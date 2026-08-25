@@ -17,6 +17,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
@@ -200,6 +201,16 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
   return self.mockConvertedViewRect;
 }
 
+@end
+
+/// A view controller that allows headless execution in the engine it creates.
+@interface FlutterHeadlessAllowedViewController : FlutterViewController
+@end
+
+@implementation FlutterHeadlessAllowedViewController
+- (BOOL)engineAllowHeadlessExecution {
+  return YES;
+}
 @end
 
 /// Sometimes we have to use a custom mock to avoid retain cycles in OCMock.
@@ -2846,6 +2857,39 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   }
 }
 
+// Verifies that `engineAllowHeadlessExecution` can be set through key-value coding.
+// The property is readonly and has no setter, so Interface Builder's User Defined Runtime
+// Attributes set the synthesized instance variable directly via KVC. If we ever declared a getter
+// or marked the poperty @dynamic, it would break.
+//
+// Interface Builder applies runtime attributes during nib loading, before `awakeFromNib` creates
+// the engine. Only the value in place at that point reaches the engine.
+- (void)testEngineAllowHeadlessExecutionIsSettableViaKeyValueCoding {
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:nil
+                                                                                 nibName:nil
+                                                                                  bundle:nil];
+  XCTAssertFalse(viewController.engineAllowHeadlessExecution);
+
+  // Verify set via key-value coding.
+  [viewController setValue:@YES forKey:@"engineAllowHeadlessExecution"];
+  XCTAssertTrue(viewController.engineAllowHeadlessExecution);
+}
+
+// Verifies that an implicitly created engine sets `allowHeadlessExecution` based on the view
+// controller's `engineAllowHeadlessExecution`.
+- (void)testImplicitEngineTakesAllowHeadlessExecutionFromViewController {
+  // Verify allowHeadlessExecution is NO by default.
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:nil
+                                                                                 nibName:nil
+                                                                                  bundle:nil];
+  XCTAssertFalse(viewController.engine.allowHeadlessExecution);
+
+  // Verify allowHeadlessExecution is YES when the VC allows it.
+  FlutterViewController* headlessViewController =
+      [[FlutterHeadlessAllowedViewController alloc] initWithProject:nil nibName:nil bundle:nil];
+  XCTAssertTrue(headlessViewController.engine.allowHeadlessExecution);
+}
+
 - (void)
     testCreateTouchRateCorrectionVSyncClientWillCreateVsyncClientWhenRefreshRateIsLargerThan60HZ {
   id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
@@ -2885,6 +2929,33 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertNotNil(clientAfter);
 
   XCTAssertTrue(clientBefore == clientAfter);
+}
+
+// Verifies that no touch rate correction vsync client is created when the engine has no platform
+// task runner. The task runner is nil before the engine's shell is created and after its context is
+// destroyed, and the vsync client dereferences the task runner it is given.
+//
+// A view controller cannot attach to an engine that has no shell, so the engine is run and its
+// context destroyed afterwards rather than simply left uninitialized.
+- (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateVsyncClientWithoutTaskRunner {
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
+  double maxFrameRate = 120;
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  [engine destroyContext];
+  XCTAssertNil(engine.platformTaskRunner);
+
+  // Verify the client is nil, and we don't crash.
+  [viewController createTouchRateCorrectionVSyncClientIfNeeded];
+  XCTAssertNil(viewController.touchRateCorrectionVSyncClient);
 }
 
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateVsyncClientWhenRefreshRateIs60HZ {
