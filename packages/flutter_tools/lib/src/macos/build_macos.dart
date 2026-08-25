@@ -139,6 +139,7 @@ Future<void> buildMacOS({
     fileSystem: globals.fs,
     logger: globals.logger,
     cocoapods: globals.cocoaPods,
+    analytics: globals.analytics,
   );
 
   final String buildDirectoryPath = getMacOSBuildDirectory();
