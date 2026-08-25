@@ -600,7 +600,6 @@ class ExamplesCrossImportChecker {
     'packages/flutter/examples/api/test/widgets/context_menu/editable_text_toolbar_builder.0_test.dart',
     'packages/flutter/examples/api/test/widgets/context_menu/editable_text_toolbar_builder.1_test.dart',
     'packages/flutter/examples/api/test/widgets/selectable_region/selectable_region.0_test.dart',
-    'examples/texture/lib/main.dart',
   };
 
   static final RegExp _examplesPrefix = RegExp(

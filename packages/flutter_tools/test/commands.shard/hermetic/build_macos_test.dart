@@ -259,6 +259,46 @@ STDERR STUFF
   );
 
   testUsingContext(
+    'macOS build fails when Xcode is not installed',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      createMinimalMockProjectFiles();
+
+      expect(
+        createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']),
+        throwsToolExit(
+          message: 'Xcode not installed; this is necessary for iOS and macOS development.',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(isInstalled: false),
+    },
+  );
+
+  testUsingContext(
     'macOS build successfully with renamed .xcodeproj/.xcworkspace files',
     () async {
       final command = BuildCommand(

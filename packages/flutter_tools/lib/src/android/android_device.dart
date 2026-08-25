@@ -571,9 +571,14 @@ class AndroidDevice extends Device {
       final releaseManifestEngineShellArgs = <String>[
         if (debuggingOptions.buildInfo.mode == BuildMode.release) ...<String>[
           ...debuggingOptions.getAndroidLaunchArguments(),
+<<<<<<< HEAD
           if (platformArgs[AndroidEngineCliFlags.traceStartup] as bool? ?? false)
             '--${AndroidEngineCliFlags.traceStartup}',
           if (route != null) '--${AndroidEngineCliFlags.route}=$route',
+=======
+          if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
+          if (route != null) '--route=$route',
+>>>>>>> 325d3b9d83da9cca4d66195a71b412458343a8a0
         ],
       ];
 
