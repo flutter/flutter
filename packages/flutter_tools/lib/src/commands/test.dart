@@ -868,15 +868,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       }
     }
 
-    for (final MapEntry<String, AssetBundleEntry> entry in entries.entries) {
-      if (entry.value.content is! DevFSFileContent) {
+    for (final MapEntry(key: assetPath, value: assetEntry) in entries.entries) {
+      if (assetEntry.content is! DevFSFileContent) {
         final File file = globals.fs.file(
-          globals.fs.path.join('build', 'unit_test_assets', entry.key),
+          globals.fs.path.join('build', 'unit_test_assets', assetPath),
         );
         if (!file.existsSync()) {
           return true;
         }
-        final List<int> entryBytes = await entry.value.contentsAsBytes();
+        final List<int> entryBytes = await assetEntry.contentsAsBytes();
         final List<int> fileBytes = await file.readAsBytes();
         if (!listEquals(entryBytes, fileBytes)) {
           return true;
