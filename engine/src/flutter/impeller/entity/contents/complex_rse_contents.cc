@@ -8,6 +8,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/geometry/round_superellipse_param.h"
 
 namespace impeller {
 
@@ -24,22 +25,22 @@ using FS = ComplexRSEPipeline::FragmentShader;
 std::unique_ptr<ComplexRoundedSuperellipseContents>
 ComplexRoundedSuperellipseContents::Make(
     Color color,
-    const Rect& bounds,
-    const RoundSuperellipseParam& round_superellipse_params,
+    const RoundSuperellipse& round_superellipse,
     std::optional<StrokeParameters> stroke) {
   return std::unique_ptr<ComplexRoundedSuperellipseContents>(
-      new ComplexRoundedSuperellipseContents(
-          color, bounds, round_superellipse_params, stroke));
+      new ComplexRoundedSuperellipseContents(color, round_superellipse,
+                                             stroke));
 }
 
 ComplexRoundedSuperellipseContents::ComplexRoundedSuperellipseContents(
     Color color,
-    const Rect& bounds,
-    const RoundSuperellipseParam& round_superellipse_params,
+    const RoundSuperellipse& round_superellipse,
     std::optional<StrokeParameters> stroke)
     : color_(color),
-      bounds_(bounds),
-      round_superellipse_params_(round_superellipse_params),
+      bounds_(round_superellipse.GetBounds()),
+      round_superellipse_params_(RoundSuperellipseParam::MakeBoundsRadii(
+          round_superellipse.GetBounds(),
+          round_superellipse.GetRadii())),
       stroke_(stroke) {
   if (stroke) {
     geometry_ = Geometry::MakeRect(bounds_.Expand(stroke->width / 2.0f));
@@ -57,12 +58,17 @@ bool ComplexRoundedSuperellipseContents::Render(const ContentContext& renderer,
 
   RoundSuperellipseParam::Quadrant top_right =
       round_superellipse_params_.top_right;
-  RoundSuperellipseParam::Quadrant bottom_right =
-      round_superellipse_params_.bottom_right;
-  RoundSuperellipseParam::Quadrant bottom_left =
-      round_superellipse_params_.bottom_left;
-  RoundSuperellipseParam::Quadrant top_left =
-      round_superellipse_params_.top_left;
+
+  RoundSuperellipseParam::Quadrant bottom_right, bottom_left, top_left;
+  if (round_superellipse_params_.all_corners_same) {
+    bottom_right = top_right;
+    bottom_left = top_right;
+    top_left = top_right;
+  } else {
+    bottom_right = round_superellipse_params_.bottom_right;
+    bottom_left = round_superellipse_params_.bottom_left;
+    top_left = round_superellipse_params_.top_left;
+  }
 
   Point top_right_center_relative = top_right.offset - center;
   Point bottom_right_center_relative = bottom_right.offset - center;
