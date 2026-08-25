@@ -2931,6 +2931,33 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertTrue(clientBefore == clientAfter);
 }
 
+// Verifies that no touch rate correction vsync client is created when the engine has no platform
+// task runner. The task runner is nil before the engine's shell is created and after its context is
+// destroyed, and the vsync client dereferences the task runner it is given.
+//
+// A view controller cannot attach to an engine that has no shell, so the engine is run and its
+// context destroyed afterwards rather than simply left uninitialized.
+- (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateVsyncClientWithoutTaskRunner {
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
+  double maxFrameRate = 120;
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  [engine destroyContext];
+  XCTAssertNil(engine.platformTaskRunner);
+
+  // Verify the client is nil, and we don't crash.
+  [viewController createTouchRateCorrectionVSyncClientIfNeeded];
+  XCTAssertNil(viewController.touchRateCorrectionVSyncClient);
+}
+
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateVsyncClientWhenRefreshRateIs60HZ {
   id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
   [self addTeardownBlock:^{
