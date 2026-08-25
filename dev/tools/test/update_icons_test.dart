@@ -65,5 +65,6 @@ void main() {
     expect(Icon(const MapEntry<String, String>('help_center_rounded', '')).isMirroredInRTL, false);
     // No match
     expect(Icon(const MapEntry<String, String>('arrow', '')).isMirroredInRTL, false);
+    expect(Icon(const MapEntry<String, String>('prompt_suggestion', '')).isMirroredInRTL, false);
   });
 }
