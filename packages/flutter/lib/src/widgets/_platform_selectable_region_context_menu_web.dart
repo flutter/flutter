@@ -117,26 +117,17 @@ class PlatformSelectableRegionContextMenu extends StatefulWidget {
     _nextElementId = 0;
     _clientsByElementId.clear();
     _elementsByClient.clear();
-    debugPrint('removing copy handler');
     web.document.body?.removeEventListener('copy', _copyEventHandler);
   }
 
   // Registers the view factories for the interceptor widgets.
   static void _register() {
     assert(_registeredViewType == null);
-    debugPrint('adding copy handler');
     web.document.body?.addEventListener('copy', _copyEventHandler);
-    web.document.body?.addEventListener(
-      'copy',
-      () {
-        debugPrint('running second copyt handler');
-      }.toJS,
-    );
     _registeredViewType = _registerWebSelectionCallback((
       web.HTMLElement element,
       web.MouseEvent event,
     ) {
-      debugPrint('running selection handler');
       final SelectionContainerDelegate? client = _activeClient;
       if (client != null) {
         _activeElement = element;
@@ -153,11 +144,9 @@ class PlatformSelectableRegionContextMenu extends StatefulWidget {
 
   /// Syncs the selection from [client] into the hidden [element].
   static void _syncDomSelection(SelectionContainerDelegate client, web.HTMLElement element) {
-    debugPrint('syncing dom');
     // The innerText must contain the text in order to be selected by
     // the browser.
     final String? newText = client.getSelectedContent()?.plainText;
-    debugPrint('new selection is: "$newText"');
     element.innerText = newText ?? '';
 
     // Programmatically select the dom element in browser.
@@ -174,7 +163,6 @@ class PlatformSelectableRegionContextMenu extends StatefulWidget {
   /// Registered in [_register] and unregistered in [debugResetRegistry].
   static final JSExportedDartFunction<Null Function(web.Event event)> _copyEventHandler =
       (web.Event event) {
-        debugPrint('running copy handler');
         final SelectionContainerDelegate? client = _activeClient;
         final web.HTMLElement? element = _activeElement;
         if (client == null || element == null) {
