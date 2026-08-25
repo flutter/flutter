@@ -595,7 +595,7 @@ class Overlay extends StatefulWidget {
             '${debugRequiredFor?.runtimeType ?? 'Some'} widgets require an Overlay widget ancestor for correct operation.',
           ),
           ErrorHint(
-            'The most common way to add an Overlay to an application is to include a MaterialApp, CupertinoApp or Navigator widget in the runApp() call.',
+            'The most common way to add an Overlay to an application is to include a WidgetsApp or Navigator widget in the runApp() call.',
           ),
           if (debugRequiredFor != null)
             DiagnosticsProperty<Widget>(
@@ -1791,6 +1791,8 @@ enum OverlayChildLocation {
 
 /// A widget that renders its overlay child on an [Overlay].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=S0Ylpa44OAQ}
+///
 /// The overlay child is initially hidden until [OverlayPortalController.show]
 /// is called on the associated [controller]. The [OverlayPortal] uses
 /// [overlayChildBuilder] to build its overlay child and renders it on the
@@ -2318,7 +2320,7 @@ class _RenderTheaterMarker extends InheritedWidget {
       ErrorHint(
         'To introduce an Overlay widget, you can either directly '
         'include one, or use a widget that contains an Overlay itself, '
-        'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
+        'such as a Navigator or WidgetsApp.',
       ),
       ...context.describeMissingAncestor(expectedAncestorType: Overlay),
     ]);
