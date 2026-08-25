@@ -46,9 +46,14 @@ class GridTile extends StatelessWidget {
       return child;
     }
 
+    // The tile sizes itself to its child so that it can be used where the
+    // incoming constraints are unbounded, e.g. in a horizontally scrolling
+    // ListView. A Stack whose children are all positioned would try to expand
+    // to the biggest allowed size, which is infinite in that case.
     return Stack(
+      fit: StackFit.passthrough,
       children: <Widget>[
-        Positioned.fill(child: child),
+        child,
         if (header != null) Positioned(top: 0.0, left: 0.0, right: 0.0, child: header!),
         if (footer != null) Positioned(left: 0.0, bottom: 0.0, right: 0.0, child: footer!),
       ],
