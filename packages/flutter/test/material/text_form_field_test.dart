@@ -1942,4 +1942,63 @@ void main() {
 
     expect(controller.text, 'Initial Value');
   });
+
+  testWidgets(
+    'onFieldSubmitted is called with TextInputAction.next after focus was requested for a detached node',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/66106
+      final submitted = <String>[];
+      final detachedNodes = <FocusNode>[];
+      addTearDown(() {
+        for (final node in detachedNodes) {
+          node.dispose();
+        }
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Scaffold(
+                body: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onPanDown: (DragDownDetails details) {
+                    // Focusing a node that no widget owns leaves a node without a
+                    // context in the focus tree, which used to break traversal.
+                    final node = FocusNode();
+                    detachedNodes.add(node);
+                    FocusScope.of(context).requestFocus(node);
+                  },
+                  child: Center(
+                    child: TextFormField(
+                      textInputAction: TextInputAction.next,
+                      onFieldSubmitted: submitted.add,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      await tester.enterText(find.byType(TextField), 'first');
+      await tester.testTextInput.receiveAction(TextInputAction.next);
+      await tester.pump();
+      expect(submitted, <String>['first']);
+
+      // Swiping the page focuses another node that is not attached to a widget.
+      await tester.drag(find.byType(Scaffold), const Offset(0.0, -50.0));
+      await tester.pump();
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      await tester.enterText(find.byType(TextField), 'second');
+      await tester.testTextInput.receiveAction(TextInputAction.next);
+      await tester.pump();
+      expect(submitted, <String>['first', 'second']);
+    },
+  );
 }
