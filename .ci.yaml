@@ -5356,8 +5356,8 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: channels_integration_test_ios
-    dependencies: >-
-      [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -5430,8 +5430,8 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: route_test_ios
-    dependencies: >-
-      [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
 
   - name: Mac flavors_test_ios
     recipe: devicelab/devicelab_drone
@@ -5807,8 +5807,8 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: platform_interaction_test_ios
-    dependencies: >-
-      [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
 
   - name: Mac_ios platform_view_ios__start_up
     recipe: devicelab/devicelab_drone
