@@ -447,6 +447,42 @@ void main() {
     expect(previousPageCompleted, true);
   });
 
+  testWidgets('PageController nextPage animates to the next page with an overshooting curve', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/160880
+    final controller = PageController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          controller: controller,
+          physics: const NeverScrollableScrollPhysics(),
+          children: kStates.map<Widget>((String state) => Text(state)).toList(),
+        ),
+      ),
+    );
+
+    expect(controller.page, 0.0);
+
+    // Curves.elasticInOut moves outside of the animated range, which
+    // overscrolls the page view that is still resting on its first page.
+    controller.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.elasticInOut);
+    await tester.pumpAndSettle();
+    expect(controller.page, 1.0);
+    expect(find.text('Alaska'), findsOneWidget);
+
+    controller.previousPage(
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.elasticInOut,
+    );
+    await tester.pumpAndSettle();
+    expect(controller.page, 0.0);
+    expect(find.text('Alabama'), findsOneWidget);
+  });
+
   testWidgets('PageView in zero-size container', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

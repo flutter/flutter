@@ -702,7 +702,9 @@ class DrivenScrollActivity extends ScrollActivity {
     required Duration duration,
     required Curve curve,
     required TickerProvider vsync,
-  }) : assert(duration > Duration.zero) {
+  }) : assert(duration > Duration.zero),
+       _lowerBound = math.min(from, to),
+       _upperBound = math.max(from, to) {
     _completer = Completer<void>();
     _controller =
         AnimationController.unbounded(
@@ -724,7 +726,8 @@ class DrivenScrollActivity extends ScrollActivity {
     super.delegate,
     Simulation simulation, {
     required TickerProvider vsync,
-  }) {
+  }) : _lowerBound = null,
+       _upperBound = null {
     _completer = Completer<void>();
     _controller =
         AnimationController.unbounded(
@@ -740,6 +743,11 @@ class DrivenScrollActivity extends ScrollActivity {
   late final Completer<void> _completer;
   late final AnimationController _controller;
 
+  // The range spanned by the animation, or null if the activity is driven by a
+  // simulation, in which case the range is not known ahead of time.
+  final double? _lowerBound;
+  final double? _upperBound;
+
   /// A [Future] that completes when the activity stops.
   ///
   /// For example, this [Future] will complete if the animation reaches the end
@@ -748,7 +756,17 @@ class DrivenScrollActivity extends ScrollActivity {
   Future<void> get done => _completer.future;
 
   void _tick() {
-    if (!applyMoveTo(_controller.value)) {
+    final double value = _controller.value;
+    if (applyMoveTo(value)) {
+      return;
+    }
+    // The position could not be fully applied. If the animation is currently
+    // overshooting the range it was asked to animate over (as curves such as
+    // Curves.elasticInOut do), the overflow is only transient: the animation
+    // still ends within that range, so the activity keeps going instead of
+    // being cancelled. Otherwise the requested range itself is out of the
+    // scrollable's bounds and there is no point in continuing.
+    if (_lowerBound == null || (value >= _lowerBound && value <= _upperBound!)) {
       delegate.goIdle();
     }
   }
