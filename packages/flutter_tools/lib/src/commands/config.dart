@@ -273,6 +273,9 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
         final bool keyValue = boolArg(configSetting);
         globals.config.setValue(configSetting, keyValue);
         globals.printStatus('Setting "$configSetting" value to "$keyValue".');
+        if (!keyValue && feature.warningMessageOnDisable != null) {
+          globals.printWarning(feature.warningMessageOnDisable!);
+        }
       }
     }
 
