@@ -2807,6 +2807,35 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
   });
 
+  testWidgets('Does not reload the image when the cache is cleared while ticker mode is disabled', (
+    WidgetTester tester,
+  ) async {
+    final provider = _ReloadableTestImageProvider(image10x10);
+
+    Widget buildFrame({required bool enabled}) {
+      return TickerMode(enabled: enabled, child: Image(image: provider));
+    }
+
+    await tester.pumpWidget(buildFrame(enabled: true));
+    expect(provider.loadCallCount, 1);
+    expect(tester.widget<RawImage>(find.byType(RawImage)).image, isNotNull);
+
+    // Pause the image, e.g. because its route was pushed behind another route.
+    await tester.pumpWidget(buildFrame(enabled: false));
+    expect(provider.loadCallCount, 1);
+    expect(tester.widget<RawImage>(find.byType(RawImage)).image, isNotNull);
+
+    // The image cache is cleared while the image is paused, e.g. because the
+    // engine signaled memory pressure while the app was in the background.
+    imageCache.clear();
+
+    // Resuming must neither drop the image that is currently displayed nor
+    // decode it a second time.
+    await tester.pumpWidget(buildFrame(enabled: true));
+    expect(provider.loadCallCount, 1);
+    expect(tester.widget<RawImage>(find.byType(RawImage)).image, isNotNull);
+  });
+
   testWidgets('Keeps stream alive when animations are disabled', (WidgetTester tester) async {
     imageCache.maximumSize = 0;
     final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
@@ -3230,6 +3259,30 @@ class _ConfigurationKeyedTestImageProvider extends _TestImageProvider {
   @override
   Future<_ConfigurationAwareKey> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<_ConfigurationAwareKey>(_ConfigurationAwareKey(this, configuration));
+  }
+}
+
+/// An [ImageProvider] that creates a new [ImageStreamCompleter] every time it
+/// is loaded, like real image providers do.
+class _ReloadableTestImageProvider extends ImageProvider<_ReloadableTestImageProvider> {
+  _ReloadableTestImageProvider(this.image);
+
+  final ui.Image image;
+
+  int get loadCallCount => _loadCallCount;
+  int _loadCallCount = 0;
+
+  @override
+  Future<_ReloadableTestImageProvider> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<_ReloadableTestImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter loadImage(_ReloadableTestImageProvider key, ImageDecoderCallback decode) {
+    _loadCallCount += 1;
+    return OneFrameImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(ImageInfo(image: image.clone())),
+    );
   }
 }
 
