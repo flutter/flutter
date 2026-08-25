@@ -31,6 +31,8 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   PlatformSelectableRegionContextMenu({
     // ignore: avoid_unused_constructor_parameters
     required Widget child,
+    // ignore: avoid_unused_constructor_parameters
+    required SelectionContainerDelegate client,
     super.key,
   });
 
