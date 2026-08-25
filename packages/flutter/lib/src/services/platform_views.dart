@@ -627,7 +627,18 @@ class _AndroidMotionEventConverter {
   }
 
   AndroidMotionEvent? toAndroidMotionEvent(PointerEvent event) {
-    final List<int> pointers = pointerPositions.keys.toList();
+    // Android orders the pointers within a MotionEvent by Android pointer id, and
+    // the engine pairs the coordinates sent from here with the pointers of the
+    // original MotionEvent by array position. `pointerPositions` is keyed by
+    // Flutter pointer and iterates in insertion order, which stops matching
+    // Android's order as soon as a released Android pointer id is recycled by
+    // [handlePointerDownEvent]. The action index and the batching check below
+    // are relative to this order as well.
+    // See https://github.com/flutter/flutter/issues/191105.
+    final List<int> pointers = pointerPositions.keys.toList()
+      ..sort(
+        (int a, int b) => (pointerProperties[a]?.id ?? 0).compareTo(pointerProperties[b]?.id ?? 0),
+      );
     final int pointerIdx = pointers.indexOf(event.pointer);
     final int numPointers = pointers.length;
 

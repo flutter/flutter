@@ -496,6 +496,96 @@ void main() {
       final moveArgs = moveCalls.single.arguments as List<dynamic>;
       expect(moveArgs[kAndroidMotionEventListIndexPointerCount], equals(pointerCount));
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/191105.
+    testWidgets('motion event converter orders pointers by Android pointer id', (
+      WidgetTester tester,
+    ) async {
+      final log = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform_views,
+        (MethodCall methodCall) async {
+          log.add(methodCall);
+          return null;
+        },
+      );
+
+      final AndroidViewController viewController = PlatformViewsService.initSurfaceAndroidView(
+        id: 7,
+        viewType: 'web',
+        layoutDirection: TextDirection.ltr,
+      );
+      viewController.pointTransformer = (Offset offset) => offset;
+
+      // Indexes in the list returned by AndroidMotionEvent._asList.
+      const kIndexAction = 3;
+      const kIndexPointerCount = 4;
+      const kIndexPointerProperties = 5;
+      const kIndexPointerCoords = 6;
+      // Index of x within the list returned by AndroidPointerCoords._asList.
+      const kCoordsIndexX = 7;
+
+      List<double> xOf(MethodCall call) {
+        final args = call.arguments as List<dynamic>;
+        return (args[kIndexPointerCoords] as List<dynamic>)
+            .map<double>((dynamic coords) => (coords as List<dynamic>)[kCoordsIndexX] as double)
+            .toList();
+      }
+
+      // Flutter pointer 1 takes Android pointer id 0, Flutter pointer 2 takes id 1.
+      await viewController.dispatchPointerEvent(
+        const PointerDownEvent(pointer: 1, position: Offset(10, 10)),
+      );
+      await viewController.dispatchPointerEvent(
+        const PointerDownEvent(pointer: 2, position: Offset(20, 20)),
+      );
+      // Lifting Flutter pointer 1 releases Android pointer id 0 for reuse.
+      await viewController.dispatchPointerEvent(
+        const PointerUpEvent(pointer: 1, position: Offset(10, 10)),
+      );
+      log.clear();
+      // Flutter pointer 3 is assigned the recycled Android pointer id 0, so it is
+      // last in insertion order but first in Android pointer id order.
+      await viewController.dispatchPointerEvent(
+        const PointerDownEvent(pointer: 3, position: Offset(30, 30)),
+      );
+
+      final MethodCall downCall = log.singleWhere((MethodCall call) => call.method == 'touch');
+      final downArgs = downCall.arguments as List<dynamic>;
+      expect(downArgs[kIndexPointerCount], 2);
+      // The action index is the position of the pressed pointer in Android pointer id order.
+      expect(
+        downArgs[kIndexAction],
+        AndroidViewController.pointerAction(0, AndroidViewController.kActionPointerDown),
+      );
+      expect(
+        downArgs[kIndexPointerProperties],
+        <List<int>>[
+          <int>[0, AndroidPointerProperties.kToolTypeFinger],
+          <int>[1, AndroidPointerProperties.kToolTypeFinger],
+        ],
+      );
+      // Android pointer id 0 is Flutter pointer 3, id 1 is Flutter pointer 2.
+      expect(xOf(downCall), <double>[30, 20]);
+
+      // The engine splits one Android move across its pointers in Android pointer
+      // id order, flagging each with the original pointer count. The converter must
+      // send a single MotionEvent once the last of them has arrived.
+      const kPointerDataFlagMultiple = 2;
+      const int platformData = kPointerDataFlagMultiple | (2 << 8);
+      log.clear();
+      await viewController.dispatchPointerEvent(
+        const PointerMoveEvent(pointer: 3, position: Offset(31, 31), platformData: platformData),
+      );
+      await viewController.dispatchPointerEvent(
+        const PointerMoveEvent(pointer: 2, position: Offset(21, 21), platformData: platformData),
+      );
+
+      final MethodCall moveCall = log.singleWhere((MethodCall call) => call.method == 'touch');
+      final moveArgs = moveCall.arguments as List<dynamic>;
+      expect(moveArgs[kIndexAction], AndroidViewController.kActionMove);
+      expect(xOf(moveCall), <double>[31, 21]);
+    });
   });
 
   group('iOS', () {
