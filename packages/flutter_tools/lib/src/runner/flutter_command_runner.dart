@@ -369,8 +369,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
             ) ??
             command;
       }
-      if (command case final ExtensionArgParserMixin dynamicCommand) {
-        await dynamicCommand.initializeDynamicOptions();
+      Command<void>? current = command;
+      while (current != null) {
+        if (current case final ExtensionArgParserMixin dynamicCommand) {
+          await dynamicCommand.initializeDynamicOptions();
+        }
+        current = current.parent;
       }
     }
   }
