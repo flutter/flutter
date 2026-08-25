@@ -4,6 +4,8 @@
 
 // Logic for native assets shared between all host OSes.
 
+import 'dart:collection';
+
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:hooks/hooks.dart';
@@ -544,6 +546,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.packageConfig,
     this.fileSystem,
     this.logger,
+    this.platform,
     this.runPackageName,
     this.pubspecPath, {
     required this.includeDevDependencies,
@@ -554,6 +557,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   final PackageConfig packageConfig;
   final FileSystem fileSystem;
   final Logger logger;
+  final Platform platform;
   final String runPackageName;
 
   /// Include the dev dependencies of [runPackageName].
@@ -582,7 +586,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   late final Uri _dartExecutable = fileSystem
       .directory(Cache.flutterRoot)
       .uri
-      .resolve('bin/cache/dart-sdk/bin/dart');
+      .resolve('bin/cache/dart-sdk/bin/dart${platform.isWindows ? '.exe' : ''}');
 
   late final packageLayout = PackageLayout.fromPackageConfig(
     fileSystem,
@@ -1001,10 +1005,10 @@ OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
 }
 
 extension OSArchitectures on OS {
-  Set<Architecture> get architectures => _osTargets[this]!;
+  Set<Architecture> get architectures => UnmodifiableSetView<Architecture>(_osTargets[this]!);
 }
 
-const _osTargets = <OS, Set<Architecture>>{
+final _osTargets = <OS, Set<Architecture>>{
   OS.android: <Architecture>{
     Architecture.arm,
     Architecture.arm64,

@@ -655,7 +655,7 @@ abstract class Route<T> extends _RoutePlaceholder {
           'This usually happens when the type provided to Navigator.$methodName() '
           'is not a subtype of the type expected by the Route (e.g. DialogRoute<Null>), '
           'or when a generic type is explicitly provided to a route creation method '
-          '(such as showDialog<T>()) but the popped value does not match this type.',
+          '(such as showRawDialog<T>()) but the popped value does not match this type.',
         ),
         DiagnosticsProperty<Route<Object?>>('The route was', this),
         DiagnosticsProperty<Object?>('The provided result was', result),
@@ -5716,7 +5716,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         (_RouteEntry e) => _RouteEntry.isPresentPredicate(e) && e != candidate,
       );
 
-      if (next != null && !next.route.willHandlePopInternally && predicate(next.route)) {
+      if (next != null && !candidate.route.willHandlePopInternally && predicate(next.route)) {
         pop<T>(result);
       } else {
         pop();

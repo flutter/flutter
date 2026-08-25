@@ -9,7 +9,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
-#import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 @class FlutterBinaryMessengerRelay;
@@ -23,6 +22,7 @@ class ThreadHost;
 
 @property(readonly, nonatomic) FlutterEngineProcTable& embedderAPI;
 @property(readonly, nonatomic) BOOL enableEmbedderAPI;
+@property(readonly, nonatomic) BOOL allowHeadlessExecution;
 @property(nonatomic, readonly) NSMutableDictionary* pluginPublications;
 @property(nonatomic, strong) FlutterRestorationPlugin* restorationPlugin;
 
@@ -30,7 +30,6 @@ class ThreadHost;
 - (flutter::PlatformViewIOS*)platformView;
 
 - (void)setBinaryMessenger:(FlutterBinaryMessengerRelay*)binaryMessenger;
-- (flutter::IOSRenderingAPI)platformViewsRenderingAPI;
 - (void)waitForFirstFrame:(NSTimeInterval)timeout callback:(void (^)(BOOL didTimeout))callback;
 - (FlutterEngine*)spawnWithEntrypoint:(/*nullable*/ NSString*)entrypoint
                            libraryURI:(/*nullable*/ NSString*)libraryURI
