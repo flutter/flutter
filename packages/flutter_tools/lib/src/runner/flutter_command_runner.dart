@@ -363,14 +363,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
       if (command.name == 'help') {
         // If the top-level 'help' command was matched (e.g. `flutter help config` or `flutter help --verbose config`),
         // identify the target command whose help documentation is requested rather than the help command itself.
-        command = switch (command.parent) {
-          final Command<void> parent => parent,
-          _ =>
+        command =
             _findTargetCommand(
-                  args.skipWhile((String arg) => arg == 'help' || arg.startsWith('-')),
-                ) ??
-                command,
-        };
+              args.skipWhile((String arg) => arg == 'help' || arg.startsWith('-')),
+            ) ??
+            command;
       }
       if (command case final ExtensionArgParserMixin dynamicCommand) {
         await dynamicCommand.initializeDynamicOptions();
