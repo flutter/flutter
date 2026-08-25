@@ -1408,8 +1408,12 @@ void main() {
     expect(
       tester.getSemantics(find.byType(PopupMenuButton<int>)),
       matchesSemantics(
+        isButton: true,
+        hasEnabledState: true,
+        isEnabled: true,
         hasExpandedState: true,
         label: 'XXX',
+        tooltip: 'Show menu',
         hasTapAction: true,
         hasFocusAction: true,
         isFocusable: true,
@@ -1441,8 +1445,107 @@ void main() {
     expect(
       tester.getSemantics(find.byType(PopupMenuButton<int>)),
       matchesSemantics(
+        isButton: true,
+        hasEnabledState: true,
+        isEnabled: true,
         hasExpandedState: true,
         label: 'XXX',
+        tooltip: 'Show menu',
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+      ),
+    );
+  });
+
+  testWidgets('PopupMenuButton with a child has button semantics', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/147043
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<int>(
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<int>>[const PopupMenuItem<int>(value: 1, child: Text('Item 1'))];
+            },
+            child: const Text('XXX'),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(PopupMenuButton<int>)),
+      matchesSemantics(
+        isButton: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        hasExpandedState: true,
+        label: 'XXX',
+        tooltip: 'Show menu',
+        hasTapAction: true,
+        hasFocusAction: true,
+        isFocusable: true,
+      ),
+    );
+  });
+
+  testWidgets('Disabled PopupMenuButton with a child has button semantics', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/147043
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<int>(
+            enabled: false,
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<int>>[const PopupMenuItem<int>(value: 1, child: Text('Item 1'))];
+            },
+            child: const Text('XXX'),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(PopupMenuButton<int>)),
+      matchesSemantics(
+        isButton: true,
+        hasEnabledState: true,
+        hasExpandedState: true,
+        label: 'XXX',
+        tooltip: 'Show menu',
+      ),
+    );
+  });
+
+  testWidgets('PopupMenuButton with a padded tap target has button semantics', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/147043
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: PopupMenuButton<int>(
+            style: const ButtonStyle(tapTargetSize: MaterialTapTargetSize.padded),
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuItem<int>>[const PopupMenuItem<int>(value: 1, child: Text('Item 1'))];
+            },
+            child: const Text('XXX'),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(PopupMenuButton<int>)),
+      matchesSemantics(
+        isButton: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        hasExpandedState: true,
+        label: 'XXX',
+        tooltip: 'Show menu',
         hasTapAction: true,
         hasFocusAction: true,
         isFocusable: true,
