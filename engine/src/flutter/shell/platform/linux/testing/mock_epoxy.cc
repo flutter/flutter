@@ -369,6 +369,47 @@ EGLBoolean _eglQueryContext(EGLDisplay display,
   return EGL_FALSE;
 }
 
+EGLBoolean _eglQuerySurface(EGLDisplay dpy,
+                            EGLSurface surface,
+                            EGLint attribute,
+                            EGLint* value) {
+  if (!check_display(dpy) || !check_initialized(dpy)) {
+    return EGL_FALSE;
+  }
+
+  // The mock surfaces have no size, so anything drawing to them will see a
+  // size change on the first frame.
+  if (value != nullptr) {
+    *value = 0;
+  }
+
+  return bool_success();
+}
+
+EGLBoolean _eglDestroySurface(EGLDisplay dpy, EGLSurface surface) {
+  if (!check_display(dpy) || !check_initialized(dpy)) {
+    return EGL_FALSE;
+  }
+
+  return bool_success();
+}
+
+EGLBoolean _eglDestroyContext(EGLDisplay dpy, EGLContext ctx) {
+  if (!check_display(dpy) || !check_initialized(dpy)) {
+    return EGL_FALSE;
+  }
+
+  return bool_success();
+}
+
+EGLBoolean _eglSwapInterval(EGLDisplay dpy, EGLint interval) {
+  if (!check_display(dpy) || !check_initialized(dpy)) {
+    return EGL_FALSE;
+  }
+
+  return bool_success();
+}
+
 EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
   if (!check_display(dpy) || !check_initialized(dpy)) {
     return EGL_FALSE;
@@ -732,6 +773,13 @@ EGLBoolean (*epoxy_eglMakeCurrent)(EGLDisplay dpy,
                                    EGLSurface read,
                                    EGLContext ctx);
 EGLBoolean (*epoxy_eglSwapBuffers)(EGLDisplay dpy, EGLSurface surface);
+EGLBoolean (*epoxy_eglQuerySurface)(EGLDisplay dpy,
+                                    EGLSurface surface,
+                                    EGLint attribute,
+                                    EGLint* value);
+EGLBoolean (*epoxy_eglDestroySurface)(EGLDisplay dpy, EGLSurface surface);
+EGLBoolean (*epoxy_eglDestroyContext)(EGLDisplay dpy, EGLContext ctx);
+EGLBoolean (*epoxy_eglSwapInterval)(EGLDisplay dpy, EGLint interval);
 EGLImageKHR (*epoxy_eglCreateImageKHR)(EGLDisplay dpy,
                                        EGLContext ctx,
                                        EGLenum target,
@@ -830,6 +878,10 @@ static void library_init() {
   epoxy_eglMakeCurrent = _eglMakeCurrent;
   epoxy_eglQueryContext = _eglQueryContext;
   epoxy_eglSwapBuffers = _eglSwapBuffers;
+  epoxy_eglQuerySurface = _eglQuerySurface;
+  epoxy_eglDestroySurface = _eglDestroySurface;
+  epoxy_eglDestroyContext = _eglDestroyContext;
+  epoxy_eglSwapInterval = _eglSwapInterval;
   epoxy_eglCreateImageKHR = _eglCreateImageKHR;
   epoxy_eglDestroyImageKHR = _eglDestroyImageKHR;
 
