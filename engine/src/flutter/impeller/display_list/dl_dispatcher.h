@@ -289,7 +289,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
 
   virtual Canvas& GetCanvas() = 0;
 
-  virtual const ContentContext& GetContentContext() const = 0;
+  virtual ContentContext& GetContentContext() const = 0;
 
   std::shared_ptr<Texture> GetTexture(const sk_sp<flutter::DlImage>& image);
 
@@ -347,10 +347,10 @@ class CanvasDlDispatcher : public DlDispatcherBase {
 
  private:
   Canvas canvas_;
-  const ContentContext& renderer_;
+  ContentContext& renderer_;
 
   Canvas& GetCanvas() override;
-  const ContentContext& GetContentContext() const override;
+  ContentContext& GetContentContext() const override;
 };
 
 /// Performs a first pass over the display list to collect information

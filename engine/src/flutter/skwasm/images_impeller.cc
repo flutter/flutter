@@ -32,7 +32,7 @@ class DlWimpImageBase : public impeller::DlImageImpeller {
 
   // |DlImageImpeller|
   std::shared_ptr<impeller::Texture> GetImpellerTexture(
-      const impeller::ContentContext& renderer) const override {
+      impeller::ContentContext& renderer) const override {
     return nullptr;
   }
 
@@ -76,7 +76,7 @@ class DlWimpImageFromTexture : public DlWimpImageBase {
             surface->CreateTextureSourceWrapper(texture_source)) {}
 
   std::shared_ptr<impeller::Texture> GetImpellerTexture(
-      const impeller::ContentContext& renderer) const override {
+      impeller::ContentContext& renderer) const override {
     auto* gles_context =
         impeller::ContextGLES::Cast(renderer.GetContext().get());
     GLuint gl_texture_id = skwasm_createGlTextureFromTextureSource(
@@ -116,7 +116,7 @@ class DlWimpImageFromPixels : public DlWimpImageBase {
         row_byte_count_(row_byte_count) {}
 
   std::shared_ptr<impeller::Texture> GetImpellerTexture(
-      const impeller::ContentContext& renderer) const override {
+      impeller::ContentContext& renderer) const override {
     impeller::TextureDescriptor desc;
     desc.size = impeller::ISize(width_, height_);
 
@@ -161,10 +161,9 @@ class DlWimpImageFromPicture : public DlWimpImageBase {
         display_list_(std::move(display_list)) {}
 
   std::shared_ptr<impeller::Texture> GetImpellerTexture(
-      const impeller::ContentContext& renderer) const override {
+      impeller::ContentContext& renderer) const override {
     return impeller::DisplayListToTexture(
-        display_list_, impeller::ISize(width_, height_),
-        const_cast<impeller::ContentContext&>(renderer));
+        display_list_, impeller::ISize(width_, height_), renderer);
   }
 
  private:

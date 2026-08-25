@@ -955,7 +955,7 @@ Canvas& CanvasDlDispatcher::GetCanvas() {
   return canvas_;
 }
 
-const ContentContext& CanvasDlDispatcher::GetContentContext() const {
+ContentContext& CanvasDlDispatcher::GetContentContext() const {
   return renderer_;
 }
 

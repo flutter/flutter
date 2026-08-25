@@ -26,10 +26,9 @@ class DlImageImpeller : public flutter::DlImage {
   bool isTextureBacked() const override { return true; }
 
   virtual std::shared_ptr<Texture> GetImpellerTexture(
-      const ContentContext& renderer) const = 0;
+      ContentContext& renderer) const = 0;
 
-  std::shared_ptr<Texture> GetCachedTexture(
-      const ContentContext& renderer) const;
+  std::shared_ptr<Texture> GetCachedTexture(ContentContext& renderer) const;
 
   static sk_sp<DlImageImpeller> Make(
       std::shared_ptr<Texture> texture,
@@ -51,7 +50,7 @@ class DlImageImpellerTexture final : public DlImageImpeller {
 
   // |DlImageImpeller|
   std::shared_ptr<Texture> GetImpellerTexture(
-      const ContentContext& renderer) const override;
+      ContentContext& renderer) const override;
 
   flutter::DlColorSpace GetColorSpace() const override;
   bool isOpaque() const override;

@@ -52,7 +52,7 @@ sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
 }
 
 std::shared_ptr<Texture> DlImageImpeller::GetCachedTexture(
-    const ContentContext& renderer) const {
+    ContentContext& renderer) const {
   auto texture = renderer.GetCachedTexture(this);
   if (texture) {
     return texture;
@@ -71,7 +71,7 @@ DlImageImpellerTexture::~DlImageImpellerTexture() = default;
 
 // |DlImage|
 std::shared_ptr<impeller::Texture> DlImageImpellerTexture::GetImpellerTexture(
-    const ContentContext& renderer) const {
+    ContentContext& renderer) const {
   return texture_;
 }
 
