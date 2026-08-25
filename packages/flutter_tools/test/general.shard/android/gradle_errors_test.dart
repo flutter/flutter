@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -50,6 +51,7 @@ void main() {
           sslExceptionHandler,
           zipExceptionHandler,
           incompatibleJavaAndGradleVersionsHandler,
+          unsupportedJavaVersionHandler,
           remoteTerminatedHandshakeHandler,
           couldNotOpenCacheDirectoryHandler,
           incompatibleCompileSdk35AndAgpVersionHandler,
@@ -1394,6 +1396,57 @@ Could not compile build file '…/example/android/build.gradle'.
         );
       },
       overrides: <Type, Generator>{
+        GradleUtils: () => FakeGradleUtils(),
+        Platform: () => fakePlatform('android'),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+  });
+
+  group('unsupported java version error', () {
+    const errorMessage = '''
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':flutter:javaDocDebugGeneration'.
+> 25.0.2
+
+java.lang.IllegalArgumentException: 25.0.2
+\tat org.jetbrains.kotlin.com.intellij.util.lang.JavaVersion.parse(JavaVersion.java:245)
+''';
+
+    testWithoutContext('pattern', () {
+      expect(unsupportedJavaVersionHandler.test(errorMessage), isTrue);
+      // The exception message alone is too generic to be matched.
+      expect(
+        unsupportedJavaVersionHandler.test('java.lang.IllegalArgumentException: 25.0.2'),
+        isFalse,
+      );
+    });
+
+    testUsingContext(
+      'suggestion',
+      () async {
+        final GradleBuildStatus status = await unsupportedJavaVersionHandler.handler(
+          line: errorMessage,
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          usesAndroidX: true,
+        );
+
+        expect(status, equals(GradleBuildStatus.exit));
+        expect(
+          testLogger.statusText,
+          contains('The Java version used by Flutter (25.0.2) is not supported'),
+        );
+        expect(testLogger.statusText, contains('flutter config --jdk-dir='));
+        expect(
+          testLogger.statusText,
+          contains('https://docs.gradle.org/current/userguide/compatibility.html#java'),
+        );
+      },
+      overrides: <Type, Generator>{
+        Java: () => FakeJava(version: const Version.withText(25, 0, 2, '25.0.2')),
         GradleUtils: () => FakeGradleUtils(),
         Platform: () => fakePlatform('android'),
         FileSystem: () => fileSystem,
