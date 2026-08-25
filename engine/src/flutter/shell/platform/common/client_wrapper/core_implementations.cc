@@ -115,10 +115,21 @@ void BinaryMessengerImpl::Send(const std::string& channel,
 
 void BinaryMessengerImpl::SetMessageHandler(const std::string& channel,
                                             BinaryMessageHandler handler) {
+  // Setting a callback requires a running engine, so there is nothing to
+  // register or unregister once the engine is gone. Handlers are commonly
+  // cleared from plugin destructors, which run while the engine is being torn
+  // down, so this is a normal call rather than a client error.
+  const bool engine_available =
+      FlutterDesktopMessengerIsAvailable(messenger_);
   if (!handler) {
     handlers_.erase(channel);
-    FlutterDesktopMessengerSetCallback(messenger_, channel.c_str(), nullptr,
-                                       nullptr);
+    if (engine_available) {
+      FlutterDesktopMessengerSetCallback(messenger_, channel.c_str(), nullptr,
+                                         nullptr);
+    }
+    return;
+  }
+  if (!engine_available) {
     return;
   }
   // Save the handler, to keep it alive.

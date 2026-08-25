@@ -40,9 +40,15 @@ class TestApi : public testing::StubFlutterApi {
     last_message_callback_set_ = callback;
   }
 
+  bool MessengerIsAvailable() override { return messenger_available_; }
+
   void PluginRegistrarSetDestructionHandler(
       FlutterDesktopOnPluginRegistrarDestroyed callback) override {
     last_destruction_callback_set_ = callback;
+  }
+
+  void set_messenger_available(bool available) {
+    messenger_available_ = available;
   }
 
   const uint8_t* last_data_sent() { return last_data_sent_; }
@@ -54,6 +60,7 @@ class TestApi : public testing::StubFlutterApi {
   }
 
  private:
+  bool messenger_available_ = true;
   const uint8_t* last_data_sent_ = nullptr;
   FlutterDesktopMessageCallback last_message_callback_set_ = nullptr;
   FlutterDesktopOnPluginRegistrarDestroyed last_destruction_callback_set_ =
@@ -153,6 +160,32 @@ TEST(PluginRegistrarTest, MessengerSetMessageHandler) {
   // Unregister.
   messenger->SetMessageHandler(channel_name, nullptr);
   EXPECT_EQ(test_api->last_message_callback_set(), nullptr);
+}
+
+// Tests that a messenger doesn't call into the C API to unregister a handler
+// once the engine is gone, since setting a callback requires a running engine.
+// Handlers are commonly cleared from plugin destructors, which run while the
+// engine is being torn down.
+TEST(PluginRegistrarTest, MessengerSetMessageHandlerWithoutEngine) {
+  testing::ScopedStubFlutterApi scoped_api_stub(std::make_unique<TestApi>());
+  auto test_api = static_cast<TestApi*>(scoped_api_stub.stub());
+
+  auto dummy_registrar_handle =
+      reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1);
+  PluginRegistrar registrar(dummy_registrar_handle);
+  BinaryMessenger* messenger = registrar.messenger();
+  const std::string channel_name("foo");
+
+  BinaryMessageHandler binary_handler = [](const uint8_t* message,
+                                           const size_t message_size,
+                                           const BinaryReply& reply) {};
+  messenger->SetMessageHandler(channel_name, std::move(binary_handler));
+  ASSERT_NE(test_api->last_message_callback_set(), nullptr);
+
+  // The engine is gone; clearing the handler must not reach the C API.
+  test_api->set_messenger_available(false);
+  messenger->SetMessageHandler(channel_name, nullptr);
+  EXPECT_NE(test_api->last_message_callback_set(), nullptr);
 }
 
 // Tests that the registrar manager returns the same instance when getting

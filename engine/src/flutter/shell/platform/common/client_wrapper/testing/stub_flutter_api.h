@@ -65,6 +65,9 @@ class StubFlutterApi {
                                     FlutterDesktopMessageCallback callback,
                                     void* user_data) {}
 
+  // Called for FlutterDesktopMessengerIsAvailable.
+  virtual bool MessengerIsAvailable() { return true; }
+
   // Called for FlutterDesktopTextureRegistrarRegisterExternalTexture.
   virtual int64_t TextureRegistrarRegisterExternalTexture(
       const FlutterDesktopTextureInfo* info) {

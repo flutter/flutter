@@ -106,8 +106,10 @@ void FlutterDesktopMessengerRelease(FlutterDesktopMessengerRef messenger) {
 }
 
 bool FlutterDesktopMessengerIsAvailable(FlutterDesktopMessengerRef messenger) {
-  assert(false);  // not implemented
-  return false;
+  if (s_stub_implementation) {
+    return s_stub_implementation->MessengerIsAvailable();
+  }
+  return true;
 }
 
 FlutterDesktopMessengerRef FlutterDesktopMessengerLock(
