@@ -2191,8 +2191,14 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
   /// Updates the last selection edge locations of both start and end selection
   /// edges based on their [SelectionGeometry].
   void _updateLastSelectionEdgeLocationsFromGeometries() {
+    // A selectable's `hasSelection` only reflects its [SelectionStatus], which
+    // stays `uncollapsed` even when its `startSelectionPoint`/`endSelectionPoint`
+    // is null because that edge's [Selectable] is off-screen (e.g. scrolled out
+    // of a lazily-built list). See `getSelectionGeometry` above, which already
+    // tolerates this. https://github.com/flutter/flutter/issues/175016
     if (currentSelectionStartIndex != -1 &&
-        selectables[currentSelectionStartIndex].value.hasSelection) {
+        selectables[currentSelectionStartIndex].value.hasSelection &&
+        selectables[currentSelectionStartIndex].value.startSelectionPoint != null) {
       final Selectable start = selectables[currentSelectionStartIndex];
       final Offset localStartEdge =
           start.value.startSelectionPoint!.localPosition +
@@ -2206,7 +2212,8 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
       );
     }
     if (currentSelectionEndIndex != -1 &&
-        selectables[currentSelectionEndIndex].value.hasSelection) {
+        selectables[currentSelectionEndIndex].value.hasSelection &&
+        selectables[currentSelectionEndIndex].value.endSelectionPoint != null) {
       final Selectable end = selectables[currentSelectionEndIndex];
       final Offset localEndEdge =
           end.value.endSelectionPoint!.localPosition +

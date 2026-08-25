@@ -1046,6 +1046,26 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets(
+    'does not crash when a selectable has a selection with an off-screen edge point',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/175016.
+      await tester.pumpWidget(
+        TestWidgetsApp(home: _selectableRegion(child: const OffscreenEdgeSelectionSpy())),
+      );
+      await tester.pumpAndSettle();
+
+      final SelectableRegionState state = tester.state<SelectableRegionState>(
+        find.byType(SelectableRegion),
+      );
+
+      state.selectAll();
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('dragging handle or selecting word triggers haptic feedback on Android', (
     WidgetTester tester,
   ) async {
@@ -7062,6 +7082,69 @@ class RenderSelectionSpy extends RenderProxyBox with Selectable, SelectionRegist
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
     ),
+    endSelectionPoint: SelectionPoint(
+      localPosition: Offset.zero,
+      lineHeight: 0.0,
+      handleType: TextSelectionHandleType.left,
+    ),
+  );
+
+  @override
+  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {}
+}
+
+// Regression test helper for https://github.com/flutter/flutter/issues/175016.
+//
+// A selectable's `SelectionGeometry.hasSelection` reflects only its `status`,
+// which can be `SelectionStatus.uncollapsed` while `startSelectionPoint` (or
+// `endSelectionPoint`) is null, e.g. when that edge scrolled off-screen. See
+// `MultiSelectableSelectionContainerDelegate.getSelectionGeometry`, which
+// already produces exactly this combination.
+class OffscreenEdgeSelectionSpy extends LeafRenderObjectWidget {
+  const OffscreenEdgeSelectionSpy({super.key});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return RenderOffscreenEdgeSelectionSpy(SelectionContainer.maybeOf(context));
+  }
+}
+
+class RenderOffscreenEdgeSelectionSpy extends RenderProxyBox with Selectable, SelectionRegistrant {
+  RenderOffscreenEdgeSelectionSpy(SelectionRegistrar? registrar) {
+    this.registrar = registrar;
+  }
+
+  @override
+  List<Rect> get boundingBoxes => <Rect>[paintBounds];
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
+
+  @override
+  void performLayout() => size = computeDryLayout(constraints);
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
+
+  @override
+  SelectionResult dispatchSelectionEvent(SelectionEvent event) => SelectionResult.end;
+
+  @override
+  SelectedContent? getSelectedContent() => const SelectedContent(plainText: 'content');
+
+  @override
+  SelectedContentRange? getSelection() => null;
+
+  @override
+  int get contentLength => 1;
+
+  @override
+  final SelectionGeometry value = const SelectionGeometry(
+    hasContent: true,
+    status: SelectionStatus.uncollapsed,
     endSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
