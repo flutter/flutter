@@ -129,7 +129,7 @@ enum WidgetsServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [ViewMetricsOverride], the value this service extension exposes.
+  /// * [DebugViewMetricsOverride], the value this service extension exposes.
   /// * [debugViewMetricsOverrides], the map this service extension writes to.
   /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.

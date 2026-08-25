@@ -830,7 +830,7 @@ mixin WidgetsBinding
   ///  * `viewId`: the [FlutterView.viewId] to act on. Required unless
   ///    `clearAll` is `true`.
   ///  * `overrides`: a JSON object in the format accepted by
-  ///    [ViewMetricsOverride.fromJson]. When present, it replaces the current
+  ///    [DebugViewMetricsOverride.fromJson]. When present, it replaces the current
   ///    override for `viewId`. An empty object removes the override.
   ///  * `clearAll`: when `'true'`, removes every override and ignores `viewId`.
   ///

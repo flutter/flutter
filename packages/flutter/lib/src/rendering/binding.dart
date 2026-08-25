@@ -412,7 +412,7 @@ mixin RendererBinding
   /// Applies any [debugViewMetricsOverrides] change to the [ViewConfiguration]
   /// of every [RenderView], and schedules a frame if one actually changed.
   ///
-  /// Overrides that do not affect layout, such as [ViewMetricsOverride.boldText],
+  /// Overrides that do not affect layout, such as [DebugViewMetricsOverride.boldText],
   /// leave every configuration untouched and schedule nothing here; the views
   /// that report them rebuild through [MediaQuery] instead.
   ///

@@ -485,7 +485,7 @@ class DebugViewMetricsOverride with Diagnosticable {
   ///
   /// [physicalSize] is subject to the same requirement, but cannot be asserted
   /// here without making this constructor unusable in a `const` expression.
-  /// [ViewMetricsOverride.fromJson] rejects invalid sizes, which covers values
+  /// [DebugViewMetricsOverride.fromJson] rejects invalid sizes, which covers values
   /// arriving from developer tooling; a bad size passed directly is caught
   /// downstream by [BoxConstraints.debugAssertIsValid].
   const DebugViewMetricsOverride({
@@ -926,7 +926,7 @@ class _DebugViewMetricsOverridesNotifier extends ChangeNotifier {
 /// Installs [override] for the view with the given [viewId] and notifies
 /// listeners.
 ///
-/// Passing a null [override], or one for which [ViewMetricsOverride.isEmpty] is
+/// Passing a null [override], or one for which [DebugViewMetricsOverride.isEmpty] is
 /// true, removes the entry.
 ///
 /// Returns true if the override actually changed. This has no effect in release
