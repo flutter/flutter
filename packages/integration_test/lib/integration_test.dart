@@ -259,7 +259,11 @@ https://docs.flutter.dev/testing/integration-tests
     if (_vmService == null) {
       final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
       assert(info.serverUri != null);
-      final address = 'ws://localhost:${info.serverUri!.port}${info.serverUri!.path}ws';
+      final Uri serverUri = info.serverUri!;
+      final path = serverUri.path.endsWith('/')
+          ? '${serverUri.path}ws'
+          : '${serverUri.path}/ws';
+      final address = 'ws://localhost:${serverUri.port}$path';
       try {
         _vmService = await _vmServiceConnectUri(address, httpClient: httpClient);
       } on SocketException catch (e, s) {
