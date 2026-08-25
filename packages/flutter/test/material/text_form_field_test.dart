@@ -1942,4 +1942,58 @@ void main() {
 
     expect(controller.text, 'Initial Value');
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/40494.
+  testWidgets(
+    'validator receives the up-to-date value when validate() is called from a controller listener',
+    (WidgetTester tester) async {
+      final formKey = GlobalKey<FormState>();
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+
+      final controllerTexts = <String>[];
+      final validatedValues = <String?>[];
+      final fieldValues = <String?>[];
+
+      // This listener is added before the TextFormField adds its own listener,
+      // so it is notified first, while the TextFormField has not had a chance
+      // to update its value yet.
+      controller.addListener(() {
+        final FormState? formState = formKey.currentState;
+        if (formState == null) {
+          return;
+        }
+        controllerTexts.add(controller.text);
+        formState.validate();
+        fieldValues.add(formState.fields.single.value as String?);
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Form(
+              key: formKey,
+              child: TextFormField(
+                controller: controller,
+                validator: (String? value) {
+                  validatedValues.add(value);
+                  return null;
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextFormField), 'a');
+      await tester.pump();
+
+      expect(controller.text, 'a');
+      expect(controllerTexts, contains('a'));
+      // The validator and the field value must always agree with the value the
+      // controller is notifying about.
+      expect(validatedValues, controllerTexts);
+      expect(fieldValues, controllerTexts);
+    },
+  );
 }

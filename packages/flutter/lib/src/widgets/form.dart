@@ -674,7 +674,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   ///  * [validate], which may update [errorText] and [hasError].
   ///
   ///  * [FormField.forceErrorText], which also may update [errorText] and [hasError].
-  bool get isValid => widget.forceErrorText == null && widget.validator?.call(_value) == null;
+  bool get isValid => widget.forceErrorText == null && widget.validator?.call(value) == null;
 
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
@@ -734,7 +734,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       return;
     }
     if (widget.validator != null) {
-      _errorText.value = widget.validator!(_value);
+      _errorText.value = widget.validator!(value);
     } else {
       _errorText.value = null;
     }
