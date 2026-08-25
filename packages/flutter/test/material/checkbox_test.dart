@@ -2474,6 +2474,49 @@ void main() {
     expect(getCheckboxRenderer(), paints..rrect(color: inactiveBackgroundColor));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/132947
+  testWidgets('Checkbox outline does not self-intersect with a large ContinuousRectangleBorder radius', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Checkbox(
+              shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(24.0)),
+              value: false,
+              onChanged: (bool? value) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    Path? outline;
+    expect(
+      tester.renderObject<RenderBox>(find.byType(Checkbox)),
+      paints..something((Symbol method, List<dynamic> arguments) {
+        if (method != #drawPath) {
+          return false;
+        }
+        outline = arguments[0] as Path;
+        return true;
+      }),
+    );
+
+    // The checkbox is painted in an 18x18 box centered in the render box, so
+    // the 24.0 radius has to be scaled down to 9.0 to fit.
+    final Size size = tester.getSize(find.byType(Checkbox));
+    final box = Rect.fromLTWH((size.width - 18.0) / 2.0, (size.height - 18.0) / 2.0, 18.0, 18.0);
+    final Path expected = ContinuousRectangleBorder(
+      borderRadius: BorderRadius.circular(9.0),
+    ).getOuterPath(box);
+
+    expect(outline, isNotNull);
+    expect(outline, coversSameAreaAs(expected, areaToCompare: box.inflate(2.0)));
+  });
+
   testWidgets('Checkbox renders at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
