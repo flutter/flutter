@@ -1212,6 +1212,52 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/163475.
+  testWidgets('[Default] Arrow keys are not blocked by a closed anchor', (
+    WidgetTester tester,
+  ) async {
+    final textController = TextEditingController(text: 'text');
+    addTearDown(textController.dispose);
+    final textFieldFocusNode = FocusNode(debugLabel: 'EditableText');
+    addTearDown(textFieldFocusNode.dispose);
+
+    await tester.pumpWidget(
+      App(
+        Menu(
+          controller: controller,
+          menuPanel: Panel(children: <Widget>[Text(Tag.a.text)]),
+          child: SizedBox(
+            width: 200,
+            child: EditableText(
+              controller: textController,
+              focusNode: textFieldFocusNode,
+              style: const TextStyle(),
+              cursorColor: const Color(0xFF000000),
+              backgroundCursorColor: const Color(0xFF000000),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    textFieldFocusNode.requestFocus();
+    await tester.pump();
+
+    textController.selection = const TextSelection.collapsed(offset: 4);
+    await tester.pump();
+
+    // The menu is closed, so the anchor should not intercept arrow keys.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+
+    expect(textController.selection.baseOffset, 3);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+
+    expect(textController.selection.baseOffset, 4);
+  });
+
   testWidgets('[Default] Focus traversal shortcuts are not bound to actions', (
     WidgetTester tester,
   ) async {

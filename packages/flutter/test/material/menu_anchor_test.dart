@@ -2479,6 +2479,51 @@ void main() {
       await tester.pump();
       expect(focusedMenu, equals('MenuItemButton(Text("Submenu item 1"))'));
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/163475.
+    testWidgets('Arrow keys move the caret of a TextField in the anchor when the menu is closed', (
+      WidgetTester tester,
+    ) async {
+      final textController = TextEditingController(text: 'text');
+      addTearDown(textController.dispose);
+      final textFieldFocusNode = FocusNode(debugLabel: 'TextField');
+      addTearDown(textFieldFocusNode.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MenuAnchor(
+              controller: controller,
+              menuChildren: <Widget>[
+                MenuItemButton(child: Text(TestMenu.subMenu00.label), onPressed: () {}),
+              ],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return TextField(controller: textController, focusNode: textFieldFocusNode);
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      expect(textFieldFocusNode.hasFocus, isTrue);
+      expect(controller.isOpen, isFalse);
+
+      textController.selection = const TextSelection.collapsed(offset: 4);
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      await tester.pump();
+
+      expect(textController.selection.baseOffset, 3);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump();
+
+      expect(textController.selection.baseOffset, 4);
+    });
   });
 
   group('Accelerators', () {
