@@ -58,6 +58,8 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    printMigrationWarning('macos');
+
     final String outputArgument =
         stringArg('output') ??
         globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'macos', 'framework');
