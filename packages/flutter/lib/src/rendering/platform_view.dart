@@ -42,7 +42,7 @@ bool _factoryTypesSetEquals<T>(Set<Factory<T>>? a, Set<Factory<T>>? b) {
   if (a == null || b == null) {
     return false;
   }
-  return setEquals(_factoriesTypeSet(a), _factoriesTypeSet(b));
+  return setEquals<Type>(_factoriesTypeSet<T>(a), _factoriesTypeSet<T>(b));
 }
 
 Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
