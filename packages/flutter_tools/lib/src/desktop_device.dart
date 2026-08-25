@@ -27,18 +27,18 @@ import 'vmservice.dart';
 abstract class DesktopDevice extends Device {
   DesktopDevice(
     super.id, {
-    required PlatformType super.platformType,
     required super.ephemeral,
-    required super.logger,
-    required ProcessManager processManager,
     required FileSystem fileSystem,
+    required super.logger,
     required OperatingSystemUtils operatingSystemUtils,
-    required Artifacts artifacts,
+    required PlatformType super.platformType,
+    required ProcessManager processManager,
+    Artifacts? artifacts,
   }) : _logger = logger,
        _processManager = processManager,
        _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
-       _artifacts = artifacts,
+       _artifacts = artifacts ?? globals.artifacts!,
        super(category: Category.desktop);
 
   final Logger _logger;

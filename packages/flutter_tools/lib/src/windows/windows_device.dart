@@ -13,6 +13,7 @@ import '../base/os.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import 'application_package.dart';
 import 'build_windows.dart';
@@ -21,11 +22,11 @@ import 'windows_workflow.dart';
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends DesktopDevice {
   WindowsDevice({
-    required super.processManager,
-    required super.logger,
     required super.fileSystem,
+    required super.logger,
     required super.operatingSystemUtils,
-    required super.artifacts,
+    required super.processManager,
+    super.artifacts,
   }) : _operatingSystemUtils = operatingSystemUtils,
        super('windows', platformType: PlatformType.windows, ephemeral: false);
 
@@ -78,18 +79,18 @@ class WindowsDevice extends DesktopDevice {
 
 class WindowsDevices extends PollingDeviceDiscovery {
   WindowsDevices({
-    required ProcessManager processManager,
-    required Logger logger,
     required FileSystem fileSystem,
+    required Logger logger,
     required OperatingSystemUtils operatingSystemUtils,
+    required ProcessManager processManager,
     required WindowsWorkflow windowsWorkflow,
-    required Artifacts artifacts,
+    Artifacts? artifacts,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
        _windowsWorkflow = windowsWorkflow,
-       _artifacts = artifacts,
+       _artifacts = artifacts ?? globals.artifacts!,
        super('windows devices');
 
   final FileSystem _fileSystem;

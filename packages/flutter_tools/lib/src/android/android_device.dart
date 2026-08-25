@@ -22,6 +22,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -63,19 +64,19 @@ class AndroidDevice extends Device {
     this.productID,
     required this.modelID,
     this.deviceCodeName,
-    required super.logger,
-    required ProcessManager processManager,
-    required Platform platform,
     required AndroidSdk androidSdk,
     required FileSystem fileSystem,
-    required Artifacts artifacts,
+    required super.logger,
+    required Platform platform,
+    required ProcessManager processManager,
     AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
+    Artifacts? artifacts,
   }) : _logger = logger,
        _processManager = processManager,
        _androidSdk = androidSdk,
        _platform = platform,
        _fileSystem = fileSystem,
-       _artifacts = artifacts,
+       _artifacts = artifacts ?? globals.artifacts!,
        _androidConsoleSocketFactory = androidConsoleSocketFactory,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(category: Category.mobile, platformType: PlatformType.android, ephemeral: true);
