@@ -481,6 +481,9 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, void* user_
   // Proxy to allow plugins, channels to hold a weak reference to the binary messenger (self).
   FlutterBinaryMessengerRelay* _binaryMessenger;
 
+  // A FlutterRunLoop that runs on the main thread.
+  FlutterRunLoop* _mainRunLoop;
+
   // Map from ViewId to vsync waiter. Note that this is modified on main thread
   // but accessed on UI thread, so access must be @synchronized.
   NSMapTable<NSNumber*, FlutterVSyncWaiter*>* _vsyncWaiters;
@@ -533,8 +536,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
 
-  [FlutterRunLoop ensureMainLoopInitialized];
-
+  _mainRunLoop = [FlutterRunLoop mainRunLoop];
   _pasteboard = [[FlutterPasteboard alloc] init];
   _active = NO;
   _visible = NO;
@@ -940,23 +942,33 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
 - (void)deregisterViewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier {
   if (viewIdentifier != kFlutterImplicitViewId) {
+    struct RemoveViewContext {
+      bool* removed;
+      FlutterRunLoop* mainRunLoop;
+    };
     bool removed = false;
+    // Stack allocation is safe here because this method blocks the current thread
+    // until `removed` becomes true.
+    RemoveViewContext context = {
+        .removed = &removed,
+        .mainRunLoop = _mainRunLoop,
+    };
     FlutterRemoveViewInfo info;
     info.struct_size = sizeof(FlutterRemoveViewInfo);
     info.view_id = viewIdentifier;
-    info.user_data = &removed;
+    info.user_data = &context;
     // RemoveViewCallback is not finished synchronously, the remove_view_callback
     // is called from raster thread when the engine knows for sure that the resources
     // associated with the view are no longer needed.
     info.remove_view_callback = [](const FlutterRemoveViewResult* r) {
-      auto removed = reinterpret_cast<bool*>(r->user_data);
-      [FlutterRunLoop.mainRunLoop performBlock:^{
-        *removed = true;
+      auto context = reinterpret_cast<RemoveViewContext*>(r->user_data);
+      [context->mainRunLoop performBlock:^{
+        *(context->removed) = true;
       }];
     };
     _embedderAPI.RemoveView(_engine, &info);
     while (!removed) {
-      [[FlutterRunLoop mainRunLoop] pollFlutterMessagesOnce];
+      [_mainRunLoop pollFlutterMessagesOnce];
     }
   }
 
@@ -1358,7 +1370,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   if ([NSThread isMainThread]) {
     block();
   } else {
-    [FlutterRunLoop.mainRunLoop performBlock:block];
+    [_mainRunLoop performBlock:block];
   }
 }
 
@@ -1837,17 +1849,16 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   __weak FlutterEngine* weakSelf = self;
 
   const auto engine_time = _embedderAPI.GetCurrentTime();
-  [FlutterRunLoop.mainRunLoop
-      performAfterDelay:(targetTime - (double)engine_time) / NSEC_PER_SEC
-                  block:^{
-                    FlutterEngine* self = weakSelf;
-                    if (self != nil && self->_engine != nil) {
-                      auto result = _embedderAPI.RunTask(self->_engine, &task);
-                      if (result != kSuccess) {
-                        NSLog(@"Could not post a task to the Flutter engine.");
-                      }
-                    }
-                  }];
+  [_mainRunLoop performAfterDelay:(targetTime - (double)engine_time) / NSEC_PER_SEC
+                            block:^{
+                              FlutterEngine* self = weakSelf;
+                              if (self != nil && self->_engine != nil) {
+                                auto result = _embedderAPI.RunTask(self->_engine, &task);
+                                if (result != kSuccess) {
+                                  NSLog(@"Could not post a task to the Flutter engine.");
+                                }
+                              }
+                            }];
 }
 
 // Getter used by test harness, only exposed through the FlutterEngine(Test) category
