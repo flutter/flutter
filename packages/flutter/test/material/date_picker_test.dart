@@ -79,6 +79,8 @@ void main() {
     bool useMaterial3 = false,
     ThemeData? theme,
     TextScaler textScaler = TextScaler.noScaling,
+    CalendarDatePickerDayBuilder? dayBuilder,
+    CalendarDatePickerWeekdayBuilder? weekdayBuilder,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(
@@ -125,6 +127,8 @@ void main() {
       onDatePickerModeChange: (DatePickerEntryMode value) {
         currentMode = value;
       },
+      dayBuilder: dayBuilder,
+      weekdayBuilder: weekdayBuilder,
       builder: (BuildContext context, Widget? child) {
         return Directionality(textDirection: textDirection, child: child ?? const SizedBox());
       },
@@ -148,6 +152,24 @@ void main() {
   }
 
   group('showDatePicker Dialog', () {
+    testWidgets('forwards dayBuilder and weekdayBuilder to the calendar', (
+      WidgetTester tester,
+    ) async {
+      await prepareDatePicker(
+        tester,
+        (Future<DateTime?> date) async {
+          expect(find.text('Custom day 1'), findsOneWidget);
+          expect(find.text('Custom Sunday'), findsOneWidget);
+        },
+        dayBuilder: (BuildContext context, DateTime day, Set<WidgetState> states, Widget child) {
+          return day.day == 1 ? const Text('Custom day 1') : child;
+        },
+        weekdayBuilder: (BuildContext context, int weekday, Widget child) {
+          return weekday == DateTime.sunday ? const Text('Custom Sunday') : child;
+        },
+      );
+    });
+
     testWidgets('Default dialog size', (WidgetTester tester) async {
       Future<void> showPicker(WidgetTester tester, Size size) async {
         tester.view.physicalSize = size;

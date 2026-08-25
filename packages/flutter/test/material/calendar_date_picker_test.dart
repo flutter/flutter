@@ -37,6 +37,8 @@ void main() {
     ValueChanged<DateTime>? onDisplayedMonthChanged,
     DatePickerMode initialCalendarMode = DatePickerMode.day,
     SelectableDayPredicate? selectableDayPredicate,
+    CalendarDatePickerDayBuilder? dayBuilder,
+    CalendarDatePickerWeekdayBuilder? weekdayBuilder,
     TextDirection textDirection = TextDirection.ltr,
     ThemeData? theme,
     bool? useMaterial3,
@@ -56,6 +58,8 @@ void main() {
             onDisplayedMonthChanged: onDisplayedMonthChanged,
             initialCalendarMode: initialCalendarMode,
             selectableDayPredicate: selectableDayPredicate,
+            dayBuilder: dayBuilder,
+            weekdayBuilder: weekdayBuilder,
           ),
         ),
       ),
@@ -468,6 +472,57 @@ void main() {
       await tester.tap(find.text('2018'));
       await tester.pumpAndSettle();
       expect(find.text('January 2018'), findsOneWidget);
+    });
+
+    testWidgets('dayBuilder customizes days', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        calendarDatePicker(
+          dayBuilder: (BuildContext context, DateTime day, Set<WidgetState> states, Widget child) {
+            return day.day == 1 ? const Text('Custom day 1') : child;
+          },
+        ),
+      );
+
+      expect(find.text('Custom day 1'), findsOneWidget);
+    });
+
+    testWidgets('dayBuilder receives day states', (WidgetTester tester) async {
+      final statesForDay = <DateTime, Set<WidgetState>>{};
+
+      await tester.pumpWidget(
+        calendarDatePicker(
+          initialDate: DateTime(2016, DateTime.january, 15),
+          selectableDayPredicate: (DateTime day) => day.day != 10,
+          dayBuilder: (BuildContext context, DateTime day, Set<WidgetState> states, Widget child) {
+            statesForDay[day] = Set<WidgetState>.of(states);
+            return child;
+          },
+        ),
+      );
+
+      expect(statesForDay[DateTime(2016, DateTime.january, 10)], contains(WidgetState.disabled));
+      expect(statesForDay[DateTime(2016, DateTime.january, 15)], contains(WidgetState.selected));
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await gesture.addPointer(location: Offset.zero);
+      await gesture.moveTo(tester.getCenter(find.text('12')));
+      await tester.pump();
+      expect(statesForDay[DateTime(2016, DateTime.january, 12)], contains(WidgetState.hovered));
+    });
+
+    testWidgets('weekdayBuilder customizes headers and uses DateTime weekday values', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        calendarDatePicker(
+          weekdayBuilder: (BuildContext context, int weekday, Widget child) {
+            return weekday == DateTime.sunday ? const Text('Custom Sunday') : child;
+          },
+        ),
+      );
+
+      expect(find.text('Custom Sunday'), findsOneWidget);
     });
 
     testWidgets('Material2 - currentDate is highlighted', (WidgetTester tester) async {
