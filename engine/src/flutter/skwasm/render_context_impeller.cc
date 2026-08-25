@@ -77,8 +77,9 @@ class ImpellerRenderContext : public Skwasm::RenderContext {
                               Skwasm::ImageByteFormat format,
                               void* out_pixels) override {
     auto impeller_image = image ? image->asImpellerImage() : nullptr;
-    auto texture =
-        impeller_image ? impeller_image->GetImpellerTexture(context_) : nullptr;
+    auto texture = impeller_image
+                       ? impeller_image->GetImpellerTexture(*content_context_)
+                       : nullptr;
     if (!texture) {
       return false;
     }

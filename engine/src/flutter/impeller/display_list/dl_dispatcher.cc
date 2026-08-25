@@ -1228,7 +1228,7 @@ FirstPassDispatcher::TakeBackdropData() {
 std::shared_ptr<Texture> DisplayListToTexture(
     const sk_sp<flutter::DisplayList>& display_list,
     ISize size,
-    AiksContext& context,
+    ContentContext& context,
     bool reset_host_buffer,
     bool generate_mips,
     std::optional<PixelFormat> target_pixel_format) {
@@ -1276,11 +1276,11 @@ std::shared_ptr<Texture> DisplayListToTexture(
   }
 
   DlIRect cull_rect = DlIRect::MakeWH(size.width, size.height);
-  impeller::FirstPassDispatcher collector(
-      context.GetContentContext(), impeller::Matrix(), Rect::MakeSize(size));
+  impeller::FirstPassDispatcher collector(context, impeller::Matrix(),
+                                          Rect::MakeSize(size));
   display_list->Dispatch(collector, cull_rect);
   impeller::CanvasDlDispatcher impeller_dispatcher(
-      context.GetContentContext(),               //
+      context,                                   //
       target,                                    //
       /*is_onscreen=*/false,                     //
       display_list->root_has_backdrop_filter(),  //
@@ -1289,14 +1289,14 @@ std::shared_ptr<Texture> DisplayListToTexture(
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
-  context.GetContentContext().GetTextShadowCache().MarkFrameStart();
+  context.GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
-      context.GetContentContext().GetTransientsDataBuffer().Reset();
-      context.GetContentContext().GetTransientsIndexesBuffer().Reset();
+      context.GetTransientsDataBuffer().Reset();
+      context.GetTransientsIndexesBuffer().Reset();
     }
-    context.GetContentContext().GetTextShadowCache().MarkFrameEnd();
-    context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
+    context.GetTextShadowCache().MarkFrameEnd();
+    context.GetLazyGlyphAtlas()->ResetTextFrames();
     context.GetContext()->DisposeThreadLocalCachedResources();
   });
 
@@ -1304,6 +1304,18 @@ std::shared_ptr<Texture> DisplayListToTexture(
   impeller_dispatcher.FinishRecording();
 
   return target.GetRenderTargetTexture();
+}
+
+std::shared_ptr<Texture> DisplayListToTexture(
+    const sk_sp<flutter::DisplayList>& display_list,
+    ISize size,
+    AiksContext& context,
+    bool reset_host_buffer,
+    bool generate_mips,
+    std::optional<PixelFormat> target_pixel_format) {
+  return DisplayListToTexture(display_list, size, context.GetContentContext(),
+                              reset_host_buffer, generate_mips,
+                              target_pixel_format);
 }
 
 bool RenderToTarget(ContentContext& context,

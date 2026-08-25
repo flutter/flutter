@@ -49,7 +49,7 @@ DlDeferredImageGPUImpeller::~DlDeferredImageGPUImpeller() = default;
 // |DlImage|
 std::shared_ptr<impeller::Texture>
 DlDeferredImageGPUImpeller::GetImpellerTexture(
-    const std::shared_ptr<impeller::Context>& context) const {
+    const impeller::ContentContext& renderer) const {
   if (!wrapper_) {
     return nullptr;
   }

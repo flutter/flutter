@@ -108,7 +108,7 @@ class MockDlImage : public impeller::DlImageImpeller {
   MOCK_METHOD(const DlImageSkia*, asSkiaImage, (), (const, override));
   MOCK_METHOD(std::shared_ptr<impeller::Texture>,
               GetImpellerTexture,
-              (const std::shared_ptr<impeller::Context>&),
+              (const impeller::ContentContext&),
               (const, override));
 };
 #endif

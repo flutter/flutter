@@ -57,7 +57,7 @@ std::shared_ptr<Texture> DlImageImpeller::GetCachedTexture(
   if (texture) {
     return texture;
   }
-  texture = GetImpellerTexture(renderer.GetContext());
+  texture = GetImpellerTexture(renderer);
   renderer.SetCachedTexture(this, texture);
   return texture;
 }
@@ -71,7 +71,7 @@ DlImageImpellerTexture::~DlImageImpellerTexture() = default;
 
 // |DlImage|
 std::shared_ptr<impeller::Texture> DlImageImpellerTexture::GetImpellerTexture(
-    const std::shared_ptr<impeller::Context>& context) const {
+    const ContentContext& renderer) const {
   return texture_;
 }
 

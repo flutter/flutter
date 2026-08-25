@@ -449,6 +449,15 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
 std::shared_ptr<Texture> DisplayListToTexture(
     const sk_sp<flutter::DisplayList>& display_list,
     ISize size,
+    ContentContext& context,
+    bool reset_host_buffer = true,
+    bool generate_mips = false,
+    std::optional<PixelFormat> target_pixel_format = std::nullopt);
+
+/// Render the provided display list to a texture with the given size.
+std::shared_ptr<Texture> DisplayListToTexture(
+    const sk_sp<flutter::DisplayList>& display_list,
+    ISize size,
     AiksContext& context,
     bool reset_host_buffer = true,
     bool generate_mips = false,

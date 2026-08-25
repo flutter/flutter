@@ -8,6 +8,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/impeller/core/allocator.h"
 #include "flutter/impeller/core/device_buffer.h"
+#include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/size.h"
 #include "flutter/impeller/renderer/context.h"
@@ -404,8 +405,9 @@ TEST_F(ImageDecoderFixtureTest, ImpellerUploadToSharedNoGpu) {
   ASSERT_EQ(no_gpu_access_context->command_buffer_count_, 0ul);
   ASSERT_EQ(result.second, "");
   EXPECT_EQ(no_gpu_access_context->DidDisposeResources(), true);
+  impeller::AiksContext aiks_context(no_gpu_access_context, nullptr);
   EXPECT_EQ(result.first->asImpellerImage()
-                ->GetImpellerTexture(no_gpu_access_context)
+                ->GetImpellerTexture(aiks_context.GetContentContext())
                 ->GetTextureDescriptor()
                 .storage_mode,
             impeller::StorageMode::kHostVisible);
