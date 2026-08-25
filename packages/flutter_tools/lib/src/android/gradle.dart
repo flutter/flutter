@@ -59,6 +59,7 @@ import 'migrations/top_level_gradle_build_file_migration.dart';
 final _kBuildVariantRegex = RegExp('^BuildVariant: (?<$_kBuildVariantRegexGroupName>.*)\$');
 const _kBuildVariantRegexGroupName = 'variant';
 const _kBuildVariantTaskName = 'printBuildVariants';
+const _kAndroidCliPathProperty = 'flutter.androidCliPath';
 const _kSdkManagerPathProperty = 'flutter.sdkManagerPath';
 const _kAndroidSdkRootProperty = 'flutter.androidSdkRoot';
 const _kInstalledNdkVersionsProperty = 'flutter.installedNdkVersions';
@@ -1074,6 +1075,13 @@ To fix this, you can either:
       '-P$_kAndroidSdkRootProperty=${androidSdk.directory.path}',
       '-P$_kInstalledNdkVersionsProperty=${_getInstalledNdkVersionsForGradle(androidSdk).join(',')}',
     ];
+
+    final String? androidCliPath = androidSdk.androidCliPath;
+    if (androidCliPath != null &&
+        androidSdk.cmdlineToolsAvailable &&
+        androidSdk.licensesAvailable) {
+      properties.add('-P$_kAndroidCliPathProperty=$androidCliPath');
+    }
 
     final String? sdkManagerPath = androidSdk.sdkManagerPath;
     if (sdkManagerPath != null &&

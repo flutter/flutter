@@ -444,7 +444,42 @@ class AndroidLicenseValidator extends DoctorValidator {
     return true;
   }
 
+  bool _areDiskLicensesAccepted() {
+    if (_androidSdk == null) {
+      return false;
+    }
+    final Directory licensesDir = _androidSdk.directory.childDirectory('licenses');
+    if (!licensesDir.existsSync()) {
+      return false;
+    }
+    final File sdkLicense = licensesDir.childFile('android-sdk-license');
+    if (!sdkLicense.existsSync()) {
+      return false;
+    }
+    try {
+      final String content = sdkLicense.readAsStringSync().trim();
+      return content.isNotEmpty;
+    } on FileSystemException {
+      return false;
+    }
+  }
+
   Future<LicensesAccepted> get licensesAccepted async {
+    if (_androidSdk == null) {
+      return LicensesAccepted.unknown;
+    }
+
+    if (_androidSdk.sdkToolType == AndroidSdkToolType.androidCli) {
+      if (_areDiskLicensesAccepted()) {
+        return LicensesAccepted.all;
+      }
+      return LicensesAccepted.none;
+    }
+
+    if (!_canRunSdkManager()) {
+      return LicensesAccepted.unknown;
+    }
+
     LicensesAccepted? status;
 
     void handleLine(String line) {
@@ -465,13 +500,9 @@ class AndroidLicenseValidator extends DoctorValidator {
       }
     }
 
-    if (!_canRunSdkManager()) {
-      return LicensesAccepted.unknown;
-    }
-
     try {
       final Process process = await _processManager.start(<String>[
-        _androidSdk!.sdkManagerPath!,
+        _androidSdk.sdkManagerPath!,
         '--licenses',
       ], environment: _java?.environment);
       await ProcessUtils.writelnToStdinUnsafe(stdin: process.stdin, line: 'n');
@@ -488,7 +519,15 @@ class AndroidLicenseValidator extends DoctorValidator {
           .listen(handleLine)
           .asFuture<void>();
       await Future.wait<void>(<Future<void>>[output, errors]);
-      return status ?? LicensesAccepted.unknown;
+      if (status != null) {
+        return status!;
+      }
+      // If status could not be parsed from sdkmanager output (e.g. deprecation warning in v23+),
+      // fall back to inspecting licenses on disk.
+      if (_areDiskLicensesAccepted()) {
+        return LicensesAccepted.all;
+      }
+      return LicensesAccepted.unknown;
     } on IOException catch (e) {
       _logger.printTrace('Failed to run Android sdk manager: $e');
       return LicensesAccepted.unknown;
@@ -500,6 +539,10 @@ class AndroidLicenseValidator extends DoctorValidator {
     if (_androidSdk == null) {
       _logger.printStatus(_androidSdkShort);
       return false;
+    }
+
+    if (_androidSdk.sdkToolType == AndroidSdkToolType.androidCli) {
+      return _runAndroidCliLicenseManager();
     }
 
     if (!_canRunSdkManager()) {
@@ -561,6 +604,74 @@ class AndroidLicenseValidator extends DoctorValidator {
         ),
       );
     }
+  }
+
+  Future<bool> _runAndroidCliLicenseManager() async {
+    final Directory licensesDir = _androidSdk!.directory.childDirectory('licenses');
+    final File sdkLicenseFile = licensesDir.childFile('android-sdk-license');
+
+    if (_areDiskLicensesAccepted()) {
+      _logger.printStatus(_androidLicensesAll);
+      return true;
+    }
+
+    _logger.printStatus(
+      'Android SDK License Agreement\n'
+      'Review the license agreement at: https://developer.android.com/studio/terms\n',
+    );
+    _logger.printStatus('Do you accept the Android SDK license? (y/N): ');
+
+    final completer = Completer<bool>();
+    final StreamSubscription<String> subscription = _stdio.stdin
+        .transform<String>(const Utf8Decoder(reportErrors: false))
+        .transform<String>(const LineSplitter())
+        .listen(
+          (String line) {
+            final String answer = line.trim().toLowerCase();
+            if (!completer.isCompleted) {
+              completer.complete(answer == 'y' || answer == 'yes');
+            }
+          },
+          onError: (Object err) {
+            if (!completer.isCompleted) {
+              completer.complete(false);
+            }
+          },
+          onDone: () {
+            if (!completer.isCompleted) {
+              completer.complete(false);
+            }
+          },
+        );
+
+    final bool accepted = await completer.future;
+    await subscription.cancel();
+
+    if (!accepted) {
+      _logger.printStatus('Android SDK license not accepted.');
+      return false;
+    }
+
+    if (!licensesDir.existsSync()) {
+      licensesDir.createSync(recursive: true);
+    }
+    const standardSdkLicenseHashes = '''
+8933bad161af4178b1185d1a37fbf41ea5269c55
+d56f5187479451eabf01fb78af6dfcb131a6481e
+24333f8a63b6825ea9c5514f83c2829b004d1fee
+''';
+    sdkLicenseFile.writeAsStringSync(standardSdkLicenseHashes);
+
+    final bool hasPreview = _androidSdk.sdkVersions.any(
+      (AndroidSdkVersion v) => v.platformName.contains('ext') || v.platformName.contains('Preview'),
+    );
+    if (hasPreview) {
+      const previewHash = '84831b9409646a533e30ed3af49110737043c2f8\n';
+      licensesDir.childFile('android-sdk-preview-license').writeAsStringSync(previewHash);
+    }
+
+    _logger.printStatus(_androidLicensesAll);
+    return true;
   }
 
   bool _canRunSdkManager() {

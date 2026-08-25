@@ -824,6 +824,23 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   AndroidSdkVersion? latestVersion;
+
+  @override
+  String? androidCliPath;
+
+  @override
+  String? sdkManagerPath;
+
+  @override
+  AndroidSdkToolType get sdkToolType {
+    if (androidCliPath != null) {
+      return AndroidSdkToolType.androidCli;
+    }
+    if (sdkManagerPath != null) {
+      return AndroidSdkToolType.sdkManager;
+    }
+    return AndroidSdkToolType.none;
+  }
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {

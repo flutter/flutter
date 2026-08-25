@@ -30,6 +30,8 @@ const kAndroidNdkRoot = 'ANDROID_NDK_ROOT';
 final _numberedAndroidPlatformRe = RegExp(r'^android-([0-9]+)$');
 final _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 
+enum AndroidSdkToolType { androidCli, sdkManager, none }
+
 // Android SDK layout:
 
 // $ANDROID_HOME/platform-tools/adb
@@ -145,6 +147,23 @@ class AndroidSdk {
         }
       }
 
+      // in cmdline-tools/$version/bin/android or sdkmanager
+      final cmdlineBins = <File>[
+        ...globals.os.whichAll('android'),
+        ...globals.os.whichAll('sdkmanager'),
+      ];
+      for (var bin in cmdlineBins) {
+        bin = globals.fs.file(bin.resolveSymbolicLinksSync());
+        final String dir = bin.parent.parent.parent.parent.path;
+        if (validSdkDirectory(dir)) {
+          return dir;
+        }
+        final String legacyDir = bin.parent.parent.parent.path;
+        if (validSdkDirectory(legacyDir)) {
+          return legacyDir;
+        }
+      }
+
       return null;
     }
 
@@ -159,11 +178,17 @@ class AndroidSdk {
   }
 
   static bool validSdkDirectory(String dir) {
-    return sdkDirectoryHasLicenses(dir) || sdkDirectoryHasPlatformTools(dir);
+    return sdkDirectoryHasLicenses(dir) ||
+        sdkDirectoryHasPlatformTools(dir) ||
+        sdkDirectoryHasCmdlineTools(dir);
   }
 
   static bool sdkDirectoryHasPlatformTools(String dir) {
     return globals.fs.isDirectorySync(globals.fs.path.join(dir, 'platform-tools'));
+  }
+
+  static bool sdkDirectoryHasCmdlineTools(String dir) {
+    return globals.fs.isDirectorySync(globals.fs.path.join(dir, 'cmdline-tools'));
   }
 
   static bool sdkDirectoryHasLicenses(String dir) {
@@ -528,10 +553,63 @@ class AndroidSdk {
     _latestVersion = _sdkVersions.isEmpty ? null : _sdkVersions.last;
   }
 
+  /// Returns the filesystem path of the Android CLI tool (`android`).
+  String? get androidCliPath {
+    if (globals.platform.isWindows) {
+      return getCmdlineToolsPath('android.bat', skipOldTools: true) ??
+          getCmdlineToolsPath('android.exe', skipOldTools: true);
+    }
+    return getCmdlineToolsPath('android', skipOldTools: true);
+  }
+
   /// Returns the filesystem path of the Android SDK manager tool.
   String? get sdkManagerPath {
     final executable = globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager';
     return getCmdlineToolsPath(executable, skipOldTools: true);
+  }
+
+  /// Returns the active Android SDK management tool type.
+  AndroidSdkToolType get sdkToolType {
+    final String? cliPath = androidCliPath;
+    if (cliPath != null && globals.processManager.canRun(cliPath)) {
+      return AndroidSdkToolType.androidCli;
+    }
+    final String? managerPath = sdkManagerPath;
+    if (managerPath != null && globals.processManager.canRun(managerPath)) {
+      return AndroidSdkToolType.sdkManager;
+    }
+    return AndroidSdkToolType.none;
+  }
+
+  /// Returns the path to the primary Android SDK management tool (`android` or `sdkmanager`).
+  String? get sdkToolPath {
+    return switch (sdkToolType) {
+      AndroidSdkToolType.androidCli => androidCliPath,
+      AndroidSdkToolType.sdkManager => sdkManagerPath,
+      AndroidSdkToolType.none => null,
+    };
+  }
+
+  /// Returns the version of the primary Android SDK management tool or null if not found.
+  String? get sdkToolVersion {
+    final String? toolPath = sdkToolPath;
+    if (toolPath == null || !globals.processManager.canRun(toolPath)) {
+      throwToolExit(
+        'Android command-line tools not found. Update to the latest Android SDK and ensure that '
+        'the cmdline-tools are installed to resolve this.',
+      );
+    }
+    final RunResult result = globals.processUtils.runSync(<String>[
+      toolPath,
+      '--version',
+    ], environment: _java?.environment);
+    if (result.exitCode != 0) {
+      globals.printTrace(
+        '$toolPath --version failed: exitCode: ${result.exitCode} stdout: ${result.stdout} stderr: ${result.stderr}',
+      );
+      return null;
+    }
+    return result.stdout.trim();
   }
 
   /// Returns the version of the Android SDK manager tool or null if not found.
@@ -566,29 +644,39 @@ extension AndroidSdkNdkHelpers on AndroidSdk {
     return ndkDirectory.childFile('source.properties').existsSync();
   }
 
-  /// Installs a specific Android SDK component with sdkmanager.
+  /// Installs a specific Android SDK component with the available command-line tool.
   Future<RunResult> installSdkComponent(
     String component, {
     Java? java,
     ProcessUtils? processUtils,
   }) async {
     processUtils ??= globals.processUtils;
-    final String? executable = sdkManagerPath;
-    if (executable == null || !globals.processManager.canRun(executable)) {
-      throwToolExit(
-        'Android sdkmanager not found. Update to the latest Android SDK and ensure that '
-        'the cmdline-tools are installed to resolve this.',
-      );
+    switch (sdkToolType) {
+      case AndroidSdkToolType.androidCli:
+        final String packageSpec = component.replaceAll(';', '@');
+        return processUtils.run(<String>[
+          androidCliPath!,
+          '--sdk=${directory.path}',
+          'sdk',
+          'install',
+          packageSpec,
+        ], environment: java?.environment);
+      case AndroidSdkToolType.sdkManager:
+        return processUtils.run(<String>[
+          sdkManagerPath!,
+          '--sdk_root=${directory.path}',
+          '--install',
+          component,
+        ], environment: java?.environment);
+      case AndroidSdkToolType.none:
+        throwToolExit(
+          'Android command-line tools not found. Update to the latest Android SDK and ensure that '
+          'the cmdline-tools are installed to resolve this.',
+        );
     }
-    return processUtils.run(<String>[
-      executable,
-      '--sdk_root=${directory.path}',
-      '--install',
-      component,
-    ], environment: java?.environment);
   }
 
-  /// Installs the requested NDK version via sdkmanager.
+  /// Installs the requested NDK version via the available command-line tool.
   Future<RunResult> installNdkVersion(String version, {Java? java, ProcessUtils? processUtils}) {
     return installSdkComponent('ndk;$version', java: java, processUtils: processUtils);
   }

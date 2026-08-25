@@ -53,8 +53,16 @@ class UserMessages {
       'Android sdkmanager tool not found ($sdkManagerPath).\n'
       'Try re-installing or updating your Android SDK,\n'
       'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
+  String androidMissingSdkTool(String toolPath, Platform platform) =>
+      'Android command-line tool not found ($toolPath).\n'
+      'Try re-installing or updating your Android SDK,\n'
+      'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidCannotRunSdkManager(String sdkManagerPath, String error, Platform platform) =>
       'Android sdkmanager tool was found, but failed to run ($sdkManagerPath): "$error".\n'
+      'Try re-installing or updating your Android SDK,\n'
+      'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
+  String androidCannotRunSdkTool(String toolPath, String error, Platform platform) =>
+      'Android command-line tool was found, but failed to run ($toolPath): "$error".\n'
       'Try re-installing or updating your Android SDK,\n'
       'visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
   String androidSdkBuildToolsOutdated(

@@ -307,6 +307,135 @@ Review licenses that have not been accepted (y/N)?
     expect(result, LicensesAccepted.none);
   });
 
+  testWithoutContext(
+    'licensesAccepted returns all when using android CLI and disk license is present',
+    () async {
+      sdk.androidCliPath = '/foo/bar/android';
+      final File licenseFile = fileSystem.file('/foo/bar/licenses/android-sdk-license');
+      licenseFile.createSync(recursive: true);
+      licenseFile.writeAsStringSync('24333f8a63b6825ea9c5514f83c2829b004d1fee');
+      sdk.directory = fileSystem.directory('/foo/bar');
+
+      final licenseValidator = AndroidLicenseValidator(
+        java: FakeJava(),
+        androidSdk: sdk,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+        stdio: stdio,
+        logger: BufferLogger.test(),
+        userMessages: UserMessages(),
+      );
+      final LicensesAccepted result = await licenseValidator.licensesAccepted;
+
+      expect(result, LicensesAccepted.all);
+    },
+  );
+
+  testWithoutContext(
+    'licensesAccepted returns none when using android CLI and disk license is missing',
+    () async {
+      sdk.androidCliPath = '/foo/bar/android';
+      sdk.directory = fileSystem.directory('/foo/bar');
+
+      final licenseValidator = AndroidLicenseValidator(
+        java: FakeJava(),
+        androidSdk: sdk,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+        stdio: stdio,
+        logger: BufferLogger.test(),
+        userMessages: UserMessages(),
+      );
+      final LicensesAccepted result = await licenseValidator.licensesAccepted;
+
+      expect(result, LicensesAccepted.none);
+    },
+  );
+
+  testWithoutContext(
+    'licensesAccepted falls back to disk license on cmdline-tools 23 deprecation output',
+    () async {
+      sdk.sdkManagerPath = '/foo/bar/sdkmanager';
+      const output = '''
+WARNING: The SDK Manager CLI tool (sdkmanager) is deprecated. Android CLI will be used instead.
+The 'android' binary can also be found in the cmdline-tools directory, and 'android sdk' is the replacement for 'sdkmanager'.
+
+Warning: The --licenses option is no longer needed.
+''';
+      processManager.addCommand(
+        const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--licenses'], stdout: output),
+      );
+      final File licenseFile = fileSystem.file('/foo/bar/licenses/android-sdk-license');
+      licenseFile.createSync(recursive: true);
+      licenseFile.writeAsStringSync('24333f8a63b6825ea9c5514f83c2829b004d1fee');
+      sdk.directory = fileSystem.directory('/foo/bar');
+
+      final licenseValidator = AndroidLicenseValidator(
+        java: FakeJava(),
+        androidSdk: sdk,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+        stdio: stdio,
+        logger: BufferLogger.test(),
+        userMessages: UserMessages(),
+      );
+      final LicensesAccepted result = await licenseValidator.licensesAccepted;
+
+      expect(result, LicensesAccepted.all);
+    },
+  );
+
+  testWithoutContext(
+    'runLicenseManager succeeds when using android CLI and licenses already accepted',
+    () async {
+      sdk.androidCliPath = '/foo/bar/android';
+      final File licenseFile = fileSystem.file('/foo/bar/licenses/android-sdk-license');
+      licenseFile.createSync(recursive: true);
+      licenseFile.writeAsStringSync('24333f8a63b6825ea9c5514f83c2829b004d1fee');
+      sdk.directory = fileSystem.directory('/foo/bar');
+
+      final logger = BufferLogger.test();
+      final licenseValidator = AndroidLicenseValidator(
+        java: FakeJava(),
+        androidSdk: sdk,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+        stdio: stdio,
+        logger: logger,
+        userMessages: UserMessages(),
+      );
+
+      expect(await licenseValidator.runLicenseManager(), isTrue);
+      expect(logger.statusText, contains('All Android licenses accepted.'));
+    },
+  );
+
+  testWithoutContext(
+    'runLicenseManager prompts and accepts license when using android CLI',
+    () async {
+      sdk.androidCliPath = '/foo/bar/android';
+      sdk.directory = fileSystem.directory('/foo/bar');
+
+      final logger = BufferLogger.test();
+      final fakeStdio = FakeStdio();
+      fakeStdio.simulateStdin('y\n');
+
+      final licenseValidator = AndroidLicenseValidator(
+        java: FakeJava(),
+        androidSdk: sdk,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+        stdio: fakeStdio,
+        logger: logger,
+        userMessages: UserMessages(),
+      );
+
+      expect(await licenseValidator.runLicenseManager(), isTrue);
+      expect(fileSystem.file('/foo/bar/licenses/android-sdk-license').existsSync(), isTrue);
+      expect(logger.statusText, contains('All Android licenses accepted.'));
+    },
+  );
+
   testWithoutContext('runLicenseManager succeeds for version >= 26', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     sdk.sdkManagerVersion = '26.0.0';
@@ -953,10 +1082,27 @@ class ConflictFakeOperatingSystemUtils extends FakeOperatingSystemUtils {
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
+  String? androidCliPath;
+
+  @override
   String? sdkManagerPath;
 
   @override
   String? sdkManagerVersion;
+
+  @override
+  AndroidSdkToolType get sdkToolType {
+    if (androidCliPath != null) {
+      return AndroidSdkToolType.androidCli;
+    }
+    if (sdkManagerPath != null) {
+      return AndroidSdkToolType.sdkManager;
+    }
+    return AndroidSdkToolType.none;
+  }
+
+  @override
+  List<AndroidSdkVersion> sdkVersions = <AndroidSdkVersion>[];
 
   @override
   String? adbPath;
