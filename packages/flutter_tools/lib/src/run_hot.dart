@@ -607,6 +607,45 @@ class HotRunner extends ResidentRunner {
     await Future.wait(futures);
   }
 
+  Future<void> _sendHotEvent(
+  String eventKind, {
+  required Map<FlutterDevice?, List<FlutterView>> viewsByDevice,
+}) async {
+  for (final FlutterDevice? device in flutterDevices) {
+    try {
+      if (device == null || device.vmService == null) {
+        continue;
+      }
+
+      final sentIsolates = <String>{};
+      final List<FlutterView> views = viewsByDevice[device] ?? <FlutterView>[];
+
+      for (final view in views) {
+        final String? isolateId = view.uiIsolate?.id;
+
+        if (isolateId == null || !sentIsolates.add(isolateId)) {
+          continue;
+        }
+
+        await device.vmService!.flutterSendExtensionEvent(
+          isolateId: isolateId,
+          eventKind: eventKind,
+        );
+
+        if (eventKind == kHotRestartEventKind) {
+          break;
+        }
+      }
+    } on Object catch (error, stackTrace) {
+      // Event delivery is best-effort and must not turn a successful reload or
+      // restart into a failed operation.
+      globals.printTrace(
+        'Failed to send $eventKind event: $error\n$stackTrace',
+      );
+    }
+  }
+}
+
   Future<OperationResult> _restartFromSources({String? reason}) async {
     final restartTimer = Stopwatch()..start();
     UpdateFSReport updatedDevFS;
@@ -633,9 +672,11 @@ class HotRunner extends ResidentRunner {
     }
     // Check if the isolate is paused and resume it.
     final operations = <Future<void>>[];
+    final viewsByDevice = <FlutterDevice?, List<FlutterView>>{};
     for (final FlutterDevice? device in flutterDevices) {
       final uiIsolatesIds = <String?>{};
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      viewsByDevice[device] = views;
       for (final view in views) {
         if (view.uiIsolate == null) {
           continue;
@@ -717,6 +758,11 @@ class HotRunner extends ResidentRunner {
         );
       }
     }
+    // Send the event while the original UI isolates are still available. A full
+    // restart may leave the replacement isolate paused before framework service
+    // extensions are registered, so forwarding from the old isolate is the only
+    // reliable point that does not depend on application execution after restart.
+    await _sendHotEvent(kHotRestartEventKind, viewsByDevice: viewsByDevice);
     await Future.wait(operations);
     globals.printTrace('Finished waiting on operations.');
     await _launchFromDevFS();
@@ -1041,6 +1087,7 @@ class HotRunner extends ResidentRunner {
     );
     shouldReportReloadTime = reassembleResult.shouldReportReloadTime;
     if (reassembleResult.reassembleViews.isEmpty) {
+      await _sendHotEvent(kHotReloadEventKind, viewsByDevice: viewCache);
       return OperationResult(OperationResult.ok.code, reloadMessage);
     }
     // Record time it took for Flutter to reassemble the application.
@@ -1101,11 +1148,15 @@ class HotRunner extends ResidentRunner {
         ),
       );
     }
-    return OperationResult(
+    final result = OperationResult(
       reassembleResult.failedReassemble ? 1 : OperationResult.ok.code,
       reloadMessage,
       extraTimings: extraTimings,
     );
+    if (result.isOk) {
+      await _sendHotEvent(kHotReloadEventKind, viewsByDevice: viewCache);
+    }
+    return result;
   }
 
   @override

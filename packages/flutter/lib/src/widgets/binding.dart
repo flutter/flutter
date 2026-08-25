@@ -728,6 +728,26 @@ mixin WidgetsBinding
       );
 
       registerServiceExtension(
+  name: WidgetsServiceExtensions.sendExtensionEvent.name,
+  callback: (Map<String, String> parameters) async {
+    final String? eventKind = parameters['eventKind'];
+
+    if (eventKind == null || eventKind.isEmpty) {
+      return <String, dynamic>{
+        'sent': false,
+        'error': 'Missing or empty event kind param.',
+      };
+    }
+
+    postEvent(eventKind, <String, dynamic>{});
+
+    return <String, dynamic>{
+      'sent': true,
+    };
+  },
+);
+
+      registerServiceExtension(
         name: WidgetsServiceExtensions.didSendFirstFrameRasterizedEvent.name,
         callback: (_) async {
           return <String, dynamic>{

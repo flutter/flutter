@@ -115,6 +115,10 @@ enum WidgetsServiceExtensions {
   ///   registered.
   debugAllowBanner,
 
+  /// Name of service extension that, when called, sends an event to the
+  /// Extension event stream.
+  sendExtensionEvent,
+
   /// Name of service extension that, when called, will perform accessibility
   /// evaluations on the widget tree and return the results.
   ///

@@ -37,6 +37,8 @@ const kFlutterToolAlias = 'Flutter Tools';
 
 const kReloadSourcesServiceName = 'reloadSources';
 const kHotRestartServiceName = 'hotRestart';
+const kHotReloadEventKind = 'Flutter.HotReload';
+const kHotRestartEventKind = 'Flutter.HotRestart';
 const kFlutterVersionServiceName = 'flutterVersion';
 const kCompileExpressionServiceName = 'compileExpression';
 const kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
@@ -664,6 +666,18 @@ class FlutterVmService {
 
   Future<Map<String, Object?>?> flutterReassemble({required String? isolateId}) {
     return invokeFlutterExtensionRpcRaw('ext.flutter.reassemble', isolateId: isolateId);
+  }
+
+  /// Sends [eventKind] to the VM Service Extension stream from [isolateId].
+  Future<Map<String, Object?>?> flutterSendExtensionEvent({
+    required String isolateId,
+    required String eventKind,
+  }) {
+    return invokeFlutterExtensionRpcRaw(
+      'ext.flutter.sendExtensionEvent',
+      isolateId: isolateId,
+      args: <String, Object>{'eventKind': eventKind},
+    );
   }
 
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame({required String isolateId}) async {

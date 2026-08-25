@@ -195,6 +195,23 @@ void main() {
     expect(call.args, <String, String>{'isolateId': 'def'});
   });
 
+  testUsingContext('flutterSendExtensionEvent forwards arguments correctly', () async {
+    final fakeVmServiceHost = FakeVmServiceHost(
+      requests: <VmServiceExpectation>[
+        const FakeVmServiceRequest(
+          method: 'ext.flutter.sendExtensionEvent',
+          args: <String, Object>{'isolateId': 'def', 'eventKind': kHotReloadEventKind},
+        ),
+      ],
+    );
+
+    await fakeVmServiceHost.vmService.flutterSendExtensionEvent(
+      isolateId: 'def',
+      eventKind: kHotReloadEventKind,
+    );
+    expect(fakeVmServiceHost.hasRemainingExpectations, false);
+  });
+
   testUsingContext('runInView forwards arguments correctly', () async {
     final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[

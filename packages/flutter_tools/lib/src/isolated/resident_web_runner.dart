@@ -441,6 +441,30 @@ class ResidentWebRunner extends ResidentRunner {
     return OperationResult.ok;
   }
 
+  Future<void> _sendHotEvent(String eventKind) async {
+    if (!supportsServiceProtocol || !_deviceIsDebuggable || !isRunningDebug) {
+      return;
+    }
+    try {
+      final vmservice.VM vm = await _vmService.service.getVM();
+      for (final vmservice.IsolateRef isolate in vm.isolates ?? <vmservice.IsolateRef>[]) {
+        if (isolate.isSystemIsolate ?? false) {
+          continue;
+        }
+        final String? isolateId = isolate.id;
+        if (isolateId == null) {
+          continue;
+        }
+        await _vmService.flutterSendExtensionEvent(isolateId: isolateId, eventKind: eventKind);
+        break;
+      }
+    } on Object catch (error, stackTrace) {
+      // Event delivery is best-effort and must not turn a successful web reload
+      // or restart into a failed operation.
+      _logger.printTrace('Failed to send $eventKind event: $error\n$stackTrace');
+    }
+  }
+
   @override
   Future<OperationResult> restart({
     bool fullRestart = false,
@@ -627,6 +651,7 @@ class ResidentWebRunner extends ResidentRunner {
     final Duration elapsed = _systemClock.now().difference(start);
     final String elapsedMS = getElapsedAsMilliseconds(elapsed);
     _logger.printStatus('${fullRestart ? 'Restarted' : 'Reloaded'} application in $elapsedMS.');
+    await _sendHotEvent(fullRestart ? kHotRestartEventKind : kHotReloadEventKind);
 
     if (fullRestart) {
       for (final FlutterDevice? device in flutterDevices) {

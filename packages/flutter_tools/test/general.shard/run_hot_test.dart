@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -166,11 +167,14 @@ class _FakeDevFS extends Fake implements DevFS {
 }
 
 class _FakeFlutterDevice extends Fake implements FlutterDevice {
+  _FakeFlutterDevice({FlutterVmService? vmService})
+      : vmService = vmService ?? _FakeFlutterVmService();
+
   @override
   final DevFS? devFS = _FakeDevFS();
 
   @override
-  final FlutterVmService? vmService = _FakeFlutterVmService();
+  final FlutterVmService? vmService;
 }
 
 class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
@@ -204,6 +208,18 @@ class _FakeHotCompatibleFlutterDevice extends Fake implements FlutterDevice {
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
   @override
   final vm_service.VmService service = _FakeVmService();
+
+  @override
+  Future<void> flutterSendExtensionEvent({
+    required String isolateId,
+    required String eventKind,
+    Map<String, dynamic>? eventData,
+  }) async {
+    sentEvents.add((isolateId: isolateId, eventKind: eventKind));
+  }
+
+  final List<({String isolateId, String eventKind})> sentEvents =
+      <({String isolateId, String eventKind})>[];
 }
 
 class _FakeVmService extends Fake implements vm_service.VmService {
