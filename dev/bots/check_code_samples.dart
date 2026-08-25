@@ -211,7 +211,7 @@ class SampleChecker {
       }
       buffer.write(
         'Correct the formatting of these links so that they match the exact pattern:\n'
-        r"  r'\*\* See code in (?<path>.+) \*\*'",
+        r"  '\*\* See code in (?<path>.+) \*\*'",
       );
       foundError(buffer.toString().split('\n'));
     }
@@ -225,7 +225,7 @@ class SampleChecker {
       }
       buffer.write(
         'Correct the formatting of these links so that they match the exact pattern:\n'
-        r"  r'{@example /<path>}' or '{@example /<path>#<region>}'",
+        "  '{@example /<path>}' or '{@example /<path>#<region>}'",
       );
       foundError(buffer.toString().split('\n'));
     }
@@ -275,7 +275,7 @@ class SampleChecker {
     final legacyMalformedLinkRe = RegExp(
       r'^(?<malformed>\s*///\s*\*\*?\s*[sS][eE][eE]\s*[Cc][Oo][Dd][Ee].+\*\*?)',
     );
-    final standardMalformedLinkRe = RegExp(r'^(?<malformed>\s*///\s*{@example.*})');
+    final standardMalformedLinkRe = RegExp(r'^(?<malformed>\s*///\s*{@example.*)');
     for (final file in files) {
       final String contents = file.readAsStringSync();
       final List<String> lines = contents.split('\n');

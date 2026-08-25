@@ -223,7 +223,7 @@ void main() {
             if (isWindows)
               r'║   C:\flutter sdk\packages\flutter\lib\src\layer\bar.dart:6: /// ** See code examples/api/lib/layer/bar_example.0.dart **',
             '║ Correct the formatting of these links so that they match the exact pattern:',
-            r"║   r'\*\* See code in (?<path>.+) \*\*'",
+            r"║   '\*\* See code in (?<path>.+) \*\*'",
           ] else ...<String>[
             if (!isWindows)
               '║   /flutter sdk/packages/flutter/lib/src/layer/foo.dart:6: ///{@example}',
@@ -234,7 +234,7 @@ void main() {
             if (isWindows)
               r'║   C:\flutter sdk\packages\flutter\lib\src\layer\bar.dart:6: ///{@example examples/api/lib/layer/bar_example.0.dart}',
             '║ Correct the formatting of these links so that they match the exact pattern:',
-            r"║   r'{@example /<path>}' or '{@example /<path>#<region>}'",
+            "║   '{@example /<path>}' or '{@example /<path>#<region>}'",
           ],
           '╚═══════════════════════════════════════════════════════════════════════════════',
         ].join('\n');
