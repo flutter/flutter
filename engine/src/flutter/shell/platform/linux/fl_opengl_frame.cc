@@ -83,7 +83,10 @@ void fl_opengl_frame_composite(FlOpenGLFrame* self,
       fl_framebuffer_get_width(self->framebuffer) != width ||
       fl_framebuffer_get_height(self->framebuffer) != height) {
     GLint general_format = GL_RGBA;
-    if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
+    if (layers[0]->type == kFlutterLayerContentTypeBackingStore &&
+        layers[0]->backing_store != nullptr &&
+        layers[0]->backing_store->type == kFlutterBackingStoreTypeOpenGL &&
+        layers[0]->backing_store->open_gl.framebuffer.target == GL_BGRA8_EXT) {
       general_format = GL_BGRA_EXT;
     }
     g_clear_object(&self->framebuffer);
