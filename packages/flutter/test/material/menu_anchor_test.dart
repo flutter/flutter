@@ -2524,6 +2524,61 @@ void main() {
 
       expect(textController.selection.baseOffset, 4);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/163475.
+    testWidgets(
+      'Up and down arrow keys move the caret of a multiline TextField in the anchor when the menu is closed',
+      (WidgetTester tester) async {
+        final textController = TextEditingController(text: 'aaaa\nbbbb');
+        addTearDown(textController.dispose);
+        final textFieldFocusNode = FocusNode(debugLabel: 'TextField');
+        addTearDown(textFieldFocusNode.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: MenuAnchor(
+                controller: controller,
+                menuChildren: <Widget>[
+                  MenuItemButton(child: Text(TestMenu.subMenu00.label), onPressed: () {}),
+                ],
+                builder: (BuildContext context, MenuController controller, Widget? child) {
+                  return TextField(
+                    controller: textController,
+                    focusNode: textFieldFocusNode,
+                    maxLines: 2,
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(TextField));
+        await tester.pump();
+
+        expect(textFieldFocusNode.hasFocus, isTrue);
+        expect(controller.isOpen, isFalse);
+
+        // Place the caret on the second line, between the second and third
+        // characters.
+        textController.selection = const TextSelection.collapsed(offset: 7);
+        await tester.pump();
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+
+        // The caret moved up to the first line instead of moving the focus.
+        expect(textController.selection.baseOffset, 2);
+        expect(textFieldFocusNode.hasFocus, isTrue);
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+
+        expect(textController.selection.baseOffset, 7);
+        expect(textFieldFocusNode.hasFocus, isTrue);
+      },
+    );
   });
 
   group('Accelerators', () {
