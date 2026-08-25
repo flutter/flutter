@@ -78,7 +78,7 @@ class IMobileDevice {
     required Cache cache,
     required ProcessManager processManager,
     required Logger logger,
-  }) : _idevicesyslogPath = artifacts.getHostArtifact(HostArtifact.idevicesyslog).path,
+  }) : _artifacts = artifacts,
        _dyLdLibEntry = cache.dyLdLibEntry,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
@@ -93,9 +93,11 @@ class IMobileDevice {
     );
   }
 
-  final String _idevicesyslogPath;
+  final Artifacts _artifacts;
   final MapEntry<String, String> _dyLdLibEntry;
   final ProcessUtils _processUtils;
+
+  String get _idevicesyslogPath => _artifacts.getHostArtifact(HostArtifact.idevicesyslog).path;
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID, bool isWirelesslyConnected) {
@@ -180,6 +182,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     fileSystem: globals.fs,
     logger: globals.logger,
     cocoapods: globals.cocoaPods,
+    featureFlags: featureFlags,
   );
 
   await removeExtendedAttributesForProject(
