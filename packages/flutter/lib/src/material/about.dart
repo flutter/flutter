@@ -350,7 +350,7 @@ class AboutDialog extends StatelessWidget {
     this.applicationIcon,
     this.applicationLegalese,
     this.children,
-  });
+  }) : _isAdaptive = false;
 
   /// Creates an adaptive [AboutDialog] based on whether the target platform is
   /// iOS or macOS, following Material design's
@@ -365,14 +365,18 @@ class AboutDialog extends StatelessWidget {
   /// [applicationLegalese], and additional [children] that appear in the dialog.
   ///
   /// The target platform is based on the current [Theme]: [ThemeData.platform].
-  const factory AboutDialog.adaptive({
-    Key? key,
-    String? applicationName,
-    String? applicationVersion,
-    Widget? applicationIcon,
-    String? applicationLegalese,
-    List<Widget>? children,
-  }) = _AdaptiveAboutDialog;
+  const AboutDialog.adaptive({
+    super.key,
+    this.applicationName,
+    this.applicationVersion,
+    this.applicationIcon,
+    this.applicationLegalese,
+    this.children,
+  }) : _isAdaptive = true;
+
+  // Whether this dialog was created with [AboutDialog.adaptive]. When true, an
+  // [AlertDialog.adaptive] with platform specific actions is built.
+  final bool _isAdaptive;
 
   /// The name of the application.
   ///
@@ -410,6 +414,50 @@ class AboutDialog extends StatelessWidget {
   /// Defaults to nothing.
   final List<Widget>? children;
 
+  List<Widget> _actions(BuildContext context) {
+    final ThemeData themeData = Theme.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final String viewLicensesLabel = themeData.useMaterial3
+        ? localizations.viewLicensesButtonLabel
+        : localizations.viewLicensesButtonLabel.toUpperCase();
+    final String closeLabel = themeData.useMaterial3
+        ? localizations.closeButtonLabel
+        : localizations.closeButtonLabel.toUpperCase();
+    void showLicenses() {
+      showLicensePage(
+        context: context,
+        applicationName: applicationName,
+        applicationVersion: applicationVersion,
+        applicationIcon: applicationIcon,
+        applicationLegalese: applicationLegalese,
+      );
+    }
+
+    void close() {
+      Navigator.pop(context);
+    }
+
+    if (_isAdaptive) {
+      switch (themeData.platform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return <Widget>[
+            CupertinoDialogAction(onPressed: showLicenses, child: Text(viewLicensesLabel)),
+            CupertinoDialogAction(onPressed: close, child: Text(closeLabel)),
+          ];
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+      }
+    }
+    return <Widget>[
+      TextButton(onPressed: showLicenses, child: Text(viewLicensesLabel)),
+      TextButton(onPressed: close, child: Text(closeLabel)),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -417,183 +465,35 @@ class AboutDialog extends StatelessWidget {
     final String version = applicationVersion ?? _defaultApplicationVersion(context);
     final Widget? icon = applicationIcon ?? _defaultApplicationIcon(context);
     final ThemeData themeData = Theme.of(context);
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    return AlertDialog(
-      content: ListBody(
-        children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              if (icon != null) IconTheme(data: themeData.iconTheme, child: icon),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: ListBody(
-                    children: <Widget>[
-                      Text(name, style: themeData.textTheme.headlineSmall),
-                      Text(version, style: themeData.textTheme.bodyMedium),
-                      const SizedBox(height: _textVerticalSeparation),
-                      Text(applicationLegalese ?? '', style: themeData.textTheme.bodySmall),
-                    ],
-                  ),
+    final Widget content = ListBody(
+      children: <Widget>[
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            if (icon != null) IconTheme(data: themeData.iconTheme, child: icon),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: ListBody(
+                  children: <Widget>[
+                    Text(name, style: themeData.textTheme.headlineSmall),
+                    Text(version, style: themeData.textTheme.bodyMedium),
+                    const SizedBox(height: _textVerticalSeparation),
+                    Text(applicationLegalese ?? '', style: themeData.textTheme.bodySmall),
+                  ],
                 ),
               ),
-            ],
-          ),
-          ...?children,
-        ],
-      ),
-      actions: <Widget>[
-        TextButton(
-          child: Text(
-            themeData.useMaterial3
-                ? localizations.viewLicensesButtonLabel
-                : localizations.viewLicensesButtonLabel.toUpperCase(),
-          ),
-          onPressed: () {
-            showLicensePage(
-              context: context,
-              applicationName: applicationName,
-              applicationVersion: applicationVersion,
-              applicationIcon: applicationIcon,
-              applicationLegalese: applicationLegalese,
-            );
-          },
+            ),
+          ],
         ),
-        TextButton(
-          child: Text(
-            themeData.useMaterial3
-                ? localizations.closeButtonLabel
-                : localizations.closeButtonLabel.toUpperCase(),
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        ...?children,
       ],
-      scrollable: true,
     );
-  }
-}
-
-class _AdaptiveAboutDialog extends AboutDialog {
-  const _AdaptiveAboutDialog({
-    super.key,
-    super.applicationName,
-    super.applicationVersion,
-    super.applicationIcon,
-    super.applicationLegalese,
-    super.children,
-  });
-
-  List<Widget>? _actions(BuildContext context) {
-    final ThemeData themeData = Theme.of(context);
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-
-    switch (themeData.platform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        return <Widget>[
-          CupertinoDialogAction(
-            child: Text(
-              themeData.useMaterial3
-                  ? localizations.viewLicensesButtonLabel
-                  : localizations.viewLicensesButtonLabel.toUpperCase(),
-            ),
-            onPressed: () {
-              showLicensePage(
-                context: context,
-                applicationName: applicationName,
-                applicationVersion: applicationVersion,
-                applicationIcon: applicationIcon,
-                applicationLegalese: applicationLegalese,
-              );
-            },
-          ),
-          CupertinoDialogAction(
-            child: Text(
-              themeData.useMaterial3
-                  ? localizations.closeButtonLabel
-                  : localizations.closeButtonLabel.toUpperCase(),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ];
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        return <Widget>[
-          TextButton(
-            child: Text(
-              themeData.useMaterial3
-                  ? localizations.viewLicensesButtonLabel
-                  : localizations.viewLicensesButtonLabel.toUpperCase(),
-            ),
-            onPressed: () {
-              showLicensePage(
-                context: context,
-                applicationName: applicationName,
-                applicationVersion: applicationVersion,
-                applicationIcon: applicationIcon,
-                applicationLegalese: applicationLegalese,
-              );
-            },
-          ),
-          TextButton(
-            child: Text(
-              themeData.useMaterial3
-                  ? localizations.closeButtonLabel
-                  : localizations.closeButtonLabel.toUpperCase(),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ];
+    final List<Widget> actions = _actions(context);
+    if (_isAdaptive) {
+      return AlertDialog.adaptive(content: content, actions: actions, scrollable: true);
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-
-    final String name = applicationName ?? _defaultApplicationName(context);
-    final String version = applicationVersion ?? _defaultApplicationVersion(context);
-    final Widget? icon = applicationIcon ?? _defaultApplicationIcon(context);
-    final ThemeData themeData = Theme.of(context);
-    final List<Widget>? actions = _actions(context);
-
-    return AlertDialog.adaptive(
-      content: ListBody(
-        children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              if (icon != null) IconTheme(data: themeData.iconTheme, child: icon),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: ListBody(
-                    children: <Widget>[
-                      Text(name, style: themeData.textTheme.headlineSmall),
-                      Text(version, style: themeData.textTheme.bodyMedium),
-                      const SizedBox(height: _textVerticalSeparation),
-                      Text(applicationLegalese ?? '', style: themeData.textTheme.bodySmall),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          ...?children,
-        ],
-      ),
-      actions: actions,
-      scrollable: true,
-    );
+    return AlertDialog(content: content, actions: actions, scrollable: true);
   }
 }
 

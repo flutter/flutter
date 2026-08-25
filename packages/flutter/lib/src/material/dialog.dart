@@ -451,7 +451,11 @@ class AlertDialog extends StatelessWidget {
     this.alignment,
     this.constraints,
     this.scrollable = false,
-  });
+  }) : _isAdaptive = false,
+       _scrollController = null,
+       _actionScrollController = null,
+       _insetAnimationDuration = const Duration(milliseconds: 100),
+       _insetAnimationCurve = Curves.decelerate;
 
   /// Creates an adaptive [AlertDialog] based on whether the target platform is
   /// iOS or macOS, following Material design's
@@ -482,40 +486,55 @@ class AlertDialog extends StatelessWidget {
   ///
   /// ** See code in examples/api/lib/material/dialog/adaptive_alert_dialog.0.dart **
   /// {@end-tool}
-  const factory AlertDialog.adaptive({
-    Key? key,
-    Widget? icon,
-    EdgeInsetsGeometry? iconPadding,
-    Color? iconColor,
-    Widget? title,
-    EdgeInsetsGeometry? titlePadding,
-    TextStyle? titleTextStyle,
-    Widget? content,
-    EdgeInsetsGeometry? contentPadding,
-    TextStyle? contentTextStyle,
-    List<Widget>? actions,
-    EdgeInsetsGeometry? actionsPadding,
-    MainAxisAlignment? actionsAlignment,
-    OverflowBarAlignment? actionsOverflowAlignment,
-    VerticalDirection? actionsOverflowDirection,
-    double? actionsOverflowButtonSpacing,
-    EdgeInsetsGeometry? buttonPadding,
-    Color? backgroundColor,
-    double? elevation,
-    Color? shadowColor,
-    Color? surfaceTintColor,
-    String? semanticLabel,
-    EdgeInsets insetPadding,
-    Clip? clipBehavior,
-    ShapeBorder? shape,
-    AlignmentGeometry? alignment,
-    BoxConstraints? constraints,
-    bool scrollable,
+  const AlertDialog.adaptive({
+    super.key,
+    this.icon,
+    this.iconPadding,
+    this.iconColor,
+    this.title,
+    this.titlePadding,
+    this.titleTextStyle,
+    this.content,
+    this.contentPadding,
+    this.contentTextStyle,
+    this.actions,
+    this.actionsPadding,
+    this.actionsAlignment,
+    this.actionsOverflowAlignment,
+    this.actionsOverflowDirection,
+    this.actionsOverflowButtonSpacing,
+    this.buttonPadding,
+    this.backgroundColor,
+    this.elevation,
+    this.shadowColor,
+    this.surfaceTintColor,
+    this.semanticLabel,
+    this.insetPadding,
+    this.clipBehavior,
+    this.shape,
+    this.alignment,
+    this.constraints,
+    this.scrollable = false,
     ScrollController? scrollController,
     ScrollController? actionScrollController,
-    Duration insetAnimationDuration,
-    Curve insetAnimationCurve,
-  }) = _AdaptiveAlertDialog;
+    Duration insetAnimationDuration = const Duration(milliseconds: 100),
+    Curve insetAnimationCurve = Curves.decelerate,
+  }) : _isAdaptive = true,
+       _scrollController = scrollController,
+       _actionScrollController = actionScrollController,
+       _insetAnimationDuration = insetAnimationDuration,
+       _insetAnimationCurve = insetAnimationCurve;
+
+  // Whether this dialog was created with [AlertDialog.adaptive]. When true, a
+  // [CupertinoAlertDialog] is built on iOS and macOS.
+  final bool _isAdaptive;
+
+  // The following fields are only used by [AlertDialog.adaptive] to configure
+  // the [CupertinoAlertDialog] built on iOS and macOS.
+  final ScrollController? _scrollController;
+  final ScrollController? _actionScrollController;
+  final Duration _insetAnimationDuration;
+  final Curve _insetAnimationCurve;
 
   /// An optional icon to display at the top of the dialog.
   ///
@@ -766,6 +785,27 @@ class AlertDialog extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
 
+    if (_isAdaptive) {
+      switch (theme.platform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          break;
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          return CupertinoAlertDialog(
+            title: title,
+            content: content,
+            actions: actions ?? <Widget>[],
+            scrollController: _scrollController,
+            actionScrollController: _actionScrollController,
+            insetAnimationDuration: _insetAnimationDuration,
+            insetAnimationCurve: _insetAnimationCurve,
+          );
+      }
+    }
+
     final DialogThemeData dialogTheme = DialogTheme.of(context);
     final DialogThemeData defaults = theme.useMaterial3
         ? _DialogDefaultsM3(context)
@@ -953,72 +993,6 @@ class AlertDialog extends StatelessWidget {
       semanticsRole: SemanticsRole.alertDialog,
       child: dialogChild,
     );
-  }
-}
-
-class _AdaptiveAlertDialog extends AlertDialog {
-  const _AdaptiveAlertDialog({
-    super.key,
-    super.icon,
-    super.iconPadding,
-    super.iconColor,
-    super.title,
-    super.titlePadding,
-    super.titleTextStyle,
-    super.content,
-    super.contentPadding,
-    super.contentTextStyle,
-    super.actions,
-    super.actionsPadding,
-    super.actionsAlignment,
-    super.actionsOverflowAlignment,
-    super.actionsOverflowDirection,
-    super.actionsOverflowButtonSpacing,
-    super.buttonPadding,
-    super.backgroundColor,
-    super.elevation,
-    super.shadowColor,
-    super.surfaceTintColor,
-    super.semanticLabel,
-    super.insetPadding,
-    super.clipBehavior,
-    super.shape,
-    super.alignment,
-    super.constraints,
-    super.scrollable = false,
-    this.scrollController,
-    this.actionScrollController,
-    this.insetAnimationDuration = const Duration(milliseconds: 100),
-    this.insetAnimationCurve = Curves.decelerate,
-  });
-
-  final ScrollController? scrollController;
-  final ScrollController? actionScrollController;
-  final Duration insetAnimationDuration;
-  final Curve insetAnimationCurve;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    switch (theme.platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        break;
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        return CupertinoAlertDialog(
-          title: title,
-          content: content,
-          actions: actions ?? <Widget>[],
-          scrollController: scrollController,
-          actionScrollController: actionScrollController,
-          insetAnimationDuration: insetAnimationDuration,
-          insetAnimationCurve: insetAnimationCurve,
-        );
-    }
-    return super.build(context);
   }
 }
 

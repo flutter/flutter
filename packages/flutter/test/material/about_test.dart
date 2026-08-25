@@ -2000,6 +2000,33 @@ void main() {
     final Finder xText = find.text('X');
     expect(tester.getSize(xText).isEmpty, isTrue);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177089
+  testWidgets('AboutDialog.adaptive can be found by type on each platform', (
+    WidgetTester tester,
+  ) async {
+    for (final TargetPlatform platform in TargetPlatform.values) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: const Material(
+            child: Center(child: ElevatedButton(onPressed: null, child: Text('Go'))),
+          ),
+        ),
+      );
+
+      final BuildContext context = tester.element(find.text('Go'));
+
+      showAdaptiveAboutDialog(context: context, applicationName: 'Test');
+
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      expect(find.byType(AboutDialog), findsOneWidget, reason: 'platform: $platform');
+
+      Navigator.of(context).pop();
+      await tester.pumpAndSettle();
+    }
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {

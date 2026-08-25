@@ -168,7 +168,8 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// ** See code in examples/api/lib/material/search_anchor/search_anchor.0.dart **
   /// {@end-tool}
-  factory SearchAnchor.bar({
+  SearchAnchor.bar({
+    Key? key,
     Widget? barLeading,
     Iterable<Widget>? barTrailing,
     String? barHintText,
@@ -203,17 +204,82 @@ class SearchAnchor extends StatefulWidget {
     EdgeInsetsGeometry? viewPadding,
     bool? shrinkWrap,
     bool? isFullScreen,
-    SearchController searchController,
-    TextCapitalization textCapitalization,
+    SearchController? searchController,
+    TextCapitalization? textCapitalization,
     required SuggestionsBuilder suggestionsBuilder,
     TextInputAction? textInputAction,
     TextInputType? keyboardType,
-    EdgeInsets scrollPadding,
-    EditableTextContextMenuBuilder contextMenuBuilder,
-    bool enabled,
+    EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
+    EditableTextContextMenuBuilder contextMenuBuilder = SearchBar._defaultContextMenuBuilder,
+    bool enabled = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
-  }) = _SearchAnchorWithSearchBar;
+  }) : this(
+         key: key,
+         viewBarPadding: viewBarPadding,
+         viewBuilder: viewBuilder,
+         viewLeading: viewLeading,
+         viewTrailing: viewTrailing,
+         viewHintText: viewHintText ?? barHintText,
+         viewBackgroundColor: viewBackgroundColor,
+         viewElevation: viewElevation,
+         viewSide: viewSide,
+         viewShape: viewShape,
+         headerHeight: viewHeaderHeight,
+         headerTextStyle: viewHeaderTextStyle,
+         headerHintStyle: viewHeaderHintStyle,
+         dividerColor: dividerColor,
+         viewConstraints: viewConstraints,
+         viewPadding: viewPadding,
+         shrinkWrap: shrinkWrap,
+         isFullScreen: isFullScreen,
+         searchController: searchController,
+         textCapitalization: textCapitalization,
+         viewOnSubmitted: onSubmitted,
+         viewOnChanged: onChanged,
+         viewOnClose: onClose,
+         viewOnOpen: onOpen,
+         suggestionsBuilder: suggestionsBuilder,
+         textInputAction: textInputAction,
+         keyboardType: keyboardType,
+         enabled: enabled,
+         smartDashesType: smartDashesType,
+         smartQuotesType: smartQuotesType,
+         builder: (BuildContext context, SearchController controller) {
+           return SearchBar(
+             constraints: constraints,
+             controller: controller,
+             onTap: () {
+               controller.openView();
+               onTap?.call();
+             },
+             onChanged: (String value) {
+               controller.openView();
+             },
+             onSubmitted: onSubmitted,
+             hintText: barHintText,
+             hintStyle: barHintStyle,
+             textStyle: barTextStyle,
+             elevation: barElevation,
+             backgroundColor: barBackgroundColor,
+             overlayColor: barOverlayColor,
+             side: barSide,
+             shape: barShape,
+             padding:
+                 barPadding ??
+                 const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
+             leading: barLeading ?? const Icon(Icons.search),
+             trailing: barTrailing,
+             textCapitalization: textCapitalization,
+             textInputAction: textInputAction,
+             keyboardType: keyboardType,
+             scrollPadding: scrollPadding,
+             contextMenuBuilder: contextMenuBuilder,
+             smartDashesType: smartDashesType,
+             smartQuotesType: smartQuotesType,
+           );
+         },
+       );
 
   /// Whether the search view grows to fill the entire screen when the
   /// [SearchAnchor] is tapped.
@@ -1218,98 +1284,6 @@ class _ViewContentState extends State<_ViewContent> {
       ),
     );
   }
-}
-
-class _SearchAnchorWithSearchBar extends SearchAnchor {
-  _SearchAnchorWithSearchBar({
-    Widget? barLeading,
-    Iterable<Widget>? barTrailing,
-    String? barHintText,
-    GestureTapCallback? onTap,
-    WidgetStateProperty<double?>? barElevation,
-    WidgetStateProperty<Color?>? barBackgroundColor,
-    WidgetStateProperty<Color?>? barOverlayColor,
-    WidgetStateProperty<BorderSide?>? barSide,
-    WidgetStateProperty<OutlinedBorder?>? barShape,
-    WidgetStateProperty<EdgeInsetsGeometry?>? barPadding,
-    super.viewBarPadding,
-    WidgetStateProperty<TextStyle?>? barTextStyle,
-    WidgetStateProperty<TextStyle?>? barHintStyle,
-    super.viewBuilder,
-    super.viewLeading,
-    super.viewTrailing,
-    String? viewHintText,
-    super.viewBackgroundColor,
-    super.viewElevation,
-    super.viewSide,
-    super.viewShape,
-    double? viewHeaderHeight,
-    TextStyle? viewHeaderTextStyle,
-    TextStyle? viewHeaderHintStyle,
-    super.dividerColor,
-    BoxConstraints? constraints,
-    super.viewConstraints,
-    super.viewPadding,
-    super.shrinkWrap,
-    super.isFullScreen,
-    super.searchController,
-    super.textCapitalization,
-    ValueChanged<String>? onChanged,
-    ValueChanged<String>? onSubmitted,
-    VoidCallback? onClose,
-    VoidCallback? onOpen,
-    required super.suggestionsBuilder,
-    super.textInputAction,
-    super.keyboardType,
-    EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
-    EditableTextContextMenuBuilder contextMenuBuilder = SearchBar._defaultContextMenuBuilder,
-    super.enabled,
-    super.smartDashesType,
-    super.smartQuotesType,
-  }) : super(
-         viewHintText: viewHintText ?? barHintText,
-         headerHeight: viewHeaderHeight,
-         headerTextStyle: viewHeaderTextStyle,
-         headerHintStyle: viewHeaderHintStyle,
-         viewOnSubmitted: onSubmitted,
-         viewOnChanged: onChanged,
-         viewOnClose: onClose,
-         viewOnOpen: onOpen,
-         builder: (BuildContext context, SearchController controller) {
-           return SearchBar(
-             constraints: constraints,
-             controller: controller,
-             onTap: () {
-               controller.openView();
-               onTap?.call();
-             },
-             onChanged: (String value) {
-               controller.openView();
-             },
-             onSubmitted: onSubmitted,
-             hintText: barHintText,
-             hintStyle: barHintStyle,
-             textStyle: barTextStyle,
-             elevation: barElevation,
-             backgroundColor: barBackgroundColor,
-             overlayColor: barOverlayColor,
-             side: barSide,
-             shape: barShape,
-             padding:
-                 barPadding ??
-                 const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
-             leading: barLeading ?? const Icon(Icons.search),
-             trailing: barTrailing,
-             textCapitalization: textCapitalization,
-             textInputAction: textInputAction,
-             keyboardType: keyboardType,
-             scrollPadding: scrollPadding,
-             contextMenuBuilder: contextMenuBuilder,
-             smartDashesType: smartDashesType,
-             smartQuotesType: smartQuotesType,
-           );
-         },
-       );
 }
 
 /// A controller to manage a search view created by [SearchAnchor].

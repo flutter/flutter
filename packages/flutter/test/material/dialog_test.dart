@@ -3465,6 +3465,30 @@ void main() {
 
     semantics.dispose();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/177089
+  testWidgets('AlertDialog.adaptive can be found by type on each platform', (
+    WidgetTester tester,
+  ) async {
+    final dialog = AlertDialog.adaptive(
+      title: const Text('title'),
+      content: const Text('content'),
+      actions: <Widget>[TextButton(onPressed: () {}, child: const Text('OK'))],
+    );
+
+    for (final TargetPlatform platform in TargetPlatform.values) {
+      await tester.pumpWidget(_buildAppWithDialog(dialog, theme: ThemeData(platform: platform)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsOneWidget, reason: 'platform: $platform');
+
+      await tester.tapAt(const Offset(10.0, 10.0));
+      await tester.pumpAndSettle();
+    }
+  });
 }
 
 @pragma('vm:entry-point')
