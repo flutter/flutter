@@ -1152,11 +1152,19 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// For this reason, this method should only be called when the [build] method
   /// will, as a result of whatever state change was detected, change its result
   /// meaningfully.
+  /// To minimize the rebuild cost it's better to call [State.setState] on leaves
+  /// children.
+  ///
+  /// It is also possible to trigger a rebuild without directly calling [State.setState]
+  /// one way to do that is using [AnimatedBuilder] with any subtype of [Listenable]
+  /// which can be more performant is some situations.
   ///
   /// See also:
   ///
   ///  * [StatefulWidget], the API documentation for which has a section on
   ///    performance considerations that are relevant here.
+  ///  * [Listenable], for more information on how to send notifications and notify
+  ///    clients when a change is detected to control when and how to rebuild.
   @protected
   void setState(VoidCallback fn) {
     assert(() {
