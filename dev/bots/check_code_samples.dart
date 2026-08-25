@@ -134,8 +134,8 @@ class SampleChecker {
   final Directory flutterRoot;
   final FileSystem filesystem;
 
-  // The `exampleBase` is where the paths in "See code in" are relative to.
-  // Defaults to <flutter_root>/packages/flutter.
+  // The `exampleBase` is where the paths in "See code in" or "{@example}" are
+  // relative to.  Defaults to <flutter_root>/packages/flutter.
   Directory get exampleBase => examples.parent.parent;
 
   bool checkCodeSamples() {
@@ -145,14 +145,25 @@ class SampleChecker {
     final List<File> exampleFilenames = getExampleFilenames(examples);
 
     // Get a list of all the example link paths that appear in the source files.
-    final (Set<String> exampleLinks, Set<LinkInfo> malformedLinks) = getExampleLinks(packages);
+    final (
+      Set<String> exampleLinks,
+      Set<LinkInfo> legacyMalformedLinks,
+      Set<LinkInfo> standardMalformedLinks,
+    ) = getExampleLinks(
+      packages,
+    );
     // Also add in any that might be found in the dart:ui directory.
-    final (Set<String> uiExampleLinks, Set<LinkInfo> uiMalformedLinks) = getExampleLinks(
+    final (
+      Set<String> uiExampleLinks,
+      Set<LinkInfo> uiLegacyMalformedLinks,
+      Set<LinkInfo> uiStandardMalformedLinks,
+    ) = getExampleLinks(
       dartUIPath,
     );
 
     exampleLinks.addAll(uiExampleLinks);
-    malformedLinks.addAll(uiMalformedLinks);
+    legacyMalformedLinks.addAll(uiLegacyMalformedLinks);
+    standardMalformedLinks.addAll(uiStandardMalformedLinks);
 
     // Get a list of the filenames that were not found in the source files.
     final List<String> missingFilenames = checkForMissingLinks(exampleFilenames, exampleLinks);
@@ -165,7 +176,10 @@ class SampleChecker {
     // generate new examples.
     missingFilenames.removeWhere((String file) => _knownUnlinkedExamples.contains(file));
 
-    if (missingFilenames.isEmpty && missingTests.isEmpty && malformedLinks.isEmpty) {
+    if (missingFilenames.isEmpty &&
+        missingTests.isEmpty &&
+        legacyMalformedLinks.isEmpty &&
+        standardMalformedLinks.isEmpty) {
       return true;
     }
 
@@ -188,16 +202,30 @@ class SampleChecker {
       foundError(buffer.toString().split('\n'));
     }
 
-    if (malformedLinks.isNotEmpty) {
+    if (legacyMalformedLinks.isNotEmpty) {
       final buffer = StringBuffer(
         'The following malformed links were found in API doc comments:\n',
       );
-      for (final link in malformedLinks) {
+      for (final link in legacyMalformedLinks) {
         buffer.writeln('  $link');
       }
       buffer.write(
         'Correct the formatting of these links so that they match the exact pattern:\n'
         r"  r'\*\* See code in (?<path>.+) \*\*'",
+      );
+      foundError(buffer.toString().split('\n'));
+    }
+
+    if (standardMalformedLinks.isNotEmpty) {
+      final buffer = StringBuffer(
+        'The following malformed links were found in API doc comments:\n',
+      );
+      for (final link in standardMalformedLinks) {
+        buffer.writeln('  $link');
+      }
+      buffer.write(
+        'Correct the formatting of these links so that they match the exact pattern:\n'
+        r"  r'{@example /<path>}' or '{@example /<path>#<region>}'",
       );
       foundError(buffer.toString().split('\n'));
     }
@@ -233,23 +261,21 @@ class SampleChecker {
     return getFiles(directory.childDirectory('lib'), RegExp(r'\d+\.dart$'));
   }
 
-  (Set<String>, Set<LinkInfo>) getExampleLinks(Directory searchDirectory) {
+  (Set<String>, Set<LinkInfo>, Set<LinkInfo>) getExampleLinks(Directory searchDirectory) {
     final List<File> files = getFiles(searchDirectory, RegExp(r'\.dart$'));
     final searchStrings = <String>{};
-    final malformedStrings = <LinkInfo>{};
+    final legacyMalformedStrings = <LinkInfo>{};
+    final standardMalformedStrings = <LinkInfo>{};
     final legacyValidExampleRe = RegExp(r'\*\* See code in (?<path>.+) \*\*');
-    final newValidExampleRe = RegExp(r'{@example /(?<path>[^#}]+)(?:#.+)?}');
+    final standardValidExampleRe = RegExp(r'{@example /(?<path>[^#}]+)(?:#.+)?}');
     // Looks for some common broken versions of example links. This looks for
     // something that is at minimum "///*seecode<something>*" or
     // "///{@example<something>}" to indicate that it looks like an example
     // link. It should be narrowed if we start getting false positives.
-    final malformedLinkRe = RegExp(
-      r'^(?<malformed>\s*///\s*'
-      r'(?:'
-      r'(?:\*\*?\s*[sS][eE][eE]\s*[Cc][Oo][Dd][Ee].+\*\*?)|'
-      r'(?:{@example.*})'
-      r'))',
+    final legacyMalformedLinkRe = RegExp(
+      r'^(?<malformed>\s*///\s*\*\*?\s*[sS][eE][eE]\s*[Cc][Oo][Dd][Ee].+\*\*?)',
     );
+    final standardMalformedLinkRe = RegExp(r'^(?<malformed>\s*///\s*{@example.*})');
     for (final file in files) {
       final String contents = file.readAsStringSync();
       final List<String> lines = contents.split('\n');
@@ -257,20 +283,28 @@ class SampleChecker {
       for (final line in lines) {
         count += 1;
         final RegExpMatch? legacyValidMatch = legacyValidExampleRe.firstMatch(line);
-        final RegExpMatch? newValidMatch = newValidExampleRe.firstMatch(line);
+        final RegExpMatch? standardValidMatch = standardValidExampleRe.firstMatch(line);
         if (legacyValidMatch != null) {
           searchStrings.add(legacyValidMatch.namedGroup('path')!);
-        } else if (newValidMatch != null) {
-          searchStrings.add(newValidMatch.namedGroup('path')!);
+        } else if (standardValidMatch != null) {
+          searchStrings.add(standardValidMatch.namedGroup('path')!);
         }
-        final RegExpMatch? malformedMatch = malformedLinkRe.firstMatch(line);
+        final RegExpMatch? legacyMalformedMatch = legacyMalformedLinkRe.firstMatch(line);
+        final RegExpMatch? standardMalformedMatch = standardMalformedLinkRe.firstMatch(line);
         // It's only malformed if it doesn't match the valid RegExp.
-        if (malformedMatch != null && legacyValidMatch == null && newValidMatch == null) {
-          malformedStrings.add(LinkInfo(malformedMatch.namedGroup('malformed')!, file, count));
+        if (legacyMalformedMatch != null && legacyValidMatch == null) {
+          legacyMalformedStrings.add(
+            LinkInfo(legacyMalformedMatch.namedGroup('malformed')!, file, count),
+          );
+        }
+        if (standardMalformedMatch != null && standardValidMatch == null) {
+          standardMalformedStrings.add(
+            LinkInfo(standardMalformedMatch.namedGroup('malformed')!, file, count),
+          );
         }
       }
     }
-    return (searchStrings, malformedStrings);
+    return (searchStrings, legacyMalformedStrings, standardMalformedStrings);
   }
 
   List<String> checkForMissingLinks(List<File> exampleFilenames, Set<String> searchStrings) {
