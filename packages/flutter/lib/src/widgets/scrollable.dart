@@ -1181,6 +1181,15 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   // Pointer drag is a single point, it should not have a size.
   static const double _kDefaultDragTargetSize = 0;
 
+  // Pointer devices that are bound to the screen, such as a finger, cannot be
+  // dragged past the bounds of the screen, so a drag with those devices cannot
+  // reach the edge of a scrollable that is flush against the edge of the
+  // screen. Giving the drag target a size makes edge scrolling possible in that
+  // case. This is an eye-balled value that leaves enough room for the size of a
+  // finger and for the offset between a selection handle and the pointer that
+  // drags it.
+  static const double _kTouchDragTargetSize = 100;
+
   // An eye-balled value for a smooth scrolling speed.
   static const double _kDefaultSelectToScrollVelocityScalar = 30;
 
@@ -1192,6 +1201,14 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
 
   // The scrollable only auto scrolls if the selection starts in the scrollable.
   bool _selectionStartsInScrollable = false;
+
+  // The device kind of the pointer that is driving the current selection.
+  //
+  // Some selection edge updates are synthesized, for example when a selectable
+  // is added while the scrollable is auto scrolling, and they do not carry a
+  // device kind. The last known device kind is used for those updates so the
+  // drag target keeps its size for the duration of the drag.
+  PointerDeviceKind? _currentDragDeviceKind;
 
   ScrollPosition get position => _position;
   ScrollPosition _position;
@@ -1258,6 +1275,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     _currentDragStartRelatedToOrigin = null;
     _currentDragEndRelatedToOrigin = null;
     _selectionStartsInScrollable = false;
+    _currentDragDeviceKind = null;
     return super.handleClearSelection(event);
   }
 
@@ -1267,6 +1285,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       assert(!_selectionStartsInScrollable);
       _selectionStartsInScrollable = _globalPositionInScrollable(event.globalPosition);
     }
+    _currentDragDeviceKind = event.deviceKind ?? _currentDragDeviceKind;
     final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
     if (event.type == SelectionEventType.endEdgeUpdate) {
       _currentDragEndRelatedToOrigin = _inferPositionRelatedToOrigin(event.globalPosition);
@@ -1277,6 +1296,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       event = SelectionEdgeUpdateEvent.forEnd(
         globalPosition: endOffset,
         granularity: event.granularity,
+        deviceKind: event.deviceKind,
       );
     } else {
       _currentDragStartRelatedToOrigin = _inferPositionRelatedToOrigin(event.globalPosition);
@@ -1287,6 +1307,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       event = SelectionEdgeUpdateEvent.forStart(
         globalPosition: startOffset,
         granularity: event.granularity,
+        deviceKind: event.deviceKind,
       );
     }
     final SelectionResult result = super.handleSelectionEdgeUpdate(event);
@@ -1506,10 +1527,23 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   Rect _dragTargetFromEvent(SelectionEdgeUpdateEvent event) {
+    final double dragTargetSize = switch (_currentDragDeviceKind) {
+      PointerDeviceKind.touch ||
+      PointerDeviceKind.stylus ||
+      PointerDeviceKind.invertedStylus => _kTouchDragTargetSize,
+      PointerDeviceKind.mouse ||
+      PointerDeviceKind.trackpad ||
+      PointerDeviceKind.unknown ||
+      null => _kDefaultDragTargetSize,
+    };
+    // The drag target is clamped to half of the scrollable so that the auto
+    // scroll areas of the leading and the trailing edge never overlap,
+    // otherwise the auto scroller bounces between the two edges.
+    final box = state.context.findRenderObject()! as RenderBox;
     return Rect.fromCenter(
       center: event.globalPosition,
-      width: _kDefaultDragTargetSize,
-      height: _kDefaultDragTargetSize,
+      width: math.min(dragTargetSize, box.size.width / 2),
+      height: math.min(dragTargetSize, box.size.height / 2),
     );
   }
 

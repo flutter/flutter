@@ -952,11 +952,10 @@ void main() {
 
     // Release handle should stop scrolling.
     await gesture.up();
-    // Last scheduled scroll.
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    previousOffset = controller.offset;
+    // Let the scrolls that were already scheduled before the release finish.
     await tester.pumpAndSettle();
+    previousOffset = controller.offset;
+    await tester.pump(const Duration(seconds: 1));
     expect(controller.offset, previousOffset);
   });
 
@@ -1013,11 +1012,10 @@ void main() {
 
     // Release handle should stop scrolling.
     await gesture.up();
-    // Last scheduled scroll.
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    previousOffset = controller.offset;
+    // Let the scrolls that were already scheduled before the release finish.
     await tester.pumpAndSettle();
+    previousOffset = controller.offset;
+    await tester.pump(const Duration(seconds: 1));
     expect(controller.offset, previousOffset);
   });
 
@@ -1440,6 +1438,102 @@ void main() {
     // If _selectionStartsInScrollable was correctly preserved as TRUE,
     // the scrollable will have started auto-scrolling downwards.
     expect(position.pixels, greaterThan(0.0));
+    await gesture.up();
+  });
+
+  testWidgets('select to scroll forward works when a touch drag reaches the edge of the viewport', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/162856.
+    // A touch pointer cannot be dragged past the physical bounds of the screen,
+    // so the auto scroll must start before the drag position leaves the
+    // scrollable when the scrollable is flush against the edge of the screen.
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectionArea(
+          selectionControls: materialTextSelectionControls,
+          child: ListView.builder(
+            controller: controller,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
+    );
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
+    addTearDown(gesture.removePointer);
+    // Long press to start selecting.
+    await tester.pump(kLongPressTimeout);
+    expect(controller.offset, 0.0);
+
+    // Drag to the bottom of the viewport without leaving its bounds.
+    await gesture.moveTo(tester.getBottomLeft(find.byType(ListView)) - const Offset(0.0, 1.0));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset, greaterThan(0.0));
+
+    // Scroll to the end.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(controller.offset, 4200.0);
+    await gesture.up();
+  });
+
+  testWidgets('select to scroll works when a selection handle is dragged to the edge of the viewport', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/162856.
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectionArea(
+          selectionControls: materialTextSelectionControls,
+          child: ListView.builder(
+            controller: controller,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Long press to bring up the selection handles.
+    final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
+    );
+    final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph0, 2));
+    addTearDown(gesture.removePointer);
+    await tester.pump(kLongPressTimeout);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(paragraph0.selections[0], const TextSelection(baseOffset: 0, extentOffset: 4));
+
+    final List<TextBox> boxes = paragraph0.getBoxesForSelection(paragraph0.selections[0]);
+    expect(boxes.length, 1);
+    // Drag the end handle to the bottom of the viewport without leaving its
+    // bounds.
+    await gesture.down(globalize(boxes[0].toRect().bottomRight, paragraph0));
+    expect(controller.offset, 0.0);
+    await gesture.moveTo(tester.getBottomLeft(find.byType(ListView)) - const Offset(0.0, 1.0));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset, greaterThan(0.0));
+
+    // Scroll to the end.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(controller.offset, 4200.0);
     await gesture.up();
   });
 
