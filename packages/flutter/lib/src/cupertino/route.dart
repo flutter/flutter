@@ -696,7 +696,6 @@ class _CupertinoFullscreenDialogTransitionState extends State<CupertinoFullscree
 /// detector is associated.
 class _CupertinoBackGestureDetector<T> extends StatefulWidget {
   const _CupertinoBackGestureDetector({
-    super.key,
     required this.enabledCallback,
     required this.onStartPopGesture,
     required this.child,
