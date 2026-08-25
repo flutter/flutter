@@ -2957,6 +2957,16 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
     _isMergedIntoParent = value;
     parent?._markDirty();
+    if (mergeAllDescendantsIntoThisNode) {
+      // No need to update the descendants since they are merged into this node
+      // regardless of whether this node is merged into its parent.
+      return;
+    }
+    // Children that were introduced in RenderObject.assembleSemanticsNode are
+    // not visited when the semantics tree is compiled, so their merge flag is
+    // only updated when they are adopted or when this node's merge flag
+    // changes.
+    _updateChildrenMergeFlags();
   }
 
   /// Whether the user can interact with this node in assistive technologies.
@@ -3226,19 +3236,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   void _updateChildMergeFlagRecursively(SemanticsNode child) {
     assert(child.owner == owner);
-    final bool childShouldMergeToParent = isPartOfNodeMerging;
-
-    if (childShouldMergeToParent == child.isMergedIntoParent) {
-      return;
-    }
-
-    child.isMergedIntoParent = childShouldMergeToParent;
-
-    if (child.mergeAllDescendantsIntoThisNode) {
-      // No need to update the descendants since `child` has the merge flag set.
-    } else {
-      child._updateChildrenMergeFlags();
-    }
+    // The setter propagates the change to the descendants of `child` if needed.
+    child.isMergedIntoParent = isPartOfNodeMerging;
   }
 
   void _updateChildrenMergeFlags() {
