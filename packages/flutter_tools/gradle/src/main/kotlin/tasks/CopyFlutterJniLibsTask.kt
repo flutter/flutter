@@ -92,7 +92,9 @@ abstract class CopyFlutterJniLibsTask : DefaultTask() {
 
     // Ensure destination exists
     if (!destDirFile.exists()) {
-      destDirFile.mkdirs()
+      if (!destDirFile.mkdirs()) {
+        throw GradleException("Failed to create destination directory: ${destDirFile.absolutePath}")
+      }
     }
 
     // Copy each discovered lib root into the destination using an explicitly typed CopySpec lambda.

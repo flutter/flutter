@@ -9,7 +9,6 @@ import org.gradle.api.plugins.PluginContainer
 import org.gradle.api.plugins.PluginManager
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.ExtraPropertiesExtension
-import org.gradle.api.provider.Provider
 import org.gradle.process.ExecSpec
 import java.io.File
 import java.util.Properties
@@ -30,8 +29,8 @@ fun Project.flutterLogger(): Logger = this.logger
 /** Safely get the project's plugin manager. */
 fun Project.flutterPluginManager(): PluginManager = this.pluginManager
 
-/** Safely get the project's plugin container (alias to pluginManager for callers that expect PluginContainer). */
-fun Project.flutterPluginContainer(): PluginContainer = this.pluginManager as PluginContainer
+/** Safely get the project's plugin container (use project.plugins). */
+fun Project.flutterPluginContainer(): PluginContainer = this.plugins
 
 /** Safely get the project's root directory. */
 fun Project.flutterProjectDir(): File = this.projectDir
@@ -55,7 +54,6 @@ fun Project.loadLocalProperties(): Properties {
 fun Project.registerTaskIfAbsent(name: String, configure: (Task) -> Unit): TaskProvider<Task> {
   val existing = this.tasks.findByName(name)
   return if (existing != null) {
-    // Wrap existing task in a TaskProvider-like object via named
     this.tasks.named(name)
   } else {
     this.tasks.register(name) { task ->

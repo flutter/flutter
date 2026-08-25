@@ -54,7 +54,7 @@ object VersionUtils {
         return if (version1.length >= version2.length) version1 else version2
     }
 
-    /** Compares only non digits and returns true if v1Part is than v2Part. */
+    /** Compares only non-digit characters and returns true if v1Part is considered newer than v2Part. */
     private fun comparePreReleaseIdentifiers(
         v1Part: String,
         v2Part: String
@@ -62,6 +62,6 @@ object VersionUtils {
         val digits = Regex("\\d")
         val v1PreRelease = v1Part.replace(digits, "")
         val v2PreRelease = v2Part.replace(digits, "")
-        return v1PreRelease < v2PreRelease
+        return v1PreRelease > v2PreRelease
     }
 }

@@ -62,9 +62,9 @@ class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
             throw IllegalStateException("native_plugin_loader.gradle.kts not found at: ${loaderScriptFile.absolutePath}")
         }
 
-        // Apply the script file to the Settings.
+        // Apply the script file to the Settings using the map-based apply form to avoid Kotlin-DSL receiver issues.
         settings.apply {
-            from(loaderScriptFile)
+            apply(mapOf("from" to loaderScriptFile))
         }
 
         // Use the ExtraPropertiesExtension instance when calling the reflection bridge.
@@ -81,13 +81,16 @@ class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
                 ?: throw IllegalStateException("Plugin name missing for plugin at: ${pluginDirectory.absolutePath}")
 
             // Include the plugin project and set its projectDir to the plugin's android directory.
+            // Use settings.include and then set projectDir defensively.
             settings.include(":$pluginName")
-            // settings.project(...) returns a ProjectDescriptor; set projectDir defensively.
+
+            // Set projectDir defensively: prefer findProject then fallback to settings.project(...)
             val descriptor = settings.findProject(":$pluginName")
             if (descriptor != null) {
                 descriptor.projectDir = pluginDirectory
             } else {
                 // If the descriptor is not yet available, obtain it via settings.project and set projectDir.
+                // settings.project(...) will create the project descriptor if necessary.
                 settings.project(":$pluginName").projectDir = pluginDirectory
             }
         }

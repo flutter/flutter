@@ -8,6 +8,12 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
+/**
+ * Simple holder for intent-filter checks discovered when parsing Android manifests.
+ *
+ * Kept intentionally small and defensive so it can be used from the Gradle plugin
+ * without introducing additional runtime dependencies.
+ */
 class IntentFilterCheck(
     var hasAutoVerify: Boolean = false,
     var hasActionView: Boolean = false,

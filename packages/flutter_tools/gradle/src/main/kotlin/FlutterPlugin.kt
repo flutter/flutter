@@ -16,6 +16,7 @@ import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.kotlin.dsl.* // Kotlin DSL helpers (register, named, dependsOn, etc.)
 import org.gradle.api.file.CopySpec
 import org.gradle.process.ExecSpec
+import org.gradle.api.artifacts.repositories.PasswordCredentials
 import java.io.File
 
 /**
@@ -28,7 +29,7 @@ import java.io.File
  *  - avoid direct use of variant.outputs / assembleProvider; prefer task-by-name wiring
  *  - use project.exec for on-the-fly execution instead of creating tasks during execution
  *
- * Defensive and compatible with AGP 8.3.x and Kotlin 1.9.x.
+ * Defensive and compatible with AGP 8.3.x and Kotlin 2.4.x.
  */
 @Suppress("unused") // Instantiated by Gradle via reflection
 class FlutterPlugin : Plugin<Project> {
@@ -63,7 +64,7 @@ class FlutterPlugin : Plugin<Project> {
     // Configure repositories in a safe, AGP-compatible way if needed
     project.repositories.apply {
       try {
-        // Use Kotlin-DSL safe form: set repository URL via url = project.uri(...)
+        // Use Kotlin DSL property assignment to set repository URL
         maven {
           url = project.uri("https://storage.googleapis.com/download.flutter.io")
         }
@@ -79,7 +80,7 @@ class FlutterPlugin : Plugin<Project> {
     val androidComponents = project.extensions.findByType(AndroidComponentsExtension::class.java)
 
     // Register a top-level helper task that other tasks can depend on
-    val flutterPreBuild: TaskProvider<Task> = project.tasks.register("flutterPreBuild") { task ->
+    val flutterPreBuild: TaskProvider<*> = project.tasks.register("flutterPreBuild") { task ->
       task.group = "flutter"
       task.description = "Prepare Flutter-related artifacts before Android build"
     }
@@ -104,17 +105,18 @@ class FlutterPlugin : Plugin<Project> {
     project.tasks.register<Exec>("runFlutterPubGet") { execTask ->
       execTask.group = "flutter"
       execTask.description = "Run 'flutter pub get' in the Flutter module"
-      execTask.workingDir = project.rootDir
+      // Use explicit setter methods to avoid potential Kotlin DSL property resolution issues
+      execTask.setWorkingDir(project.rootDir)
       val flutterExecutable = File(flutterSdkPath, "bin/flutter")
       val flutterBat = File(flutterSdkPath, "bin/flutter.bat")
       when {
         flutterExecutable.exists() -> {
-          execTask.executable = flutterExecutable.absolutePath
-          execTask.args = listOf("pub", "get")
+          execTask.setExecutable(flutterExecutable.absolutePath)
+          execTask.setArgs(listOf("pub", "get"))
         }
         flutterBat.exists() -> {
-          execTask.executable = flutterBat.absolutePath
-          execTask.args = listOf("pub", "get")
+          execTask.setExecutable(flutterBat.absolutePath)
+          execTask.setArgs(listOf("pub", "get"))
         }
         else -> {
           // If flutter binary not found, do not configure executable to avoid failure
@@ -133,7 +135,7 @@ class FlutterPlugin : Plugin<Project> {
   private fun configureVariantTasks(
     project: Project,
     variant: Variant,
-    topLevelTask: TaskProvider<Task>,
+    topLevelTask: TaskProvider<*>,
     flutterSdkPath: String
   ) {
     val capitalized = variant.name.replaceFirstChar {
@@ -183,9 +185,10 @@ class FlutterPlugin : Plugin<Project> {
           }
           if (executable != null) {
             project.exec { spec: ExecSpec ->
-              spec.workingDir = project.rootDir
-              spec.executable = executable
-              spec.args = listOf("build", "apk", "--target-platform=android-arm,android-arm64")
+              // Use explicit setters on ExecSpec to avoid unresolved reference issues
+              spec.setWorkingDir(project.rootDir)
+              spec.setExecutable(executable)
+              spec.args(listOf("build", "apk", "--target-platform=android-arm,android-arm64"))
               spec.isIgnoreExitValue = true
             }
           } else {

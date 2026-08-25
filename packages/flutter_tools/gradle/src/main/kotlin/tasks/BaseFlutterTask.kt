@@ -17,6 +17,9 @@ import java.io.File
 /**
  * Base implementation of a Gradle task. Gradle tasks can not be instantiated for testing,
  * so this class delegates all logic to [BaseFlutterTaskHelper].
+ *
+ * This class is intentionally lightweight: it only exposes task inputs/outputs and
+ * delegates behavior to the helper to keep the task class simple and easy to test.
  */
 open class BaseFlutterTask : DefaultTask() {
     @Internal
@@ -128,17 +131,17 @@ open class BaseFlutterTask : DefaultTask() {
     var flavor: String? = null
 
     /**
-     * Gets the dependency file(s) by calling [com.flutter.gradle.tasks.BaseFlutterTaskHelper.getDependenciesFiles].
+     * Gets the dependency file(s) by calling [BaseFlutterTaskHelper.getDependenciesFiles].
      *
-     * @return the dependency file(s) based on the current intermediate directory path.
+     * Returning the files via @OutputFiles ensures Gradle can track task inputs/outputs.
      */
     @OutputFiles
     fun getDependenciesFiles() = BaseFlutterTaskHelper.getDependenciesFiles(baseFlutterTask = this)
 
     /**
-     * Builds a Flutter Android application bundle by verifying the Flutter source directory,
-     * creating an intermediate build directory if necessary, and running flutter assemble by
-     * configuring and executing with a set of build configurations.
+     * Builds a Flutter Android application bundle by delegating to [BaseFlutterTaskHelper.buildBundle].
+     *
+     * The actual build logic is kept in the helper to make the task class simple and testable.
      */
     fun buildBundle() = BaseFlutterTaskHelper.buildBundle(baseFlutterTask = this)
 }

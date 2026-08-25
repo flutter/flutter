@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@file:Suppress("DSL_SCOPE_VIOLATION")
-
 plugins {
     `java-gradle-plugin`
     groovy
-    kotlin("jvm") version "1.9.24"
+    kotlin("jvm") version "2.4.0"
+    `maven-publish`
 }
 
 group = "dev.flutter.plugin"
@@ -31,16 +30,22 @@ gradlePlugin {
 }
 
 tasks.withType<JavaCompile> {
-    options.release.set(11)
+    // Use Java 17 for compilation to match the selected toolchain below
+    options.release.set(17)
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        jvmTarget = "11"
+// Configure Kotlin to use the local JDK 17 toolchain and target JVM 17
+kotlin {
+    // Use the local JDK 17 toolchain (adjust if you prefer another installed JDK)
+    jvmToolchain(17)
+
+    // New compilerOptions DSL (Kotlin Gradle Plugin 2.4+)
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -62,7 +67,7 @@ dependencies {
 
     // Provide Kotlin Gradle plugin classes at compile time for reflection/inspection.
     // This helps code that references Kotlin plugin types during compilation.
-    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.24")
+    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.0")
 
     // AndroidX annotation
     compileOnly("androidx.annotation:annotation-jvm:1.9.1")
@@ -78,4 +83,41 @@ dependencies {
     testImplementation("com.android.tools.build:gradle:8.3.2")
     testImplementation("org.mockito:mockito-core:5.8.0")
     testImplementation("io.mockk:mockk:1.13.16")
+}
+
+/*
+ Minimal publishing configuration to enable publishToMavenLocal.
+ This publishes the plugin jar to the local Maven repository.
+*/
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifactId = "flutter-tools-gradle"
+            // Publish the produced jar artifact explicitly.
+            // This is robust even if a java component is not present.
+            artifact(tasks.named("jar"))
+
+            // Optional: add basic POM metadata
+            pom {
+                name.set("Flutter Tools Gradle Plugin")
+                description.set("Gradle plugin used by Flutter tooling")
+                url.set("https://flutter.dev")
+                licenses {
+                    license {
+                        name.set("BSD")
+                        url.set("https://opensource.org/licenses/BSD-3-Clause")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("flutter")
+                        name.set("Flutter Authors")
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        mavenLocal()
+    }
 }

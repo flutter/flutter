@@ -4,7 +4,6 @@
 
 package com.flutter.gradle.tasks
 
-import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.VersionUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
@@ -20,8 +19,8 @@ import java.io.File
  * Task to validate that the project's compileSdkVersion and ndkVersion are not lower than
  * those required by any of the plugins.
  *
- * This version is defensive about nulls and uses the helper utilities from
- * the com.flutter.gradle package (FlutterPluginUtils and VersionUtils).
+ * This version is defensive about nulls and avoids a hard compile-time dependency on
+ * com.flutter.gradle.FlutterPluginUtils by resolving it reflectively at runtime.
  */
 abstract class ValidateCompileSdkVersionTask : DefaultTask() {
     @get:Input
@@ -140,13 +139,7 @@ abstract class ValidateCompileSdkVersionTask : DefaultTask() {
                 )
             }
 
-            val buildGradleFile = try {
-                FlutterPluginUtils.getBuildGradleFileFromProjectDir(projectDirectory, logger)
-            } catch (t: Throwable) {
-                logger.warn("Could not locate build.gradle file: ${t.message}")
-                null
-            }
-
+            val buildGradleFile = resolveBuildGradleFileSafely(projectDirectory, logger)
             val buildGradlePath = buildGradleFile?.path ?: File(projectDirectory, "build.gradle").path
 
             logger.error(
@@ -176,13 +169,7 @@ abstract class ValidateCompileSdkVersionTask : DefaultTask() {
                 logger.error("- ${pluginToNdkVersion.name} requires Android NDK ${pluginToNdkVersion.version}")
             }
 
-            val buildGradleFile = try {
-                FlutterPluginUtils.getBuildGradleFileFromProjectDir(projectDirectory, logger)
-            } catch (t: Throwable) {
-                logger.warn("Could not locate build.gradle file: ${t.message}")
-                null
-            }
-
+            val buildGradleFile = resolveBuildGradleFileSafely(projectDirectory, logger)
             val buildGradlePath = buildGradleFile?.path ?: File(projectDirectory, "build.gradle").path
 
             logger.error(
@@ -196,6 +183,23 @@ abstract class ValidateCompileSdkVersionTask : DefaultTask() {
                     }
                 """.trimIndent()
             )
+        }
+
+        /**
+         * Attempt to resolve the project's build.gradle file using the FlutterPluginUtils helper if available.
+         * This uses reflection to avoid a hard compile-time dependency on com.flutter.gradle.FlutterPluginUtils.
+         * If the helper cannot be loaded or invoked, fall back to a sensible default File(projectDirectory, "build.gradle").
+         */
+        private fun resolveBuildGradleFileSafely(projectDirectory: File, logger: Logger): File? {
+            return try {
+                val helperClass = Class.forName("com.flutter.gradle.FlutterPluginUtils")
+                val method = helperClass.getMethod("getBuildGradleFileFromProjectDir", File::class.java, Logger::class.java)
+                val result = method.invoke(null, projectDirectory, logger)
+                result as? File
+            } catch (t: Throwable) {
+                logger.warn("Could not locate build.gradle via FlutterPluginUtils: ${t.message}")
+                null
+            }
         }
     }
 }

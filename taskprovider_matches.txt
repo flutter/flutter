@@ -1,0 +1,10 @@
+src\main\kotlin\com\flutter\gradle\FlutterPluginUtils.kt:55:fun Project.registerTaskIfAbsent(name: String, configure: (Task) -> Unit): TaskProvider<Task> {
+src\main\kotlin\com\flutter\gradle\FlutterPluginUtils.kt:99: * Create or register an Exec task to run a command. Returns the TaskProvider<Exec>.
+src\main\kotlin\com\flutter\gradle\FlutterPluginUtils.kt:109:): TaskProvider<Exec> {
+src\main\kotlin\com\flutter\gradle\FlutterPluginUtils.kt:113:    this.tasks.named(taskName) as TaskProvider<Exec>
+src\main\kotlin\com\flutter\gradle\FlutterPluginUtils.kt:132:fun TaskProvider<out Task>.dependsOnTaskProvider(other: TaskProvider<out Task>) {
+src\main\kotlin\com\flutter\gradle\FlutterPluginUtils.kt:141:fun Project.configureNamedTaskDependsOn(namedTaskName: String, dependency: TaskProvider<out Task>) {
+src\main\kotlin\DependencyVersionChecker.kt:58:    val topLevelCheck: TaskProvider<Task> = project.tasks.register("checkDependencyVersions") { task ->
+src\main\kotlin\DependencyVersionChecker.kt:77:    topLevelCheck: TaskProvider<Task>
+src\main\kotlin\FlutterPlugin.kt:83:    val flutterPreBuild: TaskProvider<*> = project.tasks.register("flutterPreBuild") { task ->
+src\main\kotlin\FlutterPlugin.kt:138:    topLevelTask: TaskProvider<*>,

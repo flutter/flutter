@@ -9,7 +9,13 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-class Deeplink(
+/**
+ * Represents a deep link entry used by the Gradle plugin.
+ *
+ * Note: equality and hashCode intentionally consider only scheme, host and path
+ * (keeps parity with the original Groovy behavior).
+ */
+class DeepLink(
     @VisibleForTesting
     val scheme: String?,
     @VisibleForTesting
@@ -19,22 +25,22 @@ class Deeplink(
     @VisibleForTesting
     val intentFilterCheck: IntentFilterCheck
 ) {
-    // TODO(gmackall): This behavior was kept identical to the original Groovy behavior as part of
-    // the Groovy->Kotlin conversion, but should be changed once the conversion is complete.
     override fun equals(other: Any?): Boolean {
-        if (other == null) {
-            throw NullPointerException()
-        }
-        if (other.javaClass != javaClass) {
-            return false
-        }
-        val otherAsDeeplink = other as Deeplink
-        return scheme == otherAsDeeplink.scheme &&
-            host == otherAsDeeplink.host &&
-            path == otherAsDeeplink.path
+        if (this === other) return true
+        if (other == null) return false
+        if (other.javaClass != javaClass) return false
+        other as DeepLink
+        return scheme == other.scheme &&
+            host == other.host &&
+            path == other.path
     }
 
-    override fun hashCode(): Int = scheme.hashCode() + host.hashCode() + path.hashCode()
+    override fun hashCode(): Int {
+        var result = scheme?.hashCode() ?: 0
+        result = 31 * result + (host?.hashCode() ?: 0)
+        result = 31 * result + (path?.hashCode() ?: 0)
+        return result
+    }
 
     fun toJson(): JsonObject =
         buildJsonObject {
