@@ -808,6 +808,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 @property(nonatomic, strong) NSArray<NSDictionary*>* editMenuItems;
 
 - (void)setEditableTransform:(NSArray*)matrix;
+- (BOOL)becomeFirstResponderFromFramework;
+- (BOOL)resignFirstResponderFromFramework;
 @end
 
 @implementation FlutterTextInputView {
@@ -825,6 +827,12 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   bool _isFloatingCursorActive;
   CGPoint _floatingCursorOffset;
   bool _enableInteractiveSelection;
+  BOOL _isResigningFirstResponderFromFramework;
+  // A non-framework resign arms a one-shot notification for this exact view. The responder API
+  // does not reveal which object, if any, takes focus next, so a handoff to a native input can arm
+  // it too. Framework responder calls and client updates cancel it before UIKit can restore stale
+  // input state.
+  BOOL _shouldNotifyFrameworkOnFirstResponderRestore;
   UITextInteraction* _textInteraction API_AVAILABLE(ios(13.0));
 }
 
@@ -1168,6 +1176,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)setTextInputClient:(int)client {
+  _shouldNotifyFrameworkOnFirstResponderRestore = NO;
   _textInputClient = client;
   _hasPlaceholder = NO;
 }
@@ -1336,14 +1345,43 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   return _textInputClient != 0;
 }
 
-- (BOOL)resignFirstResponder {
-  BOOL success = [super resignFirstResponder];
-  if (success) {
-    if (!_preventCursorDismissWhenResignFirstResponder) {
-      [self.textInputDelegate flutterTextInputView:self
-          didResignFirstResponderWithTextInputClient:_textInputClient];
-    }
+- (BOOL)becomeFirstResponder {
+  BOOL wasFirstResponder = self.isFirstResponder;
+  BOOL success = [super becomeFirstResponder];
+  if (success && !wasFirstResponder && self.isFirstResponder &&
+      _shouldNotifyFrameworkOnFirstResponderRestore) {
+    _shouldNotifyFrameworkOnFirstResponderRestore = NO;
+    // Existing framework client and FocusNode guards decide whether to accept the restored focus.
+    [self.textInputDelegate flutterTextInputView:self
+        didRestoreFirstResponderWithTextInputClient:_textInputClient];
   }
+  return success;
+}
+
+- (BOOL)resignFirstResponder {
+  BOOL wasFirstResponder = self.isFirstResponder;
+  BOOL success = [super resignFirstResponder];
+  if (success && !_preventCursorDismissWhenResignFirstResponder) {
+    if (wasFirstResponder) {
+      _shouldNotifyFrameworkOnFirstResponderRestore =
+          !_isResigningFirstResponderFromFramework && _textInputClient != 0;
+    }
+    [self.textInputDelegate flutterTextInputView:self
+        didResignFirstResponderWithTextInputClient:_textInputClient];
+  }
+  return success;
+}
+
+- (BOOL)becomeFirstResponderFromFramework {
+  _shouldNotifyFrameworkOnFirstResponderRestore = NO;
+  return [self becomeFirstResponder];
+}
+
+- (BOOL)resignFirstResponderFromFramework {
+  _shouldNotifyFrameworkOnFirstResponderRestore = NO;
+  _isResigningFirstResponderFromFramework = YES;
+  BOOL success = [self resignFirstResponder];
+  _isResigningFirstResponderFromFramework = NO;
   return success;
 }
 
@@ -2853,7 +2891,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (void)showTextInput {
   _activeView.viewResponder = _viewResponder;
   [self addToInputParentViewIfNeeded:_activeView];
-  [_activeView becomeFirstResponder];
+  [_activeView becomeFirstResponderFromFramework];
 }
 
 - (void)enableActiveViewAccessibility {
@@ -2864,7 +2902,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)hideTextInput {
-  [_activeView resignFirstResponder];
+  [_activeView resignFirstResponderFromFramework];
 
   // Remove the input view from the view hierarchy after resigning first responder.
   // This flag is set by clearTextInputClient when autofillContext is empty.
@@ -2878,7 +2916,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)triggerAutofillSave:(BOOL)saveEntries {
-  [_activeView resignFirstResponder];
+  [_activeView resignFirstResponderFromFramework];
 
   if (saveEntries) {
     // Make all the input fields in the autofill context visible,
