@@ -28,6 +28,12 @@ void main() {
             as ShapeDecoration?;
       }
 
+      // The date picker defaults to the calendar entry mode in portrait
+      // orientation only.
+      tester.view.physicalSize = const Size(1080.0, 2400.0);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.reset);
+
       await tester.pumpWidget(const example.DatePickerApp());
 
       await tester.tap(find.text('Open Date Picker'));

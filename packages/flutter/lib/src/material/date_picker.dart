@@ -98,7 +98,11 @@ const double _fontSizeToScale = 14.0;
 /// An optional [initialEntryMode] argument can be used to display the date
 /// picker in the [DatePickerEntryMode.calendar] (a calendar month grid)
 /// or [DatePickerEntryMode.input] (a text input field) mode.
-/// It defaults to [DatePickerEntryMode.calendar].
+/// If it is null, [DatePickerEntryMode.calendar] is used in portrait
+/// orientation and [DatePickerEntryMode.input] is used in landscape
+/// orientation. This is because the calendar grid can't respect the minimum
+/// touch target size recommended by the accessibility guidelines when the
+/// available height is as small as it is in landscape orientation.
 ///
 /// {@template flutter.material.date_picker.switchToInputEntryModeIcon}
 /// An optional [switchToInputEntryModeIcon] argument can be used to
@@ -199,7 +203,7 @@ Future<DateTime?> showDatePicker({
   required DateTime firstDate,
   required DateTime lastDate,
   DateTime? currentDate,
-  DatePickerEntryMode initialEntryMode = DatePickerEntryMode.calendar,
+  DatePickerEntryMode? initialEntryMode,
   SelectableDayPredicate? selectableDayPredicate,
   String? helpText,
   String? cancelText,
@@ -245,12 +249,25 @@ Future<DateTime?> showDatePicker({
   );
   assert(debugCheckHasMaterialLocalizations(context));
 
+  // The calendar day grid can't respect the minimum touch target size
+  // recommended by the accessibility guidelines in landscape orientation,
+  // because the dialog height is too small to lay out 7 rows of 48 logical
+  // pixels. The input entry mode is used instead, as recommended by the
+  // Material Design guidelines for constrained viewports. The user can still
+  // switch to the calendar entry mode with the entry mode button.
+  final DatePickerEntryMode effectiveInitialEntryMode =
+      initialEntryMode ??
+      switch (MediaQuery.orientationOf(context)) {
+        Orientation.portrait => DatePickerEntryMode.calendar,
+        Orientation.landscape => DatePickerEntryMode.input,
+      };
+
   Widget dialog = DatePickerDialog(
     initialDate: initialDate,
     firstDate: firstDate,
     lastDate: lastDate,
     currentDate: currentDate,
-    initialEntryMode: initialEntryMode,
+    initialEntryMode: effectiveInitialEntryMode,
     selectableDayPredicate: selectableDayPredicate,
     helpText: helpText,
     cancelText: cancelText,

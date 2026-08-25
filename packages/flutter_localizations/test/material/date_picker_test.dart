@@ -125,6 +125,7 @@ void main() {
                     firstDate: firstDate,
                     lastDate: lastDate,
                     locale: const Locale('fr', 'CA'),
+                    initialEntryMode: DatePickerEntryMode.calendar,
                   );
                 },
                 child: const Text('X'),
@@ -164,6 +165,7 @@ void main() {
                     firstDate: firstDate,
                     lastDate: lastDate,
                     locale: const Locale('fr', 'CA'),
+                    initialEntryMode: DatePickerEntryMode.calendar,
                   );
                 },
                 child: const Text('X'),
@@ -204,6 +206,7 @@ void main() {
                     firstDate: firstDate,
                     lastDate: lastDate,
                     textDirection: TextDirection.rtl,
+                    initialEntryMode: DatePickerEntryMode.calendar,
                   );
                 },
                 child: const Text('X'),
@@ -242,6 +245,7 @@ void main() {
                     firstDate: firstDate,
                     lastDate: lastDate,
                     textDirection: TextDirection.rtl,
+                    initialEntryMode: DatePickerEntryMode.calendar,
                   );
                 },
                 child: const Text('X'),
@@ -284,6 +288,7 @@ void main() {
                     lastDate: lastDate,
                     locale: const Locale('fr', 'CA'),
                     textDirection: TextDirection.rtl,
+                    initialEntryMode: DatePickerEntryMode.calendar,
                   );
                 },
                 child: const Text('X'),
@@ -327,6 +332,7 @@ void main() {
                     lastDate: lastDate,
                     locale: const Locale('fr', 'CA'),
                     textDirection: TextDirection.rtl,
+                    initialEntryMode: DatePickerEntryMode.calendar,
                   );
                 },
                 child: const Text('X'),
@@ -377,6 +383,7 @@ void main() {
                       initialDate: initialDate,
                       firstDate: firstDate,
                       lastDate: lastDate,
+                      initialEntryMode: DatePickerEntryMode.calendar,
                     );
                   },
                 ),

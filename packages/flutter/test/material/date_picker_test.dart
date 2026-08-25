@@ -176,6 +176,67 @@ void main() {
       expect(dialogContainerSize, calendarPortraitDialogSizeM3);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/170786.
+    testWidgets('Default entry mode depends on the orientation', (WidgetTester tester) async {
+      Future<void> showPicker(Size size) async {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+        late BuildContext buttonContext;
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      buttonContext = context;
+                    },
+                    child: const Text('Go'),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('Go'));
+        showDatePicker(
+          context: buttonContext,
+          initialDate: initialDate,
+          firstDate: firstDate,
+          lastDate: lastDate,
+        );
+        await tester.pumpAndSettle();
+      }
+
+      // In portrait, the calendar day grid has enough room to respect the
+      // minimum touch target size, so the calendar entry mode is used.
+      await showPicker(narrowWindowSize);
+      expect(find.byType(CalendarDatePicker), findsOneWidget);
+      expect(find.byType(InputDatePickerFormField), findsNothing);
+
+      // Close the dialog.
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      // In landscape, the calendar day grid can't respect the minimum touch
+      // target size, so the input entry mode is used.
+      await showPicker(wideWindowSize);
+      expect(find.byType(CalendarDatePicker), findsNothing);
+      expect(find.byType(InputDatePickerFormField), findsOneWidget);
+    });
+
+    testWidgets('Explicit initialEntryMode is not overridden by the orientation', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = wideWindowSize;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        expect(find.byType(CalendarDatePicker), findsOneWidget);
+      }, useMaterial3: true);
+    });
+
     testWidgets('Default dialog properties', (WidgetTester tester) async {
       final theme = ThemeData();
       await prepareDatePicker(tester, (Future<DateTime?> date) async {
@@ -741,6 +802,7 @@ void main() {
                       firstDate: DateTime(2018),
                       lastDate: DateTime(2030),
                       switchToInputEntryModeIcon: switchToInputEntryModeIcon,
+                      initialEntryMode: DatePickerEntryMode.calendar,
                     );
                   },
                 );
