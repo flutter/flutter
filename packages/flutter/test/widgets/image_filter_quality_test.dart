@@ -135,4 +135,6 @@ Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) as
     find.byType(Image),
     matchesGoldenFile('image_quality_${quality ?? 'default'}.png'),
   );
+
+  imageCache.clear();
 }

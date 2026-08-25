@@ -96,6 +96,7 @@ Future<void> precacheTestImage(
     late final ImageStreamListener listener;
     listener = ImageStreamListener(
       (ImageInfo info, bool syncCall) {
+        info.dispose();
         if (!completer.isCompleted) {
           stream.removeListener(listener);
           completer.complete();

@@ -84,10 +84,12 @@ void main() {
     final ui.Image image1 = await createTestImage(width: 10, height: 10);
     expect(image1.width, 10);
     expect(image1.height, 10);
+    image1.dispose();
 
     final ui.Image image2 = await createTestImage(width: 10, height: 10);
     expect(image2.width, 10);
     expect(image2.height, 10);
+    image2.dispose();
   });
 
   test('precacheTestImage can be used in a standalone test', () async {
@@ -95,12 +97,14 @@ void main() {
     await precacheTestImage(provider);
     expect(imageCache.containsKey(provider), isTrue);
     imageCache.clear();
+    imageCache.clearLiveImages();
   });
 
   testWidgets('precacheTestImage synchronously loads image into ImageCache for first frame', (
     WidgetTester tester,
   ) async {
     addTearDown(imageCache.clear);
+    addTearDown(imageCache.clearLiveImages);
     final provider = MemoryImage(kTransparentImage);
     await precacheTestImage(provider);
 
@@ -133,6 +137,9 @@ void main() {
 
     expect(caughtError, isA<StateError>());
     expect(caughtStackTrace, isNotNull);
+    imageCache.clear();
+    imageCache.clearLiveImages();
+    await tester.pump();
   });
 
   testWidgets('precacheTestImage throws if onError is not provided and load fails', (
@@ -141,6 +148,9 @@ void main() {
     final errorProvider = _FailingImageProvider();
 
     await expectLater(() => precacheTestImage(errorProvider), throwsA(isA<StateError>()));
+    imageCache.clear();
+    imageCache.clearLiveImages();
+    await tester.pump();
   });
 }
 
