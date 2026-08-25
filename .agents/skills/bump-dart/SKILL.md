@@ -1,5 +1,5 @@
 ---
-name: personal-bump-dart
+name: bump-dart
 description: Bump the minimum Dart SDK version constraint across the flutter/flutter repository, update dependency checksums, and run verification.
 ---
 
