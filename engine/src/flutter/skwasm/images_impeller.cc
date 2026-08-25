@@ -17,6 +17,7 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/backend/gles/texture_gles.h"
+#include "impeller/typographer/backends/skia/typographer_context_skia.h"
 
 #include <emscripten/wasm_worker.h>
 
@@ -161,7 +162,8 @@ class DlWimpImageFromPicture : public DlWimpImageBase {
 
   std::shared_ptr<impeller::Texture> GetImpellerTexture(
       const std::shared_ptr<impeller::Context>& context) const override {
-    impeller::AiksContext aiks_context(context, nullptr);
+    impeller::AiksContext aiks_context(
+        context, impeller::TypographerContextSkia::Make());
     return impeller::DisplayListToTexture(
         display_list_, impeller::ISize(width_, height_), aiks_context);
   }
