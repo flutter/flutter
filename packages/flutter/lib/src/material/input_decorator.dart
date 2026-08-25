@@ -2206,7 +2206,28 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
             : themeData.textTheme.titleMedium!)
         .merge(widget.baseStyle)
         .merge(defaultStyle)
+        .merge(_getThemeHintColorStyle(themeData))
         .merge(style);
+  }
+
+  // ThemeData.hintColor is a Material 2 property, but it is still honored for
+  // Material 3 when it has been set by the application, for backward
+  // compatibility. It is ignored when the input is disabled because the
+  // disabled color takes precedence, as it does for Material 2.
+  //
+  // ThemeData always resolves hintColor to a non-null value, so the only way to
+  // know whether it has been set is to compare it with the value that the
+  // ThemeData constructor defaults to.
+  // See https://github.com/flutter/flutter/issues/153219.
+  TextStyle? _getThemeHintColorStyle(ThemeData themeData) {
+    if (!themeData.useMaterial3 || widgetState.contains(WidgetState.disabled)) {
+      return null;
+    }
+    final Color defaultHintColor = switch (themeData.brightness) {
+      Brightness.dark => Colors.white60,
+      Brightness.light => Colors.black.withOpacity(0.6),
+    };
+    return themeData.hintColor == defaultHintColor ? null : TextStyle(color: themeData.hintColor);
   }
 
   TextStyle _getFloatingLabelStyle(ThemeData themeData, InputDecorationThemeData defaults) {

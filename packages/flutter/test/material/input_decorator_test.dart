@@ -5387,6 +5387,78 @@ void main() {
       );
       expect(getHintRect(tester).right, expectedHintRight);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/153219.
+    group('ThemeData.hintColor', () {
+      testWidgets('is used when it is set', (WidgetTester tester) async {
+        const hintColor = Color(0xFFFF0000);
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isEmpty: true,
+            theme: ThemeData(hintColor: hintColor),
+            decoration: const InputDecoration(hintText: hintText),
+          ),
+        );
+
+        expect(getHintStyle(tester).color, hintColor);
+      });
+
+      testWidgets('is used when it is set on a dark theme', (WidgetTester tester) async {
+        const hintColor = Color(0xFFFF0000);
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isEmpty: true,
+            theme: ThemeData(brightness: Brightness.dark, hintColor: hintColor),
+            decoration: const InputDecoration(hintText: hintText),
+          ),
+        );
+
+        expect(getHintStyle(tester).color, hintColor);
+      });
+
+      testWidgets('is ignored when it is not set', (WidgetTester tester) async {
+        final theme = ThemeData();
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isEmpty: true,
+            theme: theme,
+            decoration: const InputDecoration(hintText: hintText),
+          ),
+        );
+
+        expect(getHintStyle(tester).color, theme.colorScheme.onSurfaceVariant);
+      });
+
+      testWidgets('is ignored when the field is disabled', (WidgetTester tester) async {
+        const hintColor = Color(0xFFFF0000);
+        final theme = ThemeData(hintColor: hintColor);
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isEmpty: true,
+            theme: theme,
+            decoration: const InputDecoration(enabled: false, hintText: hintText),
+          ),
+        );
+
+        expect(getHintStyle(tester).color, theme.colorScheme.onSurface.withOpacity(0.38));
+      });
+
+      testWidgets('is overridden by InputDecoration.hintStyle', (WidgetTester tester) async {
+        const hintStyleColor = Color(0xFF00FF00);
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isEmpty: true,
+            theme: ThemeData(hintColor: const Color(0xFFFF0000)),
+            decoration: const InputDecoration(
+              hintText: hintText,
+              hintStyle: TextStyle(color: hintStyleColor),
+            ),
+          ),
+        );
+
+        expect(getHintStyle(tester).color, hintStyleColor);
+      });
+    });
   });
 
   group('Material3 - InputDecoration helper/counter/error', () {
