@@ -14043,6 +14043,69 @@ void main() {
       skip: kIsWeb, // [intended]
     );
 
+    // Regression test for https://github.com/flutter/flutter/issues/99186.
+    testWidgets(
+      'Can redo a change that was undone before the throttling delay',
+      (WidgetTester tester) async {
+        // Initialize the controller with a non empty text.
+        controller.text = textA;
+        await tester.pumpWidget(boilerplate());
+
+        // Focus the field and wait for throttling delay to get the initial
+        // state saved in text editing history.
+        focusNode.requestFocus();
+        await tester.pump();
+        await waitForThrottling(tester);
+        expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
+
+        // Insert some text and undo it without waiting for the throttling delay.
+        await tester.enterText(find.byType(EditableText), textAB);
+        expect(controller.value, textABCollapsedAtEnd);
+        await sendUndo(tester);
+        expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
+
+        // The insertion is still on the history, so it can be redone.
+        await sendRedo(tester);
+        expect(controller.value, textABCollapsedAtEnd);
+
+        // On web, these keyboard shortcuts are handled by the browser.
+      },
+      variant: TargetPlatformVariant.all(),
+      skip: kIsWeb, // [intended]
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/99186.
+    testWidgets(
+      'Redo does not revert a change that is still waiting for the throttling delay',
+      (WidgetTester tester) async {
+        // Initialize the controller with a non empty text.
+        controller.text = textA;
+        await tester.pumpWidget(boilerplate());
+
+        // Focus the field and wait for throttling delay to get the initial
+        // state saved in text editing history.
+        focusNode.requestFocus();
+        await tester.pump();
+        await waitForThrottling(tester);
+        expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
+
+        // Insert some text and redo without waiting for the throttling delay.
+        // There is nothing to redo, so the insertion must be left alone.
+        await tester.enterText(find.byType(EditableText), textAB);
+        expect(controller.value, textABCollapsedAtEnd);
+        await sendRedo(tester);
+        expect(controller.value, textABCollapsedAtEnd);
+
+        // The insertion can still be undone.
+        await sendUndo(tester);
+        expect(controller.value, isDesktop() ? textASelected : textACollapsedAtEnd);
+
+        // On web, these keyboard shortcuts are handled by the browser.
+      },
+      variant: TargetPlatformVariant.all(),
+      skip: kIsWeb, // [intended]
+    );
+
     testWidgets(
       'Can make changes in the middle of the history',
       (WidgetTester tester) async {
