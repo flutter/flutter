@@ -3634,8 +3634,22 @@ class _SelectableFragment
       final selectionPaint = Paint()
         ..style = PaintingStyle.fill
         ..color = paragraph.selectionColor!;
+      // Selection boxes can extend past the bounds of the text, for instance
+      // when the selection contains trailing whitespace, which is never
+      // wrapped. Clip the highlight so that it is never painted outside of the
+      // text, the same way RenderEditable does.
+      final textBounds = Rect.fromLTWH(
+        0.0,
+        0.0,
+        paragraph._textPainter.width,
+        paragraph._textPainter.height,
+      );
       for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
-        context.canvas.drawRect(textBox.toRect().shift(offset), selectionPaint);
+        final Rect rect = textBox.toRect().intersect(textBounds);
+        if (rect.isEmpty) {
+          continue;
+        }
+        context.canvas.drawRect(rect.shift(offset), selectionPaint);
       }
     }
   }

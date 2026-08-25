@@ -1121,6 +1121,30 @@ void main() {
       expect(paintingContext.pushedLayers.whereType<LeaderLayer>(), hasLength(2));
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/99139.
+    test('does not paint selection highlight outside of the text bounds', () async {
+      final registrar = TestSelectionRegistrar();
+      const selectionColor = Color(0xAF6694e8);
+      // Trailing whitespace is never wrapped, so the selection boxes for the
+      // whitespace extend past the width the paragraph was laid out with.
+      final paragraph = RenderParagraph(
+        const TextSpan(text: '12       '),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        selectionColor: selectionColor,
+      );
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0));
+      expect(paragraph.size.width, 50.0);
+      for (final Selectable selectable in registrar.selectables) {
+        selectable.dispatchSelectionEvent(const SelectAllSelectionEvent());
+      }
+
+      final paintingContext = MockPaintingContext();
+      paragraph.paint(paintingContext, Offset.zero);
+      expect(paintingContext.canvas.drawnRect, isNotNull);
+      expect(paintingContext.canvas.drawnRect!.right, lessThanOrEqualTo(50.0));
+    });
+
     // Regression test for https://github.com/flutter/flutter/issues/126652.
     test('paints selection when tap at chinese character', () async {
       final registrar = TestSelectionRegistrar();
