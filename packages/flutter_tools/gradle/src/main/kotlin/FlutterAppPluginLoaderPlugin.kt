@@ -7,7 +7,6 @@ package com.flutter.gradle
 import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
 import org.gradle.api.plugins.ExtraPropertiesExtension
-import org.gradle.kotlin.dsl.* // brings Kotlin-DSL helpers (from, apply, etc.) into scope
 import java.io.File
 import java.nio.file.Paths
 import java.util.Properties
@@ -63,7 +62,7 @@ class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
             throw IllegalStateException("native_plugin_loader.gradle.kts not found at: ${loaderScriptFile.absolutePath}")
         }
 
-        // Apply the script file to the Settings. Use Kotlin DSL 'from' inside apply block.
+        // Apply the script file to the Settings.
         settings.apply {
             from(loaderScriptFile)
         }
@@ -83,7 +82,14 @@ class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
 
             // Include the plugin project and set its projectDir to the plugin's android directory.
             settings.include(":$pluginName")
-            settings.project(":$pluginName").projectDir = pluginDirectory
+            // settings.project(...) returns a ProjectDescriptor; set projectDir defensively.
+            val descriptor = settings.findProject(":$pluginName")
+            if (descriptor != null) {
+                descriptor.projectDir = pluginDirectory
+            } else {
+                // If the descriptor is not yet available, obtain it via settings.project and set projectDir.
+                settings.project(":$pluginName").projectDir = pluginDirectory
+            }
         }
     }
 }

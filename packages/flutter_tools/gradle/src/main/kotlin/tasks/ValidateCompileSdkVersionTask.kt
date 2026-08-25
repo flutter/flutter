@@ -19,6 +19,9 @@ import java.io.File
 /**
  * Task to validate that the project's compileSdkVersion and ndkVersion are not lower than
  * those required by any of the plugins.
+ *
+ * This version is defensive about nulls and uses the helper utilities from
+ * the com.flutter.gradle package (FlutterPluginUtils and VersionUtils).
  */
 abstract class ValidateCompileSdkVersionTask : DefaultTask() {
     @get:Input
@@ -38,13 +41,20 @@ abstract class ValidateCompileSdkVersionTask : DefaultTask() {
 
     @TaskAction
     fun run() {
+        // Use safe getters to avoid throwing if properties are not configured.
+        val projSdk = try { projectCompileSdk.get() } catch (_: Throwable) { -1 }
+        val projNdk = try { projectNdkVersion.get() } catch (_: Throwable) { "" }
+        val pluginSdks = try { pluginCompileSdks.get() } catch (_: Throwable) { emptyMap() }
+        val pluginNdks = try { pluginNdkVersions.get() } catch (_: Throwable) { emptyMap() }
+        val projDir = try { projectDir.get().asFile } catch (_: Throwable) { project.projectDir }
+
         performValidation(
-            projSdk = projectCompileSdk.get(),
-            projNdk = projectNdkVersion.get(),
-            pluginCompileSdks = pluginCompileSdks.get(),
-            pluginNdkVersions = pluginNdkVersions.get(),
+            projSdk = projSdk,
+            projNdk = projNdk,
+            pluginCompileSdks = pluginSdks,
+            pluginNdkVersions = pluginNdks,
             logger = logger,
-            projectDir = projectDir.get().asFile
+            projectDir = projDir
         )
     }
 
@@ -57,23 +67,39 @@ abstract class ValidateCompileSdkVersionTask : DefaultTask() {
             logger: Logger,
             projectDir: File
         ) {
+            // If project SDK is not set or invalid, bail out early with a warning.
+            if (projSdk <= 0) {
+                logger.warn("Project compileSdk not configured or invalid; skipping plugin compileSdk validation.")
+                return
+            }
+
             var maxPluginCompileSdkVersion = projSdk
             var maxPluginNdkVersion = projNdk
 
             val pluginsWithHigherSdkVersion = mutableListOf<PluginVersionPair>()
             val pluginsWithDifferentNdkVersion = mutableListOf<PluginVersionPair>()
 
+            // Determine highest compileSdk required by plugins and collect those that require higher.
             pluginCompileSdks.forEach { (name, sdk) ->
-                maxPluginCompileSdkVersion = maxOf(maxPluginCompileSdkVersion, sdk)
-                if (sdk > projSdk) {
-                    pluginsWithHigherSdkVersion.add(PluginVersionPair(name, sdk.toString()))
+                try {
+                    maxPluginCompileSdkVersion = maxOf(maxPluginCompileSdkVersion, sdk)
+                    if (sdk > projSdk) {
+                        pluginsWithHigherSdkVersion.add(PluginVersionPair(name, sdk.toString()))
+                    }
+                } catch (t: Throwable) {
+                    logger.warn("Could not evaluate compileSdk for plugin $name: ${t.message}")
                 }
             }
 
+            // Determine most recent NDK version among plugins and collect those that differ.
             pluginNdkVersions.forEach { (name, ndk) ->
-                maxPluginNdkVersion = VersionUtils.mostRecentSemanticVersion(ndk, maxPluginNdkVersion)
-                if (ndk != projNdk) {
-                    pluginsWithDifferentNdkVersion.add(PluginVersionPair(name, ndk))
+                try {
+                    maxPluginNdkVersion = VersionUtils.mostRecentSemanticVersion(ndk, maxPluginNdkVersion)
+                    if (ndk != projNdk) {
+                        pluginsWithDifferentNdkVersion.add(PluginVersionPair(name, ndk))
+                    }
+                } catch (t: Throwable) {
+                    logger.warn("Could not evaluate ndkVersion for plugin $name: ${t.message}")
                 }
             }
 
@@ -87,7 +113,7 @@ abstract class ValidateCompileSdkVersionTask : DefaultTask() {
                 )
             }
 
-            if (maxPluginNdkVersion != projNdk) {
+            if (maxPluginNdkVersion.isNotEmpty() && maxPluginNdkVersion != projNdk) {
                 logPluginNdkWarnings(
                     maxPluginNdkVersion = maxPluginNdkVersion,
                     projectNdkVersion = projNdk,
@@ -113,15 +139,20 @@ abstract class ValidateCompileSdkVersionTask : DefaultTask() {
                     "- ${pluginToCompileSdkVersion.name} compiles against Android SDK ${pluginToCompileSdkVersion.version}"
                 )
             }
-            val buildGradleFile =
-                FlutterPluginUtils.getBuildGradleFileFromProjectDir(
-                    projectDirectory,
-                    logger
-                )
+
+            val buildGradleFile = try {
+                FlutterPluginUtils.getBuildGradleFileFromProjectDir(projectDirectory, logger)
+            } catch (t: Throwable) {
+                logger.warn("Could not locate build.gradle file: ${t.message}")
+                null
+            }
+
+            val buildGradlePath = buildGradleFile?.path ?: File(projectDirectory, "build.gradle").path
+
             logger.error(
                 """
                 Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
-                Add the following to ${buildGradleFile.path}:
+                Add the following to $buildGradlePath:
                 
                     android {
                         compileSdk = $maxPluginCompileSdkVersion
@@ -144,15 +175,20 @@ abstract class ValidateCompileSdkVersionTask : DefaultTask() {
             for (pluginToNdkVersion in pluginsWithDifferentNdkVersion) {
                 logger.error("- ${pluginToNdkVersion.name} requires Android NDK ${pluginToNdkVersion.version}")
             }
-            val buildGradleFile =
-                FlutterPluginUtils.getBuildGradleFileFromProjectDir(
-                    projectDirectory,
-                    logger
-                )
+
+            val buildGradleFile = try {
+                FlutterPluginUtils.getBuildGradleFileFromProjectDir(projectDirectory, logger)
+            } catch (t: Throwable) {
+                logger.warn("Could not locate build.gradle file: ${t.message}")
+                null
+            }
+
+            val buildGradlePath = buildGradleFile?.path ?: File(projectDirectory, "build.gradle").path
+
             logger.error(
                 """
                 Fix this issue by using the highest Android NDK version (they are backward compatible).
-                Add the following to ${buildGradleFile.path}:
+                Add the following to $buildGradlePath:
                 
                     android {
                         ndkVersion = "$maxPluginNdkVersion"

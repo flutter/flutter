@@ -63,8 +63,9 @@ class FlutterPlugin : Plugin<Project> {
     // Configure repositories in a safe, AGP-compatible way if needed
     project.repositories.apply {
       try {
+        // Use Kotlin-DSL safe form: set repository URL via url = project.uri(...)
         maven {
-          setUrl("https://storage.googleapis.com/download.flutter.io")
+          url = project.uri("https://storage.googleapis.com/download.flutter.io")
         }
       } catch (_: Throwable) {
         // Ignore repository configuration errors; keep plugin resilient
