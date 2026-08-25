@@ -1012,7 +1012,7 @@ void main() {
         expect(
           tester.getSemantics(previousMonthIcon),
           matchesSemantics(
-            tooltip: 'Previous month',
+            label: 'Previous month',
             isButton: true,
             hasTapAction: true,
             hasFocusAction: true,
@@ -1024,7 +1024,7 @@ void main() {
         expect(
           tester.getSemantics(nextMonthIcon),
           matchesSemantics(
-            tooltip: 'Next month',
+            label: 'Next month',
             isButton: true,
             hasTapAction: true,
             hasFocusAction: true,
@@ -1448,6 +1448,44 @@ void main() {
             isButton: true,
           ),
         );
+        semantics.dispose();
+      });
+
+      testWidgets('Enabled next and previous month buttons have meaningful labels', (
+        WidgetTester tester,
+      ) async {
+        final SemanticsHandle semantics = tester.ensureSemantics();
+
+        await tester.pumpWidget(
+          calendarDatePicker(initialDate: DateTime(2016, DateTime.january, 15)),
+        );
+
+        // Prev/Next month buttons.
+        expect(
+          tester.getSemantics(previousMonthIcon),
+          matchesSemantics(
+            label: 'Previous month',
+            isButton: true,
+            hasTapAction: true,
+            hasFocusAction: true,
+            isEnabled: true,
+            hasEnabledState: true,
+            isFocusable: true,
+          ),
+        );
+        expect(
+          tester.getSemantics(nextMonthIcon),
+          matchesSemantics(
+            label: 'Next month',
+            isButton: true,
+            hasTapAction: true,
+            hasFocusAction: true,
+            isEnabled: true,
+            hasEnabledState: true,
+            isFocusable: true,
+          ),
+        );
+
         semantics.dispose();
       });
 

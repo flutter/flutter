@@ -25,6 +25,7 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'material_state.dart';
 import 'theme.dart';
+import 'tooltip_theme.dart';
 
 const Duration _monthScrollDuration = Duration(milliseconds: 200);
 
@@ -906,32 +907,35 @@ class _MonthPickerState extends State<_MonthPicker> {
             height: _subHeaderHeight,
             child: Padding(
               padding: const EdgeInsetsDirectional.only(start: 16, end: 4),
-              child: Row(
-                children: <Widget>[
-                  const Spacer(),
-                  IconButton(
-                    icon: Icon(
-                      Icons.chevron_left,
-                      semanticLabel: _isDisplayingFirstMonth
-                          ? _localizations.previousMonthTooltip
-                          : null,
+              // The tooltips of the month navigation buttons are excluded from
+              // semantics because the buttons already expose the same message as
+              // their semantics label. Screen readers that fold the tooltip into
+              // the accessible name would otherwise announce it twice.
+              child: TooltipTheme(
+                data: const TooltipThemeData(excludeFromSemantics: true),
+                child: Row(
+                  children: <Widget>[
+                    const Spacer(),
+                    IconButton(
+                      icon: Icon(
+                        Icons.chevron_left,
+                        semanticLabel: _localizations.previousMonthTooltip,
+                      ),
+                      color: subHeaderForegroundColor,
+                      tooltip: _isDisplayingFirstMonth ? null : _localizations.previousMonthTooltip,
+                      onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
                     ),
-                    color: subHeaderForegroundColor,
-                    tooltip: _isDisplayingFirstMonth ? null : _localizations.previousMonthTooltip,
-                    onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.chevron_right,
-                      semanticLabel: _isDisplayingLastMonth
-                          ? _localizations.nextMonthTooltip
-                          : null,
+                    IconButton(
+                      icon: Icon(
+                        Icons.chevron_right,
+                        semanticLabel: _localizations.nextMonthTooltip,
+                      ),
+                      color: subHeaderForegroundColor,
+                      tooltip: _isDisplayingLastMonth ? null : _localizations.nextMonthTooltip,
+                      onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
                     ),
-                    color: subHeaderForegroundColor,
-                    tooltip: _isDisplayingLastMonth ? null : _localizations.nextMonthTooltip,
-                    onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

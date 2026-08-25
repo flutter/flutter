@@ -38,6 +38,7 @@ import 'text_button.dart';
 import 'text_field.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+import 'tooltip_theme.dart';
 
 // The M3 sizes are coming from the tokens, but are hand coded,
 // as the current token DB does not contain landscape versions.
@@ -690,13 +691,23 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     switch (_entryMode.value) {
       case DatePickerEntryMode.calendar:
         picker = calendarDatePicker();
-        entryModeButton = IconButton(
-          icon:
-              widget.switchToInputEntryModeIcon ??
-              Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit),
-          color: headerForegroundColor,
-          tooltip: localizations.inputDateModeButtonLabel,
-          onPressed: _handleEntryModeToggle,
+        entryModeButton = TooltipTheme(
+          // The tooltip is excluded from the semantics tree because the button
+          // already exposes the same message as its semantics label. Screen
+          // readers that fold the tooltip into the accessible name would
+          // otherwise announce the message twice.
+          data: const TooltipThemeData(excludeFromSemantics: true),
+          child: IconButton(
+            icon: Semantics(
+              label: localizations.inputDateModeButtonLabel,
+              child:
+                  widget.switchToInputEntryModeIcon ??
+                  Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit),
+            ),
+            color: headerForegroundColor,
+            tooltip: localizations.inputDateModeButtonLabel,
+            onPressed: _handleEntryModeToggle,
+          ),
         );
 
       case DatePickerEntryMode.calendarOnly:
@@ -705,11 +716,17 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 
       case DatePickerEntryMode.input:
         picker = inputDatePicker();
-        entryModeButton = IconButton(
-          icon: widget.switchToCalendarEntryModeIcon ?? const Icon(Icons.calendar_today),
-          color: headerForegroundColor,
-          tooltip: localizations.calendarModeButtonLabel,
-          onPressed: _handleEntryModeToggle,
+        entryModeButton = TooltipTheme(
+          data: const TooltipThemeData(excludeFromSemantics: true),
+          child: IconButton(
+            icon: Semantics(
+              label: localizations.calendarModeButtonLabel,
+              child: widget.switchToCalendarEntryModeIcon ?? const Icon(Icons.calendar_today),
+            ),
+            color: headerForegroundColor,
+            tooltip: localizations.calendarModeButtonLabel,
+            onPressed: _handleEntryModeToggle,
+          ),
         );
 
       case DatePickerEntryMode.inputOnly:
@@ -1641,13 +1658,19 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           onConfirm: _hasSelectedDateRange ? _handleOk : null,
           onCancel: _handleCancel,
           entryModeButton: showEntryModeButton
-              ? IconButton(
-                  icon:
-                      widget.switchToInputEntryModeIcon ??
-                      Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit),
-                  padding: EdgeInsets.zero,
-                  tooltip: localizations.inputDateModeButtonLabel,
-                  onPressed: _handleEntryModeToggle,
+              ? TooltipTheme(
+                  data: const TooltipThemeData(excludeFromSemantics: true),
+                  child: IconButton(
+                    icon: Semantics(
+                      label: localizations.inputDateModeButtonLabel,
+                      child:
+                          widget.switchToInputEntryModeIcon ??
+                          Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit),
+                    ),
+                    padding: EdgeInsets.zero,
+                    tooltip: localizations.inputDateModeButtonLabel,
+                    onPressed: _handleEntryModeToggle,
+                  ),
                 )
               : null,
           confirmText:
@@ -1715,11 +1738,18 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> with Rest
           onConfirm: _handleOk,
           onCancel: _handleCancel,
           entryModeButton: showEntryModeButton
-              ? IconButton(
-                  icon: widget.switchToCalendarEntryModeIcon ?? const Icon(Icons.calendar_today),
-                  padding: EdgeInsets.zero,
-                  tooltip: localizations.calendarModeButtonLabel,
-                  onPressed: _handleEntryModeToggle,
+              ? TooltipTheme(
+                  data: const TooltipThemeData(excludeFromSemantics: true),
+                  child: IconButton(
+                    icon: Semantics(
+                      label: localizations.calendarModeButtonLabel,
+                      child:
+                          widget.switchToCalendarEntryModeIcon ?? const Icon(Icons.calendar_today),
+                    ),
+                    padding: EdgeInsets.zero,
+                    tooltip: localizations.calendarModeButtonLabel,
+                    onPressed: _handleEntryModeToggle,
+                  ),
                 )
               : null,
           confirmText: widget.confirmText ?? localizations.okButtonLabel,
