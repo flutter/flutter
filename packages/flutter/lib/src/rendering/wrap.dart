@@ -620,7 +620,10 @@ class RenderWrap extends RenderBox
     }
     final BoxConstraints childConstraints = switch (direction) {
       Axis.horizontal => BoxConstraints(maxWidth: constraints.maxWidth),
-      Axis.vertical => BoxConstraints(maxHeight: constraints.maxHeight),
+      Axis.vertical => BoxConstraints(
+        maxWidth: constraints.maxWidth,
+        maxHeight: constraints.maxHeight,
+      ),
     };
 
     final (_AxisSize childrenAxisSize, List<_RunMetrics> runMetrics) = _computeRuns(
@@ -659,7 +662,10 @@ class RenderWrap extends RenderBox
   ]) {
     final (BoxConstraints childConstraints, double mainAxisLimit) = switch (direction) {
       Axis.horizontal => (BoxConstraints(maxWidth: constraints.maxWidth), constraints.maxWidth),
-      Axis.vertical => (BoxConstraints(maxHeight: constraints.maxHeight), constraints.maxHeight),
+      Axis.vertical => (
+        BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: constraints.maxHeight),
+        constraints.maxHeight,
+      ),
     };
 
     var mainAxisExtent = 0.0;
@@ -738,7 +744,15 @@ class RenderWrap extends RenderBox
     assert(firstChild != null);
     final (BoxConstraints childConstraints, double mainAxisLimit) = switch (direction) {
       Axis.horizontal => (BoxConstraints(maxWidth: constraints.maxWidth), constraints.maxWidth),
-      Axis.vertical => (BoxConstraints(maxHeight: constraints.maxHeight), constraints.maxHeight),
+      // Unlike the horizontal case, where the main axis limit already bounds
+      // the width of the children, a vertical Wrap must explicitly forward the
+      // incoming width constraint. Otherwise the children are laid out with an
+      // unbounded width, which many widgets (for instance TextField) do not
+      // support.
+      Axis.vertical => (
+        BoxConstraints(maxWidth: constraints.maxWidth, maxHeight: constraints.maxHeight),
+        constraints.maxHeight,
+      ),
     };
 
     final (bool flipMainAxis, _) = _areAxesFlipped;
