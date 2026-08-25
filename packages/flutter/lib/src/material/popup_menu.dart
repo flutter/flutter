@@ -949,6 +949,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     super.settings,
     super.requestFocus,
     this.popUpAnimationStyle,
+    this.disableAnimations = false,
+    this.reduceMotion = false,
   }) : assert(
          (position != null) != (positionBuilder != null),
          'Either position or positionBuilder must be provided.',
@@ -976,6 +978,14 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final Clip clipBehavior;
   final AnimationStyle? popUpAnimationStyle;
 
+  // Whether MediaQueryData.disableAnimations/reduceMotion (or, absent an
+  // override, the platform's AccessibilityFeatures) request that the menu's
+  // open/close animation be skipped or shortened. Resolved once in [showMenu]
+  // from the ambient MediaQuery so it stays consistent for the lifetime of
+  // this route.
+  final bool disableAnimations;
+  final bool reduceMotion;
+
   CurvedAnimation? _animation;
 
   @override
@@ -1000,7 +1010,21 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  Duration get transitionDuration => popUpAnimationStyle?.duration ?? _kMenuDuration;
+  Duration get transitionDuration {
+    // Disabling animations entirely means the menu should pop open and
+    // closed instantly, so a zero duration is used instead of skipping the
+    // AnimationController's forward()/reverse() calls: this keeps the
+    // controller-driven status changes (and therefore route finalization)
+    // intact while making the transition imperceptible.
+    if (disableAnimations) {
+      return Duration.zero;
+    }
+    final Duration duration = popUpAnimationStyle?.duration ?? _kMenuDuration;
+    if (reduceMotion) {
+      return duration ~/ 3;
+    }
+    return duration;
+  }
 
   @override
   bool get barrierDismissible => true;
@@ -1202,6 +1226,20 @@ Future<T?> showMenu<T>({
 
   final menuItemKeys = List<GlobalKey>.generate(items.length, (int index) => GlobalKey());
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
+
+  // These settings are read from the ambient MediaQuery (falling back to the
+  // platform values when there is no MediaQuery) so that they can be
+  // overridden for a subtree, like every other accessibility feature exposed
+  // by MediaQueryData. They are resolved here, from the calling context,
+  // because the route itself may need them before its own subtree (and
+  // therefore its own MediaQuery) has been built.
+  final AccessibilityFeatures accessibilityFeatures =
+      View.of(context).platformDispatcher.accessibilityFeatures;
+  final bool disableAnimations =
+      MediaQuery.maybeDisableAnimationsOf(context) ?? accessibilityFeatures.disableAnimations;
+  final bool reduceMotion =
+      MediaQuery.maybeReduceMotionOf(context) ?? accessibilityFeatures.reduceMotion;
+
   return navigator.push(
     _PopupMenuRoute<T>(
       position: position,
@@ -1223,6 +1261,8 @@ Future<T?> showMenu<T>({
       settings: routeSettings,
       popUpAnimationStyle: popUpAnimationStyle,
       requestFocus: requestFocus,
+      disableAnimations: disableAnimations,
+      reduceMotion: reduceMotion,
     ),
   );
 }

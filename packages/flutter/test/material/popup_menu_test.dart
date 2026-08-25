@@ -4391,6 +4391,79 @@ void main() {
     );
   });
 
+
+  testWidgets('showMenu skips its open animation when MediaQueryData.disableAnimations is true', (
+    WidgetTester tester,
+  ) async {
+    List<PopupMenuItem<int>> menuItems() => const <PopupMenuItem<int>>[
+      PopupMenuItem<int>(value: 1, child: Text('One')),
+      PopupMenuItem<int>(value: 2, child: Text('Two')),
+      PopupMenuItem<int>(value: 3, child: Text('Three')),
+    ];
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: MaterialApp(
+          home: Material(
+            child: Center(child: ElevatedButton(onPressed: null, child: Text('Go'))),
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.text('Go'));
+    showMenu<int>(context: context, position: RelativeRect.fill, items: menuItems());
+
+    // Even with only a single, near-instant pump (no time advanced beyond a
+    // single millisecond), the menu should already be fully open because its
+    // open animation duration is reduced to zero when
+    // MediaQueryData.disableAnimations is true.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    expect(
+      tester.getSize(find.byType(Material).last),
+      within(distance: 0.1, from: const Size(112.0, 160.0)),
+    );
+  });
+
+  testWidgets('showMenu shortens its open animation when MediaQueryData.reduceMotion is true', (
+    WidgetTester tester,
+  ) async {
+    List<PopupMenuItem<int>> menuItems() => const <PopupMenuItem<int>>[
+      PopupMenuItem<int>(value: 1, child: Text('One')),
+      PopupMenuItem<int>(value: 2, child: Text('Two')),
+      PopupMenuItem<int>(value: 3, child: Text('Three')),
+    ];
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(reduceMotion: true),
+        child: MaterialApp(
+          home: Material(
+            child: Center(child: ElevatedButton(onPressed: null, child: Text('Go'))),
+          ),
+        ),
+      ),
+    );
+
+    final BuildContext context = tester.element(find.text('Go'));
+    showMenu<int>(context: context, position: RelativeRect.fill, items: menuItems());
+
+    await tester.pump();
+    // The default menu open animation takes 300ms. With reduceMotion the
+    // duration is shortened to a third of that (100ms), so by 100ms the menu
+    // should already be fully open, whereas without the fix it would still
+    // be only a third of the way through its default 300ms animation.
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(
+      tester.getSize(find.byType(Material).last),
+      within(distance: 0.1, from: const Size(112.0, 160.0)),
+    );
+  });
+
   testWidgets('PopupMenuButton scrolls initial value/selected value to visible', (
     WidgetTester tester,
   ) async {
