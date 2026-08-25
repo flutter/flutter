@@ -45,41 +45,6 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {}
 
-// Checks if the current OpenGL driver is known to have a broken or unsupported
-// glBlitFramebuffer implementation.
-static gboolean driver_supports_blit() {
-  const gchar* vendor = reinterpret_cast<const gchar*>(glGetString(GL_VENDOR));
-  if (vendor == nullptr) {
-    return TRUE;
-  }
-
-  // Note: List of unsupported vendors due to issue
-  // https://github.com/flutter/flutter/issues/152099
-  const char* unsupported_vendors_exact[] = {"Vivante Corporation", "ARM"};
-  const char* unsupported_vendors_fuzzy[] = {"NVIDIA"};
-
-  for (const char* unsupported : unsupported_vendors_fuzzy) {
-    if (strstr(vendor, unsupported) != nullptr) {
-      return FALSE;
-    }
-  }
-  for (const char* unsupported : unsupported_vendors_exact) {
-    if (strcmp(vendor, unsupported) == 0) {
-      return FALSE;
-    }
-  }
-  return TRUE;
-}
-
-// Checks if glBlitFramebuffer can be used. It is a GLES3 / OpenGL 3.0 function
-// and may not be present on older drivers, so treat it as optional and fall
-// back to compositing with the shader when it is unavailable.
-static gboolean can_blit_framebuffer() {
-  return driver_supports_blit() &&
-         (epoxy_gl_version() >= 30 ||
-          epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
-}
-
 FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
       g_object_new(fl_compositor_opengl_get_type(), nullptr));
@@ -89,7 +54,7 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager) {
 
   // Determine once whether glBlitFramebuffer is available on this driver.
   fl_opengl_manager_make_current(opengl_manager);
-  self->can_blit = can_blit_framebuffer();
+  self->can_blit = fl_opengl_manager_can_blit(opengl_manager);
 
   return self;
 }
