@@ -400,8 +400,10 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
 
 /// A descriptor for enum-based options that automatically validates allowed values
 /// and parses CLI string arguments directly into typed enum values [T].
-class EnumOptionDescriptor<T extends Enum> extends OptionDescriptor<T?> {
-  const EnumOptionDescriptor({
+/// A private base class providing shared enum parsing and registration infrastructure
+/// for [EnumOptionDescriptor] and [DefaultedEnumOptionDescriptor].
+abstract class _EnumOptionDescriptorBase<T extends Enum, R> extends OptionDescriptor<R> {
+  const _EnumOptionDescriptorBase({
     required super.name,
     required super.help,
     required this.values,
@@ -459,7 +461,7 @@ class EnumOptionDescriptor<T extends Enum> extends OptionDescriptor<T?> {
       _throwConflictError(name, existing);
     }
 
-    final String? defaultString = defaultsTo != null ? _formatName(defaultsTo!) : null;
+    final String? defaultString = defaultsTo != null ? _formatName(defaultsTo! as T) : null;
 
     Map<String, String>? effectiveAllowedHelp = allowedHelp;
     if (effectiveAllowedHelp == null && values.isNotEmpty && values.first is CliEnum) {
@@ -481,6 +483,26 @@ class EnumOptionDescriptor<T extends Enum> extends OptionDescriptor<T?> {
     );
     registry?[name] = this;
   }
+}
+
+/// A descriptor for enum-based options that automatically validates allowed values
+/// and parses CLI string arguments directly into typed enum values [T].
+class EnumOptionDescriptor<T extends Enum> extends _EnumOptionDescriptorBase<T, T?> {
+  const EnumOptionDescriptor({
+    required super.name,
+    required super.help,
+    required super.values,
+    super.nameMapper,
+    super.valueParser,
+    super.abbr,
+    super.valueHelp,
+    super.defaultsTo,
+    super.aliases,
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
 
   @override
   T? getValue(ArgResults? results, {ArgResults? globalResults}) {
@@ -504,87 +526,22 @@ class EnumOptionDescriptor<T extends Enum> extends OptionDescriptor<T?> {
 }
 
 /// A descriptor for enum-based options that have a non-null default value.
-class DefaultedEnumOptionDescriptor<T extends Enum> extends OptionDescriptor<T> {
+class DefaultedEnumOptionDescriptor<T extends Enum> extends _EnumOptionDescriptorBase<T, T> {
   const DefaultedEnumOptionDescriptor({
     required super.name,
     required super.help,
-    required this.values,
+    required super.values,
     required T super.defaultsTo,
-    this.nameMapper,
-    this.valueParser,
+    super.nameMapper,
+    super.valueParser,
     super.abbr,
     super.valueHelp,
-    this.aliases = const <String>[],
+    super.aliases,
     super.allowedHelp,
     super.scope,
     super.hide,
     super.verboseOnly,
   });
-
-  /// The list of enum values allowed for this option.
-  final List<T> values;
-
-  /// Optional function to map an enum value to its CLI string representation.
-  /// Defaults to `value.cliName` if [T] is a [CliEnum], otherwise `value.name`.
-  final String Function(T value)? nameMapper;
-
-  /// Optional function to parse a string into an enum value.
-  /// Defaults to matching against [nameMapper], `cliName`, or `value.name`.
-  final T? Function(String name)? valueParser;
-
-  /// Alternative names for this option.
-  final List<String> aliases;
-
-  String _formatName(T value) {
-    if (nameMapper != null) {
-      return nameMapper!(value);
-    }
-    if (value is CliEnum) {
-      return (value as CliEnum).cliName;
-    }
-    return value.name;
-  }
-
-  @override
-  List<String> get allowed => values.map(_formatName).toList();
-
-  @override
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  }) {
-    if (parser.options.containsKey(name)) {
-      final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && identical(existing, this)) {
-        return;
-      }
-      _throwConflictError(name, existing);
-    }
-
-    final String defaultString = _formatName(defaultsTo!);
-
-    Map<String, String>? effectiveAllowedHelp = allowedHelp;
-    if (effectiveAllowedHelp == null && values.isNotEmpty && values.first is CliEnum) {
-      effectiveAllowedHelp = <String, String>{
-        for (final T val in values) _formatName(val): (val as CliEnum).helpText,
-      };
-    }
-
-    parser.addOption(
-      name,
-      abbr: abbr,
-      aliases: aliases,
-      help: help,
-      valueHelp: valueHelp,
-      defaultsTo: defaultString,
-      allowed: allowed,
-      allowedHelp: effectiveAllowedHelp,
-      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
-    );
-    registry?[name] = this;
-  }
 
   @override
   T getValue(ArgResults? results, {ArgResults? globalResults}) {
