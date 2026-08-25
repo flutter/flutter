@@ -123,6 +123,7 @@ Future<void> buildMacOS({
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
       config: globals.config,
+      analytics: globals.analytics,
     ),
     SwiftPackageManagerGitignoreMigration(flutterProject, globals.logger),
     MetalAPIValidationMigrator.macos(flutterProject.macos, globals.logger),

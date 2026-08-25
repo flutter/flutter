@@ -13,12 +13,13 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/swift_package_manager_integration_migration.dart';
 import 'package:flutter_tools/src/plugins.dart';
-
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 const pluginName = 'my_plugin';
 const supportedPlatforms = <FlutterDarwinPlatform>[
@@ -48,6 +49,7 @@ void main() {
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
         config: FakeConfig(),
+        analytics: const NoOpAnalytics(),
       );
       await projectMigration.migrate();
       expect(
@@ -74,6 +76,7 @@ void main() {
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
         config: FakeConfig(),
+        analytics: const NoOpAnalytics(),
       );
       await projectMigration.migrate();
       expect(
@@ -87,6 +90,10 @@ void main() {
     testWithoutContext('fails if Xcode project not found', () async {
       final memoryFileSystem = MemoryFileSystem();
       final testLogger = BufferLogger.test();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: memoryFileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
       final project = FakeXcodeProject(
         platform: FlutterDarwinPlatform.ios.name,
         fileSystem: memoryFileSystem,
@@ -104,10 +111,21 @@ void main() {
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
         config: FakeConfig(),
+        analytics: fakeAnalytics,
       );
       await expectLater(
         () => projectMigration.migrate(),
         throwsToolExit(message: 'Xcode project not found.'),
+      );
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.appleUsageEvent(
+            workflow: 'swiftpm-migration-failure',
+            parameter: 'full',
+            result: 'Exception: Xcode project not found.',
+          ),
+        ),
       );
       expect(testLogger.traceText, isEmpty);
       expect(testLogger.statusText, isEmpty);
@@ -117,6 +135,10 @@ void main() {
       testWithoutContext('fails if Xcode project info not found', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
+        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: memoryFileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
         final project = FakeXcodeProject(
           platform: FlutterDarwinPlatform.ios.name,
           fileSystem: memoryFileSystem,
@@ -134,10 +156,21 @@ void main() {
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(),
           config: FakeConfig(),
+          analytics: fakeAnalytics,
         );
         await expectLater(
           () => projectMigration.migrate(),
           throwsToolExit(message: 'Unable to get Xcode project info.'),
+        );
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.appleUsageEvent(
+              workflow: 'swiftpm-migration-failure',
+              parameter: 'full',
+              result: 'Exception: Unable to get Xcode project info.',
+            ),
+          ),
         );
         expect(testLogger.traceText, isEmpty);
         expect(testLogger.statusText, isEmpty);
@@ -146,6 +179,10 @@ void main() {
       testWithoutContext('fails if scheme not found', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
+        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: memoryFileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
         final project = FakeXcodeProject(
           platform: FlutterDarwinPlatform.ios.name,
           fileSystem: memoryFileSystem,
@@ -163,11 +200,23 @@ void main() {
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(),
           config: FakeConfig(),
+          analytics: fakeAnalytics,
         );
         await expectLater(
           () => projectMigration.migrate(),
           throwsToolExit(
             message: 'You must specify a --flavor option to select one of the available schemes.',
+          ),
+        );
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.appleUsageEvent(
+              workflow: 'swiftpm-migration-failure',
+              parameter: 'full',
+              result:
+                  'Error: You must specify a --flavor option to select one of the available schemes.',
+            ),
           ),
         );
         expect(testLogger.traceText, isEmpty);
@@ -177,6 +226,10 @@ void main() {
       testWithoutContext('fails if scheme file not found', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
+        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: memoryFileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
         final project = FakeXcodeProject(
           platform: FlutterDarwinPlatform.ios.name,
           fileSystem: memoryFileSystem,
@@ -198,10 +251,21 @@ void main() {
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(),
           config: FakeConfig(),
+          analytics: fakeAnalytics,
         );
         await expectLater(
           () => projectMigration.migrate(),
           throwsToolExit(message: 'Unable to get scheme file for Runner.'),
+        );
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.appleUsageEvent(
+              workflow: 'swiftpm-migration-failure',
+              parameter: 'full',
+              result: 'Exception: Unable to get scheme file for Runner.',
+            ),
+          ),
         );
         expect(testLogger.traceText, isEmpty);
         expect(testLogger.statusText, isEmpty);
@@ -233,6 +297,7 @@ void main() {
         fileSystem: memoryFileSystem,
         plistParser: FakePlistParser(),
         config: FakeConfig(),
+        analytics: const NoOpAnalytics(),
       );
       await projectMigration.migrate();
       expect(testLogger.traceText, isEmpty);
@@ -271,6 +336,7 @@ void main() {
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
           config: FakeConfig(),
+          analytics: const NoOpAnalytics(),
         );
         await expectLater(() => projectMigration.migrate(), throwsToolExit());
         expect(testLogger.traceText, contains('Runner.xcscheme already migrated. Skipping...'));
@@ -302,6 +368,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -341,6 +408,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
 
               await expectLater(
@@ -381,6 +449,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
 
               await expectLater(
@@ -421,6 +490,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
 
               await expectLater(
@@ -452,6 +522,7 @@ void main() {
               fileSystem: memoryFileSystem,
               plistParser: FakePlistParser(),
               config: FakeConfig(),
+              analytics: const NoOpAnalytics(),
             );
 
             await expectLater(
@@ -483,6 +554,7 @@ void main() {
               fileSystem: memoryFileSystem,
               plistParser: FakePlistParser(),
               config: FakeConfig(),
+              analytics: const NoOpAnalytics(),
             );
 
             await expectLater(
@@ -520,6 +592,7 @@ void main() {
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
               config: FakeConfig(),
+              analytics: const NoOpAnalytics(),
             );
 
             await projectMigration.migrate();
@@ -557,6 +630,7 @@ void main() {
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
               config: FakeConfig(),
+              analytics: const NoOpAnalytics(),
             );
 
             await projectMigration.migrate();
@@ -594,6 +668,7 @@ void main() {
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
               config: FakeConfig(),
+              analytics: const NoOpAnalytics(),
             );
 
             await projectMigration.migrate();
@@ -632,6 +707,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
 
               await projectMigration.migrate();
@@ -704,6 +780,7 @@ void main() {
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
               config: FakeConfig(),
+              analytics: const NoOpAnalytics(),
             );
 
             await projectMigration.migrate();
@@ -795,6 +872,7 @@ void main() {
           fileSystem: memoryFileSystem,
           plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
           config: FakeConfig(),
+          analytics: const NoOpAnalytics(),
         );
         await projectMigration.migrate();
         expect(testLogger.traceText, isEmpty);
@@ -820,6 +898,7 @@ void main() {
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
             config: FakeConfig(),
+            analytics: const NoOpAnalytics(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -846,6 +925,7 @@ void main() {
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(json: '[]'),
             config: FakeConfig(),
+            analytics: const NoOpAnalytics(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -872,6 +952,7 @@ void main() {
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(json: 'this is not json'),
             config: FakeConfig(),
+            analytics: const NoOpAnalytics(),
           );
           await expectLater(
             () => projectMigration.migrate(),
@@ -901,6 +982,7 @@ void main() {
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
             config: FakeConfig(),
+            analytics: const NoOpAnalytics(),
           );
           expect(
             () => projectMigration.migrate(),
@@ -928,6 +1010,7 @@ void main() {
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
             config: FakeConfig(),
+            analytics: const NoOpAnalytics(),
           );
           expect(
             () => projectMigration.migrate(),
@@ -955,6 +1038,7 @@ void main() {
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
             config: FakeConfig(),
+            analytics: const NoOpAnalytics(),
           );
           expect(
             () => projectMigration.migrate(),
@@ -982,6 +1066,7 @@ void main() {
             fileSystem: memoryFileSystem,
             plistParser: FakePlistParser(),
             config: FakeConfig(),
+            analytics: const NoOpAnalytics(),
           );
           expect(
             () => projectMigration.migrate(),
@@ -1024,6 +1109,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1063,6 +1149,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1099,6 +1186,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1138,6 +1226,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1178,6 +1267,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(<String>[])),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1222,6 +1312,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1268,6 +1359,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1307,6 +1399,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1347,6 +1440,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               expect(
                 () => projectMigration.migrate(),
@@ -1391,6 +1485,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1462,6 +1557,7 @@ void main() {
                     fileSystem: memoryFileSystem,
                     plistParser: plistParser,
                     config: FakeConfig(),
+                    analytics: const NoOpAnalytics(),
                   );
                   await projectMigration.migrate();
                   expect(testLogger.errorText, isEmpty);
@@ -1515,6 +1611,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1558,6 +1655,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -1607,6 +1705,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -1647,6 +1746,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1695,6 +1795,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1743,6 +1844,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1798,6 +1900,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -1845,6 +1948,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1881,6 +1985,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -1921,6 +2026,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -1967,6 +2073,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2020,6 +2127,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2069,6 +2177,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2144,6 +2253,7 @@ void main() {
                     fileSystem: memoryFileSystem,
                     plistParser: plistParser,
                     config: FakeConfig(),
+                    analytics: const NoOpAnalytics(),
                   );
                   await projectMigration.migrate();
                   expect(testLogger.errorText, isEmpty);
@@ -2195,6 +2305,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2233,6 +2344,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2273,6 +2385,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2319,6 +2432,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2375,6 +2489,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -2427,6 +2542,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -2485,6 +2601,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -2531,6 +2648,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2573,6 +2691,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2621,6 +2740,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await expectLater(
                   () => projectMigration.migrate(),
@@ -2658,6 +2778,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2712,6 +2833,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -2762,6 +2884,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -2820,6 +2943,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -2861,6 +2985,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -2904,6 +3029,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -2954,6 +3080,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -3007,6 +3134,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -3049,6 +3177,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: FakePlistParser(json: _plutilOutput(settingsAsJsonBeforeMigration)),
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await expectLater(
                 () => projectMigration.migrate(),
@@ -3089,6 +3218,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -3139,6 +3269,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -3192,6 +3323,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(testLogger.errorText, isEmpty);
@@ -3236,6 +3368,7 @@ void main() {
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
               config: FakeConfig(),
+              analytics: const NoOpAnalytics(),
             );
             await expectLater(
               () => projectMigration.migrate(),
@@ -3312,6 +3445,7 @@ void main() {
                 fileSystem: memoryFileSystem,
                 plistParser: plistParser,
                 config: FakeConfig(),
+                analytics: const NoOpAnalytics(),
               );
               await projectMigration.migrate();
               expect(
@@ -3380,6 +3514,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await projectMigration.migrate();
                 expect(
@@ -3445,6 +3580,7 @@ void main() {
                   fileSystem: memoryFileSystem,
                   plistParser: plistParser,
                   config: FakeConfig(),
+                  analytics: const NoOpAnalytics(),
                 );
                 await projectMigration.migrate();
                 expect(testLogger.errorText, isEmpty);
@@ -3499,6 +3635,7 @@ void main() {
           fileSystem: memoryFileSystem,
           plistParser: plistParser,
           config: FakeConfig(),
+          analytics: const NoOpAnalytics(),
         );
         await expectLater(
           () => projectMigration.migrate(),
@@ -4675,6 +4812,7 @@ class FakeSwiftPackageManagerIntegrationMigration extends SwiftPackageManagerInt
     required super.plistParser,
     this.validateBackup = false,
     required super.config,
+    super.analytics = const NoOpAnalytics(),
   }) : _xcodeProject = project;
 
   final XcodeBasedProject _xcodeProject;

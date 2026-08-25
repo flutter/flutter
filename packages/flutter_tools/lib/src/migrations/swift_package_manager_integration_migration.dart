@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 
 import '../base/common.dart';
@@ -31,6 +32,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     required FileSystem fileSystem,
     required PlistParser plistParser,
     required Config config,
+    required Analytics analytics,
   }) : _xcodeProject = project,
        _platform = platform,
        _buildInfo = buildInfo,
@@ -39,6 +41,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
        _fileSystem = fileSystem,
        _plistParser = plistParser,
        _config = config,
+       _analytics = analytics,
        super(logger);
 
   final XcodeBasedProject _xcodeProject;
@@ -49,6 +52,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   final File _xcodeProjectInfoFile;
   final PlistParser _plistParser;
   final Config _config;
+  final Analytics _analytics;
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
   static const _flutterPluginsSwiftPackageBuildFileIdentifier = '78A318202AECB46A00862997';
@@ -237,6 +241,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
       if (optionalOnly) {
+        _analytics.send(Event.appleUsageEvent(workflow: 'swiftpm-migration-failure', parameter: 'optional', result: e.toString()));
         // This part of the migration is optional. We'll log this for debugging sake but don't
         // really expect the user to see it.
         logger.printTrace(
@@ -245,10 +250,11 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           'See instructions to add manually: https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-plugin-authors',
         );
       } else {
+        _analytics.send(Event.appleUsageEvent(workflow: 'swiftpm-migration-failure', parameter: 'full', result: e.toString()));
         throwToolExit(
           'An error occurred when adding Swift Package Manager integration:\n'
           '  $e\n\n'
-          'Swift Package Manager is currently an experimental feature, please file a bug at\n'
+          'To help the Flutter team improve this process, please file a bug at\n'
           '  https://github.com/flutter/flutter/issues/new?template=01_activation.yml \n'
           'Consider including a copy of the following files in your bug report:\n'
           '  ${_platform.name}/Runner.xcodeproj/project.pbxproj\n'

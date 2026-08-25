@@ -540,6 +540,13 @@ class CocoaPods {
               ),
         );
         if (missingPluginSupportsSwiftPM) {
+          _analytics.send(
+            Event.appleUsageEvent(
+              workflow: 'cocoapod-swiftpm-interdependency-failure',
+              parameter: requiringPlugin,
+              result: missingPlugin,
+            ),
+          );
           return 'Error: A dependency conflict has occurred because $requiringPlugin uses CocoaPods while '
               '$missingPlugin uses Swift Package Manager. Please contact the $requiringPlugin '
               'maintainers to request Swift Package Manager adoption.\n\n'
