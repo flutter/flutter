@@ -550,9 +550,8 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
     }
 
     final ButtonStyle segmentStyle = segmentStyleFor(widget.style);
-    final ButtonStyle segmentThemeStyle = segmentStyleFor(
-      theme.style,
-    ).merge(segmentStyleFor(defaults.style));
+    final ButtonStyle segmentThemeStyle = segmentStyleFor(theme.style)
+        .merge(segmentStyleFor(defaults.style));
     final Widget? selectedIcon = widget.showSelectedIcon
         ? widget.selectedIcon ?? theme.selectedIcon ?? defaults.selectedIcon
         : null;
@@ -719,7 +718,6 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
 
 class _SegmentedButtonRenderWidget<T> extends MultiChildRenderObjectWidget {
   const _SegmentedButtonRenderWidget({
-    super.key,
     required this.segments,
     required this.enabledBorder,
     required this.disabledBorder,

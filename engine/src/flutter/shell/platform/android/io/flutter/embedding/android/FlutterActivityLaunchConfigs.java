@@ -4,7 +4,15 @@
 
 package io.flutter.embedding.android;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import io.flutter.embedding.engine.loader.FlutterLoader;
+import java.util.List;
 
 /** Collection of Flutter launch configuration options. */
 // This class is public so that Flutter app developers can reference
@@ -60,6 +68,58 @@ public class FlutterActivityLaunchConfigs {
       // Return true if the deep linking flag is not found in metadata.
       return true;
     }
+  }
+
+  /**
+   * Extracts the initial route from the application's manifest shell arguments, if present.
+   *
+   * @param context The application context.
+   * @return The initial route if defined in the manifest shell arguments, otherwise null.
+   */
+  @Nullable
+  public static String getInitialRouteFromManifest(@NonNull Context context) {
+    try {
+      ApplicationInfo appInfo =
+          context
+              .getPackageManager()
+              .getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+      List<String> shellArgs = FlutterLoader.getManifestEngineShellArgs(appInfo.metaData);
+      if (shellArgs != null) {
+        final String routeFlag = "--route=";
+        for (String arg : shellArgs) {
+          if (arg != null && arg.startsWith(routeFlag)) {
+            return arg.substring(routeFlag.length());
+          }
+        }
+      }
+    } catch (PackageManager.NameNotFoundException e) {
+      // Ignore
+    }
+    return null;
+  }
+
+  /**
+   * Resolves the initial route for an activity based on Intent extras, manifest engine arguments,
+   * or Activity meta-data.
+   *
+   * @param intent The launching intent.
+   * @param context The application context.
+   * @param metaData The Activity's metadata bundle, or null.
+   * @return The initial route if defined, otherwise null.
+   */
+  @Nullable
+  public static String getInitialRoute(
+      @NonNull Intent intent, @NonNull Context context, @Nullable Bundle metaData) {
+    if (intent.hasExtra(EXTRA_INITIAL_ROUTE)) {
+      return intent.getStringExtra(EXTRA_INITIAL_ROUTE);
+    }
+
+    String routeFromManifest = getInitialRouteFromManifest(context);
+    if (routeFromManifest != null) {
+      return routeFromManifest;
+    }
+
+    return metaData != null ? metaData.getString(INITIAL_ROUTE_META_DATA_KEY) : null;
   }
 
   private FlutterActivityLaunchConfigs() {}

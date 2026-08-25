@@ -102,12 +102,11 @@ class OnTapPage extends StatelessWidget {
 class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
   SlideInOutPageRoute({required WidgetBuilder bodyBuilder, super.settings})
     : super(
-        pageBuilder:
-            (
-              BuildContext context,
-              Animation<double> animation,
-              Animation<double> secondaryAnimation,
-            ) => bodyBuilder(context),
+        pageBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) => bodyBuilder(context),
         transitionsBuilder:
             (
               BuildContext context,
@@ -6466,7 +6465,7 @@ void main() {
         '   This usually happens when the type provided to Navigator.pop() is\n'
         '   not a subtype of the type expected by the Route (e.g.\n'
         '   DialogRoute<Null>), or when a generic type is explicitly provided\n'
-        '   to a route creation method (such as showDialog<T>()) but the\n'
+        '   to a route creation method (such as showRawDialog<T>()) but the\n'
         '   popped value does not match this type.\n'
         '   The route was: PageRouteBuilder<bool>(RouteSettings(none, null),\n'
         '     animation: AnimationController#00000(⏭ 1.000; paused; for\n'
@@ -6531,7 +6530,8 @@ void main() {
         '   Navigator.maybePop() is not a subtype of the type expected by the\n'
         '   Route (e.g. DialogRoute<Null>), or when a generic type is\n'
         '   explicitly provided to a route creation method (such as\n'
-        '   showDialog<T>()) but the popped value does not match this type.\n'
+        '   showRawDialog<T>()) but the popped value does not match this\n'
+        '   type.\n'
         '   The route was: PageRouteBuilder<bool>(RouteSettings(none, null),\n'
         '     animation: AnimationController#00000(⏭ 1.000; paused; for\n'
         '     PageRouteBuilder<bool>))\n'

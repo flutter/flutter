@@ -64,8 +64,10 @@ typedef _DismissCallback = void Function(BuildContext context, double scale, dou
 
 /// A function that builds the child and handles the transition between the
 /// default child and the preview when the CupertinoContextMenu is open.
-typedef CupertinoContextMenuBuilder =
-    Widget Function(BuildContext context, Animation<double> animation);
+typedef CupertinoContextMenuBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+);
 
 // Given a GlobalKey, return the Rect of the corresponding RenderBox's
 // paintBounds in global coordinates.
@@ -762,7 +764,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     super.filter,
     required Rect previousChildRect,
     required double scaleFactor,
-    super.settings,
   }) : assert(actions.isNotEmpty),
        _actions = actions,
        _builder = builder,

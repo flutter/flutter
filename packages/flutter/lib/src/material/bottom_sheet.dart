@@ -39,8 +39,10 @@ typedef BottomSheetDragStartHandler = void Function(DragStartDetails details);
 /// A callback for when the user stops dragging the bottom sheet.
 ///
 /// Used by [BottomSheet.onDragEnd].
-typedef BottomSheetDragEndHandler =
-    void Function(DragEndDetails details, {required bool isClosing});
+typedef BottomSheetDragEndHandler = void Function(
+  DragEndDetails details, {
+  required bool isClosing,
+});
 
 /// A Material Design bottom sheet.
 ///
@@ -652,7 +654,6 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
 
 class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({
-    super.key,
     required this.route,
     this.backgroundColor,
     this.elevation,

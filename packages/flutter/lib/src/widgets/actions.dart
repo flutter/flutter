@@ -809,7 +809,7 @@ class Actions extends StatefulWidget {
   /// returned callback is called. If the return value is needed, consider using
   /// [Actions.invoke] instead.
   static VoidCallback? handler<T extends Intent>(BuildContext context, T intent) {
-    final Action<Intent>? action = Actions.maybeFind(context);
+    final Action<Intent>? action = Actions.maybeFind<T>(context, intent: intent);
     if (action != null && action._isEnabled(intent, context)) {
       return () {
         // Could be that the action was enabled when the closure was created,

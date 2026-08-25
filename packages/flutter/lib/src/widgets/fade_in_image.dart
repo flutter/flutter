@@ -116,6 +116,11 @@ class FadeInImage extends StatefulWidget {
   /// and [height] regardless of these parameters. These parameters are primarily
   /// intended to reduce the memory usage of [ImageCache].
   ///
+  /// If [useLogicalCacheSize] is true, the cache dimensions are interpreted
+  /// as logical pixels instead of physical pixels. Set this to true when
+  /// the cache dimensions describe the image's on-screen size in logical
+  /// pixels. The flag applies to both the placeholder and the image.
+  ///
   /// The [placeholder], [image], [placeholderScale], [imageScale],
   /// [fadeOutDuration], [fadeOutCurve], [fadeInDuration], [fadeInCurve],
   /// [alignment], [repeat], and [matchTextDirection] arguments must not be
@@ -158,15 +163,18 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
+    bool useLogicalCacheSize = false,
   }) : placeholder = ResizeImage.resizeIfNeeded(
          placeholderCacheWidth,
          placeholderCacheHeight,
          MemoryImage(placeholder, scale: placeholderScale),
+         useLogicalSize: useLogicalCacheSize,
        ),
        image = ResizeImage.resizeIfNeeded(
          imageCacheWidth,
          imageCacheHeight,
          NetworkImage(image, scale: imageScale),
+         useLogicalSize: useLogicalCacheSize,
        );
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
@@ -189,6 +197,11 @@ class FadeInImage extends StatefulWidget {
   /// The image will be rendered to the constraints of the layout or [width]
   /// and [height] regardless of these parameters. These parameters are primarily
   /// intended to reduce the memory usage of [ImageCache].
+  ///
+  /// If [useLogicalCacheSize] is true, the cache dimensions are interpreted
+  /// as logical pixels instead of physical pixels. Set this to true when
+  /// the cache dimensions describe the image's on-screen size in logical
+  /// pixels. The flag applies to both the placeholder and the image.
   ///
   /// See also:
   ///
@@ -228,21 +241,25 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
+    bool useLogicalCacheSize = false,
   }) : placeholder = placeholderScale != null
            ? ResizeImage.resizeIfNeeded(
                placeholderCacheWidth,
                placeholderCacheHeight,
                ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale),
+               useLogicalSize: useLogicalCacheSize,
              )
            : ResizeImage.resizeIfNeeded(
                placeholderCacheWidth,
                placeholderCacheHeight,
                AssetImage(placeholder, bundle: bundle),
+               useLogicalSize: useLogicalCacheSize,
              ),
        image = ResizeImage.resizeIfNeeded(
          imageCacheWidth,
          imageCacheHeight,
          NetworkImage(image, scale: imageScale),
+         useLogicalSize: useLogicalCacheSize,
        );
 
   /// Image displayed while the target [image] is loading.
@@ -545,20 +562,16 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _targetOpacity =
-        visitor(
-              _targetOpacity,
-              widget.isTargetLoaded ? 1.0 : 0.0,
-              (dynamic value) => Tween<double>(begin: value as double),
-            )
-            as Tween<double>?;
-    _placeholderOpacity =
-        visitor(
-              _placeholderOpacity,
-              widget.isTargetLoaded ? 0.0 : 1.0,
-              (dynamic value) => Tween<double>(begin: value as double),
-            )
-            as Tween<double>?;
+    _targetOpacity = visitor(
+      _targetOpacity,
+      widget.isTargetLoaded ? 1.0 : 0.0,
+      (dynamic value) => Tween<double>(begin: value as double),
+    ) as Tween<double>?;
+    _placeholderOpacity = visitor(
+      _placeholderOpacity,
+      widget.isTargetLoaded ? 0.0 : 1.0,
+      (dynamic value) => Tween<double>(begin: value as double),
+    ) as Tween<double>?;
   }
 
   @override

@@ -25,7 +25,7 @@ List<Map<String, Object?>> _getList(Object? object, String errorMessage) {
   throw IconTreeShakerException._(errorMessage);
 }
 
-/// A class that wraps the functionality of the const finder package and the
+/// A class that wraps the functionality of recorded uses and the
 /// font subset utility to tree shake unused icons from fonts.
 class IconTreeShaker {
   /// Creates a wrapper for icon font subsetting.
@@ -130,7 +130,7 @@ class IconTreeShaker {
       final Recordings recordings = await _readRecordings(file);
       combinedRecordings = combinedRecordings == null
           ? recordings
-          : combinedRecordings.merge(recordings);
+          : combinedRecordings + recordings;
     }
 
     final Map<String, List<int>> iconData = _parseRecordings(combinedRecordings!);
@@ -478,31 +478,4 @@ class IconTreeShakerException implements Exception {
       'IconTreeShakerException: $message\n\n'
       'To disable icon tree shaking, pass --no-tree-shake-icons to the requested '
       'flutter build command';
-}
-
-extension on Recordings {
-  /// Returns a new [Recordings] containing all usages from both `this` and
-  /// [other].
-  ///
-  /// If a definition is present in both recordings, its usages from both
-  /// are combined in the returned [Recordings].
-  Recordings merge(Recordings other) {
-    final newCalls = <DefinitionWithStaticCalls, List<CallReference>>{};
-    for (final MapEntry(:key, :value) in calls.entries) {
-      newCalls[key] = <CallReference>[...value];
-    }
-    for (final MapEntry(:key, :value) in other.calls.entries) {
-      newCalls.putIfAbsent(key, () => <CallReference>[]).addAll(value);
-    }
-
-    final newInstances = <DefinitionWithInstances, List<InstanceReference>>{};
-    for (final MapEntry(:key, :value) in instances.entries) {
-      newInstances[key] = <InstanceReference>[...value];
-    }
-    for (final MapEntry(:key, :value) in other.instances.entries) {
-      newInstances.putIfAbsent(key, () => <InstanceReference>[]).addAll(value);
-    }
-
-    return Recordings(calls: newCalls, instances: newInstances);
-  }
 }

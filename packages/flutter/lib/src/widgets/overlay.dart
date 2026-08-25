@@ -31,13 +31,15 @@ import 'ticker_provider.dart';
 
 /// The signature of the widget builder callback used in
 /// [OverlayPortal.overlayChildLayoutBuilder].
-typedef OverlayChildLayoutBuilder =
-    Widget Function(BuildContext context, OverlayChildLayoutInfo info);
+typedef OverlayChildLayoutBuilder = Widget Function(
+  BuildContext context,
+  OverlayChildLayoutInfo info,
+);
 
 /// The additional layout information available to the
 /// [OverlayPortal.overlayChildLayoutBuilder] callback.
 extension type OverlayChildLayoutInfo._(
-  (Size childSize, Matrix4 childPaintTransform, Size overlaySize) _info
+  (Size childSize, Matrix4 childPaintTransform, Size overlaySize) _info,
 ) {
   /// The size of [OverlayPortal.child] in its own coordinates.
   Size get childSize => _info.$1;
@@ -595,7 +597,7 @@ class Overlay extends StatefulWidget {
             '${debugRequiredFor?.runtimeType ?? 'Some'} widgets require an Overlay widget ancestor for correct operation.',
           ),
           ErrorHint(
-            'The most common way to add an Overlay to an application is to include a MaterialApp, CupertinoApp or Navigator widget in the runApp() call.',
+            'The most common way to add an Overlay to an application is to include a WidgetsApp or Navigator widget in the runApp() call.',
           ),
           if (debugRequiredFor != null)
             DiagnosticsProperty<Widget>(
@@ -2320,7 +2322,7 @@ class _RenderTheaterMarker extends InheritedWidget {
       ErrorHint(
         'To introduce an Overlay widget, you can either directly '
         'include one, or use a widget that contains an Overlay itself, '
-        'such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.',
+        'such as a Navigator or WidgetsApp.',
       ),
       ...context.describeMissingAncestor(expectedAncestorType: Overlay),
     ]);

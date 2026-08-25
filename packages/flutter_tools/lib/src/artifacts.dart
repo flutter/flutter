@@ -83,9 +83,6 @@ enum Artifact {
   /// Tools related to subsetting or icon font files.
   fontSubset('font-subset', isExecutable: true),
 
-  /// Still used in g3 so cannot be deleted yet.
-  constFinder('const_finder.dart.snapshot'),
-
   /// The location of file generators.
   flutterToolsFileGenerators.directory();
 
@@ -476,7 +473,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
-      case Artifact.constFinder:
       case Artifact.flutterFramework:
       case Artifact.flutterFrameworkDsym:
       case Artifact.flutterMacOSFramework:
@@ -528,7 +524,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
-      case Artifact.constFinder:
       case Artifact.flutterFramework:
       case Artifact.flutterFrameworkDsym:
       case Artifact.flutterMacOSFramework:
@@ -580,7 +575,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
-      case Artifact.constFinder:
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterMacOSFrameworkDsym:
       case Artifact.flutterMacOSXcframework:
@@ -632,7 +626,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.fuchsiaFlutterRunner:
         final String artifactFileName = artifact.getFileName(_platform, mode);
         return _fileSystem.path.join(root, runtime, artifactFileName);
-      case Artifact.constFinder:
       case Artifact.flutterFramework:
       case Artifact.flutterFrameworkDsym:
       case Artifact.flutterMacOSFramework:
@@ -768,7 +761,6 @@ class CachedArtifacts implements Artifacts {
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path, artifact.getFileName(_platform));
       case Artifact.fontSubset:
-      case Artifact.constFinder:
         return _cache
             .getArtifactDirectory('engine')
             .childDirectory(_enginePlatformDirectoryName(platform))
@@ -1150,8 +1142,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
         );
       case Artifact.fontSubset:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
-      case Artifact.constFinder:
-        return _fileSystem.path.join(_hostEngineOutPath, 'gen', artifactFileName);
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
       case Artifact.windowsDesktopPath:
@@ -1306,7 +1296,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.fuchsiaKernelCompiler:
         case Artifact.fuchsiaFlutterRunner:
         case Artifact.fontSubset:
-        case Artifact.constFinder:
         case Artifact.flutterToolsFileGenerators:
           break;
       }

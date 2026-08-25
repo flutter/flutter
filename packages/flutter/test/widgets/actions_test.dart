@@ -316,6 +316,64 @@ void main() {
       expect(Actions.maybeFind<DoNothingIntent>(containerKey.currentContext!), isNull);
     });
 
+    testWidgets('Actions.handler forwards the intent type and finds the bound action', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/191045.
+      final GlobalKey containerKey = GlobalKey();
+      var invoked = false;
+      final testAction = TestAction(
+        onInvoke: (Intent intent) {
+          invoked = true;
+          return invoked;
+        },
+      );
+      await tester.pumpWidget(
+        Actions(
+          actions: <Type, Action<Intent>>{TestIntent: testAction},
+          child: Container(key: containerKey),
+        ),
+      );
+
+      final VoidCallback? handler = Actions.handler(
+        containerKey.currentContext!,
+        const TestIntent(),
+      );
+      expect(handler, isNotNull);
+
+      handler!();
+      expect(invoked, isTrue);
+    });
+
+    testWidgets('Actions.handler returns null when the action is disabled', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey containerKey = GlobalKey();
+      final testAction = TestAction(onInvoke: (Intent intent) => null)..enabled = false;
+      await tester.pumpWidget(
+        Actions(
+          actions: <Type, Action<Intent>>{TestIntent: testAction},
+          child: Container(key: containerKey),
+        ),
+      );
+
+      expect(Actions.handler(containerKey.currentContext!, const TestIntent()), isNull);
+    });
+
+    testWidgets('Actions.handler returns null when no matching action is found', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey containerKey = GlobalKey();
+      await tester.pumpWidget(
+        Actions(
+          actions: const <Type, Action<Intent>>{},
+          child: Container(key: containerKey),
+        ),
+      );
+
+      expect(Actions.handler(containerKey.currentContext!, const TestIntent()), isNull);
+    });
+
     testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (
       WidgetTester tester,
     ) async {
@@ -1007,15 +1065,13 @@ void main() {
       WidgetTester tester,
     ) async {
       expect(
-        DefaultToKeyEventResultAction(
-          consumesKey: false,
-        ).toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
+        DefaultToKeyEventResultAction(consumesKey: false)
+            .toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
         KeyEventResult.skipRemainingHandlers,
       );
       expect(
-        DefaultToKeyEventResultAction(
-          consumesKey: true,
-        ).toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
+        DefaultToKeyEventResultAction(consumesKey: true)
+            .toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
         KeyEventResult.handled,
       );
     });
@@ -1999,8 +2055,11 @@ void main() {
   });
 }
 
-typedef PostInvokeCallback =
-    void Function({Action<Intent> action, Intent intent, ActionDispatcher dispatcher});
+typedef PostInvokeCallback = void Function({
+  Action<Intent> action,
+  Intent intent,
+  ActionDispatcher dispatcher,
+});
 
 class TestIntent extends Intent {
   const TestIntent();

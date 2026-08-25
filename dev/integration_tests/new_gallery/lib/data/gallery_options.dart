@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
+
 import '../constants.dart';
 
 enum CustomTextDirection { localeBased, ltr, rtl }
@@ -142,6 +143,12 @@ class GalleryOptions {
     platform,
     isTestMode,
   );
+
+  static GalleryOptions? maybeOf(BuildContext context) {
+    final _ModelBindingScope? scope = context
+        .dependOnInheritedWidgetOfExactType<_ModelBindingScope>();
+    return scope?.modelBindingState.currentModel;
+  }
 
   static GalleryOptions of(BuildContext context) {
     final _ModelBindingScope scope = context

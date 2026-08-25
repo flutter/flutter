@@ -279,12 +279,14 @@ void testMain() {
     expect(program.name, 'test');
 
     {
-      final shader = program.fragmentShader() as CkFragmentShader;
+      final shader = (program.fragmentShader() as EngineFragmentShader).getBackendShader(
+        ui.FilterQuality.none,
+      ) as CkFragmentShader;
 
       shader.setFloat(0, 4);
       expect(reason: 'SkShaders are created lazily', shader.ref, isNull);
 
-      final SkShader skShader = shader.getSkShader(ui.FilterQuality.none);
+      final SkShader skShader = shader.skShader;
       final CkUniqueRef<SkShader> ref = shader.ref!;
       expect(skShader, same(ref.nativeObject));
       expect(ref.isDisposed, false);
@@ -296,18 +298,19 @@ void testMain() {
     }
 
     {
-      final shader = program.fragmentShader() as CkFragmentShader;
+      final shader = (program.fragmentShader() as EngineFragmentShader).getBackendShader(
+        ui.FilterQuality.none,
+      ) as CkFragmentShader;
       shader.setFloat(0, 5);
 
-      final SkShader skShader1 = shader.getSkShader(ui.FilterQuality.none);
+      final SkShader skShader1 = shader.skShader;
       final CkUniqueRef<SkShader> ref1 = shader.ref!;
 
-      final SkShader skShader2 = shader.getSkShader(ui.FilterQuality.none);
+      final SkShader skShader2 = shader.skShader;
       final CkUniqueRef<SkShader> ref2 = shader.ref!;
       expect(ref1, isNot(same(ref2)));
       expect(
-        reason:
-            'getSkShader creates a new shader every time. Old references should be disposed of.',
+        reason: 'skShader creates a new shader every time. Old references should be disposed of.',
         ref1.isDisposed,
         true,
       );
@@ -323,8 +326,7 @@ void testMain() {
       shader.dispose();
       expect(shader.debugDisposed, true);
       expect(
-        reason:
-            'The last remaining SkShader reference should be disposed of when the FragmentShader itself is disposed of.',
+        reason: 'The last remaining SkShader reference should be disposed of when the FragmentShader itself is disposed of.',
         ref2.isDisposed,
         true,
       );
@@ -344,5 +346,32 @@ void testMain() {
     expect(program.textureCount, 0);
     expect(program.uniforms, hasLength(7));
     expect(program.name, 'test');
+
+    final shader = (program.fragmentShader() as EngineFragmentShader).getBackendShader(
+      ui.FilterQuality.none,
+    ) as CkFragmentShader;
+
+    final ui.UniformArray<ui.UniformFloatSlot> floatArray = shader.getUniformFloatArray('uFloats');
+    expect(floatArray.length, 10);
+    for (var i = 0; i < floatArray.length; i++) {
+      expect(floatArray[i].name, 'uFloats');
+      expect(floatArray[i].index, i);
+      expect(floatArray[i].shaderIndex, 2 + i);
+    }
+
+    final ui.UniformArray<ui.UniformVec2Slot> vec2Array = shader.getUniformVec2Array('uVectors');
+    expect(vec2Array.length, 3);
+    vec2Array[0].set(1.0, 2.0);
+    expect(shader.floats.toTypedArray()[13], 1.0);
+    expect(shader.floats.toTypedArray()[14], 2.0);
+    vec2Array[1].set(3.0, 4.0);
+    expect(shader.floats.toTypedArray()[15], 3.0);
+    expect(shader.floats.toTypedArray()[16], 4.0);
+    vec2Array[2].set(5.0, 6.0);
+    expect(shader.floats.toTypedArray()[17], 5.0);
+    expect(shader.floats.toTypedArray()[18], 6.0);
+
+    final ui.UniformArray<ui.UniformMat4Slot> mat4Array = shader.getUniformMat4Array('uMatrices');
+    expect(mat4Array.length, 2);
   });
 }
