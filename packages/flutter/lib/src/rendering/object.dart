@@ -5931,6 +5931,20 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         config.isBlockingUserActions = blocksUserAction;
       });
     }
+    if (configProvider.effective.traversalChildIdentifier != null && isBlockingPreviousSibling) {
+      // A traversal child is grafted onto the semantics node that provides the
+      // matching traversalParentIdentifier. For example, an OverlayPortal's
+      // overlay child is grafted onto the OverlayPortal itself.
+      //
+      // When this render object also blocks the semantics of previously painted
+      // nodes, the traversal parent is painted before this render object and is
+      // therefore blocked as well, leaving no node to graft onto. Dropping the
+      // identifier keeps this subtree in the semantics tree at its paint order
+      // position instead of removing it from the semantics tree entirely.
+      configProvider.updateConfig((SemanticsConfiguration config) {
+        config.traversalChildIdentifier = null;
+      });
+    }
     if (localeForChildren != configProvider.effective.locale) {
       configProvider.updateConfig((SemanticsConfiguration config) {
         config.locale = localeForChildren;
