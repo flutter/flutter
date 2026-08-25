@@ -12066,6 +12066,19 @@ void main() {
       expect(find.text('errorText'), findsOneWidget);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/67409.
+    testWidgets('InputDecorator shows error text when disabled', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecoratorM2(
+          decoration: const InputDecoration(enabled: false, errorText: errorText),
+        ),
+      );
+
+      final ThemeData theme = Theme.of(tester.element(findDecorator()));
+      expect(findError(), findsOneWidget);
+      expect(getErrorStyle(tester).color, theme.colorScheme.error);
+    });
+
     testWidgets('InputDecoration shows error border for errorText and error widget', (
       WidgetTester tester,
     ) async {

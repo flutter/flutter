@@ -7163,7 +7163,8 @@ void main() {
     expect(helperWidget.style!.color, isNot(equals(Colors.transparent)));
     expect(errorWidget.style!.color, isNot(equals(Colors.transparent)));
 
-    // When enabled is false, the helper/error and counter are not visible.
+    // When enabled is false, the helper and counter are not visible, but the
+    // error is still shown, see https://github.com/flutter/flutter/issues/67409.
     await tester.pumpWidget(buildFrame(false, false));
     helperWidget = tester.widget(find.text(helperText));
     counterWidget = tester.widget(find.text(counterText));
@@ -7173,7 +7174,7 @@ void main() {
     errorWidget = tester.widget(find.text(errorText));
     counterWidget = tester.widget(find.text(counterText));
     expect(counterWidget.style!.color, equals(Colors.transparent));
-    expect(errorWidget.style!.color, equals(Colors.transparent));
+    expect(errorWidget.style!.color, isNot(equals(Colors.transparent)));
   });
 
   testWidgets('Disabled text field has default M2 disabled text style for the input text', (

@@ -5863,9 +5863,9 @@ class _InputDecoratorDefaultsM2 extends InputDecorationThemeData {
   @override
   TextStyle? get errorStyle => WidgetStateTextStyle.resolveWith((Set<WidgetState> states) {
     final ThemeData themeData = Theme.of(context);
-    if (states.contains(WidgetState.disabled)) {
-      return themeData.textTheme.bodySmall!.copyWith(color: Colors.transparent);
-    }
+    // The error text is shown even when the field is disabled: the subtext
+    // space is allocated for it in any case, so hiding the text would only
+    // leave an unexplained gap below the field.
     return themeData.textTheme.bodySmall!.copyWith(color: themeData.colorScheme.error);
   });
 
