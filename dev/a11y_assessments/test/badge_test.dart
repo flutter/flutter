@@ -20,4 +20,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(findHeadingLevelOnes, findsOne);
   });
+
+  // The badge label carries a `semanticsLabel` that differs from the rendered
+  // text, so `textContrastGuideline` cannot locate it and silently skips it.
+  // Check the label explicitly with a finder based guideline instead.
+  // Regression test for https://github.com/flutter/flutter/issues/172993.
+  testWidgets('badge label meets text contrast guideline', (WidgetTester tester) async {
+    await pumpsUseCase(tester, BadgeUseCase());
+    await expectLater(
+      tester,
+      meetsGuideline(CustomMinimumContrastGuideline(finder: find.text('5'))),
+    );
+  });
 }
