@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import 'constants.dart';
+import 'distance.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
@@ -306,7 +307,7 @@ typedef GestureScaleUpdateCallback = void Function(ScaleUpdateDetails details);
 typedef GestureScaleEndCallback = void Function(ScaleEndDetails details);
 
 bool _isFlingGesture(Velocity velocity) {
-  return velocity.pixelsPerSecond.distanceExceeds(kMinFlingVelocity);
+  return offsetExceedsThreshold(velocity.pixelsPerSecond, kMinFlingVelocity);
 }
 
 /// Defines a line between two pointers on screen.
@@ -695,7 +696,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         Velocity velocity = tracker.getVelocity();
         if (_isFlingGesture(velocity)) {
           final Offset pixelsPerSecond = velocity.pixelsPerSecond;
-          if (pixelsPerSecond.distanceExceeds(kMaxFlingVelocity)) {
+          if (offsetExceedsThreshold(pixelsPerSecond, kMaxFlingVelocity)) {
             velocity = Velocity(
               pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity,
             );

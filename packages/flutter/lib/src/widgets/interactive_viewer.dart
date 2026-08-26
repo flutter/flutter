@@ -15,6 +15,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
 
+import '../gestures/distance.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -826,7 +827,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
     switch (_gestureType) {
       case _GestureType.pan:
-        if (details.velocity.pixelsPerSecond.distanceIsWithin(kMinFlingVelocity)) {
+        if (!offsetExceedsThreshold(details.velocity.pixelsPerSecond, kMinFlingVelocity)) {
           _currentAxis = null;
           return;
         }

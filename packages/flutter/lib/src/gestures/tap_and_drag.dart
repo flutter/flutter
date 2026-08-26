@@ -12,6 +12,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import 'constants.dart';
+import 'distance.dart';
 import 'events.dart';
 import 'gesture_details.dart';
 import 'monodrag.dart';
@@ -582,7 +583,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
     }
 
     final Offset difference = secondTapOffset - _lastTapOffset!;
-    return difference.distanceIsWithin(kDoubleTapSlop);
+    return !offsetExceedsThreshold(difference, kDoubleTapSlop);
   }
 
   bool _representsSameSeries(PointerDownEvent event) {

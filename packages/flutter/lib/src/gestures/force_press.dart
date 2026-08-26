@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import 'distance.dart';
 import 'events.dart';
 import 'gesture_details.dart';
 import 'recognizer.dart';
@@ -249,7 +250,10 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
         if (pressure > startPressure) {
           _state = _ForceState.started;
           resolve(GestureDisposition.accepted);
-        } else if (event.delta.distanceExceeds(computeHitSlop(event.kind, gestureSettings))) {
+        } else if (offsetExceedsThreshold(
+          event.delta,
+          computeHitSlop(event.kind, gestureSettings),
+        )) {
           resolve(GestureDisposition.rejected);
         }
       }

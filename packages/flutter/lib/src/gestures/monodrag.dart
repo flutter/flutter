@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'constants.dart';
+import 'distance.dart';
 import 'drag_details.dart';
 import 'events.dart';
 import 'recognizer.dart';
@@ -1063,8 +1064,8 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   bool isFlingGesture(VelocityEstimate estimate, PointerDeviceKind kind) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? computeHitSlop(kind, gestureSettings);
-    return estimate.pixelsPerSecond.distanceExceeds(minVelocity) &&
-        estimate.offset.distanceExceeds(minDistance);
+    return offsetExceedsThreshold(estimate.pixelsPerSecond, minVelocity) &&
+        offsetExceedsThreshold(estimate.offset, minDistance);
   }
 
   @override

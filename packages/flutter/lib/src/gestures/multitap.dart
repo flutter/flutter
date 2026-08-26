@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
+import 'distance.dart';
 import 'events.dart';
 import 'gesture_details.dart';
 import 'pointer_router.dart';
@@ -101,7 +102,7 @@ class _TapTracker {
 
   bool isWithinGlobalTolerance(PointerEvent event, double tolerance) {
     final Offset offset = event.position - _initialGlobalPosition;
-    return offset.distanceIsWithin(tolerance);
+    return !offsetExceedsThreshold(offset, tolerance);
   }
 
   bool hasElapsedMinTime() {
