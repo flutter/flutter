@@ -10,6 +10,7 @@
 namespace impeller {
 
 // TODO(b-luk): this should use a platform specific max texture size.
+// https://github.com/flutter/flutter/issues/191820
 static constexpr uint32_t kMaxGradientTextureSize = 1024;
 
 static void AppendColor(const Color& color, GradientData* data) {
