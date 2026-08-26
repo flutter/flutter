@@ -1972,10 +1972,7 @@ server:
         );
         await runner.run(<String>['run']);
 
-        expect(
-          testLogger.warningText,
-          isNot(contains('is deprecated')),
-        );
+        expect(testLogger.warningText, isNot(contains('is deprecated')));
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
