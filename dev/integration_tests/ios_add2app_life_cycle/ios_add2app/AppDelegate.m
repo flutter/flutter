@@ -23,21 +23,19 @@
 
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-
-  MainViewController *mainViewController = [[MainViewController alloc] init];
-  UINavigationController *navigationController = [[UINavigationController alloc]
-      initWithRootViewController:mainViewController];
-
-  navigationController.navigationBar.translucent = NO;
-
   self.engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [self.engine runWithEntrypoint:nil];
 
-  self.window.rootViewController = navigationController;
-  [self.window makeKeyAndVisible];
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
 
-  return YES;
+#pragma mark - UISceneSession lifecycle
+
+- (UISceneConfiguration *)application:(UIApplication *)application
+    configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
+                                   options:(UISceneConnectionOptions *)options {
+  return [[UISceneConfiguration alloc] initWithName:@"Default Configuration"
+                                        sessionRole:connectingSceneSession.role];
 }
 
 @end
