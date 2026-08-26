@@ -1288,17 +1288,16 @@ std::shared_ptr<Texture> DisplayListToTexture(
       impeller::IRect32::MakeSize(size)          //
   );
   const auto& [data, count] = collector.TakeBackdropData();
-  if (reset_host_buffer) {
-    context.GetTextShadowCache().MarkFrameStart();
-  }
+  impeller_dispatcher.SetBackdropData(data, count);
+  context.GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
       context.GetTransientsDataBuffer().Reset();
       context.GetTransientsIndexesBuffer().Reset();
-      context.GetTextShadowCache().MarkFrameEnd();
-      context.GetLazyGlyphAtlas()->ResetTextFrames();
-      context.GetContext()->DisposeThreadLocalCachedResources();
     }
+    context.GetTextShadowCache().MarkFrameEnd();
+    context.GetLazyGlyphAtlas()->ResetTextFrames();
+    context.GetContext()->DisposeThreadLocalCachedResources();
   });
 
   display_list->Dispatch(impeller_dispatcher, cull_rect);
@@ -1338,14 +1337,12 @@ bool RenderToTarget(ContentContext& context,
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
-  context.GetRenderTargetCache()->Start();
   context.GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
       context.ResetTransientsBuffers();
     }
     context.GetTextShadowCache().MarkFrameEnd();
-    context.GetRenderTargetCache()->End();
   });
 
   display_list->Dispatch(impeller_dispatcher, cull_rect);
