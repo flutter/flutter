@@ -2047,6 +2047,57 @@ resolution: workspace
         );
       });
 
+      _testInMemory(
+        'ignores build and .dart_tool directories during workspace discovery',
+        () async {
+          final Directory directory = globals.fs.directory('myproject');
+          directory.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- '*'
+''');
+          directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+          directory.childDirectory('other').childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: other
+flutter:
+resolution: workspace
+''');
+          // A nested pubspec inside build/ or .dart_tool/ should be ignored when wildcard matching
+          directory.childDirectory('build').childDirectory('nested').childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: build_child
+flutter:
+resolution: workspace
+''');
+          directory.childDirectory('.dart_tool').childDirectory('nested').childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: dart_tool_child
+flutter:
+resolution: workspace
+''');
+
+          expect(
+            FlutterProject.fromDirectory(directory).workspaceProjects
+                .map((FlutterProject subproject) => subproject.manifest.appName)
+                .toSet(),
+            <String>{'other'},
+          );
+        },
+      );
+
       _testInMemory('workspaceRoot returns root project for member projects', () async {
         final Directory directory = globals.fs.directory('myproject');
         directory.childFile('pubspec.yaml')
