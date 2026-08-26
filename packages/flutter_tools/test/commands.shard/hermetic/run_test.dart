@@ -1913,6 +1913,75 @@ server:
       // https://github.com/flutter/flutter/issues/142060
       skip: true,
     );
+
+    testUsingContext(
+      'warning triggered when --build flag is passed',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run', '--build']);
+
+        expect(
+          testLogger.warningText,
+          contains(
+            'The "--build" flag is deprecated and will be removed in a future release. '
+            'Building is the default behavior, so this flag can be safely removed.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+
+    testUsingContext(
+      'warning triggered when --no-build flag is passed',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run', '--no-build']);
+
+        expect(
+          testLogger.warningText,
+          contains(
+            'The "--no-build" flag is deprecated and will be removed in a future release. '
+            'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+
+    testUsingContext(
+      'no warning triggered when --build or --no-build flag is not passed',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run']);
+
+        expect(testLogger.warningText, isNot(contains('is deprecated')));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
   });
 }
 
@@ -2236,6 +2305,9 @@ class FakeAnsiTerminal extends Fake implements AnsiTerminal {
 class FakeFeatureFlags extends Fake implements FeatureFlags {
   @override
   bool get isWebEnabled => true;
+
+  @override
+  bool get isToolExtensionsEnabled => false;
 
   @override
   bool isEnabled(Feature feature) => feature.master.enabledByDefault;

@@ -182,6 +182,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     fileSystem: globals.fs,
     logger: globals.logger,
     cocoapods: globals.cocoaPods,
+    featureFlags: featureFlags,
   );
 
   await removeExtendedAttributesForProject(
@@ -1093,7 +1094,8 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       missingModule: _parseMissingModule(message),
     );
   } else if (message.toLowerCase().contains('has been modified since') ||
-      (message.toLowerCase().contains('module map file') && message.toLowerCase().contains('not found'))) {
+      (message.toLowerCase().contains('module map file') &&
+          message.toLowerCase().contains('not found'))) {
     return _XCResultIssueHandlingResult(
       requiresProvisioningProfile: false,
       hasProvisioningProfileIssue: false,
