@@ -28,14 +28,6 @@ static NSString *_kReloadChannelName = @"reload";
 
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-
-  _mainViewController = [[MainViewController alloc] init];
-  _navigationController = [[UINavigationController alloc]
-      initWithRootViewController:_mainViewController];
-
-  _navigationController.navigationBar.translucent = NO;
-
   _engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [_engine runWithEntrypoint:nil];
 
@@ -44,10 +36,16 @@ static NSString *_kReloadChannelName = @"reload";
       binaryMessenger:_engine.binaryMessenger
                 codec:[FlutterStringCodec sharedInstance]];
 
-  self.window.rootViewController = _navigationController;
-  [self.window makeKeyAndVisible];
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
 
-  return YES;
+#pragma mark - UISceneSession lifecycle
+
+- (UISceneConfiguration *)application:(UIApplication *)application
+    configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
+                                   options:(UISceneConnectionOptions *)options {
+  return [[UISceneConfiguration alloc] initWithName:@"Default Configuration"
+                                        sessionRole:connectingSceneSession.role];
 }
 
 @end

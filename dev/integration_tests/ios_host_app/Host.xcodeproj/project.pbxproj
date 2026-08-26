@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4AF9D63425F74F0694CAB07D /* libPods-Host.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E20960BD8B505D605FE82853 /* libPods-Host.a */; };
 		74F97866215AB9E8005A0F04 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 74F97865215AB9E8005A0F04 /* AppDelegate.m */; };
+		74F97878215AB9EA005A0F04 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 74F97877215AB9EA005A0F04 /* SceneDelegate.m */; };
 		74F9786E215AB9E9005A0F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 74F9786D215AB9E9005A0F04 /* Assets.xcassets */; };
 		74F97871215AB9E9005A0F04 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 74F9786F215AB9E9005A0F04 /* LaunchScreen.storyboard */; };
 		74F97874215AB9E9005A0F04 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 74F97873215AB9E9005A0F04 /* main.m */; };
@@ -39,6 +40,8 @@
 		74F97861215AB9E8005A0F04 /* Host.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Host.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		74F97864215AB9E8005A0F04 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		74F97865215AB9E8005A0F04 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		74F97876215AB9EA005A0F04 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
+		74F97877215AB9EA005A0F04 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
 		74F9786D215AB9E9005A0F04 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		74F97870215AB9E9005A0F04 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		74F97872215AB9E9005A0F04 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -120,6 +123,8 @@
 				F7C2661124AC18D00085742D /* HybridViewController.m */,
 				74F97864215AB9E8005A0F04 /* AppDelegate.h */,
 				74F97865215AB9E8005A0F04 /* AppDelegate.m */,
+				74F97876215AB9EA005A0F04 /* SceneDelegate.h */,
+				74F97877215AB9EA005A0F04 /* SceneDelegate.m */,
 				74F9786D215AB9E9005A0F04 /* Assets.xcassets */,
 				74F9786F215AB9E9005A0F04 /* LaunchScreen.storyboard */,
 				74F97872215AB9E9005A0F04 /* Info.plist */,
@@ -396,6 +401,7 @@
 				F7C2661624AC18D00085742D /* HybridViewController.m in Sources */,
 				F7C2661B24AC18DD0085742D /* NativeViewController.m in Sources */,
 				74F97866215AB9E8005A0F04 /* AppDelegate.m in Sources */,
+				74F97878215AB9EA005A0F04 /* SceneDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
