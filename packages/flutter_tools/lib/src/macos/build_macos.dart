@@ -96,6 +96,10 @@ Future<void> buildMacOS({
     );
   }
 
+  if (globals.xcodeProjectInterpreter?.isInstalled != true) {
+    throwToolExit(globals.userMessages.xcodeMissing);
+  }
+
   // The .xcworkspace may not exist (e.g. a project using Swift Package Manager
   // without CocoaPods). When absent, xcodebuild builds the .xcodeproj directly.
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
@@ -144,6 +148,7 @@ Future<void> buildMacOS({
     logger: globals.logger,
     cocoapods: globals.cocoaPods,
     analytics: globals.analytics,
+    featureFlags: featureFlags,
   );
 
   final String buildDirectoryPath = getMacOSBuildDirectory();
@@ -161,11 +166,14 @@ Future<void> buildMacOS({
     projectFilename: xcodeProjectName,
     buildDirectory: flutterBuildDir,
   );
-  final String? scheme = projectInfo?.schemeFor(buildInfo);
-  if (scheme == null) {
-    projectInfo!.reportFlavorNotFoundAndExit();
+  if (projectInfo == null) {
+    throwToolExit('Unable to get Xcode project information.');
   }
-  final String? configuration = projectInfo?.buildConfigurationFor(buildInfo, scheme);
+  final String? scheme = projectInfo.schemeFor(buildInfo);
+  if (scheme == null) {
+    projectInfo.reportFlavorNotFoundAndExit();
+  }
+  final String? configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }

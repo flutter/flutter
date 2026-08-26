@@ -164,6 +164,7 @@ class DarwinDependencyManagement {
   /// Validate that plugins are compatible with the project dependency management set up.
   ///
   /// This includes the following checks:
+  ///   - Warns when SwiftPM feature flag has been disabled
   ///   - Throws when using a SwiftPM-only plugin but SwiftPM is not enabled
   ///   - Warns when using CocoaPod-only plugins
   ///   - Warns when CocoaPods integration is removable
@@ -176,10 +177,17 @@ class DarwinDependencyManagement {
     required Logger logger,
     required CocoaPods? cocoapods,
     required Analytics analytics,
+    required FeatureFlags featureFlags,
   }) async {
     final bool projectUsesSwiftPM =
         xcodeProject.usesSwiftPackageManager &&
         xcodeProject.flutterPluginSwiftPackageInProjectSettings;
+    if (!featureFlags.isSwiftPackageManagerEnabled) {
+      logger.printWarning(
+        'Swift Package Manager is currently disabled. $kSwiftPackageManagerDisabledWarning '
+        'To re-enable it, run "flutter config --enable-swift-package-manager"',
+      );
+    }
 
     final swiftPackageOnlyPlugins = <String>[];
     final cocoapodOnlyPlugins = <String>[];

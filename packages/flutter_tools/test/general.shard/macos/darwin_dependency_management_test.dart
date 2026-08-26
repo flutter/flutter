@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/darwin_dependency_management.dart';
 import 'package:flutter_tools/src/macos/swift_package_manager.dart';
@@ -1096,6 +1097,76 @@ flutter:
   });
 
   group('validatePluginSupport', () {
+    for (final platform in supportedPlatforms) {
+      testWithoutContext(
+        'warns when Swift Package Manager is disabled for ${platform.name}',
+        () async {
+          final fileSystem = MemoryFileSystem.test();
+          final logger = BufferLogger.test();
+          final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+            fs: fileSystem,
+            fakeFlutterVersion: FakeFlutterVersion(),
+          );
+          final XcodeBasedProject project = switch (platform) {
+            FlutterDarwinPlatform.ios => FakeIosProject(
+              fileSystem: fileSystem,
+              usesSwiftPackageManager: false,
+              compatibleWithSwiftPackageManager: true,
+            ),
+            FlutterDarwinPlatform.macos => FakeMacOSProject(
+              fileSystem: fileSystem,
+              usesSwiftPackageManager: false,
+              compatibleWithSwiftPackageManager: true,
+            ),
+          };
+
+          await DarwinDependencyManagement.validatePluginSupport(
+            platform: platform,
+            xcodeProject: project,
+            plugins: <Plugin>[],
+            fileSystem: fileSystem,
+            logger: logger,
+            cocoapods: FakeCocoaPods(),
+            analytics: fakeAnalytics,
+            featureFlags: TestFeatureFlags(),
+          );
+
+          expect(
+            logger.warningText,
+            'Swift Package Manager is currently disabled. $kSwiftPackageManagerDisabledWarning '
+            'To re-enable it, run "flutter config --enable-swift-package-manager"\n',
+          );
+        },
+      );
+    }
+
+    testWithoutContext('does not warn when Swift Package Manager is unavailable', () async {
+      final fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fileSystem,
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+      final project = FakeIosProject(
+        fileSystem: fileSystem,
+        usesSwiftPackageManager: false,
+        compatibleWithSwiftPackageManager: false,
+      );
+
+      await DarwinDependencyManagement.validatePluginSupport(
+        platform: FlutterDarwinPlatform.ios,
+        xcodeProject: project,
+        plugins: <Plugin>[],
+        fileSystem: fileSystem,
+        logger: logger,
+        cocoapods: FakeCocoaPods(),
+        analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+      );
+
+      expect(logger.warningText, isEmpty);
+    });
+
     testWithoutContext('when plugin does not support platform', () async {
       final fileSystem = MemoryFileSystem.test();
       final logger = BufferLogger.test();
@@ -1115,6 +1186,7 @@ flutter:
         logger: logger,
         cocoapods: cocoapods,
         analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(logger.warningText, isEmpty);
@@ -1129,11 +1201,7 @@ flutter:
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
       );
-      final project = FakeIosProject(
-        fileSystem: fileSystem,
-        usesSwiftPackageManager: false,
-        compatibleWithSwiftPackageManager: true,
-      );
+      final project = FakeIosProject(fileSystem: fileSystem, usesSwiftPackageManager: true);
 
       final appFacingPlugin = Plugin(
         name: 'foo',
@@ -1210,6 +1278,7 @@ flutter:
         logger: logger,
         cocoapods: cocoapods,
         analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
       expect(logger.warningText, isEmpty);
       expect(logger.errorText, isEmpty);
@@ -1240,6 +1309,7 @@ flutter:
         logger: logger,
         cocoapods: cocoapods,
         analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(logger.warningText, isEmpty);
@@ -1276,6 +1346,7 @@ flutter:
           logger: logger,
           cocoapods: cocoapods,
           analytics: fakeAnalytics,
+          featureFlags: TestFeatureFlags(),
         ),
         throwsToolExit(
           message:
@@ -1320,6 +1391,7 @@ flutter:
             logger: logger,
             cocoapods: cocoapods,
             analytics: fakeAnalytics,
+            featureFlags: TestFeatureFlags(),
           ),
           throwsToolExit(
             message:
@@ -1359,6 +1431,7 @@ flutter:
         logger: logger,
         cocoapods: cocoapods,
         analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(
@@ -1406,6 +1479,7 @@ flutter:
         logger: logger,
         cocoapods: cocoapods,
         analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(
@@ -1458,6 +1532,7 @@ flutter:
         logger: logger,
         cocoapods: cocoapods,
         analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(
@@ -1507,6 +1582,7 @@ flutter:
         logger: logger,
         cocoapods: cocoapods,
         analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(
@@ -1557,6 +1633,7 @@ flutter:
         logger: logger,
         cocoapods: cocoapods,
         analytics: fakeAnalytics,
+        featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
       );
 
       expect(
