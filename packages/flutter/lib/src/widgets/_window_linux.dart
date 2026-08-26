@@ -1502,7 +1502,7 @@ class _GtkWindow extends _GtkContainer {
 
   /// Gets the current title of the window.
   String getTitle() {
-    return _nativeToString(_gtkWindowGetTitle(instance)) ?? "";
+    return _nativeToString(_gtkWindowGetTitle(instance)) ?? '';
   }
 
   /// Set the default size of the window.
