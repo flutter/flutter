@@ -237,9 +237,7 @@ class FlutterDevice {
       service =
           await Future.any<dynamic>(<Future<dynamic>>[
                 connectToVmService(
-                  debuggingOptions.enableDds
-                      ? (device!.dds.uri ?? vmServiceUri)
-                      : vmServiceUri,
+                  debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri) : vmServiceUri,
                   reloadSources: reloadSources,
                   restart: restart,
                   compileExpression: compileExpression,
@@ -249,9 +247,7 @@ class FlutterDevice {
                   logger: globals.logger,
                 ),
                 if (!existingDds)
-                  device!.dds.done.whenComplete(
-                    () => throw Exception('DDS shut down too early'),
-                  ),
+                  device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
               ])
               as FlutterVmService?;
     } on Exception catch (exception) {
