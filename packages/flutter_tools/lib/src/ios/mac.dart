@@ -150,6 +150,10 @@ Future<XcodeBuildResult> buildXcodeProject({
       plistParser: globals.plistParser,
       config: globals.config,
       analytics: globals.analytics,
+      hostPlatform: globals.platform,
+      operatingSystemUtils: globals.os,
+      flutterVersion: globals.flutterVersion,
+      reportCrashes: !await globals.isRunningOnBot
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),

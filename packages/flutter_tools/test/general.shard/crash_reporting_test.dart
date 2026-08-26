@@ -152,6 +152,30 @@ void main() {
       await verifyCrashReportSent(requestInfo);
     });
 
+    testWithoutContext('should send crash reports with custom typeId', () async {
+      final requestInfo = RequestInfo();
+
+      final crashReportSender = CrashReportSender(
+        client: FakeCrashReportSender(requestInfo),
+        platform: platform,
+        logger: logger,
+        operatingSystemUtils: operatingSystemUtils,
+        analytics: fakeAnalytics,
+      );
+
+      await crashReportSender.sendReport(
+        error: StateError('Test bad state error'),
+        stackTrace: stackTrace,
+        getFlutterVersion: () => 'test-version',
+        command: 'crash',
+        typeId: 'XcodeBuildError',
+      );
+
+      expect(requestInfo.fields?['type'], 'XcodeBuildError');
+      expect(logger.traceText, contains('Sending crash report to Google.'));
+      expect(logger.traceText, contains('Crash report sent (report ID: test-report-id)'));
+    });
+
     testWithoutContext(
       'should print an explanatory message when there is a SocketException',
       () async {

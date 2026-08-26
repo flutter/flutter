@@ -5,11 +5,14 @@
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 
+import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
 import '../convert.dart';
@@ -19,6 +22,8 @@ import '../ios/xcodeproj.dart';
 import '../macos/swift_package_manager.dart';
 import '../plugins.dart';
 import '../project.dart';
+import '../reporting/crash_reporting.dart';
+import '../version.dart';
 
 /// Swift Package Manager integration requires changes to the Xcode project's
 /// project.pbxproj and xcscheme. This class handles making those changes.
@@ -33,6 +38,10 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     required PlistParser plistParser,
     required Config config,
     required Analytics analytics,
+    required Platform hostPlatform,
+    required OperatingSystemUtils operatingSystemUtils,
+    required FlutterVersion flutterVersion,
+    required bool reportCrashes,
   }) : _xcodeProject = project,
        _platform = platform,
        _buildInfo = buildInfo,
@@ -42,6 +51,10 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
        _plistParser = plistParser,
        _config = config,
        _analytics = analytics,
+       _hostPlatform = hostPlatform,
+       _operatingSystemUtils = operatingSystemUtils,
+       _flutterVersion = flutterVersion,
+       _reportCrashes = reportCrashes,
        super(logger);
 
   final XcodeBasedProject _xcodeProject;
@@ -53,6 +66,10 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   final PlistParser _plistParser;
   final Config _config;
   final Analytics _analytics;
+  final Platform _hostPlatform;
+  final OperatingSystemUtils _operatingSystemUtils;
+  final FlutterVersion _flutterVersion;
+  final bool _reportCrashes;
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
   static const _flutterPluginsSwiftPackageBuildFileIdentifier = '78A318202AECB46A00862997';
@@ -138,6 +155,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// If the app is not an example app or the plugin cannot be found, this will return null.
   late final ({String name, String path})? _examplePlugin;
 
+  String _flutterVersionString() => _flutterVersion.getVersionString(redactUnknownBranches: true);
+
   void restoreFromBackup(SchemeInfo? schemeInfo) {
     if (backupProjectSettings.existsSync()) {
       logger.printTrace('Restoring project settings from backup file...');
@@ -175,7 +194,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     var optionalOnly = false;
     try {
       if (!_xcodeProjectInfoFile.existsSync()) {
-        throw Exception('Xcode project not found.');
+        throw SwiftPackageManagerMigrationException('Xcode project not found.');
       }
 
       _examplePlugin = await _loadPluginFromExampleProject(
@@ -223,21 +242,59 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       // If pbxproj was not already migrated, verify settings were set correctly.
       if (!isPbxprojMigrated) {
         if (!_isPbxprojMigratedCorrectly(updatedInfo, logErrorIfNotMigrated: true)) {
-          throw Exception('Settings were not updated correctly.');
+          throw SwiftPackageManagerMigrationException('Settings were not updated correctly.');
         }
       } else if (!isOptionalFilesMigrated) {
         if (!_areOptionalFilesMigratedCorrectly(updatedInfo, logErrorIfNotMigrated: true)) {
-          throw Exception('Settings were not updated correctly.');
+          throw SwiftPackageManagerMigrationException('Settings were not updated correctly.');
         }
       }
 
       // Get the project info to make sure it compiles with xcodebuild
-      await _xcodeProjectInterpreter.getInfo(
-        _xcodeProject,
-        buildDirectory: _fileSystem.directory(
-          _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
-        ),
-      );
+      try {
+        await _xcodeProjectInterpreter.getInfo(
+          _xcodeProject,
+          buildDirectory: _fileSystem.directory(
+            _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
+          ),
+        );
+      } on Exception catch (e, stackTrace) {
+        // Send error to crash reporter.
+        if (_reportCrashes) {
+          try {
+            await asyncGuard(() async {
+              final crashReportSender = CrashReportSender(
+                platform: _hostPlatform,
+                logger: logger,
+                operatingSystemUtils: _operatingSystemUtils,
+                analytics: _analytics,
+              );
+              await crashReportSender.sendReport(
+                error: e,
+                stackTrace: stackTrace,
+                getFlutterVersion: _flutterVersionString,
+                command: 'swiftpm-migration',
+                typeId: 'XcodeBuildError',
+              );
+            });
+          } on Exception catch (_) {
+            // Fail silently if it fails to send crash report
+          }
+        }
+
+        final message = e.toString();
+        if (message.contains('Could not resolve package dependencies')) {
+          throw SwiftPackageManagerMigrationException(
+            message,
+            machineMessage: 'Xcode could not resolve package dependencies.',
+          );
+        } else {
+          throw SwiftPackageManagerMigrationException(
+            message,
+            machineMessage: 'Xcode failed for unknown reason.',
+          );
+        }
+      }
       if (optionalOnly) {
         _analytics.send(
           Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'optional'),
@@ -249,14 +306,16 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       }
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
-      if (optionalOnly) {
+      if (e is SwiftPackageManagerMigrationException) {
         _analytics.send(
           Event.appleUsageEvent(
             workflow: 'swiftpm-migration-failure',
-            parameter: 'optional',
-            result: e.toString(),
+            parameter: optionalOnly ? 'optional' : 'full',
+            result: e.machineMessage ?? e.userMessage,
           ),
         );
+      }
+      if (optionalOnly) {
         // This part of the migration is optional. We'll log this for debugging sake but don't
         // really expect the user to see it.
         logger.printTrace(
@@ -265,13 +324,6 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           'See instructions to add manually: https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-plugin-authors',
         );
       } else {
-        _analytics.send(
-          Event.appleUsageEvent(
-            workflow: 'swiftpm-migration-failure',
-            parameter: 'full',
-            result: e.toString(),
-          ),
-        );
         throwToolExit(
           'An error occurred when adding Swift Package Manager integration:\n'
           '  $e\n\n'
@@ -298,7 +350,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   Future<SchemeInfo> _getSchemeFile() async {
     final XcodeProjectInfo? projectInfo = await _xcodeProject.projectInfo();
     if (projectInfo == null) {
-      throw Exception('Unable to get Xcode project info.');
+      throw SwiftPackageManagerMigrationException('Unable to get Xcode project info.');
     }
     final String? scheme = projectInfo.schemeFor(_buildInfo);
     if (scheme == null) {
@@ -307,7 +359,10 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
     final File schemeFile = _xcodeProject.xcodeProjectSchemeFile(scheme: scheme);
     if (!schemeFile.existsSync()) {
-      throw Exception('Unable to get scheme file for $scheme.');
+      throw SwiftPackageManagerMigrationException(
+        'Unable to get scheme file for $scheme.',
+        machineMessage: 'Unable to get scheme file for ${_replaceCustomNames(scheme)}.',
+      );
     }
 
     final String schemeContent = schemeFile.readAsStringSync();
@@ -342,7 +397,11 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     try {
       document = XmlDocument.parse(schemeContent);
     } on XmlException catch (exception) {
-      throw Exception('Failed to parse ${schemeFile.basename}: Invalid xml: $exception');
+      throw SwiftPackageManagerMigrationException(
+        'Failed to parse ${schemeFile.basename}: Invalid xml: $exception',
+        machineMessage:
+            'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Invalid xml',
+      );
     }
 
     final Iterable<XmlElement> buildableReferences = document.findAllElements('BuildableReference');
@@ -354,28 +413,44 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       }
     }
     if (targetReference == null) {
-      throw Exception(
+      throw SwiftPackageManagerMigrationException(
         'Failed to parse ${schemeFile.basename}: Could not find BuildableReference '
         'for ${_xcodeProject.hostAppProjectName}.',
+        machineMessage:
+            'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
+            'find BuildableReference for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)}',
       );
     }
 
     final String? buildableNameAttr = targetReference.getAttribute('BuildableName');
     if (buildableNameAttr == null) {
-      throw Exception('Failed to parse ${schemeFile.basename}: Could not find BuildableName.');
+      throw SwiftPackageManagerMigrationException(
+        'Failed to parse ${schemeFile.basename}: Could not find BuildableName.',
+        machineMessage:
+            'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
+            'find BuildableName.',
+      );
     }
     final buildableName = 'BuildableName = "$buildableNameAttr"';
 
     final String? blueprintNameAttr = targetReference.getAttribute('BlueprintName');
     if (blueprintNameAttr == null) {
-      throw Exception('Failed to parse ${schemeFile.basename}: Could not find BlueprintName.');
+      throw SwiftPackageManagerMigrationException(
+        'Failed to parse ${schemeFile.basename}: Could not find BlueprintName.',
+        machineMessage:
+            'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
+            'find BlueprintName.',
+      );
     }
     final blueprintName = 'BlueprintName = "$blueprintNameAttr"';
 
     final String? referencedContainerAttr = targetReference.getAttribute('ReferencedContainer');
     if (referencedContainerAttr == null) {
-      throw Exception(
+      throw SwiftPackageManagerMigrationException(
         'Failed to parse ${schemeFile.basename}: Could not find ReferencedContainer.',
+        machineMessage:
+            'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
+            'find ReferencedContainer.',
       );
     }
     final referencedContainer = 'ReferencedContainer = "$referencedContainerAttr"';
@@ -432,7 +507,12 @@ $newContent
             .firstOrNull;
 
         if (buildAction == null) {
-          throw Exception('Failed to parse ${schemeFile.basename}: Could not find BuildAction.');
+          throw SwiftPackageManagerMigrationException(
+            'Failed to parse ${schemeFile.basename}: Could not find BuildAction.',
+            machineMessage:
+                'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
+                'find BuildAction.',
+          );
         }
       }
       newScheme = schemeContent.replaceFirst(buildAction, '$newContent$buildAction');
@@ -442,8 +522,11 @@ $newContent
     try {
       XmlDocument.parse(newScheme);
     } on XmlException catch (exception) {
-      throw Exception(
-        'Failed to parse ${schemeFile.basename}: Invalid xml: $newScheme\n$exception',
+      throw SwiftPackageManagerMigrationException(
+        'Failed to parse ${schemeFile.basename} after upgrading: Invalid xml: $newScheme\n$exception',
+        machineMessage:
+            'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme after updating: '
+            'Invalid xml',
       );
     }
   }
@@ -453,17 +536,23 @@ $newContent
   ParsedProjectInfo _parsePbxproj() {
     final String? results = _plistParser.plistJsonContent(_xcodeProjectInfoFile.path);
     if (results == null) {
-      throw Exception('Failed to parse project settings.');
+      throw SwiftPackageManagerMigrationException('Failed to parse project settings.');
     }
 
     try {
       final decodeResult = json.decode(results) as Object;
       if (decodeResult is! Map<String, Object?>) {
-        throw Exception('project.pbxproj returned unexpected JSON response: $results');
+        throw SwiftPackageManagerMigrationException(
+          'project.pbxproj returned unexpected JSON response: $results',
+          machineMessage: 'project.pbxproj returned unexpected JSON response',
+        );
       }
       return ParsedProjectInfo.fromJson(decodeResult);
     } on FormatException {
-      throw Exception('project.pbxproj returned non-JSON response: $results');
+      throw SwiftPackageManagerMigrationException(
+        'project.pbxproj returned non-JSON response: $results',
+        machineMessage: 'project.pbxproj returned non-JSON response',
+      );
     }
   }
 
@@ -636,19 +725,23 @@ $newContent
           '$_flutterPluginsSwiftPackageBuildFileIdentifier /* $kFlutterGeneratedPluginSwiftPackageName in Frameworks */',
         ) &&
         originalProjectContents.contains(_flutterPluginsSwiftPackageBuildFileIdentifier)) {
-      throw Exception('Duplicate id found for PBXBuildFile.');
+      throw SwiftPackageManagerMigrationException('Duplicate id found for PBXBuildFile.');
     }
     if (!originalProjectContents.contains(
           '$_flutterPluginsSwiftPackageProductDependencyIdentifier /* $kFlutterGeneratedPluginSwiftPackageName */',
         ) &&
         originalProjectContents.contains(_flutterPluginsSwiftPackageProductDependencyIdentifier)) {
-      throw Exception('Duplicate id found for XCSwiftPackageProductDependency.');
+      throw SwiftPackageManagerMigrationException(
+        'Duplicate id found for XCSwiftPackageProductDependency.',
+      );
     }
     if (!originalProjectContents.contains(
           '$_localFlutterPluginsSwiftPackageReferenceIdentifier /* XCLocalSwiftPackageReference',
         ) &&
         originalProjectContents.contains(_localFlutterPluginsSwiftPackageReferenceIdentifier)) {
-      throw Exception('Duplicate id found for XCLocalSwiftPackageReference.');
+      throw SwiftPackageManagerMigrationException(
+        'Duplicate id found for XCLocalSwiftPackageReference.',
+      );
     }
   }
 
@@ -657,7 +750,7 @@ $newContent
           '$_flutterPluginsSwiftPackageFileIdentifer /* $kFlutterGeneratedPluginSwiftPackageName */',
         ) &&
         originalProjectContents.contains(_flutterPluginsSwiftPackageFileIdentifer)) {
-      throw Exception(
+      throw SwiftPackageManagerMigrationException(
         'Duplicate id found for $kFlutterGeneratedPluginSwiftPackageName PBXFileReference.',
       );
     }
@@ -666,13 +759,16 @@ $newContent
             '$_flutterPluginLocalOverrideFileIdenitifier /* ${_examplePlugin.name} */',
           ) &&
           originalProjectContents.contains(_flutterPluginLocalOverrideFileIdenitifier)) {
-        throw Exception('Duplicate id found for ${_examplePlugin.name} PBXFileReference.');
+        throw SwiftPackageManagerMigrationException(
+          'Duplicate id found for ${_examplePlugin.name} PBXFileReference.',
+          machineMessage: 'Duplicate id found for plugin PBXFileReference.',
+        );
       }
       if (!originalProjectContents.contains(
             '$_flutterFrameworkLocalOverrideFileIdentifier /* $kFlutterGeneratedFrameworkSwiftPackageTargetName */',
           ) &&
           originalProjectContents.contains(_flutterFrameworkLocalOverrideFileIdentifier)) {
-        throw Exception(
+        throw SwiftPackageManagerMigrationException(
           'Duplicate id found for $kFlutterGeneratedFrameworkSwiftPackageTargetName PBXFileReference.',
         );
       }
@@ -776,8 +872,10 @@ $newContent
     );
     if (runnerFrameworksPhaseStartIndex == -1 ||
         runnerFrameworksPhaseStartIndex > endSectionIndex) {
-      throw Exception(
+      throw SwiftPackageManagerMigrationException(
         'Unable to find PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} target.',
+        machineMessage:
+            'Unable to find PBXFrameworksBuildPhase for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
       );
     }
 
@@ -792,8 +890,10 @@ $newContent
         .toList()
         .firstOrNull;
     if (runnerFrameworksPhase == null) {
-      throw Exception(
+      throw SwiftPackageManagerMigrationException(
         'Unable to find parsed PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} target.',
+        machineMessage:
+            'Unable to find parsed PBXFrameworksBuildPhase for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
       );
     }
 
@@ -812,8 +912,10 @@ $newContent
         runnerFrameworksPhaseStartIndex,
       );
       if (startFilesIndex == -1 || startFilesIndex > endSectionIndex) {
-        throw Exception(
+        throw SwiftPackageManagerMigrationException(
           'Unable to files for PBXFrameworksBuildPhase ${_xcodeProject.hostAppProjectName} target.',
+          machineMessage:
+              'Unable to find files for PBXFrameworksBuildPhase for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
         );
       }
       const newContent =
@@ -858,8 +960,10 @@ $newContent
         .where((ParsedNativeTarget target) => target.identifier == _runnerNativeTargetIdentifier)
         .firstOrNull;
     if (runnerNativeTarget == null) {
-      throw Exception(
+      throw SwiftPackageManagerMigrationException(
         'Unable to find parsed PBXNativeTarget for ${_xcodeProject.hostAppProjectName} target.',
+        machineMessage:
+            'Unable to find parsed PBXNativeTarget for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
       );
     }
     final String subsectionLineStart = runnerNativeTarget.name != null
@@ -870,8 +974,10 @@ $newContent
       startSectionIndex,
     );
     if (runnerNativeTargetStartIndex == -1 || runnerNativeTargetStartIndex > endSectionIndex) {
-      throw Exception(
+      throw SwiftPackageManagerMigrationException(
         'Unable to find PBXNativeTarget for ${_xcodeProject.hostAppProjectName} target.',
+        machineMessage:
+            'Unable to find PBXNativeTarget for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
       );
     }
 
@@ -891,8 +997,10 @@ $newContent
       );
       if (packageProductDependenciesIndex == -1 ||
           packageProductDependenciesIndex > endSectionIndex) {
-        throw Exception(
+        throw SwiftPackageManagerMigrationException(
           'Unable to find packageProductDependencies for ${_xcodeProject.hostAppProjectName} PBXNativeTarget.',
+          machineMessage:
+              'Unable to find packageProductDependencies for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} PBXNativeTarget.',
         );
       }
       const newContent =
@@ -941,7 +1049,7 @@ $newContent
       startSectionIndex,
     );
     if (flutterGroupStartIndex == -1 || flutterGroupStartIndex > endSectionIndex) {
-      throw Exception('Unable to find Flutter PBXGroup.');
+      throw SwiftPackageManagerMigrationException('Unable to find Flutter PBXGroup.');
     }
 
     // Get the Flutter Group from the parsed project info.
@@ -950,7 +1058,7 @@ $newContent
         .toList()
         .firstOrNull;
     if (parsedGroup == null) {
-      throw Exception('Unable to find parsed Flutter PBXGroup.');
+      throw SwiftPackageManagerMigrationException('Unable to find parsed Flutter PBXGroup.');
     }
 
     // Find the children field within the Flutter PBXGroup.
@@ -1008,7 +1116,11 @@ $newContent
       startSectionIndex,
     );
     if (projectStartIndex == -1 || projectStartIndex > endSectionIndex) {
-      throw Exception('Unable to find PBXProject for ${_xcodeProject.hostAppProjectName}.');
+      throw SwiftPackageManagerMigrationException(
+        'Unable to find PBXProject for ${_xcodeProject.hostAppProjectName}.',
+        machineMessage:
+            'Unable to find PBXProject for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)}.',
+      );
     }
 
     // Get the Runner project from the parsed project info.
@@ -1017,7 +1129,11 @@ $newContent
         .toList()
         .firstOrNull;
     if (projectObject == null) {
-      throw Exception('Unable to find parsed PBXProject for ${_xcodeProject.hostAppProjectName}.');
+      throw SwiftPackageManagerMigrationException(
+        'Unable to find parsed PBXProject for ${_xcodeProject.hostAppProjectName}.',
+        machineMessage:
+            'Unable to find parsed PBXProject for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)}.',
+      );
     }
 
     if (projectObject.packageReferences == null) {
@@ -1035,8 +1151,10 @@ $newContent
         projectStartIndex,
       );
       if (packageReferencesIndex == -1 || packageReferencesIndex > endSectionIndex) {
-        throw Exception(
+        throw SwiftPackageManagerMigrationException(
           'Unable to find packageReferences for ${_xcodeProject.hostAppProjectName} PBXProject.',
+          machineMessage:
+              'Unable to find packageReferences for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} PBXProject.',
         );
       }
       const newContent =
@@ -1089,7 +1207,7 @@ $newContent
 
       final int index = lines.lastIndexWhere((String line) => line.trim().startsWith('/* End'));
       if (index == -1) {
-        throw Exception('Unable to find any sections.');
+        throw SwiftPackageManagerMigrationException('Unable to find any sections.');
       }
       lines.insertAll(index + 1, newContent);
 
@@ -1151,7 +1269,7 @@ $newContent
 
       final int index = lines.lastIndexWhere((String line) => line.trim().startsWith('/* End'));
       if (index == -1) {
-        throw Exception('Unable to find any sections.');
+        throw SwiftPackageManagerMigrationException('Unable to find any sections.');
       }
       lines.insertAll(index + 1, newContent);
 
@@ -1231,14 +1349,18 @@ $newContent
   (int, int) _sectionRange(String sectionName, List<String> lines, {bool throwIfMissing = true}) {
     final int startSectionIndex = lines.indexOf('/* Begin $sectionName section */');
     if (throwIfMissing && startSectionIndex == -1) {
-      throw Exception('Unable to find beginning of $sectionName section.');
+      throw SwiftPackageManagerMigrationException(
+        'Unable to find beginning of $sectionName section.',
+      );
     }
     final int endSectionIndex = lines.indexOf('/* End $sectionName section */');
     if (throwIfMissing && endSectionIndex == -1) {
-      throw Exception('Unable to find end of $sectionName section.');
+      throw SwiftPackageManagerMigrationException('Unable to find end of $sectionName section.');
     }
     if (throwIfMissing && startSectionIndex > endSectionIndex) {
-      throw Exception('Found the end of $sectionName section before the beginning.');
+      throw SwiftPackageManagerMigrationException(
+        'Found the end of $sectionName section before the beginning.',
+      );
     }
     return (startSectionIndex, endSectionIndex);
   }
@@ -1293,6 +1415,14 @@ $newContent
       return null;
     }
     return null;
+  }
+
+  /// If the [name] is not the default, anonymize it for analytics purposes.
+  String _replaceCustomNames(String name) {
+    if (name == 'Runner') {
+      return 'Runner';
+    }
+    return 'custom';
   }
 }
 
@@ -1453,4 +1583,14 @@ class ParsedProject {
   final Map<String, Object?> data;
   final String identifier;
   final List<String>? packageReferences;
+}
+
+class SwiftPackageManagerMigrationException implements Exception {
+  SwiftPackageManagerMigrationException(this.userMessage, {this.machineMessage});
+
+  final String userMessage;
+  final String? machineMessage;
+
+  @override
+  String toString() => userMessage;
 }
