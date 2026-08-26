@@ -4699,17 +4699,17 @@ void main() {
       test('sets user and machine message', () {
         final exception = SwiftPackageManagerMigrationException(
           'user message',
-          machineMessage: 'machine message',
+          analyticsMessage: 'machine message',
         );
         expect(exception.userMessage, 'user message');
-        expect(exception.machineMessage, 'machine message');
+        expect(exception.analyticsMessage, 'machine message');
         expect(exception.toString(), 'user message');
       });
 
       test('sets user message when machine message is null', () {
         final exception = SwiftPackageManagerMigrationException('user message');
         expect(exception.userMessage, 'user message');
-        expect(exception.machineMessage, isNull);
+        expect(exception.analyticsMessage, isNull);
         expect(exception.toString(), 'user message');
       });
     });

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 
@@ -286,12 +287,12 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         if (message.contains('Could not resolve package dependencies')) {
           throw SwiftPackageManagerMigrationException(
             message,
-            machineMessage: 'Xcode could not resolve package dependencies.',
+            analyticsMessage: 'Xcode could not resolve package dependencies.',
           );
         } else {
           throw SwiftPackageManagerMigrationException(
             message,
-            machineMessage: 'Xcode failed for unknown reason.',
+            analyticsMessage: 'Xcode failed for unknown reason.',
           );
         }
       }
@@ -311,7 +312,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           Event.appleUsageEvent(
             workflow: 'swiftpm-migration-failure',
             parameter: optionalOnly ? 'optional' : 'full',
-            result: e.machineMessage ?? e.userMessage,
+            result: e.analyticsMessage ?? e.userMessage,
           ),
         );
       }
@@ -361,7 +362,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     if (!schemeFile.existsSync()) {
       throw SwiftPackageManagerMigrationException(
         'Unable to get scheme file for $scheme.',
-        machineMessage: 'Unable to get scheme file for ${_replaceCustomNames(scheme)}.',
+        analyticsMessage: 'Unable to get scheme file for ${_replaceCustomNames(scheme)}.',
       );
     }
 
@@ -399,7 +400,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     } on XmlException catch (exception) {
       throw SwiftPackageManagerMigrationException(
         'Failed to parse ${schemeFile.basename}: Invalid xml: $exception',
-        machineMessage:
+        analyticsMessage:
             'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Invalid xml',
       );
     }
@@ -416,7 +417,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       throw SwiftPackageManagerMigrationException(
         'Failed to parse ${schemeFile.basename}: Could not find BuildableReference '
         'for ${_xcodeProject.hostAppProjectName}.',
-        machineMessage:
+        analyticsMessage:
             'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
             'find BuildableReference for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)}',
       );
@@ -426,7 +427,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     if (buildableNameAttr == null) {
       throw SwiftPackageManagerMigrationException(
         'Failed to parse ${schemeFile.basename}: Could not find BuildableName.',
-        machineMessage:
+        analyticsMessage:
             'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
             'find BuildableName.',
       );
@@ -437,7 +438,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     if (blueprintNameAttr == null) {
       throw SwiftPackageManagerMigrationException(
         'Failed to parse ${schemeFile.basename}: Could not find BlueprintName.',
-        machineMessage:
+        analyticsMessage:
             'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
             'find BlueprintName.',
       );
@@ -448,7 +449,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     if (referencedContainerAttr == null) {
       throw SwiftPackageManagerMigrationException(
         'Failed to parse ${schemeFile.basename}: Could not find ReferencedContainer.',
-        machineMessage:
+        analyticsMessage:
             'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
             'find ReferencedContainer.',
       );
@@ -509,7 +510,7 @@ $newContent
         if (buildAction == null) {
           throw SwiftPackageManagerMigrationException(
             'Failed to parse ${schemeFile.basename}: Could not find BuildAction.',
-            machineMessage:
+            analyticsMessage:
                 'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
                 'find BuildAction.',
           );
@@ -524,7 +525,7 @@ $newContent
     } on XmlException catch (exception) {
       throw SwiftPackageManagerMigrationException(
         'Failed to parse ${schemeFile.basename} after upgrading: Invalid xml: $newScheme\n$exception',
-        machineMessage:
+        analyticsMessage:
             'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme after updating: '
             'Invalid xml',
       );
@@ -544,14 +545,14 @@ $newContent
       if (decodeResult is! Map<String, Object?>) {
         throw SwiftPackageManagerMigrationException(
           'project.pbxproj returned unexpected JSON response: $results',
-          machineMessage: 'project.pbxproj returned unexpected JSON response',
+          analyticsMessage: 'project.pbxproj returned unexpected JSON response',
         );
       }
       return ParsedProjectInfo.fromJson(decodeResult);
     } on FormatException {
       throw SwiftPackageManagerMigrationException(
         'project.pbxproj returned non-JSON response: $results',
-        machineMessage: 'project.pbxproj returned non-JSON response',
+        analyticsMessage: 'project.pbxproj returned non-JSON response',
       );
     }
   }
@@ -761,7 +762,7 @@ $newContent
           originalProjectContents.contains(_flutterPluginLocalOverrideFileIdenitifier)) {
         throw SwiftPackageManagerMigrationException(
           'Duplicate id found for ${_examplePlugin.name} PBXFileReference.',
-          machineMessage: 'Duplicate id found for plugin PBXFileReference.',
+          analyticsMessage: 'Duplicate id found for plugin PBXFileReference.',
         );
       }
       if (!originalProjectContents.contains(
@@ -874,7 +875,7 @@ $newContent
         runnerFrameworksPhaseStartIndex > endSectionIndex) {
       throw SwiftPackageManagerMigrationException(
         'Unable to find PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} target.',
-        machineMessage:
+        analyticsMessage:
             'Unable to find PBXFrameworksBuildPhase for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
       );
     }
@@ -892,7 +893,7 @@ $newContent
     if (runnerFrameworksPhase == null) {
       throw SwiftPackageManagerMigrationException(
         'Unable to find parsed PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} target.',
-        machineMessage:
+        analyticsMessage:
             'Unable to find parsed PBXFrameworksBuildPhase for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
       );
     }
@@ -914,7 +915,7 @@ $newContent
       if (startFilesIndex == -1 || startFilesIndex > endSectionIndex) {
         throw SwiftPackageManagerMigrationException(
           'Unable to files for PBXFrameworksBuildPhase ${_xcodeProject.hostAppProjectName} target.',
-          machineMessage:
+          analyticsMessage:
               'Unable to find files for PBXFrameworksBuildPhase for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
         );
       }
@@ -962,7 +963,7 @@ $newContent
     if (runnerNativeTarget == null) {
       throw SwiftPackageManagerMigrationException(
         'Unable to find parsed PBXNativeTarget for ${_xcodeProject.hostAppProjectName} target.',
-        machineMessage:
+        analyticsMessage:
             'Unable to find parsed PBXNativeTarget for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
       );
     }
@@ -976,7 +977,7 @@ $newContent
     if (runnerNativeTargetStartIndex == -1 || runnerNativeTargetStartIndex > endSectionIndex) {
       throw SwiftPackageManagerMigrationException(
         'Unable to find PBXNativeTarget for ${_xcodeProject.hostAppProjectName} target.',
-        machineMessage:
+        analyticsMessage:
             'Unable to find PBXNativeTarget for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
       );
     }
@@ -999,7 +1000,7 @@ $newContent
           packageProductDependenciesIndex > endSectionIndex) {
         throw SwiftPackageManagerMigrationException(
           'Unable to find packageProductDependencies for ${_xcodeProject.hostAppProjectName} PBXNativeTarget.',
-          machineMessage:
+          analyticsMessage:
               'Unable to find packageProductDependencies for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} PBXNativeTarget.',
         );
       }
@@ -1118,7 +1119,7 @@ $newContent
     if (projectStartIndex == -1 || projectStartIndex > endSectionIndex) {
       throw SwiftPackageManagerMigrationException(
         'Unable to find PBXProject for ${_xcodeProject.hostAppProjectName}.',
-        machineMessage:
+        analyticsMessage:
             'Unable to find PBXProject for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)}.',
       );
     }
@@ -1131,7 +1132,7 @@ $newContent
     if (projectObject == null) {
       throw SwiftPackageManagerMigrationException(
         'Unable to find parsed PBXProject for ${_xcodeProject.hostAppProjectName}.',
-        machineMessage:
+        analyticsMessage:
             'Unable to find parsed PBXProject for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)}.',
       );
     }
@@ -1153,7 +1154,7 @@ $newContent
       if (packageReferencesIndex == -1 || packageReferencesIndex > endSectionIndex) {
         throw SwiftPackageManagerMigrationException(
           'Unable to find packageReferences for ${_xcodeProject.hostAppProjectName} PBXProject.',
-          machineMessage:
+          analyticsMessage:
               'Unable to find packageReferences for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} PBXProject.',
         );
       }
@@ -1585,11 +1586,16 @@ class ParsedProject {
   final List<String>? packageReferences;
 }
 
+/// Exception thrown when the Swift Package Manager integration migration fails.
+@visibleForTesting
 class SwiftPackageManagerMigrationException implements Exception {
-  SwiftPackageManagerMigrationException(this.userMessage, {this.machineMessage});
+  SwiftPackageManagerMigrationException(this.userMessage, {this.analyticsMessage});
 
+  /// The message to display to the user.
   final String userMessage;
-  final String? machineMessage;
+
+  /// An optional message for analytics/reporting.
+  final String? analyticsMessage;
 
   @override
   String toString() => userMessage;
