@@ -11,10 +11,11 @@ library foundation;
 
 export 'package:meta/meta.dart'
     show
+        RecordUse,
+        awaitNotRequired,
         factory,
         immutable,
         internal,
-        // ignore: experimental_member_use
         mustBeConst,
         mustCallSuper,
         nonVirtual,

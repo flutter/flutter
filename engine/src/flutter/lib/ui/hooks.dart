@@ -375,6 +375,24 @@ void _dispatchPointerDataPacket(ByteData packet) {
 }
 
 @pragma('vm:entry-point')
+class _HitTestResponse {
+  _HitTestResponse({required this.hasPlatformView});
+
+  @pragma('vm:entry-point')
+  final bool hasPlatformView;
+}
+
+@pragma('vm:entry-point')
+_HitTestResponse _hitTest(int viewId, double x, double y) {
+  assert(PlatformDispatcher.instance._views.containsKey(viewId), 'View $viewId does not exist.');
+  final FlutterView view = PlatformDispatcher.instance._views[viewId]!;
+  final offset = Offset(x, y);
+  final request = HitTestRequest(view: view, offset: offset);
+  final HitTestResponse response = PlatformDispatcher.instance._hitTest(request);
+  return _HitTestResponse(hasPlatformView: response.hasPlatformView);
+}
+
+@pragma('vm:entry-point')
 void _dispatchSemanticsAction(int viewId, int nodeId, int action, ByteData? args) {
   PlatformDispatcher.instance._dispatchSemanticsAction(viewId, nodeId, action, args);
 }
@@ -481,6 +499,30 @@ void _invoke3<A1, A2, A3>(
     zone.runGuarded(() {
       callback(arg1, arg2, arg3);
     });
+  }
+}
+
+/// Invokes [callback] inside the given [zone] passing it [arg1],
+/// and returns a nullable result of the specified type.
+///
+/// The 1 in the name refers to the number of arguments expected by
+/// the callback (and thus passed to this function, in addition to the
+/// callback itself and the zone in which the callback is executed).
+R? _invoke1WithReturn<A1, R>(R Function(A1 a1)? callback, Zone zone, A1 arg1) {
+  if (callback == null) {
+    return null;
+  }
+  if (identical(zone, Zone.current)) {
+    return callback(arg1);
+  } else {
+    return runZonedGuarded(
+      () {
+        return callback(arg1);
+      },
+      (e, s) {
+        zone.handleUncaughtError(e, s);
+      },
+    );
   }
 }
 

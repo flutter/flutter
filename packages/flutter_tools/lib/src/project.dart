@@ -4,28 +4,31 @@
 
 import 'dart:collection';
 
+import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
-import '../src/convert.dart';
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/project_migrator.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'base/yaml.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'migrations/analysis_options_migration.dart';
 import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
@@ -88,7 +91,65 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, this._manifest, this._exampleManifest);
+  FlutterProject(this.directory, FlutterManifest manifest, this._exampleManifest) {
+    _setManifest(manifest);
+  }
+
+  FlutterProject? _workspaceRoot;
+  bool _searchedForWorkspaceRoot = false;
+
+  /// Returns the workspace root project if this project is a member of a workspace.
+  ///
+  /// Returns null if this project is not part of a workspace or is itself the workspace root.
+  FlutterProject? get workspaceRoot {
+    if (_searchedForWorkspaceRoot) {
+      return _workspaceRoot;
+    }
+    _searchedForWorkspaceRoot = true;
+    _workspaceRoot = _findWorkspaceRoot();
+    return _workspaceRoot;
+  }
+
+  FlutterProject? _findWorkspaceRoot() {
+    final FileSystem fileSystem = directory.fileSystem;
+    final String normalizedPath = fileSystem.path.normalize(directory.absolute.path);
+    Directory candidate = fileSystem.directory(normalizedPath);
+
+    while (true) {
+      final Directory parent = candidate.parent;
+      if (fileSystem.path.equals(parent.path, candidate.path)) {
+        break;
+      }
+      candidate = parent;
+      final File pubspec = candidate.childFile('pubspec.yaml');
+      if (!pubspec.existsSync()) {
+        continue;
+      }
+      try {
+        final FlutterManifest manifest = FlutterProject._readManifest(
+          pubspec.path,
+          logger: globals.logger,
+          fileSystem: fileSystem,
+        );
+        if (manifest.workspace.isNotEmpty) {
+          final String relativePath = fileSystem.path.relative(
+            normalizedPath,
+            from: candidate.path,
+          );
+          final bool isMember = manifest.workspace.any((String entry) {
+            final glob = Glob(entry, context: fileSystem.path);
+            return glob.matches(relativePath);
+          });
+          if (isMember) {
+            return FlutterProject.fromDirectory(candidate);
+          }
+        }
+      } on Exception catch (_) {
+        // Ignore manifest reading errors.
+      }
+    }
+    return null;
+  }
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -132,13 +193,32 @@ class FlutterProject {
   final FlutterManifest _exampleManifest;
 
   /// List of [FlutterProject]s corresponding to the workspace entries.
-  List<FlutterProject> get workspaceProjects => manifest.workspace
-      .map(
-        (String entry) => FlutterProject.fromDirectory(
-          directory.childDirectory(directory.fileSystem.path.normalize(entry)),
-        ),
-      )
-      .toList();
+  List<FlutterProject> get workspaceProjects => _workspaceProjects;
+  late List<FlutterProject> _workspaceProjects;
+
+  void _setManifest(FlutterManifest manifest) {
+    _manifest = manifest;
+    _searchedForWorkspaceRoot = false;
+    _workspaceRoot = null;
+
+    // Update the workspace projects based on the new manifest.
+    _workspaceProjects = <FlutterProject>[];
+    for (final String entry in manifest.workspace) {
+      final glob = Glob(entry, context: directory.fileSystem.path);
+      for (final Directory globResult
+          in glob
+              .listFileSystemSync(directory.fileSystem, root: directory.path)
+              .whereType<Directory>()) {
+        if (globResult.childFile('pubspec.yaml').existsSync()) {
+          try {
+            _workspaceProjects.add(FlutterProject.fromDirectory(globResult));
+          } on Exception catch (_) {
+            // Ignore child projects with invalid manifests.
+          }
+        }
+      }
+    }
+  }
 
   /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
@@ -233,10 +313,7 @@ class FlutterProject {
 
   /// The location of the generated scaffolding project for hosting widget
   /// previews from this project.
-  // TODO(bkonyi): don't create this project in $TMP.
-  // See https://github.com/flutter/flutter/issues/179036
-  late final Directory widgetPreviewScaffold = directory.fileSystem.systemTempDirectory
-      .createTempSync('widget_preview_scaffold');
+  late final Directory widgetPreviewScaffold = directory.childDirectory('.widget_preview');
 
   /// The directory containing the generated code for this project.
   Directory get generated => directory.absolute
@@ -337,7 +414,7 @@ class FlutterProject {
 
   /// Reloads the content of [pubspecFile] and updates the contents of [manifest].
   void reloadManifest({required Logger logger, required FileSystem fs}) {
-    _manifest = _readManifest(pubspecFile.path, logger: logger, fileSystem: fs);
+    _setManifest(_readManifest(pubspecFile.path, logger: logger, fileSystem: fs));
   }
 
   /// Returns the MD5 hash of the contents of [manifest], ensuring [manifest] is up to date before
@@ -352,7 +429,7 @@ class FlutterProject {
   void replacePubspec(FlutterManifest updated) {
     final YamlMap updatedPubspecContents = updated.toYaml();
     pubspecFile.writeAsStringSync(encodeYamlAsString(updatedPubspecContents));
-    _manifest = updated;
+    _setManifest(updated);
   }
 
   /// Reapplies template files and regenerates project files and plugin
@@ -406,7 +483,25 @@ class FlutterProject {
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
   }) async {
-    if (!directory.existsSync() || isPlugin) {
+    if (!directory.existsSync()) {
+      return;
+    }
+
+    final migration = ProjectMigration(<ProjectMigrator>[
+      AnalysisOptionsMigration(this, globals.logger, packageConfig: packageConfig),
+    ]);
+    await migration.run();
+
+    // When no platforms are enabled, nothing reads the plugin list or the
+    // injected per-platform files.
+    final bool anyPlatformEnabled =
+        androidPlatform ||
+        iosPlatform ||
+        linuxPlatform ||
+        macOSPlatform ||
+        windowsPlatform ||
+        webPlatform;
+    if (isPlugin || !anyPlatformEnabled) {
       return;
     }
     await refreshPluginsList(
@@ -524,6 +619,10 @@ class AndroidProject extends FlutterProjectPlatform {
     '^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$',
   );
 
+  static final _kotlinCompilerOptionsPattern = RegExp(
+    r'kotlin\s*\{[\s\S]*?compilerOptions\s*\{[^}]*\}',
+  );
+
   /// Examples of strings that this regex matches:
   /// - `id "kotlin-android"`
   /// - `id("kotlin-android")`
@@ -630,11 +729,30 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
-    final bool declarativeMatch = _declarativeKotlinPluginPatterns.any((RegExp pattern) {
-      return (firstMatchInFile(appGradleFile, pattern) != null);
-    });
-    return imperativeMatch || declarativeMatch;
+    if (appGradleFile.existsSync()) {
+      if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+        return true;
+      }
+      for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+        if (firstMatchInFile(appGradleFile, pattern) != null) {
+          return true;
+        }
+      }
+      try {
+        final String content = appGradleFile.readAsStringSync();
+        if (_kotlinCompilerOptionsPattern.hasMatch(content)) {
+          return true;
+        }
+      } on FileSystemException {
+        // Ignore and continue with other checks.
+      }
+    }
+    final Directory kotlinSrc = hostAppGradleRoot
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('kotlin');
+    return kotlinSrc.existsSync();
   }
 
   /// Gets top-level Gradle build file.
@@ -1043,13 +1161,29 @@ See the link below for more information:
     );
   }
 
-  bool computeHcppEnabled() {
-    return _computeManifestMetadataBoolValue('io.flutter.embedding.android.EnableHcpp', false);
+  /// Returns the `io.flutter.embedding.android.EnableHcpp` manifest value.
+  ///
+  /// If there is no manifest file, or the key is not present, returns
+  /// [ifAbsent]. Callers should pass the value the build injects into the
+  /// manifest when the key is not explicitly set, so that the result reflects
+  /// what is actually packaged.
+  ///
+  /// This reads the app's primary source manifest, so it is an estimate of the
+  /// packaged value: it does not account for contributions from build
+  /// type/flavor overlay manifests or library manifests merged in at build
+  /// time. Intended for analytics, not for correctness-sensitive decisions.
+  bool computeHcppEnabled({bool ifAbsent = false}) {
+    return _computeManifestMetadataBoolValueOrNull('io.flutter.embedding.android.EnableHcpp') ??
+        ifAbsent;
   }
 
   bool _computeManifestMetadataBoolValue(String metadataKey, bool defaultValue) {
+    return _computeManifestMetadataBoolValueOrNull(metadataKey) ?? defaultValue;
+  }
+
+  bool? _computeManifestMetadataBoolValueOrNull(String metadataKey) {
     if (!appManifestFile.existsSync()) {
-      return defaultValue;
+      return null;
     }
     final XmlDocument document;
     try {
@@ -1080,7 +1214,7 @@ See the link below for more information:
         }
       }
     }
-    return defaultValue;
+    return null;
   }
 }
 

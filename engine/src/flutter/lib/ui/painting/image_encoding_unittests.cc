@@ -8,6 +8,7 @@
 #include "flutter/lib/ui/painting/image_encoding_impl.h"
 
 #include "flutter/common/task_runners.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/testing/mocks.h"
@@ -150,9 +151,13 @@ TEST_F(ShellTest, EncodeImageAccessesSyncSwitch) {
           .WillOnce([](const MockSyncSwitch::Handlers& handlers) {
             handlers.true_handler();
           });
-      ConvertToRasterUsingResourceContext(canvas_image->image()->skia_image(),
-                                          io_manager->GetResourceContext(),
-                                          is_gpu_disabled_sync_switch);
+      auto skia_image = canvas_image->image()
+                            ? canvas_image->image()->asSkiaImage()
+                            : nullptr;
+      ConvertToRasterUsingResourceContext(
+          skia_image ? skia_image->skia_image() : nullptr,
+          io_manager->GetResourceContext(), is_gpu_disabled_sync_switch);
+
       latch.Signal();
     });
 
@@ -209,7 +214,7 @@ std::shared_ptr<impeller::Context> MakeConvertDlImageToSkImageContext(
   EXPECT_CALL(*context, GetResourceAllocator).WillRepeatedly(Return(allocator));
   EXPECT_CALL(*context, CreateCommandBuffer).WillOnce(Return(command_buffer));
   EXPECT_CALL(*device_buffer, OnGetContents).WillOnce(Return(buffer.data()));
-  EXPECT_CALL(*command_queue, Submit(_, _, _))
+  EXPECT_CALL(*command_queue, Submit(_, _))
       .WillRepeatedly(
           DoAll(InvokeArgument<1>(impeller::CommandBuffer::Status::kCompleted),
                 Return(fml::Status())));
@@ -485,10 +490,14 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage16Float) {
   sk_sp<MockDlImage> image(new MockDlImage());
   EXPECT_CALL(*image, GetSize)  //
       .WillRepeatedly(Return(DlISize(100, 100)));
+
   impeller::TextureDescriptor desc;
   desc.format = impeller::PixelFormat::kR16G16B16A16Float;
   auto texture = std::make_shared<MockTexture>(desc);
-  EXPECT_CALL(*image, impeller_texture).WillOnce(Return(texture));
+  EXPECT_CALL(*texture, GetSize)
+      .WillRepeatedly(Return(impeller::ISize(100, 100)));
+  EXPECT_CALL(*image, GetImpellerTexture(::testing::_))
+      .WillOnce(Return(texture));
   std::vector<uint8_t> buffer;
   buffer.reserve(100 * 100 * 8);
   auto context = MakeConvertDlImageToSkImageContext(buffer);
@@ -515,10 +524,14 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
   sk_sp<MockDlImage> image(new MockDlImage());
   EXPECT_CALL(*image, GetSize)  //
       .WillRepeatedly(Return(DlISize(100, 100)));
+
   impeller::TextureDescriptor desc;
   desc.format = impeller::PixelFormat::kB10G10R10XR;
   auto texture = std::make_shared<MockTexture>(desc);
-  EXPECT_CALL(*image, impeller_texture).WillOnce(Return(texture));
+  EXPECT_CALL(*texture, GetSize)
+      .WillRepeatedly(Return(impeller::ISize(100, 100)));
+  EXPECT_CALL(*image, GetImpellerTexture(::testing::_))
+      .WillOnce(Return(texture));
   std::vector<uint8_t> buffer;
   buffer.reserve(100 * 100 * 4);
   auto context = MakeConvertDlImageToSkImageContext(buffer);
@@ -536,6 +549,44 @@ TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImage10XR) {
         EXPECT_EQ(100, image.value()->height());
         EXPECT_EQ(kBGR_101010x_XR_SkColorType, image.value()->colorType());
         EXPECT_EQ(nullptr, image.value()->colorSpace());
+      },
+      snapshot_delegate.GetWeakPtr(), context);
+  EXPECT_TRUE(did_call);
+}
+
+TEST(ImageEncodingImpellerTest, ConvertDlImageToSkImageTextureSizeMismatch) {
+  DlISize dl_image_size(100, 100);
+  sk_sp<MockDlImage> image(new MockDlImage());
+  EXPECT_CALL(*image, GetSize)  //
+      .WillRepeatedly(Return(dl_image_size));
+
+  // Create a texture that is smaller than the DlImage.
+  impeller::TextureDescriptor desc;
+  desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = impeller::ISize(50, 50);
+  auto texture = std::make_shared<MockTexture>(desc);
+  EXPECT_CALL(*texture, GetSize).WillRepeatedly(Return(desc.size));
+  EXPECT_CALL(*image, GetImpellerTexture(::testing::_))
+      .WillOnce(Return(texture));
+  std::vector<uint8_t> buffer;
+  buffer.reserve(desc.size.width * desc.size.height *
+                 impeller::BytesPerPixelForPixelFormat(desc.format));
+  auto context = MakeConvertDlImageToSkImageContext(buffer);
+
+  bool did_call = false;
+  MockSnapshotDelegate snapshot_delegate;
+  EXPECT_CALL(snapshot_delegate, MakeRenderContextCurrent)
+      .WillRepeatedly(Return(true));
+  ImageEncodingImpeller::ConvertDlImageToSkImage(
+      image,
+      [&](const fml::StatusOr<sk_sp<SkImage>>& result) {
+        did_call = true;
+        ASSERT_TRUE(result.ok());
+        ASSERT_TRUE(result.value());
+        // The SkImage size should match the size of the actual texture, not
+        // the size of the DlImage.
+        EXPECT_EQ(desc.size.width, result.value()->width());
+        EXPECT_EQ(desc.size.height, result.value()->height());
       },
       snapshot_delegate.GetWeakPtr(), context);
   EXPECT_TRUE(did_call);

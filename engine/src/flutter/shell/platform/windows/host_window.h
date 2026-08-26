@@ -45,7 +45,9 @@ class HostWindow {
       FlutterWindowsEngine* engine,
       const WindowSizeRequest& preferred_size,
       const WindowConstraints& preferred_constraints,
-      LPCWSTR title);
+      LPCWSTR title,
+      bool sized_to_content,
+      bool resizable);
 
   // Creates a dialog Win32 window with a child view confined to its client
   // area. |window_manager| is a pointer to the window manager that manages the
@@ -64,9 +66,39 @@ class HostWindow {
       const WindowSizeRequest& preferred_size,
       const WindowConstraints& preferred_constraints,
       LPCWSTR title,
+      HWND parent,
+      bool sized_to_content,
+      bool resizable);
+
+  // Creates a tooltip Win32 window with a child view confined to its client
+  // area. |window_manager| is a pointer to the window manager that manages the
+  // |HostWindow|. |engine| is a pointer to the engine that manages
+  // the window manager. |preferred_constraints| are the constraints set on
+  // the window's size. |get_position_callback| is a callback
+  // that determines the position of the tooltip window. It is invoked on the
+  // platform thread whenever the rendered content size of the tooltip changes,
+  // including after the initial frame is rendered and on any subsequent content
+  // resize. It is not called in response to parent window movement or other
+  // Win32 window messages. |parent| is the parent of this tooltip, which must
+  // be non-null.
+  static std::unique_ptr<HostWindow> CreateTooltipWindow(
+      WindowManager* window_manager,
+      FlutterWindowsEngine* engine,
+      const WindowConstraints& preferred_constraints,
+      GetWindowPositionCallback get_position_callback,
       HWND parent);
 
-  static std::unique_ptr<HostWindow> CreateTooltipWindow(
+  // Creates a popup Win32 window with a child view confined to its client
+  // area. |window_manager| is a pointer to the window manager that manages the
+  // |HostWindow|. |engine| is a pointer to the engine that manages
+  // the window manager. |preferred_constraints| are the constraints set on
+  // the window's size. |get_position_callback| is a callback that determines
+  // the position of the popup window. It is invoked on the platform thread
+  // whenever the rendered content size of the popup changes, including after
+  // the initial frame is rendered and on any subsequent content resize. It is
+  // not called in response to parent window movement or other Win32 window
+  // messages. |parent| is the parent of this popup, which must be non-null.
+  static std::unique_ptr<HostWindow> CreatePopupWindow(
       WindowManager* window_manager,
       FlutterWindowsEngine* engine,
       const WindowConstraints& preferred_constraints,
@@ -183,6 +215,14 @@ class HostWindow {
   // Sets the focus to the child view window of |window|.
   static void FocusRootViewOf(HostWindow* window);
 
+  // Handles a WM_ACTIVATE message for |hwnd| with the given |wparam|. When the
+  // window is being activated, focus its view; if the window is disabled
+  // (e.g. it owns a modal dialog), activation is instead redirected to the
+  // first enabled descendant. Does nothing when the window is being
+  // deactivated, so that a deactivated window does not reactivate itself and
+  // jump back to the top of the z-order.
+  void HandleWindowActivation(HWND hwnd, WPARAM wparam);
+
   // Enables or disables mouse and keyboard input to this window and all its
   // descendants.
   void EnableRecursively(bool enable);
@@ -191,6 +231,9 @@ class HostWindow {
   // is enabled, returns the current window. If no window is enabled, returns
   // `nullptr`.
   HostWindow* FindFirstEnabledDescendant() const;
+
+  // Returns the archetype of this window.
+  WindowArchetype GetArchetype() const { return archetype_; }
 
   // Returns windows owned by this window.
   std::vector<HostWindow*> GetOwnedWindows() const;

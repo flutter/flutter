@@ -28,7 +28,7 @@ std::optional<Rect> EllipseGeometry::GetCoverage(
 }
 
 bool EllipseGeometry::CoversArea(const Matrix& transform,
-                                 const Rect& rect) const {
+                                 const IRect& rect) const {
   return false;
 }
 

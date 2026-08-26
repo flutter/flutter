@@ -8,14 +8,16 @@ import 'package:hooks/hooks.dart';
 void main(List<String> args) async {
   await build(args, (BuildInput input, BuildOutputBuilder output) async {
     if (input.config.buildAssetTypes.contains('data_assets/data')) {
+      final Uri file = input.packageRoot.resolve('data/translations.json');
       output.assets.data.add(
         DataAsset(
           package: input.packageName,
           name: 'data/translations.json',
-          file: input.packageRoot.resolve('data/translations.json'),
+          file: file,
         ),
         routing: input.config.linkingEnabled ? ToLinkHook(input.packageName) : const ToAppBundle(),
       );
+      output.dependencies.add(file);
     }
   });
 }

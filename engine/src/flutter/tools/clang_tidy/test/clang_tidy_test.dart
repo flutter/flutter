@@ -532,6 +532,18 @@ void main() {
     expect(lintAction, equals(LintAction.skipMissing));
   });
 
+  test('Command getLintAction handles non-UTF8 files without throwing', () async {
+    final io.Directory tempDir = io.Directory.systemTemp.createTempSync('clang_tidy_test_');
+    final tempFile = io.File(path.join(tempDir.path, 'non_utf8_file.cc'));
+    tempFile.writeAsBytesSync(<int>[0x80, 0x81, 0xFE, 0xFF, 0x0A]);
+    try {
+      final LintAction lintAction = await Command.getLintAction(tempFile.path);
+      expect(lintAction, equals(LintAction.lint));
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
+
   test('Command getLintActionFromContents flags FLUTTER_NOLINT', () async {
     final LintAction lintAction = await Command.lintActionFromContents(
       Stream<String>.fromIterable(<String>[

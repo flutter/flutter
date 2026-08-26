@@ -200,7 +200,7 @@ void exitWithError(String errorMessage) {
 }
 
 void checkCwdIsRepoRoot(String commandName) {
-  final bool isRepoRoot = Directory('.git').existsSync();
+  final bool isRepoRoot = Directory('.git').existsSync() || File('.git').existsSync();
 
   if (!isRepoRoot) {
     exitWithError(

@@ -57,6 +57,8 @@ impeller_component("display_list") {
     "//flutter/skia",
   ]
 
+  deps = [ "//third_party/abseil-cpp/absl/hash" ]
+
   if (impeller_supports_rendering) {
     public_deps += [ "//flutter/impeller/runtime_stage" ]
   }
@@ -77,6 +79,7 @@ template("display_list_unittests_component") {
     "aiks_dl_gradient_unittests.cc",
     "aiks_dl_opacity_unittests.cc",
     "aiks_dl_path_unittests.cc",
+    "aiks_dl_primitive_shape_unittests.cc",
     "aiks_dl_runtime_effect_unittests.cc",
     "aiks_dl_shadow_unittests.cc",
     "aiks_dl_text_unittests.cc",
@@ -116,8 +119,8 @@ template("display_list_unittests_component") {
       ":display_list",
       "../playground:playground_test",
       "//flutter/display_list/testing:display_list_testing",
-      "//flutter/impeller/golden_tests:screenshot",
       "//flutter/impeller/renderer/testing:mocks",
+      "//flutter/impeller/testing:screenshot",
       "//flutter/txt",
     ]
     if (defined(invoker.public_configs)) {

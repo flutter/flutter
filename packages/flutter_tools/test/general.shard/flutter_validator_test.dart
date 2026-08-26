@@ -8,9 +8,9 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -28,6 +28,12 @@ Matcher _matchDoctorValidation({
       .having((ValidationResult result) => result.statusInfo, 'statusInfo', statusInfo)
       .having((ValidationResult result) => result.messages, 'messages', messages);
 }
+
+Matcher _first(Object matcher) => const TypeMatcher<Iterable<Object?>>().having(
+  (Iterable<Object?> element) => element.first,
+  'first',
+  matcher,
+);
 
 void main() {
   testWithoutContext('FlutterValidator shows an error message if gen_snapshot is '
@@ -360,7 +366,7 @@ void main() {
           const ValidationMessage.hint(
             'Flutter version 1.0.0 on channel [user-branch] at /sdk/flutter\n'
             'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
-            "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/setup.",
+            "If that doesn't fix the issue, try deleting the 'bin/cache/flutter.version.json' file in your Flutter SDK directory and then reinstall Flutter by following instructions at https://flutter.dev/setup.",
           ),
           const ValidationMessage(
             'If those were intentional, you can disregard the above warnings; however it is '
@@ -393,7 +399,7 @@ void main() {
           const ValidationMessage.hint(
             'Flutter version 0.0.0-unknown on channel beta at /sdk/flutter\n'
             'Cannot resolve current version, possibly due to local changes.\n'
-            'Reinstall Flutter by following instructions at https://flutter.dev/setup.',
+            "If that doesn't fix the issue, try deleting the 'bin/cache/flutter.version.json' file in your Flutter SDK directory and then reinstall Flutter by following instructions at https://flutter.dev/setup.",
           ),
           const ValidationMessage(
             'If those were intentional, you can disregard the above warnings; however it is '
@@ -715,6 +721,45 @@ void main() {
       ),
     );
   });
+
+  testWithoutContext('FlutterValidator shows a warning message on Intel Macs', () async {
+    final flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', branch: 'beta');
+    final fileSystem = MemoryFileSystem.test();
+    final artifacts = Artifacts.test();
+    final flutterValidator = FlutterValidator(
+      platform: FakePlatform(
+        operatingSystem: 'macos',
+        localeName: 'en_US.UTF-8',
+        environment: <String, String>{},
+      ),
+      flutterVersion: () => flutterVersion,
+      devToolsVersion: () => '2.8.0',
+      artifacts: artifacts,
+      fileSystem: fileSystem,
+      flutterRoot: () => '/sdk/flutter',
+      operatingSystemUtils: FakeOperatingSystemUtils(
+        name: 'macOS',
+        hostPlatform: HostPlatform.darwin_x64,
+        fs: fileSystem,
+      ),
+      processManager: FakeProcessManager.any(),
+      featureFlags: TestFeatureFlags(),
+    );
+
+    expect(
+      await flutterValidator.validate(),
+      _matchDoctorValidation(
+        validationType: ValidationType.partial,
+        statusInfo: 'Channel beta, 1.0.0, on macOS, locale en_US.UTF-8',
+        messages: _first(
+          const ValidationMessage.hint(
+            'Flutter is deprecating support for Intel-based Macs. '
+            'A future version of Flutter will require an Apple Silicon Mac to build applications.',
+          ),
+        ),
+      ),
+    );
+  });
 }
 
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
@@ -811,6 +856,12 @@ class FakeFlutterFeatures extends FeatureFlags {
 
   @override
   bool get isRecordUseEnabled => _enabled;
+
+  @override
+  bool get isMacOSArm64OnlyEnabled => _enabled;
+
+  @override
+  bool get isToolExtensionsEnabled => _enabled;
 
   @override
   final List<Feature> allFeatures;

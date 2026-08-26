@@ -198,12 +198,7 @@ class _DialogDemoState extends State<DialogDemo> with RestorationMixin {
 
 /// A MaterialPageRoute without any transition animations.
 class _NoAnimationMaterialPageRoute<T> extends MaterialPageRoute<T> {
-  _NoAnimationMaterialPageRoute({
-    required super.builder,
-    super.settings,
-    super.maintainState,
-    super.fullscreenDialog,
-  });
+  _NoAnimationMaterialPageRoute({required super.builder, super.settings});
 
   @override
   Widget buildTransitions(

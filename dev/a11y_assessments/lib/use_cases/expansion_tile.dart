@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class ExpansionTileUseCase extends UseCase {
-  ExpansionTileUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  ExpansionTileUseCase();
 
   @override
   String get name => 'ExpansionTile';
 
   @override
   String get route => '/expansion-tile';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const ExpansionTileExample();
@@ -34,10 +37,7 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: Column(
         children: <Widget>[
           const ExpansionTile(

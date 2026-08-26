@@ -12,7 +12,7 @@ Future<void> main() async {
       useWasm: false,
       forceSingleThreadedSkwasm: false,
       useDdc: true,
-      withHotReload: false,
+      withHotReload: true,
       buildMode: 'debug',
     ));
   });

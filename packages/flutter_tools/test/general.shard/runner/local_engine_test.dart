@@ -478,7 +478,7 @@ void main() {
 
       await expectToolExitLater(
         localWebEngineLocator.findEnginePath(),
-        contains('Unable to detect a Flutter engine build directory in blah'),
+        contains('No Flutter engine build directory found at: blah'),
       );
     },
   );

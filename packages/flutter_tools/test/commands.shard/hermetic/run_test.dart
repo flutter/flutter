@@ -347,7 +347,7 @@ void main() {
           expect(
             logger.warningText,
             contains(
-              '--flavor is only supported for Android, macOS, and iOS devices. '
+              '--flavor is only supported for Android, Linux, macOS, iOS, and Windows devices. '
               'Flavor-related features may not function properly and could '
               'behave differently in a future release.',
             ),
@@ -1694,6 +1694,7 @@ server:
           'run',
           '--start-paused',
           '--disable-service-auth-codes',
+          '--disable-service-origin-check',
           '--use-test-fonts',
           '--trace-skia',
           '--trace-systrace',
@@ -1719,6 +1720,7 @@ server:
 
       expect(options.startPaused, true);
       expect(options.disableServiceAuthCodes, true);
+      expect(options.disableServiceOriginCheck, true);
       expect(options.useTestFonts, true);
       expect(options.traceSkia, true);
       expect(options.traceSystrace, true);
@@ -1834,6 +1836,8 @@ server:
       final File mainFile = libDir.childFile('main.dart');
       mainFile.writeAsStringSync('void main() {}');
     });
+    // TODO(nshahan): Safe to remove after
+    // https://github.com/flutter/flutter/issues/142060.
     testUsingContext(
       'no warning triggered when web hot reload flag not present',
       () async {
@@ -1875,6 +1879,8 @@ server:
         DeviceManager: () => testDeviceManager,
       },
       initializeFlutterRoot: false,
+      // https://github.com/flutter/flutter/issues/142060
+      skip: true,
     );
 
     testUsingContext(
@@ -1895,6 +1901,80 @@ server:
             'please open an issue explaining why at '
             'https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml.',
           ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+      // https://github.com/flutter/flutter/issues/142060
+      skip: true,
+    );
+
+    testUsingContext(
+      'warning triggered when --build flag is passed',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run', '--build']);
+
+        expect(
+          testLogger.warningText,
+          contains(
+            'The "--build" flag is deprecated and will be removed in a future release. '
+            'Building is the default behavior, so this flag can be safely removed.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+
+    testUsingContext(
+      'warning triggered when --no-build flag is passed',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run', '--no-build']);
+
+        expect(
+          testLogger.warningText,
+          contains(
+            'The "--no-build" flag is deprecated and will be removed in a future release. '
+            'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+
+    testUsingContext(
+      'no warning triggered when --build or --no-build flag is not passed',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run']);
+
+        expect(
+          testLogger.warningText,
+          isNot(contains('is deprecated')),
         );
       },
       overrides: <Type, Generator>{
@@ -1991,8 +2071,7 @@ class FakeDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion => Future<String>.value(_sdkNameAndVersion);
 
   @override
-  Future<String> get targetPlatformDisplayName async =>
-      getNameForTargetPlatform(await targetPlatform);
+  Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
@@ -2093,6 +2172,7 @@ class TestRunCommandForUsageValues extends RunCommand {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
+    bool? forcedWebEnableHotReload,
   }) async {
     return const BuildInfo(
       BuildMode.debug,
@@ -2250,6 +2330,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     required analytics.Analytics analytics,
     required FileSystem fileSystem,
     required FlutterProject flutterProject,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
     required Logger logger,
     required OutputPreferences outputPreferences,
     required Platform platform,

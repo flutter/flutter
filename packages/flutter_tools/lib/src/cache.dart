@@ -8,6 +8,7 @@
 library;
 
 import 'dart:async';
+import 'dart:ffi' show Abi;
 import 'dart:math' show max;
 
 import 'package:crypto/crypto.dart';
@@ -15,7 +16,9 @@ import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import 'artifacts.dart';
 import 'base/common.dart';
+import 'base/context.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/io.dart'
@@ -179,6 +182,7 @@ class Cache {
     Platform? platform,
     Stdio? stdio,
     required ProcessManager processManager,
+    Abi? currentAbi,
   }) {
     if (rootOverride?.fileSystem != null &&
         fileSystem != null &&
@@ -204,6 +208,7 @@ class Cache {
         logger: logger,
         platform: platform,
         processManager: processManager,
+        currentAbi: currentAbi,
       ),
     );
   }
@@ -212,6 +217,7 @@ class Cache {
   final Platform _platform;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _osUtils;
+  OperatingSystemUtils get osUtils => _osUtils;
   final Directory? _rootOverride;
   final List<ArtifactSet> _artifacts;
   final Stdio? _stdio;
@@ -758,10 +764,17 @@ class Cache {
     Set<DevelopmentArtifact> requiredArtifacts,
   ) async {
     final artifactsToUpdate = <ArtifactSet>[];
+    final isLocalEngine = context.get<Artifacts>()?.localEngineInfo != null;
 
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
         _logger.printTrace('Artifact $artifact is not required, skipping update.');
+        continue;
+      }
+      if (isLocalEngine && (artifact is EngineCachedArtifact || artifact.name == 'engine_stamp')) {
+        _logger.printTrace(
+          'Artifact $artifact is an engine artifact or stamp and local engine is provided, skipping update.',
+        );
         continue;
       }
       if (await artifact.isUpToDate(_fileSystem)) {
@@ -944,17 +957,18 @@ abstract class CachedArtifact extends ArtifactSet {
         );
       }
     }
+    final String? version = this.version;
+    if (version == null) {
+      logger.printWarning(
+        'No known version for the artifact name "$name". '
+        'Flutter can continue, but the artifact may be re-downloaded on '
+        'subsequent invocations until the problem is resolved.',
+      );
+      return;
+    }
     await updateInner(artifactUpdater, fileSystem, operatingSystemUtils);
     try {
-      if (version == null) {
-        logger.printWarning(
-          'No known version for the artifact name "$name". '
-          'Flutter can continue, but the artifact may be re-downloaded on '
-          'subsequent invocations until the problem is resolved.',
-        );
-      } else {
-        cache.setStampFor(stampName, version!);
-      }
+      cache.setStampFor(stampName, version);
     } on FileSystemException catch (err) {
       logger.printWarning(
         'The new artifact "$name" was downloaded, but Flutter failed to update '

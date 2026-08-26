@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../src/android/android_sdk.dart';
-import '../../src/android/android_studio.dart';
+import '../android/android_sdk.dart';
+import '../android/android_studio.dart';
 import '../android/java.dart';
 import '../base/common.dart';
 import '../convert.dart';
@@ -197,6 +197,9 @@ class ConfigCommand extends FlutterCommand {
         final bool keyValue = boolArg(configSetting);
         globals.config.setValue(configSetting, keyValue);
         globals.printStatus('Setting "$configSetting" value to "$keyValue".');
+        if (!keyValue && feature.warningMessageOnDisable != null) {
+          globals.printWarning(feature.warningMessageOnDisable!);
+        }
       }
     }
 

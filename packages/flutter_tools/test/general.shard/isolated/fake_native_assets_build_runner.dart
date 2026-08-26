@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:file/file.dart';
@@ -40,13 +42,23 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     required bool linkingEnabled,
   }) async {
     BuildResult? result = buildResult;
+    final io.Directory tempDir = io.Directory.systemTemp.createTempSync(
+      'flutter_native_assets_test.',
+    );
+    final String tempPath = tempDir.path;
     for (final String package in packagesWithNativeAssetsResult) {
+      final packageDir = io.Platform.isWindows ? '$tempPath\\$package' : '$tempPath/$package';
+      final sharedDir = io.Platform.isWindows
+          ? '$tempPath\\build-out-dir-shared'
+          : '$tempPath/build-out-dir-shared';
       final input = BuildInputBuilder()
         ..setupShared(
-          packageRoot: Uri.parse('$package/'),
+          packageRoot: Uri.file('$packageDir/'),
           packageName: package,
-          outputDirectoryShared: Uri.parse('build-out-dir-shared'),
-          outputFile: Uri.file('output.json'),
+          outputDirectoryShared: Uri.file('$sharedDir/'),
+          outputFile: Uri.file(
+            io.Platform.isWindows ? '$packageDir\\output.json' : '$packageDir/output.json',
+          ),
         )
         ..setupBuildInput()
         ..config.setupBuild(linkingEnabled: linkingEnabled);
@@ -147,6 +159,17 @@ final class FakeFlutterNativeAssetsBuilderResult implements BuildResult, LinkRes
       dependencies: dependencies,
     );
   }
+
+  @override
+  Map<String, Object?> toJson() => <String, Object?>{
+    'encodedAssets': encodedAssets.map((e) => e.toJson()).toList(),
+    'encodedAssetsForLinking': Map.fromEntries(
+      encodedAssetsForLinking.entries.map(
+        (e) => MapEntry(e.key, e.value.map((a) => a.toJson()).toList()),
+      ),
+    ),
+    'dependencies': dependencies.map((e) => e.toString()).toList(),
+  };
 
   @override
   final List<EncodedAsset> encodedAssets;

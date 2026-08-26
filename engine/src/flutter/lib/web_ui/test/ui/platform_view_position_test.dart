@@ -22,7 +22,48 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
 
-  test('Onscreen canvas has position: absolute', () async {
+  test('base onscreen canvas is not positioned as an overlay', () async {
+    if (!isCanvasKit) {
+      return;
+    }
+
+    // Force multi-surface mode to ensure OnscreenCanvasProvider is used.
+    engine.debugOverrideJsConfiguration(
+      <String, Object?>{'canvasKitForceMultiSurfaceRasterizer': true}.jsify()
+          as engine.JsFlutterConfiguration?,
+    );
+    // Reset the renderer to ensure it is created with the new configuration.
+    engine.renderer.debugResetRasterizer();
+    engine.renderer.debugClear();
+
+    // Create a scene with only Flutter content. This uses the base canvas, not
+    // an overlay canvas interleaved with platform views.
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+    canvas.drawRect(
+      const ui.Rect.fromLTWH(0, 0, 100, 100),
+      ui.Paint()..color = const ui.Color(0xFFFF0000),
+    );
+
+    final sb = ui.SceneBuilder();
+    sb.addPicture(ui.Offset.zero, recorder.endRecording());
+
+    await renderScene(sb.build());
+
+    final DomElement canvasElement = (implicitView as engine.EngineFlutterView).dom.sceneHost
+        .querySelectorAll('canvas')
+        .single;
+
+    expect(
+      canvasElement.style.position,
+      isNot('absolute'),
+      reason: 'Base canvas should not be styled as a platform-view overlay.',
+    );
+
+    engine.debugOverrideJsConfiguration(null);
+  });
+
+  test('Onscreen overlay canvas has position: absolute', () async {
     // Force multi-surface mode to ensure OnscreenCanvasProvider is used.
     engine.debugOverrideJsConfiguration(
       <String, Object?>{'canvasKitForceMultiSurfaceRasterizer': true}.jsify()
@@ -57,16 +98,14 @@ Future<void> testMain() async {
 
     await renderScene(sb.build());
 
-    // Find the canvas element.
     final DomElement canvasElement = (implicitView as engine.EngineFlutterView).dom.sceneHost
         .querySelectorAll('canvas')
         .single;
 
-    // Verify position is absolute.
     expect(
       canvasElement.style.position,
       'absolute',
-      reason: 'Canvas should have position: absolute',
+      reason: 'Overlay canvas should have position: absolute.',
     );
 
     engine.debugOverrideJsConfiguration(null);

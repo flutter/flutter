@@ -34,7 +34,6 @@ import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
@@ -114,7 +113,6 @@ void testUsingContext(
               Logger: () => BufferLogger.test(),
               OperatingSystemUtils: () => FakeOperatingSystemUtils(),
               PersistentToolState: () => buildPersistentToolState(globals.fs),
-              Usage: () => TestUsage(),
               XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
               FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
               PlistParser: () => FakePlistParser(),
@@ -353,21 +351,36 @@ class NoopIOSSimulatorUtils implements IOSSimulatorUtils {
 }
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
-  @override
-  bool get isInstalled => true;
+  FakeXcodeProjectInterpreter({
+    bool isInstalled = true,
+    String? versionText = 'Xcode 15',
+    Version? version = const Version.withText(15, 0, 0, '15.0.0'),
+    String? build = '15A240D',
+  }) : _isInstalled = isInstalled,
+       _versionText = versionText,
+       _version = version,
+       _build = build;
+
+  final bool _isInstalled;
+  final String? _versionText;
+  final Version? _version;
+  final String? _build;
 
   @override
-  String get versionText => 'Xcode 15';
+  bool get isInstalled => _isInstalled;
 
   @override
-  Version get version => Version(15, 0, 0);
+  String? get versionText => _versionText;
 
   @override
-  String get build => '15A240D';
+  Version? get version => _version;
+
+  @override
+  String? get build => _build;
 
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -384,6 +397,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   Future<void> cleanWorkspace(
+    XcodeBasedProject xcodeProject,
     String workspacePath,
     String scheme, {
     required Directory buildDirectory,
@@ -392,7 +406,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   Future<XcodeProjectInfo> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {
@@ -405,20 +419,23 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Future<void> prefetchSwiftPackages(
-    String projectPath, {
+  Future<void> prefetchSwiftPackagesForProject(
+    XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
-    bool quiet = true,
-    bool waitForCompletion = true,
   }) async {}
 
   @override
-  Future<List<String>> xcodebuildProjectCommand(
-    String projectPath,
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageResolution = true,
+    bool skipPackageValidation = true,
   }) async {
     return <String>['xcrun', 'xcodebuild'];
+  }
+
+  @override
+  String swiftPackageCachePath(Directory buildDirectory) {
+    return '';
   }
 }
 

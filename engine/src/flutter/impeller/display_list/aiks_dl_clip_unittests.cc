@@ -54,7 +54,7 @@ TEST_P(AiksTest, CanRenderDifferenceClips) {
   // Draw a huge yellow rectangle to prove the clipping works.
   DlPaint paint;
   paint.setColor(DlColor::kYellow());
-  builder.DrawRect(DlRect::MakeXYWH(-1000, -1000, 2000, 2000), paint);
+  builder.DrawRect(DlRect::MakeCircleBounds({0, 0}, 1000), paint);
 
   // Remove the difference clips and draw hair that partially covers the eyes.
   builder.Restore();
@@ -108,7 +108,7 @@ TEST_P(AiksTest, ClipsUseCurrentTransform) {
 
     paint.setColor(colors[i % colors.size()]);
     builder.ClipPath(DlPath::MakeCircle(DlPoint(0, 0), 300));
-    builder.DrawRect(DlRect::MakeXYWH(-300, -300, 600, 600), paint);
+    builder.DrawRect(DlRect::MakeCircleBounds({0, 0}, 300), paint);
   }
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }

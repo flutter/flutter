@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -83,7 +84,11 @@ PreviewDetector createTestPreviewDetector() {
   _projectRoot = _fs.systemTempDirectory.createTempSync('root');
   final FlutterProject project = FlutterProject.fromDirectory(_projectRoot!);
 
+  final String sdkPath = _fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'dart-sdk');
+  final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
+
   return PreviewDetector(
+    artifacts: artifacts,
     platform: FakePlatform(),
     previewAnalytics: WidgetPreviewAnalytics(
       analytics: getInitializedFakeAnalyticsInstance(
@@ -129,7 +134,7 @@ void _onPackageConfigChangeDetectedRoot(String path) {
 /// Test the files included in [filesWithErrors] contain errors after executing [changeOperation].
 Future<void> expectHasErrors({
   required WidgetPreviewProject project,
-  required void Function() changeOperation,
+  required FutureOr<void> Function() changeOperation,
   required Set<WidgetPreviewSourceFile> filesWithErrors,
 }) async {
   await waitForChangeDetected(
@@ -146,7 +151,7 @@ Future<void> expectHasErrors({
 /// errors.
 Future<void> expectHasNoErrors({
   required WidgetPreviewProject project,
-  required void Function() changeOperation,
+  required FutureOr<void> Function() changeOperation,
 }) async {
   await expectHasErrors(
     project: project,
@@ -156,7 +161,9 @@ Future<void> expectHasNoErrors({
 }
 
 /// Waits for a pubspec changed event to be detected after executing [changeOperation].
-Future<String> waitForPubspecChangeDetected({required void Function() changeOperation}) {
+Future<String> waitForPubspecChangeDetected({
+  required FutureOr<void> Function() changeOperation,
+}) async {
   final completer = Completer<String>();
   _onPubspecChangeDetected = (String path) {
     if (completer.isCompleted) {
@@ -164,12 +171,18 @@ Future<String> waitForPubspecChangeDetected({required void Function() changeOper
     }
     completer.complete(path);
   };
-  changeOperation();
+  // Short delay to allow the file watcher (especially FSEvents on macOS) to
+  // fully initialize and start listening for events before we trigger the
+  // change operation.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
+  await changeOperation();
   return completer.future;
 }
 
 /// Waits for a package_config.json changed event to be detected after executing [changeOperation].
-Future<String> waitForPackageConfigChangeDetected({required void Function() changeOperation}) {
+Future<String> waitForPackageConfigChangeDetected({
+  required FutureOr<void> Function() changeOperation,
+}) async {
   final completer = Completer<String>();
   _onPackageConfigChangeDetected = (String path) {
     if (completer.isCompleted) {
@@ -177,7 +190,11 @@ Future<String> waitForPackageConfigChangeDetected({required void Function() chan
     }
     completer.complete(path);
   };
-  changeOperation();
+  // Short delay to allow the file watcher (especially FSEvents on macOS) to
+  // fully initialize and start listening for events before we trigger the
+  // change operation.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
+  await changeOperation();
   return completer.future;
 }
 
@@ -196,6 +213,10 @@ Future<void> waitForChangeDetected({
     onChangeDetected(updated);
     completer.complete();
   };
+  // Short delay to allow the file watcher (especially FSEvents on macOS) to
+  // fully initialize and start listening for events before we trigger the
+  // change operation.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
   await changeOperation();
   await completer.future;
 }
@@ -203,7 +224,7 @@ Future<void> waitForChangeDetected({
 /// Waits for [n] change detected events after executing [changeOperation].
 Future<void> waitForNChangesDetected({
   required int n,
-  required void Function() changeOperation,
+  required FutureOr<void> Function() changeOperation,
 }) async {
   var changeCount = 0;
   final completer = Completer<void>();
@@ -216,7 +237,11 @@ Future<void> waitForNChangesDetected({
       completer.complete();
     }
   };
-  changeOperation();
+  // Short delay to allow the file watcher (especially FSEvents on macOS) to
+  // fully initialize and start listening for events before we trigger the
+  // change operation.
+  await Future<void>.delayed(const Duration(milliseconds: 100));
+  await changeOperation();
   await completer.future;
 }
 

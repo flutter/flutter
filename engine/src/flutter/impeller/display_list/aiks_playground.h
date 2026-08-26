@@ -30,16 +30,17 @@ class AiksPlayground : public PlaygroundTest {
 
   bool OpenPlaygroundHere(const sk_sp<flutter::DisplayList>& list);
 
-  static bool ImGuiBegin(const char* name,
-                         bool* p_open,
-                         ImGuiWindowFlags flags);
-
  private:
   std::shared_ptr<TypographerContext> typographer_context_;
 
   AiksPlayground(const AiksPlayground&) = delete;
 
   AiksPlayground& operator=(const AiksPlayground&) = delete;
+};
+
+class AiksPlaygroundWithGoldens : public AiksPlayground {
+ public:
+  bool IsGoldenTestSuite() const override;
 };
 
 }  // namespace impeller

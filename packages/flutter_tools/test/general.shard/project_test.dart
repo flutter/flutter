@@ -145,6 +145,37 @@ void main() {
         );
         expectNotExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
+      _testInMemory('does nothing in a project with no platform directories', () async {
+        // A project (e.g. a pure-Dart package or the flutter framework's own
+        // packages) with no android/ios/linux/macos/windows/web directories
+        // has nothing for refreshPluginsList or injectPlugins to do — every
+        // consumer of `.flutter-plugins-dependencies` and the plugin symlinks
+        // gates on the matching platform directory existing. The plugin
+        // dependency below ensures the file would be written without the
+        // early-return.
+        await aPluginProject(legacy: false);
+        final Directory directory = globals.fs.directory('some_project');
+        writePackageConfigFiles(
+          directory: directory,
+          mainLibName: 'app_name',
+          packages: <String, String>{'my_plugin': '/plugin_project'},
+        );
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: app_name
+flutter:
+
+dependencies:
+  my_plugin:
+    sdk: flutter
+''');
+        final FlutterProject project = FlutterProject.fromDirectory(directory);
+
+        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+
+        expectNotExists(project.flutterPluginsDependenciesFile);
+      });
       _testInMemory('works if there is an "example" folder', () async {
         final FlutterProject project = await someProject();
         // The presence of an "example" folder used to be used as an indicator
@@ -993,6 +1024,111 @@ plugins {
             },
           );
 
+          expect(project.android.isKotlin, isFalse);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      group('_kotlinCompilerOptionsPattern', () {
+        void testRegex(String description, String content, {bool expected = true}) {
+          testUsingContext(
+            description,
+            () async {
+              final FlutterProject project = await someProject();
+              addAndroidGradleFile(project.directory, gradleFileContent: () => content);
+              expect(project.android.isKotlin, expected);
+            },
+            overrides: <Type, Generator>{
+              FileSystem: () => fs,
+              ProcessManager: () => FakeProcessManager.any(),
+              XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+              FlutterProjectFactory: () => flutterProjectFactory,
+            },
+          );
+        }
+
+        testRegex('matches standard formatting', '''
+kotlin {
+  compilerOptions {
+    jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+  }
+}
+''');
+
+        testRegex('matches irregular whitespace', '''
+kotlin
+{
+  compilerOptions
+  {
+    jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+  }
+}
+''');
+
+        testRegex('matches even when there are additional blocks in kotlin{}', '''
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
+
+    sourceSets {
+        main {
+            kotlin.srcDir("src/main/custom_kotlin")
+        }
+    }
+}
+''');
+
+        testRegex(
+          'matches no spacing',
+          'kotlin{compilerOptions{jvmTarget=org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17}}',
+        );
+
+        testRegex('does not match generic block without kotlin.compilerOptions{} DSL', '''
+android {
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+''', expected: false);
+      });
+
+      testUsingContext(
+        'isKotlin is true if src/main/kotlin directory exists',
+        () async {
+          final FlutterProject project = await someProject();
+          project.android.hostAppGradleRoot
+              .childDirectory('app')
+              .childDirectory('src')
+              .childDirectory('main')
+              .childDirectory('kotlin')
+              .createSync(recursive: true);
+          expect(project.android.isKotlin, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'isKotlin is false if src/main/kotlin directory does not exist',
+        () async {
+          final FlutterProject project = await someProject();
+          project.android.hostAppGradleRoot
+              .childDirectory('app')
+              .childDirectory('src')
+              .childDirectory('main')
+              .childDirectory('java')
+              .createSync(recursive: true);
           expect(project.android.isKotlin, isFalse);
         },
         overrides: <Type, Generator>{
@@ -1877,6 +2013,137 @@ resolution: workspace
           <String>['child1', 'child2', 'child2_example'],
         );
       });
+
+      _testInMemory('supports glob patterns in workspace entries', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- packages/*
+''');
+        directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+        directory.childDirectory('packages').childDirectory('child2').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child2
+flutter:
+resolution: workspace
+''');
+
+        expect(
+          FlutterProject.fromDirectory(directory).workspaceProjects
+              .map((FlutterProject subproject) => subproject.manifest.appName)
+              .toList(),
+          <String>['child1', 'child2'],
+        );
+      });
+
+      _testInMemory('workspaceRoot returns root project for member projects', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- pkgs/*
+''');
+        final Directory child1Dir = directory.childDirectory('pkgs').childDirectory('child1');
+        child1Dir.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+
+        final FlutterProject parentProject = FlutterProject.fromDirectory(directory);
+        final FlutterProject childProject = FlutterProject.fromDirectory(child1Dir);
+
+        expect(
+          globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+          globals.fs.path.canonicalize(parentProject.directory.path),
+        );
+        expect(parentProject.workspaceRoot, null);
+      });
+
+      _testInMemory('workspaceRoot works with relative paths', () async {
+        final Directory directory = globals.fs.directory('myproject')..createSync(recursive: true);
+        directory.childFile('pubspec.yaml').writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- child1
+''');
+        final Directory child1Dir = directory.childDirectory('child1')..createSync(recursive: true);
+        child1Dir.childFile('pubspec.yaml').writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+
+        final Directory originalCwd = globals.fs.currentDirectory;
+        try {
+          globals.fs.currentDirectory = directory;
+          final FlutterProject childProject = FlutterProject.fromDirectory(
+            globals.fs.directory('child1'),
+          );
+          expect(
+            globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+            globals.fs.path.canonicalize(globals.fs.currentDirectory.path),
+          );
+        } finally {
+          globals.fs.currentDirectory = originalCwd;
+        }
+      });
+
+      _testInMemory(
+        'workspaceRoot is resilient to malformed sibling packages in workspace',
+        () async {
+          final Directory directory = globals.fs.directory('myproject');
+          directory.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- pkgs/*
+''');
+          final Directory validChildDir = directory
+              .childDirectory('pkgs')
+              .childDirectory('valid_child');
+          validChildDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: valid_child
+flutter:
+resolution: workspace
+''');
+          final Directory brokenChildDir = directory
+              .childDirectory('pkgs')
+              .childDirectory('broken_child');
+          brokenChildDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('invalid: yaml: [broken');
+
+          final FlutterProject parentProject = FlutterProject.fromDirectory(directory);
+          final FlutterProject childProject = FlutterProject.fromDirectory(validChildDir);
+
+          expect(
+            globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+            globals.fs.path.canonicalize(parentProject.directory.path),
+          );
+        },
+      );
     });
   });
 
@@ -2534,7 +2801,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -2546,7 +2813,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<XcodeProjectInfo> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {

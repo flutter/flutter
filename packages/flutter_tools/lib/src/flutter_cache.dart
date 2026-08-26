@@ -823,7 +823,7 @@ class IosUsbArtifacts extends CachedArtifact {
   // used for additional download checks below, so we can re-download if they are
   // missing.
   static const _kExecutables = <String, List<String>>{
-    'libimobiledevice': <String>['idevicescreenshot', 'idevicesyslog'],
+    'libimobiledevice': <String>['idevicesyslog'],
     'libusbmuxd': <String>['iproxy'],
   };
 
@@ -864,7 +864,7 @@ class IosUsbArtifacts extends CachedArtifact {
   @visibleForTesting
   Uri get archiveUri => Uri.parse(
     '${cache.realmlessStorageBaseUrl}/flutter_infra_release/'
-    'ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}'
+    'ios-usb-dependencies/arm64_x86_64${cache.useUnsignedMacBinaries ? '/unsigned' : ''}'
     '/$name/$version/$name.zip',
   );
 }
@@ -927,7 +927,6 @@ const _iosBinaryDirs = <List<String>>[
 ];
 
 const _androidBinaryDirs = <List<String>>[
-  <String>['android-x86', 'android-x86/artifacts.zip'],
   <String>['android-x64', 'android-x64/artifacts.zip'],
   <String>['android-arm', 'android-arm/artifacts.zip'],
   <String>['android-arm-profile', 'android-arm-profile/artifacts.zip'],

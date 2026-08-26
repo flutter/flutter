@@ -12,6 +12,7 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -29,6 +30,7 @@ Watcher _defaultWatcherBuilder(String path) {
 
 class PreviewDetector {
   PreviewDetector({
+    required this.artifacts,
     required this.platform,
     required this.previewAnalytics,
     required this.project,
@@ -38,8 +40,17 @@ class PreviewDetector {
     required this.onPubspecChangeDetected,
     @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
     @visibleForTesting this.onPackageConfigChangeDetected,
-  }) : projectRoot = project.directory;
+  }) : projectRoot = _resolveDirectory(project.directory);
 
+  static Directory _resolveDirectory(Directory directory) {
+    try {
+      return directory.fileSystem.directory(directory.resolveSymbolicLinksSync());
+    } on Object catch (_) {
+      return directory.absolute;
+    }
+  }
+
+  final Artifacts artifacts;
   final Platform platform;
   final WidgetPreviewAnalytics previewAnalytics;
   final FlutterProject project;
@@ -51,6 +62,10 @@ class PreviewDetector {
   @visibleForTesting
   final void Function(String path)? onPackageConfigChangeDetected;
   final WatcherBuilder watcherBuilder;
+
+  late final List<String> _resolvedEphemeralDirectoryPaths = project.ephemeralDirectories
+      .map((Directory dir) => _resolveDirectory(dir).path)
+      .toList();
 
   @visibleForTesting
   static const kDirectoryWatcherClosedUnexpectedlyPrefix = 'Directory watcher closed unexpectedly';
@@ -127,9 +142,13 @@ class PreviewDetector {
   }
 
   Future<void> _initializeAnalysisContextCollection() async {
+    final String sdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+    final bool sdkExists =
+        fs.path.isAbsolute(sdkPath) && PhysicalResourceProvider.INSTANCE.getFolder(sdkPath).exists;
     _collection = AnalysisContextCollection(
       includedPaths: <String>[projectRoot.absolute.path],
       resourceProvider: PhysicalResourceProvider.INSTANCE,
+      sdkPath: sdkExists ? sdkPath : null,
     );
 
     // Find the initial set of previews.
@@ -154,10 +173,11 @@ class PreviewDetector {
         onPackageConfigChangeDetected?.call(event.path);
         return;
       }
-      // Ignore any files under .dart_tool or ephemeral directories created by
+      // Ignore any files under .dart_tool, .widget_preview, or ephemeral directories created by
       // the tool (e.g., build/, plugin directories, etc.).
       if (eventPath.doesContainDartTool ||
-          project.ephemeralDirectories.any((dir) => eventPath.contains(dir.path))) {
+          eventPath.doesContainWidgetPreview ||
+          _resolvedEphemeralDirectoryPaths.any((String path) => eventPath.contains(path))) {
         return;
       }
       // If the pubspec has changed, new dependencies or assets could have been added, requiring

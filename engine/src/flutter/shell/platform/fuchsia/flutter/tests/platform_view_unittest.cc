@@ -107,6 +107,11 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
     return settings_;
   }
   // |flutter::PlatformView::Delegate|
+  std::shared_ptr<fml::BasicTaskRunner>
+  OnPlatformViewGetShutdownSafeIOTaskRunner() const {
+    return nullptr;
+  }
+  // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchPlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message) {
     message_ = std::move(message);
@@ -115,6 +120,12 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
   void OnPlatformViewDispatchPointerDataPacket(
       std::unique_ptr<flutter::PointerDataPacket> packet) {
     pointer_packets_.push_back(std::move(packet));
+  }
+  // |flutter::PlatformView::Delegate|
+  flutter::HitTestResponse OnPlatformViewHitTest(
+      int64_t view_id,
+      const flutter::PointData offset) {
+    return {.has_platform_view = false};
   }
   // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchKeyDataPacket(

@@ -58,6 +58,33 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   final Arena frameArena = Arena();
 
+  /// The number of renders requested by the first frame that have not settled
+  /// yet.
+  ///
+  /// A multi-view app renders one scene per view, so the first frame is not
+  /// settled until all of them are. A render whose scene is superseded by a
+  /// newer one counts as settled, because the view will display the newer scene
+  /// instead.
+  int _pendingFirstFrameRenders = 0;
+
+  /// Whether the first frame is still being built, and can therefore still
+  /// request renders.
+  ///
+  /// This is false for the rest of the app's lifetime once the first frame ends,
+  /// so renders requested by later frames are not counted, even while the first
+  /// frame's own renders are still in flight.
+  bool _isBuildingFirstFrame = true;
+
+  /// Completes once every render the first frame requested has settled, and is
+  /// then set to null to stop tracking renders for the rest of the app's
+  /// lifetime.
+  ///
+  /// The framework reports its first frame from a post-frame callback, while web
+  /// renderers may still be rasterizing that frame asynchronously. The browser
+  /// event waits on this so it is not sent while the first frame is still
+  /// rasterizing.
+  Completer<void>? _firstFrameCompleter = Completer<void>();
+
   /// The [EnginePlatformDispatcher] singleton.
   static EnginePlatformDispatcher get instance => _instance;
   static final EnginePlatformDispatcher _instance = EnginePlatformDispatcher();
@@ -274,6 +301,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     invoke(_onDrawFrame, _onDrawFrameZone);
     _viewsRenderedInCurrentFrame = null;
     frameArena.collect();
+    if (_isBuildingFirstFrame) {
+      // The first frame has requested every render it is ever going to request.
+      // A frame that rendered nothing is still a first frame, so there may be
+      // nothing left to wait for.
+      _isBuildingFirstFrame = false;
+      _completeFirstFrameIfRendered();
+    }
   }
 
   /// A callback that is invoked when pointer data is available.
@@ -563,7 +597,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       // Dispatched by the bindings to delay service worker initialization.
       case 'flutter/service_worker':
-        domWindow.dispatchEvent(createDomEvent('Event', 'flutter-first-frame'));
+        unawaited(_dispatchFirstFrameEventAfterRender());
         return;
 
       case 'flutter/textinput':
@@ -589,10 +623,10 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         final arguments = decoded.arguments as Map<dynamic, dynamic>;
         switch (decoded.method) {
           case 'activateSystemCursor':
-            // TODO(mdebbar): Once the framework starts sending us a viewId, we
-            //                should use it to grab the correct view.
-            //                https://github.com/flutter/flutter/issues/140226
-            views.firstOrNull?.mouseCursor.activateSystemCursor(arguments.tryString('kind'));
+            final String? kind = arguments.tryString('kind');
+            for (final EngineFlutterView view in views) {
+              view.mouseCursor.activateSystemCursor(kind);
+            }
         }
         return;
 
@@ -756,8 +790,44 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // view hasn't been rendered already in this scope.
     final bool shouldRender = _viewsRenderedInCurrentFrame?.add(target) ?? false;
     if (shouldRender) {
-      await renderer.renderScene(scene, target);
+      final Future<void> sceneRender = renderer.renderScene(scene, target);
+      // The first frame ends while this render is still in flight, so remember
+      // whether it belongs to it instead of asking again below.
+      final bool isFirstFrameRender = _isBuildingFirstFrame;
+      if (isFirstFrameRender) {
+        _pendingFirstFrameRenders++;
+      }
+      try {
+        await sceneRender;
+      } finally {
+        if (isFirstFrameRender) {
+          _pendingFirstFrameRenders--;
+          _completeFirstFrameIfRendered();
+        }
+      }
     }
+  }
+
+  /// Completes [_firstFrameCompleter] once the first frame is done building and
+  /// every render it requested has settled.
+  ///
+  /// A render that failed counts as settled: [render] reports the failure to
+  /// its caller, and withholding the browser event would leave an app that hides
+  /// its loading screen on that event stuck on it forever.
+  void _completeFirstFrameIfRendered() {
+    if (_isBuildingFirstFrame || _pendingFirstFrameRenders > 0) {
+      return;
+    }
+    _firstFrameCompleter?.complete();
+    // Null it out to completely disable tracking for all future frames.
+    _firstFrameCompleter = null;
+  }
+
+  Future<void> _dispatchFirstFrameEventAfterRender() async {
+    await _firstFrameCompleter?.future;
+    domWindow.requestAnimationFrame((_) {
+      domWindow.dispatchEvent(createDomEvent('Event', 'flutter-first-frame'));
+    });
   }
 
   @override
@@ -1064,7 +1134,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _typographyMeasurementElement!.text = 'flutter typography measurement';
     // The element should be hidden from screen readers.
     _typographyMeasurementElement!.setAttribute('aria-hidden', 'true');
-    const spacingDefault = 9999.0;
+    const spacingDefault = 100.0;
     _typographyMeasurementElement!.style
       // The element should be positioned off-screen above
       // the window and not visible.
@@ -1084,9 +1154,17 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       ..wordSpacing = '${spacingDefault}px'
       ..margin = '0px 0px ${spacingDefault}px 0px';
     domDocument.body!.append(_typographyMeasurementElement!);
+
+    // Measure baseline font size to calculate the default line-height factor.
     final double typographyMeasurementElementFontSize =
         parseFontSize(_typographyMeasurementElement!)?.toDouble() ?? _defaultRootFontSize;
-    final double defaultLineHeightFactor = spacingDefault / typographyMeasurementElementFontSize;
+
+    // The factor that we expect for line-height if no override is present.
+    // This factor is constant regardless of browser zoom because both
+    // lineHeight and fontSize scale proportionally.
+    final double defaultLineHeightFactor =
+        spacingDefault / (typographyMeasurementElementFontSize / findBrowserTextScaleFactor());
+
     _typographySettingsObserver = createDomResizeObserver((
       List<DomResizeObserverEntry> entries,
       DomResizeObserver observer,
@@ -1097,9 +1175,25 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         'line-height',
       )?.toDouble();
       final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
+
+      // A property is considered "default" (not overridden) if it matches either
+      // the specified value or the zoomed specified value.
+      bool isDefault(double? value, double defaultValue) {
+        if (value == null) {
+          return true;
+        }
+        return (value - defaultValue).abs() < _typographyPrecisionErrorTolerance ||
+            (value - defaultValue * computedTextScaleFactor).abs() <
+                _typographyPrecisionErrorTolerance;
+      }
+
+      // We only consider it an override if the line-height factor deviates from
+      // our baseline. Both lineHeight and fontSize scale with browser zoom,
+      // so their ratio should remain equal to defaultLineHeightFactor unless
+      // an external CSS rule overrides it.
       final double? computedLineHeightScaleFactor =
-          fontSize != null && lineHeight != null && lineHeight != spacingDefault
-          ? lineHeight / fontSize
+          (fontSize != null && !isDefault(lineHeight, spacingDefault))
+          ? lineHeight! / fontSize
           : null;
       final double? computedWordSpacing = parseNumericStyleProperty(
         _typographyMeasurementElement!,
@@ -1126,18 +1220,20 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       computedTextScaleFactorChanged = _updateTextScaleFactor(computedTextScaleFactor);
       computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(
-        computedLineHeightScaleFactor == defaultLineHeightFactor
+        (computedLineHeightScaleFactor != null &&
+                (computedLineHeightScaleFactor - defaultLineHeightFactor).abs() <
+                    _typographyPrecisionErrorTolerance)
             ? null
             : computedLineHeightScaleFactor,
       );
       computedLetterSpacingChanged = _updateLetterSpacingOverride(
-        computedLetterSpacing == spacingDefault ? null : computedLetterSpacing,
+        isDefault(computedLetterSpacing, spacingDefault) ? null : computedLetterSpacing,
       );
       computedWordSpacingChanged = _updateWordSpacingOverride(
-        computedWordSpacing == spacingDefault ? null : computedWordSpacing,
+        isDefault(computedWordSpacing, spacingDefault) ? null : computedWordSpacing,
       );
       computedParagraphSpacingChanged = _updateParagraphSpacingOverride(
-        computedParagraphSpacing == spacingDefault ? null : computedParagraphSpacing,
+        isDefault(computedParagraphSpacing, spacingDefault) ? null : computedParagraphSpacing,
       );
 
       final bool metricsChanged =
@@ -1378,6 +1474,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _onSemanticsActionEvent = callback;
     _onSemanticsActionEventZone = Zone.current;
   }
+
+  /// A callback invoked when the platform wants to hit test a [FlutterView].
+  ///
+  /// For example, this is used by iOS to determine if a gesture hits a
+  /// [UIKitView].
+  @override
+  ui.HitTestCallback? onHitTest;
 
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
@@ -1765,6 +1868,7 @@ void invoke3<A1, A2, A3>(
 }
 
 const double _defaultRootFontSize = 16.0;
+const double _typographyPrecisionErrorTolerance = 1e-4;
 
 /// Finds the text scale factor of the browser by looking at the computed style
 /// of the browser's <html> element.

@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -19,8 +17,8 @@ import 'package:flutter_tools/src/project_validator.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_process_manager.dart' as test_process_manager;
 import '../../src/test_flutter_command_runner.dart';
+import 'analysis_server_mock.dart';
 
 const _kFlutterRoot = '/data/flutter';
 const SIGABRT = -6;
@@ -115,12 +113,47 @@ void main() {
     );
 
     testUsingContext(
+      'Analysis server premature exit with 255 throws ToolExit',
+      () async {
+        const stderr = 'Fatal error in analyzer';
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: stderr,
+          ),
+        ]);
+        await expectLater(
+          runner.run(<String>['analyze']),
+          throwsA(
+            isA<ToolExit>()
+                .having(
+                  (ToolExit e) => e.message,
+                  'message',
+                  contains('analysis server exited with code 255 and output:\n[stderr] $stderr'),
+                )
+                .having((ToolExit e) => e.exitCode, 'exitCode', equals(255)),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       '--flutter-repo analyzes everything in the flutterRoot',
       () async {
-        final streamController = StreamController<List<int>>();
-        final sink = IOSink(streamController.sink);
-        final exitCompleter = Completer<void>();
-        final process = _CustomLspProcess(stdin: sink, exitCompleter: exitCompleter);
+        final process = MockLspServerProcess();
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             // artifact paths are from Artifacts.test() and stable
@@ -137,41 +170,9 @@ void main() {
           ),
         ]);
 
-        final buffer = StringBuffer();
-        final messageReceived = Completer<void>();
-        String? firstMessage;
-
-        streamController.stream.transform(utf8.decoder).listen((String chunk) {
-          buffer.write(chunk);
-          final current = buffer.toString();
-          if (current.contains('{') && firstMessage == null) {
-            final int startIndex = current.indexOf('{');
-            firstMessage = current.substring(startIndex);
-            final request = jsonDecode(firstMessage!) as Map<String, Object?>;
-            if (request['method'] == 'initialize') {
-              process.addResponse(
-                '{"jsonrpc":"2.0","id":1,"result":'
-                '{"capabilities":{"window":{"workDoneProgress":true}}}}',
-              );
-              process.addResponse(
-                r'{"jsonrpc":"2.0","method":"$/progress","params":'
-                r'{"token":"analyze","value":{"kind":"begin"}}}',
-              );
-              process.addResponse(
-                r'{"jsonrpc":"2.0","method":"$/progress","params":'
-                r'{"token":"analyze","value":{"kind":"end"}}}',
-              );
-              exitCompleter.complete();
-              messageReceived.complete();
-            }
-          }
-        });
-
         await runner.run(<String>['analyze', '--flutter-repo']);
 
-        expect(firstMessage, isNotNull);
-        final request = jsonDecode(firstMessage!) as Map<String, Object?>;
-        expect(request['method'], 'initialize');
+        final Map<String, Object?> request = await process.initializeRequest;
         final params = request['params']! as Map<String, Object?>;
         expect(
           params['workspaceFolders'] as List?,
@@ -231,18 +232,4 @@ bool inRepo(List<String>? fileList, FileSystem fileSystem) {
     }
   }
   return false;
-}
-
-class _CustomLspProcess extends test_process_manager.FakeProcess {
-  _CustomLspProcess({super.stdin, Completer<void>? exitCompleter})
-    : super(completer: exitCompleter);
-
-  final StreamController<List<int>> _stdoutController = StreamController<List<int>>();
-
-  @override
-  Stream<List<int>> get stdout => _stdoutController.stream;
-
-  void addResponse(String message) {
-    _stdoutController.add(utf8.encode('Content-Length: ${message.length}\r\n\r\n$message'));
-  }
 }

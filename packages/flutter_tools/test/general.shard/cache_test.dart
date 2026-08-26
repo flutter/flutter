@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' show Abi;
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -30,14 +32,25 @@ const unameCommandForX64 = FakeCommand(command: <String>['uname', '-m'], stdout:
 const unameCommandForArm64 = FakeCommand(command: <String>['uname', '-m'], stdout: 'aarch64');
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
   late FakeProcessManager fakeProcessManager;
 
   setUp(() {
     fakeProcessManager = FakeProcessManager.empty();
   });
 
-  Cache createCache(Platform platform) {
-    return Cache.test(platform: platform, processManager: fakeProcessManager);
+  Cache createCache(Platform platform, {Abi? currentAbi}) {
+    return Cache.test(
+      platform: platform,
+      processManager: fakeProcessManager,
+      currentAbi: currentAbi,
+    );
   }
 
   group('Cache.checkLockAcquired', () {
@@ -148,6 +161,35 @@ void main() {
       expect(logger.warningText, contains('No known version for the artifact name "fake"'));
     });
 
+    testWithoutContext('MaterialFonts continues on missing version file', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final Directory artifactDir = fileSystem.systemTempDirectory.createTempSync(
+        'flutter_cache_test_artifact.',
+      );
+      final Directory downloadDir = fileSystem.systemTempDirectory.createTempSync(
+        'flutter_cache_test_download.',
+      );
+      final Cache cache = FakeSecondaryCache()
+        ..version =
+            null // version is missing.
+        ..artifactDirectory = artifactDir
+        ..downloadDir = downloadDir;
+
+      final materialFonts = MaterialFonts(cache);
+      await materialFonts.update(
+        FakeArtifactUpdater(),
+        logger,
+        fileSystem,
+        FakeOperatingSystemUtils(),
+      );
+
+      expect(
+        logger.warningText,
+        contains('No known version for the artifact name "material_fonts"'),
+      );
+    });
+
     testWithoutContext(
       'Gradle wrapper should not be up to date, if some cached artifact is not available',
       () {
@@ -243,7 +285,7 @@ void main() {
       expect(await cache.isUpToDate(), isTrue);
     });
 
-    testWithoutContext('should update cached artifacts which are not up to date', () async {
+    testUsingContext('should update cached artifacts which are not up to date', () async {
       final artifact1 = FakeSecondaryCachedArtifact()..upToDate = true;
       final artifact2 = FakeSecondaryCachedArtifact()..upToDate = false;
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -258,6 +300,39 @@ void main() {
       expect(artifact1.didUpdate, false);
       expect(artifact2.didUpdate, true);
     });
+
+    testUsingContext('should skip EngineCachedArtifacts when local engine is provided', () async {
+      final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
+      final fileSystem = MemoryFileSystem.test();
+      final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      final artifact2 = FakeEngineCachedArtifact(cache)..upToDate = false;
+
+      final cacheWithArtifacts = Cache.test(
+        fileSystem: fileSystem,
+        artifacts: <CachedArtifact>[artifact1, artifact2],
+        processManager: FakeProcessManager.any(),
+      );
+
+      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+      expect(artifact1.didUpdate, true);
+      expect(artifact2.didUpdate, false);
+    }, overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()});
+
+    testUsingContext('should skip engine_stamp artifact when local engine is provided', () async {
+      final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
+      final fileSystem = MemoryFileSystem.test();
+      final artifact2 = FakeEngineStampArtifact()..upToDate = false;
+
+      final cacheWithArtifacts = Cache.test(
+        fileSystem: fileSystem,
+        artifacts: <CachedArtifact>[artifact1, artifact2],
+        processManager: FakeProcessManager.any(),
+      );
+
+      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+      expect(artifact1.didUpdate, true);
+      expect(artifact2.didUpdate, false);
+    }, overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()});
 
     testWithoutContext(
       "getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter",
@@ -285,7 +360,7 @@ void main() {
       },
     );
 
-    testWithoutContext('failed storage.googleapis.com download shows China warning', () async {
+    testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final InternetAddress address = (await InternetAddress.lookup(
         'storage.googleapis.com',
       )).first;
@@ -947,13 +1022,12 @@ void main() {
         platform: FakePlatform(operatingSystem: 'macos'),
       );
       iosUsbArtifacts.location.createSync();
-      final File ideviceScreenshotFile = iosUsbArtifacts.location.childFile('idevicescreenshot')
+      final File ideviceSyslogFile = iosUsbArtifacts.location.childFile('idevicesyslog')
         ..createSync();
-      iosUsbArtifacts.location.childFile('idevicesyslog').createSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(fileSystem), true);
 
-      ideviceScreenshotFile.deleteSync();
+      ideviceSyslogFile.deleteSync();
 
       expect(iosUsbArtifacts.isUpToDateInner(fileSystem), false);
     },
@@ -1051,7 +1125,7 @@ void main() {
   testWithoutContext('FontSubset artifacts on x64 linux', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxX64);
     final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
 
@@ -1063,7 +1137,7 @@ void main() {
   testWithoutContext('FontSubset artifacts on arm64 linux', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxArm64);
     final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
     cache.includeAllPlatforms = false;
 
@@ -1073,7 +1147,10 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on windows', () {
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'windows'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'windows'),
+      currentAbi: Abi.windowsX64,
+    );
     final artifacts = FontSubsetArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'windows'),
@@ -1086,15 +1163,12 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on macos', () {
-    fakeProcessManager.addCommands(<FakeCommand>[
-      const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/sbin/sysctl'),
-      const FakeCommand(
-        command: <String>['sysctl', 'hw.optional.arm64'],
-        stdout: 'hw.optional.arm64: 0',
-      ),
-    ]);
+    fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kx64CheckCommand]);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'macos'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'macos'),
+      currentAbi: Abi.macosX64,
+    );
     final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'macos'));
     cache.includeAllPlatforms = false;
 
@@ -1122,7 +1196,10 @@ void main() {
   testWithoutContext('FontSubset artifacts for all platforms on x64 hosts', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'fuchsia'),
+      currentAbi: Abi.linuxX64,
+    );
     final artifacts = FontSubsetArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'fuchsia'),
@@ -1139,7 +1216,10 @@ void main() {
   testWithoutContext('FontSubset artifacts for all platforms on arm64 hosts', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
+    final Cache cache = createCache(
+      FakePlatform(operatingSystem: 'fuchsia'),
+      currentAbi: Abi.linuxArm64,
+    );
     final artifacts = FontSubsetArtifacts(
       cache,
       platform: FakePlatform(operatingSystem: 'fuchsia'),
@@ -1214,7 +1294,7 @@ void main() {
   testWithoutContext('Linux desktop artifacts for x64 include profile and release artifacts', () {
     fakeProcessManager.addCommand(unameCommandForX64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxX64);
     final artifacts = LinuxEngineArtifacts(cache, platform: FakePlatform());
 
     expect(artifacts.getBinaryDirs(), <List<String>>[
@@ -1227,7 +1307,7 @@ void main() {
   testWithoutContext('Linux desktop artifacts for arm64 include profile and release artifacts', () {
     fakeProcessManager.addCommand(unameCommandForArm64);
 
-    final Cache cache = createCache(FakePlatform());
+    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxArm64);
     final artifacts = LinuxEngineArtifacts(cache, platform: FakePlatform());
 
     expect(artifacts.getBinaryDirs(), <List<String>>[
@@ -1763,6 +1843,9 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   Exception? updateException;
 
   @override
+  String get name => 'fake';
+
+  @override
   Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
 
   @override
@@ -1795,6 +1878,73 @@ class FakeIosUsbArtifacts extends Fake implements IosUsbArtifacts {
 
   @override
   String stampName = 'ios-usb';
+}
+
+class FakeLocalEngineArtifacts extends Fake implements Artifacts {
+  @override
+  LocalEngineInfo get localEngineInfo => const LocalEngineInfo(
+    targetOutPath: 'out/android_debug_unopt',
+    hostOutPath: 'out/host_debug_unopt',
+  );
+
+  @override
+  bool get usesLocalArtifacts => true;
+}
+
+class FakeEngineCachedArtifact extends EngineCachedArtifact {
+  FakeEngineCachedArtifact(Cache cache)
+    : super('fake_engine', cache, DevelopmentArtifact.universal);
+
+  bool didUpdate = false;
+  bool upToDate = false;
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils, {
+    bool offline = false,
+  }) async {
+    didUpdate = true;
+  }
+
+  @override
+  List<List<String>> getBinaryDirs() => <List<String>>[];
+
+  @override
+  List<String> getLicenseDirs() => <String>[];
+
+  @override
+  List<String> getPackageDirs() => <String>[];
+}
+
+class FakeEngineStampArtifact extends Fake implements CachedArtifact {
+  bool upToDate = false;
+  bool didUpdate = false;
+
+  @override
+  String get name => 'engine_stamp';
+
+  @override
+  DevelopmentArtifact get developmentArtifact => DevelopmentArtifact.universal;
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils, {
+    bool offline = false,
+  }) async {
+    didUpdate = true;
+  }
 }
 
 class FakeSecondaryCache extends Fake implements Cache {

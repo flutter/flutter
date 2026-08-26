@@ -30,6 +30,10 @@ class TextInputPluginModifier {
     text_input_plugin->view_id_ = view_id;
   }
 
+  FlutterViewId GetViewId() { return text_input_plugin->view_id_; }
+
+  bool HasActiveModel() { return text_input_plugin->active_model_ != nullptr; }
+
  private:
   TextInputPlugin* text_input_plugin;
 
@@ -775,6 +779,103 @@ TEST_F(TextInputPluginTest, SetAndUseMultipleClients) {
 
   set_client_and_send_message(123, 456);  // Set and send for the first view
   set_client_and_send_message(123, 789);  // Set and send for the next view
+}
+
+// Verify that OnViewRemoved resets active model and view id when the
+// active view is removed.
+TEST_F(TextInputPluginTest, OnViewRemovedResetsActiveView) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger([](const std::string& channel,
+                                   const uint8_t* message, size_t message_size,
+                                   BinaryReply reply) {});
+  BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
+
+  TextInputPlugin handler(&messenger, engine());
+  TextInputPluginModifier modifier(&handler);
+  modifier.SetViewId(456);
+
+  // Set a client to create an active model.
+  auto& codec = JsonMethodCodec::GetInstance();
+  auto set_client_message = codec.EncodeMethodCall(
+      {"TextInput.setClient",
+       EncodedClientConfig("TextInputType.text", "TextInputAction.done")});
+  messenger.SimulateEngineMessage(kChannelName, set_client_message->data(),
+                                  set_client_message->size(), reply_handler);
+
+  EXPECT_TRUE(modifier.HasActiveModel());
+  EXPECT_EQ(modifier.GetViewId(), 456);
+
+  // Remove the active view.
+  handler.OnViewRemoved(456);
+
+  EXPECT_FALSE(modifier.HasActiveModel());
+  EXPECT_EQ(modifier.GetViewId(), 0);
+}
+
+// Verify that OnViewRemoved does not reset state when a different view
+// is removed.
+TEST_F(TextInputPluginTest, OnViewRemovedIgnoresNonActiveView) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger([](const std::string& channel,
+                                   const uint8_t* message, size_t message_size,
+                                   BinaryReply reply) {});
+  BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
+
+  TextInputPlugin handler(&messenger, engine());
+  TextInputPluginModifier modifier(&handler);
+  modifier.SetViewId(456);
+
+  // Set a client to create an active model.
+  auto& codec = JsonMethodCodec::GetInstance();
+  auto set_client_message = codec.EncodeMethodCall(
+      {"TextInput.setClient",
+       EncodedClientConfig("TextInputType.text", "TextInputAction.done")});
+  messenger.SimulateEngineMessage(kChannelName, set_client_message->data(),
+                                  set_client_message->size(), reply_handler);
+
+  EXPECT_TRUE(modifier.HasActiveModel());
+  EXPECT_EQ(modifier.GetViewId(), 456);
+
+  // Remove a different view.
+  handler.OnViewRemoved(789);
+
+  // State should be unchanged.
+  EXPECT_TRUE(modifier.HasActiveModel());
+  EXPECT_EQ(modifier.GetViewId(), 456);
+}
+
+// Verify that OnViewRemoved does not reset state for the implicit view.
+TEST_F(TextInputPluginTest, OnViewRemovedIgnoresImplicitView) {
+  UseEngineWithView();
+
+  TestBinaryMessenger messenger([](const std::string& channel,
+                                   const uint8_t* message, size_t message_size,
+                                   BinaryReply reply) {});
+  BinaryReply reply_handler = [](const uint8_t* reply, size_t reply_size) {};
+
+  TextInputPlugin handler(&messenger, engine());
+  TextInputPluginModifier modifier(&handler);
+
+  // Set a client to create an active model. EncodedClientConfig sets view_id
+  // to 456, so we override it to the implicit view id afterwards.
+  auto& codec = JsonMethodCodec::GetInstance();
+  auto set_client_message = codec.EncodeMethodCall(
+      {"TextInput.setClient",
+       EncodedClientConfig("TextInputType.text", "TextInputAction.done")});
+  messenger.SimulateEngineMessage(kChannelName, set_client_message->data(),
+                                  set_client_message->size(), reply_handler);
+
+  EXPECT_TRUE(modifier.HasActiveModel());
+  modifier.SetViewId(kImplicitViewId);
+
+  // Attempt to remove the implicit view.
+  handler.OnViewRemoved(kImplicitViewId);
+
+  // State should be unchanged for the implicit view.
+  EXPECT_TRUE(modifier.HasActiveModel());
+  EXPECT_EQ(modifier.GetViewId(), kImplicitViewId);
 }
 
 }  // namespace testing

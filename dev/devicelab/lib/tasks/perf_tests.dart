@@ -284,10 +284,11 @@ TaskFunction createFlutterGalleryStartupTest({
   ).run;
 }
 
-TaskFunction createComplexLayoutStartupTest({bool? enableImpeller}) {
+TaskFunction createComplexLayoutStartupTest({bool? enableImpeller, bool forceOpenGLES = false}) {
   return StartupTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     enableImpeller: enableImpeller,
+    forceOpenGLES: forceOpenGLES,
   ).run;
 }
 
@@ -372,6 +373,21 @@ TaskFunction createTextfieldPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/textfield_perf_e2e.dart',
+  ).run;
+}
+
+/// Creates a task that runs the text shadow performance benchmark.
+TaskFunction createTextShadowPerfTest({
+  bool? enableImpeller,
+  List<String> createPlatforms = const <String>[],
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'text_shadow_perf',
+    testDriver: 'test_driver/text_shadow_perf_test.dart',
+    enableImpeller: enableImpeller,
+    createPlatforms: createPlatforms,
   ).run;
 }
 
@@ -592,24 +608,29 @@ TaskFunction createOpacityPeepholeColOfAlphaSaveLayerRowsPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createGradientDynamicPerfE2ETest() {
+TaskFunction createGradientDynamicPerfE2ETest({List<String> createPlatforms = const <String>[]}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_dynamic_perf_e2e.dart',
+    createPlatforms: createPlatforms,
   ).run;
 }
 
-TaskFunction createGradientConsistentPerfE2ETest() {
+TaskFunction createGradientConsistentPerfE2ETest({
+  List<String> createPlatforms = const <String>[],
+}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_consistent_perf_e2e.dart',
+    createPlatforms: createPlatforms,
   ).run;
 }
 
-TaskFunction createGradientStaticPerfE2ETest() {
+TaskFunction createGradientStaticPerfE2ETest({List<String> createPlatforms = const <String>[]}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_static_perf_e2e.dart',
+    createPlatforms: createPlatforms,
   ).run;
 }
 
@@ -906,6 +927,7 @@ class StartupTest {
     this.enableLazyShaderMode = false,
     this.enableHcpp = false,
     this.enableImpeller,
+    this.forceOpenGLES = false,
   });
 
   final String testDirectory;
@@ -913,6 +935,7 @@ class StartupTest {
   final bool enableLazyShaderMode;
   final bool enableHcpp;
   final bool? enableImpeller;
+  final bool forceOpenGLES;
   final String target;
   final Map<String, String>? runEnvironment;
 
@@ -928,6 +951,9 @@ class StartupTest {
       }
       if (enableHcpp) {
         _addHcppSupportToManifest(testDirectory);
+      }
+      if ((enableImpeller ?? true) && forceOpenGLES) {
+        _addOpenGLESToManifest(testDirectory);
       }
 
       try {

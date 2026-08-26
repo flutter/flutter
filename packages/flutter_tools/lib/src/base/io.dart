@@ -37,7 +37,7 @@ import 'dart:io'
     as io
     show
         IOSink,
-        InternetAddress,
+        InterfaceAddress,
         InternetAddressType,
         NetworkInterface,
         Process,
@@ -294,26 +294,28 @@ class Stdio {
   bool get supportsAnsiEscapes => hasTerminal && stdout.supportsAnsiEscapes;
 
   /// Writes [message] to [stderr], falling back on [fallback] if the write
-  /// throws any exception. The default fallback calls [print] on [message].
+  /// throws any exception. The default fallback prints [message] to the console,
+  /// ignoring any errors.
   void stderrWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
     if (!_stderrDone) {
       _stdioWrite(stderr, message, fallback: fallback);
       return;
     }
     fallback == null
-        ? print(message)
+        ? _safePrint(message)
         : fallback(message, const io.StdoutException('stderr is done'), StackTrace.current);
   }
 
   /// Writes [message] to [stdout], falling back on [fallback] if the write
-  /// throws any exception. The default fallback calls [print] on [message].
+  /// throws any exception. The default fallback prints [message] to the console,
+  /// ignoring any errors.
   void stdoutWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
     if (!_stdoutDone) {
       _stdioWrite(stdout, message, fallback: fallback);
       return;
     }
     fallback == null
-        ? print(message)
+        ? _safePrint(message)
         : fallback(message, const io.StdoutException('stdout is done'), StackTrace.current);
   }
 
@@ -329,12 +331,20 @@ class Stdio {
       },
       onError: (Object error, StackTrace stackTrace) {
         if (fallback == null) {
-          print(message);
+          _safePrint(message);
         } else {
           fallback(message, error, stackTrace);
         }
       },
     );
+  }
+
+  void _safePrint(String message) {
+    try {
+      print(message);
+    } on Exception catch (_) {
+      // If print also throws (e.g. broken pipe on stdout), we ignore it.
+    }
   }
 
   /// Adds [stream] to [stdout].
@@ -400,7 +410,7 @@ class NetworkInterface implements io.NetworkInterface {
   final io.NetworkInterface _delegate;
 
   @override
-  List<io.InternetAddress> get addresses => _delegate.addresses;
+  List<io.InterfaceAddress> get addresses => _delegate.addresses;
 
   @override
   int get index => _delegate.index;

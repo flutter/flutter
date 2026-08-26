@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:dart_style/dart_style.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -17,6 +19,7 @@ import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:process/process.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
@@ -84,8 +87,15 @@ const Brightness brightnessConstant = Brightness.dark;
 
 const kThemeDart = '''
 import 'package:flutter/widget_previews.dart';
+import 'package:flutter/widgets.dart';
 
-PreviewThemeData myThemeData() => PreviewThemeData();
+final class MyThemeData extends PreviewThemeData {
+  const MyThemeData();
+  @override
+  Widget apply(BuildContext context, Widget child) => child;
+}
+
+PreviewThemeData myThemeData() => const MyThemeData();
 ''';
 
 const kWrapperDart = '''
@@ -256,7 +266,12 @@ void main() {
         ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary)
         ..childFile('lib/src/custom_previews.dart').writeAsStringSync(kCustomPreviews);
       project = FlutterProject.fromDirectoryTest(projectDir);
+      final String? sdkPath = Cache.flutterRoot != null
+          ? fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'dart-sdk')
+          : null;
+      final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
       previewDetector = PreviewDetector(
+        artifacts: artifacts,
         platform: FakePlatform(),
         previewAnalytics: WidgetPreviewAnalytics(
           analytics: getInitializedFakeAnalyticsInstance(
@@ -463,16 +478,18 @@ List<_i1.WidgetPreview> previews() => [];
           dtdUri: dtdUri,
           widgetPreviewServiceName: 'widget-preview-service',
           widgetPreviewScaffoldStreamName: 'widget-preview-stream',
+          projectRootPath: project.directory.absolute.path,
         );
 
-        final expectedDtdConnectionInfo =
-            '''
+        final String expectedDtdConnectionInfo = DartFormatter(languageVersion: Version.none)
+            .format('''
 // ignore_for_file: implementation_imports
 
 const String kWidgetPreviewDtdUri = '$dtdUri';
 const String kWidgetPreviewService = 'widget-preview-service';
 const String kWidgetPreviewScaffoldStream = 'widget-preview-stream';
-''';
+const String kProjectRootPath = r'${project.directory.absolute.path}';
+''');
         expect(generatedDtdConnectionInfoFile.readAsStringSync(), expectedDtdConnectionInfo);
       },
     );

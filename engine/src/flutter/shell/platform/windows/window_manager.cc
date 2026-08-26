@@ -17,6 +17,7 @@
 #include "shell/platform/windows/client_wrapper/include/flutter/flutter_view.h"
 #include "shell/platform/windows/flutter_windows_view.h"
 #include "shell/platform/windows/host_window.h"
+#include "shell/platform/windows/host_window_popup.h"
 #include "shell/platform/windows/host_window_tooltip.h"
 
 namespace flutter {
@@ -32,7 +33,7 @@ FlutterViewId WindowManager::CreateRegularWindow(
     const RegularWindowCreationRequest* request) {
   auto window = HostWindow::CreateRegularWindow(
       this, engine_, request->preferred_size, request->preferred_constraints,
-      request->title);
+      request->title, request->sized_to_content, request->resizable);
   if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
     return -1;
@@ -46,7 +47,8 @@ FlutterViewId WindowManager::CreateDialogWindow(
     const DialogWindowCreationRequest* request) {
   auto window = HostWindow::CreateDialogWindow(
       this, engine_, request->preferred_size, request->preferred_constraints,
-      request->title, request->parent_or_null);
+      request->title, request->parent_or_null, request->sized_to_content,
+      request->resizable);
   if (!window || !window->GetWindowHandle()) {
     FML_LOG(ERROR) << "Failed to create host window";
     return -1;
@@ -70,20 +72,38 @@ FlutterViewId WindowManager::CreateTooltipWindow(
   return view_id;
 }
 
+FlutterViewId WindowManager::CreatePopupWindow(
+    const PopupWindowCreationRequest* request) {
+  auto window = HostWindow::CreatePopupWindow(
+      this, engine_, request->preferred_constraints,
+      request->get_position_callback, request->parent);
+  if (!window || !window->GetWindowHandle()) {
+    FML_LOG(ERROR) << "Failed to create host window";
+    return -1;
+  }
+  FlutterViewId const view_id = window->view_controller_->view()->view_id();
+  active_windows_[window->GetWindowHandle()] = std::move(window);
+  return view_id;
+}
+
 void WindowManager::OnEngineShutdown() {
-  // Don't send any more messages to isolate.
-  on_message_ = nullptr;
   std::vector<HWND> active_handles;
   active_handles.reserve(active_windows_.size());
   for (auto& [hwnd, window] : active_windows_) {
     active_handles.push_back(hwnd);
   }
+  // Destroy the windows before clearing |on_message_| so the WM_DESTROY
+  // round-trip reaches the isolate. Otherwise per-view Dart controllers
+  // never observe destruction and may issue follow-up FFI calls (e.g.
+  // updatePosition) with stale handles after the engine is torn down.
   for (auto hwnd : active_handles) {
     // This will destroy the window, which will in turn remove the
     // HostWindow from map when handling WM_NCDESTROY inside
     // HandleMessage.
     InternalFlutterWindows_WindowManager_OnDestroyWindow(hwnd);
   }
+  // Don't send any more messages to isolate.
+  on_message_ = nullptr;
 }
 
 std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
@@ -160,6 +180,15 @@ FlutterViewId InternalFlutterWindows_WindowManager_CreateTooltipWindow(
   flutter::FlutterWindowsEngine* engine =
       flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
   return engine->window_manager()->CreateTooltipWindow(request);
+}
+
+FLUTTER_EXPORT
+FlutterViewId InternalFlutterWindows_WindowManager_CreatePopupWindow(
+    int64_t engine_id,
+    const flutter::PopupWindowCreationRequest* request) {
+  flutter::FlutterWindowsEngine* engine =
+      flutter::FlutterWindowsEngine::GetEngineForId(engine_id);
+  return engine->window_manager()->CreatePopupWindow(request);
 }
 
 HWND InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
@@ -246,4 +275,12 @@ void InternalFlutterWindows_WindowManager_UpdateTooltipPosition(HWND hwnd) {
   flutter::HostWindowTooltip* tooltip_window =
       reinterpret_cast<flutter::HostWindowTooltip*>(window);
   tooltip_window->UpdatePosition();
+}
+
+FLUTTER_EXPORT
+void InternalFlutterWindows_WindowManager_UpdatePopupPosition(HWND hwnd) {
+  flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
+  flutter::HostWindowPopup* popup_window =
+      reinterpret_cast<flutter::HostWindowPopup*>(window);
+  popup_window->UpdatePosition();
 }

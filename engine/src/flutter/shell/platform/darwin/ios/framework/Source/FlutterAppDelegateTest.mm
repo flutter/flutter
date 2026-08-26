@@ -8,10 +8,10 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -192,7 +192,7 @@ FLUTTER_ASSERT_ARC
   OCMVerifyAll(self.mockNavigationChannel);
 }
 
-- (void)testUseNonDeprecatedOpenURLAPI {
+- (void)testUniversalLinkDoesNotRelayToSystemWhenUnhandled {
   OCMStub([self.mockMainBundle objectForInfoDictionaryKey:@"FlutterDeepLinkingEnabled"])
       .andReturn(@YES);
   NSUserActivity* userActivity = [[NSUserActivity alloc] initWithActivityType:@"com.example.test"];
@@ -205,13 +205,15 @@ FLUTTER_ASSERT_ARC
       });
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+
   BOOL result = [self.appDelegate
                application:[UIApplication sharedApplication]
       continueUserActivity:userActivity
         restorationHandler:^(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects){
         }];
   XCTAssertTrue(result);
-  OCMVerify([mockApplication openURL:[OCMArg any]
+  // openURL should NOT have been called.
+  OCMReject([mockApplication openURL:[OCMArg any]
                              options:[OCMArg any]
                    completionHandler:[OCMArg any]]);
 }

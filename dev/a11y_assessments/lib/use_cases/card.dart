@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class CardUseCase extends UseCase {
-  CardUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  CardUseCase();
 
   @override
   String get name => 'Card';
 
   @override
   String get route => '/card';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();
@@ -34,10 +37,7 @@ class MainWidgetState extends State<MainWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

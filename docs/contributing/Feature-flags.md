@@ -60,7 +60,7 @@ For example:
 
   We do not consider it a breaking change to modify or remove experimental flags
   across releases, or to make changes guarded by experimental flags. APIs that
-  are guarded by flags are subject to chage at any time.
+  are guarded by flags are subject to change at any time.
 
 ## Adding a flag
 
@@ -248,7 +248,7 @@ const Feature unicornEmojis = Feature(
 );
 ```
 
-Flutter uses the following precendence order:
+Flutter uses the following precedence order:
 
 1. The app's `pubspec.yaml` file:
 

@@ -4,11 +4,11 @@
 
 import 'package:meta/meta.dart';
 
-import '../../src/base/process.dart';
-import '../../src/convert.dart' show json;
-import '../../src/macos/xcode.dart';
+import '../base/process.dart';
 import '../base/version.dart';
+import '../convert.dart' show json;
 import '../convert.dart';
+import '../macos/xcode.dart';
 
 /// The generator of xcresults.
 ///

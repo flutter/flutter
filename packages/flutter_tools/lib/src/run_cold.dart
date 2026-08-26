@@ -37,6 +37,9 @@ class ColdRunner extends ResidentRunner {
   bool get canHotReload => false;
 
   @override
+  bool get reloadIsRestart => false;
+
+  @override
   Logger get logger => globals.logger;
 
   @override
@@ -77,7 +80,7 @@ class ColdRunner extends ResidentRunner {
     }
 
     final FlutterDevice flutterDevice = flutterDevices.first;
-    if (flutterDevice.vmServiceUris != null) {
+    if (flutterDevice.vmServiceUri != null) {
       final FlutterVmService? vmService = flutterDevice.vmService;
       final DartDevelopmentService dds = flutterDevice.device!.dds;
       // For now, only support one debugger connection.

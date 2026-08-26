@@ -4,8 +4,12 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'checkbox_tester.dart';
+import 'radio_group_tester.dart';
+import 'radio_tester.dart';
 
 void main() {
   group('tab', () {
@@ -266,19 +270,20 @@ void main() {
     testWidgets('success case, radio group can have checkbox children', (
       WidgetTester tester,
     ) async {
+      final node0 = FocusNode();
+      addTearDown(node0.dispose);
+      final node1 = FocusNode();
+      addTearDown(node1.dispose);
       await tester.pumpWidget(
-        Material(
-          child: Material(
-            child: RadioGroup<int>(
-              groupValue: 0,
-              onChanged: (int? value) {},
-              child: Column(
-                children: <Widget>[
-                  Checkbox(value: false, onChanged: (bool? value) {}),
-                  const Radio<int>(value: 0),
-                  const Radio<int>(value: 1),
-                ],
-              ),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: TestRadioGroup<int>(
+            child: Column(
+              children: <Widget>[
+                TestCheckbox(value: false, onChanged: (bool? value) {}),
+                const TestRadio<int>(value: 0),
+                const TestRadio<int>(value: 1),
+              ],
             ),
           ),
         ),
@@ -287,23 +292,22 @@ void main() {
     });
 
     testWidgets('success case, radio group can nest', (WidgetTester tester) async {
+      final stringNode = FocusNode();
+      addTearDown(stringNode.dispose);
+      final node0 = FocusNode();
+      addTearDown(node0.dispose);
+      final node1 = FocusNode();
+      addTearDown(node1.dispose);
       await tester.pumpWidget(
-        Material(
-          child: Material(
-            child: RadioGroup<int>(
-              groupValue: 0,
-              onChanged: (int? value) {},
-              child: Column(
-                children: <Widget>[
-                  RadioGroup<String>(
-                    groupValue: 'string',
-                    onChanged: (String? value) {},
-                    child: const Radio<String>(value: 'string'),
-                  ),
-                  const Radio<int>(value: 0),
-                  const Radio<int>(value: 1),
-                ],
-              ),
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: TestRadioGroup<int>(
+            child: Column(
+              children: <Widget>[
+                TestRadioGroup<String>(child: TestRadio<String>(value: 'string')),
+                TestRadio<int>(value: 0),
+                TestRadio<int>(value: 1),
+              ],
             ),
           ),
         ),

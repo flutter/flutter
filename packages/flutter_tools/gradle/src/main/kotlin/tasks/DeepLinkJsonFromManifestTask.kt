@@ -7,9 +7,12 @@ package com.flutter.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
 /**
@@ -19,14 +22,16 @@ import org.gradle.api.tasks.TaskAction
  * designed for modification. The task is responsible for an exact copy of the input
  * manifest being used for the output manifest.
 */
+@CacheableTask
 abstract class DeepLinkJsonFromManifestTask : DefaultTask() {
     // Input property to receive the manifest file
     @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val manifestFile: RegularFileProperty
 
-    // In the past for this task namespace was the ApplicationId.
+    // The resolved application ID for this variant.
     @get:Input
-    abstract val namespace: Property<String>
+    abstract val applicationId: Property<String>
 
     // Does not need to transform manifest at all but there does not appear to be another dsl
     // supported way to depend on the merged manifest.
@@ -41,7 +46,11 @@ abstract class DeepLinkJsonFromManifestTask : DefaultTask() {
         manifestFile.get().asFile.copyTo(updatedManifest.get().asFile, overwrite = true)
         logger.debug("DeepLinkJsonFromManifestTask: Unmodified manifest written.")
 
-        DeepLinkJsonFromManifestTaskHelper.createAppLinkSettingsFile(namespace.get(), manifestFile, deepLinkJson)
+        DeepLinkJsonFromManifestTaskHelper.createAppLinkSettingsFile(
+            applicationId.get(),
+            manifestFile,
+            deepLinkJson
+        )
         logger.debug("DeepLinkJsonFromManifestTask: appLinkSettings written to ${deepLinkJson.get().asFile.absolutePath}.")
     }
 }

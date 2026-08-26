@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:dwds/data/build_result.dart';
 import 'package:dwds/dwds.dart';
 import 'package:logging/logging.dart' as logging;
@@ -24,6 +25,7 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
@@ -116,15 +118,17 @@ class WebAssetServer implements AssetReader {
     }
   }
 
-  static const _reloadedSourcesFileName = 'reloaded_sources.json';
+  // Use relative path for the URI so the app can still find it even if it's in
+  // a different domain than the server.
+  @visibleForTesting
+  static Uri reloadedSourcesUri = Uri.parse('reloaded_sources.json');
 
-  /// Given a list of [modules] that need to be reloaded during a hot restart or
-  /// hot reload, writes a file that contains a list of objects each with three
-  /// fields:
+  /// Given a list of [modulePaths] that need to be reloaded during a hot
+  /// restart or hot reload, writes a file that contains a list of objects each
+  /// with three fields:
   ///
-  /// `src`: A string that corresponds to the file path containing a DDC library
-  /// bundle. To support embedded libraries, the path should include the
-  /// `baseUri` of the web server.
+  /// `src`: A string that corresponds to the file path relative to the app base
+  /// URL root that contains the DDC library bundle.
   /// `module`: The name of the library bundle in `src`.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
@@ -133,7 +137,7 @@ class WebAssetServer implements AssetReader {
   /// ```json
   /// [
   ///   {
-  ///     "src": "<baseUri>/<file_name>",
+  ///     "src": "/<file_name>",
   ///     "module": "<module_name>",
   ///     "libraries": ["<lib1>", "<lib2>"],
   ///   },
@@ -142,22 +146,28 @@ class WebAssetServer implements AssetReader {
   ///
   /// The path of the output file should stay consistent across the lifetime of
   /// the app.
-  void writeReloadedSources(List<String> modules) {
+  void writeReloadedSources(List<String> modulePaths) {
     final moduleToLibrary = <Map<String, Object>>[];
-    for (final module in modules) {
+    for (final relativeModulePath in modulePaths) {
       final metadata = ModuleMetadata.fromJson(
-        json.decode(utf8.decode(_webMemoryFS.metadataFiles['$module.metadata']!.toList()))
+        json.decode(
+              utf8.decode(_webMemoryFS.metadataFiles['$relativeModulePath.metadata']!.toList()),
+            )
             as Map<String, dynamic>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
-      final moduleUri = '$baseUri/$module';
       moduleToLibrary.add(<String, Object>{
-        'src': moduleUri,
+        // Use only the path for the module so the app can still find it even if
+        // it's in a different domain than the server.
+        // TODO(srujzs): We use a `/` prefix to match the path that DWDS gets
+        // when parsing the parsed URL. It may be cleaner to just remove the `/`
+        // in DWDS rather than add it here.
+        'src': '/$relativeModulePath',
         'module': metadata.name,
         'libraries': libraries,
       });
     }
-    writeFile(_reloadedSourcesFileName, json.encode(moduleToLibrary));
+    writeFile(reloadedSourcesUri.path, json.encode(moduleToLibrary));
   }
 
   @visibleForTesting
@@ -318,20 +328,6 @@ class WebAssetServer implements AssetReader {
 
     // Ensure dwds is present and provide middleware to avoid trying to
     // load the through the isolate APIs.
-    final Directory directory = await loadDwdsDirectory(fileSystem, logger);
-    shelf.Handler middleware(FutureOr<shelf.Response> Function(shelf.Request) innerHandler) {
-      return (shelf.Request request) async {
-        if (request.url.path.endsWith('dwds/src/injected/client.js')) {
-          final Uri uri = directory.uri.resolve('src/injected/client.js');
-          final String result = await fileSystem.file(uri.toFilePath()).readAsString();
-          return shelf.Response.ok(
-            result,
-            headers: <String, String>{HttpHeaders.contentTypeHeader: 'application/javascript'},
-          );
-        }
-        return innerHandler(request);
-      };
-    }
 
     logging.Logger.root.level = logging.Level.ALL;
     logging.Logger.root.onRecord.listen((logging.LogRecord event) => log(logger, event));
@@ -352,16 +348,13 @@ class WebAssetServer implements AssetReader {
                 PackageUriMapper(packageConfig),
                 digestProvider,
                 BuildSettings(
-                  appEntrypoint: packageConfig.toPackageUri(
+                  appEntrypoint: packageConfig.toPackageUriForWorkspace(
                     fileSystem.file(entrypoint).absolute.uri,
                   ),
                   canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
-                reloadedSourcesUri: server._baseUri.replace(
-                  pathSegments: List<String>.from(server._baseUri.pathSegments)
-                    ..add(_reloadedSourcesFileName),
-                ),
+                reloadedSourcesUri: reloadedSourcesUri,
               ).strategy
             : FrontendServerRequireStrategyProvider(
                 ReloadConfiguration.none,
@@ -369,7 +362,7 @@ class WebAssetServer implements AssetReader {
                 PackageUriMapper(packageConfig),
                 digestProvider,
                 BuildSettings(
-                  appEntrypoint: packageConfig.toPackageUri(
+                  appEntrypoint: packageConfig.toPackageUriForWorkspace(
                     fileSystem.file(entrypoint).absolute.uri,
                   ),
                   canaryFeatures: canaryFeatures,
@@ -392,7 +385,7 @@ class WebAssetServer implements AssetReader {
     );
     var pipeline = const shelf.Pipeline();
     if (shouldEnableMiddleware) {
-      pipeline = pipeline.addMiddleware(middleware).addMiddleware(dwds.middleware);
+      pipeline = pipeline.addMiddleware(dwds.middleware);
     }
     pipeline = pipeline.addMiddleware(proxyMiddleware(proxy, globals.logger));
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
@@ -533,7 +526,7 @@ class WebAssetServer implements AssetReader {
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
       final Uri potential = fileSystem
-          .directory(getAssetBuildDirectory())
+          .directory(getAssetBuildDirectory(null, fileSystem))
           .uri
           .resolve(requestPath.replaceFirst('assets/', ''));
       file = fileSystem.file(potential);
@@ -607,8 +600,32 @@ class WebAssetServer implements AssetReader {
   final Logger logger;
 
   String get _buildConfigString {
+    final wasmHashes = <String, String>{};
+    for (final String path in _webMemoryFS.files.keys) {
+      if (path.endsWith('.wasm')) {
+        wasmHashes[path] = crypto.sha256.convert(_webMemoryFS.files[path]!).toString();
+      }
+    }
+    final String canvasKitPath = globals.artifacts!
+        .getHostArtifact(HostArtifact.flutterWebSdk)
+        .path;
+    final Directory canvasKitDirectory = fileSystem.directory(
+      fileSystem.path.join(canvasKitPath, 'canvaskit'),
+    );
+    if (canvasKitDirectory.existsSync()) {
+      for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
+        if (file.path.endsWith('.wasm')) {
+          final String relativePath = fileSystem.path
+              .relative(file.path, from: canvasKitDirectory.path)
+              .replaceAll(r'\', '/');
+          wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+        }
+      }
+    }
+
     final buildConfig = <String, Object>{
       'engineRevision': globals.flutterVersion.engineRevision,
+      'wasmHashes': wasmHashes,
       'builds': <Object>[
         <String, Object>{
           'compileTarget': 'dartdevc',
@@ -675,7 +692,11 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     );
   }
 
-  // Attempt to resolve `path` to a dart file.
+  /// File extensions that may legitimately be requested from the project and
+  /// Flutter SDK roots for source-map resolution.
+  static const _sourceMapExtensions = <String>{'.dart', '.map'};
+
+  /// Attempts to resolve [path] to a dart file.
   File _resolveDartFile(String path) {
     // Return the actual file objects so that local engine changes are automatically picked up.
     switch (path) {
@@ -683,59 +704,63 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         return _resolveDartSdkJsFile;
       case 'dart_sdk.js.map':
         return _resolveDartSdkJsMapFile;
-    }
-    // This is the special generated entrypoint.
-    if (path == 'web_entrypoint.dart') {
-      return entrypointCacheDirectory.childFile('web_entrypoint.dart');
+      case 'web_entrypoint.dart':
+        return entrypointCacheDirectory.childFile('web_entrypoint.dart');
     }
 
-    // If this is a dart file, it must be on the local file system and is
-    // likely coming from a source map request. The tool doesn't currently
-    // consider the case of Dart files as assets.
-    final File dartFile = fileSystem.file(fileSystem.currentDirectory.uri.resolve(path));
-    if (dartFile.existsSync()) {
-      return dartFile;
-    }
+    final String extension = fileSystem.path.extension(path);
+    if (_sourceMapExtensions.contains(extension)) {
+      // If this is a dart file, it must be on the local file system and is
+      // likely coming from a source map request. The tool doesn't currently
+      // consider the case of Dart files as assets.
+      final File dartFile = fileSystem.file(fileSystem.currentDirectory.uri.resolve(path));
+      if (dartFile.existsSync()) {
+        return dartFile;
+      }
 
-    final List<String> segments = path.split('/');
-    if (segments.first.isEmpty) {
-      segments.removeAt(0);
-    }
+      final List<String> segments = path.split('/');
+      if (segments.first.isEmpty) {
+        segments.removeAt(0);
+      }
 
-    // The file might have been a package file which is signaled by a
-    // `/packages/<package>/<path>` request.
-    if (segments.first == 'packages') {
-      final Uri? filePath = _packages.resolve(
-        Uri(scheme: 'package', pathSegments: segments.skip(1)),
-      );
-      if (filePath != null) {
-        final File packageFile = fileSystem.file(filePath);
-        if (packageFile.existsSync()) {
-          return packageFile;
+      // The file might have been a package file which is signaled by a
+      // `/packages/<package>/<path>` request.
+      if (segments.first == 'packages') {
+        final Uri? filePath = _packages.resolve(
+          Uri(scheme: 'package', pathSegments: segments.skip(1)),
+        );
+        if (filePath != null) {
+          final File packageFile = fileSystem.file(filePath);
+          if (packageFile.existsSync()) {
+            return packageFile;
+          }
         }
+      }
+
+      // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
+      final Directory dartSdkParent = fileSystem
+          .directory(
+            globals.artifacts!.getArtifactPath(
+              Artifact.engineDartSdkPath,
+              platform: TargetPlatform.web_javascript,
+            ),
+          )
+          .parent;
+      final File dartSdkFile = fileSystem.file(dartSdkParent.uri.resolve(path));
+      if (dartSdkFile.existsSync()) {
+        return dartSdkFile;
+      }
+
+      final Directory flutterWebSdk = fileSystem.directory(
+        globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk),
+      );
+      final File webSdkFile = fileSystem.file(flutterWebSdk.uri.resolve(path));
+      if (webSdkFile.existsSync()) {
+        return webSdkFile;
       }
     }
 
-    // Otherwise it must be a Dart SDK source or a Flutter Web SDK source.
-    final Directory dartSdkParent = fileSystem
-        .directory(
-          globals.artifacts!.getArtifactPath(
-            Artifact.engineDartSdkPath,
-            platform: TargetPlatform.web_javascript,
-          ),
-        )
-        .parent;
-    final File dartSdkFile = fileSystem.file(dartSdkParent.uri.resolve(path));
-    if (dartSdkFile.existsSync()) {
-      return dartSdkFile;
-    }
-
-    final Directory flutterWebSdk = fileSystem.directory(
-      globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk),
-    );
-    final File webSdkFile = fileSystem.file(flutterWebSdk.uri.resolve(path));
-
-    return webSdkFile;
+    return fileSystem.currentDirectory.childFile('.non_existent_file');
   }
 
   File get _resolveDartSdkJsFile {
