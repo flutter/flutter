@@ -559,21 +559,21 @@ void main() {
     () async {
       await _createAndAnalyzeProject(
         projectDir,
-        <String>['--template=package'],
+        <String>['--template=package', '-a', 'java'],
         <String>[
           'analysis_options.yaml',
+          'example/analysis_options.yaml',
+          'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
+          'example/lib/main.dart',
+          'example/pubspec.yaml',
           'lib/flutter_project.dart',
+          'pubspec.yaml',
           'test/flutter_project_test.dart',
         ],
         unexpectedPaths: <String>[
           'android/app/src/main/java/com/example/flutter_project/MainActivity.java',
           'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
           'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
-          'example/android/app/src/main/java/com/example/flutter_project_example/MainActivity.java',
-          'example/ios/Runner/AppDelegate.h',
-          'example/ios/Runner/AppDelegate.m',
-          'example/ios/Runner/main.m',
-          'example/lib/main.dart',
           'ios/Classes/FlutterProjectPlugin.h',
           'ios/Classes/FlutterProjectPlugin.m',
           'ios/Runner/AppDelegate.h',
