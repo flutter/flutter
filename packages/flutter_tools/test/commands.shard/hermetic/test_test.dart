@@ -716,7 +716,7 @@ resolution: workspace
           final Map<String, dynamic> myApp = packages.cast<Map<String, dynamic>>().firstWhere(
             (Map<String, dynamic> p) => p['name'] == 'my_app',
           );
-          expect(myApp['rootUri'], fs.directory('/package').absolute.uri.toString());
+          expect(myApp['rootUri'], fs.currentDirectory.uri.toString());
         },
       );
       expect(caughtToolExit, true);
@@ -1757,6 +1757,24 @@ resolution: workspace
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
+
+  testUsingContext(
+    'passes regular expression lookahead in --name argument to test runner',
+    () async {
+      final testRunner = FakeFlutterTestRunner(0);
+
+      final testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>['test', '--name', r'^(?!Golden).+', '--no-pub']);
+
+      expect(testRunner.lastNames, <String>[r'^(?!Golden).+']);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
@@ -1771,6 +1789,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   int? lastConcurrency;
   TestWatcher? lastTestWatcher;
   FakeVmServiceHost? fakeVmServiceHost;
+  List<String> lastNames = const <String>[];
+  List<String> lastPlainNames = const <String>[];
 
   @override
   Future<int> runTests(
@@ -1817,6 +1837,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     lastReporterOption = reporter;
     lastConcurrency = concurrency;
     lastTestWatcher = watcher;
+    lastNames = names;
+    lastPlainNames = plainNames;
 
     if (leastRunTime != null) {
       await Future<void>.delayed(leastRunTime!);
