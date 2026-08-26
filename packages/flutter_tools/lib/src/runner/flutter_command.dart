@@ -1971,7 +1971,7 @@ abstract class FlutterCommand extends Command<void> {
           throwToolExit(
             'Running a prebuilt APK with --${FlutterOptions.kUseApplicationBinary} in release mode with flags used to configure the Flutter Android engine '
             '(${intentFlags.join(', ')}) is no longer supported. Define the required flags via the Android manifest instead. See '
-            'https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-intent-flags for more details.',
+            'https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries for more details.',
           );
         }
       }
