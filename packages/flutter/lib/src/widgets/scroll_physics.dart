@@ -516,7 +516,7 @@ class ScrollPhysics {
   /// method to return true when those parameters change, and should call
   /// `super.shouldUpdate(old)` to also update when the [parent] changes.
   ///
-  /// The base class implementation returns false if [this] and [old] are
+  /// The base class implementation returns false if `this` and [old] are
   /// [identical], and returns true if the [runtimeType] or [parent] changes.
   @mustCallSuper
   bool shouldUpdate(covariant ScrollPhysics old) {
