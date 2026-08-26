@@ -365,15 +365,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// dynamic option initialization (via [ExtensionArgParserMixin.initializeDynamicOptions])
   /// before argument parsing begins.
   Future<void> _initializeDynamicOptions(Iterable<String> args) async {
-    FeatureFlags? flags = _featureFlags;
-    if (flags == null) {
-      try {
-        flags = context.get<FeatureFlags>();
-      } on UnsupportedError {
-        flags = null;
-      }
-    }
-    if (flags == null || !flags.isToolExtensionsEnabled) {
+    if (_featureFlags?.isToolExtensionsEnabled != true) {
       return;
     }
     if (_findTargetCommand(args) case var command?) {

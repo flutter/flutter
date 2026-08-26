@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -26,9 +27,14 @@ CommandRunner<void> createTestCommandRunner([
   FlutterCommand? command,
   Analytics? analytics,
   ToolContext? toolContext,
+  FeatureFlags? featureFlags,
 ]) {
   final ToolContext? effectiveToolContext = toolContext ?? command?.toolContext;
-  final runner = TestFlutterCommandRunner(analytics: analytics, toolContext: effectiveToolContext);
+  final runner = TestFlutterCommandRunner(
+    analytics: analytics,
+    featureFlags: featureFlags,
+    toolContext: effectiveToolContext,
+  );
   if (command != null) {
     runner.addCommand(command);
   }
@@ -52,17 +58,29 @@ Future<String> createProject(
 }
 
 class TestFlutterCommandRunner extends FlutterCommandRunner {
-  TestFlutterCommandRunner({Analytics? analytics, ToolContext? toolContext})
-    : super(
-        analytics: analytics ?? _defaultAnalytics(),
-        toolContext: toolContext ?? DelegatingToolContext(),
-      );
+  TestFlutterCommandRunner({
+    Analytics? analytics,
+    FeatureFlags? featureFlags,
+    ToolContext? toolContext,
+  }) : super(
+         analytics: analytics ?? _defaultAnalytics(),
+         featureFlags: featureFlags ?? _defaultFeatureFlags(),
+         toolContext: toolContext ?? DelegatingToolContext(),
+       );
 
   static Analytics _defaultAnalytics() {
     try {
       return context.get<Analytics>() ?? const NoOpAnalytics();
     } on UnsupportedError {
       return const NoOpAnalytics();
+    }
+  }
+
+  static FeatureFlags? _defaultFeatureFlags() {
+    try {
+      return context.get<FeatureFlags>();
+    } on UnsupportedError {
+      return null;
     }
   }
 

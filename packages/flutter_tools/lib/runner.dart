@@ -97,6 +97,7 @@ Future<int> run(
     );
     final runner = FlutterCommandRunner(
       analytics: toolDeps.analytics,
+      featureFlags: featureFlags,
       toolContext: toolDeps.toolContext,
       verboseHelp: verboseHelp,
     );
