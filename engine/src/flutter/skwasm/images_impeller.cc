@@ -12,6 +12,7 @@
 #include "impeller/display_list/dl_image_impeller.h"
 #include "third_party/skia/include/core/SkData.h"
 
+#include "flutter/skwasm/image_precache_impeller.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
@@ -162,6 +163,7 @@ class DlWimpImageFromPicture : public DlWimpImageBase {
 
   std::shared_ptr<impeller::Texture> GetImpellerTexture(
       impeller::ContentContext& renderer) const override {
+    PrecacheImages(display_list_.get(), renderer);
     return impeller::DisplayListToTexture(
         display_list_, impeller::ISize(width_, height_), renderer);
   }
