@@ -86,14 +86,24 @@ void main() {
       environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
     );
 
-    expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
-    expect(projectDir.existsSync(), isTrue);
-    final File verificationFile = projectDir.childFile('.custom_device_extension_info');
-    expect(verificationFile.existsSync(), isTrue);
-    expect(
-      verificationFile.readAsStringSync().trim(),
-      'Custom Linux Device Extension App Template Verified',
-    );
+    if (isLinux) {
+      expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
+      expect(projectDir.existsSync(), isTrue);
+      final File verificationFile = projectDir.childFile('.custom_device_extension_info');
+      expect(verificationFile.existsSync(), isTrue);
+      expect(
+        verificationFile.readAsStringSync().trim(),
+        'Custom Linux Device Extension App Template Verified',
+      );
+    } else {
+      expect(
+        result.exitCode,
+        isNot(0),
+        reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}',
+      );
+      expect(result.stderr, contains('custom-linux-app'));
+      expect(projectDir.existsSync(), isFalse);
+    }
   });
 
   testWithoutContext('flutter create with custom template fails when disabled', () async {
