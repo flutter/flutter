@@ -44,6 +44,14 @@ const double kDefaultFontSize = 14.0;
 ///
 /// A [TextOverflow] can be passed to [Text] and [RichText] via their
 /// [Text.overflow] and [RichText.overflow] properties respectively.
+///
+/// {@tool dartpad}
+/// This sample shows a file path that does not fit the box it is in, and how
+/// [TextOverflow.ellipsisStart], [TextOverflow.ellipsisMiddle] and
+/// [TextOverflow.ellipsis] each choose a different part of it to keep.
+///
+/// ** See code in examples/api/lib/painting/text_painter/text_overflow.0.dart **
+/// {@end-tool}
 enum TextOverflow {
   /// Clip the overflowing text to fix its container.
   clip,
@@ -52,7 +60,55 @@ enum TextOverflow {
   fade,
 
   /// Use an ellipsis to indicate that the text has overflowed.
+  ///
+  /// The ellipsis is placed at the end of the last visible line.
   ellipsis,
+
+  /// Use an ellipsis at the beginning of the text to indicate that the text has
+  /// overflowed, keeping as much of the end of the text as fits.
+  ///
+  /// This is useful when the end of the text is the most informative part of
+  /// it, such as a file path: `/Users/someone/Documents/report.txt` renders as
+  /// `…ocuments/report.txt` rather than `/Users/someone/D…`.
+  ///
+  /// The text is always rendered on a single line, so `maxLines` must be null
+  /// or 1 and soft wrapping does not apply. Rendering the trailing lines of a
+  /// wrapped paragraph is not supported.
+  ///
+  /// Unlike [TextOverflow.ellipsis], which is applied by the text engine while
+  /// the text is laid out, the truncated text is computed by
+  /// [RenderParagraph]. This has two consequences: text is only ever truncated
+  /// at grapheme cluster boundaries, and the text that is laid out is the
+  /// truncated text, so selection and semantics reflect what is on screen
+  /// rather than the full string. Use [Text.semanticsLabel] to announce the
+  /// full string to assistive technologies.
+  ///
+  /// A paragraph that contains a [WidgetSpan] (or any other [PlaceholderSpan])
+  /// cannot be split, so it falls back to [TextOverflow.clip].
+  ellipsisStart,
+
+  /// Use an ellipsis in the middle of the text to indicate that the text has
+  /// overflowed, keeping as much of both ends of the text as fits.
+  ///
+  /// This is useful when both ends of the text are informative, such as a file
+  /// path whose root and file name both matter:
+  /// `/Users/someone/Documents/report.txt` renders as `/Users/s…eport.txt`.
+  ///
+  /// The text is always rendered on a single line, so `maxLines` must be null
+  /// or 1 and soft wrapping does not apply. Rendering the trailing lines of a
+  /// wrapped paragraph is not supported.
+  ///
+  /// Unlike [TextOverflow.ellipsis], which is applied by the text engine while
+  /// the text is laid out, the truncated text is computed by
+  /// [RenderParagraph]. This has two consequences: text is only ever truncated
+  /// at grapheme cluster boundaries, and the text that is laid out is the
+  /// truncated text, so selection and semantics reflect what is on screen
+  /// rather than the full string. Use [Text.semanticsLabel] to announce the
+  /// full string to assistive technologies.
+  ///
+  /// A paragraph that contains a [WidgetSpan] (or any other [PlaceholderSpan])
+  /// cannot be split, so it falls back to [TextOverflow.clip].
+  ellipsisMiddle,
 
   /// Render overflowing text outside of its container.
   visible,

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, ClipOp, Paragraph, TextBox;
 
 import 'package:flutter/foundation.dart';
@@ -1660,6 +1661,363 @@ void main() {
       // We expect the function to not throw an exception
       // ignore: invalid_use_of_protected_member
       expect(() => paragraph.positionInlineChildren(boxes), returnsNormally);
+    });
+  });
+
+  group('TextOverflow.ellipsisStart and TextOverflow.ellipsisMiddle', () {
+    // Every glyph of the test font is one font size wide, so `_kText26` is
+    // 260px wide at a font size of 10 and the ellipsis is 10px wide.
+    const kText26 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const kStyle = TextStyle(fontSize: 10.0);
+    const kInlineEllipsisModes = <TextOverflow>[
+      TextOverflow.ellipsisStart,
+      TextOverflow.ellipsisMiddle,
+    ];
+
+    RenderParagraph makeParagraph(
+      TextOverflow overflow, {
+      InlineSpan span = const TextSpan(text: kText26, style: kStyle),
+      TextDirection textDirection = TextDirection.ltr,
+      int? maxLines,
+      bool softWrap = true,
+      SelectionRegistrar? registrar,
+      List<RenderBox>? children,
+    }) {
+      return RenderParagraph(
+        span,
+        textDirection: textDirection,
+        overflow: overflow,
+        softWrap: softWrap,
+        maxLines: maxLines,
+        registrar: registrar,
+        children: children,
+      );
+    }
+
+    // Lays `paragraph` out at `maxWidth` and returns the width the text it
+    // renders actually occupies, measured independently of the paragraph.
+    double renderedWidth(RenderParagraph paragraph) {
+      final painter = TextPainter(
+        text: TextSpan(text: paragraph.debugRenderedText, style: kStyle),
+        textDirection: paragraph.textDirection,
+        maxLines: 1,
+      )..layout();
+      final double width = painter.width;
+      painter.dispose();
+      return width;
+    }
+
+    for (final overflow in kInlineEllipsisModes) {
+      group('$overflow', () {
+        test('asserts when the constructor is given a maxLines above 1', () {
+          expect(() => makeParagraph(overflow, maxLines: 2), throwsAssertionError);
+          expect(() => makeParagraph(overflow, maxLines: 10), throwsAssertionError);
+          // null and 1 both mean a single line, and are allowed.
+          expect(() => makeParagraph(overflow), returnsNormally);
+          expect(() => makeParagraph(overflow, maxLines: 1), returnsNormally);
+        });
+
+        test('asserts when maxLines is set above 1', () {
+          final RenderParagraph paragraph = makeParagraph(overflow);
+          expect(() => paragraph.maxLines = 2, throwsAssertionError);
+          expect(() => paragraph.maxLines = 1, returnsNormally);
+          expect(() => paragraph.maxLines = null, returnsNormally);
+        });
+
+        test('asserts when overflow is set while maxLines is above 1', () {
+          final RenderParagraph paragraph = makeParagraph(TextOverflow.clip, maxLines: 2);
+          expect(() => paragraph.overflow = overflow, throwsAssertionError);
+          paragraph.maxLines = 1;
+          expect(() => paragraph.overflow = overflow, returnsNormally);
+        });
+
+        test('renders on a single line even though softWrap is true', () {
+          final RenderParagraph paragraph = makeParagraph(overflow);
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+          expect(paragraph.softWrap, isTrue);
+          expect(paragraph.size, const Size(80.0, 10.0));
+        });
+
+        test('never renders text wider than the constraint', () {
+          // Widths that do not line up with a character boundary included: the
+          // truncated text must still fit, or its last glyph is clipped.
+          const widths = <double>[0.0, 3.0, 15.0, 21.0, 47.0, 85.0, 111.0, 259.0];
+          for (final width in widths) {
+            final RenderParagraph paragraph = makeParagraph(overflow);
+            layout(paragraph, constraints: BoxConstraints(maxWidth: width));
+            expect(
+              renderedWidth(paragraph),
+              lessThanOrEqualTo(math.max(width, 10.0)),
+              reason: 'overflowed at maxWidth $width with "${paragraph.debugRenderedText}"',
+            );
+          }
+        });
+
+        test('renders the full text when it fits', () {
+          final RenderParagraph paragraph = makeParagraph(overflow);
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 500.0));
+          expect(paragraph.debugRenderedText, kText26);
+        });
+
+        test('renders nothing but the ellipsis when nothing else fits', () {
+          final RenderParagraph paragraph = makeParagraph(overflow);
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 5.0));
+          expect(paragraph.debugRenderedText, '…');
+        });
+
+        test('leaves empty text alone', () {
+          final RenderParagraph paragraph = makeParagraph(
+            overflow,
+            span: const TextSpan(text: '', style: kStyle),
+          );
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 5.0));
+          expect(paragraph.debugRenderedText, isEmpty);
+        });
+
+        test('text returns the untruncated span', () {
+          final RenderParagraph paragraph = makeParagraph(overflow);
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+          expect(paragraph.debugRenderedText, isNot(kText26));
+          expect(paragraph.text.toPlainText(), kText26);
+        });
+
+        test('setting the same span again is a no-op after a truncating layout', () {
+          final RenderParagraph paragraph = makeParagraph(overflow);
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+          // An equal span compares as identical, so this must not relayout
+          // even though the painter now holds the truncated text.
+          paragraph.text = const TextSpan(text: kText26, style: kStyle);
+          expect(paragraph.debugNeedsLayout, isFalse);
+          expect(paragraph.text.toPlainText(), kText26);
+        });
+
+        test('splits on grapheme cluster boundaries', () {
+          // A ZWJ emoji sequence and a combining mark, either side of the text
+          // the truncation lands in.
+          const text = 'éaaaaaaaa\u{1F469}\u{200D}\u{1F469}\u{200D}\u{1F467}aaaaaaaa';
+          for (var width = 10.0; width <= 200.0; width += 5.0) {
+            final RenderParagraph paragraph = makeParagraph(
+              overflow,
+              span: const TextSpan(text: text, style: kStyle),
+            );
+            layout(paragraph, constraints: BoxConstraints(maxWidth: width));
+            final String rendered = paragraph.debugRenderedText;
+            final reason =
+                'split a grapheme cluster at maxWidth $width: '
+                '${rendered.codeUnits}';
+            // Surrogates always come in pairs.
+            for (var i = 0; i < rendered.length; i += 1) {
+              final int unit = rendered.codeUnitAt(i);
+              if (unit >= 0xD800 && unit <= 0xDBFF) {
+                expect(i + 1 < rendered.length, isTrue, reason: reason);
+                expect(
+                  rendered.codeUnitAt(i + 1),
+                  inInclusiveRange(0xDC00, 0xDFFF),
+                  reason: reason,
+                );
+              } else if (unit >= 0xDC00 && unit <= 0xDFFF) {
+                expect(i > 0, isTrue, reason: reason);
+                expect(
+                  rendered.codeUnitAt(i - 1),
+                  inInclusiveRange(0xD800, 0xDBFF),
+                  reason: reason,
+                );
+              }
+            }
+            // The text on either side of an ellipsis was cut at a cluster
+            // boundary, so it never starts with a continuation of a cluster
+            // (a combining mark or a zero width joiner) or ends with a joiner.
+            for (int i = rendered.indexOf('…'); i != -1; i = rendered.indexOf('…', i + 1)) {
+              if (i + 1 < rendered.length) {
+                final int next = rendered.codeUnitAt(i + 1);
+                expect(next, isNot(0x200D), reason: reason);
+                expect(next < 0x0300 || next > 0x036F, isTrue, reason: reason);
+              }
+              if (i > 0) {
+                expect(rendered.codeUnitAt(i - 1), isNot(0x200D), reason: reason);
+              }
+            }
+          }
+        });
+
+        test('right to left text fits the constraint', () {
+          const rtlText = 'السلام عليكم';
+          for (final width in <double>[30.0, 60.0, 90.0]) {
+            final RenderParagraph paragraph = makeParagraph(
+              overflow,
+              span: const TextSpan(text: rtlText, style: kStyle),
+              textDirection: TextDirection.rtl,
+            );
+            layout(paragraph, constraints: BoxConstraints(maxWidth: width));
+            expect(
+              renderedWidth(paragraph),
+              lessThanOrEqualTo(width),
+              reason: 'overflowed at maxWidth $width with "${paragraph.debugRenderedText}"',
+            );
+          }
+        });
+
+        test('preserves the styles and recognizers of the spans it keeps', () {
+          final recognizer = TapGestureRecognizer();
+          addTearDown(recognizer.dispose);
+          const boldStyle = TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold);
+          final RenderParagraph paragraph = makeParagraph(
+            overflow,
+            span: TextSpan(
+              style: kStyle,
+              children: <InlineSpan>[
+                const TextSpan(text: 'AAAAAAAAAAAAAAAA'),
+                TextSpan(text: 'BBBBBBBB', style: boldStyle, recognizer: recognizer),
+              ],
+            ),
+          );
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+
+          // The tail of the text is kept in both modes, so the styled and
+          // tappable span is partly visible; hit test its last glyph.
+          final result = BoxHitTestResult();
+          final Offset endOfText = paragraph.getOffsetForCaret(
+            TextPosition(offset: paragraph.debugRenderedText.length),
+            Rect.zero,
+          );
+          paragraph.hitTest(result, position: Offset(endOfText.dx - 1.0, 5.0));
+          final TextSpan hitSpan = result.path
+              .map((HitTestEntry entry) => entry.target)
+              .whereType<TextSpan>()
+              .single;
+          expect(hitSpan.style, boldStyle);
+          expect(hitSpan.recognizer, same(recognizer));
+        });
+
+        test('falls back to clipping when the text contains a WidgetSpan', () {
+          final child = RenderConstrainedBox(
+            additionalConstraints: const BoxConstraints.tightFor(width: 20.0, height: 20.0),
+          );
+          const span = TextSpan(
+            style: kStyle,
+            children: <InlineSpan>[
+              TextSpan(text: 'AAAAAAAA'),
+              WidgetSpan(child: SizedBox.shrink()),
+              TextSpan(text: 'BBBBBBBB'),
+            ],
+          );
+          final RenderParagraph paragraph = makeParagraph(
+            overflow,
+            span: span,
+            children: <RenderBox>[child],
+          );
+          _applyParentData(<RenderBox>[child], span);
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0));
+          expect(paragraph.debugRenderedText, isNot(contains('…')));
+          expect(paragraph.debugRenderedText, span.toPlainText());
+        });
+
+        test('the dry layout matches the real layout', () {
+          for (final width in <double>[15.0, 47.0, 85.0, 500.0]) {
+            final RenderParagraph paragraph = makeParagraph(overflow);
+            final constraints = BoxConstraints(maxWidth: width);
+            final Size dry = paragraph.getDryLayout(constraints);
+            layout(paragraph, constraints: constraints);
+            expect(dry, paragraph.size, reason: 'dry layout differed at maxWidth $width');
+          }
+        });
+
+        test('retruncates when the constraint changes', () {
+          final RenderParagraph paragraph = makeParagraph(overflow);
+          final constrainedBox = RenderConstrainedBox(
+            additionalConstraints: const BoxConstraints(maxWidth: 80.0),
+            child: paragraph,
+          );
+          // Wrapped the way layout() wraps a box it is given constraints for,
+          // so that the constraints can be changed between frames.
+          layout(RenderPositionedBox(child: constrainedBox));
+          final String atEighty = paragraph.debugRenderedText;
+          expect(atEighty.length, 8);
+
+          constrainedBox.additionalConstraints = const BoxConstraints(maxWidth: 150.0);
+          pumpFrame();
+          expect(paragraph.debugRenderedText.length, 15);
+          expect(renderedWidth(paragraph), lessThanOrEqualTo(150.0));
+
+          constrainedBox.additionalConstraints = const BoxConstraints(maxWidth: 80.0);
+          pumpFrame();
+          expect(paragraph.debugRenderedText, atEighty);
+        });
+
+        test('retruncates when the text changes', () {
+          final RenderParagraph paragraph = makeParagraph(overflow);
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+          expect(paragraph.debugRenderedText, contains('…'));
+
+          paragraph.text = const TextSpan(text: 'AB', style: kStyle);
+          pumpFrame();
+          expect(paragraph.text.toPlainText(), 'AB');
+          expect(paragraph.debugRenderedText, 'AB');
+        });
+
+        test('retruncates when only the style of the text changes', () {
+          final RenderParagraph paragraph = makeParagraph(overflow);
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+          final String before = paragraph.debugRenderedText;
+          expect(before, contains('…'));
+
+          // A colour change only affects painting for an untruncated
+          // paragraph, but the truncated text is built from the span, so it
+          // has to be rebuilt by a layout pass rather than painted directly.
+          paragraph.text = const TextSpan(
+            text: kText26,
+            style: TextStyle(fontSize: 10.0, color: Color(0xFFFF0000)),
+          );
+          expect(paragraph.debugNeedsLayout, isTrue);
+          pumpFrame();
+          expect(paragraph.debugRenderedText, before);
+          expect(paragraph.text.style!.color, const Color(0xFFFF0000));
+        });
+
+        test('lays the full text out again after overflow changes', () {
+          final RenderParagraph paragraph = makeParagraph(overflow);
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+          expect(paragraph.debugRenderedText, contains('…'));
+
+          paragraph.overflow = TextOverflow.clip;
+          pumpFrame();
+          expect(paragraph.text.toPlainText(), kText26);
+          expect(paragraph.debugRenderedText, kText26);
+
+          paragraph.overflow = overflow;
+          pumpFrame();
+          expect(paragraph.debugRenderedText, contains('…'));
+        });
+
+        test('selection covers the text that is rendered', () async {
+          final registrar = TestSelectionRegistrar();
+          final RenderParagraph paragraph = makeParagraph(overflow, registrar: registrar);
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+
+          final Selectable selectable = registrar.selectables.single;
+          selectable.dispatchSelectionEvent(const SelectAllSelectionEvent());
+          expect(selectable.value.status, SelectionStatus.uncollapsed);
+          expect(selectable.getSelectedContent()!.plainText, paragraph.debugRenderedText);
+        });
+      });
+    }
+
+    test('ellipsisStart keeps the end of the text', () {
+      final RenderParagraph paragraph = makeParagraph(TextOverflow.ellipsisStart);
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+      expect(paragraph.debugRenderedText, '…TUVWXYZ');
+    });
+
+    test('ellipsisMiddle keeps both ends of the text', () {
+      final RenderParagraph paragraph = makeParagraph(TextOverflow.ellipsisMiddle);
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+      expect(paragraph.debugRenderedText, 'ABCD…XYZ');
+    });
+
+    test('ellipsisMiddle gives the odd grapheme cluster to the leading half', () {
+      final RenderParagraph paragraph = makeParagraph(TextOverflow.ellipsisMiddle);
+      layout(paragraph, constraints: const BoxConstraints(maxWidth: 70.0));
+      expect(paragraph.debugRenderedText, 'ABC…XYZ');
     });
   });
 }
