@@ -288,7 +288,16 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   NSDictionary<NSString*, id>* args = [call arguments];
 
   int64_t viewId = [args[@"id"] longLongValue];
+  // A missing argument arrives as nil and an explicit Dart null as NSNull, neither of which can be
+  // converted to a view type.
   NSString* viewTypeString = args[@"viewType"];
+  if (![viewTypeString isKindOfClass:[NSString class]]) {
+    result([FlutterError
+        errorWithCode:@"unknown_view"
+              message:@"'viewType' argument must be a string to create a platform view."
+              details:nil]);
+    return;
+  }
   std::string viewType(viewTypeString.UTF8String);
 
   if (self.platformViews.count(viewId) != 0) {

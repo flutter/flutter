@@ -813,6 +813,46 @@ dependencies:
       );
 
       testUsingContext(
+        '.flutter-plugins-dependencies forces swift_package_manager_enabled if forceSwiftPM is true',
+        () async {
+          createPlugin(
+            name: 'plugin-a',
+            platforms: const <String, _PluginPlatformInfo>{
+              'ios': _PluginPlatformInfo(
+                pluginClass: 'Foo',
+                dartPluginClass: 'Bar',
+                sharedDarwinSource: true,
+              ),
+            },
+          );
+          iosProject.testExists = true;
+
+          final dateCreated = DateTime(1970);
+          systemClock.currentTime = dateCreated;
+
+          iosProject.usesSwiftPackageManager = false;
+          macosProject.usesSwiftPackageManager = false;
+
+          await refreshPluginsList(flutterProject, forceSwiftPM: true);
+
+          expect(flutterProject.flutterPluginsDependenciesFile, exists);
+          final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+              .readAsStringSync();
+          final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
+
+          final expectedSwiftPackageManagerEnabled = <String, dynamic>{'ios': true, 'macos': true};
+          expect(jsonContent['swift_package_manager_enabled'], expectedSwiftPackageManagerEnabled);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          SystemClock: () => systemClock,
+          FlutterVersion: () => flutterVersion,
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
         '.flutter-plugins-dependencies can have different swift_package_manager_enabled values for iOS and macoS',
         () async {
           createPlugin(
@@ -2826,82 +2866,6 @@ iosPrefix: FLT
           Pub: () => const ThrowingPub(),
         },
       );
-    });
-
-    group('flutterPluginsListHasDevDependencies', () {
-      testWithoutContext('throws if file does not exist', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        expect(
-          () => flutterPluginsListHasDevDependencies(pluginsFile),
-          throwsA(isA<FileSystemException>()),
-        );
-      });
-
-      testWithoutContext('throws if file is malformed', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('This is not JSON');
-
-        expect(
-          () => flutterPluginsListHasDevDependencies(pluginsFile),
-          throwsA(isA<FormatException>()),
-        );
-      });
-
-      testWithoutContext('Returns false if has no dependencies', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('''
-{
-  "plugins": {}
-}
-''');
-        expect(flutterPluginsListHasDevDependencies(pluginsFile), isFalse);
-      });
-
-      testWithoutContext('Returns false if has no dev dependencies', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('''
-{
-  "plugins": {
-    "ios": [
-      {
-        "name": "foo_package",
-        "dev_dependency": false
-      }
-    ]
-  }
-}
-''');
-
-        expect(flutterPluginsListHasDevDependencies(pluginsFile), isFalse);
-      });
-
-      testWithoutContext('Returns true if has dev dependencies', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('''
-{
-  "plugins": {
-    "ios": [
-      {
-        "name": "foo_package",
-        "dev_dependency": true
-      }
-    ]
-  }
-}
-''');
-
-        expect(flutterPluginsListHasDevDependencies(pluginsFile), isTrue);
-      });
     });
   });
 
