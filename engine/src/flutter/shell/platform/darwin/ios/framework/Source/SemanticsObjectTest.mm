@@ -196,6 +196,30 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertFalse(scrollView.isAccessibilityElement);
 }
 
+- (void)testFlutterScrollableSemanticsObjectDoesNotParticipateInScrollsToTop {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.flags.hasImplicitScrolling = true;
+  node.actions = flutter::kVerticalScrollSemanticsActions;
+  node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
+  node.scrollExtentMax = 100.0;
+  node.scrollPosition = 0.0;
+
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [scrollable setSemanticsNode:&node];
+  [scrollable accessibilityBridgeDidFinishUpdate];
+
+  UIScrollView* scrollView = [scrollable nativeAccessibility];
+
+  // The semantics scroll view must opt out of the system status bar scroll-to-top gesture so that
+  // it never competes with the FlutterViewController's dedicated scroll view.
+  XCTAssertFalse(scrollView.scrollsToTop);
+}
+
 - (void)testAccessibilityScrollToVisibleWithChild {
   fml::WeakPtrFactory<flutter::testing::MockAccessibilityBridge> factory(
       new flutter::testing::MockAccessibilityBridge());

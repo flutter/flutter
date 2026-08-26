@@ -17,6 +17,12 @@ FLUTTER_ASSERT_ARC
     _semanticsObject = semanticsObject;
     _isDoingSystemScrolling = NO;
     self.delegate = self;
+    // This scroll view only mirrors the Flutter scrollable for accessibility; it must not take part
+    // in the system's status bar scroll-to-top gesture. Otherwise, once the user scrolls, UIKit can
+    // pick this view over the FlutterViewController's dedicated scroll view and the framework never
+    // receives the tap. Accessibility scrolling goes through accessibilityScroll: instead, so
+    // opting out here does not affect assistive technologies.
+    self.scrollsToTop = NO;
   }
   return self;
 }
