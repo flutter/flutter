@@ -428,6 +428,61 @@ void main() {
   );
 
   testWithoutContext(
+    'gradle task outputs<mode>AppLinkSettings uses resolved application ID',
+    () async {
+      ProcessResult result = await processManager.run(<String>[
+        flutterBin,
+        'create',
+        tempDir.path,
+        '--project-name=testapp',
+      ], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
+
+      final File buildGradle = tempDir
+          .childDirectory('android')
+          .childDirectory('app')
+          .childFile('build.gradle.kts');
+      buildGradle.writeAsStringSync(
+        buildGradle.readAsStringSync().replaceFirst(
+          'applicationId = "com.example.testapp"',
+          'applicationId = System.getenv("TEST_APPLICATION_ID") ?: "com.example.testapp"',
+        ),
+      );
+
+      // Ensure that gradle files exists from templates.
+      result = await processManager.run(<String>[
+        flutterBin,
+        'build',
+        'apk',
+        '--config-only',
+      ], workingDirectory: tempDir.path);
+      expect(result, const ProcessResultMatcher());
+
+      final Directory androidApp = tempDir.childDirectory('android');
+      final io.File fileDump = tempDir
+          .childDirectory('build')
+          .childDirectory('app')
+          .childFile('app-link-settings-release.json');
+      result = await processManager.run(
+        <String>[
+          '.${platform.pathSeparator}${getGradlewFileName(platform)}',
+          ...getLocalEngineArguments(),
+          '-q', // quiet output.
+          '-PoutputPath=${fileDump.path}',
+          'outputReleaseAppLinkSettings',
+        ],
+        workingDirectory: androidApp.path,
+        environment: <String, String>{'TEST_APPLICATION_ID': 'com.example.fromenv'},
+      );
+
+      expect(result, const ProcessResultMatcher());
+      expect(fileDump.existsSync(), true);
+      final json = jsonDecode(fileDump.readAsStringSync()) as Map<String, dynamic>;
+      expect(json['applicationId'], 'com.example.fromenv');
+    },
+  );
+
+  testWithoutContext(
     'gradle task outputs<mode>AppLinkSettings is resolved FROM-CACHE after clean build if manifest does not change with build caching enabled',
     () async {
       // Create a new flutter project.
