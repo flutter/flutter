@@ -139,12 +139,19 @@ void main() {
 
     test('can usePathUrlStrategy with the default includeHash', () {
       expect(() => usePathUrlStrategy(), returnsNormally);
-      expect(urlStrategy, isA<PathUrlStrategy>());
+      final UrlStrategy? strategy = urlStrategy;
+      expect(strategy, isA<PathUrlStrategy>());
+      // Dynamic access is needed because `PathUrlStrategy.includeHash` isn't
+      // declared on the non-web stub that the conditional export statically
+      // resolves to outside of a web build.
+      expect((strategy as dynamic).includeHash, isFalse);
     });
 
     test('can usePathUrlStrategy with includeHash: true', () {
       expect(() => usePathUrlStrategy(includeHash: true), returnsNormally);
-      expect(urlStrategy, isA<PathUrlStrategy>());
+      final UrlStrategy? strategy = urlStrategy;
+      expect(strategy, isA<PathUrlStrategy>());
+      expect((strategy as dynamic).includeHash, isTrue);
     });
   });
 }
