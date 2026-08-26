@@ -65,7 +65,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     required ToolContext toolContext,
     Analytics analytics = const NoOpAnalytics(),
     bool verboseHelp = false,
+    FeatureFlags? featureFlags,
   }) : _analytics = analytics,
+       _featureFlags = featureFlags,
        _toolContext = toolContext,
        _verboseHelp = verboseHelp,
        _argParser = ArgParser(
@@ -320,6 +322,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   final Analytics _analytics;
+  final FeatureFlags? _featureFlags;
   final ToolContext _toolContext;
 
   /// The [Analytics] instance.
@@ -362,7 +365,15 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// dynamic option initialization (via [ExtensionArgParserMixin.initializeDynamicOptions])
   /// before argument parsing begins.
   Future<void> _initializeDynamicOptions(Iterable<String> args) async {
-    if (!featureFlags.isToolExtensionsEnabled) {
+    FeatureFlags? flags = _featureFlags;
+    if (flags == null) {
+      try {
+        flags = context.get<FeatureFlags>();
+      } on UnsupportedError {
+        flags = null;
+      }
+    }
+    if (flags == null || !flags.isToolExtensionsEnabled) {
       return;
     }
     if (_findTargetCommand(args) case var command?) {
