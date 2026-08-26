@@ -257,7 +257,6 @@ class FlutterProjectMetadata {
       final ParsedFlutterTemplateType? templateType = ParsedFlutterTemplateType.fromCliName(
         yamlRoot['project_type'] as String,
         extensionTemplateManager: _extensionTemplateManager,
-        fallbackToCustom: true,
       );
       _projectType = switch (templateType) {
         RemovedFlutterTemplateType() || null => null,

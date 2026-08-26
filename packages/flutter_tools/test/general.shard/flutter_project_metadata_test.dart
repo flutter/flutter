@@ -305,7 +305,7 @@ migration:
   });
 
   testWithoutContext(
-    'projectType parses custom template when extensionTemplateManager is null',
+    'projectType is null for unknown or custom template when extensionTemplateManager is null',
     () {
       metadataFile
         ..createSync()
@@ -320,17 +320,13 @@ project_type: custom-linux-app
         logger,
         extensionTemplateManager: null,
       );
-      expect(projectMetadata.projectType, isA<ExtensionProjectTemplateType>());
-      expect(projectMetadata.projectType?.cliName, 'custom-linux-app');
+      expect(projectMetadata.projectType, isNull);
     },
   );
 
   testWithoutContext('ParsedFlutterTemplateType.fromCliName respects fallbackToCustom', () {
     expect(
-      ParsedFlutterTemplateType.fromCliName(
-        'custom-template',
-        extensionTemplateManager: null,
-      ),
+      ParsedFlutterTemplateType.fromCliName('custom-template', extensionTemplateManager: null),
       isNull,
     );
     expect(
