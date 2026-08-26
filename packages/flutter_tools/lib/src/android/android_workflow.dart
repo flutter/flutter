@@ -470,6 +470,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     if (_androidSdk.sdkToolType == AndroidSdkToolType.androidCli) {
+      _logger.printTrace('AndroidLicenseValidator: validating licenses via disk for android CLI');
       if (_areDiskLicensesAccepted()) {
         return LicensesAccepted.all;
       }

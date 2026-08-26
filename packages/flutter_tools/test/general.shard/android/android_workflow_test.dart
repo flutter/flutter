@@ -316,18 +316,23 @@ Review licenses that have not been accepted (y/N)?
       licenseFile.writeAsStringSync('24333f8a63b6825ea9c5514f83c2829b004d1fee');
       sdk.directory = fileSystem.directory('/foo/bar');
 
+      final logger = BufferLogger.test();
       final licenseValidator = AndroidLicenseValidator(
         java: FakeJava(),
         androidSdk: sdk,
         processManager: processManager,
         platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
         stdio: stdio,
-        logger: BufferLogger.test(),
+        logger: logger,
         userMessages: UserMessages(),
       );
       final LicensesAccepted result = await licenseValidator.licensesAccepted;
 
       expect(result, LicensesAccepted.all);
+      expect(
+        logger.traceText,
+        contains('AndroidLicenseValidator: validating licenses via disk for android CLI'),
+      );
     },
   );
 

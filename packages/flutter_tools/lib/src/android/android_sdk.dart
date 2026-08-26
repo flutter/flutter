@@ -572,10 +572,12 @@ class AndroidSdk {
   AndroidSdkToolType get sdkToolType {
     final String? cliPath = androidCliPath;
     if (cliPath != null && globals.processManager.canRun(cliPath)) {
+      globals.logger.printTrace('AndroidSdk: using native android CLI tool at $cliPath');
       return AndroidSdkToolType.androidCli;
     }
     final String? managerPath = sdkManagerPath;
     if (managerPath != null && globals.processManager.canRun(managerPath)) {
+      globals.logger.printTrace('AndroidSdk: using sdkmanager at $managerPath');
       return AndroidSdkToolType.sdkManager;
     }
     return AndroidSdkToolType.none;
