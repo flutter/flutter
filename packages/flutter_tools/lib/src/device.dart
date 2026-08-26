@@ -1535,13 +1535,6 @@ abstract class DeviceLogReader {
   void dispose();
 }
 
-/// Describes an app running on the device.
-class DiscoveredApp {
-  DiscoveredApp(this.id, this.vmServicePort);
-  final String id;
-  final int vmServicePort;
-}
-
 // An empty device log reader
 class NoOpDeviceLogReader implements DeviceLogReader {
   NoOpDeviceLogReader(String? nameOrNull) : name = nameOrNull ?? '';

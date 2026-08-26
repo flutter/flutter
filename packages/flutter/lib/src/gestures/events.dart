@@ -1236,9 +1236,7 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.down,
     super.synthesized,
     super.embedderId,
-  }) : // Dart doesn't support comparing enums with == in const contexts yet.
-       // https://github.com/dart-lang/language/issues/1811
-       assert(!identical(kind, PointerDeviceKind.trackpad)),
+  }) : assert(kind != PointerDeviceKind.trackpad),
        super(pressure: 0.0);
 
   /// Creates an enter event from a [PointerEvent].
