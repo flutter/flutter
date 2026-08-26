@@ -12,7 +12,9 @@ import 'framework.dart';
 import 'media_query.dart';
 
 /// A widget that insets its child with sufficient padding to avoid intrusions
-/// by the operating system.
+/// by the operating system (such as the status bar, display cutouts/notches, or
+/// navigation bar) or ambient obstructions introduced by edge-docked overlays
+/// such as [SafeAreaOverlay].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=lkF0TQJO0bA}
 ///
@@ -29,7 +31,7 @@ import 'media_query.dart';
 /// {@tool snippet}
 ///
 /// This example creates a blue box containing text that is sufficiently padded
-/// to avoid intrusions by the operating system.
+/// to avoid intrusions by the operating system or edge overlays.
 ///
 /// ```dart
 /// SafeArea(
@@ -52,14 +54,17 @@ import 'media_query.dart';
 ///
 /// See also:
 ///
+///  * [SafeAreaOverlay], for positioning edge-docked overlays and adjusting
+///    descendant safe area insets.
 ///  * [SliverSafeArea], for insetting slivers to avoid operating system
-///    intrusions.
+///    intrusions and edge-docked overlays.
 ///  * [Padding], for insetting widgets in general.
 ///  * [MediaQuery], from which the view padding is obtained.
 ///  * [dart:ui.FlutterView.padding], which reports the padding from the operating
 ///    system.
 class SafeArea extends StatelessWidget {
-  /// Creates a widget that avoids operating system interfaces.
+  /// Creates a widget that avoids operating system interfaces and ambient edge
+  /// overlays.
   const SafeArea({
     super.key,
     this.left = true,
@@ -71,17 +76,18 @@ class SafeArea extends StatelessWidget {
     required this.child,
   });
 
-  /// Whether to avoid system intrusions on the left.
+  /// Whether to avoid system intrusions and edge overlays on the left.
   final bool left;
 
-  /// Whether to avoid system intrusions at the top of the screen, typically the
-  /// system status bar.
+  /// Whether to avoid intrusions at the top of the screen, typically the
+  /// system status bar or top edge overlays.
   final bool top;
 
-  /// Whether to avoid system intrusions on the right.
+  /// Whether to avoid system intrusions and edge overlays on the right.
   final bool right;
 
-  /// Whether to avoid system intrusions on the bottom side of the screen.
+  /// Whether to avoid intrusions on the bottom side of the screen, such as the
+  /// system navigation bar or bottom edge overlays.
   final bool bottom;
 
   /// This minimum padding to apply.
@@ -147,27 +153,32 @@ class SafeArea extends StatelessWidget {
 }
 
 /// A sliver that insets another sliver by sufficient padding to avoid
-/// intrusions by the operating system.
+/// intrusions by the operating system or ambient obstructions introduced by
+/// edge-docked overlays (such as [SafeAreaOverlay]).
 ///
 /// For example, this will indent the sliver by enough to avoid the status bar
 /// at the top of the screen.
 ///
 /// It will also indent the sliver by the amount necessary to avoid The Notch
 /// on the iPhone X, or other similar creative physical features of the
-/// display.
+/// display, as well as any edge overlays placed above the sliver viewport.
 ///
 /// When a [minimum] padding is specified, the greater of the minimum padding
 /// or the safe area padding will be applied.
 ///
 /// See also:
 ///
-///  * [SafeArea], for insetting box widgets to avoid operating system intrusions.
+///  * [SafeArea], for insetting box widgets to avoid operating system
+///    intrusions and edge overlays.
+///  * [SafeAreaOverlay], for positioning edge-docked overlays and adjusting
+///    descendant safe area insets.
 ///  * [SliverPadding], for insetting slivers in general.
 ///  * [MediaQuery], from which the window padding is obtained.
 ///  * [dart:ui.FlutterView.padding], which reports the padding from the operating
 ///    system.
 class SliverSafeArea extends StatelessWidget {
-  /// Creates a sliver that avoids operating system interfaces.
+  /// Creates a sliver that avoids operating system interfaces and ambient edge
+  /// overlays.
   const SliverSafeArea({
     super.key,
     this.left = true,
@@ -178,17 +189,18 @@ class SliverSafeArea extends StatelessWidget {
     required this.sliver,
   });
 
-  /// Whether to avoid system intrusions on the left.
+  /// Whether to avoid system intrusions and edge overlays on the left.
   final bool left;
 
-  /// Whether to avoid system intrusions at the top of the screen, typically the
-  /// system status bar.
+  /// Whether to avoid intrusions at the top of the screen, typically the
+  /// system status bar or top edge overlays.
   final bool top;
 
-  /// Whether to avoid system intrusions on the right.
+  /// Whether to avoid system intrusions and edge overlays on the right.
   final bool right;
 
-  /// Whether to avoid system intrusions on the bottom side of the screen.
+  /// Whether to avoid intrusions on the bottom side of the screen, such as the
+  /// system navigation bar or bottom edge overlays.
   final bool bottom;
 
   /// This minimum padding to apply.
