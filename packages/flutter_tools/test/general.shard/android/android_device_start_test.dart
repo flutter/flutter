@@ -389,6 +389,7 @@ void main() {
           '--es', 'dart-flags', 'foo',
           '--ez', 'use-test-fonts', 'true',
           '--ez', 'verbose-logging', 'true',
+          '--es', 'route', '/custom/route',
           '--user', '10',
           'FlutterActivity',
         ],
@@ -398,6 +399,7 @@ void main() {
     final LaunchResult launchResult = await device.startApp(
       apk,
       prebuiltApplication: true,
+      route: '/custom/route',
       debuggingOptions: DebuggingOptions.enabled(
         BuildInfo.debug,
         startPaused: true,
@@ -576,6 +578,110 @@ void main() {
     setUp(() {
       fakeAndroidBuilder = FakeAndroidBuilder();
     });
+
+    testUsingContext(
+      'AndroidDevice.startApp passes route via manifest when --use-application-binary is not used in release mode',
+      () async {
+        final logger = BufferLogger.test();
+        final device = AndroidDevice(
+          '1234',
+          modelID: 'TestModel',
+          fileSystem: fileSystem,
+          processManager: processManager,
+          logger: logger,
+          platform: FakePlatform(),
+          androidSdk: androidSdk,
+        );
+        final File apkFile = fileSystem.file('app-release.apk')..createSync();
+        final apk = AndroidApk(
+          id: 'FlutterApp',
+          applicationPackage: apkFile,
+          launchActivity: 'FlutterActivity',
+          versionCode: 1,
+        );
+
+        fileSystem.directory('android').createSync();
+        fileSystem.file('android/AndroidManifest.xml').writeAsStringSync('''
+        <manifest package="FlutterApp">
+          <application>
+            <activity android:name="FlutterActivity">
+              <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+              </intent-filter>
+            </activity>
+          </application>
+        </manifest>
+        ''');
+
+        fileSystem.file('build/app-release.apk').createSync(recursive: true);
+
+        processManager.addCommand(kAdbVersionCommand);
+        processManager.addCommand(kStartServer);
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+            stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'build/app-release.apk'],
+          ),
+        );
+        processManager.addCommand(kShaCommand);
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'adb',
+              '-s',
+              '1234',
+              'shell',
+              'am',
+              'start',
+              '-a',
+              'android.intent.action.MAIN',
+              '-c',
+              'android.intent.category.LAUNCHER',
+              '-f',
+              '0x20000000',
+              '--ez',
+              'enable-impeller',
+              'true',
+              '--es',
+              'route',
+              '/custom/route',
+              'FlutterApp/FlutterActivity',
+            ],
+          ),
+        );
+
+        final LaunchResult launchResult = await device.startApp(
+          apk,
+          route: '/custom/route',
+          debuggingOptions: DebuggingOptions.disabled(
+            BuildInfo.release,
+            enableImpeller: ImpellerStatus.enabled,
+            enableDartProfiling: false,
+          ),
+          platformArgs: <String, dynamic>{},
+        );
+
+        expect(launchResult.started, true);
+        expect(processManager, hasNoRemainingExpectations);
+        expect(fakeAndroidBuilder.lastAndroidBuildInfo?.releaseManifestEngineShellArgs, contains('--route=/custom/route'));
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => fakeAndroidBuilder,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
 
     testUsingContext(
       'AndroidDevice.startApp passes debugging options via manifest when --use-application-binary is not used in release mode',

@@ -54,16 +54,9 @@ zip_bundle("font_subset") {
       source = "$root_build_dir/$font_subset_bin"
       destination = font_subset_bin
     },
-    {
-      source = "$root_gen_dir/const_finder.dart.snapshot"
-      destination = "const_finder.dart.snapshot"
-    },
   ]
 
-  deps = [
-    ":_font-subset",
-    "//flutter/tools/const_finder",
-  ]
+  deps = [ ":_font-subset" ]
   if (is_mac) {
     deps += [ ":font_entitlement_config" ]
     files += [
