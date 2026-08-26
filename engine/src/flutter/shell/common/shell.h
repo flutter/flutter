@@ -339,18 +339,14 @@ class Shell final : public PlatformView::Delegate,
                                     bool base64_encode);
 
   //----------------------------------------------------------------------------
-  /// @brief      Pauses the calling thread until the first frame is presented.
+  /// @brief      Invokes a callback when the first frame has been presented.
   ///
-  /// @param[in]  timeout  The duration to wait before timing out. If this
-  ///                      duration would cause an overflow when added to
-  ///                      std::chrono::steady_clock::now(), this method will
-  ///                      wait indefinitely for the first frame.
+  /// @param[in]  callback  A callback that will be invoked on an arbitrary
+  ///                       thread when the first frame is presented.  If the
+  ///                       first frame has already been presented, then the
+  ///                       callback will be invoked immediately.
   ///
-  /// @return     'kOk' when the first frame has been presented before the
-  ///             timeout successfully, 'kFailedPrecondition' if called from the
-  ///             GPU or UI thread, 'kDeadlineExceeded' if there is a timeout.
-  ///
-  fml::Status WaitForFirstFrame(fml::TimeDelta timeout);
+  void AddFirstFrameCallback(std::function<void()> callback);
 
   //----------------------------------------------------------------------------
   /// @brief      Unblocks any call to WaitForFirstFrame(), causing it to
@@ -529,14 +525,8 @@ class Shell final : public PlatformView::Delegate,
   // waiting_for_first_frame_mutex_ in WaitForFirstFrame.
   std::atomic<bool> waiting_for_first_frame_ = true;
 
-  // True when WaitForFirstFrame has been cancelled because the shell is
-  // shutting down and waiting threads should be unblocked.
-  //
-  // Guarded by waiting_for_first_frame_mutex_.
-  bool wait_for_first_frame_cancelled_ = false;
-
   std::mutex waiting_for_first_frame_mutex_;
-  std::condition_variable waiting_for_first_frame_condition_;
+  std::vector<std::function<void()>> waiting_for_first_frame_callbacks_;
 
   // Written in the UI thread and read from the raster thread. Hence make it
   // atomic.

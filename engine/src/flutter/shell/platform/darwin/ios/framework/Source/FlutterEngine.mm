@@ -612,10 +612,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)destroyContext {
-  // Clear any tasks waiting on first frame prior to destroying _shell.
-  if (_shell) {
-    _shell->CancelWaitForFirstFrame();
-  }
   if (_firstFrameWaiters) {
     dispatch_group_wait(_firstFrameWaiters, DISPATCH_TIME_FOREVER);
   }
@@ -1571,6 +1567,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (void)waitForFirstFrame:(NSTimeInterval)timeout
                  callback:(void (^_Nonnull)(BOOL didTimeout))callback {
+  auto first_frame_event = std::make_shared<fml::AutoResetWaitableEvent>();
+
+  self.shell.AddFirstFrameCallback([weak_event = std::weak_ptr(first_frame_event)] {
+    if (auto event = weak_event.lock()) {
+      event->Signal();
+    }
+  });
+
   dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0);
   dispatch_group_t group = dispatch_group_create();
 
@@ -1583,18 +1587,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   dispatch_group_t firstFrameWaiters = _firstFrameWaiters;
   dispatch_group_enter(firstFrameWaiters);
 
-  __weak FlutterEngine* weakSelf = self;
   __block BOOL didTimeout = NO;
   dispatch_group_async(group, queue, ^{
-    FlutterEngine* strongSelf = weakSelf;
-    if (!strongSelf || !strongSelf->_shell) {
-      dispatch_group_leave(firstFrameWaiters);
-      return;
-    }
-
     fml::TimeDelta waitTime = fml::TimeDelta::FromMilliseconds(timeout * 1000);
-    fml::Status status = strongSelf.shell.WaitForFirstFrame(waitTime);
-    didTimeout = status.code() == fml::StatusCode::kDeadlineExceeded;
+    didTimeout = first_frame_event->WaitWithTimeout(waitTime);
     dispatch_group_leave(firstFrameWaiters);
   });
 
