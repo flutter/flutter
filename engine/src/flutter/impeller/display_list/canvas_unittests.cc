@@ -248,6 +248,44 @@ TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
   EXPECT_FALSE(canvas->RequiresReadback());
 }
 
+TEST_P(AiksTest, BackdropGroupIdUsesCoverageUnionForSnapshot) {
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 1000, 1000),
+                                 /*requires_readback=*/true);
+  std::unordered_map<int64_t, BackdropData> data;
+  data[1] = BackdropData{
+      .backdrop_count = 2,
+      .all_filters_equal = true,
+      .coverage_union = Rect::MakeLTRB(100, 100, 200, 200),
+  };
+  canvas->SetBackdropData(data, 2);
+
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(4, 4, flutter::DlTileMode::kClamp);
+
+  canvas->DrawRect(flutter::DlRect::MakeLTRB(0, 0, 1000, 1000),
+                   {.color = Color::Azure()});
+  canvas->SaveLayer({}, std::nullopt, blur.get(),
+                    ContentBoundsPromise::kContainsContents,
+                    /*total_content_depth=*/1, /*can_distribute_opacity=*/false,
+                    /*backdrop_id=*/1);
+  canvas->Restore();
+
+  canvas->SaveLayer({}, std::nullopt, blur.get(),
+                    ContentBoundsPromise::kContainsContents,
+                    /*total_content_depth=*/1, /*can_distribute_opacity=*/false,
+                    /*backdrop_id=*/1);
+  canvas->Restore();
+
+  const auto& backdrop_map = canvas->GetBackdropData();
+  auto it = backdrop_map.find(1);
+  ASSERT_TRUE(it != backdrop_map.end());
+  ASSERT_TRUE(it->second.shared_filter_snapshot.has_value());
+  ISize snapshot_size = it->second.shared_filter_snapshot->texture->GetSize();
+  EXPECT_LE(snapshot_size.width, 250u);
+  EXPECT_LE(snapshot_size.height, 250u);
+}
+
 // We only know the total number of backdrop filters, not the number of backdrop
 // filters in the root pass. If we reach a count of 0 while in a nested
 // saveLayer, we should not restore to the onscreen.

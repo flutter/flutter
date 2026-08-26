@@ -1003,17 +1003,39 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
   if (backdrop != nullptr && backdrop_id.has_value()) {
     std::shared_ptr<flutter::DlImageFilter> shared_backdrop =
         backdrop->shared();
+    Rect layer_coverage = cull_rect_state_.back();
+    if (!bounds.IsEmpty() && !bounds.IsMaximum()) {
+      auto transformed_bounds = bounds.TransformBounds(matrix_);
+      auto intersection = layer_coverage.Intersection(transformed_bounds);
+      if (intersection.has_value()) {
+        layer_coverage = intersection.value();
+      }
+    }
     std::unordered_map<int64_t, BackdropData>::iterator existing =
         backdrop_data_.find(backdrop_id.value());
     if (existing == backdrop_data_.end()) {
-      backdrop_data_[backdrop_id.value()] =
-          BackdropData{.backdrop_count = 1, .last_backdrop = shared_backdrop};
+      backdrop_data_[backdrop_id.value()] = BackdropData{
+          .backdrop_count = 1,
+          .all_filters_equal = true,
+          .texture_slot = nullptr,
+          .shared_filter_snapshot = std::nullopt,
+          .last_backdrop = shared_backdrop,
+          .coverage_union = layer_coverage.IsEmpty()
+                                ? std::nullopt
+                                : std::optional<Rect>(layer_coverage)};
     } else {
       BackdropData& data = existing->second;
       data.backdrop_count++;
       if (data.all_filters_equal) {
         data.all_filters_equal = (*data.last_backdrop == *shared_backdrop);
         data.last_backdrop = shared_backdrop;
+      }
+      if (!layer_coverage.IsEmpty()) {
+        if (data.coverage_union.has_value()) {
+          data.coverage_union = data.coverage_union->Union(layer_coverage);
+        } else {
+          data.coverage_union = layer_coverage;
+        }
       }
     }
   }
@@ -1038,6 +1060,66 @@ void FirstPassDispatcher::restore() {
   matrix_ = stack_.back();
   stack_.pop_back();
   cull_rect_state_.pop_back();
+}
+
+// |flutter::DlOpReceiver|
+void FirstPassDispatcher::clipRect(const DlRect& rect,
+                                   flutter::DlClipOp clip_op,
+                                   bool is_aa) {
+  if (clip_op == flutter::DlClipOp::kIntersect) {
+    auto global_rect = rect.TransformBounds(matrix_);
+    auto new_cull_rect = cull_rect_state_.back().Intersection(global_rect);
+    cull_rect_state_.back() =
+        new_cull_rect.value_or(Rect::MakeLTRB(0, 0, 0, 0));
+  }
+}
+
+// |flutter::DlOpReceiver|
+void FirstPassDispatcher::clipOval(const DlRect& bounds,
+                                   flutter::DlClipOp clip_op,
+                                   bool is_aa) {
+  if (clip_op == flutter::DlClipOp::kIntersect) {
+    auto global_rect = bounds.TransformBounds(matrix_);
+    auto new_cull_rect = cull_rect_state_.back().Intersection(global_rect);
+    cull_rect_state_.back() =
+        new_cull_rect.value_or(Rect::MakeLTRB(0, 0, 0, 0));
+  }
+}
+
+// |flutter::DlOpReceiver|
+void FirstPassDispatcher::clipRoundRect(const DlRoundRect& rrect,
+                                        flutter::DlClipOp clip_op,
+                                        bool is_aa) {
+  if (clip_op == flutter::DlClipOp::kIntersect) {
+    auto global_rect = rrect.GetBounds().TransformBounds(matrix_);
+    auto new_cull_rect = cull_rect_state_.back().Intersection(global_rect);
+    cull_rect_state_.back() =
+        new_cull_rect.value_or(Rect::MakeLTRB(0, 0, 0, 0));
+  }
+}
+
+// |flutter::DlOpReceiver|
+void FirstPassDispatcher::clipPath(const DlPath& path,
+                                   flutter::DlClipOp clip_op,
+                                   bool is_aa) {
+  if (clip_op == flutter::DlClipOp::kIntersect) {
+    auto global_rect = path.GetBounds().TransformBounds(matrix_);
+    auto new_cull_rect = cull_rect_state_.back().Intersection(global_rect);
+    cull_rect_state_.back() =
+        new_cull_rect.value_or(Rect::MakeLTRB(0, 0, 0, 0));
+  }
+}
+
+// |flutter::DlOpReceiver|
+void FirstPassDispatcher::clipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                                                flutter::DlClipOp clip_op,
+                                                bool is_aa) {
+  if (clip_op == flutter::DlClipOp::kIntersect) {
+    auto global_rect = rse.GetBounds().TransformBounds(matrix_);
+    auto new_cull_rect = cull_rect_state_.back().Intersection(global_rect);
+    cull_rect_state_.back() =
+        new_cull_rect.value_or(Rect::MakeLTRB(0, 0, 0, 0));
+  }
 }
 
 void FirstPassDispatcher::translate(DlScalar tx, DlScalar ty) {

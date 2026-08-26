@@ -46,6 +46,9 @@ struct BackdropData {
   // multiple backdrops that share an identical filter.
   std::optional<Snapshot> shared_filter_snapshot;
   std::shared_ptr<flutter::DlImageFilter> last_backdrop;
+  // The union of the coverage bounding boxes for all backdrop filters
+  // that share this backdrop_id.
+  std::optional<Rect> coverage_union;
 };
 
 struct CanvasStackEntry {
@@ -143,6 +146,10 @@ class Canvas {
   ///        within the same layer
   void SetBackdropData(std::unordered_map<int64_t, BackdropData> backdrop_data,
                        size_t backdrop_count);
+
+  const std::unordered_map<int64_t, BackdropData>& GetBackdropData() const {
+    return backdrop_data_;
+  }
 
   /// @brief Return the culling bounds of the current render target, or nullopt
   ///        if there is no coverage.
