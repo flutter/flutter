@@ -7612,6 +7612,19 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/ignore_pointer.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// The following sample shows an [IgnorePointer] and an [AbsorbPointer] side
+/// by side, each wrapping a box that partially covers a tappable target
+/// behind it in a stack. Tapping the overlapping region on the
+/// [IgnorePointer] side taps the target behind: the [IgnorePointer] is
+/// invisible to hit testing, so the pointer event goes through to the next
+/// target in the stack. Tapping the same region on the [AbsorbPointer] side
+/// does nothing: the [AbsorbPointer] absorbs the pointer events itself, so
+/// neither its child nor the target behind it receives the tap.
+///
+/// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
+/// {@end-tool}
+///
 /// ## Semantics
 ///
 /// Using this class may also affect how the semantics subtree underneath is
