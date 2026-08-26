@@ -219,18 +219,32 @@ class FlutterProject {
     }
   }
 
-  static Iterable<Directory> _resolveWorkspacePattern(Directory root, String pattern) {
-    Iterable<Directory> current = <Directory>[root];
-    for (final String segment in pattern.split('/')) {
-      if (segment.isEmpty) {
-        continue;
-      }
-      if (segment.contains('*') ||
+  static List<Directory> _resolveWorkspacePattern(Directory root, String pattern) {
+    final List<String> segments = pattern.split('/').where((String s) => s.isNotEmpty).toList();
+    if (segments.isEmpty) {
+      return const <Directory>[];
+    }
+
+    var currentDirs = <Directory>[root];
+
+    for (final segment in segments) {
+      if (segment == '**') {
+        final nextDirs = <Directory>[];
+        final visited = <String>{};
+        for (final dir in currentDirs) {
+          if (!dir.existsSync()) {
+            continue;
+          }
+          nextDirs.add(dir);
+          _collectSubdirectories(dir, nextDirs, visited);
+        }
+        currentDirs = nextDirs;
+      } else if (segment.contains('*') ||
           segment.contains('?') ||
           segment.contains('[') ||
           segment.contains('{')) {
         final glob = Glob(segment, context: root.fileSystem.path);
-        current = current.expand((Directory dir) {
+        currentDirs = currentDirs.expand((Directory dir) {
           if (!dir.existsSync()) {
             return const <Directory>[];
           }
@@ -242,14 +256,35 @@ class FlutterProject {
           } on FileSystemException {
             return const <Directory>[];
           }
-        });
+        }).toList();
       } else {
-        current = current
+        currentDirs = currentDirs
             .map((Directory dir) => dir.childDirectory(segment))
-            .where((Directory dir) => dir.existsSync());
+            .where((Directory dir) => dir.existsSync())
+            .toList();
       }
     }
-    return current;
+
+    return currentDirs;
+  }
+
+  static void _collectSubdirectories(Directory dir, List<Directory> results, Set<String> visited) {
+    if (!visited.add(dir.path)) {
+      return;
+    }
+    try {
+      for (final FileSystemEntity entity in dir.listSync(followLinks: false)) {
+        if (entity is Directory) {
+          final String name = entity.basename;
+          if (!name.startsWith('.') && name != 'build') {
+            results.add(entity);
+            _collectSubdirectories(entity, results, visited);
+          }
+        }
+      }
+    } on FileSystemException {
+      // Ignore unreadable or transient directories.
+    }
   }
 
   /// The set of organization names found in this project as
