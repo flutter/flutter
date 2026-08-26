@@ -203,18 +203,15 @@ class FlutterProject {
 
     // Update the workspace projects based on the new manifest.
     _workspaceProjects = <FlutterProject>[];
-    if (!directory.existsSync()) {
-      return;
-    }
     for (final String entry in manifest.workspace) {
-      final glob = Glob(entry);
-      for (final Directory entity in directory.listSync(recursive: true).whereType<Directory>()) {
-        final String relativePath = directory.fileSystem.path
-            .relative(entity.path, from: directory.path)
-            .replaceAll(r'\', '/');
-        if (glob.matches(relativePath) && entity.childFile('pubspec.yaml').existsSync()) {
+      final glob = Glob(entry, context: directory.fileSystem.path);
+      for (final Directory globResult
+          in glob
+              .listFileSystemSync(directory.fileSystem, root: directory.path)
+              .whereType<Directory>()) {
+        if (globResult.childFile('pubspec.yaml').existsSync()) {
           try {
-            _workspaceProjects.add(FlutterProject.fromDirectory(entity));
+            _workspaceProjects.add(FlutterProject.fromDirectory(globResult));
           } on Exception catch (_) {
             // Ignore child projects with invalid manifests.
           }
