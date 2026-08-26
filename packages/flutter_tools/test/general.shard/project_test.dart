@@ -2097,6 +2097,40 @@ workspace:
         expect(FlutterProject.fromDirectory(directory).workspaceProjects, isEmpty);
       });
 
+      _testInMemory('handles Windows backslash separators in workspace entries', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(r'''
+name: parent
+flutter:
+workspace:
+- packages\child1
+- packages\*
+''');
+        directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+        directory.childDirectory('packages').childDirectory('child2').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child2
+flutter:
+resolution: workspace
+''');
+
+        expect(
+          FlutterProject.fromDirectory(directory).workspaceProjects
+              .map((FlutterProject subproject) => subproject.manifest.appName)
+              .toSet(),
+          <String>{'child1', 'child2'},
+        );
+      });
+
       _testInMemory(
         'ignores build and .dart_tool directories during workspace discovery',
         () async {
