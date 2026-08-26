@@ -7,6 +7,7 @@
 /// The command line flags that are passed directly to the Android engine.
 abstract final class AndroidEngineCliFlags {
   static const String traceStartup = 'trace-startup';
+  static const String profileStartup = 'profile-startup';
   static const String route = 'route';
   static const String traceSkia = 'trace-skia';
   static const String traceAllowlist = 'trace-allowlist';
@@ -22,12 +23,20 @@ abstract final class AndroidEngineCliFlags {
   static const String enableImpeller = 'enable-impeller';
   static const String enableVulkanValidation = 'enable-vulkan-validation';
   static const String enableFlutterGpu = 'enable-flutter-gpu';
+  static const String enableHcpp = 'enable-hcpp';
+  static const String testFlag = 'test-flag';
   static const String startPaused = 'start-paused';
+  static const String disableServiceAuthCodes = 'disable-service-auth-codes';
+  static const String disableServiceOriginCheck = 'disable-service-origin-check';
   static const String dartFlags = 'dart-flags';
+  static const String useTestFonts = 'use-test-fonts';
+  static const String verboseLogging = 'verbose-logging';
+  static const String verboseSystemLogs = 'verbose-system-logs';
 
   static const List<String> allFlags = <String>[
     route,
     traceStartup,
+    profileStartup,
     traceSkia,
     traceAllowlist,
     traceSkiaAllowlist,
@@ -42,7 +51,13 @@ abstract final class AndroidEngineCliFlags {
     enableImpeller,
     enableVulkanValidation,
     enableFlutterGpu,
+    enableHcpp,
+    testFlag,
     startPaused,
+    disableServiceAuthCodes,
+    disableServiceOriginCheck,
     dartFlags,
+    useTestFonts,
+    verboseSystemLogs,
   ];
 }

@@ -1954,7 +1954,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   @protected
-  void validateUseApplicationBinaryForAndroidEngineConfigOptions() {
+  void validatePrebuiltAndroidApplicationFlags() {
     final String? applicationBinary =
         argParser.options.containsKey(FlutterOptions.kUseApplicationBinary)
         ? stringArg(FlutterOptions.kUseApplicationBinary)
@@ -1969,9 +1969,9 @@ abstract class FlutterCommand extends Command<void> {
 
         if (intentFlags.isNotEmpty) {
           throwToolExit(
-            'Using --${FlutterOptions.kUseApplicationBinary} in release mode and additional flags used to configure the Flutter Android embedding '
-            'is not supported for Android (${intentFlags.join(', ')}). Please do not use a prebuilt binary or define the '
-            'required flags via the Android manifest. See https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-intent-flags for more details.',
+            'Running a prebuilt APK with --${FlutterOptions.kUseApplicationBinary} in release mode with flags used to configure the Flutter Android engine '
+            '(${intentFlags.join(', ')}) is no longer supported. Define the required flags via the Android manifest instead. See '
+            'https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-intent-flags for more details.',
           );
         }
       }
@@ -1981,7 +1981,7 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
-    validateUseApplicationBinaryForAndroidEngineConfigOptions();
+    validatePrebuiltAndroidApplicationFlags();
     if (_requiresPubspecYaml && globalResults?.wasParsed('packages') != true) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit package_config.json file path.
 

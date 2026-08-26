@@ -1418,7 +1418,7 @@ class DebuggingOptions {
   Map<String, Object?> _getAndroidEngineConfig() {
     return <String, Object?>{
       if (enableDartProfiling) AndroidEngineCliFlags.enableDartProfiling: true,
-      if (profileStartup) 'profile-startup': true,
+      if (profileStartup) AndroidEngineCliFlags.profileStartup: true,
       if (enableSoftwareRendering) AndroidEngineCliFlags.enableSoftwareRendering: true,
       if (skiaDeterministicRendering) AndroidEngineCliFlags.skiaDeterministicRendering: true,
       if (traceSkia) AndroidEngineCliFlags.traceSkia: true,
@@ -1434,16 +1434,18 @@ class DebuggingOptions {
       if (enableFlutterGpu) AndroidEngineCliFlags.enableFlutterGpu: true,
       if (enableVulkanValidation) AndroidEngineCliFlags.enableVulkanValidation: true,
       if (enableHcpp) 'enable-hcpp-and-surface-control': true,
-      if (testFlag) 'test-flag': true,
+      if (testFlag) AndroidEngineCliFlags.testFlag: true,
       if (debuggingEnabled) ...<String, Object?>{
+        // TODO(camsim99): Determine if we should even forward these to the Android embedding since Android
+        // appears unsupported. https://github.com/flutter/flutter/issues/191849
         if (buildInfo.isDebug) 'enable-checked-mode': true,
         if (buildInfo.isDebug) 'verify-entry-points': true,
         if (startPaused) AndroidEngineCliFlags.startPaused: true,
-        if (disableServiceAuthCodes) 'disable-service-auth-codes': true,
-        if (disableServiceOriginCheck) 'disable-service-origin-check': true,
+        if (disableServiceAuthCodes) AndroidEngineCliFlags.disableServiceAuthCodes: true,
+        if (disableServiceOriginCheck) AndroidEngineCliFlags.disableServiceOriginCheck: true,
         if (dartFlags.isNotEmpty) AndroidEngineCliFlags.dartFlags: dartFlags,
-        if (useTestFonts) 'use-test-fonts': true,
-        if (verboseSystemLogs) 'verbose-logging': true,
+        if (useTestFonts) AndroidEngineCliFlags.useTestFonts: true,
+        if (verboseSystemLogs) AndroidEngineCliFlags.verboseLogging: true,
       },
     };
   }
