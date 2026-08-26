@@ -224,11 +224,7 @@ void main() {
         expect(buildInfo.flavor, isNull);
         expect(buildInfo.splitDebugInfoPath, isNull);
         expect(buildInfo.dartObfuscation, isFalse);
-        expect(androidBuildInfo.targetArchs, <CpuArch>[
-          CpuArch.armv7,
-          CpuArch.arm64,
-          CpuArch.x64,
-        ]);
+        expect(androidBuildInfo.targetArchs, <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64]);
       }
       expect(buildModes, hasLength(3));
       expect(
@@ -395,22 +391,23 @@ void main() {
           tempDir,
           arguments: <String>['--no-pub', '--template=module'],
         );
-        final AndroidSdk androidSdk = globals.androidSdk!;
-        final List<String> installedNdkVersions =
-            androidSdk.directory
-                .childDirectory('ndk')
-                .listSync()
-                .whereType<Directory>()
-                .map((Directory dir) => dir.basename)
-                .where(
-                  (String version) => androidSdk.directory
-                      .childDirectory('ndk')
-                      .childDirectory(version)
-                      .childFile('source.properties')
-                      .existsSync(),
-                )
-                .toList()
-              ..sort();
+        final AndroidSdk? androidSdk = globals.androidSdk;
+        if (androidSdk == null) {
+          return;
+        }
+        final Directory ndkDir = androidSdk.directory.childDirectory('ndk');
+        final List<String> installedNdkVersions = ndkDir.existsSync()
+            ? ndkDir
+                  .listSync()
+                  .whereType<Directory>()
+                  .map((Directory dir) => dir.basename)
+                  .where(
+                    (String version) =>
+                        ndkDir.childDirectory(version).childFile('source.properties').existsSync(),
+                  )
+                  .toList()
+            : <String>[];
+        installedNdkVersions.sort();
         final ndkProvisioningProperties = <String>[
           '-Pflutter.androidSdkRoot=${androidSdk.directory.path}',
           '-Pflutter.installedNdkVersions=${installedNdkVersions.join(',')}',
