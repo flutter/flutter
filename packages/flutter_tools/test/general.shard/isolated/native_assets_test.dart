@@ -312,11 +312,8 @@ void main() {
 
       // Verify installed files only contain native_assets.json and used.so, but not unused.so.
       expect(
-        installedFiles.map((File f) => f.basename),
-        unorderedEquals(<String>[
-          InstallCodeAssets.nativeAssetsFilename,
-          'used.so',
-        ]),
+        installedFiles.map((File f) => f.uri.pathSegments.lastWhere((String s) => s.isNotEmpty)),
+        unorderedEquals(<String>[InstallCodeAssets.nativeAssetsFilename, 'used.so']),
       );
       final File nativeAssetsJsonFile = fileSystem.file(nonFlutterTesterAssetUri);
       expect(nativeAssetsJsonFile, exists);
