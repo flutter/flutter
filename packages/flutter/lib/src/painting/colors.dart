@@ -27,6 +27,16 @@ double _getHue(double red, double green, double blue, double max, double delta) 
   return hue;
 }
 
+double _lerpHue(double a, double b, double t) {
+  double delta = b - a;
+  if (delta > 180.0) {
+    delta -= 360.0;
+  } else if (delta < -180.0) {
+    delta += 360.0;
+  }
+  return (a + delta * t) % 360.0;
+}
+
 Color _colorFromHue(double alpha, double hue, double chroma, double secondary, double match) {
   final (double red, double green, double blue) = switch (hue) {
     < 60.0 => (chroma, secondary, 0.0),
@@ -187,7 +197,7 @@ class HSVColor {
     }
     return HSVColor.fromAHSV(
       clampDouble(lerpDouble(a.alpha, b.alpha, t)!, 0.0, 1.0),
-      lerpDouble(a.hue, b.hue, t)! % 360.0,
+      _lerpHue(a.hue, b.hue, t),
       clampDouble(lerpDouble(a.saturation, b.saturation, t)!, 0.0, 1.0),
       clampDouble(lerpDouble(a.value, b.value, t)!, 0.0, 1.0),
     );
@@ -370,7 +380,7 @@ class HSLColor {
     }
     return HSLColor.fromAHSL(
       clampDouble(lerpDouble(a.alpha, b.alpha, t)!, 0.0, 1.0),
-      lerpDouble(a.hue, b.hue, t)! % 360.0,
+      _lerpHue(a.hue, b.hue, t),
       clampDouble(lerpDouble(a.saturation, b.saturation, t)!, 0.0, 1.0),
       clampDouble(lerpDouble(a.lightness, b.lightness, t)!, 0.0, 1.0),
     );

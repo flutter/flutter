@@ -301,7 +301,7 @@ void main() {
     binary.createSync(recursive: true);
     processManager.addCommands(<FakeCommand>[
       copyFrameworkCommand,
-        chmodDebugFrameworkCommand,
+      chmodDebugFrameworkCommand,
       lipoInfoNonFatCommand,
       lipoVerifyX86_64Command,
     ]);
@@ -318,7 +318,7 @@ void main() {
     binary.createSync(recursive: true);
     processManager.addCommands(<FakeCommand>[
       copyFrameworkCommand,
-        chmodDebugFrameworkCommand,
+      chmodDebugFrameworkCommand,
       lipoInfoFatCommand,
       lipoVerifyX86_64Command,
       lipoExtractX86_64Command,
