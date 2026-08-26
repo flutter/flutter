@@ -2076,10 +2076,7 @@ server:
         );
         await runner.run(<String>['run']);
 
-        expect(
-          testLogger.warningText,
-          isNot(contains('is deprecated')),
-        );
+        expect(testLogger.warningText, isNot(contains('is deprecated')));
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -2412,6 +2409,9 @@ class FakeAnsiTerminal extends Fake implements AnsiTerminal {
 class FakeFeatureFlags extends Fake implements FeatureFlags {
   @override
   bool get isWebEnabled => true;
+
+  @override
+  bool get isToolExtensionsEnabled => false;
 
   @override
   bool isEnabled(Feature feature) => feature.master.enabledByDefault;
