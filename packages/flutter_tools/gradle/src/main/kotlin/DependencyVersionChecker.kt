@@ -142,8 +142,12 @@ object DependencyVersionChecker {
         val kgpVersion: Version? = VersionFetcher.getKGPVersion(project)
         if (kgpVersion != null) {
             checkKGPVersion(kgpVersion, project)
+        } else {
+            project.logger.debug(
+                "Unable to detect project Kotlin Gradle Plugin version. Skipping Kotlin min-version enforcement. " +
+                    "This is expected if the project uses AGP built-in Kotlin (android.builtInKotlin) or does not apply KGP."
+            )
         }
-        // KGP is not required, so don't log any warning if we can't find the version.
     }
 
     private fun configureMinSdkCheck(project: Project) {

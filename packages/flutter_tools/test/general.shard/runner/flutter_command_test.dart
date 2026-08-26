@@ -237,6 +237,100 @@ void main() {
     );
 
     testUsingContext(
+      'prints warning when enable-impeller flag is used with release build',
+      () async {
+        final flutterCommand = DummyFlutterCommand()
+          ..addBuildModeFlags(verboseHelp: false)
+          ..addEnableImpellerFlag(verboseHelp: false);
+
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--release', '--enable-impeller']);
+
+        expect(
+          testLogger.warningText,
+          contains('The "--enable-impeller" flag is ignored in release builds'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'prints warning when no-enable-impeller flag is used with release build',
+      () async {
+        final flutterCommand = DummyFlutterCommand()
+          ..addBuildModeFlags(verboseHelp: false)
+          ..addEnableImpellerFlag(verboseHelp: false);
+
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--release', '--no-enable-impeller']);
+
+        expect(
+          testLogger.warningText,
+          contains('The "--no-enable-impeller" flag is ignored in release builds'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'does not print warning when enable-impeller flag is used with debug build',
+      () async {
+        final flutterCommand = DummyFlutterCommand()
+          ..addBuildModeFlags(verboseHelp: false)
+          ..addEnableImpellerFlag(verboseHelp: false);
+
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--debug', '--enable-impeller']);
+
+        expect(testLogger.warningText, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'does not print warning when no impeller flags are used with release build',
+      () async {
+        final flutterCommand = DummyFlutterCommand()
+          ..addBuildModeFlags(verboseHelp: false)
+          ..addEnableImpellerFlag(verboseHelp: false);
+
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy', '--release']);
+
+        expect(testLogger.warningText, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'does not fail or warn on command without build mode flags',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['dummy']);
+
+        expect(testLogger.warningText, isEmpty);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'uses the error handling file system',
       () async {
         final flutterCommand = DummyFlutterCommand(
@@ -684,6 +778,73 @@ void main() {
           defaultBuildInfo.toGradleConfig(),
           isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
         );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'getBuildInfo defaults when no build options are registered on command',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+        await createTestCommandRunner(flutterCommand).run(<String>['dummy']);
+
+        final BuildInfo debugBuildInfo = await flutterCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(debugBuildInfo.trackWidgetCreation, isFalse);
+        expect(debugBuildInfo.treeShakeIcons, isFalse);
+        expect(debugBuildInfo.androidGradleDaemon, isTrue);
+        expect(debugBuildInfo.androidSkipBuildDependencyValidation, isTrue);
+
+        final BuildInfo releaseBuildInfo = await flutterCommand.getBuildInfo(
+          forcedBuildMode: BuildMode.release,
+        );
+        expect(releaseBuildInfo.trackWidgetCreation, isFalse);
+        expect(releaseBuildInfo.treeShakeIcons, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'getBuildInfo default flag values with options registered',
+      () async {
+        final command = DummyAllBuildOptionsFlutterCommand();
+        await createTestCommandRunner(command).run(<String>['dummy']);
+
+        final BuildInfo debugBuildInfo = await command.getBuildInfo(
+          forcedBuildMode: BuildMode.debug,
+        );
+        expect(debugBuildInfo.trackWidgetCreation, isTrue);
+        expect(debugBuildInfo.androidSkipBuildDependencyValidation, isFalse);
+
+        final BuildInfo releaseBuildInfo = await command.getBuildInfo(
+          forcedBuildMode: BuildMode.release,
+        );
+        expect(releaseBuildInfo.treeShakeIcons, isTrue);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'getBuildInfo respects historical ExtraFrontEndOptions and ExtraGenSnapshotOptions aliases',
+      () async {
+        final command = DummyAllBuildOptionsFlutterCommand();
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['dummy', '--ExtraFrontEndOptions=--foo', '--ExtraGenSnapshotOptions=--bar']);
+
+        final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.release);
+        expect(buildInfo.extraFrontEndOptions, contains('--foo'));
+        expect(buildInfo.extraGenSnapshotOptions, contains('--bar'));
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -2206,5 +2367,14 @@ class DummyMachineFlutterCommand extends DummyFlutterCommand {
 class DummyHcppFlutterCommand extends DummyFlutterCommand {
   DummyHcppFlutterCommand() : super(name: 'dummy') {
     addEnableHcppFlag(verboseHelp: false);
+  }
+}
+
+class DummyAllBuildOptionsFlutterCommand extends DummyFlutterCommand {
+  DummyAllBuildOptionsFlutterCommand() : super(name: 'dummy') {
+    usesTrackWidgetCreation(verboseHelp: false);
+    addTreeShakeIconsFlag();
+    usesExtraDartFlagOptions(verboseHelp: false);
+    addAndroidSpecificBuildOptions();
   }
 }

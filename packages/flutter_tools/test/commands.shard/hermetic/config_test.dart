@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -17,8 +18,11 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -46,7 +50,7 @@ void main() {
     fs = MemoryFileSystem.test();
     config = Config.test(directory: fs.directory('/'));
     logger = BufferLogger.test();
-    fakeJava = fakes.FakeJava();
+    fakeJava = fakes.FakeJava(javaHome: 'path/to/jdk');
     fakeAndroidStudio = FakeAndroidStudio();
     fakeAndroidSdk = FakeAndroidSdk(fileSystem: fs);
     fakeFlutterVersion = FakeFlutterVersion();
@@ -71,6 +75,7 @@ void main() {
     FeatureFlags? featureFlags,
     Analytics? analytics,
     bool verboseHelp = false,
+    ExtensionManager? extensionManager,
   }) {
     final FileSystem fs = fileSystem ?? MemoryFileSystem.test();
     final Logger resolvedLogger = logger ?? BufferLogger.test();
@@ -80,10 +85,11 @@ void main() {
       verboseHelp: verboseHelp,
       featureFlags: featureFlags ?? TestFeatureFlags(),
       analytics: analytics ?? fakeAnalytics,
+      extensionManager: extensionManager,
       androidContext: FakeAndroidContext(
-        androidSdk: androidSdk ?? FakeAndroidSdk(fileSystem: fs),
-        androidStudio: androidStudio ?? FakeAndroidStudio(),
-        java: java ?? fakes.FakeJava(),
+        androidSdk: androidSdk,
+        androidStudio: androidStudio,
+        java: java,
       ),
       toolContext: FakeToolContext(
         config: config ?? Config.test(directory: fs.directory('/')),
@@ -94,90 +100,79 @@ void main() {
         processManager: resolvedProcessManager,
         processUtils:
             processUtils ??
-            ProcessUtils(processManager: resolvedProcessManager, logger: resolvedLogger),
+            ProcessUtils(logger: resolvedLogger, processManager: resolvedProcessManager),
         terminal: terminal ?? AnsiTerminal(stdio: FakeStdio(), platform: resolvedPlatform),
       ),
     );
   }
 
   group('config', () {
-    testWithoutContext('prints all settings with --list', () async {
+    testWithoutContext('machine flag displays values in json format', () async {
       final ConfigCommand configCommand = createConfigCommand(
         config: config,
         logger: logger,
         fileSystem: fs,
         flutterVersion: fakeFlutterVersion,
+        androidStudio: fakeAndroidStudio,
+        androidSdk: fakeAndroidSdk,
+        java: fakeJava,
       );
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
-      await commandRunner.run(<String>['config', '--list']);
-      final String channel = fakeFlutterVersion.channel;
-      expect(
-        logger.statusText,
-        'All Settings:\n'
-        '${TestFeatureFlags().allFeatures.where((Feature e) => e.configSetting != null).map((Feature e) {
-          final FeatureChannelSetting setting = e.getSettingForChannel(channel);
-          if (!setting.available) {
-            return '  ${e.configSetting}: (Not set) (Unavailable)';
-          }
-          return '  ${e.configSetting}: (Not set)';
-        }).join('\n')}'
-        '\n\n',
-      );
-    });
 
-    testWithoutContext('prints default values with --help', () async {
-      final ConfigCommand configCommand = createConfigCommand(
-        config: config,
-        logger: logger,
-        fileSystem: fs,
-        flutterVersion: fakeFlutterVersion,
-      );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
-      await commandRunner.run(<String>['config', '--help']);
-      expect(logger.statusText, contains('(defaults to on)'));
-    });
-
-    testWithoutContext('throws error on excess arguments', () {
-      final ConfigCommand configCommand = createConfigCommand(
-        config: config,
-        logger: logger,
-        fileSystem: fs,
-        flutterVersion: fakeFlutterVersion,
-      );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      await commandRunner.run(<String>['config', '--machine']);
 
       expect(
-        () => commandRunner.run(<String>[
-          'config',
-          '--android-studio-dir=/opt/My',
-          'Android',
-          'Studio',
-        ]),
-        throwsToolExit(),
+        json.decode(logger.statusText),
+        equals(<String, Object?>{
+          'android-studio-dir': 'path/to/android/studio',
+          'android-sdk': 'path/to/android/sdk',
+          'jdk-dir': 'path/to/jdk',
+        }),
       );
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext('machine flag', () async {
-      final ConfigCommand command = createConfigCommand(
+    testWithoutContext('machine flag outputs empty json when tools are not found', () async {
+      final ConfigCommand configCommand = createConfigCommand(
         config: config,
         logger: logger,
         fileSystem: fs,
         flutterVersion: fakeFlutterVersion,
-        androidSdk: fakeAndroidSdk,
+      );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      await commandRunner.run(<String>['config', '--machine']);
+
+      expect(json.decode(logger.statusText), equals(<String, Object?>{}));
+      expect(fakeAnalytics.sentEvents, isEmpty);
+    });
+
+    testWithoutContext('machine flag includes custom values in output', () async {
+      final ConfigCommand configCommand = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
         androidStudio: fakeAndroidStudio,
+        androidSdk: fakeAndroidSdk,
         java: fakeJava,
       );
-      await command.handleMachine();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
-      expect(logger.statusText, isNotEmpty);
-      final dynamic jsonObject = json.decode(logger.statusText);
-      expect(jsonObject, const TypeMatcher<Map<String, dynamic>>());
-      if (jsonObject is Map<String, dynamic>) {
-        expect(jsonObject['android-studio-dir'], fakeAndroidStudio.directory);
-        expect(jsonObject['android-sdk'], fakeAndroidSdk.directory.path);
-        expect(jsonObject['jdk-dir'], fakeJava.javaHome);
-      }
+      config.setValue('android-studio-dir', 'dummy/dir/to/android/studio');
+      config.setValue('android-sdk', 'dummy/dir/to/android/sdk');
+      config.setValue('jdk-dir', 'dummy/dir/to/jdk');
+
+      await commandRunner.run(<String>['config', '--machine']);
+
+      expect(
+        json.decode(logger.statusText),
+        equals(<String, Object?>{
+          'android-studio-dir': 'dummy/dir/to/android/studio',
+          'android-sdk': 'dummy/dir/to/android/sdk',
+          'jdk-dir': 'dummy/dir/to/jdk',
+        }),
+      );
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
@@ -235,15 +230,6 @@ void main() {
       expect(config.getValue('enable-windows-desktop'), true);
       expect(config.getValue('enable-macos-desktop'), true);
 
-      await commandRunner.run(<String>['config', '--clear-features']);
-
-      expect(config.getValue('enable-android'), null);
-      expect(config.getValue('enable-ios'), null);
-      expect(config.getValue('enable-web'), null);
-      expect(config.getValue('enable-linux-desktop'), null);
-      expect(config.getValue('enable-windows-desktop'), null);
-      expect(config.getValue('enable-macos-desktop'), null);
-
       await commandRunner.run(<String>[
         'config',
         '--no-enable-android',
@@ -260,10 +246,24 @@ void main() {
       expect(config.getValue('enable-linux-desktop'), false);
       expect(config.getValue('enable-windows-desktop'), false);
       expect(config.getValue('enable-macos-desktop'), false);
+
+      await commandRunner.run(<String>['config', '--clear-features']);
+
+      expect(config.getValue('enable-android'), null);
+      expect(config.getValue('enable-ios'), null);
+      expect(config.getValue('enable-web'), null);
+      expect(config.getValue('enable-linux-desktop'), null);
+      expect(config.getValue('enable-windows-desktop'), null);
+      expect(config.getValue('enable-macos-desktop'), null);
+
+      expect(
+        logger.statusText,
+        contains('You may need to restart any open editors for them to read new settings.'),
+      );
       expect(fakeAnalytics.sentEvents, isEmpty);
     });
 
-    testWithoutContext('warns the user to reload IDE', () async {
+    testWithoutContext('displays notice when setting is changed', () async {
       final ConfigCommand configCommand = createConfigCommand(
         config: config,
         logger: logger,
@@ -278,6 +278,20 @@ void main() {
         logger.statusText,
         containsIgnoringWhitespace('You may need to restart any open editors'),
       );
+    });
+
+    testWithoutContext('warns when Swift Package Manager is disabled', () async {
+      final ConfigCommand configCommand = createConfigCommand(
+        config: config,
+        logger: logger,
+        fileSystem: fs,
+        flutterVersion: fakeFlutterVersion,
+      );
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      await commandRunner.run(<String>['config', '--no-enable-swift-package-manager']);
+
+      expect(logger.warningText, contains(kSwiftPackageManagerDisabledWarning));
     });
 
     testWithoutContext('displays which config settings are available on stable', () async {
@@ -383,6 +397,132 @@ void main() {
       expect(fakeLocalLogger.statusText, contains('All Settings:'));
       expect(fakeLocalConfig.keysQueried, isTrue);
     });
+
+    testWithoutContext(
+      'custom configuration options and feature flags are registered in parser',
+      () async {
+        final mockExtension = FakeConfigurationExtension(
+          title: 'My Extension',
+          featureFlags: <FeatureFlag>[
+            const FeatureFlag(
+              name: 'my-ext-feature',
+              help: 'My extension feature help',
+              enabledByDefault: true,
+            ),
+          ],
+          configOptions: <ConfigOption>[
+            const ConfigOption(
+              name: 'my-ext-option',
+              help: 'My extension option help',
+              value: 'default-value',
+            ),
+          ],
+        );
+        final fakeExtensionManager = FakeExtensionManager(
+          extensions: <ConfigurationExtension>[mockExtension],
+        );
+
+        final ConfigCommand configCommand = createConfigCommand(
+          config: config,
+          logger: logger,
+          fileSystem: fs,
+          flutterVersion: fakeFlutterVersion,
+          extensionManager: fakeExtensionManager,
+          featureFlags: fakes.TestFeatureFlags(isToolExtensionsEnabled: true),
+        );
+        createTestCommandRunner(configCommand);
+
+        await configCommand.initializeDynamicOptions();
+        final ArgParser parser = configCommand.argParser;
+
+        expect(parser.options, contains('my-ext-feature'));
+        expect(parser.options, contains('my-ext-option'));
+
+        expect(parser.options['my-ext-feature']!.isFlag, true);
+        expect(parser.options['my-ext-feature']!.help, 'My extension feature help');
+        expect(parser.options['my-ext-feature']!.defaultsTo, true);
+
+        expect(parser.options['my-ext-option']!.isFlag, false);
+        expect(parser.options['my-ext-option']!.help, 'My extension option help');
+        expect(parser.options['my-ext-option']!.defaultsTo, 'default-value');
+      },
+    );
+
+    testWithoutContext(
+      'custom configuration options and feature flags can be set/cleared via runCommand',
+      () async {
+        final mockExtension = FakeConfigurationExtension(
+          title: 'My Extension',
+          featureFlags: <FeatureFlag>[
+            const FeatureFlag(name: 'my-ext-feature', help: 'My extension feature help'),
+          ],
+          configOptions: <ConfigOption>[
+            const ConfigOption(name: 'my-ext-option', help: 'My extension option help'),
+          ],
+        );
+        final fakeExtensionManager = FakeExtensionManager(
+          extensions: <ConfigurationExtension>[mockExtension],
+        );
+
+        final ConfigCommand configCommand = createConfigCommand(
+          config: config,
+          logger: logger,
+          fileSystem: fs,
+          flutterVersion: fakeFlutterVersion,
+          extensionManager: fakeExtensionManager,
+          featureFlags: fakes.TestFeatureFlags(isToolExtensionsEnabled: true),
+        );
+        await configCommand.initializeDynamicOptions();
+        final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+        await commandRunner.run(<String>['config', '--my-ext-feature', '--my-ext-option=my-value']);
+
+        expect(config.getValue('my-ext-feature'), true);
+        expect(config.getValue('my-ext-option'), 'my-value');
+
+        // Test disabling flag
+        await commandRunner.run(<String>['config', '--no-my-ext-feature']);
+        expect(config.getValue('my-ext-feature'), false);
+
+        await commandRunner.run(<String>['config', '--clear-features']);
+        expect(config.getValue('my-ext-feature'), null);
+
+        await commandRunner.run(<String>['config', '--my-ext-option=']);
+        expect(config.getValue('my-ext-option'), null);
+      },
+    );
+
+    testWithoutContext(
+      'conflicting extension options and feature flags are skipped without throwing',
+      () async {
+        final mockExtension = FakeConfigurationExtension(
+          title: 'Conflicting Extension',
+          featureFlags: <FeatureFlag>[
+            const FeatureFlag(name: 'analytics', help: 'Conflicting analytics flag'),
+          ],
+          configOptions: <ConfigOption>[
+            const ConfigOption(name: 'android-sdk', help: 'Conflicting android-sdk option'),
+          ],
+        );
+        final fakeExtensionManager = FakeExtensionManager(
+          extensions: <ConfigurationExtension>[mockExtension],
+        );
+
+        final ConfigCommand configCommand = createConfigCommand(
+          config: config,
+          logger: logger,
+          fileSystem: fs,
+          flutterVersion: fakeFlutterVersion,
+          extensionManager: fakeExtensionManager,
+          featureFlags: fakes.TestFeatureFlags(isToolExtensionsEnabled: true),
+        );
+        await configCommand.initializeDynamicOptions();
+        final ArgParser parser = configCommand.argParser;
+
+        expect(parser.options.containsKey('analytics'), isTrue);
+        expect(parser.options.containsKey('android-sdk'), isTrue);
+      },
+    );
   });
 }
 
@@ -425,4 +565,35 @@ class FakeConfig extends Fake implements Config {
 
   @override
   Object? getValue(String key) => null;
+}
+
+class FakeExtensionManager extends Fake implements ExtensionManager {
+  FakeExtensionManager({this.extensions = const <ConfigurationExtension>[]});
+
+  final List<ConfigurationExtension> extensions;
+
+  @override
+  List<ConfigurationExtension> get configurationExtensions => extensions;
+
+  @override
+  Future<void> ensureInitialized() async {}
+}
+
+class FakeConfigurationExtension extends Fake implements ConfigurationExtension {
+  FakeConfigurationExtension({
+    required this.title,
+    required this.featureFlags,
+    required this.configOptions,
+  });
+
+  @override
+  final String title;
+  final List<FeatureFlag> featureFlags;
+  final List<ConfigOption> configOptions;
+
+  @override
+  Future<List<FeatureFlag>> getFeatureFlags() async => featureFlags;
+
+  @override
+  Future<List<ConfigOption>> getConfigurations() async => configOptions;
 }
