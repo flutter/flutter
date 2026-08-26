@@ -32,6 +32,22 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.47 Changes
 
+### [3.47.2](https://github.com/flutter/flutter/releases/tag/3.47.2)
+- [flutter/191179](https://github.com/flutter/flutter/issues/191179) When WebSocket upgrade fails during DDS startup on web, handle the `DartDevelopmentServiceException` gracefully instead of crashing.
+- [flutter/190518](https://github.com/flutter/flutter/pull/190518) Fix memory leak caused by processing touch events on Linux.
+- [flutter/188265](https://github.com/flutter/flutter/issues/188265) iOS or macOS builds may fail when Swift Package Manager is enabled.
+- [flutter/190846](https://github.com/flutter/flutter/issues/190846) When building an existing native iOS app that's integrated with Flutter using SwiftPM on Xcode 27, it may fail to build Flutter's Swift packages.
+- [flutter/187925](https://github.com/flutter/flutter/issues/187925) On Linux, fix header elements not being announced by screen reader.
+- [flutter/190774](https://github.com/flutter/flutter/issues/190774) When using external textures on Windows, a crash could occur when the engine paints them.
+- [flutter/191177](https://github.com/flutter/flutter/issues/191177) The Flutter tool crashes if a configured custom device ping times out.
+- [flutter/190987](https://github.com/flutter/flutter/issues/190987) Updates `libpng` to fix security vulnerabilty.
+- [flutter/191060](https://github.com/flutter/flutter/issues/191060) When `analysis_options.yaml` contains flow-style `exclude:` sequences, `AnalysisOptionsMigration` converts the node to block style before appending to avoid `YamlEditor` assertion crashes.
+- [flutter/191131](https://github.com/flutter/flutter/issues/191131) Only exclude platform directories that actually exist from analysis, so web/** sources in Dart web packages are no longer silently dropped.
+- [flutter/191198](https://github.com/flutter/flutter/issues/191198) On Windows, truncate `lastCompiled` timestamp to whole seconds in `ProjectFileInvalidator` so rapid consecutive file modifications within the same second are not silently ignored by hot reload.
+- [flutter/152236](https://github.com/flutter/flutter/issues/152236) On desktop platforms, forward `--build-name` and `--build-number` flags to the desktop build pipeline so generated `version.json` reflects command-line build version parameters.
+- [flutter/191205](https://github.com/flutter/flutter/issues/191205) Prevent `StateError: Bad state: Future already completed in Symbolizer`  during stack symbolization.
+- [flutter/191178](https://github.com/flutter/flutter/issues/191178) Handle `HttpException` during VM service connection retries and ensure typed exceptions are passed to error completers.
+
 ### [3.47.1](https://github.com/flutter/flutter/releases/tag/3.47.1)
 - [flutter/190871](https://github.com/flutter/flutter/issues/190871) Flutter GPU could not be enabled in release builds on Linux and Windows, since those embedders had no project-level opt-in and release builds ignore engine switches from the environment.
 - [flutter/188446](https://github.com/flutter/flutter/issues/188446) When building multi-target applications in parallel on iOS and macOS, a race condition in SwiftPM integration causes `FileSystemException`.
