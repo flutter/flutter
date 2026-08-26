@@ -303,4 +303,51 @@ migration:
       contains(FlutterTemplateType.plugin),
     );
   });
+
+  testWithoutContext(
+    'projectType parses custom template when extensionTemplateManager is null',
+    () {
+      metadataFile
+        ..createSync()
+        ..writeAsStringSync('''
+version:
+  revision: b59b226a49391949247e3d6122e34bb001049ae4
+  channel: stable
+project_type: custom-linux-app
+      ''');
+      final projectMetadata = FlutterProjectMetadata(
+        metadataFile,
+        logger,
+        extensionTemplateManager: null,
+      );
+      expect(projectMetadata.projectType, isA<ExtensionProjectTemplateType>());
+      expect(projectMetadata.projectType?.cliName, 'custom-linux-app');
+    },
+  );
+
+  testWithoutContext('ParsedFlutterTemplateType.fromCliName respects fallbackToCustom', () {
+    expect(
+      ParsedFlutterTemplateType.fromCliName(
+        'custom-template',
+        extensionTemplateManager: null,
+      ),
+      isNull,
+    );
+    expect(
+      ParsedFlutterTemplateType.fromCliName(
+        'custom-template',
+        extensionTemplateManager: null,
+        fallbackToCustom: true,
+      ),
+      isA<ExtensionProjectTemplateType>(),
+    );
+    expect(
+      ParsedFlutterTemplateType.fromCliName(
+        'custom-template',
+        extensionTemplateManager: null,
+        fallbackToCustom: true,
+      )?.cliName,
+      'custom-template',
+    );
+  });
 }
