@@ -6,14 +6,11 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_process_manager.dart';
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -345,47 +342,6 @@ void main() {
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         Platform: () => FakePlatform(),
-        Config: () => config,
-      },
-    );
-
-    testUsingContext(
-      'installSdkComponent uses android CLI syntax when android is present',
-      () async {
-        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem, withSdkManager: false);
-        config.setValue('android-sdk', sdkDir.path);
-        final String androidBinary = fileSystem.path.join(
-          sdkDir.path,
-          'cmdline-tools',
-          'latest',
-          'bin',
-          'android',
-        );
-        fileSystem.file(androidBinary).createSync(recursive: true);
-
-        processManager.addCommand(
-          FakeCommand(
-            command: <String>[
-              androidBinary,
-              '--sdk=${sdkDir.path}',
-              'sdk',
-              'install',
-              'ndk@28.0.0',
-            ],
-          ),
-        );
-
-        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
-        await sdk.installNdkVersion(
-          '28.0.0',
-          processUtils: ProcessUtils(processManager: processManager, logger: BufferLogger.test()),
-        );
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        Platform: () => FakePlatform(environment: <String, String>{}),
         Config: () => config,
       },
     );

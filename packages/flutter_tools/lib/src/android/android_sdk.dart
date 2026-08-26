@@ -637,51 +637,6 @@ class AndroidSdk {
   String toString() => 'AndroidSdk: $directory';
 }
 
-extension AndroidSdkNdkHelpers on AndroidSdk {
-  /// Returns whether the Android SDK already contains the requested NDK version.
-  bool hasNdkVersion(String version) {
-    final Directory ndkDirectory = directory.childDirectory('ndk').childDirectory(version);
-    return ndkDirectory.childFile('source.properties').existsSync();
-  }
-
-  /// Installs a specific Android SDK component with the available command-line tool.
-  Future<RunResult> installSdkComponent(
-    String component, {
-    Java? java,
-    ProcessUtils? processUtils,
-  }) async {
-    processUtils ??= globals.processUtils;
-    switch (sdkToolType) {
-      case AndroidSdkToolType.androidCli:
-        final String packageSpec = component.replaceAll(';', '@');
-        return processUtils.run(<String>[
-          androidCliPath!,
-          '--sdk=${directory.path}',
-          'sdk',
-          'install',
-          packageSpec,
-        ], environment: java?.environment);
-      case AndroidSdkToolType.sdkManager:
-        return processUtils.run(<String>[
-          sdkManagerPath!,
-          '--sdk_root=${directory.path}',
-          '--install',
-          component,
-        ], environment: java?.environment);
-      case AndroidSdkToolType.none:
-        throwToolExit(
-          'Android command-line tools not found. Update to the latest Android SDK and ensure that '
-          'the cmdline-tools are installed to resolve this.',
-        );
-    }
-  }
-
-  /// Installs the requested NDK version via the available command-line tool.
-  Future<RunResult> installNdkVersion(String version, {Java? java, ProcessUtils? processUtils}) {
-    return installSdkComponent('ndk;$version', java: java, processUtils: processUtils);
-  }
-}
-
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   AndroidSdkVersion._(
     this.sdk, {
