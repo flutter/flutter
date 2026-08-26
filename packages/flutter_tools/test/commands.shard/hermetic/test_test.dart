@@ -716,7 +716,7 @@ resolution: workspace
           final Map<String, dynamic> myApp = packages.cast<Map<String, dynamic>>().firstWhere(
             (Map<String, dynamic> p) => p['name'] == 'my_app',
           );
-          expect(myApp['rootUri'], fs.currentDirectory.uri.toString());
+          expect(myApp['rootUri'], fs.directory('/package').absolute.uri.toString());
         },
       );
       expect(caughtToolExit, true);
