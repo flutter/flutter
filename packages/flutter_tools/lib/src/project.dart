@@ -239,10 +239,7 @@ class FlutterProject {
           _collectSubdirectories(dir, nextDirs, visited);
         }
         currentDirs = nextDirs;
-      } else if (segment.contains('*') ||
-          segment.contains('?') ||
-          segment.contains('[') ||
-          segment.contains('{')) {
+      } else {
         final glob = Glob(segment, context: root.fileSystem.path);
         currentDirs = currentDirs.expand((Directory dir) {
           if (!dir.existsSync()) {
@@ -257,11 +254,6 @@ class FlutterProject {
             return const <Directory>[];
           }
         }).toList();
-      } else {
-        currentDirs = currentDirs
-            .map((Directory dir) => dir.childDirectory(segment))
-            .where((Directory dir) => dir.existsSync())
-            .toList();
       }
     }
 
