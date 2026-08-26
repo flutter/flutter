@@ -71,6 +71,18 @@ static void moved_to_rect_cb(FlWindowMonitor* self,
                          final_rect->height);
 }
 
+// The moved-to-rect signal is on the GdkWindow, which only exists while the
+// widget is realized. Re-connected on each realize, since unrealizing destroys
+// the GdkWindow (and with it this connection).
+static void realize_cb(FlWindowMonitor* self) {
+  GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(self->window));
+  if (window == nullptr) {
+    return;
+  }
+  g_signal_connect_object(window, "moved-to-rect", G_CALLBACK(moved_to_rect_cb),
+                          self, G_CONNECT_SWAPPED);
+}
+
 static gboolean delete_event_cb(FlWindowMonitor* self, GdkEvent* event) {
   flutter::IsolateScope scope(self->isolate);
   self->on_close();
@@ -130,9 +142,11 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
                           G_CONNECT_SWAPPED);
   g_signal_connect_object(window, "notify::title", G_CALLBACK(title_notify_cb),
                           self, G_CONNECT_SWAPPED);
-  g_signal_connect_object(gtk_widget_get_window(GTK_WIDGET(window)),
-                          "moved-to-rect", G_CALLBACK(moved_to_rect_cb), self,
+  g_signal_connect_object(window, "realize", G_CALLBACK(realize_cb), self,
                           G_CONNECT_SWAPPED);
+  if (gtk_widget_get_realized(GTK_WIDGET(window))) {
+    realize_cb(self);
+  }
   g_signal_connect_object(window, "delete-event", G_CALLBACK(delete_event_cb),
                           self, G_CONNECT_SWAPPED);
   g_signal_connect_object(window, "destroy", G_CALLBACK(destroy_cb), self,
