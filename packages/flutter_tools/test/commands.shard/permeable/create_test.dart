@@ -67,6 +67,24 @@ FakePlatform _kNoColorTerminalMacOSPlatform() => FakePlatform.fromPlatform(const
   ..stdoutSupportsAnsi = false
   ..operatingSystem = 'macos';
 
+/// A [FakeFlutterVersion] whose [FakeFlutterVersion.frameworkRevision] can be
+/// changed between `flutter create` runs, to simulate re-creating a platform
+/// with a newer Flutter SDK revision.
+class _MutableFakeFlutterVersion extends FakeFlutterVersion {
+  _MutableFakeFlutterVersion(String revision, String branch)
+    : _frameworkRevision = revision,
+      super(frameworkRevision: revision, branch: branch);
+
+  String _frameworkRevision;
+
+  @override
+  String get frameworkRevision => _frameworkRevision;
+
+  set frameworkRevision(String value) {
+    _frameworkRevision = value;
+  }
+}
+
 final Map<Type, FakePlatform Function()> noColorTerminalOverride = {
   Platform: _kNoColorTerminalPlatform,
 };
@@ -1621,10 +1639,11 @@ void main() {
       // The revisions written to .metadata must look like git hashes; a
       // purely numeric revision would be parsed back as a number by YAML and
       // rejected by the migrate config validation.
-      fakeFlutterVersion = FakeFlutterVersion(
-        frameworkRevision: 'abcdef1234567890abcdef1234567890abcdef12',
-        branch: frameworkChannel,
+      final _MutableFakeFlutterVersion mutableFlutterVersion = _MutableFakeFlutterVersion(
+        'abcdef1234567890abcdef1234567890abcdef12',
+        frameworkChannel,
       );
+      fakeFlutterVersion = mutableFlutterVersion;
       final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
         'flutter_create_append_platforms_',
       );
@@ -1636,7 +1655,9 @@ void main() {
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
 
-        // Append the ios platform to the existing project.
+        // Append the ios platform to the existing project, simulating a later
+        // run with a newer Flutter SDK revision.
+        mutableFlutterVersion.frameworkRevision = 'fedcba9876543210fedcba9876543210fedcba98';
         final appendCommand = CreateCommand();
         final CommandRunner<void> appendRunner = createTestCommandRunner(appendCommand);
         await appendRunner.run(<String>['create', '--no-pub', '--platforms=ios', projectDir.path]);
@@ -1649,17 +1670,120 @@ void main() {
         final yamlMap = loadYaml(metadataFile.readAsStringSync()) as YamlMap;
         final migration = yamlMap['migration'] as YamlMap;
         final platforms = migration['platforms'] as YamlList;
+        final platformEntries = platforms.whereType<YamlMap>().toList();
 
         // Each entry in the platforms list is a map that tracks the platform
         // name along with the revisions it was created at; extract the names.
         final actualPlatforms = <String>[
-          for (final YamlMap platform in platforms.whereType<YamlMap>())
-            platform['platform'] as String,
+          for (final YamlMap platform in platformEntries) platform['platform'] as String,
         ];
 
         // The root platform is always tracked, and neither the previously
         // added android platform nor the newly added ios platform may be lost.
         expect(actualPlatforms, unorderedEquals(<String>['root', 'android', 'ios']));
+
+        // Appending a new platform must not overwrite the revisions recorded
+        // for platforms that are not part of this run: the android entry
+        // keeps the revisions of the run that created it.
+        final androidEntry = platformEntries.singleWhere(
+          (YamlMap platform) => platform['platform'] == 'android',
+        );
+        expect(androidEntry['create_revision'], 'abcdef1234567890abcdef1234567890abcdef12');
+        expect(androidEntry['base_revision'], 'abcdef1234567890abcdef1234567890abcdef12');
+
+        // The root platform is always part of every create run, so its entry
+        // reflects the most recent run, as does the newly added ios entry.
+        const latestRevision = 'fedcba9876543210fedcba9876543210fedcba98';
+        final rootEntry = platformEntries.singleWhere(
+          (YamlMap platform) => platform['platform'] == 'root',
+        );
+        expect(rootEntry['create_revision'], latestRevision);
+        expect(rootEntry['base_revision'], latestRevision);
+        final iosEntry = platformEntries.singleWhere(
+          (YamlMap platform) => platform['platform'] == 'ios',
+        );
+        expect(iosEntry['create_revision'], latestRevision);
+        expect(iosEntry['base_revision'], latestRevision);
+      } finally {
+        tryToDelete(tempDir);
+      }
+    },
+    overrides: {
+      FlutterVersion: () => fakeFlutterVersion,
+      Platform: _kNoColorTerminalPlatform,
+    },
+  );
+
+  testUsingContext(
+    'flutter create --platforms overwrites the .metadata entry when the same platform is created twice',
+    () async {
+      // The revisions written to .metadata must look like git hashes; a
+      // purely numeric revision would be parsed back as a number by YAML and
+      // rejected by the migrate config validation.
+      final _MutableFakeFlutterVersion mutableFlutterVersion = _MutableFakeFlutterVersion(
+        'abcdef1234567890abcdef1234567890abcdef12',
+        frameworkChannel,
+      );
+      fakeFlutterVersion = mutableFlutterVersion;
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+        'flutter_create_overwrite_platform_',
+      );
+      final Directory projectDir = tempDir.childDirectory('myapp');
+
+      try {
+        // Create a project that supports the android platform.
+        final command = CreateCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
+
+        // Re-create the same android platform, simulating a later run with a
+        // newer Flutter SDK revision.
+        mutableFlutterVersion.frameworkRevision = 'fedcba9876543210fedcba9876543210fedcba98';
+        final repeatCommand = CreateCommand();
+        final CommandRunner<void> repeatRunner = createTestCommandRunner(repeatCommand);
+        await repeatRunner.run(<String>[
+          'create',
+          '--no-pub',
+          '--platforms=android',
+          projectDir.path,
+        ]);
+
+        // Parse the migration section of the .metadata file with loadYaml,
+        // the same parser the tool uses when reading the file back.
+        final File metadataFile = projectDir.childFile('.metadata');
+        expect(metadataFile, exists);
+
+        final yamlMap = loadYaml(metadataFile.readAsStringSync()) as YamlMap;
+        final migration = yamlMap['migration'] as YamlMap;
+        final platforms = migration['platforms'] as YamlList;
+        final platformEntries = platforms.whereType<YamlMap>().toList();
+
+        // Each entry in the platforms list is a map that tracks the platform
+        // name along with the revisions it was created at; extract the names.
+        final actualPlatforms = <String>[
+          for (final YamlMap platform in platformEntries) platform['platform'] as String,
+        ];
+
+        // Creating the same platform twice must not add a duplicate entry:
+        // the root platform and the android platform each appear exactly once.
+        expect(actualPlatforms, unorderedEquals(<String>['root', 'android']));
+
+        // The existing android entry is overwritten with the revisions of the
+        // most recent create run instead of keeping the old ones.
+        const latestRevision = 'fedcba9876543210fedcba9876543210fedcba98';
+        final androidEntry = platformEntries.singleWhere(
+          (YamlMap platform) => platform['platform'] == 'android',
+        );
+        expect(androidEntry['create_revision'], latestRevision);
+        expect(androidEntry['base_revision'], latestRevision);
+
+        // The root platform is always part of every create run, so its entry
+        // is overwritten the same way.
+        final rootEntry = platformEntries.singleWhere(
+          (YamlMap platform) => platform['platform'] == 'root',
+        );
+        expect(rootEntry['create_revision'], latestRevision);
+        expect(rootEntry['base_revision'], latestRevision);
       } finally {
         tryToDelete(tempDir);
       }
