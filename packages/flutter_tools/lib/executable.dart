@@ -94,8 +94,8 @@ Future<void> main(List<String> args) async {
       (args.length == 1 && verbose);
   final bool muteCommandLogging = (help || doctor) && !veryVerbose;
   final bool verboseHelp = help && verbose;
-  final bool daemon = args.contains('daemon');
-  final bool widgetPreviews = args.contains(WidgetPreviewCommand.kWidgetPreview);
+  final daemon = commandName == 'daemon';
+  final widgetPreviews = commandName == WidgetPreviewCommand.kWidgetPreview;
   final bool runMachine = args.contains('--machine');
 
   // Cache.flutterRoot must be set early because other features use it (e.g.
@@ -254,7 +254,7 @@ List<FlutterCommand> generateCommands({
   ),
   ChannelCommand(verboseHelp: verboseHelp),
   CleanCommand(verbose: verbose),
-  ConfigCommand(verboseHelp: verboseHelp),
+  ConfigCommand(verboseHelp: verboseHelp, extensionManager: extensionManager),
   CustomDevicesCommand(
     customDevicesConfig: toolDependencies.toolContext.customDevicesConfig,
     operatingSystemUtils: toolDependencies.toolContext.os,

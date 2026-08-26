@@ -287,15 +287,16 @@ static bool create_opengl_backing_store(
     return false;
   }
 
-  GLint sized_format = GL_RGBA8;
   GLint general_format = GL_RGBA;
+  GLint sized_format = GL_RGBA8;
   if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
-    sized_format = GL_BGRA8_EXT;
     general_format = GL_BGRA_EXT;
+    sized_format = GL_BGRA8_EXT;
   }
 
-  FlFramebuffer* framebuffer = fl_framebuffer_new(
-      general_format, config->size.width, config->size.height, FALSE);
+  FlFramebuffer* framebuffer = fl_framebuffer_new_multisample(
+      general_format, config->size.width, config->size.height,
+      fl_dart_project_get_enable_impeller(self->project));
   if (!framebuffer) {
     g_warning("Failed to create backing store");
     return false;
@@ -306,7 +307,8 @@ static bool create_opengl_backing_store(
   backing_store_out->open_gl.framebuffer.user_data = framebuffer;
   backing_store_out->open_gl.framebuffer.name =
       fl_framebuffer_get_id(framebuffer);
-  backing_store_out->open_gl.framebuffer.target = sized_format;
+  backing_store_out->open_gl.framebuffer.target =
+      fl_framebuffer_get_texture_id(framebuffer) != 0 ? sized_format : GL_RGBA8;
   backing_store_out->open_gl.framebuffer.destruction_callback = [](void* p) {
     // Backing store destroyed in fl_compositor_opengl_collect_backing_store(),
     // set on FlutterCompositor.collect_backing_store_callback during engine

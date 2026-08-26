@@ -657,6 +657,7 @@ class XCDevice {
             fileSystem: globals.fs,
             processUtils: _processUtils,
             xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+            deviceVersion: Version.parse(sdkVersionString),
           ),
           xcodeDebug: _xcodeDebug,
           xcode: _xcode,
