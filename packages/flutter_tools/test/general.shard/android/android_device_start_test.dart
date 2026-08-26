@@ -674,7 +674,10 @@ void main() {
 
         expect(launchResult.started, true);
         expect(processManager, hasNoRemainingExpectations);
-        expect(fakeAndroidBuilder.lastAndroidBuildInfo?.releaseManifestEngineShellArgs, contains('--route=/custom/route'));
+        expect(
+          fakeAndroidBuilder.lastAndroidBuildInfo?.releaseManifestEngineShellArgs,
+          contains('--route=/custom/route'),
+        );
       },
       overrides: <Type, Generator>{
         AndroidBuilder: () => fakeAndroidBuilder,
