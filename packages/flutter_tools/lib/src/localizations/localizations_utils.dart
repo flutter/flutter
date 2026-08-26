@@ -13,9 +13,6 @@ import '../runner/flutter_command.dart';
 import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
 
-typedef HeaderGenerator = String Function(String regenerateInstructions);
-typedef ConstructorGenerator = String Function(LocaleInfo locale);
-
 int sortFilesByPath(File a, File b) {
   return a.path.compareTo(b.path);
 }
