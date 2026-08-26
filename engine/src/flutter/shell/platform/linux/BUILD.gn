@@ -298,8 +298,6 @@ executable("flutter_linux_unittests") {
     "testing/mock_engine.cc",
     "testing/mock_epoxy.cc",
     "testing/mock_gtk.cc",
-    "testing/mock_isolate.cc",
-    "testing/mock_isolate.h",
     "testing/mock_plugin_registrar.cc",
     "testing/mock_renderable.cc",
     "testing/mock_settings.cc",

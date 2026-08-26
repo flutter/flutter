@@ -7,7 +7,6 @@
 #include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
-#include "flutter/shell/platform/linux/testing/mock_isolate.h"
 #include "gtest/gtest.h"
 
 namespace {
@@ -123,8 +122,6 @@ class FlWindowMonitorTest : public flutter::testing::LinuxTest {
     calls = MonitorCalls();
   }
 
-  // The monitor records the isolate it is created in.
-  flutter::testing::MockIsolate isolate;
   ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
 };
 

@@ -123,7 +123,12 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
       FL_WINDOW_MONITOR(g_object_new(fl_window_monitor_get_type(), nullptr));
 
   self->window = GTK_WINDOW(g_object_ref(window));
-  self->isolate = flutter::Isolate::Current();
+  // Callbacks are made in the isolate this was created in. There is not always
+  // an isolate, e.g. in unit tests, and the isolate this object is created with
+  // does nothing when entered.
+  if (Dart_CurrentIsolate() != nullptr) {
+    self->isolate = flutter::Isolate::Current();
+  }
   self->on_configure = on_configure;
   self->on_state_changed = on_state_changed;
   self->on_is_active_notify = on_is_active_notify;
