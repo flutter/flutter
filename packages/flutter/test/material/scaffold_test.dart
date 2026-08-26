@@ -3896,7 +3896,7 @@ class _CustomPageRoute<T> extends PageRoute<T> {
   String? get barrierLabel => null;
 
   @override
-  bool get maintainState = true;
+  bool get maintainState => true;
 
   @override
   Widget buildPage(
