@@ -20,12 +20,15 @@ IOSSdk getIOSSdk(EnvironmentType environmentType) {
   };
 }
 
-/// Extract the [Architecture] from a [DarwinArch].
-Architecture getNativeIOSArchitecture(DarwinArch darwinArch) {
-  return switch (darwinArch) {
-    DarwinArch.armv7 => Architecture.arm,
-    DarwinArch.arm64 => Architecture.arm64,
-    DarwinArch.x86_64 => Architecture.x64,
+/// Extract the [Architecture] from a [CpuArch].
+Architecture getNativeIOSArchitecture(CpuArch cpuArch) {
+  return switch (cpuArch) {
+    CpuArch.armv7 => Architecture.arm,
+    CpuArch.arm64 => Architecture.arm64,
+    CpuArch.x64 => Architecture.x64,
+    CpuArch.x86 ||
+    CpuArch.riscv64 ||
+    CpuArch.unknown => throw Exception('Unknown iOS CPU arch: $cpuArch.'),
   };
 }
 
@@ -48,14 +51,22 @@ Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsIOS(List<FlutterCodeAsset
   for (final asset in nativeAssets) {
     final String assetId = asset.codeAsset.id;
     final KernelAssetPath path =
-        idToPath[assetId] ?? _targetLocationIOS(asset, alreadyTakenNames).path;
+        idToPath[assetId] ??
+        _targetLocationIOS(asset, alreadyTakenNames, useInstallName: true).path;
     idToPath[assetId] = path;
     result[asset] = KernelAsset(id: assetId, target: asset.target, path: path);
   }
   return result;
 }
 
-KernelAsset _targetLocationIOS(FlutterCodeAsset asset, Set<String> alreadyTakenNames) {
+/// [useInstallName] gives the name the asset is loaded with at runtime rather
+/// than the location it is bundled at. The two are different for a framework,
+/// and the native assets manifest needs the former: see [frameworkInstallName].
+KernelAsset _targetLocationIOS(
+  FlutterCodeAsset asset,
+  Set<String> alreadyTakenNames, {
+  bool useInstallName = false,
+}) {
   final LinkMode linkMode = asset.codeAsset.linkMode;
   final KernelAssetPath kernelAssetPath;
   switch (linkMode) {
@@ -67,7 +78,11 @@ KernelAsset _targetLocationIOS(FlutterCodeAsset asset, Set<String> alreadyTakenN
       kernelAssetPath = KernelAssetInProcess();
     case DynamicLoadingBundled _:
       final String fileName = asset.codeAsset.file!.pathSegments.last;
-      kernelAssetPath = KernelAssetAbsolutePath(frameworkUri(fileName, alreadyTakenNames));
+      Uri uri = frameworkUri(fileName, alreadyTakenNames);
+      if (useInstallName) {
+        uri = Uri(path: frameworkInstallName(uri));
+      }
+      kernelAssetPath = KernelAssetAbsolutePath(uri);
     default:
       throw Exception('Unsupported asset link mode $linkMode in asset $asset');
   }
@@ -123,8 +138,7 @@ Future<List<File>> copyNativeCodeAssetsIOS(
       );
     }
 
-    final String dylibFileName = dylibFile.basename;
-    final newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
+    final String newInstallName = frameworkInstallName(target);
     final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;

@@ -35,9 +35,6 @@ import 'platform.dart';
 // ToolExit and a message that is more clear than the FileSystemException by
 // itself.
 
-/// On Windows this is error code 0: ERROR_SUCCESS.
-const int kSystemCodeSuccess = 0;
-
 /// On Windows this is error code 1: ERROR_INVALID_FUNCTION.
 const int kSystemCodeInvalidFunction = 1;
 
@@ -58,10 +55,6 @@ const int kSystemCodeSharingViolation = 32;
 
 /// On Windows this is error code 33: ERROR_LOCK_VIOLATION.
 const int kSystemCodeLockViolation = 33;
-
-/// On Windows this is error code 112: ERROR_DISK_FULL, and on
-/// macOS/Linux, it is error code 28/ENOSPC: No space left on device.
-const int kSystemCodeDeviceFull = 112;
 
 /// On Windows this is error code 1224: ERROR_USER_MAPPED_FILE.
 const int kSystemCodeUserMappedSectionOpened = 1224;
@@ -96,13 +89,21 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   /// This can be used to bypass the [ErrorHandlingFileSystem] permission exit
   /// checks for situations where failure is acceptable, such as the flutter
   /// persistent settings cache.
-  static void noExitOnFailure(void Function() operation) {
+  static T noExitOnFailure<T>(T Function() operation) {
     final bool previousValue = ErrorHandlingFileSystem._noExitOnFailure;
+    ErrorHandlingFileSystem._noExitOnFailure = true;
     try {
-      ErrorHandlingFileSystem._noExitOnFailure = true;
-      operation();
-    } finally {
+      final T result = operation();
+      if (result is Future) {
+        return (result.whenComplete(() {
+          ErrorHandlingFileSystem._noExitOnFailure = previousValue;
+        })) as T;
+      }
       ErrorHandlingFileSystem._noExitOnFailure = previousValue;
+      return result;
+    } catch (_) {
+      ErrorHandlingFileSystem._noExitOnFailure = previousValue;
+      rethrow;
     }
   }
 

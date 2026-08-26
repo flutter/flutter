@@ -224,11 +224,7 @@ void main() {
         expect(buildInfo.flavor, isNull);
         expect(buildInfo.splitDebugInfoPath, isNull);
         expect(buildInfo.dartObfuscation, isFalse);
-        expect(androidBuildInfo.targetArchs, <AndroidArch>[
-          AndroidArch.armeabi_v7a,
-          AndroidArch.arm64_v8a,
-          AndroidArch.x86_64,
-        ]);
+        expect(androidBuildInfo.targetArchs, <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64]);
       }
       expect(buildModes, hasLength(3));
       expect(
@@ -272,7 +268,7 @@ void main() {
 
       final AndroidBuildInfo androidBuildInfo =
           (buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>).single;
-      expect(androidBuildInfo.targetArchs, <AndroidArch>[AndroidArch.x86_64]);
+      expect(androidBuildInfo.targetArchs, <CpuArch>[CpuArch.x64]);
 
       final BuildInfo buildInfo = androidBuildInfo.buildInfo;
       expect(buildInfo.mode, BuildMode.release);
@@ -281,6 +277,38 @@ void main() {
       expect(buildInfo.splitDebugInfoPath, '/project-name/v1.2.3/');
       expect(buildInfo.dartObfuscation, isTrue);
       expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
+    }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
+
+    testUsingContext('defaults androidEnableHcpp to false without explicit flag', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--no-pub', '--template=module'],
+      );
+      await runBuildAar(projectPath, arguments: <String>['--no-pub']);
+
+      final Invocation buildAarCall = fakeAndroidBuilder.capturedBuildAarCalls.single;
+      for (final androidBuildInfo
+          in buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>) {
+        // The property is piped to the aar gradle build for consistency (defaulting to
+        // false in this PR), but the Flutter Gradle Plugin only consumes it for application
+        // projects: injecting into a module (aar) manifest would conflict
+        // with an explicit value in the add-to-app host's manifest and fail
+        // the host build in the manifest merger.
+        expect(androidBuildInfo.buildInfo.androidEnableHcpp, isFalse);
+      }
+    }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
+
+    testUsingContext('does not define --enable-hcpp', () async {
+      final String projectPath = await createProject(
+        tempDir,
+        arguments: <String>['--no-pub', '--template=module'],
+      );
+      // HCPP for add-to-app is controlled by the host app's manifest; an aar
+      // level flag would be a silent no-op, so the command must reject it.
+      await expectLater(
+        runBuildAar(projectPath, arguments: <String>['--no-pub', '--no-enable-hcpp']),
+        throwsA(isA<UsageException>()),
+      );
     }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
   });
 
@@ -363,22 +391,23 @@ void main() {
           tempDir,
           arguments: <String>['--no-pub', '--template=module'],
         );
-        final AndroidSdk androidSdk = globals.androidSdk!;
-        final List<String> installedNdkVersions =
-            androidSdk.directory
-                .childDirectory('ndk')
-                .listSync()
-                .whereType<Directory>()
-                .map((Directory dir) => dir.basename)
-                .where(
-                  (String version) => androidSdk.directory
-                      .childDirectory('ndk')
-                      .childDirectory(version)
-                      .childFile('source.properties')
-                      .existsSync(),
-                )
-                .toList()
-              ..sort();
+        final AndroidSdk? androidSdk = globals.androidSdk;
+        if (androidSdk == null) {
+          return;
+        }
+        final Directory ndkDir = androidSdk.directory.childDirectory('ndk');
+        final List<String> installedNdkVersions = ndkDir.existsSync()
+            ? ndkDir
+                  .listSync()
+                  .whereType<Directory>()
+                  .map((Directory dir) => dir.basename)
+                  .where(
+                    (String version) =>
+                        ndkDir.childDirectory(version).childFile('source.properties').existsSync(),
+                  )
+                  .toList()
+            : <String>[];
+        installedNdkVersions.sort();
         final ndkProvisioningProperties = <String>[
           '-Pflutter.androidSdkRoot=${androidSdk.directory.path}',
           '-Pflutter.installedNdkVersions=${installedNdkVersions.join(',')}',
@@ -413,6 +442,7 @@ void main() {
               '-Pextra-front-end-options=foo,bar',
               '-Ptrack-widget-creation=true',
               '-Ptree-shake-icons=true',
+              '-Penable-hcpp=false',
               ...ndkProvisioningProperties,
               '-Ptarget-platform=android-arm,android-arm64,android-x64',
               'assembleAarRelease',

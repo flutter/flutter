@@ -110,7 +110,6 @@ class _DropdownMenuPainter extends CustomPainter {
 // The widget that is the button wrapping the menu items.
 class _DropdownMenuItemButton<T> extends StatefulWidget {
   const _DropdownMenuItemButton({
-    super.key,
     this.padding,
     required this.route,
     required this.buttonRect,
@@ -249,7 +248,6 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
 class _DropdownMenu<T> extends StatefulWidget {
   const _DropdownMenu({
-    super.key,
     this.padding,
     required this.route,
     required this.buttonRect,
@@ -258,7 +256,6 @@ class _DropdownMenu<T> extends StatefulWidget {
     required this.enableFeedback,
     this.borderRadius,
     required this.scrollController,
-    this.menuWidth,
     this.mouseCursor,
   });
 
@@ -270,7 +267,6 @@ class _DropdownMenu<T> extends StatefulWidget {
   final bool enableFeedback;
   final BorderRadius? borderRadius;
   final ScrollController scrollController;
-  final double? menuWidth;
   final MouseCursor? mouseCursor;
 
   @override
@@ -649,7 +645,6 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
 class _DropdownRoutePage<T> extends StatefulWidget {
   const _DropdownRoutePage({
-    super.key,
     required this.route,
     required this.constraints,
     this.items,
@@ -758,7 +753,7 @@ class _DropdownRoutePageState<T> extends State<_DropdownRoutePage<T>> {
 // selected item lines up with the vertical center of the dropdown button,
 // as closely as possible.
 class _MenuItem<T> extends SingleChildRenderObjectWidget {
-  const _MenuItem({super.key, required this.onLayout, required this.item}) : super(child: item);
+  const _MenuItem({required this.onLayout, required this.item}) : super(child: item);
 
   final ValueChanged<Size> onLayout;
   final DropdownMenuItem<T>? item;
@@ -1042,7 +1037,6 @@ class DropdownButton<T> extends StatefulWidget {
        _isEmpty = false;
 
   DropdownButton._formField({
-    super.key,
     required this.items,
     this.selectedItemBuilder,
     this.value,
@@ -1052,7 +1046,6 @@ class DropdownButton<T> extends StatefulWidget {
     this.onTap,
     this.elevation = 8,
     this.style,
-    this.underline,
     this.icon,
     this.iconDisabledColor,
     this.iconEnabledColor,
@@ -1060,7 +1053,6 @@ class DropdownButton<T> extends StatefulWidget {
     this.isDense = false,
     this.isExpanded = false,
     this.itemHeight = kMinInteractiveDimension,
-    this.menuWidth,
     this.focusColor,
     this.focusNode,
     this.autofocus = false,
@@ -1089,6 +1081,8 @@ class DropdownButton<T> extends StatefulWidget {
          'with the same value',
        ),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
+       underline = null,
+       menuWidth = null,
        _inputDecoration = inputDecoration,
        _isEmpty = isEmpty;
 

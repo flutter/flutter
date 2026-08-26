@@ -200,14 +200,12 @@ void GoldenPlaygroundTest::SetUp() {
   PlaygroundSwitches switches;
   switches.enable_wide_gamut =
       test_name.find("WideGamut_") != std::string::npos;
-  switches.flags.antialiased_lines =
-      test_name.find("ExperimentAntialiasLines_") != std::string::npos;
   switch (GetParam()) {
     case PlaygroundBackend::kMetalSDF:
       switches.flags.use_sdfs = true;
       [[fallthrough]];
     case PlaygroundBackend::kMetal:
-      if (!DoesSupportWideGamutTests()) {
+      if (switches.enable_wide_gamut && !DoesSupportWideGamutTests()) {
         GTEST_SKIP()
             << "This metal device doesn't support wide gamut golden tests.";
       }
@@ -217,10 +215,6 @@ void GoldenPlaygroundTest::SetUp() {
     case PlaygroundBackend::kVulkan: {
       if (switches.enable_wide_gamut) {
         GTEST_SKIP() << "Vulkan doesn't support wide gamut golden tests.";
-      }
-      if (switches.flags.antialiased_lines) {
-        GTEST_SKIP()
-            << "Vulkan doesn't support antialiased lines golden tests.";
       }
       const std::unique_ptr<PlaygroundImpl>& playground =
           GetSharedVulkanPlayground(/*enable_validations=*/true);
@@ -234,10 +228,6 @@ void GoldenPlaygroundTest::SetUp() {
     case PlaygroundBackend::kOpenGLES: {
       if (switches.enable_wide_gamut) {
         GTEST_SKIP() << "OpenGLES doesn't support wide gamut golden tests.";
-      }
-      if (switches.flags.antialiased_lines) {
-        GTEST_SKIP()
-            << "OpenGLES doesn't support antialiased lines golden tests.";
       }
       const std::unique_ptr<PlaygroundImpl>& playground =
           GetSharedOpenGLESPlayground(switches.flags.use_sdfs);
