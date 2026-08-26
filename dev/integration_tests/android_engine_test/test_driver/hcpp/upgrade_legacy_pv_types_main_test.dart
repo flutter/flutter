@@ -25,6 +25,7 @@ void main() async {
     flutterDriver = await FlutterDriver.connect();
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
     await flutterDriver.waitUntilFirstFrameRasterized();
+    await nativeDriver.waitUntilFirstFrameDisplayed();
   });
 
   tearDownAll(() async {
