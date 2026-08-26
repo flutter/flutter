@@ -1955,7 +1955,8 @@ abstract class FlutterCommand extends Command<void> {
 
   @protected
   void validateUseApplicationBinaryForAndroidEngineConfigOptions() {
-    final String? applicationBinary = argParser.options.containsKey(FlutterOptions.kUseApplicationBinary)
+    final String? applicationBinary =
+        argParser.options.containsKey(FlutterOptions.kUseApplicationBinary)
         ? stringArg(FlutterOptions.kUseApplicationBinary)
         : null;
     if (applicationBinary != null && applicationBinary.toLowerCase().endsWith('.apk')) {
@@ -1970,7 +1971,7 @@ abstract class FlutterCommand extends Command<void> {
           throwToolExit(
             'Using --${FlutterOptions.kUseApplicationBinary} in release mode and additional flags used to configure the Flutter Android embedding '
             'is not supported for Android (${intentFlags.join(', ')}). Please do not use a prebuilt binary or define the '
-            'required flags via the Android manifest. See TODO(camsim99) for more details.',
+            'required flags via the Android manifest. See https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-intent-flags for more details.',
           );
         }
       }

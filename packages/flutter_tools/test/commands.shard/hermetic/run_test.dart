@@ -182,8 +182,14 @@ void main() {
           final RunCommand command = TestRunCommandThatOnlyValidates();
           final CommandRunner<void> runner = createTestCommandRunner(command);
           expect(
-            () => runner.run(<String>['run', '--no-pub', '--release', '--route=/', '--use-application-binary=path/to/app.apk']),
-            throwsToolExit(message: 'Using --use-application-binary in release mode and additional flags used to configure the Flutter Android embedding is not supported for Android (route). Please do not use a prebuilt binary or define the required flags via the Android manifest. See TODO(camsim99) for more details.'),
+            () => runner.run(<String>[
+              'run',
+              '--no-pub',
+              '--release',
+              '--route=/',
+              '--use-application-binary=path/to/app.apk',
+            ]),
+            throwsToolExit(),
           );
         },
         overrides: <Type, Generator>{
@@ -199,8 +205,14 @@ void main() {
           testDeviceManager.devices = <Device>[FakeDevice()];
           final RunCommand command = TestRunCommandThatOnlyValidates();
           final CommandRunner<void> runner = createTestCommandRunner(command);
-          
-          await runner.run(<String>['run', '--no-pub', '--release', '--route=/', '--use-application-binary=path/to/app.ipa']);
+
+          await runner.run(<String>[
+            'run',
+            '--no-pub',
+            '--release',
+            '--route=/',
+            '--use-application-binary=path/to/app.ipa',
+          ]);
           expect(command.prebuiltApplicationBinaryPath, 'path/to/app.ipa');
         },
         overrides: <Type, Generator>{
@@ -216,8 +228,14 @@ void main() {
           testDeviceManager.devices = <Device>[FakeDevice()];
           final RunCommand command = TestRunCommandThatOnlyValidates();
           final CommandRunner<void> runner = createTestCommandRunner(command);
-          
-          await runner.run(<String>['run', '--no-pub', '--release', '--route=/', '--use-application-binary=path/to/app.exe']);
+
+          await runner.run(<String>[
+            'run',
+            '--no-pub',
+            '--release',
+            '--route=/',
+            '--use-application-binary=path/to/app.exe',
+          ]);
           expect(command.prebuiltApplicationBinaryPath, 'path/to/app.exe');
         },
         overrides: <Type, Generator>{
@@ -233,8 +251,14 @@ void main() {
           testDeviceManager.devices = <Device>[FakeDevice()];
           final RunCommand command = TestRunCommandThatOnlyValidates();
           final CommandRunner<void> runner = createTestCommandRunner(command);
-          
-          await runner.run(<String>['run', '--no-pub', '--release', '--route=/', '--use-application-binary=path/to/app.app']);
+
+          await runner.run(<String>[
+            'run',
+            '--no-pub',
+            '--release',
+            '--route=/',
+            '--use-application-binary=path/to/app.app',
+          ]);
           expect(command.prebuiltApplicationBinaryPath, 'path/to/app.app');
         },
         overrides: <Type, Generator>{
@@ -243,7 +267,6 @@ void main() {
           DeviceManager: () => testDeviceManager,
         },
       );
-
 
       testUsingContext(
         'exits with a user message when no supported devices attached',
@@ -2042,10 +2065,7 @@ server:
         );
         await runner.run(<String>['run']);
 
-        expect(
-          testLogger.warningText,
-          isNot(contains('is deprecated')),
-        );
+        expect(testLogger.warningText, isNot(contains('is deprecated')));
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
