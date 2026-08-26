@@ -219,81 +219,37 @@ class FlutterProject {
     }
   }
 
-  static List<Directory> _resolveWorkspacePattern(Directory root, String pattern) {
-    final List<String> segments = pattern.split('/').where((String s) => s.isNotEmpty).toList();
-    if (segments.isEmpty) {
-      return const <Directory>[];
-    }
-
-    var currentDirs = <Directory>[root];
-
-    for (final segment in segments) {
-      final bool hasWildcard =
-          segment.contains('*') ||
+  static Iterable<Directory> _resolveWorkspacePattern(Directory root, String pattern) {
+    Iterable<Directory> current = <Directory>[root];
+    for (final String segment in pattern.split('/')) {
+      if (segment.isEmpty) {
+        continue;
+      }
+      if (segment.contains('*') ||
           segment.contains('?') ||
           segment.contains('[') ||
-          segment.contains('{');
-
-      if (!hasWildcard) {
-        currentDirs = currentDirs
-            .map((Directory d) => d.childDirectory(segment))
-            .where((Directory d) => d.existsSync())
-            .toList();
-      } else if (segment == '**') {
-        final nextDirs = <Directory>[];
-        final visited = <String>{};
-        for (final dir in currentDirs) {
+          segment.contains('{')) {
+        final glob = Glob(segment, context: root.fileSystem.path);
+        current = current.expand((Directory dir) {
           if (!dir.existsSync()) {
-            continue;
-          }
-          nextDirs.add(dir);
-          _collectSubdirectories(dir, nextDirs, visited);
-        }
-        currentDirs = nextDirs;
-      } else {
-        final segmentGlob = Glob(segment, context: root.fileSystem.path);
-        final nextDirs = <Directory>[];
-        for (final dir in currentDirs) {
-          if (!dir.existsSync()) {
-            continue;
+            return const <Directory>[];
           }
           try {
-            for (final FileSystemEntity entity in dir.listSync(followLinks: false)) {
-              if (entity is Directory) {
-                final String name = entity.basename;
-                if (!name.startsWith('.') && name != 'build' && segmentGlob.matches(name)) {
-                  nextDirs.add(entity);
-                }
-              }
-            }
+            return dir.listSync(followLinks: false).whereType<Directory>().where((Directory d) {
+              final String name = d.basename;
+              return !name.startsWith('.') && name != 'build' && glob.matches(name);
+            });
           } on FileSystemException {
-            // Ignore unreadable or transient directories.
+            return const <Directory>[];
           }
-        }
-        currentDirs = nextDirs;
+        });
+      } else {
+        current = current
+            .map((Directory dir) => dir.childDirectory(segment))
+            .where((Directory dir) => dir.existsSync());
       }
     }
-
-    return currentDirs;
-  }
-
-  static void _collectSubdirectories(Directory dir, List<Directory> results, Set<String> visited) {
-    if (!visited.add(dir.path)) {
-      return;
-    }
-    try {
-      for (final FileSystemEntity entity in dir.listSync(followLinks: false)) {
-        if (entity is Directory) {
-          final String name = entity.basename;
-          if (!name.startsWith('.') && name != 'build') {
-            results.add(entity);
-            _collectSubdirectories(entity, results, visited);
-          }
-        }
-      }
-    } on FileSystemException {
-      // Ignore unreadable or transient directories.
-    }
+    return current;
   }
 
   /// The set of organization names found in this project as
