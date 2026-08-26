@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_api_samples/widgets/fade_in_image/fade_in_image.transition.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';

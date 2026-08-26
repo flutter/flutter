@@ -5,7 +5,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 /// Flutter code sample for [FadeInImage.transition].
 
@@ -16,7 +16,12 @@ class FadeInImageTransitionExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: FadeInImageTransitionExample());
+    return WidgetsApp(
+      color: const Color(0xFFFFFFFF),
+      builder: (BuildContext context, Widget? child) {
+        return const FadeInImageTransitionExample();
+      },
+    );
   }
 }
 
@@ -42,29 +47,27 @@ class _FadeInImageTransitionExampleState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('FadeInImage.transition')),
-      body: Center(
+    return ColoredBox(
+      color: const Color(0xFFFFFFFF),
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            SegmentedButton<FadeInImageTransition>(
-              segments: const <ButtonSegment<FadeInImageTransition>>[
-                ButtonSegment<FadeInImageTransition>(
-                  value: FadeInImageTransition.sequential,
-                  label: Text('sequential'),
-                ),
-                ButtonSegment<FadeInImageTransition>(
-                  value: FadeInImageTransition.fadeInOver,
-                  label: Text('fadeInOver'),
-                ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                for (final FadeInImageTransition transition
+                    in FadeInImageTransition.values)
+                  _TransitionButton(
+                    transition: transition,
+                    selected: transition == _transition,
+                    onPressed: () {
+                      setState(() {
+                        _transition = transition;
+                      });
+                    },
+                  ),
               ],
-              selected: <FadeInImageTransition>{_transition},
-              onSelectionChanged: (Set<FadeInImageTransition> selection) {
-                setState(() {
-                  _transition = selection.first;
-                });
-              },
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -80,6 +83,41 @@ class _FadeInImageTransitionExampleState
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TransitionButton extends StatelessWidget {
+  const _TransitionButton({
+    required this.transition,
+    required this.selected,
+    required this.onPressed,
+  });
+
+  final FadeInImageTransition transition;
+  final bool selected;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFF0175C2)),
+          color: selected ? const Color(0xFF0175C2) : const Color(0xFFFFFFFF),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          transition.name,
+          style: TextStyle(
+            color: selected ? const Color(0xFFFFFFFF) : const Color(0xFF0175C2),
+            fontSize: 14,
+          ),
         ),
       ),
     );
