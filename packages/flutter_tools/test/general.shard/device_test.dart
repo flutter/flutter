@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter_tools/src/android/android_engine_cli_flags.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -962,84 +963,84 @@ void main() {
       () {
         final original = DebuggingOptions.enabled(
           BuildInfo.debug,
-        profileStartup: true,
-        enableSoftwareRendering: true,
-        skiaDeterministicRendering: true,
-        traceSkia: true,
-        traceAllowlist: 'foo',
-        traceSkiaAllowlist: 'bar',
-        traceSystrace: true,
-        traceToFile: 'path',
-        endlessTraceBuffer: true,
-        profileMicrotasks: true,
-        purgePersistentCache: true,
-        enableImpeller: ImpellerStatus.enabled,
-        enableFlutterGpu: true,
-        enableVulkanValidation: true,
-        enableHcpp: true,
-      );
+          profileStartup: true,
+          enableSoftwareRendering: true,
+          skiaDeterministicRendering: true,
+          traceSkia: true,
+          traceAllowlist: 'foo',
+          traceSkiaAllowlist: 'bar',
+          traceSystrace: true,
+          traceToFile: 'path',
+          endlessTraceBuffer: true,
+          profileMicrotasks: true,
+          purgePersistentCache: true,
+          enableImpeller: ImpellerStatus.enabled,
+          enableFlutterGpu: true,
+          enableVulkanValidation: true,
+          enableHcpp: true,
+        );
 
-      final Set<String> launchArguments = original.getAndroidLaunchArguments();
+        final Set<String> launchArguments = original.getAndroidLaunchArguments();
 
-      expect(
-        launchArguments,
-        containsAll(<String>[
-          '--enable-dart-profiling',
-          '--profile-startup',
-          '--enable-software-rendering',
-          '--skia-deterministic-rendering',
-          '--trace-skia',
-          '--trace-allowlist=foo',
-          '--trace-skia-allowlist=bar',
-          '--trace-systrace',
-          '--trace-to-file=path',
-          '--endless-trace-buffer',
-          '--profile-microtasks',
-          '--purge-persistent-cache',
-          '--enable-impeller=true',
-          '--enable-flutter-gpu',
-          '--enable-vulkan-validation',
-          '--enable-hcpp-and-surface-control',
-        ]),
-      );
-    });
+        expect(
+          launchArguments,
+          containsAll(<String>[
+            '--enable-dart-profiling',
+            '--profile-startup',
+            '--enable-software-rendering',
+            '--skia-deterministic-rendering',
+            '--trace-skia',
+            '--trace-allowlist=foo',
+            '--trace-skia-allowlist=bar',
+            '--trace-systrace',
+            '--trace-to-file=path',
+            '--endless-trace-buffer',
+            '--profile-microtasks',
+            '--purge-persistent-cache',
+            '--enable-impeller=true',
+            '--enable-flutter-gpu',
+            '--enable-vulkan-validation',
+            '--enable-hcpp-and-surface-control',
+          ]),
+        );
+      },
+    );
 
     testWithoutContext(
       'Get launch arguments for manifest injection with debugging enabled - debug-mode specific flags',
       () {
         final original = DebuggingOptions.enabled(
-        BuildInfo.debug,
-        startPaused: true,
-        disableServiceAuthCodes: true,
-        disableServiceOriginCheck: true,
-        dartFlags: 'baz',
-        useTestFonts: true,
-        verboseSystemLogs: true,
-        testFlag: true,
-      );
+          BuildInfo.debug,
+          startPaused: true,
+          disableServiceAuthCodes: true,
+          disableServiceOriginCheck: true,
+          dartFlags: 'baz',
+          useTestFonts: true,
+          verboseSystemLogs: true,
+          testFlag: true,
+        );
 
-      final Set<String> launchArguments = original.getAndroidLaunchArguments();
+        final Set<String> launchArguments = original.getAndroidLaunchArguments();
 
-      expect(
-        launchArguments,
-        containsAll(<String>[
-          '--enable-checked-mode',
-          '--verify-entry-points',
-          '--start-paused',
-          '--disable-service-auth-codes',
-          '--disable-service-origin-check',
-          '--dart-flags=baz',
-          '--use-test-fonts',
-          '--verbose-logging',
-          '--test-flag',
-        ]),
-      );
-    });
+        expect(
+          launchArguments,
+          containsAll(<String>[
+            '--enable-checked-mode',
+            '--verify-entry-points',
+            '--start-paused',
+            '--disable-service-auth-codes',
+            '--disable-service-origin-check',
+            '--dart-flags=baz',
+            '--use-test-fonts',
+            '--verbose-logging',
+            '--test-flag',
+          ]),
+        );
+      },
+    );
 
     testWithoutContext('Get launch arguments for manifest injection - debugging disabled', () {
-      final original = DebuggingOptions.disabled(
-        BuildInfo.release,
-      );
+      final original = DebuggingOptions.disabled(BuildInfo.release);
 
       final Set<String> launchArguments = original.getAndroidLaunchArguments();
 
@@ -1079,22 +1080,54 @@ void main() {
       expect(
         launchArguments,
         containsAll(<String>[
-          '--ez', 'enable-dart-profiling', 'true',
-          '--ez', 'profile-startup', 'true',
-          '--ez', 'enable-software-rendering', 'true',
-          '--ez', 'skia-deterministic-rendering', 'true',
-          '--ez', 'trace-skia', 'true',
-          '--es', 'trace-allowlist', 'foo',
-          '--es', 'trace-skia-allowlist', 'bar',
-          '--ez', 'trace-systrace', 'true',
-          '--es', 'trace-to-file', 'path',
-          '--ez', 'endless-trace-buffer', 'true',
-          '--ez', 'profile-microtasks', 'true',
-          '--ez', 'purge-persistent-cache', 'true',
-          '--ez', 'enable-impeller', 'true',
-          '--ez', 'enable-flutter-gpu', 'true',
-          '--ez', 'enable-vulkan-validation', 'true',
-          '--ez', 'enable-hcpp-and-surface-control', 'true',
+          '--ez',
+          'enable-dart-profiling',
+          'true',
+          '--ez',
+          'profile-startup',
+          'true',
+          '--ez',
+          'enable-software-rendering',
+          'true',
+          '--ez',
+          'skia-deterministic-rendering',
+          'true',
+          '--ez',
+          'trace-skia',
+          'true',
+          '--es',
+          'trace-allowlist',
+          'foo',
+          '--es',
+          'trace-skia-allowlist',
+          'bar',
+          '--ez',
+          'trace-systrace',
+          'true',
+          '--es',
+          'trace-to-file',
+          'path',
+          '--ez',
+          'endless-trace-buffer',
+          'true',
+          '--ez',
+          'profile-microtasks',
+          'true',
+          '--ez',
+          'purge-persistent-cache',
+          'true',
+          '--ez',
+          'enable-impeller',
+          'true',
+          '--ez',
+          'enable-flutter-gpu',
+          'true',
+          '--ez',
+          'enable-vulkan-validation',
+          'true',
+          '--ez',
+          'enable-hcpp-and-surface-control',
+          'true',
         ]),
       );
     });
@@ -1103,39 +1136,52 @@ void main() {
       'Get Intent launch arguments when debugging enabled - debug-mode specific flags',
       () {
         final original = DebuggingOptions.enabled(
-        BuildInfo.debug,
-        startPaused: true,
-        disableServiceAuthCodes: true,
-        disableServiceOriginCheck: true,
-        dartFlags: 'baz',
-        useTestFonts: true,
-        verboseSystemLogs: true,
-        testFlag: true,
-      );
+          BuildInfo.debug,
+          startPaused: true,
+          disableServiceAuthCodes: true,
+          disableServiceOriginCheck: true,
+          dartFlags: 'baz',
+          useTestFonts: true,
+          verboseSystemLogs: true,
+          testFlag: true,
+        );
 
-      final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
+        final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
 
-      expect(
-        launchArguments,
-        containsAll(<String>[
-          '--ez', 'enable-checked-mode', 'true',
-          '--ez', 'verify-entry-points', 'true',
-          '--ez', 'start-paused', 'true',
-          '--ez', 'disable-service-auth-codes', 'true',
-          '--ez', 'disable-service-origin-check', 'true',
-          '--es', 'dart-flags', 'baz',
-          '--ez', 'use-test-fonts', 'true',
+        expect(
+          launchArguments,
+          containsAll(<String>[
+            '--ez',
+            'enable-checked-mode',
+            'true',
+            '--ez',
+            'verify-entry-points',
+            'true',
+            '--ez',
+            'start-paused',
+            'true',
+            '--ez',
+            'disable-service-auth-codes',
+            'true',
+            '--ez',
+            'disable-service-origin-check',
+            'true',
+            '--es',
+            'dart-flags',
+            'baz',
+            '--ez',
+            'use-test-fonts',
+            'true',
             '--ez',
             'verbose-logging',
             'true',
-        ]),
-      );
-    });
+          ]),
+        );
+      },
+    );
 
     testWithoutContext('Get Intent launch arguments - debugging disabled', () {
-      final original = DebuggingOptions.disabled(
-        BuildInfo.release,
-      );
+      final original = DebuggingOptions.disabled(BuildInfo.release);
 
       final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
 
@@ -1149,6 +1195,61 @@ void main() {
       expect(launchArguments.contains('verbose-logging'), isFalse);
       expect(launchArguments.contains('test-flag'), isFalse);
     });
+
+    testWithoutContext(
+      'all Android engine config keys are tracked in AndroidEngineCliFlags.allFlags',
+      () {
+        final original = DebuggingOptions.enabled(
+          BuildInfo.debug,
+          profileStartup: true,
+          enableSoftwareRendering: true,
+          skiaDeterministicRendering: true,
+          traceSkia: true,
+          traceAllowlist: 'foo',
+          traceSkiaAllowlist: 'bar',
+          traceSystrace: true,
+          traceToFile: 'path',
+          endlessTraceBuffer: true,
+          profileMicrotasks: true,
+          purgePersistentCache: true,
+          enableImpeller: ImpellerStatus.enabled,
+          enableFlutterGpu: true,
+          enableVulkanValidation: true,
+          enableHcpp: true,
+          startPaused: true,
+          disableServiceAuthCodes: true,
+          disableServiceOriginCheck: true,
+          dartFlags: 'baz',
+          useTestFonts: true,
+          verboseSystemLogs: true,
+          testFlag: true,
+        );
+
+        const knownExceptions = <String>{'enable-checked-mode', 'verify-entry-points'};
+        const switchAliases = <String, String>{
+          'enable-hcpp-and-surface-control': AndroidEngineCliFlags.enableHcpp,
+          'verbose-logging': AndroidEngineCliFlags.verboseSystemLogs,
+        };
+
+        final Set<String> launchKeys = original
+            .getAndroidLaunchArguments()
+            .map((String arg) => arg.replaceFirst(RegExp(r'^--'), '').split('=').first)
+            .toSet();
+
+        for (final key in launchKeys) {
+          if (knownExceptions.contains(key)) {
+            continue;
+          }
+          final String cliFlag = switchAliases[key] ?? key;
+          expect(
+            AndroidEngineCliFlags.allFlags,
+            contains(cliFlag),
+            reason:
+                'Flag "$key" in DebuggingOptions is missing from AndroidEngineCliFlags.allFlags',
+          );
+        }
+      },
+    );
   });
 
   group('PollingDeviceDiscovery', () {
