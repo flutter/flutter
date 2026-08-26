@@ -3687,6 +3687,9 @@ class FakePlugin extends Fake implements Plugin {
 class FakeFeatureFlags extends Fake implements FeatureFlags {
   @override
   bool get isSwiftPackageManagerEnabled => true;
+
+  @override
+  bool get isToolExtensionsEnabled => false;
 }
 
 class CocoaPodPluginDependenciesSkipPodProcessing extends CocoaPodPluginDependencies {

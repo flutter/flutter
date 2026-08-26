@@ -284,7 +284,7 @@ List<FlutterCommand> generateCommands({
     xcode: toolDependencies.appleContext.xcode,
     xcodeProjectInterpreter: toolDependencies.appleContext.xcodeProjectInterpreter,
   ),
-  ConfigCommand(verboseHelp: verboseHelp),
+  ConfigCommand(verboseHelp: verboseHelp, extensionManager: extensionManager),
   CustomDevicesCommand(
     customDevicesConfig: toolDependencies.toolContext.customDevicesConfig,
     operatingSystemUtils: toolDependencies.toolContext.os,

@@ -2310,6 +2310,9 @@ class FakeFeatureFlags extends Fake implements FeatureFlags {
   bool get isWebEnabled => true;
 
   @override
+  bool get isToolExtensionsEnabled => false;
+
+  @override
   bool isEnabled(Feature feature) => feature.master.enabledByDefault;
 
   @override
