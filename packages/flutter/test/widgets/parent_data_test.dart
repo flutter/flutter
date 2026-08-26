@@ -339,6 +339,7 @@ void main() {
 
     final List<Object> exceptions = <Object>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    addTearDown(() => FlutterError.onError = oldHandler);
     FlutterError.onError = (FlutterErrorDetails details) {
       exceptions.add(details.exception);
     };
@@ -436,6 +437,7 @@ void main() {
   testWidgets('Parent data invalid ancestor', (WidgetTester tester) async {
     final List<Object> exceptions = <Object>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    addTearDown(() => FlutterError.onError = oldHandler);
     FlutterError.onError = (FlutterErrorDetails details) {
       exceptions.add(details.exception);
     };
@@ -481,6 +483,7 @@ void main() {
   ) async {
     final List<Object> exceptions = <Object>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    addTearDown(() => FlutterError.onError = oldHandler);
     FlutterError.onError = (FlutterErrorDetails details) {
       exceptions.add(details.exception);
     };
@@ -518,6 +521,7 @@ void main() {
     (WidgetTester tester) async {
       final List<Object> exceptions = <Object>[];
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      addTearDown(() => FlutterError.onError = oldHandler);
       FlutterError.onError = (FlutterErrorDetails details) {
         exceptions.add(details.exception);
       };
