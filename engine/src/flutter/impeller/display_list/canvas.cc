@@ -1637,7 +1637,6 @@ void Canvas::DrawAtlas(const std::shared_ptr<AtlasContents>& atlas_contents,
 /////////////////////////////////////////
 
 void Canvas::SetupRenderPass() {
-  renderer_.GetRenderTargetCache()->Start();
   ColorAttachment color0 = render_target_.GetColorAttachment(0);
 
   auto& stencil_attachment = render_target_.GetStencilAttachment();
@@ -2656,7 +2655,6 @@ void Canvas::EndReplay() {
     VALIDATION_LOG << "Failed to submit command buffers";
   }
   render_passes_.clear();
-  renderer_.GetRenderTargetCache()->End();
   clip_geometry_.clear();
 
   Reset();

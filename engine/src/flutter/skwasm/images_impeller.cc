@@ -163,7 +163,8 @@ class DlWimpImageFromPicture : public DlWimpImageBase {
   std::shared_ptr<impeller::Texture> GetImpellerTexture(
       impeller::ContentContext& renderer) const override {
     return impeller::DisplayListToTexture(
-        display_list_, impeller::ISize(width_, height_), renderer);
+        display_list_, impeller::ISize(width_, height_), renderer,
+        /*reset_host_buffer=*/false);
   }
 
  private:
