@@ -58,6 +58,11 @@ class NativeDriverSupportPlugin :
         channel.setMethodCallHandler(null)
         flutterRenderer?.removeIsDisplayingFlutterUiListener(displayListener)
         flutterRenderer = null
+        isFlutterUiDisplayed = false
+        for (result in pendingDisplayResults) {
+            result.error("DETACHED", "Engine detached before frame was displayed", null)
+        }
+        pendingDisplayResults.clear()
     }
 
     override fun onMethodCall(
