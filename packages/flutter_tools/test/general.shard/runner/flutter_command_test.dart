@@ -425,8 +425,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'success',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.platformName,
+            maxRss: 10,
           ),
         ),
       );
@@ -449,8 +450,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'warning',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.platformName,
+            maxRss: 10,
           ),
         ),
       );
@@ -472,8 +474,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'fail',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.platformName,
+            maxRss: 10,
           ),
         ),
       );
@@ -578,8 +581,9 @@ void main() {
               Event.flutterCommandResult(
                 commandPath: 'dummy',
                 result: 'killed',
-                maxRss: 10,
                 commandHasTerminal: false,
+                hostArch: globals.os.hostPlatform.platformName,
+                maxRss: 10,
               ),
             ),
           );
