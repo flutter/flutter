@@ -246,6 +246,16 @@ void mockGenBuffers(GLsizei n, GLuint* buffers) {
   CallMockMethod(&IMockGLESImpl::GenBuffers, n, buffers);
 }
 
+void mockBufferData(GLenum target,
+                    GLsizeiptr size,
+                    const void* data,
+                    GLenum usage) {
+  CallMockMethod(&IMockGLESImpl::BufferData, target, size, data, usage);
+}
+
+static_assert(CheckSameSignature<decltype(mockBufferData),  //
+                                 decltype(glBufferData)>::value);
+
 void mockBufferSubData(GLenum target,
                        GLintptr offset,
                        GLsizeiptr size,
@@ -557,6 +567,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockObjectLabelKHR);
   } else if (strcmp(name, "glGenBuffers") == 0) {
     return reinterpret_cast<void*>(mockGenBuffers);
+  } else if (strcmp(name, "glBufferData") == 0) {
+    return reinterpret_cast<void*>(mockBufferData);
   } else if (strcmp(name, "glBufferSubData") == 0) {
     return reinterpret_cast<void*>(mockBufferSubData);
   } else if (strcmp(name, "glIsTexture") == 0) {

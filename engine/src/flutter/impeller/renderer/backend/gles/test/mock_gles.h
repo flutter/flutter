@@ -97,6 +97,10 @@ class IMockGLESImpl {
   virtual void DeleteQueriesEXT(GLsizei size, const GLuint* queries) {}
   virtual void GenBuffers(GLsizei n, GLuint* buffers) {}
   virtual void DeleteBuffers(GLsizei n, const GLuint* buffers) {}
+  virtual void BufferData(GLenum target,
+                          GLsizeiptr size,
+                          const void* data,
+                          GLenum usage) {}
   virtual void BufferSubData(GLenum target,
                              GLintptr offset,
                              GLsizeiptr size,
@@ -270,6 +274,10 @@ class MockGLESImpl : public IMockGLESImpl {
   MOCK_METHOD(void,
               DeleteBuffers,
               (GLsizei n, const GLuint* buffers),
+              (override));
+  MOCK_METHOD(void,
+              BufferData,
+              (GLenum target, GLsizeiptr size, const void* data, GLenum usage),
               (override));
   MOCK_METHOD(
       void,
