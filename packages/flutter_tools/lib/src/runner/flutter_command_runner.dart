@@ -18,6 +18,8 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../experimental/extension_arg_parser.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
@@ -323,7 +325,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   late bool _machineFlagPresentInAnyCliArg;
 
   @override
-  Future<void> run(Iterable<String> args) {
+  Future<void> run(Iterable<String> args) async {
     final ToolContext toolContext = _toolContext!;
     var exitWithCodeOne = false;
 
@@ -342,12 +344,88 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     _machineFlagPresentInAnyCliArg = args.contains('--${FlutterGlobalOptions.kMachineFlag}');
-    return super.run(args).then((_) async {
-      if (exitWithCodeOne) {
-        // No need to print anything because the help was already printed.
-        await exitWithHooks(1, shutdownHooks: toolContext.shutdownHooks);
+    await _initializeDynamicOptions(args);
+    await super.run(args);
+    if (exitWithCodeOne) {
+      // No need to print anything because the help was already printed.
+      await exitWithHooks(1, shutdownHooks: toolContext.shutdownHooks);
+    }
+  }
+
+  /// Traverses [args] to identify the target command being invoked and triggers
+  /// dynamic option initialization (via [ExtensionArgParserMixin.initializeDynamicOptions])
+  /// before argument parsing begins.
+  Future<void> _initializeDynamicOptions(Iterable<String> args) async {
+    if (!featureFlags.isToolExtensionsEnabled) {
+      return;
+    }
+    if (_findTargetCommand(args) case var command?) {
+      if (command.name == 'help') {
+        // If the top-level 'help' command was matched (e.g. `flutter help config` or `flutter help --verbose config`),
+        // identify the target command whose help documentation is requested rather than the help command itself.
+        command =
+            _findTargetCommand(
+              args.skipWhile((String arg) => arg == 'help' || arg.startsWith('-')),
+            ) ??
+            command;
       }
-    });
+      Command<void>? current = command;
+      while (current != null) {
+        if (current case final ExtensionArgParserMixin dynamicCommand) {
+          await dynamicCommand.initializeDynamicOptions();
+        }
+        current = current.parent;
+      }
+    }
+  }
+
+  /// Helper to find the target command from the list of arguments, traversing subcommands and skipping options.
+  ///
+  /// Skips global and command-level options (e.g., `--verbose`, `-v`, `--device-id <id>`, `--device-id=id`)
+  /// so that non-option arguments are matched against registered command and subcommand names.
+  Command<void>? _findTargetCommand(Iterable<String> args) {
+    Map<String, Command<void>> commandsMap = commands;
+    Command<void>? lastFoundCommand;
+    ArgParser currentParser = argParser;
+    final List<String> argsList = args.toList();
+    var i = 0;
+    while (i < argsList.length) {
+      final String arg = argsList[i];
+      // Options and flags start with '-'.
+      if (arg.startsWith('-')) {
+        var name = arg;
+        while (name.startsWith('-')) {
+          name = name.substring(1);
+        }
+        // Option with inline value (e.g., '--device-id=foo' or '-d=foo'): consumes 1 argument token.
+        if (name.contains('=')) {
+          i++;
+          continue;
+        }
+        // Look up option in the current command or runner parser to check if it expects a separate value token.
+        Option? option;
+        for (final Option opt in currentParser.options.values) {
+          if (opt.name == name || opt.abbr == name) {
+            option = opt;
+            break;
+          }
+        }
+        // Non-flag options (single/multi options) consume the subsequent argument as their value (e.g., '-d' 'linux').
+        if (option != null && !option.isFlag) {
+          i += 2;
+        } else {
+          i++;
+        }
+      } else {
+        if (commandsMap[arg] case final matchedCommand?) {
+          lastFoundCommand = matchedCommand;
+          commandsMap = matchedCommand.subcommands;
+          currentParser = matchedCommand.argParser;
+        }
+        i++;
+      }
+    }
+    return lastFoundCommand;
   }
 
   /// Whether to perform a flutter version check, which prints a warning if old.

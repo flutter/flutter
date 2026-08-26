@@ -7158,7 +7158,6 @@ targets:
   - name: Windows tool_tests_commands_2_2
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
