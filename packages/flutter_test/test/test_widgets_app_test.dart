@@ -756,9 +756,39 @@ void main() {
         isTrue,
       );
     });
+
+    testWidgets('onGenerateInitialRoutes defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.onGenerateInitialRoutes, isNull);
+    });
+
+    testWidgets('onGenerateInitialRoutes is passed to WidgetsApp', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          onGenerateInitialRoutes: testOnGenerateInitialRoutes,
+          onGenerateRoute: (_) => null,
+        ),
+      );
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(identical(widgetsApp.onGenerateInitialRoutes, testOnGenerateInitialRoutes), isTrue);
+    });
   });
 }
 
 Locale? testLocalResolutionCallback(List<Locale>? locales, Iterable<Locale> supportedLocales) {
   return null;
+}
+
+List<Route<Object?>> testOnGenerateInitialRoutes(String initialRouteName) {
+  return <Route<Object?>>[
+    PageRouteBuilder<int>(
+      settings: const RouteSettings(name: '/'),
+      pageBuilder: (_, _, _) {
+        return const Placeholder();
+      },
+    ),
+  ];
 }

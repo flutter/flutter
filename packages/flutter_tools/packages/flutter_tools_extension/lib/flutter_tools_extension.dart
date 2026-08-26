@@ -6,8 +6,10 @@
 /// tools extensibility.
 ///
 /// This package defines the platform-agnostic RPC protocol framing, handshake,
-/// and service handler interfaces (`DeviceExtension`, `DiagnosticsExtension`,
-/// `ConfigurationExtension`, etc.) implemented by extension authors.
+/// and service handler interfaces implemented by extension authors.
 library flutter_tools_extension;
 
-// TODO(bkonyi): export extension protocol base classes and service interfaces.
+export 'src/config.dart';
+export 'src/diagnostics.dart';
+export 'src/protocol_base/provider.dart';
+export 'src/protocol_base/service.dart';

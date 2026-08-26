@@ -6,14 +6,17 @@ package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.DynamicFeatureBuildType
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.ApplicationVariant
 import com.android.build.gradle.BaseExtension
-import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
 import com.flutter.gradle.tasks.EnableHcppManifestTask
+import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.ValidateCompileSdkVersionTask
 import groovy.lang.Closure
@@ -29,6 +32,8 @@ import java.io.File
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.Properties
+import com.android.build.api.dsl.BuildType as DslBuildType
+import com.android.builder.model.BuildType as ModelBuildType
 
 /**
  * A collection of static utility functions used by the Flutter Gradle Plugin.
@@ -472,13 +477,45 @@ object FlutterPluginUtils {
      */
     @JvmStatic
     @JvmName("buildModeFor")
-    internal fun buildModeFor(buildType: BuildType): String {
-        if (buildType.name == "profile") {
+    internal fun buildModeFor(buildType: ModelBuildType): String = buildModeFor(buildType.name, buildType.isDebuggable)
+
+    /**
+     * Returns a Flutter build mode for a build type identified by [buildTypeName] and its
+     * [isDebuggable] flag.
+     *
+     * @return "debug", "profile", or "release" (fall-back).
+     */
+    @JvmStatic
+    @JvmName("buildModeFor")
+    internal fun buildModeFor(
+        buildTypeName: String,
+        isDebuggable: Boolean
+    ): String {
+        if (buildTypeName == "profile") {
             return "profile"
-        } else if (buildType.isDebuggable) {
+        } else if (isDebuggable) {
             return "debug"
         }
         return "release"
+    }
+
+    /**
+     * Returns a Flutter build mode for an AGP public DSL [buildType].
+     *
+     * Application and dynamic-feature build types expose a public `isDebuggable` flag.
+     * Library build types do not, so for them the conventional "debug" name is the only
+     * public signal available at DSL scope.
+     */
+    @JvmStatic
+    @JvmName("buildModeFor")
+    internal fun buildModeFor(buildType: DslBuildType): String {
+        val isDebuggable =
+            when (buildType) {
+                is ApplicationBuildType -> buildType.isDebuggable
+                is DynamicFeatureBuildType -> buildType.isDebuggable
+                else -> buildType.name == "debug"
+            }
+        return buildModeFor(buildType.name, isDebuggable)
     }
 
     /**
@@ -531,18 +568,22 @@ object FlutterPluginUtils {
     internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
         project.extensions.getByType(ApplicationExtension::class.java)
 
-    internal fun getConfiguredNdkVersion(project: Project): String? =
-        project.extensions.findByType(ApplicationExtension::class.java)?.ndkVersion
-            ?: getLegacyAndroidExtension(project).ndkVersion
+    internal fun getConfiguredNdkVersion(project: Project): String? = getAndroidExtension(project).ndkVersion
 
     /**
-     * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
-     * `android-` followed by either the numeric version, e.g. `android-35`, or a preview version,
-     * e.g. `android-UpsideDownCake`.
+     * Returns the compile SDK configured on the project's Android extension: the numeric
+     * API level (`compileSdk = 36`) or a preview codename (`compileSdkPreview = "Baklava"`).
      */
     @JvmStatic
     @JvmName("getCompileSdkFromProject")
-    internal fun getCompileSdkFromProject(project: Project): String = getLegacyAndroidExtension(project).compileSdkVersion!!.substring(8)
+    internal fun getCompileSdkFromProject(project: Project): CompileSdkVersion {
+        val androidExtension = getAndroidExtension(project)
+        val preview = androidExtension.compileSdkPreview
+        return CompileSdkVersion(
+            apiLevel = if (preview != null) null else androidExtension.compileSdk,
+            previewCodename = preview
+        )
+    }
 
     /**
      * Returns:
@@ -986,7 +1027,7 @@ object FlutterPluginUtils {
     @JvmName("addFlutterDependencies")
     internal fun addFlutterDependencies(
         project: Project,
-        buildType: BuildType,
+        buildType: DslBuildType,
         pluginHandler: PluginHandler,
         engineVersion: String
     ) {
@@ -1135,9 +1176,12 @@ object FlutterPluginUtils {
         // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
         androidComponents.onVariants { variant ->
+            if (variant !is ApplicationVariant) {
+                return@onVariants
+            }
             val manifestUpdater =
                 project.tasks.register("output${capitalize(variant.name)}AppLinkSettings", DeepLinkJsonFromManifestTask::class.java) {
-                    namespace.set(variant.namespace)
+                    applicationId.set(variant.applicationId)
                     // Flutter should always use project.layout.buildDirectory.file("deeplink.json")
                     // instead of relying on passing in a path.
                     if (project.hasProperty("outputPath")) {
@@ -1157,6 +1201,38 @@ object FlutterPluginUtils {
                     DeepLinkJsonFromManifestTask::manifestFile,
                     DeepLinkJsonFromManifestTask::updatedManifest
                 ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
+        }
+    }
+
+    /**
+     * Creates a task to generate an AndroidManifest.xml containing the engine shell arguments
+     * and adds it to the variant's manifests.
+     */
+    @JvmStatic
+    @JvmName("addTaskForGeneratingEngineShellArgumentManifest")
+    internal fun addTaskForGeneratingEngineShellArgumentManifest(project: Project) {
+        val engineShellArgsJson = project.findProperty("flutter.engineShellArgs") as? String ?: return
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+
+        androidComponents.onVariants { variant ->
+            val capitalizeVariantName = capitalize(variant.name)
+            val generateManifestTaskProvider =
+                project.tasks.register(
+                    "generateEngineFlagsManifest$capitalizeVariantName",
+                    GenerateEngineFlagsManifestTask::class.java
+                ) {
+                    this.engineShellArgsJson.set(engineShellArgsJson)
+                    this.manifestOutputFile.set(
+                        project.layout.buildDirectory.file(
+                            "intermediates/flutter/${variant.name}/AndroidManifest.xml"
+                        )
+                    )
+                }
+
+            variant.sources.manifests?.addGeneratedManifestFile(
+                generateManifestTaskProvider,
+                GenerateEngineFlagsManifestTask::manifestOutputFile
+            )
         }
     }
 

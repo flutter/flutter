@@ -1306,4 +1306,61 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph.fallback_fonts.png', region: region);
   });
+
+  test('WebParagraph correctly handles fractional devicePixelRatio', () {
+    final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
+    try {
+      for (final dpr in <double>[1.5, 2.0, 2.5]) {
+        EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
+
+        final arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+        final builder = WebParagraphBuilder(arialStyle);
+        builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
+        builder.addText('Fractional DPR text');
+        final WebParagraph paragraph = builder.build();
+        paragraph.layout(const ParagraphConstraints(width: double.infinity));
+
+        final mockCanvas = _MockCanvas();
+        const offset = Offset(10.25, 20.75); // Subpixel offset
+        paragraph.paint(mockCanvas, offset);
+
+        final Rect? sourceRect = mockCanvas.lastSourceRect;
+        final Rect? targetRect = mockCanvas.lastTargetRect;
+
+        expect(sourceRect, isNotNull);
+        expect(targetRect, isNotNull);
+
+        // Verify sourceRect dimensions are exact integers (physical pixels rounded up via ceilToDouble)
+        expect(sourceRect!.width % 1.0, 0.0);
+        expect(sourceRect.height % 1.0, 0.0);
+
+        // Verify targetRect dimensions perfectly map to sourceRect without being forced to integer values
+        expect(targetRect!.width, closeTo(sourceRect.width / dpr, 0.0001));
+        expect(targetRect.height, closeTo(sourceRect.height / dpr, 0.0001));
+
+        // Verify subpixel position precision
+        expect(targetRect.left, closeTo(offset.dx + paragraph.paintBounds.left, 0.0001));
+        expect(targetRect.top, closeTo(offset.dy + paragraph.paintBounds.top, 0.0001));
+      }
+    } finally {
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
+    }
+  });
+}
+
+class _MockCanvas implements Canvas {
+  Rect? lastSourceRect;
+  Rect? lastTargetRect;
+
+  @override
+  void drawImageRect(Image image, Rect src, Rect dst, Paint paint) {
+    lastSourceRect = src;
+    lastTargetRect = dst;
+  }
+
+  @override
+  void drawRect(Rect rect, Paint paint) {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }
