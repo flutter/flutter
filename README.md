@@ -25,7 +25,7 @@ open source.
 * [Install Flutter](https://docs.flutter.dev/get-started)
 * [Flutter documentation](https://docs.flutter.dev)
 * [Development wiki](./docs/README.md)
-* [Contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
+* [Contributing to Flutter](CONTRIBUTING.md)
 
 For release and other announcements, join the
 [flutter-announce](https://groups.google.com/g/flutter-announce)
