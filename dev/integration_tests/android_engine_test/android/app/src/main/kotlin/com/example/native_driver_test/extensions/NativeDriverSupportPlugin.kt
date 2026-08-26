@@ -14,6 +14,8 @@ import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.embedding.engine.renderer.FlutterRenderer
+import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -25,20 +27,53 @@ class NativeDriverSupportPlugin :
     private val tag = "NativeDriverSupportPlugin"
     private lateinit var channel: MethodChannel
     private var activity: Activity? = null
+    private var flutterRenderer: FlutterRenderer? = null
+    private var isFlutterUiDisplayed = false
+    private val pendingDisplayResults = mutableListOf<MethodChannel.Result>()
+
+    private val displayListener =
+        object : FlutterUiDisplayListener {
+            override fun onFlutterUiDisplayed() {
+                isFlutterUiDisplayed = true
+                val pending = pendingDisplayResults.toList()
+                pendingDisplayResults.clear()
+                for (result in pending) {
+                    result.success(null)
+                }
+            }
+
+            override fun onFlutterUiNoLongerDisplayed() {
+                isFlutterUiDisplayed = false
+            }
+        }
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(binding.binaryMessenger, "native_driver")
         channel.setMethodCallHandler(this)
+        flutterRenderer = binding.flutterEngine.renderer
+        flutterRenderer?.addIsDisplayingFlutterUiListener(displayListener)
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        flutterRenderer?.removeIsDisplayingFlutterUiListener(displayListener)
+        flutterRenderer = null
     }
 
     override fun onMethodCall(
         call: MethodCall,
         result: MethodChannel.Result
     ) {
+        if (call.method == "wait_for_first_frame_displayed") {
+            if (isFlutterUiDisplayed || (flutterRenderer?.isDisplayingFlutterUi == true)) {
+                isFlutterUiDisplayed = true
+                result.success(null)
+            } else {
+                pendingDisplayResults.add(result)
+            }
+            return
+        }
+
         val activity = this.activity
         if (activity == null) {
             Log.w(tag, "Received method channel, but no current activity")
