@@ -1046,25 +1046,24 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets(
-    'does not crash when a selectable has a selection with an off-screen edge point',
-    (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/175016.
-      await tester.pumpWidget(
-        TestWidgetsApp(home: _selectableRegion(child: const OffscreenEdgeSelectionSpy())),
-      );
-      await tester.pumpAndSettle();
+  testWidgets('does not crash when a selectable has a selection with an off-screen edge point', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/175016.
+    await tester.pumpWidget(
+      TestWidgetsApp(home: _selectableRegion(child: const OffscreenEdgeSelectionSpy())),
+    );
+    await tester.pumpAndSettle();
 
-      final SelectableRegionState state = tester.state<SelectableRegionState>(
-        find.byType(SelectableRegion),
-      );
+    final SelectableRegionState state = tester.state<SelectableRegionState>(
+      find.byType(SelectableRegion),
+    );
 
-      state.selectAll();
-      await tester.pump();
+    state.selectAll();
+    await tester.pump();
 
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('dragging handle or selecting word triggers haptic feedback on Android', (
     WidgetTester tester,
