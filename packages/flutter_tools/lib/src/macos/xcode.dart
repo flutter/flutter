@@ -310,6 +310,5 @@ EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSyste
   if (sdkName.contains('iphone')) {
     return sdkName.contains('simulator') ? EnvironmentType.simulator : EnvironmentType.physical;
   }
-  assert(false);
   return null;
 }
