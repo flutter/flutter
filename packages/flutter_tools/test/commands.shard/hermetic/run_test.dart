@@ -206,7 +206,7 @@ void main() {
                   allOf(
                     contains(flag),
                     contains(
-                      'https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-intent-flags',
+                      'https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries',
                     ),
                   ),
                 ),
