@@ -788,7 +788,6 @@ class FlutterBuildSystem extends BuildSystem {
   /// files, if these were not already covered by the built-in cleanup. This
   /// cleanup is only necessary when multiple different build configurations
   /// output to the same directory.
-  @visibleForTesting
   void trackSharedBuildDirectory(
     Environment environment,
     FileSystem fileSystem,
@@ -830,15 +829,56 @@ class FlutterBuildSystem extends BuildSystem {
     }
     final List<String> lastOutputs = (json.decode(outputsFile.readAsStringSync()) as List<Object?>)
         .cast<String>();
-    for (final lastOutput in lastOutputs) {
-      if (!currentOutputs.containsKey(lastOutput)) {
-        final File lastOutputFile = fileSystem.file(lastOutput);
-        if (preservedOutputFilePaths.contains(lastOutputFile.path)) {
-          continue;
-        }
-        ErrorHandlingFileSystem.deleteIfExists(lastOutputFile);
-      }
+    _deleteStaleOutputs(
+      currentOutputs: currentOutputs,
+      environment: environment,
+      fileSystem: fileSystem,
+      preservedOutputFilePaths: preservedOutputFilePaths,
+      previousOutputs: lastOutputs,
+    );
+  }
+}
+
+/// Deletes stale output files from previous builds or build stages that are no
+/// longer part of the current build configuration or output graph.
+///
+/// Files located in the shared hooks runner output directory
+/// (`.dart_tool/hooks_runner/shared/`) and files in [preservedOutputFilePaths]
+/// are explicitly spared from deletion. Shared native asset hook outputs manage
+/// their own caching and invalidation lifecycles independently, so cleaning
+/// them up when switching to build configurations or stages that do not invoke
+/// native assets hooks would incorrectly cause subsequent hook-enabled builds
+/// to skip running hooks (due to valid metadata) while failing to locate the
+/// deleted output files.
+void _deleteStaleOutputs({
+  required Map<String, File> currentOutputs,
+  required Environment environment,
+  required FileSystem fileSystem,
+  required Set<String> preservedOutputFilePaths,
+  required Iterable<String> previousOutputs,
+}) {
+  String projectDirPath;
+  try {
+    projectDirPath = environment.projectDir.resolveSymbolicLinksSync();
+  } on FileSystemException {
+    projectDirPath = environment.projectDir.absolute.path;
+  }
+  final String sharedHooksPath = fileSystem.path.canonicalize(
+    fileSystem.path.join(projectDirPath, '.dart_tool', 'hooks_runner', 'shared'),
+  );
+  for (final previousOutput in previousOutputs) {
+    if (currentOutputs.containsKey(previousOutput)) {
+      continue;
     }
+    final File previousFile = fileSystem.file(previousOutput);
+    if (preservedOutputFilePaths.contains(previousFile.path) ||
+        fileSystem.path.isWithin(
+          sharedHooksPath,
+          fileSystem.path.canonicalize(previousFile.path),
+        )) {
+      continue;
+    }
+    ErrorHandlingFileSystem.deleteIfExists(previousFile);
   }
 }
 
@@ -953,16 +993,13 @@ class _BuildInstance {
 
       // Delete outputs from previous stages that are no longer a part of the
       // build.
-      for (final String previousOutput in node.previousOutputs) {
-        if (outputFiles.containsKey(previousOutput)) {
-          continue;
-        }
-        final File previousFile = fileSystem.file(previousOutput);
-        if (preservedOutputFilePaths.contains(previousFile.path)) {
-          continue;
-        }
-        ErrorHandlingFileSystem.deleteIfExists(previousFile);
-      }
+      _deleteStaleOutputs(
+        currentOutputs: outputFiles,
+        environment: environment,
+        fileSystem: fileSystem,
+        preservedOutputFilePaths: preservedOutputFilePaths,
+        previousOutputs: node.previousOutputs,
+      );
     } on Exception catch (exception, stackTrace) {
       node.target.clearStamp(environment);
       succeeded = false;
@@ -1040,26 +1077,6 @@ void checkCycles(Target initial) {
   }
 
   checkInternal(initial, <Target>{}, <Target>{});
-}
-
-/// Verifies that all files exist and are in a subdirectory of [Environment.buildDir].
-void verifyOutputDirectories(List<File> outputs, Environment environment, Target target) {
-  final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
-  final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
-  final missingOutputs = <File>[];
-  for (final sourceFile in outputs) {
-    if (!sourceFile.existsSync()) {
-      missingOutputs.add(sourceFile);
-      continue;
-    }
-    final String path = sourceFile.path;
-    if (!path.startsWith(buildDirectory) && !path.startsWith(projectDirectory)) {
-      throw MisplacedOutputException(path, target.name);
-    }
-  }
-  if (missingOutputs.isNotEmpty) {
-    throw MissingOutputException(missingOutputs, target.name);
-  }
 }
 
 /// A node in the build graph.

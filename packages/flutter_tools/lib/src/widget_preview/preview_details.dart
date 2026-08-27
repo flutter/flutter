@@ -4,8 +4,6 @@
 
 import 'package:analyzer/dart/constant/value.dart';
 
-typedef PreviewProperty = ({String key, DartObject object, bool isCallback});
-
 /// Contains details related to a single preview instance.
 final class PreviewDetails {
   PreviewDetails({

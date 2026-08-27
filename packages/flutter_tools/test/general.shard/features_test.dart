@@ -28,6 +28,7 @@ void main() {
       expect(feature.name, 'example');
       expect(feature.environmentOverride, null);
       expect(feature.configSetting, null);
+      expect(feature.warningMessageOnDisable, null);
     });
 
     testWithoutContext('retrieves the correct setting for each branch', () {
@@ -415,6 +416,7 @@ void main() {
     test('can be configured', () {
       expect(swiftPackageManager.configSetting, 'enable-swift-package-manager');
       expect(swiftPackageManager.environmentOverride, 'FLUTTER_SWIFT_PACKAGE_MANAGER');
+      expect(swiftPackageManager.warningMessageOnDisable, kSwiftPackageManagerDisabledWarning);
     });
 
     test('forwards to isEnabled', () {
@@ -443,6 +445,29 @@ void main() {
     test('forwards to isEnabled', () {
       final checkFlags = _TestIsGetterForwarding(shouldInvoke: macOSArm64Only);
       expect(checkFlags.isMacOSArm64OnlyEnabled, isTrue);
+    });
+  });
+
+  group('Tool Extensions', () {
+    test('is available only on master', () {
+      expect(
+        toolExtensionsFeature,
+        allOf(<Matcher>[
+          _onChannelIs('master', available: true, enabledByDefault: false),
+          _onChannelIs('stable', available: false, enabledByDefault: false),
+          _onChannelIs('beta', available: false, enabledByDefault: false),
+        ]),
+      );
+    });
+
+    test('can be configured', () {
+      expect(toolExtensionsFeature.configSetting, 'enable-tool-extensions');
+      expect(toolExtensionsFeature.environmentOverride, 'FLUTTER_TOOL_EXTENSIONS');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: toolExtensionsFeature);
+      expect(checkFlags.isToolExtensionsEnabled, isTrue);
     });
   });
 }
