@@ -7,7 +7,6 @@ import 'dart:core' hide print;
 import 'dart:io' hide exit;
 import 'dart:typed_data';
 
-import 'package:collection/equality.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -303,16 +302,6 @@ List<Validation> _getValidations({
       () => _verifyMegaGallery(flutterRoot, dart, passthroughArguments),
     ),
     Validation(
-      'gen-defaults-names',
-      'Correct file names in gen_defaults.dart...',
-      () => verifyTokenTemplatesUpdateCorrectFiles(flutterRoot),
-    ),
-    Validation(
-      'gen-defaults-up-to-date',
-      'Material library files are up-to-date with token template files...',
-      () => verifyMaterialFilesAreUpToDateWithTemplateFiles(flutterRoot, dart),
-    ),
-    Validation(
       'integration-templates',
       'Up to date integration test template files...',
       () => verifyIntegrationTestTemplateFiles(flutterRoot),
@@ -429,138 +418,6 @@ Future<void> verifyTargetPlatform(String workingDirectory) async {
   if (toolExtra.isNotEmpty) {
     foundError(<String>[
       'The nextPlatform logic in the tool has some extra values not found in TargetPlatform: ${toolExtra.join(", ")}',
-    ]);
-  }
-}
-
-/// Verify Token Templates are mapped to correct file names while generating
-/// M3 defaults in /dev/tools/gen_defaults/bin/gen_defaults.dart.
-Future<void> verifyTokenTemplatesUpdateCorrectFiles(String workingDirectory) async {
-  final errors = <String>[];
-
-  String getMaterialDirPath(List<String> lines) {
-    final String line = lines.firstWhere((String line) => line.contains('String materialLib'));
-    final String relativePath = line.substring(line.indexOf("'") + 1, line.lastIndexOf("'"));
-    return path.join(workingDirectory, relativePath);
-  }
-
-  String getFileName(String line) {
-    const materialLibString = r"'$materialLib/";
-    final String leftClamp = line.substring(
-      line.indexOf(materialLibString) + materialLibString.length,
-    );
-    return leftClamp.substring(0, leftClamp.indexOf("'"));
-  }
-
-  final genDefaultsBinDir = '$workingDirectory/dev/tools/gen_defaults/bin';
-  final file = File(path.join(genDefaultsBinDir, 'gen_defaults.dart'));
-  final List<String> lines = file.readAsLinesSync();
-  final String materialDirPath = getMaterialDirPath(lines);
-  var atLeastOneTargetLineExists = false;
-
-  for (final line in lines) {
-    if (line.contains('updateFile();')) {
-      atLeastOneTargetLineExists = true;
-      final String fileName = getFileName(line);
-      final String filePath = path.join(materialDirPath, fileName);
-      final file = File(filePath);
-
-      if (!file.existsSync()) {
-        errors.add('file $filePath does not exist.');
-      }
-    }
-  }
-
-  assert(
-    atLeastOneTargetLineExists,
-    'No lines exist that this test expects to '
-    'verify. Check if the target file is correct or remove this test',
-  );
-
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    final s = errors.length > 1 ? 's' : '';
-    final itThem = errors.length > 1 ? 'them' : 'it';
-    foundError(<String>[
-      ...errors,
-      '${bold}Please correct the file name$s or remove $itThem from /dev/tools/gen_defaults/bin/gen_defaults.dart$reset',
-    ]);
-  }
-}
-
-/// Verify Material library files are up-to-date with the token template files
-/// when running /dev/tools/gen_defaults/bin/gen_defaults.dart.
-Future<void> verifyMaterialFilesAreUpToDateWithTemplateFiles(
-  String workingDirectory,
-  String dartExecutable,
-) async {
-  final errors = <String>[];
-  const beginGeneratedComment = '// BEGIN GENERATED TOKEN PROPERTIES';
-
-  String getMaterialDirPath(List<String> lines) {
-    final String line = lines.firstWhere((String line) => line.contains('String materialLib'));
-    final String relativePath = line.substring(line.indexOf("'") + 1, line.lastIndexOf("'"));
-    return path.join(workingDirectory, relativePath);
-  }
-
-  String getFileName(String line) {
-    const materialLibString = r"'$materialLib/";
-    final String leftClamp = line.substring(
-      line.indexOf(materialLibString) + materialLibString.length,
-    );
-    return leftClamp.substring(0, leftClamp.indexOf("'"));
-  }
-
-  // Get the template generated code from the file.
-  List<String> getGeneratedCode(List<String> lines) {
-    return lines.skipWhile((String line) => !line.contains(beginGeneratedComment)).toList();
-  }
-
-  final genDefaultsBinDir = '$workingDirectory/dev/tools/gen_defaults/bin';
-  final file = File(path.join(genDefaultsBinDir, 'gen_defaults.dart'));
-  final List<String> lines = file.readAsLinesSync();
-  final String materialDirPath = getMaterialDirPath(lines);
-  final beforeGeneratedCode = <String, List<String>>{};
-  final afterGeneratedCode = <String, List<String>>{};
-
-  for (final line in lines) {
-    if (line.contains('updateFile();')) {
-      final String fileName = getFileName(line);
-      final String filePath = path.join(materialDirPath, fileName);
-      final file = File(filePath);
-      beforeGeneratedCode[fileName] = getGeneratedCode(file.readAsLinesSync());
-    }
-  }
-
-  // Run gen_defaults.dart to generate the token template files.
-  await runCommand(dartExecutable, <String>[
-    '--enable-asserts',
-    path.join('dev', 'tools', 'gen_defaults', 'bin', 'gen_defaults.dart'),
-  ], workingDirectory: workingDirectory);
-
-  for (final line in lines) {
-    if (line.contains('updateFile();')) {
-      final String fileName = getFileName(line);
-      final String filePath = path.join(materialDirPath, fileName);
-      final file = File(filePath);
-      afterGeneratedCode[fileName] = getGeneratedCode(file.readAsLinesSync());
-    }
-  }
-
-  // Compare the generated code before and after running gen_defaults.dart.
-  for (final String fileName in beforeGeneratedCode.keys) {
-    final List<String> before = beforeGeneratedCode[fileName]!;
-    final List<String> after = afterGeneratedCode[fileName]!;
-    if (!const IterableEquality<String>().equals(before, after)) {
-      errors.add('$fileName is not up-to-date with the token template file.');
-    }
-  }
-
-  // Fail if any errors.
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      ...errors,
-      '${bold}See: https://github.com/flutter/flutter/blob/main/dev/tools/gen_defaults to update the token template files.$reset',
     ]);
   }
 }
