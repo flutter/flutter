@@ -531,26 +531,24 @@ class _TextPainterLayoutCacheWithOffset {
   /// The identity of the returned list only changes when the text layout or the
   /// paint offset changes, so callers may use `identical` to check whether the
   /// text layout has been invalidated since the last access.
-  /// `VerticalCaretMovementRun` relies on that: creating a new list on every
-  /// access makes it impossible for a vertical caret run to ever stay valid.
   List<ui.LineMetrics> get lineMetrics {
     final Offset offset = paintOffset;
     final List<ui.LineMetrics>? cachedMetrics = _cachedLineMetrics;
     if (cachedMetrics != null && offset == _cachedLineMetricsPaintOffset) {
       return cachedMetrics;
     }
-    final List<ui.LineMetrics> metrics;
+    final List<ui.LineMetrics> shiftedMetrics;
     if (!offset.dx.isFinite || !offset.dy.isFinite) {
-      metrics = const <ui.LineMetrics>[];
+      shiftedMetrics = const <ui.LineMetrics>[];
     } else if (offset == Offset.zero) {
-      metrics = _rawLineMetrics;
+      shiftedMetrics = _rawLineMetrics;
     } else {
-      metrics = _rawLineMetrics
+      shiftedMetrics = _rawLineMetrics
           .map((ui.LineMetrics metrics) => TextPainter._shiftLineMetrics(metrics, offset))
           .toList(growable: false);
     }
     _cachedLineMetricsPaintOffset = offset;
-    return _cachedLineMetrics = metrics;
+    return _cachedLineMetrics = shiftedMetrics;
   }
 
   List<ui.LineMetrics>? _cachedLineMetrics;
@@ -1824,8 +1822,8 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   ///
-  /// The returned list is cached: as long as the text layout and the paint
-  /// offset stay the same, this method returns the same list instance.
+  /// The returned list is cached, and returns the same instance as long as the
+  /// text layout has not changed.
   List<ui.LineMetrics> computeLineMetrics() {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
