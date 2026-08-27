@@ -2489,6 +2489,144 @@ void main() {
       tester: tester,
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/181988.
+  testWidgets('RenderViewport getOffsetToReveal with anchor', (WidgetTester tester) async {
+    final controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
+    final children = <Widget>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 200.0,
+            width: 300.0,
+            child: CustomScrollView(
+              anchor: 0.2, // anchorOffset = 0.2 * 200.0 = 40.0
+              controller: controller,
+              slivers: List<Widget>.generate(20, (int i) {
+                final Widget sliver = SliverToBoxAdapter(
+                  child: SizedBox(height: 100.0, child: Text('Tile $i')),
+                );
+                children.add(sliver);
+                return SliverPadding(
+                  padding: const EdgeInsets.only(top: 22.0, bottom: 23.0),
+                  sliver: sliver,
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
+
+    final RenderObject target = tester.renderObject(
+      find.byWidget(children[5], skipOffstage: false),
+    );
+    // target layout offset = 5 * (100 + 22 + 23) + 22 = 725 + 22 = 747.
+    // anchor offset = 40.0.
+
+    // alignment 0.0 -> target should be at top of viewport (0.0).
+    // targetOffset = layoutOffset + anchorOffset = 747 + 40 = 787.
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, 787.0);
+
+    // alignment 1.0 -> target should be at bottom of viewport (200.0).
+    // targetOffset = leadingScrollOffset + anchorOffset - mainAxisExtentDifference * 1.0
+    // mainAxisExtentDifference = 200 - 100 = 100.
+    // targetOffset = 747 + 40 - 100 = 687.
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, 687.0);
+
+    // With rect specified.
+    // rect = Rect.fromLTRB(1, 2, 3, 4). Top is 2.
+    // leadingScrollOffset for rect = 747 + 2 = 749.
+    // targetOffset (alignment 0.0) = 749 + 40 = 789.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 789.0);
+
+    // alignment 1.0
+    // rect height = 2.
+    // mainAxisExtentDifference = 200 - 2 = 198.
+    // targetOffset = 749 + 40 - 198 = 591.
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 591.0);
+  });
+
+  testWidgets('RenderViewport getOffsetToReveal with anchor - horizontal', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController(initialScrollOffset: 300.0);
+    addTearDown(controller.dispose);
+    final children = <Widget>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            height: 300.0,
+            width: 200.0,
+            child: CustomScrollView(
+              scrollDirection: Axis.horizontal,
+              anchor: 0.2, // anchorOffset = 0.2 * 200.0 = 40.0
+              controller: controller,
+              slivers: List<Widget>.generate(20, (int i) {
+                final Widget sliver = SliverToBoxAdapter(
+                  child: SizedBox(width: 100.0, child: Text('Tile $i')),
+                );
+                children.add(sliver);
+                return SliverPadding(
+                  padding: const EdgeInsets.only(left: 22.0, right: 23.0),
+                  sliver: sliver,
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects
+        .whereType<RenderAbstractViewport>()
+        .first;
+
+    final RenderObject target = tester.renderObject(
+      find.byWidget(children[5], skipOffstage: false),
+    );
+    // target layout offset = 5 * (100 + 22 + 23) + 22 = 725 + 22 = 747.
+    // anchor offset = 40.0.
+
+    // alignment 0.0 -> target should be at left of viewport (0.0).
+    // targetOffset = layoutOffset + anchorOffset = 747 + 40 = 787.
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, 787.0);
+
+    // alignment 1.0 -> target should be at right of viewport (200.0).
+    // targetOffset = leadingScrollOffset + anchorOffset - mainAxisExtentDifference * 1.0
+    // mainAxisExtentDifference = 200 - 100 = 100.
+    // targetOffset = 747 + 40 - 100 = 687.
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, 687.0);
+
+    // With rect specified.
+    // rect = Rect.fromLTRB(1, 2, 3, 4). Left is 1.
+    // leadingScrollOffset for rect = 747 + 1 = 748.
+    // targetOffset (alignment 0.0) = 748 + 40 = 788.
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 788.0);
+
+    // alignment 1.0
+    // rect width = 2.
+    // mainAxisExtentDifference = 200 - 2 = 198.
+    // targetOffset = 748 + 40 - 198 = 590.
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTRB(1, 2, 3, 4));
+    expect(revealed.offset, 590.0);
+  });
 }
 
 class TestCustomPainter extends CustomPainter {
