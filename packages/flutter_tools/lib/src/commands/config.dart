@@ -178,10 +178,8 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   final description =
       'Configure Flutter settings.\n\n'
       'To remove a setting, configure it to an empty string.\n\n'
-      'The Flutter tool logs metric data on some Flutter executions for internal usage analysis. '
-      'The data is anonymized before being sent to Google and no personal information is '
-      'collected. To prevent reporting of the data to Google, disable telemetry with '
-      '"flutter config --no-analytics".';
+      'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve '
+      "Flutter tools over time. See Google's privacy policy: https://www.google.com/intl/en/policies/privacy/";
 
   @override
   final category = FlutterCommandCategory.sdk;
@@ -198,11 +196,6 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   /// Return null to disable analytics recording of the `config` command.
   @override
   Future<String?> get usagePath async => null;
-
-  @override
-  void printUsage() {
-    _toolContext.logger.printStatus(usage);
-  }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
