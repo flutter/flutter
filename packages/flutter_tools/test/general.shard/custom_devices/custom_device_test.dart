@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -294,6 +295,58 @@ void main() {
       );
 
       expect(await discovery.discoverDevices(), hasLength(0));
+    },
+  );
+
+  testWithoutContext(
+    "CustomDevices.discoverDevices doesn't report device and does not throw when ping command times out",
+    () async {
+      final fs = MemoryFileSystem.test();
+      final Directory dir = fs.directory('custom_devices_config_dir');
+
+      _writeCustomDevicesConfigFile(dir, <CustomDeviceConfig>[testConfig]);
+
+      final logger = BufferLogger.test();
+      final discovery = CustomDevices(
+        featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+        logger: logger,
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: testConfig.pingCommand,
+            exception: const ProcessException('testping', <String>[], 'Process timed out'),
+          ),
+        ]),
+        config: CustomDevicesConfig.test(fileSystem: fs, directory: dir, logger: logger),
+      );
+
+      expect(await discovery.discoverDevices(), hasLength(0));
+      expect(
+        logger.traceText,
+        contains('Error pinging custom device testid: ProcessException: Process timed out'),
+      );
+    },
+  );
+
+  testWithoutContext(
+    'CustomDevice.tryPing returns false and logs trace when ping command times out',
+    () async {
+      final logger = BufferLogger.test();
+      final device = CustomDevice(
+        config: testConfig,
+        logger: logger,
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: testConfig.pingCommand,
+            exception: const ProcessException('testping', <String>[], 'Process timed out'),
+          ),
+        ]),
+      );
+
+      expect(await device.tryPing(), isFalse);
+      expect(
+        logger.traceText,
+        contains('Error pinging custom device testid: ProcessException: Process timed out'),
+      );
     },
   );
 

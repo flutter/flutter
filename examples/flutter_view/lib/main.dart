@@ -3,8 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'package:flutter/material.dart';
+
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+const Color _grey = Color(0xFF9E9E9E);
+const Color _white = Color(0xFFFFFFFF);
+const Color _black = Color(0xFF000000);
+const Color _blue = Color(0xFF2196F3);
 
 void main() {
   runApp(const FlutterView());
@@ -15,9 +21,23 @@ class FlutterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return WidgetsApp(
       title: 'Flutter View',
-      theme: ThemeData(primarySwatch: Colors.grey),
+      color: _grey,
+      textStyle: const TextStyle(color: _black, decoration: TextDecoration.none),
+      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+        return PageRouteBuilder<T>(
+          settings: settings,
+          pageBuilder:
+              (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) {
+                return builder(context);
+              },
+        );
+      },
       home: const MyHomePage(),
     );
   }
@@ -60,32 +80,64 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return ColoredBox(
+      color: _white,
+      child: Stack(
         children: <Widget>[
-          Expanded(
-            child: Center(
-              child: Text(
-                'Platform button tapped $_counter time${_counter == 1 ? '' : 's'}.',
-                style: const TextStyle(fontSize: 17.0),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'Platform button tapped $_counter time${_counter == 1 ? '' : 's'}.',
+                    style: const TextStyle(fontSize: 17.0),
+                  ),
+                ),
               ),
-            ),
+              Container(
+                padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
+                child: Row(
+                  children: <Widget>[
+                    Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
+                    const Text('Flutter', style: TextStyle(fontSize: 30.0)),
+                  ],
+                ),
+              ),
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
-            child: Row(
-              children: <Widget>[
-                Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
-                const Text('Flutter', style: TextStyle(fontSize: 30.0)),
-              ],
+          Positioned(
+            bottom: 16.0,
+            right: 16.0,
+            child: _Button(
+              onPressed: _sendFlutterIncrement,
+              icon: const Text(
+                '+',
+                style: TextStyle(color: _white, fontSize: 28.0, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _sendFlutterIncrement,
-        child: const Icon(Icons.add),
+    );
+  }
+}
+
+class _Button extends StatelessWidget {
+  const _Button({required this.onPressed, required this.icon});
+
+  final VoidCallback onPressed;
+  final Widget icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 56.0,
+        height: 56.0,
+        decoration: const BoxDecoration(color: _blue, shape: BoxShape.circle),
+        child: Center(child: icon),
       ),
     );
   }

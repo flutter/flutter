@@ -350,43 +350,47 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'can create a project in the engine examples directory',
-    () async {
-      final String flutterBin = globals.fs.path.join(
-        getFlutterRoot(),
-        'bin',
-        globals.platform.isWindows ? 'flutter.bat' : 'flutter',
-      );
-      final String engineExamplesDirectory = globals.fs.path.join(
-        getFlutterRoot(),
-        'engine',
-        'src',
-        'flutter',
-        'examples',
-      );
-      const projectName = 'flutter_project';
-      final ProcessResult exec = await Process.run(flutterBin, <String>[
-        'create',
-        projectName,
-      ], workingDirectory: engineExamplesDirectory);
-      expect(exec.exitCode, 0);
-      globals.fs
-          .file(globals.fs.path.join(engineExamplesDirectory, projectName))
-          .deleteSync(recursive: true);
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-        stdio: mockStdio,
-      ),
-      ...noColorTerminalOverride,
-    },
-  );
+  for (final (String description, List<String> examplesPath) in [
+    ('examples', ['examples']),
+    ('engine examples', ['engine', 'src', 'flutter', 'examples']),
+    ('package examples', ['packages', 'flutter', 'examples']),
+    ('dev', ['dev']),
+  ]) {
+    testUsingContext(
+      'can create a project in the $description directory',
+      () async {
+        final String flutterBin = globals.fs.path.join(
+          getFlutterRoot(),
+          'bin',
+          globals.platform.isWindows ? 'flutter.bat' : 'flutter',
+        );
+        final String examplesDirectory = globals.fs.path.joinAll([
+          getFlutterRoot(),
+          ...examplesPath,
+        ]);
+        const projectName = 'flutter_project';
+        final ProcessResult exec = await Process.run(flutterBin, <String>[
+          'create',
+          projectName,
+        ], workingDirectory: examplesDirectory);
+        expect(exec.exitCode, 0);
+        globals.fs
+            .file(globals.fs.path.join(examplesDirectory, projectName))
+            .deleteSync(recursive: true);
+      },
+      overrides: {
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
+        ...noColorTerminalOverride,
+      },
+    );
+  }
 
   testUsingContext(
     'Will create an app project if non-empty non-project directory exists without .metadata',
@@ -4204,6 +4208,23 @@ void main() {
       ),
     },
   );
+
+  testUsingContext('analysis_options.yaml only excludes platforms that were generated', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--platforms', 'android,ios'],
+      <String>['analysis_options.yaml'],
+    );
+
+    final String analysisOptions = projectDir.childFile('analysis_options.yaml').readAsStringSync();
+    expect(analysisOptions, contains('- build/**'));
+    expect(analysisOptions, contains('- android/**'));
+    expect(analysisOptions, contains('- ios/**'));
+    expect(analysisOptions, isNot(contains('- web/**')));
+    expect(analysisOptions, isNot(contains('- windows/**')));
+    expect(analysisOptions, isNot(contains('- macos/**')));
+    expect(analysisOptions, isNot(contains('- linux/**')));
+  });
 
   testUsingContext('should escape ":" in project description', () async {
     await _createProject(

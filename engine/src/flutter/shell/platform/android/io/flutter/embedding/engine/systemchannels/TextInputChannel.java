@@ -607,6 +607,8 @@ public class TextInputChannel {
             return View.AUTOFILL_HINT_CREDIT_CARD_SECURITY_CODE;
           case "email":
             return View.AUTOFILL_HINT_EMAIL_ADDRESS;
+          case "emailOTPCode":
+            return "emailOTPCode";
           case "familyName":
             return "personFamilyName";
           case "fullStreetAddress":
@@ -716,7 +718,7 @@ public class TextInputChannel {
    * A text input type.
    *
    * <p>If the {@link #type} is {@link TextInputType#NUMBER}, this {@code InputType} also reports
-   * whether that number {@link #isSigned} and {@link #isDecimal}.
+   * whether that number {@link #isSigned}, {@link #isDecimal}, and {@link #isPassword}.
    */
   public static class InputType {
     @NonNull
@@ -725,17 +727,22 @@ public class TextInputChannel {
       return new InputType(
           TextInputType.fromValue(json.getString("name")),
           json.optBoolean("signed", false),
-          json.optBoolean("decimal", false));
+          json.optBoolean("decimal", false),
+          json.optBoolean("password", false));
     }
 
     @NonNull public final TextInputType type;
     public final boolean isSigned;
     public final boolean isDecimal;
+    public final boolean isPassword;
 
-    public InputType(@NonNull TextInputType type, boolean isSigned, boolean isDecimal) {
+    /** Constructs an {@code InputType} for {@code type} with the given NUMBER-variation flags. */
+    public InputType(
+        @NonNull TextInputType type, boolean isSigned, boolean isDecimal, boolean isPassword) {
       this.type = type;
       this.isSigned = isSigned;
       this.isDecimal = isDecimal;
+      this.isPassword = isPassword;
     }
   }
 

@@ -17,7 +17,6 @@ import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'semantics_tester.dart';
 import 'states.dart';
 import 'test_page_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   const kBlue = Color(0xFF0000FF);
@@ -1873,6 +1872,67 @@ void main() {
 
       // Should scroll (existing behavior).
       expect(controller.page, 1.0);
+    },
+  );
+
+  testWidgets('PageView updates _ForceImplicitScrollPhysics when allowImplicitScrolling changes', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(children: const <Widget>[Text('Page 1'), Text('Page 2')]),
+      ),
+    );
+
+    ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    final ScrollPhysics initialPhysics = scrollable.position.physics;
+    expect(initialPhysics.allowImplicitScrolling, isFalse);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView(
+          allowImplicitScrolling: true,
+          children: const <Widget>[Text('Page 1'), Text('Page 2')],
+        ),
+      ),
+    );
+
+    scrollable = tester.state(find.byType(Scrollable));
+    final ScrollPhysics updatedPhysics = scrollable.position.physics;
+    expect(updatedPhysics.allowImplicitScrolling, isTrue);
+    expect(identical(initialPhysics, updatedPhysics), isFalse);
+  });
+
+  testWidgets(
+    'PageView skips updating _ForceImplicitScrollPhysics when allowImplicitScrolling is unchanged',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: PageView(
+            allowImplicitScrolling: true,
+            children: const <Widget>[Text('Page 1'), Text('Page 2')],
+          ),
+        ),
+      );
+
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+      final ScrollPhysics initialPhysics = scrollable.position.physics;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: PageView(
+            allowImplicitScrolling: true,
+            children: const <Widget>[Text('Page 1'), Text('Page 2')],
+          ),
+        ),
+      );
+
+      final ScrollPhysics currentPhysics = scrollable.position.physics;
+      expect(identical(initialPhysics, currentPhysics), isTrue);
     },
   );
 }

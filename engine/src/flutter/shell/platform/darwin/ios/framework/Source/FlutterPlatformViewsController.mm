@@ -7,7 +7,6 @@
 #include "impeller/geometry/rounding_radii.h"
 
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
-#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
@@ -89,74 +88,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                     clipDlRect.GetTop(),    //
                     clipDlRect.GetWidth(),  //
                     clipDlRect.GetHeight());
-}
-
-static bool HasNonRectClipForUnderlayCutout(const flutter::EmbeddedViewParams& params) {
-  auto iter = params.mutatorsStack().Begin();
-  while (iter != params.mutatorsStack().End()) {
-    switch ((*iter)->GetType()) {
-      case flutter::MutatorType::kClipRRect:
-      case flutter::MutatorType::kClipRSE:
-      case flutter::MutatorType::kClipPath:
-        return true;
-      default:
-        break;
-    }
-    ++iter;
-  }
-  return false;
-}
-
-// Overlay canvas needs to be clipped to the shape of platform view to ensure
-// underlay shows up correctly, so that when there's backdrop filter, the region outside of platform
-// view's shape is blurred. See: https://github.com/flutter/flutter/issues/150660
-static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
-                                            const flutter::EmbeddedViewParams& params) {
-  flutter::DlMatrix transform;
-  auto iter = params.mutatorsStack().Begin();
-  while (iter != params.mutatorsStack().End()) {
-    switch ((*iter)->GetType()) {
-      case flutter::MutatorType::kTransform:
-        transform = transform * (*iter)->GetMatrix();
-        break;
-      case flutter::MutatorType::kClipRRect: {
-        if (transform.IsIdentity()) {
-          overlay_canvas->ClipRoundRect((*iter)->GetRRect(), flutter::DlClipOp::kIntersect, true);
-        } else {
-          auto path = flutter::DlPath::MakeRoundRect((*iter)->GetRRect());
-          auto transformed_path =
-              flutter::DlPath(path.GetSkPath().makeTransform(flutter::ToSkMatrix(transform)));
-          overlay_canvas->ClipPath(transformed_path, flutter::DlClipOp::kIntersect, true);
-        }
-        break;
-      }
-      case flutter::MutatorType::kClipRSE: {
-        if (transform.IsIdentity()) {
-          overlay_canvas->ClipRoundSuperellipse((*iter)->GetRSE(), flutter::DlClipOp::kIntersect,
-                                                true);
-        } else {
-          auto path = flutter::DlPath::MakeRoundSuperellipse((*iter)->GetRSE());
-          auto transformed_path =
-              flutter::DlPath(path.GetSkPath().makeTransform(flutter::ToSkMatrix(transform)));
-          overlay_canvas->ClipPath(transformed_path, flutter::DlClipOp::kIntersect, true);
-        }
-        break;
-      }
-      case flutter::MutatorType::kClipPath: {
-        if (transform.IsIdentity()) {
-          overlay_canvas->ClipPath((*iter)->GetPath(), flutter::DlClipOp::kIntersect, true);
-        } else {
-          auto transformed_path = flutter::DlPath(
-              (*iter)->GetPath().GetSkPath().makeTransform(flutter::ToSkMatrix(transform)));
-          overlay_canvas->ClipPath(transformed_path, flutter::DlClipOp::kIntersect, true);
-        }
-        break;
-      }
-      default:
-        break;
-    }
-    ++iter;
-  }
 }
 
 @interface FlutterPlatformViewsController ()
@@ -357,7 +288,16 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
   NSDictionary<NSString*, id>* args = [call arguments];
 
   int64_t viewId = [args[@"id"] longLongValue];
+  // A missing argument arrives as nil and an explicit Dart null as NSNull, neither of which can be
+  // converted to a view type.
   NSString* viewTypeString = args[@"viewType"];
+  if (![viewTypeString isKindOfClass:[NSString class]]) {
+    result([FlutterError
+        errorWithCode:@"unknown_view"
+              message:@"'viewType' argument must be a string to create a platform view."
+              details:nil]);
+    return;
+  }
   std::string viewType(viewTypeString.UTF8String);
 
   if (self.platformViews.count(viewId) != 0) {
@@ -504,15 +444,6 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
 
 - (void)cancelFrame {
   [self resetFrameState];
-}
-
-- (flutter::PostPrerollResult)postPrerollActionWithThreadMerger:
-    (const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger {
-  return flutter::PostPrerollResult::kSuccess;
-}
-
-- (void)endFrameWithResubmit:(BOOL)shouldResubmitFrame
-                threadMerger:(const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger {
 }
 
 - (void)pushFilterToVisitedPlatformViews:(const std::shared_ptr<flutter::DlImageFilter>&)filter
@@ -843,19 +774,13 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
   std::vector<std::unique_ptr<flutter::SurfaceFrame>> surfaceFrames;
   surfaceFrames.reserve(self.compositionOrder.size());
   std::unordered_map<int64_t, DlRect> viewRects;
-  std::unordered_set<int64_t> viewsWithUnderlayPreserved;
 
   for (int64_t viewId : self.compositionOrder) {
-    const flutter::EmbeddedViewParams& params = self.currentCompositionParams[viewId];
-    viewRects[viewId] = params.finalBoundingRect();
-    if (HasNonRectClipForUnderlayCutout(params)) {
-      viewsWithUnderlayPreserved.insert(viewId);
-    }
+    viewRects[viewId] = self.currentCompositionParams[viewId].finalBoundingRect();
   }
 
   std::unordered_map<int64_t, DlRect> overlayLayers =
-      SliceViews(background_frame->Canvas(), self.compositionOrder, self.slices, viewRects,
-                 viewsWithUnderlayPreserved);
+      SliceViews(background_frame->Canvas(), self.compositionOrder, self.slices, viewRects);
 
   size_t requiredOverlayLayers = 0;
   for (int64_t viewId : self.compositionOrder) {
@@ -891,9 +816,6 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
     int restoreCount = overlayCanvas->GetSaveCount();
     overlayCanvas->Save();
     overlayCanvas->ClipRect(overlay->second);
-    if (viewsWithUnderlayPreserved.find(viewId) != viewsWithUnderlayPreserved.end()) {
-      ApplyNonRectClipToOverlayCanvas(overlayCanvas, self.currentCompositionParams[viewId]);
-    }
     overlayCanvas->Clear(flutter::DlColor::kTransparent());
     self.slices[viewId]->render_into(overlayCanvas);
     overlayCanvas->RestoreToCount(restoreCount);
@@ -1033,8 +955,10 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
 
 - (void)bringLayersIntoView:(const LayersMap&)layerMap
        withCompositionOrder:(const std::vector<int64_t>&)compositionOrder {
-  FML_DCHECK(self.flutterView);
   UIView* flutterView = self.flutterView;
+  if (flutterView == nil) {
+    return;
+  }
 
   _previousCompositionOrder.clear();
   NSMutableArray* desiredPlatformSubviews = [NSMutableArray array];

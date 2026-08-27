@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -1022,7 +1023,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         appFilenamePattern: 'App',
       );
       // Only support 64bit iOS code size analysis.
-      final String arch = DarwinArch.arm64.name;
+      final String arch = CpuArch.arm64.darwinArchName;
       final File aotSnapshot = globals.fs
           .directory(buildInfo.codeSizeDirectory)
           .childFile('snapshot.$arch.json');

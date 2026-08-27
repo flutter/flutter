@@ -8,6 +8,7 @@
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"
 #import "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/pointer_data.h"
+#include "flutter/lib/ui/window/pointer_data_packet.h"
 #import "flutter/lib/ui/window/viewport_metrics.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterHourFormat.h"
@@ -16,6 +17,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
@@ -201,6 +203,16 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval targetTime);
 
 @end
 
+/// A view controller that allows headless execution in the engine it creates.
+@interface FlutterHeadlessAllowedViewController : FlutterViewController
+@end
+
+@implementation FlutterHeadlessAllowedViewController
+- (BOOL)engineAllowHeadlessExecution {
+  return YES;
+}
+@end
+
 /// Sometimes we have to use a custom mock to avoid retain cycles in OCMock.
 /// Used for testing low memory notification.
 @interface FlutterEnginePartialMock : FlutterEngine
@@ -344,6 +356,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)addInternalPlugins;
 - (flutter::PointerData)generatePointerDataForFake;
+- (void)dispatchTouches:(NSSet*)touches
+    pointerDataChangeOverride:(flutter::PointerData::Change*)changeOverride
+                        event:(UIEvent*)event;
 - (void)sharedSetupWithProject:(nullable FlutterDartProject*)project
                   initialRoute:(nullable NSString*)initialRoute;
 - (void)applicationBecameActive:(NSNotification*)notification;
@@ -370,6 +385,27 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @interface UITouch ()
 
 @property(nonatomic, readwrite) UITouchPhase phase;
+
+@end
+
+/// A `FlutterEngine` that saves received `PointerData`s instead of forwarding to the shell.
+@interface PointerDataCapturingEngine : FlutterEngine
+- (const std::vector<flutter::PointerData>&)capturedPointerData;
+@end
+
+@implementation PointerDataCapturingEngine {
+  std::vector<flutter::PointerData> _capturedPointerData;
+}
+
+- (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet {
+  for (size_t i = 0; i < packet->GetLength(); i++) {
+    _capturedPointerData.push_back(packet->GetPointerData(i));
+  }
+}
+
+- (const std::vector<flutter::PointerData>&)capturedPointerData {
+  return _capturedPointerData;
+}
 
 @end
 
@@ -551,7 +587,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   engine.viewController = (FlutterViewController*)delegate;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
 
   BOOL isLocal = YES;
 
@@ -639,7 +676,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   // Exercise the real shouldIgnoreKeyboardNotification: implementation.
   FlutterKeyboardInsetManager* managerMock = [[FlutterKeyboardInsetManager alloc]
-      initWithDelegate:(id<FlutterKeyboardInsetManagerDelegate>)viewControllerMock];
+        initWithDelegate:(id<FlutterKeyboardInsetManagerDelegate>)viewControllerMock
+      displayLinkManager:FlutterDisplayLinkManager.shared];
   viewController.keyboardInsetManager = managerMock;
 
   UIScreen* screen = [self setUpMockScreen];
@@ -973,7 +1011,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   delegate.mockConvertedViewRect = convertedViewFrame;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
 
   CGFloat adjustment = [manager calculateMultitaskingAdjustment:screenRect
                                                   keyboardFrame:keyboardFrame];
@@ -994,7 +1033,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   delegate.mockConvertedViewRect = convertedViewFrame;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
 
   CGFloat inset = [manager calculateKeyboardInset:keyboardFrame
                                      keyboardMode:FlutterKeyboardModeDocked];
@@ -1031,7 +1071,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   engine.viewController = (FlutterViewController*)delegate;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
   manager.targetViewInsetBottom = 0;
 
   [manager handleKeyboardNotification:notification];
@@ -2280,6 +2321,109 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
       dispatchPointerDataPacket:std::make_unique<flutter::PointerDataPacket>(0)];
 }
 
+// Verify stylus and touch-geometry fields.
+//
+// Ensure `tilt` and `orientation` are correctly renormalized. iOS reports angles relative to the
+// surface plane with 0 representing horizontal. The engine expects them relative to the surface
+// normal with zero representing vertical.
+- (void)testStylusTouchFieldsSurviveConversion {
+  PointerDataCapturingEngine* engine = [[PointerDataCapturingEngine alloc] initWithName:@"foobar"
+                                                                                project:nil];
+  // `-[FlutterEngine setViewController:]` requires PlatformViewIOS, which only exists after
+  // the shell has been created.
+  [engine run];
+  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:engine
+                                                                    nibName:nil
+                                                                     bundle:nil];
+  XCTAssertNotNil(vc);
+
+  // A stylus held at 30 degrees off the surface, swung 45 degrees clockwise from the +x axis.
+  const CGFloat altitudeAngle = M_PI / 6;  // 30 degrees from the surface plane.
+  const CGFloat azimuthAngle = M_PI / 4;   // 45 degrees clockwise from +x.
+  const CGFloat force = 0.75;
+  const CGFloat maximumPossibleForce = 4.0;
+  const CGFloat majorRadius = 20.0;
+  const CGFloat majorRadiusTolerance = 3.0;
+
+  id fakeTouch = OCMPartialMock([[UITouch alloc] init]);
+  [fakeTouch setPhase:UITouchPhaseBegan];
+  OCMStub([fakeTouch force]).andReturn(force);
+  OCMStub([fakeTouch maximumPossibleForce]).andReturn(maximumPossibleForce);
+  OCMStub([fakeTouch majorRadius]).andReturn(majorRadius);
+  OCMStub([fakeTouch majorRadiusTolerance]).andReturn(majorRadiusTolerance);
+  OCMStub([fakeTouch altitudeAngle]).andReturn(altitudeAngle);
+  OCMStub([fakeTouch azimuthAngleInView:[OCMArg any]]).andReturn(azimuthAngle);
+
+  [vc dispatchTouches:[NSSet setWithObject:fakeTouch] pointerDataChangeOverride:nullptr event:nil];
+
+  const std::vector<flutter::PointerData>& captured = [engine capturedPointerData];
+  XCTAssertEqual(captured.size(), 1u);
+  const flutter::PointerData& data = captured[0];
+
+  const double tolerance = 1e-6;
+
+  // Pressure is a straight copy; `pressure_min` is always 0.
+  XCTAssertEqualWithAccuracy(data.pressure, force, tolerance);
+  XCTAssertEqualWithAccuracy(data.pressure_max, maximumPossibleForce, tolerance);
+  XCTAssertEqualWithAccuracy(data.pressure_min, 0.0, tolerance);
+
+  // Radius is a copy, with the tolerance applied symmetrically to produce min/max.
+  XCTAssertEqualWithAccuracy(data.radius_major, majorRadius, tolerance);
+  XCTAssertEqualWithAccuracy(data.radius_min, majorRadius - majorRadiusTolerance, tolerance);
+  XCTAssertEqualWithAccuracy(data.radius_max, majorRadius + majorRadiusTolerance, tolerance);
+
+  // iOS measures altitude from the surface plane; `PointerData.tilt` measures from the surface
+  // normal. Same range, swapped origin, so the two are complements about pi/2.
+  XCTAssertEqualWithAccuracy(data.tilt, M_PI_2 - altitudeAngle, tolerance);
+
+  // iOS measures azimuth from the +x axis; `PointerData.orientation` measures from the +y axis.
+  // Same sweep direction, phase-shifted by pi/2.
+  XCTAssertEqualWithAccuracy(data.orientation, azimuthAngle - M_PI_2, tolerance);
+}
+
+// Verify max stylus tilt angle.
+//
+// A stylus lying flat on the glass is altitude 0 to iOS, which must map to the maximum tilt of pi/2
+// in the engine. A stylus held perpendicular is altitude pi/2, mapping to engine tilt 0.
+- (void)testStylusTiltEndpoints {
+  PointerDataCapturingEngine* engine = [[PointerDataCapturingEngine alloc] initWithName:@"foobar"
+                                                                                project:nil];
+  [engine run];
+  FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:engine
+                                                                    nibName:nil
+                                                                     bundle:nil];
+
+  id flatTouch = OCMPartialMock([[UITouch alloc] init]);
+  [flatTouch setPhase:UITouchPhaseBegan];
+  OCMStub([flatTouch altitudeAngle]).andReturn(0.0);
+  OCMStub([flatTouch azimuthAngleInView:[OCMArg any]]).andReturn(M_PI_2);
+
+  [vc dispatchTouches:[NSSet setWithObject:flatTouch] pointerDataChangeOverride:nullptr event:nil];
+
+  id perpendicularTouch = OCMPartialMock([[UITouch alloc] init]);
+  [perpendicularTouch setPhase:UITouchPhaseBegan];
+  OCMStub([perpendicularTouch altitudeAngle]).andReturn(M_PI_2);
+  OCMStub([perpendicularTouch azimuthAngleInView:[OCMArg any]]).andReturn(0.0);
+
+  [vc dispatchTouches:[NSSet setWithObject:perpendicularTouch]
+      pointerDataChangeOverride:nullptr
+                          event:nil];
+
+  const double tolerance = 1e-6;
+  const std::vector<flutter::PointerData>& captured = [engine capturedPointerData];
+  XCTAssertEqual(captured.size(), 2u);
+
+  // Flat on the surface: maximum tilt.
+  XCTAssertEqualWithAccuracy(captured[0].tilt, M_PI_2, tolerance);
+  // Azimuth of pi/2 points along +y, which is orientation 0.
+  XCTAssertEqualWithAccuracy(captured[0].orientation, 0.0, tolerance);
+
+  // Perpendicular to the surface: zero tilt.
+  XCTAssertEqualWithAccuracy(captured[1].tilt, 0.0, tolerance);
+  // Azimuth of 0 points along +x, a quarter turn back from +y.
+  XCTAssertEqualWithAccuracy(captured[1].orientation, -M_PI_2, tolerance);
+}
+
 - (void)testFakeEventTimeStamp {
   FlutterViewController* vc = [[FlutterViewController alloc] initWithEngine:self.mockEngine
                                                                     nibName:nil
@@ -2305,7 +2449,12 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-  UIWindow* window = [[UIWindow alloc] init];
+  // The window must be attached to the connected scene to have a screen, without which the
+  // viewport metrics stay empty and the surface is never updated.
+  UIWindowScene* windowScene =
+      (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
+  XCTAssertNotNil(windowScene, @"The host app must have a connected scene for test");
+  UIWindow* window = [[UIWindow alloc] initWithWindowScene:windowScene];
   [window addSubview:flutterViewController.view];
   flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
   [flutterViewController viewDidLayoutSubviews];
@@ -2343,7 +2492,12 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [engine runWithEntrypoint:nil];
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
-  UIWindow* window = [[UIWindow alloc] init];
+  // The window must be attached to the connected scene to have a screen, without which the
+  // viewport metrics stay empty and the surface is never updated.
+  UIWindowScene* windowScene =
+      (UIWindowScene*)UIApplication.sharedApplication.connectedScenes.anyObject;
+  XCTAssertNotNil(windowScene, @"The host app must have a connected scene for test");
+  UIWindow* window = [[UIWindow alloc] initWithWindowScene:windowScene];
   [window addSubview:flutterViewController.view];
   flutterViewController.view.bounds = CGRectMake(0, 0, 100, 100);
   [flutterViewController viewDidLayoutSubviews];
@@ -2703,6 +2857,39 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   }
 }
 
+// Verifies that `engineAllowHeadlessExecution` can be set through key-value coding.
+// The property is readonly and has no setter, so Interface Builder's User Defined Runtime
+// Attributes set the synthesized instance variable directly via KVC. If we ever declared a getter
+// or marked the poperty @dynamic, it would break.
+//
+// Interface Builder applies runtime attributes during nib loading, before `awakeFromNib` creates
+// the engine. Only the value in place at that point reaches the engine.
+- (void)testEngineAllowHeadlessExecutionIsSettableViaKeyValueCoding {
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:nil
+                                                                                 nibName:nil
+                                                                                  bundle:nil];
+  XCTAssertFalse(viewController.engineAllowHeadlessExecution);
+
+  // Verify set via key-value coding.
+  [viewController setValue:@YES forKey:@"engineAllowHeadlessExecution"];
+  XCTAssertTrue(viewController.engineAllowHeadlessExecution);
+}
+
+// Verifies that an implicitly created engine sets `allowHeadlessExecution` based on the view
+// controller's `engineAllowHeadlessExecution`.
+- (void)testImplicitEngineTakesAllowHeadlessExecutionFromViewController {
+  // Verify allowHeadlessExecution is NO by default.
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithProject:nil
+                                                                                 nibName:nil
+                                                                                  bundle:nil];
+  XCTAssertFalse(viewController.engine.allowHeadlessExecution);
+
+  // Verify allowHeadlessExecution is YES when the VC allows it.
+  FlutterViewController* headlessViewController =
+      [[FlutterHeadlessAllowedViewController alloc] initWithProject:nil nibName:nil bundle:nil];
+  XCTAssertTrue(headlessViewController.engine.allowHeadlessExecution);
+}
+
 - (void)
     testCreateTouchRateCorrectionVSyncClientWillCreateVsyncClientWhenRefreshRateIsLargerThan60HZ {
   id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
@@ -2742,6 +2929,33 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertNotNil(clientAfter);
 
   XCTAssertTrue(clientBefore == clientAfter);
+}
+
+// Verifies that no touch rate correction vsync client is created when the engine has no platform
+// task runner. The task runner is nil before the engine's shell is created and after its context is
+// destroyed, and the vsync client dereferences the task runner it is given.
+//
+// A view controller cannot attach to an engine that has no shell, so the engine is run and its
+// context destroyed afterwards rather than simply left uninitialized.
+- (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateVsyncClientWithoutTaskRunner {
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
+  double maxFrameRate = 120;
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  [engine destroyContext];
+  XCTAssertNil(engine.platformTaskRunner);
+
+  // Verify the client is nil, and we don't crash.
+  [viewController createTouchRateCorrectionVSyncClientIfNeeded];
+  XCTAssertNil(viewController.touchRateCorrectionVSyncClient);
 }
 
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateVsyncClientWhenRefreshRateIs60HZ {
@@ -2834,7 +3048,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   delegate.mockEngine = engine;
 
   FlutterKeyboardInsetManager* manager =
-      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate];
+      [[FlutterKeyboardInsetManager alloc] initWithDelegate:delegate
+                                         displayLinkManager:FlutterDisplayLinkManager.shared];
   manager.targetViewInsetBottom = 100;
   [manager startKeyBoardAnimation:0.25];
 

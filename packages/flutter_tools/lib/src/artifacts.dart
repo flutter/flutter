@@ -82,7 +82,6 @@ enum Artifact {
 
   /// Tools related to subsetting or icon font files.
   fontSubset('font-subset', isExecutable: true),
-  constFinder('const_finder.dart.snapshot'),
 
   /// The location of file generators.
   flutterToolsFileGenerators.directory();
@@ -161,8 +160,9 @@ enum HostArtifact {
 
   iosDeploy('ios-deploy'),
   idevicesyslog('idevicesyslog'),
-  idevicescreenshot('idevicescreenshot'),
   iproxy('iproxy'),
+
+  idevicescreenshot('idevicescreenshot'),
 
   /// The root of the sky_engine package.
   skyEnginePath('sky_engine'),
@@ -473,7 +473,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
-      case Artifact.constFinder:
       case Artifact.flutterFramework:
       case Artifact.flutterFrameworkDsym:
       case Artifact.flutterMacOSFramework:
@@ -525,7 +524,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
-      case Artifact.constFinder:
       case Artifact.flutterFramework:
       case Artifact.flutterFrameworkDsym:
       case Artifact.flutterMacOSFramework:
@@ -577,7 +575,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
-      case Artifact.constFinder:
       case Artifact.flutterMacOSFramework:
       case Artifact.flutterMacOSFrameworkDsym:
       case Artifact.flutterMacOSXcframework:
@@ -629,7 +626,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.fuchsiaFlutterRunner:
         final String artifactFileName = artifact.getFileName(_platform, mode);
         return _fileSystem.path.join(root, runtime, artifactFileName);
-      case Artifact.constFinder:
       case Artifact.flutterFramework:
       case Artifact.flutterFrameworkDsym:
       case Artifact.flutterMacOSFramework:
@@ -765,7 +761,6 @@ class CachedArtifacts implements Artifacts {
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path, artifact.getFileName(_platform));
       case Artifact.fontSubset:
-      case Artifact.constFinder:
         return _cache
             .getArtifactDirectory('engine')
             .childDirectory(_enginePlatformDirectoryName(platform))
@@ -1147,8 +1142,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
         );
       case Artifact.fontSubset:
         return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
-      case Artifact.constFinder:
-        return _fileSystem.path.join(_hostEngineOutPath, 'gen', artifactFileName);
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
       case Artifact.windowsDesktopPath:
@@ -1303,7 +1296,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.fuchsiaKernelCompiler:
         case Artifact.fuchsiaFlutterRunner:
         case Artifact.fontSubset:
-        case Artifact.constFinder:
         case Artifact.flutterToolsFileGenerators:
           break;
       }
@@ -1373,70 +1365,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
 
   @override
   LocalEngineInfo? get localEngineInfo => _parent.localEngineInfo;
-}
-
-/// An implementation of [Artifacts] that provides individual overrides.
-///
-/// If an artifact is not provided, the lookup delegates to the parent.
-class OverrideArtifacts implements Artifacts {
-  /// Creates a new [OverrideArtifacts].
-  ///
-  /// [parent] must be provided.
-  OverrideArtifacts({
-    required this.parent,
-    this.frontendServer,
-    this.engineDartBinary,
-    this.platformKernelDill,
-    this.flutterPatchedSdk,
-  });
-
-  final Artifacts parent;
-  final File? frontendServer;
-  final File? engineDartBinary;
-  final File? platformKernelDill;
-  final File? flutterPatchedSdk;
-
-  @override
-  LocalEngineInfo? get localEngineInfo => parent.localEngineInfo;
-
-  @override
-  String getArtifactPath(
-    Artifact artifact, {
-    TargetPlatform? platform,
-    BuildMode? mode,
-    EnvironmentType? environmentType,
-  }) {
-    if (artifact == Artifact.engineDartBinary && engineDartBinary != null) {
-      return engineDartBinary!.path;
-    }
-    if (artifact == Artifact.frontendServerSnapshotForEngineDartSdk && frontendServer != null) {
-      return frontendServer!.path;
-    }
-    if (artifact == Artifact.platformKernelDill && platformKernelDill != null) {
-      return platformKernelDill!.path;
-    }
-    if (artifact == Artifact.flutterPatchedSdkPath && flutterPatchedSdk != null) {
-      return flutterPatchedSdk!.path;
-    }
-    return parent.getArtifactPath(
-      artifact,
-      platform: platform,
-      mode: mode,
-      environmentType: environmentType,
-    );
-  }
-
-  @override
-  String getEngineType(TargetPlatform platform, [BuildMode? mode]) =>
-      parent.getEngineType(platform, mode);
-
-  @override
-  bool get usesLocalArtifacts => parent.usesLocalArtifacts;
-
-  @override
-  FileSystemEntity getHostArtifact(HostArtifact artifact) {
-    return parent.getHostArtifact(artifact);
-  }
 }
 
 /// Locate the Dart SDK.

@@ -205,7 +205,7 @@ void GoldenPlaygroundTest::SetUp() {
       switches.flags.use_sdfs = true;
       [[fallthrough]];
     case PlaygroundBackend::kMetal:
-      if (!DoesSupportWideGamutTests()) {
+      if (switches.enable_wide_gamut && !DoesSupportWideGamutTests()) {
         GTEST_SKIP()
             << "This metal device doesn't support wide gamut golden tests.";
       }
