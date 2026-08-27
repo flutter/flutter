@@ -205,23 +205,6 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
     }
   }
 
-  // Make runnable.
-  Dart_ExitScope();
-  Dart_ExitIsolate();
-  *error = Dart_IsolateMakeRunnable(isolate);
-  if (*error) {
-    if (strcmp(*error, "Isolate is already runnable") == 0) {
-      free(*error);
-      *error = nullptr;
-    } else {
-      Dart_EnterIsolate(isolate);
-      Dart_ShutdownIsolate();
-      return false;
-    }
-  }
-  Dart_EnterIsolate(isolate);
-  Dart_EnterScope();
-
   return true;
 }
 
