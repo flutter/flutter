@@ -14,12 +14,14 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import 'application_package.dart';
+import 'device_support.dart';
 import 'lldb.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
@@ -41,6 +43,7 @@ class IOSCoreDeviceLauncher {
     required FileSystem fileSystem,
     required ProcessUtils processUtils,
     required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required Version? deviceVersion,
     @visibleForTesting LLDB? lldb,
   }) : _coreDeviceControl = coreDeviceControl,
        _logger = logger,
@@ -52,6 +55,7 @@ class IOSCoreDeviceLauncher {
              logger: logger,
              processUtils: processUtils,
              xcodeProjectInterpreter: xcodeProjectInterpreter,
+             deviceVersion: deviceVersion,
            );
 
   final IOSCoreDeviceControl _coreDeviceControl;
@@ -101,6 +105,7 @@ class IOSCoreDeviceLauncher {
   /// Requires Xcode 16+.
   Future<bool> launchAppWithLLDBDebugger({
     required String deviceId,
+    required IOSDeviceSupport deviceSupport,
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
@@ -150,12 +155,22 @@ class IOSCoreDeviceLauncher {
       return false;
     }
 
+    // Kill LLDB and devicectl if the CLI shuts down so they do not hang in the background.
+    shutdownHooks.addShutdownHook(() async {
+      try {
+        await stopApp(deviceId: deviceId, processId: processId);
+      } on Exception {
+        // ignore any failures
+      }
+    });
+
     // Start LLDB and attach to the device process.
     final bool attachStatus = await _lldb.attachAndStart(
       deviceId: deviceId,
       appProcessId: processId,
       lldbLogForwarder: lldbLogForwarder,
       mode: mode,
+      deviceSupport: deviceSupport,
     );
 
     // If it fails to attach with lldb, kill the launched process so it doesn't stay hanging.
@@ -717,6 +732,7 @@ class IOSCoreDeviceControl {
       'launch',
       '--device',
       deviceId,
+      '--terminate-existing',
       if (startStopped) '--start-stopped',
       if (attachToConsole) ...<String>[
         '--console',
@@ -853,7 +869,7 @@ class IOSCoreDeviceControl {
       unawaited(
         launchProcess.exitCode
             .then((int status) async {
-              _logger.printTrace('lldb exited with code $status');
+              _logger.printTrace('devicectl exited with code $status');
               await stdoutSubscription.cancel();
               await stderrSubscription.cancel();
             })

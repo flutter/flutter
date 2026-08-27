@@ -65,8 +65,8 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   Directory? _xcodeDirectoryWithExtension(String extension) {
     final List<FileSystemEntity> contents = hostAppRoot.listSync();
     for (final entity in contents) {
-      if (globals.fs.path.extension(entity.path) == extension &&
-          !globals.fs.path.basename(entity.path).startsWith('.')) {
+      if (hostAppRoot.fileSystem.path.extension(entity.path) == extension &&
+          !hostAppRoot.fileSystem.path.basename(entity.path).startsWith('.')) {
         return hostAppRoot.childDirectory(entity.basename);
       }
     }
@@ -222,10 +222,8 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       return false;
     }
 
-    // Swift Package Manager requires Xcode 15 or greater.
     final Xcode? xcode = globals.xcode;
-    final Version? xcodeVersion = xcode?.currentVersion;
-    if (xcodeVersion == null || xcodeVersion.major < 15) {
+    if (xcode == null || !xcode.isInstalled) {
       return false;
     }
 

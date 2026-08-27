@@ -19,6 +19,7 @@ import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
+import 'src/context/tool_dependencies.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/features.dart';
@@ -30,14 +31,14 @@ import 'src/runner/flutter_command_runner.dart';
 /// Runs the Flutter tool with support for the specified list of [commands].
 Future<int> run(
   List<String> args,
-  List<FlutterCommand> Function() commands, {
+  List<FlutterCommand> Function(ToolDependencies toolDependencies) commands, {
+  required ShutdownHooks shutdownHooks,
+  String? flutterVersion,
   bool muteCommandLogging = false,
+  Map<Type, Generator>? overrides,
+  bool? reportCrashes,
   bool verbose = false,
   bool verboseHelp = false,
-  bool? reportCrashes,
-  String? flutterVersion,
-  Map<Type, Generator>? overrides,
-  required ShutdownHooks shutdownHooks,
 }) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
@@ -55,8 +56,52 @@ Future<int> run(
     globals.terminal.applyFeatureFlags(featureFlags);
 
     reportCrashes ??= !await globals.isRunningOnBot;
-    final runner = FlutterCommandRunner(verboseHelp: verboseHelp);
-    commands().forEach(runner.addCommand);
+    final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
+      analytics: globals.analytics,
+      androidSdk: globals.androidSdk,
+      androidStudio: globals.androidStudio,
+      botDetector: globals.botDetector,
+      buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
+      cache: globals.cache,
+      cocoaPods: globals.cocoaPods,
+      cocoapodsValidator: globals.cocoapodsValidator,
+      config: globals.config,
+      crashReporter: globals.crashReporter,
+      customDevicesConfig: globals.customDevicesConfig,
+      flutterVersion: globals.flutterVersion,
+      fs: globals.fs,
+      git: globals.git,
+      gradleUtils: globals.gradleUtils,
+      iosSimulatorUtils: globals.iosSimulatorUtils,
+      iosWorkflow: globals.iosWorkflow,
+      java: globals.java,
+      localEngineLocator: globals.localEngineLocator,
+      logger: globals.logger,
+      nativeAssetsBuilder: globals.nativeAssetsBuilder,
+      outputPreferences: globals.outputPreferences,
+      persistentToolState: globals.persistentToolState,
+      platform: globals.platform,
+      plistParser: globals.plistParser,
+      preRunValidator: globals.preRunValidator,
+      processManager: globals.processManager,
+      projectFactory: globals.projectFactory,
+      shutdownHooks: shutdownHooks,
+      stdio: globals.stdio,
+      systemClock: globals.systemClock,
+      terminal: globals.terminal,
+      userMessages: globals.userMessages,
+      xcdevice: globals.xcdevice,
+      xcode: globals.xcode,
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+    );
+    final runner = FlutterCommandRunner(
+      analytics: toolDeps.analytics,
+      featureFlags: featureFlags,
+      toolContext: toolDeps.toolContext,
+      verboseHelp: verboseHelp,
+    );
+    commands(toolDeps).forEach(runner.addCommand);
 
     // Initialize the system locale.
     final String systemLocale = await intl_standalone.findSystemLocale();

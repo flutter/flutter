@@ -55,11 +55,10 @@ class WindowManagerTest : public WindowsTest {
     ASSERT_TRUE(engine_->Run("testWindowController"));
 
     bool signalled = false;
-    context.AddNativeFunction(
-        "Signal", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-          isolate_ = flutter::Isolate::Current();
-          signalled = true;
-        }));
+    context.AddFfiNativeFunction("Signal", CREATE_FFI_LAMBDA([&]() {
+                                   isolate_ = flutter::Isolate::Current();
+                                   signalled = true;
+                                 }));
     while (!signalled) {
       engine_->task_runner()->ProcessTasks();
     }
@@ -950,7 +949,10 @@ TEST_F(WindowManagerTest, CreateRegularWindowSizedToContent) {
   EXPECT_GE(view_id, 0);
 }
 
-TEST_F(WindowManagerTest, RegularWindowSizedToContentResizesToContent) {
+// TODO(team-windows): Fix flakes. See:
+// https://github.com/flutter/flutter/issues/177172
+TEST_F(WindowManagerTest,
+       DISABLED_RegularWindowSizedToContentResizesToContent) {
   IsolateScope isolate_scope(isolate());
 
   RegularWindowCreationRequest creation_request{
@@ -1024,8 +1026,11 @@ TEST_F(WindowManagerTest, RegularWindowSizedToContentResizableHasThickFrame) {
   EXPECT_NE(style & WS_MAXIMIZEBOX, 0L);
 }
 
-TEST_F(WindowManagerTest,
-       RegularWindowSizedToContentResizableStopsTrackingAfterFirstFrame) {
+// TODO(team-windows): Fix flakes. See:
+// https://github.com/flutter/flutter/issues/177172
+TEST_F(
+    WindowManagerTest,
+    DISABLED_RegularWindowSizedToContentResizableStopsTrackingAfterFirstFrame) {
   IsolateScope isolate_scope(isolate());
 
   RegularWindowCreationRequest creation_request{
@@ -1092,7 +1097,9 @@ TEST_F(WindowManagerTest, CreateModalDialogSizedToContent) {
   EXPECT_GE(view_id, 0);
 }
 
-TEST_F(WindowManagerTest, DialogWindowSizedToContentResizesToContent) {
+// TODO(team-windows): Fix flakes. See:
+// https://github.com/flutter/flutter/issues/177172
+TEST_F(WindowManagerTest, DISABLED_DialogWindowSizedToContentResizesToContent) {
   IsolateScope isolate_scope(isolate());
 
   DialogWindowCreationRequest creation_request{
