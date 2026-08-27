@@ -35,6 +35,14 @@
         withBlock:(nonnull dispatch_block_t)block
             delay:(NSTimeInterval)delay;
 
+/*
+ * Schedules the block on the platform thread for a frame that has no layers.
+ *
+ * Such a frame displays no contents and has no frame size, so it unblocks the platform thread no
+ * matter which frame size that thread is waiting for during a resize.
+ */
+- (void)onPresentEmptyFrameWithBlock:(nonnull dispatch_block_t)block delay:(NSTimeInterval)delay;
+
 @end
 
 /**
@@ -83,6 +91,17 @@
 - (void)presentSurfaces:(nonnull NSArray<FlutterSurfacePresentInfo*>*)surfaces
                  atTime:(CFTimeInterval)presentationTime
                  notify:(nullable dispatch_block_t)notify;
+
+/**
+ * Presents a frame that has no layers, removing all sublayers.
+ *
+ * Called instead of `presentSurfaces:atTime:notify:` when the frame being presented has no layers
+ * at all, and thus nothing on screen that a window resize could be out of sync with.
+ *
+ * Must be called on raster thread, and behaves like `presentSurfaces:atTime:notify:` otherwise.
+ */
+- (void)presentEmptyFrameAtTime:(CFTimeInterval)presentationTime
+                         notify:(nullable dispatch_block_t)notify;
 
 @end
 
