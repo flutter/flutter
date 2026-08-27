@@ -636,9 +636,7 @@ class _AndroidMotionEventConverter {
     // are relative to this order as well.
     // See https://github.com/flutter/flutter/issues/191105.
     final List<int> pointers = pointerPositions.keys.toList()
-      ..sort(
-        (int a, int b) => (pointerProperties[a]?.id ?? 0).compareTo(pointerProperties[b]?.id ?? 0),
-      );
+      ..sort((int a, int b) => pointerProperties[a]!.id.compareTo(pointerProperties[b]!.id));
     final int pointerIdx = pointers.indexOf(event.pointer);
     final int numPointers = pointers.length;
 
