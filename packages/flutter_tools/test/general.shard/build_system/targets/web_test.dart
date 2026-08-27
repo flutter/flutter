@@ -2317,6 +2317,40 @@ console.log(mapName);
   );
 
   test(
+    'WebReleaseBundle hashes physical assets and updates AssetManifest when webContentHash is true',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      environment.projectDir.childDirectory('web').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync(recursive: true);
+
+      // Create a pubspec.yaml with assets
+      environment.projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: my_app
+flutter:
+  assets:
+    - images/logo.png
+''');
+
+      final File logo = environment.projectDir.childDirectory('images').childFile('logo.png')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+
+      final String logoHash = '9f64a747'; // sha256 of [1,2,3,4]
+
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(webContentHash: true),
+      ], const NoOpAnalytics()).build(environment);
+
+      final Directory assetsDir = environment.outputDir.childDirectory('assets');
+
+      expect(assetsDir.childDirectory('images').childFile('logo.$logoHash.png').existsSync(), true);
+      expect(assetsDir.childDirectory('images').childFile('logo.png').existsSync(), false);
+
+      final File manifestFile = assetsDir.childFile('AssetManifest.bin');
+      expect(manifestFile.existsSync(), true);
+    }),
+  );
+  test(
     'WebTemplatedFiles populates wasmHashes from compileTargets on clean builds before outputDir is copied',
     () => testbed.run(() async {
       environment.projectDir.childDirectory('web').createSync(recursive: true);

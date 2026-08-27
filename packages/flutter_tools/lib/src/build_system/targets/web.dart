@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
+import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../../artifacts.dart';
 import '../../base/common.dart';
@@ -1115,6 +1119,13 @@ class WebReleaseBundle extends Target {
     final DepfileService depfileService = environment.depFileService;
     depfileService.writeToFile(bundledDepfile, environment.buildDir.childFile('flutter_assets.d'));
 
+    final bool webContentHash = compileTargets.any(
+      (Dart2WebTarget t) => t.compilerConfig.webContentHash,
+    );
+    if (webContentHash) {
+      _hashWebAssets(outputDirectory);
+    }
+
     final Directory webResources = environment.projectDir.childDirectory('web');
     final List<File> inputResourceFiles = webResources
         .listSync(recursive: true)
@@ -1540,4 +1551,104 @@ extension on Environment {
   ServiceWorkerStrategy get serviceWorkerStrategy =>
       ServiceWorkerStrategy.fromCliName(defines[kServiceWorkerStrategy]) ??
       ServiceWorkerStrategy.offlineFirst;
+}
+
+void _hashWebAssets(Directory assetsDir) {
+  if (!assetsDir.existsSync()) {
+    return;
+  }
+
+  final FileSystem fileSystem = assetsDir.fileSystem;
+  final List<File> files = assetsDir.listSync(recursive: true).whereType<File>().toList();
+  final Map<String, String> renamedAssets = <String, String>{};
+
+  for (final File file in files) {
+    final String basename = file.basename;
+    if (basename == 'AssetManifest.json' ||
+        basename == 'AssetManifest.bin' ||
+        basename == 'AssetManifest.bin.json' ||
+        basename == 'FontManifest.json') {
+      continue;
+    }
+
+    final String contentHash = crypto.sha256
+        .convert(file.readAsBytesSync())
+        .toString()
+        .substring(0, 8);
+    final String newBasename = _computeHashedBasename(basename, contentHash);
+
+    final String relativePath = fileSystem.path.relative(file.path, from: assetsDir.path);
+    final String newRelativePath = fileSystem.path.join(
+      fileSystem.path.dirname(relativePath),
+      newBasename,
+    );
+
+    // Rename the file
+    final String newPath = fileSystem.path.join(assetsDir.path, newRelativePath);
+    file.renameSync(newPath);
+
+    // Note: use forward slashes for mapping since the manifest uses them.
+    final String posixOldPath = relativePath.replaceAll(fileSystem.path.separator, '/');
+    final String posixNewPath = newRelativePath.replaceAll(fileSystem.path.separator, '/');
+    renamedAssets[posixOldPath] = posixNewPath;
+  }
+
+  // Now update the manifests if they exist
+  final File assetManifestBin = assetsDir.childFile('AssetManifest.bin');
+  if (assetManifestBin.existsSync()) {
+    final ByteData message = assetManifestBin.readAsBytesSync().buffer.asByteData();
+    final Object? decoded = const StandardMessageCodec().decodeMessage(message);
+    if (decoded is Map<Object?, Object?>) {
+      final Map<String, dynamic> newManifest = <String, dynamic>{};
+      for (final MapEntry<Object?, Object?> entry in decoded.entries) {
+        final String key = entry.key as String;
+        final List<Object?> variants = entry.value as List<Object?>;
+        final List<dynamic> newVariants = <dynamic>[];
+        for (final Object? variantObj in variants) {
+          final Map<Object?, Object?> variantMap = variantObj as Map<Object?, Object?>;
+          final Map<String, dynamic> newVariantMap = <String, dynamic>{};
+          for (final MapEntry<Object?, Object?> vEntry in variantMap.entries) {
+            final String vKey = vEntry.key as String;
+            if (vKey == 'asset') {
+              final String vValue = vEntry.value as String;
+              newVariantMap[vKey] = renamedAssets[vValue] ?? vValue;
+            } else {
+              newVariantMap[vKey] = vEntry.value;
+            }
+          }
+          newVariants.add(newVariantMap);
+        }
+        newManifest[key] = newVariants;
+      }
+      final ByteData encoded = const StandardMessageCodec().encodeMessage(newManifest)!;
+      final Uint8List encodedBytes = encoded.buffer.asUint8List(0, encoded.lengthInBytes);
+      assetManifestBin.writeAsBytesSync(encodedBytes);
+
+      // Update AssetManifest.bin.json
+      final File assetManifestBinJson = assetsDir.childFile('AssetManifest.bin.json');
+      if (assetManifestBinJson.existsSync()) {
+        assetManifestBinJson.writeAsStringSync(json.encode(base64.encode(encodedBytes)));
+      }
+    }
+  }
+
+  final File fontManifest = assetsDir.childFile('FontManifest.json');
+  if (fontManifest.existsSync()) {
+    // List of map with 'fonts' -> List of map 'asset' string
+    final List<dynamic> decoded = json.decode(fontManifest.readAsStringSync()) as List<dynamic>;
+    for (final dynamic font in decoded) {
+      final Map<String, dynamic> fontMap = font as Map<String, dynamic>;
+      if (fontMap.containsKey('fonts')) {
+        final List<dynamic> fonts = fontMap['fonts'] as List<dynamic>;
+        for (final dynamic fontAsset in fonts) {
+          final Map<String, dynamic> fontAssetMap = fontAsset as Map<String, dynamic>;
+          if (fontAssetMap.containsKey('asset')) {
+            final String asset = fontAssetMap['asset'] as String;
+            fontAssetMap['asset'] = renamedAssets[asset] ?? asset;
+          }
+        }
+      }
+    }
+    fontManifest.writeAsStringSync(json.encode(decoded));
+  }
 }
