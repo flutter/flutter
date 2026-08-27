@@ -2308,7 +2308,7 @@ console.log(mapName);
         ..createSync(recursive: true);
 
       await WebReleaseBundle(<WebCompilerConfig>[
-        const JsCompilerConfig(webContentHash: false),
+        const JsCompilerConfig(),
       ], const NoOpAnalytics()).build(environment);
 
       expect(staleHashedJs, isNot(exists));
@@ -2354,7 +2354,7 @@ flutter:
     'WebTemplatedFiles populates wasmHashes from compileTargets on clean builds before outputDir is copied',
     () => testbed.run(() async {
       environment.projectDir.childDirectory('web').createSync(recursive: true);
-      final File wasmFile = environment.buildDir.childFile('main.dart.89abcdef.wasm')
+      environment.buildDir.childFile('main.dart.89abcdef.wasm')
         ..createSync(recursive: true)
         ..writeAsBytesSync(<int>[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
       environment.buildDir.childFile('main.dart.01234567.mjs').createSync(recursive: true);
@@ -2369,7 +2369,7 @@ flutter:
       );
 
       final String configString = target.buildConfigString(environment);
-      final String expectedHash = crypto.sha256.convert(<int>[
+      final expectedHash = crypto.sha256.convert(<int>[
         0x00,
         0x61,
         0x73,
