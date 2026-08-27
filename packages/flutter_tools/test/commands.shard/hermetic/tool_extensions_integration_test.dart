@@ -51,7 +51,11 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final configCommand = ConfigCommand(extensionManager: manager);
+        final configCommand = ConfigCommand(
+          androidContext: FakeAndroidContext(),
+          toolContext: FakeToolContext(logger: testLogger),
+          extensionManager: manager,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
         await commandRunner.run(<String>['config', '--list']);
@@ -114,7 +118,11 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final configCommand = ConfigCommand(extensionManager: manager);
+        final configCommand = ConfigCommand(
+          androidContext: FakeAndroidContext(),
+          toolContext: FakeToolContext(logger: testLogger),
+          extensionManager: manager,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
         await commandRunner.run(<String>['config', '--list']);
