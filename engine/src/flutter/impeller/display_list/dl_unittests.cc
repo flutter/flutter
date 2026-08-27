@@ -1751,12 +1751,15 @@ TEST_P(DisplayListTest, FirstPassDispatcherBackdropCoverageUnion) {
 
   auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
   EXPECT_EQ(backdrop_count, 2u);
-  ASSERT_TRUE(backdrop_data.find(1) != backdrop_data.end());
-  EXPECT_EQ(backdrop_data[1].backdrop_count, 2u);
-  EXPECT_TRUE(backdrop_data[1].all_filters_equal);
-  ASSERT_TRUE(backdrop_data[1].coverage_union.has_value());
-  EXPECT_EQ(backdrop_data[1].coverage_union.value(),
-            Rect::MakeLTRB(10, 20, 150, 150));
+  auto it = backdrop_data.find(1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
+  EXPECT_TRUE(it->second.all_filters_equal);
+  EXPECT_TRUE(it->second.coverage_union.has_value());
+  if (it->second.coverage_union.has_value()) {
+    EXPECT_EQ(it->second.coverage_union.value(),
+              Rect::MakeLTRB(10, 20, 150, 150));
+  }
 }
 
 TEST_P(DisplayListTest, FirstPassDispatcherBackdropCoverageUnionClippedOut) {
@@ -1787,13 +1790,15 @@ TEST_P(DisplayListTest, FirstPassDispatcherBackdropCoverageUnionClippedOut) {
 
   auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
   EXPECT_EQ(backdrop_count, 2u);
-  ASSERT_TRUE(backdrop_data.find(1) != backdrop_data.end());
-  EXPECT_EQ(backdrop_data[1].backdrop_count, 2u);
-  EXPECT_TRUE(backdrop_data[1].all_filters_equal);
-  ASSERT_TRUE(backdrop_data[1].coverage_union.has_value());
-  EXPECT_TRUE(backdrop_data[1].coverage_union.value().IsEmpty());
-  EXPECT_EQ(backdrop_data[1].coverage_union.value(),
-            Rect::MakeLTRB(0, 0, 0, 0));
+  auto it = backdrop_data.find(1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
+  EXPECT_TRUE(it->second.all_filters_equal);
+  EXPECT_TRUE(it->second.coverage_union.has_value());
+  if (it->second.coverage_union.has_value()) {
+    EXPECT_TRUE(it->second.coverage_union.value().IsEmpty());
+    EXPECT_EQ(it->second.coverage_union.value(), Rect::MakeLTRB(0, 0, 0, 0));
+  }
 }
 
 TEST_P(DisplayListTest,
@@ -1824,12 +1829,15 @@ TEST_P(DisplayListTest,
 
   auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
   EXPECT_EQ(backdrop_count, 2u);
-  ASSERT_TRUE(backdrop_data.find(1) != backdrop_data.end());
-  EXPECT_EQ(backdrop_data[1].backdrop_count, 2u);
-  EXPECT_TRUE(backdrop_data[1].all_filters_equal);
-  ASSERT_TRUE(backdrop_data[1].coverage_union.has_value());
-  EXPECT_EQ(backdrop_data[1].coverage_union.value(),
-            Rect::MakeLTRB(10, 20, 60, 80));
+  auto it = backdrop_data.find(1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
+  EXPECT_TRUE(it->second.all_filters_equal);
+  EXPECT_TRUE(it->second.coverage_union.has_value());
+  if (it->second.coverage_union.has_value()) {
+    EXPECT_EQ(it->second.coverage_union.value(),
+              Rect::MakeLTRB(10, 20, 60, 80));
+  }
 }
 
 }  // namespace testing

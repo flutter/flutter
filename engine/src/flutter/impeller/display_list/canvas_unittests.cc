@@ -280,10 +280,12 @@ TEST_P(AiksTest, BackdropGroupIdUsesCoverageUnionForSnapshot) {
   const auto& backdrop_map = canvas->GetBackdropData();
   auto it = backdrop_map.find(1);
   ASSERT_TRUE(it != backdrop_map.end());
-  ASSERT_TRUE(it->second.shared_filter_snapshot.has_value());
-  ISize snapshot_size = it->second.shared_filter_snapshot->texture->GetSize();
-  EXPECT_LE(snapshot_size.width, 250u);
-  EXPECT_LE(snapshot_size.height, 250u);
+  EXPECT_TRUE(it->second.shared_filter_snapshot.has_value());
+  if (it->second.shared_filter_snapshot.has_value()) {
+    ISize snapshot_size = it->second.shared_filter_snapshot->texture->GetSize();
+    EXPECT_LE(snapshot_size.width, 250u);
+    EXPECT_LE(snapshot_size.height, 250u);
+  }
 }
 
 // We only know the total number of backdrop filters, not the number of backdrop
