@@ -1859,6 +1859,43 @@ void main() {
       TargetPlatform.iOS,
     }),
   );
+
+  testWidgets('Scrollable short-circuits shouldUpdate when physics reference is identical', (
+    WidgetTester tester,
+  ) async {
+    const ScrollPhysics sharedPhysics = BouncingScrollPhysics();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scrollable(
+          physics: sharedPhysics,
+          viewportBuilder: (BuildContext context, ViewportOffset offset) {
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    final ScrollPhysics initialPhysics = scrollable.position.physics;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Scrollable(
+          physics: sharedPhysics,
+          viewportBuilder: (BuildContext context, ViewportOffset offset) {
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    final ScrollPhysics currentPhysics = scrollable.position.physics;
+
+    expect(identical(initialPhysics, currentPhysics), isTrue);
+  });
 }
 
 // ignore: must_be_immutable

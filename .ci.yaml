@@ -5546,7 +5546,6 @@ targets:
 
   - name: Mac integration_test_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5639,7 +5638,6 @@ targets:
 
   - name: Mac ios_defines_test
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5740,7 +5738,6 @@ targets:
 
   - name: Mac native_platform_view_ui_tests_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5770,7 +5767,6 @@ targets:
 
   - name: Mac platform_channel_sample_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5782,7 +5778,6 @@ targets:
 
   - name: Mac platform_channel_sample_test_swift
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -6134,7 +6129,6 @@ targets:
 
   - name: Mac keyboard_hot_restart_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:

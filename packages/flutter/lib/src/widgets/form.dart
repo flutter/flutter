@@ -635,6 +635,10 @@ class FormField<T> extends StatefulWidget {
 
 /// The current state of a [FormField]. Passed to the [FormFieldBuilder] method
 /// for use in constructing the form field's widget.
+///
+/// Subclasses whose [FormField.builder] returns a sliver can override
+/// [wrapWithSemantics], [wrapWithFocus], and [focusIncludesSemantics] to
+/// replace the default render-box wrappers with sliver-compatible ones.
 class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   late T? _value = widget.initialValue;
   // Marking it as late, so it can be registered
@@ -829,6 +833,78 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     super.dispose();
   }
 
+  /// The [SemanticsValidationResult] published by [wrapWithSemantics] for this
+  /// field's current state.
+  ///
+  /// See also:
+  ///
+  ///  * [wrapWithSemantics], which publishes this value on a [Semantics] node.
+  ///  * [hasError], which the default implementation reflects.
+  @protected
+  SemanticsValidationResult get semanticsValidationResult =>
+      hasError ? SemanticsValidationResult.invalid : SemanticsValidationResult.valid;
+
+  /// Whether [wrapWithFocus]'s [Focus] should add its own [Semantics] node.
+  ///
+  /// Subclasses whose [wrapWithSemantics] uses a sliver-typed semantics node
+  /// override this to `false`, since the box-typed semantics node added by
+  /// [Focus] would otherwise crash on a sliver child.
+  ///
+  /// See also:
+  ///
+  ///  * [wrapWithFocus], whose [Focus] node this flag configures.
+  ///  * [Focus.includeSemantics], which receives this value.
+  @protected
+  bool get focusIncludesSemantics => true;
+
+  /// Wraps the result of [FormField.builder] with a [Semantics] node that
+  /// publishes the field's [SemanticsValidationResult].
+  ///
+  /// Subclasses whose builder returns a sliver override this to wrap with a
+  /// sliver-typed semantics node instead, since [Semantics] is a render-box
+  /// widget and would crash when given a sliver child.
+  ///
+  /// See also:
+  ///
+  ///  * [semanticsValidationResult], the value the default implementation
+  ///    publishes.
+  ///  * [wrapWithFocus], which wraps the result of this method when
+  ///    [AutovalidateMode.onUnfocus] validation is in effect.
+  @protected
+  Widget wrapWithSemantics(Widget child) {
+    return Semantics(validationResult: semanticsValidationResult, child: child);
+  }
+
+  /// Wraps [child] with the [Focus] node used to drive
+  /// [AutovalidateMode.onUnfocus] validation.
+  ///
+  /// Subclasses whose builder returns a sliver override [focusIncludesSemantics]
+  /// to disable [Focus]'s own [Semantics] wrapper, which is a render-box widget.
+  ///
+  /// See also:
+  ///
+  ///  * [focusIncludesSemantics], which controls whether the [Focus] node adds
+  ///    its own [Semantics] node.
+  ///  * [wrapWithSemantics], which wraps the result of [FormField.builder]
+  ///    before this method runs.
+  @protected
+  Widget wrapWithFocus(Widget child) {
+    return Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      includeSemantics: focusIncludesSemantics,
+      onFocusChange: (bool value) {
+        if (!value) {
+          setState(() {
+            _validate();
+          });
+        }
+      },
+      focusNode: _focusNode,
+      child: child,
+    );
+  }
+
   @protected
   @override
   Widget build(BuildContext context) {
@@ -852,29 +928,12 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
     Form.maybeOf(context)?._register(this);
 
-    final Widget child = Semantics(
-      validationResult: hasError
-          ? SemanticsValidationResult.invalid
-          : SemanticsValidationResult.valid,
-      child: widget.builder(this),
-    );
+    final Widget child = wrapWithSemantics(widget.builder(this));
 
     if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus &&
             widget.autovalidateMode != AutovalidateMode.always ||
         widget.autovalidateMode == AutovalidateMode.onUnfocus) {
-      return Focus(
-        canRequestFocus: false,
-        skipTraversal: true,
-        onFocusChange: (bool value) {
-          if (!value) {
-            setState(() {
-              _validate();
-            });
-          }
-        },
-        focusNode: _focusNode,
-        child: child,
-      );
+      return wrapWithFocus(child);
     }
 
     return child;
