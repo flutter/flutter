@@ -27,6 +27,7 @@ This plugin replaces legacy regex-based and manual AST scripts (previously locat
     - [`protect_public_state_subtypes`](#protect_public_state_subtypes)
     - [`render_box_intrinsics`](#render_box_intrinsics)
     - [`null_initialized_debug_expensive_fields`](#null_initialized_debug_expensive_fields)
+    - [`no_globals_in_flutter_tools`](#no_globals_in_flutter_tools)
   - [Testing Rules](#testing-rules)
     - [`skip_test_comments`](#skip_test_comments)
     - [`integration_test_timeouts`](#integration_test_timeouts)
@@ -104,6 +105,7 @@ The analyzer requires all `analysis_options.yaml` files referencing `flutter_ana
 | [`protect_public_state_subtypes`](#protect_public_state_subtypes) | `ERROR` | Enabled | `packages/flutter` | Require `@protected` on overridden lifecycle methods in public `State` classes. |
 | [`render_box_intrinsics`](#render_box_intrinsics) | `ERROR` | Enabled | `packages/flutter/lib/src/rendering/` | Disallow calling `compute*` intrinsic methods directly (use `get*`). |
 | [`null_initialized_debug_expensive_fields`](#null_initialized_debug_expensive_fields) | `ERROR` | Enabled | `packages/flutter` | Require `@_debugOnly` fields to be conditionally initialized via `kDebugMode ? <value> : null;`. |
+| [`no_globals_in_flutter_tools`](#no_globals_in_flutter_tools) | `ERROR` | Enabled | `packages/flutter_tools/` | Disallow importing `globals.dart` in migrated Flutter tool files. |
 | [`skip_test_comments`](#skip_test_comments) | `ERROR` | Enabled | Test files | Require justification comments (e.g. `// [intended]` or issue link) for skipped tests. |
 | [`integration_test_timeouts`](#integration_test_timeouts) | `ERROR` | Enabled | `test_driver/` files | Require integration test files under `test_driver/` to set `timeout: Timeout.none`. |
 
@@ -331,6 +333,22 @@ List<StackTrace> _creationStackTraces = <StackTrace>[];
 // GOOD:
 @_debugOnly
 List<StackTrace>? _creationStackTraces = kDebugMode ? <StackTrace>[] : null;
+```
+
+---
+
+#### `no_globals_in_flutter_tools`
+- **Severity**: `ERROR`
+- **Scope**: `packages/flutter_tools/` (specified migrated files)
+- **Description**: Disallows importing `globals.dart` (or `package:flutter_tools/src/globals.dart`) in specified migrated files in `packages/flutter_tools/`.
+- **Rationale**: As part of the modular dependency injection refactor in `flutter_tools`, commands and services are migrated to receive all dependencies via explicit constructor injection rather than accessing ambient singleton instances from `globals.dart`. Forbidding imports of `globals.dart` prevents regressions in migrated files.
+
+```dart
+// BAD (in packages/flutter_tools/lib/src/commands/clean.dart):
+import '../globals.dart' as globals;
+
+// GOOD:
+// Pass required dependencies (fileSystem, logger, etc.) via constructor parameters.
 ```
 
 ---

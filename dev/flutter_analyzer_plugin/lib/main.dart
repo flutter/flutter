@@ -12,6 +12,7 @@ import 'src/rules/integration_test_timeouts.dart';
 import 'src/rules/issue_link_syntax.dart';
 import 'src/rules/no_bad_imports_in_flutter.dart';
 import 'src/rules/no_double_clamp.dart';
+import 'src/rules/no_globals_in_flutter_tools.dart';
 import 'src/rules/no_runtimetype_in_tostring.dart';
 import 'src/rules/no_stopwatches.dart';
 import 'src/rules/no_sync_async_star.dart';
@@ -36,6 +37,7 @@ class FlutterAnalyzerPlugin extends Plugin {
       ..registerWarningRule(IssueLinkSyntax())
       ..registerWarningRule(NoBadImportsInFlutter())
       ..registerWarningRule(NoDoubleClamp())
+      ..registerWarningRule(NoGlobalsInFlutterTools())
       ..registerWarningRule(NoRuntimeTypeInToString())
       ..registerWarningRule(NoStopwatches())
       ..registerWarningRule(NoSyncAsyncStar())
