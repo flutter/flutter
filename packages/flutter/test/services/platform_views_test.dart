@@ -558,13 +558,10 @@ void main() {
         downArgs[kIndexAction],
         AndroidViewController.pointerAction(0, AndroidViewController.kActionPointerDown),
       );
-      expect(
-        downArgs[kIndexPointerProperties],
-        <List<int>>[
-          <int>[0, AndroidPointerProperties.kToolTypeFinger],
-          <int>[1, AndroidPointerProperties.kToolTypeFinger],
-        ],
-      );
+      expect(downArgs[kIndexPointerProperties], <List<int>>[
+        <int>[0, AndroidPointerProperties.kToolTypeFinger],
+        <int>[1, AndroidPointerProperties.kToolTypeFinger],
+      ]);
       // Android pointer id 0 is Flutter pointer 3, id 1 is Flutter pointer 2.
       expect(xOf(downCall), <double>[30, 20]);
 
