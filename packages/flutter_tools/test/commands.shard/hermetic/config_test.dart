@@ -73,7 +73,6 @@ void main() {
     AndroidStudio? androidStudio,
     Java? java,
     FeatureFlags? featureFlags,
-    Analytics? analytics,
     bool verboseHelp = false,
     ExtensionManager? extensionManager,
   }) {
