@@ -716,7 +716,7 @@ resolution: workspace
           final Map<String, dynamic> myApp = packages.cast<Map<String, dynamic>>().firstWhere(
             (Map<String, dynamic> p) => p['name'] == 'my_app',
           );
-          expect(myApp['rootUri'], fs.currentDirectory.uri.toString());
+          expect(myApp['rootUri'], fs.directory('/package').absolute.uri.toString());
         },
       );
       expect(caughtToolExit, true);
@@ -1602,6 +1602,40 @@ dev_dependencies:
           '--enable-flutter-gpu',
         ]);
         expect(testRunner.lastDebuggingOptionsValue.enableFlutterGpu, true);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'forwards an explicit --[no-]enable-hcpp as a launch override',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+
+        final testCommand = TestCommand(testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>['test', '--no-pub', '--no-enable-hcpp']);
+        expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'sends no hcpp launch override when --enable-hcpp was not passed',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+
+        final testCommand = TestCommand(testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>['test', '--no-pub']);
+        expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isNull);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fs,

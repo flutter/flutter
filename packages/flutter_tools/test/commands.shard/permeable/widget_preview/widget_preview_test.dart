@@ -283,21 +283,7 @@ void main() {
   }
 
   Future<void> cleanWidgetPreview({required Directory rootProject}) async {
-    var retries = 5;
-    var delay = const Duration(milliseconds: 100);
-    while (true) {
-      try {
-        await runWidgetPreviewCommand(<String>['clean', rootProject.path]);
-        break;
-      } on Exception catch (_) {
-        retries--;
-        if (retries <= 0) {
-          rethrow;
-        }
-        await Future<void>.delayed(delay);
-        delay *= 2;
-      }
-    }
+    await runWidgetPreviewCommand(<String>['clean', rootProject.path]);
     expect(fs.directory(rootProject).childDirectory('.widget_preview'), isNot(exists));
   }
 
