@@ -399,6 +399,15 @@ void main() {
         runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']),
         throwsToolExit(message: 'deprecated "FlutterLoader.loadEntrypoint" API'),
       );
+
+      // 3. Comments mentioning main.dart.js do not cause failure
+      fileSystem.currentDirectory
+          .childDirectory('web')
+          .childFile('index.html')
+          .writeAsStringSync(
+            '<html><body><!-- Migrated from main.dart.js --><script src="flutter_bootstrap.js" async></script></body></html>',
+          );
+      await runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']);
     },
     overrides: <Type, Generator>{
       Platform: () => fakePlatform,

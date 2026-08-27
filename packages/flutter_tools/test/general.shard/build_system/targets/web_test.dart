@@ -2231,4 +2231,121 @@ _flutter.loader.load();
       expect(noHashTarget.buildKey, isNot(target.buildKey));
     }),
   );
+
+  test(
+    'Dart2JSTarget and Dart2WasmTarget getBuildConfig safely handle multiple candidate files in buildDir',
+    () => testbed.run(() {
+      environment.buildDir.childFile('main.dart.js').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.11111111.js').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.wasm').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.22222222.wasm').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.mjs').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.33333333.mjs').createSync(recursive: true);
+
+      final jsTarget = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      expect(jsTarget.getBuildConfig(environment)['mainJsPath'], 'main.dart.11111111.js');
+
+      final wasmTarget = Dart2WasmTarget(
+        const WasmCompilerConfig(webContentHash: true),
+        const NoOpAnalytics(),
+      );
+      final Map<String, Object?> wasmConfig = wasmTarget.getBuildConfig(environment);
+      expect(wasmConfig['mainWasmPath'], 'main.dart.22222222.wasm');
+      expect(wasmConfig['jsSupportRuntimePath'], 'main.dart.33333333.mjs');
+    }),
+  );
+
+  test(
+    'hashAndRenameWebOutput only updates sourceMappingURL and does not replace matching string constants in code',
+    () => testbed.run(() {
+      const jsContent = '''
+const mapName = "main.dart.js.map";
+console.log(mapName);
+//# sourceMappingURL=main.dart.js.map
+''';
+      final File jsFile = environment.buildDir.childFile('main.dart.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(jsContent);
+      final File mapFile = environment.buildDir.childFile('main.dart.js.map')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"version":3}');
+
+      final String newBasename = hashAndRenameWebOutput(file: jsFile, sourceMapFile: mapFile);
+      final File renamedJs = environment.buildDir.childFile(newBasename);
+      expect(renamedJs.readAsStringSync(), contains('const mapName = "main.dart.js.map";'));
+      expect(renamedJs.readAsStringSync(), contains('//# sourceMappingURL=$newBasename.map'));
+    }),
+  );
+
+  test(
+    'hashAndRenameWebOutput supports non-dart compound extensions like worker.js.map',
+    () => testbed.run(() {
+      final File workerJs = environment.buildDir.childFile('worker.js')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('console.log("worker");\n//# sourceMappingURL=worker.js.map\n');
+      final File workerMap = environment.buildDir.childFile('worker.js.map')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"version":3}');
+
+      final String newBasename = hashAndRenameWebOutput(file: workerJs, sourceMapFile: workerMap);
+      expect(newBasename, matches(r'^worker\.[a-f0-9]{8}\.js$'));
+      expect(workerMap.existsSync(), isFalse);
+      expect(environment.buildDir.childFile('$newBasename.map').existsSync(), isTrue);
+    }),
+  );
+
+  test(
+    'WebReleaseBundle build cleans up stale hashed files even when webContentHash is false',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      environment.projectDir
+          .childDirectory('web')
+          .childFile('index.html')
+          .createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync(recursive: true);
+
+      final File staleHashedJs = environment.outputDir.childFile('main.dart.11111111.js')
+        ..createSync(recursive: true);
+
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(webContentHash: false),
+      ], const NoOpAnalytics()).build(environment);
+
+      expect(staleHashedJs, isNot(exists));
+      expect(environment.outputDir.childFile('main.dart.js'), exists);
+    }),
+  );
+
+  test(
+    'WebTemplatedFiles populates wasmHashes from compileTargets on clean builds before outputDir is copied',
+    () => testbed.run(() async {
+      environment.projectDir.childDirectory('web').createSync(recursive: true);
+      final File wasmFile = environment.buildDir.childFile('main.dart.89abcdef.wasm')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
+      environment.buildDir.childFile('main.dart.01234567.mjs').createSync(recursive: true);
+
+      final wasmTarget = Dart2WasmTarget(
+        const WasmCompilerConfig(webContentHash: true),
+        const NoOpAnalytics(),
+      );
+      final target = WebTemplatedFiles(
+        <Map<String, Object?>>[],
+        compileTargets: <Dart2WebTarget>[wasmTarget],
+      );
+
+      final String configString = target.buildConfigString(environment);
+      final String expectedHash = crypto.sha256.convert(<int>[
+        0x00,
+        0x61,
+        0x73,
+        0x6d,
+        0x01,
+        0x00,
+        0x00,
+        0x00,
+      ]).toString();
+      expect(configString, contains('"main.dart.89abcdef.wasm":"$expectedHash"'));
+    }),
+  );
 }

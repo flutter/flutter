@@ -120,17 +120,17 @@ String hashAndRenameWebOutput({required File file, File? sourceMapFile}) =>
     _hashAndRenameWebOutput(file: file, sourceMapFile: sourceMapFile);
 
 const List<String> _kKnownHashedExtensions = <String>[
-  '.js',
-  '.wasm',
-  '.mjs',
   '.js.map',
   '.wasm.map',
   '.mjs.map',
+  '.js',
+  '.wasm',
+  '.mjs',
 ];
 
 String _computeHashedBasename(String oldBasename, String contentHash) {
   for (final String ext in _kKnownHashedExtensions) {
-    if (oldBasename.endsWith('.dart$ext')) {
+    if (oldBasename.endsWith(ext)) {
       final String stem = oldBasename.substring(0, oldBasename.length - ext.length);
       return '$stem.$contentHash$ext';
     }
@@ -167,8 +167,14 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
     sourceMapFile.renameSync(sourceMapFile.parent.childFile(newMapBasename).path);
 
     final String content = file.readAsStringSync();
-    if (content.contains(oldMapBasename)) {
-      file.writeAsStringSync(content.replaceAll(oldMapBasename, newMapBasename));
+    final RegExp mapDirectiveRegex = RegExp(
+      r'//[#@]\s*sourceMappingURL=' + RegExp.escape(oldMapBasename) + r'\s*$',
+      multiLine: true,
+    );
+    if (mapDirectiveRegex.hasMatch(content)) {
+      file.writeAsStringSync(
+        content.replaceFirst(mapDirectiveRegex, '//# sourceMappingURL=$newMapBasename'),
+      );
     }
   }
 
@@ -368,8 +374,11 @@ class Dart2JSTarget extends Dart2WebTarget {
           .where((File f) => _mainJsRegex.hasMatch(f.basename))
           .toList();
       if (candidates.isNotEmpty) {
-        // The pre-compile cleanup in [build] guarantees at most one candidate.
-        mainJsPath = candidates.single.basename;
+        final File match = candidates.firstWhere(
+          (File f) => f.basename != 'main.dart.js',
+          orElse: () => candidates.first,
+        );
+        mainJsPath = match.basename;
       }
     }
     return <String, Object?>{
@@ -621,20 +630,26 @@ class Dart2WasmTarget extends Dart2WebTarget {
     var mainWasmPath = 'main.dart.wasm';
     var jsSupportRuntimePath = 'main.dart.mjs';
     if (compilerConfig.webContentHash) {
-      // The pre-compile cleanup in [build] guarantees at most one candidate
-      // per extension.
       final List<File> files = environment.buildDir.listSync().whereType<File>().toList();
       final List<File> wasmCandidates = files
           .where((File f) => _mainWasmRegex.hasMatch(f.basename))
           .toList();
       if (wasmCandidates.isNotEmpty) {
-        mainWasmPath = wasmCandidates.single.basename;
+        final File match = wasmCandidates.firstWhere(
+          (File f) => f.basename != 'main.dart.wasm',
+          orElse: () => wasmCandidates.first,
+        );
+        mainWasmPath = match.basename;
       }
       final List<File> mjsCandidates = files
           .where((File f) => _mainMjsRegex.hasMatch(f.basename))
           .toList();
       if (mjsCandidates.isNotEmpty) {
-        jsSupportRuntimePath = mjsCandidates.single.basename;
+        final File match = mjsCandidates.firstWhere(
+          (File f) => f.basename != 'main.dart.mjs',
+          orElse: () => mjsCandidates.first,
+        );
+        jsSupportRuntimePath = match.basename;
       }
     }
     return <String, Object?>{
@@ -1057,19 +1072,17 @@ class WebReleaseBundle extends Target {
       for (final Dart2WebTarget target in compileTargets) ...target.buildFiles(environment),
     ];
 
-    // Hashed entrypoint filenames change whenever the compiled output
-    // changes, and the glob-based [outputs] patterns match the previous
-    // build's files too, so the build system's stale-output deletion never
-    // removes them. Delete outdated entrypoints before copying the current
-    // ones so that build/web does not accumulate dead files.
-    if (compileTargets.any((Dart2WebTarget target) => target.compilerConfig.webContentHash)) {
-      final currentBasenames = <String>{for (final File file in compiledFiles) file.basename};
-      if (environment.outputDir.existsSync()) {
-        for (final File file in environment.outputDir.listSync().whereType<File>()) {
-          if (_entrypointFileRegex.hasMatch(file.basename) &&
-              !currentBasenames.contains(file.basename)) {
-            file.deleteSync();
-          }
+    // Entrypoint filenames change when compiling with content hashes or when
+    // toggling between build modes, and glob-based [outputs] patterns match
+    // previous builds' files too. Delete outdated entrypoints before copying
+    // the current ones so that build/web does not accumulate dead files or
+    // pollute the service worker cache.
+    final currentBasenames = <String>{for (final File file in compiledFiles) file.basename};
+    if (environment.outputDir.existsSync()) {
+      for (final File file in environment.outputDir.listSync().whereType<File>()) {
+        if (_entrypointFileRegex.hasMatch(file.basename) &&
+            !currentBasenames.contains(file.basename)) {
+          file.deleteSync();
         }
       }
     }
@@ -1245,19 +1258,33 @@ class WebTemplatedFiles extends Target {
       }
     }
 
-    final Directory outputDirectory = environment.outputDir;
-    for (final File file in outputDirectory.listSync(recursive: true).whereType<File>()) {
-      if (file.path.endsWith('.wasm')) {
-        final String relativePath = globals.fs.path
-            .relative(file.path, from: outputDirectory.path)
-            .replaceAll(r'\', '/');
-        // Skip files under the canvaskit/ subdirectory — they are already
-        // covered by the canvasKit SDK directory scan above with keys that
-        // match what the JS lookup code actually uses.
-        if (relativePath.startsWith('canvaskit/')) {
-          continue;
+    if (compileTargets != null) {
+      for (final Dart2WebTarget target in compileTargets!) {
+        for (final File file in target.buildFiles(environment)) {
+          if (file.path.endsWith('.wasm') && !file.path.contains('canvaskit/')) {
+            if (file.existsSync()) {
+              wasmHashes[file.basename] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+            }
+          }
         }
-        wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+      }
+    } else {
+      final Directory outputDirectory = environment.outputDir;
+      if (outputDirectory.existsSync()) {
+        for (final File file in outputDirectory.listSync(recursive: true).whereType<File>()) {
+          if (file.path.endsWith('.wasm')) {
+            final String relativePath = globals.fs.path
+                .relative(file.path, from: outputDirectory.path)
+                .replaceAll(r'\', '/');
+            // Skip files under the canvaskit/ subdirectory — they are already
+            // covered by the canvasKit SDK directory scan above with keys that
+            // match what the JS lookup code actually uses.
+            if (relativePath.startsWith('canvaskit/')) {
+              continue;
+            }
+            wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+          }
+        }
       }
     }
 

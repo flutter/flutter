@@ -163,9 +163,7 @@ class BuildWebCommand extends BuildSubCommand {
         'To configure this project for the web, run flutter create . --platforms web',
       );
     }
-    final File indexHtmlFile = _fileSystem.currentDirectory
-        .childDirectory('web')
-        .childFile('index.html');
+    final File indexHtmlFile = project.web.indexFile;
     if (indexHtmlFile.existsSync()) {
       final String indexHtmlContent = indexHtmlFile.readAsStringSync();
       if (!indexHtmlContent.contains(kBaseHrefPlaceholder) && baseHref != null) {
@@ -174,16 +172,21 @@ class BuildWebCommand extends BuildSubCommand {
           'Please add `<base href="$kBaseHrefPlaceholder">` to web/index.html',
         );
       }
-      if (webContentHash &&
-          (indexHtmlContent.contains('main.dart.js') ||
-              indexHtmlContent.contains('loadEntrypoint'))) {
-        throwToolExit(
-          'Cannot build with "--web-content-hash" because web/index.html contains '
-          'direct references to "main.dart.js" or the deprecated "FlutterLoader.loadEntrypoint" API.\n'
-          'Modern Flutter Web applications use the templated "flutter_bootstrap.js" loader script '
-          'which automatically resolves content-hashed entrypoints. '
-          'Please update web/index.html or run "flutter create . --platforms web" to migrate.',
+      if (webContentHash) {
+        final String uncommentedContent = indexHtmlContent.replaceAll(
+          RegExp(r'<!--[\s\S]*?-->'),
+          '',
         );
+        if (uncommentedContent.contains('main.dart.js') ||
+            uncommentedContent.contains('loadEntrypoint')) {
+          throwToolExit(
+            'Cannot build with "--web-content-hash" because web/index.html contains '
+            'direct references to "main.dart.js" or the deprecated "FlutterLoader.loadEntrypoint" API.\n'
+            'Modern Flutter Web applications use the templated "flutter_bootstrap.js" loader script '
+            'which automatically resolves content-hashed entrypoints. '
+            'Please update web/index.html or run "flutter create . --platforms web" to migrate.',
+          );
+        }
       }
     }
 
