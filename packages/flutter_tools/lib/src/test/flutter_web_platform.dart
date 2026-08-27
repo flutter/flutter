@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
+import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
@@ -811,8 +812,36 @@ class BrowserManager {
     );
 
     _environment = _loadBrowserEnvironment();
-    _channel.stream.listen(_onMessage, onDone: close);
+    _channel.stream.listen(
+      _onMessage,
+      onDone: () {
+        // The browser hung up; this side did not initiate the close. Without a
+        // message here the run ends with nothing but "did not complete" lines,
+        // because close() marks this manager and the browser closed before the
+        // browser process exits, which suppresses both exit-code messages
+        // above.
+        if (!_closed) {
+          _logger.printError(
+            'The ${_runtime.name} browser closed its connection to the test '
+            'host unexpectedly, so any unfinished test suites are reported as '
+            '"did not complete". The browser page or its renderer was most '
+            'likely terminated, for example after running out of memory.',
+          );
+        }
+        close();
+      },
+    );
   }
+
+  /// Creates a manager for an already-running [browser] connected over
+  /// [webSocket].
+  @visibleForTesting
+  factory BrowserManager.test(
+    Chromium browser,
+    Runtime runtime,
+    WebSocketChannel webSocket,
+    Logger logger,
+  ) = BrowserManager._;
 
   /// The browser instance that this is connected to via [_channel].
   final Chromium _browser;
