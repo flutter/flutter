@@ -92,7 +92,12 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, FlutterManifest manifest, this._exampleManifest) {
+  FlutterProject(
+    this.directory,
+    FlutterManifest manifest,
+    this._exampleManifest, {
+    Directory? buildDirectory,
+  }) : _buildDirectory = buildDirectory {
     _setManifest(manifest);
   }
 
@@ -108,7 +113,11 @@ class FlutterProject {
 
   /// Create a [FlutterProject] and bypass the project caching.
   @visibleForTesting
-  static FlutterProject fromDirectoryTest(Directory directory, [Logger? logger]) {
+  static FlutterProject fromDirectoryTest(
+    Directory directory, [
+    Logger? logger,
+    Directory? buildDirectory,
+  ]) {
     final FileSystem fileSystem = directory.fileSystem;
     logger ??= BufferLogger.test();
     final FlutterManifest manifest = FlutterProject._readManifest(
@@ -121,15 +130,22 @@ class FlutterProject {
       logger: logger,
       fileSystem: fileSystem,
     );
-    return FlutterProject(directory, manifest, exampleManifest);
+    return FlutterProject(
+      directory,
+      manifest,
+      exampleManifest,
+      buildDirectory: buildDirectory ?? directory.childDirectory('build'),
+    );
   }
 
   /// The location of this project.
   final Directory directory;
 
+  final Directory? _buildDirectory;
+
   /// The location of the build folder.
   Directory get buildDirectory =>
-      directory.childDirectory(getBuildDirectory(null, directory.fileSystem));
+      _buildDirectory ?? directory.childDirectory(getBuildDirectory(null, directory.fileSystem));
 
   /// The manifest of this project.
   FlutterManifest get manifest => _manifest;

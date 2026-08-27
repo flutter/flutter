@@ -34,6 +34,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
     super.platform, {
     super.exitOnFail,
     super.title,
+    super.outputDir,
     Directory? templatesDir,
   }) : _templatesDir = templatesDir;
 

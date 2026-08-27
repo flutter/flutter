@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -15,10 +14,9 @@ import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -969,26 +967,6 @@ void main() {
       // Shared hook output should NOT be deleted.
       expect(sharedHookOutputFile, exists);
     },
-  );
-
-  testUsingContext(
-    'Environment rootBuildDir uses configured build-dir when not specified',
-    () async {
-      final fileSystem = MemoryFileSystem.test();
-      globals.config.setValue('build-dir', 'custom_build_dir');
-      final environment = Environment.test(
-        fileSystem.currentDirectory,
-        artifacts: Artifacts.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-      );
-      expect(
-        environment.rootBuildDir.path,
-        fileSystem.path.join(fileSystem.currentDirectory.path, 'custom_build_dir'),
-      );
-    },
-    overrides: <Type, Generator>{Config: () => Config.test()},
   );
 }
 

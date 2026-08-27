@@ -474,8 +474,10 @@ void main() {
   });
 
   group('getBuildDirectory', () {
-    testWithoutContext('defaults to "build" when config is not set or in testWithoutContext', () {
-      expect(getBuildDirectory(), 'build');
+    testWithoutContext('defaults to "build" when config does not specify build-dir', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      expect(getBuildDirectory(config, fileSystem), 'build');
     });
 
     testWithoutContext('uses passed in config', () {
@@ -491,6 +493,10 @@ void main() {
       config.setValue('build-dir', '/absolute/path/to/build');
       expect(() => getBuildDirectory(config, fileSystem), throwsException);
     });
+
+    testUsingContext('defaults to "build" when config does not specify build-dir in context', () {
+      expect(getBuildDirectory(), 'build');
+    }, overrides: <Type, Generator>{Config: () => Config.test()});
 
     testUsingContext('uses zone injected config', () {
       globals.config.setValue('build-dir', 'injected_build_dir');

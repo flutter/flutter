@@ -7,6 +7,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../android/android_builder.dart';
 import '../android/build_validation.dart';
 import '../android/deferred_components_prebuild_validator.dart';
+import '../android/deferred_components_validator.dart';
 import '../android/gradle_utils.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
@@ -142,6 +143,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
         globals.logger,
         globals.platform,
         title: 'Deferred components prebuild validation',
+        outputDir: project.buildDirectory.childDirectory(
+          DeferredComponentsValidator.kDeferredComponentsTempDirectory,
+        ),
       );
       validator.clearOutputDir();
       await validator.checkAndroidDynamicFeature(deferredComponents);
