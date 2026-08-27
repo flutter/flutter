@@ -33,16 +33,19 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     bool verboseHelp = false,
     ExtensionManager? extensionManager,
   }) : _androidContext = androidContext,
+       _toolContext = toolContext,
        _extensionManager = extensionManager,
        _verboseHelp = verboseHelp,
        super(toolContext: toolContext);
 
   final AndroidContext _androidContext;
+  final ToolContext _toolContext;
   final FeatureFlags featureFlags;
   final ExtensionManager? _extensionManager;
   final bool _verboseHelp;
 
-  ToolContext get _toolContext => toolContext!;
+  @override
+  ToolContext get toolContext => _toolContext;
 
   var _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
 
