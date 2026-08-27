@@ -999,6 +999,7 @@ class DebuggingOptions {
     this.printDtd = false,
     this.webDevServerConfig,
     this.testFlag = false,
+    this.adbLogFiltering = true,
     this.iosProfileDebugger,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
@@ -1035,6 +1036,7 @@ class DebuggingOptions {
     this.iosProfileDebugger,
     this.traceSystrace = false,
   }) : debuggingEnabled = false,
+       adbLogFiltering = true,
        useTestFonts = false,
        startPaused = false,
        dartFlags = '',
@@ -1122,6 +1124,7 @@ class DebuggingOptions {
     required this.ipv6,
     required this.google3WorkspaceRoot,
     required this.printDtd,
+    required this.adbLogFiltering,
     this.webDevServerConfig,
     this.iosProfileDebugger,
   }) : testFlag = false;
@@ -1172,6 +1175,7 @@ class DebuggingOptions {
   final bool printDtd;
   final WebDevServerConfig? webDevServerConfig;
   final bool testFlag;
+  final bool adbLogFiltering;
 
   /// Whether to attach the LLDB debugger when running in profile mode on a physical iOS device.
   final bool? iosProfileDebugger;
@@ -1336,6 +1340,7 @@ class DebuggingOptions {
     'ipv6': ipv6,
     'google3WorkspaceRoot': google3WorkspaceRoot,
     'printDtd': printDtd,
+    'adbLogFiltering': adbLogFiltering,
     // TODO(jsimmons): This field is required for backward compatibility with
     // the flutter_tools binary that is currently checked into Google3.
     // Remove this when that binary has been updated.
@@ -1406,6 +1411,7 @@ class DebuggingOptions {
         ipv6: (json['ipv6'] as bool?) ?? false,
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
+        adbLogFiltering: (json['adbLogFiltering'] as bool?) ?? true,
         webDevServerConfig: WebDevServerConfig(
           port: json['port'] is int ? json['port']! as int : 8080,
           host: json['hostname'] is String ? json['hostname']! as String : 'localhost',
@@ -1533,13 +1539,6 @@ abstract class DeviceLogReader {
 
   // Clean up resources allocated by log reader e.g. subprocesses
   void dispose();
-}
-
-/// Describes an app running on the device.
-class DiscoveredApp {
-  DiscoveredApp(this.id, this.vmServicePort);
-  final String id;
-  final int vmServicePort;
 }
 
 // An empty device log reader
