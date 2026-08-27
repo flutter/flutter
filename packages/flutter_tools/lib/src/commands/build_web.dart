@@ -71,6 +71,15 @@ class BuildWebCommand extends BuildSubCommand {
     final webRenderer = WebRendererMode.fromDartDefines(dartDefines, useWasm: useWasm);
 
     final bool sourceMaps = getValue(WebOptions.sourceMaps);
+    final bool webContentHash = getValue(WebOptions.webContentHash);
+    if (webContentHash && getValue(WebOptions.enableWasmDeferredLoading)) {
+      throwToolExit(
+        '"--web-content-hash" does not yet support deferred loading: deferred '
+        'module files keep unhashed names and can be served stale from the '
+        'browser cache alongside a new entrypoint. Build without '
+        '"--enable-wasm-deferred-loading" or without "--web-content-hash".',
+      );
+    }
     final bool? minifyJs = getValue(WebOptions.minifyJs);
     final bool? minifyWasm = getValue(WebOptions.minifyWasm);
 
@@ -91,6 +100,7 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: optimizationLevel,
           stripWasm: getValue(WebOptions.stripWasm),
           sourceMaps: sourceMaps,
+          webContentHash: webContentHash,
           minify: minifyWasm,
           enableWasmDeferredLoading: getValue(WebOptions.enableWasmDeferredLoading),
         ),
@@ -102,6 +112,7 @@ class BuildWebCommand extends BuildSubCommand {
           useFrequencyBasedMinification: !getValue(WebOptions.noFrequencyBasedMinification),
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
+          webContentHash: webContentHash,
         ),
       ];
     } else {
@@ -114,6 +125,7 @@ class BuildWebCommand extends BuildSubCommand {
           useFrequencyBasedMinification: !getValue(WebOptions.noFrequencyBasedMinification),
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
+          webContentHash: webContentHash,
           renderer: webRenderer,
         ),
 
@@ -122,6 +134,7 @@ class BuildWebCommand extends BuildSubCommand {
             optimizationLevel: optimizationLevel,
             stripWasm: getValue(WebOptions.stripWasm),
             sourceMaps: sourceMaps,
+            webContentHash: webContentHash,
             minify: minifyWasm,
             enableWasmDeferredLoading: getValue(WebOptions.enableWasmDeferredLoading),
             dryRun: true,
@@ -150,16 +163,28 @@ class BuildWebCommand extends BuildSubCommand {
         'To configure this project for the web, run flutter create . --platforms web',
       );
     }
-    if (!_fileSystem.currentDirectory
-            .childDirectory('web')
-            .childFile('index.html')
-            .readAsStringSync()
-            .contains(kBaseHrefPlaceholder) &&
-        baseHref != null) {
-      throwToolExit(
-        "Couldn't find the placeholder for base href. "
-        'Please add `<base href="$kBaseHrefPlaceholder">` to web/index.html',
-      );
+    final File indexHtmlFile = _fileSystem.currentDirectory
+        .childDirectory('web')
+        .childFile('index.html');
+    if (indexHtmlFile.existsSync()) {
+      final String indexHtmlContent = indexHtmlFile.readAsStringSync();
+      if (!indexHtmlContent.contains(kBaseHrefPlaceholder) && baseHref != null) {
+        throwToolExit(
+          "Couldn't find the placeholder for base href. "
+          'Please add `<base href="$kBaseHrefPlaceholder">` to web/index.html',
+        );
+      }
+      if (webContentHash &&
+          (indexHtmlContent.contains('main.dart.js') ||
+              indexHtmlContent.contains('loadEntrypoint'))) {
+        throwToolExit(
+          'Cannot build with "--web-content-hash" because web/index.html contains '
+          'direct references to "main.dart.js" or the deprecated "FlutterLoader.loadEntrypoint" API.\n'
+          'Modern Flutter Web applications use the templated "flutter_bootstrap.js" loader script '
+          'which automatically resolves content-hashed entrypoints. '
+          'Please update web/index.html or run "flutter create . --platforms web" to migrate.',
+        );
+      }
     }
 
     final String? outputDirectoryPath = getValue(CommonOptions.outputDir);
@@ -185,6 +210,14 @@ class BuildWebCommand extends BuildSubCommand {
       outputDirectoryPath: outputDirectoryPath,
       webDefines: webDefines,
     );
+    if (webContentHash) {
+      globals.logger.printStatus(
+        '\nServing tip: Configure your web host to serve "index.html" and "flutter_bootstrap.js"\n'
+        'with "Cache-Control: no-cache" (or revalidation) so browser clients immediately pick up new deployments.\n'
+        'Hashed entrypoint files (*.<hash>.*) can be served with long-term immutable caching (e.g. "Cache-Control: max-age=31536000, immutable").\n'
+        'See https://docs.flutter.dev/platform-integration/web/deployment for caching guidance.',
+      );
+    }
     return FlutterCommandResult.success();
   }
 }
