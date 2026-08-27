@@ -301,8 +301,7 @@ abstract interface class BaseWindowControllerLinux {
 /// See also:
 ///
 ///  * [WindowController], the base class for regular windows.
-class WindowControllerLinux extends WindowController
-    implements BaseWindowControllerLinux {
+class WindowControllerLinux extends WindowController implements BaseWindowControllerLinux {
   /// Creates a new regular window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -509,7 +508,8 @@ class WindowControllerLinux extends WindowController
 /// See also:
 ///
 ///  * [DialogWindowController], the base class for dialog windows.
-class DialogWindowControllerLinux extends DialogWindowController implements BaseWindowControllerLinux {
+class DialogWindowControllerLinux extends DialogWindowController
+    implements BaseWindowControllerLinux {
   /// Creates a new dialog window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -895,7 +895,8 @@ class TooltipWindowControllerLinux extends TooltipWindowController
 /// See also:
 ///
 ///  * [PopupWindowController], the base class for popup windows.
-class PopupWindowControllerLinux extends PopupWindowController implements BaseWindowControllerLinux {
+class PopupWindowControllerLinux extends PopupWindowController
+    implements BaseWindowControllerLinux {
   /// Creates a new popup window controller for Linux.
   ///
   /// When this constructor completes the native window has been created and
@@ -1193,7 +1194,10 @@ ffi.Pointer<ffi.Uint8> _stringToNative(String value) {
   return buffer;
 }
 
-String _nativeToString(ffi.Pointer<ffi.Uint8> value) {
+String? _nativeToString(ffi.Pointer<ffi.Uint8> value) {
+  if (value == ffi.nullptr) {
+    return null;
+  }
   var length = 0;
   while (value[length] != 0) {
     length++;
@@ -1498,7 +1502,7 @@ class _GtkWindow extends _GtkContainer {
 
   /// Gets the current title of the window.
   String getTitle() {
-    return _nativeToString(_gtkWindowGetTitle(instance));
+    return _nativeToString(_gtkWindowGetTitle(instance)) ?? '';
   }
 
   /// Set the default size of the window.
