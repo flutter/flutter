@@ -4,6 +4,7 @@
 
 #include "impeller/entity/contents/uber_sdf_contents.h"
 
+#include "fml/logging.h"
 #include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/pipelines.h"
@@ -46,6 +47,47 @@ Scalar ToShaderStrokeJoin(Join join) {
   }
 }
 
+Scalar ToShaderColorSourceType(const UberSDFParameters& params) {
+  if (!params.gradient.has_value()) {
+    return 0.0f;
+  }
+  switch (params.gradient->type) {
+    case UberSDFParameters::GradientParameters::Type::kLinear:
+      return 1.0f;
+    case UberSDFParameters::GradientParameters::Type::kRadial:
+      return 2.0f;
+  }
+}
+
+struct SamplerBinding {
+  std::shared_ptr<Texture> texture;
+  raw_ptr<const Sampler> sampler;
+};
+
+/// @brief  Populates the gradient uniform fields in `frag_info` and returns
+///         the texture and sampler for the gradient.
+SamplerBinding SetupGradientParameters(
+    const UberSDFParameters::GradientParameters& gradient,
+    const ContentContext& renderer,
+    FS::FragInfo& frag_info) {
+  FML_DCHECK(gradient.texture);
+  frag_info.gradient_start = gradient.start;
+  frag_info.gradient_end = gradient.end;
+  frag_info.tile_mode = static_cast<Scalar>(gradient.tile_mode);
+  auto texture_size = gradient.texture->GetSize();
+  FML_DCHECK(!texture_size.IsEmpty());
+  frag_info.half_texel =
+      Point(0.5f, 0.5f) / Point(texture_size.width, texture_size.height);
+
+  SamplerDescriptor sampler_desc;
+  sampler_desc.min_filter = MinMagFilter::kLinear;
+  sampler_desc.mag_filter = MinMagFilter::kLinear;
+  raw_ptr<const Sampler> sampler =
+      renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
+
+  return {gradient.texture, sampler};
+}
+
 }  // namespace
 
 std::unique_ptr<UberSDFContents> UberSDFContents::Make(
@@ -69,6 +111,7 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
   frag_info.type = ToShaderType(params_.type);
+  frag_info.color_source_type = ToShaderColorSourceType(params_);
   frag_info.color =
       params_.color.WithAlpha(params_.color.alpha * GetOpacityFactor());
   frag_info.center = params_.center;
@@ -84,6 +127,16 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.circle_center_right = params_.circle_center_right;
   frag_info.radii = params_.radii;
 
+  SamplerBinding sampler_binding;
+  if (params_.gradient) {
+    sampler_binding =
+        SetupGradientParameters(params_.gradient.value(), renderer, frag_info);
+  } else {
+    sampler_binding.texture = renderer.GetEmptyTexture();
+    sampler_binding.sampler =
+        renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
+  }
+
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);
 
@@ -96,7 +149,10 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       this, GetGeometry(), renderer, entity, pass, pipeline_callback,
       frame_info,
       /*bind_fragment_callback=*/
-      [&frag_info, &data_host_buffer](RenderPass& pass) {
+      [&frag_info, &data_host_buffer,
+       sampler_binding = std::move(sampler_binding)](RenderPass& pass) {
+        FS::BindColorSourceSampler(pass, sampler_binding.texture,
+                                   sampler_binding.sampler);
         FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
         pass.SetCommandLabel("UberSDF");
         return true;
@@ -123,6 +179,9 @@ Color UberSDFContents::GetColor() const {
 
 bool UberSDFContents::ApplyColorFilter(
     const ColorFilterProc& color_filter_proc) {
+  if (params_.gradient.has_value()) {
+    return false;
+  }
   params_.color = color_filter_proc(params_.color);
   return true;
 }
@@ -130,7 +189,8 @@ bool UberSDFContents::ApplyColorFilter(
 std::optional<Color> UberSDFContents::AsBackgroundColor(
     const Entity& entity,
     ISize target_size) const {
-  if (params_.type != UberSDFParameters::Type::kRect) {
+  if (params_.type != UberSDFParameters::Type::kRect ||
+      params_.gradient.has_value()) {
     return std::nullopt;
   }
   const Geometry* geometry = GetGeometry();
