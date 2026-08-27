@@ -90,6 +90,30 @@ void main() {
   }
 
   // ignore: non_constant_identifier_names
+  Future<void> test_unrelated_import_with_globals_prefix() async {
+    const source = '''
+import 'other.dart' as globals;
+
+void main() {
+  const int x = globals.other;
+}
+''';
+    await assertNoDiagnostics(source);
+  }
+
+  // ignore: non_constant_identifier_names
+  Future<void> test_globals_import_with_custom_prefix() async {
+    const source = '''
+import 'globals.dart' as g;
+
+void main() {
+  const int x = g.fs;
+}
+''';
+    await assertDiagnostics(source, [lint(7, 14)]);
+  }
+
+  // ignore: non_constant_identifier_names
   Future<void> test_package_globals_import() async {
     const source = '''
 import 'package:flutter_tools/src/globals.dart';

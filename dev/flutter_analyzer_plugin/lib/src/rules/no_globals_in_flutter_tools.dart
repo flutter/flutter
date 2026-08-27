@@ -9,11 +9,10 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+const String _flutterToolsPackageName = 'flutter_tools';
 const String _flutterToolsPackagePath = 'packages/flutter_tools/';
-const String _flutterToolsPackagePrefix = 'package:flutter_tools/';
 const String _globalsFileName = 'globals.dart';
-const String _globalsFileSuffix = '/globals.dart';
-const String _packagePrefix = 'package:';
+const String _packageScheme = 'package';
 
 /// Verifies that `globals.dart` is not imported in specified `flutter_tools` files.
 class NoGlobalsInFlutterTools extends AnalysisRule {
@@ -70,11 +69,15 @@ class _Visitor extends SimpleAstVisitor<void> {
   @override
   void visitImportDirective(ImportDirective node) {
     if (node.uri.stringValue case final String uriStr) {
-      final bool isFlutterToolsGlobals =
-          uriStr.startsWith(_packagePrefix)
-              ? uriStr.startsWith(_flutterToolsPackagePrefix) && uriStr.endsWith(_globalsFileSuffix)
-              : uriStr == _globalsFileName || uriStr.endsWith(_globalsFileSuffix);
-      if (isFlutterToolsGlobals) {
+      final Uri? uri = Uri.tryParse(uriStr);
+      if (uri == null || uri.pathSegments.isEmpty) {
+        return;
+      }
+      if (uri.pathSegments.last != _globalsFileName) {
+        return;
+      }
+      if (!uri.hasScheme ||
+          (uri.isScheme(_packageScheme) && uri.pathSegments.first == _flutterToolsPackageName)) {
         rule.reportAtNode(node.uri);
       }
     }
