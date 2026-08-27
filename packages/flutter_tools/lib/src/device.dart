@@ -989,7 +989,7 @@ class DebuggingOptions {
     this.uninstallFirst = false,
     this.uninstallApp = true,
     this.enableDartProfiling = true,
-    this.enableHcpp = false,
+    this.enableHcpp,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -1000,6 +1000,7 @@ class DebuggingOptions {
     this.printDtd = false,
     this.webDevServerConfig,
     this.testFlag = false,
+    this.adbLogFiltering = true,
     this.iosProfileDebugger,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
@@ -1026,7 +1027,7 @@ class DebuggingOptions {
     this.uninstallFirst = false,
     this.uninstallApp = true,
     this.enableDartProfiling = true,
-    this.enableHcpp = false,
+    this.enableHcpp,
     this.profileStartup = false,
     this.enableEmbedderApi = false,
     this.usingCISystem = false,
@@ -1036,6 +1037,7 @@ class DebuggingOptions {
     this.iosProfileDebugger,
     this.traceSystrace = false,
   }) : debuggingEnabled = false,
+       adbLogFiltering = true,
        useTestFonts = false,
        startPaused = false,
        dartFlags = '',
@@ -1123,6 +1125,7 @@ class DebuggingOptions {
     required this.ipv6,
     required this.google3WorkspaceRoot,
     required this.printDtd,
+    required this.adbLogFiltering,
     this.webDevServerConfig,
     this.iosProfileDebugger,
   }) : testFlag = false;
@@ -1162,7 +1165,14 @@ class DebuggingOptions {
   final bool enableFlutterGpu;
   final bool enableVulkanValidation;
   final bool enableDartProfiling;
-  final bool enableHcpp;
+
+  /// Whether HCPP platform views were explicitly enabled or disabled with
+  /// `--[no-]enable-hcpp`.
+  ///
+  /// When null the flag was not passed, and no override is sent to the device
+  /// at launch, so the `io.flutter.embedding.android.EnableHcpp` value in the
+  /// manifest of the installed artifact decides.
+  final bool? enableHcpp;
   final bool profileStartup;
   final bool enableEmbedderApi;
   final bool usingCISystem;
@@ -1173,6 +1183,7 @@ class DebuggingOptions {
   final bool printDtd;
   final WebDevServerConfig? webDevServerConfig;
   final bool testFlag;
+  final bool adbLogFiltering;
 
   /// Whether to attach the LLDB debugger when running in profile mode on a physical iOS device.
   final bool? iosProfileDebugger;
@@ -1337,6 +1348,7 @@ class DebuggingOptions {
     'ipv6': ipv6,
     'google3WorkspaceRoot': google3WorkspaceRoot,
     'printDtd': printDtd,
+    'adbLogFiltering': adbLogFiltering,
     // TODO(jsimmons): This field is required for backward compatibility with
     // the flutter_tools binary that is currently checked into Google3.
     // Remove this when that binary has been updated.
@@ -1398,7 +1410,7 @@ class DebuggingOptions {
         uninstallFirst: (json['uninstallFirst'] as bool?) ?? false,
         uninstallApp: (json['uninstallApp'] as bool?) ?? true,
         enableDartProfiling: (json['enableDartProfiling'] as bool?) ?? true,
-        enableHcpp: (json['enableHcpp'] as bool?) ?? false,
+        enableHcpp: json['enableHcpp'] as bool?,
         profileStartup: (json['profileStartup'] as bool?) ?? false,
         enableEmbedderApi: (json['enableEmbedderApi'] as bool?) ?? false,
         usingCISystem: (json['usingCISystem'] as bool?) ?? false,
@@ -1407,6 +1419,7 @@ class DebuggingOptions {
         ipv6: (json['ipv6'] as bool?) ?? false,
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
+        adbLogFiltering: (json['adbLogFiltering'] as bool?) ?? true,
         webDevServerConfig: WebDevServerConfig(
           port: json['port'] is int ? json['port']! as int : 8080,
           host: json['hostname'] is String ? json['hostname']! as String : 'localhost',
@@ -1433,7 +1446,7 @@ class DebuggingOptions {
       if (enableImpeller == ImpellerStatus.disabled) AndroidEngineCliFlags.enableImpeller: false,
       if (enableFlutterGpu) AndroidEngineCliFlags.enableFlutterGpu: true,
       if (enableVulkanValidation) AndroidEngineCliFlags.enableVulkanValidation: true,
-      if (enableHcpp) 'enable-hcpp-and-surface-control': true,
+      if (enableHcpp != null) 'enable-hcpp-and-surface-control': enableHcpp,
       if (testFlag) AndroidEngineCliFlags.testFlag: true,
       if (debuggingEnabled) ...<String, Object?>{
         // TODO(camsim99): Determine if we should even forward these to the Android embedding since Android
@@ -1456,7 +1469,8 @@ class DebuggingOptions {
     final Map<String, Object?> configs = _getAndroidEngineConfig();
     final args = <String>{};
     for (final MapEntry<String, Object?> entry in configs.entries) {
-      if (entry.key == AndroidEngineCliFlags.enableImpeller) {
+      if (entry.key == AndroidEngineCliFlags.enableImpeller ||
+          entry.key == 'enable-hcpp-and-surface-control') {
         args.add('--${entry.key}=${entry.value}');
       } else if (entry.value is bool) {
         final value = entry.value! as bool;
@@ -1520,13 +1534,6 @@ abstract class DeviceLogReader {
 
   // Clean up resources allocated by log reader e.g. subprocesses
   void dispose();
-}
-
-/// Describes an app running on the device.
-class DiscoveredApp {
-  DiscoveredApp(this.id, this.vmServicePort);
-  final String id;
-  final int vmServicePort;
 }
 
 // An empty device log reader

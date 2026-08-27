@@ -1000,7 +1000,7 @@ void main() {
             '--enable-impeller=true',
             '--enable-flutter-gpu',
             '--enable-vulkan-validation',
-            '--enable-hcpp-and-surface-control',
+            '--enable-hcpp-and-surface-control=true',
           ]),
         );
       },
@@ -1053,6 +1053,16 @@ void main() {
       expect(launchArguments.contains('--use-test-fonts'), isFalse);
       expect(launchArguments.contains('--verbose-logging'), isFalse);
       expect(launchArguments.contains('--test-flag'), isFalse);
+      expect(launchArguments.contains('--enable-hcpp-and-surface-control=true'), isFalse);
+      expect(launchArguments.contains('--enable-hcpp-and-surface-control=false'), isFalse);
+    });
+
+    testWithoutContext('Get launch arguments for manifest injection with enableHcpp: false', () {
+      final original = DebuggingOptions.enabled(BuildInfo.debug, enableHcpp: false);
+
+      final Set<String> launchArguments = original.getAndroidLaunchArguments();
+
+      expect(launchArguments, contains('--enable-hcpp-and-surface-control=false'));
     });
 
     testWithoutContext('Get Intent launch arguments when debugging enabled - top level flags', () {
@@ -1132,6 +1142,17 @@ void main() {
       );
     });
 
+    testWithoutContext('Get Intent launch arguments with enableHcpp: false', () {
+      final original = DebuggingOptions.enabled(BuildInfo.debug, enableHcpp: false);
+
+      final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
+
+      expect(
+        launchArguments,
+        containsAll(<String>['--ez', 'enable-hcpp-and-surface-control', 'false']),
+      );
+    });
+
     testWithoutContext(
       'Get Intent launch arguments when debugging enabled - debug-mode specific flags',
       () {
@@ -1194,6 +1215,7 @@ void main() {
       expect(launchArguments.contains('use-test-fonts'), isFalse);
       expect(launchArguments.contains('verbose-logging'), isFalse);
       expect(launchArguments.contains('test-flag'), isFalse);
+      expect(launchArguments.contains('enable-hcpp-and-surface-control'), isFalse);
     });
 
     testWithoutContext(
