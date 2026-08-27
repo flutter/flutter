@@ -16,6 +16,7 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/context.dart';
 import '../../src/fakes.dart';
@@ -166,6 +167,7 @@ void main() {
           androidContext: FakeAndroidContext(),
           toolContext: FakeToolContext(logger: logger),
           featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          analytics: const NoOpAnalytics(),
           extensionManager: manager,
         );
 
