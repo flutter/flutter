@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/context.dart';
 import '../../src/fakes.dart';
@@ -55,6 +56,7 @@ void main() {
           androidContext: FakeAndroidContext(),
           toolContext: FakeToolContext(logger: testLogger),
           featureFlags: featureFlags,
+          analytics: const NoOpAnalytics(),
           extensionManager: manager,
         );
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
@@ -123,6 +125,7 @@ void main() {
           androidContext: FakeAndroidContext(),
           toolContext: FakeToolContext(logger: testLogger),
           featureFlags: featureFlags,
+          analytics: const NoOpAnalytics(),
           extensionManager: manager,
         );
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
