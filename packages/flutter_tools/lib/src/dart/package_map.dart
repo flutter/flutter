@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -105,9 +104,9 @@ Future<PackageConfig> loadPackageConfigWithLogging(
       if (!configFile.existsSync()) {
         return null;
       }
-      return Future<Uint8List>.value(configFile.readAsBytesSync());
+      return configFile.readAsBytes();
     },
-    onError: (dynamic error) {
+    onError: (Object? error) {
       if (!throwOnError) {
         return;
       }
