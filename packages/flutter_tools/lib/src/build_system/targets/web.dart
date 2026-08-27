@@ -167,7 +167,7 @@ String _hashAndRenameWebOutput({required File file, File? sourceMapFile}) {
     sourceMapFile.renameSync(sourceMapFile.parent.childFile(newMapBasename).path);
 
     final String content = file.readAsStringSync();
-    final RegExp mapDirectiveRegex = RegExp(
+    final mapDirectiveRegex = RegExp(
       r'//[#@]\s*sourceMappingURL=' + RegExp.escape(oldMapBasename) + r'\s*$',
       multiLine: true,
     );
