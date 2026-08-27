@@ -2317,25 +2317,29 @@ console.log(mapName);
   );
 
   test(
-    'WebReleaseBundle hashes physical assets and updates AssetManifest when webContentHash is true',
+    'WebReleaseBundle hashes physical assets, leaves NOTICES unhashed, and updates AssetManifest when webContentHash is true',
     () => testbed.run(() async {
       environment.defines[kBuildMode] = 'release';
       environment.projectDir.childDirectory('web').createSync(recursive: true);
       environment.buildDir.childFile('main.dart.js').createSync(recursive: true);
 
-      // Create a pubspec.yaml with assets
+      // Create a pubspec.yaml with assets and notices
       environment.projectDir.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_app
 flutter:
   assets:
     - images/logo.png
+    - NOTICES
 ''');
 
       final File logo = environment.projectDir.childDirectory('images').childFile('logo.png')
         ..createSync(recursive: true)
         ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+      environment.projectDir.childFile('NOTICES')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('License notices');
 
-      final String logoHash = '9f64a747'; // sha256 of [1,2,3,4]
+      const String logoHash = '9f64a747'; // sha256 of [1,2,3,4]
 
       await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig(webContentHash: true),
@@ -2345,9 +2349,31 @@ flutter:
 
       expect(assetsDir.childDirectory('images').childFile('logo.$logoHash.png').existsSync(), true);
       expect(assetsDir.childDirectory('images').childFile('logo.png').existsSync(), false);
+      expect(assetsDir.childFile('NOTICES').existsSync(), true);
+      expect(assetsDir.childFile('AssetManifest.bin').existsSync(), true);
+      expect(assetsDir.childFile('AssetManifest.bin.json').existsSync(), true);
 
-      final File manifestFile = assetsDir.childFile('AssetManifest.bin');
-      expect(manifestFile.existsSync(), true);
+      // Verify flutter_assets.d references the hashed logo path
+      final File depfile = environment.buildDir.childFile('flutter_assets.d');
+      expect(depfile.existsSync(), true);
+      expect(depfile.readAsStringSync(), contains('logo.$logoHash.png'));
+
+      // Test stale asset cleanup on rebuild: modify logo content
+      logo.writeAsBytesSync(<int>[5, 6, 7, 8]);
+      const String newLogoHash = '55e5509f'; // sha256 of [5,6,7,8]
+
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(webContentHash: true),
+      ], const NoOpAnalytics()).build(environment);
+
+      expect(
+        assetsDir.childDirectory('images').childFile('logo.$newLogoHash.png').existsSync(),
+        true,
+      );
+      expect(
+        assetsDir.childDirectory('images').childFile('logo.$logoHash.png').existsSync(),
+        false,
+      );
     }),
   );
   test(
