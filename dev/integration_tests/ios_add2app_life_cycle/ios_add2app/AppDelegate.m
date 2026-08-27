@@ -26,7 +26,7 @@
   self.engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [self.engine runWithEntrypoint:nil];
 
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+  return YES;
 }
 
 #pragma mark - UISceneSession lifecycle

@@ -36,7 +36,7 @@ static NSString *_kReloadChannelName = @"reload";
       binaryMessenger:_engine.binaryMessenger
                 codec:[FlutterStringCodec sharedInstance]];
 
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+  return YES;
 }
 
 #pragma mark - UISceneSession lifecycle
