@@ -6,7 +6,9 @@
 
 #include <algorithm>
 #include <string>
+#include <utility>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/string_conversion.h"
 
 namespace flutter {
@@ -31,12 +33,14 @@ TextInputModel::~TextInputModel() = default;
 bool TextInputModel::SetText(const std::string& text,
                              const TextRange& selection,
                              const TextRange& composing_range) {
-  text_ = fml::Utf8ToUtf16(text);
-  if (!text_range().Contains(selection) ||
-      !text_range().Contains(composing_range)) {
+  std::u16string new_text = fml::Utf8ToUtf16(text);
+  const TextRange new_text_range(0, new_text.length());
+  if (!new_text_range.Contains(selection) ||
+      !new_text_range.Contains(composing_range)) {
     return false;
   }
 
+  text_ = std::move(new_text);
   selection_ = selection;
   composing_range_ = composing_range;
   composing_ = !composing_range.collapsed();
@@ -56,7 +60,8 @@ bool TextInputModel::SetSelection(const TextRange& range) {
 
 bool TextInputModel::SetComposingRange(const TextRange& range,
                                        size_t cursor_offset) {
-  if (!composing_ || !text_range().Contains(range)) {
+  if (!composing_ || !text_range().Contains(range) ||
+      cursor_offset > text_.length() - range.start()) {
     return false;
   }
   composing_range_ = range;
@@ -71,6 +76,12 @@ void TextInputModel::BeginComposing() {
 
 void TextInputModel::UpdateComposingText(const std::u16string& text,
                                          const TextRange& selection) {
+  // Re-clamp current selection and composing range to text.
+  FML_DCHECK(text_range().Contains(selection_) &&
+             text_range().Contains(composing_range_));
+  selection_ = selection_.ClampedTo(text_.length());
+  composing_range_ = composing_range_.ClampedTo(text_.length());
+
   // Preserve selection if we get a no-op update to the composing region.
   if (text.length() == 0 && composing_range_.collapsed()) {
     return;
@@ -79,8 +90,11 @@ void TextInputModel::UpdateComposingText(const std::u16string& text,
       composing_range_.collapsed() ? selection_ : composing_range_;
   text_.replace(rangeToDelete.start(), rangeToDelete.length(), text);
   composing_range_.set_end(composing_range_.start() + text.length());
-  selection_ = TextRange(selection.start() + composing_range_.start(),
-                         selection.extent() + composing_range_.start());
+
+  // Updated |selection| is supplied by the IME. Clamp to text length.
+  const TextRange clamped_selection = selection.ClampedTo(text.length());
+  selection_ = TextRange(clamped_selection.start() + composing_range_.start(),
+                         clamped_selection.extent() + composing_range_.start());
 }
 
 void TextInputModel::UpdateComposingText(const std::u16string& text) {

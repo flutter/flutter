@@ -345,7 +345,7 @@ class FlutterProject {
   FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),
     _exampleManifest,
-    FlutterManifest.empty(logger: globals.logger),
+    FlutterManifest.empty(logger: _manifest.logger),
   );
 
   /// The generated scaffolding project for hosting widget previews from this
