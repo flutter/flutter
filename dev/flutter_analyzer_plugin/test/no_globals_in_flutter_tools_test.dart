@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer/utilities/package_config_file_builder.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/no_globals_in_flutter_tools.dart';
 import 'package:test_reflective_loader/test_reflective_loader.dart';
+
+import '../tool/update_migrated_files.dart';
 
 @reflectiveTest
 class NoGlobalsInFlutterToolsRestrictedFileTest extends AnalysisRuleTest {
@@ -338,6 +342,37 @@ void main() {
   }
 }
 
+@reflectiveTest
+class NoGlobalsInFlutterToolsVerificationTest {
+  // ignore: non_constant_identifier_names
+  void test_all_migrated_files_included_in_defaultRestrictedPaths() {
+    final Directory toolsDir = findFlutterToolsDirectory();
+    final Set<String> migratedFiles = findMigratedFiles(toolsDir);
+    final Set<String> missing = migratedFiles.difference(
+      NoGlobalsInFlutterTools.defaultRestrictedPaths,
+    );
+    final Set<String> extra = NoGlobalsInFlutterTools.defaultRestrictedPaths.difference(
+      migratedFiles,
+    );
+
+    if (missing.isNotEmpty) {
+      throw StateError(
+        'The following files in flutter_tools do not import globals.dart but are missing from '
+        'NoGlobalsInFlutterTools.defaultRestrictedPaths:\n'
+        '${missing.take(10).join('\n')}${missing.length > 10 ? '\n...and ${missing.length - 10} more' : ''}\n\n'
+        'Run `dart dev/flutter_analyzer_plugin/tool/update_migrated_files.dart` to update the set.',
+      );
+    }
+    if (extra.isNotEmpty) {
+      throw StateError(
+        'The following files in NoGlobalsInFlutterTools.defaultRestrictedPaths actually import globals.dart:\n'
+        '${extra.take(10).join('\n')}${extra.length > 10 ? '\n...and ${extra.length - 10} more' : ''}\n\n'
+        'Run `dart dev/flutter_analyzer_plugin/tool/update_migrated_files.dart` to update the set.',
+      );
+    }
+  }
+}
+
 void main() {
   defineReflectiveSuite(() {
     defineReflectiveTests(NoGlobalsInFlutterToolsRestrictedFileTest);
@@ -346,5 +381,6 @@ void main() {
     defineReflectiveTests(NoGlobalsInFlutterToolsDefaultPathsTest);
     defineReflectiveTests(NoGlobalsInFlutterToolsDefaultTestPathTest);
     defineReflectiveTests(NoGlobalsInFlutterToolsWindowsRestrictedPathTest);
+    defineReflectiveTests(NoGlobalsInFlutterToolsVerificationTest);
   });
 }

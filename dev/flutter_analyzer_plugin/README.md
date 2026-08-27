@@ -342,6 +342,15 @@ List<StackTrace>? _creationStackTraces = kDebugMode ? <StackTrace>[] : null;
 - **Scope**: `packages/flutter_tools/` (specified migrated files)
 - **Description**: Disallows importing `globals.dart` (or `package:flutter_tools/src/globals.dart`) in specified migrated files in `packages/flutter_tools/`.
 - **Rationale**: As part of the modular dependency injection refactor in `flutter_tools`, commands and services are migrated to receive all dependencies via explicit constructor injection rather than accessing ambient singleton instances from `globals.dart`. Forbidding imports of `globals.dart` prevents regressions in migrated files.
+- **Updating Migrated Files**: The set of protected files is maintained in `lib/src/rules/no_globals_in_flutter_tools_restricted_paths.dart`. Whenever files in `packages/flutter_tools` are migrated, update the set by running:
+  ```bash
+  dart dev/flutter_analyzer_plugin/tool/update_migrated_files.dart
+  ```
+  or from `packages/flutter_tools/`:
+  ```bash
+  dart tool/update_migrated_globals.dart
+  ```
+- **Verification**: A unit test in `test/no_globals_in_flutter_tools_test.dart` verifies that every file in `packages/flutter_tools/` that does not import `globals.dart` is included in `defaultRestrictedPaths`.
 
 ```dart
 // BAD (in packages/flutter_tools/lib/src/commands/clean.dart):
