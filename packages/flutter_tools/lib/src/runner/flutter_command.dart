@@ -185,21 +185,17 @@ abstract class FlutterCommand extends Command<void> {
     this.verboseHelp = false,
     ToolContext? toolContext,
     OutputPreferences? outputPreferences,
-    Analytics? analytics,
   }) : _explicitToolContext = toolContext,
-       _outputPreferences = outputPreferences,
-       _explicitAnalytics = analytics;
+       _outputPreferences = outputPreferences;
 
   /// Whether this command was invoked with verbose help enabled.
   final bool verboseHelp;
 
   final ToolContext? _explicitToolContext;
   final OutputPreferences? _outputPreferences;
-  final Analytics? _explicitAnalytics;
 
   /// The [ToolContext] providing explicit dependency injection for this command.
-  ToolContext? get toolContext =>
-      _explicitToolContext ?? (super.runner as FlutterCommandRunner?)?.toolContext;
+  ToolContext? get toolContext => _explicitToolContext ?? runner?.toolContext;
 
   SystemClock get _clock => _explicitToolContext?.systemClock ?? globals.systemClock;
   Logger get _logger => _explicitToolContext?.logger ?? globals.logger;
@@ -214,8 +210,7 @@ abstract class FlutterCommand extends Command<void> {
   FileSystem get _fs => _explicitToolContext?.fs ?? globals.fs;
   FlutterProjectFactory get _projectFactory =>
       _explicitToolContext?.projectFactory ?? globals.projectFactory;
-  Analytics get _analytics =>
-      _explicitAnalytics ?? (super.runner as FlutterCommandRunner?)?.analytics ?? globals.analytics;
+  Analytics get _analytics => runner?.analytics ?? globals.analytics;
   Cache get _cache => _explicitToolContext?.cache ?? globals.cache;
   FlutterVersion get _flutterVersion =>
       _explicitToolContext?.flutterVersion ?? globals.flutterVersion;

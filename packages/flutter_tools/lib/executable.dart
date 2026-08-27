@@ -288,7 +288,6 @@ List<FlutterCommand> generateCommands({
     verboseHelp: verboseHelp,
     androidContext: toolDependencies.androidContext,
     toolContext: toolDependencies.toolContext,
-    analytics: toolDependencies.analytics,
     featureFlags: featureFlags,
     extensionManager: extensionManager,
   ),
