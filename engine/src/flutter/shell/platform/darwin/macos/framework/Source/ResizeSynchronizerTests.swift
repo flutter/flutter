@@ -97,6 +97,56 @@ struct ResizeSynchronizerTests {
   }
 
   @MainActor
+  @Test("beginResize does not invoke onTimeout if a frame with nothing to rasterize is committed")
+  func testBeginResizeDoesNotTimeOutWithEmptyFrameCommit() async {
+    FlutterRunLoop.ensureMainLoopInitialized()
+
+    // Resize synchronizer must have presented a frame in order to block.
+    let synchronizer = ResizeSynchronizer()
+    var didReceiveFrame = false
+    synchronizer.performCommit(forSize: CGSize(width: 10, height: 10), afterDelay: 0) {
+      didReceiveFrame = true
+    }
+    do {
+      try await waitForCondition("didReceiveFrame to be true", timeout: 1.0) { didReceiveFrame }
+    } catch {
+      // Record the timeout and bail out of the test.
+      Issue.record("\(error)")
+      return
+    }
+
+    var didCommit = false
+    var didTimeout = false
+    let latch = DispatchSemaphore(value: 0)
+
+    // Call performCommitForEmptyFrame from raster thread during frame present.
+    Thread.detachNewThread {
+      // Block until `beginResize` has been called.
+      latch.wait()
+
+      synchronizer.performCommitForEmptyFrame(afterDelay: 0) {
+        didCommit = true
+      }
+    }
+
+    // This call blocks until a frame is committed, or times out.
+    synchronizer.beginResize(forSize: CGSize(width: 100, height: 100)) {
+      // Unblock the raster thread by signaling the latch.
+      latch.signal()
+    } onTimeout: {
+      didTimeout = true
+    }
+
+    // Verify beginResize did not timeout.
+    #expect(
+      didTimeout == false,
+      "onTimeout was called even though a frame with nothing to rasterize was committed")
+
+    // Verify performCommitForEmptyFrame callback was invoked.
+    #expect(didCommit == true)
+  }
+
+  @MainActor
   @Test("beginResize invokes onTimeout if performCommit not called with matching frame size")
   func testBeginResizeDoesTimeOutWithoutMatchingPerformCommit() async {
     FlutterRunLoop.ensureMainLoopInitialized()
