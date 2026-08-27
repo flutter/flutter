@@ -467,6 +467,11 @@ void verifyOptions(String? command, Iterable<Option> options) {
 }
 
 class FakeAnalytics extends Fake implements Analytics {
+  final sentEvents = <Event>[];
+
+  @override
+  void send(Event event) => sentEvents.add(event);
+
   @override
   bool get telemetryEnabled => false;
 
