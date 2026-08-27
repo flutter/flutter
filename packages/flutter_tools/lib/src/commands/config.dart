@@ -29,17 +29,16 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   ConfigCommand({
     required AndroidContext androidContext,
     required ToolContext toolContext,
-    required FeatureFlags featureFlags,
+    required this.featureFlags,
     bool verboseHelp = false,
     ExtensionManager? extensionManager,
   }) : _androidContext = androidContext,
-       _featureFlags = featureFlags,
        _extensionManager = extensionManager,
        _verboseHelp = verboseHelp,
        super(toolContext: toolContext);
 
   final AndroidContext _androidContext;
-  final FeatureFlags _featureFlags;
+  final FeatureFlags featureFlags;
   final ExtensionManager? _extensionManager;
   final bool _verboseHelp;
 
@@ -98,7 +97,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       help: 'Outputs in a machine readable structured JSON format.',
       hide: !_verboseHelp,
     );
-    for (final Feature feature in _featureFlags.allFeatures) {
+    for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
@@ -219,7 +218,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     }
 
     if (boolArg('clear-features')) {
-      for (final Feature feature in _featureFlags.allFeatures) {
+      for (final Feature feature in featureFlags.allFeatures) {
         final String? configSetting = feature.configSetting;
         if (configSetting != null) {
           config.removeValue(configSetting);
@@ -288,7 +287,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       _updateConfig('build-dir', buildDir);
     }
 
-    for (final Feature feature in _featureFlags.allFeatures) {
+    for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
@@ -368,12 +367,12 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   Future<String> get settingsText async {
     final Config config = _toolContext.config;
     final featuresByName = <String, Feature>{
-      for (final feature in _featureFlags.allFeatures)
+      for (final feature in featureFlags.allFeatures)
         if (feature.configSetting case final configSetting?) configSetting: feature,
     };
     final String channel = _toolContext.flutterVersion.channel;
     final keys = <String>{
-      ..._featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
+      ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
       ...config.keys,
     };
     final Iterable<String> settings = keys.map<String>((String key) {
