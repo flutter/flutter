@@ -2282,7 +2282,7 @@ void testMain() {
     };
 
     rootElement.dispatchEvent(
-      context.stylusTouchDown(pointerId: 100, buttons: 0x32, clientX: 5.0, clientY: 100.0),
+      context.stylusTouchDown(pointerId: 100, buttons: 0x20, clientX: 5.0, clientY: 100.0),
     );
     expect(packets, hasLength(1));
     expect(packets[0].data, hasLength(2));
@@ -2290,17 +2290,17 @@ void testMain() {
     expect(packets[0].data[0].kind, equals(ui.PointerDeviceKind.invertedStylus));
     expect(packets[0].data[1].change, equals(ui.PointerChange.down));
     expect(packets[0].data[1].kind, equals(ui.PointerDeviceKind.invertedStylus));
-    expect(packets[0].data[1].buttons, equals(0x6));
+    expect(packets[0].data[1].buttons, equals(0x1));
     packets.clear();
 
     rootElement.dispatchEvent(
-      context.stylusTouchMove(pointerId: 100, buttons: 0x32, clientX: 10.0, clientY: 105.0),
+      context.stylusTouchMove(pointerId: 100, buttons: 0x20, clientX: 10.0, clientY: 105.0),
     );
     expect(packets, hasLength(1));
     expect(packets[0].data, hasLength(1));
     expect(packets[0].data[0].change, equals(ui.PointerChange.move));
     expect(packets[0].data[0].kind, equals(ui.PointerDeviceKind.invertedStylus));
-    expect(packets[0].data[0].buttons, equals(0x6));
+    expect(packets[0].data[0].buttons, equals(0x1));
     packets.clear();
 
     rootElement.dispatchEvent(
@@ -2312,6 +2312,46 @@ void testMain() {
     expect(packets[0].data[0].kind, equals(ui.PointerDeviceKind.invertedStylus));
     expect(packets[0].data[0].buttons, equals(0));
     packets.clear();
+  });
+
+  test('preserves stylus barrel button with eraser contact', () {
+    final context = _PointerEventContext();
+
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    rootElement.dispatchEvent(
+      context.stylusTouchDown(pointerId: 102, buttons: 0x22, clientX: 5.0, clientY: 100.0),
+    );
+    expect(packets[0].data.last.kind, equals(ui.PointerDeviceKind.invertedStylus));
+    expect(packets[0].data.last.buttons, equals(0x3));
+    packets.clear();
+
+    rootElement.dispatchEvent(
+      context.stylusTouchUp(pointerId: 102, buttons: 0, clientX: 5.0, clientY: 100.0),
+    );
+    expect(packets[0].data.single.change, equals(ui.PointerChange.up));
+    expect(packets[0].data.single.kind, equals(ui.PointerDeviceKind.invertedStylus));
+  });
+
+  test('does not treat the pen eraser bit as inverted stylus for mouse', () {
+    final context = _PointerEventContext();
+
+    final packets = <ui.PointerDataPacket>[];
+    ui.PlatformDispatcher.instance.onPointerDataPacket = (ui.PointerDataPacket packet) {
+      packets.add(packet);
+    };
+
+    rootElement.dispatchEvent(context.mouseDown(button: 5, buttons: 0x20));
+    expect(packets[0].data.last.kind, equals(ui.PointerDeviceKind.mouse));
+    expect(packets[0].data.last.buttons, equals(0x20));
+    packets.clear();
+
+    rootElement.dispatchEvent(context.mouseUp(button: 5, buttons: 0));
+    expect(packets[0].data.last.change, equals(ui.PointerChange.up));
+    expect(packets[0].data.last.kind, equals(ui.PointerDeviceKind.mouse));
   });
 
   // MULTIPOINTER ADAPTERS

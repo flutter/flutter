@@ -70,8 +70,6 @@ const int _kPrimaryMouseButton = 0x1;
 const int _kSecondaryMouseButton = 0x2;
 const int _kMiddleMouseButton = 0x4;
 const int _kStylusContact = 0x1;
-const int _kPrimaryStylusButton = 0x2;
-const int _kSecondaryStylusButton = 0x4;
 const int _kHtmlPenEraserButton = 0x20;
 
 int _nthButton(int n) => 0x1 << n;
@@ -922,9 +920,7 @@ class _ButtonSanitizer {
   /// Transform [DomPointerEvent.buttons] to Flutter's PointerEvent buttons.
   int _htmlButtonsToFlutterButtons(int buttons, ui.PointerDeviceKind kind) {
     if (kind == ui.PointerDeviceKind.stylus && buttons & _kHtmlPenEraserButton != 0) {
-      return (buttons & _kStylusContact) |
-          (buttons & _kPrimaryStylusButton) |
-          _kSecondaryStylusButton;
+      buttons = (buttons & ~_kHtmlPenEraserButton) | _kStylusContact;
     }
     // Flutter's button definition conveniently matches that of JavaScript
     // from primary button (0x1) to forward button (0x10), which allows us to
@@ -939,15 +935,13 @@ class _ButtonSanitizer {
     return kind;
   }
 
-  /// Given [DomPointerEvent.button] and [DomPointerEvent.buttons], tries to
-  /// infer the correct value for Flutter buttons.
-  int _inferDownFlutterButtons(int button, int buttons, ui.PointerDeviceKind kind) {
+  int _inferDownHtmlButtons(int button, int buttons) {
     if (buttons == 0 && button > -1) {
       // In some cases, the browser sends `buttons:0` in a down event. In such
       // case, we try to infer the value from `button`.
-      buttons = convertButtonToButtons(button);
+      return convertButtonToButtons(button);
     }
-    return _htmlButtonsToFlutterButtons(buttons, kind);
+    return buttons;
   }
 
   _SanitizedDetails sanitizeDownEvent({
@@ -961,8 +955,9 @@ class _ButtonSanitizer {
       return sanitizeMoveEvent(buttons: buttons, kind: kind);
     }
 
-    _pressedButtons = _inferDownFlutterButtons(button, buttons, kind);
-    _pressedKind = _htmlButtonsToPointerKind(buttons, kind);
+    final int htmlButtons = _inferDownHtmlButtons(button, buttons);
+    _pressedButtons = _htmlButtonsToFlutterButtons(htmlButtons, kind);
+    _pressedKind = _htmlButtonsToPointerKind(htmlButtons, kind);
 
     return _SanitizedDetails(
       change: ui.PointerChange.down,
