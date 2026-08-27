@@ -162,7 +162,11 @@ void main() {
           ],
         );
 
-        final command = ConfigCommand(extensionManager: manager);
+        final command = ConfigCommand(
+          androidContext: FakeAndroidContext(),
+          toolContext: FakeToolContext(logger: logger),
+          extensionManager: manager,
+        );
 
         final String settingsOutput = await command.settingsText;
         expect(settingsOutput, contains('Extension Settings:'));
