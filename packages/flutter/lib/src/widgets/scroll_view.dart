@@ -1666,6 +1666,14 @@ class ListView extends BoxScrollView {
   /// Unlike [itemExtent] or [prototypeItem], this allows children to have
   /// different extents.
   ///
+  /// For [ListView.separated], the `index` argument passed to the callback
+  /// represents the interleaved child index, which includes both items and separators.
+  /// Even indices correspond to the items, and odd indices correspond to the
+  /// separators.
+  ///
+  /// To map the interleaved child index to the semantic item index (for example,
+  /// to look up the extent in a data list), divide it by 2 (`index ~/ 2`).
+  ///
   /// See also:
   ///
   ///  * [SliverVariedExtentList], the sliver used internally when this property
