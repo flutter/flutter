@@ -1,8 +1,9 @@
 ## Legacy Token Defaults Generator
 
-This legacy tool is deprecated. It only targets the frozen SDK Material library
-under `packages/flutter/lib/src/material`, and should not be used for new
-Material defaults work.
+> [!WARNING]
+> This legacy tool is deprecated. It only targets the frozen SDK Material library
+> under `packages/flutter/lib/src/material`, and should not be used for new
+> Material defaults work.
 
 Active Material defaults generation has moved to the standalone `material_ui`
 package in the `flutter/packages` repository. Use
