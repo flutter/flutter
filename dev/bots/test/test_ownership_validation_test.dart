@@ -165,7 +165,7 @@ _TestOwnersRegistry _parseTestOwners(String content) {
           owners[testName] = owner;
         }
       case _Section.shards:
-        // Shard suites in TESTOWNERS are defined as comment lines with owners ('# framework_tests @Piinks').
+        // Shard suites in TESTOWNERS are defined as comment lines with owners ('# framework_tests @justinmc').
         if (!line.startsWith('#') || !line.contains('@')) {
           continue;
         }

@@ -2,13 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/ui.dart' as ui;
+import 'package:ui/src/engine.dart';
 
-import 'canvaskit_api.dart';
+class CkMaskFilter implements BackendMaskFilter {
+  CkMaskFilter(EngineMaskFilter maskFilter) {
+    _skMaskFilter = canvasKit.MaskFilter.MakeBlur(
+      toSkBlurStyle(maskFilter.webOnlyBlurStyle),
+      maskFilter.webOnlySigma,
+      true,
+    )!;
+  }
 
-/// Creates and returns a [SkMaskFilter] that applies a blur effect.
-///
-/// It is the responsibility of the caller to delete the returned Skia object.
-SkMaskFilter createBlurSkMaskFilter(ui.BlurStyle blurStyle, double sigma) {
-  return canvasKit.MaskFilter.MakeBlur(toSkBlurStyle(blurStyle), sigma, true)!;
+  late final SkMaskFilter _skMaskFilter;
+
+  SkMaskFilter get skiaObject => _skMaskFilter;
+
+  @override
+  void dispose() {
+    _skMaskFilter.delete();
+  }
 }

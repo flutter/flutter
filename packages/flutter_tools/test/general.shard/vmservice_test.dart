@@ -108,6 +108,37 @@ void main() {
     });
   }, overrides: <Type, Generator>{WebSocketConnector: () => failingWebSocketConnector});
 
+  testUsingContext(
+    'VM Service prints messages for HttpException connection failures and retries',
+    () {
+      final logger = BufferLogger.test();
+      FakeAsync().run((FakeAsync time) {
+        final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
+        unawaited(connectToVmService(uri, logger: logger));
+
+        time.elapse(const Duration(seconds: 5));
+        expect(logger.statusText, isEmpty);
+
+        time.elapse(const Duration(minutes: 2));
+
+        final String statusText = logger.statusText;
+        expect(
+          statusText,
+          containsIgnoringWhitespace(
+            'Connecting to the VM Service is taking longer than expected...',
+          ),
+        );
+        expect(statusText, containsIgnoringWhitespace('try re-running with --host-vmservice-port'));
+        expect(
+          statusText,
+          containsIgnoringWhitespace('Exception attempting to connect to the VM Service:'),
+        );
+        expect(statusText, containsIgnoringWhitespace('This was attempt #50. Will retry'));
+      });
+    },
+    overrides: <Type, Generator>{WebSocketConnector: () => httpFailingWebSocketConnector},
+  );
+
   testWithoutContext('setAssetDirectory forwards arguments correctly', () async {
     final mockVMService = FakeVMService();
     final flutterVmService = FlutterVmService(mockVMService);
@@ -638,6 +669,16 @@ void main() {
     expect(processVmServiceMessage(event), 'Hello There');
   });
 
+  testWithoutContext('Can process log events containing a valid replacement character', () {
+    final event = vm_service.Event(
+      bytes: base64.encode(utf8ForTesting.encode('flutter: \u{FFFD}\n')),
+      timestamp: 0,
+      kind: vm_service.EventKind.kLogging,
+    );
+
+    expect(processVmServiceMessage(event), 'flutter: \u{FFFD}');
+  });
+
   testUsingContext('WebSocket URL construction uses correct URI join primitives', () async {
     final completer = Completer<String>();
     openChannelForTesting =
@@ -737,4 +778,15 @@ Future<io.WebSocket> failingWebSocketConnector(
   Logger? logger,
 }) {
   throw const io.SocketException('Failed WebSocket connection');
+}
+
+/// A [WebSocketConnector] that always throws an [io.HttpException].
+Future<io.WebSocket> httpFailingWebSocketConnector(
+  String url, {
+  io.CompressionOptions? compression,
+  Logger? logger,
+}) {
+  throw const io.HttpException(
+    'Connection closed before full header was received, uri = http://127.0.0.1:63745/TjwUKCgX5S8=/ws',
+  );
 }

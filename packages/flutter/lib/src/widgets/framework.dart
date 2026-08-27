@@ -1477,6 +1477,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// this method because they need to do some expensive work (e.g., network
   /// fetches) when their dependencies change, and that work would be too
   /// expensive to do for every build.
+  ///
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.didChangeDependencies`.
   @protected
   @mustCallSuper
   void didChangeDependencies() {}
@@ -1501,7 +1504,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   }
 
   // If @protected State methods are added or removed, the analysis rule should be
-  // updated accordingly (dev/bots/custom_rules/protect_public_state_subtypes.dart)
+  // updated accordingly (dev/flutter_analyzer_plugin/lib/src/rules/protect_public_state_subtypes.dart)
 }
 
 /// A widget that has a child widget provided to it, instead of building a new
