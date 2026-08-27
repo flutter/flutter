@@ -2196,13 +2196,13 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
     // is null because that edge's [Selectable] is off-screen (e.g. scrolled out
     // of a lazily-built list). See `getSelectionGeometry` above, which already
     // tolerates this. https://github.com/flutter/flutter/issues/175016
-    if (currentSelectionStartIndex != -1 &&
-        selectables[currentSelectionStartIndex].value.hasSelection &&
-        selectables[currentSelectionStartIndex].value.startSelectionPoint != null) {
-      final Selectable start = selectables[currentSelectionStartIndex];
+    final Selectable? start = currentSelectionStartIndex != -1
+        ? selectables[currentSelectionStartIndex]
+        : null;
+    final SelectionPoint? startPoint = start?.value.startSelectionPoint;
+    if (start != null && start.value.hasSelection && startPoint != null) {
       final Offset localStartEdge =
-          start.value.startSelectionPoint!.localPosition +
-          Offset(0, -start.value.startSelectionPoint!.lineHeight / 2);
+          startPoint.localPosition + Offset(0, -startPoint.lineHeight / 2);
       updateLastSelectionEdgeLocation(
         globalSelectionEdgeLocation: MatrixUtils.transformPoint(
           start.getTransformTo(null),
@@ -2211,13 +2211,12 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
         forEnd: false,
       );
     }
-    if (currentSelectionEndIndex != -1 &&
-        selectables[currentSelectionEndIndex].value.hasSelection &&
-        selectables[currentSelectionEndIndex].value.endSelectionPoint != null) {
-      final Selectable end = selectables[currentSelectionEndIndex];
-      final Offset localEndEdge =
-          end.value.endSelectionPoint!.localPosition +
-          Offset(0, -end.value.endSelectionPoint!.lineHeight / 2);
+    final Selectable? end = currentSelectionEndIndex != -1
+        ? selectables[currentSelectionEndIndex]
+        : null;
+    final SelectionPoint? endPoint = end?.value.endSelectionPoint;
+    if (end != null && end.value.hasSelection && endPoint != null) {
+      final Offset localEndEdge = endPoint.localPosition + Offset(0, -endPoint.lineHeight / 2);
       updateLastSelectionEdgeLocation(
         globalSelectionEdgeLocation: MatrixUtils.transformPoint(
           end.getTransformTo(null),
