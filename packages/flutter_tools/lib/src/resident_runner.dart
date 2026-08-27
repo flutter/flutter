@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'android/android_device.dart';
 import 'application_package.dart';
 import 'asset.dart';
 import 'base/command_help.dart';
@@ -237,9 +238,7 @@ class FlutterDevice {
       service =
           await Future.any<dynamic>(<Future<dynamic>>[
                 connectToVmService(
-                  debuggingOptions.enableDds
-                      ? (device!.dds.uri ?? vmServiceUri)
-                      : vmServiceUri,
+                  debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri) : vmServiceUri,
                   reloadSources: reloadSources,
                   restart: restart,
                   compileExpression: compileExpression,
@@ -249,9 +248,7 @@ class FlutterDevice {
                   logger: globals.logger,
                 ),
                 if (!existingDds)
-                  device!.dds.done.whenComplete(
-                    () => throw Exception('DDS shut down too early'),
-                  ),
+                  device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
               ])
               as FlutterVmService?;
     } on Exception catch (exception) {
@@ -315,6 +312,11 @@ class FlutterDevice {
       logStream = (device! as IOSDevice)
           .getLogReader(app: package as IOSApp?, usingCISystem: debuggingOptions.usingCISystem)
           .logLines;
+    } else if (device is AndroidDevice) {
+      logStream = (await (device! as AndroidDevice).getLogReader(
+        app: package,
+        adbLogFiltering: debuggingOptions.adbLogFiltering,
+      )).logLines;
     } else {
       logStream = (await device!.getLogReader(app: package)).logLines;
     }

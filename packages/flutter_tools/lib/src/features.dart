@@ -88,6 +88,9 @@ abstract class FeatureFlags {
   /// Whether to only build for arm64 when targeting macOS.
   bool get isMacOSArm64OnlyEnabled;
 
+  /// Whether the HCPP platform view rendering mode is enabled by default.
+  bool get isHcppEnabled;
+
   /// Whether support for tool extensions is enabled.
   bool get isToolExtensionsEnabled;
 
@@ -118,6 +121,7 @@ abstract class FeatureFlags {
     uiSceneMigration,
     riscv64,
     macOSArm64Only,
+    hcpp,
     toolExtensionsFeature,
   ];
 
@@ -233,11 +237,16 @@ const recordUse = Feature(
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
+/// Warning printed when Swift Package Manager is disabled in configuration.
+const kSwiftPackageManagerDisabledWarning =
+    'Enabling Swift Package Manager will be required in a future version of Flutter.';
+
 /// Enable Swift Package Manager as a darwin dependency manager.
 const swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
+  warningMessageOnDisable: kSwiftPackageManagerDisabledWarning,
   master: FeatureChannelSetting(available: true, enabledByDefault: true),
   beta: FeatureChannelSetting(available: true, enabledByDefault: true),
   stable: FeatureChannelSetting(available: true, enabledByDefault: true),
@@ -331,6 +340,25 @@ const macOSArm64Only = Feature(
   stable: FeatureChannelSetting(available: true),
 );
 
+/// Whether the HCPP (Hybrid Composition++) platform view rendering mode is used
+/// by default on Android.
+///
+/// This is the default only: it is baked into the Android manifest of the
+/// artifact the tool builds, and an explicit
+/// `io.flutter.embedding.android.EnableHcpp` entry in the app's manifest, or an
+/// explicit `--[no-]enable-hcpp`, takes priority over it.
+const hcpp = Feature(
+  name: 'the HCPP platform view rendering mode',
+  extraHelpText:
+      'HCPP requires the Impeller rendering backend, and Android API 34 or above. '
+      "Devices that do not support it fall back to each platform view's developer-chosen mode.",
+  configSetting: 'enable-hcpp',
+  environmentOverride: 'FLUTTER_ENABLE_HCPP',
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true),
+);
+
 /// Enable tool extensions feature.
 const toolExtensionsFeature = Feature(
   name: 'support for tool extensions',
@@ -355,6 +383,7 @@ class Feature {
     this.configSetting,
     this.runtimeId,
     this.extraHelpText,
+    this.warningMessageOnDisable,
     this.master = const FeatureChannelSetting(),
     this.beta = const FeatureChannelSetting(),
     this.stable = const FeatureChannelSetting(),
@@ -367,6 +396,7 @@ class Feature {
     this.configSetting,
     this.runtimeId,
     this.extraHelpText,
+    this.warningMessageOnDisable,
   }) : master = const FeatureChannelSetting(available: true, enabledByDefault: true),
        beta = const FeatureChannelSetting(available: true, enabledByDefault: true),
        stable = const FeatureChannelSetting(available: true, enabledByDefault: true);
@@ -407,6 +437,11 @@ class Feature {
   ///
   /// If not provided, defaults to `null` meaning there is no additional text.
   final String? extraHelpText;
+
+  /// A warning to print when this feature is explicitly disabled.
+  ///
+  /// If not provided, defaults to `null` meaning there is no warning.
+  final String? warningMessageOnDisable;
 
   /// A help message for the `flutter config` command, or null if unsupported.
   String? generateHelpMessage() {
