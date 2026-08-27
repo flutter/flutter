@@ -255,7 +255,8 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
 TEST_F(FlCompositorOpenGLTest, FrameFormatMatchesBackingStore) {
   FlutterBackingStore bgra_backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
-      .open_gl = {.framebuffer = {.target = GL_BGRA8_EXT}}};
+      .open_gl = {.type = kFlutterOpenGLTargetTypeFramebuffer,
+                  .framebuffer = {.target = GL_BGRA8_EXT}}};
   FlutterLayer bgra_layer = {.type = kFlutterLayerContentTypeBackingStore,
                              .backing_store = &bgra_backing_store};
   const FlutterLayer* bgra_layers[1] = {&bgra_layer};
@@ -263,7 +264,8 @@ TEST_F(FlCompositorOpenGLTest, FrameFormatMatchesBackingStore) {
 
   FlutterBackingStore rgba_backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
-      .open_gl = {.framebuffer = {.target = GL_RGBA8}}};
+      .open_gl = {.type = kFlutterOpenGLTargetTypeFramebuffer,
+                  .framebuffer = {.target = GL_RGBA8}}};
   FlutterLayer rgba_layer = {.type = kFlutterLayerContentTypeBackingStore,
                              .backing_store = &rgba_backing_store};
   const FlutterLayer* rgba_layers[1] = {&rgba_layer};
@@ -286,6 +288,18 @@ TEST_F(FlCompositorOpenGLTest, FrameFormatDefaultsToRGBA) {
                                  .backing_store = &software_backing_store};
   const FlutterLayer* software_layers[1] = {&software_layer};
   EXPECT_EQ(fl_compositor_opengl_get_frame_format(software_layers, 1), GL_RGBA);
+
+  // fl_engine.cc only ever creates framebuffer backing stores. A texture
+  // backing store keeps its format in a different member of the same union, so
+  // it must not be read as if it were a framebuffer.
+  FlutterBackingStore texture_backing_store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {.type = kFlutterOpenGLTargetTypeTexture,
+                  .texture = {.target = GL_BGRA8_EXT}}};
+  FlutterLayer texture_layer = {.type = kFlutterLayerContentTypeBackingStore,
+                                .backing_store = &texture_backing_store};
+  const FlutterLayer* texture_layers[1] = {&texture_layer};
+  EXPECT_EQ(fl_compositor_opengl_get_frame_format(texture_layers, 1), GL_RGBA);
 }
 
 // Platform views have no format of their own, so the format must be taken from
@@ -298,7 +312,8 @@ TEST_F(FlCompositorOpenGLTest, FrameFormatSkipsPlatformViews) {
 
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
-      .open_gl = {.framebuffer = {.target = GL_BGRA8_EXT}}};
+      .open_gl = {.type = kFlutterOpenGLTargetTypeFramebuffer,
+                  .framebuffer = {.target = GL_BGRA8_EXT}}};
   FlutterLayer backing_store_layer = {
       .type = kFlutterLayerContentTypeBackingStore,
       .backing_store = &backing_store};
@@ -317,7 +332,8 @@ TEST_F(FlCompositorOpenGLTest, FrameFormatIgnoresTextureFormatExtension) {
 
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
-      .open_gl = {.framebuffer = {.target = GL_RGBA8}}};
+      .open_gl = {.type = kFlutterOpenGLTargetTypeFramebuffer,
+                  .framebuffer = {.target = GL_RGBA8}}};
   FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
                         .backing_store = &backing_store};
   const FlutterLayer* layers[1] = {&layer};
