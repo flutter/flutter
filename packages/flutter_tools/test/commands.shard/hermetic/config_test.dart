@@ -84,7 +84,6 @@ void main() {
     return ConfigCommand(
       verboseHelp: verboseHelp,
       featureFlags: featureFlags ?? TestFeatureFlags(),
-      analytics: analytics ?? fakeAnalytics,
       extensionManager: extensionManager,
       androidContext: FakeAndroidContext(
         androidSdk: androidSdk,
@@ -106,6 +105,10 @@ void main() {
     );
   }
 
+  CommandRunner<void> createRunner(ConfigCommand command, [Analytics? analytics]) {
+    return createTestCommandRunner(command, analytics ?? fakeAnalytics);
+  }
+
   group('config', () {
     testWithoutContext('machine flag displays values in json format', () async {
       final ConfigCommand configCommand = createConfigCommand(
@@ -117,7 +120,7 @@ void main() {
         androidSdk: fakeAndroidSdk,
         java: fakeJava,
       );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
 
       await commandRunner.run(<String>['config', '--machine']);
 
@@ -139,7 +142,7 @@ void main() {
         fileSystem: fs,
         flutterVersion: fakeFlutterVersion,
       );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
 
       await commandRunner.run(<String>['config', '--machine']);
 
@@ -157,7 +160,7 @@ void main() {
         androidSdk: fakeAndroidSdk,
         java: fakeJava,
       );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
 
       config.setValue('android-studio-dir', 'dummy/dir/to/android/studio');
       config.setValue('android-sdk', 'dummy/dir/to/android/sdk');
@@ -183,7 +186,7 @@ void main() {
         fileSystem: fs,
         flutterVersion: fakeFlutterVersion,
       );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
 
       await commandRunner.run(<String>['config', '--build-dir=foo']);
 
@@ -198,7 +201,7 @@ void main() {
         fileSystem: fs,
         flutterVersion: fakeFlutterVersion,
       );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
 
       expect(() => commandRunner.run(<String>['config', '--build-dir=/foo']), throwsToolExit());
       expect(fakeAnalytics.sentEvents, isEmpty);
@@ -211,7 +214,7 @@ void main() {
         fileSystem: fs,
         flutterVersion: fakeFlutterVersion,
       );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
 
       await commandRunner.run(<String>[
         'config',
@@ -270,7 +273,7 @@ void main() {
         fileSystem: fs,
         flutterVersion: fakeFlutterVersion,
       );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
 
       await commandRunner.run(<String>['config', '--enable-web']);
 
@@ -287,7 +290,7 @@ void main() {
         fileSystem: fs,
         flutterVersion: fakeFlutterVersion,
       );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
 
       await commandRunner.run(<String>['config', '--no-enable-swift-package-manager']);
 
@@ -302,7 +305,7 @@ void main() {
         fileSystem: fs,
         flutterVersion: fakeFlutterVersion,
       );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
 
       await commandRunner.run(<String>[
         'config',
@@ -328,7 +331,7 @@ void main() {
         fileSystem: fs,
         flutterVersion: fakeFlutterVersion,
       );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
 
       expect(fakeAnalytics.telemetryEnabled, true);
 
@@ -346,7 +349,7 @@ void main() {
         fileSystem: fs,
         flutterVersion: fakeFlutterVersion,
       );
-      createTestCommandRunner(configCommand);
+      createRunner(configCommand);
 
       await fakeAnalytics.setTelemetry(false);
       expect(
@@ -372,7 +375,7 @@ void main() {
         flutterVersion: fakeFlutterVersion,
       );
 
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
       await commandRunner.run(<String>['config', '--enable-web']);
 
       expect(fakeInjectedConfig.getValue('enable-web'), true);
@@ -391,7 +394,7 @@ void main() {
         fileSystem: fs,
         flutterVersion: fakeFlutterVersion,
       );
-      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+      final CommandRunner<void> commandRunner = createRunner(configCommand);
       await commandRunner.run(<String>['config', '--list']);
 
       expect(fakeLocalLogger.statusText, contains('All Settings:'));
@@ -430,7 +433,7 @@ void main() {
           extensionManager: fakeExtensionManager,
           featureFlags: fakes.TestFeatureFlags(isToolExtensionsEnabled: true),
         );
-        createTestCommandRunner(configCommand);
+        createRunner(configCommand);
 
         await configCommand.initializeDynamicOptions();
         final ArgParser parser = configCommand.argParser;
@@ -473,7 +476,7 @@ void main() {
           featureFlags: fakes.TestFeatureFlags(isToolExtensionsEnabled: true),
         );
         await configCommand.initializeDynamicOptions();
-        final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+        final CommandRunner<void> commandRunner = createRunner(configCommand);
 
         await commandRunner.run(<String>['config', '--my-ext-feature', '--my-ext-option=my-value']);
 
