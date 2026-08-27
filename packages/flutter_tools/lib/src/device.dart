@@ -1469,14 +1469,14 @@ class DebuggingOptions {
     final Map<String, Object?> configs = _getAndroidEngineConfig();
     final args = <String>{};
     for (final MapEntry<String, Object?> entry in configs.entries) {
+      final Object? value = entry.value;
       if (entry.key == AndroidEngineCliFlags.enableImpeller ||
           entry.key == 'enable-hcpp-and-surface-control') {
-        args.add('--${entry.key}=${entry.value}');
-      } else if (entry.value is bool) {
-        final value = entry.value! as bool;
+        args.add('--${entry.key}=$value');
+      } else if (value is bool) {
         args.add(value ? '--${entry.key}' : '--${entry.key}=false');
       } else {
-        args.add('--${entry.key}=${entry.value}');
+        args.add('--${entry.key}=$value');
       }
     }
     return args;
@@ -1488,10 +1488,11 @@ class DebuggingOptions {
     final Map<String, Object?> configs = _getAndroidEngineConfig();
     final args = <String>[];
     for (final MapEntry<String, Object?> entry in configs.entries) {
-      if (entry.value is bool) {
-        args.addAll(<String>['--ez', entry.key, entry.value.toString()]);
-      } else if (entry.value is String) {
-        args.addAll(<String>['--es', entry.key, entry.value! as String]);
+      final Object? value = entry.value;
+      if (value is bool) {
+        args.addAll(<String>['--ez', entry.key, value.toString()]);
+      } else if (value is String) {
+        args.addAll(<String>['--es', entry.key, value]);
       }
     }
     return args;
