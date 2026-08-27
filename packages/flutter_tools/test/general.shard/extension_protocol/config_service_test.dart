@@ -165,6 +165,7 @@ void main() {
         final command = ConfigCommand(
           androidContext: FakeAndroidContext(),
           toolContext: FakeToolContext(logger: logger),
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
           extensionManager: manager,
         );
 

@@ -54,6 +54,7 @@ void main() {
         final configCommand = ConfigCommand(
           androidContext: FakeAndroidContext(),
           toolContext: FakeToolContext(logger: testLogger),
+          featureFlags: featureFlags,
           extensionManager: manager,
         );
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
@@ -121,6 +122,7 @@ void main() {
         final configCommand = ConfigCommand(
           androidContext: FakeAndroidContext(),
           toolContext: FakeToolContext(logger: testLogger),
+          featureFlags: featureFlags,
           extensionManager: manager,
         );
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
