@@ -11,6 +11,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.DynamicFeatureBuildType
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.ApplicationVariant
 import com.android.build.gradle.BaseExtension
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
@@ -1175,9 +1176,12 @@ object FlutterPluginUtils {
         // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
         androidComponents.onVariants { variant ->
+            if (variant !is ApplicationVariant) {
+                return@onVariants
+            }
             val manifestUpdater =
                 project.tasks.register("output${capitalize(variant.name)}AppLinkSettings", DeepLinkJsonFromManifestTask::class.java) {
-                    namespace.set(variant.namespace)
+                    applicationId.set(variant.applicationId)
                     // Flutter should always use project.layout.buildDirectory.file("deeplink.json")
                     // instead of relying on passing in a path.
                     if (project.hasProperty("outputPath")) {
@@ -1234,8 +1238,10 @@ object FlutterPluginUtils {
 
     /**
      * Adds tasks that inject the `io.flutter.embedding.android.EnableHcpp` meta-data into the
-     * merged manifest of each variant, when the flutter tool passed `-Penable-hcpp=true` (i.e.
-     * when the `--enable-hcpp` flag was passed).
+     * merged manifest of each variant, when the flutter tool passed `-Penable-hcpp=true`. The
+     * tool does that when the `enable-hcpp` feature flag is on, or when `--enable-hcpp` was
+     * passed explicitly (these are not the same thing: an explicit flag sets the property
+     * regardless of the feature flag).
      *
      * The meta-data is only added when not already present in the merged manifest, so an
      * explicit value in the developer's manifest always takes priority over the tool's default.
