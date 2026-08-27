@@ -30,7 +30,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   ConfigCommand({
     required AndroidContext androidContext,
     required ToolContext toolContext,
-    FeatureFlags? featureFlags,
+    required FeatureFlags featureFlags,
     Analytics? analytics,
     bool verboseHelp = false,
     ExtensionManager? extensionManager,
@@ -42,13 +42,12 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
        super(toolContext: toolContext);
 
   final AndroidContext _androidContext;
-  final FeatureFlags? _featureFlags;
+  final FeatureFlags _featureFlags;
   final Analytics? _explicitAnalytics;
   final ExtensionManager? _extensionManager;
   final bool _verboseHelp;
 
   ToolContext get _toolContext => toolContext!;
-  FeatureFlags get _effectiveFeatureFlags => _featureFlags ?? const _DefaultFeatureFlags();
   @override
   Analytics get analytics => _explicitAnalytics ?? super.analytics;
 
@@ -105,7 +104,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       help: 'Outputs in a machine readable structured JSON format.',
       hide: !_verboseHelp,
     );
-    for (final Feature feature in _effectiveFeatureFlags.allFeatures) {
+    for (final Feature feature in _featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
@@ -226,7 +225,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
     }
 
     if (boolArg('clear-features')) {
-      for (final Feature feature in _effectiveFeatureFlags.allFeatures) {
+      for (final Feature feature in _featureFlags.allFeatures) {
         final String? configSetting = feature.configSetting;
         if (configSetting != null) {
           config.removeValue(configSetting);
@@ -295,7 +294,7 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       _updateConfig('build-dir', buildDir);
     }
 
-    for (final Feature feature in _effectiveFeatureFlags.allFeatures) {
+    for (final Feature feature in _featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
@@ -375,12 +374,12 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   Future<String> get settingsText async {
     final Config config = _toolContext.config;
     final featuresByName = <String, Feature>{
-      for (final feature in _effectiveFeatureFlags.allFeatures)
+      for (final feature in _featureFlags.allFeatures)
         if (feature.configSetting case final configSetting?) configSetting: feature,
     };
     final String channel = _toolContext.flutterVersion.channel;
     final keys = <String>{
-      ..._effectiveFeatureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
+      ..._featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
       ...config.keys,
     };
     final Iterable<String> settings = keys.map<String>((String key) {
@@ -437,55 +436,4 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   /// Raising the reload tip for setting changes.
   final requireReloadTipText =
       'You may need to restart any open editors for them to read new settings.';
-}
-
-class _DefaultFeatureFlags extends FeatureFlags {
-  const _DefaultFeatureFlags();
-
-  @override
-  bool isEnabled(Feature feature) => false;
-  @override
-  bool get isLinuxEnabled => false;
-  @override
-  bool get isMacOSEnabled => false;
-  @override
-  bool get isWindowsEnabled => false;
-  @override
-  bool get isWebEnabled => false;
-  @override
-  bool get isAndroidEnabled => false;
-  @override
-  bool get isIOSEnabled => false;
-  @override
-  bool get isFuchsiaEnabled => false;
-  @override
-  bool get areCustomDevicesEnabled => false;
-  @override
-  bool get isCliAnimationEnabled => false;
-  @override
-  bool get isNativeAssetsEnabled => false;
-  @override
-  bool get isDartDataAssetsEnabled => false;
-  @override
-  bool get isRecordUseEnabled => false;
-  @override
-  bool get isSwiftPackageManagerEnabled => false;
-  @override
-  bool get isOmitLegacyVersionFileEnabled => false;
-  @override
-  bool get isWindowingEnabled => false;
-  @override
-  bool get isAccessibilityEvaluationsEnabled => false;
-  @override
-  bool get isLLDBDebuggingEnabled => false;
-  @override
-  bool get isUISceneMigrationEnabled => false;
-  @override
-  bool get isRiscv64SupportEnabled => false;
-  @override
-  bool get isMacOSArm64OnlyEnabled => false;
-  @override
-  bool get isHcppEnabled => false;
-  @override
-  bool get isToolExtensionsEnabled => false;
 }
