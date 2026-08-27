@@ -1,4 +1,4 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -42,14 +42,15 @@ class PrePushCommand extends Command<bool> {
   Future<bool> _runClangTidy(String flutterRoot, bool verbose) async {
     io.stdout.writeln('Starting clang-tidy checks.');
     final sw = Stopwatch()..start();
+    final String engineSrcDir = path.join(flutterRoot, 'engine', 'src');
     // First ensure that out/host_debug/compile_commands.json exists by running
     // //flutter/tools/gn.
     var compileCommands = io.File(
-      path.join(flutterRoot, '..', 'out', 'host_debug', 'compile_commands.json'),
+      path.join(engineSrcDir, 'out', 'host_debug', 'compile_commands.json'),
     );
     if (!compileCommands.existsSync()) {
       compileCommands = io.File(
-        path.join(flutterRoot, '..', 'out', 'host_debug_unopt', 'compile_commands.json'),
+        path.join(engineSrcDir, 'out', 'host_debug_unopt', 'compile_commands.json'),
       );
       if (!compileCommands.existsSync()) {
         io.stderr.writeln(
@@ -79,10 +80,11 @@ class PrePushCommand extends Command<bool> {
   Future<bool> _runFormatter(String flutterRoot, bool verbose) async {
     io.stdout.writeln('Starting formatting checks.');
     final sw = Stopwatch()..start();
+    final String engineDir = path.join(flutterRoot, 'engine', 'src', 'flutter');
     final ext = io.Platform.isWindows ? '.bat' : '.sh';
     final bool result = await _runCheck(
-      flutterRoot,
-      path.join(flutterRoot, 'ci', 'format$ext'),
+      engineDir,
+      path.join(engineDir, 'ci', 'format$ext'),
       <String>[],
       'Formatting check',
       verbose: verbose,
