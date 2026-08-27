@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
@@ -47,8 +48,11 @@ import 'src/commands/test.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/widget_preview.dart';
+import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/devtools_launcher.dart';
+import 'src/experimental/extension_discovery.dart';
+import 'src/experimental/extension_manager.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
@@ -91,8 +95,8 @@ Future<void> main(List<String> args) async {
       (args.length == 1 && verbose);
   final bool muteCommandLogging = (help || doctor) && !veryVerbose;
   final bool verboseHelp = help && verbose;
-  final bool daemon = args.contains('daemon');
-  final bool widgetPreviews = args.contains(WidgetPreviewCommand.kWidgetPreview);
+  final daemon = commandName == 'daemon';
+  final widgetPreviews = commandName == WidgetPreviewCommand.kWidgetPreview;
   final bool runMachine = args.contains('--machine');
 
   // Cache.flutterRoot must be set early because other features use it (e.g.
@@ -106,11 +110,20 @@ Future<void> main(List<String> args) async {
 
   await runner.run(
     args,
-    (ToolDependencies toolDependencies) => generateCommands(
-      toolDependencies: toolDependencies,
-      verbose: verbose,
-      verboseHelp: verboseHelp,
-    ),
+    (ToolDependencies toolDependencies) {
+      final manager = ExtensionManager(
+        hostPlatform: globals.os.hostPlatform,
+        logger: globals.logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      return generateCommands(
+        toolDependencies: toolDependencies,
+        verboseHelp: verboseHelp,
+        verbose: verbose,
+        extensionManager: manager,
+      );
+    },
     verbose: verbose,
     muteCommandLogging: muteCommandLogging,
     verboseHelp: verboseHelp,
@@ -172,10 +185,12 @@ Future<void> main(List<String> args) async {
 /// [ArgResults.rest]. `help` is the exception, since the command runner
 /// registers it on the parser itself and so reports it as a parsed command.
 @visibleForTesting
-String? findCommandName(List<String> args) {
+String? findCommandName(List<String> args, {ToolContext? toolContext}) {
   final ArgResults results;
   try {
-    results = FlutterCommandRunner().argParser.parse(args);
+    results = FlutterCommandRunner(
+      toolContext: toolContext ?? _FallbackToolContext(),
+    ).argParser.parse(args);
   } on ArgParserException {
     // The real parser will complain about these later.
     return null;
@@ -183,10 +198,33 @@ String? findCommandName(List<String> args) {
   return results.command?.name ?? results.rest.firstOrNull;
 }
 
+class _FallbackToolContext implements ToolContext {
+  _FallbackToolContext({OutputPreferences? outputPreferences})
+    : _outputPreferences = outputPreferences;
+
+  final OutputPreferences? _outputPreferences;
+
+  @override
+  OutputPreferences get outputPreferences {
+    if (_outputPreferences != null) {
+      return _outputPreferences;
+    }
+    try {
+      return globals.outputPreferences;
+    } on Object catch (_) {
+      return OutputPreferences.test();
+    }
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 List<FlutterCommand> generateCommands({
   required ToolDependencies toolDependencies,
   required bool verbose,
   required bool verboseHelp,
+  ExtensionManager? extensionManager,
 }) => <FlutterCommand>[
   AnalyzeCommand(
     verboseHelp: verboseHelp,
@@ -240,8 +278,13 @@ List<FlutterCommand> generateCommands({
     flutterVersion: toolDependencies.toolContext.flutterVersion,
   ),
   ChannelCommand(verboseHelp: verboseHelp),
-  CleanCommand(verbose: verbose),
-  ConfigCommand(verboseHelp: verboseHelp),
+  CleanCommand(
+    verbose: verbose,
+    toolContext: toolDependencies.toolContext,
+    xcode: toolDependencies.appleContext.xcode,
+    xcodeProjectInterpreter: toolDependencies.appleContext.xcodeProjectInterpreter,
+  ),
+  ConfigCommand(verboseHelp: verboseHelp, extensionManager: extensionManager),
   CustomDevicesCommand(
     customDevicesConfig: toolDependencies.toolContext.customDevicesConfig,
     operatingSystemUtils: toolDependencies.toolContext.os,
@@ -256,7 +299,7 @@ List<FlutterCommand> generateCommands({
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),
-  DoctorCommand(verbose: verbose),
+  DoctorCommand(verbose: verbose, extensionManager: extensionManager),
   DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
   DriveCommand(
     verboseHelp: verboseHelp,
