@@ -721,7 +721,7 @@ class FlutterPlatform extends PlatformPlugin {
             'test $ourTestCount: connected to test device, now awaiting test result',
           );
 
-          await _pipeHarnessToRemote(
+          await pipeHarnessToRemote(
             id: ourTestCount,
             harnessChannel: testHarnessChannel,
             remoteChannel: remoteChannel,
@@ -889,9 +889,10 @@ class _AsyncError {
 ///
 /// The returned future completes when either side is closed, which also
 /// indicates when the tests have finished.
-Future<void> _pipeHarnessToRemote({
+@visibleForTesting
+Future<void> pipeHarnessToRemote({
   required int id,
-  required StreamChannel<dynamic> harnessChannel,
+  required StreamChannel<Object?> harnessChannel,
   required StreamChannel<String> remoteChannel,
 }) async {
   globals.printTrace('test $id: Waiting for test harness or tests to finish');
@@ -902,10 +903,24 @@ Future<void> _pipeHarnessToRemote({
     ) {
       globals.printTrace('test $id: Test process is no longer needed by test harness');
     }),
-    remoteChannel.stream.map<dynamic>(json.decode).pipe(harnessChannel.sink).then<void>((
-      void value,
-    ) {
-      globals.printTrace('test $id: Test harness is no longer needed by test process');
-    }),
+    remoteChannel.stream
+        .transform(
+          StreamTransformer<String, Object?>.fromHandlers(
+            handleData: (String message, EventSink<Object?> sink) {
+              try {
+                sink.add(json.decode(message));
+              } on FormatException catch (error) {
+                globals.printWarning(
+                  'Received unexpected non-JSON output from test runner: $message',
+                );
+                globals.printTrace('test $id: JSON decoding failed: $error');
+              }
+            },
+          ),
+        )
+        .pipe(harnessChannel.sink)
+        .then<void>((void value) {
+          globals.printTrace('test $id: Test harness is no longer needed by test process');
+        }),
   ]);
 }
