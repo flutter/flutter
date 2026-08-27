@@ -55,8 +55,57 @@ FLUTTER_ASSERT_ARC
                                                                       arguments:@"Test"];
     FlutterResult result = ^(id result) {
       OCMVerify([mockEngineViewController
-          addChildViewController:[OCMArg isKindOfClass:[FLTTranslateViewController class]]]);
+          addChildViewController:[OCMArg isKindOfClass:[FlutterTranslateViewController class]]]);
       [presentExpectation fulfill];
+    };
+    [mockPlugin handleMethodCall:methodCall result:result];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+  }
+}
+
+- (void)testTranslateNotInvokedWhenUnavailable {
+  if (!@available(iOS 17.4, *)) {
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+    [engine runWithEntrypoint:nil];
+
+    XCTestExpectation* expectation =
+        [self expectationWithDescription:@"Translate view returns not implemented"];
+
+    FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+    FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
+
+    FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"Translate.invoke"
+                                                                      arguments:@"Test"];
+    FlutterResult result = ^(id result) {
+      XCTAssertEqualObjects(result, FlutterMethodNotImplemented);
+      [expectation fulfill];
+    };
+    [mockPlugin handleMethodCall:methodCall result:result];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+  }
+}
+
+- (void)testTranslateInvokedWithEmptyTermDoesNotAddChildViewController {
+  if (@available(iOS 17.4, *)) {
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+    [engine runWithEntrypoint:nil];
+
+    XCTestExpectation* expectation =
+        [self expectationWithDescription:@"Translate view ignored for empty term"];
+
+    FlutterViewController* engineViewController =
+        [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+    FlutterViewController* mockEngineViewController = OCMPartialMock(engineViewController);
+
+    FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+    FlutterPlatformPlugin* mockPlugin = OCMPartialMock(plugin);
+
+    FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"Translate.invoke"
+                                                                      arguments:@""];
+    FlutterResult result = ^(id result) {
+      OCMReject([mockEngineViewController
+          addChildViewController:[OCMArg isKindOfClass:[FlutterTranslateViewController class]]]);
+      [expectation fulfill];
     };
     [mockPlugin handleMethodCall:methodCall result:result];
     [self waitForExpectationsWithTimeout:1 handler:nil];

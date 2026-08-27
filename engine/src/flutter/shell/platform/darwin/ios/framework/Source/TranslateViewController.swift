@@ -12,7 +12,7 @@ import UIKit
 /// This is necessary because UIHostingController is a generic class and cannot
 /// be imported directly into Objective-C.
 @available(iOS 17.4, *)
-@objc(FLTTranslateViewController)
+@objc(FlutterTranslateViewController)
 class TranslateViewController: UIViewController {
 
   private let termToTranslate: String
@@ -61,7 +61,7 @@ class TranslateViewController: UIViewController {
   }
 
   private func makeTranslateHostingController(termToTranslate: String) -> UIViewController {
-    var contentView = ContentView(
+    var contentView = TranslateContentView(
       termToTranslate: termToTranslate,
       ipadBounds: ipadBounds
     )
@@ -81,7 +81,7 @@ class TranslateViewController: UIViewController {
 }
 
 @available(iOS 17.4, *)
-fileprivate struct ContentView: View {
+fileprivate struct TranslateContentView: View {
   fileprivate let termToTranslate: String
   fileprivate let ipadBounds: CGRect?
 
@@ -101,7 +101,14 @@ fileprivate struct ContentView: View {
     Color.clear
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .translationPresentation(
-        isPresented: Binding( get: { true }, set: { shown in if !shown { onDismiss?() } } ),
+        isPresented: Binding(
+          get: { true },
+          set: { shown in
+            if !shown {
+              onDismiss?()
+            }
+          }
+        ),
         text: termToTranslate,
         attachmentAnchor: .rect(anchorSource)
       )
