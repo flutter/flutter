@@ -582,6 +582,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isUISceneMigrationEnabled = false,
     this.isRiscv64SupportEnabled = false,
     this.isMacOSArm64OnlyEnabled = false,
+    this.isHcppEnabled = false,
     this.isToolExtensionsEnabled = false,
   });
 
@@ -646,6 +647,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isMacOSArm64OnlyEnabled;
 
   @override
+  final bool isHcppEnabled;
+
+  @override
   final bool isToolExtensionsEnabled;
 
   @override
@@ -670,6 +674,7 @@ class TestFeatureFlags implements FeatureFlags {
       riscv64 => isRiscv64SupportEnabled,
       macOSArm64Only => isMacOSArm64OnlyEnabled,
       recordUse => isRecordUseEnabled,
+      hcpp => isHcppEnabled,
       toolExtensionsFeature => isToolExtensionsEnabled,
       _ => false,
     };
@@ -697,6 +702,7 @@ class TestFeatureFlags implements FeatureFlags {
     uiSceneMigration,
     riscv64,
     macOSArm64Only,
+    hcpp,
     toolExtensionsFeature,
   ];
 

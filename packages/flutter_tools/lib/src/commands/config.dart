@@ -492,5 +492,7 @@ class _DefaultFeatureFlags extends FeatureFlags {
   @override
   bool get isMacOSArm64OnlyEnabled => false;
   @override
+  bool get isHcppEnabled => false;
+  @override
   bool get isToolExtensionsEnabled => false;
 }

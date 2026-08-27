@@ -3688,6 +3688,10 @@ class FakeFeatureFlags extends Fake implements FeatureFlags {
   @override
   bool get isSwiftPackageManagerEnabled => true;
 
+  // Queried by getBuildInfo.
+  @override
+  bool get isHcppEnabled => false;
+
   @override
   bool get isToolExtensionsEnabled => false;
 }
