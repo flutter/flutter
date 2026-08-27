@@ -213,6 +213,8 @@ class BuildWebCommand extends BuildSubCommand {
       outputDirectoryPath: outputDirectoryPath,
       webDefines: webDefines,
     );
+    // TODO(kevmoo): Ensure https://github.com/flutter/website/issues/13825 is
+    // documented and merged before this feature is promoted to default/stable.
     if (webContentHash) {
       globals.logger.printStatus(
         '\nServing tip: Configure your web host to serve "index.html" and "flutter_bootstrap.js"\n'
