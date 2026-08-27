@@ -1576,16 +1576,16 @@ extension on Environment {
 }
 
 Map<String, File> _hashWebAssets(Directory assetsDir) {
-  final Map<String, File> renamedFileMap = <String, File>{};
+  final renamedFileMap = <String, File>{};
   if (!assetsDir.existsSync()) {
     return renamedFileMap;
   }
 
   final FileSystem fileSystem = assetsDir.fileSystem;
   final List<File> files = assetsDir.listSync(recursive: true).whereType<File>().toList();
-  final Map<String, String> renamedAssets = <String, String>{};
+  final renamedAssets = <String, String>{};
 
-  for (final File file in files) {
+  for (final file in files) {
     final String basename = file.basename;
     if (_kUnhashedAssetBasenames.contains(basename)) {
       continue;
@@ -1620,26 +1620,26 @@ Map<String, File> _hashWebAssets(Directory assetsDir) {
   final File assetManifestBin = assetsDir.childFile('AssetManifest.bin');
   if (assetManifestBin.existsSync()) {
     final Uint8List rawBytes = assetManifestBin.readAsBytesSync();
-    final ByteData message = ByteData.sublistView(rawBytes);
+    final message = ByteData.sublistView(rawBytes);
     final Object? decoded = const StandardMessageCodec().decodeMessage(message);
     if (decoded is Map<Object?, Object?>) {
-      final Map<String, dynamic> newManifest = <String, dynamic>{};
+      final newManifest = <String, dynamic>{};
       for (final MapEntry<Object?, Object?> entry in decoded.entries) {
-        final String key = entry.key.toString();
+        final key = entry.key.toString();
         final Object? variantsVal = entry.value;
         if (variantsVal is! List<Object?>) {
           continue;
         }
-        final List<dynamic> newVariants = <dynamic>[];
+        final newVariants = <dynamic>[];
         for (final Object? variantObj in variantsVal) {
           if (variantObj is! Map<Object?, Object?>) {
             continue;
           }
-          final Map<String, dynamic> newVariantMap = <String, dynamic>{};
+          final newVariantMap = <String, dynamic>{};
           for (final MapEntry<Object?, Object?> vEntry in variantObj.entries) {
-            final String vKey = vEntry.key.toString();
+            final vKey = vEntry.key.toString();
             if (vKey == 'asset') {
-              final String vValue = vEntry.value.toString();
+              final vValue = vEntry.value.toString();
               newVariantMap[vKey] = renamedAssets[vValue] ?? vValue;
             } else {
               newVariantMap[vKey] = vEntry.value;
@@ -1650,7 +1650,7 @@ Map<String, File> _hashWebAssets(Directory assetsDir) {
         newManifest[key] = newVariants;
       }
       final ByteData encoded = const StandardMessageCodec().encodeMessage(newManifest)!;
-      final Uint8List encodedBytes = Uint8List.sublistView(encoded);
+      final encodedBytes = Uint8List.sublistView(encoded);
       assetManifestBin.writeAsBytesSync(encodedBytes);
 
       // Update AssetManifest.bin.json
@@ -1658,6 +1658,28 @@ Map<String, File> _hashWebAssets(Directory assetsDir) {
       if (assetManifestBinJson.existsSync()) {
         assetManifestBinJson.writeAsStringSync(json.encode(base64.encode(encodedBytes)));
       }
+    }
+  }
+
+  // Update legacy AssetManifest.json if present
+  final File assetManifestJson = assetsDir.childFile('AssetManifest.json');
+  if (assetManifestJson.existsSync()) {
+    final Object? decodedJson = json.decode(assetManifestJson.readAsStringSync());
+    if (decodedJson is Map<String, dynamic>) {
+      final newManifest = <String, dynamic>{};
+      for (final MapEntry<String, dynamic> entry in decodedJson.entries) {
+        final Object? variants = entry.value;
+        if (variants is List<dynamic>) {
+          final newVariants = <String>[];
+          for (final Object? variant in variants) {
+            if (variant is String) {
+              newVariants.add(renamedAssets[variant] ?? variant);
+            }
+          }
+          newManifest[entry.key] = newVariants;
+        }
+      }
+      assetManifestJson.writeAsStringSync(json.encode(newManifest));
     }
   }
 

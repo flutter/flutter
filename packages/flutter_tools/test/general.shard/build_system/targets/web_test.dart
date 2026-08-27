@@ -2339,7 +2339,7 @@ flutter:
         ..createSync(recursive: true)
         ..writeAsStringSync('License notices');
 
-      const String logoHash = '9f64a747'; // sha256 of [1,2,3,4]
+      const logoHash = '9f64a747'; // sha256 of [1,2,3,4]
 
       await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig(webContentHash: true),
@@ -2360,7 +2360,7 @@ flutter:
 
       // Test stale asset cleanup on rebuild: modify logo content
       logo.writeAsBytesSync(<int>[5, 6, 7, 8]);
-      const String newLogoHash = '55e5509f'; // sha256 of [5,6,7,8]
+      const newLogoHash = '55e5509f'; // sha256 of [5,6,7,8]
 
       await WebReleaseBundle(<WebCompilerConfig>[
         const JsCompilerConfig(webContentHash: true),
