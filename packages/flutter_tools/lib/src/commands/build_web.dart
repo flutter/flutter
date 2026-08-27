@@ -218,7 +218,7 @@ class BuildWebCommand extends BuildSubCommand {
         '\nServing tip: Configure your web host to serve "index.html" and "flutter_bootstrap.js"\n'
         'with "Cache-Control: no-cache" (or revalidation) so browser clients immediately pick up new deployments.\n'
         'Hashed entrypoint files (*.<hash>.*) can be served with long-term immutable caching (e.g. "Cache-Control: max-age=31536000, immutable").\n'
-        'See https://docs.flutter.dev/platform-integration/web/deployment for caching guidance.',
+        'See https://docs.flutter.dev/deployment/web for caching guidance.',
       );
     }
     return FlutterCommandResult.success();
