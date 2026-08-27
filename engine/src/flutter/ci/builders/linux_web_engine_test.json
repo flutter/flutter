@@ -493,7 +493,7 @@
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac-15.7",
+        "os=Mac-26.5",
         "cpu=arm64"
       ],
       "gclient_variables": {
