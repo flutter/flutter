@@ -466,6 +466,11 @@ class UpgradeCommandRunner {
   }
 }
 
+/// Update the engine repository and precache all artifacts.
+///
+/// Check for and download any engine and pkg/ updates. We run the 'flutter'
+/// shell script reentrantly here so that it will download the updated
+/// Dart and so forth if necessary.
 Future<void> precacheArtifacts({
   String? workingDirectory,
   Logger? logger,
