@@ -36,6 +36,8 @@ FLUTTER_ASSERT_ARC
 - (void)presentTexture:(FlutterTexture*)texture;
 - (void)displayTexture:(FlutterTexture*)texture;
 - (void)returnTexture:(FlutterTexture*)texture;
+- (void)resetSampleBufferDisplayLayer;
+- (void)willEnterForeground:(NSNotification*)notification;
 
 @end
 
@@ -149,14 +151,15 @@ FLUTTER_ASSERT_ARC
     self.device = self.preferredDevice;
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
-    _sampleBufferDisplayLayer = [[AVSampleBufferDisplayLayer alloc] init];
-    _sampleBufferDisplayLayer.videoGravity = AVLayerVideoGravityResize;
-    _sampleBufferDisplayLayer.backgroundColor = UIColor.clearColor.CGColor;
-    [self addSublayer:_sampleBufferDisplayLayer];
+    [self resetSampleBufferDisplayLayer];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground:)
                                                  name:UIApplicationDidEnterBackgroundNotification
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(willEnterForeground:)
+                                                 name:UIApplicationWillEnterForegroundNotification
                                                object:nil];
   }
   return self;
@@ -180,6 +183,17 @@ FLUTTER_ASSERT_ARC
   [CATransaction commit];
 }
 
+- (void)resetSampleBufferDisplayLayer {
+  [_sampleBufferDisplayLayer removeFromSuperlayer];
+
+  _sampleBufferDisplayLayer = [[AVSampleBufferDisplayLayer alloc] init];
+  _sampleBufferDisplayLayer.videoGravity = AVLayerVideoGravityResize;
+  _sampleBufferDisplayLayer.backgroundColor = UIColor.clearColor.CGColor;
+  _sampleBufferDisplayLayer.preventsDisplaySleepDuringVideoPlayback = NO;
+  _sampleBufferDisplayLayer.frame = self.bounds;
+  [self insertSublayer:_sampleBufferDisplayLayer atIndex:0];
+}
+
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -194,10 +208,22 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)didEnterBackground:(id)notification {
-  [_sampleBufferDisplayLayer flushAndRemoveImage];
+  [_sampleBufferDisplayLayer flush];
   @synchronized(self) {
     [_availableTextures removeAllObjects];
     _totalTextures = _front != nil ? 1 : 0;
+  }
+}
+
+- (void)willEnterForeground:(NSNotification*)notification {
+  [self resetSampleBufferDisplayLayer];
+
+  FlutterTexture* front = nil;
+  @synchronized(self) {
+    front = _front;
+  }
+  if (front != nil) {
+    [self displayTexture:front];
   }
 }
 
