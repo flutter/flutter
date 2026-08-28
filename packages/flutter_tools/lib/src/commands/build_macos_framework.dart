@@ -60,7 +60,12 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
         stringArg('output') ??
-        globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'macos', 'framework');
+        globals.fs.path.join(
+          globals.fs.currentDirectory.path,
+          getBuildDirectory(globals.config, globals.fs),
+          'macos',
+          'framework',
+        );
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');

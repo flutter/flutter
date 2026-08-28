@@ -119,6 +119,17 @@ void main() {
           globals.fs.currentDirectory.absolute.path,
         );
       });
+
+      _testInMemory('buildDirectory uses configured build-dir', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        globals.config.setValue('build-dir', 'custom_build');
+        final FlutterProject project = FlutterProject.fromDirectory(directory);
+        expect(project.buildDirectory.path, globals.fs.path.join(directory.path, 'custom_build'));
+        expect(
+          project.ephemeralDirectories.map((Directory d) => d.path),
+          contains(project.buildDirectory.path),
+        );
+      });
     });
 
     group('ensure ready for platform-specific tooling', () {
