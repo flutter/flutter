@@ -19,12 +19,7 @@ FLUTTER_ASSERT_ARC
 @class FlutterDrawable;
 
 @interface FlutterMetalLayer () {
-  id<MTLDevice> _preferredDevice;
-  id<MTLDevice> _device;
-  MTLPixelFormat _pixelFormat;
-  CGColorSpaceRef _colorspace;
   CGSize _drawableSize;
-  CAMetalLayer* _presentationSignalLayer;
 
   NSUInteger _nextDrawableId;
 
@@ -133,10 +128,11 @@ FLUTTER_ASSERT_ARC
 - (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer {
   FlutterTexture* texture = _texture;
   texture.waitingForCompletion = YES;
+
   id<CAMetalDrawable> presentationDrawable = [_layer acquirePresentationDrawable];
   id<MTLTexture> presentationTexture = presentationDrawable.texture;
 
-  // A resize can leave an old Flutter texture in flight. do not copy
+  // A resize can leave an old Flutter texture in flight. Do not copy
   // it into a drawable created for the new layer configuration.
   const BOOL canCopy = presentationTexture != nil &&
                        presentationTexture.width == texture.texture.width &&
@@ -144,9 +140,9 @@ FLUTTER_ASSERT_ARC
                        presentationTexture.pixelFormat == texture.texture.pixelFormat;
 
   if (canCopy) {
-    // CAMetalLayer can only present its own drawables, so bridge the IOSurface-backed
-    // Flutter result into this drawable. Keeping the copy and presentation on Flutter
-    // render command buffer preserves GPU ordering without making the CPU wait.
+    // Copy the IOSurface-backed Flutter result into the drawable owned by this CAMetalLayer.
+    // Encoding the copy and presentation on the render command buffer preserves GPU ordering
+    // without making the CPU wait.
     id<MTLBlitCommandEncoder> blit = [commandBuffer blitCommandEncoder];
     MTLOrigin origin = MTLOriginMake(0, 0, 0);
     MTLSize size = MTLSizeMake(texture.texture.width, texture.texture.height, 1);
@@ -173,23 +169,9 @@ FLUTTER_ASSERT_ARC
 
 - (instancetype)init {
   if (self = [super init]) {
-    _preferredDevice = MTLCreateSystemDefaultDevice();
-    self.device = self.preferredDevice;
+    self.device = MTLCreateSystemDefaultDevice();
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
-
-    // Use CAMetalLayer presentation path to prevent completed Flutter frames published
-    // through CALayer.contents from being deferred to a later Core Animation presentation
-    // opportunity, while retaining the IOSurface-backed rendering required by the
-    // platform-view composition path. This child layer only owns final presentation.
-    _presentationSignalLayer = [CAMetalLayer layer];
-    _presentationSignalLayer.device = _preferredDevice;
-    _presentationSignalLayer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-    _presentationSignalLayer.frame = self.bounds;
-    _presentationSignalLayer.framebufferOnly = NO;
-    _presentationSignalLayer.opaque = YES;
-    _presentationSignalLayer.presentsWithTransaction = NO;
-    [self addSublayer:_presentationSignalLayer];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground:)
@@ -203,52 +185,13 @@ FLUTTER_ASSERT_ARC
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (BOOL)isKindOfClass:(Class)aClass {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability-new"
-  // Pretend that we're a CAMetalLayer so that the rest of Flutter plays along
-  if ([aClass isEqual:[CAMetalLayer class]]) {
-    return YES;
-  }
-#pragma clang diagnostic pop
-  return [super isKindOfClass:aClass];
-}
-
-- (void)setDevice:(id<MTLDevice>)device {
-  _device = device;
-  _presentationSignalLayer.device = device;
-}
-
-- (id<MTLDevice>)device {
-  return _device;
-}
-
-- (void)setPixelFormat:(MTLPixelFormat)pixelFormat {
-  _pixelFormat = pixelFormat;
-  _presentationSignalLayer.pixelFormat = pixelFormat;
-}
-
-- (MTLPixelFormat)pixelFormat {
-  return _pixelFormat;
-}
-
-- (void)setColorspace:(CGColorSpaceRef)colorspace {
-  _colorspace = colorspace;
-  _presentationSignalLayer.colorspace = colorspace;
-}
-
-- (CGColorSpaceRef)colorspace {
-  return _colorspace;
-}
-
 - (void)setDrawableSize:(CGSize)drawableSize {
   @synchronized(self) {
     [_availableTextures removeAllObjects];
     _front = nil;
     _totalTextures = 0;
     _drawableSize = drawableSize;
-    _presentationSignalLayer.frame = self.bounds;
-    _presentationSignalLayer.drawableSize = drawableSize;
+    [super setDrawableSize:drawableSize];
   }
 }
 
@@ -340,12 +283,12 @@ FLUTTER_ASSERT_ARC
         return nil;
       }
       MTLTextureDescriptor* textureDescriptor =
-          [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:_pixelFormat
+          [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:self.pixelFormat
                                                              width:_drawableSize.width
                                                             height:_drawableSize.height
                                                          mipmapped:NO];
 
-      if (_framebufferOnly) {
+      if (self.framebufferOnly) {
         textureDescriptor.usage = MTLTextureUsageRenderTarget;
       } else {
         textureDescriptor.usage =
@@ -387,7 +330,7 @@ FLUTTER_ASSERT_ARC
   }
 }
 
-- (id<CAMetalDrawable>)nextDrawable {
+- (id<CAMetalDrawable>)nextFlutterDrawable {
   FlutterTexture* texture = [self nextTexture];
   if (texture == nil) {
     return nil;
@@ -398,8 +341,13 @@ FLUTTER_ASSERT_ARC
   return drawable;
 }
 
+- (id<CAMetalDrawable>)nextDrawable {
+  // Metal renderers receive this instance as CAMetalLayer and call nextDrawable.
+  return [self nextFlutterDrawable];
+}
+
 - (id<CAMetalDrawable>)acquirePresentationDrawable {
-  return [_presentationSignalLayer nextDrawable];
+  return [super nextDrawable];
 }
 
 - (void)presentTexture:(FlutterTexture*)texture {
