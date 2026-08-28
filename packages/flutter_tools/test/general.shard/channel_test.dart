@@ -487,6 +487,7 @@ void main() {
         );
 
         final command = ChannelCommand(toolContext: toolContext);
+        expect(command.toolContext, same(toolContext));
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['channel']);
