@@ -77,8 +77,12 @@ class AccessibilityInspector {
       return <String, Object?>{'error': 'rootSemanticsNode is null', 'needsFrame': true};
     }
 
+    // The violations are displayed in Devtool.
+    // TODO(hangyujin): If we add a "target platforms" option on the devtool side,
+    // we can display violations for both iOS/android standards
+    // regardless of the testing device platform.
     final Size minSize = switch (defaultTargetPlatform) {
-      TargetPlatform.android || TargetPlatform.fuchsia => const Size(48.0, 48.0),
+      TargetPlatform.android  => const Size(48.0, 48.0),
       TargetPlatform.iOS || TargetPlatform.macOS => const Size(44.0, 44.0),
       _ => const Size(48.0, 48.0),
     };
