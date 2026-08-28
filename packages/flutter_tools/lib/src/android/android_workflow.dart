@@ -518,7 +518,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     final Directory licensesDir = _androidSdk.directory.childDirectory('licenses');
     try {
       final bool hasAcceptedLicense = licensesDir.listSync().whereType<File>().any(
-        (File file) => file.lengthSync() > 0,
+        (File file) => !file.basename.startsWith('.') && file.lengthSync() > 0,
       );
       return hasAcceptedLicense ? LicensesAccepted.all : LicensesAccepted.none;
     } on FileSystemException {
