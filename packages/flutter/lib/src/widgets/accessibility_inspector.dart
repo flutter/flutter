@@ -78,11 +78,11 @@ class AccessibilityInspector {
     }
 
     // The violations are displayed in Devtool.
-    // TODO(hangyujin): If we add a "target platforms" option on the devtool side,
+    // TODO(hannah-hyj): If we add a "target platforms" option on the devtool side,
     // we can display violations for both iOS/android standards
     // regardless of the testing device platform.
     final Size minSize = switch (defaultTargetPlatform) {
-      TargetPlatform.android  => const Size(48.0, 48.0),
+      TargetPlatform.android => const Size(48.0, 48.0),
       TargetPlatform.iOS || TargetPlatform.macOS => const Size(44.0, 44.0),
       _ => const Size(48.0, 48.0),
     };
@@ -151,22 +151,9 @@ class AccessibilityInspector {
     return <String, Object?>{'data': nodes};
   }
 
-  // TODO(hannahjin): This returns the first SemanticsOwner of any RenderView.
+  // TODO(hannah-hyj): This returns the first RenderView with a SemanticsOwner.
   // This getSemanticsTree feature is used in DevTools, which currently only supports
   // single-view inspection. Add multi-view support when DevTools needs it.
-  PipelineOwner? _findPipelineOwner() {
-    for (final RenderView renderView in RendererBinding.instance.renderViews) {
-      if (renderView.owner?.semanticsOwner != null) {
-        return renderView.owner;
-      }
-    }
-    final PipelineOwner deprecatedOwner = RendererBinding.instance.pipelineOwner;
-    if (deprecatedOwner.semanticsOwner != null) {
-      return deprecatedOwner;
-    }
-    return null;
-  }
-
   RenderView? _findRenderView() {
     for (final RenderView renderView in RendererBinding.instance.renderViews) {
       if (renderView.owner?.semanticsOwner != null) {
