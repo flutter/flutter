@@ -96,8 +96,10 @@ class AccessibilityInspector {
       }
     }
 
-    final List<Violation> labeledViolations = const LabeledTapTargetEvaluation().traverse(root);
-    for (final violation in labeledViolations) {
+    final List<Violation> labeledTapTargetViolations = const LabeledTapTargetEvaluation().traverse(
+      root,
+    );
+    for (final violation in labeledTapTargetViolations) {
       nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
         <String, Object?>{'rule': 'missingLabel', 'description': violation.reason},
       );

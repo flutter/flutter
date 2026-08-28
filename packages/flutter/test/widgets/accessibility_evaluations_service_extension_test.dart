@@ -103,15 +103,16 @@ void main() {
       );
 
       // Run LabeledTapTargetEvaluation
-      final Map<String, Object?> labeledResult = await _runEvaluation(tester, <String, String>{
-        'type': 'LabeledTapTargetEvaluation',
-      });
+      final Map<String, Object?> labeledTapTargetResult = await _runEvaluation(
+        tester,
+        <String, String>{'type': 'LabeledTapTargetEvaluation'},
+      );
 
-      expect(labeledResult.keys, contains('result'));
-      final labeledViolations = labeledResult['result']! as List<Object?>;
-      expect(labeledViolations, isNotEmpty);
+      expect(labeledTapTargetResult.keys, contains('result'));
+      final labeledTapTargetViolations = labeledTapTargetResult['result']! as List<Object?>;
+      expect(labeledTapTargetViolations, isNotEmpty);
       expect(
-        labeledViolations.any(
+        labeledTapTargetViolations.any(
           (Object? v) => (v! as Map<String, Object?>)['message'].toString().contains(
             'expected tappable node to have semantic label',
           ),
@@ -196,10 +197,11 @@ void main() {
     expect(tapTargetResult['result'], isEmpty);
 
     // Run LabeledTapTargetEvaluation
-    final Map<String, Object?> labeledResult = await _runEvaluation(tester, <String, String>{
-      'type': 'LabeledTapTargetEvaluation',
-    });
-    expect(labeledResult['result'], isEmpty);
+    final Map<String, Object?> labeledTapTargetResult = await _runEvaluation(
+      tester,
+      <String, String>{'type': 'LabeledTapTargetEvaluation'},
+    );
+    expect(labeledTapTargetResult['result'], isEmpty);
 
     // Run MinimumTextContrastEvaluation
     final Map<String, Object?> contrastResult = await _runEvaluation(tester, <String, String>{
