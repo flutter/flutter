@@ -376,13 +376,11 @@ TEST_F(FlutterEngineTest, CanToggleAccessibility) {
   // Verify the accessibility tree is attached to the flutter view.
   EXPECT_EQ([engine.viewController.flutterView.accessibilityChildren count], 1u);
   NSAccessibilityElement* native_root = engine.viewController.flutterView.accessibilityChildren[0];
-  std::string root_label = [native_root.accessibilityLabel UTF8String];
-  EXPECT_TRUE(root_label == "root");
+  EXPECT_TRUE([native_root.accessibilityLabel isEqualToString:@"root"]);
   EXPECT_EQ(native_root.accessibilityRole, NSAccessibilityGroupRole);
   EXPECT_EQ([native_root.accessibilityChildren count], 1u);
   NSAccessibilityElement* native_child1 = native_root.accessibilityChildren[0];
-  std::string child1_value = [native_child1.accessibilityValue UTF8String];
-  EXPECT_TRUE(child1_value == "child 1");
+  EXPECT_TRUE([native_child1.accessibilityValue isEqualToString:@"child 1"]);
   EXPECT_EQ(native_child1.accessibilityRole, NSAccessibilityStaticTextRole);
   EXPECT_EQ([native_child1.accessibilityChildren count], 0u);
   // Disable the semantics.
