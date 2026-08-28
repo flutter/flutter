@@ -53,6 +53,20 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* compositor,
                                            const FlutterLayer** layers,
                                            size_t layers_count);
 
+/**
+ * fl_compositor_opengl_get_frame_format:
+ * @layers: layers the frame is composited from.
+ * @layers_count: number of layers.
+ *
+ * Gets the texture format to composite @layers into. This matches the format
+ * the engine rendered them with, so the composited frame can be read back
+ * correctly. Compositing into a mismatched format produces an empty frame.
+ *
+ * Returns: a texture format, e.g. GL_RGBA or GL_BGRA_EXT.
+ */
+GLint fl_compositor_opengl_get_frame_format(const FlutterLayer** layers,
+                                            size_t layers_count);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_COMPOSITOR_OPENGL_H_
