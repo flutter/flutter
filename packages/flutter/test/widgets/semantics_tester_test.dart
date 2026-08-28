@@ -245,4 +245,27 @@ void main() {
     expect(semantics, includesNodeWith(maxValue: '10'));
     semantics.dispose();
   });
+
+  testWidgets('includesNodeWith accepts attributed fields and hint alone', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Semantics(
+        container: true,
+        attributedLabel: AttributedString('label'),
+        attributedValue: AttributedString('value'),
+        attributedHint: AttributedString('hint'),
+        textDirection: TextDirection.ltr,
+        child: Container(),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(attributedLabel: AttributedString('label')));
+    expect(semantics, includesNodeWith(attributedValue: AttributedString('value')));
+    expect(semantics, includesNodeWith(attributedHint: AttributedString('hint')));
+    expect(semantics, includesNodeWith(hint: 'hint'));
+    semantics.dispose();
+  });
 }

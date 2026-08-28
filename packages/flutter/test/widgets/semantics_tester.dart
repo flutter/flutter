@@ -1168,7 +1168,11 @@ class _IncludesNodeWith extends Matcher {
     this.maxValue,
   }) : assert(
          label != null ||
+             attributedLabel != null ||
              value != null ||
+             attributedValue != null ||
+             hint != null ||
+             attributedHint != null ||
              actions != null ||
              flags != null ||
              flagsCollection != null ||
@@ -1184,7 +1188,8 @@ class _IncludesNodeWith extends Matcher {
              minValue != null ||
              maxValue != null,
          'At least one matcher field must be non-null so the matcher checks for at least one '
-         'property of a semantics node. Pass any of `label`, `value`, `actions`, `flags`, '
+         'property of a semantics node. Pass any of `label`, `attributedLabel`, `value`, '
+         '`attributedValue`, `hint`, `attributedHint`, `actions`, `flags`, '
          '`flagsCollection`, `tags`, `increasedValue`, `decreasedValue`, `scrollPosition`, '
          '`scrollExtentMax`, `scrollExtentMin`, `maxValueLength`, `currentValueLength`, '
          '`inputType`, `minValue`, or `maxValue`.',
