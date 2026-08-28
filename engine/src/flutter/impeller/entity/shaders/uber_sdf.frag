@@ -12,20 +12,68 @@ precision mediump float;
 #include "sdf_utils.glsl"
 
 uniform FragInfo {
+  // FragInfo fields are sorted by size (vec4 -> vec2 -> float) to optimize
+  // uniform register usage.
+
+  // ===========================================================================
+  // vec4 fields
+  // ===========================================================================
+
+  /// The RGBA color of the shape.
   vec4 color;
-  vec2 center;
-  vec2 size;
-  float stroke_width;
-  float stroke_join;
-  float aa_pixels;
-  float stroked;
-  float type;
-  vec2 superellipse_degree;
-  vec2 angle_span;
-  float octant_offset_c;
-  vec2 circle_center_top;
-  vec2 circle_center_right;
+  /// Corner radii for rounded rects (top-left, top-right, bottom-left,
+  /// bottom-right), or the circular cap radii for rounded superellipses in
+  /// radii.xy (top octant in x, right octant in y).
   vec4 radii;
+
+  // ===========================================================================
+  // vec2 fields
+  // ===========================================================================
+
+  // --- General Shape Geometry ---
+  /// The center position of the shape in local coordinates.
+  vec2 center;
+  /// The half-dimensions of the shape (half-width, half-height).
+  vec2 size;
+
+  // --- Superellipse Parameters ---
+  /// The exponent degree (n_x, n_y) of the superellipse curvature.
+  vec2 superellipse_degree;
+  /// The angular span of the corner circular arc transitions for rounded
+  /// superellipses.
+  vec2 angle_span;
+  /// The center of the corner transition circle for the top octant of a
+  /// rounded superellipse.
+  vec2 circle_center_top;
+  /// The center of the corner transition circle for the right octant of a
+  /// rounded superellipse.
+  vec2 circle_center_right;
+
+  // ===========================================================================
+  // float fields
+  // ===========================================================================
+
+  // --- General Configuration ---
+  /// The shape type:
+  ///   0: Circle
+  ///   1: Rect
+  ///   2: Oval
+  ///   3: RoundRect
+  ///   4: Rounded Superellipse (must have uniform circular corner radii)
+  float type;
+  /// The width in device pixels over which to apply antialiasing.
+  float aa_pixels;
+
+  // --- Stroke Parameters ---
+  /// Whether the shape is stroked (1.0) or filled (0.0).
+  float stroked;
+  /// The width of the stroke.
+  float stroke_width;
+  /// The join style for the stroke:
+  ///   0: Miter
+  ///   1: Bevel
+  ///   2: Round
+  float stroke_join;
 }
 frag_info;
 
@@ -77,10 +125,12 @@ float distanceFromRoundedSuperellipse(vec2 p,
                                       vec2 radii,
                                       vec2 angle_span,
                                       vec2 circle_center_top,
-                                      vec2 circle_center_right,
-                                      float c) {
+                                      vec2 circle_center_right) {
   // Do work in the first quadrant to simply things.
   p = abs(p);
+
+  // Transition line offset dividing top and right octants.
+  float c = size.x - size.y;
 
   // Declare all RSE params for a single octant.
   float se_degree, span, radius, axis_length;
@@ -195,7 +245,7 @@ vec2 filledSDF(vec2 p) {
     sdf = distanceFromRoundedSuperellipse(
         p, frag_info.superellipse_degree, frag_info.size, frag_info.radii.xy,
         frag_info.angle_span, frag_info.circle_center_top,
-        frag_info.circle_center_right, frag_info.octant_offset_c);
+        frag_info.circle_center_right);
     pixel_size = pixelSize(sdf);
   }
   return vec2(sdf, pixel_size);
