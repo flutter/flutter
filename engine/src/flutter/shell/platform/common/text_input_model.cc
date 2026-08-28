@@ -225,9 +225,24 @@ bool TextInputModel::DeleteSurrounding(int offset_from_cursor, int count) {
   // Cursor moves only if deleted area is before it.
   selection_ = TextRange(offset_from_cursor <= 0 ? start : selection_.start());
 
-  // Adjust composing range.
+  // Adjust composing range: a bound inside the deleted span collapses to its
+  // start, a bound after it shifts back by the deleted length, and a bound
+  // before it is unaffected. The deleted span can extend past the composing
+  // range's stored bounds when a surrogate pair straddles them, so shifting
+  // the end unconditionally could underflow, and the start needs the same
+  // treatment when the span extends past it in the other direction.
   if (composing_) {
-    composing_range_.set_end(composing_range_.end() - deleted_length);
+    auto clamp_to_deletion = [start, end, deleted_length](size_t pos) {
+      if (pos <= start) {
+        return pos;
+      }
+      if (pos >= end) {
+        return pos - deleted_length;
+      }
+      return start;
+    };
+    composing_range_.set_base(clamp_to_deletion(composing_range_.base()));
+    composing_range_.set_extent(clamp_to_deletion(composing_range_.extent()));
   }
   return true;
 }

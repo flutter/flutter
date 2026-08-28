@@ -934,6 +934,8 @@ TEST(TextInputModel, DeleteSurroundingGuardStopsAtComposingEnd) {
   // Composing range deliberately ends in the middle of the surrogate pair.
   EXPECT_TRUE(model->SetComposingRange(TextRange(0, 2), 0));
   EXPECT_TRUE(model->DeleteSurrounding(0, 3));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_EQ(model->composing_range(), TextRange(0, 0));
   EXPECT_STREQ(model->GetText().c_str(), "B");
 }
 
@@ -950,6 +952,8 @@ TEST(TextInputModel, DeleteSurroundingGuardStopsAtComposingStart) {
   // Composing range deliberately starts in the middle of the surrogate pair.
   EXPECT_TRUE(model->SetComposingRange(TextRange(2, 4), 2));
   EXPECT_TRUE(model->DeleteSurrounding(-3, 1));
+  EXPECT_EQ(model->selection(), TextRange(1));
+  EXPECT_EQ(model->composing_range(), TextRange(1, 1));
   EXPECT_STREQ(model->GetText().c_str(), "A");
 }
 
