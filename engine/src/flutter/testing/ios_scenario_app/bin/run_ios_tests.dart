@@ -188,7 +188,7 @@ final _args = ArgParser()
   ..addOption(
     'os-runtime',
     help: 'The OS runtime of the iOS simulator device to use.',
-    defaultsTo: 'com.apple.CoreSimulator.SimRuntime.iOS-26-2',
+    defaultsTo: 'com.apple.CoreSimulator.SimRuntime.iOS-26-0',
   )
   ..addOption(
     'os-version',
