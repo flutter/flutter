@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
+import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
+import 'package:meta/meta.dart';
+
 import 'runner.dart' as runner;
 import 'src/base/context.dart';
 import 'src/base/io.dart';
@@ -44,8 +48,11 @@ import 'src/commands/test.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/widget_preview.dart';
+import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/devtools_launcher.dart';
+import 'src/experimental/extension_discovery.dart';
+import 'src/experimental/extension_manager.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
@@ -59,6 +66,7 @@ import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';
 import 'src/resident_runner.dart';
 import 'src/runner/flutter_command.dart';
+import 'src/runner/flutter_command_runner.dart';
 import 'src/web/web_runner.dart';
 
 /// Main entry point for commands.
@@ -78,18 +86,17 @@ Future<void> main(List<String> args) async {
     args[slashQuestionHelpIndex] = '-h';
   }
 
-  final bool doctor =
-      (args.isNotEmpty && args.first == 'doctor') ||
-      (args.length == 2 && verbose && args.last == 'doctor');
+  final String? commandName = findCommandName(args);
+  final doctor = commandName == 'doctor';
   final bool help =
       args.contains('-h') ||
       args.contains('--help') ||
-      (args.isNotEmpty && args.first == 'help') ||
+      commandName == 'help' ||
       (args.length == 1 && verbose);
   final bool muteCommandLogging = (help || doctor) && !veryVerbose;
   final bool verboseHelp = help && verbose;
-  final bool daemon = args.contains('daemon');
-  final bool widgetPreviews = args.contains(WidgetPreviewCommand.kWidgetPreview);
+  final daemon = commandName == 'daemon';
+  final widgetPreviews = commandName == WidgetPreviewCommand.kWidgetPreview;
   final bool runMachine = args.contains('--machine');
 
   // Cache.flutterRoot must be set early because other features use it (e.g.
@@ -103,11 +110,20 @@ Future<void> main(List<String> args) async {
 
   await runner.run(
     args,
-    (ToolDependencies toolDependencies) => generateCommands(
-      toolDependencies: toolDependencies,
-      verbose: verbose,
-      verboseHelp: verboseHelp,
-    ),
+    (ToolDependencies toolDependencies) {
+      final manager = ExtensionManager(
+        hostPlatform: globals.os.hostPlatform,
+        logger: globals.logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      return generateCommands(
+        toolDependencies: toolDependencies,
+        verboseHelp: verboseHelp,
+        verbose: verbose,
+        extensionManager: manager,
+      );
+    },
     verbose: verbose,
     muteCommandLogging: muteCommandLogging,
     verboseHelp: verboseHelp,
@@ -161,10 +177,54 @@ Future<void> main(List<String> args) async {
   );
 }
 
+/// The name of the command in [args], or null if there isn't one.
+///
+/// Global options can come before the command, so it can't be found by
+/// position. A throwaway parser walks past them instead: trailing options are
+/// disabled, so parsing stops at the command and leaves it at the head of
+/// [ArgResults.rest]. `help` is the exception, since the command runner
+/// registers it on the parser itself and so reports it as a parsed command.
+@visibleForTesting
+String? findCommandName(List<String> args, {ToolContext? toolContext}) {
+  final ArgResults results;
+  try {
+    results = FlutterCommandRunner(
+      toolContext: toolContext ?? _FallbackToolContext(),
+    ).argParser.parse(args);
+  } on ArgParserException {
+    // The real parser will complain about these later.
+    return null;
+  }
+  return results.command?.name ?? results.rest.firstOrNull;
+}
+
+class _FallbackToolContext implements ToolContext {
+  _FallbackToolContext({OutputPreferences? outputPreferences})
+    : _outputPreferences = outputPreferences;
+
+  final OutputPreferences? _outputPreferences;
+
+  @override
+  OutputPreferences get outputPreferences {
+    if (_outputPreferences != null) {
+      return _outputPreferences;
+    }
+    try {
+      return globals.outputPreferences;
+    } on Object catch (_) {
+      return OutputPreferences.test();
+    }
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 List<FlutterCommand> generateCommands({
   required ToolDependencies toolDependencies,
   required bool verbose,
   required bool verboseHelp,
+  ExtensionManager? extensionManager,
 }) => <FlutterCommand>[
   AnalyzeCommand(
     verboseHelp: verboseHelp,
@@ -228,8 +288,8 @@ List<FlutterCommand> generateCommands({
     verboseHelp: verboseHelp,
     androidContext: toolDependencies.androidContext,
     toolContext: toolDependencies.toolContext,
-    analytics: toolDependencies.analytics,
     featureFlags: featureFlags,
+    extensionManager: extensionManager,
   ),
   CustomDevicesCommand(
     customDevicesConfig: toolDependencies.toolContext.customDevicesConfig,
@@ -245,7 +305,7 @@ List<FlutterCommand> generateCommands({
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),
-  DoctorCommand(verbose: verbose),
+  DoctorCommand(verbose: verbose, extensionManager: extensionManager),
   DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
   DriveCommand(
     verboseHelp: verboseHelp,

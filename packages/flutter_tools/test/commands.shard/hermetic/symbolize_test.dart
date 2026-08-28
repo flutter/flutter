@@ -52,6 +52,33 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/191205.
+  testWithoutContext('DwarfSymbolizationService handles stream errors without crashing', () async {
+    final symbolizationService = DwarfSymbolizationService(
+      symbolsTransformer: (Uint8List symbols) {
+        return StreamTransformer<String, String>.fromHandlers(
+          handleData: (String data, EventSink<String> sink) {
+            sink.addError('Test error');
+          },
+        );
+      },
+    );
+    final output = StreamController<List<int>>();
+
+    final Future<void> decodeFuture = symbolizationService.decode(
+      input: Stream<Uint8List>.fromIterable(<Uint8List>[
+        const Utf8Encoder().convert('Hello, World\n'),
+      ]),
+      symbols: Uint8List(0),
+      output: IOSink(output.sink),
+    );
+
+    expect(
+      decodeFuture,
+      throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', contains('Test error'))),
+    );
+  });
+
   testWithoutContext(
     'symbolize exits when --debug-info and --unit-id-debug-info arguments are missing',
     () async {
@@ -542,7 +569,7 @@ void main() {
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
 
-    expect(command.name, 'symbolize');
+    expect(command.toolContext, toolContext);
   });
 }
 
