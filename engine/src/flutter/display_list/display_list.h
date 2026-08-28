@@ -178,6 +178,7 @@ class SaveLayerOptions {
     SaveLayerOptions options;
     options.fRendersWithAttributes = fRendersWithAttributes;
     options.fBoundsFromCaller = fBoundsFromCaller;
+    options.fContainsClips = fContainsClips;
     return options;
   }
 
@@ -236,6 +237,13 @@ class SaveLayerOptions {
     return options;
   }
 
+  bool contains_clips() const { return fContainsClips; }
+  SaveLayerOptions with_contains_clips() const {
+    SaveLayerOptions options(this);
+    options.fContainsClips = true;
+    return options;
+  }
+
   SaveLayerOptions& operator=(const SaveLayerOptions& other) {
     flags_ = other.flags_;
     return *this;
@@ -253,6 +261,7 @@ class SaveLayerOptions {
       unsigned fContentIsClipped : 1;
       unsigned fHasBackdropFilter : 1;
       unsigned fContentIsUnbounded : 1;
+      unsigned fContainsClips : 1;
     };
     uint32_t flags_;
   };

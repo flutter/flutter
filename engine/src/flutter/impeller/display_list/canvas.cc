@@ -188,13 +188,18 @@ static const constexpr RenderTarget::AttachmentConfig kDefaultStencilConfig =
 static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
     ContentContext& renderer,
     ISize size,
-    const Color& clear_color) {
+    const Color& clear_color,
+    bool depth_stencil_enabled = true) {
   const std::shared_ptr<Context>& context = renderer.GetContext();
 
   /// All of the load/store actions are managed by `InlinePassContext` when
   /// `RenderPasses` are created, so we just set them to `kDontCare` here.
   /// What's important is the `StorageMode` of the textures, which cannot be
   /// changed for the lifetime of the textures.
+
+  std::optional<RenderTarget::AttachmentConfig> stencil_config =
+      depth_stencil_enabled ? kDefaultStencilConfig
+                            : std::optional<RenderTarget::AttachmentConfig>();
 
   RenderTarget target;
   if (context->GetCapabilities()->SupportsOffscreenMSAA()) {
@@ -210,7 +215,7 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
             .load_action = LoadAction::kDontCare,
             .store_action = StoreAction::kMultisampleResolve,
             .clear_color = clear_color},
-        /*stencil_attachment_config=*/kDefaultStencilConfig);
+        /*stencil_attachment_config=*/stencil_config);
   } else {
     target = renderer.GetRenderTargetCache()->CreateOffscreen(
         *context,  // context
@@ -222,8 +227,8 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
             .load_action = LoadAction::kDontCare,
             .store_action = StoreAction::kDontCare,
             .clear_color = clear_color,
-        },                     // color_attachment_config
-        kDefaultStencilConfig  //
+        },              // color_attachment_config
+        stencil_config  // stencil_attachment_config
     );
   }
 
@@ -1749,7 +1754,8 @@ void Canvas::SaveLayer(const Paint& paint,
                        ContentBoundsPromise bounds_promise,
                        uint32_t total_content_depth,
                        bool can_distribute_opacity,
-                       std::optional<int64_t> backdrop_id) {
+                       std::optional<int64_t> backdrop_id,
+                       bool depth_stencil_enabled) {
   TRACE_EVENT0("flutter", "Canvas::saveLayer");
   if (IsSkipping()) {
     return SkipUntilMatchingRestore(total_content_depth);
@@ -1936,10 +1942,11 @@ void Canvas::SaveLayer(const Paint& paint,
   transform_stack_.back().distributed_opacity = 1.0;
 
   render_passes_.push_back(
-      LazyRenderingConfig(renderer_,                                    //
-                          CreateRenderTarget(renderer_,                 //
-                                             subpass_size,              //
-                                             Color::BlackTransparent()  //
+      LazyRenderingConfig(renderer_,                                     //
+                          CreateRenderTarget(renderer_,                  //
+                                             subpass_size,               //
+                                             Color::BlackTransparent(),  //
+                                             depth_stencil_enabled       //
                                              )));
   save_layer_state_.push_back(SaveLayerState{
       paint_copy, subpass_coverage.Shift(-coverage_origin_adjustment)});

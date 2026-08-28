@@ -30,6 +30,7 @@
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/entity/render_target_cache.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/playground/playground.h"
 
@@ -1180,6 +1181,59 @@ TEST_P(AiksTest, DisplayListToTextureWithMipGeneration) {
                            /*reset_host_buffer=*/true, /*generate_mips=*/true);
 
   EXPECT_FALSE(texture->NeedsMipmapGeneration());
+}
+
+TEST_P(AiksTest,
+       SaveLayerWithoutClipsDoesNotAllocateDepthStencilInRenderTargetCache) {
+  DisplayListBuilder builder;
+  builder.SaveLayer(std::nullopt, nullptr);
+  builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+  builder.Restore();
+
+  AiksContext aiks_context(GetContext(), nullptr);
+  auto texture =
+      DisplayListToTexture(builder.Build(), ISize{100, 100}, aiks_context);
+
+  ASSERT_NE(texture, nullptr);
+  const auto& cache = std::static_pointer_cast<RenderTargetCache>(
+      aiks_context.GetContentContext().GetRenderTargetCache());
+
+  size_t count = 0;
+  for (auto it = cache->GetRenderTargetDataBegin();
+       it != cache->GetRenderTargetDataEnd(); ++it) {
+    count++;
+    EXPECT_FALSE(it->render_target.GetDepthAttachment().has_value());
+    EXPECT_FALSE(it->render_target.GetStencilAttachment().has_value());
+  }
+  EXPECT_GT(count, 0u);
+}
+
+TEST_P(AiksTest, SaveLayerWithClipsAllocatesDepthStencilInRenderTargetCache) {
+  DisplayListBuilder builder;
+  builder.SaveLayer(std::nullopt, nullptr);
+  builder.ClipRect(DlRect::MakeLTRB(10, 10, 40, 40), DlClipOp::kIntersect,
+                   true);
+  builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+  builder.Restore();
+
+  AiksContext aiks_context(GetContext(), nullptr);
+  auto texture =
+      DisplayListToTexture(builder.Build(), ISize{100, 100}, aiks_context);
+
+  ASSERT_NE(texture, nullptr);
+  const auto& cache = std::static_pointer_cast<RenderTargetCache>(
+      aiks_context.GetContentContext().GetRenderTargetCache());
+
+  bool found_depth_stencil = false;
+  for (auto it = cache->GetRenderTargetDataBegin();
+       it != cache->GetRenderTargetDataEnd(); ++it) {
+    if (it->render_target.GetDepthAttachment().has_value() ||
+        it->render_target.GetStencilAttachment().has_value()) {
+      found_depth_stencil = true;
+      break;
+    }
+  }
+  EXPECT_TRUE(found_depth_stencil);
 }
 
 }  // namespace testing

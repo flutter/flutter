@@ -161,6 +161,8 @@ std::ostream& operator<<(std::ostream& os, const SaveLayerOptions& options) {
             << "contains_backdrop: " << options.contains_backdrop_filter()
             << ", "
             << "is_unbounded: " << options.content_is_unbounded()
+            << ", "
+            << "contains_clips: " << options.contains_clips()
             << ")";
 }
 

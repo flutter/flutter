@@ -728,6 +728,10 @@ void DisplayListBuilder::RestoreLayer() {
     layer_op->options = layer_op->options.with_content_is_unbounded();
   }
 
+  if (current_layer().contains_clips) {
+    layer_op->options = layer_op->options.with_contains_clips();
+  }
+
   // Ensure that the bounds transferred in the following call will be
   // attributed to the index of the restore op.
   FML_DCHECK(layer_op->restore_index == op_index_);
@@ -1051,6 +1055,7 @@ void DisplayListBuilder::ClipRect(const DlRect& rect,
     return;
   }
   current_info().has_valid_clip = true;
+  current_layer().contains_clips = true;
   checkForDeferredSave();
   switch (clip_op) {
     case DlClipOp::kIntersect:
@@ -1082,6 +1087,7 @@ void DisplayListBuilder::ClipOval(const DlRect& bounds,
     return;
   }
   current_info().has_valid_clip = true;
+  current_layer().contains_clips = true;
   checkForDeferredSave();
   switch (clip_op) {
     case DlClipOp::kIntersect:
@@ -1118,6 +1124,7 @@ void DisplayListBuilder::ClipRoundRect(const DlRoundRect& rrect,
     return;
   }
   current_info().has_valid_clip = true;
+  current_layer().contains_clips = true;
   checkForDeferredSave();
   switch (clip_op) {
     case DlClipOp::kIntersect:
@@ -1154,6 +1161,7 @@ void DisplayListBuilder::ClipRoundSuperellipse(const DlRoundSuperellipse& rse,
     return;
   }
   current_info().has_valid_clip = true;
+  current_layer().contains_clips = true;
   checkForDeferredSave();
   switch (clip_op) {
     case DlClipOp::kIntersect:
@@ -1194,6 +1202,7 @@ void DisplayListBuilder::ClipPath(const DlPath& path,
     return;
   }
   current_info().has_valid_clip = true;
+  current_layer().contains_clips = true;
   checkForDeferredSave();
   switch (clip_op) {
     case DlClipOp::kIntersect:

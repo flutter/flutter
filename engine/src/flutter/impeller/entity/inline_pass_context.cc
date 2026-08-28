@@ -117,27 +117,19 @@ const std::shared_ptr<RenderPass>& InlinePassContext::GetRenderPass() {
       is_msaa ? StoreAction::kMultisampleResolve : StoreAction::kStore;
 
   auto depth = pass_target_.GetRenderTarget().GetDepthAttachment();
-  if (!depth.has_value()) {
-    VALIDATION_LOG << "Depth attachment unexpectedly missing from the "
-                      "EntityPass render target.";
-    return pass_;
+  if (depth.has_value()) {
+    depth->load_action = LoadAction::kClear;
+    depth->store_action = StoreAction::kDontCare;
+    pass_target_.target_.SetDepthAttachment(depth.value());
   }
-  depth->load_action = LoadAction::kClear;
-  depth->store_action = StoreAction::kDontCare;
-  pass_target_.target_.SetDepthAttachment(depth.value());
 
   auto stencil = pass_target_.GetRenderTarget().GetStencilAttachment();
-  if (!depth.has_value() || !stencil.has_value()) {
-    VALIDATION_LOG << "Stencil/Depth attachment unexpectedly missing from the "
-                      "EntityPass render target.";
-    return pass_;
+  if (stencil.has_value()) {
+    stencil->load_action = LoadAction::kClear;
+    stencil->store_action = StoreAction::kDontCare;
+    pass_target_.target_.SetStencilAttachment(stencil.value());
   }
-  stencil->load_action = LoadAction::kClear;
-  stencil->store_action = StoreAction::kDontCare;
-  depth->load_action = LoadAction::kClear;
-  depth->store_action = StoreAction::kDontCare;
-  pass_target_.target_.SetDepthAttachment(depth);
-  pass_target_.target_.SetStencilAttachment(stencil.value());
+
   pass_target_.target_.SetColorAttachment(color0, 0);
 
   pass_ = command_buffer_->CreateRenderPass(pass_target_.GetRenderTarget());

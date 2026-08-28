@@ -330,7 +330,8 @@ void DlDispatcherBase::saveLayer(const DlRect& bounds,
       // Unbounded content can still have user specified bounds that require a
       // saveLayer to be created to perform the clip.
       options.can_distribute_opacity() && !options.content_is_unbounded(),
-      backdrop_id  //
+      backdrop_id,
+      options.contains_clips()  //
   );
 }
 

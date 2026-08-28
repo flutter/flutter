@@ -1652,6 +1652,156 @@ TEST_F(DisplayListTest, SaveLayerImageFilterOnChildInheritsOpacity) {
   EXPECT_TRUE(expector.all_expectations_checked());
 }
 
+TEST_F(DisplayListTest, SaveLayerWithClipRectSetsContainsClips) {
+  for (auto clip_op : {DlClipOp::kIntersect, DlClipOp::kDifference}) {
+    SAVE_LAYER_EXPECTOR(expector);
+    expector.addExpectation(
+        SaveLayerOptions::kNoAttributes.with_can_distribute_opacity()
+            .with_contains_clips());
+
+    DisplayListBuilder builder;
+    builder.SaveLayer(std::nullopt, nullptr);
+    builder.ClipRect(DlRect::MakeLTRB(10, 10, 20, 20), clip_op, true);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+    builder.Restore();
+
+    builder.Build()->Dispatch(expector);
+    EXPECT_TRUE(expector.all_expectations_checked());
+  }
+}
+
+TEST_F(DisplayListTest, SaveLayerWithClipOvalSetsContainsClips) {
+  for (auto clip_op : {DlClipOp::kIntersect, DlClipOp::kDifference}) {
+    SAVE_LAYER_EXPECTOR(expector);
+    expector.addExpectation(
+        SaveLayerOptions::kNoAttributes.with_can_distribute_opacity()
+            .with_contains_clips());
+
+    DisplayListBuilder builder;
+    builder.SaveLayer(std::nullopt, nullptr);
+    builder.ClipOval(DlRect::MakeLTRB(10, 10, 20, 20), clip_op, true);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+    builder.Restore();
+
+    builder.Build()->Dispatch(expector);
+    EXPECT_TRUE(expector.all_expectations_checked());
+  }
+}
+
+TEST_F(DisplayListTest, SaveLayerWithClipRoundRectSetsContainsClips) {
+  for (auto clip_op : {DlClipOp::kIntersect, DlClipOp::kDifference}) {
+    SAVE_LAYER_EXPECTOR(expector);
+    expector.addExpectation(
+        SaveLayerOptions::kNoAttributes.with_can_distribute_opacity()
+            .with_contains_clips());
+
+    DisplayListBuilder builder;
+    builder.SaveLayer(std::nullopt, nullptr);
+    builder.ClipRoundRect(kTestRRect, clip_op, true);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+    builder.Restore();
+
+    builder.Build()->Dispatch(expector);
+    EXPECT_TRUE(expector.all_expectations_checked());
+  }
+}
+
+TEST_F(DisplayListTest, SaveLayerWithClipRoundSuperellipseSetsContainsClips) {
+  for (auto clip_op : {DlClipOp::kIntersect, DlClipOp::kDifference}) {
+    SAVE_LAYER_EXPECTOR(expector);
+    expector.addExpectation(
+        SaveLayerOptions::kNoAttributes.with_can_distribute_opacity()
+            .with_contains_clips());
+
+    DisplayListBuilder builder;
+    builder.SaveLayer(std::nullopt, nullptr);
+    builder.ClipRoundSuperellipse(kTestRSuperellipse, clip_op, true);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+    builder.Restore();
+
+    builder.Build()->Dispatch(expector);
+    EXPECT_TRUE(expector.all_expectations_checked());
+  }
+}
+
+TEST_F(DisplayListTest, SaveLayerWithClipPathSetsContainsClips) {
+  for (auto clip_op : {DlClipOp::kIntersect, DlClipOp::kDifference}) {
+    SAVE_LAYER_EXPECTOR(expector);
+    expector.addExpectation(
+        SaveLayerOptions::kNoAttributes.with_can_distribute_opacity()
+            .with_contains_clips());
+
+    DisplayListBuilder builder;
+    builder.SaveLayer(std::nullopt, nullptr);
+    builder.ClipPath(kTestPath1, clip_op, true);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+    builder.Restore();
+
+    builder.Build()->Dispatch(expector);
+    EXPECT_TRUE(expector.all_expectations_checked());
+  }
+}
+
+TEST_F(DisplayListTest, SaveLayerNestedClipsLayerIsolation) {
+  // Outer layer has no clips, inner layer has clips
+  {
+    SAVE_LAYER_EXPECTOR(expector);
+    expector.addExpectation(SaveLayerOptions::kNoAttributes);
+    expector.addExpectation(
+        SaveLayerOptions::kNoAttributes.with_can_distribute_opacity()
+            .with_contains_clips());
+
+    DisplayListBuilder builder;
+    builder.SaveLayer(std::nullopt, nullptr);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+    builder.SaveLayer(std::nullopt, nullptr);
+    builder.ClipRect(DlRect::MakeLTRB(10, 10, 20, 20), DlClipOp::kIntersect,
+                     true);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+    builder.Restore();
+    builder.Restore();
+
+    builder.Build()->Dispatch(expector);
+    EXPECT_TRUE(expector.all_expectations_checked());
+  }
+
+  // Outer layer has clips, inner layer has no clips
+  {
+    SAVE_LAYER_EXPECTOR(expector);
+    expector.addExpectation(
+        SaveLayerOptions::kNoAttributes.with_contains_clips());
+    expector.addExpectation(
+        SaveLayerOptions::kNoAttributes.with_can_distribute_opacity());
+
+    DisplayListBuilder builder;
+    builder.SaveLayer(std::nullopt, nullptr);
+    builder.ClipRect(DlRect::MakeLTRB(10, 10, 20, 20), DlClipOp::kIntersect,
+                     true);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+    builder.SaveLayer(std::nullopt, nullptr);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+    builder.Restore();
+    builder.Restore();
+
+    builder.Build()->Dispatch(expector);
+    EXPECT_TRUE(expector.all_expectations_checked());
+  }
+}
+
+TEST_F(DisplayListTest, SaveLayerWithoutClipsDoesNotSetContainsClips) {
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(
+      SaveLayerOptions::kNoAttributes.with_can_distribute_opacity());
+
+  DisplayListBuilder builder;
+  builder.SaveLayer(std::nullopt, nullptr);
+  builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+  builder.Restore();
+
+  builder.Build()->Dispatch(expector);
+  EXPECT_TRUE(expector.all_expectations_checked());
+}
+
 TEST_F(DisplayListTest, SaveLayerColorFilterOnChildDoesNotInheritOpacity) {
   SAVE_LAYER_EXPECTOR(expector);
   expector.addExpectation(SaveLayerOptions::kWithAttributes);
