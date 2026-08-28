@@ -10,15 +10,16 @@ import '../android/java.dart';
 /// Holds Android-specific dependencies.
 class AndroidContext {
   AndroidContext({
-    required this.androidSdk,
+    required AndroidSdk? Function() androidSdkBuilder,
     required AndroidStudio? Function() androidStudioBuilder,
     required this.gradleUtils,
     required Java? Function() javaBuilder,
-  }) : _androidStudioBuilder = androidStudioBuilder,
+  }) : _androidSdkBuilder = androidSdkBuilder,
+       _androidStudioBuilder = androidStudioBuilder,
        _javaBuilder = javaBuilder;
 
   /// Discovers, validates, and manages the local Android SDK and platform tools.
-  final AndroidSdk? androidSdk;
+  late final AndroidSdk? androidSdk = _androidSdkBuilder();
 
   /// Discovers and inspects local Android Studio installations and embedded JDK paths.
   late final AndroidStudio? androidStudio = _androidStudioBuilder();
@@ -29,6 +30,7 @@ class AndroidContext {
   /// Discovers and validates the active Java Development Kit (JDK) binary.
   late final Java? java = _javaBuilder();
 
+  final AndroidSdk? Function() _androidSdkBuilder;
   final AndroidStudio? Function() _androidStudioBuilder;
   final Java? Function() _javaBuilder;
 }

@@ -162,51 +162,83 @@ void main() {
         }
       },
     );
+
+    testUsingContext('lazily evaluates androidSdk upon first access in AndroidContext', () async {
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+
+      final AndroidSdk? sdk = dependencies.androidContext.androidSdk;
+      expect(sdk, isNull);
+    });
   });
 
   group('AndroidContext', () {
-    testWithoutContext('evaluates androidStudio and java lazily and memoizes results', () {
-      var studioEvaluations = 0;
-      var javaEvaluations = 0;
+    testWithoutContext(
+      'evaluates androidSdk, androidStudio, and java lazily and memoizes results',
+      () {
+        var sdkEvaluations = 0;
+        var studioEvaluations = 0;
+        var javaEvaluations = 0;
 
-      final mockStudio = FakeAndroidStudio();
-      final mockJava = FakeJava();
+        final mockSdk = FakeAndroidSdk();
+        final mockStudio = FakeAndroidStudio();
+        final mockJava = FakeJava();
 
-      final context = AndroidContext(
-        androidSdk: FakeAndroidSdk(),
-        androidStudioBuilder: () {
-          studioEvaluations++;
-          return mockStudio;
-        },
-        gradleUtils: FakeGradleUtils(),
-        javaBuilder: () {
-          javaEvaluations++;
-          return mockJava;
-        },
-      );
+        final context = AndroidContext(
+          androidSdkBuilder: () {
+            sdkEvaluations++;
+            return mockSdk;
+          },
+          androidStudioBuilder: () {
+            studioEvaluations++;
+            return mockStudio;
+          },
+          gradleUtils: FakeGradleUtils(),
+          javaBuilder: () {
+            javaEvaluations++;
+            return mockJava;
+          },
+        );
 
-      // Neither factory has been invoked upon instantiation.
-      expect(studioEvaluations, 0);
-      expect(javaEvaluations, 0);
+        // No factory has been invoked upon instantiation.
+        expect(sdkEvaluations, 0);
+        expect(studioEvaluations, 0);
+        expect(javaEvaluations, 0);
 
-      // Accessing androidStudio multiple times evaluates factory exactly once.
-      expect(context.androidStudio, same(mockStudio));
-      expect(context.androidStudio, same(mockStudio));
-      expect(studioEvaluations, 1);
-      expect(javaEvaluations, 0);
+        // Accessing androidSdk multiple times evaluates factory exactly once.
+        expect(context.androidSdk, same(mockSdk));
+        expect(context.androidSdk, same(mockSdk));
+        expect(sdkEvaluations, 1);
+        expect(studioEvaluations, 0);
+        expect(javaEvaluations, 0);
 
-      // Accessing java multiple times evaluates factory exactly once.
-      expect(context.java, same(mockJava));
-      expect(context.java, same(mockJava));
-      expect(javaEvaluations, 1);
-    });
+        // Accessing androidStudio multiple times evaluates factory exactly once.
+        expect(context.androidStudio, same(mockStudio));
+        expect(context.androidStudio, same(mockStudio));
+        expect(studioEvaluations, 1);
+        expect(javaEvaluations, 0);
+
+        // Accessing java multiple times evaluates factory exactly once.
+        expect(context.java, same(mockJava));
+        expect(context.java, same(mockJava));
+        expect(javaEvaluations, 1);
+      },
+    );
 
     testWithoutContext('memoizes null results without re-invoking factory closures', () {
+      var sdkEvaluations = 0;
       var studioEvaluations = 0;
       var javaEvaluations = 0;
 
       final context = AndroidContext(
-        androidSdk: FakeAndroidSdk(),
+        androidSdkBuilder: () {
+          sdkEvaluations++;
+          return null;
+        },
         androidStudioBuilder: () {
           studioEvaluations++;
           return null;
@@ -217,6 +249,10 @@ void main() {
           return null;
         },
       );
+
+      expect(context.androidSdk, isNull);
+      expect(context.androidSdk, isNull);
+      expect(sdkEvaluations, 1);
 
       expect(context.androidStudio, isNull);
       expect(context.androidStudio, isNull);

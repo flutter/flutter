@@ -404,11 +404,13 @@ class ToolDependencies {
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
     // 12. AndroidContext Dependencies
+    final AndroidSdk? Function() androidSdkBuilder = androidSdk != null
+        ? () => androidSdk
+        : AndroidSdk.locateAndroidSdk;
+
     final AndroidStudio? Function() androidStudioBuilder = androidStudio != null
         ? () => androidStudio
         : AndroidStudio.latestValid;
-
-    final AndroidSdk? finalAndroidSdk = androidSdk ?? AndroidSdk.locateAndroidSdk();
 
     final Java? Function() javaBuilder = java != null
         ? () => java
@@ -433,7 +435,7 @@ class ToolDependencies {
     return ToolDependencies(
       analytics: finalAnalytics,
       androidContext: AndroidContext(
-        androidSdk: finalAndroidSdk,
+        androidSdkBuilder: androidSdkBuilder,
         androidStudioBuilder: androidStudioBuilder,
         gradleUtils: finalGradleUtils,
         javaBuilder: javaBuilder,
