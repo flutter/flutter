@@ -66,7 +66,7 @@ class AccessibilityInspector {
       return <String, Object?>{'error': 'Semantics not enabled.'};
     }
     final RenderView? renderView = _findRenderView();
-    final PipelineOwner? pipelineOwner = renderView?.owner ?? _findPipelineOwner();
+    final PipelineOwner? pipelineOwner = renderView?.owner;
     final SemanticsOwner? semanticsOwner = pipelineOwner?.semanticsOwner;
     if (semanticsOwner == null) {
       return <String, Object?>{'error': 'No PipelineOwner with SemanticsOwner found'};
