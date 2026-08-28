@@ -178,14 +178,16 @@ void main() {
 
   group('AndroidContext', () {
     testWithoutContext(
-      'evaluates androidSdk, androidStudio, and java lazily and memoizes results',
+      'evaluates androidSdk, androidStudio, gradleUtils, and java lazily and memoizes results',
       () {
         var sdkEvaluations = 0;
         var studioEvaluations = 0;
+        var gradleEvaluations = 0;
         var javaEvaluations = 0;
 
         final mockSdk = FakeAndroidSdk();
         final mockStudio = FakeAndroidStudio();
+        final mockGradle = FakeGradleUtils();
         final mockJava = FakeJava();
 
         final context = AndroidContext(
@@ -197,7 +199,10 @@ void main() {
             studioEvaluations++;
             return mockStudio;
           },
-          gradleUtils: FakeGradleUtils(),
+          gradleUtilsBuilder: () {
+            gradleEvaluations++;
+            return mockGradle;
+          },
           javaBuilder: () {
             javaEvaluations++;
             return mockJava;
@@ -207,6 +212,7 @@ void main() {
         // No factory has been invoked upon instantiation.
         expect(sdkEvaluations, 0);
         expect(studioEvaluations, 0);
+        expect(gradleEvaluations, 0);
         expect(javaEvaluations, 0);
 
         // Accessing androidSdk multiple times evaluates factory exactly once.
@@ -214,12 +220,20 @@ void main() {
         expect(context.androidSdk, same(mockSdk));
         expect(sdkEvaluations, 1);
         expect(studioEvaluations, 0);
+        expect(gradleEvaluations, 0);
         expect(javaEvaluations, 0);
 
         // Accessing androidStudio multiple times evaluates factory exactly once.
         expect(context.androidStudio, same(mockStudio));
         expect(context.androidStudio, same(mockStudio));
         expect(studioEvaluations, 1);
+        expect(gradleEvaluations, 0);
+        expect(javaEvaluations, 0);
+
+        // Accessing gradleUtils multiple times evaluates factory exactly once.
+        expect(context.gradleUtils, same(mockGradle));
+        expect(context.gradleUtils, same(mockGradle));
+        expect(gradleEvaluations, 1);
         expect(javaEvaluations, 0);
 
         // Accessing java multiple times evaluates factory exactly once.
@@ -243,7 +257,7 @@ void main() {
           studioEvaluations++;
           return null;
         },
-        gradleUtils: FakeGradleUtils(),
+        gradleUtilsBuilder: FakeGradleUtils.new,
         javaBuilder: () {
           javaEvaluations++;
           return null;

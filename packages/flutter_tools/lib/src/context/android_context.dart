@@ -12,10 +12,11 @@ class AndroidContext {
   AndroidContext({
     required AndroidSdk? Function() androidSdkBuilder,
     required AndroidStudio? Function() androidStudioBuilder,
-    required this.gradleUtils,
+    required GradleUtils Function() gradleUtilsBuilder,
     required Java? Function() javaBuilder,
   }) : _androidSdkBuilder = androidSdkBuilder,
        _androidStudioBuilder = androidStudioBuilder,
+       _gradleUtilsBuilder = gradleUtilsBuilder,
        _javaBuilder = javaBuilder;
 
   /// Discovers, validates, and manages the local Android SDK and platform tools.
@@ -25,12 +26,13 @@ class AndroidContext {
   late final AndroidStudio? androidStudio = _androidStudioBuilder();
 
   /// Utility helpers for interacting with Gradle builds and resolving project configs.
-  final GradleUtils gradleUtils;
+  late final GradleUtils gradleUtils = _gradleUtilsBuilder();
 
   /// Discovers and validates the active Java Development Kit (JDK) binary.
   late final Java? java = _javaBuilder();
 
   final AndroidSdk? Function() _androidSdkBuilder;
   final AndroidStudio? Function() _androidStudioBuilder;
+  final GradleUtils Function() _gradleUtilsBuilder;
   final Java? Function() _javaBuilder;
 }

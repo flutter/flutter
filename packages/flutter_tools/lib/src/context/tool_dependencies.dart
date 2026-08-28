@@ -423,21 +423,21 @@ class ToolDependencies {
             processManager: finalProcessManager,
           );
 
-    final GradleUtils finalGradleUtils =
-        gradleUtils ??
-        GradleUtils(
-          platform: finalPlatform,
-          logger: finalLogger,
-          cache: finalCache,
-          operatingSystemUtils: finalOS,
-        );
+    final GradleUtils Function() gradleUtilsBuilder = gradleUtils != null
+        ? () => gradleUtils
+        : () => GradleUtils(
+            platform: finalPlatform,
+            logger: finalLogger,
+            cache: finalCache,
+            operatingSystemUtils: finalOS,
+          );
 
     return ToolDependencies(
       analytics: finalAnalytics,
       androidContext: AndroidContext(
         androidSdkBuilder: androidSdkBuilder,
         androidStudioBuilder: androidStudioBuilder,
-        gradleUtils: finalGradleUtils,
+        gradleUtilsBuilder: gradleUtilsBuilder,
         javaBuilder: javaBuilder,
       ),
       appleContext: AppleContext(
