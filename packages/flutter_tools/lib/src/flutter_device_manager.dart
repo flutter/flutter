@@ -61,7 +61,6 @@ class FlutterDeviceManager extends DeviceManager {
            fileSystem: fileSystem,
            platform: platform,
            userMessages: userMessages,
-           artifacts: artifacts,
          ),
          IOSDevices(
            platform: platform,

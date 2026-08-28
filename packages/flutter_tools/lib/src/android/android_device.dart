@@ -9,7 +9,6 @@ import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../application_package.dart';
-import '../artifacts.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -22,7 +21,6 @@ import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
@@ -64,19 +62,17 @@ class AndroidDevice extends Device {
     this.productID,
     required this.modelID,
     this.deviceCodeName,
+    required super.logger,
+    required ProcessManager processManager,
+    required Platform platform,
     required AndroidSdk androidSdk,
     required FileSystem fileSystem,
-    required super.logger,
-    required Platform platform,
-    required ProcessManager processManager,
     AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
-    Artifacts? artifacts,
   }) : _logger = logger,
        _processManager = processManager,
        _androidSdk = androidSdk,
        _platform = platform,
        _fileSystem = fileSystem,
-       _artifacts = artifacts ?? globals.artifacts!,
        _androidConsoleSocketFactory = androidConsoleSocketFactory,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        super(category: Category.mobile, platformType: PlatformType.android, ephemeral: true);
@@ -86,7 +82,6 @@ class AndroidDevice extends Device {
   final AndroidSdk _androidSdk;
   final Platform _platform;
   final FileSystem _fileSystem;
-  final Artifacts _artifacts;
   final ProcessUtils _processUtils;
   final AndroidConsoleSocketFactory _androidConsoleSocketFactory;
 
@@ -634,24 +629,11 @@ class AndroidDevice extends Device {
       );
     }
 
-    final String? vmserviceSharedLibPath = debuggingOptions.buildInfo.isProfile
-        ? _artifacts.getArtifactPath(
-            Artifact.vmserviceSharedLibrary,
-            platform: await targetPlatform,
-            mode: BuildMode.profile,
-          )
-        : null;
     final cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
-      if (vmserviceSharedLibPath != null &&
-          _fileSystem.file(vmserviceSharedLibPath).existsSync()) ...<String>[
-        '--es',
-        'aot-vmservice-shared-library-name',
-        _fileSystem.path.basename(vmserviceSharedLibPath),
-      ],
       ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
       if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
       if (route != null) ...<String>['--es', 'route', route],

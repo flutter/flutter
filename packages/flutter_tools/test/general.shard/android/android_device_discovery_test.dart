@@ -30,7 +30,6 @@ void main() {
     'AndroidDevices returns empty device list and diagnostics on null adb',
     () async {
       final androidDevices = AndroidDevices(
-        artifacts: FakeArtifacts(),
         androidSdk: FakeAndroidSdk(null),
         logger: BufferLogger.test(),
         androidWorkflow: AndroidWorkflow(
@@ -54,7 +53,6 @@ void main() {
       final fakeProcessManager = FakeProcessManager.empty();
       fakeProcessManager.excludedExecutables.add('adb');
       final androidDevices = AndroidDevices(
-        artifacts: FakeArtifacts(),
         androidSdk: FakeAndroidSdk(),
         logger: BufferLogger.test(),
         androidWorkflow: AndroidWorkflow(
@@ -77,7 +75,6 @@ void main() {
     'AndroidDevices returns empty device list and diagnostics on null Android SDK',
     () async {
       final androidDevices = AndroidDevices(
-        artifacts: FakeArtifacts(),
         logger: BufferLogger.test(),
         androidWorkflow: AndroidWorkflow(
           androidSdk: FakeAndroidSdk(null),
@@ -103,7 +100,6 @@ void main() {
       ),
     ]);
     final androidDevices = AndroidDevices(
-      artifacts: FakeArtifacts(),
       androidSdk: FakeAndroidSdk(),
       logger: BufferLogger.test(),
       androidWorkflow: androidWorkflow,
@@ -126,7 +122,6 @@ void main() {
 
   testWithoutContext('AndroidDevices is disabled if feature is disabled', () {
     final androidDevices = AndroidDevices(
-      artifacts: FakeArtifacts(),
       androidSdk: FakeAndroidSdk(),
       logger: BufferLogger.test(),
       androidWorkflow: AndroidWorkflow(
@@ -144,7 +139,6 @@ void main() {
 
   testWithoutContext('AndroidDevices can parse output for physical attached devices', () async {
     final androidDevices = AndroidDevices(
-      artifacts: FakeArtifacts(),
       userMessages: UserMessages(),
       androidWorkflow: androidWorkflow,
       androidSdk: FakeAndroidSdk(),
@@ -173,7 +167,6 @@ List of devices attached
 
   testWithoutContext('AndroidDevices can parse output for physical wireless devices', () async {
     final androidDevices = AndroidDevices(
-      artifacts: FakeArtifacts(),
       userMessages: UserMessages(),
       androidWorkflow: androidWorkflow,
       androidSdk: FakeAndroidSdk(),
@@ -204,7 +197,6 @@ List of devices attached
     'AndroidDevices can parse output for wireless devices with mDNS conflict (space in serial)',
     () async {
       final androidDevices = AndroidDevices(
-        artifacts: FakeArtifacts(),
         userMessages: UserMessages(),
         androidWorkflow: androidWorkflow,
         androidSdk: FakeAndroidSdk(),
@@ -432,7 +424,6 @@ adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    device product:vantage_ge mod
       }
 
       final androidDevices = AndroidDevices(
-        artifacts: FakeArtifacts(),
         userMessages: UserMessages(),
         androidWorkflow: androidWorkflow,
         androidSdk: FakeAndroidSdk(),
@@ -477,7 +468,6 @@ adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    device product:vantage_ge mod
 
   testWithoutContext('AndroidDevices can parse output for emulators and short listings', () async {
     final androidDevices = AndroidDevices(
-      artifacts: FakeArtifacts(),
       userMessages: UserMessages(),
       androidWorkflow: androidWorkflow,
       androidSdk: FakeAndroidSdk(),
@@ -508,7 +498,6 @@ emulator-5612          host features:shell_2
 
   testWithoutContext('AndroidDevices can parse output from android n', () async {
     final androidDevices = AndroidDevices(
-      artifacts: FakeArtifacts(),
       userMessages: UserMessages(),
       androidWorkflow: androidWorkflow,
       androidSdk: FakeAndroidSdk(),
@@ -535,7 +524,6 @@ ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu f
 
   testWithoutContext('AndroidDevices provides adb error message as diagnostics', () async {
     final androidDevices = AndroidDevices(
-      artifacts: FakeArtifacts(),
       userMessages: UserMessages(),
       androidWorkflow: androidWorkflow,
       androidSdk: FakeAndroidSdk(),
@@ -562,7 +550,6 @@ Use the 'android' tool to install them:
 
   testWithoutContext('AndroidDevices handles no permissions devices', () async {
     final androidDevices = AndroidDevices(
-      artifacts: FakeArtifacts(),
       userMessages: UserMessages(),
       androidWorkflow: androidWorkflow,
       androidSdk: FakeAndroidSdk(),
@@ -599,7 +586,6 @@ List of devices attached
     'AndroidDevices handles other device states (unauthorized, offline, bootloader, unknown)',
     () async {
       final androidDevices = AndroidDevices(
-        artifacts: FakeArtifacts(),
         userMessages: UserMessages(),
         androidWorkflow: androidWorkflow,
         androidSdk: FakeAndroidSdk(),
@@ -647,7 +633,6 @@ device4       unknown usb:3-7
     'AndroidDevices can parse output with extra non-key-value attributes without mis-matching device ID',
     () async {
       final androidDevices = AndroidDevices(
-        artifacts: FakeArtifacts(),
         userMessages: UserMessages(),
         androidWorkflow: androidWorkflow,
         androidSdk: FakeAndroidSdk(),
@@ -677,7 +662,6 @@ ABCDEFG           device 20-30 product:mokey model:mokey device:mokey transport_
     'AndroidDevices handles serial containing spaces and state keywords correctly',
     () async {
       final androidDevices = AndroidDevices(
-        artifacts: FakeArtifacts(),
         userMessages: UserMessages(),
         androidWorkflow: androidWorkflow,
         androidSdk: FakeAndroidSdk(),
