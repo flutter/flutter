@@ -182,3 +182,29 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   glBlendFuncSeparate(saved_src_rgb, saved_dst_rgb, saved_src_alpha,
                       saved_dst_alpha);
 }
+
+GLint fl_compositor_opengl_get_frame_format(const FlutterLayer** layers,
+                                            size_t layers_count) {
+  // Every backing store in a frame is created by the same engine code from
+  // context-wide capabilities, so they all share a format and the first one
+  // describes the frame. Layers that aren't OpenGL framebuffer backing stores,
+  // e.g. platform views, don't have a format to match; fl_engine.cc only
+  // creates framebuffers, so there is nothing else to read a format from.
+  for (size_t i = 0; i < layers_count; i++) {
+    const FlutterLayer* layer = layers[i];
+    if (layer == nullptr ||
+        layer->type != kFlutterLayerContentTypeBackingStore ||
+        layer->backing_store == nullptr ||
+        layer->backing_store->type != kFlutterBackingStoreTypeOpenGL ||
+        layer->backing_store->open_gl.type !=
+            kFlutterOpenGLTargetTypeFramebuffer) {
+      continue;
+    }
+
+    return layer->backing_store->open_gl.framebuffer.target == GL_BGRA8_EXT
+               ? GL_BGRA_EXT
+               : GL_RGBA;
+  }
+
+  return GL_RGBA;
+}
