@@ -8,20 +8,33 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
-import 'context.dart';
+import 'fakes.dart';
 
 export 'package:test/test.dart' hide isInstanceOf, test;
 
-CommandRunner<void> createTestCommandRunner([FlutterCommand? command]) {
-  final FlutterCommandRunner runner = TestFlutterCommandRunner();
+CommandRunner<void> createTestCommandRunner([
+  FlutterCommand? command,
+  Analytics? analytics,
+  ToolContext? toolContext,
+  FeatureFlags? featureFlags,
+]) {
+  final ToolContext? effectiveToolContext = toolContext ?? command?.toolContext;
+  final runner = TestFlutterCommandRunner(
+    analytics: analytics,
+    featureFlags: featureFlags,
+    toolContext: effectiveToolContext,
+  );
   if (command != null) {
     runner.addCommand(command);
   }
@@ -37,7 +50,7 @@ Future<String> createProject(
   List<String>? arguments,
 }) async {
   arguments ??= <String>['--no-pub'];
-  final String projectPath = globals.fs.path.join(temp.path, name);
+  final String projectPath = temp.fileSystem.path.join(temp.path, name);
   final command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...arguments, projectPath]);
@@ -45,24 +58,52 @@ Future<String> createProject(
 }
 
 class TestFlutterCommandRunner extends FlutterCommandRunner {
+  TestFlutterCommandRunner({
+    Analytics? analytics,
+    FeatureFlags? featureFlags,
+    ToolContext? toolContext,
+  }) : super(
+         analytics: analytics ?? _defaultAnalytics(),
+         featureFlags: featureFlags ?? _defaultFeatureFlags(),
+         toolContext: toolContext ?? DelegatingToolContext(),
+       );
+
+  static Analytics _defaultAnalytics() {
+    try {
+      return context.get<Analytics>() ?? const NoOpAnalytics();
+    } on UnsupportedError {
+      return const NoOpAnalytics();
+    }
+  }
+
+  static FeatureFlags? _defaultFeatureFlags() {
+    try {
+      return context.get<FeatureFlags>();
+    } on UnsupportedError {
+      return null;
+    }
+  }
+
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Logger topLevelLogger = globals.logger;
-    final contextOverrides = <Type, dynamic>{
+    final Logger topLevelLogger = toolContext.logger;
+    final contextOverrides = <Type, Object?>{
       if (topLevelResults['verbose'] as bool) Logger: VerboseLogger(topLevelLogger),
+      ProcessInfo: toolContext.processInfo,
     };
     return context.run<void>(
-      overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
+      overrides: contextOverrides.map<Type, Generator>((Type type, Object? value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
         Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-          platform: globals.platform,
-          fileSystem: globals.fs,
+          platform: toolContext.platform,
+          fileSystem: toolContext.fs,
           userMessages: UserMessages(),
         );
         // For compatibility with tests that set this to a relative path.
-        Cache.flutterRoot = globals.fs.path.normalize(globals.fs.path.absolute(Cache.flutterRoot!));
+        final FileSystem fs = toolContext.fs;
+        Cache.flutterRoot = fs.path.normalize(fs.path.absolute(Cache.flutterRoot!));
         return super.runCommand(topLevelResults);
       },
     );
@@ -70,6 +111,6 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
 
   @override
   void printUsage() {
-    testLogger.printStatus(usage);
+    toolContext.logger.printStatus(usage);
   }
 }

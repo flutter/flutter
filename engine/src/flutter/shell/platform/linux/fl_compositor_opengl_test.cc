@@ -24,7 +24,6 @@ class FlCompositorOpenGLTest : public flutter::testing::LinuxTest {
   void SetUp() override {
     opengl_manager = fl_opengl_manager_new();
     renderable = fl_mock_renderable_new();
-    compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
     fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   }
 
@@ -40,10 +39,12 @@ class FlCompositorOpenGLTest : public flutter::testing::LinuxTest {
   FlCompositorOpenGL* compositor = nullptr;
 };
 
-TEST_F(FlCompositorOpenGLTest, Render) {
-  // Present layer from a thread.
+TEST_F(FlCompositorOpenGLTest, Composite) {
   constexpr size_t width = 100;
   constexpr size_t height = 100;
+  compositor = fl_compositor_opengl_new(opengl_manager);
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -54,74 +55,11 @@ TEST_F(FlCompositorOpenGLTest, Render) {
                         .offset = {0, 0},
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
+  // Composite the layers from a thread, as is done on the raster thread.
   std::thread([&]() {
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fl_framebuffer_get_id(target));
     fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
-
-  size_t frame_width, frame_height;
-  fl_compositor_opengl_get_frame_size(compositor, &frame_width, &frame_height);
-  EXPECT_EQ(frame_width, width);
-  EXPECT_EQ(frame_height, height);
-
-  // Render presented layer.
-  int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
-  g_autofree unsigned char* image_data =
-      static_cast<unsigned char*>(malloc(height * stride));
-  cairo_surface_t* surface = cairo_image_surface_create_for_data(
-      image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
-  cairo_t* cr = cairo_create(surface);
-  fl_compositor_opengl_render(compositor, cr, nullptr);
-  cairo_surface_destroy(surface);
-  cairo_destroy(cr);
-}
-
-TEST_F(FlCompositorOpenGLTest, Resize) {
-  // Present a layer that is the old size.
-  constexpr size_t width1 = 90;
-  constexpr size_t height1 = 90;
-  g_autoptr(FlFramebuffer) framebuffer1 =
-      fl_framebuffer_new(GL_RGB, width1, height1, FALSE);
-  FlutterBackingStore backing_store1 = {
-      .type = kFlutterBackingStoreTypeOpenGL,
-      .open_gl = {.framebuffer = {.user_data = framebuffer1}}};
-  FlutterLayer layer1 = {.type = kFlutterLayerContentTypeBackingStore,
-                         .backing_store = &backing_store1,
-                         .offset = {0, 0},
-                         .size = {width1, height1}};
-  const FlutterLayer* layers1[1] = {&layer1};
-  fl_compositor_opengl_composite_layers(compositor, layers1, 1);
-
-  // Present layer in current size.
-  constexpr size_t width2 = 100;
-  constexpr size_t height2 = 100;
-  g_autoptr(FlFramebuffer) framebuffer2 =
-      fl_framebuffer_new(GL_RGB, width2, height2, FALSE);
-  FlutterBackingStore backing_store2 = {
-      .type = kFlutterBackingStoreTypeOpenGL,
-      .open_gl = {.framebuffer = {.user_data = framebuffer2}}};
-  FlutterLayer layer2 = {.type = kFlutterLayerContentTypeBackingStore,
-                         .backing_store = &backing_store2,
-                         .offset = {0, 0},
-                         .size = {width2, height2}};
-  const FlutterLayer* layers2[1] = {&layer2};
-  fl_compositor_opengl_composite_layers(compositor, layers2, 1);
-
-  // The stored frame is now the new size.
-  size_t frame_width, frame_height;
-  fl_compositor_opengl_get_frame_size(compositor, &frame_width, &frame_height);
-  EXPECT_EQ(frame_width, width2);
-  EXPECT_EQ(frame_height, height2);
-
-  // Render the presented layer.
-  int stride2 = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width2);
-  g_autofree unsigned char* image_data =
-      static_cast<unsigned char*>(malloc(height2 * stride2));
-  cairo_surface_t* surface = cairo_image_surface_create_for_data(
-      image_data, CAIRO_FORMAT_ARGB32, width2, height2, stride2);
-  cairo_t* cr = cairo_create(surface);
-  fl_compositor_opengl_render(compositor, cr, nullptr);
-  cairo_surface_destroy(surface);
-  cairo_destroy(cr);
 }
 
 TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
@@ -135,6 +73,10 @@ TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
 
+  compositor = fl_compositor_opengl_new(opengl_manager);
+
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -151,19 +93,11 @@ TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
   glDisable(GL_BLEND);
   glEnable(GL_SCISSOR_TEST);
 
-  // Present layer and render.
+  // Composite the layers.
   std::thread([&]() {
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fl_framebuffer_get_id(target));
     fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
-  int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
-  g_autofree unsigned char* image_data =
-      static_cast<unsigned char*>(malloc(height * stride));
-  cairo_surface_t* surface = cairo_image_surface_create_for_data(
-      image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
-  cairo_t* cr = cairo_create(surface);
-  fl_compositor_opengl_render(compositor, cr, nullptr);
-  cairo_surface_destroy(surface);
-  cairo_destroy(cr);
 
   GLuint texture_2d_binding;
   glGetIntegerv(GL_TEXTURE_BINDING_2D,
@@ -186,6 +120,10 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
+  compositor = fl_compositor_opengl_new(opengl_manager);
+
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -197,19 +135,10 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
 
-  // Present layer and render.
   std::thread([&]() {
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fl_framebuffer_get_id(target));
     fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
-  int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
-  g_autofree unsigned char* image_data =
-      static_cast<unsigned char*>(malloc(height * stride));
-  cairo_surface_t* surface = cairo_image_surface_create_for_data(
-      image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
-  cairo_t* cr = cairo_create(surface);
-  fl_compositor_opengl_render(compositor, cr, nullptr);
-  cairo_surface_destroy(surface);
-  cairo_destroy(cr);
 }
 
 TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
@@ -230,6 +159,10 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
+  compositor = fl_compositor_opengl_new(opengl_manager);
+
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -241,19 +174,10 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
 
-  // Present layer and render.
   std::thread([&]() {
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fl_framebuffer_get_id(target));
     fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
-  int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
-  g_autofree unsigned char* image_data =
-      static_cast<unsigned char*>(malloc(height * stride));
-  cairo_surface_t* surface = cairo_image_surface_create_for_data(
-      image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
-  cairo_t* cr = cairo_create(surface);
-  fl_compositor_opengl_render(compositor, cr, nullptr);
-  cairo_surface_destroy(surface);
-  cairo_destroy(cr);
 }
 
 TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
@@ -267,6 +191,12 @@ TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
 
+  EXPECT_CALL(epoxy, glBlitFramebuffer).Times(0);
+
+  compositor = fl_compositor_opengl_new(opengl_manager);
+
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -278,19 +208,10 @@ TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
 
-  // Present layer and render.
   std::thread([&]() {
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fl_framebuffer_get_id(target));
     fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
-  int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
-  g_autofree unsigned char* image_data =
-      static_cast<unsigned char*>(malloc(height * stride));
-  cairo_surface_t* surface = cairo_image_surface_create_for_data(
-      image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
-  cairo_t* cr = cairo_create(surface);
-  fl_compositor_opengl_render(compositor, cr, nullptr);
-  cairo_surface_destroy(surface);
-  cairo_destroy(cr);
 }
 
 TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
@@ -305,6 +226,12 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
 
+  EXPECT_CALL(epoxy, glBlitFramebuffer).Times(0);
+
+  compositor = fl_compositor_opengl_new(opengl_manager);
+
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height, FALSE);
   FlutterBackingStore backing_store = {
@@ -316,59 +243,99 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
 
-  // Present layer and render.
   std::thread([&]() {
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fl_framebuffer_get_id(target));
     fl_compositor_opengl_composite_layers(compositor, layers, 1);
   }).join();
-  int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
-  g_autofree unsigned char* image_data =
-      static_cast<unsigned char*>(malloc(height * stride));
-  cairo_surface_t* surface = cairo_image_surface_create_for_data(
-      image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
-  cairo_t* cr = cairo_create(surface);
-  fl_compositor_opengl_render(compositor, cr, nullptr);
-  cairo_surface_destroy(surface);
-  cairo_destroy(cr);
 }
 
-TEST_F(FlCompositorOpenGLTest, RenderResizeCrash) {
-  // Present layer of size 100x100.
-  constexpr size_t width = 100;
-  constexpr size_t height = 100;
-  g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGB, width, height, FALSE);
+// The frame must be composited into the format the engine rendered the layers
+// with. Deriving it from anything else (e.g. an extension check) produces an
+// empty frame, which showed up as a black window in the subsurface renderer.
+TEST_F(FlCompositorOpenGLTest, FrameFormatMatchesBackingStore) {
+  FlutterBackingStore bgra_backing_store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {.type = kFlutterOpenGLTargetTypeFramebuffer,
+                  .framebuffer = {.target = GL_BGRA8_EXT}}};
+  FlutterLayer bgra_layer = {.type = kFlutterLayerContentTypeBackingStore,
+                             .backing_store = &bgra_backing_store};
+  const FlutterLayer* bgra_layers[1] = {&bgra_layer};
+  EXPECT_EQ(fl_compositor_opengl_get_frame_format(bgra_layers, 1), GL_BGRA_EXT);
+
+  FlutterBackingStore rgba_backing_store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {.type = kFlutterOpenGLTargetTypeFramebuffer,
+                  .framebuffer = {.target = GL_RGBA8}}};
+  FlutterLayer rgba_layer = {.type = kFlutterLayerContentTypeBackingStore,
+                             .backing_store = &rgba_backing_store};
+  const FlutterLayer* rgba_layers[1] = {&rgba_layer};
+  EXPECT_EQ(fl_compositor_opengl_get_frame_format(rgba_layers, 1), GL_RGBA);
+}
+
+// Frames with nothing to match the format of fall back to RGBA.
+TEST_F(FlCompositorOpenGLTest, FrameFormatDefaultsToRGBA) {
+  EXPECT_EQ(fl_compositor_opengl_get_frame_format(nullptr, 0), GL_RGBA);
+
+  FlutterLayer no_backing_store = {.type = kFlutterLayerContentTypeBackingStore,
+                                   .backing_store = nullptr};
+  const FlutterLayer* no_backing_store_layers[1] = {&no_backing_store};
+  EXPECT_EQ(fl_compositor_opengl_get_frame_format(no_backing_store_layers, 1),
+            GL_RGBA);
+
+  FlutterBackingStore software_backing_store = {
+      .type = kFlutterBackingStoreTypeSoftware};
+  FlutterLayer software_layer = {.type = kFlutterLayerContentTypeBackingStore,
+                                 .backing_store = &software_backing_store};
+  const FlutterLayer* software_layers[1] = {&software_layer};
+  EXPECT_EQ(fl_compositor_opengl_get_frame_format(software_layers, 1), GL_RGBA);
+
+  // fl_engine.cc only ever creates framebuffer backing stores. A texture
+  // backing store keeps its format in a different member of the same union, so
+  // it must not be read as if it were a framebuffer.
+  FlutterBackingStore texture_backing_store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {.type = kFlutterOpenGLTargetTypeTexture,
+                  .texture = {.target = GL_BGRA8_EXT}}};
+  FlutterLayer texture_layer = {.type = kFlutterLayerContentTypeBackingStore,
+                                .backing_store = &texture_backing_store};
+  const FlutterLayer* texture_layers[1] = {&texture_layer};
+  EXPECT_EQ(fl_compositor_opengl_get_frame_format(texture_layers, 1), GL_RGBA);
+}
+
+// Platform views have no format of their own, so the format must be taken from
+// the backing stores around them rather than from whichever layer comes first.
+TEST_F(FlCompositorOpenGLTest, FrameFormatSkipsPlatformViews) {
+  FlutterPlatformView platform_view = {.identifier = 1};
+  FlutterLayer platform_view_layer = {
+      .type = kFlutterLayerContentTypePlatformView,
+      .platform_view = &platform_view};
+
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
-      .open_gl = {.framebuffer = {.user_data = framebuffer}}};
+      .open_gl = {.type = kFlutterOpenGLTargetTypeFramebuffer,
+                  .framebuffer = {.target = GL_BGRA8_EXT}}};
+  FlutterLayer backing_store_layer = {
+      .type = kFlutterLayerContentTypeBackingStore,
+      .backing_store = &backing_store};
+
+  const FlutterLayer* layers[2] = {&platform_view_layer, &backing_store_layer};
+  EXPECT_EQ(fl_compositor_opengl_get_frame_format(layers, 2), GL_BGRA_EXT);
+}
+
+// Regression test: the format must come from the layers, never from what the
+// driver is capable of. Mesa advertises GL_EXT_texture_format_BGRA8888 while
+// the engine still renders RGBA, so choosing BGRA from the extension gives a
+// framebuffer that doesn't match the frame and composites to nothing.
+TEST_F(FlCompositorOpenGLTest, FrameFormatIgnoresTextureFormatExtension) {
+  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
+      .WillByDefault(::testing::Return(true));
+
+  FlutterBackingStore backing_store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {.type = kFlutterOpenGLTargetTypeFramebuffer,
+                  .framebuffer = {.target = GL_RGBA8}}};
   FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
-                        .backing_store = &backing_store,
-                        .offset = {0, 0},
-                        .size = {width, height}};
+                        .backing_store = &backing_store};
   const FlutterLayer* layers[1] = {&layer};
-  std::thread([&]() {
-    fl_compositor_opengl_composite_layers(compositor, layers, 1);
-  }).join();
-
-  // Mock window size to be larger (200x200).
-  flutter::testing::MockGtk mock_gtk;
-  EXPECT_CALL(mock_gtk, gdk_window_get_width(::testing::_))
-      .WillRepeatedly(::testing::Return(200));
-  EXPECT_CALL(mock_gtk, gdk_window_get_height(::testing::_))
-      .WillRepeatedly(::testing::Return(200));
-
-  // Render into the larger window.
-  // This renders the 100x100 frame into the 200x200 window without waiting.
-  // If bug is present, it will try to read 200x200 from 100x100 buffer.
-  int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, 200);
-  g_autofree unsigned char* image_data =
-      static_cast<unsigned char*>(g_malloc(200 * stride));
-  cairo_surface_t* surface = cairo_image_surface_create_for_data(
-      image_data, CAIRO_FORMAT_ARGB32, 200, 200, stride);
-  cairo_t* cr = cairo_create(surface);
-
-  // We expect this to not crash.
-  fl_compositor_opengl_render(compositor, cr, nullptr);
-
-  cairo_surface_destroy(surface);
-  cairo_destroy(cr);
+  EXPECT_EQ(fl_compositor_opengl_get_frame_format(layers, 1), GL_RGBA);
 }
