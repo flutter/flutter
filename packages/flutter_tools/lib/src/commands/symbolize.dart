@@ -62,6 +62,9 @@ class SymbolizeCommand extends FlutterCommand {
   final DwarfSymbolizationService _dwarfSymbolizationService;
 
   @override
+  ToolContext get toolContext => _toolContext;
+
+  @override
   String get description => 'Symbolize a stack trace from an AOT-compiled Flutter app.';
 
   @override

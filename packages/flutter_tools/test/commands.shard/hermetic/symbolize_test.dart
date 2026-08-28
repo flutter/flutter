@@ -569,7 +569,7 @@ void main() {
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
 
-    expect(command.name, 'symbolize');
+    expect(command.toolContext, toolContext);
   });
 }
 
