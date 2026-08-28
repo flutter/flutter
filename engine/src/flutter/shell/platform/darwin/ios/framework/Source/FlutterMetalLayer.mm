@@ -21,6 +21,7 @@ FLUTTER_ASSERT_ARC
 @class FlutterDrawable;
 
 @interface FlutterMetalLayer () {
+  id<MTLDevice> _preferredDevice;
   CGSize _drawableSize;
 
   NSUInteger _nextDrawableId;
@@ -144,7 +145,8 @@ FLUTTER_ASSERT_ARC
 
 - (instancetype)init {
   if (self = [super init]) {
-    self.device = MTLCreateSystemDefaultDevice();
+    _preferredDevice = MTLCreateSystemDefaultDevice();
+    self.device = self.preferredDevice;
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
     _sampleBufferDisplayLayer = [[AVSampleBufferDisplayLayer alloc] init];
@@ -158,6 +160,16 @@ FLUTTER_ASSERT_ARC
                                                object:nil];
   }
   return self;
+}
+
+- (BOOL)isKindOfClass:(Class)aClass {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+  if ([aClass isEqual:[CAMetalLayer class]]) {
+    return YES;
+  }
+#pragma clang diagnostic pop
+  return [super isKindOfClass:aClass];
 }
 
 - (void)layoutSublayers {
@@ -178,7 +190,6 @@ FLUTTER_ASSERT_ARC
     _front = nil;
     _totalTextures = 0;
     _drawableSize = drawableSize;
-    [super setDrawableSize:drawableSize];
   }
 }
 
