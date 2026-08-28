@@ -4,7 +4,9 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterMetalLayer.h"
 
+#include <AVFoundation/AVFoundation.h>
 #include <CoreMedia/CoreMedia.h>
+#include <CoreVideo/CoreVideo.h>
 #include <IOSurface/IOSurfaceObjC.h>
 #include <Metal/Metal.h>
 #include <UIKit/UIKit.h>
@@ -27,11 +29,12 @@ FLUTTER_ASSERT_ARC
   NSMutableSet<FlutterTexture*>* _availableTextures;
   NSUInteger _totalTextures;
   FlutterTexture* _front;
+  AVSampleBufferDisplayLayer* _sampleBufferDisplayLayer;
 }
 
 - (void)presentTexture:(FlutterTexture*)texture;
+- (void)displayTexture:(FlutterTexture*)texture;
 - (void)returnTexture:(FlutterTexture*)texture;
-- (id<CAMetalDrawable>)acquirePresentationDrawable;
 
 @end
 
@@ -59,7 +62,6 @@ FLUTTER_ASSERT_ARC
 @interface FlutterDrawable : NSObject <FlutterMetalDrawable> {
   FlutterTexture* _texture;
   __weak FlutterMetalLayer* _layer;
-  id<CAMetalDrawable> _presentationDrawable;
   NSUInteger _drawableId;
   BOOL _presented;
 }
@@ -103,8 +105,6 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)present {
-  [_presentationDrawable present];
-  _presentationDrawable = nil;
   [_layer presentTexture:self->_texture];
   self->_presented = YES;
 }
@@ -130,40 +130,10 @@ FLUTTER_ASSERT_ARC
 
 - (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer {
   FlutterTexture* texture = _texture;
+  FlutterMetalLayer* layer = _layer;
   texture.waitingForCompletion = YES;
-
-  id<CAMetalDrawable> presentationDrawable = [_layer acquirePresentationDrawable];
-  id<MTLTexture> presentationTexture = presentationDrawable.texture;
-
-  // A resize can leave an old Flutter texture in flight. Do not copy
-  // it into a drawable created for the new layer configuration.
-  const BOOL canCopy = presentationTexture != nil &&
-                       presentationTexture.width == texture.texture.width &&
-                       presentationTexture.height == texture.texture.height &&
-                       presentationTexture.pixelFormat == texture.texture.pixelFormat;
-
-  if (canCopy) {
-    // Copy the IOSurface-backed Flutter result into the drawable owned by this CAMetalLayer.
-    // Encoding the copy and presentation on the render command buffer preserves GPU ordering
-    // without making the CPU wait.
-    id<MTLBlitCommandEncoder> blit = [commandBuffer blitCommandEncoder];
-    MTLOrigin origin = MTLOriginMake(0, 0, 0);
-    MTLSize size = MTLSizeMake(texture.texture.width, texture.texture.height, 1);
-    [blit copyFromTexture:texture.texture
-              sourceSlice:0
-              sourceLevel:0
-             sourceOrigin:origin
-               sourceSize:size
-                toTexture:presentationTexture
-         destinationSlice:0
-         destinationLevel:0
-        destinationOrigin:origin];
-    [blit endEncoding];
-    // Defer presentation until the command buffer is scheduled so the native
-    // drawable can join the Core Animation transaction used by platform views.
-    _presentationDrawable = presentationDrawable;
-  }
   [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
+    [layer displayTexture:texture];
     texture.waitingForCompletion = NO;
   }];
 }
@@ -177,6 +147,10 @@ FLUTTER_ASSERT_ARC
     self.device = MTLCreateSystemDefaultDevice();
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
+    _sampleBufferDisplayLayer = [[AVSampleBufferDisplayLayer alloc] init];
+    _sampleBufferDisplayLayer.videoGravity = AVLayerVideoGravityResize;
+    _sampleBufferDisplayLayer.backgroundColor = UIColor.clearColor.CGColor;
+    [self addSublayer:_sampleBufferDisplayLayer];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground:)
@@ -184,6 +158,14 @@ FLUTTER_ASSERT_ARC
                                                object:nil];
   }
   return self;
+}
+
+- (void)layoutSublayers {
+  [super layoutSublayers];
+  [CATransaction begin];
+  [CATransaction setDisableActions:YES];
+  _sampleBufferDisplayLayer.frame = self.bounds;
+  [CATransaction commit];
 }
 
 - (void)dealloc {
@@ -201,6 +183,7 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)didEnterBackground:(id)notification {
+  [_sampleBufferDisplayLayer flushAndRemoveImage];
   @synchronized(self) {
     [_availableTextures removeAllObjects];
     _totalTextures = _front != nil ? 1 : 0;
@@ -351,10 +334,6 @@ FLUTTER_ASSERT_ARC
   return [self nextFlutterDrawable];
 }
 
-- (id<CAMetalDrawable>)acquirePresentationDrawable {
-  return [super nextDrawable];
-}
-
 - (void)presentTexture:(FlutterTexture*)texture {
   @synchronized(self) {
     if (texture.texture.width != _drawableSize.width ||
@@ -367,6 +346,45 @@ FLUTTER_ASSERT_ARC
     _front = texture;
     texture.presentedTime = CACurrentMediaTime();
   }
+}
+
+- (void)displayTexture:(FlutterTexture*)texture {
+  CVPixelBufferRef pixelBuffer = nil;
+  CVReturn result = CVPixelBufferCreateWithIOSurface(
+      kCFAllocatorDefault, (__bridge IOSurfaceRef)texture.surface, nil, &pixelBuffer);
+  if (result != kCVReturnSuccess || pixelBuffer == nil) {
+    return;
+  }
+
+  CMVideoFormatDescriptionRef formatDescription = nil;
+  OSStatus status =
+      CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, pixelBuffer,
+                                                   &formatDescription);
+  if (status != noErr || formatDescription == nil) {
+    CFRelease(pixelBuffer);
+    return;
+  }
+
+  CMSampleTimingInfo timing = {
+      .duration = kCMTimeInvalid,
+      .presentationTimeStamp = kCMTimeZero,
+      .decodeTimeStamp = kCMTimeInvalid,
+  };
+  CMSampleBufferRef sampleBuffer = nil;
+  status = CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixelBuffer,
+                                                     formatDescription, &timing, &sampleBuffer);
+  if (status == noErr && sampleBuffer != nil) {
+    CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, YES);
+    if (attachments != nil && CFArrayGetCount(attachments) > 0) {
+      CFMutableDictionaryRef attachment =
+          (CFMutableDictionaryRef)CFArrayGetValueAtIndex(attachments, 0);
+      CFDictionarySetValue(attachment, kCMSampleAttachmentKey_DisplayImmediately, kCFBooleanTrue);
+    }
+    [_sampleBufferDisplayLayer enqueueSampleBuffer:sampleBuffer];
+    CFRelease(sampleBuffer);
+  }
+  CFRelease(formatDescription);
+  CFRelease(pixelBuffer);
 }
 
 - (void)returnTexture:(FlutterTexture*)texture {
