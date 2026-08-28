@@ -56,7 +56,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TITLE: '[Automated Task] Bump goldctl version in .ci.yaml'
           ASSIGNEES: Piinks
-          LABELS: 'automated task,team-ecosystem, infra: flutter gold'
+          LABELS: 'automated task,team-ecosystem,infra: flutter gold'
           BODY: |
             ### Quarterly goldctl Version Update
 

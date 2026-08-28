@@ -14,7 +14,7 @@ You can find active or closed automated task issues using the following GitHub i
 
 - [All open automated tasks](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22automated+task%22) (`is:issue is:open label:"automated task"`)
 - [Localization tasks](https://github.com/flutter/flutter/issues?q=is%3Aissue+label%3A%22automated+task%22+label%3A%22a%3A+internationalization%22) (`is:issue label:"automated task" label:"a: internationalization"`)
-- [goldctl tasks](https://github.com/flutter/flutter/issues?q=is%3Aissue+label%3A%22automated+task%22+label%3A%22team-ecosystem%22) (`is:issue label:"automated task" label:"team-ecosystem"`)
+- [goldctl tasks](https://github.com/flutter/flutter/issues?q=is%3Aissue+label%3A%22automated+task%22+label%3A%22infra%3A+flutter+gold%22) (`is:issue label:"automated task" label:"infra: flutter gold"`)
 
 ---
 
