@@ -491,7 +491,7 @@ mixin _PositionedWindowControllerLinux on BaseWindowControllerLinux {
     _parent = parent;
     final _GtkWindow? parentWindow = _owner.registrar._windowForViewId(parent.rootView.viewId);
     if (parentWindow == null) {
-      throw Exception('Failed to find $description parent window');
+      throw StateError('Failed to find $description parent window');
     }
     _window.setTransientFor(parentWindow);
     updatePosition(anchorRect: anchorRect, positioner: positioner);
@@ -679,7 +679,7 @@ class DialogWindowControllerLinux extends DialogWindowController
     if (parent != null) {
       final _GtkWindow? parentWindow = owner.registrar._windowForViewId(parent.rootView.viewId);
       if (parentWindow == null) {
-        throw Exception('Failed to find dialog parent window');
+        throw StateError('Failed to find dialog parent window');
       }
       _window.setTransientFor(parentWindow);
       _window.setModal(true);
