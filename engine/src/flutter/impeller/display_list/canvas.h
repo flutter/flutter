@@ -48,7 +48,7 @@ struct BackdropData {
   std::shared_ptr<flutter::DlImageFilter> last_backdrop;
   // The union of the coverage bounding boxes for all backdrop filters
   // that share this backdrop_id.
-  std::optional<Rect> coverage_union;
+  Rect coverage_union;
 };
 
 struct CanvasStackEntry {

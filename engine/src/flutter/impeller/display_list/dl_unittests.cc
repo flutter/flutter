@@ -1755,11 +1755,7 @@ TEST_P(DisplayListTest, FirstPassDispatcherBackdropCoverageUnion) {
   ASSERT_TRUE(it != backdrop_data.end());
   EXPECT_EQ(it->second.backdrop_count, 2u);
   EXPECT_TRUE(it->second.all_filters_equal);
-  EXPECT_TRUE(it->second.coverage_union.has_value());
-  if (it->second.coverage_union.has_value()) {
-    EXPECT_EQ(it->second.coverage_union.value(),
-              Rect::MakeLTRB(10, 20, 150, 150));
-  }
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(10, 20, 150, 150));
 }
 
 TEST_P(DisplayListTest, FirstPassDispatcherBackdropCoverageUnionClippedOut) {
@@ -1794,11 +1790,8 @@ TEST_P(DisplayListTest, FirstPassDispatcherBackdropCoverageUnionClippedOut) {
   ASSERT_TRUE(it != backdrop_data.end());
   EXPECT_EQ(it->second.backdrop_count, 2u);
   EXPECT_TRUE(it->second.all_filters_equal);
-  EXPECT_TRUE(it->second.coverage_union.has_value());
-  if (it->second.coverage_union.has_value()) {
-    EXPECT_TRUE(it->second.coverage_union.value().IsEmpty());
-    EXPECT_EQ(it->second.coverage_union.value(), Rect::MakeLTRB(0, 0, 0, 0));
-  }
+  EXPECT_TRUE(it->second.coverage_union.IsEmpty());
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(0, 0, 0, 0));
 }
 
 TEST_P(DisplayListTest,
@@ -1833,11 +1826,38 @@ TEST_P(DisplayListTest,
   ASSERT_TRUE(it != backdrop_data.end());
   EXPECT_EQ(it->second.backdrop_count, 2u);
   EXPECT_TRUE(it->second.all_filters_equal);
-  EXPECT_TRUE(it->second.coverage_union.has_value());
-  if (it->second.coverage_union.has_value()) {
-    EXPECT_EQ(it->second.coverage_union.value(),
-              Rect::MakeLTRB(10, 20, 60, 80));
-  }
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(10, 20, 60, 80));
+}
+
+TEST_P(DisplayListTest,
+       FirstPassDispatcherBackdropCoverageUnionDisjointBounds) {
+  flutter::DisplayListBuilder builder;
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // Layer 1: disjoint bounds (outside initial cull rect 0, 0, 1000, 1000)
+  builder.SaveLayer(DlRect::MakeLTRB(-100, -100, -50, -50), &save_paint,
+                    blur.get(), /*backdrop_id=*/1);
+  builder.Restore();
+
+  // Layer 2: visible at (10, 20, 60, 80)
+  builder.SaveLayer(DlRect::MakeLTRB(10, 20, 60, 80), &save_paint, blur.get(),
+                    /*backdrop_id=*/1);
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  auto it = backdrop_data.find(1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
+  EXPECT_TRUE(it->second.all_filters_equal);
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(10, 20, 60, 80));
 }
 
 }  // namespace testing

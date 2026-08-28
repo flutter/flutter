@@ -1005,11 +1005,8 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
         backdrop->shared();
     Rect layer_coverage = cull_rect_state_.back();
     if (!bounds.IsEmpty() && !bounds.IsMaximum()) {
-      auto transformed_bounds = bounds.TransformBounds(matrix_);
-      auto intersection = layer_coverage.Intersection(transformed_bounds);
-      if (intersection.has_value()) {
-        layer_coverage = intersection.value();
-      }
+      layer_coverage =
+          layer_coverage.IntersectionOrEmpty(bounds.TransformBounds(matrix_));
     }
     std::unordered_map<int64_t, BackdropData>::iterator existing =
         backdrop_data_.find(backdrop_id.value());
@@ -1020,10 +1017,7 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
                        .texture_slot = nullptr,
                        .shared_filter_snapshot = std::nullopt,
                        .last_backdrop = shared_backdrop,
-                       .coverage_union =
-                           layer_coverage.IsEmpty()
-                               ? std::optional<Rect>(Rect::MakeLTRB(0, 0, 0, 0))
-                               : std::optional<Rect>(layer_coverage)};
+                       .coverage_union = layer_coverage};
     } else {
       BackdropData& data = existing->second;
       data.backdrop_count++;
@@ -1031,14 +1025,7 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
         data.all_filters_equal = (*data.last_backdrop == *shared_backdrop);
         data.last_backdrop = shared_backdrop;
       }
-      if (!layer_coverage.IsEmpty()) {
-        if (data.coverage_union.has_value() &&
-            !data.coverage_union->IsEmpty()) {
-          data.coverage_union = data.coverage_union->Union(layer_coverage);
-        } else {
-          data.coverage_union = layer_coverage;
-        }
-      }
+      data.coverage_union = data.coverage_union.Union(layer_coverage);
     }
   }
 

@@ -1899,11 +1899,9 @@ void Canvas::SaveLayer(const Paint& paint,
       // layer once.
       if (backdrop_data->all_filters_equal &&
           !backdrop_data->shared_filter_snapshot.has_value()) {
-        Contents::SnapshotOptions snapshot_options;
-        if (backdrop_data->coverage_union.has_value()) {
-          snapshot_options.coverage_limit =
-              backdrop_data->coverage_union.value();
-        }
+        Contents::SnapshotOptions snapshot_options = {
+            .coverage_limit = backdrop_data->coverage_union,
+        };
         backdrop_data->shared_filter_snapshot =
             backdrop_filter_contents->RenderToSnapshot(renderer_, {},
                                                        snapshot_options);
