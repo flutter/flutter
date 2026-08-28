@@ -25,7 +25,7 @@
   self.engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [self.engine runWithEntrypoint:nil];
 
-  return YES;
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
 @end

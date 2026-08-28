@@ -33,7 +33,7 @@ static NSString *_kReloadChannelName = @"reload";
                                        binaryMessenger:_engine.binaryMessenger
                                                  codec:[FlutterStringCodec sharedInstance]];
 
-  return YES;
+  return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
 @end
