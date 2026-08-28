@@ -177,7 +177,15 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     }
     assert(devToolsUri != null);
     logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUri');
-    unawaited(startChrome(<String>[devToolsUri!.toString()]));
+    Future<void> launchChrome() async {
+      try {
+        await startChrome(<String>[devToolsUri!.toString()]);
+      } on Exception catch (error) {
+        logger.printError('Failed to launch DevTools in browser: $error');
+      }
+    }
+
+    unawaited(launchChrome());
     return true;
   }
 

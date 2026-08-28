@@ -6,6 +6,7 @@ import '../android/android_workflow.dart';
 import '../base/common.dart';
 import '../context/tool_context.dart';
 import '../doctor.dart';
+import '../experimental/extension_manager.dart';
 import '../runner/flutter_command.dart';
 
 class DoctorCommand extends FlutterCommand {
@@ -14,6 +15,7 @@ class DoctorCommand extends FlutterCommand {
     Doctor? doctor,
     AndroidLicenseValidator? androidLicenseValidator,
     this.verbose = false,
+    this.extensionManager,
   }) : _doctor = doctor,
        _androidLicenseValidator = androidLicenseValidator,
        super(toolContext: toolContext) {
@@ -35,6 +37,7 @@ class DoctorCommand extends FlutterCommand {
   final Doctor? _doctor;
   final AndroidLicenseValidator? _androidLicenseValidator;
   final bool verbose;
+  final ExtensionManager? extensionManager;
 
   @override
   final name = 'doctor';
@@ -73,6 +76,7 @@ class DoctorCommand extends FlutterCommand {
           androidLicenses: boolArg('android-licenses'),
           verbose: verbose,
           androidLicenseValidator: androidLicenseValidator,
+          extensionManager: extensionManager,
         ) ??
         false;
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);

@@ -8,11 +8,13 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -25,12 +27,14 @@ CommandRunner<void> createTestCommandRunner([
   FlutterCommand? command,
   Analytics? analytics,
   ToolContext? toolContext,
+  FeatureFlags? featureFlags,
 ]) {
-  final ToolContext effectiveToolContext =
-      toolContext ??
-      (command != null ? (command as dynamic).toolContext as ToolContext? : null) ??
-      DelegatingToolContext();
-  final runner = TestFlutterCommandRunner(analytics: analytics, toolContext: effectiveToolContext);
+  final ToolContext? effectiveToolContext = toolContext ?? command?.toolContext;
+  final runner = TestFlutterCommandRunner(
+    analytics: analytics,
+    featureFlags: featureFlags,
+    toolContext: effectiveToolContext,
+  );
   if (command != null) {
     runner.addCommand(command);
   }
@@ -54,20 +58,41 @@ Future<String> createProject(
 }
 
 class TestFlutterCommandRunner extends FlutterCommandRunner {
-  TestFlutterCommandRunner({Analytics? analytics, ToolContext? toolContext})
-    : super(
-        analytics: analytics ?? const NoOpAnalytics(),
-        toolContext: toolContext ?? FakeToolContext(),
-      );
+  TestFlutterCommandRunner({
+    Analytics? analytics,
+    FeatureFlags? featureFlags,
+    ToolContext? toolContext,
+  }) : super(
+         analytics: analytics ?? _defaultAnalytics(),
+         featureFlags: featureFlags ?? _defaultFeatureFlags(),
+         toolContext: toolContext ?? DelegatingToolContext(),
+       );
+
+  static Analytics _defaultAnalytics() {
+    try {
+      return context.get<Analytics>() ?? const NoOpAnalytics();
+    } on UnsupportedError {
+      return const NoOpAnalytics();
+    }
+  }
+
+  static FeatureFlags? _defaultFeatureFlags() {
+    try {
+      return context.get<FeatureFlags>();
+    } on UnsupportedError {
+      return null;
+    }
+  }
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Logger topLevelLogger = toolContext.logger;
-    final contextOverrides = <Type, dynamic>{
+    final contextOverrides = <Type, Object?>{
       if (topLevelResults['verbose'] as bool) Logger: VerboseLogger(topLevelLogger),
+      ProcessInfo: toolContext.processInfo,
     };
     return context.run<void>(
-      overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
+      overrides: contextOverrides.map<Type, Generator>((Type type, Object? value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
@@ -77,9 +102,8 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
           userMessages: UserMessages(),
         );
         // For compatibility with tests that set this to a relative path.
-        Cache.flutterRoot = toolContext.fs.path.normalize(
-          toolContext.fs.path.absolute(Cache.flutterRoot!),
-        );
+        final FileSystem fs = toolContext.fs;
+        Cache.flutterRoot = fs.path.normalize(fs.path.absolute(Cache.flutterRoot!));
         return super.runCommand(topLevelResults);
       },
     );

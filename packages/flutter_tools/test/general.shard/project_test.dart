@@ -119,6 +119,17 @@ void main() {
           globals.fs.currentDirectory.absolute.path,
         );
       });
+
+      _testInMemory('buildDirectory uses configured build-dir', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        globals.config.setValue('build-dir', 'custom_build');
+        final FlutterProject project = FlutterProject.fromDirectory(directory);
+        expect(project.buildDirectory.path, globals.fs.path.join(directory.path, 'custom_build'));
+        expect(
+          project.ephemeralDirectories.map((Directory d) => d.path),
+          contains(project.buildDirectory.path),
+        );
+      });
     });
 
     group('ensure ready for platform-specific tooling', () {
@@ -2046,6 +2057,104 @@ resolution: workspace
           <String>['child1', 'child2'],
         );
       });
+
+      _testInMemory('workspaceRoot returns root project for member projects', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- pkgs/*
+''');
+        final Directory child1Dir = directory.childDirectory('pkgs').childDirectory('child1');
+        child1Dir.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+
+        final FlutterProject parentProject = FlutterProject.fromDirectory(directory);
+        final FlutterProject childProject = FlutterProject.fromDirectory(child1Dir);
+
+        expect(
+          globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+          globals.fs.path.canonicalize(parentProject.directory.path),
+        );
+        expect(parentProject.workspaceRoot, null);
+      });
+
+      _testInMemory('workspaceRoot works with relative paths', () async {
+        final Directory directory = globals.fs.directory('myproject')..createSync(recursive: true);
+        directory.childFile('pubspec.yaml').writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- child1
+''');
+        final Directory child1Dir = directory.childDirectory('child1')..createSync(recursive: true);
+        child1Dir.childFile('pubspec.yaml').writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+
+        final Directory originalCwd = globals.fs.currentDirectory;
+        try {
+          globals.fs.currentDirectory = directory;
+          final FlutterProject childProject = FlutterProject.fromDirectory(
+            globals.fs.directory('child1'),
+          );
+          expect(
+            globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+            globals.fs.path.canonicalize(globals.fs.currentDirectory.path),
+          );
+        } finally {
+          globals.fs.currentDirectory = originalCwd;
+        }
+      });
+
+      _testInMemory(
+        'workspaceRoot is resilient to malformed sibling packages in workspace',
+        () async {
+          final Directory directory = globals.fs.directory('myproject');
+          directory.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- pkgs/*
+''');
+          final Directory validChildDir = directory
+              .childDirectory('pkgs')
+              .childDirectory('valid_child');
+          validChildDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: valid_child
+flutter:
+resolution: workspace
+''');
+          final Directory brokenChildDir = directory
+              .childDirectory('pkgs')
+              .childDirectory('broken_child');
+          brokenChildDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('invalid: yaml: [broken');
+
+          final FlutterProject parentProject = FlutterProject.fromDirectory(directory);
+          final FlutterProject childProject = FlutterProject.fromDirectory(validChildDir);
+
+          expect(
+            globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+            globals.fs.path.canonicalize(parentProject.directory.path),
+          );
+        },
+      );
     });
   });
 

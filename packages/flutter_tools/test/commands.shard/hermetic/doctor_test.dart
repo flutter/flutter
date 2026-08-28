@@ -20,8 +20,10 @@ import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -1344,6 +1346,7 @@ class FakeDiagnoseDoctor extends Fake implements Doctor {
     bool androidLicenses = false,
     bool verbose = true,
     AndroidLicenseValidator? androidLicenseValidator,
+    ExtensionManager? extensionManager,
     bool showPii = true,
     List<ValidatorTask>? startedValidatorTasks,
     bool sendEvent = true,
