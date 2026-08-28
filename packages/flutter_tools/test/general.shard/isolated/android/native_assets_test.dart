@@ -54,7 +54,11 @@ void main() {
       'build with assets $buildMode',
       // [intended] Backslashes in commands, but we will never run these commands on Windows.
       skip: const LocalPlatform().isWindows,
-      overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.empty(),
+        FeatureFlags: () =>
+            TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
+      },
       () async {
         final File packageConfig = environment.projectDir.childFile(
           '.dart_tool/package_config.json',
@@ -93,7 +97,7 @@ void main() {
         };
         final DartHooksResult result = await runFlutterSpecificHooks(
           environmentDefines: environmentDefines,
-          targetPlatform: const TargetPlatform(.android, .arm64),
+          targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: buildRunner,
@@ -104,7 +108,7 @@ void main() {
         await installCodeAssets(
           dartHookResult: result,
           environmentDefines: environmentDefines,
-          targetPlatform: const TargetPlatform(.android, .arm64),
+          targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
           fileSystem: fileSystem,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
@@ -142,7 +146,7 @@ void main() {
           kBuildMode: BuildMode.debug.cliName,
           kMinSdkVersion: minSdkVersion,
         },
-        targetPlatform: const TargetPlatform(.android, .x64),
+        targetPlatform: TargetPlatform.android_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
         buildRunner: _BuildRunnerWithoutNdk(),
@@ -170,7 +174,7 @@ void main() {
             kBuildMode: BuildMode.debug.cliName,
             kMinSdkVersion: minSdkVersion,
           },
-          targetPlatform: const TargetPlatform(.android, .arm64),
+          targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
           fileSystem: fileSystem,
           buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),

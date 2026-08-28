@@ -5,8 +5,8 @@
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 
-import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'dialog_window_content.dart';
 import 'dialog_window_edit_dialog.dart';
@@ -105,10 +105,7 @@ class _WindowsTable extends StatelessWidget {
 
   void _showWindowEditDialog(BaseWindowController controller, BuildContext context) {
     return switch (controller) {
-      final WindowController regular => showWindowEditDialog(
-        context: context,
-        controller: regular,
-      ),
+      final WindowController regular => showWindowEditDialog(context: context, controller: regular),
       final DialogWindowController dialog => showDialogWindowEditDialog(
         context: context,
         controller: dialog,

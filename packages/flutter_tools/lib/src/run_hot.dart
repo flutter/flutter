@@ -156,7 +156,7 @@ class HotRunner extends ResidentRunner {
       case 1:
         final Device device = flutterDevices.first.device!;
         final TargetPlatform targetPlatform = await device.targetPlatform;
-        _targetPlatformName = targetPlatform.devicePlatformName;
+        _targetPlatformName = targetPlatform.getName();
         _targetPlatforms.add(targetPlatform);
         _sdkName = await device.sdkNameAndVersion;
         _emulator = await device.isLocalEmulator;
@@ -1124,8 +1124,9 @@ class HotRunner extends ResidentRunner {
             uiIsolateId: view.uiIsolate!.id,
             viewId: view.id,
             windows:
-                (device.targetPlatform.type == .tester && globals.platform.isWindows) ||
-                device.targetPlatform.type == .windows,
+                (device.targetPlatform == TargetPlatform.tester && globals.platform.isWindows) ||
+                device.targetPlatform == TargetPlatform.windows_x64 ||
+                device.targetPlatform == TargetPlatform.windows_arm64,
           ),
         ),
       );
@@ -1485,6 +1486,20 @@ class ProjectFileInvalidator {
         if (_isNotInPubCache(uri)) uri,
     ];
     final invalidatedFiles = <Uri>[];
+
+    final bool Function(DateTime) isInvalidated;
+    if (_platform.isWindows) {
+      // On Windows, FileStat.modified truncates to second precision (via GetFileAttributesExW).
+      // However, lastCompiled is recorded with millisecond precision.
+      final lastCompiledTruncated = DateTime.fromMillisecondsSinceEpoch(
+        (lastCompiled.millisecondsSinceEpoch ~/ 1000) * 1000,
+        isUtc: lastCompiled.isUtc,
+      );
+      isInvalidated = (DateTime updatedAt) => !updatedAt.isBefore(lastCompiledTruncated);
+    } else {
+      isInvalidated = (DateTime updatedAt) => updatedAt.isAfter(lastCompiled);
+    }
+
     if (asyncScanning) {
       final pool = Pool(_kMaxPendingStats);
       final waitList = <Future<void>>[];
@@ -1501,7 +1516,7 @@ class ProjectFileInvalidator {
                         : _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
                     .then((FileStat stat) {
                       final DateTime updatedAt = stat.modified;
-                      if (updatedAt.isAfter(lastCompiled)) {
+                      if (isInvalidated(updatedAt)) {
                         invalidatedFiles.add(uri);
                       }
                     }),
@@ -1516,7 +1531,7 @@ class ProjectFileInvalidator {
         final DateTime updatedAt = uri.hasScheme && uri.scheme != 'file'
             ? _fileSystem.file(uri).statSync().modified
             : _fileSystem.statSync(uri.toFilePath(windows: _platform.isWindows)).modified;
-        if (updatedAt.isAfter(lastCompiled)) {
+        if (isInvalidated(updatedAt)) {
           invalidatedFiles.add(uri);
         }
       }
@@ -1526,7 +1541,7 @@ class ProjectFileInvalidator {
     final File packageFile = _fileSystem.file(packagesPath);
     final Uri packageUri = packageFile.uri;
     final DateTime updatedAt = packageFile.statSync().modified;
-    if (updatedAt.isAfter(lastCompiled)) {
+    if (isInvalidated(updatedAt)) {
       invalidatedFiles.add(packageUri);
     }
 

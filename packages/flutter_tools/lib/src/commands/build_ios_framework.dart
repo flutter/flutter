@@ -499,7 +499,12 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
         stringArg('output') ??
-        globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'ios', 'framework');
+        globals.fs.path.join(
+          globals.fs.currentDirectory.path,
+          getBuildDirectory(globals.config, globals.fs),
+          'ios',
+          'framework',
+        );
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');
@@ -744,7 +749,7 @@ end
     final Status status = globals.logger.startProgress(' ├─Copying Flutter.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = globals.artifacts!.getArtifactPath(
       Artifact.flutterXcframework,
-      platform: FlutterDarwinPlatform.ios.targetPlatform,
+      platform: TargetPlatform.ios,
       mode: buildInfo.mode,
     );
     final String flutterFrameworkFileName = globals.fs.path.basename(
@@ -798,7 +803,7 @@ end
           flutterRootDir: globals.fs.directory(Cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
-            kTargetPlatform: FlutterDarwinPlatform.ios.targetPlatform.getName(),
+            kTargetPlatform: TargetPlatform.ios.getName(),
             kIosArchs: defaultIOSArchsForEnvironment(
               sdkType,
               globals.artifacts!,

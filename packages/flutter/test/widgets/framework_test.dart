@@ -1714,7 +1714,7 @@ void main() {
     final element = TestRenderObjectElement();
 
     final focusTraversalOrder = _TestInheritedElement(
-      const FocusTraversalOrder(order: LexicalFocusOrder(''), child: Placeholder()),
+      const FocusTraversalOrder(order: .lexical(''), child: Placeholder()),
     );
     final directionality = _TestInheritedElement(
       const Directionality(textDirection: TextDirection.ltr, child: Placeholder()),

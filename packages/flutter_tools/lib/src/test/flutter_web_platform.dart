@@ -246,7 +246,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     _fileSystem.path.join(
       _artifacts!.getArtifactPath(
         Artifact.engineDartSdkPath,
-        platform: const TargetPlatform(.web, .unknown),
+        platform: TargetPlatform.web_javascript,
       ),
       'lib',
       'dev_compiler',
@@ -260,7 +260,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     _fileSystem.path.join(
       _artifacts!.getArtifactPath(
         Artifact.engineDartSdkPath,
-        platform: const TargetPlatform(.web, .unknown),
+        platform: TargetPlatform.web_javascript,
       ),
       'lib',
       'dev_compiler',
@@ -274,7 +274,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     _fileSystem.path.join(
       _artifacts!.getArtifactPath(
         Artifact.engineDartSdkPath,
-        platform: const TargetPlatform(.web, .unknown),
+        platform: TargetPlatform.web_javascript,
       ),
       'lib',
       'dev_compiler',
@@ -449,9 +449,13 @@ window.\$dartLoader.loader.nextAttempt();
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
     } else if (request.requestedUri.path.contains('main.dart.wasm')) {
+      final File wasmFile = _buildDirectory.childFile('main.dart.wasm');
       return shelf.Response.ok(
-        _buildDirectory.childFile('main.dart.wasm').openRead(),
-        headers: <String, String>{'Content-Type': 'application/wasm'},
+        wasmFile.openRead(),
+        headers: <String, String>{
+          HttpHeaders.contentTypeHeader: 'application/wasm',
+          HttpHeaders.contentLengthHeader: wasmFile.lengthSync().toString(),
+        },
       );
     } else {
       return shelf.Response.notFound('Not Found');
@@ -704,7 +708,6 @@ window.\$dartLoader.loader.nextAttempt();
       completer.future,
       headless: !_config.pauseAfterLoad,
       logger: _logger,
-      webBrowserFlags: <String>[if (useWasm) '--disable-dev-shm-usage'],
     );
   }
 

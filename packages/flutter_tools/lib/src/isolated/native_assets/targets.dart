@@ -67,32 +67,33 @@ sealed class AssetBuildTarget {
     required List<SupportedAssetTypes> supportedAssetTypes,
     required Directory? buildDirectory,
   }) {
-    switch (targetPlatform.type) {
-      case .windows:
-        return _windowsTarget(
-          supportedAssetTypes,
-          targetPlatform.cpuArch == .arm64 ? Architecture.arm64 : Architecture.x64,
-        );
-      case .linux:
-        final Architecture architecture = switch (targetPlatform.cpuArch) {
-          .arm64 => Architecture.arm64,
-          .riscv64 => Architecture.riscv64,
-          _ => Architecture.x64,
-        };
-        return _linuxTarget(supportedAssetTypes, architecture, buildMode, buildDirectory);
-      case .macos:
+    switch (targetPlatform) {
+      case TargetPlatform.windows_x64:
+        return _windowsTarget(supportedAssetTypes, Architecture.x64);
+      case TargetPlatform.linux_x64:
+        return _linuxTarget(supportedAssetTypes, Architecture.x64, buildMode, buildDirectory);
+      case TargetPlatform.linux_arm64:
+        return _linuxTarget(supportedAssetTypes, Architecture.arm64, buildMode, buildDirectory);
+      case TargetPlatform.linux_riscv64:
+        return _linuxTarget(supportedAssetTypes, Architecture.riscv64, buildMode, buildDirectory);
+      case TargetPlatform.windows_arm64:
+        return _windowsTarget(supportedAssetTypes, Architecture.arm64);
+      case TargetPlatform.darwin:
         return _macTargets(environmentDefines, supportedAssetTypes);
-      case .android:
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
         return _androidTargets(targetPlatform, environmentDefines, supportedAssetTypes);
-      case .ios:
+      case TargetPlatform.ios:
         return _iosTargets(environmentDefines, fileSystem, supportedAssetTypes);
-      case .web:
+      case TargetPlatform.web_javascript:
         return _webTarget(supportedAssetTypes);
-      case .tester:
+      case TargetPlatform.tester:
         return _flutterTesterTarget(supportedAssetTypes);
-      case .fuchsia:
-      case .custom:
-      case .unsupported:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.unsupported:
         throwToolExit('No targets defined for target platform $targetPlatform.');
     }
   }
@@ -418,16 +419,32 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
 }
 
 List<CpuArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {
-  if (targetPlatform.type != .android) {
-    throwToolExit('Unsupported Android target platform: $targetPlatform.');
+  switch (targetPlatform) {
+    case TargetPlatform.android_arm:
+      return <CpuArch>[CpuArch.armv7];
+    case TargetPlatform.android_arm64:
+      return <CpuArch>[CpuArch.arm64];
+    case TargetPlatform.android_x64:
+      return <CpuArch>[CpuArch.x64];
+    case TargetPlatform.android:
+      if (androidArchsEnvironment == null) {
+        throw MissingDefineException(kAndroidArchs, 'native_assets');
+      }
+      return androidArchsEnvironment.split(' ').map(getCpuArchForName).toList();
+    case TargetPlatform.darwin:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+    case TargetPlatform.ios:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_riscv64:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.tester:
+    case TargetPlatform.web_javascript:
+    case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_arm64:
+    case TargetPlatform.unsupported:
+      throwToolExit('Unsupported Android target platform: $targetPlatform.');
   }
-  return switch (targetPlatform.cpuArch) {
-    .armv7 || .arm64 || .x64 => <CpuArch>[targetPlatform.cpuArch],
-    CpuArch.unknown when androidArchsEnvironment != null =>
-      androidArchsEnvironment.split(' ').map(getCpuArchForName).toList(),
-    .unknown => throw MissingDefineException(kAndroidArchs, 'native_assets'),
-    .x86 || .riscv64 => throwToolExit('Unsupported Android target platform: $targetPlatform.'),
-  };
 }
 
 String? _emptyToNull(String? input) {

@@ -149,7 +149,7 @@ class WebTestCompiler {
       fileSystem: _fileSystem,
       shutdownHooks: _shutdownHooks,
       config: _config,
-      targetPlatform: const TargetPlatform(.web, .unknown),
+      targetPlatform: .web_javascript,
     );
 
     final CompilerOutput? output = await residentCompiler.recompile(
@@ -204,7 +204,7 @@ class WebTestCompiler {
     final compilationArgs = <String>[
       _artifacts.getArtifactPath(
         Artifact.engineDartBinary,
-        platform: const TargetPlatform(.web, .unknown),
+        platform: TargetPlatform.web_javascript,
       ),
       'compile',
       'wasm',

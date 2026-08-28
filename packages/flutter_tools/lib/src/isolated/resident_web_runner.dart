@@ -26,6 +26,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../dart/language_version.dart';
+import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
@@ -263,7 +264,7 @@ class ResidentWebRunner extends ResidentRunner {
   }) async {
     final ApplicationPackage? package = await ApplicationPackageFactory.instance!
         .getPackageForPlatform(
-          const TargetPlatform(.web, .unknown),
+          TargetPlatform.web_javascript,
           buildInfo: debuggingOptions.buildInfo,
         );
     if (package == null) {
@@ -292,9 +293,7 @@ class ResidentWebRunner extends ResidentRunner {
             ? WebExpressionCompiler(flutterDevice!.generator!, fileSystem: _fileSystem)
             : null;
 
-        flutterDevice!.developmentShaderCompiler.configureCompiler(
-          const TargetPlatform(.web, .unknown),
-        );
+        flutterDevice!.developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript);
 
         flutterDevice!.devFS = WebDevFS(
           webDevServerConfig: updatedConfig,
@@ -357,6 +356,7 @@ class ResidentWebRunner extends ResidentRunner {
             debuggingOptions.buildInfo,
             ServiceWorkerStrategy.none,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+            webDefines: _webDefines,
           );
         }
         final webDevFS = flutterDevice!.devFS! as WebDevFS;
@@ -406,14 +406,14 @@ class ResidentWebRunner extends ResidentRunner {
         stackTrace: stackTrace,
       );
       throwToolExit('Failed to connect to the web debug service.');
-    } on DartDevelopmentServiceException catch (error) {
+    } on DartDevelopmentServiceException catch (error, stackTrace) {
       // The application may have started shutting down before DDS was able to finish establishing
       // its connection to DWDS. Don't treat this as an unhandled exception.
       appFailedToStart();
-      if (error.errorCode == DartDevelopmentServiceException.failedToStartError) {
-        throwToolExit(kExitMessage);
+      if (error.errorCode != DartDevelopmentServiceException.failedToStartError) {
+        _logger.printError(error.message, stackTrace: stackTrace);
       }
-      rethrow;
+      throwToolExit(kExitMessage);
     } on Exception {
       appFailedToStart();
       rethrow;
@@ -463,7 +463,7 @@ class ResidentWebRunner extends ResidentRunner {
       status = _logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
     }
 
-    final String targetPlatform = const TargetPlatform(.web, .unknown).getName();
+    final String targetPlatform = TargetPlatform.web_javascript.getName();
     final String sdkName = await flutterDevice!.device!.sdkNameAndVersion;
 
     // Will be null if there is no report.
@@ -510,6 +510,7 @@ class ResidentWebRunner extends ResidentRunner {
           debuggingOptions.buildInfo,
           ServiceWorkerStrategy.none,
           compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+          webDefines: _webDefines,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -712,7 +713,7 @@ class ResidentWebRunner extends ResidentRunner {
       // the web_plugin_registrant.dart file alongside the generated main.dart
       const generatedImport = 'web_plugin_registrant.dart';
 
-      Uri? importedEntrypoint = packageConfig!.toPackageUri(mainUri);
+      Uri? importedEntrypoint = packageConfig!.toPackageUriForWorkspace(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
         final String parent = _fileSystem.file(mainUri).parent.path;
@@ -752,12 +753,12 @@ class ResidentWebRunner extends ResidentRunner {
       _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
         flutterHookResult: await dartBuilder?.runHooks(
-          targetPlatform: const TargetPlatform(.web, .unknown),
+          targetPlatform: TargetPlatform.web_javascript,
           environment: environment,
           logger: _logger,
         ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
-        targetPlatform: const TargetPlatform(.web, .unknown),
+        targetPlatform: TargetPlatform.web_javascript,
       );
       if (result != 0) {
         return UpdateFSReport();

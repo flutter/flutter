@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -37,7 +38,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
   ),
   FakeDeviceJsonData(
     FakeDevice('webby', 'webby')
-      ..targetPlatform = Future<TargetPlatform>.value(const TargetPlatform(.web, .unknown))
+      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript)
       ..cpuArch = Future<CpuArch>.value(CpuArch.unknown)
       ..sdkNameAndVersion = Future<String>.value('Web SDK (1.2.4)'),
     <String, Object>{
@@ -90,7 +91,7 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
         type: PlatformType.ios,
         connectionInterface: DeviceConnectionInterface.wireless,
       )
-      ..targetPlatform = Future<TargetPlatform>.value(const TargetPlatform(.ios, .arm64))
+      ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.ios)
       ..cpuArch = Future<CpuArch>.value(CpuArch.arm64)
       ..sdkNameAndVersion = Future<String>.value('iOS 16'),
     <String, Object>{
@@ -167,9 +168,7 @@ class FakeDevice extends Device {
   Future<void> dispose() async {}
 
   @override
-  Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(
-    const TargetPlatform(.android, .armv7),
-  );
+  Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
 
   @override
   Future<CpuArch> cpuArch = Future<CpuArch>.value(CpuArch.armv7);
@@ -199,8 +198,33 @@ class FakeDevice extends Device {
   Future<String> sdkNameAndVersion = Future<String>.value('Test SDK (1.2.3)');
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
-      deviceLogReader ?? FakeDeviceLogReader();
+  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+    return deviceLogReader ?? FakeDeviceLogReader();
+  }
+}
+
+class FakeAndroidDevice extends FakeDevice implements AndroidDevice {
+  FakeAndroidDevice(
+    super.name,
+    super.id, {
+    super.type = PlatformType.android,
+    super.deviceLogReader,
+  });
+
+  bool? lastPassedAdbLogFiltering;
+
+  @override
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) {
+    lastPassedAdbLogFiltering = adbLogFiltering;
+    return deviceLogReader ?? FakeDeviceLogReader();
+  }
+
+  @override
+  Future<bool> supportsRuntimeMode(BuildMode buildMode) async => true;
 }
 
 /// Combines fake device with its canonical JSON representation.

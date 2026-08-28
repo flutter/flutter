@@ -3932,6 +3932,7 @@ skia
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
+skia
 vulkan
 
 // Copyright (c) 2018 Google Inc. All rights reserved.
@@ -15939,12 +15940,6 @@ Copyright 2014-2022 The Khronos Group Inc.
 
 SPDX-License-Identifier: Apache-2.0
 --------------------------------------------------------------------------------
-swiftshader
-
-Copyright 2014-2025 The Khronos Group Inc.
-
-SPDX-License-Identifier: Apache-2.0
---------------------------------------------------------------------------------
 vulkan
 vulkan-headers
 
@@ -18193,6 +18188,13 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
+--------------------------------------------------------------------------------
+skia
+
+Copyright 2026 Google LLC.
+
+Use of this source code is governed by a BSD-style license that can be
+found in the LICENSE file.
 --------------------------------------------------------------------------------
 angle
 

@@ -34,6 +34,8 @@ void main() {
   late FakeCommand copyFrameworkCommand;
   late FakeCommand releaseCopyFrameworkCommand;
   late FakeCommand copyFrameworkDsymCommand;
+  late FakeCommand chmodDebugFrameworkCommand;
+  late FakeCommand chmodReleaseFrameworkCommand;
   late FakeCommand lipoInfoNonFatCommand;
   late FakeCommand lipoInfoFatCommand;
   late FakeCommand lipoVerifyX86_64Command;
@@ -84,6 +86,15 @@ void main() {
       ],
     );
 
+    chmodDebugFrameworkCommand = FakeCommand(
+      command: <String>[
+        'chmod',
+        '-R',
+        'u+w',
+        environment.outputDir.childDirectory('Artifact.flutterMacOSFramework.debug').path,
+      ],
+    );
+
     releaseCopyFrameworkCommand = FakeCommand(
       command: <String>[
         'rsync',
@@ -97,11 +108,20 @@ void main() {
       ],
     );
 
+    chmodReleaseFrameworkCommand = FakeCommand(
+      command: <String>[
+        'chmod',
+        '-R',
+        'u+w',
+        environment.outputDir.childDirectory('Artifact.flutterMacOSFramework.release').path,
+      ],
+    );
+
     frameworkDsym = fileSystem
         .directory(
           artifacts.getArtifactPath(
             Artifact.flutterMacOSFrameworkDsym,
-            platform: const TargetPlatform(.macos, .x64),
+            platform: TargetPlatform.darwin,
             mode: BuildMode.release,
           ),
         )
@@ -125,7 +145,7 @@ void main() {
         '--filter',
         '- .DS_Store/',
         '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-        'Artifact.flutterMacOSFrameworkDsym.darwin-x64.release',
+        'Artifact.flutterMacOSFrameworkDsym.TargetPlatform.darwin.release',
         environment.outputDir.path,
       ],
     );
@@ -155,6 +175,7 @@ void main() {
       binary.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
         copyFrameworkCommand,
+        chmodDebugFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
       ]);
@@ -204,6 +225,7 @@ void main() {
             nestedEntitlements.writeAsStringSync('somefile.bin');
           },
         ),
+        chmodDebugFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
       ]);
@@ -226,6 +248,7 @@ void main() {
     'thinning fails when framework missing',
     () async {
       processManager.addCommand(copyFrameworkCommand);
+      processManager.addCommand(chmodDebugFrameworkCommand);
       await expectLater(
         const DebugUnpackMacOS().build(environment),
         throwsA(
@@ -250,6 +273,7 @@ void main() {
       binary.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
         copyFrameworkCommand,
+        chmodDebugFrameworkCommand,
         lipoInfoFatCommand,
         FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64'], exitCode: 1),
       ]);
@@ -277,6 +301,7 @@ void main() {
     binary.createSync(recursive: true);
     processManager.addCommands(<FakeCommand>[
       copyFrameworkCommand,
+      chmodDebugFrameworkCommand,
       lipoInfoNonFatCommand,
       lipoVerifyX86_64Command,
     ]);
@@ -293,6 +318,7 @@ void main() {
     binary.createSync(recursive: true);
     processManager.addCommands(<FakeCommand>[
       copyFrameworkCommand,
+      chmodDebugFrameworkCommand,
       lipoInfoFatCommand,
       lipoVerifyX86_64Command,
       lipoExtractX86_64Command,
@@ -309,6 +335,7 @@ void main() {
       binary.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
         releaseCopyFrameworkCommand,
+        chmodReleaseFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
       ]);
@@ -330,6 +357,7 @@ void main() {
       frameworkDsym.createSync(recursive: true);
       processManager.addCommands(<FakeCommand>[
         releaseCopyFrameworkCommand,
+        chmodReleaseFrameworkCommand,
         lipoInfoNonFatCommand,
         lipoVerifyX86_64Command,
         copyFrameworkDsymCommand,
@@ -358,13 +386,14 @@ void main() {
           '--filter',
           '- .DS_Store/',
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
-          'Artifact.flutterMacOSFrameworkDsym.darwin-x64.release',
+          'Artifact.flutterMacOSFrameworkDsym.TargetPlatform.darwin.release',
           environment.outputDir.path,
         ],
         exitCode: 1,
       );
       processManager.addCommands(<FakeCommand>[
         releaseCopyFrameworkCommand,
+        chmodReleaseFrameworkCommand,
         lipoInfoFatCommand,
         lipoVerifyX86_64Command,
         lipoExtractX86_64Command,
@@ -421,7 +450,7 @@ void main() {
           .file(
             artifacts.getArtifactPath(
               Artifact.vmSnapshotData,
-              platform: const TargetPlatform(.macos, .x64),
+              platform: TargetPlatform.darwin,
               mode: BuildMode.debug,
             ),
           )
@@ -430,7 +459,7 @@ void main() {
           .file(
             artifacts.getArtifactPath(
               Artifact.isolateSnapshotData,
-              platform: const TargetPlatform(.macos, .x64),
+              platform: TargetPlatform.darwin,
               mode: BuildMode.debug,
             ),
           )
@@ -482,7 +511,7 @@ void main() {
           .file(
             artifacts.getArtifactPath(
               Artifact.vmSnapshotData,
-              platform: const TargetPlatform(.macos, .x64),
+              platform: TargetPlatform.darwin,
               mode: BuildMode.debug,
             ),
           )
@@ -491,7 +520,7 @@ void main() {
           .file(
             artifacts.getArtifactPath(
               Artifact.isolateSnapshotData,
-              platform: const TargetPlatform(.macos, .x64),
+              platform: TargetPlatform.darwin,
               mode: BuildMode.debug,
             ),
           )
@@ -813,7 +842,7 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
-            'Artifact.genSnapshotArm64.darwin-x64.release',
+            'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
             '--deterministic',
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
@@ -826,7 +855,7 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
-            'Artifact.genSnapshotX64.darwin-x64.release',
+            'Artifact.genSnapshotX64.TargetPlatform.darwin.release',
             '--deterministic',
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=${environment.buildDir.childFile('x86_64/App.framework/App').path}',

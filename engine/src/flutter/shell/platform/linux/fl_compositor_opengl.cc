@@ -7,6 +7,8 @@
 #include <epoxy/egl.h>
 #include <epoxy/gl.h>
 
+#include <cstring>
+
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_compositor_opengl_shader.h"
@@ -16,17 +18,11 @@
 struct _FlCompositorOpenGL {
   GObject parent_instance;
 
-  // TRUE if can share framebuffers between contexts.
-  gboolean shareable;
+  // TRUE if glBlitFramebuffer can be used to composite the first layer.
+  gboolean can_blit;
 
   // Flutter OpenGL contexts.
   FlOpenGLManager* opengl_manager;
-
-  // Last rendered frame.
-  FlFramebuffer* framebuffer;
-
-  // Last rendered frame pixels (only set if shareable is FALSE).
-  uint8_t* pixels;
 
   // Shader program used to composite layers.
   FlCompositorOpenGLShader* shader;
@@ -38,10 +34,7 @@ static void fl_compositor_opengl_dispose(GObject* object) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(object);
 
   g_clear_object(&self->shader);
-
   g_clear_object(&self->opengl_manager);
-  g_clear_object(&self->framebuffer);
-  g_clear_pointer(&self->pixels, g_free);
 
   G_OBJECT_CLASS(fl_compositor_opengl_parent_class)->dispose(object);
 }
@@ -52,14 +45,16 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {}
 
-FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
-                                             gboolean shareable) {
+FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
       g_object_new(fl_compositor_opengl_get_type(), nullptr));
 
-  self->shareable = shareable;
   self->opengl_manager = FL_OPENGL_MANAGER(g_object_ref(opengl_manager));
   self->shader = fl_compositor_opengl_shader_new(opengl_manager);
+
+  // Determine once whether glBlitFramebuffer is available on this driver.
+  fl_opengl_manager_make_current(opengl_manager);
+  self->can_blit = fl_opengl_manager_can_blit(opengl_manager);
 
   return self;
 }
@@ -83,16 +78,11 @@ static void composite_layer(FlCompositorOpenGL* self,
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
-                                               const FlutterLayer** layers,
-                                               size_t layers_count) {
+void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
+                                           const FlutterLayer** layers,
+                                           size_t layers_count) {
   if (layers_count == 0) {
-    return TRUE;
-  }
-
-  GLint general_format = GL_RGBA;
-  if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
-    general_format = GL_BGRA_EXT;
+    return;
   }
 
   // Save bindings that are set by this function.  All bindings must be restored
@@ -104,8 +94,6 @@ gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &saved_vao_binding);
   GLint saved_array_buffer_binding;
   glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &saved_array_buffer_binding);
-  GLint saved_draw_framebuffer_binding;
-  glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_draw_framebuffer_binding);
   GLint saved_read_framebuffer_binding;
   glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &saved_read_framebuffer_binding);
   GLint saved_current_program;
@@ -121,23 +109,8 @@ gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   GLint saved_dst_alpha;
   glGetIntegerv(GL_BLEND_DST_ALPHA, &saved_dst_alpha);
 
-  // Update framebuffer to write into.
   size_t width = layers[0]->size.width;
   size_t height = layers[0]->size.height;
-  if (self->framebuffer == nullptr ||
-      fl_framebuffer_get_width(self->framebuffer) != width ||
-      fl_framebuffer_get_height(self->framebuffer) != height) {
-    g_clear_object(&self->framebuffer);
-    self->framebuffer =
-        fl_framebuffer_new(general_format, width, height, self->shareable);
-
-    // If not shareable make buffer to copy frame pixels into.
-    if (!self->shareable) {
-      size_t data_length = width * height * 4;
-      self->pixels =
-          static_cast<uint8_t*>(g_realloc(self->pixels, data_length));
-    }
-  }
 
   // FIXME(robert-ancell): The vertex array is the same for all views, but
   // cannot be shared in OpenGL. Find a way to not generate this every time.
@@ -155,31 +128,30 @@ gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   // See OpenGL specification version 4.6, section 18.3.1.
   glDisable(GL_SCISSOR_TEST);
 
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
-                    fl_framebuffer_get_id(self->framebuffer));
   gboolean first_layer = TRUE;
   for (size_t i = 0; i < layers_count; ++i) {
     const FlutterLayer* layer = layers[i];
     switch (layer->type) {
       case kFlutterLayerContentTypeBackingStore: {
         const FlutterBackingStore* backing_store = layer->backing_store;
-        FlFramebuffer* framebuffer =
+        FlFramebuffer* layer_framebuffer =
             FL_FRAMEBUFFER(backing_store->open_gl.framebuffer.user_data);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER,
-                          fl_framebuffer_get_id(framebuffer));
         // The first layer can be blitted, and following layers composited with
-        // this.
-        if (first_layer) {
+        // this. If glBlitFramebuffer is unavailable, composite the first layer
+        // with the shader instead.
+        if (first_layer && self->can_blit) {
+          glBindFramebuffer(GL_READ_FRAMEBUFFER,
+                            fl_framebuffer_get_id(layer_framebuffer));
           glBlitFramebuffer(layer->offset.x, layer->offset.y, layer->size.width,
                             layer->size.height, layer->offset.x,
                             layer->offset.y, layer->size.width,
                             layer->size.height, GL_COLOR_BUFFER_BIT,
                             GL_NEAREST);
-          first_layer = FALSE;
         } else {
-          composite_layer(self, framebuffer, layer->offset.x, layer->offset.y,
-                          width, height);
+          composite_layer(self, layer_framebuffer, layer->offset.x,
+                          layer->offset.y, width, height);
         }
+        first_layer = FALSE;
       } break;
       case kFlutterLayerContentTypePlatformView: {
         // TODO(robert-ancell) Not implemented -
@@ -187,7 +159,6 @@ gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
       } break;
     }
   }
-  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   glFlush();
 
   glDeleteVertexArrays(1, &vao);
@@ -206,80 +177,34 @@ gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
   glBindVertexArray(saved_vao_binding);
   glBindBuffer(GL_ARRAY_BUFFER, saved_array_buffer_binding);
-  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, saved_read_framebuffer_binding);
   glUseProgram(saved_current_program);
   glBlendFuncSeparate(saved_src_rgb, saved_dst_rgb, saved_src_alpha,
                       saved_dst_alpha);
-
-  if (!self->shareable) {
-    glBindFramebuffer(GL_READ_FRAMEBUFFER,
-                      fl_framebuffer_get_id(self->framebuffer));
-    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, self->pixels);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-  }
-  glBindFramebuffer(GL_READ_FRAMEBUFFER, saved_read_framebuffer_binding);
-
-  return TRUE;
 }
 
-void fl_compositor_opengl_get_frame_size(FlCompositorOpenGL* self,
-                                         size_t* width,
-                                         size_t* height) {
-  if (width != nullptr) {
-    *width = self->framebuffer != nullptr
-                 ? fl_framebuffer_get_width(self->framebuffer)
-                 : 0;
-  }
-  if (height != nullptr) {
-    *height = self->framebuffer != nullptr
-                  ? fl_framebuffer_get_height(self->framebuffer)
-                  : 0;
-  }
-}
-
-gboolean fl_compositor_opengl_render(FlCompositorOpenGL* self,
-                                     cairo_t* cr,
-                                     GdkWindow* window) {
-  if (self->framebuffer == nullptr) {
-    return FALSE;
-  }
-
-  gint scale_factor = gdk_window_get_scale_factor(window);
-  size_t width = gdk_window_get_width(window) * scale_factor;
-  size_t height = gdk_window_get_height(window) * scale_factor;
-
-  if (fl_framebuffer_get_shareable(self->framebuffer)) {
-    g_autoptr(FlFramebuffer) sibling =
-        fl_framebuffer_create_sibling(self->framebuffer);
-    gdk_cairo_draw_from_gl(cr, window, fl_framebuffer_get_texture_id(sibling),
-                           GL_TEXTURE, scale_factor, 0, 0, width, height);
-  } else {
-    GLint saved_texture_binding;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
-
-    GLuint texture_id;
-    glGenTextures(1, &texture_id);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-    GLsizei fb_width = 0;
-    GLsizei fb_height = 0;
-    if (self->framebuffer != nullptr) {
-      fb_width =
-          static_cast<GLsizei>(fl_framebuffer_get_width(self->framebuffer));
-      fb_height =
-          static_cast<GLsizei>(fl_framebuffer_get_height(self->framebuffer));
+GLint fl_compositor_opengl_get_frame_format(const FlutterLayer** layers,
+                                            size_t layers_count) {
+  // Every backing store in a frame is created by the same engine code from
+  // context-wide capabilities, so they all share a format and the first one
+  // describes the frame. Layers that aren't OpenGL framebuffer backing stores,
+  // e.g. platform views, don't have a format to match; fl_engine.cc only
+  // creates framebuffers, so there is nothing else to read a format from.
+  for (size_t i = 0; i < layers_count; i++) {
+    const FlutterLayer* layer = layers[i];
+    if (layer == nullptr ||
+        layer->type != kFlutterLayerContentTypeBackingStore ||
+        layer->backing_store == nullptr ||
+        layer->backing_store->type != kFlutterBackingStoreTypeOpenGL ||
+        layer->backing_store->open_gl.type !=
+            kFlutterOpenGLTargetTypeFramebuffer) {
+      continue;
     }
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fb_width, fb_height, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, self->pixels);
 
-    gdk_cairo_draw_from_gl(cr, window, texture_id, GL_TEXTURE, scale_factor, 0,
-                           0, width, height);
-
-    glDeleteTextures(1, &texture_id);
-
-    glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
+    return layer->backing_store->open_gl.framebuffer.target == GL_BGRA8_EXT
+               ? GL_BGRA_EXT
+               : GL_RGBA;
   }
 
-  glFlush();
-
-  return TRUE;
+  return GL_RGBA;
 }

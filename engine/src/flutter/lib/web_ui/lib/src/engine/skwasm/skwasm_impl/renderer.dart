@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:js_interop';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -14,7 +13,11 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class SkwasmRenderer extends Renderer {
+  @override
   bool get isMultiThreaded => skwasmIsMultiThreaded();
+
+  @override
+  bool get supportsResizingAnimatedImages => true;
 
   bool get isWimp => skwasmIsWimp();
 
@@ -30,89 +33,128 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.Gradient createConicalGradient(
-    ui.Offset focal,
-    double focalRadius,
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix,
-  ]) => SkwasmGradient.conical(
-    focal: focal,
-    focalRadius: focalRadius,
-    center: center,
-    centerRadius: radius,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    matrix4: matrix,
-  );
+  BackendImageFilter createBlurImageFilter({
+    required double sigmaX,
+    required double sigmaY,
+    required ui.TileMode tileMode,
+  }) {
+    return SkwasmBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  }
 
   @override
-  ui.ImageFilter createBlurImageFilter({
-    double sigmaX = 0.0,
-    double sigmaY = 0.0,
-    ui.TileMode? tileMode,
-    ui.Rect? bounds,
-  }) =>
-      // TODO(dkwingsmt): `bounds` is currently not implemented in Skwasm.
-      // Fall back to unbounded blur.
-      // https://github.com/flutter/flutter/issues/175899
-      SkwasmImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY}) {
+    return SkwasmDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
+  }
 
   @override
-  ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
-      SkwasmImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
+  BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY}) {
+    return SkwasmErodeImageFilter(radiusX: radiusX, radiusY: radiusY);
+  }
 
   @override
-  ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
-      SkwasmImageFilter.erode(radiusX: radiusX, radiusY: radiusY);
+  BackendImageFilter createMatrixImageFilter({
+    required Float64List matrix,
+    required ui.FilterQuality filterQuality,
+  }) {
+    return SkwasmMatrixImageFilter(matrix: matrix, filterQuality: filterQuality);
+  }
 
   @override
-  ui.ImageFilter composeImageFilters({
-    required ui.ImageFilter outer,
-    required ui.ImageFilter inner,
-  }) => SkwasmImageFilter.compose(
-    SkwasmImageFilter.fromUiFilter(outer),
-    SkwasmImageFilter.fromUiFilter(inner),
-  );
+  BackendImageFilter createComposeImageFilter({
+    required BackendImageFilter outer,
+    required BackendImageFilter inner,
+  }) {
+    return SkwasmComposeImageFilter(outer: outer, inner: inner);
+  }
 
   @override
-  ui.ImageFilter createMatrixImageFilter(
-    Float64List matrix4, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.low,
-  }) => SkwasmImageFilter.matrix(matrix4, filterQuality: filterQuality);
+  BackendImageFilter createColorFilterImageFilter({required BackendColorFilter filter}) {
+    return SkwasmColorFilterImageFilter(filter as SkwasmColorFilter);
+  }
 
   @override
-  ui.ImageShader createImageShader(
-    ui.Image image,
+  BackendImageShader createImageShader(
+    EngineImage image,
     ui.TileMode tmx,
     ui.TileMode tmy,
-    Float64List matrix4,
-    ui.FilterQuality? filterQuality,
-  ) => SkwasmImageShader.imageShader(image, tmx, tmy, matrix4, filterQuality);
+    Float64List? matrix4,
+    ui.FilterQuality filterQuality,
+  ) => SkwasmImageShader(image.backendImage as SkwasmImage, tmx, tmy, matrix4, filterQuality);
 
   @override
-  ui.Gradient createLinearGradient(
-    ui.Offset from,
-    ui.Offset to,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+  BackendGradient createGradientLinear(
+    Float32List endPoints,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]) => SkwasmGradient.linear(
-    from: from,
-    to: to,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    matrix4: matrix4,
+  ) => SkwasmGradient.linear(endPoints, colors, colorStops, tileMode, matrix4);
+
+  @override
+  BackendGradient createGradientRadial(
+    double centerX,
+    double centerY,
+    double radius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) => SkwasmGradient.radial(centerX, centerY, radius, colors, colorStops, tileMode, matrix4);
+
+  @override
+  BackendGradient createGradientConical(
+    double startX,
+    double startY,
+    double startRadius,
+    double endX,
+    double endY,
+    double endRadius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) => SkwasmGradient.conical(
+    startX,
+    startY,
+    startRadius,
+    endX,
+    endY,
+    endRadius,
+    colors,
+    colorStops,
+    tileMode,
+    matrix4,
+  );
+
+  @override
+  BackendGradient createGradientSweep(
+    double centerX,
+    double centerY,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    double startAngle,
+    double endAngle,
+    Float32List? matrix4,
+  ) => SkwasmGradient.sweep(
+    centerX,
+    centerY,
+    colors,
+    colorStops,
+    tileMode,
+    startAngle,
+    endAngle,
+    matrix4,
   );
 
   @override
   ui.Paint createPaint() => SkwasmPaint();
+
+  @override
+  BackendColorFilter createColorFilter(EngineColorFilter filter) => SkwasmColorFilter(filter);
+
+  @override
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter) => SkwasmMaskFilter(filter);
 
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
@@ -156,23 +198,6 @@ class SkwasmRenderer extends Renderer {
   ui.PictureRecorder createPictureRecorder() => SkwasmPictureRecorder();
 
   @override
-  ui.Gradient createRadialGradient(
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix4,
-  ]) => SkwasmGradient.radial(
-    center: center,
-    radius: radius,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    matrix4: matrix4,
-  );
-
-  @override
   ui.SceneBuilder createSceneBuilder() => LayerSceneBuilder();
 
   @override
@@ -196,25 +221,6 @@ class SkwasmRenderer extends Renderer {
     fontWeight: fontWeight,
     fontStyle: fontStyle,
     forceStrutHeight: forceStrutHeight,
-  );
-
-  @override
-  ui.Gradient createSweepGradient(
-    ui.Offset center,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    double startAngle = 0.0,
-    double endAngle = math.pi * 2,
-    Float32List? matrix4,
-  ]) => SkwasmGradient.sweep(
-    center: center,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    startAngle: startAngle,
-    endAngle: endAngle,
-    matrix4: matrix4,
   );
 
   @override
@@ -265,12 +271,12 @@ class SkwasmRenderer extends Renderer {
   );
 
   @override
-  ui.Vertices createVertices(
+  BackendVertices createVertices(
     ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
+    Float32List positions, {
+    Float32List? textureCoordinates,
+    Int32List? colors,
+    Uint16List? indices,
   }) => SkwasmVertices(
     mode,
     positions,
@@ -280,44 +286,16 @@ class SkwasmRenderer extends Renderer {
   );
 
   @override
-  ui.Vertices createVerticesRaw(
-    ui.VertexMode mode,
-    Float32List positions, {
-    Float32List? textureCoordinates,
-    Int32List? colors,
-    Uint16List? indices,
-  }) => SkwasmVertices.raw(
-    mode,
-    positions,
-    textureCoordinates: textureCoordinates,
-    colors: colors,
-    indices: indices,
-  );
-
-  @override
-  void decodeImageFromPixels(
-    Uint8List pixels,
-    int width,
-    int height,
-    ui.PixelFormat format,
-    ui.ImageDecoderCallback callback, {
+  BackendImage decodeBackendImageFromPixels(
+    Uint8List pixels, {
+    required int width,
+    required int height,
+    required ui.PixelFormat format,
     int? rowBytes,
-    int? targetWidth,
-    int? targetHeight,
-    bool allowUpscaling = true,
-  }) {
-    final EngineImage pixelImage = createSkwasmImageFromPixels(pixels, width, height, format);
-    final ui.Image scaledImage = scaleImageIfNeeded(
-      pixelImage,
-      targetWidth: targetWidth,
-      targetHeight: targetHeight,
-      allowUpscaling: allowUpscaling,
-    );
-    callback(scaledImage);
-  }
+  }) => createSkwasmImageFromPixels(pixels, width, height, format, rowBytes: rowBytes);
 
   @override
-  FutureOr<void> initialize() async {
+  FutureOr<void> initialize() {
     rasterizer = OffscreenCanvasRasterizer(
       (OffscreenCanvasProvider canvasProvider) => SkwasmSurface(canvasProvider),
     );
@@ -325,74 +303,19 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  Future<ui.Codec> instantiateImageCodec(
-    Uint8List list, {
-    int? targetWidth,
-    int? targetHeight,
-    bool allowUpscaling = true,
-  }) async {
-    final ImageType? contentType = detectImageType(list);
-    if (contentType == null) {
-      throw Exception('Could not determine content type of image from data');
-    }
-    if (browserSupportsImageDecoder) {
-      final baseDecoder = SkwasmBrowserImageDecoder(
-        contentType: contentType.mimeType,
-        dataSource: list.toJS,
-        debugSource: 'encoded image bytes',
-      );
-      await baseDecoder.initialize();
-      if (targetWidth == null && targetHeight == null) {
-        return baseDecoder;
-      }
-      return ResizingCodec(
-        baseDecoder,
-        targetWidth: targetWidth,
-        targetHeight: targetHeight,
-        allowUpscaling: allowUpscaling,
-      );
-    } else {
-      if (contentType.isAnimated) {
-        return SkwasmAnimatedImageDecoder(list, targetWidth, targetHeight);
-      } else {
-        final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
-        return SkwasmDomImageDecoder(blob, targetWidth, targetHeight);
-      }
-    }
+  BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight}) {
+    return SkwasmAnimatedImageDecoder(bytes, targetWidth, targetHeight);
   }
 
   @override
-  Future<ui.Codec> instantiateImageCodecFromUrl(
-    Uri uri, {
-    ui_web.ImageCodecChunkCallback? chunkCallback,
-  }) async {
-    final DomResponse response = await rawHttpGet(uri.toString());
-    final String? contentType = response.headers.get('Content-Type');
-    if (contentType == null) {
-      throw Exception('Could not determine content type of image at url $uri');
-    }
-    if (browserSupportsImageDecoder) {
-      final decoder = SkwasmBrowserImageDecoder(
-        contentType: contentType,
-        dataSource: response.body,
-        debugSource: uri.toString(),
-      );
-      await decoder.initialize();
-      return decoder;
-    } else {
-      final ByteBuffer buffer = await response.arrayBuffer();
-      final Uint8List data = buffer.asUint8List();
-      final ImageType? parsedContentType = detectImageType(data);
-      if (parsedContentType == null) {
-        throw Exception('Could not determine content type of image from data');
-      }
-      if (parsedContentType.isAnimated) {
-        return SkwasmAnimatedImageDecoder(data);
-      } else {
-        final DomBlob blob = createDomBlob(<ByteBuffer>[buffer]);
-        return SkwasmDomImageDecoder(blob);
-      }
-    }
+  BackendImage createImageFromImageSource(ImageSource source) {
+    final ImageHandle handle = imageCreateFromTextureSource(
+      source.canvasImageSource as JSObject,
+      source.width,
+      source.height,
+      (pictureToImageSurface as SkwasmSurface).handle,
+    );
+    return SkwasmImage(handle);
   }
 
   @override
@@ -438,57 +361,6 @@ class SkwasmRenderer extends Renderer {
     baseline: baseline,
     lineNumber: lineNumber,
   );
-
-  @override
-  ui.Image createImageFromImageBitmap(DomImageBitmap imageSource) {
-    // Cache the dimensions before passing the image to the texture source creator,
-    // which may transfer ownership of the bitmap to a web worker and detach it.
-    final int width = imageSource.width;
-    final int height = imageSource.height;
-
-    final ImageHandle handle = imageCreateFromTextureSource(
-      imageSource,
-      width,
-      height,
-      (pictureToImageSurface as SkwasmSurface).handle,
-    );
-    return EngineImage(
-      SkwasmImage(handle),
-      width,
-      height,
-      imageSource: ImageBitmapImageSource(imageSource),
-    );
-  }
-
-  @override
-  FutureOr<ui.Image> createImageFromTextureSource(
-    JSAny textureSource, {
-    required int width,
-    required int height,
-    required bool transferOwnership,
-  }) async {
-    // If the caller does not wish to transfer ownership, or if the runtime environment
-    // is multi-threaded and the provided texture type cannot be natively transferred
-    // between threads, convert the texture to a transferable DomImageBitmap first.
-    if (!transferOwnership || (isMultiThreaded && !_isTransferable(textureSource))) {
-      textureSource = (await createImageBitmap(textureSource, (
-        x: 0,
-        y: 0,
-        width: width,
-        height: height,
-      ))).toJSAnyShallow;
-    }
-    final ImageHandle handle = imageCreateFromTextureSource(
-      textureSource as JSObject,
-      width,
-      height,
-      (pictureToImageSurface as SkwasmSurface).handle,
-    );
-    return EngineImage(SkwasmImage(handle), width, height);
-  }
-
-  bool _isTransferable(JSAny object) =>
-      object.isA<DomImageBitmap>() || object.isA<VideoFrame>() || object.isA<DomOffscreenCanvas>();
 
   @override
   void dumpDebugInfo() {

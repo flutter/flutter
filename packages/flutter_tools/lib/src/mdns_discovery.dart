@@ -579,8 +579,8 @@ class MDnsVmServiceDiscovery {
       return;
     }
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    switch (targetPlatform.type) {
-      case .ios:
+    switch (targetPlatform) {
+      case TargetPlatform.ios:
         _analytics.send(
           Event.appleUsageEvent(workflow: 'ios-mdns', parameter: 'no-ipv4-link-local'),
         );
@@ -591,16 +591,22 @@ class MDnsVmServiceDiscovery {
           'under System Preferences > Network > iPhone USB. '
           'See https://github.com/flutter/flutter/issues/46698 for details.',
         );
-      case .android:
-      case .macos:
-      case .fuchsia:
-      case .linux:
-      case .tester:
-      case .web:
-      case .windows:
-      case .custom:
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.darwin:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         _logger.printTrace('No interface with an ipv4 link local address was found.');
-      case .unsupported:
+      case TargetPlatform.unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
   }

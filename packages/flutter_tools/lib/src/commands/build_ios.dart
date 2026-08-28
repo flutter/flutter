@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -936,7 +937,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   late final Future<BuildableIOSApp> buildableIOSApp = () async {
     final app =
         await applicationPackages?.getPackageForPlatform(
-              FlutterDarwinPlatform.ios.targetPlatform,
+              TargetPlatform.ios,
               buildInfo: await cachedBuildInfo,
             )
             as BuildableIOSApp?;
@@ -978,10 +979,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final logTarget = environmentType == EnvironmentType.simulator ? 'simulator' : 'device';
-    final String typeName = globals.artifacts!.getEngineType(
-      FlutterDarwinPlatform.ios.targetPlatform,
-      buildInfo.mode,
-    );
+    final String typeName = globals.artifacts!.getEngineType(TargetPlatform.ios, buildInfo.mode);
     globals.printStatus(switch (xcodeBuildAction) {
       XcodeBuildAction.build => 'Building $app for $logTarget ($typeName)...',
       XcodeBuildAction.archive => 'Archiving $app...',

@@ -38,7 +38,7 @@ void main() {
       packageConfigPath: '.dart_tool/package_config.json',
       flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
       flavor: flavor,
-      targetPlatform: const TargetPlatform(.tester, .unknown),
+      targetPlatform: TargetPlatform.tester,
     );
     return bundle;
   }

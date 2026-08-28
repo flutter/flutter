@@ -7,20 +7,10 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../darwin/darwin.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import 'xcodeproj.dart';
-
-String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem, Artifacts artifacts) {
-  final String flutterMacOSFramework = artifacts.getArtifactPath(
-    Artifact.flutterMacOSFramework,
-    platform: FlutterDarwinPlatform.macos.targetPlatform,
-    mode: mode,
-  );
-  return fileSystem.path.normalize(fileSystem.path.dirname(flutterMacOSFramework));
-}
 
 /// Writes or rewrites Xcode property files with the specified information.
 ///
@@ -134,14 +124,14 @@ void _updateGeneratedEnvironmentVariablesScript({
 /// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.
 String? parsedBuildName({required FlutterManifest manifest, BuildInfo? buildInfo}) {
   final String? buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNameForPlatform(PlatformType.ios, buildNameToParse, globals.logger);
+  return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, globals.logger);
 }
 
 /// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
 String? parsedBuildNumber({required FlutterManifest manifest, BuildInfo? buildInfo}) {
   String? buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
   final String? buildNumber = validatedBuildNumberForPlatform(
-    PlatformType.ios,
+    TargetPlatform.ios,
     buildNumberToParse,
     globals.logger,
   );
@@ -151,7 +141,7 @@ String? parsedBuildNumber({required FlutterManifest manifest, BuildInfo? buildIn
   // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
   // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
   buildNumberToParse = buildInfo?.buildName ?? manifest.buildName;
-  return validatedBuildNumberForPlatform(PlatformType.ios, buildNumberToParse, globals.logger);
+  return validatedBuildNumberForPlatform(TargetPlatform.ios, buildNumberToParse, globals.logger);
 }
 
 /// List of lines of build settings. Example: 'FLUTTER_BUILD_DIR=build'

@@ -4,9 +4,9 @@
 
 // ignore_for_file: invalid_use_of_internal_member
 
-import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 // ignore: avoid_relative_lib_imports
 import '../lib/main.dart' as multiple_windows;

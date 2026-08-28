@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:dds/dap.dart';
+import 'package:dap_adapters/dap_adapters.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
 import 'package:flutter_tools/src/globals.dart' as globals show fs, platform;
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service.dart' as vm;
 
 import 'mocks.dart';
 
@@ -601,6 +601,56 @@ void main() {
           'params': <String, Object?>{'warning': 'This is a test warning'},
         });
       });
+
+      test('forward inspector deep links as dart.flutter.devToolsDeepLink events', () async {
+        final adapter = FakeFlutterDebugAdapter(
+          fileSystem: MemoryFileSystem.test(style: fsStyle),
+          platform: platform,
+        );
+
+        // Simulate startup.
+        final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+        final responseCompleter = Completer<void>();
+        await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+        await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
+
+        // Start listening for the forwarded event (don't await it yet, it won't
+        // be triggered until the call below).
+        final Future<Map<String, Object?>> forwardedEvent = adapter.dapToClientMessages.firstWhere(
+          (Map<String, Object?> data) => data['event'] == 'dart.flutter.devToolsDeepLink',
+        );
+
+        // Simulate Flutter asking for a URL to be launched.
+        await adapter.handleExtensionEvent(
+          vm.Event(
+            kind: vm.EventKind.kExtension,
+            extensionKind: 'Flutter.Error',
+            extensionData: vm.ExtensionData.parse({
+              'properties': <Map<String, Object?>>[
+                {
+                  'type': 'ErrorSummary',
+                  'description': 'An overflow occurred',
+                  'properties': <Map<String, Object?>>[
+                    <String, Object?>{
+                      'type': 'DevToolsDeepLinkProperty',
+                      'description': 'Click to open the inspector',
+                      'value': 'http://127.0.0.1:9100/inspector?uri=x&inspectorRef=y',
+                    },
+                  ],
+                },
+              ],
+            }),
+          ),
+        );
+
+        // Wait for the forwarded event.
+        final Map<String, Object?> message = await forwardedEvent;
+        // Ensure the body of the event matches the original event sent by Flutter.
+        expect(message['body'], <String, Object?>{
+          'summary': 'An overflow occurred',
+          'deepLinkUrl': 'http://127.0.0.1:9100/inspector?uri=x&inspectorRef=y',
+        });
+      });
     });
 
     group('handles reverse requests', () {
@@ -907,11 +957,52 @@ stdout "The relevant error-causing widget was:\n    MyWidget:file:///path/to/wid
 stderr "════════════════════════════════════════════════════════════════════════════════\n"
 ''');
       });
+
+      test('extracts the error summary', () {
+        final formatter = FlutterErrorFormatter()
+          ..formatError(<String, Object?>{
+            'type': 'NotErrorSummary',
+            'description': 'xxx',
+            'properties': <Map<String, Object?>>[
+              <String, Object>{'description': 'yyy'},
+              <String, Object?>{
+                'type': 'ErrorSummary',
+                'description': 'my error summary',
+                'children': <Map<String, Object>>[
+                  <String, Object>{'type': 'NotErrorSummary2', 'description': 'zzz'},
+                ],
+              },
+            ],
+          });
+
+        expect(formatter.errorSummary, 'my error summary');
+      });
+
+      test('extracts a DevTools Deep Link', () {
+        final formatter = FlutterErrorFormatter()
+          ..formatError(<String, Object?>{
+            'type': 'NotErrorSummary',
+            'description': 'xxx',
+            'properties': <Map<String, Object?>>[
+              <String, Object>{'description': 'yyy'},
+              <String, Object?>{
+                'type': 'DevToolsDeepLinkProperty',
+                'description': 'Click to open the inspector',
+                'value': 'http://127.0.0.1:9100/inspector?uri=x&inspectorRef=y',
+              },
+            ],
+          });
+
+        expect(
+          formatter.devToolsDeepLinkUrl,
+          'http://127.0.0.1:9100/inspector?uri=x&inspectorRef=y',
+        );
+      });
     });
   });
 }
 
-class _FakeVm extends Fake implements VM {
+class _FakeVm extends Fake implements vm.VM {
   _FakeVm({this.pid = 1});
 
   @override

@@ -62,6 +62,12 @@ class ShaderLibrary : public RefCountedDartWrappable<ShaderLibrary> {
   fml::RefPtr<Shader> GetShader(const std::string& shader_name,
                                 Dart_Handle shader_wrapper);
 
+  // Looks up a registered shader by name without creating a Dart wrapper, for
+  // tests and tooling that run without a UI isolate. Production code uses
+  // `GetShader`.
+  fml::RefPtr<Shader> FindShaderForTesting(
+      const std::string& shader_name) const;
+
   const std::string& GetLibraryId() const { return library_id_; }
 
   ~ShaderLibrary() override;

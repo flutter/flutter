@@ -60,7 +60,12 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
         stringArg('output') ??
-        globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'macos', 'framework');
+        globals.fs.path.join(
+          globals.fs.currentDirectory.path,
+          getBuildDirectory(globals.config, globals.fs),
+          'macos',
+          'framework',
+        );
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');
@@ -258,7 +263,7 @@ end
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
         defines: <String, String>{
           kTargetFile: targetFile,
-          kTargetPlatform: FlutterDarwinPlatform.macos.targetPlatform.getName(),
+          kTargetPlatform: TargetPlatform.darwin.getName(),
           kDarwinArchs: defaultMacOSArchsForEnvironment(
             globals.artifacts!,
           ).map((CpuArch e) => e.darwinArchName).join(' '),
@@ -316,7 +321,7 @@ end
     final Status status = globals.logger.startProgress(' ├─Copying FlutterMacOS.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = globals.artifacts!.getArtifactPath(
       Artifact.flutterMacOSXcframework,
-      platform: FlutterDarwinPlatform.macos.targetPlatform,
+      platform: TargetPlatform.darwin,
       mode: buildInfo.mode,
     );
     final String flutterFrameworkFileName = globals.fs.path.basename(

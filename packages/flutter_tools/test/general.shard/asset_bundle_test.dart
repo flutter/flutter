@@ -47,7 +47,7 @@ void main() {
         expect(
           await ab.build(
             packageConfigPath: '.dart_tool/package_config.json',
-            targetPlatform: const TargetPlatform(.tester, .unknown),
+            targetPlatform: TargetPlatform.tester,
           ),
           0,
         );
@@ -70,7 +70,7 @@ void main() {
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
         expect(bundle.entries.keys, unorderedEquals(<String>['AssetManifest.bin']));
         const expectedBinAssetManifest = <Object, Object>{};
@@ -120,7 +120,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(
@@ -163,7 +163,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
         expect(
           bundle.entries.keys,
@@ -182,7 +182,7 @@ flutter:
         expect(bundle.needsBuild(), true);
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
         expect(
           bundle.entries.keys,
@@ -223,7 +223,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
         expect(
           bundle.entries.keys,
@@ -254,7 +254,7 @@ name: my_app''')
         expect(bundle.needsBuild(), true);
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
         expect(
           bundle.entries.keys,
@@ -295,7 +295,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
         expect(
           bundle.entries.keys,
@@ -350,7 +350,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
         expect(
           bundle.entries.keys,
@@ -401,7 +401,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
         expect(
           bundle.entries.keys,
@@ -462,7 +462,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
         expect(
           bundle.entries.keys,
@@ -486,7 +486,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           deferredComponentsEnabled: true,
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(
@@ -540,7 +540,7 @@ flutter:
         () => bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         ),
         throwsToolExit(
           message:
@@ -580,7 +580,7 @@ flutter:
         () => bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         ),
         throwsToolExit(
           message:
@@ -625,7 +625,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
@@ -634,7 +634,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isFalse);
@@ -652,7 +652,7 @@ flutter:
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         );
 
         expect(bundle.entries['my-asset.txt']!.content.isModified, isTrue);
@@ -682,7 +682,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.web, .unknown),
+          targetPlatform: TargetPlatform.web_javascript,
         );
 
         expect(
@@ -721,7 +721,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.web, .unknown),
+          targetPlatform: TargetPlatform.web_javascript,
         );
 
         expect(
@@ -774,7 +774,7 @@ flutter:
     await writeBundle(
       directory,
       const <String, AssetBundleEntry>{},
-      targetPlatform: const TargetPlatform(.android, .unknown),
+      targetPlatform: TargetPlatform.android,
       impellerStatus: ImpellerStatus.disabled,
       processManager: globals.processManager,
       fileSystem: globals.fs,
@@ -803,7 +803,7 @@ assets:
       final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(
         packageConfigPath: '.dart_tool/package_config.json',
-        targetPlatform: const TargetPlatform(.tester, .unknown),
+        targetPlatform: TargetPlatform.tester,
       );
 
       final AssetBundleEntry? fontManifest = bundle.entries['FontManifest.json'];
@@ -811,7 +811,7 @@ assets:
 
       await bundle.build(
         packageConfigPath: '.dart_tool/package_config.json',
-        targetPlatform: const TargetPlatform(.tester, .unknown),
+        targetPlatform: TargetPlatform.tester,
       );
 
       expect(fontManifest, bundle.entries['FontManifest.json']);
@@ -843,7 +843,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         ),
         0,
       );
@@ -878,7 +878,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         ),
         0,
       );
@@ -931,7 +931,7 @@ flutter:
         expect(
           await bundle.build(
             packageConfigPath: '.dart_tool/package_config.json',
-            targetPlatform: const TargetPlatform(.tester, .unknown),
+            targetPlatform: TargetPlatform.tester,
           ),
           0,
         );
@@ -939,7 +939,7 @@ flutter:
         await writeBundle(
           output,
           bundle.entries,
-          targetPlatform: const TargetPlatform(.android, .unknown),
+          targetPlatform: TargetPlatform.android,
           impellerStatus: ImpellerStatus.disabled,
           processManager: globals.processManager,
           fileSystem: globals.fs,
@@ -994,7 +994,7 @@ flutter:
         expect(
           await bundle.build(
             packageConfigPath: '.dart_tool/package_config.json',
-            targetPlatform: const TargetPlatform(.web, .unknown),
+            targetPlatform: TargetPlatform.web_javascript,
           ),
           0,
         );
@@ -1002,7 +1002,7 @@ flutter:
         await writeBundle(
           output,
           bundle.entries,
-          targetPlatform: const TargetPlatform(.web, .unknown),
+          targetPlatform: TargetPlatform.web_javascript,
           impellerStatus: ImpellerStatus.disabled,
           processManager: globals.processManager,
           fileSystem: globals.fs,
@@ -1156,7 +1156,7 @@ flutter:
         expect(
           await bundle.build(
             packageConfigPath: '.dart_tool/package_config.json',
-            targetPlatform: const TargetPlatform(.web, .unknown),
+            targetPlatform: TargetPlatform.web_javascript,
           ),
           0,
         );
@@ -1164,7 +1164,7 @@ flutter:
         await writeBundle(
           output,
           bundle.entries,
-          targetPlatform: const TargetPlatform(.web, .unknown),
+          targetPlatform: TargetPlatform.web_javascript,
           impellerStatus: ImpellerStatus.disabled,
           processManager: globals.processManager,
           fileSystem: globals.fs,
@@ -1215,7 +1215,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         ),
         0,
       );
@@ -1258,7 +1258,7 @@ flutter:
 
       await bundle.build(
         packageConfigPath: '.dart_tool/package_config.json',
-        targetPlatform: const TargetPlatform(.tester, .unknown),
+        targetPlatform: TargetPlatform.tester,
       );
 
       expect(
@@ -1315,7 +1315,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         ),
         1,
       );
@@ -1350,7 +1350,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         ),
         1,
       );
@@ -1395,7 +1395,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         ),
         0,
       );
@@ -1437,7 +1437,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         ),
         0,
       );
@@ -1487,7 +1487,7 @@ flutter:
       expect(
         await bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         ),
         0,
       );
@@ -1529,7 +1529,7 @@ flutter:
         () => bundle.build(
           packageConfigPath: '.dart_tool/package_config.json',
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          targetPlatform: const TargetPlatform(.tester, .unknown),
+          targetPlatform: TargetPlatform.tester,
         ),
         throwsToolExit(
           message:

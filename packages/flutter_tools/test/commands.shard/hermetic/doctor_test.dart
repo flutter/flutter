@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -1238,8 +1239,7 @@ class FakeDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion async => '1.2.3';
 
   @override
-  Future<TargetPlatform> get targetPlatform =>
-      Future<TargetPlatform>.value(const TargetPlatform(.android, .unknown));
+  Future<TargetPlatform> get targetPlatform => Future<TargetPlatform>.value(TargetPlatform.android);
 }
 
 class FakeTerminal extends Fake implements AnsiTerminal {

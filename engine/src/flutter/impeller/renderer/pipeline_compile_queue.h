@@ -5,12 +5,11 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_PIPELINE_COMPILE_QUEUE_H_
 #define FLUTTER_IMPELLER_RENDERER_PIPELINE_COMPILE_QUEUE_H_
 
-#include <unordered_map>
-
 #include "flutter/fml/closure.h"
 #include "flutter/fml/concurrent_message_loop.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/pipeline_descriptor.h"
+#include "third_party/abseil-cpp/absl/container/linked_hash_map.h"
 
 namespace impeller {
 
@@ -125,10 +124,10 @@ class PipelineCompileQueue
 
  private:
   Mutex pending_jobs_mutex_;
-  std::unordered_map<PipelineDescriptor,
-                     fml::closure,
-                     ComparableHash<PipelineDescriptor>,
-                     ComparableEqual<PipelineDescriptor>>
+  absl::linked_hash_map<PipelineDescriptor,
+                        fml::closure,
+                        ComparableHash<PipelineDescriptor>,
+                        ComparableEqual<PipelineDescriptor>>
       pending_jobs_ IPLR_GUARDED_BY(pending_jobs_mutex_);
   size_t priorities_elevated_ = {};
   fml::closure TakeJob(const PipelineDescriptor& desc);

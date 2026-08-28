@@ -535,7 +535,7 @@ class FakeDevice extends Fake implements Device {
   final DartDevelopmentService dds = FakeDartDevelopmentService();
 
   @override
-  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.android, .armv7);
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
   Future<DeviceLogReader> getLogReader({

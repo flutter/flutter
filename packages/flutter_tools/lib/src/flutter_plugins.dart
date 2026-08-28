@@ -401,27 +401,6 @@ bool _writeFlutterPluginsList(
   }
 }
 
-/// Checks if the .flutter-plugins-dependencies file has any plugin
-/// dev dependencies with platform-specific implementations.
-bool flutterPluginsListHasDevDependencies(File pluginsFile) {
-  final String pluginsString = pluginsFile.readAsStringSync();
-  final pluginsJson = json.decode(pluginsString) as Map<String, dynamic>;
-  final plugins = pluginsJson[_kFlutterPluginsPluginListKey] as Map<String, dynamic>;
-
-  for (final MapEntry<String, dynamic> pluginEntries in plugins.entries) {
-    final platformPlugins = pluginEntries.value as List<dynamic>;
-    final bool hasDevDependencies = platformPlugins.cast<Map<String, dynamic>>().any(
-      (Map<String, dynamic> plugin) => plugin[_kFlutterPluginsDevDependencyKey] == true,
-    );
-
-    if (hasDevDependencies) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 /// Creates a map representation of the [plugins] for those supported by [platformKey].
 /// All given [plugins] must provide an implementation for the [platformKey].
 List<Map<String, Object>> _createPluginMapOfPlatform(List<Plugin> plugins, String platformKey) {
@@ -1299,6 +1278,7 @@ Future<void> refreshPluginsList(
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
+  bool forceSwiftPM = false,
   PubspecCache? pubspecCache,
   PackageGraph? packageGraph,
   PackageConfig? packageConfig,
@@ -1314,7 +1294,10 @@ Future<void> refreshPluginsList(
 
   var swiftPackageManagerEnabledIos = false;
   var swiftPackageManagerEnabledMacos = false;
-  if (!forceCocoaPodsOnly) {
+  if (forceSwiftPM) {
+    swiftPackageManagerEnabledIos = true;
+    swiftPackageManagerEnabledMacos = true;
+  } else if (!forceCocoaPodsOnly) {
     if (iosPlatform) {
       swiftPackageManagerEnabledIos = project.ios.usesSwiftPackageManager;
     }
@@ -1457,6 +1440,7 @@ Future<void> injectPlugins(
             templateRenderer: globals.templateRenderer,
             processUtils: globals.processUtils,
             config: globals.config,
+            logger: globals.logger,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,

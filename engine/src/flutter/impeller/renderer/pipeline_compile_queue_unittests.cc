@@ -27,6 +27,8 @@ class TestPipelineCompileQueue : public PipelineCompileQueue {
   }
 
   bool HasPendingJobsForTest() { return HasPendingJobs(); }
+
+  void DoOneJobForTest() { DoOneJob(); }
 };
 
 TEST(PipelineCompileQueueTest, AddJobReturnsTrueForNewDescriptor) {
@@ -90,6 +92,28 @@ TEST(PipelineCompileQueueTest, FinishAllJobsDrainsQueue) {
   queue.reset();
 
   EXPECT_TRUE(job_executed);
+}
+
+TEST(PipelineCompileQueueTest, ExecutesJobsInInsertionOrder) {
+  constexpr size_t kJobCount = 10;
+  auto queue = std::make_shared<TestPipelineCompileQueue>();
+
+  std::vector<size_t> job_order;
+  for (size_t i = 0; i < kJobCount; i++) {
+    PipelineDescriptor desc;
+    desc.SetLabel(std::to_string(i));
+    ASSERT_TRUE(queue->AddJobForTest(
+        desc, [&job_order, index = i] { job_order.push_back(index); }));
+  }
+
+  for (size_t i = 0; i < kJobCount; i++) {
+    queue->DoOneJobForTest();
+  }
+
+  EXPECT_EQ(job_order.size(), kJobCount);
+  for (size_t i = 0; i < kJobCount; i++) {
+    EXPECT_EQ(i, job_order[i]);
+  }
 }
 
 }  // namespace testing

@@ -844,9 +844,9 @@ flutter:
         testUsingContext(
           platform,
           () async {
-            final targetPlatform = platform == 'android'
-                ? const TargetPlatform(.ios, .arm64)
-                : const TargetPlatform(.android, .unknown);
+            final TargetPlatform targetPlatform = platform == 'android'
+                ? TargetPlatform.ios
+                : TargetPlatform.android;
             final bool didInclude = await setupAndBuildPlatformAsset(platform, targetPlatform);
 
             expect(

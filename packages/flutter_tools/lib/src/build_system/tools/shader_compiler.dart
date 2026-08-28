@@ -175,10 +175,16 @@ class ShaderCompiler {
   bool _hasLoggedSecurityBlockError = false;
 
   List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
-    switch (targetPlatform.type) {
-      case .android:
-      case .linux:
-      case .windows:
+    switch (targetPlatform) {
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android:
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
         return <String>[
           '--sksl',
           '--runtime-stage-gles',
@@ -186,20 +192,20 @@ class ShaderCompiler {
           '--runtime-stage-vulkan',
         ];
 
-      case .ios:
+      case TargetPlatform.ios:
         return <String>['--runtime-stage-metal'];
-      case .macos:
+      case TargetPlatform.darwin:
         return <String>['--sksl', '--runtime-stage-metal'];
 
-      case .fuchsia:
-      case .tester:
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+      case TargetPlatform.tester:
         return <String>['--sksl', '--runtime-stage-vulkan'];
 
-      case .web:
+      case TargetPlatform.web_javascript:
         return <String>['--sksl'];
 
-      case .custom:
-      case .unsupported:
+      case TargetPlatform.unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
   }
@@ -242,7 +248,7 @@ class ShaderCompiler {
       impellerc.path,
       ...targets,
       '--iplr',
-      if (targetPlatform.type == .web) '--json',
+      if (targetPlatform == TargetPlatform.web_javascript) '--json',
       '--sl=$outputPath',
       '--spirv=$outputPath.spirv',
       '--input=${input.path}',
@@ -259,7 +265,7 @@ class ShaderCompiler {
       final List<String> shaderTargets = _shaderTargetsFromTargetPlatform(targetPlatform);
       final List<String> cmd = makeImpellercCommand(shaderTargets);
       _logger.printTrace('impellerc command: $cmd');
-      final ProcessResult result = await _runCommand(cmd);
+      ProcessResult result = await _runCommand(cmd);
       if (result.exitCode != 0) {
         // Maybe retry impellerc command without --sksl.
         if (!(shaderTargets.length > 1 && shaderTargets.contains('--sksl'))) {
@@ -280,6 +286,7 @@ class ShaderCompiler {
         if (retryResult.exitCode != 0) {
           // Retry failed.
           _logger.printError('impellerc failure: ${retryResult.stderr}');
+          result = retryResult;
           failure = true;
         } else {
           // Retry succeeded. Don't fail, but log a warning message and the sksl
@@ -296,9 +303,15 @@ class ShaderCompiler {
 
       if (failure) {
         if (fatal) {
+          final String? hint = _getHelpfulHint(result, input, outputPath, impellerc.path);
+          final message =
+              'Shader compilation of "${input.path}" to "$outputPath" '
+              'failed with exit code ${result.exitCode}.'
+              '${hint != null ? '\n$hint' : ''}';
           throw ShaderCompilerException._(
-            'Shader compilation of "${input.path}" to "$outputPath" '
-            'failed with exit code ${result.exitCode}.',
+            message,
+            stdout: result.stdout as String?,
+            stderr: result.stderr as String?,
           );
         }
         return false;
@@ -314,9 +327,46 @@ class ShaderCompiler {
     return true;
   }
 
+  String? _getHelpfulHint(
+    ProcessResult result,
+    File input,
+    String outputPath,
+    String impellercPath,
+  ) {
+    final int exitCode = result.exitCode;
+    if (_platform.isMacOS && exitCode == -9) {
+      return 'The shader compiler (impellerc) may have been blocked by macOS Gatekeeper or run out of memory (OOM).\n'
+          'To resolve Gatekeeper issues, try running:\n'
+          '  xattr -d com.apple.quarantine "$impellercPath"';
+    }
+
+    final bool isWindowsAbort = _platform.isWindows && exitCode == 3;
+    final bool isPosixAbort = (_platform.isMacOS || _platform.isLinux) && exitCode == -6;
+
+    if (isWindowsAbort || isPosixAbort) {
+      var hint = 'The shader compiler (impellerc) aborted during compilation.';
+      if (_platform.isWindows) {
+        final bool hasNonAscii =
+            RegExp(r'[^\x00-\x7F]').hasMatch(input.path) ||
+            RegExp(r'[^\x00-\x7F]').hasMatch(outputPath);
+        if (hasNonAscii) {
+          hint +=
+              '\nWarning: The path contains non-ASCII characters, which is known to cause crashes on Windows.\n'
+              'Try moving your project to a path containing only ASCII characters.';
+        }
+      }
+      return hint;
+    }
+    return null;
+  }
+
   Future<ProcessResult> _runCommand(List<String> command) async {
     try {
-      return await _processManager.run(command, stderrEncoding: utf8);
+      return await _processManager.run(
+        command,
+        stdoutEncoding: utf8AllowMalformed,
+        stderrEncoding: utf8AllowMalformed,
+      );
     } on ProcessException catch (e) {
       if (_isBlockedBySecurityPolicy(e)) {
         throw _SecurityPolicyBlockException(e);
@@ -330,7 +380,9 @@ class ShaderCompiler {
       return false;
     }
     const winErrorAccessDisabledByPolicy = 1260;
-    return exception.errorCode == winErrorAccessDisabledByPolicy;
+    const winErrorSystemIntegrityPolicyViolation = 4551;
+    return exception.errorCode == winErrorAccessDisabledByPolicy ||
+        exception.errorCode == winErrorSystemIntegrityPolicyViolation;
   }
 
   void _logSecurityBlockError(String impellercPath) {
@@ -357,10 +409,26 @@ class _SecurityPolicyBlockException implements Exception {
 }
 
 class ShaderCompilerException implements Exception {
-  ShaderCompilerException._(this.message);
+  ShaderCompilerException._(this.message, {this.stdout, this.stderr});
 
   final String message;
+  final String? stdout;
+  final String? stderr;
 
   @override
-  String toString() => 'ShaderCompilerException: $message\n\n';
+  String toString() {
+    final buffer = StringBuffer();
+    buffer.write('ShaderCompilerException: $message\n');
+    final String? stdout = this.stdout;
+    if (stdout != null && stdout.trim().isNotEmpty) {
+      buffer.writeln('Stdout:');
+      buffer.writeln(stdout.trim());
+    }
+    final String? stderr = this.stderr;
+    if (stderr != null && stderr.trim().isNotEmpty) {
+      buffer.writeln('Stderr:');
+      buffer.writeln(stderr.trim());
+    }
+    return buffer.toString();
+  }
 }

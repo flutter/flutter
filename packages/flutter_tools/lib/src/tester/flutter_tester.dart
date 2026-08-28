@@ -94,7 +94,7 @@ class FlutterTesterDevice extends Device {
   bool get supportsFlavors => true;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.tester, .unknown);
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.unknown;
@@ -152,7 +152,7 @@ class FlutterTesterDevice extends Device {
       buildInfo: buildInfo,
       mainPath: mainPath,
       applicationKernelFilePath: applicationKernelFilePath,
-      platform: const TargetPlatform(.tester, .unknown),
+      platform: TargetPlatform.tester,
       assetDirPath: assetDirectory.path,
     );
 
@@ -187,14 +187,14 @@ class FlutterTesterDevice extends Device {
         return LaunchResult.succeeded();
       }
 
+      _logReader.listenToProcessOutput(_process!);
       vmServiceDiscovery = ProtocolDiscovery.vmService(
-        getLogReader(),
+        SingleLaunchLogReader(_logReader.logLines, _process!.exitCode),
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: debuggingOptions.ipv6,
         logger: _logger,
       );
-      _logReader.initializeProcess(_process!);
 
       final Uri? vmServiceUri = await vmServiceDiscovery.uri;
       if (vmServiceUri != null) {

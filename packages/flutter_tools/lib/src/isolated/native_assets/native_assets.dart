@@ -12,6 +12,7 @@ import 'package:logging/logging.dart' as logging;
 import 'package:package_config/package_config_types.dart';
 
 import '../../base/common.dart';
+import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/platform.dart';
@@ -97,7 +98,10 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     buildDataAssets: buildDataAssets,
   );
 
-  final BuildMode buildMode = _getBuildMode(environmentDefines, targetPlatform.type == .tester);
+  final BuildMode buildMode = _getBuildMode(
+    environmentDefines,
+    targetPlatform == TargetPlatform.tester,
+  );
   final bool linkingEnabled = _nativeAssetsLinkingEnabled(buildMode);
   final DartHooksResult linkResult;
   if (linkingEnabled) {
@@ -222,7 +226,10 @@ List<AssetBuildTarget> _getTargets({
     if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) SupportedAssetTypes.dataAssets,
   ];
 
-  final BuildMode buildMode = _getBuildMode(environmentDefines, targetPlatform.type == .tester);
+  final BuildMode buildMode = _getBuildMode(
+    environmentDefines,
+    targetPlatform == TargetPlatform.tester,
+  );
 
   return AssetBuildTarget.targetsFor(
     targetPlatform: targetPlatform,
@@ -256,7 +263,10 @@ Future<({List<AssetBuildTarget> targets, BuildMode buildMode, bool linkingEnable
     if (featureFlags.isDartDataAssetsEnabled && buildDataAssets) SupportedAssetTypes.dataAssets,
   ];
 
-  final BuildMode buildMode = _getBuildMode(environmentDefines, targetPlatform.type == .tester);
+  final BuildMode buildMode = _getBuildMode(
+    environmentDefines,
+    targetPlatform == TargetPlatform.tester,
+  );
 
   if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets)) {
     for (final CodeAssetTarget target in targets.whereType<CodeAssetTarget>()) {
@@ -476,7 +486,7 @@ Future<List<File>> installCodeAssets({
   required Uri targetUri,
 }) async {
   final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
-  final flutterTester = targetPlatform.type == .tester;
+  final flutterTester = targetPlatform == TargetPlatform.tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
   final String? codesignIdentity = environmentDefines[kCodesignIdentity];
@@ -534,6 +544,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.packageConfig,
     this.fileSystem,
     this.logger,
+    this.platform,
     this.runPackageName,
     this.pubspecPath, {
     required this.includeDevDependencies,
@@ -544,6 +555,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   final PackageConfig packageConfig;
   final FileSystem fileSystem;
   final Logger logger;
+  final Platform platform;
   final String runPackageName;
 
   /// Include the dev dependencies of [runPackageName].
@@ -572,7 +584,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   late final Uri _dartExecutable = fileSystem
       .directory(Cache.flutterRoot)
       .uri
-      .resolve('bin/cache/dart-sdk/bin/dart');
+      .resolve('bin/cache/dart-sdk/bin/dart${platform.isWindows ? '.exe' : ''}');
 
   late final packageLayout = PackageLayout.fromPackageConfig(
     fileSystem,
@@ -821,8 +833,8 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   if (!targetDir.existsSync()) {
     targetDir.createSync(recursive: true);
   }
-  await for (final FileSystemEntity entity in targetDir.list()) {
-    await entity.delete(recursive: true);
+  for (final FileSystemEntity entity in await targetDir.list().toList()) {
+    ErrorHandlingFileSystem.deleteIfExists(entity, recursive: true);
   }
 
   if (assetTargetLocations.isEmpty) {
@@ -953,20 +965,27 @@ Never _throwNativeAssetsLinkFailed() {
 }
 
 OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
-  switch (platform.type) {
-    case .ios:
+  switch (platform) {
+    case TargetPlatform.ios:
       return OS.iOS;
-    case .macos:
+    case TargetPlatform.darwin:
       return OS.macOS;
-    case .linux:
+    case TargetPlatform.linux_x64:
+    case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_riscv64:
       return OS.linux;
-    case .windows:
+    case TargetPlatform.windows_x64:
+    case TargetPlatform.windows_arm64:
       return OS.windows;
-    case .fuchsia:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
       return OS.fuchsia;
-    case .android:
+    case TargetPlatform.android:
+    case TargetPlatform.android_arm:
+    case TargetPlatform.android_arm64:
+    case TargetPlatform.android_x64:
       return OS.android;
-    case .tester:
+    case TargetPlatform.tester:
       if (const LocalPlatform().isMacOS) {
         return OS.macOS;
       } else if (const LocalPlatform().isLinux) {
@@ -976,39 +995,12 @@ OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
       } else {
         throw StateError('Unknown operating system');
       }
-    case .web:
+    case TargetPlatform.web_javascript:
       throw StateError('No dart builds for web yet.');
-    case .custom:
-    case .unsupported:
+    case TargetPlatform.unsupported:
       TargetPlatform.throwUnsupportedTarget();
   }
 }
-
-extension OSArchitectures on OS {
-  Set<Architecture> get architectures => _osTargets[this]!;
-}
-
-const _osTargets = <OS, Set<Architecture>>{
-  OS.android: <Architecture>{
-    Architecture.arm,
-    Architecture.arm64,
-    Architecture.ia32,
-    Architecture.x64,
-    Architecture.riscv64,
-  },
-  OS.fuchsia: <Architecture>{Architecture.arm64, Architecture.x64},
-  OS.iOS: <Architecture>{Architecture.arm, Architecture.arm64, Architecture.x64},
-  OS.linux: <Architecture>{
-    Architecture.arm,
-    Architecture.arm64,
-    Architecture.ia32,
-    Architecture.riscv32,
-    Architecture.riscv64,
-    Architecture.x64,
-  },
-  OS.macOS: <Architecture>{Architecture.arm64, Architecture.x64},
-  OS.windows: <Architecture>{Architecture.arm64, Architecture.ia32, Architecture.x64},
-};
 
 BuildMode _getBuildMode(Map<String, String> environmentDefines, bool isFlutterTester) {
   if (isFlutterTester) {

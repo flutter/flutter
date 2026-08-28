@@ -88,7 +88,7 @@ void main() {
       );
 
       await ApplicationPackageFactory.instance!.getPackageForPlatform(
-        const TargetPlatform(.android, .armv7),
+        TargetPlatform.android_arm,
         applicationBinary: apkFile,
       );
       final logger = BufferLogger.test();
@@ -158,7 +158,7 @@ void main() {
       );
 
       await ApplicationPackageFactory.instance!.getPackageForPlatform(
-        const TargetPlatform(.android, .armv7),
+        TargetPlatform.android_arm,
         applicationBinary: apkFile,
       );
       final logger = BufferLogger.test();
@@ -214,10 +214,7 @@ void main() {
         );
 
         final ApplicationPackage applicationPackage = (await ApplicationPackageFactory.instance!
-            .getPackageForPlatform(
-              const TargetPlatform(.android, .armv7),
-              applicationBinary: apkFile,
-            ))!;
+            .getPackageForPlatform(TargetPlatform.android_arm, applicationBinary: apkFile))!;
         expect(applicationPackage.name, 'app-debug.apk');
         expect(applicationPackage, isA<PrebuiltApplicationPackage>());
         expect(
@@ -245,7 +242,7 @@ void main() {
       gradleWrapperDir.childFile('gradlew.bat').writeAsStringSync('irrelevant');
 
       await ApplicationPackageFactory.instance!.getPackageForPlatform(
-        const TargetPlatform(.android, .armv7),
+        TargetPlatform.android_arm,
         applicationBinary: globals.fs.file('app-debug.apk'),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -257,9 +254,7 @@ void main() {
         final AndroidSdkVersion sdkVersion = FakeAndroidSdkVersion();
         sdk.latestVersion = sdkVersion;
 
-        await ApplicationPackageFactory.instance!.getPackageForPlatform(
-          const TargetPlatform(.android, .armv7),
-        );
+        await ApplicationPackageFactory.instance!.getPackageForPlatform(TargetPlatform.android_arm);
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },
       overrides: overrides,

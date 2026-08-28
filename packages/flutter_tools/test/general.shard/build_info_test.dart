@@ -5,9 +5,11 @@
 import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -21,47 +23,51 @@ void main() {
 
   group('Validate build number', () {
     testWithoutContext('CFBundleVersion for iOS', () async {
-      String? buildName = validatedBuildNumberForPlatform(PlatformType.ios, 'xyz', logger);
+      String? buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz', logger);
       expect(buildName, isNull);
-      buildName = validatedBuildNumberForPlatform(PlatformType.ios, '0.0.1', logger);
+      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '0.0.1', logger);
       expect(buildName, '0.0.1');
-      buildName = validatedBuildNumberForPlatform(PlatformType.ios, '123.xyz', logger);
+      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.xyz', logger);
       expect(buildName, '123');
-      buildName = validatedBuildNumberForPlatform(PlatformType.ios, '123.456.xyz', logger);
+      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.456.xyz', logger);
       expect(buildName, '123.456');
     });
 
     testWithoutContext('versionCode for Android', () async {
       String? buildName = validatedBuildNumberForPlatform(
-        PlatformType.android,
+        TargetPlatform.android_arm,
         '123.abc+-',
         logger,
       );
       expect(buildName, '123');
-      buildName = validatedBuildNumberForPlatform(PlatformType.android, 'abc', logger);
+      buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, 'abc', logger);
       expect(buildName, '1');
     });
   });
 
   group('Validate build name', () {
     testWithoutContext('CFBundleShortVersionString for iOS', () async {
-      String? buildName = validatedBuildNameForPlatform(PlatformType.ios, 'xyz', logger);
+      String? buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz', logger);
       expect(buildName, isNull);
-      buildName = validatedBuildNameForPlatform(PlatformType.ios, '0.0.1', logger);
+      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '0.0.1', logger);
       expect(buildName, '0.0.1');
 
-      buildName = validatedBuildNameForPlatform(PlatformType.ios, '123.456.xyz', logger);
+      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.456.xyz', logger);
       expect(logger.traceText, contains('Invalid build-name'));
       expect(buildName, '123.456.0');
 
-      buildName = validatedBuildNameForPlatform(PlatformType.ios, '123.xyz', logger);
+      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.xyz', logger);
       expect(buildName, '123.0.0');
     });
 
     testWithoutContext('versionName for Android', () async {
-      String? buildName = validatedBuildNameForPlatform(PlatformType.android, '123.abc+-', logger);
+      String? buildName = validatedBuildNameForPlatform(
+        TargetPlatform.android_arm,
+        '123.abc+-',
+        logger,
+      );
       expect(buildName, '123.abc+-');
-      buildName = validatedBuildNameForPlatform(PlatformType.android, 'abc+-', logger);
+      buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, 'abc+-', logger);
       expect(buildName, 'abc+-');
     });
 
@@ -102,25 +108,11 @@ void main() {
     expect(CpuArch.x64.darwinArchName, 'x86_64');
   });
 
-  testWithoutContext('getName derives the canonical name from the platform and arch', () {
-    // iOS and macOS include the CPU architecture in their name (e.g.
-    // `ios-arm64`, `darwin-x64`), falling back to the bare platform name when
-    // the architecture is unknown.
-    expect(const TargetPlatform(.ios, .arm64).getName(), 'ios-arm64');
-    expect(const TargetPlatform(.ios, .x64).getName(), 'ios-x64');
-    expect(const TargetPlatform(.ios, .unknown).getName(), 'ios');
-    expect(const TargetPlatform(.macos, .arm64).getName(), 'darwin-arm64');
-    expect(const TargetPlatform(.macos, .x64).getName(), 'darwin-x64');
-    expect(const TargetPlatform(.macos, .unknown).getName(), 'darwin');
-    // Desktop platforms follow the `<platform>-<arch>` convention.
-    expect(const TargetPlatform(.linux, .x64).getName(), 'linux-x64');
-    expect(const TargetPlatform(.linux, .arm64).getName(), 'linux-arm64');
-    expect(const TargetPlatform(.windows, .arm64).getName(), 'windows-arm64');
-    // Android has its own per-arch names.
-    expect(const TargetPlatform(.android, .armv7).getName(), 'android-arm');
-    expect(const TargetPlatform(.android, .arm64).getName(), 'android-arm64');
-    expect(const TargetPlatform(.android, .x64).getName(), 'android-x64');
-    expect(const TargetPlatform(.android, .unknown).getName(), 'android');
+  testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
+    expect(TargetPlatform.ios.getName(cpuArch: CpuArch.arm64), 'ios-arm64');
+    expect(TargetPlatform.ios.getName(cpuArch: CpuArch.armv7), 'ios-armv7');
+    expect(TargetPlatform.ios.getName(cpuArch: CpuArch.x64), 'ios-x86_64');
+    expect(TargetPlatform.android.getName(), isNot(contains('ios')));
   });
 
   testUsingContext(
@@ -302,6 +294,20 @@ void main() {
     });
   });
 
+  testWithoutContext('toEnvironmentConfig includes build name and build number', () {
+    const buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      buildName: '4.5.6',
+      buildNumber: '7',
+      treeShakeIcons: false,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+    );
+
+    expect(buildInfo.toEnvironmentConfig()['BUILD_NAME'], '4.5.6');
+    expect(buildInfo.toEnvironmentConfig()['BUILD_NUMBER'], '7');
+  });
+
   testWithoutContext('toGradleConfig encoding of standard values', () {
     const buildInfo = BuildInfo(
       BuildMode.debug,
@@ -332,6 +338,58 @@ void main() {
       '-Pfoo=bar',
       '-Pfizz=bazz',
     ]);
+  });
+
+  testWithoutContext('toGradleConfig encoding of androidEnableHcpp', () {
+    const buildInfo = BuildInfo(
+      BuildMode.debug,
+      '',
+      treeShakeIcons: true,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+      androidEnableHcpp: true,
+      explicitAndroidEnableHcpp: true,
+    );
+
+    expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=true'));
+    expect(buildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
+    expect(
+      buildInfo.copyWith().androidEnableHcpp,
+      isTrue,
+      reason: 'copyWith should preserve androidEnableHcpp',
+    );
+    expect(
+      buildInfo.copyWith().explicitAndroidEnableHcpp,
+      isTrue,
+      reason: 'copyWith should preserve explicitAndroidEnableHcpp',
+    );
+
+    const disabledBuildInfo = BuildInfo(
+      BuildMode.debug,
+      '',
+      treeShakeIcons: true,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+      androidEnableHcpp: false,
+      explicitAndroidEnableHcpp: false,
+    );
+    expect(disabledBuildInfo.toGradleConfig(), contains('-Penable-hcpp=false'));
+    expect(disabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=false'));
+
+    const unsetBuildInfo = BuildInfo(
+      BuildMode.debug,
+      '',
+      treeShakeIcons: true,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+    );
+    expect(
+      unsetBuildInfo.toGradleConfig(),
+      isNot(anyElement(contains('-Penable-hcpp'))),
+      reason: 'no property should be passed when unset',
+    );
+    expect(
+      unsetBuildInfo.toGradleConfig(),
+      isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
+      reason: 'no property should be passed when unset',
+    );
   });
 
   testWithoutContext('encodeDartDefines encodes define values with base64 encoded components', () {
@@ -413,5 +471,36 @@ void main() {
     expect(CpuArch.x86.name, 'x86');
     expect(CpuArch.x64.name, 'x64');
     expect(CpuArch.riscv64.name, 'riscv64');
+  });
+
+  group('getBuildDirectory', () {
+    testWithoutContext('defaults to "build" when config does not specify build-dir', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      expect(getBuildDirectory(config, fileSystem), 'build');
+    });
+
+    testWithoutContext('uses passed in config', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      config.setValue('build-dir', 'custom_build_out');
+      expect(getBuildDirectory(config, fileSystem), 'custom_build_out');
+    });
+
+    testWithoutContext('throws exception when configured build-dir is absolute', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      config.setValue('build-dir', '/absolute/path/to/build');
+      expect(() => getBuildDirectory(config, fileSystem), throwsException);
+    });
+
+    testUsingContext('defaults to "build" when config does not specify build-dir in context', () {
+      expect(getBuildDirectory(), 'build');
+    }, overrides: <Type, Generator>{Config: () => Config.test()});
+
+    testUsingContext('uses zone injected config', () {
+      globals.config.setValue('build-dir', 'injected_build_dir');
+      expect(getBuildDirectory(), 'injected_build_dir');
+    }, overrides: <Type, Generator>{Config: () => Config.test()});
   });
 }

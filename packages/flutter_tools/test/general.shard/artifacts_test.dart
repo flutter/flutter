@@ -44,7 +44,7 @@ void main() {
     testWithoutContext('getArtifactPath', () {
       final String xcframeworkPath = artifacts.getArtifactPath(
         Artifact.flutterXcframework,
-        platform: const TargetPlatform(.ios, .arm64),
+        platform: TargetPlatform.ios,
         mode: BuildMode.release,
       );
       expect(
@@ -62,7 +62,7 @@ void main() {
       expect(
         () => artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: const TargetPlatform(.ios, .arm64),
+          platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
         ),
@@ -72,7 +72,7 @@ void main() {
       expect(
         () => artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: const TargetPlatform(.ios, .arm64),
+          platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
         ),
@@ -93,7 +93,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: const TargetPlatform(.ios, .arm64),
+          platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
         ),
@@ -101,7 +101,7 @@ void main() {
       );
       final String actualReleaseFrameworkArtifact = artifacts.getArtifactPath(
         Artifact.flutterFramework,
-        platform: const TargetPlatform(.ios, .arm64),
+        platform: TargetPlatform.ios,
         mode: BuildMode.release,
         environmentType: EnvironmentType.physical,
       );
@@ -114,7 +114,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.flutterXcframework,
-          platform: const TargetPlatform(.ios, .arm64),
+          platform: TargetPlatform.ios,
           mode: BuildMode.release,
         ),
         fileSystem.path.join(
@@ -140,10 +140,7 @@ void main() {
         ),
       );
       expect(
-        artifacts.getArtifactPath(
-          Artifact.flutterTester,
-          platform: const TargetPlatform(.linux, .arm64),
-        ),
+        artifacts.getArtifactPath(Artifact.flutterTester, platform: TargetPlatform.linux_arm64),
         fileSystem.path.join(
           'root',
           'bin',
@@ -192,7 +189,7 @@ void main() {
         expect(
           artifacts.getArtifactPath(
             Artifact.flutterMacOSXcframework,
-            platform: const TargetPlatform(.macos, .x64),
+            platform: TargetPlatform.darwin,
             mode: BuildMode.release,
           ),
           xcframeworkPath,
@@ -204,7 +201,7 @@ void main() {
         expect(
           () => artifacts.getArtifactPath(
             Artifact.flutterMacOSFramework,
-            platform: const TargetPlatform(.macos, .x64),
+            platform: TargetPlatform.darwin,
             mode: BuildMode.release,
           ),
           throwsToolExit(message: 'No xcframework found at $xcframeworkPath.'),
@@ -217,7 +214,7 @@ void main() {
         expect(
           () => artifacts.getArtifactPath(
             Artifact.flutterMacOSFramework,
-            platform: const TargetPlatform(.macos, .x64),
+            platform: TargetPlatform.darwin,
             mode: BuildMode.release,
           ),
           throwsToolExit(message: 'No macOS frameworks found in $xcframeworkPath'),
@@ -230,7 +227,7 @@ void main() {
         expect(
           artifacts.getArtifactPath(
             Artifact.flutterMacOSFramework,
-            platform: const TargetPlatform(.macos, .x64),
+            platform: TargetPlatform.darwin,
             mode: BuildMode.release,
           ),
           fileSystem.path.join(xcframeworkPath, 'macos-arm64_x86_64', 'FlutterMacOS.framework'),
@@ -266,36 +263,9 @@ void main() {
     );
 
     testWithoutContext('getEngineType', () {
-      expect(
-        artifacts.getEngineType(const TargetPlatform(.android, .armv7), BuildMode.debug),
-        'android-arm',
-      );
-      expect(
-        artifacts.getEngineType(const TargetPlatform(.ios, .arm64), BuildMode.release),
-        'ios-release',
-      );
-      expect(artifacts.getEngineType(const TargetPlatform(.macos, .x64)), 'darwin-x64');
-    });
-
-    testWithoutContext('getArtifactPath resolves a generic Android target to arm64 for '
-        'architecture-independent artifacts', () {
-      // The Dart kernel / patched SDK is architecture independent, so the
-      // build system requests it with a generic Android target whose CPU
-      // architecture is unknown. This must not throw and should resolve to
-      // the same path as an explicit arm64 target. Regression test for the
-      // assertion crash introduced by the PlatformType + CpuArch refactor.
-      expect(
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: const TargetPlatform(.android, .unknown),
-          mode: BuildMode.release,
-        ),
-        artifacts.getArtifactPath(
-          Artifact.flutterPatchedSdkPath,
-          platform: const TargetPlatform(.android, .arm64),
-          mode: BuildMode.release,
-        ),
-      );
+      expect(artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug), 'android-arm');
+      expect(artifacts.getEngineType(TargetPlatform.ios, BuildMode.release), 'ios-release');
+      expect(artifacts.getEngineType(TargetPlatform.darwin), 'darwin-x64');
     });
 
     testWithoutContext(
@@ -365,7 +335,7 @@ void main() {
         expect(
           artifacts.getArtifactPath(
             Artifact.flutterMacOSXcframework,
-            platform: const TargetPlatform(.macos, .x64),
+            platform: TargetPlatform.darwin,
             mode: BuildMode.release,
           ),
           xcframeworkPath,
@@ -377,7 +347,7 @@ void main() {
         expect(
           () => artifacts.getArtifactPath(
             Artifact.flutterMacOSFramework,
-            platform: const TargetPlatform(.macos, .x64),
+            platform: TargetPlatform.darwin,
             mode: BuildMode.release,
           ),
           throwsToolExit(
@@ -394,7 +364,7 @@ void main() {
         expect(
           () => artifacts.getArtifactPath(
             Artifact.flutterMacOSFramework,
-            platform: const TargetPlatform(.macos, .x64),
+            platform: TargetPlatform.darwin,
             mode: BuildMode.release,
           ),
           throwsToolExit(
@@ -419,7 +389,7 @@ void main() {
         expect(
           artifacts.getArtifactPath(
             Artifact.flutterMacOSFramework,
-            platform: const TargetPlatform(.macos, .x64),
+            platform: TargetPlatform.darwin,
             mode: BuildMode.release,
           ),
           fileSystem.path.join(xcframeworkPath, 'macos-arm64_x86_64', 'FlutterMacOS.framework'),
@@ -434,7 +404,7 @@ void main() {
     testWithoutContext('getArtifactPath', () {
       final String xcframeworkPath = artifacts.getArtifactPath(
         Artifact.flutterXcframework,
-        platform: const TargetPlatform(.ios, .arm64),
+        platform: TargetPlatform.ios,
         mode: BuildMode.release,
       );
       expect(
@@ -444,7 +414,7 @@ void main() {
       expect(
         () => artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: const TargetPlatform(.ios, .arm64),
+          platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
         ),
@@ -456,7 +426,7 @@ void main() {
       expect(
         () => artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: const TargetPlatform(.ios, .arm64),
+          platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
         ),
@@ -485,7 +455,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: const TargetPlatform(.ios, .arm64),
+          platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.simulator,
         ),
@@ -494,7 +464,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.flutterFramework,
-          platform: const TargetPlatform(.ios, .arm64),
+          platform: TargetPlatform.ios,
           mode: BuildMode.release,
           environmentType: EnvironmentType.physical,
         ),
@@ -503,7 +473,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.flutterXcframework,
-          platform: const TargetPlatform(.ios, .arm64),
+          platform: TargetPlatform.ios,
           mode: BuildMode.release,
         ),
         fileSystem.path.join('/out', 'android_debug_unopt', 'Flutter.xcframework'),
@@ -602,21 +572,21 @@ void main() {
       expect(
         () => webArtifacts.getArtifactPath(
           Artifact.frontendServerSnapshotForEngineDartSdk,
-          platform: const TargetPlatform(.web, .unknown),
+          platform: TargetPlatform.web_javascript,
         ),
         throwsToolExit(message: failureMessage),
       );
       expect(
         () => webArtifacts.getArtifactPath(
           Artifact.engineDartSdkPath,
-          platform: const TargetPlatform(.web, .unknown),
+          platform: TargetPlatform.web_javascript,
         ),
         throwsToolExit(message: failureMessage),
       );
       expect(
         () => webArtifacts.getArtifactPath(
           Artifact.engineDartBinary,
-          platform: const TargetPlatform(.web, .unknown),
+          platform: TargetPlatform.web_javascript,
         ),
         throwsToolExit(message: failureMessage),
       );
@@ -632,7 +602,7 @@ void main() {
       expect(
         webArtifacts.getArtifactPath(
           Artifact.frontendServerSnapshotForEngineDartSdk,
-          platform: const TargetPlatform(.web, .unknown),
+          platform: TargetPlatform.web_javascript,
         ),
         fileSystem.path.join(
           '/flutter',
@@ -647,21 +617,21 @@ void main() {
       expect(
         webArtifacts.getArtifactPath(
           Artifact.engineDartSdkPath,
-          platform: const TargetPlatform(.web, .unknown),
+          platform: TargetPlatform.web_javascript,
         ),
         fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk'),
       );
       expect(
         webArtifacts.getArtifactPath(
           Artifact.engineDartBinary,
-          platform: const TargetPlatform(.web, .unknown),
+          platform: TargetPlatform.web_javascript,
         ),
         fileSystem.path.join('/flutter', 'prebuilts', 'linux-x64', 'dart-sdk', 'bin', 'dart'),
       );
       expect(
         webArtifacts.getArtifactPath(
           Artifact.engineDartAotRuntime,
-          platform: const TargetPlatform(.web, .unknown),
+          platform: TargetPlatform.web_javascript,
         ),
         fileSystem.path.join(
           '/flutter',
@@ -684,7 +654,7 @@ void main() {
       expect(
         () => artifacts.getArtifactPath(
           Artifact.engineDartSdkPath,
-          platform: const TargetPlatform(.web, .unknown),
+          platform: TargetPlatform.web_javascript,
         ),
         throwsToolExit(message: failureMessage),
       );
@@ -699,7 +669,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.engineDartSdkPath,
-          platform: const TargetPlatform(.web, .unknown),
+          platform: TargetPlatform.web_javascript,
         ),
         fileSystem.path.join('/out', 'host_debug_unopt', 'dart-sdk'),
       );
@@ -707,14 +677,11 @@ void main() {
 
     testWithoutContext('getEngineType', () {
       expect(
-        artifacts.getEngineType(const TargetPlatform(.android, .armv7), BuildMode.debug),
+        artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug),
         'android_debug_unopt',
       );
-      expect(
-        artifacts.getEngineType(const TargetPlatform(.ios, .arm64), BuildMode.release),
-        'android_debug_unopt',
-      );
-      expect(artifacts.getEngineType(const TargetPlatform(.macos, .x64)), 'android_debug_unopt');
+      expect(artifacts.getEngineType(TargetPlatform.ios, BuildMode.release), 'android_debug_unopt');
+      expect(artifacts.getEngineType(TargetPlatform.darwin), 'android_debug_unopt');
     });
 
     testWithoutContext('Looks up dart.exe on windows platforms', () async {
@@ -797,7 +764,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.engineDartBinary,
-          platform: const TargetPlatform(.web, .unknown),
+          platform: TargetPlatform.web_javascript,
         ),
         fileSystem.path.join('/flutter', 'prebuilts', 'windows-x64', 'dart-sdk', 'bin', 'dart.exe'),
       );
@@ -835,7 +802,7 @@ void main() {
       expect(
         artifacts.getArtifactPath(
           Artifact.engineDartBinary,
-          platform: const TargetPlatform(.web, .unknown),
+          platform: TargetPlatform.web_javascript,
         ),
         fileSystem.path.join('/flutter', 'prebuilts', 'macos-x64', 'dart-sdk', 'bin', 'dart'),
       );

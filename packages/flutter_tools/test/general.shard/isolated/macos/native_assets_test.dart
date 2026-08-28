@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart'
@@ -22,6 +23,7 @@ import 'package:hooks/hooks.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -78,6 +80,8 @@ void main() {
       testUsingContext(
         'build with assets $buildMode$testName',
         overrides: <Type, Generator>{
+          FeatureFlags: () =>
+              TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
           ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
             if (flutterTester) ...<FakeCommand>[
               FakeCommand(
@@ -284,7 +288,7 @@ void main() {
           }
           if (flutterTester && !const LocalPlatform().isMacOS) {
             // The [runFlutterSpecificDartBuild] will - when given
-            // `TargetPlatform(.tester, .unknown)` - enable `flutter test` mode. That means if
+            // `TargetPlatform.tester` - enable `flutter test` mode. That means if
             // this test is run on linux, it's going to do a linux build.
             // Though this test is mac-specific, so we skip that.
             //
@@ -333,9 +337,9 @@ void main() {
             kBuildMode: buildMode.cliName,
             kDarwinArchs: 'arm64 x86_64',
           };
-          final targetPlatform = flutterTester
-              ? const TargetPlatform(.tester, .unknown)
-              : const TargetPlatform(.macos, .x64);
+          final TargetPlatform targetPlatform = flutterTester
+              ? TargetPlatform.tester
+              : TargetPlatform.darwin;
           final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,
@@ -388,8 +392,9 @@ void main() {
                 // Tests run on host system, so the have the full path on the system.
                 projectUri.resolve('build/native_assets/macos/libbar.dylib').toFilePath()
               else
-                // Apps are a bundle with the dylibs on their dlopen path.
-                'bar.framework/bar',
+                // Apps are a bundle, and the dylibs are opened by the install
+                // name of the framework they are bundled in.
+                '@rpath/bar.framework/bar',
             ]),
           );
           expect(
@@ -400,8 +405,9 @@ void main() {
                 // Tests run on host system, so the have the full path on the system.
                 projectUri.resolve('build/native_assets/macos/libbuz.dylib').toFilePath()
               else
-                // Apps are a bundle with the dylibs on their dlopen path.
-                'buz.framework/buz',
+                // Apps are a bundle, and the dylibs are opened by the install
+                // name of the framework they are bundled in.
+                '@rpath/buz.framework/buz',
             ]),
           );
           // Multi arch.

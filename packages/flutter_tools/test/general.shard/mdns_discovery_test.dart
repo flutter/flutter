@@ -1282,7 +1282,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   final String name;
 
   @override
-  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.ios, .arm64);
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
   Future<bool> isSupported() async => true;

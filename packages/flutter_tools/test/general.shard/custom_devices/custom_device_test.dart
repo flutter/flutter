@@ -8,6 +8,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -118,7 +119,7 @@ void main() {
       expect(device.name, 'testlabel');
       expect(device.platformType, PlatformType.custom);
       expect(await device.sdkNameAndVersion, 'testsdknameandversion');
-      expect(await device.targetPlatform, const TargetPlatform(.linux, .arm64));
+      expect(await device.targetPlatform, TargetPlatform.linux_arm64);
       expect(await device.installApp(linuxApp), true);
       expect(await device.uninstallApp(linuxApp), true);
       expect(await device.isLatestBuildInstalled(linuxApp), false);
@@ -294,6 +295,58 @@ void main() {
       );
 
       expect(await discovery.discoverDevices(), hasLength(0));
+    },
+  );
+
+  testWithoutContext(
+    "CustomDevices.discoverDevices doesn't report device and does not throw when ping command times out",
+    () async {
+      final fs = MemoryFileSystem.test();
+      final Directory dir = fs.directory('custom_devices_config_dir');
+
+      _writeCustomDevicesConfigFile(dir, <CustomDeviceConfig>[testConfig]);
+
+      final logger = BufferLogger.test();
+      final discovery = CustomDevices(
+        featureFlags: TestFeatureFlags(areCustomDevicesEnabled: true),
+        logger: logger,
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: testConfig.pingCommand,
+            exception: const ProcessException('testping', <String>[], 'Process timed out'),
+          ),
+        ]),
+        config: CustomDevicesConfig.test(fileSystem: fs, directory: dir, logger: logger),
+      );
+
+      expect(await discovery.discoverDevices(), hasLength(0));
+      expect(
+        logger.traceText,
+        contains('Error pinging custom device testid: ProcessException: Process timed out'),
+      );
+    },
+  );
+
+  testWithoutContext(
+    'CustomDevice.tryPing returns false and logs trace when ping command times out',
+    () async {
+      final logger = BufferLogger.test();
+      final device = CustomDevice(
+        config: testConfig,
+        logger: logger,
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: testConfig.pingCommand,
+            exception: const ProcessException('testping', <String>[], 'Process timed out'),
+          ),
+        ]),
+      );
+
+      expect(await device.tryPing(), isFalse);
+      expect(
+        logger.traceText,
+        contains('Error pinging custom device testid: ProcessException: Process timed out'),
+      );
     },
   );
 
@@ -537,7 +590,7 @@ void main() {
       final runDebugCompleter = Completer<void>();
 
       final CustomDeviceConfig config = testConfig.copyWith(
-        platform: const TargetPlatform(.linux, .arm64),
+        platform: TargetPlatform.linux_arm64,
         postBuildCommand: const <String>[
           'testpostbuild',
           r'--buildMode=${buildMode}',
@@ -675,12 +728,12 @@ void main() {
 
   testWithoutContext('CustomDevice returns correct target platform', () async {
     final device = CustomDevice(
-      config: testConfig.copyWith(platform: const TargetPlatform(.linux, .x64)),
+      config: testConfig.copyWith(platform: TargetPlatform.linux_x64),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.empty(),
     );
 
-    expect(await device.targetPlatform, const TargetPlatform(.linux, .x64));
+    expect(await device.targetPlatform, TargetPlatform.linux_x64);
   });
 
   testWithoutContext(

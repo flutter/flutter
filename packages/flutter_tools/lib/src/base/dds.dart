@@ -10,6 +10,7 @@ import 'package:dds/dds_launcher.dart';
 import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
+import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
@@ -176,7 +177,15 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     }
     assert(devToolsUri != null);
     logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUri');
-    unawaited(startChrome(<String>[devToolsUri!.toString()]));
+    Future<void> launchChrome() async {
+      try {
+        await startChrome(<String>[devToolsUri!.toString()]);
+      } on Exception catch (error) {
+        logger.printError('Failed to launch DevTools in browser: $error');
+      }
+    }
+
+    unawaited(launchChrome());
     return true;
   }
 
@@ -266,7 +275,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
     if (!(await _waitForExtensionsForDevice(device, method))) {
       return;
     }
-    if (device.targetPlatform.type == .web) {
+    if (device.targetPlatform == TargetPlatform.web_javascript) {
       await device.vmService!.callMethodWrapper(method, args: params);
       return;
     }

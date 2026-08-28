@@ -13,6 +13,7 @@ import '../../dart/package_map.dart';
 import '../../devfs.dart';
 import '../../flutter_manifest.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
+import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -207,8 +208,8 @@ Future<Depfile> copyAssets(
       assetBundle.deferredComponentsEntries.entries.map<Future<void>>((
         MapEntry<String, Map<String, AssetBundleEntry>> componentEntries,
       ) async {
-        final Directory componentOutputDir = environment.projectDir
-            .childDirectory('build')
+        final Directory componentOutputDir = FlutterProject.fromDirectory(environment.projectDir)
+            .buildDirectory
             .childDirectory(componentEntries.key)
             .childDirectory('intermediates')
             .childDirectory('flutter');
@@ -295,7 +296,7 @@ class CopyAssets extends Target {
   @override
   Future<void> build(
     Environment environment, {
-    TargetPlatform targetPlatform = const TargetPlatform(.android, .unknown),
+    TargetPlatform targetPlatform = TargetPlatform.android,
   }) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {

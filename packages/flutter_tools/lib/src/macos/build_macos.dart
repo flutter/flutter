@@ -18,6 +18,7 @@ import '../darwin/darwin.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/migrations/metal_api_validation_migration.dart';
+import '../ios/plist_parser.dart';
 import '../ios/xcode_build_settings.dart';
 import '../ios/xcodeproj.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
@@ -95,6 +96,10 @@ Future<void> buildMacOS({
     );
   }
 
+  if (globals.xcodeProjectInterpreter?.isInstalled != true) {
+    throwToolExit(globals.userMessages.xcodeMissing);
+  }
+
   // The .xcworkspace may not exist (e.g. a project using Swift Package Manager
   // without CocoaPods). When absent, xcodebuild builds the .xcodeproj directly.
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
@@ -137,6 +142,7 @@ Future<void> buildMacOS({
     fileSystem: globals.fs,
     logger: globals.logger,
     cocoapods: globals.cocoaPods,
+    featureFlags: featureFlags,
   );
 
   final String buildDirectoryPath = getMacOSBuildDirectory();
@@ -154,11 +160,14 @@ Future<void> buildMacOS({
     projectFilename: xcodeProjectName,
     buildDirectory: flutterBuildDir,
   );
-  final String? scheme = projectInfo?.schemeFor(buildInfo);
-  if (scheme == null) {
-    projectInfo!.reportFlavorNotFoundAndExit();
+  if (projectInfo == null) {
+    throwToolExit('Unable to get Xcode project information.');
   }
-  final String? configuration = projectInfo?.buildConfigurationFor(buildInfo, scheme);
+  final String? scheme = projectInfo.schemeFor(buildInfo);
+  if (scheme == null) {
+    projectInfo.reportFlavorNotFoundAndExit();
+  }
+  final String? configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
     throwToolExit('Unable to find expected configuration in Xcode project.');
   }
@@ -277,16 +286,13 @@ Future<void> buildMacOS({
         .fetchDependenciesAndGenerateXcodebuildArgs(
           flutterProject.macos,
           globals.fs.directory(buildDirectoryPath),
-          skipPackageUpdatesAndValidation: false,
+          skipPackageValidation: false,
         );
     result = await globals.processUtils.stream(
       <String>[
         '/usr/bin/env',
         ...xcodebuildCommandArgs,
-        if (xcodeWorkspace != null) ...<String>[
-          '-workspace',
-          xcodeWorkspace.path,
-        ] else ...<String>[
+        if (xcodeWorkspace != null) ...<String>['-workspace', xcodeWorkspace.path] else ...<String>[
           '-project',
           xcodeProject.path,
         ],
@@ -356,6 +362,22 @@ Future<void> buildMacOS({
       'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
       color: TerminalColor.green,
     );
+
+    final File builtInfoPlist = globals.fs.file(
+      globals.fs.path.join(outputDirectory.path, 'Contents', 'Info.plist'),
+    );
+    final String plistPath = builtInfoPlist.existsSync()
+        ? builtInfoPlist.path
+        : flutterProject.macos.defaultHostInfoPlist.path;
+    final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
+      plistPath,
+      PlistParser.kFLTEnableImpellerKey,
+    );
+
+    final buildLabel = impellerEnabled == false
+        ? 'plist-impeller-disabled'
+        : 'plist-impeller-enabled';
+    globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'macos'));
   }
   await _writeCodeSizeAnalysis(buildInfo, sizeAnalyzer);
   final Duration elapsedDuration = sw.elapsed;

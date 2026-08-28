@@ -44,6 +44,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     buildInfo.packageConfig,
     globals.fs,
     globals.logger,
+    globals.platform,
     runPackageName,
     includeDevDependencies: true,
     pubspecPath,
@@ -62,7 +63,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   // Only `flutter test` uses the
   // `build/native_assets/<os>/native_assets.json` file which uses absolute
   // paths to the shared libraries.
-  final OS targetOS = getNativeOSFromTargetPlatform(const TargetPlatform(.tester, .unknown));
+  final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
   final String buildDir = getBuildDirectory();
   final String osName = targetOS.name;
   final Uri buildUri = projectUri.resolve('$buildDir/native_assets/$osName/');
@@ -74,7 +75,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
     environmentDefines: environmentDefines,
     buildRunner: buildRunner,
-    targetPlatform: const TargetPlatform(.tester, .unknown),
+    targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
     fileSystem: globals.fs,
     buildCodeAssets: const BuildCodeAssetsOptions(
@@ -89,7 +90,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   await installCodeAssets(
     dartHookResult: dartHookResult,
     environmentDefines: environmentDefines,
-    targetPlatform: const TargetPlatform(.tester, .unknown),
+    targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
     fileSystem: globals.fs,
     nativeAssetsFileUri: nativeAssetsFileUri,

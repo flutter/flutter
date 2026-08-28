@@ -43,7 +43,7 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: const TargetPlatform(.android, .x64),
+              platform: TargetPlatform.android_x64,
               mode: BuildMode.release,
             ),
             '--additional_arg',
@@ -52,7 +52,7 @@ void main() {
       );
 
       final int result = await genSnapshot.run(
-        snapshotType: SnapshotType(const TargetPlatform(.android, .x64), BuildMode.release),
+        snapshotType: SnapshotType(TargetPlatform.android_x64, BuildMode.release),
         additionalArgs: <String>['--additional_arg'],
       );
       expect(result, 0);
@@ -61,7 +61,7 @@ void main() {
     testWithoutContext('iOS arm64', () async {
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
-        platform: const TargetPlatform(.ios, .arm64),
+        platform: TargetPlatform.ios,
         mode: BuildMode.release,
       );
       processManager.addCommand(
@@ -69,7 +69,8 @@ void main() {
       );
 
       final int result = await genSnapshot.run(
-        snapshotType: SnapshotType(const TargetPlatform(.ios, .arm64), BuildMode.release),
+        snapshotType: SnapshotType(TargetPlatform.ios, BuildMode.release),
+        cpuArch: CpuArch.arm64,
         additionalArgs: <String>['--additional_arg'],
       );
       expect(result, 0);
@@ -81,7 +82,7 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: const TargetPlatform(.android, .x64),
+              platform: TargetPlatform.android_x64,
               mode: BuildMode.release,
             ),
             '--strip',
@@ -91,7 +92,7 @@ void main() {
       );
 
       final int result = await genSnapshot.run(
-        snapshotType: SnapshotType(const TargetPlatform(.android, .x64), BuildMode.release),
+        snapshotType: SnapshotType(TargetPlatform.android_x64, BuildMode.release),
         additionalArgs: <String>['--strip'],
       );
 
@@ -128,7 +129,8 @@ void main() {
 
       expect(
         await snapshotter.build(
-          platform: const TargetPlatform(.ios, .arm64),
+          platform: TargetPlatform.ios,
+          cpuArch: CpuArch.arm64,
           sdkRoot: 'path/to/sdk',
           buildMode: BuildMode.debug,
           mainPath: 'main.dill',
@@ -144,7 +146,7 @@ void main() {
 
       expect(
         await snapshotter.build(
-          platform: const TargetPlatform(.android, .armv7),
+          platform: TargetPlatform.android_arm,
           buildMode: BuildMode.debug,
           mainPath: 'main.dill',
           outputPath: outputPath,
@@ -159,7 +161,7 @@ void main() {
 
       expect(
         await snapshotter.build(
-          platform: const TargetPlatform(.android, .arm64),
+          platform: TargetPlatform.android_arm64,
           buildMode: BuildMode.debug,
           mainPath: 'main.dill',
           outputPath: outputPath,
@@ -174,7 +176,7 @@ void main() {
       final String debugPath = fileSystem.path.join('foo', 'app.ios-arm64.symbols');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
-        platform: const TargetPlatform(.ios, .arm64),
+        platform: TargetPlatform.ios,
         mode: BuildMode.profile,
       );
       processManager.addCommands(<FakeCommand>[
@@ -218,10 +220,11 @@ void main() {
       ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: const TargetPlatform(.ios, .arm64),
+        platform: TargetPlatform.ios,
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
         outputPath: outputPath,
+        cpuArch: CpuArch.arm64,
         sdkRoot: 'path/to/sdk',
         splitDebugInfo: 'foo',
         dartObfuscation: false,
@@ -235,7 +238,7 @@ void main() {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
-        platform: const TargetPlatform(.ios, .arm64),
+        platform: TargetPlatform.ios,
         mode: BuildMode.profile,
       );
       processManager.addCommands(<FakeCommand>[
@@ -277,10 +280,11 @@ void main() {
       ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: const TargetPlatform(.ios, .arm64),
+        platform: TargetPlatform.ios,
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
         outputPath: outputPath,
+        cpuArch: CpuArch.arm64,
         sdkRoot: 'path/to/sdk',
         dartObfuscation: true,
       );
@@ -293,7 +297,7 @@ void main() {
       final String outputPath = fileSystem.path.join('build', 'foo');
       final String genSnapshotPath = artifacts.getArtifactPath(
         Artifact.genSnapshotArm64,
-        platform: const TargetPlatform(.ios, .arm64),
+        platform: TargetPlatform.ios,
         mode: BuildMode.release,
       );
       processManager.addCommands(<FakeCommand>[
@@ -334,10 +338,11 @@ void main() {
       ]);
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: const TargetPlatform(.ios, .arm64),
+        platform: TargetPlatform.ios,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
+        cpuArch: CpuArch.arm64,
         sdkRoot: 'path/to/sdk',
         dartObfuscation: false,
       );
@@ -353,13 +358,12 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: const TargetPlatform(.android, .armv7),
+              platform: TargetPlatform.android_arm,
               mode: BuildMode.release,
             ),
             '--deterministic',
             '--snapshot_kind=app-aot-elf',
             '--elf=build/foo/app.so',
-            '--no-sim-use-hardfp',
             '--no-use-integer-division',
             'main.dill',
           ],
@@ -367,7 +371,7 @@ void main() {
       );
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: const TargetPlatform(.android, .armv7),
+        platform: TargetPlatform.android_arm,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
@@ -386,13 +390,12 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: const TargetPlatform(.android, .armv7),
+              platform: TargetPlatform.android_arm,
               mode: BuildMode.release,
             ),
             '--deterministic',
             '--snapshot_kind=app-aot-elf',
             '--elf=build/foo/app.so',
-            '--no-sim-use-hardfp',
             '--no-use-integer-division',
             '--dwarf-stack-traces',
             '--resolve-dwarf-paths',
@@ -403,7 +406,7 @@ void main() {
       );
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: const TargetPlatform(.android, .armv7),
+        platform: TargetPlatform.android_arm,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
@@ -422,13 +425,12 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: const TargetPlatform(.android, .armv7),
+              platform: TargetPlatform.android_arm,
               mode: BuildMode.release,
             ),
             '--deterministic',
             '--snapshot_kind=app-aot-elf',
             '--elf=build/foo/app.so',
-            '--no-sim-use-hardfp',
             '--no-use-integer-division',
             '--obfuscate',
             'main.dill',
@@ -437,7 +439,7 @@ void main() {
       );
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: const TargetPlatform(.android, .armv7),
+        platform: TargetPlatform.android_arm,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
@@ -457,13 +459,12 @@ void main() {
             command: <String>[
               artifacts.getArtifactPath(
                 Artifact.genSnapshot,
-                platform: const TargetPlatform(.android, .armv7),
+                platform: TargetPlatform.android_arm,
                 mode: BuildMode.release,
               ),
               '--deterministic',
               '--snapshot_kind=app-aot-elf',
               '--elf=build/foo/app.so',
-              '--no-sim-use-hardfp',
               '--no-use-integer-division',
               'main.dill',
             ],
@@ -471,7 +472,7 @@ void main() {
         );
 
         final int genSnapshotExitCode = await snapshotter.build(
-          platform: const TargetPlatform(.android, .armv7),
+          platform: TargetPlatform.android_arm,
           buildMode: BuildMode.release,
           mainPath: 'main.dill',
           outputPath: outputPath,
@@ -491,7 +492,7 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: const TargetPlatform(.android, .arm64),
+              platform: TargetPlatform.android_arm64,
               mode: BuildMode.release,
             ),
             '--deterministic',
@@ -503,7 +504,7 @@ void main() {
       );
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: const TargetPlatform(.android, .arm64),
+        platform: TargetPlatform.android_arm64,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
@@ -521,7 +522,7 @@ void main() {
           command: <String>[
             artifacts.getArtifactPath(
               Artifact.genSnapshot,
-              platform: const TargetPlatform(.android, .arm64),
+              platform: TargetPlatform.android_arm64,
               mode: BuildMode.release,
             ),
             '--deterministic',
@@ -533,7 +534,7 @@ void main() {
       );
 
       final int genSnapshotExitCode = await snapshotter.build(
-        platform: const TargetPlatform(.android, .arm64),
+        platform: TargetPlatform.android_arm64,
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,

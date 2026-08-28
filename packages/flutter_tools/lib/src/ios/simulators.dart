@@ -623,6 +623,9 @@ class IOSSimulator extends Device {
   }
 
   @override
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
+
+  @override
   Future<String> get sdkNameAndVersion async => simulatorCategory;
 
   final _iosSdkRegExp = RegExp(r'iOS( |-)(\d+)');
@@ -840,7 +843,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
     final uisceneCrashInterceptor = LogInterceptor(
       identifier: 'uiscene_crash',
       pattern: RegExp(r'UIScene life\s?cycle is required'),
-      action: () {
+      action: (String message) {
         throwToolExit(kUISceneMigrationRequiredError);
       },
       excludeFromStream: false,

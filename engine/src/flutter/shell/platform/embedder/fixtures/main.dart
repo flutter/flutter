@@ -20,7 +20,7 @@ void customEntrypoint() {
   sayHiFromCustomEntrypoint();
 }
 
-@pragma('vm:external-name', 'SayHiFromCustomEntrypoint')
+@ffi.Native<ffi.Void Function()>(symbol: 'SayHiFromCustomEntrypoint')
 external void sayHiFromCustomEntrypoint();
 
 @pragma('vm:entry-point')
@@ -30,11 +30,11 @@ void customEntrypoint1() {
   sayHiFromCustomEntrypoint3();
 }
 
-@pragma('vm:external-name', 'SayHiFromCustomEntrypoint1')
+@ffi.Native<ffi.Void Function()>(symbol: 'SayHiFromCustomEntrypoint1')
 external void sayHiFromCustomEntrypoint1();
-@pragma('vm:external-name', 'SayHiFromCustomEntrypoint2')
+@ffi.Native<ffi.Void Function()>(symbol: 'SayHiFromCustomEntrypoint2')
 external void sayHiFromCustomEntrypoint2();
-@pragma('vm:external-name', 'SayHiFromCustomEntrypoint3')
+@ffi.Native<ffi.Void Function()>(symbol: 'SayHiFromCustomEntrypoint3')
 external void sayHiFromCustomEntrypoint3();
 
 @pragma('vm:entry-point')
@@ -52,9 +52,9 @@ void implicitViewNotNull() {
   notifyBoolValue(PlatformDispatcher.instance.implicitView != null);
 }
 
-@pragma('vm:external-name', 'NotifyStringValue')
+@ffi.Native<ffi.Void Function(ffi.Handle)>(symbol: 'NotifyStringValue')
 external void notifyStringValue(String value);
-@pragma('vm:external-name', 'NotifyBoolValue')
+@ffi.Native<ffi.Void Function(ffi.Bool)>(symbol: 'NotifyBoolValue')
 external void notifyBoolValue(bool value);
 
 @pragma('vm:entry-point')
@@ -104,17 +104,17 @@ Float64List kTestTransform = () {
   return values;
 }();
 
-@pragma('vm:external-name', 'SignalNativeTest')
+@ffi.Native<ffi.Void Function()>(symbol: 'SignalNativeTest')
 external void signalNativeTest();
-@pragma('vm:external-name', 'SignalNativeCount')
+@ffi.Native<ffi.Void Function(ffi.Int64)>(symbol: 'SignalNativeCount')
 external void signalNativeCount(int count);
-@pragma('vm:external-name', 'SignalNativeMessage')
+@ffi.Native<ffi.Void Function(ffi.Handle)>(symbol: 'SignalNativeMessage')
 external void signalNativeMessage(String message);
-@pragma('vm:external-name', 'NotifySemanticsEnabled')
+@ffi.Native<ffi.Void Function(ffi.Bool)>(symbol: 'NotifySemanticsEnabled')
 external void notifySemanticsEnabled(bool enabled);
-@pragma('vm:external-name', 'NotifyAccessibilityFeatures')
+@ffi.Native<ffi.Void Function(ffi.Bool)>(symbol: 'NotifyAccessibilityFeatures')
 external void notifyAccessibilityFeatures(bool reduceMotion);
-@pragma('vm:external-name', 'NotifySemanticsAction')
+@ffi.Native<ffi.Void Function(ffi.Int64, ffi.Int64, ffi.Handle)>(symbol: 'NotifySemanticsAction')
 external void notifySemanticsAction(int nodeId, int action, List<int> data);
 
 @ffi.Native<ffi.Void Function()>(symbol: 'FFISignalNativeTest')
@@ -689,7 +689,7 @@ void can_composite_platform_views_with_platform_layer_on_bottom() {
   PlatformDispatcher.instance.scheduleFrame();
 }
 
-@pragma('vm:external-name', 'SignalBeginFrame')
+@ffi.Native<ffi.Void Function()>(symbol: 'SignalBeginFrame')
 // ignore: unreachable_from_main
 external void signalBeginFrame();
 
@@ -772,7 +772,17 @@ Picture createGradientBox(Size size) {
   return baseRecorder.endRecording();
 }
 
-@pragma('vm:external-name', 'EchoKeyEvent')
+@ffi.Native<
+  ffi.Void Function(
+    ffi.Uint64,
+    ffi.Uint64,
+    ffi.Uint64,
+    ffi.Uint64,
+    ffi.Uint64,
+    ffi.Bool,
+    ffi.Uint64,
+  )
+>(symbol: 'EchoKeyEvent')
 external void _echoKeyEvent(
   int change,
   int timestamp,
@@ -1234,7 +1244,7 @@ void scene_builder_with_complex_clips() {
   PlatformDispatcher.instance.scheduleFrame();
 }
 
-@pragma('vm:external-name', 'SendObjectToNativeCode')
+@ffi.Native<ffi.Void Function(ffi.Handle)>(symbol: 'SendObjectToNativeCode')
 external void sendObjectToNativeCode(dynamic object);
 
 @pragma('vm:entry-point')
@@ -1312,7 +1322,7 @@ void render_targets_are_in_stable_order() {
   PlatformDispatcher.instance.scheduleFrame();
 }
 
-@pragma('vm:external-name', 'NativeArgumentsCallback')
+@ffi.Native<ffi.Void Function(ffi.Handle)>(symbol: 'NativeArgumentsCallback')
 external void nativeArgumentsCallback(List<String> args);
 
 @pragma('vm:entry-point')
@@ -1327,7 +1337,7 @@ void dart_entrypoint_args(List<String> args) {
   nativeArgumentsCallback(args);
 }
 
-@pragma('vm:external-name', 'SnapshotsCallback')
+@ffi.Native<ffi.Void Function(ffi.Handle, ffi.Handle)>(symbol: 'SnapshotsCallback')
 external void snapshotsCallback(Image bigImage, Image smallImage);
 
 @pragma('vm:entry-point')

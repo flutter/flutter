@@ -125,7 +125,6 @@ void main() {
         expect(response.data['id'], 0);
         expect(response.data['result'], isNotEmpty);
         expect(response.data['result']! as Map<String, Object?>, const <String, Object>{
-          'platforms': <String>['macos', 'windows'],
           'platformTypes': <String, Map<String, Object>>{
             'web': <String, Object>{
               'isSupported': false,
@@ -577,10 +576,7 @@ void main() {
         );
         expect(applicationPackageIdResponse.data['id'], 0);
         expect(applicationPackageFactory.applicationBinaryRequested!.basename, 'test_file');
-        expect(
-          applicationPackageFactory.platformRequested,
-          const TargetPlatform(.android, .unknown),
-        );
+        expect(applicationPackageFactory.platformRequested, TargetPlatform.android);
         final applicationPackageId = applicationPackageIdResponse.data['result'] as String?;
 
         // Try starting the app.
@@ -1165,7 +1161,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<String> get emulatorId async => 'device';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => const TargetPlatform(.android, .armv7);
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.armv7;
@@ -1222,8 +1218,11 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   late DeviceLogReader logReader;
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
-      logReader;
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) => logReader;
 
   ApplicationPackage? startAppPackage;
   late LaunchResult launchResult;

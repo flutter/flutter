@@ -480,7 +480,7 @@ class WebDevFS implements DevFS {
     fileSystem.path.join(
       globals.artifacts!.getArtifactPath(
         Artifact.engineDartSdkPath,
-        platform: const TargetPlatform(.web, .unknown),
+        platform: TargetPlatform.web_javascript,
       ),
       'lib',
       'dev_compiler',
@@ -494,7 +494,7 @@ class WebDevFS implements DevFS {
     fileSystem.path.join(
       globals.artifacts!.getArtifactPath(
         Artifact.engineDartSdkPath,
-        platform: const TargetPlatform(.web, .unknown),
+        platform: TargetPlatform.web_javascript,
       ),
       'lib',
       'dev_compiler',
@@ -516,7 +516,7 @@ class WebDevFS implements DevFS {
     fileSystem.path.join(
       globals.artifacts!.getArtifactPath(
         Artifact.engineDartSdkPath,
-        platform: const TargetPlatform(.web, .unknown),
+        platform: TargetPlatform.web_javascript,
       ),
       'lib',
       'dev_compiler',
