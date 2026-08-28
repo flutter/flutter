@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #import "AppDelegate.h"
-#import "MainViewController.h"
 
 @interface AppDelegate ()
 
@@ -12,8 +11,6 @@
 static NSString *_kReloadChannelName = @"reload";
 
 @implementation AppDelegate {
-  MainViewController *_mainViewController;
-  UINavigationController *_navigationController;
   FlutterEngine *_engine;
   FlutterBasicMessageChannel *_reloadMessageChannel;
 }
@@ -31,21 +28,12 @@ static NSString *_kReloadChannelName = @"reload";
   _engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [_engine runWithEntrypoint:nil];
 
-  _reloadMessageChannel = [[FlutterBasicMessageChannel alloc]
-         initWithName:_kReloadChannelName
-      binaryMessenger:_engine.binaryMessenger
-                codec:[FlutterStringCodec sharedInstance]];
+  _reloadMessageChannel =
+      [[FlutterBasicMessageChannel alloc] initWithName:_kReloadChannelName
+                                       binaryMessenger:_engine.binaryMessenger
+                                                 codec:[FlutterStringCodec sharedInstance]];
 
   return YES;
-}
-
-#pragma mark - UISceneSession lifecycle
-
-- (UISceneConfiguration *)application:(UIApplication *)application
-    configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
-                                   options:(UISceneConnectionOptions *)options {
-  return [[UISceneConfiguration alloc] initWithName:@"Default Configuration"
-                                        sessionRole:connectingSceneSession.role];
 }
 
 @end

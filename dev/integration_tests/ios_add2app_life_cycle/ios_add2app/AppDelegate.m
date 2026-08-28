@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #import "AppDelegate.h"
-#import "MainViewController.h"
 
 @implementation GREYHostApplicationDistantObject (AppDelegate)
 
@@ -15,7 +14,7 @@
 
 @interface AppDelegate ()
 
-@property(nonatomic, strong, readwrite) FlutterEngine* engine;
+@property(nonatomic, strong, readwrite) FlutterEngine *engine;
 
 @end
 
@@ -27,15 +26,6 @@
   [self.engine runWithEntrypoint:nil];
 
   return YES;
-}
-
-#pragma mark - UISceneSession lifecycle
-
-- (UISceneConfiguration *)application:(UIApplication *)application
-    configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
-                                   options:(UISceneConnectionOptions *)options {
-  return [[UISceneConfiguration alloc] initWithName:@"Default Configuration"
-                                        sessionRole:connectingSceneSession.role];
 }
 
 @end
