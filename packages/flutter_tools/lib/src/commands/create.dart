@@ -187,9 +187,13 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   Future<void> initializeDynamicOptions() async {
     final ExtensionTemplateManager? manager = _extensionTemplateManager;
     if (manager != null) {
-      await manager.getProjectTemplates();
-      if (manager.cachedTemplates.isNotEmpty) {
-        rebuildDynamicArgParser();
+      try {
+        await manager.getProjectTemplates();
+        if (manager.cachedTemplates.isNotEmpty) {
+          rebuildDynamicArgParser();
+        }
+      } on Object catch (e) {
+        globals.printTrace('Failed to initialize dynamic templates: $e');
       }
     }
   }
@@ -402,7 +406,11 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
 
     final ExtensionTemplateManager? manager = _extensionTemplateManager;
     if (manager != null) {
-      await manager.getProjectTemplates();
+      try {
+        await manager.getProjectTemplates();
+      } on Object catch (e) {
+        globals.printTrace('Failed to retrieve project templates: $e');
+      }
     }
     final ParsedFlutterTemplateType template = _getProjectType(projectDir);
 
