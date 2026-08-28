@@ -51,7 +51,7 @@ Future<void> runAndroidHardwareSmokeTests({
   try {
     _setAndroidManifestBackend(androidManifestXml, androidManifestContents, backend);
 
-    // 1. Run driver tests to generate reference screenshots (with retry loop)
+    // 1. Run driver tests to generate reference screenshots
     final bool success = await _runRetryLoop(testDir);
     if (!success) {
       return;
@@ -69,6 +69,9 @@ Future<void> runAndroidHardwareSmokeTests({
         '-s',
       ], workingDirectory: androidDir);
     }
+  } on _InfrastructureException catch (e) {
+    foundError(<String>[e.message]);
+    io.exitCode = 2;
   } finally {
     // Restore original contents.
     androidManifestXml.writeAsStringSync(androidManifestContents);
@@ -100,8 +103,7 @@ void _setAndroidManifestBackend(File file, String contents, ImpellerBackend back
 }
 
 Future<bool> _runRetryLoop(String testDir) async {
-  const maxAttempts = 3;
-  var exitCode = 0;
+  const maxAttempts = 2;
 
   for (var attempt = 1; attempt <= maxAttempts; attempt++) {
     // Clear logcat buffer before running
@@ -119,47 +121,64 @@ Future<bool> _runRetryLoop(String testDir) async {
       driveArgs.add('--no-build');
     }
 
-    final Command command = await startCommand('flutter', driveArgs, workingDirectory: testDir);
-    exitCode = await command.process.exitCode;
-    if (exitCode == 0) {
+    final CommandResult result = await runCommand('flutter', driveArgs, workingDirectory: testDir);
+    if (result.exitCode == 0) {
       return true;
     }
 
     io.stderr.writeln(
-      'flutter drive failed with exit code $exitCode on attempt $attempt/$maxAttempts.',
+      'flutter drive failed with exit code ${result.exitCode} on attempt $attempt/$maxAttempts.',
     );
 
-    // Inspect the process logcat on failure to detect if a transient EGL/graphics context
-    // negotiation error occurred during startup, enabling a safe activity/process level retry.
-    final bool hasEglWarning = await _checkForTransientEglFailure();
-    if (!hasEglWarning) {
-      // Non-retryable error: exit immediately and log specific failure
-      foundError(<String>[
-        'Android Hardware Smoke Tests driver run failed with exit code $exitCode and no transient EGL warning was found in logcat.',
-      ]);
-      return false;
-    }
+    final driverOutput = '${result.flattenedStdout}\n${result.flattenedStderr}';
 
-    // Retryable EGL warning: log progress and continue if attempts remain
-    if (attempt < maxAttempts) {
+    // Inspect logcat and driver output on failure to detect if an unrecoverable EGL
+    // graphics pipeline collapse occurred (requires both logcat EGL error and blank image failure).
+    final bool hasEglWarning = await _checkForTransientEglFailure(driverOutput);
+    if (hasEglWarning) {
+      if (attempt < maxAttempts) {
+        io.stderr.writeln(
+          'Attempt $attempt failed with EGL/graphics error. Retrying with clean engine cache...',
+        );
+        continue;
+      }
       io.stderr.writeln(
-        'attempt $attempt of $maxAttempts: detected retryable EGL initialization warning. Retrying...',
+        'INFRASTRUCTURE FAILURE: EGL / graphics driver pipeline collapsed on emulator after $maxAttempts attempts.',
+      );
+      throw _InfrastructureException(
+        'INFRASTRUCTURE FAILURE: EGL / graphics driver pipeline collapsed on emulator after $maxAttempts attempts.',
       );
     }
+
+    foundError(<String>[
+      'Android Hardware Smoke Tests driver run failed with exit code ${result.exitCode}.',
+    ]);
+    return false;
   }
 
-  // Loop finished: exhausted all attempts
-  foundError(<String>[
-    'Android Hardware Smoke Tests driver run failed to initialize EGL after $maxAttempts attempts.',
-  ]);
-  return false;
+  throw StateError('Unreachable');
 }
 
-Future<bool> _checkForTransientEglFailure() async {
+class _InfrastructureException implements Exception {
+  _InfrastructureException(this.message);
+  final String message;
+  @override
+  String toString() => message;
+}
+
+Future<bool> _checkForTransientEglFailure(String driverOutput) async {
   try {
     final String logcatOutput = await runAndGetStdout('adb', <String>['logcat', '-d']).join('\n');
-    return logcatOutput.contains('Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED') ||
-        logcatOutput.contains('Failed to initialize 101010-2 format');
+    final bool hasEglWarning =
+        logcatOutput.contains('Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED') ||
+        logcatOutput.contains('EGL_NOT_INITIALIZED') ||
+        logcatOutput.contains('EGL_BAD_CONFIG');
+    final bool hasRenderingError =
+        driverOutput.contains('blank/empty') ||
+        driverOutput.contains('BlankScreenshotException') ||
+        driverOutput.contains('EglInitializationException');
+
+    return hasEglWarning && hasRenderingError;
   } catch (e) {
     io.stderr.writeln('Warning: Failed to check logcat for EGL failure: $e');
     return false;
