@@ -5,13 +5,15 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
+import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:test/fake.dart';
-import 'package:test/test.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -24,6 +26,10 @@ class FakeAndroidStudio extends Fake implements AndroidStudio {
 }
 
 class FakeBuildTargets extends Fake implements BuildTargets {}
+
+class FakeGradleUtils extends Fake implements GradleUtils {}
+
+class FakeJava extends Fake implements Java {}
 
 void main() {
   group('ToolDependencies.bootstrap', () {
@@ -131,6 +137,94 @@ void main() {
       );
 
       expect(dependencies.buildTargets, same(mockBuildTargets));
+    });
+
+    testUsingContext(
+      'lazily evaluates androidStudio and shares instance between AndroidContext and Java',
+      () async {
+        // Mock Android SDK directory to allow SDK detection.
+        fs.directory('/home/user/Android/Sdk/licenses').createSync(recursive: true);
+
+        final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        );
+
+        // Java and AndroidStudio are not evaluated until accessed.
+        final Java? java = dependencies.androidContext.java;
+        final AndroidStudio? studio = dependencies.androidContext.androidStudio;
+
+        // If Java home was resolved from AndroidStudio, verify same instance was used.
+        if (java != null && java.javaSource == JavaSource.androidStudio) {
+          expect(java.javaHome, studio?.javaPath);
+        }
+      },
+    );
+  });
+
+  group('AndroidContext', () {
+    testWithoutContext('evaluates androidStudio and java lazily and memoizes results', () {
+      var studioEvaluations = 0;
+      var javaEvaluations = 0;
+
+      final mockStudio = FakeAndroidStudio();
+      final mockJava = FakeJava();
+
+      final context = AndroidContext(
+        androidSdk: FakeAndroidSdk(),
+        androidStudio: () {
+          studioEvaluations++;
+          return mockStudio;
+        },
+        gradleUtils: FakeGradleUtils(),
+        java: () {
+          javaEvaluations++;
+          return mockJava;
+        },
+      );
+
+      // Neither factory has been invoked upon instantiation.
+      expect(studioEvaluations, 0);
+      expect(javaEvaluations, 0);
+
+      // Accessing androidStudio multiple times evaluates factory exactly once.
+      expect(context.androidStudio, same(mockStudio));
+      expect(context.androidStudio, same(mockStudio));
+      expect(studioEvaluations, 1);
+      expect(javaEvaluations, 0);
+
+      // Accessing java multiple times evaluates factory exactly once.
+      expect(context.java, same(mockJava));
+      expect(context.java, same(mockJava));
+      expect(javaEvaluations, 1);
+    });
+
+    testWithoutContext('memoizes null results without re-invoking factory closures', () {
+      var studioEvaluations = 0;
+      var javaEvaluations = 0;
+
+      final context = AndroidContext(
+        androidSdk: FakeAndroidSdk(),
+        androidStudio: () {
+          studioEvaluations++;
+          return null;
+        },
+        gradleUtils: FakeGradleUtils(),
+        java: () {
+          javaEvaluations++;
+          return null;
+        },
+      );
+
+      expect(context.androidStudio, isNull);
+      expect(context.androidStudio, isNull);
+      expect(studioEvaluations, 1);
+
+      expect(context.java, isNull);
+      expect(context.java, isNull);
+      expect(javaEvaluations, 1);
     });
   });
 }
