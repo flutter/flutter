@@ -99,18 +99,17 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
     final violations = <Violation>[];
     for (final RenderView view in binding.renderViews) {
-      violations.addAll(
-        _traverse(view.flutterView, view.owner!.semanticsOwner!.rootSemanticsNode!),
-      );
+      violations.addAll(traverse(view.flutterView, view.owner!.semanticsOwner!.rootSemanticsNode!));
     }
 
     return EvaluationResult(violations);
   }
 
-  List<Violation> _traverse(ui.FlutterView view, SemanticsNode node) {
+  /// Traverses the given [node] and returns all found violations.
+  List<Violation> traverse(ui.FlutterView view, SemanticsNode node) {
     final violations = <Violation>[];
     node.visitChildren((SemanticsNode child) {
-      violations.addAll(_traverse(view, child));
+      violations.addAll(traverse(view, child));
       return true;
     });
     if (node.isMergedIntoParent) {
@@ -199,16 +198,17 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
     final violations = <Violation>[];
 
     for (final RenderView view in binding.renderViews) {
-      violations.addAll(_traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
+      violations.addAll(traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
     }
 
     return EvaluationResult(violations);
   }
 
-  List<Violation> _traverse(SemanticsNode node) {
+  /// Traverses the given [node] and returns all found violations.
+  List<Violation> traverse(SemanticsNode node) {
     final violations = <Violation>[];
     node.visitChildren((SemanticsNode child) {
-      violations.addAll(_traverse(child));
+      violations.addAll(traverse(child));
       return true;
     });
     if (node.isMergedIntoParent ||
@@ -783,17 +783,18 @@ class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
   FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
     final violations = <Violation>[];
     for (final RenderView view in binding.renderViews) {
-      violations.addAll(_traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
+      violations.addAll(traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
     }
     return EvaluationResult(violations);
   }
 
-  List<Violation> _traverse(SemanticsNode node) {
+  /// Traverses the given [node] and returns all found violations.
+  List<Violation> traverse(SemanticsNode node) {
     final violations = <Violation>[];
     var hasChildren = false;
     node.visitChildren((SemanticsNode child) {
       hasChildren = true;
-      violations.addAll(_traverse(child));
+      violations.addAll(traverse(child));
       return true;
     });
 
