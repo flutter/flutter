@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import '_accessibility_evaluations.dart';
 import 'service_extensions.dart';
 
 /// Service that handles accessibility and semantics inspection.
@@ -64,7 +65,8 @@ class AccessibilityInspector {
     if (!SemanticsBinding.instance.semanticsEnabled) {
       return <String, Object?>{'error': 'Semantics not enabled.'};
     }
-    final PipelineOwner? pipelineOwner = _findPipelineOwner();
+    final RenderView? renderView = _findRenderView();
+    final PipelineOwner? pipelineOwner = renderView?.owner ?? _findPipelineOwner();
     final SemanticsOwner? semanticsOwner = pipelineOwner?.semanticsOwner;
     if (semanticsOwner == null) {
       return <String, Object?>{'error': 'No PipelineOwner with SemanticsOwner found'};
@@ -75,6 +77,41 @@ class AccessibilityInspector {
       return <String, Object?>{'error': 'rootSemanticsNode is null', 'needsFrame': true};
     }
 
+    final Size minSize = switch (defaultTargetPlatform) {
+      TargetPlatform.android || TargetPlatform.fuchsia => const Size(48.0, 48.0),
+      TargetPlatform.iOS || TargetPlatform.macOS => const Size(44.0, 44.0),
+      _ => const Size(48.0, 48.0),
+    };
+
+    final nodeIssues = <int, List<Map<String, Object?>>>{};
+
+    if (renderView != null) {
+      final List<Violation> tapTargetViolations = MinimumTapTargetEvaluation(
+        size: minSize,
+      ).traverse(renderView.flutterView, root);
+      for (final violation in tapTargetViolations) {
+        nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
+          <String, Object?>{'rule': 'tapTargetSize', 'description': violation.reason},
+        );
+      }
+    }
+
+    final List<Violation> labeledViolations = const LabeledTapTargetEvaluation().traverse(root);
+    for (final violation in labeledViolations) {
+      nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
+        <String, Object?>{'rule': 'missingLabel', 'description': violation.reason},
+      );
+    }
+
+    final List<Violation> unlabeledLeafViolations = const UnlabeledLeafNodeEvaluation().traverse(
+      root,
+    );
+    for (final violation in unlabeledLeafViolations) {
+      nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
+        <String, Object?>{'rule': 'unlabeledLeafNode', 'description': violation.reason},
+      );
+    }
+
     final nodes = <String, Object?>{};
     final visited = <int>{};
     final queue = <SemanticsNode>[root];
@@ -83,7 +120,12 @@ class AccessibilityInspector {
       if (!visited.add(node.id)) {
         continue;
       }
-      nodes[node.id.toString()] = node.toJson();
+
+      nodes[node.id.toString()] = <String, Object?>{
+        ...node.toJson(),
+        'issues': nodeIssues[node.id] ?? <Map<String, Object?>>[],
+      };
+
       for (final SemanticsNode child in node.debugListChildrenInOrder(
         DebugSemanticsDumpOrder.traversalOrder,
       )) {
@@ -115,6 +157,15 @@ class AccessibilityInspector {
     final PipelineOwner deprecatedOwner = RendererBinding.instance.pipelineOwner;
     if (deprecatedOwner.semanticsOwner != null) {
       return deprecatedOwner;
+    }
+    return null;
+  }
+
+  RenderView? _findRenderView() {
+    for (final RenderView renderView in RendererBinding.instance.renderViews) {
+      if (renderView.owner?.semanticsOwner != null) {
+        return renderView;
+      }
     }
     return null;
   }
