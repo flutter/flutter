@@ -80,6 +80,17 @@ class AndroidSdk {
   /// the SDK on demand.
   bool get licensesAvailable => directory.childDirectory('licenses').existsSync();
 
+  /// Whether the core `android-sdk-license` file exists in the Android SDK
+  /// `licenses` directory and contains at least one license signature.
+  bool get hasAcceptedLicenses {
+    try {
+      final File sdkLicense = directory.childDirectory('licenses').childFile('android-sdk-license');
+      return sdkLicense.existsSync() && sdkLicense.readAsStringSync().trim().isNotEmpty;
+    } on FileSystemException {
+      return false;
+    }
+  }
+
   static AndroidSdk? locateAndroidSdk() {
     String? findAndroidHomeDir() {
       String? androidHomeDir;

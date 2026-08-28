@@ -230,6 +230,62 @@ All SDK package licenses accepted.
     expect(result, LicensesAccepted.all);
   });
 
+  testWithoutContext(
+    'licensesAccepted returns LicensesAccepted.all when --licenses option is no longer needed and licenses are accepted',
+    () async {
+      sdk.sdkManagerPath = '/foo/bar/sdkmanager';
+      sdk.hasAcceptedLicenses = true;
+      const output = '''
+WARNING: The SDK Manager CLI tool (sdkmanager) is deprecated. Android CLI will be used instead.
+Warning: The --licenses option is no longer needed.
+''';
+      processManager.addCommand(
+        const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--licenses'], stderr: output),
+      );
+
+      final licenseValidator = AndroidLicenseValidator(
+        java: FakeJava(),
+        androidSdk: sdk,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+        stdio: stdio,
+        logger: BufferLogger.test(),
+        userMessages: UserMessages(),
+      );
+      final LicensesAccepted result = await licenseValidator.licensesAccepted;
+
+      expect(result, LicensesAccepted.all);
+    },
+  );
+
+  testWithoutContext(
+    'licensesAccepted returns LicensesAccepted.none when --licenses option is no longer needed and licenses are not accepted',
+    () async {
+      sdk.sdkManagerPath = '/foo/bar/sdkmanager';
+      sdk.hasAcceptedLicenses = false;
+      const output = '''
+WARNING: The SDK Manager CLI tool (sdkmanager) is deprecated. Android CLI will be used instead.
+Warning: The --licenses option is no longer needed.
+''';
+      processManager.addCommand(
+        const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--licenses'], stderr: output),
+      );
+
+      final licenseValidator = AndroidLicenseValidator(
+        java: FakeJava(),
+        androidSdk: sdk,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+        stdio: stdio,
+        logger: BufferLogger.test(),
+        userMessages: UserMessages(),
+      );
+      final LicensesAccepted result = await licenseValidator.licensesAccepted;
+
+      expect(result, LicensesAccepted.none);
+    },
+  );
+
   testWithoutContext('licensesAccepted sets environment for finding java', () async {
     final Java java = FakeJava();
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
@@ -963,6 +1019,9 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   bool licensesAvailable = false;
+
+  @override
+  bool hasAcceptedLicenses = false;
 
   @override
   bool platformToolsAvailable = false;

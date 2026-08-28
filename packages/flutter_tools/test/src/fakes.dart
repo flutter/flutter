@@ -830,6 +830,9 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   late bool licensesAvailable;
 
   @override
+  bool hasAcceptedLicenses = false;
+
+  @override
   AndroidSdkVersion? latestVersion;
 }
 

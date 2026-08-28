@@ -33,6 +33,10 @@ enum LicensesAccepted { none, some, all, unknown }
 final licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
 final licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitive: false);
 final licenseAccepted = RegExp(r'All SDK package licenses accepted.');
+final licenseOptionNotNeeded = RegExp(
+  r'The --licenses option is no longer needed',
+  caseSensitive: false,
+);
 
 class AndroidWorkflow implements Workflow {
   AndroidWorkflow({required AndroidSdk? androidSdk, required FeatureFlags featureFlags})
@@ -446,6 +450,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   Future<LicensesAccepted> get licensesAccepted async {
     LicensesAccepted? status;
+    var sawOptionNotNeeded = false;
 
     void handleLine(String line) {
       if (licenseCounts.hasMatch(line)) {
@@ -462,6 +467,8 @@ class AndroidLicenseValidator extends DoctorValidator {
         status = LicensesAccepted.none;
       } else if (licenseAccepted.hasMatch(line)) {
         status ??= LicensesAccepted.all;
+      } else if (licenseOptionNotNeeded.hasMatch(line)) {
+        sawOptionNotNeeded = true;
       }
     }
 
@@ -488,7 +495,13 @@ class AndroidLicenseValidator extends DoctorValidator {
           .listen(handleLine)
           .asFuture<void>();
       await Future.wait<void>(<Future<void>>[output, errors]);
-      return status ?? LicensesAccepted.unknown;
+      if (status != null) {
+        return status!;
+      }
+      if (sawOptionNotNeeded) {
+        return _androidSdk.hasAcceptedLicenses ? LicensesAccepted.all : LicensesAccepted.none;
+      }
+      return LicensesAccepted.unknown;
     } on IOException catch (e) {
       _logger.printTrace('Failed to run Android sdk manager: $e');
       return LicensesAccepted.unknown;

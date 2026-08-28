@@ -510,6 +510,48 @@ void main() {
         Config: () => config,
       },
     );
+
+    testUsingContext(
+      'hasAcceptedLicenses returns true when android-sdk-license file exists and is not empty',
+      () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+        config.setValue('android-sdk', sdkDir.path);
+
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+        fileSystem.file(fileSystem.path.join(sdk.directory.path, 'licenses', 'android-sdk-license'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('24333f8a63b6825ea9c5514f83c2829b004d1fee');
+
+        expect(sdk.hasAcceptedLicenses, isTrue);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Config: () => config,
+      },
+    );
+
+    testUsingContext(
+      'hasAcceptedLicenses returns false when android-sdk-license file is empty or does not exist',
+      () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+        config.setValue('android-sdk', sdkDir.path);
+
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+        expect(sdk.hasAcceptedLicenses, isFalse);
+
+        fileSystem
+            .file(fileSystem.path.join(sdk.directory.path, 'licenses', 'android-sdk-license'))
+            .createSync(recursive: true);
+
+        expect(sdk.hasAcceptedLicenses, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Config: () => config,
+      },
+    );
   });
 
   const llvmHostDirectoryName = <String, String>{
