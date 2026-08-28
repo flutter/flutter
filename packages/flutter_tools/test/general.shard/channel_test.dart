@@ -474,12 +474,13 @@ void main() {
           processManager: localFakeProcessManager,
           logger: contextLogger,
         );
-        final git = Git(currentPlatform: const LocalPlatform(), runProcessWith: processUtils);
+        final fakePlatform = FakePlatform();
+        final git = Git(currentPlatform: fakePlatform, runProcessWith: processUtils);
 
         final toolContext = FakeToolContext(
           fs: localFs,
           logger: contextLogger,
-          platform: const LocalPlatform(),
+          platform: fakePlatform,
           processManager: localFakeProcessManager,
           processUtils: processUtils,
           git: git,
