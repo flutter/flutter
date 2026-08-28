@@ -324,6 +324,63 @@ void main() {
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
+    testWithoutContext('can switch channels with --force', () async {
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['git', 'fetch']),
+        FakeCommand(command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta']),
+        FakeCommand(command: <String>['git', 'checkout', '-f', 'beta', '--']),
+        FakeCommand(
+          command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
+        ),
+      ]);
+
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['channel', '--force', 'beta']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(
+        logger.statusText,
+        containsIgnoringWhitespace("Switching to flutter channel 'beta'..."),
+      );
+      expect(logger.errorText, hasLength(0));
+    });
+
+    testWithoutContext('can switch channels with -f when branch does not exist locally', () async {
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['git', 'fetch']),
+        FakeCommand(
+          command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
+          exitCode: 1,
+        ),
+        FakeCommand(
+          command: <String>['git', 'checkout', '-f', '--track', '-b', 'beta', 'origin/beta'],
+        ),
+        FakeCommand(
+          command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
+        ),
+      ]);
+
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['channel', '-f', 'beta']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(
+        logger.statusText,
+        containsIgnoringWhitespace("Switching to flutter channel 'beta'..."),
+      );
+      expect(logger.errorText, hasLength(0));
+    });
+
     testWithoutContext('switching channels prompts to run flutter upgrade', () async {
       fakeProcessManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>['git', 'fetch']),
