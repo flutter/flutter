@@ -1007,6 +1007,61 @@ void main() {
       expect(innerFocus().skipTraversal, isTrue);
     });
 
+    testWidgets('FocusableActionDetector can be skipped by focus traversal', (
+      WidgetTester tester,
+    ) async {
+      final buttonNode1 = FocusNode(debugLabel: 'Button Node 1');
+      final detectorNode = FocusNode(debugLabel: 'Detector Node');
+      final buttonNode2 = FocusNode(debugLabel: 'Button Node 2');
+
+      addTearDown(() {
+        buttonNode1.dispose();
+        detectorNode.dispose();
+        buttonNode2.dispose();
+      });
+
+      Widget build({bool? skipTraversal}) {
+        return TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              TestButton(onPressed: () {}, focusNode: buttonNode1, child: const Text('Node 1')),
+              FocusableActionDetector(
+                focusNode: detectorNode,
+                skipTraversal: skipTraversal,
+                child: const Text('Detector'),
+              ),
+              TestButton(onPressed: () {}, focusNode: buttonNode2, child: const Text('Node 2')),
+            ],
+          ),
+        );
+      }
+
+      // By default the detector takes part in traversal.
+      await tester.pumpWidget(build());
+      buttonNode1.requestFocus();
+      await tester.pump();
+      primaryFocus!.nextFocus();
+      await tester.pump();
+      expect(detectorNode.hasFocus, isTrue);
+      expect(buttonNode2.hasFocus, isFalse);
+
+      // With skipTraversal, traversal moves straight past it to the next node.
+      await tester.pumpWidget(build(skipTraversal: true));
+      buttonNode1.requestFocus();
+      await tester.pump();
+      primaryFocus!.nextFocus();
+      await tester.pump();
+      expect(detectorNode.hasFocus, isFalse);
+      expect(buttonNode2.hasFocus, isTrue);
+
+      // Skipping traversal does not make it unfocusable: it can still be
+      // focused explicitly, which is the whole point of skipTraversal over
+      // canRequestFocus.
+      detectorNode.requestFocus();
+      await tester.pump();
+      expect(detectorNode.hasFocus, isTrue);
+    });
+
     testWidgets('FocusableActionDetector can exclude Focus semantics', (WidgetTester tester) async {
       await tester.pumpWidget(
         TestWidgetsApp(
