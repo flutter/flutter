@@ -2033,6 +2033,49 @@ void main() {
     expect(editable.computeDryLayout(constraints).width, lessThan(initialWidth));
   });
 
+  test('hitTestChildren works after TextPainter layout is invalidated', () {
+    // Regression test for https://github.com/flutter/flutter/issues/191881.
+    // When async spell check completes, it sets renderEditable.text, which
+    // invalidates TextPainter's layout cache via markNeedsLayout(). If a
+    // pointer event arrives before the next layout pass, hitTestChildren() is
+    // called with an invalid TextPainter. The fix ensures
+    // _computeTextMetricsIfNeeded() is called before accessing layout metrics.
+    final TextSelectionDelegate delegate = _FakeEditableTextState();
+    final TextSpan textSpan = TextSpan(text: 'Hello World', style: const TextStyle(fontSize: 10.0));
+    final RenderEditable editable = RenderEditable(
+      text: textSpan,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      textDirection: TextDirection.ltr,
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    const BoxConstraints constraints = BoxConstraints(maxWidth: 200);
+    layout(editable, constraints: constraints);
+
+    // Verify hit test works normally after layout.
+    BoxHitTestResult result = BoxHitTestResult();
+    expect(editable.hitTest(result, position: const Offset(5.0, 5.0)), isTrue);
+    expect(result.path, isNotEmpty);
+
+    // Simulate async spell check completion: set new text which invalidates
+    // the TextPainter layout cache via TextPainter.markNeedsLayout().
+    final TextSpan newTextSpan = TextSpan(
+      text: 'Hello World!',
+      style: const TextStyle(fontSize: 10.0),
+    );
+    editable.text = newTextSpan;
+
+    // At this point, the TextPainter's layout cache is null (invalidated),
+    // but RenderEditable has not been laid out yet. hitTestChildren() must
+    // call _computeTextMetricsIfNeeded() to re-layout the TextPainter before
+    // accessing layout metrics.
+    result = BoxHitTestResult();
+    expect(editable.hitTest(result, position: const Offset(5.0, 5.0)), isTrue);
+    expect(result.path, isNotEmpty);
+  });
+
   test('Floating cursor position is independent of viewport offset', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final showCursor = ValueNotifier<bool>(true);

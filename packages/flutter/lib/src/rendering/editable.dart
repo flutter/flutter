@@ -1986,6 +1986,7 @@ class RenderEditable extends RenderBox
   @override
   @protected
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    _computeTextMetricsIfNeeded();
     final Offset effectivePosition = position - _paintOffset;
     final GlyphInfo? glyph = _textPainter.getClosestGlyphForOffset(effectivePosition);
     // The hit-test can't fall through the horizontal gaps between visually
