@@ -834,16 +834,28 @@ class AndroidDevice extends Device {
     await runAdbCheckedAsync(<String>['shell', 'rm', remotePath]);
   }
 
+  /// Records the device screen to [outputFile] using `adb screenrecord`.
+  ///
+  /// The recording is stored on the device at a temporary path, then pulled
+  /// to the host via `adb pull`. The temporary file is always cleaned up.
+  ///
+  /// [duration] is clamped to 1–180 seconds (the `adb screenrecord` platform
+  /// limit). When null, defaults to 180 seconds (the maximum). If the output
+  /// path is not writable on the host, `adb pull` will throw.
+  ///
+  /// See: https://developer.android.com/tools/adb#screenrecord
   @override
   Future<void> startScreenRecording(
     File outputFile, {
     Duration? duration,
   }) async {
-    // adb screenrecord caps at 180 seconds.
-    const maxAdbSeconds = 180;
+    // https://developer.android.com/tools/adb#screenrecord
+    const int maxAdbSeconds = 180;
     final effectiveDuration = duration != null
         ? Duration(seconds: duration.inSeconds.clamp(1, maxAdbSeconds))
         : const Duration(seconds: maxAdbSeconds);
+    // Temporary path on the Android device; /data/local/tmp/ is writable by
+    // the shell user on all API levels that support screenrecord (19+).
     const remotePath = '/data/local/tmp/flutter_recording.mp4';
     final args = <String>[
       'shell', 'screenrecord',
@@ -853,9 +865,9 @@ class AndroidDevice extends Device {
     final Process process = await _processManager.start(
       adbCommandForDevice(args),
     );
-    int exitCode = -1;
+    int recordExitCode = -1;
     try {
-      exitCode = await process.exitCode;
+      recordExitCode = await process.exitCode;
     } finally {
       try {
         await _processUtils.run(
@@ -863,8 +875,8 @@ class AndroidDevice extends Device {
           throwOnError: true,
         );
       } on Exception catch (error) {
-        if (exitCode != 0) {
-          throwToolExit('screenrecord failed with exit code $exitCode.');
+        if (recordExitCode != 0) {
+          throwToolExit('screenrecord failed with exit code $recordExitCode.');
         }
         rethrow;
       } finally {
