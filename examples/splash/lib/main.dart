@@ -4,13 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 
-const Color _white = Color(0xFFFFFFFF);
-const Color _black87 = Color(0xDD000000);
-
 void main() {
   runApp(
     const DecoratedBox(
-      decoration: BoxDecoration(color: _white),
+      decoration: BoxDecoration(color: Color(0xFFFFFFFF)),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -23,7 +20,7 @@ void main() {
                 'This app is only meant to be run under the Flutter debugger',
                 textDirection: TextDirection.ltr,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: _black87),
+                style: TextStyle(color: Color(0xDD000000)),
               ),
             ),
           ],
