@@ -80,9 +80,18 @@ void MessageLoopDarwin::WakeUp(fml::TimePoint time_point) {
 }
 
 void MessageLoopDarwin::OnTimerFire(CFRunLoopTimerRef timer, MessageLoopDarwin* loop) {
-  @autoreleasepool {
-    // RunExpiredTasksNow rearms the timer as appropriate via a call to WakeUp.
-    loop->RunExpiredTasksNow();
+  // Drain the existing autorelease pool after each task instead of retaining
+  // temporary Objective-C objects until the entire ready-task batch finishes.
+  // Keep one timestamp so tasks posted by the batch run on the next wakeup.
+  const auto now = fml::TimePoint::Now();
+  while (true) {
+    bool ran_task = false;
+    @autoreleasepool {
+      ran_task = loop->RunSingleExpiredTaskNow(now);
+    }
+    if (!ran_task) {
+      break;
+    }
   }
 }
 
