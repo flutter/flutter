@@ -244,12 +244,21 @@ void main() {
     }
 
     expect(tapTargetNodes, isNotEmpty);
+    expect(missingLabelNodes, isNotEmpty);
+    // The small unlabeled tap target node should contain multiple issues.
+    expect(tapTargetNodes.first['id'], missingLabelNodes.first['id']);
+    final List<Map<String, Object?>> multiIssueList =
+        (tapTargetNodes.first['issues']! as List<Object?>).cast<Map<String, Object?>>();
+    expect(
+      multiIssueList.map((Map<String, Object?> issue) => issue['rule']),
+      containsAll(<String>['tapTargetSize', 'missingLabel', 'unlabeledLeafNode']),
+    );
+
     final Map<String, Object?> tapTargetIssue = (tapTargetNodes.first['issues']! as List<Object?>)
         .cast<Map<String, Object?>>()
         .firstWhere((Map<String, Object?> issue) => issue['rule'] == 'tapTargetSize');
     expect(tapTargetIssue['description'], contains('expected tap target size'));
 
-    expect(missingLabelNodes, isNotEmpty);
     final Map<String, Object?> missingLabelIssue =
         (missingLabelNodes.first['issues']! as List<Object?>)
             .cast<Map<String, Object?>>()
