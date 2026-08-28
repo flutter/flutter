@@ -44,14 +44,11 @@ final _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 // $ANDROID_HOME/platforms/android-23/android.jar
 // $ANDROID_HOME/platforms/android-N/android.jar
 class AndroidSdk {
-  AndroidSdk(this.directory, {FileSystem? fileSystem, Java? java})
-    : _fileSystem = fileSystem,
-      _java = java;
+  AndroidSdk(this.directory, {Java? java}) : _java = java;
 
   /// The Android SDK root directory.
   final Directory directory;
 
-  final FileSystem? _fileSystem;
   final Java? _java;
 
   List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
@@ -63,7 +60,7 @@ class AndroidSdk {
       return;
     }
     _reinitialized = true;
-    reinitialize(fileSystem: _fileSystem);
+    reinitialize();
   }
 
   /// Whether the `cmdline-tools` directory exists in the Android SDK.
@@ -467,9 +464,9 @@ class AndroidSdk {
   ///
   /// This method should be called in a case where the tooling may have updated
   /// SDK artifacts, such as after running a gradle build.
-  void reinitialize({FileSystem? fileSystem}) {
+  void reinitialize() {
     _reinitialized = true;
-    final FileSystem fs = fileSystem ?? _fileSystem ?? globals.fs;
+    final FileSystem fs = directory.fileSystem;
     var buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
     final Directory buildToolsDir = directory.childDirectory('build-tools');
