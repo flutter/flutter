@@ -89,6 +89,13 @@ class TextRange {
     return range.start() >= start() && range.end() <= end();
   }
 
+  // Returns the range with both endpoints clamped to |length|.
+  //
+  // The base/extent ordering is preserved, so a reversed range stays reversed.
+  TextRange ClampedTo(size_t length) const {
+    return TextRange(std::min(base_, length), std::min(extent_, length));
+  }
+
   bool operator==(const TextRange& other) const {
     return base_ == other.base_ && extent_ == other.extent_;
   }
