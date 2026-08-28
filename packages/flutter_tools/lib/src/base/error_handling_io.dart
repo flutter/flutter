@@ -1450,6 +1450,9 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kAccessDenied = 5;
   const kFatalDeviceHardwareError = 483;
   const kDeviceDoesNotExist = 433;
+  const kApplicationControlPolicyBlocked = 4551;
+  const kAccessDisabledByPolicy = 1260;
+  const kSystemIntegrityPolicyViolation = 454;
 
   // Catch errors and bail when:
   final String? errorMessage = switch (errorCode) {
@@ -1478,6 +1481,13 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The device was not found.'
           '\n$e\n'
           'Verify the device is mounted and try again.',
+    kApplicationControlPolicyBlocked ||
+    kAccessDisabledByPolicy ||
+    kSystemIntegrityPolicyViolation =>
+      '${message != null ? "$message. " : ""}An Application Control policy or security policy has blocked execution.\n'
+          '$e\n'
+          'Please verify your Windows Security Smart App Control, Application Control policy (WDAC), '
+          'or Group Policy settings, or add an exclusion for the Flutter SDK directory.',
     _ => null,
   };
   _throwFileSystemException(errorMessage);
