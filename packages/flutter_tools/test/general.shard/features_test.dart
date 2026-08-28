@@ -448,6 +448,29 @@ void main() {
     });
   });
 
+  group('hcpp', () {
+    test('is available on all channels, enabled by default on master and beta', () {
+      expect(
+        hcpp,
+        allOf(<Matcher>[
+          _onChannelIs('master', available: true, enabledByDefault: true),
+          _onChannelIs('beta', available: true, enabledByDefault: true),
+          _onChannelIs('stable', available: true, enabledByDefault: false),
+        ]),
+      );
+    });
+
+    test('can be configured', () {
+      expect(hcpp.configSetting, 'enable-hcpp');
+      expect(hcpp.environmentOverride, 'FLUTTER_ENABLE_HCPP');
+    });
+
+    test('forwards to isEnabled', () {
+      final checkFlags = _TestIsGetterForwarding(shouldInvoke: hcpp);
+      expect(checkFlags.isHcppEnabled, isTrue);
+    });
+  });
+
   group('Tool Extensions', () {
     test('is available only on master', () {
       expect(

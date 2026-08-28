@@ -304,11 +304,11 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     this.fakeDevFS, {
     Future<Uri>? vmServiceUri,
   }) : super(
-        targetPlatform: .unsupported,
-        buildInfo: buildInfo,
-        generator: residentCompiler,
-        developmentShaderCompiler: const FakeShaderCompiler(),
-      ) {
+         targetPlatform: .unsupported,
+         buildInfo: buildInfo,
+         generator: residentCompiler,
+         developmentShaderCompiler: const FakeShaderCompiler(),
+       ) {
     this.vmServiceUri = vmServiceUri ?? Future<Uri>.value(testUri);
   }
 
