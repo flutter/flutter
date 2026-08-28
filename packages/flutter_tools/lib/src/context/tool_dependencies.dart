@@ -412,7 +412,7 @@ class ToolDependencies {
         java ??
         Java.find(
           config: finalConfig,
-          androidStudio: resolvedAndroidStudio,
+          androidStudio: () => resolvedAndroidStudio,
           logger: finalLogger,
           fileSystem: finalFS,
           platform: finalPlatform,

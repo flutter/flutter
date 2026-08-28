@@ -58,7 +58,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         );
         final Java java = Java.find(
           config: config,
-          androidStudio: androidStudio,
+          androidStudio: () => androidStudio,
           logger: logger,
           fileSystem: fs,
           platform: platform,
@@ -86,7 +86,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 
           final Java java = Java.find(
             config: config,
-            androidStudio: androidStudio,
+            androidStudio: () => androidStudio,
             logger: logger,
             fileSystem: fs,
             platform: FakePlatform(
@@ -112,7 +112,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 
         final Java java = Java.find(
           config: config,
-          androidStudio: androidStudio,
+          androidStudio: () => androidStudio,
           logger: logger,
           fileSystem: fs,
           platform: platform,
@@ -131,7 +131,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         );
         final Java? java = Java.find(
           config: config,
-          androidStudio: androidStudio,
+          androidStudio: () => androidStudio,
           logger: logger,
           fileSystem: fs,
           platform: platform,
@@ -155,7 +155,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         );
         Java? java = Java.find(
           config: config,
-          androidStudio: androidStudio,
+          androidStudio: () => androidStudio,
           logger: logger,
           fileSystem: fs,
           platform: platformWithJavaHome,
@@ -173,7 +173,7 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
 
         java = Java.find(
           config: config,
-          androidStudio: androidStudio,
+          androidStudio: () => androidStudio,
           logger: logger,
           fileSystem: fs,
           platform: platformWithJavaHome,
@@ -185,6 +185,28 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         expect(java!.javaHome, androidStudio.javaPath);
         expect(java.binaryPath, fs.path.join(androidStudio.javaPath!, 'bin', 'java'));
         expect(java.javaSource, expectedJavaHomeSource);
+      });
+
+      testWithoutContext('does not invoke androidStudio factory if jdk-dir is configured', () {
+        const configuredJdkPath = '/jdk';
+        config.setValue('jdk-dir', configuredJdkPath);
+        var factoryInvoked = false;
+
+        final Java? java = Java.find(
+          config: config,
+          androidStudio: () {
+            factoryInvoked = true;
+            return _FakeAndroidStudioWithJdk();
+          },
+          logger: logger,
+          fileSystem: fs,
+          platform: platform,
+          processManager: processManager,
+        );
+
+        expect(java, isNotNull);
+        expect(java!.javaHome, configuredJdkPath);
+        expect(factoryInvoked, isFalse);
       });
     });
 
