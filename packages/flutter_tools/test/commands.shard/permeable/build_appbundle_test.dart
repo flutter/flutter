@@ -301,7 +301,7 @@ void main() {
               commandPath: 'create',
               result: 'success',
               commandHasTerminal: false,
-              hostArch: globals.os.hostPlatform.platformName,
+              hostArch: globals.os.hostPlatform.cliName,
               maxRss: processInfo.maxRss,
             ),
           ),
