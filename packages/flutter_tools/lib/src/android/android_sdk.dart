@@ -86,7 +86,7 @@ class AndroidSdk {
     try {
       final File sdkLicense = directory.childDirectory('licenses').childFile('android-sdk-license');
       return sdkLicense.existsSync() && sdkLicense.readAsStringSync().trim().isNotEmpty;
-    } on FileSystemException {
+    } on Exception {
       return false;
     }
   }
