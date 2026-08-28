@@ -5347,14 +5347,17 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: basic_material_app_ios__compile
 
-  - name: Mac_ios channels_integration_test_ios
+  - name: Mac channels_integration_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: channels_integration_test_ios
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -5418,14 +5421,17 @@ targets:
       task_name: external_textures_integration_test_ios
       ignore_flakiness: "true"
 
-  - name: Mac_ios route_test_ios
+  - name: Mac route_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: route_test_ios
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
 
   - name: Mac flavors_test_ios
     recipe: devicelab/devicelab_drone
@@ -5656,15 +5662,6 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: hello_world_impeller_ios_sdfs
 
-  - name: Mac_ios ios_platform_view_tests
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: ios_platform_view_tests
-
   - name: Mac_ios large_image_changer_perf_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5796,14 +5793,17 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: platform_channels_benchmarks_ios
 
-  - name: Mac_ios platform_interaction_test_ios
+  - name: Mac platform_interaction_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: platform_interaction_test_ios
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
 
   - name: Mac_ios platform_view_ios__start_up
     recipe: devicelab/devicelab_drone
