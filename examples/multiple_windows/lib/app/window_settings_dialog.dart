@@ -103,7 +103,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                     _buildDivider(),
                     _buildDialogEditor(),
                     _buildDivider(),
-                    _buildTooltipEditor(),
+                    _buildTooltipAndPopupEditor(),
                   ],
                 ),
               ),
@@ -207,10 +207,10 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     );
   }
 
-  Widget _buildTooltipEditor() {
+  Widget _buildTooltipAndPopupEditor() {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-      title: const Text('Tooltip'),
+      title: const Text('Tooltips and Popups'),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

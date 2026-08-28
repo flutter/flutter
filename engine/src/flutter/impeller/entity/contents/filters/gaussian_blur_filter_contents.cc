@@ -847,7 +847,8 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   std::optional<Quad> source_bounds;
   if (bounds_.has_value()) {
-    Matrix transform = snapshot_entity.GetTransform() * effect_transform;
+    Matrix transform =
+        snapshot_entity.GetTransform() * GetLocalToPassTransform();
     source_bounds = bounds_->GetTransformedPoints(transform);
   }
 

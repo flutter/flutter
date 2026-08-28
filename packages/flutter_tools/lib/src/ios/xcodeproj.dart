@@ -26,7 +26,6 @@ import '../xcode_project.dart';
 
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final _varExpr = RegExp(r'\$\(([^)]*)\)');
-const kSwiftPackageCacheDirectoryName = 'SourcePackages';
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
@@ -189,7 +188,7 @@ class XcodeProjectInterpreter {
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) async {
     // All `xcodebuild` project commands will download and resolve Swift packages.
     // We should always prefetch Swift packages before running any `xcodebuild` project command
@@ -198,7 +197,7 @@ class XcodeProjectInterpreter {
 
     return _xcodebuildProjectCommandArguments(
       buildDirectory,
-      skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
+      skipPackageValidation: skipPackageValidation,
     );
   }
 
@@ -209,11 +208,11 @@ class XcodeProjectInterpreter {
 
   /// Returns a list of required arguments for the `xcodebuild` Xcode project command.
   ///
-  /// When [skipPackageUpdatesAndValidation] is true, it uses arguments to attempt skipping any
-  /// Swift package updates and validation.
+  /// When [skipPackageValidation] is true, it uses arguments to attempt skipping any Swift
+  /// package validation.
   List<String> _xcodebuildProjectCommandArguments(
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) {
     final String cachePath = swiftPackageCachePath(buildDirectory);
     return <String>[
@@ -221,8 +220,7 @@ class XcodeProjectInterpreter {
       'xcodebuild',
       '-clonedSourcePackagesDirPath',
       cachePath,
-      if (skipPackageUpdatesAndValidation) ...<String>[
-        '-skipPackageUpdates',
+      if (skipPackageValidation) ...<String>[
         '-skipPackagePluginValidation',
         '-skipPackageSignatureValidation',
       ],
@@ -395,9 +393,9 @@ class XcodeProjectInterpreter {
     await xcodeProject.prefetchSwiftPackages(
       xcodebuildProjectCommandArguments: _xcodebuildProjectCommandArguments(
         buildDirectory,
-        // skipPackageUpdatesAndValidation should be false so that when subsequent xcodebuild
+        // skipPackageValidation should be false so that when subsequent xcodebuild
         // commands run, packages should already be resolved, downloaded, updated, and validated.
-        skipPackageUpdatesAndValidation: false,
+        skipPackageValidation: false,
       ),
       processUtils: _processUtils,
       logger: _logger,
@@ -416,29 +414,33 @@ class XcodeProjectInterpreter {
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
     const corruptedProjectExitCode = 74;
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
-    final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
-      xcodeProject,
-      buildDirectory,
-    );
-    final RunResult result = await _processUtils.run(
-      <String>[
-        ...xcodebuildCommandArgs,
-        '-list',
-        if (projectFilename != null) ...<String>['-project', projectFilename],
-      ],
-      throwOnError: true,
-      allowedFailures: allowedFailures,
-      workingDirectory: xcodeProject.hostAppRoot.path,
-    );
-    if (allowedFailures(result.exitCode)) {
-      // User configuration error, tool exit instead of crashing.
-      throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
+    try {
+      final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
+        xcodeProject,
+        buildDirectory,
+      );
+      final RunResult result = await _processUtils.run(
+        <String>[
+          ...xcodebuildCommandArgs,
+          '-list',
+          if (projectFilename != null) ...<String>['-project', projectFilename],
+        ],
+        throwOnError: true,
+        allowedFailures: allowedFailures,
+        workingDirectory: xcodeProject.hostAppRoot.path,
+      );
+      if (allowedFailures(result.exitCode)) {
+        // User configuration error, tool exit instead of crashing.
+        throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
+      }
+      return XcodeProjectInfo.fromXcodeBuildOutput(
+        result.toString(),
+        _logger,
+        ignoredSchemes: await _ignoredSwiftPackageSchemes(xcodeProject, buildDirectory),
+      );
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to get Xcode project information:\n $exception');
     }
-    return XcodeProjectInfo.fromXcodeBuildOutput(
-      result.toString(),
-      _logger,
-      ignoredSchemes: await _ignoredSwiftPackageSchemes(xcodeProject, buildDirectory),
-    );
   }
 
   /// Returns scheme-name candidates for Swift packages that should be excluded from
