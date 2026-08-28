@@ -411,10 +411,10 @@ class ToolDependencies {
     late final Java? resolvedJava =
         java ??
         Java.find(
+          androidStudioBuilder: () => resolvedAndroidStudio,
           config: finalConfig,
-          androidStudio: () => resolvedAndroidStudio,
-          logger: finalLogger,
           fileSystem: finalFS,
+          logger: finalLogger,
           platform: finalPlatform,
           processManager: finalProcessManager,
         );
@@ -432,9 +432,9 @@ class ToolDependencies {
       analytics: finalAnalytics,
       androidContext: AndroidContext(
         androidSdk: finalAndroidSdk,
-        androidStudio: () => resolvedAndroidStudio,
+        androidStudioBuilder: () => resolvedAndroidStudio,
         gradleUtils: finalGradleUtils,
-        java: () => resolvedJava,
+        javaBuilder: () => resolvedJava,
       ),
       appleContext: AppleContext(
         cocoaPods: finalCocoaPods,

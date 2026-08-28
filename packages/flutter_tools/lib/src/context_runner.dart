@@ -257,10 +257,10 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
       ),
       Java: () => Java.find(
+        androidStudioBuilder: () => globals.androidStudio,
         config: globals.config,
-        androidStudio: () => globals.androidStudio,
-        logger: globals.logger,
         fileSystem: globals.fs,
+        logger: globals.logger,
         platform: globals.platform,
         processManager: globals.processManager,
       ),

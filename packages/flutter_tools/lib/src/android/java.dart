@@ -69,10 +69,10 @@ class Java {
   ///
   /// Returns null if no java binary could be found.
   static Java? find({
+    required AndroidStudio? Function() androidStudioBuilder,
     required Config config,
-    required AndroidStudio? Function() androidStudio,
-    required Logger logger,
     required FileSystem fileSystem,
+    required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
   }) {
@@ -83,9 +83,9 @@ class Java {
       processManager: processManager,
     );
     final _JavaHomePathWithSource? home = _findJavaHome(
+      androidStudioBuilder: androidStudioBuilder,
       config: config,
       logger: logger,
-      androidStudio: androidStudio,
       platform: platform,
     );
     final String? binary = _findJavaBinary(
@@ -224,9 +224,9 @@ class Java {
 }
 
 _JavaHomePathWithSource? _findJavaHome({
+  required AndroidStudio? Function() androidStudioBuilder,
   required Config config,
   required Logger logger,
-  required AndroidStudio? Function() androidStudio,
   required Platform platform,
 }) {
   final Object? configured = config.getValue('jdk-dir');
@@ -234,7 +234,7 @@ _JavaHomePathWithSource? _findJavaHome({
     return (path: configured as String, source: JavaSource.flutterConfig);
   }
 
-  final String? androidStudioJavaPath = androidStudio()?.javaPath;
+  final String? androidStudioJavaPath = androidStudioBuilder()?.javaPath;
   if (androidStudioJavaPath != null) {
     return (path: androidStudioJavaPath, source: JavaSource.androidStudio);
   }

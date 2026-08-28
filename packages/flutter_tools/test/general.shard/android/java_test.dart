@@ -57,10 +57,10 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           ),
         );
         final Java java = Java.find(
+          androidStudioBuilder: () => androidStudio,
           config: config,
-          androidStudio: () => androidStudio,
-          logger: logger,
           fileSystem: fs,
+          logger: logger,
           platform: platform,
           processManager: processManager,
         )!;
@@ -85,10 +85,10 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           const JavaSource expectedJavaHomeSource = JavaSource.javaHome;
 
           final Java java = Java.find(
+            androidStudioBuilder: () => androidStudio,
             config: config,
-            androidStudio: () => androidStudio,
-            logger: logger,
             fileSystem: fs,
+            logger: logger,
             platform: FakePlatform(
               environment: <String, String>{Java.javaHomeEnvironmentVariable: javaHome},
             ),
@@ -111,10 +111,10 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         );
 
         final Java java = Java.find(
+          androidStudioBuilder: () => androidStudio,
           config: config,
-          androidStudio: () => androidStudio,
-          logger: logger,
           fileSystem: fs,
+          logger: logger,
           platform: platform,
           processManager: processManager,
         )!;
@@ -130,10 +130,10 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           const FakeCommand(command: <String>['which', 'java'], exitCode: 1),
         );
         final Java? java = Java.find(
+          androidStudioBuilder: () => androidStudio,
           config: config,
-          androidStudio: () => androidStudio,
-          logger: logger,
           fileSystem: fs,
+          logger: logger,
           platform: platform,
           processManager: processManager,
         );
@@ -154,10 +154,10 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
           environment: <String, String>{'JAVA_HOME': '/old/jdk'},
         );
         Java? java = Java.find(
+          androidStudioBuilder: () => androidStudio,
           config: config,
-          androidStudio: () => androidStudio,
-          logger: logger,
           fileSystem: fs,
+          logger: logger,
           platform: platformWithJavaHome,
           processManager: processManager,
         );
@@ -172,10 +172,10 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         expectedJavaHomeSource = JavaSource.androidStudio;
 
         java = Java.find(
+          androidStudioBuilder: () => androidStudio,
           config: config,
-          androidStudio: () => androidStudio,
-          logger: logger,
           fileSystem: fs,
+          logger: logger,
           platform: platformWithJavaHome,
           processManager: processManager,
         );
@@ -193,13 +193,13 @@ OpenJDK 64-Bit Server VM Zulu19.32+15-CA (build 19.0.2+7, mixed mode, sharing)
         var factoryInvoked = false;
 
         final Java? java = Java.find(
-          config: config,
-          androidStudio: () {
+          androidStudioBuilder: () {
             factoryInvoked = true;
             return _FakeAndroidStudioWithJdk();
           },
-          logger: logger,
+          config: config,
           fileSystem: fs,
+          logger: logger,
           platform: platform,
           processManager: processManager,
         );

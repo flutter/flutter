@@ -11,24 +11,24 @@ import '../android/java.dart';
 class AndroidContext {
   AndroidContext({
     required this.androidSdk,
-    required AndroidStudio? Function() androidStudio,
+    required AndroidStudio? Function() androidStudioBuilder,
     required this.gradleUtils,
-    required Java? Function() java,
-  }) : _androidStudio = androidStudio,
-       _java = java;
+    required Java? Function() javaBuilder,
+  }) : _androidStudioBuilder = androidStudioBuilder,
+       _javaBuilder = javaBuilder;
 
   /// Discovers, validates, and manages the local Android SDK and platform tools.
   final AndroidSdk? androidSdk;
 
   /// Discovers and inspects local Android Studio installations and embedded JDK paths.
-  late final AndroidStudio? androidStudio = _androidStudio();
+  late final AndroidStudio? androidStudio = _androidStudioBuilder();
 
   /// Utility helpers for interacting with Gradle builds and resolving project configs.
   final GradleUtils gradleUtils;
 
   /// Discovers and validates the active Java Development Kit (JDK) binary.
-  late final Java? java = _java();
+  late final Java? java = _javaBuilder();
 
-  final AndroidStudio? Function() _androidStudio;
-  final Java? Function() _java;
+  final AndroidStudio? Function() _androidStudioBuilder;
+  final Java? Function() _javaBuilder;
 }

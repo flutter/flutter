@@ -174,12 +174,12 @@ void main() {
 
       final context = AndroidContext(
         androidSdk: FakeAndroidSdk(),
-        androidStudio: () {
+        androidStudioBuilder: () {
           studioEvaluations++;
           return mockStudio;
         },
         gradleUtils: FakeGradleUtils(),
-        java: () {
+        javaBuilder: () {
           javaEvaluations++;
           return mockJava;
         },
@@ -207,12 +207,12 @@ void main() {
 
       final context = AndroidContext(
         androidSdk: FakeAndroidSdk(),
-        androidStudio: () {
+        androidStudioBuilder: () {
           studioEvaluations++;
           return null;
         },
         gradleUtils: FakeGradleUtils(),
-        java: () {
+        javaBuilder: () {
           javaEvaluations++;
           return null;
         },
