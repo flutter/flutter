@@ -4,22 +4,21 @@
 
 package com.flutter.gradle.plugins
 
-import com.android.builder.model.BuildType
 import com.flutter.gradle.CompileSdkVersion
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.FlutterPluginUtils.addApiDependencies
 import com.flutter.gradle.FlutterPluginUtils.buildModeFor
+import com.flutter.gradle.FlutterPluginUtils.getAndroidExtension
 import com.flutter.gradle.FlutterPluginUtils.getCompileSdkFromProject
 import com.flutter.gradle.FlutterPluginUtils.getLegacyAndroidExtension
 import com.flutter.gradle.FlutterPluginUtils.isBuiltAsApp
 import com.flutter.gradle.FlutterPluginUtils.supportsBuildMode
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
-import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
-import com.android.build.gradle.internal.dsl.BuildType as dslBuildType
+import com.android.build.api.dsl.BuildType as DslBuildType
 
 /**
  * Handles interactions with the flutter plugins (not Gradle plugins) used by the Flutter project,
@@ -112,7 +111,7 @@ class PluginHandler(
             // Add plugin dependency to the app project. We only want to add dependency
             // for dev dependencies in non-release builds.
             project.afterEvaluate {
-                getLegacyAndroidExtension(project).buildTypes.forEach { buildType ->
+                getAndroidExtension(project).buildTypes.forEach { buildType ->
                     if (!(pluginObject["dev_dependency"] as Boolean) || buildType.name != "release") {
                         project.dependencies.add("${buildType.name}Api", pluginProject)
                     }
@@ -133,7 +132,7 @@ class PluginHandler(
                     )
                 }
 
-                getLegacyAndroidExtension(project).buildTypes.forEach { buildType ->
+                getAndroidExtension(project).buildTypes.forEach { buildType ->
                     addEmbeddingDependencyToPlugin(project, pluginProject, buildType, engineVersion)
                 }
             }
@@ -142,7 +141,7 @@ class PluginHandler(
         private fun addEmbeddingDependencyToPlugin(
             project: Project,
             pluginProject: Project,
-            buildType: BuildType,
+            buildType: DslBuildType,
             engineVersion: String
         ) {
             val flutterBuildMode: String = buildModeFor(buildType)
@@ -163,8 +162,14 @@ class PluginHandler(
             // However, only copy if the plugin is also an app project, since library projects
             // cannot have applicationIdSuffix and other app-specific properties.
             if (isBuiltAsApp(pluginProject)) {
-                (getLegacyAndroidExtension(pluginProject).buildTypes as NamedDomainObjectContainer<dslBuildType>)
-                    .addAll(getLegacyAndroidExtension(project).buildTypes as NamedDomainObjectContainer<dslBuildType>)
+                getLegacyAndroidExtension(project).buildTypes.forEach { appBuildType ->
+                    val pluginBuildTypes = getLegacyAndroidExtension(pluginProject).buildTypes
+                    if (pluginBuildTypes.findByName(appBuildType.name) == null) {
+                        pluginBuildTypes.create(appBuildType.name) {
+                            initWith(appBuildType)
+                        }
+                    }
+                }
             } else {
                 // For library projects, create compatible build types without app-specific properties
                 getLegacyAndroidExtension(project).buildTypes.forEach { appBuildType ->
@@ -213,7 +218,7 @@ class PluginHandler(
                 }
             val pluginProject: Project = project.rootProject.findProject(":$pluginName") ?: return
 
-            getLegacyAndroidExtension(project).buildTypes.forEach { buildType ->
+            getAndroidExtension(project).buildTypes.forEach { buildType ->
                 val flutterBuildMode: String = buildModeFor(buildType)
                 if (flutterBuildMode == "release" && (pluginObject["dev_dependency"] as? Boolean == true)) {
                     // This plugin is a dev dependency will not be included in the

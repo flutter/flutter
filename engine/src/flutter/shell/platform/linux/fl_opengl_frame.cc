@@ -7,6 +7,7 @@
 #include <epoxy/egl.h>
 #include <epoxy/gl.h>
 
+#include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 
 struct _FlOpenGLFrame {
@@ -82,10 +83,8 @@ void fl_opengl_frame_composite(FlOpenGLFrame* self,
   if (self->framebuffer == nullptr ||
       fl_framebuffer_get_width(self->framebuffer) != width ||
       fl_framebuffer_get_height(self->framebuffer) != height) {
-    GLint general_format = GL_RGBA;
-    if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
-      general_format = GL_BGRA_EXT;
-    }
+    GLint general_format =
+        fl_compositor_opengl_get_frame_format(layers, layers_count);
     g_clear_object(&self->framebuffer);
     self->framebuffer =
         fl_framebuffer_new(general_format, width, height, self->shareable);

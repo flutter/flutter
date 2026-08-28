@@ -672,7 +672,7 @@
             "longest_path_cycles": [
               4.25,
               3.637500047683716,
-              3.487499952316284,
+              3.53125,
               4.25,
               0.0,
               0.25,
@@ -707,7 +707,7 @@
             "total_cycles": [
               4.3125,
               3.737499952316284,
-              3.75,
+              3.799999952316284,
               4.3125,
               0.0,
               0.25,
@@ -2882,7 +2882,7 @@
             "longest_path_cycles": [
               4.25,
               4.074999809265137,
-              3.46875,
+              3.53125,
               4.25,
               0.0,
               0.25,
@@ -2917,7 +2917,7 @@
             "total_cycles": [
               4.3125,
               4.1875,
-              3.924999952316284,
+              3.987499952316284,
               4.3125,
               0.0,
               0.25,
@@ -2957,7 +2957,7 @@
               "arithmetic"
             ],
             "shortest_path_cycles": [
-              9.899999618530273,
+              10.229999542236328,
               1.0,
               2.0
             ],
@@ -8642,7 +8642,7 @@
             "total_cycles": [
               13.625,
               13.625,
-              4.53125,
+              4.5,
               13.4375,
               0.0,
               0.25,
@@ -8651,7 +8651,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 46,
+          "uniform_registers_used": 44,
           "work_registers_used": 32
         }
       }
@@ -8669,7 +8669,7 @@
               "arithmetic"
             ],
             "longest_path_cycles": [
-              43.88999938964844,
+              44.220001220703125,
               3.0,
               4.0
             ],
@@ -8690,13 +8690,13 @@
               "arithmetic"
             ],
             "total_cycles": [
-              105.66666412353516,
+              106.0,
               3.0,
               24.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 7,
+          "uniform_registers_used": 6,
           "work_registers_used": 4
         }
       }
@@ -11833,7 +11833,7 @@
             "longest_path_cycles": [
               4.0,
               3.387500047683716,
-              1.9375,
+              1.9249999523162842,
               4.0,
               0.0,
               0.25,
@@ -11868,7 +11868,7 @@
             "total_cycles": [
               13.4375,
               12.4375,
-              4.875,
+              4.84375,
               13.4375,
               0.0,
               0.25,
@@ -11877,7 +11877,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 48,
+          "uniform_registers_used": 46,
           "work_registers_used": 32
         }
       }
