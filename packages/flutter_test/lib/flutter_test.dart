@@ -90,6 +90,7 @@ export 'src/test_exception_reporter.dart';
 export 'src/test_pointer.dart';
 export 'src/test_text_input.dart';
 export 'src/test_vsync.dart';
+export 'src/test_widgets_app.dart';
 export 'src/tree_traversal.dart';
 export 'src/widget_tester.dart';
 export 'src/window.dart';

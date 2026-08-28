@@ -4429,6 +4429,9 @@ abstract class ImageFilter {
   /// also be at least one sampler2D uniform, the first of which will be set by
   /// the engine to contain the filter input.
   ///
+  /// The optional [filterQuality] argument sets the quality level used to sample
+  /// the filter input. By default, it is set to [FilterQuality.none].
+  ///
   /// When Impeller uses the OpenGL(ES) backend, the y-axis direction is
   /// reversed. Custom fragment shaders must invert the y-axis on
   /// GLES or they will render upside-down.
@@ -4458,7 +4461,10 @@ abstract class ImageFilter {
   /// }
   ///
   /// ```
-  factory ImageFilter.shader(FragmentShader shader) {
+  factory ImageFilter.shader(
+    FragmentShader shader, {
+    FilterQuality filterQuality = FilterQuality.none,
+  }) {
     if (!_impellerEnabled) {
       throw UnsupportedError('ImageFilter.shader only supported with Impeller rendering engine.');
     }
@@ -4477,7 +4483,7 @@ abstract class ImageFilter {
       }
       throw StateError(buffer.toString());
     }
-    return _FragmentShaderImageFilter(shader);
+    return _FragmentShaderImageFilter(shader, filterQuality);
   }
 
   /// Whether [ImageFilter.shader] is supported on the current backend.
@@ -4673,9 +4679,10 @@ class _ComposeImageFilter implements ImageFilter {
 }
 
 class _FragmentShaderImageFilter implements ImageFilter {
-  _FragmentShaderImageFilter(this.shader);
+  _FragmentShaderImageFilter(this.shader, this.filterQuality);
 
   final FragmentShader shader;
+  final FilterQuality filterQuality;
 
   late final _ImageFilter nativeFilter = _ImageFilter.shader(this);
 
@@ -4686,7 +4693,7 @@ class _FragmentShaderImageFilter implements ImageFilter {
   String get debugShortDescription => 'shader';
 
   @override
-  String toString() => 'ImageFilter.shader(Shader#${shader.hashCode})';
+  String toString() => 'ImageFilter.shader(Shader#${shader.hashCode}, $filterQuality)';
 
   @override
   bool operator ==(Object other) {
@@ -4695,6 +4702,7 @@ class _FragmentShaderImageFilter implements ImageFilter {
     }
     return other is _FragmentShaderImageFilter &&
         other.shader == shader &&
+        other.filterQuality == filterQuality &&
         _equals(nativeFilter, other.nativeFilter);
   }
 
@@ -4702,7 +4710,7 @@ class _FragmentShaderImageFilter implements ImageFilter {
   external static bool _equals(_ImageFilter a, _ImageFilter b);
 
   @override
-  int get hashCode => shader.hashCode;
+  int get hashCode => Object.hash(shader, filterQuality);
 }
 
 /// An [ImageFilter] that is backed by a native DlImageFilter.
@@ -4770,7 +4778,7 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
 
   _ImageFilter.shader(_FragmentShaderImageFilter filter) : creator = filter {
     _constructor();
-    _initShader(filter.shader);
+    _initShader(filter.shader, filter.filterQuality.index);
   }
 
   @Native<Void Function(Handle)>(symbol: 'ImageFilter::Create')
@@ -4813,8 +4821,8 @@ base class _ImageFilter extends NativeFieldWrapperClass1 {
   )
   external void _initComposed(_ImageFilter outerFilter, _ImageFilter innerFilter);
 
-  @Native<Void Function(Pointer<Void>, Pointer<Void>)>(symbol: 'ImageFilter::initShader')
-  external void _initShader(FragmentShader shader);
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int32)>(symbol: 'ImageFilter::initShader')
+  external void _initShader(FragmentShader shader, int filterQuality);
 
   /// The original Dart object that created the native wrapper, which retains
   /// the values used for the filter.

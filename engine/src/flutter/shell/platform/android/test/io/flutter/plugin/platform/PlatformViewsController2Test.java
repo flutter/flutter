@@ -366,7 +366,7 @@ public class PlatformViewsController2Test {
 
     // Simulate create call from the framework.
     createPlatformView(jni, PlatformViewsController2, platformViewId, "testType");
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     assertFalse(PlatformViewsController2.initializePlatformViewIfNeeded(platformViewId));
   }
@@ -392,7 +392,7 @@ public class PlatformViewsController2Test {
 
     // Simulate create call from the framework.
     createPlatformView(jni, PlatformViewsController2, platformViewId, "testType");
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     assertFalse(PlatformViewsController2.initializePlatformViewIfNeeded(platformViewId));
   }
@@ -421,7 +421,7 @@ public class PlatformViewsController2Test {
 
     // Simulate create call from the framework.
     createPlatformView(jni, PlatformViewsController2, platformViewId, "testType");
-    assertEquals(ShadowFlutterJNI.getResponses().size(), 1);
+    assertEquals(1, ShadowFlutterJNI.getResponses().size());
 
     // Simulate set direction call from the framework.
     setLayoutDirection(jni, PlatformViewsController2, platformViewId, 1);
@@ -430,7 +430,7 @@ public class PlatformViewsController2Test {
     // The limit value of reply message will be equal to 2 if the layout direction is set
     // successfully, otherwise it will be much more than 2 due to the reply message contains
     // an error message wrapped with exception detail information.
-    assertEquals(ShadowFlutterJNI.getResponses().get(0).limit(), 2);
+    assertEquals(2, ShadowFlutterJNI.getResponses().get(0).limit());
   }
 
   @Test
@@ -551,6 +551,44 @@ public class PlatformViewsController2Test {
 
     verify(mockAttachedSurfaceControl, times(1))
         .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onEndFrameIsANoopAfterDetachFromView() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    FlutterView mockFlutterView = mock(FlutterView.class);
+    AttachedSurfaceControl mockAttachedSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
+
+    controller.attachToView(mockFlutterView);
+    controller.detachFromView();
+
+    // onEndFrame is posted from the raster thread, so it can run after the view was detached.
+    // It must not throw: the JNI caller turns a pending exception into an abort.
+    controller.onEndFrame();
+
+    verify(mockAttachedSurfaceControl, never())
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onEndFrameIsANoopWhenFlutterViewHasNoRootSurfaceControl() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    // getRootSurfaceControl() returns null while the view is not attached to a window.
+    FlutterView mockFlutterView = mock(FlutterView.class);
+    when(mockFlutterView.getRootSurfaceControl()).thenReturn(null);
+
+    controller.attachToView(mockFlutterView);
+
+    controller.onEndFrame();
+
+    verify(mockFlutterView, never()).invalidate();
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {

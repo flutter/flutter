@@ -1,10 +1,10 @@
 ---
 name: shepherd-prs
 description: >
-  Automate shepherding, updating, and landing both your own open PRs and approved third-party contributor PRs in the flutter/flutter repository.
+  Automate shepherding, checking status, updating branches, and landing open PRs or approved third-party contributor PRs in the flutter/flutter repository using the gh CLI.
 
   When to use:
-  - When you need to check the status of your open PRs or approved third-party PRs.
+  - When you need to check the status of open PRs or shepherded third-party PRs.
   - When you need to update stale branches or apply the 'autosubmit' label to land approved PRs.
 
   When not to use:
@@ -12,61 +12,95 @@ description: >
   - Do not use for repositories other than flutter/flutter.
 ---
 
-# Shepherding Pull Requests Skill
+# Shepherding Pull Requests Skill (`flutter/flutter`)
 
-This skill allows you to automate shepherding actions on approved PRs using the [shepherd.dart](scripts/shepherd.dart) script. For details on how the tool works, see the [README.md](scripts/README.md).
+This skill defines the canonical runbook for shepherding pull requests in the `flutter/flutter` repository using native GitHub CLI (`gh`) commands.
 
-## Workflow and Interaction Guidelines
+## 1. Checking PR Status
 
-When the user asks for the status of their open or approved PRs:
-1. **Do NOT automatically execute shepherding actions** (e.g., do not run `shepherd.dart run --all` or `shepherd.dart run --pr <number>`) on the initial inquiry.
-2. **First, retrieve the PR states** using the `list` command:
+When the user asks for the status of open or approved PRs:
+1. **List Your Own Open PRs**:
    ```bash
-   dart .agents/skills/shepherd-prs/scripts/shepherd.dart list
+   gh pr list --repo flutter/flutter --author <username> --state open --json number,title,url,mergeable,reviewDecision
    ```
-3. **Present a clear summary** of the PRs, including their current status and recommended actions.
-4. **Explicitly ask the user for confirmation** before executing any shepherding/running actions.
-5. **Only proceed with executing actions** (e.g., `run --all` or `run --pr`) after receiving explicit approval from the user.
+2. **List Shepherded / Reviewed Third-Party PRs**:
+   ```bash
+   gh pr list --repo flutter/flutter --search "reviewed-by:<username> -author:<username> is:open" --json number,title,url,mergeable,reviewDecision
+   ```
+3. **Inspect Detailed PR Checks**:
+   ```bash
+   gh pr checks <number> --repo flutter/flutter
+   ```
+4. **Inspect Reviews, Labels, and Comments**:
+   ```bash
+   gh pr view <number> --repo flutter/flutter --json labels,reviewDecision,reviews,comments
+   ```
 
-## Handling Execution Outputs & Edge Cases
+## 2. Pre-Autosubmit Verification Rules
 
-When running the `run` command, inspect the returned JSON logs and handle specific results as follows:
+Before applying or re-applying the `autosubmit` label (`gh pr edit <number> --repo flutter/flutter --add-label autosubmit`), **always perform the following pre-flight verification checks** to ensure the `autosubmit` bot will not reject or strip the label:
 
-### 1. Stale Branch Updates
-* The tool automatically merges the default branch into the PR if it is behind by 50+ commits, or if it has a `ci.yaml validation` failure and is behind by at least 1 commit.
-* **Stale Token Scope Error**: If the branch contains GitHub Actions workflow files, the update may fail with an HTTP 403 error due to a lack of `workflow` scope.
-  - *Action*: If a log contains `ERROR: ... lacks the "workflow" scope`, do not try to rerun. Output a highly prominent note to the user asking them to refresh their CLI scope:
-    `gh auth refresh -h github.com -s workflow`
+1. **Check Previous `autosubmit` Removal History in Comments**:
+   * Always check if the `autosubmit` label was previously removed by the `auto-submit` bot by checking PR comments:
+     ```bash
+     gh pr view <number> --repo flutter/flutter --json comments
+     ```
+   * Look for messages from `auto-submit` such as `"autosubmit label was removed..."`.
+   * If the label was previously removed, identify the exact reason stated by the bot (e.g., failing CI checks, insufficient approvals, merge conflicts, or stale branch) and confirm that the underlying issue has been resolved before re-applying `autosubmit`.
 
-### 2. Failed Checks & Manual Re-runs
-* Due to GitHub App permission policies, third-party check runs (such as LUCI checks created by `flutter-dashboard`) cannot be re-run via the API.
-* When a PR has failed checks, the tool will log a warning instructing you to ask the user to manually trigger the re-run via the LUCI build page or the Flutter Build Dashboard.
+2. **Verify Freshness of Base Commit (>7 Days Old)**:
+   * Check whether the PR's base commit is stale (>7 days old).
+   * If the base commit is more than **7 days old**, always instruct running or execute a branch update before attempting to add `autosubmit`:
+     ```bash
+     gh pr update-branch <number> --repo flutter/flutter
+     ```
+   * Do not apply `autosubmit` until the branch update is complete and CI checks on the updated branch succeed.
+
+3. **Strictly Verify Required Reviewer Approvals**:
+   * Strictly verify that third-party contributor PRs (`CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, `NONE`) have at least **2 team member approvals** (`MEMBER` or `OWNER`) before adding `autosubmit` so the bot doesn't remove it again.
+   * Check `reviews` in `gh pr view <number> --repo flutter/flutter --json reviews` to confirm the number of approvals from Flutter team members.
+
+4. **Verify All Status Checks Are 100% Passing**:
+   * The Flutter `autosubmit` bot automatically strips the `autosubmit` label whenever any CI check fails.
+   * Verify that all status checks are passing (`SUCCESS`/`pass`).
+   * If any check is flaky, failing, or pending a retry:
+     1. Do **NOT** apply the `autosubmit` label immediately.
+     2. Inform the user of the failing check and instruct them to retry it first.
+     3. Only apply the `autosubmit` label after all retried checks complete successfully:
+        ```bash
+        gh pr edit <number> --repo flutter/flutter --add-label autosubmit
+        ```
+
+## 3. Third-Party Contributor PRs (2-Reviewer Requirement)
+
+* Pull requests authored by third-party contributors (`CONTRIBUTOR`, `FIRST_TIME_CONTRIBUTOR`, `NONE`) require **two explicit approvals** from Flutter team members (`MEMBER` or `OWNER`) before the `autosubmit` bot will merge them.
+* If only one team member has approved a third-party PR and the `autosubmit` label is applied, the `autosubmit` bot will remove the label.
+* *Action*: Strictly verify via `gh pr view <number> --repo flutter/flutter --json reviews` that at least **2 team member approvals** are present before adding `autosubmit` so the bot doesn't remove it again. If only 1 approval exists, remind the user to request a second reviewer before applying the label.
+
+## 4. Failed Checks & Manual LUCI Re-runs
+
+* Due to GitHub App permission policies, third-party check runs (such as LUCI checks created by `flutter-dashboard`) cannot be re-run via the GitHub API.
 * *Action*:
-  1. Print the warning and ask the user to click the "Details" link on the failed check in GitHub to go to the LUCI build page and click the "Retry Build" button.
-  2. If the check run continues to fail after manual re-runs, inspect the failure logs using `gh pr view <number> --repo flutter/flutter` or through the checks details, and write a summary of the failure for the user.
+  1. Print the exact LUCI Buildbucket link (e.g., `https://cr-buildbucket.appspot.com/build/<build_id>`) for the failing check.
+  2. Instruct the user to open the URL and click **Retry Build** on the LUCI page.
+  3. If a check continues to fail after manual retries, inspect the failure logs (`gh pr view <number> --repo flutter/flutter` or `flutter-pr-checks-finder`) and summarize the failure for the user.
 
-### 3. Target Branch Correction
-* **Dismissed Reviews Warning**: Changing the target branch of a PR often causes GitHub to automatically dismiss existing approvals.
-  - *Action*: If the target branch was changed, the PR will disappear from the approved list. Output a clear note to the user informing them that the base was corrected, and they need to go to the PR page on GitHub to **re-approve the PR** so the automation can resume shepherding it.
+## 5. Stale Branch Updates, CICD Label & Token Scope
 
-### 4. Merge Conflicts
-* The tool will log: `WARNING: PR has merge conflicts. Manual intervention required.`
-  - *Action*: Inform the user about the conflict so they can ask the contributor to resolve it.
+* If a PR branch is out of date with `master` (including when the base commit is >7 days old):
+  * Always update the branch using `gh pr update-branch <number> --repo flutter/flutter` before attempting to add `autosubmit`.
+* **Re-applying the `CICD` Label**:
+  * After updating a branch with `gh pr update-branch` (or when shepherding a PR that has not run CI), the `CICD` label is often stripped or required to start the CI checks on the updated commit.
+  * Always check if the `CICD` label is present after a branch update, and re-apply it if missing:
+    ```bash
+    gh pr edit <number> --repo flutter/flutter --add-label CICD
+    ```
+* **Stale Token Scope Error**: If updating fails due to workflow file permissions (`ERROR: ... lacks the "workflow" scope`), instruct the user to refresh their CLI scope:
+  ```bash
+  gh auth refresh -h github.com -s workflow
+  ```
 
-## Examples
+## 6. Target Branch Correction & Merge Conflicts
 
-- **User:** "What is the status of my approved and open PRs?"
-- **Agent:**
-  1. Identifies the read-only inquiry and runs `dart .agents/skills/shepherd-prs/scripts/shepherd.dart list`.
-  2. Parses the JSON output to present a summary of all your own open PRs and approved third-party PRs, their CI checks, and recommended actions.
-  3. Asks the user for confirmation before executing any shepherding actions.
-
-- **User:** "Yes, please update the branch for PR #186254."
-- **Agent:**
-  1. Identifies the user's explicit confirmation and runs `dart .agents/skills/shepherd-prs/scripts/shepherd.dart run --pr 186254`.
-  2. Logs the result of the branch update to the user.
-
-- **User:** "Run shepherding on all my eligible PRs."
-- **Agent:**
-  1. Asks the user for confirmation: "I will run shepherding on all eligible approved PRs. Would you like me to proceed?"
-  2. Upon receiving confirmation, runs `dart .agents/skills/shepherd-prs/scripts/shepherd.dart run --all` and reports the action logs.
+* **Dismissed Reviews Warning**: Changing the target branch of a PR often causes GitHub to automatically dismiss existing approvals. Alert the user if the target branch changed so they can re-approve on GitHub.
+* **Merge Conflicts**: If a PR has conflicts (`MERGEABLE` is `CONFLICTING`), notify the user so the author can resolve them.

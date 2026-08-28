@@ -4,8 +4,11 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+const _kTransparent = Color(0x00000000);
+const _kBlue = Color(0xFF0000FF);
 
 class MyPainter extends CustomPainter {
   const MyPainter({required this.color});
@@ -55,7 +58,7 @@ void main() {
     testWidgets('matches when the predicate returns true', (WidgetTester tester) async {
       await tester.pumpWidget(
         const CustomPaint(
-          painter: MyPainter(color: Colors.transparent),
+          painter: MyPainter(color: _kTransparent),
           child: SizedBox(width: 50, height: 50),
         ),
       );
@@ -72,7 +75,7 @@ void main() {
 
       expect(methodsAndArguments, <MethodAndArguments>[
         const MethodAndArguments(#save, <dynamic>[]),
-        const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
+        const MethodAndArguments(#drawColor, <dynamic>[_kTransparent, BlendMode.color]),
         // The #restore call is never evaluated
       ]);
     });
@@ -80,7 +83,7 @@ void main() {
     testWidgets('fails when the predicate always returns false', (WidgetTester tester) async {
       await tester.pumpWidget(
         const CustomPaint(
-          painter: MyPainter(color: Colors.transparent),
+          painter: MyPainter(color: _kTransparent),
           child: SizedBox(width: 50, height: 50),
         ),
       );
@@ -99,7 +102,7 @@ void main() {
 
       expect(methodsAndArguments, <MethodAndArguments>[
         const MethodAndArguments(#save, <dynamic>[]),
-        const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
+        const MethodAndArguments(#drawColor, <dynamic>[_kTransparent, BlendMode.color]),
         const MethodAndArguments(#restore, <dynamic>[]),
       ]);
     });
@@ -107,7 +110,7 @@ void main() {
     testWidgets('fails when the predicate throws', (WidgetTester tester) async {
       await tester.pumpWidget(
         const CustomPaint(
-          painter: MyPainter(color: Colors.transparent),
+          painter: MyPainter(color: _kTransparent),
           child: SizedBox(width: 50, height: 50),
         ),
       );
@@ -132,7 +135,7 @@ void main() {
 
       expect(methodsAndArguments, <MethodAndArguments>[
         const MethodAndArguments(#save, <dynamic>[]),
-        const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
+        const MethodAndArguments(#drawColor, <dynamic>[_kTransparent, BlendMode.color]),
         // The #restore call is never evaluated
       ]);
     });
@@ -142,7 +145,7 @@ void main() {
     testWidgets('matches when the predicate always returns true', (WidgetTester tester) async {
       await tester.pumpWidget(
         const CustomPaint(
-          painter: MyPainter(color: Colors.transparent),
+          painter: MyPainter(color: _kTransparent),
           child: SizedBox(width: 50, height: 50),
         ),
       );
@@ -159,7 +162,7 @@ void main() {
 
       expect(methodsAndArguments, <MethodAndArguments>[
         const MethodAndArguments(#save, <dynamic>[]),
-        const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
+        const MethodAndArguments(#drawColor, <dynamic>[_kTransparent, BlendMode.color]),
         const MethodAndArguments(#restore, <dynamic>[]),
       ]);
     });
@@ -167,7 +170,7 @@ void main() {
     testWidgets('fails when the predicate returns false', (WidgetTester tester) async {
       await tester.pumpWidget(
         const CustomPaint(
-          painter: MyPainter(color: Colors.transparent),
+          painter: MyPainter(color: _kTransparent),
           child: SizedBox(width: 50, height: 50),
         ),
       );
@@ -187,7 +190,7 @@ void main() {
 
       expect(methodsAndArguments, <MethodAndArguments>[
         const MethodAndArguments(#save, <dynamic>[]),
-        const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
+        const MethodAndArguments(#drawColor, <dynamic>[_kTransparent, BlendMode.color]),
         // The #restore call is never evaluated
       ]);
     });
@@ -195,7 +198,7 @@ void main() {
     testWidgets('fails if the predicate ever throws', (WidgetTester tester) async {
       await tester.pumpWidget(
         const CustomPaint(
-          painter: MyPainter(color: Colors.transparent),
+          painter: MyPainter(color: _kTransparent),
           child: SizedBox(width: 50, height: 50),
         ),
       );
@@ -217,7 +220,7 @@ void main() {
 
       expect(methodsAndArguments, <MethodAndArguments>[
         const MethodAndArguments(#save, <dynamic>[]),
-        const MethodAndArguments(#drawColor, <dynamic>[Colors.transparent, BlendMode.color]),
+        const MethodAndArguments(#drawColor, <dynamic>[_kTransparent, BlendMode.color]),
         // The #restore call is never evaluated
       ]);
     });
@@ -228,7 +231,7 @@ void main() {
     const double startAngle = math.pi / 4;
     const double sweepAngle = math.pi / 2;
     const useCenter = false;
-    final paint = Paint()..color = Colors.blue;
+    final paint = Paint()..color = _kBlue;
 
     Future<void> pumpPainter(WidgetTester tester) async {
       await tester.pumpWidget(
@@ -357,7 +360,7 @@ void main() {
       Offset.zero & const Size.square(50),
       const Radius.circular(5),
     );
-    final paint = Paint()..color = Colors.blue;
+    final paint = Paint()..color = _kBlue;
 
     Future<void> pumpPainter(WidgetTester tester) async {
       await tester.pumpWidget(

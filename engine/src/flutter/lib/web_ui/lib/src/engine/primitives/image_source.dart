@@ -340,3 +340,24 @@ Future<Uint8List> encodeDomImageSourceAsPng(
   canvas.height = 0;
   return base64.decode(pngBase64);
 }
+
+/// An [ImageSource] implementation wrapping a generic [DomCanvasImageSource]
+/// (such as an HTMLCanvasElement, OffscreenCanvas, SVGImageElement, or HTMLVideoElement)
+/// that does not require manual resource cleanup.
+class CanvasImageSourceWrapper extends ImageSource {
+  CanvasImageSourceWrapper(this.canvasImageSource, this.width, this.height);
+
+  @override
+  final DomCanvasImageSource canvasImageSource;
+
+  @override
+  final int width;
+
+  @override
+  final int height;
+
+  @override
+  void _doClose() {
+    // Generic canvas image sources do not require manual resource disposal.
+  }
+}

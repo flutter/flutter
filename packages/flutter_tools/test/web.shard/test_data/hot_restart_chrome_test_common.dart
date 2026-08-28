@@ -14,6 +14,8 @@ import '../../src/common.dart';
 
 import 'hot_reload_index_html_samples.dart';
 
+// TODO(nshahan): Remove useDDCLibraryBundleFormat parameter after
+// https://github.com/flutter/flutter/issues/142060.
 Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
   await _testProject(
     HotReloadProject(),
@@ -92,10 +94,7 @@ Future<void> _testProject(
         additionalCommandArgs: <String>[
           '--verbose',
           '--no-web-resources-cdn',
-          if (useDDCLibraryBundleFormat)
-            '--web-experimental-hot-reload'
-          else
-            '--no-web-experimental-hot-reload',
+          if (!useDDCLibraryBundleFormat) '--no-web-experimental-hot-reload',
         ],
       );
       // hot restart works without error

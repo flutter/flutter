@@ -4,7 +4,6 @@
 
 import '../base/file_system.dart';
 import '../base/project_migrator.dart';
-import '../base/version.dart';
 import '../ios/xcodeproj.dart';
 import '../xcode_project.dart';
 
@@ -33,13 +32,9 @@ class CocoaPodsScriptReadlink extends ProjectMigrator {
       return;
     }
 
-    final Version? version = _xcodeProjectInterpreter.version;
-
-    // If Xcode not installed or less than 14.3 with readlink behavior change, skip this migration.
-    if (version == null || version < Version(14, 3, 0)) {
-      logger.printTrace(
-        'Detected Xcode version is $version, below 14.3, skipping "readlink -f" workaround.',
-      );
+    // If Xcode not installed, skip this migration.
+    if (!_xcodeProjectInterpreter.isInstalled) {
+      logger.printTrace('Xcode is not installed, skipping "readlink -f" workaround.');
       return;
     }
 

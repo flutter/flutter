@@ -95,15 +95,13 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    return child?.getDistanceToActualBaseline(baseline) ??
-        super.computeDistanceToActualBaseline(baseline);
+    return child?.getDistanceToActualBaseline(baseline);
   }
 
   @override
   @protected
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    final double? result = child?.getDryBaseline(constraints, baseline);
-    return result ?? super.computeDryBaseline(constraints, baseline);
+    return child?.getDryBaseline(constraints, baseline);
   }
 
   @override
@@ -157,6 +155,22 @@ enum HitTestBehavior {
 
   /// Translucent targets both receive events within their bounds and permit
   /// targets visually behind them to also receive events.
+  ///
+  /// When both a translucent target and its descendant are listening to the
+  /// same pointer event, both will receive it. Events are dispatched to the
+  /// most specific target first (the descendant), then to the translucent
+  /// target. In gesture arena competitions for the same gesture, the
+  /// descendant typically wins because it enters the arena first (first come,
+  /// first served). The translucent target's gesture is not invoked unless the
+  /// descendant's gesture is rejected or the descendant listens to a different
+  /// gesture.
+  ///
+  /// See also:
+  ///
+  ///  * [HitTestResult.path], which describes the order in which hit test
+  ///    entries receive events.
+  ///  * [GestureDetector.behavior], which configures the hit test behavior
+  ///    used for gesture detection.
   translucent,
 }
 
@@ -1385,6 +1399,8 @@ class RenderBackdropFilter extends RenderProxyBox {
 ///  * [ClipRRect], which can be customized with a [CustomClipper<RRect>].
 ///  * [ClipOval], which can be customized with a [CustomClipper<Rect>].
 ///  * [ClipPath], which can be customized with a [CustomClipper<Path>].
+///  * [SliverClipRect], which can be customized with a [CustomClipper<Rect>].
+///  * [SliverClipRRect], which can be customized with a [CustomClipper<RRect>].
 ///  * [ShapeBorderClipper], for specifying a clip path using a [ShapeBorder].
 abstract class CustomClipper<T> extends Listenable {
   /// Creates a custom clipper.
@@ -2210,7 +2226,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     _updateClip();
     final RRect offsetRRect = _clip!.shift(offset);
-    final offsetRRectAsPath = Path()..addRRect(offsetRRect);
     var paintShadows = true;
     assert(() {
       if (debugDisableShadows) {
@@ -2230,6 +2245,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
 
     final Canvas canvas = context.canvas;
     if (elevation != 0.0 && paintShadows) {
+      final offsetRRectAsPath = Path()..addRRect(offsetRRect);
       canvas.drawShadow(offsetRRectAsPath, shadowColor, elevation, color.alpha != 0xFF);
     }
     final usesSaveLayer = clipBehavior == Clip.antiAliasWithSaveLayer;

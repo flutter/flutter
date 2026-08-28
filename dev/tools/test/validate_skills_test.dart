@@ -93,14 +93,14 @@ void main() {
     final bool isValid = await validateSkills(
       skillDirPaths: [skillsDirectory, reidbakerSkillsDirectory],
       customRules: [CheckBackticksRelativePathsRule(valid2SegmentPaths, repoRoot.path)],
-      resolvedRules: {
-        'check-absolute-paths': AnalysisSeverity.disabled,
-        'check-relative-paths': AnalysisSeverity.disabled,
-        'check-trailing-whitespace': AnalysisSeverity.disabled,
-        'description-too-long': AnalysisSeverity.disabled,
-        'disallowed-field': AnalysisSeverity.disabled,
-        'invalid-skill-name': AnalysisSeverity.disabled,
-        'valid-yaml-metadata': AnalysisSeverity.disabled,
+      resolvedRuleConfigs: {
+        'check-absolute-paths': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'check-relative-paths': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'check-trailing-whitespace': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'description-too-long': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'disallowed-field': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'invalid-skill-name': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'valid-yaml-metadata': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
       },
     );
     expect(isValid, isTrue, reason: 'Skills validation failed. See above for details.');

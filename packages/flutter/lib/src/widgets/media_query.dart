@@ -101,6 +101,9 @@ enum _MediaQueryAspect {
   /// Specifies the aspect corresponding to [MediaQueryData.disableAnimations].
   disableAnimations,
 
+  /// Specifies the aspect corresponding to [MediaQueryData.reduceMotion].
+  reduceMotion,
+
   /// Specifies the aspect corresponding to [MediaQueryData.boldText].
   boldText,
 
@@ -228,6 +231,7 @@ class MediaQueryData {
     this.highContrast = false,
     this.onOffSwitchLabels = false,
     this.disableAnimations = false,
+    this.reduceMotion = false,
     this.boldText = false,
     this.supportsAnnounce = false,
     this.navigationMode = NavigationMode.traditional,
@@ -319,6 +323,8 @@ class MediaQueryData {
       disableAnimations =
           platformData?.disableAnimations ??
           view.platformDispatcher.accessibilityFeatures.disableAnimations,
+      reduceMotion =
+          platformData?.reduceMotion ?? view.platformDispatcher.accessibilityFeatures.reduceMotion,
       boldText = platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
       supportsAnnounce =
           platformData?.supportsAnnounce ??
@@ -692,6 +698,29 @@ class MediaQueryData {
   ///    originates.
   final bool disableAnimations;
 
+  /// Whether the platform is requesting that animations be reduced or replaced
+  /// with cross-fades in preference to motion effects.
+  ///
+  /// This corresponds to the iOS "Reduce Motion" accessibility setting.
+  ///
+  /// Unlike [disableAnimations], this flag does not automatically alter
+  /// framework animations such as those controlled via [AnimationController].
+  /// Instead, it is intended to be read by widgets that want to tone down or
+  /// replace non-essential motion, for example by substituting a cross-fade
+  /// for a slide transition.
+  ///
+  /// When implementing custom animations, you should check this property and
+  /// adjust behavior accordingly; for example, by preferring a fade over
+  /// movement when it is true.
+  ///
+  /// See also:
+  ///
+  ///  * [dart:ui.AccessibilityFeatures.reduceMotion], the underlying primitive
+  ///    flag provided by the platform.
+  ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
+  ///    originates.
+  final bool reduceMotion;
+
   /// Whether the platform is requesting that text be drawn with a bold font
   /// weight.
   ///
@@ -852,6 +881,7 @@ class MediaQueryData {
     bool? highContrast,
     bool? onOffSwitchLabels,
     bool? disableAnimations,
+    bool? reduceMotion,
     bool? invertColors,
     bool? accessibleNavigation,
     bool? boldText,
@@ -879,6 +909,7 @@ class MediaQueryData {
       highContrast: highContrast ?? this.highContrast,
       onOffSwitchLabels: onOffSwitchLabels ?? this.onOffSwitchLabels,
       disableAnimations: disableAnimations ?? this.disableAnimations,
+      reduceMotion: reduceMotion ?? this.reduceMotion,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
       supportsAnnounce: supportsAnnounce ?? this.supportsAnnounce,
@@ -927,6 +958,7 @@ class MediaQueryData {
       highContrast: highContrast,
       onOffSwitchLabels: onOffSwitchLabels,
       disableAnimations: disableAnimations,
+      reduceMotion: reduceMotion,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
       supportsAnnounce: supportsAnnounce,
@@ -962,6 +994,7 @@ class MediaQueryData {
       highContrast: highContrast,
       onOffSwitchLabels: onOffSwitchLabels,
       disableAnimations: disableAnimations,
+      reduceMotion: reduceMotion,
       accessibleNavigation: accessibleNavigation,
       boldText: boldText,
       supportsAnnounce: supportsAnnounce,
@@ -1165,6 +1198,7 @@ class MediaQueryData {
         other.highContrast == highContrast &&
         other.onOffSwitchLabels == onOffSwitchLabels &&
         other.disableAnimations == disableAnimations &&
+        other.reduceMotion == reduceMotion &&
         other.invertColors == invertColors &&
         other.accessibleNavigation == accessibleNavigation &&
         other.boldText == boldText &&
@@ -1193,6 +1227,7 @@ class MediaQueryData {
     highContrast,
     onOffSwitchLabels,
     disableAnimations,
+    reduceMotion,
     invertColors,
     accessibleNavigation,
     boldText,
@@ -1225,6 +1260,7 @@ class MediaQueryData {
       'highContrast: $highContrast',
       'onOffSwitchLabels: $onOffSwitchLabels',
       'disableAnimations: $disableAnimations',
+      'reduceMotion: $reduceMotion',
       'invertColors: $invertColors',
       'boldText: $boldText',
       'navigationMode: ${navigationMode.name}',
@@ -2026,6 +2062,28 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
   static bool? maybeDisableAnimationsOf(BuildContext context) =>
       _maybeOf(context, _MediaQueryAspect.disableAnimations)?.disableAnimations;
 
+  /// Returns [MediaQueryData.reduceMotion] for the nearest [MediaQuery]
+  /// ancestor or false, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.reduceMotion] property of the ancestor
+  /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseOf}
+  static bool reduceMotionOf(BuildContext context) =>
+      _of(context, _MediaQueryAspect.reduceMotion).reduceMotion;
+
+  /// Returns [MediaQueryData.reduceMotion] for the nearest [MediaQuery]
+  /// ancestor or null, if no such ancestor exists.
+  ///
+  /// Use of this method will cause the given [context] to rebuild any time that
+  /// the [MediaQueryData.reduceMotion] property of the ancestor
+  /// [MediaQuery] changes.
+  ///
+  /// {@macro flutter.widgets.media_query.MediaQuery.dontUseMaybeOf}
+  static bool? maybeReduceMotionOf(BuildContext context) =>
+      _maybeOf(context, _MediaQueryAspect.reduceMotion)?.reduceMotion;
+
   /// Returns the [MediaQueryData.boldText] accessibility setting for the
   /// nearest [MediaQuery] ancestor or false, if no such ancestor exists.
   ///
@@ -2273,6 +2331,7 @@ class MediaQuery extends InheritedModel<_MediaQueryAspect> {
               data.onOffSwitchLabels != oldWidget.data.onOffSwitchLabels,
             _MediaQueryAspect.disableAnimations =>
               data.disableAnimations != oldWidget.data.disableAnimations,
+            _MediaQueryAspect.reduceMotion => data.reduceMotion != oldWidget.data.reduceMotion,
             _MediaQueryAspect.boldText => data.boldText != oldWidget.data.boldText,
             _MediaQueryAspect.supportsAnnounce =>
               data.supportsAnnounce != oldWidget.data.supportsAnnounce,

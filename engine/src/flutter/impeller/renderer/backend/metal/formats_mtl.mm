@@ -94,6 +94,9 @@ MTLTextureDescriptor* ToMTLTextureDescriptor(const TextureDescriptor& desc) {
   mtl_desc.width = desc.size.width;
   mtl_desc.height = desc.size.height;
   mtl_desc.mipmapLevelCount = desc.mip_count;
+  if (desc.type == TextureType::kTexture2DArray) {
+    mtl_desc.arrayLength = desc.array_layer_count;
+  }
   mtl_desc.usage = MTLTextureUsageUnknown;
   if (desc.usage & TextureUsage::kUnknown) {
     mtl_desc.usage |= MTLTextureUsageUnknown;

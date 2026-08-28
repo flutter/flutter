@@ -18,7 +18,10 @@ class FontFallbackManager {
   factory FontFallbackManager(FallbackFontRegistry registry) =>
       FontFallbackManager._(registry, getFallbackFontList());
 
-  FontFallbackManager._(this._registry, this._fallbackFonts);
+  FontFallbackManager._(this._registry, this._fallbackFonts)
+    : _notoFontByName = <String, NotoFont>{
+        for (final NotoFont font in _fallbackFonts) font.name: font,
+      };
 
   final FallbackFontRegistry _registry;
 
@@ -38,10 +41,57 @@ class FontFallbackManager {
   @visibleForTesting
   void Function(String family)? debugOnLoadFontFamily;
 
+  final Map<String, NotoFont> _notoFontByName;
+
+  NotoFont? findFontByName(String name) => _notoFontByName[name];
+
   final List<String> globalFontFallbacks = <String>['Roboto'];
 
   void registerFallbackFont(String family) {
     debugOnLoadFontFamily?.call(family);
+
+    if (globalFontFallbacks.contains(family)) {
+      return;
+    }
+
+    final NotoFont? notoFont = _notoFontByName[family];
+    if (notoFont != null) {
+      // If this is a split slice, and its monolithic parent is already
+      // registered, discard the registration since the parent already covers
+      // all characters.
+      final String? monolithicParent = notoFont.monolithicParent;
+      if (monolithicParent != null) {
+        if (globalFontFallbacks.contains(monolithicParent)) {
+          return;
+        }
+      }
+
+      // If this is a monolithic parent, perform a priority-preserving
+      // atomic swap: replace all of its active split slices in the fallback
+      // list with the single monolithic family name, inserting it at the
+      // index of the earliest active slice. This preserves correct relative
+      // language priority for Han Unification.
+      final Set<String> slices = notoFont.slices;
+      if (slices.isNotEmpty) {
+        var earliestIndex = -1;
+        for (var i = 0; i < globalFontFallbacks.length; i++) {
+          if (slices.contains(globalFontFallbacks[i])) {
+            earliestIndex = i;
+            break;
+          }
+        }
+
+        globalFontFallbacks.removeWhere(slices.contains);
+
+        if (earliestIndex != -1) {
+          globalFontFallbacks.insert(earliestIndex, family);
+        } else {
+          globalFontFallbacks.add(family);
+        }
+        return;
+      }
+    }
+
     // Insert emoji font before all other fallback fonts so we use the emoji
     // whenever it's available.
     if (family.startsWith('Noto Color Emoji') || family == 'Noto Emoji') {

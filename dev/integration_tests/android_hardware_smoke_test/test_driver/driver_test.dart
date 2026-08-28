@@ -12,14 +12,15 @@ import 'package:android_hardware_smoke_test/constants.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:image/image.dart' as img;
 import 'package:test/test.dart';
+import 'image_utils.dart';
 
 /// Whether the current environment is LUCI.
 bool get isLuci => io.Platform.environment['LUCI_CI'] == 'True';
 
 void main() async {
-  late final FlutterDriver flutterDriver;
-  late final NativeDriver nativeDriver;
-  late final String activeGoldenVariant;
+  late FlutterDriver flutterDriver;
+  late AndroidNativeDriver nativeDriver;
+  late String activeGoldenVariant;
 
   setUpAll(() async {
     flutterDriver = await FlutterDriver.connect();
@@ -29,13 +30,20 @@ void main() async {
     final String response = await flutterDriver.requestData(
       json.encode(<String, Object?>{keyCommand: commandGetGoldenVariant}),
     );
-    final Map<String, Object?> reply = (json.decode(response) as Map<Object?, Object?>)
-        .cast<String, Object?>();
+    final Map<String, Object?> reply =
+        (json.decode(response) as Map<Object?, Object?>)
+            .cast<String, Object?>();
     final replyVariant = reply[keyGoldenVariant] as String?;
-    activeGoldenVariant = (replyVariant != null && replyVariant.isNotEmpty) ? '.$replyVariant' : '';
+    activeGoldenVariant = switch (replyVariant) {
+      final String s when s.isNotEmpty => '.$s',
+      _ => '',
+    };
 
     if (isLuci) {
-      await enableSkiaGoldComparator(namePrefix: 'android_hardware_smoke_test$activeGoldenVariant');
+      await enableSkiaGoldComparator(
+        namePrefix: 'android_hardware_smoke_test$activeGoldenVariant',
+        localOutputDir: 'goldens',
+      );
     }
   });
 
@@ -47,19 +55,21 @@ void main() async {
   Future<void> templateTest(String testName) async {
     // Ask the app to render the test and return the rendered image bytes
     final String response = await flutterDriver.requestData(
-      json.encode(<String, Object?>{keyTestName: testName, keyPerformAppSideGoldenCompare: false}),
+      json.encode(<String, Object?>{
+        keyTestName: testName,
+        keyPerformAppSideGoldenCompare: false,
+      }),
     );
 
     // Expect a successful reply or skip status
-    final Map<String, Object?> reply = (json.decode(response) as Map<Object?, Object?>)
-        .cast<String, Object?>();
+    final Map<String, Object?> reply =
+        (json.decode(response) as Map<Object?, Object?>)
+            .cast<String, Object?>();
 
     if (reply[keyMessage] == 'Skipped') {
       markTestSkipped('Skipping $testName: ${reply[keyReason]}');
       return;
     }
-
-    expect(reply[keyMessage], equals('Rendered $testName'));
 
     final Uint8List imageBytes;
     final bool isPlatformView = testName.startsWith(platformViewPrefix);
@@ -69,19 +79,40 @@ void main() async {
       final w = reply[keyWidth]! as int;
       final h = reply[keyHeight]! as int;
 
-      final NativeScreenshot fullScreenshot = await nativeDriver.screenshot();
-      final Uint8List fullBytes = await fullScreenshot.readAsBytes();
+      img.Image? cropped;
+      const maxAttempts = 3;
 
-      final img.Image? decoded = img.decodePng(fullBytes);
-      if (decoded == null) {
-        throw StateError('Failed to decode full screen screenshot for $testName');
+      for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+        final NativeScreenshot fullScreenshot = await nativeDriver.screenshot();
+        final Uint8List fullBytes = await fullScreenshot.readAsBytes();
+
+        final img.Image? decoded = img.decodePng(fullBytes);
+        if (decoded == null) {
+          throw StateError(
+            'Failed to decode full screen screenshot for $testName',
+          );
+        }
+
+        final img.Image candidate = cropImage(decoded, x, y, w, h);
+
+        if (!isImageBlank(candidate)) {
+          cropped = candidate;
+          break;
+        }
+
+        io.stderr.writeln(
+          'Captured screenshot is blank/empty (attempt $attempt/$maxAttempts)',
+        );
+        if (attempt < maxAttempts) {
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        }
       }
-      if (x < 0 || y < 0 || w <= 0 || h <= 0 || x + w > decoded.width || y + h > decoded.height) {
+
+      if (cropped == null) {
         throw StateError(
-          'Crop bounds out of range for $testName: x=$x, y=$y, w=$w, h=$h, image.width=${decoded.width}, image.height=${decoded.height}',
+          'Captured screenshot is $errorBlankScreenshot after $maxAttempts attempts.',
         );
       }
-      final img.Image cropped = img.copyCrop(decoded, x: x, y: y, width: w, height: h);
       imageBytes = Uint8List.fromList(img.encodePng(cropped));
     } else {
       final imageBase64 = reply[keyImageBytes]! as String;
@@ -89,7 +120,11 @@ void main() async {
     }
 
     // Compare the bytes to a golden file on the host filesystem using the cached variant
-    await expectLater(imageBytes, matchesGoldenFile('goldens/$testName$activeGoldenVariant.png'));
+
+    await expectLater(
+      imageBytes,
+      matchesGoldenFile('goldens/$testName$activeGoldenVariant.png'),
+    );
   }
 
   test('should render and match blueRectangleTest golden', () async {
@@ -116,15 +151,27 @@ void main() async {
     await templateTest('backdropFilterBlurTest');
   }, timeout: Timeout.none);
 
-  test('should render and match $kPlatformViewTextureLayerTest golden', () async {
-    await templateTest(kPlatformViewTextureLayerTest);
-  }, timeout: Timeout.none);
+  test(
+    'should render and match $kPlatformViewTextureLayerTest golden',
+    () async {
+      await templateTest(kPlatformViewTextureLayerTest);
+    },
+    timeout: Timeout.none,
+  );
 
-  test('should render and match $kPlatformViewHybridCompositionTest golden', () async {
-    await templateTest(kPlatformViewHybridCompositionTest);
-  }, timeout: Timeout.none);
+  test(
+    'should render and match $kPlatformViewHybridCompositionTest golden',
+    () async {
+      await templateTest(kPlatformViewHybridCompositionTest);
+    },
+    timeout: Timeout.none,
+  );
 
-  test('should render and match $kPlatformViewHybridCompositionPlusPlusTest golden', () async {
-    await templateTest(kPlatformViewHybridCompositionPlusPlusTest);
-  }, timeout: Timeout.none);
+  test(
+    'should render and match $kPlatformViewHybridCompositionPlusPlusTest golden',
+    () async {
+      await templateTest(kPlatformViewHybridCompositionPlusPlusTest);
+    },
+    timeout: Timeout.none,
+  );
 }

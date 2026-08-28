@@ -2,6 +2,7 @@ package test.io.flutter.embedding.engine;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -140,10 +141,10 @@ public class FlutterEngineTest {
     assertEquals(flutterEngine1, FlutterEngine.engineForId(1));
     assertEquals(flutterEngine2, FlutterEngine.engineForId(2));
     flutterEngine1.destroy();
-    assertEquals(null, FlutterEngine.engineForId(1));
+    assertNull(FlutterEngine.engineForId(1));
     assertEquals(flutterEngine2, FlutterEngine.engineForId(2));
     flutterEngine2.destroy();
-    assertEquals(null, FlutterEngine.engineForId(2));
+    assertNull(FlutterEngine.engineForId(2));
   }
 
   // Helps show the root cause of MissingPluginException type errors like

@@ -1,0 +1,55 @@
+name: Mac Verify Binaries
+
+on:
+  pull_request:
+    branches: [master]
+  merge_group:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  check-engine-changes:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Check Engine Changes
+        id: check
+        uses: ./.github/actions/has-engine-changes
+
+  Mac_arm64_verify_binaries:
+    needs: check-engine-changes
+    if: needs.check-engine-changes.outputs.changed == 'true'
+    permissions:
+      contents: read
+    runs-on: macos-latest
+    timeout-minutes: 130
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Wait for Engine Build
+        uses: ./.github/actions/wait-for-engine-build
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          check-name: 'Mac mac_host_engine,Mac mac_ios_engine,Linux linux_host_engine'
+
+      - uses: ./.github/actions/composite-flutter-setup
+
+      - name: Run verify_binaries_pre_codesigned
+        run: |
+          SHARD=verify_binaries_pre_codesigned LUCI_CI=true dart --enable-asserts dev/bots/test.dart
