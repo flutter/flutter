@@ -4,8 +4,6 @@
 
 // Logic for native assets shared between all host OSes.
 
-import 'dart:collection';
-
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:hooks/hooks.dart';
@@ -1003,32 +1001,6 @@ OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
       TargetPlatform.throwUnsupportedTarget();
   }
 }
-
-extension OSArchitectures on OS {
-  Set<Architecture> get architectures => UnmodifiableSetView<Architecture>(_osTargets[this]!);
-}
-
-final _osTargets = <OS, Set<Architecture>>{
-  OS.android: <Architecture>{
-    Architecture.arm,
-    Architecture.arm64,
-    Architecture.ia32,
-    Architecture.x64,
-    Architecture.riscv64,
-  },
-  OS.fuchsia: <Architecture>{Architecture.arm64, Architecture.x64},
-  OS.iOS: <Architecture>{Architecture.arm, Architecture.arm64, Architecture.x64},
-  OS.linux: <Architecture>{
-    Architecture.arm,
-    Architecture.arm64,
-    Architecture.ia32,
-    Architecture.riscv32,
-    Architecture.riscv64,
-    Architecture.x64,
-  },
-  OS.macOS: <Architecture>{Architecture.arm64, Architecture.x64},
-  OS.windows: <Architecture>{Architecture.arm64, Architecture.ia32, Architecture.x64},
-};
 
 BuildMode _getBuildMode(Map<String, String> environmentDefines, bool isFlutterTester) {
   if (isFlutterTester) {
