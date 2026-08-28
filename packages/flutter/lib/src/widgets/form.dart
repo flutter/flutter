@@ -925,17 +925,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     final Widget child = wrapWithSemantics(widget.builder(this));
 
     return switch (_effectiveAutovalidateMode) {
-      AutovalidateMode.onUnfocus => Focus(
-        canRequestFocus: false,
-        skipTraversal: true,
-        onFocusChange: (bool value) {
-          if (!value) {
-            setState(_validate);
-          }
-        },
-        focusNode: _focusNode,
-        child: child,
-      ),
+      AutovalidateMode.onUnfocus => wrapWithFocus(child),
       _ => child,
     };
   }
