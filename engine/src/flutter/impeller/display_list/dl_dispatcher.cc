@@ -1058,8 +1058,8 @@ void Clip(std::vector<Rect>& cull_rect_state,
           flutter::DlClipOp clip_op) {
   if (clip_op == flutter::DlClipOp::kIntersect) {
     auto global_rect = bounds.TransformBounds(matrix);
-    auto new_cull_rect = cull_rect_state.back().Intersection(global_rect);
-    cull_rect_state.back() = new_cull_rect.value_or(Rect::MakeLTRB(0, 0, 0, 0));
+    cull_rect_state.back() =
+        cull_rect_state.back().IntersectionOrEmpty(global_rect);
   }
 }
 }  // namespace
