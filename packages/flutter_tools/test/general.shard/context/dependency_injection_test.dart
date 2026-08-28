@@ -9,9 +9,17 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
+import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/cocoapods.dart';
+import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
+import 'package:flutter_tools/src/macos/xcdevice.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
-import 'package:test/test.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -24,6 +32,22 @@ class FakeAndroidStudio extends Fake implements AndroidStudio {
 }
 
 class FakeBuildTargets extends Fake implements BuildTargets {}
+
+class FakeCocoaPods extends Fake implements CocoaPods {}
+
+class FakeCocoaPodsValidator extends Fake implements CocoaPodsValidator {}
+
+class FakeIOSSimulatorUtils extends Fake implements IOSSimulatorUtils {}
+
+class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
+
+class FakePlistParser extends Fake implements PlistParser {}
+
+class FakeXCDevice extends Fake implements XCDevice {}
+
+class FakeXcode extends Fake implements Xcode {}
+
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {}
 
 void main() {
   group('ToolDependencies.bootstrap', () {
@@ -88,7 +112,7 @@ void main() {
       expect(dependencies.toolContext.terminal, isNotNull);
       expect(dependencies.toolContext.userMessages, isNotNull);
 
-      // Verify AppleContext (eagerly constructed even on Linux)
+      // Verify AppleContext (lazy getters evaluated on access)
       expect(dependencies.appleContext.cocoaPods, isNotNull);
       expect(dependencies.appleContext.cocoapodsValidator, isNotNull);
       expect(dependencies.appleContext.iosSimulatorUtils, isNotNull);
@@ -100,6 +124,23 @@ void main() {
 
       // Verify AndroidContext
       expect(dependencies.androidContext.gradleUtils, isNotNull);
+    });
+
+    testUsingContext('shares memoized instance across multiple property reads', () async {
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+
+      final Xcode xcode1 = dependencies.appleContext.xcode;
+      final Xcode xcode2 = dependencies.appleContext.xcode;
+      expect(xcode1, same(xcode2));
+
+      final CocoaPods pods1 = dependencies.appleContext.cocoaPods;
+      final CocoaPods pods2 = dependencies.appleContext.cocoaPods;
+      expect(pods1, same(pods2));
     });
 
     testUsingContext('respects explicit overrides for Android SDK and Studio', () async {
@@ -131,6 +172,141 @@ void main() {
       );
 
       expect(dependencies.buildTargets, same(mockBuildTargets));
+    });
+
+    testUsingContext('respects explicit overrides for Apple dependencies', () async {
+      final mockCocoaPods = FakeCocoaPods();
+      final mockCocoaPodsValidator = FakeCocoaPodsValidator();
+      final mockIOSSimulatorUtils = FakeIOSSimulatorUtils();
+      final mockIOSWorkflow = FakeIOSWorkflow();
+      final mockPlistParser = FakePlistParser();
+      final mockXCDevice = FakeXCDevice();
+      final mockXcode = FakeXcode();
+      final mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
+
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        cocoaPods: mockCocoaPods,
+        cocoapodsValidator: mockCocoaPodsValidator,
+        fs: fs,
+        iosSimulatorUtils: mockIOSSimulatorUtils,
+        iosWorkflow: mockIOSWorkflow,
+        logger: logger,
+        platform: platform,
+        plistParser: mockPlistParser,
+        processManager: processManager,
+        xcdevice: mockXCDevice,
+        xcode: mockXcode,
+        xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+      );
+
+      expect(dependencies.appleContext.cocoaPods, same(mockCocoaPods));
+      expect(dependencies.appleContext.cocoapodsValidator, same(mockCocoaPodsValidator));
+      expect(dependencies.appleContext.iosSimulatorUtils, same(mockIOSSimulatorUtils));
+      expect(dependencies.appleContext.iosWorkflow, same(mockIOSWorkflow));
+      expect(dependencies.appleContext.plistParser, same(mockPlistParser));
+      expect(dependencies.appleContext.xcdevice, same(mockXCDevice));
+      expect(dependencies.appleContext.xcode, same(mockXcode));
+      expect(dependencies.appleContext.xcodeProjectInterpreter, same(mockXcodeProjectInterpreter));
+    });
+  });
+
+  group('AppleContext', () {
+    testWithoutContext('evaluates all dependencies lazily and memoizes results', () {
+      var cocoaPodsEvaluations = 0;
+      var cocoapodsValidatorEvaluations = 0;
+      var iosSimulatorUtilsEvaluations = 0;
+      var iosWorkflowEvaluations = 0;
+      var plistParserEvaluations = 0;
+      var xcdeviceEvaluations = 0;
+      var xcodeEvaluations = 0;
+      var xcodeProjectInterpreterEvaluations = 0;
+
+      final mockCocoaPods = FakeCocoaPods();
+      final mockCocoaPodsValidator = FakeCocoaPodsValidator();
+      final mockIOSSimulatorUtils = FakeIOSSimulatorUtils();
+      final mockIOSWorkflow = FakeIOSWorkflow();
+      final mockPlistParser = FakePlistParser();
+      final mockXCDevice = FakeXCDevice();
+      final mockXcode = FakeXcode();
+      final mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
+
+      final context = AppleContext(
+        cocoaPodsBuilder: () {
+          cocoaPodsEvaluations++;
+          return mockCocoaPods;
+        },
+        cocoapodsValidatorBuilder: () {
+          cocoapodsValidatorEvaluations++;
+          return mockCocoaPodsValidator;
+        },
+        iosSimulatorUtilsBuilder: () {
+          iosSimulatorUtilsEvaluations++;
+          return mockIOSSimulatorUtils;
+        },
+        iosWorkflowBuilder: () {
+          iosWorkflowEvaluations++;
+          return mockIOSWorkflow;
+        },
+        plistParserBuilder: () {
+          plistParserEvaluations++;
+          return mockPlistParser;
+        },
+        xcdeviceBuilder: () {
+          xcdeviceEvaluations++;
+          return mockXCDevice;
+        },
+        xcodeBuilder: () {
+          xcodeEvaluations++;
+          return mockXcode;
+        },
+        xcodeProjectInterpreterBuilder: () {
+          xcodeProjectInterpreterEvaluations++;
+          return mockXcodeProjectInterpreter;
+        },
+      );
+
+      // No builder has been invoked upon instantiation.
+      expect(cocoaPodsEvaluations, 0);
+      expect(cocoapodsValidatorEvaluations, 0);
+      expect(iosSimulatorUtilsEvaluations, 0);
+      expect(iosWorkflowEvaluations, 0);
+      expect(plistParserEvaluations, 0);
+      expect(xcdeviceEvaluations, 0);
+      expect(xcodeEvaluations, 0);
+      expect(xcodeProjectInterpreterEvaluations, 0);
+
+      // Accessing properties multiple times evaluates builder exactly once.
+      expect(context.cocoaPods, same(mockCocoaPods));
+      expect(context.cocoaPods, same(mockCocoaPods));
+      expect(cocoaPodsEvaluations, 1);
+
+      expect(context.cocoapodsValidator, same(mockCocoaPodsValidator));
+      expect(context.cocoapodsValidator, same(mockCocoaPodsValidator));
+      expect(cocoapodsValidatorEvaluations, 1);
+
+      expect(context.iosSimulatorUtils, same(mockIOSSimulatorUtils));
+      expect(context.iosSimulatorUtils, same(mockIOSSimulatorUtils));
+      expect(iosSimulatorUtilsEvaluations, 1);
+
+      expect(context.iosWorkflow, same(mockIOSWorkflow));
+      expect(context.iosWorkflow, same(mockIOSWorkflow));
+      expect(iosWorkflowEvaluations, 1);
+
+      expect(context.plistParser, same(mockPlistParser));
+      expect(context.plistParser, same(mockPlistParser));
+      expect(plistParserEvaluations, 1);
+
+      expect(context.xcdevice, same(mockXCDevice));
+      expect(context.xcdevice, same(mockXCDevice));
+      expect(xcdeviceEvaluations, 1);
+
+      expect(context.xcode, same(mockXcode));
+      expect(context.xcode, same(mockXcode));
+      expect(xcodeEvaluations, 1);
+
+      expect(context.xcodeProjectInterpreter, same(mockXcodeProjectInterpreter));
+      expect(context.xcodeProjectInterpreter, same(mockXcodeProjectInterpreter));
+      expect(xcodeProjectInterpreterEvaluations, 1);
     });
   });
 }
