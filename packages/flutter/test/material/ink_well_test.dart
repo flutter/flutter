@@ -2500,6 +2500,102 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/129058.
+  testWidgets('InkWell tertiary tap test', (WidgetTester tester) async {
+    final log = <String>[];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
+            child: InkWell(
+              onTertiaryTapDown: (TapDownDetails details) {
+                log.add('tertiary-tap-down');
+              },
+              onTertiaryTapUp: (TapUpDetails details) {
+                log.add('tertiary-tap-up');
+              },
+              onTertiaryTapCancel: () {
+                log.add('tertiary-tap-cancel');
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(InkWell), pointer: 1, buttons: kTertiaryButton);
+
+    expect(log, equals(<String>['tertiary-tap-down', 'tertiary-tap-up']));
+    log.clear();
+
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(InkWell)),
+      pointer: 2,
+      buttons: kTertiaryButton,
+    );
+    await gesture.moveTo(const Offset(100, 100));
+    await gesture.up();
+
+    expect(log, equals(<String>['tertiary-tap-down', 'tertiary-tap-cancel']));
+  });
+
+  testWidgets('InkWell tertiary tap highlights only when a tertiary callback is defined', (
+    WidgetTester tester,
+  ) async {
+    final log = <bool>[];
+
+    Widget buildFrame({required bool withTertiaryCallback}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              height: 100.0,
+              child: InkWell(
+                onTap: () {},
+                onHighlightChanged: log.add,
+                onTertiaryTapUp: withTertiaryCallback ? (TapUpDetails details) {} : null,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(withTertiaryCallback: true));
+
+    TestGesture gesture = await tester.startGesture(
+      tester.getRect(find.byType(InkWell)).center,
+      buttons: kTertiaryButton,
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(log, equals(<bool>[true]));
+    log.clear();
+
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(log, equals(<bool>[false]));
+    log.clear();
+
+    // Without a tertiary callback, a tertiary button press is ignored.
+    await tester.pumpWidget(buildFrame(withTertiaryCallback: false));
+
+    gesture = await tester.startGesture(
+      tester.getRect(find.byType(InkWell)).center,
+      buttons: kTertiaryButton,
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(log, isEmpty);
+
+    await gesture.up();
+  });
+
   testWidgets('try out hoverDuration property', (WidgetTester tester) async {
     final log = <String>[];
 
