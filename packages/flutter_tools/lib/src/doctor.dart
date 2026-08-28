@@ -750,7 +750,13 @@ class FlutterValidator extends DoctorValidator {
       );
     }
     final String resolvedFlutterPath = flutterBin.resolveSymbolicLinksSync();
-    if (!_filePathContainsDirPath(flutterRoot, resolvedFlutterPath)) {
+    var resolvedFlutterRoot = flutterRoot;
+    try {
+      resolvedFlutterRoot = _fileSystem.directory(flutterRoot).resolveSymbolicLinksSync();
+    } on FileSystemException {
+      // If the root does not exist or cannot be resolved, retain the old lexical behavior.
+    }
+    if (!_filePathContainsDirPath(resolvedFlutterRoot, resolvedFlutterPath)) {
       final hint =
           'Warning: `$binary` on your path resolves to '
           '$resolvedFlutterPath, which is not inside your current Flutter '
