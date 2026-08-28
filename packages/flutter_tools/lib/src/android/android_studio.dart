@@ -38,13 +38,11 @@ class AndroidStudio {
   /// A [version] value of null represents an unknown version.
   AndroidStudio(
     this.directory, {
-    this.version,
     this.configuredPath,
-    this.studioAppName = 'AndroidStudio',
     this.presetPluginsPath,
-  }) {
-    _initAndValidate();
-  }
+    this.studioAppName = _androidStudioId,
+    this.version,
+  });
 
   static AndroidStudio? fromMacOSBundle(String bundlePath, {String? configuredPath}) {
     final String studioPath = globals.fs.path.join(bundlePath, 'Contents');
@@ -152,8 +150,17 @@ class AndroidStudio {
   final String? presetPluginsPath;
 
   String? _javaPath;
-  var _isValid = false;
+  bool _isValid = false;
   final _validationMessages = <String>[];
+  bool _validated = false;
+
+  void _ensureValidated() {
+    if (_validated) {
+      return;
+    }
+    _validated = true;
+    _initAndValidate();
+  }
 
   /// The path of the JDK bundled with Android Studio.
   ///
@@ -161,9 +168,15 @@ class AndroidStudio {
   ///
   /// If you looking to invoke the java binary or add it to the system
   /// environment variables, consider using the [Java] class instead.
-  String? get javaPath => _javaPath;
+  String? get javaPath {
+    _ensureValidated();
+    return _javaPath;
+  }
 
-  bool get isValid => _isValid;
+  bool get isValid {
+    _ensureValidated();
+    return _isValid;
+  }
 
   String? get pluginsPath {
     if (presetPluginsPath != null) {
@@ -221,7 +234,10 @@ class AndroidStudio {
     }
   }
 
-  List<String> get validationMessages => _validationMessages;
+  List<String> get validationMessages {
+    _ensureValidated();
+    return _validationMessages;
+  }
 
   /// Locates the newest, valid version of Android Studio.
   ///
@@ -250,28 +266,31 @@ class AndroidStudio {
       return manuallyConfigured;
     }
 
-    AndroidStudio? newest;
-    for (final AndroidStudio studio in studios.where((AndroidStudio s) => s.isValid)) {
-      if (newest == null) {
-        newest = studio;
-        continue;
-      }
+    studios.sort(_compareCandidates);
 
-      // We prefer installs with known versions.
-      if (studio.version != null && newest.version == null) {
-        newest = studio;
-      } else if (studio.version != null &&
-          newest.version != null &&
-          studio.version! > newest.version!) {
-        newest = studio;
-      } else if (studio.version == null &&
-          newest.version == null &&
-          studio.directory.compareTo(newest.directory) > 0) {
-        newest = studio;
+    for (final studio in studios) {
+      if (studio.isValid) {
+        return studio;
       }
     }
 
-    return newest;
+    return null;
+  }
+
+  static int _compareCandidates(AndroidStudio a, AndroidStudio b) {
+    if (a.version != null && b.version == null) {
+      return -1;
+    }
+    if (a.version == null && b.version != null) {
+      return 1;
+    }
+    if (a.version != null && b.version != null) {
+      final int versionComparison = b.version!.compareTo(a.version!);
+      if (versionComparison != 0) {
+        return versionComparison;
+      }
+    }
+    return b.directory.compareTo(a.directory);
   }
 
   static List<AndroidStudio> allInstalled() =>
