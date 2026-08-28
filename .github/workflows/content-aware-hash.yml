@@ -25,4 +25,4 @@ jobs:
           # test notice annotation for retrival from api
           echo "::notice ::{\"engine_content_hash\": \"${engine_content_hash}\"}"
           # test summary writing
-          echo "{\"engine_content_hash\": \"${engine_content_hash}\"" >> $GITHUB_STEP_SUMMARY
+          echo "{\"engine_content_hash\": \"${engine_content_hash}\"" >> "$GITHUB_STEP_SUMMARY"
