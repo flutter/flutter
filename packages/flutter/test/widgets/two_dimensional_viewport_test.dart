@@ -3085,40 +3085,6 @@ class _NoOpToggleablePainter extends ToggleablePainter {
   void paint(Canvas canvas, Size size) {}
 }
 
-class _TestVicinity extends ChildVicinity {
-  const _TestVicinity({required super.xIndex, required super.yIndex});
-}
-
-//ignore: unused_element
-class _TestBaseDelegate extends TwoDimensionalChildDelegate {
-  // Would fail analysis without covariant
-  @override
-  Widget? build(BuildContext context, _TestVicinity vicinity) => null;
-
-  @override
-  bool shouldRebuild(covariant TwoDimensionalChildDelegate oldDelegate) => false;
-}
-
-//ignore: unused_element
-class _TestBuilderDelegate extends TwoDimensionalChildBuilderDelegate {
-  _TestBuilderDelegate({required super.builder});
-  // Would fail analysis without covariant
-  @override
-  Widget? build(BuildContext context, _TestVicinity vicinity) {
-    return super.build(context, vicinity);
-  }
-}
-
-//ignore: unused_element
-class _TestListDelegate extends TwoDimensionalChildListDelegate {
-  _TestListDelegate({required super.children});
-  // Would fail analysis without covariant
-  @override
-  Widget? build(BuildContext context, _TestVicinity vicinity) {
-    return super.build(context, vicinity);
-  }
-}
-
 RenderTwoDimensionalViewport getViewport(WidgetTester tester, Key childKey) {
   return RenderAbstractViewport.of(tester.renderObject(find.byKey(childKey)))
       as RenderSimpleBuilderTableViewport;
@@ -3182,37 +3148,4 @@ Future<void> restoreScrollAndVerify(WidgetTester tester) async {
     tester.state<TwoDimensionalScrollableState>(findScrollable).verticalScrollable.position.pixels,
     100.0,
   );
-}
-
-// Validates covariant through analysis.
-mixin _SomeDelegateMixin on TwoDimensionalChildDelegate {}
-
-// ignore: unused_element
-class _SomeRenderTwoDimensionalViewport extends RenderTwoDimensionalViewport {
-  _SomeRenderTwoDimensionalViewport({
-    required super.horizontalOffset,
-    required super.horizontalAxisDirection,
-    required super.verticalOffset,
-    required super.verticalAxisDirection,
-    required _SomeDelegateMixin super.delegate,
-    required super.mainAxis,
-    required super.childManager,
-  });
-
-  @override
-  _SomeDelegateMixin get delegate => super.delegate as _SomeDelegateMixin;
-  @override
-  set delegate(_SomeDelegateMixin value) {
-    // Analysis would fail without covariant
-    super.delegate = value;
-  }
-
-  @override
-  RenderBox? getChildFor(_TestVicinity vicinity) {
-    // Analysis would fail without covariant
-    return super.getChildFor(vicinity);
-  }
-
-  @override
-  void layoutChildSequence() {}
 }
