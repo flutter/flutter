@@ -1,5 +1,5 @@
-name: ios_universal_link
-description: "Integration test for iOS Universal Links."
+name: ios_universal_link_appdelegate
+description: "Integration test for iOS Universal Links (AppDelegate)."
 publish_to: 'none'
 version: 1.0.0+1
 
