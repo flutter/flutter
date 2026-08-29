@@ -1,0 +1,20 @@
+name: flutter_analyzer_plugin
+description: Custom analysis rules for flutter/flutter
+version: 0.0.1
+publish_to: none
+
+resolution: workspace
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  analysis_server_plugin: any
+  analyzer: any
+  path: any
+
+dev_dependencies:
+  analyzer_testing: any
+  test_reflective_loader: any
+
+# PUBSPEC CHECKSUM: jdpqac
