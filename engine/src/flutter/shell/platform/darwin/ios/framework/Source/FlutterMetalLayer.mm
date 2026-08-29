@@ -30,13 +30,15 @@ FLUTTER_ASSERT_ARC
   NSMutableSet<FlutterTexture*>* _availableTextures;
   NSUInteger _totalTextures;
   FlutterTexture* _front;
+
+  // Presents completed IOSurfaces without consuming CAMetalLayer drawables.
   AVSampleBufferDisplayLayer* _sampleBufferDisplayLayer;
 }
 
 - (void)presentTexture:(FlutterTexture*)texture;
-- (void)displayTexture:(FlutterTexture*)texture;
+- (void)enqueueTextureForDisplay:(FlutterTexture*)texture;
 - (void)returnTexture:(FlutterTexture*)texture;
-- (void)resetSampleBufferDisplayLayer;
+- (void)recreateSampleBufferDisplayLayer;
 - (void)willEnterForeground:(NSNotification*)notification;
 
 @end
@@ -136,7 +138,8 @@ FLUTTER_ASSERT_ARC
   FlutterMetalLayer* layer = _layer;
   texture.waitingForCompletion = YES;
   [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
-    [layer displayTexture:texture];
+    // Prevent the display layer from reading the IOSurface before Metal finishes writing it.
+    [layer enqueueTextureForDisplay:texture];
     texture.waitingForCompletion = NO;
   }];
 }
@@ -151,7 +154,7 @@ FLUTTER_ASSERT_ARC
     self.device = self.preferredDevice;
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
-    [self resetSampleBufferDisplayLayer];
+    [self recreateSampleBufferDisplayLayer];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground:)
@@ -168,6 +171,7 @@ FLUTTER_ASSERT_ARC
 - (BOOL)isKindOfClass:(Class)aClass {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
+  // Flutter Metal surfaces expect their layer to satisfy CAMetalLayer type checks.
   if ([aClass isEqual:[CAMetalLayer class]]) {
     return YES;
   }
@@ -183,7 +187,7 @@ FLUTTER_ASSERT_ARC
   [CATransaction commit];
 }
 
-- (void)resetSampleBufferDisplayLayer {
+- (void)recreateSampleBufferDisplayLayer {
   [_sampleBufferDisplayLayer removeFromSuperlayer];
 
   _sampleBufferDisplayLayer = [[AVSampleBufferDisplayLayer alloc] init];
@@ -216,14 +220,15 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)willEnterForeground:(NSNotification*)notification {
-  [self resetSampleBufferDisplayLayer];
+  // A flushed display layer may remain unable to enqueue after backgrounding.
+  [self recreateSampleBufferDisplayLayer];
 
   FlutterTexture* front = nil;
   @synchronized(self) {
     front = _front;
   }
   if (front != nil) {
-    [self displayTexture:front];
+    [self enqueueTextureForDisplay:front];
   }
 }
 
@@ -385,7 +390,8 @@ FLUTTER_ASSERT_ARC
   }
 }
 
-- (void)displayTexture:(FlutterTexture*)texture {
+- (void)enqueueTextureForDisplay:(FlutterTexture*)texture {
+  // Wrap the rendered IOSurface directly; this does not copy or encode its pixels.
   CVPixelBufferRef pixelBuffer = nil;
   CVReturn result = CVPixelBufferCreateWithIOSurface(
       kCFAllocatorDefault, (__bridge IOSurfaceRef)texture.surface, nil, &pixelBuffer);
@@ -394,9 +400,8 @@ FLUTTER_ASSERT_ARC
   }
 
   CMVideoFormatDescriptionRef formatDescription = nil;
-  OSStatus status =
-      CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, pixelBuffer,
-                                                   &formatDescription);
+  OSStatus status = CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, pixelBuffer,
+                                                                 &formatDescription);
   if (status != noErr || formatDescription == nil) {
     CFRelease(pixelBuffer);
     return;
@@ -409,7 +414,7 @@ FLUTTER_ASSERT_ARC
   };
   CMSampleBufferRef sampleBuffer = nil;
   status = CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixelBuffer,
-                                                     formatDescription, &timing, &sampleBuffer);
+                                                    formatDescription, &timing, &sampleBuffer);
   if (status == noErr && sampleBuffer != nil) {
     CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, YES);
     if (attachments != nil && CFArrayGetCount(attachments) > 0) {
@@ -417,6 +422,7 @@ FLUTTER_ASSERT_ARC
           (CFMutableDictionaryRef)CFArrayGetValueAtIndex(attachments, 0);
       CFDictionarySetValue(attachment, kCMSampleAttachmentKey_DisplayImmediately, kCFBooleanTrue);
     }
+    // Flutter frames are already paced by VSync, so they should not be queued by timestamp.
     [_sampleBufferDisplayLayer enqueueSampleBuffer:sampleBuffer];
     CFRelease(sampleBuffer);
   }
