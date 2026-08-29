@@ -1,0 +1,49 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import XCTest
+
+class RunnerUITests: XCTestCase {
+    
+    @available(iOS 16.4, *)
+    func testDeepLinks() throws {
+        var app = XCUIApplication()
+        // Pre-warm the app and simulator caches so the initial launch does not exceed
+        // FlutterEngine's 3.0s first-frame deadline.
+        app.launch()
+        app.terminate()
+
+        // Cold start HTTPS
+        app = XCUIApplication()
+        var url = URL(string: "https://flutter-dashboard.appspot.com/invalid_cold")!
+        app.launchArguments.append("--is-cold-start")
+        app.open(url)
+        
+        XCTAssertTrue(app.staticTexts["https://flutter-dashboard.appspot.com/invalid_cold"].waitForExistence(timeout: 10), "Cold start HTTPS deep link failed")
+        let coldPredicate = NSPredicate(format: "label == %@ OR label == %@", "applicationContinueUserActivity: \(url.absoluteString)", "applicationOpenURL: \(url.absoluteString)")
+        XCTAssertTrue(app.staticTexts.containing(coldPredicate).firstMatch.waitForExistence(timeout: 10), "Cold start HTTPS plugin event failed")
+        
+        // Warm start HTTPS
+        url = URL(string: "https://flutter-dashboard.appspot.com/invalid_warm")!
+        app.open(url)
+        XCTAssertTrue(app.staticTexts["https://flutter-dashboard.appspot.com/invalid_warm"].waitForExistence(timeout: 10), "Warm start HTTPS deep link failed")
+        let warmPredicate = NSPredicate(format: "label == %@ OR label == %@", "applicationContinueUserActivity: \(url.absoluteString)", "applicationOpenURL: \(url.absoluteString)")
+        XCTAssertTrue(app.staticTexts.containing(warmPredicate).firstMatch.waitForExistence(timeout: 10), "Warm start HTTPS plugin event failed")
+        
+        app.terminate()
+        
+        // Cold start custom scheme
+        app = XCUIApplication()
+        url = URL(string: "testscheme://flutter/custom_cold")!
+        app.open(url)
+        XCTAssertTrue(app.staticTexts["testscheme://flutter/custom_cold"].waitForExistence(timeout: 10), "Cold start custom scheme deep link failed")
+        XCTAssertTrue(app.staticTexts["applicationOpenURL: testscheme://flutter/custom_cold"].waitForExistence(timeout: 10), "Cold start custom scheme plugin event failed")
+        
+        // Warm start custom scheme
+        url = URL(string: "testscheme://flutter/custom_warm")!
+        app.open(url)
+        XCTAssertTrue(app.staticTexts["testscheme://flutter/custom_warm"].waitForExistence(timeout: 10), "Warm start custom scheme deep link failed")
+        XCTAssertTrue(app.staticTexts["applicationOpenURL: testscheme://flutter/custom_warm"].waitForExistence(timeout: 10), "Warm start custom scheme plugin event failed")
+    }
+}

@@ -6,22 +6,19 @@ import Flutter
 import UIKit
 
 @main
-@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
+@objc class AppDelegate: FlutterAppDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
-  }
-
-  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
-    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    GeneratedPluginRegistrant.register(with: self)
     LifecycleDetectorPlugin.register(
-      with: engineBridge.pluginRegistry.registrar(forPlugin: "LifecycleDetectorPlugin")!)
+      with: self.registrar(forPlugin: "LifecycleDetectorPlugin")!)
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
 
-public class LifecycleDetectorPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
+public class LifecycleDetectorPlugin: NSObject, FlutterPlugin {
   static var shared: LifecycleDetectorPlugin?
   static var events = [String]()
 
@@ -32,7 +29,6 @@ public class LifecycleDetectorPlugin: NSObject, FlutterPlugin, FlutterSceneLifeC
     shared = instance
     registrar.addMethodCallDelegate(instance, channel: channel)
     registrar.addApplicationDelegate(instance)
-    registrar.addSceneDelegate(instance)
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -43,44 +39,21 @@ public class LifecycleDetectorPlugin: NSObject, FlutterPlugin, FlutterSceneLifeC
     }
   }
 
-  @objc(scene:willConnectToSession:options:)
-  public func scene(
-    _ scene: UIScene,
-    willConnectTo session: UISceneSession,
-    options connectionOptions: UIScene.ConnectionOptions?
+  public func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-    if let userActivity = connectionOptions?.userActivities.first,
-      let url = userActivity.webpageURL
+    if let activityDict = launchOptions?[.userActivityDictionary] as? [AnyHashable: Any],
+      let activity = activityDict["UIApplicationLaunchOptionsUserActivityKey"] as? NSUserActivity,
+      let url = activity.webpageURL
     {
-      let event = "sceneContinueUserActivity: \(url.absoluteString)"
+      let event = "applicationContinueUserActivity: \(url.absoluteString)"
       if !LifecycleDetectorPlugin.events.contains(event) {
         LifecycleDetectorPlugin.events.append(event)
       }
     }
-    if let url = connectionOptions?.urlContexts.first?.url {
-      let event = "sceneOpenURLContexts: \(url.absoluteString)"
-      if !LifecycleDetectorPlugin.events.contains(event) {
-        LifecycleDetectorPlugin.events.append(event)
-      }
-    }
-    return false
-  }
-
-  @objc(scene:continueUserActivity:)
-  public func scene(_ scene: UIScene, continue userActivity: NSUserActivity) -> Bool {
-    if let url = userActivity.webpageURL {
-      let event = "sceneContinueUserActivity: \(url.absoluteString)"
-      if !LifecycleDetectorPlugin.events.contains(event) {
-        LifecycleDetectorPlugin.events.append(event)
-      }
-    }
-    return false
-  }
-
-  @objc(scene:openURLContexts:)
-  public func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) -> Bool {
-    if let url = URLContexts.first?.url {
-      let event = "sceneOpenURLContexts: \(url.absoluteString)"
+    if let url = launchOptions?[.url] as? URL {
+      let event = "applicationOpenURL: \(url.absoluteString)"
       if !LifecycleDetectorPlugin.events.contains(event) {
         LifecycleDetectorPlugin.events.append(event)
       }
