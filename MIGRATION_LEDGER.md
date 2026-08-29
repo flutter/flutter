@@ -65,6 +65,14 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [ ] `PlatformViewsController` integrations wired.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR and feedback addressed.
     - [ ] *Validation*: `dev/integration_tests/android_views` passes (texture & hybrid composition).
+- [ ] **2.7 Window Metrics Translation**: 
+    - [ ] `FlutterEngineSendWindowMetricsEvent` bounds and insets hooked to replace native `android_display`.
+    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR and feedback addressed.
+    - [ ] *Validation*: `dev/devicelab/bin/tasks/android_display_cutout.dart` passes.
+- [ ] **2.8 AChoreographer VSync Routing**: 
+    - [ ] `AChoreographer_postFrameCallback` mapped to `FlutterProjectArgs::vsync_callback` via `OSLibraryLoader`.
+    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR and feedback addressed.
+    - [ ] *Validation*: `dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart` passes.
 
 
 - [ ] **Phase 2 Parity Checkpoint**:
