@@ -32,6 +32,13 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR and feedback addressed.
     - [ ] *Validation*: `embedder_unittests` covering EngineSpawn pass.
 
+
+- [ ] **Phase 1 Parity Checkpoint**:
+    - [ ] *Validation*: Framework unit tests (`flutter test`) and `flutter_shell_native_unittests` run globally across the directory, ensuring no cascading failures.
+    - [ ] *Validation*: Golden tests verified to ensure zero pixel-level regressions on Android canvases.
+    - [ ] *Validation*: Core integration tests (`dev/integration_tests/*`) pass unconditionally.
+    - [ ] *Review*: Any deviations or failing tests are caught, adversarially root-caused, and pushed back into the specific atomic branches for this phase before proceeding.
+
 ## Phase 2: Decoupled Subsystems
 *For each subsystem, both Java `android_test` and C++ `flutter_shell_native_unittests` must pass before proceeding.*
 - [ ] **2.1 Asset Resolver**: 
@@ -59,6 +66,13 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR and feedback addressed.
     - [ ] *Validation*: `dev/integration_tests/android_views` passes (texture & hybrid composition).
 
+
+- [ ] **Phase 2 Parity Checkpoint**:
+    - [ ] *Validation*: Framework unit tests (`flutter test`) and `flutter_shell_native_unittests` run globally across the directory, ensuring no cascading failures.
+    - [ ] *Validation*: Golden tests verified to ensure zero pixel-level regressions on Android canvases.
+    - [ ] *Validation*: Core integration tests (`dev/integration_tests/*`) pass unconditionally.
+    - [ ] *Review*: Any deviations or failing tests are caught, adversarially root-caused, and pushed back into the specific atomic branches for this phase before proceeding.
+
 ## Phase 3: Advanced Graphics & Multi-Engine Integration
 - [ ] **3.1 AHardwareBuffer**:
     - [ ] `AHardwareBuffer` wired via Virtualization.
@@ -78,6 +92,13 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [ ] *Validation*: `dev/devicelab/bin/tasks/build_android_host_app_with_module_source.dart` succeeds.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR and feedback addressed.
     - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterEngineGroupTest.java`, `FlutterEngineTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`android_shell_holder_unittests.cc`) pass.
+
+
+- [ ] **Phase 3 Parity Checkpoint**:
+    - [ ] *Validation*: Framework unit tests (`flutter test`) and `flutter_shell_native_unittests` run globally across the directory, ensuring no cascading failures.
+    - [ ] *Validation*: Golden tests verified to ensure zero pixel-level regressions on Android canvases.
+    - [ ] *Validation*: Core integration tests (`dev/integration_tests/*`) pass unconditionally.
+    - [ ] *Review*: Any deviations or failing tests are caught, adversarially root-caused, and pushed back into the specific atomic branches for this phase before proceeding.
 
 ## Phase 4: Extreme E2E Parity Validation
 *Before ANY legacy code is deleted in Phase 5, the entire engine, framework, and DeviceLab matrices must be run unconditionally against the new Embedder API logic.*
@@ -129,3 +150,9 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [ ] `flutter_shell_native` internal Skia/UI dependencies purged; targets merged.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR and feedback addressed.
     - [ ] *Validation*: Clean `gn` re-run; `ninja` builds successfully assuring absolute GN C-ABI quarantine.
+
+- [ ] **Phase 5 Parity Checkpoint**:
+    - [ ] *Validation*: Framework unit tests (`flutter test`) and `flutter_shell_native_unittests` run globally across the directory, ensuring no cascading failures.
+    - [ ] *Validation*: Golden tests verified to ensure zero pixel-level regressions on Android canvases.
+    - [ ] *Validation*: Core integration tests (`dev/integration_tests/*`) pass unconditionally.
+    - [ ] *Review*: Any deviations or failing tests are caught, adversarially root-caused, and pushed back into the specific atomic branches for this phase before proceeding.
