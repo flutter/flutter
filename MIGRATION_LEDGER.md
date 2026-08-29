@@ -7,9 +7,6 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
 - [ ] **0.1 Agentic Adversarial Loop**: 
     - [ ] Plan architecture challenged by `self`-spawned AI review agents.
     - [ ] *Validation*: `architectural_decisions_record.md` proves logic gaps were identified and formally closed (e.g., C-ABI protections, Virtualization shields).
-- [ ] **0.2 Human Verification**:
-    - [ ] Human review of this exact Ledger confirms all critical unit tests and devicelab matrices are appropriately mapped.
-    - [ ] *Validation*: Ledger committed and pushed to `android-embedder-migration-ultimate-plan`.
 
 ## Phase 1: Foundations, Safety Nets, and C-API Prep
 - [ ] **1.1 Matrix Initialization**:
