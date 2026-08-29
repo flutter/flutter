@@ -176,3 +176,12 @@ if (is_ios) {
     }
   }
 }
+
+darwin_target_arch = current_cpu
+if (darwin_target_arch == "x64") {
+  darwin_target_arch = "x86_64"
+}
+darwin_target_sim = ""
+if (is_ios && use_ios_simulator) {
+  darwin_target_sim = "-simulator"
+}

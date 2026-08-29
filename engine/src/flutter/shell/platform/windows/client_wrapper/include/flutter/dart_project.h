@@ -153,6 +153,16 @@ class DartProject {
   // Defaults to ImpellerSwitch::Default.
   ImpellerSwitch impeller_switch() const { return impeller_switch_; }
 
+  // Sets whether the Flutter GPU API (package:flutter_gpu) is enabled.
+  // Flutter GPU requires the Impeller renderer.
+  void set_enable_flutter_gpu(bool enable_flutter_gpu) {
+    enable_flutter_gpu_ = enable_flutter_gpu;
+  }
+
+  // Returns whether the Flutter GPU API is enabled.
+  // Defaults to false.
+  bool enable_flutter_gpu() const { return enable_flutter_gpu_; }
+
  private:
   // Accessors for internals are private, so that they can be changed if more
   // flexible options for project structures are needed later without it
@@ -185,6 +195,8 @@ class DartProject {
   AccessibilityMode accessibility_mode_ = AccessibilityMode::Default;
   // The Impeller enablement switch.
   ImpellerSwitch impeller_switch_ = ImpellerSwitch::Default;
+  // Whether the Flutter GPU API is enabled.
+  bool enable_flutter_gpu_ = false;
 };
 
 }  // namespace flutter

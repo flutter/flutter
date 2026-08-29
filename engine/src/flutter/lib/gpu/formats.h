@@ -38,6 +38,18 @@ constexpr impeller::StorageMode ToImpellerStorageMode(int value) {
   return ToImpellerStorageMode(static_cast<FlutterGPUStorageMode>(value));
 }
 
+constexpr FlutterGPUStorageMode FromImpellerStorageMode(
+    impeller::StorageMode value) {
+  switch (value) {
+    case impeller::StorageMode::kHostVisible:
+      return FlutterGPUStorageMode::kHostVisible;
+    case impeller::StorageMode::kDevicePrivate:
+      return FlutterGPUStorageMode::kDevicePrivate;
+    case impeller::StorageMode::kDeviceTransient:
+      return FlutterGPUStorageMode::kDeviceTransient;
+  }
+}
+
 enum class FlutterGPUPixelFormat {
   kUnknown,
   kA8UNormInt,

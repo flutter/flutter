@@ -9,8 +9,5 @@ import '../integration.shard/test_data/stateless_stateful_hot_reload_test_common
 import '../src/common.dart';
 
 void main() {
-  testAll(
-    chrome: true,
-    additionalCommandArgs: <String>['--web-experimental-hot-reload', '--no-web-resources-cdn'],
-  );
+  testAll(chrome: true, additionalCommandArgs: <String>['--no-web-resources-cdn']);
 }

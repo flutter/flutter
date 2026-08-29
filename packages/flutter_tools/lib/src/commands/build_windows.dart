@@ -25,6 +25,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   }) : _operatingSystemUtils = operatingSystemUtils,
        super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
+    usesFlavorOption();
     argParser.addFlag(
       'config-only',
       help: 'Update the project configuration without performing a build.',

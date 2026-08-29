@@ -254,6 +254,45 @@ android {
     expect(libappContent.contains('probe-BBBB'), isTrue);
     expect(libappContent.contains('probe-AAAA'), isFalse);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/188785.
+  //
+  // Building the androidTest variant directly (as flutter/packages' Firebase Test
+  // Lab tooling does) configures Gradle without a Flutter compile task: the single
+  // `assembleAndroidTest` CLI task makes `shouldConfigureFlutterTask` return false,
+  // so `compileFlutterBuild<Variant>` is never registered. The jniLibs copy task
+  // wired via the variant API must tolerate that (absent) compile task rather than
+  // failing with "Task with name 'compileFlutterBuildDebug' not found".
+  testWithoutContext(
+    'app:assembleAndroidTest builds when no Flutter compile task is configured',
+    () async {
+      final Directory appDir = _createApp(tempDir);
+
+      // Configure Gradle without running the Flutter build (no `flutter assemble`).
+      final ProcessResult configResult = processManager.runSync(<String>[
+        flutterBin,
+        'build',
+        'apk',
+        '--debug',
+        '--config-only',
+      ], workingDirectory: appDir.path);
+      expect(configResult, const ProcessResultMatcher());
+
+      final Directory androidDir = appDir.childDirectory('android');
+      final File gradlew = androidDir.childFile(Platform.isWindows ? 'gradlew.bat' : 'gradlew');
+      final ProcessResult assembleResult = processManager.runSync(<String>[
+        gradlew.path,
+        'app:assembleAndroidTest',
+        '-Pverbose=true',
+      ], workingDirectory: androidDir.path);
+      expect(
+        assembleResult.exitCode,
+        0,
+        reason:
+            'gradlew app:assembleAndroidTest failed:\n${assembleResult.stdout}\n${assembleResult.stderr}',
+      );
+    },
+  );
 }
 
 Directory _createApp(Directory workingDir) {

@@ -12,10 +12,13 @@
 
 namespace impeller {
 
-YUVConversionVK::YUVConversionVK(const vk::Device& device,
-                                 const YUVConversionDescriptorVK& chain)
-    : chain_(chain) {
-  auto conversion = device.createSamplerYcbcrConversionUnique(chain_.get());
+YUVConversionVK::YUVConversionVK(
+    const std::shared_ptr<DeviceHolderVK>& device_holder,
+    const YUVConversionDescriptorVK& chain)
+    : device_holder_(device_holder), chain_(chain) {
+  auto conversion =
+      device_holder->GetDevice().createSamplerYcbcrConversionUnique(
+          chain_.get());
   if (conversion.result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not create YUV conversion: "
                    << vk::to_string(conversion.result);
@@ -24,7 +27,11 @@ YUVConversionVK::YUVConversionVK(const vk::Device& device,
   conversion_ = std::move(conversion.value);
 }
 
-YUVConversionVK::~YUVConversionVK() = default;
+YUVConversionVK::~YUVConversionVK() {
+  if (auto device = device_holder_.lock(); !device) {
+    conversion_.release();
+  }
+}
 
 bool YUVConversionVK::IsValid() const {
   return conversion_ && !!conversion_.get();

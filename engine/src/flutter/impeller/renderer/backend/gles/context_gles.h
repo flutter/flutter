@@ -28,7 +28,8 @@ class ContextGLES final : public Context,
       const Flags& flags,
       std::unique_ptr<ProcTableGLES> gl,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries,
-      bool enable_gpu_tracing);
+      bool enable_gpu_tracing,
+      std::shared_ptr<fml::BasicTaskRunner> io_task_runner = nullptr);
 
   // |Context|
   ~ContextGLES() override;
@@ -45,8 +46,14 @@ class ContextGLES final : public Context,
 
   std::shared_ptr<GPUTracerGLES> GetGPUTracer() const { return gpu_tracer_; }
 
+  // Mutable tracker for command buffer submission bookkeeping.
+  const std::shared_ptr<GpuSubmissionTracker>& GetMutableSubmissionTracker()
+      const;
+
  private:
   std::shared_ptr<ReactorGLES> reactor_;
+  std::shared_ptr<GpuSubmissionTracker> submission_tracker_ =
+      std::make_shared<GpuSubmissionTracker>();
   std::shared_ptr<ShaderLibraryGLES> shader_library_;
   std::shared_ptr<PipelineLibraryGLES> pipeline_library_;
   std::shared_ptr<SamplerLibraryGLES> sampler_library_;
@@ -64,7 +71,8 @@ class ContextGLES final : public Context,
       const Flags& flags,
       std::unique_ptr<ProcTableGLES> gl,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries,
-      bool enable_gpu_tracing);
+      bool enable_gpu_tracing,
+      std::shared_ptr<fml::BasicTaskRunner> io_task_runner = nullptr);
 
   // |Context|
   std::string DescribeGpuModel() const override;
@@ -74,6 +82,10 @@ class ContextGLES final : public Context,
 
   // |Context|
   std::shared_ptr<Allocator> GetResourceAllocator() const override;
+
+  // |Context|
+  std::shared_ptr<const GpuSubmissionTracker> GetSubmissionTracker()
+      const override;
 
   // |Context|
   std::shared_ptr<ShaderLibrary> GetShaderLibrary() const override;

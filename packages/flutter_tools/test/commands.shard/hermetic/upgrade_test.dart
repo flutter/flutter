@@ -95,7 +95,7 @@ void main() {
         // checks will be up to date
         FakeCommand(
           command: const <String>[
-            'bin/flutter',
+            '/path/to/flutter/bin/flutter',
             'upgrade',
             '--continue',
             '--continue-started-at',
@@ -166,7 +166,7 @@ void main() {
         const FakeCommand(command: <String>['git', 'reset', '--hard', upstreamHeadRevision]),
         FakeCommand(
           command: const <String>[
-            'bin/flutter',
+            '/path/to/flutter/bin/flutter',
             'upgrade',
             '--continue',
             '--continue-started-at',
@@ -265,7 +265,7 @@ void main() {
         ),
         FakeCommand(
           command: const <String>[
-            'bin/flutter',
+            '/path/to/flutter/bin/flutter',
             'upgrade',
             '--continue',
             '--continue-started-at',
@@ -274,7 +274,6 @@ void main() {
           ],
           onRun: reEnterTool,
           completer: reEntryCompleter,
-          workingDirectory: flutterRoot,
         ),
 
         // commands following this are from the re-entrant `flutter upgrade --continue` call
@@ -347,7 +346,7 @@ void main() {
         const FakeCommand(command: <String>['git', 'reset', '--hard', upstreamHeadRevision]),
         FakeCommand(
           command: const <String>[
-            'bin/flutter',
+            '/path/to/flutter/bin/flutter',
             'upgrade',
             '--continue',
             '--continue-started-at',

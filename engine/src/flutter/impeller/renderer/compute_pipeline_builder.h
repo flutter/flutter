@@ -75,6 +75,7 @@ struct ComputePipelineBuilder {
       }
 
       desc.SetStageEntrypoint(std::move(compute_function));
+      desc.SetWorkgroupSize(ComputeShader::kWorkgroupSize);
     }
     return true;
   }

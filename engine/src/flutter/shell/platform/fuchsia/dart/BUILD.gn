@@ -16,22 +16,6 @@ application_snapshot("kernel_compiler") {
     "--train",
     rebase_path(main_dart),
   ]
-
-  kernel_compiler_files = exec_script("$dart_src/tools/list_dart_files.py",
-                                      [
-                                        "absolute",
-                                        rebase_path("."),
-                                      ],
-                                      "list lines")
-
-  kernel_compiler_files += exec_script("$dart_src/tools/list_dart_files.py",
-                                       [
-                                         "absolute",
-                                         rebase_path("$dart_src/pkg"),
-                                       ],
-                                       "list lines")
-
-  inputs = kernel_compiler_files
 }
 
 application_snapshot("_list_libraries_kernel") {

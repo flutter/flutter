@@ -43,6 +43,11 @@ std::shared_ptr<const IdleWaiter> Context::GetIdleWaiter() const {
   return nullptr;
 }
 
+std::shared_ptr<const GpuSubmissionTracker> Context::GetSubmissionTracker()
+    const {
+  return nullptr;
+}
+
 void Context::ResetThreadLocalState() const {
   // Nothing to do.
 }

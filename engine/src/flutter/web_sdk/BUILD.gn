@@ -8,7 +8,7 @@ import("//flutter/lib/web_ui/flutter_js/sources.gni")
 import("//flutter/web_sdk/web_sdk.gni")
 import("$dart_src/build/dart/dart_action.gni")
 
-web_ui_sources = exec_script("$dart_src/tools/list_dart_files.py",
+web_ui_sources = exec_script("list_dart_files.py",
                              [
                                "absolute",
                                rebase_path("//flutter/lib/web_ui/lib"),

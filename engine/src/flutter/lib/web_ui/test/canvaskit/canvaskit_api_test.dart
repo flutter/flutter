@@ -1159,6 +1159,7 @@ void _canvasTests() {
       SkPaint(),
       canvasKit.BlendMode.SrcOver,
       Uint32List.fromList(<int>[0xff000000, 0xffffffff]),
+      toSkFilterOptions(ui.FilterQuality.none),
     );
   });
 

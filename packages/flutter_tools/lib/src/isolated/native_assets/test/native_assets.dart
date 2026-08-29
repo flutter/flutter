@@ -44,6 +44,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     buildInfo.packageConfig,
     globals.fs,
     globals.logger,
+    globals.platform,
     runPackageName,
     includeDevDependencies: true,
     pubspecPath,

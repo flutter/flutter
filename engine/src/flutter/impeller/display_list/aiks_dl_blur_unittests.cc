@@ -409,6 +409,45 @@ TEST_P(AiksTest, CanRenderBoundedBlur) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderBoundedBlurWithTranslation) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  builder.DrawImage(image, DlPoint(0.0, 0.0), DlImageSampling::kNearestNeighbor,
+                    &paint);
+
+  DlPaint save_paint;
+  save_paint.setBlendMode(DlBlendMode::kSrcOver);
+
+  // Subcase 1: Simple translation (e.g., scrolled list item).
+  builder.Save();
+  builder.Translate(100, 150);
+  DlRect rect1 = DlRect::MakeXYWH(0, 0, 200, 100);
+  builder.ClipRect(rect1);
+  auto backdrop_filter1 =
+      DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal, /*bounds=*/rect1);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter1.get());
+  builder.Restore();
+  builder.Restore();
+
+  // Subcase 2: Translation with scale and rotation.
+  builder.Save();
+  builder.Translate(50, 300);
+  builder.Scale(1.2, 1.2);
+  builder.Rotate(5);
+  DlRect rect2 = DlRect::MakeXYWH(10, 10, 180, 80);
+  builder.ClipRect(rect2);
+  auto backdrop_filter2 =
+      DlBlurImageFilter::Make(15, 15, DlTileMode::kDecal, /*bounds=*/rect2);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter2.get());
+  builder.Restore();
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderClippedBlur) {
   DisplayListBuilder builder;
   builder.ClipRect(DlRect::MakeXYWH(100, 150, 400, 400));
@@ -531,8 +570,8 @@ TEST_P(AiksTest, ClearBlendWithBlur) {
 TEST_P(AiksTest, BlurHasNoEdge) {
   Scalar sigma = 47.6;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 50);
       ImGui::End();
     }
@@ -565,6 +604,12 @@ TEST_P(AiksTest, MaskBlurWithZeroSigmaIsSkipped) {
 }
 
 TEST_P(AiksTest, MaskBlurOnZeroDimensionIsSkippedWideGamut) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with wide gamut support.
+  if (!EnsureContextSupportsWideGamut()) {
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
+  }
+
   // Making sure this test is run on a wide gamut enabled backend
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
@@ -822,8 +867,8 @@ TEST_P(AiksTest, GaussianBlurStyleSolid) {
 TEST_P(AiksTest, MaskBlurTexture) {
   Scalar sigma = 30;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 500);
       ImGui::End();
     }
@@ -851,8 +896,8 @@ TEST_P(AiksTest, MaskBlurTexture) {
 TEST_P(AiksTest, MaskBlurDoesntStretchContents) {
   Scalar sigma = 70;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 500);
       ImGui::End();
     }
@@ -953,8 +998,8 @@ TEST_P(AiksTest, GaussianBlurAnimatedBackdrop) {
   Scalar freq = 0.1;
   Scalar amp = 50.0;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 200);
       ImGui::SliderFloat("Frequency", &freq, 0.01, 2.0);
       ImGui::SliderFloat("Amplitude", &amp, 1, 100);
@@ -1142,8 +1187,8 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClippedInteractive) {
     static float scale = 0.6;
     static int selected_tile_mode = 3;
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Rotation (degrees)", &rotation, -180, 180);
       ImGui::SliderFloat("Scale", &scale, 0, 2.0);
       ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
@@ -1253,8 +1298,8 @@ TEST_P(AiksTest, GaussianBlurRotatedNonUniform) {
     static float scale = 0.6;
     static int selected_tile_mode = 3;
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Rotation (degrees)", &rotation, -180, 180);
       ImGui::SliderFloat("Scale", &scale, 0, 2.0);
       ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,

@@ -27,7 +27,7 @@ PipelineLibraryVK::PipelineLibraryVK(
                                                    device_holder,
                                                    std::move(cache_directory))),
       worker_task_runner_(std::move(worker_task_runner)),
-      compile_queue_(PipelineCompileQueue::Create(worker_task_runner_)) {
+      compile_queue_(PipelineCompileQueueVulkan::Create(worker_task_runner_)) {
   FML_DCHECK(worker_task_runner_);
   if (!pso_cache_->IsValid() || !worker_task_runner_) {
     return;
@@ -65,8 +65,10 @@ std::unique_ptr<ComputePipelineVK> PipelineLibraryVK::CreateComputePipeline(
   auto device_properties = strong_device->GetPhysicalDevice().getProperties();
   auto max_wg_size = device_properties.limits.maxComputeWorkGroupSize;
 
-  // Give all compute shaders a specialization constant entry for the
-  // workgroup/threadgroup size.
+  // Specialization constant 0 carries the workgroup size. Set it to the device
+  // maximum. This only affects shaders that declare their size with
+  // `local_size_x_id = 0`. A shader with a literal `local_size` has no such
+  // constant, so Vulkan ignores this and uses the size baked into the module.
   vk::SpecializationMapEntry specialization_map_entry[1];
 
   uint32_t workgroup_size_x = max_wg_size[0];

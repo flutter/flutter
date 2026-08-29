@@ -210,6 +210,7 @@ List<String> getExtraImportsForLibrary(String libraryName) {
   }
   if (libraryName == 'skwasm_impl') {
     extraImports.add("import 'dart:_wasm';");
+    extraImports.add("import 'dart:_js_interop_wasm';");
   }
   return extraImports;
 }

@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 const Color _debugEvenColor = Color(0xFF00FF00);
 const Color _debugOddColor = Color(0xFFFF0000);

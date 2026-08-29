@@ -280,6 +280,19 @@ class Shell final : public PlatformView::Delegate,
   ///
   fml::WeakPtr<ShellIOManager> GetIOManager();
 
+  //----------------------------------------------------------------------------
+  /// @brief      The IO thread can be used for background tasks, including
+  ///             tasks that perform graphics operations using the resource
+  ///             context. But the IO thread will lose the resource context
+  ///             during shutdown of the Shell. Tasks that require the IO
+  ///             manager or the resource context must not run after that
+  ///             phase of shutdown.
+  ///
+  /// @return     A BasicTaskRunner that posts tasks to the IO thread but stops
+  ///             running tasks after the Shell shuts down the IO manager.
+  ///
+  std::shared_ptr<fml::BasicTaskRunner> GetShutdownSafeIOTaskRunner();
+
   // Embedders should call this under low memory conditions to free up
   // internal caches used.
   //
@@ -338,6 +351,21 @@ class Shell final : public PlatformView::Delegate,
   ///             GPU or UI thread, 'kDeadlineExceeded' if there is a timeout.
   ///
   fml::Status WaitForFirstFrame(fml::TimeDelta timeout);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Unblocks any call to WaitForFirstFrame(), causing it to
+  ///             immediately return 'kAborted' instead of blocking for the
+  ///             full timeout.
+  ///
+  ///             Embedders that pass a reference to the Shell to a thread they
+  ///             do not otherwise synchronize with the shell's destruction
+  ///             must call this, and wait for that thread to finish with the
+  ///             shell, before destroying it. This method only prevents
+  ///             WaitForFirstFrame() from blocking; it does not by itself
+  ///             make it safe to destroy the Shell out from under a caller
+  ///             that has not yet returned from WaitForFirstFrame().
+  ///
+  void CancelWaitForFirstFrame();
 
   //----------------------------------------------------------------------------
   /// @brief      Used by embedders to reload the system fonts in
@@ -480,6 +508,9 @@ class Shell final : public PlatformView::Delegate,
   fml::WeakPtr<PlatformView>
       weak_platform_view_;  // to be shared across threads
 
+  std::promise<fml::WeakPtr<ShellIOManager>> weak_io_manager_promise_;
+  std::shared_ptr<fml::BasicTaskRunner> shutdown_safe_io_task_runner_;
+
   std::unordered_map<std::string_view,  // method
                      std::pair<fml::RefPtr<fml::TaskRunner>,
                                ServiceProtocolHandler>  // task-runner/function
@@ -491,7 +522,19 @@ class Shell final : public PlatformView::Delegate,
   uint64_t next_pointer_flow_id_ = 0;
 
   bool first_frame_rasterized_ = false;
+
+  // True if a first frame has not yet been rendered.
+  //
+  // This is read and written lock-free on the raster thread, and read under
+  // waiting_for_first_frame_mutex_ in WaitForFirstFrame.
   std::atomic<bool> waiting_for_first_frame_ = true;
+
+  // True when WaitForFirstFrame has been cancelled because the shell is
+  // shutting down and waiting threads should be unblocked.
+  //
+  // Guarded by waiting_for_first_frame_mutex_.
+  bool wait_for_first_frame_cancelled_ = false;
+
   std::mutex waiting_for_first_frame_mutex_;
   std::condition_variable waiting_for_first_frame_condition_;
 
@@ -639,6 +682,10 @@ class Shell final : public PlatformView::Delegate,
 
   // |PlatformView::Delegate|
   const Settings& OnPlatformViewGetSettings() const override;
+
+  // |PlatformView::Delegate|
+  std::shared_ptr<fml::BasicTaskRunner>
+  OnPlatformViewGetShutdownSafeIOTaskRunner() const override;
 
   // |PlatformView::Delegate|
   void LoadDartDeferredLibrary(

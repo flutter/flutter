@@ -3,13 +3,23 @@
 // found in the LICENSE file.
 
 class NotoFont {
-  NotoFont(this.name, this.url);
+  NotoFont(
+    this.name,
+    this.url, {
+    required this.index,
+    this.monolithicParent,
+    this.slices = const <String>{},
+  });
 
   final String name;
   final String url;
+  final int index;
 
-  final int index = _index++;
-  static int _index = 0;
+  /// If this is a monolithic parent font, the names of all its split slices.
+  final Set<String> slices;
+
+  /// If this is a split slice, the name of its monolithic parent font.
+  final String? monolithicParent;
 }
 
 /// A component is a set of code points common to some fonts. Each code point is

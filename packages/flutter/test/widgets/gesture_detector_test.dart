@@ -7,8 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 void main() {
   const forcePressOffset = Offset(400.0, 50.0);
 

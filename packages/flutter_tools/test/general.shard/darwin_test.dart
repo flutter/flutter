@@ -40,8 +40,8 @@ void main() {
       });
     });
     group('macOS', () {
-      testWithoutContext('deployment target is 10.15', () {
-        expect(FlutterDarwinPlatform.macos.deploymentTarget().toString(), '10.15');
+      testWithoutContext('deployment target is 12.0', () {
+        expect(FlutterDarwinPlatform.macos.deploymentTarget().toString(), '12.0');
       });
 
       testWithoutContext('debug artifactName', () {

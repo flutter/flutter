@@ -4,14 +4,19 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.DynamicFeatureBuildType
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.ApplicationVariant
 import com.android.build.gradle.BaseExtension
-import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
+import com.flutter.gradle.tasks.EnableHcppManifestTask
+import com.flutter.gradle.tasks.GenerateEngineFlagsManifestTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.ValidateCompileSdkVersionTask
 import groovy.lang.Closure
@@ -21,9 +26,14 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 import java.io.File
+import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.Properties
+import com.android.build.api.dsl.BuildType as DslBuildType
+import com.android.builder.model.BuildType as ModelBuildType
 
 /**
  * A collection of static utility functions used by the Flutter Gradle Plugin.
@@ -34,12 +44,27 @@ object FlutterPluginUtils {
     // recommended to use these const values in tests.
     internal const val PROP_SHOULD_SHRINK_RESOURCES = "shrink"
     internal const val PROP_SPLIT_PER_ABI = "split-per-abi"
+    internal const val PROP_ENABLE_HCPP = "enable-hcpp"
+    internal const val PROP_EXPLICIT_ENABLE_HCPP = "explicit-enable-hcpp"
     internal const val PROP_LOCAL_ENGINE_REPO = "local-engine-repo"
     internal const val PROP_IS_VERBOSE = "verbose"
     internal const val PROP_TARGET = "target"
     internal const val PROP_LOCAL_ENGINE_BUILD_MODE = "local-engine-build-mode"
     internal const val PROP_TARGET_PLATFORM = "target-platform"
     internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
+    internal const val PROP_SDK_MANAGER_PATH = "flutter.sdkManagerPath"
+    internal const val PROP_ANDROID_SDK_ROOT = "flutter.androidSdkRoot"
+    internal const val PROP_INSTALLED_NDK_VERSIONS = "flutter.installedNdkVersions"
+    internal const val TASK_PRINT_NDK_VERSION = "printNdkVersion"
+    internal const val NDK_VERSION_OUTPUT_PREFIX = "NdkVersion: "
+
+    private data class ToolNdkProvisioningProperties(
+        val androidSdkRoot: String,
+        val installedNdkVersions: Set<String>,
+        val sdkManagerPath: String?
+    )
+
+    internal const val PROP_FORCE_VERSION_CODE_IGNORING_ABI = "force-version-code-ignoring-abi"
 
     /**
      * The URL for documentation for general information on migration to built-in Kotlin.
@@ -295,6 +320,16 @@ object FlutterPluginUtils {
         project.findProperty(PROP_DISABLE_ABI_FILTERING)?.toString()?.toBoolean() ?: false
 
     /**
+     *  Developers can set this value by passing `-P force-version-code-ignoring-abi=true`
+     *  to flutter build. Where "force-version-code-ignoring-abi" comes from
+     *  PROP_FORCE_VERSION_CODE_IGNORING_ABI.
+     */
+    @JvmStatic
+    @JvmName("shouldForceVersionCodeIgnoringAbi")
+    internal fun shouldForceVersionCodeIgnoringAbi(project: Project): Boolean =
+        project.findProperty(PROP_FORCE_VERSION_CODE_IGNORING_ABI)?.toString()?.toBoolean() ?: false
+
+    /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
      *
      * In AGP 4.0, the Android linter task depends on the JAR tasks that generate `libapp.so`.
@@ -442,13 +477,45 @@ object FlutterPluginUtils {
      */
     @JvmStatic
     @JvmName("buildModeFor")
-    internal fun buildModeFor(buildType: BuildType): String {
-        if (buildType.name == "profile") {
+    internal fun buildModeFor(buildType: ModelBuildType): String = buildModeFor(buildType.name, buildType.isDebuggable)
+
+    /**
+     * Returns a Flutter build mode for a build type identified by [buildTypeName] and its
+     * [isDebuggable] flag.
+     *
+     * @return "debug", "profile", or "release" (fall-back).
+     */
+    @JvmStatic
+    @JvmName("buildModeFor")
+    internal fun buildModeFor(
+        buildTypeName: String,
+        isDebuggable: Boolean
+    ): String {
+        if (buildTypeName == "profile") {
             return "profile"
-        } else if (buildType.isDebuggable) {
+        } else if (isDebuggable) {
             return "debug"
         }
         return "release"
+    }
+
+    /**
+     * Returns a Flutter build mode for an AGP public DSL [buildType].
+     *
+     * Application and dynamic-feature build types expose a public `isDebuggable` flag.
+     * Library build types do not, so for them the conventional "debug" name is the only
+     * public signal available at DSL scope.
+     */
+    @JvmStatic
+    @JvmName("buildModeFor")
+    internal fun buildModeFor(buildType: DslBuildType): String {
+        val isDebuggable =
+            when (buildType) {
+                is ApplicationBuildType -> buildType.isDebuggable
+                is DynamicFeatureBuildType -> buildType.isDebuggable
+                else -> buildType.name == "debug"
+            }
+        return buildModeFor(buildType.name, isDebuggable)
     }
 
     /**
@@ -501,14 +568,22 @@ object FlutterPluginUtils {
     internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
         project.extensions.getByType(ApplicationExtension::class.java)
 
+    internal fun getConfiguredNdkVersion(project: Project): String? = getAndroidExtension(project).ndkVersion
+
     /**
-     * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
-     * `android-` followed by either the numeric version, e.g. `android-35`, or a preview version,
-     * e.g. `android-UpsideDownCake`.
+     * Returns the compile SDK configured on the project's Android extension: the numeric
+     * API level (`compileSdk = 36`) or a preview codename (`compileSdkPreview = "Baklava"`).
      */
     @JvmStatic
     @JvmName("getCompileSdkFromProject")
-    internal fun getCompileSdkFromProject(project: Project): String = getLegacyAndroidExtension(project).compileSdkVersion!!.substring(8)
+    internal fun getCompileSdkFromProject(project: Project): CompileSdkVersion {
+        val androidExtension = getAndroidExtension(project)
+        val preview = androidExtension.compileSdkPreview
+        return CompileSdkVersion(
+            apiLevel = if (preview != null) null else androidExtension.compileSdk,
+            previewCodename = preview
+        )
+    }
 
     /**
      * Returns:
@@ -536,38 +611,15 @@ object FlutterPluginUtils {
     @JvmName("detectApplyingKotlinGradlePlugin")
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
         val pluginsWithKGPAppliedList = mutableListOf<String>()
-
+        val agpVersion = VersionFetcher.getAGPVersion(project)
         var shouldLogForApp = false
         project.rootProject.subprojects {
-            // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory should not be adjusted and by default does not apply KGP
-            if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) return@subprojects
-
-            val scriptText: String =
-                if (buildFile.absolutePath.contains("app/build.gradle")) {
-                    getBuildGradleFileFromProjectDir(this.projectDir, this.logger).readText()
-                } else {
-                    buildFile.readText()
-                }
-
-            val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
-                if (buildFile.extension == "kts") {
-                    Triple(
-                        kgpRegexKotlin.containsMatchIn(scriptText),
-                        appPluginRegexKotlin.containsMatchIn(scriptText),
-                        libPluginRegexKotlin.containsMatchIn(scriptText)
-                    )
-                } else {
-                    Triple(
-                        kgpRegexGroovy.containsMatchIn(scriptText),
-                        appPluginRegexGroovy.containsMatchIn(scriptText),
-                        libPluginRegexGroovy.containsMatchIn(scriptText)
-                    )
-                }
+            val pluginState = getSubprojectPluginState(this) ?: return@subprojects
 
             // Ensures applying AGP exists in the build file configuration.
-            if (!hasAppPlugin && !hasLibPlugin) return@subprojects
+            if (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin) return@subprojects
 
-            if (!hasKgpPlugin) {
+            if (!isBuiltInKotlinEnabled(project, agpVersion) && !pluginState.hasKgpPlugin) {
                 try {
                     pluginManager.apply("kotlin-android")
                 } catch (_: Exception) {
@@ -579,20 +631,27 @@ object FlutterPluginUtils {
                         """.trimIndent()
                     )
                 }
-                return@subprojects
             }
 
             // Apply AGP exists and Apply KGP also exists in build.gradle
-            if (hasAppPlugin) {
+            if (pluginState.hasAppPlugin && pluginState.hasKgpPlugin) {
                 shouldLogForApp = true
             }
 
-            if (hasLibPlugin) {
+            if (pluginState.hasLibPlugin && pluginState.hasKgpPlugin) {
                 pluginsWithKGPAppliedList.add(name)
             }
         }
 
+        // If no imperative apply KGP declarations were found, there is nothing to log.
+        if (!shouldLogForApp && pluginsWithKGPAppliedList.isEmpty()) {
+            return
+        }
+
         project.gradle.projectsEvaluated {
+            if (agpVersion == null || agpVersion.major < 9) {
+                return@projectsEvaluated
+            }
             if (shouldLogForApp) {
                 project.logger.error(
                     """
@@ -617,6 +676,99 @@ object FlutterPluginUtils {
                 """.trimIndent()
             )
         }
+    }
+
+    /**
+     * Represents whether Kotlin Gradle Plugin, Android Gradle Plugin (for applications), and the
+     * Android Gradle Plugin (for libraries) are declared in a subproject's build script.
+     *
+     * @property hasKgpPlugin `true` if the Kotlin Gradle Plugin (KGP) is declared in the subproject's build script.
+     * @property hasAppPlugin `true` if the Android Gradle Plugin (AGP) for applications is declared in the subproject's build script.
+     * @property hasLibPlugin `true` if the Android Gradle Plugin (AGP) for libraries is declared in the subproject's build script.
+     */
+    internal data class SubprojectPluginState(
+        val hasKgpPlugin: Boolean,
+        val hasAppPlugin: Boolean,
+        val hasLibPlugin: Boolean
+    )
+
+    /**
+     * Scans the build script (`build.gradle` or `build.gradle.kts`) of Flutter Android app modules and Flutter plugin
+     * modules to detect declarations of Kotlin Gradle Plugin, Android Gradle Plugin (for applications),
+     * and Android Gradle Plugin (for libraries).
+     *
+     * This inspects build script files directly via regex rather than querying Gradle plugin
+     * state at runtime. Evaluating Kotlin Gradle Plugin dynamically at runtime to conditionally apply Kotlin Gradle Plugin
+     * during configuration leads to lifecycle and ordering issues (see https://github.com/gradle/gradle/issues/36953).
+     *
+     * Returns null if the build script does not exist, is inside an ephemeral `.android/` directory,
+     * or fails to read due to an [IOException].
+     */
+    internal fun getSubprojectPluginState(subproject: Project): SubprojectPluginState? {
+        val buildFile = subproject.buildFile
+
+        // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory
+        // should not be adjusted and by default does not apply KGP
+        if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) {
+            return null
+        }
+
+        val scriptText: String =
+            try {
+                if (buildFile.absolutePath.contains("app/build.gradle")) {
+                    getBuildGradleFileFromProjectDir(
+                        subproject.projectDir,
+                        subproject.logger
+                    ).readText()
+                } else {
+                    buildFile.readText()
+                }
+            } catch (e: IOException) {
+                subproject.logger.error("Failed to read build file: ${buildFile.absolutePath}", e)
+                return null
+            }
+
+        val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
+            if (buildFile.extension == "kts") {
+                Triple(
+                    kgpRegexKotlin.containsMatchIn(scriptText),
+                    appPluginRegexKotlin.containsMatchIn(scriptText),
+                    libPluginRegexKotlin.containsMatchIn(scriptText)
+                )
+            } else {
+                Triple(
+                    kgpRegexGroovy.containsMatchIn(scriptText),
+                    appPluginRegexGroovy.containsMatchIn(scriptText),
+                    libPluginRegexGroovy.containsMatchIn(scriptText)
+                )
+            }
+
+        return SubprojectPluginState(hasKgpPlugin, hasAppPlugin, hasLibPlugin)
+    }
+
+    /**
+     * Determines if the Gradle property `android.builtInKotlin` is enabled globally across the multi-project Gradle build.
+     *
+     * Evaluates the `android.builtInKotlin` Gradle property, supporting any [standard Gradle
+     * configuration source](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties) (such as the root project's `gradle.properties` file or command-line `-P` flags).
+     *
+     * Defaults to `true` for AGP 9.0+ unless `android.builtInKotlin` is explicitly configured
+     * to `false`. Always returns `false` if the AGP version is below `9.0.0` (or null).
+     * See [Android Migration Guide](https://developer.android.com/build/migrate-to-built-in-kotlin).
+     */
+    @JvmStatic
+    @JvmName("isBuiltInKotlinEnabled")
+    internal fun isBuiltInKotlinEnabled(
+        project: Project,
+        agpVersion: AndroidPluginVersion?
+    ): Boolean {
+        if (agpVersion == null || agpVersion.major < 9) {
+            return false
+        }
+        return project.providers
+            .gradleProperty("android.builtInKotlin")
+            .orNull
+            ?.toBoolean() ?: true
     }
 
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
@@ -681,15 +833,140 @@ object FlutterPluginUtils {
         gradleProject: Project,
         flutterSdkRootPath: String
     ) {
+        if (isFlutterAppProject(gradleProject) && isInvokingMetadataNdkVersionTask(gradleProject)) {
+            return
+        }
+
         // If the project is already configuring a native build, we don't need to do anything.
         val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
+        val externalNativeBuild = gradleProjectAndroidExtension.externalNativeBuild
         val forcingNotRequired: Boolean =
-            gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null
+            externalNativeBuild?.cmake?.path != null ||
+                externalNativeBuild?.ndkBuild?.path != null
         if (forcingNotRequired) {
             return
         }
 
-        // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
+        val toolNdkProvisioningProperties = getToolNdkProvisioningProperties(gradleProject)
+        if (toolNdkProvisioningProperties != null) {
+            val androidComponents =
+                gradleProject.extensions.findByType(AndroidComponentsExtension::class.java)
+            if (androidComponents == null) {
+                configureSyntheticExternalNativeBuildFallback(
+                    gradleProject = gradleProject,
+                    flutterSdkRootPath = flutterSdkRootPath
+                )
+                return
+            }
+
+            androidComponents.finalizeDsl { _ ->
+                if (gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null) {
+                    return@finalizeDsl
+                }
+
+                val configuredNdkVersion = getConfiguredNdkVersion(gradleProject)
+                if (
+                    !configuredNdkVersion.isNullOrBlank() &&
+                    toolNdkProvisioningProperties.installedNdkVersions.contains(
+                        configuredNdkVersion
+                    )
+                ) {
+                    return@finalizeDsl
+                }
+                if (
+                    toolNdkProvisioningProperties.sdkManagerPath == null ||
+                    gradleProject.gradle.startParameter.isOffline
+                ) {
+                    configureSyntheticExternalNativeBuildFallback(
+                        gradleProject = gradleProject,
+                        flutterSdkRootPath = flutterSdkRootPath
+                    )
+                    return@finalizeDsl
+                }
+                val handledByToolProvisioning =
+                    maybeHandleToolNdkProvisioning(
+                        gradleProject = gradleProject,
+                        toolNdkProvisioningProperties = toolNdkProvisioningProperties
+                    )
+                if (!handledByToolProvisioning) {
+                    configureSyntheticExternalNativeBuildFallback(
+                        gradleProject = gradleProject,
+                        flutterSdkRootPath = flutterSdkRootPath
+                    )
+                }
+            }
+            return
+        }
+
+        configureSyntheticExternalNativeBuildFallback(
+            gradleProject = gradleProject,
+            flutterSdkRootPath = flutterSdkRootPath
+        )
+    }
+
+    private fun getToolNdkProvisioningProperties(project: Project): ToolNdkProvisioningProperties? {
+        val androidSdkRoot = project.findProperty(PROP_ANDROID_SDK_ROOT)?.toString() ?: return null
+        val installedNdkVersions =
+            project
+                .findProperty(PROP_INSTALLED_NDK_VERSIONS)
+                ?.toString()
+                ?.split(",")
+                ?.map(String::trim)
+                ?.filter(String::isNotEmpty)
+                ?.toSet() ?: return null
+        val sdkManagerPath = project.findProperty(PROP_SDK_MANAGER_PATH)?.toString()
+        return ToolNdkProvisioningProperties(
+            androidSdkRoot = androidSdkRoot,
+            installedNdkVersions = installedNdkVersions,
+            sdkManagerPath = sdkManagerPath
+        )
+    }
+
+    private fun maybeHandleToolNdkProvisioning(
+        gradleProject: Project,
+        toolNdkProvisioningProperties: ToolNdkProvisioningProperties
+    ): Boolean {
+        val configuredNdkVersion = getConfiguredNdkVersion(gradleProject)
+        if (configuredNdkVersion.isNullOrBlank()) {
+            return false
+        }
+
+        if (toolNdkProvisioningProperties.installedNdkVersions.contains(configuredNdkVersion)) {
+            return true
+        }
+
+        val sdkManagerPath = toolNdkProvisioningProperties.sdkManagerPath ?: return false
+        val execOps = gradleProject.serviceOf<ExecOperations>()
+        execOps
+            .exec {
+                commandLine(
+                    listOf(
+                        sdkManagerPath,
+                        "--sdk_root=${toolNdkProvisioningProperties.androidSdkRoot}",
+                        "--install",
+                        "ndk;$configuredNdkVersion"
+                    )
+                )
+            }.assertNormalExitValue()
+
+        val installedNdkMarker =
+            File(
+                toolNdkProvisioningProperties.androidSdkRoot,
+                "ndk/$configuredNdkVersion/source.properties"
+            )
+        if (!installedNdkMarker.exists()) {
+            throw GradleException(
+                "Android sdkmanager did not install NDK $configuredNdkVersion into ${toolNdkProvisioningProperties.androidSdkRoot}."
+            )
+        }
+        return true
+    }
+
+    private fun configureSyntheticExternalNativeBuildFallback(
+        gradleProject: Project,
+        flutterSdkRootPath: String
+    ) {
+        val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
         gradleProjectAndroidExtension.externalNativeBuild.cmake.path(
             "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
         )
@@ -724,6 +1001,13 @@ object FlutterPluginUtils {
     }
 
     @JvmStatic
+    @JvmName("isInvokingMetadataNdkVersionTask")
+    internal fun isInvokingMetadataNdkVersionTask(project: Project): Boolean =
+        project.gradle.startParameter.taskNames.any { taskName ->
+            taskName == TASK_PRINT_NDK_VERSION || taskName.endsWith(":$TASK_PRINT_NDK_VERSION")
+        }
+
+    @JvmStatic
     @JvmName("isFlutterAppProject")
     internal fun isFlutterAppProject(project: Project): Boolean =
         project.extensions.findByType(
@@ -743,7 +1027,7 @@ object FlutterPluginUtils {
     @JvmName("addFlutterDependencies")
     internal fun addFlutterDependencies(
         project: Project,
-        buildType: BuildType,
+        buildType: DslBuildType,
         pluginHandler: PluginHandler,
         engineVersion: String
     ) {
@@ -849,6 +1133,27 @@ object FlutterPluginUtils {
         }
     }
 
+    // Add a task that can be called on Flutter projects that prints the effective ndkVersion
+    // configured for the Android app.
+    //
+    // This task prints the version in this format:
+    //
+    // NdkVersion: 28.2.13676358
+    //
+    // Format of the output of this task is kept for diagnostics and targeted testing.
+    @JvmStatic
+    @JvmName("addTaskForPrintNdkVersion")
+    internal fun addTaskForPrintNdkVersion(project: Project) {
+        project.tasks.register(TASK_PRINT_NDK_VERSION, PrintTask::class.java) {
+            description = "Prints out the configured ndkVersion for this Android project"
+            message.set(
+                project.provider {
+                    "$NDK_VERSION_OUTPUT_PREFIX${getConfiguredNdkVersion(project)}"
+                }
+            )
+        }
+    }
+
     /**
      * Adds required tasks for the AppLinkSettings feature.
      *
@@ -871,9 +1176,12 @@ object FlutterPluginUtils {
         // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
         androidComponents.onVariants { variant ->
+            if (variant !is ApplicationVariant) {
+                return@onVariants
+            }
             val manifestUpdater =
                 project.tasks.register("output${capitalize(variant.name)}AppLinkSettings", DeepLinkJsonFromManifestTask::class.java) {
-                    namespace.set(variant.namespace)
+                    applicationId.set(variant.applicationId)
                     // Flutter should always use project.layout.buildDirectory.file("deeplink.json")
                     // instead of relying on passing in a path.
                     if (project.hasProperty("outputPath")) {
@@ -893,6 +1201,91 @@ object FlutterPluginUtils {
                     DeepLinkJsonFromManifestTask::manifestFile,
                     DeepLinkJsonFromManifestTask::updatedManifest
                 ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
+        }
+    }
+
+    /**
+     * Creates a task to generate an AndroidManifest.xml containing the engine shell arguments
+     * and adds it to the variant's manifests.
+     */
+    @JvmStatic
+    @JvmName("addTaskForGeneratingEngineShellArgumentManifest")
+    internal fun addTaskForGeneratingEngineShellArgumentManifest(project: Project) {
+        val engineShellArgsJson = project.findProperty("flutter.engineShellArgs") as? String ?: return
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+
+        androidComponents.onVariants { variant ->
+            val capitalizeVariantName = capitalize(variant.name)
+            val generateManifestTaskProvider =
+                project.tasks.register(
+                    "generateEngineFlagsManifest$capitalizeVariantName",
+                    GenerateEngineFlagsManifestTask::class.java
+                ) {
+                    this.engineShellArgsJson.set(engineShellArgsJson)
+                    this.manifestOutputFile.set(
+                        project.layout.buildDirectory.file(
+                            "intermediates/flutter/${variant.name}/AndroidManifest.xml"
+                        )
+                    )
+                }
+
+            variant.sources.manifests?.addGeneratedManifestFile(
+                generateManifestTaskProvider,
+                GenerateEngineFlagsManifestTask::manifestOutputFile
+            )
+        }
+    }
+
+    /**
+     * Adds tasks that inject the `io.flutter.embedding.android.EnableHcpp` meta-data into the
+     * merged manifest of each variant, when the flutter tool passed `-Penable-hcpp=true`. The
+     * tool does that when the `enable-hcpp` feature flag is on, or when `--enable-hcpp` was
+     * passed explicitly (these are not the same thing: an explicit flag sets the property
+     * regardless of the feature flag).
+     *
+     * The meta-data is only added when not already present in the merged manifest, so an
+     * explicit value in the developer's manifest always takes priority over the tool's default.
+     * An explicit `--enable-hcpp`/`--no-enable-hcpp` on `flutter run`/`flutter test` is passed
+     * to the engine at launch instead, which takes priority over the manifest at runtime.
+     *
+     * Only applies to application projects. Injecting into a module (aar) library manifest
+     * would propagate into the host app's merged manifest, and if the host app explicitly sets
+     * the meta-data to a different value the manifest merger fails the host build with an
+     * attribute conflict ("Attribute meta-data#...EnableHcpp@value value=(false) ... is also
+     * present at [library] ... value=(true)") instead of letting the host win. Add-to-app hosts
+     * therefore control HCPP exclusively through their own manifest.
+     */
+    @JvmStatic
+    @JvmName("addTasksForEnableHcppManifest")
+    internal fun addTasksForEnableHcppManifest(project: Project) {
+        if (!isFlutterAppProject(project)) {
+            return
+        }
+        val enableHcpp: Boolean =
+            project.findProperty(PROP_ENABLE_HCPP)?.toString()?.toBoolean() ?: false
+        val explicitEnableHcpp: Boolean? =
+            project.findProperty(PROP_EXPLICIT_ENABLE_HCPP)?.toString()?.toBoolean()
+        if (!enableHcpp && explicitEnableHcpp == null) {
+            return
+        }
+        val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
+        androidComponents.onVariants { variant ->
+            val hcppManifestUpdater =
+                project.tasks.register(
+                    "enableHcppInManifest${capitalize(variant.name)}",
+                    EnableHcppManifestTask::class.java
+                ) {
+                    this.requestedEnableHcpp.set(enableHcpp)
+                    if (explicitEnableHcpp != null) {
+                        this.explicitEnableHcpp.set(explicitEnableHcpp)
+                    }
+                }
+            variant.artifacts
+                .use(hcppManifestUpdater)
+                .wiredWithFiles(
+                    EnableHcppManifestTask::manifestFile,
+                    EnableHcppManifestTask::updatedManifest
+                ).toTransform(SingleArtifact.MERGED_MANIFEST)
         }
     }
 }

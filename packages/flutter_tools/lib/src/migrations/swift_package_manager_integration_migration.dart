@@ -273,9 +273,6 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     if (projectInfo == null) {
       throw Exception('Unable to get Xcode project info.');
     }
-    if (_xcodeProject.xcodeWorkspace == null) {
-      throw Exception('Xcode workspace not found.');
-    }
     final String? scheme = projectInfo.schemeFor(_buildInfo);
     if (scheme == null) {
       projectInfo.reportFlavorNotFoundAndExit();
