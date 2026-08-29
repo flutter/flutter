@@ -34,16 +34,22 @@ This document represents the synthesized blueprint for migrating the Flutter And
 * **2.2 Dart Callbacks**: Implement `FlutterEngineGetCallbackInformation` hook.
 * **2.3 Image Generators**: Hook `AndroidImageGenerator` to `FlutterEngineRegisterImageDecoder`.
 * **2.4 Mutator Translation**: Implement `AndroidMutatorsMapper`.
+* **2.5 Accessibility & Semantics**: Wire the Android accessibility bridge tree native updates.
+* **2.6 Platform Views**: Wire `AndroidPlatformView` and `PlatformViewsController` integrations.
 
 ### Phase 3: Advanced Graphics & Multi-Engine Integration
-* **3.1 AHardwareBuffer & Vulkan Textures**: Wire the Android implementation to the Phase 1.5 opaque `embedder.h` hooks via `OSLibraryLoader`.
-* **3.2 SurfaceControl HCPP**: Add dual-mode UI presentation natively into the new pipeline.
-* **3.3 Add-to-App Multi-Engine**: Wire `FlutterEngineGroup` natively to `FlutterEngineSpawn`. Java wrappers must be explicitly wired with a JNI `PhantomReference` or `Cleaner` registry catching GC events to route `FlutterEngineShutdown` and prevent pointer leaks.
+* **3.1 AHardwareBuffer**: Wire the Android implementation to the Phase 1 opaque hooks via `OSLibraryLoader`.
+* **3.2 Vulkan External Textures**: Wire the Android Vulkan instances relying on the `OSLibraryLoader` virtualization.
+* **3.3 SurfaceControl HCPP**: Add dual-mode UI presentation natively into the new pipeline.
+* **3.4 Add-to-App Multi-Engine**: Wire `FlutterEngineGroup` natively to `FlutterEngineSpawn`. Java wrappers must be explicitly wired with a JNI `PhantomReference` or `Cleaner` registry catching GC events to route `FlutterEngineShutdown` and prevent pointer leaks.
 
 ### Phase 4: E2E Parity
 * **4.1 CI E2E Harness**: Verify 100% test passing on `dev/integration_tests/channels`.
 
 ### Phase 5: Emancipation (The Purge)
 * **5.1 Default Flip**: Change the default settings fallback to `true`.
-* **5.2 Legacy Deletion**: Mass-delete legacy classes. Obliterate the `IsEmbedderEnabled` flag entirely and hardcode unconditionally to the new Embedder API.
-* **5.3 Final GN Integration**: Migrate `flutter_embedder_native` into `flutter_shell_native` AND explicitly purge all legacy UI/Skia dependencies from `flutter_shell_native`'s `BUILD.gn` to prevent Post-Migration Relapse.
+* **5.2 Legacy Deletion (Subsystems)**: Delete legacy classes for Asset, Callback, Image, and Mutators.
+* **5.3 Legacy Deletion (Platform Views & Semantics)**: Purge legacy accessibility and platform view hierarchies.
+* **5.4 Legacy Deletion (Graphics Pipeline)**: Delete `android_context`, `external_view_embedder`, and `android_surface`.
+* **5.5 Flag Obliteration**: Obliterate the `IsEmbedderEnabled` flag entirely and hardcode unconditionally to the new Embedder API.
+* **5.6 Final GN Integration**: Migrate `flutter_embedder_native` into `flutter_shell_native` AND explicitly purge all legacy UI/Skia dependencies from `flutter_shell_native`'s `BUILD.gn` to prevent Post-Migration Relapse.
