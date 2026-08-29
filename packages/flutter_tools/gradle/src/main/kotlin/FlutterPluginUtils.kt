@@ -52,6 +52,7 @@ object FlutterPluginUtils {
     internal const val PROP_LOCAL_ENGINE_BUILD_MODE = "local-engine-build-mode"
     internal const val PROP_TARGET_PLATFORM = "target-platform"
     internal const val PROP_DISABLE_ABI_FILTERING = "disable-abi-filtering"
+    internal const val PROP_ANDROID_CLI_PATH = "flutter.androidCliPath"
     internal const val PROP_SDK_MANAGER_PATH = "flutter.sdkManagerPath"
     internal const val PROP_ANDROID_SDK_ROOT = "flutter.androidSdkRoot"
     internal const val PROP_INSTALLED_NDK_VERSIONS = "flutter.installedNdkVersions"
@@ -61,6 +62,7 @@ object FlutterPluginUtils {
     private data class ToolNdkProvisioningProperties(
         val androidSdkRoot: String,
         val installedNdkVersions: Set<String>,
+        val androidCliPath: String?,
         val sdkManagerPath: String?
     )
 
@@ -874,7 +876,8 @@ object FlutterPluginUtils {
                     return@finalizeDsl
                 }
                 if (
-                    toolNdkProvisioningProperties.sdkManagerPath == null ||
+                    (toolNdkProvisioningProperties.androidCliPath == null &&
+                        toolNdkProvisioningProperties.sdkManagerPath == null) ||
                     gradleProject.gradle.startParameter.isOffline
                 ) {
                     configureSyntheticExternalNativeBuildFallback(
@@ -914,10 +917,12 @@ object FlutterPluginUtils {
                 ?.map(String::trim)
                 ?.filter(String::isNotEmpty)
                 ?.toSet() ?: return null
+        val androidCliPath = project.findProperty(PROP_ANDROID_CLI_PATH)?.toString()
         val sdkManagerPath = project.findProperty(PROP_SDK_MANAGER_PATH)?.toString()
         return ToolNdkProvisioningProperties(
             androidSdkRoot = androidSdkRoot,
             installedNdkVersions = installedNdkVersions,
+            androidCliPath = androidCliPath,
             sdkManagerPath = sdkManagerPath
         )
     }
@@ -935,19 +940,39 @@ object FlutterPluginUtils {
             return true
         }
 
-        val sdkManagerPath = toolNdkProvisioningProperties.sdkManagerPath ?: return false
+        val androidCliPath = toolNdkProvisioningProperties.androidCliPath
+        val sdkManagerPath = toolNdkProvisioningProperties.sdkManagerPath
+        if (androidCliPath == null && sdkManagerPath == null) {
+            return false
+        }
+
         val execOps = gradleProject.serviceOf<ExecOperations>()
-        execOps
-            .exec {
-                commandLine(
-                    listOf(
-                        sdkManagerPath,
-                        "--sdk_root=${toolNdkProvisioningProperties.androidSdkRoot}",
-                        "--install",
-                        "ndk;$configuredNdkVersion"
+        if (androidCliPath != null) {
+            execOps
+                .exec {
+                    commandLine(
+                        listOf(
+                            androidCliPath,
+                            "--sdk=${toolNdkProvisioningProperties.androidSdkRoot}",
+                            "sdk",
+                            "install",
+                            "ndk@$configuredNdkVersion"
+                        )
                     )
-                )
-            }.assertNormalExitValue()
+                }.assertNormalExitValue()
+        } else if (sdkManagerPath != null) {
+            execOps
+                .exec {
+                    commandLine(
+                        listOf(
+                            sdkManagerPath,
+                            "--sdk_root=${toolNdkProvisioningProperties.androidSdkRoot}",
+                            "--install",
+                            "ndk;$configuredNdkVersion"
+                        )
+                    )
+                }.assertNormalExitValue()
+        }
 
         val installedNdkMarker =
             File(
@@ -956,7 +981,7 @@ object FlutterPluginUtils {
             )
         if (!installedNdkMarker.exists()) {
             throw GradleException(
-                "Android sdkmanager did not install NDK $configuredNdkVersion into ${toolNdkProvisioningProperties.androidSdkRoot}."
+                "Android SDK tools did not install NDK $configuredNdkVersion into ${toolNdkProvisioningProperties.androidSdkRoot}."
             )
         }
         return true

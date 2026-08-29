@@ -2075,6 +2075,65 @@ class FlutterPluginUtilsTest {
     }
 
     @Test
+    fun `forceNdkDownload installs a missing ndk when android cli is provided`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<ProjectInternal>()
+        val finalizeDslSlot = captureFinalizeDslAction(project)
+        val execActionSlot = slot<Action<ExecSpec>>()
+        val mockExecSpec = mockk<ExecSpec>()
+        val mockExecResult = mockk<ExecResult>()
+        val mockExecOperations = mockk<ExecOperations>()
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockNdkBuildOptions = mockk<com.android.build.gradle.internal.dsl.NdkBuildOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.externalNativeBuild.ndkBuild } returns mockNdkBuildOptions
+        every { mockNdkBuildOptions.path } returns null
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_CLI_PATH) } returns "/android"
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns tempDir.toString()
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns ""
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+        every { project.gradle.startParameter.isOffline } returns false
+        every { project.serviceOf<ExecOperations>() } returns mockExecOperations
+        every { mockExecOperations.exec(capture(execActionSlot)) } answers {
+            File(tempDir.toFile(), "ndk/29.0.13846066/source.properties").apply {
+                parentFile.mkdirs()
+                createNewFile()
+            }
+            mockExecResult
+        }
+        every { mockExecResult.assertNormalExitValue() } returns mockExecResult
+        every { mockExecSpec.commandLine(any<List<String>>()) } returns mockExecSpec
+
+        setUpMockAndroidExtension(project)
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+        finalizeDslSlot.captured.invoke(Any())
+        execActionSlot.captured.execute(mockExecSpec)
+
+        verify(exactly = 1) { mockExecOperations.exec(any<Action<ExecSpec>>()) }
+        verify {
+            mockExecSpec.commandLine(
+                listOf(
+                    "/android",
+                    "--sdk=$tempDir",
+                    "sdk",
+                    "install",
+                    "ndk@29.0.13846066"
+                )
+            )
+        }
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
     fun `forceNdkDownload skips sdkmanager install when the requested ndk is already installed`() {
         val project = mockk<Project>()
         val finalizeDslSlot = captureFinalizeDslAction(project)

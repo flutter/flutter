@@ -258,6 +258,95 @@ void main() {
     );
 
     testUsingContext(
+      'returns android path under cmdline tools on Linux/macOS',
+      () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem, withSdkManager: false);
+        config.setValue('android-sdk', sdkDir.path);
+
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+        fileSystem
+            .file(
+              fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'android'),
+            )
+            .createSync(recursive: true);
+
+        expect(
+          sdk.androidCliPath,
+          fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'android'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => FakePlatform(),
+        Config: () => config,
+      },
+    );
+
+    testUsingContext(
+      'returns android.bat or android.exe path under cmdline tools on Windows',
+      () {
+        final Directory sdkDir = createSdkDirectory(
+          fileSystem: fileSystem,
+          withSdkManager: false,
+          platform: FakePlatform(operatingSystem: 'windows'),
+        );
+        config.setValue('android-sdk', sdkDir.path);
+
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+        fileSystem
+            .file(
+              fileSystem.path.join(
+                sdk.directory.path,
+                'cmdline-tools',
+                'latest',
+                'bin',
+                'android.bat',
+              ),
+            )
+            .createSync(recursive: true);
+
+        expect(
+          sdk.androidCliPath,
+          fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'android.bat'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => FakePlatform(operatingSystem: 'windows'),
+        Config: () => config,
+      },
+    );
+
+    testUsingContext(
+      'sdkToolType prefers androidCli over sdkManager',
+      () {
+        final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
+        config.setValue('android-sdk', sdkDir.path);
+
+        final AndroidSdk sdk = AndroidSdk.locateAndroidSdk()!;
+        fileSystem
+            .file(
+              fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'android'),
+            )
+            .createSync(recursive: true);
+
+        expect(sdk.sdkToolType, AndroidSdkToolType.androidCli);
+        expect(
+          sdk.sdkToolPath,
+          fileSystem.path.join(sdk.directory.path, 'cmdline-tools', 'latest', 'bin', 'android'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Platform: () => FakePlatform(),
+        Config: () => config,
+      },
+    );
+
+    testUsingContext(
       'returns sdkmanager version',
       () {
         final Directory sdkDir = createSdkDirectory(fileSystem: fileSystem);
