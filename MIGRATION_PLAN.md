@@ -25,7 +25,9 @@ This document represents the synthesized blueprint for migrating the Flutter And
 * **1.2 Pre-Emptive GN Quarantine**: Create `flutter_embedder_native` target dependent strictly on `embedder.h`.
 * **1.3 JNI DI Interface & Inline Routing**: Implement `if (Flags.isEmbedderApiInputEnabled())` inside the raw JNI boundary. Inject `JvmInvoker` into `JniDelegate` for abstracted JVM callbacks.
 * **1.4 Dynamic Virtualization**: Implement `OSLibraryLoader` wrapper to shield desktop host tests.
-* **1.5 C-API Extensions**: Expand `embedder.h` with opaque cross-platform abstractions for Vulkan External Textures, AHardwareBuffer, and `FlutterEngineSpawn`.
+* **1.5 C-API Extension (Vulkan)**: Expand `embedder.h` with opaque cross-platform abstractions for Vulkan External Textures.
+* **1.6 C-API Extension (AHardwareBuffer)**: Expand `embedder.h` with opaque abstractions for Android `AHardwareBuffer` zero-copy textures.
+* **1.7 C-API Extension (Engine Spawn)**: Expand `embedder.h` with `FlutterEngineSpawn` support for Add-to-App capabilities.
 
 ### Phase 2: Decoupled Subsystems
 * **2.1 Asset Resolver**: Adapt `APKAssetProvider`.

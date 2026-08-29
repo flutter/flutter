@@ -5,7 +5,9 @@
 - [ ] 1.2 Pre-Emptive GN Quarantine: strict `flutter_embedder_native` target initialized.
 - [ ] 1.3 `JvmInvoker` abstracted; JNI routing wired to `JniDelegate`.
 - [ ] 1.4 `OSLibraryLoader` implemented for mocked dynamic Android symbol lookups.
-- [ ] 1.5 `embedder.h` API abstractions prepared (using opaque structs).
+- [ ] 1.5 `embedder.h` API extension: Vulkan External Textures.
+- [ ] 1.6 `embedder.h` API extension: AHardwareBuffer (opaque structs).
+- [ ] 1.7 `embedder.h` API extension: `FlutterEngineSpawn`.
 
 ## Phase 2: Decoupled Subsystems
 - [ ] 2.1 `APKAssetProvider` adapted to Embedder Custom Asset Resolver.
