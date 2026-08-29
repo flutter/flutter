@@ -190,8 +190,8 @@ bool TextInputModel::DeleteSurrounding(int offset_from_cursor, int count) {
   size_t start = selection_.extent();
   if (offset_from_cursor < 0) {
     for (int i = 0; i < -offset_from_cursor; i++) {
-      // If requested start is before the available text then reduce the
-      // number of characters to delete. Use <= rather than == because a step
+      // If the requested start is at or before the beginning of the
+      // available text then reduce the number of characters to delete. A step
       // of 2 (crossing a surrogate pair) can land before the start of the
       // range rather than exactly on it.
       if (start <= editable_range().start()) {
@@ -208,10 +208,6 @@ bool TextInputModel::DeleteSurrounding(int offset_from_cursor, int count) {
 
   auto end = start;
   for (int i = 0; i < count && end < max_pos; i++) {
-    // Advance over whole code points: check the character at the position
-    // being advanced past, not the one the range started at. Checking |start|
-    // leaves |end| inside a surrogate pair whenever a later code point is
-    // non-BMP, which corrupts |text_| with a lone surrogate.
     end += IsLeadingSurrogate(text_.at(end)) ? 2 : 1;
   }
 
