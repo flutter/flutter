@@ -29,16 +29,16 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
 *For each subsystem, both Java `android_test` and C++ `flutter_shell_native_unittests` must pass before proceeding.*
 - [ ] **2.1 Asset Resolver**: 
     - [ ] `APKAssetProvider` adapted to Embedder Custom Asset Resolver.
-    - [ ] *Validation*: Asset resolution unit tests pass.
+    - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterLoaderTest.java`, `ApplicationInfoLoaderTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`apk_asset_provider_unittests.cc`) pass.
 - [ ] **2.2 Dart Callbacks**: 
     - [ ] Dart Callback lookup API integrated.
-    - [ ] *Validation*: Engine callback C++ integration tests pass.
+    - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterJNITest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`platform_view_android_delegate_unittests.cc`) pass.
 - [ ] **2.3 Image Generators**: 
     - [ ] `AndroidImageGenerator` hooked to `FlutterEngineRegisterImageDecoder`.
-    - [ ] *Validation*: Image decoding Java/JNI tests pass.
+    - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`ImageDecoderDefaultImplTest.java`, `ImageDecoderHeifApi36ImplTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`image_lru_unittests.cc`) pass.
 - [ ] **2.4 Mutator Translation**: 
     - [ ] `AndroidMutatorsMapper` implemented.
-    - [ ] *Validation*: Platform view mutator stack unit tests pass.
+    - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterMutatorViewTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`android_mutator_unittests.cc`) pass.
 - [ ] **2.5 Accessibility & Semantics**: 
     - [ ] `Accessibility` & `Semantics` natively wired.
     - [ ] *Validation*: `dev/integration_tests/android_semantics` passes across CI matrix.
@@ -49,17 +49,17 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
 ## Phase 3: Advanced Graphics & Multi-Engine Integration
 - [ ] **3.1 AHardwareBuffer**:
     - [ ] `AHardwareBuffer` wired via Virtualization.
-    - [ ] *Validation*: Zero-copy texture allocation C++ tests pass.
+    - [ ] *Validation*: `//shell/platform/android:flutter_shell_native_unittests` (`hardware_buffer_unittests.cc`, `android_surface_unittests.cc`) pass.
 - [ ] **3.2 Vulkan External Textures**:
     - [ ] `Vulkan External Textures` wired.
-    - [ ] *Validation*: E2E Vulkan video playback tests pass (Camera/VideoPlayer plugins).
+    - [ ] *Validation*: `dev/integration_tests/android_views` AND `dev/devicelab/bin/tasks/plugin_test_android_variants.dart` pass using Impeller Vulkan backend.
 - [ ] **3.3 SurfaceControl HCPP**:
     - [ ] SurfaceControl HCPP dual-mode presentation enabled.
     - [ ] *Validation*: Native presentation path tests pass in `android_views`.
 - [ ] **3.4 Multi-Engine & Add-to-App**:
     - [ ] Add-to-App capabilities wired to `FlutterEngineSpawn` with Java `Cleaner`/`PhantomReference` bindings.
     - [ ] *Validation*: `dev/devicelab/bin/tasks/build_android_host_app_with_module_source.dart` succeeds.
-    - [ ] *Validation*: Engine lifecycle/GC memory leak unit tests pass.
+    - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterEngineGroupTest.java`, `FlutterEngineTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`android_shell_holder_unittests.cc`) pass.
 
 ## Phase 4: Extreme E2E Parity Validation
 *Before ANY legacy code is deleted in Phase 5, the entire engine, framework, and DeviceLab matrices must be run unconditionally against the new Embedder API logic.*
@@ -88,13 +88,13 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [ ] *Validation*: CI remains unconditionally green on default runs.
 - [ ] **5.2 Legacy Deletion (Subsystems)**: 
     - [ ] Assets, Images, Callbacks, Mutators wiped. 
-    - [ ] *Validation*: Build compiles successfully; tests pass.
+    - [ ] *Validation*: `ninja -C out/android_debug_unopt flutter_shell_native_unittests` compiles successfully AND `//shell/platform/android:robolectric_tests` passes entirely without legacy code.
 - [ ] **5.3 Legacy Deletion (Platform Views/Semantics)**: 
     - [ ] Platform views and semantics wiped.
-    - [ ] *Validation*: Build compiles successfully; tests pass.
+    - [ ] *Validation*: `ninja -C out/android_debug_unopt flutter_shell_native_unittests` compiles successfully AND `//shell/platform/android:robolectric_tests` passes entirely without legacy code.
 - [ ] **5.4 Legacy Deletion (Graphics Pipeline)**: 
     - [ ] `android_context`, `android_surface` wiped.
-    - [ ] *Validation*: Build compiles successfully; tests pass.
+    - [ ] *Validation*: `ninja -C out/android_debug_unopt flutter_shell_native_unittests` compiles successfully AND `//shell/platform/android:robolectric_tests` passes entirely without legacy code.
 - [ ] **5.5 Flag Obliteration**: 
     - [ ] Flags pruned and routing hardcoded unconditionally.
     - [ ] *Validation*: CLI flags `--enable-embedder-api` are rejected by build scripts appropriately.
