@@ -78,9 +78,12 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [ ] `dev/devicelab/bin/tasks/android_verified_input_test.dart` - Passed.
     - [ ] `dev/devicelab/bin/tasks/android_semantics_integration_test.dart` - Passed.
     - [ ] `dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart` - Passed.
+    - [ ] `dev/devicelab/bin/tasks/android_engine_flags_debug_test.dart` - Passed.
+    - [ ] `dev/devicelab/bin/tasks/android_engine_flags_release_test.dart` - Passed.
 - [ ] **4.5 DeviceLab Performance & Memory Parity (No Regressions)**:
     - [ ] `dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart` - Passed.
     - [ ] `dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart` - Passed.
+    - [ ] `dev/devicelab/bin/tasks/flutter_engine_group_performance.dart` - Passed.
 
 ## Phase 5: Emancipation
 - [ ] **5.1 Target Flip**: 
