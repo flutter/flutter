@@ -135,6 +135,14 @@ public class TextInputChannel {
               textInputMethodHandler.clearClient();
               result.success(null);
               break;
+            case "TextInput.updateConfig":
+              try {
+                textInputMethodHandler.updateConfig(Configuration.fromJson((JSONObject) args));
+                result.success(null);
+              } catch (JSONException | NoSuchFieldException exception) {
+                result.error("error", exception.getMessage(), null);
+              }
+              break;
             case "TextInput.sendAppPrivateCommand":
               try {
                 final JSONObject arguments = (JSONObject) args;
@@ -433,6 +441,14 @@ public class TextInputChannel {
      *     hybrid composition.
      */
     void setPlatformViewClient(int id, boolean usesVirtualDisplay);
+
+    /**
+     * Updates the configuration of the active text input client, e.g. when the framework changes
+     * {@code textInputAction} dynamically.
+     *
+     * @param configuration The new {@link Configuration} for the active text input client.
+     */
+    void updateConfig(@NonNull Configuration configuration);
 
     /**
      * Sets the size and the transform matrix of the current text input client.
