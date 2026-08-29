@@ -1641,6 +1641,65 @@ public class TextInputPluginTest {
   }
 
   @Test
+  public void updateTextInputConfig_restartsImeAndAppliesNewInputAction() {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = new View(ctx);
+    DartExecutor dartExecutor = mock(DartExecutor.class);
+    TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            EditorInfo.IME_ACTION_DONE,
+            null,
+            null,
+            null,
+            null,
+            null));
+
+    EditorInfo editorInfo = new EditorInfo();
+    textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), editorInfo);
+    assertTrue((editorInfo.imeOptions & EditorInfo.IME_ACTION_DONE) != 0);
+    assertEquals(0, testImm.getRestartCount(testView));
+
+    textInputPlugin.updateTextInputConfig(
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            EditorInfo.IME_ACTION_SEND,
+            null,
+            null,
+            null,
+            null,
+            null));
+
+    assertEquals(1, testImm.getRestartCount(testView));
+
+    EditorInfo updatedEditorInfo = new EditorInfo();
+    textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), updatedEditorInfo);
+    assertTrue((updatedEditorInfo.imeOptions & EditorInfo.IME_ACTION_SEND) != 0);
+  }
+
+  @Test
   public void inputConnection_textInputTypeMultilineAndSuggestionsDisabled() {
     // Regression test for https://github.com/flutter/flutter/issues/71679.
     View testView = new View(ctx);
