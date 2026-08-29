@@ -199,9 +199,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -325,9 +322,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -361,9 +355,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -405,9 +396,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
@@ -441,9 +429,6 @@ void UpdateRootSemantics(flutter::AccessibilityBridge* bridge, std::string label
                                /*io=*/thread_task_runner);
   auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/mock_delegate,
-      /*rendering_api=*/mock_delegate.settings_.enable_impeller
-          ? flutter::IOSRenderingAPI::kMetal
-          : flutter::IOSRenderingAPI::kSoftware,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
