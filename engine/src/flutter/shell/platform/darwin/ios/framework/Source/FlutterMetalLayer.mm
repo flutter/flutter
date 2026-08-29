@@ -4,9 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterMetalLayer.h"
 
-#include <AVFoundation/AVFoundation.h>
 #include <CoreMedia/CoreMedia.h>
-#include <CoreVideo/CoreVideo.h>
 #include <IOSurface/IOSurfaceObjC.h>
 #include <Metal/Metal.h>
 #include <UIKit/UIKit.h>
@@ -21,7 +19,6 @@ FLUTTER_ASSERT_ARC
 @class FlutterDrawable;
 
 @interface FlutterMetalLayer () {
-  id<MTLDevice> _preferredDevice;
   CGSize _drawableSize;
 
   NSUInteger _nextDrawableId;
@@ -30,16 +27,11 @@ FLUTTER_ASSERT_ARC
   NSMutableSet<FlutterTexture*>* _availableTextures;
   NSUInteger _totalTextures;
   FlutterTexture* _front;
-
-  // Presents completed IOSurfaces without consuming CAMetalLayer drawables.
-  AVSampleBufferDisplayLayer* _sampleBufferDisplayLayer;
 }
 
 - (void)presentTexture:(FlutterTexture*)texture;
-- (void)enqueueTextureForDisplay:(FlutterTexture*)texture;
 - (void)returnTexture:(FlutterTexture*)texture;
-- (void)recreateSampleBufferDisplayLayer;
-- (void)willEnterForeground:(NSNotification*)notification;
+- (id<CAMetalDrawable>)acquirePresentationDrawable;
 
 @end
 
@@ -135,11 +127,38 @@ FLUTTER_ASSERT_ARC
 
 - (void)flutterPrepareForPresent:(nonnull id<MTLCommandBuffer>)commandBuffer {
   FlutterTexture* texture = _texture;
-  FlutterMetalLayer* layer = _layer;
   texture.waitingForCompletion = YES;
+
+  id<CAMetalDrawable> presentationDrawable = [_layer acquirePresentationDrawable];
+  id<MTLTexture> presentationTexture = presentationDrawable.texture;
+
+  // A resize can leave an old Flutter texture in flight. Do not copy
+  // it into a drawable created for the new layer configuration.
+  const BOOL canCopy = presentationTexture != nil &&
+                       presentationTexture.width == texture.texture.width &&
+                       presentationTexture.height == texture.texture.height &&
+                       presentationTexture.pixelFormat == texture.texture.pixelFormat;
+
+  if (canCopy) {
+    // Copy the IOSurface-backed Flutter result into the drawable owned by this CAMetalLayer.
+    // Encoding the copy and presentation on the render command buffer preserves GPU ordering
+    // without making the CPU wait.
+    id<MTLBlitCommandEncoder> blit = [commandBuffer blitCommandEncoder];
+    MTLOrigin origin = MTLOriginMake(0, 0, 0);
+    MTLSize size = MTLSizeMake(texture.texture.width, texture.texture.height, 1);
+    [blit copyFromTexture:texture.texture
+              sourceSlice:0
+              sourceLevel:0
+             sourceOrigin:origin
+               sourceSize:size
+                toTexture:presentationTexture
+         destinationSlice:0
+         destinationLevel:0
+        destinationOrigin:origin];
+    [blit endEncoding];
+    [commandBuffer presentDrawable:presentationDrawable];
+  }
   [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
-    // Prevent the display layer from reading the IOSurface before Metal finishes writing it.
-    [layer enqueueTextureForDisplay:texture];
     texture.waitingForCompletion = NO;
   }];
 }
@@ -150,41 +169,16 @@ FLUTTER_ASSERT_ARC
 
 - (instancetype)init {
   if (self = [super init]) {
-    _preferredDevice = MTLCreateSystemDefaultDevice();
-    self.device = self.preferredDevice;
+    self.device = MTLCreateSystemDefaultDevice();
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
-    [self recreateSampleBufferDisplayLayer];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground:)
                                                  name:UIApplicationDidEnterBackgroundNotification
                                                object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(willEnterForeground:)
-                                                 name:UIApplicationWillEnterForegroundNotification
-                                               object:nil];
   }
   return self;
-}
-
-- (void)layoutSublayers {
-  [super layoutSublayers];
-  [CATransaction begin];
-  [CATransaction setDisableActions:YES];
-  _sampleBufferDisplayLayer.frame = self.bounds;
-  [CATransaction commit];
-}
-
-- (void)recreateSampleBufferDisplayLayer {
-  [_sampleBufferDisplayLayer removeFromSuperlayer];
-
-  _sampleBufferDisplayLayer = [[AVSampleBufferDisplayLayer alloc] init];
-  _sampleBufferDisplayLayer.videoGravity = AVLayerVideoGravityResize;
-  _sampleBufferDisplayLayer.backgroundColor = UIColor.clearColor.CGColor;
-  _sampleBufferDisplayLayer.preventsDisplaySleepDuringVideoPlayback = NO;
-  _sampleBufferDisplayLayer.frame = self.bounds;
-  [self insertSublayer:_sampleBufferDisplayLayer atIndex:0];
 }
 
 - (void)dealloc {
@@ -197,27 +191,14 @@ FLUTTER_ASSERT_ARC
     _front = nil;
     _totalTextures = 0;
     _drawableSize = drawableSize;
+    [super setDrawableSize:drawableSize];
   }
 }
 
 - (void)didEnterBackground:(id)notification {
-  [_sampleBufferDisplayLayer flush];
   @synchronized(self) {
     [_availableTextures removeAllObjects];
     _totalTextures = _front != nil ? 1 : 0;
-  }
-}
-
-- (void)willEnterForeground:(NSNotification*)notification {
-  // A flushed display layer may remain unable to enqueue after backgrounding.
-  [self recreateSampleBufferDisplayLayer];
-
-  FlutterTexture* front = nil;
-  @synchronized(self) {
-    front = _front;
-  }
-  if (front != nil) {
-    [self enqueueTextureForDisplay:front];
   }
 }
 
@@ -365,6 +346,10 @@ FLUTTER_ASSERT_ARC
   return [self nextFlutterDrawable];
 }
 
+- (id<CAMetalDrawable>)acquirePresentationDrawable {
+  return [super nextDrawable];
+}
+
 - (void)presentTexture:(FlutterTexture*)texture {
   @synchronized(self) {
     if (texture.texture.width != _drawableSize.width ||
@@ -377,40 +362,6 @@ FLUTTER_ASSERT_ARC
     _front = texture;
     texture.presentedTime = CACurrentMediaTime();
   }
-}
-
-- (void)enqueueTextureForDisplay:(FlutterTexture*)texture {
-  // Wrap the rendered IOSurface directly; this does not copy or encode its pixels.
-  CVPixelBufferRef pixelBuffer = nil;
-  CVReturn result = CVPixelBufferCreateWithIOSurface(
-      kCFAllocatorDefault, (__bridge IOSurfaceRef)texture.surface, nil, &pixelBuffer);
-  if (result != kCVReturnSuccess || pixelBuffer == nil) {
-    return;
-  }
-
-  CMVideoFormatDescriptionRef formatDescription = nil;
-  OSStatus status = CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, pixelBuffer,
-                                                                 &formatDescription);
-  if (status != noErr || formatDescription == nil) {
-    CFRelease(pixelBuffer);
-    return;
-  }
-
-  CMSampleTimingInfo timing = {
-      .duration = kCMTimeInvalid,
-      .presentationTimeStamp = CMClockGetTime(CMClockGetHostTimeClock()),
-      .decodeTimeStamp = kCMTimeInvalid,
-  };
-  CMSampleBufferRef sampleBuffer = nil;
-  status = CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixelBuffer,
-                                                    formatDescription, &timing, &sampleBuffer);
-  if (status == noErr && sampleBuffer != nil) {
-    // Let the display layer schedule the frame with UIKit instead of presenting it immediately.
-    [_sampleBufferDisplayLayer enqueueSampleBuffer:sampleBuffer];
-    CFRelease(sampleBuffer);
-  }
-  CFRelease(formatDescription);
-  CFRelease(pixelBuffer);
 }
 
 - (void)returnTexture:(FlutterTexture*)texture {

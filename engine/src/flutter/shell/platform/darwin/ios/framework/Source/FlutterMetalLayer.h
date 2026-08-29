@@ -8,13 +8,11 @@
 #import <QuartzCore/QuartzCore.h>
 
 /// A CAMetalLayer that provides Flutter with IOSurface-backed render targets
-/// and presents completed contents through a sample buffer display layer.
+/// and presents their completed contents through the native drawable pipeline.
 @interface FlutterMetalLayer : CAMetalLayer
 
 /// Returns an IOSurface-backed drawable for Flutter rendering.
 - (nullable id<CAMetalDrawable>)nextFlutterDrawable;
-
-- (nullable id<CAMetalDrawable>)nextDrawable;
 
 /// Returns whether the Metal layer is enabled.
 /// This is controlled by FLTUseFlutterMetalLayer value in Info.plist.

@@ -187,7 +187,6 @@ source_set("flutter_framework_source") {
   sources += _flutter_framework_headers
 
   frameworks = [
-    "AVFoundation.framework",
     "AudioToolbox.framework",
     "CoreMedia.framework",
     "CoreVideo.framework",
