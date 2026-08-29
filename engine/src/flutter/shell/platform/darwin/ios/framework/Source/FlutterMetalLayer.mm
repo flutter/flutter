@@ -168,17 +168,6 @@ FLUTTER_ASSERT_ARC
   return self;
 }
 
-- (BOOL)isKindOfClass:(Class)aClass {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability-new"
-  // Flutter Metal surfaces expect their layer to satisfy CAMetalLayer type checks.
-  if ([aClass isEqual:[CAMetalLayer class]]) {
-    return YES;
-  }
-#pragma clang diagnostic pop
-  return [super isKindOfClass:aClass];
-}
-
 - (void)layoutSublayers {
   [super layoutSublayers];
   [CATransaction begin];
@@ -409,20 +398,14 @@ FLUTTER_ASSERT_ARC
 
   CMSampleTimingInfo timing = {
       .duration = kCMTimeInvalid,
-      .presentationTimeStamp = kCMTimeZero,
+      .presentationTimeStamp = CMClockGetTime(CMClockGetHostTimeClock()),
       .decodeTimeStamp = kCMTimeInvalid,
   };
   CMSampleBufferRef sampleBuffer = nil;
   status = CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault, pixelBuffer,
                                                     formatDescription, &timing, &sampleBuffer);
   if (status == noErr && sampleBuffer != nil) {
-    CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, YES);
-    if (attachments != nil && CFArrayGetCount(attachments) > 0) {
-      CFMutableDictionaryRef attachment =
-          (CFMutableDictionaryRef)CFArrayGetValueAtIndex(attachments, 0);
-      CFDictionarySetValue(attachment, kCMSampleAttachmentKey_DisplayImmediately, kCFBooleanTrue);
-    }
-    // Flutter frames are already paced by VSync, so they should not be queued by timestamp.
+    // Let the display layer schedule the frame with UIKit instead of presenting it immediately.
     [_sampleBufferDisplayLayer enqueueSampleBuffer:sampleBuffer];
     CFRelease(sampleBuffer);
   }

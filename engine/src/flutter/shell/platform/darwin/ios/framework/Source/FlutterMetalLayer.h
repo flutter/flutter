@@ -7,20 +7,9 @@
 
 #import <QuartzCore/QuartzCore.h>
 
-/// A CALayer that provides Flutter with IOSurface-backed render targets
-/// and presents their completed contents through the native drawable pipeline.
-@interface FlutterMetalLayer : CALayer
-
-@property(nullable, retain) id<MTLDevice> device;
-@property(nullable, readonly) id<MTLDevice> preferredDevice API_AVAILABLE(macos(10.15),
-                                                                          ios(13.0),
-                                                                          tvos(13.0))
-    API_UNAVAILABLE(watchos);
-@property MTLPixelFormat pixelFormat;
-@property BOOL framebufferOnly;
-@property CGSize drawableSize;
-@property BOOL presentsWithTransaction;
-@property(nullable) CGColorSpaceRef colorspace;
+/// A CAMetalLayer that provides Flutter with IOSurface-backed render targets
+/// and presents completed contents through a sample buffer display layer.
+@interface FlutterMetalLayer : CAMetalLayer
 
 /// Returns an IOSurface-backed drawable for Flutter rendering.
 - (nullable id<CAMetalDrawable>)nextFlutterDrawable;
