@@ -58,10 +58,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [ ] *Validation*: Native presentation path tests pass in `android_views`.
 - [ ] **3.4 Multi-Engine & Add-to-App**:
     - [ ] Add-to-App capabilities wired to `FlutterEngineSpawn` with Java `Cleaner`/`PhantomReference` bindings.
+    - [ ] *Validation*: `dev/devicelab/bin/tasks/build_android_host_app_with_module_source.dart` succeeds.
     - [ ] *Validation*: Engine lifecycle/GC memory leak unit tests pass.
 
 ## Phase 4: Extreme E2E Parity Validation
-*Before ANY legacy code is deleted in Phase 5, the entire engine and framework E2E matrix must be run unconditionally against the new Embedder API logic.*
+*Before ANY legacy code is deleted in Phase 5, the entire engine, framework, and DeviceLab matrices must be run unconditionally against the new Embedder API logic.*
 - [ ] **4.1 Engine Unit Tests**:
     - [ ] `embedder_unittests` (Host macOS/Linux) - Passed.
     - [ ] `flutter_shell_native_unittests` (Android Emulator) - Passed.
@@ -72,6 +73,14 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
 - [ ] **4.3 Framework Integration Tests (Impeller)**:
     - [ ] `dev/integration_tests/android_views` (Backend: Impeller OpenGLES) - Passed.
     - [ ] `dev/integration_tests/android_views` (Backend: Impeller Vulkan) - Passed.
+- [ ] **4.4 DeviceLab Android Lifecycle & Platform Views**:
+    - [ ] `dev/devicelab/bin/tasks/android_lifecycles_test.dart` - Passed.
+    - [ ] `dev/devicelab/bin/tasks/android_verified_input_test.dart` - Passed.
+    - [ ] `dev/devicelab/bin/tasks/android_semantics_integration_test.dart` - Passed.
+    - [ ] `dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart` - Passed.
+- [ ] **4.5 DeviceLab Performance & Memory Parity (No Regressions)**:
+    - [ ] `dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart` - Passed.
+    - [ ] `dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart` - Passed.
 
 ## Phase 5: Emancipation
 - [ ] **5.1 Target Flip**: 
