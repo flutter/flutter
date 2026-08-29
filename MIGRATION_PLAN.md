@@ -6,25 +6,26 @@ This document represents the synthesized blueprint for migrating the Flutter And
 
 1. **Zero-Regression Feature Parity**: All existing features—including Vulkan External Textures and Add-to-App multi-engine spawning—MUST be fully ported to the new Embedder API *before* the legacy code is deleted. 
 2. **Strict C-ABI Protection**: Map directly from JNI structures to `embedder.h` structs (`FlutterSize`, `FlutterPointerEvent`). Do NOT create redundant middle-man C++ structures.
-3. **JNI Pass-Through & Mocking Boundary**: The raw JNI boundary (`Java_io_flutter_...`) must be a dumb pass-through layer that immediately converts `JNIEnv` arguments into standard C++ abstractions and hands them to a `JniDelegate`. All structural conditional routing (`if (IsEmbedderEnabled())`) MUST occur *behind* this delegate boundary to enable host-side C++ Mocking without Android's HAL.
-4. **Dynamic Decoupling & Host Test Safety**: Use `dlsym`/`dlopen` wrapped in an `OSLibraryLoader` interface for Android native bindings (like `AChoreographer`) so `embedder_unittests` running on macOS/Linux hosts can fake the lookup.
+3. **JNI Routing Boundary**: The structural rollout flip (`if (IsEmbedderEnabled())`) MUST occur natively inside the raw JNI boundary function. If false, the unmodified legacy bridge receives the raw `JNIEnv*`. If true, the inputs are mapped to standard C++ primitives and handed to the `JniDelegate`. Host tests achieve decoupling by directly testing the `JniDelegate`.
+4. **Dynamic Decoupling & Host Test Safety**: Use `dlsym`/`dlopen` wrapped in an `OSLibraryLoader` interface for Android native bindings (like `AChoreographer`, `AHardwareBuffer`). This MUST be present before any Android-specific graphics are implemented to protect desktop CI.
 5. **Pre-Emptive GN Shield**: Do not wait until Phase 5 to quarantine targets. Create a strict `flutter_embedder_native` GN target in Phase 1 that explicitly forbids internal UI/Skia headers, ensuring all new development is structurally validated from Day 1.
 
 ## 2. Sequencing Rules (Correcting Oversights)
 
-- **Rule 1: JNI Routing First (No Dead Code)**: The JNI routing logic (`if/else`) and `JniDelegate` adapter must be implemented in Phase 1 BEFORE subsystem logic. This ensures Phases 2 and 3 can be dynamically exercised during development instead of resulting in a "big bang" integration.
-- **Rule 2: Atomic Deletion**: Phase 5.2 must atomically delete the legacy components, the legacy fallback CI matrices, AND the fallback `else` branches in the JNI routing logic. This prevents dangling references from breaking compilation.
+- **Rule 1: Virtualization & Routing First**: The JNI routing logic (`if/else`), `JniDelegate` adapter, and `OSLibraryLoader` must be implemented in Phase 1 BEFORE subsystem logic. This protects desktop CI and ensures subsequent phases are dynamically exercisable.
+- **Rule 2: Atomic Deletion**: Phase 5.2 must atomically delete the legacy components, the legacy fallback CI matrices, AND the fallback `else` branches in the JNI routing logic.
 - **Rule 3: Multi-Backend Matrix Testing**: All tests must utilize Parameterized Tests (`TEST_P`) across backends: `Software`, `Skia GL`, `Impeller GL`, `Impeller Vulkan`, and `Impeller Autoselect`. 
 
 ---
 
 ## 3. The Phased Blueprint
 
-### Phase 1: JNI Routing, Safety Nets, and C-API Prep
+### Phase 1: Foundations, Safety Nets, and C-API Prep
 * **1.1 Test Matrix**: Wire up `TEST_P` logic. 
-* **1.2 Pre-Emptive GN Quarantine**: Create `flutter_embedder_native` target dependent strictly on `embedder.h` for all new implementation code to securely dodge the legacy target's exposed UI headers.
-* **1.3 JNI DI Interface & Inline Routing**: Abstract JNI callback dispatch behind `JniDelegate`. Implement `if (Flags.isEmbedderApiInputEnabled())` behind this mock boundary.
-* **1.4 C-API Extensions**: Expand `embedder.h` with abstractions for Vulkan External Textures, AHardwareBuffer, and `FlutterEngineSpawn`.
+* **1.2 Pre-Emptive GN Quarantine**: Create `flutter_embedder_native` target dependent strictly on `embedder.h`.
+* **1.3 JNI DI Interface & Inline Routing**: Implement `if (Flags.isEmbedderApiInputEnabled())` inside the raw JNI boundary. Map true paths to `JniDelegate`.
+* **1.4 Dynamic Virtualization**: Implement `OSLibraryLoader` wrapper to `dlopen(libandroid.so)` for `AChoreographer` and native graphics APIs to shield desktop host tests.
+* **1.5 C-API Extensions**: Expand `embedder.h` with abstractions for Vulkan External Textures, AHardwareBuffer, and `FlutterEngineSpawn`.
 
 ### Phase 2: Decoupled Subsystems
 * **2.1 Asset Resolver**: Adapt `APKAssetProvider`.
@@ -33,13 +34,12 @@ This document represents the synthesized blueprint for migrating the Flutter And
 * **2.4 Mutator Translation**: Implement `AndroidMutatorsMapper`.
 
 ### Phase 3: Advanced Graphics & Multi-Engine Integration
-* **3.1 AHardwareBuffer & Vulkan Textures**: Wire the Android implementation to the Phase 1.4 `embedder.h` Vulkan hooks.
+* **3.1 AHardwareBuffer & Vulkan Textures**: Wire the Android implementation to the Phase 1.5 `embedder.h` Vulkan hooks securely relying on Phase 1.4 `OSLibraryLoader`.
 * **3.2 SurfaceControl HCPP**: Add dual-mode UI presentation natively into the new pipeline.
 * **3.3 Add-to-App Multi-Engine**: Wire `FlutterEngineGroup` natively to `FlutterEngineSpawn`. JNI bridge must capture the raw C pointer to retroactively construct Java wrapper lifecycles.
 
-### Phase 4: AndroidEngine Orchestrator & E2E Parity
-* **4.1 Dynamic Choreographer**: Implement `OSLibraryLoader` wrapper to `dlopen(libandroid.so)` for `AChoreographer`.
-* **4.2 CI E2E Harness**: Verify 100% test passing on `dev/integration_tests/channels` across all Vulkan, Video/Camera, and Add-to-App targets.
+### Phase 4: E2E Parity
+* **4.1 CI E2E Harness**: Verify 100% test passing on `dev/integration_tests/channels` across all Vulkan, Video/Camera, and Add-to-App targets.
 
 ### Phase 5: Emancipation (The Purge)
 * **5.1 Default Flip**: Change the default settings fallback to `true`.
