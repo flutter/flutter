@@ -70,6 +70,7 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [ ] `dev/integration_tests/android_views` - Passed.
     - [ ] `dev/integration_tests/channels` - Passed.
     - [ ] `dev/integration_tests/platform_interaction` - Passed.
+    - [ ] `dev/integration_tests/android_engine_test` - Passed.
 - [ ] **4.3 Framework Integration Tests (Impeller)**:
     - [ ] `dev/integration_tests/android_views` (Backend: Impeller OpenGLES) - Passed.
     - [ ] `dev/integration_tests/android_views` (Backend: Impeller Vulkan) - Passed.
