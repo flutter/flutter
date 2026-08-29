@@ -36,6 +36,8 @@ This document represents the synthesized blueprint for migrating the Flutter And
 * **2.4 Mutator Translation**: Implement `AndroidMutatorsMapper`.
 * **2.5 Accessibility & Semantics**: Wire the Android accessibility bridge tree native updates.
 * **2.6 Platform Views**: Wire `AndroidPlatformView` and `PlatformViewsController` integrations.
+* **2.7 Window Metrics Translation**: The C-API uses `FlutterEngineSendWindowMetricsEvent` to handle display DPI, padding, and cutouts. Route Java metrics here to safely drop `android_display.cc`.
+* **2.8 AChoreographer VSync Routing**: Utilize the Phase 1.4 Virtualization `OSLibraryLoader` to capture `AChoreographer` callbacks and route them into `FlutterProjectArgs::vsync_callback` to fix 120Hz frame pacing before legacy files drop.
 
 ### Phase 3: Advanced Graphics & Multi-Engine Integration
 * **3.1 AHardwareBuffer**: Wire the Android implementation to the Phase 1 opaque hooks via `OSLibraryLoader`.
