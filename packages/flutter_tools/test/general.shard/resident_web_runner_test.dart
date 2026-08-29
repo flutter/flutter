@@ -2649,7 +2649,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   ResidentCompiler? generator;
 
   @override
-  Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
+  Future<Uri>? get vmServiceUri => testUri != null ? Future<Uri>.value(testUri!) : null;
 
   @override
   DevelopmentShaderCompiler get developmentShaderCompiler => const FakeShaderCompiler();
@@ -2681,15 +2681,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
-    bool? ipv6 = false,
-    bool enableDevTools = false,
   }) async {}
 
   @override

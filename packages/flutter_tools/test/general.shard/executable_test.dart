@@ -38,6 +38,8 @@ void main() {
 
     test('does not mistake an argument of the command for the command', () {
       expect(findCommandName(<String>['create', 'doctor']), 'create');
+      expect(findCommandName(<String>['create', 'daemon']), 'create');
+      expect(findCommandName(<String>['create', 'widget-preview']), 'create');
       expect(findCommandName(<String>['help', 'doctor']), 'help');
     });
 
