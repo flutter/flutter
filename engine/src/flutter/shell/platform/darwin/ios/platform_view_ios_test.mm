@@ -122,8 +122,12 @@ class MockDelegate : public PlatformView::Delegate {
 
   id firstViewController = OCMClassMock([FlutterViewController class]);
   id secondViewController = OCMClassMock([FlutterViewController class]);
-  UIView* firstView = [[UIView alloc] init];
-  UIView* secondView = [[UIView alloc] init];
+  FlutterView* firstView = [[FlutterView alloc] initWithDelegate:engine
+                                                          opaque:YES
+                                                 enableWideGamut:NO];
+  FlutterView* secondView = [[FlutterView alloc] initWithDelegate:engine
+                                                           opaque:YES
+                                                  enableWideGamut:NO];
 
   OCMStub([firstViewController isViewLoaded]).andReturn(YES);
   OCMStub([firstViewController engine]).andReturn(engine);
@@ -184,8 +188,12 @@ class MockDelegate : public PlatformView::Delegate {
 
   id firstViewController = OCMClassMock([FlutterViewController class]);
   id secondViewController = OCMClassMock([FlutterViewController class]);
-  UIView* firstView = [[UIView alloc] init];
-  UIView* secondView = [[UIView alloc] init];
+  FlutterView* firstView = [[FlutterView alloc] initWithDelegate:firstEngine
+                                                          opaque:YES
+                                                 enableWideGamut:NO];
+  FlutterView* secondView = [[FlutterView alloc] initWithDelegate:secondEngine
+                                                           opaque:YES
+                                                  enableWideGamut:NO];
   OCMStub([firstViewController isViewLoaded]).andReturn(YES);
   OCMStub([firstViewController engine]).andReturn(firstEngine);
   OCMStub([firstViewController view]).andReturn(firstView);
@@ -297,7 +305,9 @@ class MockDelegate : public PlatformView::Delegate {
   id engine = OCMClassMock([FlutterEngine class]);
 
   id flutterViewController = OCMClassMock([FlutterViewController class]);
-  UIView* flutterView = [[UIView alloc] init];
+  FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
+                                                            opaque:YES
+                                                   enableWideGamut:NO];
   __block BOOL isViewLoaded = NO;
   __block UIView* viewIfLoaded = nil;
   OCMStub([flutterViewController isViewLoaded]).andDo(^(NSInvocation* invocation) {
@@ -367,8 +377,12 @@ class MockDelegate : public PlatformView::Delegate {
 
   id firstViewController = OCMClassMock([FlutterViewController class]);
   id secondViewController = OCMClassMock([FlutterViewController class]);
-  UIView* firstView = [[UIView alloc] init];
-  UIView* secondView = [[UIView alloc] init];
+  FlutterView* firstView = [[FlutterView alloc] initWithDelegate:engine
+                                                          opaque:YES
+                                                 enableWideGamut:NO];
+  FlutterView* secondView = [[FlutterView alloc] initWithDelegate:engine
+                                                           opaque:YES
+                                                  enableWideGamut:NO];
 
   OCMStub([firstViewController isViewLoaded]).andReturn(YES);
   OCMStub([firstViewController engine]).andReturn(engine);
@@ -436,8 +450,12 @@ class MockDelegate : public PlatformView::Delegate {
 
   id firstViewController = OCMClassMock([FlutterViewController class]);
   id secondViewController = OCMClassMock([FlutterViewController class]);
-  UIView* firstView = [[UIView alloc] init];
-  UIView* secondView = [[UIView alloc] init];
+  FlutterView* firstView = [[FlutterView alloc] initWithDelegate:engine
+                                                          opaque:YES
+                                                 enableWideGamut:NO];
+  FlutterView* secondView = [[FlutterView alloc] initWithDelegate:engine
+                                                           opaque:YES
+                                                  enableWideGamut:NO];
 
   OCMStub([firstViewController isViewLoaded]).andReturn(YES);
   OCMStub([firstViewController engine]).andReturn(engine);
