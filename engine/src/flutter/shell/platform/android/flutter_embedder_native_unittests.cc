@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
+#include "flutter/shell/platform/android/android_vsync_waiter.h"
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 #include "flutter/shell/platform/android/jni_router.h"
@@ -177,6 +178,13 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
 
   MOCK_METHOD(bool, OnFirstFrame, (), (override));
   MOCK_METHOD(bool, OnPreEngineRestart, (), (override));
+
+  MOCK_METHOD(bool,
+              OnVsync,
+              (int64_t frame_time_nanos, int64_t frame_target_time_nanos),
+              (override));
+
+  MOCK_METHOD(bool, AsyncWaitForVsync, (intptr_t baton), (override));
 
   MOCK_METHOD(bool,
               SetViewportMetrics,
@@ -3699,6 +3707,229 @@ TEST(WindowMetricsTranslationTest, InvalidStructSizeRejected) {
       native.NotifyDisplayUpdate(
           dummy_engine, kFlutterEngineDisplaysUpdateTypeStartup, &display, 1),
       kInvalidArguments);
+}
+
+// ---------------------------------------------------------------------------
+// VsyncRoutingTest (Phase 2.8 AChoreographer VSync Routing)
+// ---------------------------------------------------------------------------
+
+TEST(VsyncRoutingTest, JniDelegateVsyncOperations) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter =
+      std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
+  auto delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, vsync_waiter);
+
+  EXPECT_EQ(delegate->GetVsyncWaiter(), vsync_waiter);
+
+  // 1. OnVsync dispatches to JVM (and ConsumePendingVsync also notifies JVM)
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
+      .Times(2)
+      .WillRepeatedly(Return(true));
+  EXPECT_TRUE(delegate->OnVsync(1000000LL, 2000000LL));
+
+  // 2. AsyncWaitForVsync routes to AndroidVsyncWaiter
+  EXPECT_TRUE(delegate->AsyncWaitForVsync(777));
+  EXPECT_EQ(vsync_waiter->GetVsyncRequestCount(), 1u);
+  EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
+
+  // 3. Trigger AChoreographer callback
+  intptr_t delivered_baton = 0;
+  vsync_waiter->SetVsyncResultCallback(
+      [&](intptr_t baton, int64_t start, int64_t target) {
+        delivered_baton = baton;
+      });
+  mock_choreographer->TriggerPendingCallbacks(3000000LL);
+  EXPECT_EQ(delivered_baton, 777);
+  EXPECT_EQ(vsync_waiter->GetVsyncDeliveredCount(), 1u);
+}
+
+TEST(VsyncRoutingTest, JniRouterVsyncRoutingFlip) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter =
+      std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
+  auto embedder_delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, vsync_waiter);
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+
+  JniRouter router(embedder_delegate, legacy_delegate);
+
+  // 1. Legacy routing (Embedder disabled)
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kLegacy);
+
+  EXPECT_CALL(*legacy_delegate, OnVsync(5000LL, 10000LL))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*legacy_delegate, AsyncWaitForVsync(123)).WillOnce(Return(true));
+
+  EXPECT_TRUE(router.RouteVsync(5000LL, 10000LL));
+  EXPECT_TRUE(router.RouteAsyncWaitForVsync(123));
+
+  // 2. Embedder routing (Embedder enabled)
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
+
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router.RouteVsync(5000LL, 10000LL));
+
+  EXPECT_TRUE(router.RouteAsyncWaitForVsync(456));
+  EXPECT_EQ(vsync_waiter->GetVsyncRequestCount(), 1u);
+  EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
+
+  JniRouter::SetEmbedderEnabled(false);
+}
+
+TEST(VsyncRoutingTest, FlutterEmbedderNativeVsyncIntegration) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter =
+      std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr,
+                               mock_choreographer, vsync_waiter);
+
+  EXPECT_EQ(native.GetChoreographerProvider(), mock_choreographer);
+  EXPECT_EQ(native.GetVsyncWaiter(), vsync_waiter);
+
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+
+  // Test static C-API vsync callback
+  intptr_t delivered_baton = 0;
+  int64_t delivered_start = 0;
+  int64_t delivered_target = 0;
+  vsync_waiter->SetVsyncResultCallback(
+      [&](intptr_t baton, int64_t start, int64_t target) {
+        delivered_baton = baton;
+        delivered_start = start;
+        delivered_target = target;
+      });
+
+  FlutterEmbedderNative::OnVsyncCallback(&native, 8888);
+  EXPECT_EQ(vsync_waiter->GetVsyncRequestCount(), 1u);
+  EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
+
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
+      .WillOnce(Return(true));
+  mock_choreographer->TriggerPendingCallbacks(10000000LL);
+  EXPECT_EQ(delivered_baton, 8888);
+  EXPECT_EQ(delivered_start, 10000000LL);
+  EXPECT_EQ(delivered_target, 10000000LL + 16666666LL);
+
+  // Test direct NotifyVsync
+  EXPECT_EQ(native.NotifyVsync(nullptr, 8888, 10000000LL, 26666666LL),
+            kInvalidArguments);
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+TEST(VsyncRoutingTest, FlutterEmbedderNativeVsync120HzPacing) {
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter = std::make_shared<AndroidVsyncWaiter>(mock_choreographer);
+
+  FlutterEmbedderNative native(
+      std::make_shared<DefaultJvmInvoker>(), nullptr, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, nullptr, mock_choreographer, vsync_waiter);
+
+  // Set 120Hz display refresh rate
+  native.UpdateRefreshRate(120.0);
+  EXPECT_DOUBLE_EQ(native.GetRefreshRate(), 120.0);
+  EXPECT_EQ(native.GetRefreshPeriodNanos(), 8333333LL);
+
+  auto pacing_info = native.ComputeFramePacing(100000000LL, 120.0);
+  EXPECT_DOUBLE_EQ(pacing_info.refresh_rate_hz, 120.0);
+  EXPECT_EQ(pacing_info.refresh_period_nanos, 8333333LL);
+  EXPECT_EQ(
+      pacing_info.frame_target_time_nanos - pacing_info.frame_start_time_nanos,
+      8333333LL);
+
+  int64_t result_target = 0;
+  vsync_waiter->SetVsyncResultCallback(
+      [&](intptr_t baton, int64_t start, int64_t target) {
+        result_target = target;
+      });
+
+  EXPECT_TRUE(native.AsyncWaitForVsync(120));
+  mock_choreographer->TriggerPendingCallbacks(50000000LL);
+  EXPECT_EQ(result_target, 50000000LL + 8333333LL);
+}
+
+TEST(VsyncRoutingTest, FlutterEmbedderNativeNotifyVsyncInvalidArguments) {
+  FlutterEmbedderNative native;
+  auto dummy_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x1234);
+
+  // Null engine rejected
+  EXPECT_EQ(native.NotifyVsync(nullptr, 1, 1000, 2000), kInvalidArguments);
+
+  // Non-positive start time rejected
+  EXPECT_EQ(native.NotifyVsync(dummy_engine, 1, 0, 2000), kInvalidArguments);
+  EXPECT_EQ(native.NotifyVsync(dummy_engine, 1, -100, 2000), kInvalidArguments);
+
+  // Target <= start rejected
+  EXPECT_EQ(native.NotifyVsync(dummy_engine, 1, 2000, 1000), kInvalidArguments);
+  EXPECT_EQ(native.NotifyVsync(dummy_engine, 1, 2000, 2000), kInvalidArguments);
+}
+
+TEST(VsyncRoutingTest, FlutterEmbedderNativeNotifyVsyncTestingHookPropagation) {
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter = std::make_shared<AndroidVsyncWaiter>(mock_choreographer);
+
+  FlutterEmbedderNative native(
+      std::make_shared<DefaultJvmInvoker>(), nullptr, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, nullptr, mock_choreographer, vsync_waiter);
+
+  auto dummy_engine =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x5678);
+  native.SetEngine(dummy_engine);
+
+  bool hook_invoked = false;
+  intptr_t received_baton = 0;
+  uint64_t received_start = 0;
+  uint64_t received_target = 0;
+
+  native.SetNotifyVsyncFnForTesting(
+      [&](FLUTTER_API_SYMBOL(FlutterEngine) engine, intptr_t baton,
+          uint64_t start, uint64_t target) {
+        EXPECT_EQ(engine, dummy_engine);
+        hook_invoked = true;
+        received_baton = baton;
+        received_start = start;
+        received_target = target;
+        return kSuccess;
+      });
+
+  EXPECT_TRUE(native.AsyncWaitForVsync(777));
+  mock_choreographer->TriggerPendingCallbacks(10000000LL);
+
+  EXPECT_TRUE(hook_invoked);
+  EXPECT_EQ(received_baton, 777);
+  EXPECT_EQ(received_start, 10000000ULL);
+  EXPECT_EQ(received_target, 10000000ULL + 16666666ULL);
+}
+
+TEST(VsyncRoutingTest, FlutterEmbedderNativeUpdateRefreshRateExtremeValues) {
+  FlutterEmbedderNative native;
+
+  native.UpdateRefreshRate(std::numeric_limits<double>::quiet_NaN());
+  EXPECT_DOUBLE_EQ(native.GetRefreshRate(), 60.0);
+
+  native.UpdateRefreshRate(0.0);
+  EXPECT_DOUBLE_EQ(native.GetRefreshRate(), 60.0);
+
+  native.UpdateRefreshRate(-60.0);
+  EXPECT_DOUBLE_EQ(native.GetRefreshRate(), 60.0);
+
+  native.UpdateRefreshRate(1000000.0);
+  EXPECT_DOUBLE_EQ(native.GetRefreshRate(), 1000.0);
 }
 
 }  // namespace testing

@@ -8,6 +8,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/shell/platform/android/android_vsync_waiter.h"
 
 namespace flutter {
 namespace android {
@@ -18,7 +19,8 @@ JniDelegate::JniDelegate(
     std::shared_ptr<ImageDecoderProvider> image_decoder,
     std::shared_ptr<PlatformViewsProvider> platform_views_provider,
     std::shared_ptr<AndroidPlatformViewsController> platform_views_controller,
-    std::shared_ptr<WindowMetricsProvider> window_metrics_provider)
+    std::shared_ptr<WindowMetricsProvider> window_metrics_provider,
+    std::shared_ptr<AndroidVsyncWaiter> vsync_waiter)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(callback_cache
                           ? std::move(callback_cache)
@@ -26,6 +28,7 @@ JniDelegate::JniDelegate(
       image_decoder_(std::move(image_decoder)),
       platform_views_provider_(std::move(platform_views_provider)),
       window_metrics_provider_(std::move(window_metrics_provider)),
+      vsync_waiter_(std::move(vsync_waiter)),
       platform_views_controller_(std::move(platform_views_controller)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
@@ -166,6 +169,42 @@ bool JniDelegate::OnPreEngineRestart() {
     return false;
   }
   return jvm_invoker_->OnPreEngineRestart();
+}
+
+bool JniDelegate::OnVsync(int64_t frame_time_nanos,
+                          int64_t frame_target_time_nanos) {
+  TRACE_EVENT0("flutter", "JniDelegate::OnVsync");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  struct PackedVsync {
+    int64_t frame_time_nanos;
+    int64_t frame_target_time_nanos;
+  };
+  PackedVsync data = {frame_time_nanos, frame_target_time_nanos};
+  std::vector<uint8_t> payload(sizeof(PackedVsync));
+  std::memcpy(payload.data(), &data, sizeof(PackedVsync));
+  return jvm_invoker_->InvokeVoidMethod("onVsync", "(JJ)V", payload);
+}
+
+bool JniDelegate::AsyncWaitForVsync(intptr_t baton) {
+  TRACE_EVENT1("flutter", "JniDelegate::AsyncWaitForVsync", "baton",
+               std::to_string(baton).c_str());
+  std::shared_ptr<AndroidVsyncWaiter> waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    waiter = vsync_waiter_;
+  }
+  if (waiter) {
+    return waiter->AsyncWaitForVsync(baton);
+  }
+  if (!jvm_invoker_) {
+    return false;
+  }
+  int64_t baton_64 = static_cast<int64_t>(baton);
+  std::vector<uint8_t> payload(sizeof(int64_t));
+  std::memcpy(payload.data(), &baton_64, sizeof(int64_t));
+  return jvm_invoker_->InvokeVoidMethod("asyncWaitForVsync", "(J)V", payload);
 }
 
 bool JniDelegate::SetViewportMetrics(const AndroidViewportMetrics& metrics) {
@@ -788,6 +827,17 @@ std::shared_ptr<WindowMetricsProvider> JniDelegate::GetWindowMetricsProvider()
     const {
   std::scoped_lock lock(window_metrics_provider_mutex_);
   return window_metrics_provider_;
+}
+
+void JniDelegate::SetVsyncWaiter(std::shared_ptr<AndroidVsyncWaiter> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetVsyncWaiter");
+  std::scoped_lock lock(vsync_waiter_mutex_);
+  vsync_waiter_ = std::move(provider);
+}
+
+std::shared_ptr<AndroidVsyncWaiter> JniDelegate::GetVsyncWaiter() const {
+  std::scoped_lock lock(vsync_waiter_mutex_);
+  return vsync_waiter_;
 }
 
 }  // namespace android
