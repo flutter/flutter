@@ -11,6 +11,7 @@
     _binary_icudtl_dat_size;
     InternalFlutterGpu*;
     kInternalFlutterGpu*;
+    FlutterPlatformPrefetchDefaultFontManager;
   local:
     *;
 };

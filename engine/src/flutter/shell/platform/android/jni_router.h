@@ -202,6 +202,12 @@ class LegacyJniDelegate {
       int32_t view_height) {
     return PushPlatformViewMutators(platform_view, x, y, width, height);
   }
+
+  virtual bool InitVM(const AndroidVMArgs& args) { return true; }
+
+  virtual bool PrefetchDefaultFontManager() { return true; }
+
+  virtual bool SetVmServiceUri(const std::string& uri) { return true; }
 };
 
 /// @brief Native JNI Routing Boundary that dispatches calls based on
@@ -405,6 +411,12 @@ class JniRouter {
                                  int32_t height,
                                  int32_t view_width,
                                  int32_t view_height);
+
+  bool RouteInitVM(const AndroidVMArgs& args);
+
+  bool RoutePrefetchDefaultFontManager();
+
+  bool RouteSetVmServiceUri(const std::string& uri);
 
   std::shared_ptr<JniDelegate> GetEmbedderDelegate() const;
   std::shared_ptr<LegacyJniDelegate> GetLegacyDelegate() const;
