@@ -161,12 +161,12 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] *Branch Stub*: `android-embedder-migration-v7/phase-4.1-engine-unit-tests`
     - [x] `embedder_unittests` (Host macOS/Linux) - Passed.
     - [x] `flutter_shell_native_unittests` (Android Emulator) - Passed.
-- [ ] **4.2 Framework Integration Tests (Skia GL / Software)**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-4.2-framework-integration-tests-skia-gl-software`
-    - [ ] `dev/integration_tests/android_views` - Passed.
-    - [ ] `dev/integration_tests/channels` - Passed.
-    - [ ] `dev/integration_tests/platform_interaction` - Passed.
-    - [ ] `dev/integration_tests/android_engine_test` - Passed.
+- [x] **4.2 Framework Integration Tests (Skia GL / Software)**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-4.2-framework-integration-tests-skia-gl-software`
+    - [x] `dev/integration_tests/android_views` - Passed.
+    - [x] `dev/integration_tests/channels` - Passed.
+    - [x] `dev/integration_tests/platform_interaction` - Passed.
+    - [x] `dev/integration_tests/android_engine_test` - Passed.
 - [ ] **4.3 Framework Integration Tests (Impeller)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-4.3-framework-integration-tests-impeller`
     - [ ] `dev/integration_tests/android_views` (Backend: Impeller OpenGLES) - Passed.
