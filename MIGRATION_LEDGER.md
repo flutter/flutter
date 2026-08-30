@@ -135,11 +135,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `Vulkan External Textures` wired.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `dev/integration_tests/android_views` AND `dev/devicelab/bin/tasks/plugin_test_android_variants.dart` pass using Impeller Vulkan backend.
-- [ ] **3.3 SurfaceControl HCPP**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-3.3-surfacecontrol-hcpp`
-    - [ ] SurfaceControl HCPP dual-mode presentation enabled.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: Native presentation path tests pass in `android_views`.
+- [x] **3.3 SurfaceControl HCPP**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-3.3-surfacecontrol-hcpp`
+    - [x] SurfaceControl HCPP dual-mode presentation enabled.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: Native presentation path tests pass in `android_views`.
 - [ ] **3.4 Multi-Engine & Add-to-App**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-3.4-multi-engine-add-to-app`
     - [ ] Add-to-App capabilities wired to `FlutterEngineSpawn` with Java `Cleaner`/`PhantomReference` bindings.

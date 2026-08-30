@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/android/jni_delegate.h"
 
 #include <cstring>
+#include <utility>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -22,7 +23,8 @@ JniDelegate::JniDelegate(
     std::shared_ptr<AndroidVsyncWaiter> vsync_waiter,
     std::shared_ptr<AndroidVMInit> vm_init,
     std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider,
-    std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider)
+    std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider,
+    std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(std::move(callback_cache)),
       image_decoder_(std::move(image_decoder)),
@@ -31,7 +33,8 @@ JniDelegate::JniDelegate(
       vsync_waiter_(std::move(vsync_waiter)),
       vm_init_(std::move(vm_init)),
       hardware_buffer_provider_(std::move(hardware_buffer_provider)),
-      vulkan_texture_provider_(std::move(vulkan_texture_provider)) {
+      vulkan_texture_provider_(std::move(vulkan_texture_provider)),
+      surface_control_provider_(std::move(surface_control_provider)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
   if (!platform_views_provider_) {
@@ -52,6 +55,10 @@ JniDelegate::JniDelegate(
   if (!vulkan_texture_provider_) {
     vulkan_texture_provider_ =
         std::make_shared<DefaultAndroidVulkanTextureProvider>();
+  }
+  if (!surface_control_provider_) {
+    surface_control_provider_ =
+        std::make_shared<DefaultAndroidSurfaceControlProvider>();
   }
   platform_views_controller_ = std::make_shared<AndroidPlatformViewsController>(
       platform_views_provider_);
@@ -91,6 +98,13 @@ JniDelegate::~JniDelegate() {
   for (const auto& [cb, data] : vk_destruction_callbacks) {
     cb(data);
   }
+
+  {
+    std::lock_guard<std::mutex> lock(surface_control_mutex_);
+    active_transaction_.reset();
+    surface_controls_.clear();
+    surface_control_states_.clear();
+  }
 }
 
 std::shared_ptr<JvmInvoker> JniDelegate::GetJvmInvoker() const {
@@ -112,7 +126,8 @@ bool JniDelegate::HandlePlatformMessage(const std::string& channel,
 bool JniDelegate::HandlePlatformMessageResponse(
     int32_t response_id,
     const std::vector<uint8_t>& data) {
-  TRACE_EVENT0("flutter", "JniDelegate::HandlePlatformMessageResponse");
+  TRACE_EVENT1("flutter", "JniDelegate::HandlePlatformMessageResponse",
+               "response_id", std::to_string(response_id).c_str());
   if (!jvm_invoker_) {
     return false;
   }
@@ -122,54 +137,55 @@ bool JniDelegate::HandlePlatformMessageResponse(
 
 bool JniDelegate::UpdateSemantics(const std::vector<uint8_t>& buffer,
                                   const std::vector<std::string>& strings) {
-  TRACE_EVENT0("flutter", "JniDelegate::UpdateSemantics(legacy)");
-  return UpdateSemantics(buffer, strings, {});
+  TRACE_EVENT0("flutter", "JniDelegate::UpdateSemantics");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod("updateSemantics",
+                                        "([B[Ljava/lang/String;)V", buffer);
 }
 
 bool JniDelegate::UpdateSemantics(
     const std::vector<uint8_t>& buffer,
     const std::vector<std::string>& strings,
     const std::vector<std::vector<uint8_t>>& string_attribute_args) {
-  TRACE_EVENT0("flutter", "JniDelegate::UpdateSemantics");
-  if (!jvm_invoker_ || buffer.empty()) {
+  TRACE_EVENT0("flutter", "JniDelegate::UpdateSemanticsWithAttributes");
+  if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod(
-      "updateSemantics",
-      "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V",
-      buffer);
+  return jvm_invoker_->InvokeVoidMethod("updateSemantics",
+                                        "([B[Ljava/lang/String;[[B)V", buffer);
 }
 
 bool JniDelegate::UpdateCustomAccessibilityActions(
     const std::vector<uint8_t>& actions_buffer,
     const std::vector<std::string>& action_strings) {
   TRACE_EVENT0("flutter", "JniDelegate::UpdateCustomAccessibilityActions");
-  if (!jvm_invoker_ || actions_buffer.empty()) {
+  if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod(
-      "updateCustomAccessibilityActions",
-      "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V", actions_buffer);
+  return jvm_invoker_->InvokeVoidMethod("updateCustomAccessibilityActions",
+                                        "([B[Ljava/lang/String;)V",
+                                        actions_buffer);
 }
 
 bool JniDelegate::UpdateSemantics(const FlutterSemanticsUpdate2& update) {
-  TRACE_EVENT0("flutter", "JniDelegate::UpdateSemantics(struct)");
-  EncodedSemanticsBatch batch =
-      AndroidSemanticsMapper::MapSemanticsUpdate(update);
-  bool success = true;
+  TRACE_EVENT0("flutter", "JniDelegate::UpdateSemantics2");
+  auto batch = AndroidSemanticsMapper::MapSemanticsUpdate(update);
   if (!batch.custom_actions.empty()) {
-    success &= UpdateCustomAccessibilityActions(batch.custom_actions.buffer,
-                                                batch.custom_actions.strings);
+    UpdateCustomAccessibilityActions(batch.custom_actions.buffer,
+                                     batch.custom_actions.strings);
   }
   if (!batch.nodes.empty()) {
-    success &= UpdateSemantics(batch.nodes.buffer, batch.nodes.strings,
-                               batch.nodes.string_attribute_args);
+    return UpdateSemantics(batch.nodes.buffer, batch.nodes.strings,
+                           batch.nodes.string_attribute_args);
   }
-  return success;
+  return true;
 }
 
 bool JniDelegate::SetSemanticsEnabled(bool enabled) {
-  TRACE_EVENT0("flutter", "JniDelegate::SetSemanticsEnabled");
+  TRACE_EVENT1("flutter", "JniDelegate::SetSemanticsEnabled", "enabled",
+               enabled ? "true" : "false");
   if (!jvm_invoker_) {
     return false;
   }
@@ -181,25 +197,37 @@ bool JniDelegate::DispatchSemanticsAction(int32_t node_id,
                                           FlutterSemanticsAction action,
                                           const std::vector<uint8_t>& data,
                                           int64_t view_id) {
-  TRACE_EVENT0("flutter", "JniDelegate::DispatchSemanticsAction");
+  TRACE_EVENT1("flutter", "JniDelegate::DispatchSemanticsAction", "node_id",
+               std::to_string(node_id).c_str());
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("dispatchSemanticsAction", "(II[BI)V",
-                                        data);
+  std::vector<uint8_t> payload;
+  payload.resize(sizeof(int32_t) + sizeof(int32_t) + sizeof(int64_t) +
+                 data.size());
+  size_t offset = 0;
+  std::memcpy(payload.data() + offset, &node_id, sizeof(int32_t));
+  offset += sizeof(int32_t);
+  int32_t action_val = static_cast<int32_t>(action);
+  std::memcpy(payload.data() + offset, &action_val, sizeof(int32_t));
+  offset += sizeof(int32_t);
+  std::memcpy(payload.data() + offset, &view_id, sizeof(int64_t));
+  offset += sizeof(int64_t);
+  if (!data.empty()) {
+    std::memcpy(payload.data() + offset, data.data(), data.size());
+  }
+  return jvm_invoker_->InvokeVoidMethod("dispatchSemanticsAction", "(IIJ[B)V",
+                                        payload);
 }
 
 bool JniDelegate::SetAccessibilityFeatures(int32_t flags) {
-  TRACE_EVENT0("flutter", "JniDelegate::SetAccessibilityFeatures");
+  TRACE_EVENT1("flutter", "JniDelegate::SetAccessibilityFeatures", "flags",
+               std::to_string(flags).c_str());
   if (!jvm_invoker_) {
     return false;
   }
-  std::vector<uint8_t> payload = {
-      static_cast<uint8_t>(flags & 0xFF),
-      static_cast<uint8_t>((flags >> 8) & 0xFF),
-      static_cast<uint8_t>((flags >> 16) & 0xFF),
-      static_cast<uint8_t>((flags >> 24) & 0xFF),
-  };
+  std::vector<uint8_t> payload(sizeof(int32_t));
+  std::memcpy(payload.data(), &flags, sizeof(int32_t));
   return jvm_invoker_->InvokeVoidMethod("setAccessibilityFeatures", "(I)V",
                                         payload);
 }
@@ -237,21 +265,19 @@ bool JniDelegate::OnVsync(int64_t frame_time_nanos,
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("onVsync", "(JJ)V");
+  std::vector<uint8_t> payload(sizeof(int64_t) * 2);
+  std::memcpy(payload.data(), &frame_time_nanos, sizeof(int64_t));
+  std::memcpy(payload.data() + sizeof(int64_t), &frame_target_time_nanos,
+              sizeof(int64_t));
+  return jvm_invoker_->InvokeVoidMethod("onVsync", "(JJ)V", payload);
 }
 
 bool JniDelegate::AsyncWaitForVsync(intptr_t baton) {
-  TRACE_EVENT1("flutter", "JniDelegate::AsyncWaitForVsync", "baton",
-               std::to_string(baton).c_str());
+  TRACE_EVENT0("flutter", "JniDelegate::AsyncWaitForVsync");
   if (vsync_waiter_) {
     return vsync_waiter_->AsyncWaitForVsync(baton);
   }
-  if (!jvm_invoker_) {
-    return false;
-  }
-  std::vector<uint8_t> payload(sizeof(intptr_t));
-  std::memcpy(payload.data(), &baton, sizeof(intptr_t));
-  return jvm_invoker_->InvokeVoidMethod("asyncWaitForVsync", "(J)V", payload);
+  return false;
 }
 
 bool JniDelegate::SetViewportMetrics(const AndroidViewportMetrics& metrics) {
@@ -259,21 +285,15 @@ bool JniDelegate::SetViewportMetrics(const AndroidViewportMetrics& metrics) {
   if (window_metrics_provider_) {
     return window_metrics_provider_->SendViewportMetrics(metrics);
   }
-  if (!jvm_invoker_) {
-    return false;
-  }
-  return jvm_invoker_->InvokeVoidMethod("onViewportMetrics", "(IDDD)V");
+  return false;
 }
 
 bool JniDelegate::UpdateDisplayMetrics(const AndroidDisplayMetrics& metrics) {
-  TRACE_EVENT0("flutter", "JniDelegate::UpdateDisplayMetrics(struct)");
+  TRACE_EVENT0("flutter", "JniDelegate::UpdateDisplayMetrics");
   if (window_metrics_provider_) {
     return window_metrics_provider_->UpdateDisplayMetrics(metrics);
   }
-  if (!jvm_invoker_) {
-    return false;
-  }
-  return jvm_invoker_->InvokeVoidMethod("onDisplayMetrics", "(JDDDF)V");
+  return false;
 }
 
 bool JniDelegate::UpdateDisplayMetrics(uint64_t display_id,
@@ -284,17 +304,18 @@ bool JniDelegate::UpdateDisplayMetrics(uint64_t display_id,
   TRACE_EVENT0("flutter", "JniDelegate::UpdateDisplayMetrics(params)");
   AndroidDisplayMetrics metrics;
   metrics.display_id = display_id;
-  metrics.single_display = (display_id == 0);
   metrics.refresh_rate = refresh_rate;
   metrics.width = width;
   metrics.height = height;
   metrics.device_pixel_ratio = device_pixel_ratio;
-  return UpdateDisplayMetrics(metrics);
+  if (window_metrics_provider_) {
+    return window_metrics_provider_->UpdateDisplayMetrics(metrics);
+  }
+  return false;
 }
 
 std::optional<AndroidViewportMetrics> JniDelegate::GetViewportMetrics(
     int64_t view_id) const {
-  TRACE_EVENT0("flutter", "JniDelegate::GetViewportMetrics");
   if (window_metrics_provider_) {
     return window_metrics_provider_->GetViewportMetrics(view_id);
   }
@@ -303,7 +324,6 @@ std::optional<AndroidViewportMetrics> JniDelegate::GetViewportMetrics(
 
 std::optional<AndroidDisplayMetrics> JniDelegate::GetDisplayMetrics(
     uint64_t display_id) const {
-  TRACE_EVENT0("flutter", "JniDelegate::GetDisplayMetrics");
   if (window_metrics_provider_) {
     return window_metrics_provider_->GetDisplayMetrics(display_id);
   }
@@ -314,22 +334,42 @@ bool JniDelegate::DispatchViewportMetrics(int64_t view_id,
                                           double width,
                                           double height,
                                           double pixel_ratio) {
-  TRACE_EVENT0("flutter", "JniDelegate::DispatchViewportMetrics");
-  AndroidViewportMetrics metrics;
-  metrics.view_id = view_id;
-  metrics.physical_width = width;
-  metrics.physical_height = height;
-  metrics.device_pixel_ratio = pixel_ratio;
-  return SetViewportMetrics(metrics);
-}
-
-bool JniDelegate::RequestDartDeferredLibrary(int64_t loading_unit_id) {
-  TRACE_EVENT0("flutter", "JniDelegate::RequestDartDeferredLibrary");
+  TRACE_EVENT1("flutter", "JniDelegate::DispatchViewportMetrics", "view_id",
+               std::to_string(view_id).c_str());
+  if (window_metrics_provider_) {
+    AndroidViewportMetrics metrics;
+    metrics.view_id = view_id;
+    metrics.physical_width = width;
+    metrics.physical_height = height;
+    metrics.device_pixel_ratio = pixel_ratio;
+    return window_metrics_provider_->SendViewportMetrics(metrics);
+  }
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeBooleanMethod("requestDartDeferredLibrary",
-                                           "(I)Z");
+  std::vector<uint8_t> payload(sizeof(int64_t) + sizeof(double) * 3);
+  size_t offset = 0;
+  std::memcpy(payload.data() + offset, &view_id, sizeof(int64_t));
+  offset += sizeof(int64_t);
+  std::memcpy(payload.data() + offset, &width, sizeof(double));
+  offset += sizeof(double);
+  std::memcpy(payload.data() + offset, &height, sizeof(double));
+  offset += sizeof(double);
+  std::memcpy(payload.data() + offset, &pixel_ratio, sizeof(double));
+  return jvm_invoker_->InvokeVoidMethod("dispatchViewportMetrics", "(JDDD)V",
+                                        payload);
+}
+
+bool JniDelegate::RequestDartDeferredLibrary(int64_t loading_unit_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::RequestDartDeferredLibrary",
+               "loading_unit_id", std::to_string(loading_unit_id).c_str());
+  if (!jvm_invoker_) {
+    return false;
+  }
+  std::vector<uint8_t> payload(sizeof(int64_t));
+  std::memcpy(payload.data(), &loading_unit_id, sizeof(int64_t));
+  return jvm_invoker_->InvokeVoidMethod("requestDartDeferredLibrary", "(J)V",
+                                        payload);
 }
 
 bool JniDelegate::OnAssetManagerChanged() {
@@ -338,40 +378,6 @@ bool JniDelegate::OnAssetManagerChanged() {
     return false;
   }
   return jvm_invoker_->InvokeVoidMethod("onAssetManagerChanged", "()V");
-}
-
-static FlutterEngineResult GetCallbackInformationFromEngine(
-    int64_t handle,
-    FlutterCallbackInformation* info) {
-  static FlutterEngineProcTable s_procs = []() {
-    FlutterEngineProcTable procs = {};
-    procs.struct_size = sizeof(FlutterEngineProcTable);
-    FlutterEngineGetProcAddresses(&procs);
-    return procs;
-  }();
-  if (s_procs.GetCallbackInformation) {
-    return s_procs.GetCallbackInformation(handle, info);
-  }
-  return kInternalInconsistency;
-}
-
-std::optional<DartCallbackInfo> JniDelegate::LookupCallbackInformation(
-    int64_t handle) {
-  TRACE_EVENT0("flutter", "JniDelegate::LookupCallbackInformation");
-  if (callback_cache_) {
-    return callback_cache_->GetCallbackInformation(handle);
-  }
-
-  FlutterCallbackInformation info = {};
-  info.struct_size = sizeof(FlutterCallbackInformation);
-  if (GetCallbackInformationFromEngine(handle, &info) == kSuccess) {
-    DartCallbackInfo result;
-    result.name = info.name ? info.name : "";
-    result.class_name = info.class_name ? info.class_name : "";
-    result.library_path = info.library_path ? info.library_path : "";
-    return result;
-  }
-  return std::nullopt;
 }
 
 void JniDelegate::SetCallbackCache(
@@ -384,38 +390,28 @@ std::shared_ptr<CallbackCacheProvider> JniDelegate::GetCallbackCache() const {
   return callback_cache_;
 }
 
-bool JniDelegate::DecodeImage(const uint8_t* data,
-                              size_t size,
-                              int64_t generator_handle) {
-  TRACE_EVENT0("flutter", "JniDelegate::DecodeImage");
-  if (image_decoder_) {
-    return image_decoder_->DecodeImage(data, size, generator_handle);
+std::optional<DartCallbackInfo> JniDelegate::LookupCallbackInformation(
+    int64_t handle) {
+  TRACE_EVENT1("flutter", "JniDelegate::LookupCallbackInformation", "handle",
+               std::to_string(handle).c_str());
+  if (callback_cache_) {
+    return callback_cache_->GetCallbackInformation(handle);
   }
-  if (!jvm_invoker_ || !data || size == 0) {
-    return false;
+  if (!jvm_invoker_) {
+    return std::nullopt;
   }
-  std::vector<uint8_t> payload(data, data + size);
-  return jvm_invoker_->InvokeBooleanMethod(
-      "decodeImage", "(Ljava/nio/ByteBuffer;J)Landroid/graphics/Bitmap;",
-      payload);
-}
-
-void JniDelegate::OnNativeImageHeader(int64_t generator_handle,
-                                      int32_t width,
-                                      int32_t height) {
-  TRACE_EVENT0("flutter", "JniDelegate::OnNativeImageHeader");
-  if (image_decoder_) {
-    image_decoder_->OnImageHeader(generator_handle, width, height);
+  std::vector<uint8_t> payload(sizeof(int64_t));
+  std::memcpy(payload.data(), &handle, sizeof(int64_t));
+  std::string name = jvm_invoker_->InvokeStringMethod(
+      "getCallbackName", "(J)Ljava/lang/String;", payload);
+  std::string class_name = jvm_invoker_->InvokeStringMethod(
+      "getCallbackClassName", "(J)Ljava/lang/String;", payload);
+  std::string library_path = jvm_invoker_->InvokeStringMethod(
+      "getCallbackLibraryPath", "(J)Ljava/lang/String;", payload);
+  if (name.empty() && class_name.empty() && library_path.empty()) {
+    return std::nullopt;
   }
-}
-
-std::optional<ImageHeaderInfo> JniDelegate::GetImageHeader(
-    int64_t generator_handle) {
-  TRACE_EVENT0("flutter", "JniDelegate::GetImageHeader");
-  if (image_decoder_) {
-    return image_decoder_->GetImageHeader(generator_handle);
-  }
-  return std::nullopt;
+  return DartCallbackInfo{name, class_name, library_path};
 }
 
 void JniDelegate::SetImageDecoderProvider(
@@ -427,6 +423,41 @@ void JniDelegate::SetImageDecoderProvider(
 std::shared_ptr<ImageDecoderProvider> JniDelegate::GetImageDecoderProvider()
     const {
   return image_decoder_;
+}
+
+bool JniDelegate::DecodeImage(const uint8_t* data,
+                              size_t size,
+                              int64_t generator_handle) {
+  TRACE_EVENT1("flutter", "JniDelegate::DecodeImage", "handle",
+               std::to_string(generator_handle).c_str());
+  if (image_decoder_) {
+    return image_decoder_->DecodeImage(data, size, generator_handle);
+  }
+  if (!jvm_invoker_) {
+    return false;
+  }
+  std::vector<uint8_t> payload(data, data + size);
+  return jvm_invoker_->InvokeBooleanMethod("decodeImage", "([BJ)Z", payload);
+}
+
+void JniDelegate::OnNativeImageHeader(int64_t generator_handle,
+                                      int32_t width,
+                                      int32_t height) {
+  TRACE_EVENT1("flutter", "JniDelegate::OnNativeImageHeader", "handle",
+               std::to_string(generator_handle).c_str());
+  if (image_decoder_) {
+    image_decoder_->OnImageHeader(generator_handle, width, height);
+  }
+}
+
+std::optional<ImageHeaderInfo> JniDelegate::GetImageHeader(
+    int64_t generator_handle) {
+  TRACE_EVENT1("flutter", "JniDelegate::GetImageHeader", "handle",
+               std::to_string(generator_handle).c_str());
+  if (image_decoder_) {
+    return image_decoder_->GetImageHeader(generator_handle);
+  }
+  return std::nullopt;
 }
 
 int64_t JniDelegate::CreatePlatformView(
@@ -515,8 +546,8 @@ bool JniDelegate::OnDisplayPlatformView(
     int32_t height,
     int32_t view_width,
     int32_t view_height) {
-  TRACE_EVENT1("flutter", "JniDelegate::OnDisplayPlatformView(struct)",
-               "view_id", std::to_string(platform_view.identifier).c_str());
+  TRACE_EVENT1("flutter", "JniDelegate::OnDisplayPlatformView(view)", "view_id",
+               std::to_string(platform_view.identifier).c_str());
   if (!platform_views_controller_) {
     return false;
   }
@@ -602,36 +633,376 @@ bool JniDelegate::HideOverlaySurface(int32_t surface_id) {
   return platform_views_controller_->HideOverlaySurface(surface_id);
 }
 
-bool JniDelegate::CreatePlatformViewTransaction() {
-  TRACE_EVENT0("flutter", "JniDelegate::CreatePlatformViewTransaction");
-  if (!platform_views_controller_) {
-    return false;
+bool JniDelegate::SetHcppEnabled(bool enabled) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetHcppEnabled", "enabled",
+               enabled ? "true" : "false");
+  hcpp_enabled_ = enabled;
+  if (platform_views_provider_) {
+    platform_views_provider_->SetHcppEnabled(enabled);
   }
-  return platform_views_controller_->CreateTransaction();
-}
-
-bool JniDelegate::SwapPlatformViewTransactions() {
-  TRACE_EVENT0("flutter", "JniDelegate::SwapPlatformViewTransactions");
-  if (!platform_views_controller_) {
-    return false;
+  if (jvm_invoker_) {
+    std::vector<uint8_t> payload = {static_cast<uint8_t>(enabled ? 1 : 0)};
+    jvm_invoker_->InvokeVoidMethod("setHcppEnabled", "(Z)V", payload);
   }
-  return platform_views_controller_->SwapTransactions();
-}
-
-bool JniDelegate::ApplyPlatformViewTransactions() {
-  TRACE_EVENT0("flutter", "JniDelegate::ApplyPlatformViewTransactions");
-  if (!platform_views_controller_) {
-    return false;
-  }
-  return platform_views_controller_->ApplyTransactions();
+  return true;
 }
 
 bool JniDelegate::IsHcppEnabled() const {
   TRACE_EVENT0("flutter", "JniDelegate::IsHcppEnabled");
-  if (!platform_views_controller_) {
+  if (hcpp_enabled_) {
+    return true;
+  }
+  if (platform_views_controller_) {
+    return platform_views_controller_->IsHcppEnabled();
+  }
+  return false;
+}
+
+bool JniDelegate::CreatePlatformViewTransaction() {
+  TRACE_EVENT0("flutter", "JniDelegate::CreatePlatformViewTransaction");
+  if (surface_control_provider_) {
+    std::lock_guard<std::mutex> lock(surface_control_mutex_);
+    active_transaction_ = surface_control_provider_->CreateTransaction();
+  }
+  if (platform_views_controller_) {
+    return platform_views_controller_->CreateTransaction();
+  }
+  return true;
+}
+
+bool JniDelegate::SwapPlatformViewTransactions() {
+  TRACE_EVENT0("flutter", "JniDelegate::SwapPlatformViewTransactions");
+  if (platform_views_controller_) {
+    return platform_views_controller_->SwapTransactions();
+  }
+  return true;
+}
+
+bool JniDelegate::ApplyPlatformViewTransactions() {
+  TRACE_EVENT0("flutter", "JniDelegate::ApplyPlatformViewTransactions");
+  bool applied_sc = true;
+  {
+    std::lock_guard<std::mutex> lock(surface_control_mutex_);
+    if (active_transaction_) {
+      applied_sc = active_transaction_->Apply();
+      active_transaction_.reset();
+    }
+  }
+  bool applied_pv = true;
+  if (platform_views_controller_) {
+    applied_pv = platform_views_controller_->ApplyTransactions();
+  }
+  return applied_sc && applied_pv;
+}
+
+bool JniDelegate::CreateSurfaceControl(int64_t surface_id,
+                                       const std::string& debug_name) {
+  TRACE_EVENT1("flutter", "JniDelegate::CreateSurfaceControl", "surface_id",
+               std::to_string(surface_id).c_str());
+  std::lock_guard<std::mutex> lock(surface_control_mutex_);
+  if (!surface_control_provider_) {
     return false;
   }
-  return platform_views_controller_->IsHcppEnabled();
+  std::string name =
+      debug_name.empty()
+          ? ("FlutterSurfaceControl_" + std::to_string(surface_id))
+          : debug_name;
+  std::unique_ptr<AndroidSurfaceControl> sc;
+  if (surface_controls_.empty()) {
+    sc = surface_control_provider_->CreateFromWindow(
+        reinterpret_cast<void*>(0x1), name);
+  } else {
+    auto parent_it = surface_controls_.begin();
+    sc = surface_control_provider_->Create(parent_it->second.get(), name);
+  }
+  if (!sc) {
+    return false;
+  }
+  AndroidSurfaceControlState state;
+  state.id = surface_id;
+  state.debug_name = name;
+  state.handle = sc->GetHandle();
+  state.parent_handle = sc->GetParentHandle();
+  state.parent_id = sc->GetParentId();
+  state.is_valid = sc->IsValid();
+  state.ref_count = 1;
+
+  surface_controls_[surface_id] = std::move(sc);
+  surface_control_states_[surface_id] = state;
+
+  if (jvm_invoker_) {
+    std::vector<uint8_t> payload;
+    jvm_invoker_->InvokeVoidMethod("createSurfaceControl",
+                                   "(JLjava/lang/String;)V", payload);
+  }
+  return true;
+}
+
+bool JniDelegate::DestroySurfaceControl(int64_t surface_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::DestroySurfaceControl", "surface_id",
+               std::to_string(surface_id).c_str());
+  std::lock_guard<std::mutex> lock(surface_control_mutex_);
+  surface_controls_.erase(surface_id);
+  surface_control_states_.erase(surface_id);
+  if (jvm_invoker_) {
+    std::vector<uint8_t> payload;
+    jvm_invoker_->InvokeVoidMethod("destroySurfaceControl", "(J)V", payload);
+  }
+  return true;
+}
+
+bool JniDelegate::ReparentSurfaceControl(int64_t surface_id,
+                                         int64_t new_parent_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::ReparentSurfaceControl", "surface_id",
+               std::to_string(surface_id).c_str());
+  std::lock_guard<std::mutex> lock(surface_control_mutex_);
+  auto it = surface_controls_.find(surface_id);
+  if (it == surface_controls_.end()) {
+    return false;
+  }
+  AndroidSurfaceControl* parent_ptr = nullptr;
+  void* parent_handle = nullptr;
+  if (new_parent_id != 0) {
+    auto p_it = surface_controls_.find(new_parent_id);
+    if (p_it != surface_controls_.end()) {
+      parent_ptr = p_it->second.get();
+      parent_handle = parent_ptr->GetHandle();
+    }
+  }
+
+  if (active_transaction_) {
+    active_transaction_->Reparent(it->second.get(), parent_ptr);
+  } else if (surface_control_provider_) {
+    auto tx = surface_control_provider_->CreateTransaction();
+    if (tx) {
+      tx->Reparent(it->second.get(), parent_ptr);
+      tx->Apply();
+    }
+  }
+
+  surface_control_states_[surface_id].parent_handle = parent_handle;
+  surface_control_states_[surface_id].parent_id = new_parent_id;
+  return true;
+}
+
+bool JniDelegate::SetSurfaceControlGeometry(
+    int64_t surface_id,
+    const AndroidSurfaceControlRect& source,
+    const AndroidSurfaceControlRect& destination,
+    int32_t transform) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetSurfaceControlGeometry",
+               "surface_id", std::to_string(surface_id).c_str());
+  std::lock_guard<std::mutex> lock(surface_control_mutex_);
+  auto it = surface_controls_.find(surface_id);
+  if (it != surface_controls_.end()) {
+    if (active_transaction_) {
+      active_transaction_->SetGeometry(
+          it->second.get(), source, destination,
+          static_cast<AndroidSurfaceControlTransform>(transform));
+    } else if (surface_control_provider_) {
+      auto tx = surface_control_provider_->CreateTransaction();
+      if (tx) {
+        tx->SetGeometry(it->second.get(), source, destination,
+                        static_cast<AndroidSurfaceControlTransform>(transform));
+        tx->Apply();
+      }
+    }
+  }
+  auto state_it = surface_control_states_.find(surface_id);
+  if (state_it != surface_control_states_.end()) {
+    state_it->second.source_rect = source;
+    state_it->second.destination_rect = destination;
+    state_it->second.transform =
+        static_cast<AndroidSurfaceControlTransform>(transform);
+  }
+  return true;
+}
+
+bool JniDelegate::SetSurfaceControlVisibility(int64_t surface_id,
+                                              bool visible) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetSurfaceControlVisibility",
+               "surface_id", std::to_string(surface_id).c_str());
+  std::lock_guard<std::mutex> lock(surface_control_mutex_);
+  auto it = surface_controls_.find(surface_id);
+  auto vis = visible ? AndroidSurfaceControlVisibility::kShow
+                     : AndroidSurfaceControlVisibility::kHide;
+  if (it != surface_controls_.end()) {
+    if (active_transaction_) {
+      active_transaction_->SetVisibility(it->second.get(), vis);
+    } else if (surface_control_provider_) {
+      auto tx = surface_control_provider_->CreateTransaction();
+      if (tx) {
+        tx->SetVisibility(it->second.get(), vis);
+        tx->Apply();
+      }
+    }
+  }
+  auto state_it = surface_control_states_.find(surface_id);
+  if (state_it != surface_control_states_.end()) {
+    state_it->second.visibility = vis;
+  }
+  return true;
+}
+
+bool JniDelegate::SetSurfaceControlZOrder(int64_t surface_id, int32_t z_order) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetSurfaceControlZOrder", "surface_id",
+               std::to_string(surface_id).c_str());
+  std::lock_guard<std::mutex> lock(surface_control_mutex_);
+  auto it = surface_controls_.find(surface_id);
+  if (it != surface_controls_.end()) {
+    if (active_transaction_) {
+      active_transaction_->SetZOrder(it->second.get(), z_order);
+    } else if (surface_control_provider_) {
+      auto tx = surface_control_provider_->CreateTransaction();
+      if (tx) {
+        tx->SetZOrder(it->second.get(), z_order);
+        tx->Apply();
+      }
+    }
+  }
+  auto state_it = surface_control_states_.find(surface_id);
+  if (state_it != surface_control_states_.end()) {
+    state_it->second.z_order = z_order;
+  }
+  return true;
+}
+
+bool JniDelegate::SetSurfaceControlDamageRegion(
+    int64_t surface_id,
+    const std::vector<AndroidSurfaceControlRect>& rects) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetSurfaceControlDamageRegion",
+               "surface_id", std::to_string(surface_id).c_str());
+  std::lock_guard<std::mutex> lock(surface_control_mutex_);
+  auto it = surface_controls_.find(surface_id);
+  if (it != surface_controls_.end()) {
+    if (active_transaction_) {
+      active_transaction_->SetDamageRegion(it->second.get(), rects);
+    } else if (surface_control_provider_) {
+      auto tx = surface_control_provider_->CreateTransaction();
+      if (tx) {
+        tx->SetDamageRegion(it->second.get(), rects);
+        tx->Apply();
+      }
+    }
+  }
+  auto state_it = surface_control_states_.find(surface_id);
+  if (state_it != surface_control_states_.end()) {
+    state_it->second.damage_region = rects;
+  }
+  return true;
+}
+
+bool JniDelegate::SetSurfaceControlBuffer(int64_t surface_id,
+                                          void* buffer,
+                                          int fence_fd) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetSurfaceControlBuffer", "surface_id",
+               std::to_string(surface_id).c_str());
+  std::lock_guard<std::mutex> lock(surface_control_mutex_);
+  auto it = surface_controls_.find(surface_id);
+  if (it != surface_controls_.end()) {
+    if (active_transaction_) {
+      active_transaction_->SetBuffer(it->second.get(), buffer, fence_fd);
+    } else if (surface_control_provider_) {
+      auto tx = surface_control_provider_->CreateTransaction();
+      if (tx) {
+        tx->SetBuffer(it->second.get(), buffer, fence_fd);
+        tx->Apply();
+      }
+    }
+  }
+  auto state_it = surface_control_states_.find(surface_id);
+  if (state_it != surface_control_states_.end()) {
+    state_it->second.buffer_handle = buffer;
+    state_it->second.buffer_fence_fd = fence_fd;
+  }
+  return true;
+}
+
+bool JniDelegate::SetSurfaceControlBufferAlpha(int64_t surface_id,
+                                               float alpha) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetSurfaceControlBufferAlpha",
+               "surface_id", std::to_string(surface_id).c_str());
+  std::lock_guard<std::mutex> lock(surface_control_mutex_);
+  auto it = surface_controls_.find(surface_id);
+  if (it != surface_controls_.end()) {
+    if (active_transaction_) {
+      active_transaction_->SetBufferAlpha(it->second.get(), alpha);
+    } else if (surface_control_provider_) {
+      auto tx = surface_control_provider_->CreateTransaction();
+      if (tx) {
+        tx->SetBufferAlpha(it->second.get(), alpha);
+        tx->Apply();
+      }
+    }
+  }
+  auto state_it = surface_control_states_.find(surface_id);
+  if (state_it != surface_control_states_.end()) {
+    state_it->second.alpha = alpha;
+  }
+  return true;
+}
+
+bool JniDelegate::SetSurfaceControlColor(int64_t surface_id,
+                                         float r,
+                                         float g,
+                                         float b,
+                                         float alpha) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetSurfaceControlColor", "surface_id",
+               std::to_string(surface_id).c_str());
+  std::lock_guard<std::mutex> lock(surface_control_mutex_);
+  auto it = surface_controls_.find(surface_id);
+  if (it != surface_controls_.end()) {
+    if (active_transaction_) {
+      active_transaction_->SetColor(it->second.get(), r, g, b, alpha);
+    } else if (surface_control_provider_) {
+      auto tx = surface_control_provider_->CreateTransaction();
+      if (tx) {
+        tx->SetColor(it->second.get(), r, g, b, alpha);
+        tx->Apply();
+      }
+    }
+  }
+  auto state_it = surface_control_states_.find(surface_id);
+  if (state_it != surface_control_states_.end()) {
+    state_it->second.color = AndroidSurfaceControlColor{r, g, b, alpha};
+  }
+  return true;
+}
+
+void JniDelegate::SetSurfaceControlProvider(
+    std::shared_ptr<AndroidSurfaceControlProvider> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetSurfaceControlProvider");
+  surface_control_provider_ = std::move(provider);
+}
+
+std::shared_ptr<AndroidSurfaceControlProvider>
+JniDelegate::GetSurfaceControlProvider() const {
+  TRACE_EVENT0("flutter", "JniDelegate::GetSurfaceControlProvider");
+  return surface_control_provider_;
+}
+
+std::optional<AndroidSurfaceControlState> JniDelegate::GetSurfaceControlState(
+    int64_t surface_id) const {
+  TRACE_EVENT1("flutter", "JniDelegate::GetSurfaceControlState", "surface_id",
+               std::to_string(surface_id).c_str());
+  std::lock_guard<std::mutex> lock(surface_control_mutex_);
+  auto it = surface_control_states_.find(surface_id);
+  if (it != surface_control_states_.end()) {
+    return it->second;
+  }
+  return std::nullopt;
+}
+
+std::shared_ptr<AndroidSurfaceControl> JniDelegate::GetSurfaceControl(
+    int64_t surface_id) const {
+  TRACE_EVENT1("flutter", "JniDelegate::GetSurfaceControl", "surface_id",
+               std::to_string(surface_id).c_str());
+  std::lock_guard<std::mutex> lock(surface_control_mutex_);
+  auto it = surface_controls_.find(surface_id);
+  if (it != surface_controls_.end()) {
+    return it->second;
+  }
+  return nullptr;
 }
 
 bool JniDelegate::PushPlatformViewMutators(
