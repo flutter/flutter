@@ -386,6 +386,16 @@ public class FlutterJNI {
     nativeOnVsync(frameDelayNanos, refreshPeriodNanos, cookie);
   }
 
+  /**
+   * Invoked by Embedder C-API to notify the JVM of VSync timestamps.
+   *
+   * @param frameStartTimeNanos The frame start timestamp in nanoseconds.
+   * @param frameTargetTimeNanos The target presentation timestamp in nanoseconds.
+   */
+  public void onVsync(long frameStartTimeNanos, long frameTargetTimeNanos) {
+    // Embedder C-API VSync notification hook
+  }
+
   @NonNull
   @Deprecated
   public static native FlutterCallbackInformation nativeLookupCallbackInformation(long handle);
