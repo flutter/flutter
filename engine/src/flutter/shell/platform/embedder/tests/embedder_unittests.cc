@@ -4317,6 +4317,132 @@ TEST_F(EmbedderTest, PlatformThreadIsolatesWithCustomPlatformTaskRunner) {
 }
 
 //------------------------------------------------------------------------------
+/// Vulkan External Texture unit tests validating struct sizes, ABI
+/// compatibility, YCbCr conversion parameters, lifecycle registration, and
+/// destruction callbacks.
+
+TEST_F(EmbedderTest, VulkanExternalTextureStructSizesAndABI) {
+  FlutterVulkanComponentMapping mapping = {};
+  mapping.struct_size = sizeof(FlutterVulkanComponentMapping);
+  mapping.r = kFlutterVulkanComponentSwizzleIdentity;
+  mapping.g = kFlutterVulkanComponentSwizzleZero;
+  mapping.b = kFlutterVulkanComponentSwizzleOne;
+  mapping.a = kFlutterVulkanComponentSwizzleR;
+  EXPECT_EQ(mapping.struct_size, sizeof(FlutterVulkanComponentMapping));
+  EXPECT_EQ(mapping.r, kFlutterVulkanComponentSwizzleIdentity);
+  EXPECT_EQ(mapping.g, kFlutterVulkanComponentSwizzleZero);
+  EXPECT_EQ(mapping.b, kFlutterVulkanComponentSwizzleOne);
+  EXPECT_EQ(mapping.a, kFlutterVulkanComponentSwizzleR);
+
+  FlutterVulkanYcbcrConversionInfo ycbcr = {};
+  ycbcr.struct_size = sizeof(FlutterVulkanYcbcrConversionInfo);
+  ycbcr.format = 0;
+  ycbcr.ycbcr_model = 1;
+  ycbcr.ycbcr_range = 0;
+  ycbcr.components = mapping;
+  ycbcr.x_chroma_offset = 0;
+  ycbcr.y_chroma_offset = 0;
+  ycbcr.chroma_filter = 1;
+  ycbcr.force_explicit_reconstruction = 0;
+  ycbcr.external_format = 0x12345678ULL;
+  EXPECT_EQ(ycbcr.struct_size, sizeof(FlutterVulkanYcbcrConversionInfo));
+  EXPECT_EQ(ycbcr.external_format, 0x12345678ULL);
+  EXPECT_EQ(ycbcr.components.struct_size,
+            sizeof(FlutterVulkanComponentMapping));
+
+  FlutterVulkanExternalTexture texture = {};
+  texture.struct_size = sizeof(FlutterVulkanExternalTexture);
+  texture.width = 1920;
+  texture.height = 1080;
+  texture.image = 0xDEADBEEF;
+  texture.format = 44;       // VK_FORMAT_R8G8B8A8_UNORM
+  texture.image_layout = 5;  // VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+  texture.ycbcr_conversion_info = &ycbcr;
+  texture.user_data = reinterpret_cast<void*>(0xBAADF00D);
+  texture.destruction_callback = [](void* user_data) {
+    EXPECT_EQ(user_data, reinterpret_cast<void*>(0xBAADF00D));
+  };
+  EXPECT_EQ(texture.struct_size, sizeof(FlutterVulkanExternalTexture));
+  EXPECT_EQ(texture.width, 1920u);
+  EXPECT_EQ(texture.height, 1080u);
+  EXPECT_EQ(texture.image, 0xDEADBEEFULL);
+  EXPECT_EQ(texture.format, 44u);
+  EXPECT_EQ(texture.image_layout, 5u);
+  EXPECT_EQ(texture.ycbcr_conversion_info, &ycbcr);
+  EXPECT_EQ(texture.user_data, reinterpret_cast<void*>(0xBAADF00D));
+  EXPECT_NE(texture.destruction_callback, nullptr);
+  texture.destruction_callback(texture.user_data);
+
+  FlutterVulkanRendererConfig config = {};
+  config.struct_size = sizeof(FlutterVulkanRendererConfig);
+  config.external_texture_frame_callback =
+      [](void* user_data, int64_t id, size_t width, size_t height,
+         FlutterVulkanExternalTexture* out) -> bool {
+    out->struct_size = sizeof(FlutterVulkanExternalTexture);
+    return true;
+  };
+  EXPECT_EQ(config.struct_size, sizeof(FlutterVulkanRendererConfig));
+  EXPECT_NE(config.external_texture_frame_callback, nullptr);
+}
+
+TEST_F(EmbedderTest, VulkanExternalTextureYCbCrSamplerDescriptor) {
+  FlutterVulkanComponentMapping components = {
+      .struct_size = sizeof(FlutterVulkanComponentMapping),
+      .r = kFlutterVulkanComponentSwizzleR,
+      .g = kFlutterVulkanComponentSwizzleG,
+      .b = kFlutterVulkanComponentSwizzleB,
+      .a = kFlutterVulkanComponentSwizzleA,
+  };
+
+  FlutterVulkanYcbcrConversionInfo ycbcr_info = {
+      .struct_size = sizeof(FlutterVulkanYcbcrConversionInfo),
+      .format = 0,       // VK_FORMAT_UNDEFINED
+      .ycbcr_model = 1,  // VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_601
+      .ycbcr_range = 0,  // VK_SAMPLER_YCBCR_RANGE_ITU_FULL
+      .components = components,
+      .x_chroma_offset = 0,  // VK_CHROMA_LOCATION_COSITED_EVEN
+      .y_chroma_offset = 0,  // VK_CHROMA_LOCATION_COSITED_EVEN
+      .chroma_filter = 1,    // VK_FILTER_LINEAR
+      .force_explicit_reconstruction = 0,
+      .external_format = 0xFEEDBEEFULL,
+  };
+
+  EXPECT_EQ(ycbcr_info.struct_size, sizeof(FlutterVulkanYcbcrConversionInfo));
+  EXPECT_EQ(ycbcr_info.format, 0u);
+  EXPECT_EQ(ycbcr_info.ycbcr_model, 1u);
+  EXPECT_EQ(ycbcr_info.ycbcr_range, 0u);
+  EXPECT_EQ(ycbcr_info.components.r, kFlutterVulkanComponentSwizzleR);
+  EXPECT_EQ(ycbcr_info.components.g, kFlutterVulkanComponentSwizzleG);
+  EXPECT_EQ(ycbcr_info.components.b, kFlutterVulkanComponentSwizzleB);
+  EXPECT_EQ(ycbcr_info.components.a, kFlutterVulkanComponentSwizzleA);
+  EXPECT_EQ(ycbcr_info.x_chroma_offset, 0u);
+  EXPECT_EQ(ycbcr_info.y_chroma_offset, 0u);
+  EXPECT_EQ(ycbcr_info.chroma_filter, 1u);
+  EXPECT_EQ(ycbcr_info.force_explicit_reconstruction, 0u);
+  EXPECT_EQ(ycbcr_info.external_format, 0xFEEDBEEFULL);
+}
+
+TEST_F(EmbedderTest, VulkanExternalTextureDestructionCallbackInvocation) {
+  bool destruction_called = false;
+
+  auto destruction_callback = [](void* user_data) {
+    *static_cast<bool*>(user_data) = true;
+  };
+
+  FlutterVulkanExternalTexture texture = {};
+  texture.struct_size = sizeof(FlutterVulkanExternalTexture);
+  texture.width = 100;
+  texture.height = 100;
+  texture.image = 1;
+  texture.user_data = &destruction_called;
+  texture.destruction_callback = destruction_callback;
+
+  ASSERT_FALSE(destruction_called);
+  texture.destruction_callback(texture.user_data);
+  ASSERT_TRUE(destruction_called);
+}
+
+//------------------------------------------------------------------------------
 /// Multi-backend matrix initialization tests verifying consistent behavior
 /// across all available rendering backends and engine configurations.
 
@@ -4372,6 +4498,25 @@ TEST_P(EmbedderAllBackendsTest, CanSendPointerAndWindowMetrics) {
   metrics_event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &metrics_event),
             kSuccess);
+}
+
+TEST_P(EmbedderAllBackendsTest, CanRegisterAndUnregisterExternalTexture) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(800, 600));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  constexpr int64_t texture_id = 42;
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+  ASSERT_TRUE(embedder_engine->MarkTextureFrameAvailable(texture_id));
+  ASSERT_TRUE(embedder_engine->UnregisterTexture(texture_id));
+
+  engine.reset();
 }
 
 TEST_P(EmbedderTestMatrix, CanLaunchAndExecuteMatrix) {

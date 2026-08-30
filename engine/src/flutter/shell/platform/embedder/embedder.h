@@ -950,6 +950,84 @@ typedef struct {
   uint32_t format;
 } FlutterVulkanImage;
 
+/// Component swizzle for Vulkan YCbCr conversion or texture component mapping.
+typedef enum {
+  kFlutterVulkanComponentSwizzleIdentity = 0,
+  kFlutterVulkanComponentSwizzleZero = 1,
+  kFlutterVulkanComponentSwizzleOne = 2,
+  kFlutterVulkanComponentSwizzleR = 3,
+  kFlutterVulkanComponentSwizzleG = 4,
+  kFlutterVulkanComponentSwizzleB = 5,
+  kFlutterVulkanComponentSwizzleA = 6,
+} FlutterVulkanComponentSwizzle;
+
+/// Component mapping for Vulkan YCbCr conversion or texture swizzle.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanComponentMapping).
+  size_t struct_size;
+  FlutterVulkanComponentSwizzle r;
+  FlutterVulkanComponentSwizzle g;
+  FlutterVulkanComponentSwizzle b;
+  FlutterVulkanComponentSwizzle a;
+} FlutterVulkanComponentMapping;
+
+/// YCbCr conversion parameters for Vulkan external textures.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanYcbcrConversionInfo).
+  size_t struct_size;
+  /// Format of the image or 0 (VK_FORMAT_UNDEFINED) if using external_format.
+  uint32_t format;
+  /// Color model conversion (corresponds to VkSamplerYcbcrModelConversion).
+  uint32_t ycbcr_model;
+  /// Numerical range of color components (corresponds to VkSamplerYcbcrRange).
+  uint32_t ycbcr_range;
+  /// Component mapping for the conversion.
+  FlutterVulkanComponentMapping components;
+  /// Horizontal chroma location (corresponds to VkChromaLocation).
+  uint32_t x_chroma_offset;
+  /// Vertical chroma location (corresponds to VkChromaLocation).
+  uint32_t y_chroma_offset;
+  /// Filter used for chroma downsampling (corresponds to VkFilter).
+  uint32_t chroma_filter;
+  /// Force explicit reconstruction (corresponds to VkBool32).
+  uint32_t force_explicit_reconstruction;
+  /// External format ID for Android / vendor-specific buffers. When non-zero,
+  /// format must be 0 (VK_FORMAT_UNDEFINED).
+  uint64_t external_format;
+} FlutterVulkanYcbcrConversionInfo;
+
+/// Represents an external Vulkan texture provided by the embedder.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterVulkanExternalTexture).
+  size_t struct_size;
+  /// Width of the texture in pixels.
+  size_t width;
+  /// Height of the texture in pixels.
+  size_t height;
+  /// Handle to the VkImage (as a uint64_t / FlutterVulkanImageHandle).
+  FlutterVulkanImageHandle image;
+  /// The VkFormat of the image (for example: VK_FORMAT_R8G8B8A8_UNORM).
+  uint32_t format;
+  /// The VkImageLayout of the image (for example:
+  /// VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL).
+  uint32_t image_layout;
+  /// Optional pointer to YCbCr conversion info. If NULL, standard sampling is
+  /// used.
+  const FlutterVulkanYcbcrConversionInfo* ycbcr_conversion_info;
+  /// User data to be returned on the invocation of destruction_callback.
+  void* user_data;
+  /// Callback to collect the texture and associated embedder resources.
+  VoidCallback destruction_callback;
+} FlutterVulkanExternalTexture;
+
+/// Callback to provide an external Vulkan texture for a given texture_id.
+typedef bool (*FlutterVulkanExternalTextureFrameCallback)(
+    void* /* user data */,
+    int64_t /* texture identifier */,
+    size_t /* width */,
+    size_t /* height */,
+    FlutterVulkanExternalTexture* /* texture out */);
+
 /// Callback to fetch a Vulkan function pointer for a given instance. Normally,
 /// this should return the results of vkGetInstanceProcAddr.
 typedef void* (*FlutterVulkanInstanceProcAddressCallback)(
@@ -1031,6 +1109,11 @@ typedef struct {
   /// without any additional synchronization.
   /// Not used if a FlutterCompositor is supplied in FlutterProjectArgs.
   FlutterVulkanPresentCallback present_image_callback;
+  /// When the embedder specifies that a texture has a frame available, the
+  /// engine will call this method (on an internal engine managed thread) so
+  /// that external texture details can be supplied to the engine for subsequent
+  /// composition.
+  FlutterVulkanExternalTextureFrameCallback external_texture_frame_callback;
 
 } FlutterVulkanRendererConfig;
 
