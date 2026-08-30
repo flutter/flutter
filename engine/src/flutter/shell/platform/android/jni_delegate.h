@@ -22,6 +22,8 @@
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
 #include "flutter/shell/platform/android/android_vm_init.h"
+#include "flutter/shell/platform/android/android_vsync_waiter.h"
+#include "flutter/shell/platform/android/android_vulkan_texture.h"
 #include "flutter/shell/platform/android/android_window_metrics_mapper.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -143,6 +145,8 @@ class JniDelegate {
       std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr,
       std::shared_ptr<AndroidVMInit> vm_init = nullptr,
       std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider =
+          nullptr,
+      std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider =
           nullptr);
   virtual ~JniDelegate();
 
@@ -467,6 +471,41 @@ class JniDelegate {
   std::shared_ptr<AndroidHardwareBufferProvider> GetHardwareBufferProvider()
       const;
 
+  /// @brief Registers a Vulkan external texture with texture_id in JVM /
+  /// Delegate.
+  virtual bool RegisterVulkanTexture(int64_t texture_id);
+
+  /// @brief Unregisters a Vulkan external texture by texture_id.
+  virtual bool UnregisterVulkanTexture(int64_t texture_id);
+
+  /// @brief Sets the latest Vulkan texture frame for texture_id.
+  virtual bool SetVulkanTextureFrame(
+      int64_t texture_id,
+      const std::shared_ptr<AndroidVulkanExternalTexture>& texture);
+
+  /// @brief Sets the latest Vulkan external texture struct for texture_id.
+  virtual bool SetVulkanTextureFrame(
+      int64_t texture_id,
+      const FlutterVulkanExternalTexture& texture);
+
+  /// @brief Retrieves the latest Vulkan texture frame for texture_id.
+  virtual bool GetVulkanTextureFrame(int64_t texture_id,
+                                     size_t width,
+                                     size_t height,
+                                     FlutterVulkanExternalTexture* texture_out);
+
+  /// @brief Notifies that a new Vulkan texture frame is available for
+  /// texture_id.
+  virtual bool OnVulkanTextureFrameAvailable(int64_t texture_id);
+
+  /// @brief Sets or replaces the AndroidVulkanTextureProvider.
+  void SetVulkanTextureProvider(
+      std::shared_ptr<AndroidVulkanTextureProvider> provider);
+
+  /// @brief Returns the current AndroidVulkanTextureProvider.
+  std::shared_ptr<AndroidVulkanTextureProvider> GetVulkanTextureProvider()
+      const;
+
   /// @brief Returns the underlying JvmInvoker instance.
   std::shared_ptr<JvmInvoker> GetJvmInvoker() const;
 
@@ -492,6 +531,13 @@ class JniDelegate {
       hardware_buffer_frames_;
   std::map<int64_t, std::shared_ptr<AndroidHardwareBuffer>>
       hardware_buffer_objects_;
+
+  mutable std::mutex vulkan_texture_mutex_;
+  std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider_;
+  std::unordered_set<int64_t> registered_vulkan_textures_;
+  std::map<int64_t, FlutterVulkanExternalTexture> vulkan_texture_frames_;
+  std::map<int64_t, std::shared_ptr<AndroidVulkanExternalTexture>>
+      vulkan_texture_objects_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniDelegate);
 };
