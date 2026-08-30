@@ -163,6 +163,40 @@ TEST_F(EmbedderTest, CanRegisterAndResolveVulkanExternalTexture) {
   engine.reset();
 }
 
+TEST_F(EmbedderTest, CanRegisterAndResolveHardwareBufferExternalTextureVulkan) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  context.GetRendererConfig()
+      .vulkan.hardware_buffer_external_texture_frame_callback =
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterHardwareBufferExternalTexture* texture) -> bool {
+    texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    texture->width = width;
+    texture->height = height;
+    texture->format = 1;
+    texture->buffer = reinterpret_cast<FlutterHardwareBufferHandle>(0x5555);
+    texture->user_data = user_data;
+    texture->destruction_callback = [](void* data) {};
+    return true;
+  };
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(800, 600));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  constexpr int64_t texture_id = 456;
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+  ASSERT_TRUE(embedder_engine->MarkTextureFrameAvailable(texture_id));
+  ASSERT_TRUE(embedder_engine->UnregisterTexture(texture_id));
+
+  engine.reset();
+}
+
 }  // namespace testing
 }  // namespace flutter
 

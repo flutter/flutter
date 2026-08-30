@@ -726,6 +726,50 @@ typedef struct {
   FlutterDamage buffer_damage;
 } FlutterPresentInfo;
 
+/// Alias for an opaque OS-level hardware buffer handle (such as an
+/// AHardwareBuffer* on Android).
+typedef const void* FlutterHardwareBufferHandle;
+
+/// Represents an external HardwareBuffer texture (such as an Android
+/// AHardwareBuffer zero-copy buffer) provided by the embedder.
+typedef struct {
+  /// The size of this struct. Must be
+  /// sizeof(FlutterHardwareBufferExternalTexture).
+  size_t struct_size;
+  /// Width of the buffer in pixels.
+  size_t width;
+  /// Height of the buffer in pixels.
+  size_t height;
+  /// Format of the buffer (e.g. AHARDWAREBUFFER_FORMAT_* on Android).
+  uint32_t format;
+  /// Handle to the opaque hardware buffer (e.g. AHardwareBuffer* on Android).
+  FlutterHardwareBufferHandle buffer;
+  /// User data to be returned on the invocation of destruction_callback.
+  void* user_data;
+  /// Callback to collect the texture and associated embedder resources.
+  VoidCallback destruction_callback;
+} FlutterHardwareBufferExternalTexture;
+
+/// Alias for FlutterHardwareBufferExternalTexture.
+typedef FlutterHardwareBufferExternalTexture FlutterHardwareBufferTexture;
+
+/// Callback to provide an external HardwareBuffer texture for a given
+/// texture_id.
+typedef bool (*FlutterHardwareBufferExternalTextureFrameCallback)(
+    void* /* user data */,
+    int64_t /* texture identifier */,
+    size_t /* width */,
+    size_t /* height */,
+    FlutterHardwareBufferExternalTexture* /* texture out */);
+
+/// Callback to provide a HardwareBuffer texture for a given texture_id.
+typedef bool (*FlutterHardwareBufferTextureFrameCallback)(
+    void* /* user data */,
+    int64_t /* texture identifier */,
+    size_t /* width */,
+    size_t /* height */,
+    FlutterHardwareBufferTexture* /* texture out */);
+
 /// Callback for when a surface is presented.
 typedef bool (*BoolPresentInfoCallback)(
     void* /* user data */,
@@ -811,6 +855,12 @@ typedef struct {
   /// ID. Not specifying populate_existing_damage will result in full
   /// repaint (i.e. rendering all the pixels on the screen at every frame).
   FlutterFrameBufferWithDamageCallback populate_existing_damage;
+  /// When the embedder specifies that a texture backed by a HardwareBuffer has
+  /// a frame available, the engine will call this method (on an internal engine
+  /// managed thread) so that hardware buffer details can be supplied to the
+  /// engine for subsequent composition.
+  FlutterHardwareBufferExternalTextureFrameCallback
+      hardware_buffer_external_texture_frame_callback;
 } FlutterOpenGLRendererConfig;
 
 /// Alias for id<MTLDevice>.
@@ -1114,6 +1164,12 @@ typedef struct {
   /// that external texture details can be supplied to the engine for subsequent
   /// composition.
   FlutterVulkanExternalTextureFrameCallback external_texture_frame_callback;
+  /// When the embedder specifies that a texture backed by a HardwareBuffer has
+  /// a frame available, the engine will call this method (on an internal engine
+  /// managed thread) so that hardware buffer details can be supplied to the
+  /// engine for subsequent composition.
+  FlutterHardwareBufferExternalTextureFrameCallback
+      hardware_buffer_external_texture_frame_callback;
 
 } FlutterVulkanRendererConfig;
 
