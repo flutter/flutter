@@ -4316,6 +4316,102 @@ TEST_F(EmbedderTest, PlatformThreadIsolatesWithCustomPlatformTaskRunner) {
   ASSERT_EQ(platform_thread_id, ffi_call_thread_id);
 }
 
+//------------------------------------------------------------------------------
+/// Multi-backend matrix initialization tests verifying consistent behavior
+/// across all available rendering backends and engine configurations.
+
+TEST_P(EmbedderAllBackendsTest, CanLaunchAndShutdown) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+  engine.reset();
+}
+
+TEST_P(EmbedderAllBackendsTest, CanInvokeCustomEntrypoint) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  auto entrypoint = [&latch]() { latch.Signal(); };
+  context.AddFfiNativeCallback("SayHiFromCustomEntrypoint",
+                               CREATE_FFI_LAMBDA(entrypoint));
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("customEntrypoint");
+  auto engine = builder.LaunchEngine();
+  latch.Wait();
+  ASSERT_TRUE(engine.is_valid());
+}
+
+TEST_P(EmbedderAllBackendsTest, CanSendPointerAndWindowMetrics) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(800, 600));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  FlutterPointerEvent pointer_event = {};
+  pointer_event.struct_size = sizeof(pointer_event);
+  pointer_event.phase = FlutterPointerPhase::kDown;
+  pointer_event.timestamp = 0;
+  pointer_event.x = 50.0;
+  pointer_event.y = 50.0;
+  ASSERT_EQ(FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1),
+            kSuccess);
+
+  FlutterWindowMetricsEvent metrics_event = {};
+  metrics_event.struct_size = sizeof(metrics_event);
+  metrics_event.width = 800;
+  metrics_event.height = 600;
+  metrics_event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &metrics_event),
+            kSuccess);
+}
+
+TEST_P(EmbedderTestMatrix, CanLaunchAndExecuteMatrix) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  ConfigureBuilder(builder);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+  engine.reset();
+}
+
+TEST_P(EmbedderTestMatrix, CanInvokeCustomEntrypointInMatrix) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  auto entrypoint = [&latch]() { latch.Signal(); };
+  context.AddFfiNativeCallback("SayHiFromCustomEntrypoint",
+                               CREATE_FFI_LAMBDA(entrypoint));
+  EmbedderConfigBuilder builder(context);
+  ConfigureBuilder(builder);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("customEntrypoint");
+  auto engine = builder.LaunchEngine();
+  latch.Wait();
+  ASSERT_TRUE(engine.is_valid());
+}
+
+INSTANTIATE_TEST_SUITE_P(AllBackends,
+                         EmbedderAllBackendsTest,
+                         ::testing::ValuesIn(GetSupportedBackends()),
+                         EmbedderTestParamName());
+
+INSTANTIATE_TEST_SUITE_P(Matrix,
+                         EmbedderTestMatrix,
+                         ::testing::ValuesIn(GetSupportedMatrixConfigs()),
+                         EmbedderTestParamName());
+
 }  // namespace testing
 }  // namespace flutter
 
