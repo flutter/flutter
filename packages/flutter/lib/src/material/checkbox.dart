@@ -11,6 +11,7 @@
 library;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show clampDouble;
 
 import 'checkbox_theme.dart';
 import 'color_scheme.dart';
@@ -788,8 +789,8 @@ class _CheckboxPainter extends ToggleablePainter {
     // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
     // short side to the long side.
     final path = Path();
-    final double innerW = (_kEdgeSize - _markInsets.horizontal).clamp(0.0, _kEdgeSize);
-    final double innerH = (_kEdgeSize - _markInsets.vertical).clamp(0.0, _kEdgeSize);
+    final double innerW = clampDouble(_kEdgeSize - _markInsets.horizontal, 0.0, _kEdgeSize);
+    final double innerH = clampDouble(_kEdgeSize - _markInsets.vertical, 0.0, _kEdgeSize);
     if (innerW <= 0 || innerH <= 0) {
       return;
     } // no room — paint nothing
@@ -821,8 +822,8 @@ class _CheckboxPainter extends ToggleablePainter {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the horizontal line from the
     // mid point outwards.
-    final double innerW = (_kEdgeSize - _markInsets.horizontal).clamp(0.0, _kEdgeSize);
-    final double innerH = (_kEdgeSize - _markInsets.vertical).clamp(0.0, _kEdgeSize);
+    final double innerW = clampDouble(_kEdgeSize - _markInsets.horizontal, 0.0, _kEdgeSize);
+    final double innerH = clampDouble(_kEdgeSize - _markInsets.vertical, 0.0, _kEdgeSize);
     if (innerW <= 0 || innerH <= 0) {
       return;
     } // nothing to draw
