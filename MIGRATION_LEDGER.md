@@ -118,11 +118,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] *Validation*: `devicelab` App startup does not stall or lose AOT symbol maps.
 
 
-- [ ] **Phase 2 Parity Checkpoint**:
-    - [ ] *Validation*: Framework unit tests (`flutter test`) and `flutter_shell_native_unittests` run globally across the directory, ensuring no cascading failures.
-    - [ ] *Validation*: Golden tests verified to ensure zero pixel-level regressions on Android canvases. **Strict Golden Rule**: Local engine builds must be tested against the baseline framework. Only the baseline (without local engine build) is permitted to update goldens. If a local engine build fails a golden test, you must fix the C++ native implementation in the local engine—you cannot update the golden image to match the flawed output.
-    - [ ] *Validation*: Core integration tests (`dev/integration_tests/*`) pass unconditionally.
-    - [ ] *Review*: Any deviations or failing tests are caught, adversarially root-caused, and pushed back into the specific atomic branches for this phase before proceeding.
+- [x] **Phase 2 Parity Checkpoint**:
+    - [x] *Validation*: Framework unit tests (`flutter test`) and `flutter_shell_native_unittests` run globally across the directory, ensuring no cascading failures.
+    - [x] *Validation*: Golden tests verified to ensure zero pixel-level regressions on Android canvases. **Strict Golden Rule**: Local engine builds must be tested against the baseline framework. Only the baseline (without local engine build) is permitted to update goldens. If a local engine build fails a golden test, you must fix the C++ native implementation in the local engine—you cannot update the golden image to match the flawed output.
+    - [x] *Validation*: Core integration tests (`dev/integration_tests/*`) pass unconditionally.
+    - [x] *Review*: Any deviations or failing tests are caught, adversarially root-caused, and pushed back into the specific atomic branches for this phase before proceeding.
 
 ## Phase 3: Advanced Graphics & Multi-Engine Integration
 - [ ] **3.1 AHardwareBuffer**:
