@@ -1934,6 +1934,113 @@ TEST_F(EmbedderTest, DartDeferredLibraryLoadingUnitCallbackInvoked) {
 }
 
 //------------------------------------------------------------------------------
+/// Test that FlutterEngineScreenshot and FlutterEngineFreeScreenshot reject
+/// invalid arguments.
+///
+TEST_F(EmbedderTest, ScreenshotInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  FlutterEngineScreenshotInfo screenshot = {};
+  screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+
+  // Null engine.
+  EXPECT_EQ(FlutterEngineScreenshot(nullptr, &screenshot), kInvalidArguments);
+
+  // Null screenshot_out.
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), nullptr), kInvalidArguments);
+
+  // Struct size mismatch on screenshot.
+  FlutterEngineScreenshotInfo bad_screenshot = {};
+  bad_screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo) - 1;
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), &bad_screenshot),
+            kInvalidArguments);
+
+  // Free with null screenshot.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(nullptr), kInvalidArguments);
+
+  // Free with struct size mismatch.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&bad_screenshot), kInvalidArguments);
+
+  // Free with valid struct_size and null pixels should succeed.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineScreenshot returns kInternalInconsistency when no
+/// frame has been rasterized yet.
+///
+TEST_F(EmbedderTest, ScreenshotWithoutFrameReturnsInternalInconsistency) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  FlutterEngineScreenshotInfo screenshot = {};
+  screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), &screenshot),
+            kInternalInconsistency);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineScreenshot successfully captures a raster screenshot
+/// and FlutterEngineFreeScreenshot frees the buffer.
+///
+TEST_F(EmbedderTest, CanCaptureScreenshot) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetDartEntrypoint("draw_solid_red");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  fml::AutoResetWaitableEvent frame_latch;
+  VoidCallback frame_callback = [](void* user_data) {
+    auto* latch = static_cast<fml::AutoResetWaitableEvent*>(user_data);
+    latch->Signal();
+  };
+
+  ASSERT_EQ(FlutterEngineSetNextFrameCallback(engine.get(), frame_callback,
+                                              &frame_latch),
+            kSuccess);
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  frame_latch.Wait();
+
+  FlutterEngineScreenshotInfo screenshot = {};
+  screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+
+  ASSERT_EQ(FlutterEngineScreenshot(engine.get(), &screenshot), kSuccess);
+  EXPECT_EQ(screenshot.struct_size, sizeof(FlutterEngineScreenshotInfo));
+  EXPECT_EQ(screenshot.width, 800u);
+  EXPECT_EQ(screenshot.height, 600u);
+  EXPECT_GE(screenshot.row_bytes, 800u * 4);
+  EXPECT_NE(screenshot.pixels, nullptr);
+  EXPECT_GE(screenshot.pixels_size, 800u * 600u * 4);
+
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+}
+
+//------------------------------------------------------------------------------
 /// Test that a view can be added to a running engine.
 ///
 TEST_F(EmbedderTest, CanAddView) {
@@ -5235,6 +5342,50 @@ TEST_P(EmbedderTestMatrix, CanLoadDartDeferredLibraryInMatrix) {
   EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(
                 engine.get(), 10, "Test error in matrix", true),
             kSuccess);
+}
+
+TEST_P(EmbedderTestMatrix, CanCaptureScreenshotInMatrix) {
+  auto& context = GetEmbedderContext();
+  EmbedderConfigBuilder builder(context);
+  ConfigureBuilder(builder);
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetDartEntrypoint("draw_solid_red");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  fml::AutoResetWaitableEvent frame_latch;
+  VoidCallback frame_callback = [](void* user_data) {
+    auto* latch = static_cast<fml::AutoResetWaitableEvent*>(user_data);
+    latch->Signal();
+  };
+
+  ASSERT_EQ(FlutterEngineSetNextFrameCallback(engine.get(), frame_callback,
+                                              &frame_latch),
+            kSuccess);
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  frame_latch.Wait();
+
+  FlutterEngineScreenshotInfo screenshot = {};
+  screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+
+  ASSERT_EQ(FlutterEngineScreenshot(engine.get(), &screenshot), kSuccess);
+  EXPECT_EQ(screenshot.struct_size, sizeof(FlutterEngineScreenshotInfo));
+  EXPECT_EQ(screenshot.width, 800u);
+  EXPECT_EQ(screenshot.height, 600u);
+  EXPECT_GE(screenshot.row_bytes, 800u * 4);
+  EXPECT_NE(screenshot.pixels, nullptr);
+  EXPECT_GE(screenshot.pixels_size, 800u * 600u * 4);
+
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
 }
 
 INSTANTIATE_TEST_SUITE_P(AllBackends,
