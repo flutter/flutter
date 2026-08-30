@@ -87,6 +87,16 @@ class JvmInvoker {
                            size_t size,
                            int64_t generator_handle) = 0;
 
+  /// @brief Dispatches platform view mutators stack to
+  /// FlutterJNI.pushPlatformViewMutators.
+  virtual bool PushPlatformViewMutators(
+      int64_t view_id,
+      int32_t x,
+      int32_t y,
+      int32_t width,
+      int32_t height,
+      const std::vector<uint8_t>& payload) = 0;
+
   /// @brief Invokes a void JVM method.
   /// @param method_name Name of the JVM method.
   /// @param signature JNI signature of the method.
@@ -186,6 +196,12 @@ class DefaultJvmInvoker : public JvmInvoker {
   bool DecodeImage(const uint8_t* data,
                    size_t size,
                    int64_t generator_handle) override;
+  bool PushPlatformViewMutators(int64_t view_id,
+                                int32_t x,
+                                int32_t y,
+                                int32_t width,
+                                int32_t height,
+                                const std::vector<uint8_t>& payload) override;
 
   bool InvokeVoidMethod(const std::string& method_name,
                         const std::string& signature,
