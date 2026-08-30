@@ -54,11 +54,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `embedder.h` API extension: `raster_thread_context_make_current` and `clear_current`.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `embedder_unittests` covering context hooks pass.
-- [ ] **1.11 C-API Extension (Thread Priorities)**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.11-c-api-extension-thread-priorities`
-    - [ ] `embedder.h` API extension: `custom_task_runners` with Android thread mapping.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `embedder_unittests` covering task runners pass.
+- [x] **1.11 C-API Extension (Thread Priorities)**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-1.11-c-api-extension-thread-priorities`
+    - [x] `embedder.h` API extension: `custom_task_runners` with Android thread mapping.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `embedder_unittests` covering task runners pass.
 
 
 - [ ] **Phase 1 Parity Checkpoint**:

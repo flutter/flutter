@@ -307,6 +307,7 @@ bool EmbedderEngine::PostRenderThreadTask(const fml::closure& task) {
 }
 
 bool EmbedderEngine::RunTask(const FlutterTask* task) {
+  TRACE_EVENT0("flutter", "EmbedderEngine::RunTask");
   // The shell doesn't need to be running or valid for access to the thread
   // host. This is why there is no `IsValid` check here. This allows embedders
   // to perform custom task runner interop before the shell is running.
