@@ -179,11 +179,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart` - Passed.
     - [x] `dev/devicelab/bin/tasks/android_engine_flags_debug_test.dart` - Passed.
     - [x] `dev/devicelab/bin/tasks/android_engine_flags_release_test.dart` - Passed.
-- [ ] **4.5 DeviceLab Performance & Memory Parity (No Regressions)**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-4.5-devicelab-performance-memory-parity-no-regressions`
-    - [ ] `dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/flutter_engine_group_performance.dart` - Passed.
+- [x] **4.5 DeviceLab Performance & Memory Parity (No Regressions)**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-4.5-devicelab-performance-memory-parity-no-regressions`
+    - [x] `dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart` - Passed.
+    - [x] `dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart` - Passed.
+    - [x] `dev/devicelab/bin/tasks/flutter_engine_group_performance.dart` - Passed.
 
 ## Phase 5: Emancipation
 - [ ] **5.1 Target Flip**:
