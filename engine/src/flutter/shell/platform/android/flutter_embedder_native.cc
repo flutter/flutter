@@ -232,10 +232,17 @@ size_t EmbedderImageLRU::GetSize() const {
 FlutterEmbedderNative::FlutterEmbedderNative()
     : jvm_invoker_(std::make_shared<DefaultJvmInvoker>()),
       image_lru_(std::make_shared<EmbedderImageLRU>()),
+      platform_views_provider_(
+          std::make_shared<DefaultPlatformViewsProvider>(jvm_invoker_)),
+      platform_views_controller_(
+          std::make_shared<AndroidPlatformViewsController>(
+              platform_views_provider_)),
       jni_delegate_(std::make_shared<JniDelegate>(
           jvm_invoker_,
           std::make_shared<DefaultCallbackCacheProvider>(),
-          std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_))),
+          std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_),
+          platform_views_provider_,
+          platform_views_controller_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
       library_loader_(GetDefaultLibraryLoader()),
       asset_provider_(std::make_shared<APKAssetProvider>(
@@ -253,16 +260,26 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<APKAssetProvider> asset_provider,
     std::shared_ptr<CallbackCacheProvider> callback_cache,
     std::shared_ptr<ImageDecoderProvider> image_decoder,
-    std::shared_ptr<EmbedderImageLRU> image_lru)
+    std::shared_ptr<EmbedderImageLRU> image_lru,
+    std::shared_ptr<PlatformViewsProvider> platform_views_provider)
     : jvm_invoker_(std::move(jvm_invoker)),
       image_lru_(image_lru ? std::move(image_lru)
                            : std::make_shared<EmbedderImageLRU>()),
+      platform_views_provider_(
+          platform_views_provider
+              ? std::move(platform_views_provider)
+              : std::make_shared<DefaultPlatformViewsProvider>(jvm_invoker_)),
+      platform_views_controller_(
+          std::make_shared<AndroidPlatformViewsController>(
+              platform_views_provider_)),
       jni_delegate_(std::make_shared<JniDelegate>(
           jvm_invoker_,
           std::move(callback_cache),
           image_decoder
               ? std::move(image_decoder)
-              : std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_))),
+              : std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_),
+          platform_views_provider_,
+          platform_views_controller_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, legacy_delegate)),
       library_loader_(library_loader ? std::move(library_loader)
                                      : GetDefaultLibraryLoader()),
@@ -568,9 +585,11 @@ FlutterEmbedderNative::GetDefaultLibraryLoader() {
 
 std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
     std::shared_ptr<JvmInvoker> invoker,
-    const std::shared_ptr<LegacyJniDelegate>& legacy_delegate) {
+    const std::shared_ptr<LegacyJniDelegate>& legacy_delegate,
+    std::shared_ptr<PlatformViewsProvider> platform_views_provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateDefaultRouter");
-  auto delegate = std::make_shared<JniDelegate>(std::move(invoker));
+  auto delegate = std::make_shared<JniDelegate>(
+      std::move(invoker), nullptr, nullptr, std::move(platform_views_provider));
   return std::make_shared<JniRouter>(std::move(delegate), legacy_delegate);
 }
 
@@ -861,6 +880,245 @@ void FlutterEmbedderNative::SetImageLRU(std::shared_ptr<EmbedderImageLRU> lru) {
   image_lru_ = lru ? std::move(lru) : std::make_shared<EmbedderImageLRU>();
 }
 
+std::shared_ptr<PlatformViewsProvider>
+FlutterEmbedderNative::GetPlatformViewsProvider() const {
+  return platform_views_provider_;
+}
+
+void FlutterEmbedderNative::SetPlatformViewsProvider(
+    std::shared_ptr<PlatformViewsProvider> provider) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetPlatformViewsProvider");
+  platform_views_provider_ =
+      provider ? std::move(provider)
+               : std::make_shared<DefaultPlatformViewsProvider>(jvm_invoker_);
+  if (platform_views_controller_) {
+    platform_views_controller_->SetProvider(platform_views_provider_);
+  }
+  if (jni_delegate_) {
+    jni_delegate_->SetPlatformViewsProvider(platform_views_provider_);
+  }
+}
+
+std::shared_ptr<AndroidPlatformViewsController>
+FlutterEmbedderNative::GetPlatformViewsController() const {
+  return platform_views_controller_;
+}
+
+int64_t FlutterEmbedderNative::CreatePlatformView(
+    const PlatformViewCreationParams& params,
+    PlatformViewCompositionType composition_type) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::CreatePlatformView",
+               "view_id", std::to_string(params.view_id).c_str());
+  if (!jni_router_) {
+    return -1;
+  }
+  return jni_router_->RouteCreatePlatformView(params, composition_type);
+}
+
+bool FlutterEmbedderNative::DisposePlatformView(int64_t view_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::DisposePlatformView",
+               "view_id", std::to_string(view_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteDisposePlatformView(view_id);
+}
+
+bool FlutterEmbedderNative::ResizePlatformView(
+    const PlatformViewResizeRequest& request) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::ResizePlatformView",
+               "view_id", std::to_string(request.view_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteResizePlatformView(request);
+}
+
+bool FlutterEmbedderNative::OffsetPlatformView(int64_t view_id,
+                                               double top,
+                                               double left) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::OffsetPlatformView",
+               "view_id", std::to_string(view_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteOffsetPlatformView(view_id, top, left);
+}
+
+bool FlutterEmbedderNative::SetPlatformViewDirection(int64_t view_id,
+                                                     int32_t direction) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SetPlatformViewDirection",
+               "view_id", std::to_string(view_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetPlatformViewDirection(view_id, direction);
+}
+
+bool FlutterEmbedderNative::ClearPlatformViewFocus(int64_t view_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::ClearPlatformViewFocus",
+               "view_id", std::to_string(view_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteClearPlatformViewFocus(view_id);
+}
+
+bool FlutterEmbedderNative::DispatchPlatformViewTouch(
+    const PlatformViewTouch& touch) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::DispatchPlatformViewTouch",
+               "view_id", std::to_string(touch.view_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteDispatchPlatformViewTouch(touch);
+}
+
+bool FlutterEmbedderNative::OnDisplayPlatformView(
+    const PlatformViewGeometry& geometry) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::OnDisplayPlatformView",
+               "view_id", std::to_string(geometry.view_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteOnDisplayPlatformView(geometry);
+}
+
+bool FlutterEmbedderNative::OnDisplayPlatformView(
+    const FlutterPlatformView& platform_view,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    int32_t view_width,
+    int32_t view_height) const {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::OnDisplayPlatformView(struct)",
+               "view_id", std::to_string(platform_view.identifier).c_str());
+  if (platform_view.struct_size < sizeof(FlutterPlatformView)) {
+    return false;
+  }
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteOnDisplayPlatformView(
+      platform_view, x, y, width, height, view_width, view_height);
+}
+
+bool FlutterEmbedderNative::HidePlatformView(int64_t view_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::HidePlatformView", "view_id",
+               std::to_string(view_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteHidePlatformView(view_id);
+}
+
+bool FlutterEmbedderNative::SynchronizeToNativeViewHierarchy(
+    bool synchronize) const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::SynchronizeToNativeViewHierarchy");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSynchronizeToNativeViewHierarchy(synchronize);
+}
+
+bool FlutterEmbedderNative::OnBeginFrame() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnBeginFrame");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteBeginFrame();
+}
+
+bool FlutterEmbedderNative::OnEndFrame() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnEndFrame");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteEndFrame();
+}
+
+std::optional<int32_t> FlutterEmbedderNative::CreateOverlaySurface() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateOverlaySurface");
+  if (!jni_router_) {
+    return std::nullopt;
+  }
+  return jni_router_->RouteCreateOverlaySurface();
+}
+
+bool FlutterEmbedderNative::DestroyOverlaySurfaces() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::DestroyOverlaySurfaces");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteDestroyOverlaySurfaces();
+}
+
+bool FlutterEmbedderNative::OnDisplayOverlaySurface(
+    const PlatformViewOverlay& overlay) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::OnDisplayOverlaySurface",
+               "surface_id", std::to_string(overlay.surface_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteOnDisplayOverlaySurface(overlay);
+}
+
+bool FlutterEmbedderNative::ShowOverlaySurface(int32_t surface_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::ShowOverlaySurface",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteShowOverlaySurface(surface_id);
+}
+
+bool FlutterEmbedderNative::HideOverlaySurface(int32_t surface_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::HideOverlaySurface",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteHideOverlaySurface(surface_id);
+}
+
+bool FlutterEmbedderNative::CreatePlatformViewTransaction() const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::CreatePlatformViewTransaction");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteCreatePlatformViewTransaction();
+}
+
+bool FlutterEmbedderNative::SwapPlatformViewTransactions() const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::SwapPlatformViewTransactions");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSwapPlatformViewTransactions();
+}
+
+bool FlutterEmbedderNative::ApplyPlatformViewTransactions() const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::ApplyPlatformViewTransactions");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteApplyPlatformViewTransactions();
+}
+
+bool FlutterEmbedderNative::IsHcppEnabled() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::IsHcppEnabled");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteIsHcppEnabled();
+}
+
 AndroidMutatorsStack FlutterEmbedderNative::MapPlatformViewMutations(
     const FlutterPlatformViewMutation** mutations,
     size_t count) const {
@@ -881,12 +1139,25 @@ bool FlutterEmbedderNative::PushPlatformViewMutators(
     int32_t width,
     int32_t height,
     const AndroidMutatorsStack& mutators_stack) const {
+  return PushPlatformViewMutators(view_id, x, y, width, height, width, height,
+                                  mutators_stack);
+}
+
+bool FlutterEmbedderNative::PushPlatformViewMutators(
+    int64_t view_id,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    int32_t view_width,
+    int32_t view_height,
+    const AndroidMutatorsStack& mutators_stack) const {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::PushPlatformViewMutators");
   if (!jni_router_) {
     return false;
   }
-  return jni_router_->RoutePlatformViewMutators(view_id, x, y, width, height,
-                                                mutators_stack);
+  return jni_router_->RoutePlatformViewMutators(
+      view_id, x, y, width, height, view_width, view_height, mutators_stack);
 }
 
 bool FlutterEmbedderNative::PushPlatformViewMutators(
@@ -895,6 +1166,18 @@ bool FlutterEmbedderNative::PushPlatformViewMutators(
     int32_t y,
     int32_t width,
     int32_t height) const {
+  return PushPlatformViewMutators(platform_view, x, y, width, height, width,
+                                  height);
+}
+
+bool FlutterEmbedderNative::PushPlatformViewMutators(
+    const FlutterPlatformView& platform_view,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    int32_t view_width,
+    int32_t view_height) const {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::PushPlatformViewMutators(view)");
   if (platform_view.struct_size < sizeof(FlutterPlatformView)) {
@@ -903,8 +1186,8 @@ bool FlutterEmbedderNative::PushPlatformViewMutators(
   if (!jni_router_) {
     return false;
   }
-  return jni_router_->RoutePlatformViewMutators(platform_view, x, y, width,
-                                                height);
+  return jni_router_->RoutePlatformViewMutators(
+      platform_view, x, y, width, height, view_width, view_height);
 }
 
 bool FlutterEmbedderNative::UpdateSemantics(
