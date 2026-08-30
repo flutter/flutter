@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <future>
+#include <thread>
+#include <vector>
+
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 #include "flutter/shell/platform/android/jni_router.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
+#include "flutter/shell/platform/android/os_library_loader.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -120,6 +125,10 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               (override));
 };
 
+// =============================================================================
+// Embedder Native Core Tests
+// =============================================================================
+
 TEST(FlutterEmbedderNativeTest, QuarantineEnforcement) {
   EXPECT_TRUE(FlutterEmbedderNative::IsQuarantineEnforced());
 }
@@ -136,6 +145,7 @@ TEST(FlutterEmbedderNativeTest, LifecycleInstance) {
   EXPECT_NE(native_instance->GetRouter(), nullptr);
   EXPECT_NE(native_instance->GetJniDelegate(), nullptr);
   EXPECT_NE(native_instance->GetJvmInvoker(), nullptr);
+  EXPECT_NE(native_instance->GetLibraryLoader(), nullptr);
 }
 
 TEST(FlutterEmbedderNativeTest, DefaultJvmInvokerOperations) {
@@ -320,6 +330,238 @@ TEST(FlutterEmbedderNativeTest, DynamicInstanceRouterWithCustomInvoker) {
 
   FlutterEmbedderNative::SetEmbedderEnabled(false);
   EXPECT_FALSE(FlutterEmbedderNative::IsEmbedderEnabled());
+}
+
+// =============================================================================
+// OSLibraryLoader & Dynamic Virtualization Unit Tests
+// =============================================================================
+
+TEST(OSLibraryLoaderTest, DefaultOSLibraryLoaderMissingLibraryFallback) {
+  auto loader = std::make_shared<DefaultOSLibraryLoader>();
+  EXPECT_NE(loader, nullptr);
+
+  // Attempting to load non-existent library must not crash or segfault.
+  auto lib = loader->LoadDynamicLibrary("lib_nonexistent_dummy_android_lib.so");
+  EXPECT_EQ(lib, nullptr);
+
+  EXPECT_FALSE(loader->IsLibraryLoaded("lib_nonexistent_dummy_android_lib.so"));
+
+  // Resolving symbol from nonexistent library returns nullptr safely.
+  void* sym = loader->ResolveSymbol("lib_nonexistent_dummy_android_lib.so",
+                                    "AHardwareBuffer_allocate");
+  EXPECT_EQ(sym, nullptr);
+
+  auto fn = loader->ResolveFunction<int (*)(void*)>(
+      "lib_nonexistent_dummy_android_lib.so", "AHardwareBuffer_allocate");
+  EXPECT_EQ(fn, nullptr);
+
+  // Null input handles safely
+  EXPECT_EQ(loader->LoadDynamicLibrary(nullptr), nullptr);
+  EXPECT_EQ(loader->ResolveSymbol(nullptr, "symbol"), nullptr);
+  EXPECT_EQ(loader->ResolveSymbol("lib.so", nullptr), nullptr);
+  EXPECT_FALSE(loader->IsLibraryLoaded(nullptr));
+}
+
+TEST(OSLibraryLoaderTest, MockOSLibrarySymbolInjectionAndResolution) {
+  auto mock_lib = std::make_shared<MockOSLibrary>("libandroid.so");
+  EXPECT_EQ(mock_lib->GetName(), "libandroid.so");
+  EXPECT_TRUE(mock_lib->IsValid());
+
+  // Define dummy mock function
+  auto dummy_func = [](int a, int b) -> int { return a + b; };
+  using DummyFuncType = int (*)(int, int);
+
+  mock_lib->SetSymbol("AddNumbers", reinterpret_cast<void*>(+dummy_func));
+
+  void* sym = mock_lib->ResolveSymbol("AddNumbers");
+  EXPECT_NE(sym, nullptr);
+
+  auto resolved_fn = mock_lib->ResolveFunction<DummyFuncType>("AddNumbers");
+  EXPECT_NE(resolved_fn, nullptr);
+  EXPECT_EQ(resolved_fn(10, 20), 30);
+
+  // Query missing symbol
+  EXPECT_EQ(mock_lib->ResolveSymbol("NonExistentSymbol"), nullptr);
+
+  // Remove symbol
+  mock_lib->RemoveSymbol("AddNumbers");
+  EXPECT_EQ(mock_lib->ResolveSymbol("AddNumbers"), nullptr);
+
+  // Invalidate library
+  mock_lib->SetSymbol("AddNumbers", reinterpret_cast<void*>(+dummy_func));
+  mock_lib->SetValid(false);
+  EXPECT_FALSE(mock_lib->IsValid());
+  EXPECT_EQ(mock_lib->ResolveSymbol("AddNumbers"), nullptr);
+
+  // Clear symbols
+  mock_lib->SetValid(true);
+  mock_lib->ClearSymbols();
+  EXPECT_EQ(mock_lib->ResolveSymbol("AddNumbers"), nullptr);
+}
+
+// Simulated mock Android API signatures
+namespace mock_android_apis {
+static int g_ahb_allocate_count = 0;
+static int g_ahb_release_count = 0;
+static int g_choreographer_post_count = 0;
+
+static int Mock_AHardwareBuffer_allocate(const void* desc, void** out_buffer) {
+  g_ahb_allocate_count++;
+  if (out_buffer) {
+    *out_buffer = reinterpret_cast<void*>(0xBAADF00D);
+  }
+  return 0;  // OK
+}
+
+static void Mock_AHardwareBuffer_release(void* buffer) {
+  g_ahb_release_count++;
+}
+
+static void Mock_AChoreographer_postFrameCallback64(void* choreographer,
+                                                    void* callback,
+                                                    void* data) {
+  g_choreographer_post_count++;
+}
+}  // namespace mock_android_apis
+
+TEST(OSLibraryLoaderTest, MockOSLibraryLoaderAndroidApiSimulation) {
+  mock_android_apis::g_ahb_allocate_count = 0;
+  mock_android_apis::g_ahb_release_count = 0;
+  mock_android_apis::g_choreographer_post_count = 0;
+
+  auto loader = std::make_shared<MockOSLibraryLoader>();
+
+  // Register mock libandroid.so with Android C-API functions
+  auto libandroid = std::make_shared<MockOSLibrary>("libandroid.so");
+  libandroid->SetSymbol("AHardwareBuffer_allocate",
+                        reinterpret_cast<void*>(
+                            &mock_android_apis::Mock_AHardwareBuffer_allocate));
+  libandroid->SetSymbol("AHardwareBuffer_release",
+                        reinterpret_cast<void*>(
+                            &mock_android_apis::Mock_AHardwareBuffer_release));
+  libandroid->SetSymbol(
+      "AChoreographer_postFrameCallback64",
+      reinterpret_cast<void*>(
+          &mock_android_apis::Mock_AChoreographer_postFrameCallback64));
+
+  loader->RegisterLibrary("libandroid.so", libandroid);
+
+  EXPECT_TRUE(loader->IsLibraryLoaded("libandroid.so"));
+  EXPECT_FALSE(loader->IsLibraryLoaded("libEGL.so"));
+
+  // Resolve AHardwareBuffer_allocate
+  using AHardwareBuffer_allocate_fn = int (*)(const void*, void**);
+  auto allocate_fn = loader->ResolveFunction<AHardwareBuffer_allocate_fn>(
+      "libandroid.so", "AHardwareBuffer_allocate");
+  ASSERT_NE(allocate_fn, nullptr);
+
+  void* created_buffer = nullptr;
+  int alloc_result = allocate_fn(nullptr, &created_buffer);
+  EXPECT_EQ(alloc_result, 0);
+  EXPECT_EQ(created_buffer, reinterpret_cast<void*>(0xBAADF00D));
+  EXPECT_EQ(mock_android_apis::g_ahb_allocate_count, 1);
+
+  // Resolve AHardwareBuffer_release
+  using AHardwareBuffer_release_fn = void (*)(void*);
+  auto release_fn = loader->ResolveFunction<AHardwareBuffer_release_fn>(
+      "libandroid.so", "AHardwareBuffer_release");
+  ASSERT_NE(release_fn, nullptr);
+  release_fn(created_buffer);
+  EXPECT_EQ(mock_android_apis::g_ahb_release_count, 1);
+
+  // Resolve AChoreographer_postFrameCallback64
+  using AChoreographer_postFrameCallback64_fn = void (*)(void*, void*, void*);
+  auto post_vsync_fn =
+      loader->ResolveFunction<AChoreographer_postFrameCallback64_fn>(
+          "libandroid.so", "AChoreographer_postFrameCallback64");
+  ASSERT_NE(post_vsync_fn, nullptr);
+  post_vsync_fn(nullptr, nullptr, nullptr);
+  EXPECT_EQ(mock_android_apis::g_choreographer_post_count, 1);
+
+  // Unregister library
+  loader->UnregisterLibrary("libandroid.so");
+  EXPECT_FALSE(loader->IsLibraryLoaded("libandroid.so"));
+  EXPECT_EQ(loader->ResolveSymbol("libandroid.so", "AHardwareBuffer_allocate"),
+            nullptr);
+}
+
+TEST(OSLibraryLoaderTest, MockOSLibraryLoaderConvenienceSetSymbol) {
+  auto loader = std::make_shared<MockOSLibraryLoader>();
+
+  auto mock_egl_proc = []() -> void* {
+    return reinterpret_cast<void*>(0x1234);
+  };
+  loader->SetSymbol("libEGL.so", "eglGetCurrentContext",
+                    reinterpret_cast<void*>(+mock_egl_proc));
+
+  EXPECT_TRUE(loader->IsLibraryLoaded("libEGL.so"));
+
+  using EglGetCurrentContextFn = void* (*)();
+  auto egl_fn = loader->ResolveFunction<EglGetCurrentContextFn>(
+      "libEGL.so", "eglGetCurrentContext");
+  ASSERT_NE(egl_fn, nullptr);
+  EXPECT_EQ(egl_fn(), reinterpret_cast<void*>(0x1234));
+
+  loader->ClearLibraries();
+  EXPECT_FALSE(loader->IsLibraryLoaded("libEGL.so"));
+}
+
+TEST(OSLibraryLoaderTest, FlutterEmbedderNativeLibraryLoaderIntegration) {
+  // Test default loader setup
+  auto native_default = std::make_unique<FlutterEmbedderNative>();
+  EXPECT_NE(native_default->GetLibraryLoader(), nullptr);
+  EXPECT_NE(FlutterEmbedderNative::GetDefaultLibraryLoader(), nullptr);
+
+  // Test custom loader injection into FlutterEmbedderNative
+  auto mock_loader = std::make_shared<MockOSLibraryLoader>();
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+
+  auto dummy_vsync_fn = [](void* c, void* cb, void* d) {};
+  mock_loader->SetSymbol("libandroid.so", "AChoreographer_postFrameCallback64",
+                         reinterpret_cast<void*>(+dummy_vsync_fn));
+
+  FlutterEmbedderNative native_custom(mock_invoker, nullptr, mock_loader);
+  EXPECT_EQ(native_custom.GetLibraryLoader(), mock_loader);
+
+  void* vsync_symbol = native_custom.GetLibraryLoader()->ResolveSymbol(
+      "libandroid.so", "AChoreographer_postFrameCallback64");
+  EXPECT_NE(vsync_symbol, nullptr);
+}
+
+TEST(OSLibraryLoaderTest, ThreadSafeConcurrentSymbolResolution) {
+  auto mock_loader = std::make_shared<MockOSLibraryLoader>();
+
+  for (int i = 0; i < 50; ++i) {
+    std::string sym_name = "MockSymbol_" + std::to_string(i);
+    mock_loader->SetSymbol(
+        "libconcurrent.so", sym_name,
+        reinterpret_cast<void*>(static_cast<uintptr_t>(i + 1)));
+  }
+
+  constexpr size_t kThreadCount = 8;
+  constexpr size_t kIterationsPerThread = 500;
+  std::vector<std::future<bool>> futures;
+  futures.reserve(kThreadCount);
+
+  for (size_t t = 0; t < kThreadCount; ++t) {
+    futures.push_back(std::async(std::launch::async, [mock_loader, t]() {
+      for (size_t iter = 0; iter < kIterationsPerThread; ++iter) {
+        int sym_idx = static_cast<int>((t + iter) % 50);
+        std::string sym_name = "MockSymbol_" + std::to_string(sym_idx);
+        void* ptr =
+            mock_loader->ResolveSymbol("libconcurrent.so", sym_name.c_str());
+        if (ptr !=
+            reinterpret_cast<void*>(static_cast<uintptr_t>(sym_idx + 1))) {
+          return false;
+        }
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
 }
 
 }  // namespace testing
