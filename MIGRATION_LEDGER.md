@@ -24,11 +24,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `OSLibraryLoader` implemented for mocked dynamic Android symbol lookups.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: Host desktop CI pipeline is verified completely green (no macOS `dlopen` segfaults).
-- [ ] **1.5 C-API Extension (Vulkan)**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.5-c-api-extension-vulkan`
-    - [ ] `embedder.h` API extension: Vulkan External Textures (opaque structs).
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `embedder_unittests` covering new structs pass.
+- [x] **1.5 C-API Extension (Vulkan)**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-1.5-c-api-extension-vulkan`
+    - [x] `embedder.h` API extension: Vulkan External Textures (opaque structs).
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `embedder_unittests` covering new structs pass.
 - [ ] **1.6 C-API Extension (AHardwareBuffer)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.6-c-api-extension-ahardwarebuffer`
     - [ ] `embedder.h` API extension: AHardwareBuffer (opaque structs).
