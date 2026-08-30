@@ -14,16 +14,22 @@ JniDelegate::JniDelegate(
     std::shared_ptr<JvmInvoker> jvm_invoker,
     std::shared_ptr<CallbackCacheProvider> callback_cache,
     std::shared_ptr<ImageDecoderProvider> image_decoder,
-    std::shared_ptr<PlatformViewsProvider> platform_views_provider)
+    std::shared_ptr<PlatformViewsProvider> platform_views_provider,
+    std::shared_ptr<WindowMetricsProvider> window_metrics_provider)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(std::move(callback_cache)),
       image_decoder_(std::move(image_decoder)),
-      platform_views_provider_(std::move(platform_views_provider)) {
+      platform_views_provider_(std::move(platform_views_provider)),
+      window_metrics_provider_(std::move(window_metrics_provider)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
   if (!platform_views_provider_) {
     platform_views_provider_ =
         std::make_shared<DefaultPlatformViewsProvider>(jvm_invoker_);
+  }
+  if (!window_metrics_provider_) {
+    window_metrics_provider_ =
+        std::make_shared<DefaultWindowMetricsProvider>(jvm_invoker_);
   }
   platform_views_controller_ = std::make_shared<AndroidPlatformViewsController>(
       platform_views_provider_);
@@ -180,15 +186,73 @@ bool JniDelegate::OnVsync(int64_t frame_time_nanos,
   return jvm_invoker_->InvokeVoidMethod("onVsync", "(JJ)V");
 }
 
+bool JniDelegate::SetViewportMetrics(const AndroidViewportMetrics& metrics) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetViewportMetrics");
+  if (window_metrics_provider_) {
+    return window_metrics_provider_->SendViewportMetrics(metrics);
+  }
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod("onViewportMetrics", "(IDDD)V");
+}
+
+bool JniDelegate::UpdateDisplayMetrics(const AndroidDisplayMetrics& metrics) {
+  TRACE_EVENT0("flutter", "JniDelegate::UpdateDisplayMetrics(struct)");
+  if (window_metrics_provider_) {
+    return window_metrics_provider_->UpdateDisplayMetrics(metrics);
+  }
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod("onDisplayMetrics", "(JDDDF)V");
+}
+
+bool JniDelegate::UpdateDisplayMetrics(uint64_t display_id,
+                                       double refresh_rate,
+                                       double width,
+                                       double height,
+                                       double device_pixel_ratio) {
+  TRACE_EVENT0("flutter", "JniDelegate::UpdateDisplayMetrics(params)");
+  AndroidDisplayMetrics metrics;
+  metrics.display_id = display_id;
+  metrics.single_display = (display_id == 0);
+  metrics.refresh_rate = refresh_rate;
+  metrics.width = width;
+  metrics.height = height;
+  metrics.device_pixel_ratio = device_pixel_ratio;
+  return UpdateDisplayMetrics(metrics);
+}
+
+std::optional<AndroidViewportMetrics> JniDelegate::GetViewportMetrics(
+    int64_t view_id) const {
+  TRACE_EVENT0("flutter", "JniDelegate::GetViewportMetrics");
+  if (window_metrics_provider_) {
+    return window_metrics_provider_->GetViewportMetrics(view_id);
+  }
+  return std::nullopt;
+}
+
+std::optional<AndroidDisplayMetrics> JniDelegate::GetDisplayMetrics(
+    uint64_t display_id) const {
+  TRACE_EVENT0("flutter", "JniDelegate::GetDisplayMetrics");
+  if (window_metrics_provider_) {
+    return window_metrics_provider_->GetDisplayMetrics(display_id);
+  }
+  return std::nullopt;
+}
+
 bool JniDelegate::DispatchViewportMetrics(int64_t view_id,
                                           double width,
                                           double height,
                                           double pixel_ratio) {
   TRACE_EVENT0("flutter", "JniDelegate::DispatchViewportMetrics");
-  if (!jvm_invoker_) {
-    return false;
-  }
-  return jvm_invoker_->InvokeVoidMethod("onViewportMetrics", "(IDDD)V");
+  AndroidViewportMetrics metrics;
+  metrics.view_id = view_id;
+  metrics.physical_width = width;
+  metrics.physical_height = height;
+  metrics.device_pixel_ratio = pixel_ratio;
+  return SetViewportMetrics(metrics);
 }
 
 bool JniDelegate::RequestDartDeferredLibrary(int64_t loading_unit_id) {
@@ -558,6 +622,19 @@ std::shared_ptr<PlatformViewsProvider> JniDelegate::GetPlatformViewsProvider()
 std::shared_ptr<AndroidPlatformViewsController>
 JniDelegate::GetPlatformViewsController() const {
   return platform_views_controller_;
+}
+
+void JniDelegate::SetWindowMetricsProvider(
+    std::shared_ptr<WindowMetricsProvider> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetWindowMetricsProvider");
+  window_metrics_provider_ =
+      provider ? std::move(provider)
+               : std::make_shared<DefaultWindowMetricsProvider>(jvm_invoker_);
+}
+
+std::shared_ptr<WindowMetricsProvider> JniDelegate::GetWindowMetricsProvider()
+    const {
+  return window_metrics_provider_;
 }
 
 }  // namespace android

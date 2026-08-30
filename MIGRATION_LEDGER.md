@@ -99,11 +99,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `PlatformViewsController` integrations wired.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `dev/integration_tests/android_views` passes (texture & hybrid composition).
-- [ ] **2.7 Window Metrics Translation**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.7-window-metrics-translation`
-    - [ ] `FlutterEngineSendWindowMetricsEvent` bounds and insets hooked to replace native `android_display`.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `dev/devicelab/bin/tasks/android_display_cutout.dart` passes.
+- [x] **2.7 Window Metrics Translation**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-2.7-window-metrics-translation`
+    - [x] `FlutterEngineSendWindowMetricsEvent` bounds and insets hooked to replace native `android_display`.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `dev/devicelab/bin/tasks/android_display_cutout.dart` passes.
 - [ ] **2.8 AChoreographer VSync Routing**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.8-achoreographer-vsync-routing`
     - [ ] `AChoreographer_postFrameCallback` mapped to `FlutterProjectArgs::vsync_callback` via `OSLibraryLoader`.

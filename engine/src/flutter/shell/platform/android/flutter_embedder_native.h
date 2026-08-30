@@ -17,6 +17,7 @@
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
+#include "flutter/shell/platform/android/android_window_metrics_mapper.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 #include "flutter/shell/platform/android/jni_router.h"
@@ -181,7 +182,8 @@ class FlutterEmbedderNative {
       std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr,
       std::shared_ptr<ImageDecoderProvider> image_decoder = nullptr,
       std::shared_ptr<EmbedderImageLRU> image_lru = nullptr,
-      std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr);
+      std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr,
+      std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr);
   ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -212,7 +214,8 @@ class FlutterEmbedderNative {
   static std::shared_ptr<JniRouter> CreateDefaultRouter(
       std::shared_ptr<JvmInvoker> invoker,
       const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr,
-      std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr);
+      std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr,
+      std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr);
 
   /// @brief Returns the JniRouter managed by this native instance.
   std::shared_ptr<JniRouter> GetRouter() const;
@@ -448,6 +451,58 @@ class FlutterEmbedderNative {
   static void OnUpdateSemantics2(const FlutterSemanticsUpdate2* update,
                                  void* user_data);
 
+  /// @brief Returns the WindowMetricsProvider managed by this native instance.
+  std::shared_ptr<WindowMetricsProvider> GetWindowMetricsProvider() const;
+
+  /// @brief Sets or replaces the WindowMetricsProvider.
+  void SetWindowMetricsProvider(
+      std::shared_ptr<WindowMetricsProvider> provider);
+
+  /// @brief Sends viewport metrics via JniRouter.
+  bool SetViewportMetrics(const AndroidViewportMetrics& metrics) const;
+
+  /// @brief Updates display metrics via JniRouter.
+  bool UpdateDisplayMetrics(const AndroidDisplayMetrics& metrics) const;
+
+  /// @brief Updates display metrics with parameters via JniRouter.
+  bool UpdateDisplayMetrics(uint64_t display_id,
+                            double refresh_rate,
+                            double width,
+                            double height,
+                            double device_pixel_ratio) const;
+
+  /// @brief Translates AndroidViewportMetrics to a C-API
+  /// FlutterWindowMetricsEvent.
+  FlutterWindowMetricsEvent TranslateViewportMetrics(
+      const AndroidViewportMetrics& metrics) const;
+
+  /// @brief Translates AndroidDisplayMetrics to a C-API FlutterEngineDisplay.
+  FlutterEngineDisplay TranslateDisplayMetrics(
+      const AndroidDisplayMetrics& metrics) const;
+
+  /// @brief Sends a FlutterWindowMetricsEvent struct to the engine via C-API.
+  FlutterEngineResult SendWindowMetricsEvent(
+      FLUTTER_API_SYMBOL(FlutterEngine) engine,
+      const FlutterWindowMetricsEvent* event) const;
+
+  /// @brief Translates and sends AndroidViewportMetrics to the engine via
+  /// C-API.
+  FlutterEngineResult SendWindowMetricsEvent(
+      FLUTTER_API_SYMBOL(FlutterEngine) engine,
+      const AndroidViewportMetrics& metrics) const;
+
+  /// @brief Notifies engine of display updates via C-API.
+  FlutterEngineResult NotifyDisplayUpdate(
+      FLUTTER_API_SYMBOL(FlutterEngine) engine,
+      FlutterEngineDisplaysUpdateType update_type,
+      const FlutterEngineDisplay* displays,
+      size_t display_count) const;
+
+  /// @brief Translates and notifies engine of display update via C-API.
+  FlutterEngineResult NotifyDisplayUpdate(
+      FLUTTER_API_SYMBOL(FlutterEngine) engine,
+      const AndroidDisplayMetrics& display) const;
+
  private:
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;
 
@@ -456,6 +511,7 @@ class FlutterEmbedderNative {
   std::shared_ptr<ImageDecoderProvider> image_decoder_;
   std::shared_ptr<EmbedderImageLRU> image_lru_;
   std::shared_ptr<PlatformViewsProvider> platform_views_provider_;
+  std::shared_ptr<WindowMetricsProvider> window_metrics_provider_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;
