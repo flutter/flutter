@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/android_vulkan_texture.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 
 namespace flutter {
@@ -238,6 +239,34 @@ class LegacyJniDelegate {
   }
 
   virtual bool OnHardwareBufferFrameAvailable(int64_t texture_id) {
+    return false;
+  }
+
+  virtual bool RegisterVulkanTexture(int64_t texture_id) { return false; }
+
+  virtual bool UnregisterVulkanTexture(int64_t texture_id) { return false; }
+
+  virtual bool SetVulkanTextureFrame(
+      int64_t texture_id,
+      const std::shared_ptr<AndroidVulkanExternalTexture>& texture) {
+    return false;
+  }
+
+  virtual bool SetVulkanTextureFrame(
+      int64_t texture_id,
+      const FlutterVulkanExternalTexture& texture) {
+    return false;
+  }
+
+  virtual bool GetVulkanTextureFrame(
+      int64_t texture_id,
+      size_t width,
+      size_t height,
+      FlutterVulkanExternalTexture* texture_out) {
+    return false;
+  }
+
+  virtual bool OnVulkanTextureFrameAvailable(int64_t texture_id) {
     return false;
   }
 };
@@ -469,6 +498,24 @@ class JniRouter {
       FlutterHardwareBufferExternalTexture* texture_out);
 
   bool RouteOnHardwareBufferFrameAvailable(int64_t texture_id);
+
+  bool RouteRegisterVulkanTexture(int64_t texture_id);
+
+  bool RouteUnregisterVulkanTexture(int64_t texture_id);
+
+  bool RouteSetVulkanTextureFrame(
+      int64_t texture_id,
+      const std::shared_ptr<AndroidVulkanExternalTexture>& texture);
+
+  bool RouteSetVulkanTextureFrame(int64_t texture_id,
+                                  const FlutterVulkanExternalTexture& texture);
+
+  bool RouteGetVulkanTextureFrame(int64_t texture_id,
+                                  size_t width,
+                                  size_t height,
+                                  FlutterVulkanExternalTexture* texture_out);
+
+  bool RouteOnVulkanTextureFrameAvailable(int64_t texture_id);
 
   std::shared_ptr<JniDelegate> GetEmbedderDelegate() const;
   std::shared_ptr<LegacyJniDelegate> GetLegacyDelegate() const;

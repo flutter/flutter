@@ -1183,6 +1183,53 @@ public class FlutterJNI {
     return true;
   }
   // ------ End HardwareBuffer Support -----
+
+  // ------ Start Vulkan External Texture Support -----
+  /**
+   * Registers a Vulkan external texture with the given id.
+   *
+   * @param textureId The texture identifier.
+   * @return True if registration succeeded.
+   */
+  @UiThread
+  public boolean registerVulkanTexture(long textureId) {
+    return true;
+  }
+
+  /**
+   * Unregisters a Vulkan external texture by id.
+   *
+   * @param textureId The texture identifier.
+   * @return True if unregistration succeeded.
+   */
+  @UiThread
+  public boolean unregisterVulkanTexture(long textureId) {
+    return true;
+  }
+
+  /**
+   * Signals that a new Vulkan external texture frame is available for presentation.
+   *
+   * <p>This method can be called from background threads (e.g. video decoders or camera) and will
+   * safely post to the main thread before marking the frame available.
+   *
+   * @param textureId The texture identifier.
+   * @return True if frame notification succeeded.
+   */
+  public boolean onVulkanTextureFrameAvailable(long textureId) {
+    if (mainLooper != null && Looper.myLooper() != mainLooper) {
+      if (mainHandler != null) {
+        mainHandler.post(() -> onVulkanTextureFrameAvailable(textureId));
+      }
+      return true;
+    }
+    ensureRunningOnMainThread();
+    if (isAttached()) {
+      markTextureFrameAvailable(textureId);
+    }
+    return true;
+  }
+  // ------ End Vulkan External Texture Support -----
   // ------ End Texture Registration Support -----
 
   // ------ Start Dart Execution Support -------
