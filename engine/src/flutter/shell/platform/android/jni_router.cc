@@ -283,5 +283,51 @@ void JniRouter::RouteRemoveImageHeader(int64_t generator_handle) {
     }
   }
 }
+
+bool JniRouter::RoutePlatformViewMutators(
+    int64_t view_id,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    const AndroidMutatorsStack& mutators_stack) {
+  TRACE_EVENT0("flutter", "JniRouter::RoutePlatformViewMutators");
+  if (IsInstanceEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->PushPlatformViewMutators(
+          view_id, x, y, width, height, mutators_stack);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->PushPlatformViewMutators(view_id, x, y, width,
+                                                      height, mutators_stack);
+  }
+  return false;
+}
+
+bool JniRouter::RoutePlatformViewMutators(
+    const FlutterPlatformView& platform_view,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height) {
+  TRACE_EVENT0("flutter", "JniRouter::RoutePlatformViewMutators(view)");
+  if (platform_view.struct_size < sizeof(FlutterPlatformView)) {
+    return false;
+  }
+  if (IsInstanceEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->PushPlatformViewMutators(platform_view, x, y,
+                                                          width, height);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->PushPlatformViewMutators(platform_view, x, y,
+                                                      width, height);
+  }
+  return false;
+}
 }  // namespace android
 }  // namespace flutter
