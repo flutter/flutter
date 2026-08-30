@@ -1142,6 +1142,14 @@ bool AndroidPlatformViewsController::IsHcppEnabled() const {
   return provider->IsHcppEnabled();
 }
 
+void AndroidPlatformViewsController::SetHcppEnabled(bool enabled) {
+  TRACE_EVENT0("flutter", "AndroidPlatformViewsController::SetHcppEnabled");
+  auto provider = GetProvider();
+  if (provider) {
+    provider->SetHcppEnabled(enabled);
+  }
+}
+
 size_t AndroidPlatformViewsController::GetActiveViewsCount() const {
   std::lock_guard<std::mutex> lock(mutex_);
   return active_composition_types_.size();

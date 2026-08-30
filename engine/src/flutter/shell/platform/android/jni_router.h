@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/android_surface_control.h"
 #include "flutter/shell/platform/android/android_vulkan_texture.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 
@@ -157,6 +158,8 @@ class LegacyJniDelegate {
 
   virtual bool HideOverlaySurface(int32_t surface_id) = 0;
 
+  virtual bool SetHcppEnabled(bool enabled) { return true; }
+
   virtual bool CreatePlatformViewTransaction() = 0;
 
   virtual bool SwapPlatformViewTransactions() = 0;
@@ -164,6 +167,52 @@ class LegacyJniDelegate {
   virtual bool ApplyPlatformViewTransactions() = 0;
 
   virtual bool IsHcppEnabled() const = 0;
+
+  virtual bool CreateSurfaceControl(int64_t surface_id,
+                                    const std::string& debug_name = "") = 0;
+
+  virtual bool DestroySurfaceControl(int64_t surface_id) = 0;
+
+  virtual bool ReparentSurfaceControl(int64_t surface_id,
+                                      int64_t new_parent_id) = 0;
+
+  virtual bool SetSurfaceControlGeometry(
+      int64_t surface_id,
+      const AndroidSurfaceControlRect& source,
+      const AndroidSurfaceControlRect& destination,
+      int32_t transform) = 0;
+
+  virtual bool SetSurfaceControlVisibility(int64_t surface_id,
+                                           bool visible) = 0;
+
+  virtual bool SetSurfaceControlZOrder(int64_t surface_id, int32_t z_order) = 0;
+
+  virtual bool SetSurfaceControlDamageRegion(
+      int64_t surface_id,
+      const std::vector<AndroidSurfaceControlRect>& rects) = 0;
+
+  virtual bool SetSurfaceControlBuffer(int64_t surface_id,
+                                       void* buffer,
+                                       int fence_fd = -1) = 0;
+
+  virtual bool SetSurfaceControlBufferAlpha(int64_t surface_id,
+                                            float alpha) = 0;
+
+  virtual bool SetSurfaceControlColor(int64_t surface_id,
+                                      float r,
+                                      float g,
+                                      float b,
+                                      float alpha) = 0;
+
+  virtual std::optional<AndroidSurfaceControlState> GetSurfaceControlState(
+      int64_t surface_id) const {
+    return std::nullopt;
+  }
+
+  virtual std::shared_ptr<AndroidSurfaceControl> GetSurfaceControl(
+      int64_t surface_id) const {
+    return nullptr;
+  }
 
   virtual bool PushPlatformViewMutators(
       int64_t view_id,
@@ -435,6 +484,8 @@ class JniRouter {
 
   bool RouteHideOverlaySurface(int32_t surface_id);
 
+  bool RouteSetHcppEnabled(bool enabled);
+
   bool RouteCreatePlatformViewTransaction();
 
   bool RouteSwapPlatformViewTransactions();
@@ -442,6 +493,45 @@ class JniRouter {
   bool RouteApplyPlatformViewTransactions();
 
   bool RouteIsHcppEnabled() const;
+
+  bool RouteCreateSurfaceControl(int64_t surface_id,
+                                 const std::string& debug_name = "");
+
+  bool RouteDestroySurfaceControl(int64_t surface_id);
+
+  bool RouteReparentSurfaceControl(int64_t surface_id, int64_t new_parent_id);
+
+  bool RouteSetSurfaceControlGeometry(
+      int64_t surface_id,
+      const AndroidSurfaceControlRect& source,
+      const AndroidSurfaceControlRect& destination,
+      int32_t transform = 0);
+
+  bool RouteSetSurfaceControlVisibility(int64_t surface_id, bool visible);
+
+  bool RouteSetSurfaceControlZOrder(int64_t surface_id, int32_t z_order);
+
+  bool RouteSetSurfaceControlDamageRegion(
+      int64_t surface_id,
+      const std::vector<AndroidSurfaceControlRect>& rects);
+
+  bool RouteSetSurfaceControlBuffer(int64_t surface_id,
+                                    void* buffer,
+                                    int fence_fd = -1);
+
+  bool RouteSetSurfaceControlBufferAlpha(int64_t surface_id, float alpha);
+
+  bool RouteSetSurfaceControlColor(int64_t surface_id,
+                                   float r,
+                                   float g,
+                                   float b,
+                                   float alpha);
+
+  std::optional<AndroidSurfaceControlState> RouteGetSurfaceControlState(
+      int64_t surface_id) const;
+
+  std::shared_ptr<AndroidSurfaceControl> RouteGetSurfaceControl(
+      int64_t surface_id) const;
 
   bool RoutePlatformViewMutators(int64_t view_id,
                                  int32_t x,
