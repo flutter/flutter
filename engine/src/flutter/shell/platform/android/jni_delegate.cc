@@ -223,5 +223,34 @@ std::shared_ptr<ImageDecoderProvider> JniDelegate::GetImageDecoderProvider()
   return image_decoder_;
 }
 
+bool JniDelegate::PushPlatformViewMutators(
+    int64_t view_id,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    const AndroidMutatorsStack& mutators_stack) {
+  TRACE_EVENT0("flutter", "JniDelegate::PushPlatformViewMutators");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  std::vector<uint8_t> payload = mutators_stack.Serialize();
+  return jvm_invoker_->InvokeVoidMethod("pushPlatformViewMutators",
+                                        "(JIIII[B)V", payload);
+}
+
+bool JniDelegate::PushPlatformViewMutators(
+    const FlutterPlatformView& platform_view,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height) {
+  TRACE_EVENT0("flutter", "JniDelegate::PushPlatformViewMutators(view)");
+  AndroidMutatorsStack stack =
+      AndroidMutatorsMapper::MapPlatformView(platform_view);
+  return PushPlatformViewMutators(platform_view.identifier, x, y, width, height,
+                                  stack);
+}
+
 }  // namespace android
 }  // namespace flutter

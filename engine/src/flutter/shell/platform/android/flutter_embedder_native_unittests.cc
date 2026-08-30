@@ -145,6 +145,25 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               GetImageHeader,
               (int64_t generator_handle),
               (override));
+
+  MOCK_METHOD(bool,
+              PushPlatformViewMutators,
+              (int64_t view_id,
+               int32_t x,
+               int32_t y,
+               int32_t width,
+               int32_t height,
+               const AndroidMutatorsStack& mutators_stack),
+              (override));
+
+  MOCK_METHOD(bool,
+              PushPlatformViewMutators,
+              (const FlutterPlatformView& platform_view,
+               int32_t x,
+               int32_t y,
+               int32_t width,
+               int32_t height),
+              (override));
 };
 
 class MockCallbackCacheProvider : public CallbackCacheProvider {
@@ -1211,6 +1230,114 @@ TEST(ImageDecoderTest, FlutterEmbedderNativeImageDecoderAndLRUIntegration) {
 
   // RegisterImageDecoder with null engine returns kInvalidArguments
   EXPECT_EQ(native.RegisterImageDecoder(nullptr), kInvalidArguments);
+}
+
+TEST(MutatorTranslationTest, JniDelegatePlatformViewMutatorsPush) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto delegate = std::make_unique<JniDelegate>(mock_invoker);
+
+  AndroidMutatorsStack stack;
+  FlutterTransformation ft = {
+      .scaleX = 1.0,
+      .skewX = 0.0,
+      .transX = 50.0,
+      .skewY = 0.0,
+      .scaleY = 1.0,
+      .transY = 75.0,
+      .pers0 = 0.0,
+      .pers1 = 0.0,
+      .pers2 = 1.0,
+  };
+  stack.PushTransform(ft);
+  stack.PushOpacity(0.9f);
+
+  std::vector<uint8_t> expected_payload = stack.Serialize();
+
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("pushPlatformViewMutators",
+                                              "(JIIII[B)V", expected_payload))
+      .WillOnce(Return(true));
+
+  EXPECT_TRUE(
+      delegate->PushPlatformViewMutators(101L, 10, 20, 300, 400, stack));
+}
+
+TEST(MutatorTranslationTest, JniRouterPlatformViewMutatorsRoutingFlip) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker);
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
+
+  AndroidMutatorsStack stack;
+  stack.PushOpacity(0.8f);
+
+  // 1. When Embedder is disabled -> routes to legacy_delegate
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+
+  EXPECT_CALL(*legacy_delegate,
+              PushPlatformViewMutators(1001L, 0, 0, 100, 200, Eq(stack)))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RoutePlatformViewMutators(1001L, 0, 0, 100, 200, stack));
+
+  // 2. When Embedder is enabled -> routes to embedder_delegate (mock_invoker)
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+
+  std::vector<uint8_t> payload = stack.Serialize();
+  EXPECT_CALL(*legacy_delegate, PushPlatformViewMutators(1001L, _, _, _, _, _))
+      .Times(0);
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("pushPlatformViewMutators",
+                                              "(JIIII[B)V", payload))
+      .WillOnce(Return(true));
+
+  EXPECT_TRUE(router->RoutePlatformViewMutators(1001L, 0, 0, 100, 200, stack));
+
+  // Reset flag
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+}
+
+TEST(MutatorTranslationTest,
+     FlutterEmbedderNativePlatformViewMutatorsIntegration) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  FlutterEmbedderNative native(mock_invoker);
+
+  JniRouter::SetEmbedderEnabled(true);
+
+  FlutterPlatformViewMutation m1 = {
+      .type = kFlutterPlatformViewMutationTypeTransformation,
+      .transformation =
+          {
+              .scaleX = 2.0,
+              .skewX = 0.0,
+              .transX = 10.0,
+              .skewY = 0.0,
+              .scaleY = 2.0,
+              .transY = 20.0,
+              .pers0 = 0.0,
+              .pers1 = 0.0,
+              .pers2 = 1.0,
+          },
+  };
+  const FlutterPlatformViewMutation* mutations[] = {&m1};
+  FlutterPlatformView pv = {
+      .struct_size = sizeof(FlutterPlatformView),
+      .identifier = 555,
+      .mutations_count = 1,
+      .mutations = mutations,
+  };
+
+  AndroidMutatorsStack stack = native.MapPlatformView(pv);
+  EXPECT_EQ(stack.GetMutatorsCount(), 1u);
+
+  std::vector<uint8_t> payload = stack.Serialize();
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("pushPlatformViewMutators",
+                                              "(JIIII[B)V", payload))
+      .WillOnce(Return(true));
+
+  EXPECT_TRUE(native.PushPlatformViewMutators(pv, 0, 0, 500, 500));
+
+  JniRouter::SetEmbedderEnabled(false);
 }
 
 }  // namespace testing

@@ -67,6 +67,21 @@ class LegacyJniDelegate {
 
   virtual std::optional<ImageHeaderInfo> GetImageHeader(
       int64_t generator_handle) = 0;
+
+  virtual bool PushPlatformViewMutators(
+      int64_t view_id,
+      int32_t x,
+      int32_t y,
+      int32_t width,
+      int32_t height,
+      const AndroidMutatorsStack& mutators_stack) = 0;
+
+  virtual bool PushPlatformViewMutators(
+      const FlutterPlatformView& platform_view,
+      int32_t x,
+      int32_t y,
+      int32_t width,
+      int32_t height) = 0;
 };
 
 /// @brief Native JNI Routing Boundary that dispatches calls based on
@@ -138,6 +153,19 @@ class JniRouter {
                               int32_t height);
 
   std::optional<ImageHeaderInfo> RouteGetImageHeader(int64_t generator_handle);
+
+  bool RoutePlatformViewMutators(int64_t view_id,
+                                 int32_t x,
+                                 int32_t y,
+                                 int32_t width,
+                                 int32_t height,
+                                 const AndroidMutatorsStack& mutators_stack);
+
+  bool RoutePlatformViewMutators(const FlutterPlatformView& platform_view,
+                                 int32_t x,
+                                 int32_t y,
+                                 int32_t width,
+                                 int32_t height);
 
   std::shared_ptr<JniDelegate> GetEmbedderDelegate() const;
   std::shared_ptr<LegacyJniDelegate> GetLegacyDelegate() const;

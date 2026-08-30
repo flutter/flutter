@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 #include "flutter/shell/platform/android/jni_router.h"
@@ -277,6 +278,31 @@ class FlutterEmbedderNative {
 
   /// @brief Sets or replaces the EmbedderImageLRU cache.
   void SetImageLRU(std::shared_ptr<EmbedderImageLRU> lru);
+
+  /// @brief Maps raw platform view mutations into an AndroidMutatorsStack.
+  AndroidMutatorsStack MapPlatformViewMutations(
+      const FlutterPlatformViewMutation** mutations,
+      size_t count) const;
+
+  /// @brief Maps a FlutterPlatformView into an AndroidMutatorsStack.
+  AndroidMutatorsStack MapPlatformView(
+      const FlutterPlatformView& platform_view) const;
+
+  /// @brief Dispatches platform view mutator stack through JniRouter.
+  bool PushPlatformViewMutators(
+      int64_t view_id,
+      int32_t x,
+      int32_t y,
+      int32_t width,
+      int32_t height,
+      const AndroidMutatorsStack& mutators_stack) const;
+
+  /// @brief Dispatches platform view mutations through JniRouter.
+  bool PushPlatformViewMutators(const FlutterPlatformView& platform_view,
+                                int32_t x,
+                                int32_t y,
+                                int32_t width,
+                                int32_t height) const;
 
  private:
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;

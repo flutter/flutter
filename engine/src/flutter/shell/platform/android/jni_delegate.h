@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -141,6 +142,24 @@ class JniDelegate {
   /// @brief Gets parsed image header info for a generator handle.
   virtual std::optional<ImageHeaderInfo> GetImageHeader(
       int64_t generator_handle);
+
+  /// @brief Dispatches platform view mutator stack to the JVM.
+  virtual bool PushPlatformViewMutators(
+      int64_t view_id,
+      int32_t x,
+      int32_t y,
+      int32_t width,
+      int32_t height,
+      const AndroidMutatorsStack& mutators_stack);
+
+  /// @brief Dispatches platform view mutator stack derived from a
+  /// FlutterPlatformView.
+  virtual bool PushPlatformViewMutators(
+      const FlutterPlatformView& platform_view,
+      int32_t x,
+      int32_t y,
+      int32_t width,
+      int32_t height);
 
   /// @brief Sets or replaces the CallbackCacheProvider used for lookups.
   void SetCallbackCache(std::shared_ptr<CallbackCacheProvider> provider);

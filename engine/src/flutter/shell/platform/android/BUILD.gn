@@ -18,6 +18,8 @@ source_set("flutter_embedder_native_src") {
   visibility = [ ":*" ]
 
   sources = [
+    "android_mutators_mapper.cc",
+    "android_mutators_mapper.h",
     "apk_asset_provider.cc",
     "apk_asset_provider.h",
     "flutter_embedder_native.cc",
@@ -67,6 +69,7 @@ executable("flutter_embedder_native_unittests") {
   visibility = [ "*" ]
   testonly = true
   sources = [
+    "android_mutator_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_embedder_native_unittests.cc",
   ]
@@ -111,6 +114,7 @@ if (is_android) {
     sources = [
       "android_context_gl_impeller_unittests.cc",
       "android_image_generator_unittests.cc",
+      "android_mutator_unittests.cc",
       "android_shell_holder_unittests.cc",
       "apk_asset_provider_unittests.cc",
       "flutter_shell_native_unittests.cc",
@@ -164,6 +168,8 @@ if (is_android) {
       "android_egl_surface.h",
       "android_environment_gl.cc",
       "android_environment_gl.h",
+      "android_mutators_mapper.cc",
+      "android_mutators_mapper.h",
       "android_shell_holder.cc",
       "android_shell_holder.h",
       "android_surface_dynamic_impeller.cc",
