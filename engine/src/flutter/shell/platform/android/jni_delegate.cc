@@ -10,8 +10,12 @@
 namespace flutter {
 namespace android {
 
-JniDelegate::JniDelegate(std::shared_ptr<JvmInvoker> jvm_invoker)
-    : jvm_invoker_(std::move(jvm_invoker)) {
+JniDelegate::JniDelegate(std::shared_ptr<JvmInvoker> jvm_invoker,
+                         std::shared_ptr<CallbackCacheProvider> callback_cache)
+    : jvm_invoker_(std::move(jvm_invoker)),
+      callback_cache_(callback_cache
+                          ? std::move(callback_cache)
+                          : std::make_shared<DefaultCallbackCacheProvider>()) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
 }
@@ -113,6 +117,123 @@ bool JniDelegate::RequestDartDeferredLibrary(int loading_unit_id) {
     return false;
   }
   return jvm_invoker_->RequestDartDeferredLibrary(loading_unit_id);
+}
+
+static FlutterEngineResult GetCallbackInformationFromEngine(
+    int64_t handle,
+    FlutterCallbackInformation* info) {
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.GetCallbackInformation) {
+    return s_procs.GetCallbackInformation(handle, info);
+  }
+  return kInternalInconsistency;
+}
+
+DefaultCallbackCacheProvider::DefaultCallbackCacheProvider() {
+  TRACE_EVENT0("flutter",
+               "DefaultCallbackCacheProvider::DefaultCallbackCacheProvider");
+}
+
+DefaultCallbackCacheProvider::~DefaultCallbackCacheProvider() {
+  TRACE_EVENT0("flutter",
+               "DefaultCallbackCacheProvider::~DefaultCallbackCacheProvider");
+}
+
+std::optional<DartCallbackInfo>
+DefaultCallbackCacheProvider::GetCallbackInformation(int64_t handle) {
+  TRACE_EVENT0("flutter",
+               "DefaultCallbackCacheProvider::GetCallbackInformation");
+  FlutterCallbackInformation info = {};
+  info.struct_size = sizeof(FlutterCallbackInformation);
+  if (GetCallbackInformationFromEngine(handle, &info) == kSuccess) {
+    DartCallbackInfo result;
+    result.name = info.name ? info.name : "";
+    result.class_name = info.class_name ? info.class_name : "";
+    result.library_path = info.library_path ? info.library_path : "";
+    return result;
+  }
+  return std::nullopt;
+}
+
+InMemoryCallbackCacheProvider::InMemoryCallbackCacheProvider() {
+  TRACE_EVENT0("flutter",
+               "InMemoryCallbackCacheProvider::InMemoryCallbackCacheProvider");
+}
+
+InMemoryCallbackCacheProvider::~InMemoryCallbackCacheProvider() {
+  TRACE_EVENT0("flutter",
+               "InMemoryCallbackCacheProvider::~InMemoryCallbackCacheProvider");
+}
+
+void InMemoryCallbackCacheProvider::AddCallback(
+    int64_t handle,
+    const std::string& name,
+    const std::string& class_name,
+    const std::string& library_path) {
+  TRACE_EVENT0("flutter", "InMemoryCallbackCacheProvider::AddCallback");
+  std::unique_lock lock(mutex_);
+  cache_[handle] = DartCallbackInfo{name, class_name, library_path};
+}
+
+void InMemoryCallbackCacheProvider::RemoveCallback(int64_t handle) {
+  TRACE_EVENT0("flutter", "InMemoryCallbackCacheProvider::RemoveCallback");
+  std::unique_lock lock(mutex_);
+  cache_.erase(handle);
+}
+
+void InMemoryCallbackCacheProvider::Clear() {
+  TRACE_EVENT0("flutter", "InMemoryCallbackCacheProvider::Clear");
+  std::unique_lock lock(mutex_);
+  cache_.clear();
+}
+
+size_t InMemoryCallbackCacheProvider::GetSize() const {
+  std::shared_lock lock(mutex_);
+  return cache_.size();
+}
+
+std::optional<DartCallbackInfo>
+InMemoryCallbackCacheProvider::GetCallbackInformation(int64_t handle) {
+  TRACE_EVENT0("flutter",
+               "InMemoryCallbackCacheProvider::GetCallbackInformation");
+  std::shared_lock lock(mutex_);
+  auto it = cache_.find(handle);
+  if (it != cache_.end()) {
+    return it->second;
+  }
+  return std::nullopt;
+}
+
+std::optional<DartCallbackInfo> JniDelegate::LookupCallbackInformation(
+    int64_t handle) {
+  TRACE_EVENT0("flutter", "JniDelegate::LookupCallbackInformation");
+  std::shared_ptr<CallbackCacheProvider> cache;
+  {
+    std::scoped_lock lock(callback_cache_mutex_);
+    cache = callback_cache_;
+  }
+  if (cache) {
+    return cache->GetCallbackInformation(handle);
+  }
+  return std::nullopt;
+}
+
+void JniDelegate::SetCallbackCache(
+    std::shared_ptr<CallbackCacheProvider> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetCallbackCache");
+  std::scoped_lock lock(callback_cache_mutex_);
+  callback_cache_ = provider ? std::move(provider)
+                             : std::make_shared<DefaultCallbackCacheProvider>();
+}
+
+std::shared_ptr<CallbackCacheProvider> JniDelegate::GetCallbackCache() const {
+  std::scoped_lock lock(callback_cache_mutex_);
+  return callback_cache_;
 }
 
 }  // namespace android

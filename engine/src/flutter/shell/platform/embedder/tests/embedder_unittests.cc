@@ -5,6 +5,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <string>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -23,6 +24,7 @@
 #include "flutter/fml/thread.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
+#include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_hb.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
@@ -2701,6 +2703,151 @@ TEST_F(EmbedderTest, ScreenshotInvalidArguments) {
 
   // Free with valid struct_size and null pixels should succeed.
   EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineGetCallbackInformation retrieves callback
+/// representations from DartCallbackCache and validates arguments.
+///
+TEST_F(EmbedderTest, CallbackInformationLookup) {
+  FlutterCallbackInformation info = {};
+  info.struct_size = sizeof(FlutterCallbackInformation);
+
+  // Null output struct pointer.
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(0, nullptr), kInvalidArguments);
+
+  // Struct size mismatch.
+  FlutterCallbackInformation bad_info = {};
+  bad_info.struct_size = sizeof(FlutterCallbackInformation) - 1;
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(0, &bad_info),
+            kInvalidArguments);
+
+  // Non-existent callback handle returns kInternalInconsistency.
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(99999999, &info),
+            kInternalInconsistency);
+
+  // Register a top-level callback into DartCallbackCache.
+  int64_t top_level_handle = DartCallbackCache::GetCallbackHandle(
+      "topLevelMethod", "", "package:test_app/main.dart");
+  EXPECT_NE(top_level_handle, 0);
+
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(top_level_handle, &info),
+            kSuccess);
+  EXPECT_STREQ(info.name, "topLevelMethod");
+  EXPECT_EQ(info.class_name, nullptr);
+  EXPECT_STREQ(info.library_path, "package:test_app/main.dart");
+
+  // Register a class-scoped callback into DartCallbackCache.
+  int64_t class_method_handle = DartCallbackCache::GetCallbackHandle(
+      "classMethod", "TargetClass", "package:test_app/service.dart");
+  EXPECT_NE(class_method_handle, 0);
+
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(class_method_handle, &info),
+            kSuccess);
+  EXPECT_STREQ(info.name, "classMethod");
+  EXPECT_STREQ(info.class_name, "TargetClass");
+  EXPECT_STREQ(info.library_path, "package:test_app/service.dart");
+
+  // Forward compatibility: a struct_size larger than
+  // sizeof(FlutterCallbackInformation) must succeed and populate the known
+  // fields.
+  FlutterCallbackInformation forward_info = {};
+  forward_info.struct_size = sizeof(FlutterCallbackInformation) + 64;
+  EXPECT_EQ(
+      FlutterEngineGetCallbackInformation(class_method_handle, &forward_info),
+      kSuccess);
+  EXPECT_STREQ(forward_info.name, "classMethod");
+  EXPECT_STREQ(forward_info.class_name, "TargetClass");
+  EXPECT_STREQ(forward_info.library_path, "package:test_app/service.dart");
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterCallbackInformation struct layout and alignment strictly
+/// adhere to C-ABI rules across 32-bit and 64-bit architectures.
+///
+TEST_F(EmbedderTest, CallbackInformationStructSizesAndABI) {
+  // Check 8-byte natural alignment requirement (sizeof % 8 == 0).
+  EXPECT_EQ(sizeof(FlutterCallbackInformation) % 8, 0u);
+
+#if defined(__x86_64__) || defined(__aarch64__)
+  EXPECT_EQ(sizeof(FlutterCallbackInformation), 32u);
+#elif defined(__arm__) || defined(__i386__)
+  EXPECT_EQ(sizeof(FlutterCallbackInformation), 16u);
+#endif
+
+  EXPECT_EQ(offsetof(FlutterCallbackInformation, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterCallbackInformation, name), sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterCallbackInformation, class_name),
+            sizeof(size_t) + sizeof(const char*));
+  EXPECT_EQ(offsetof(FlutterCallbackInformation, library_path),
+            sizeof(size_t) + 2 * sizeof(const char*));
+}
+
+//------------------------------------------------------------------------------
+/// Test that multiple calls to FlutterEngineGetCallbackInformation on the same
+/// thread return distinct string pointers that do not alias or invalidate each
+/// other.
+///
+TEST_F(EmbedderTest, CallbackInformationMultipleLookupsSameThread) {
+  int64_t handle_a = DartCallbackCache::GetCallbackHandle(
+      "callbackAlpha", "ClassAlpha", "package:test_app/alpha.dart");
+  int64_t handle_b = DartCallbackCache::GetCallbackHandle(
+      "callbackBeta", "ClassBeta", "package:test_app/beta.dart");
+  EXPECT_NE(handle_a, 0);
+  EXPECT_NE(handle_b, 0);
+  EXPECT_NE(handle_a, handle_b);
+
+  FlutterCallbackInformation info_a = {};
+  info_a.struct_size = sizeof(FlutterCallbackInformation);
+  ASSERT_EQ(FlutterEngineGetCallbackInformation(handle_a, &info_a), kSuccess);
+
+  FlutterCallbackInformation info_b = {};
+  info_b.struct_size = sizeof(FlutterCallbackInformation);
+  ASSERT_EQ(FlutterEngineGetCallbackInformation(handle_b, &info_b), kSuccess);
+
+  // Both structs must retain their distinct, correct values.
+  EXPECT_STREQ(info_a.name, "callbackAlpha");
+  EXPECT_STREQ(info_a.class_name, "ClassAlpha");
+  EXPECT_STREQ(info_a.library_path, "package:test_app/alpha.dart");
+
+  EXPECT_STREQ(info_b.name, "callbackBeta");
+  EXPECT_STREQ(info_b.class_name, "ClassBeta");
+  EXPECT_STREQ(info_b.library_path, "package:test_app/beta.dart");
+
+  // Pointers must not alias each other.
+  EXPECT_NE(info_a.name, info_b.name);
+  EXPECT_NE(info_a.class_name, info_b.class_name);
+  EXPECT_NE(info_a.library_path, info_b.library_path);
+}
+
+//------------------------------------------------------------------------------
+/// Test that string pointers returned from FlutterEngineGetCallbackInformation
+/// on a worker thread remain valid and do not cause a heap use-after-free even
+/// after the worker thread terminates.
+///
+TEST_F(EmbedderTest, CallbackInformationWorkerThreadResolutionAndLifetime) {
+  int64_t handle = DartCallbackCache::GetCallbackHandle(
+      "workerMethod", "WorkerClass", "package:test_app/worker.dart");
+  EXPECT_NE(handle, 0);
+
+  FlutterCallbackInformation worker_info = {};
+  worker_info.struct_size = sizeof(FlutterCallbackInformation);
+
+  std::thread worker([handle, &worker_info]() {
+    ASSERT_EQ(FlutterEngineGetCallbackInformation(handle, &worker_info),
+              kSuccess);
+  });
+  worker.join();
+
+  // The worker thread has exited and its thread-local storage destroyed.
+  // The string pointers must remain valid for the lifetime of the process.
+  EXPECT_NE(worker_info.name, nullptr);
+  EXPECT_NE(worker_info.class_name, nullptr);
+  EXPECT_NE(worker_info.library_path, nullptr);
+
+  EXPECT_STREQ(worker_info.name, "workerMethod");
+  EXPECT_STREQ(worker_info.class_name, "WorkerClass");
+  EXPECT_STREQ(worker_info.library_path, "package:test_app/worker.dart");
 }
 
 //------------------------------------------------------------------------------

@@ -6,15 +6,82 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_DELEGATE_H_
 
 #include <cstdint>
+#include <map>
 #include <memory>
+#include <mutex>
+#include <optional>
+#include <shared_mutex>
 #include <string>
 #include <vector>
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 namespace android {
+
+/// @brief Decoupled representation of Dart callback metadata.
+struct DartCallbackInfo {
+  std::string name;
+  std::string class_name;
+  std::string library_path;
+
+  bool operator==(const DartCallbackInfo& other) const {
+    return name == other.name && class_name == other.class_name &&
+           library_path == other.library_path;
+  }
+};
+
+/// @brief Abstract provider interface for resolving Dart callback
+/// representations.
+class CallbackCacheProvider {
+ public:
+  virtual ~CallbackCacheProvider() = default;
+
+  /// @brief Looks up Dart callback information for a given callback handle.
+  virtual std::optional<DartCallbackInfo> GetCallbackInformation(
+      int64_t handle) = 0;
+};
+
+/// @brief Default C-API backed callback cache provider that calls
+/// FlutterEngineGetCallbackInformation.
+class DefaultCallbackCacheProvider : public CallbackCacheProvider {
+ public:
+  DefaultCallbackCacheProvider();
+  ~DefaultCallbackCacheProvider() override;
+
+  std::optional<DartCallbackInfo> GetCallbackInformation(
+      int64_t handle) override;
+};
+
+/// @brief In-memory mock callback cache provider for unit testing without
+/// Dart VM or disk cache dependencies.
+class InMemoryCallbackCacheProvider : public CallbackCacheProvider {
+ public:
+  InMemoryCallbackCacheProvider();
+  ~InMemoryCallbackCacheProvider() override;
+
+  void AddCallback(int64_t handle,
+                   const std::string& name,
+                   const std::string& class_name,
+                   const std::string& library_path);
+
+  void RemoveCallback(int64_t handle);
+
+  void Clear();
+
+  size_t GetSize() const;
+
+  std::optional<DartCallbackInfo> GetCallbackInformation(
+      int64_t handle) override;
+
+ private:
+  mutable std::shared_mutex mutex_;
+  std::map<int64_t, DartCallbackInfo> cache_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(InMemoryCallbackCacheProvider);
+};
 
 /// @brief Delegate that adapts Flutter Embedder C-API operations to the JVM.
 ///
@@ -22,7 +89,9 @@ namespace android {
 /// calls, guaranteeing host testability without native JNI dependencies.
 class JniDelegate {
  public:
-  explicit JniDelegate(std::shared_ptr<JvmInvoker> jvm_invoker);
+  explicit JniDelegate(
+      std::shared_ptr<JvmInvoker> jvm_invoker,
+      std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr);
   virtual ~JniDelegate();
 
   /// @brief Handles an incoming platform message dispatch to the JVM.
@@ -66,11 +135,23 @@ class JniDelegate {
   /// @brief Requests loading of a Dart deferred library component.
   virtual bool RequestDartDeferredLibrary(int loading_unit_id);
 
+  /// @brief Looks up Dart callback information for a given handle.
+  virtual std::optional<DartCallbackInfo> LookupCallbackInformation(
+      int64_t handle);
+
+  /// @brief Sets or replaces the CallbackCacheProvider used for lookups.
+  void SetCallbackCache(std::shared_ptr<CallbackCacheProvider> provider);
+
+  /// @brief Returns the current CallbackCacheProvider.
+  std::shared_ptr<CallbackCacheProvider> GetCallbackCache() const;
+
   /// @brief Returns the underlying JvmInvoker instance.
   std::shared_ptr<JvmInvoker> GetJvmInvoker() const;
 
  private:
   std::shared_ptr<JvmInvoker> jvm_invoker_;
+  mutable std::mutex callback_cache_mutex_;
+  std::shared_ptr<CallbackCacheProvider> callback_cache_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniDelegate);
 };

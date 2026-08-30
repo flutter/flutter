@@ -61,6 +61,9 @@ class LegacyJniDelegate {
   virtual bool OnPreEngineRestart() = 0;
 
   virtual bool RequestDartDeferredLibrary(int loading_unit_id) = 0;
+
+  virtual std::optional<DartCallbackInfo> LookupCallbackInformation(
+      int64_t handle) = 0;
 };
 
 /// @brief Native JNI Routing Boundary that dispatches calls based on
@@ -135,6 +138,9 @@ class JniRouter {
   bool RoutePreEngineRestart();
 
   bool RouteRequestDartDeferredLibrary(int loading_unit_id);
+
+  std::optional<DartCallbackInfo> RouteLookupCallbackInformation(
+      int64_t handle);
 
   std::shared_ptr<JniDelegate> GetEmbedderDelegate() const;
   std::shared_ptr<LegacyJniDelegate> GetLegacyDelegate() const;

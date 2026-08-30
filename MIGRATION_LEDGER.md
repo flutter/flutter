@@ -74,11 +74,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `APKAssetProvider` adapted to Embedder Custom Asset Resolver.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterLoaderTest.java`, `ApplicationInfoLoaderTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`apk_asset_provider_unittests.cc`) pass.
-- [ ] **2.2 Dart Callbacks**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.2-dart-callbacks`
-    - [ ] Dart Callback lookup API integrated.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterJNITest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`platform_view_android_delegate_unittests.cc`) pass.
+- [x] **2.2 Dart Callbacks**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-2.2-dart-callbacks`
+    - [x] Dart Callback lookup API integrated.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterJNITest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`platform_view_android_delegate_unittests.cc`) pass.
 - [ ] **2.3 Image Generators**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.3-image-generators`
     - [ ] `AndroidImageGenerator` hooked to `FlutterEngineRegisterImageDecoder`.

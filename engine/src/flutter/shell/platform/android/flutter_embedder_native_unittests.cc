@@ -148,6 +148,18 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               RequestDartDeferredLibrary,
               (int loading_unit_id),
               (override));
+  MOCK_METHOD(std::optional<DartCallbackInfo>,
+              LookupCallbackInformation,
+              (int64_t handle),
+              (override));
+};
+
+class MockCallbackCacheProvider : public CallbackCacheProvider {
+ public:
+  MOCK_METHOD(std::optional<DartCallbackInfo>,
+              GetCallbackInformation,
+              (int64_t handle),
+              (override));
 };
 
 // =============================================================================
@@ -172,6 +184,7 @@ TEST(FlutterEmbedderNativeTest, LifecycleInstance) {
   EXPECT_NE(native_instance->GetJvmInvoker(), nullptr);
   EXPECT_NE(native_instance->GetLibraryLoader(), nullptr);
   EXPECT_NE(native_instance->GetAssetProvider(), nullptr);
+  EXPECT_NE(native_instance->GetCallbackCache(), nullptr);
 }
 
 TEST(FlutterEmbedderNativeTest, DefaultJvmInvokerOperations) {
@@ -251,11 +264,31 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
   EXPECT_CALL(*mock_invoker, RequestDartDeferredLibrary(101))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->RequestDartDeferredLibrary(101));
+  // 9. LookupCallbackInformation with injected mock callback cache
+  auto mock_cache = std::make_shared<InMemoryCallbackCacheProvider>();
+  mock_cache->AddCallback(42L, "myDartCallback", "MyDartClass",
+                          "package:app/main.dart");
+  delegate->SetCallbackCache(mock_cache);
+  EXPECT_EQ(delegate->GetCallbackCache(), mock_cache);
+
+  auto cb_opt = delegate->LookupCallbackInformation(42L);
+  ASSERT_TRUE(cb_opt.has_value());
+  if (cb_opt.has_value()) {
+    EXPECT_EQ(cb_opt->name, "myDartCallback");
+    EXPECT_EQ(cb_opt->class_name, "MyDartClass");
+    EXPECT_EQ(cb_opt->library_path, "package:app/main.dart");
+  }
+
+  EXPECT_FALSE(delegate->LookupCallbackInformation(999L).has_value());
 }
 
 TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
-  auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker);
+  auto embedder_cache = std::make_shared<InMemoryCallbackCacheProvider>();
+  embedder_cache->AddCallback(100L, "embedderCallback", "EmbedderClass",
+                              "package:embedder/main.dart");
+  auto embedder_delegate =
+      std::make_shared<JniDelegate>(mock_invoker, embedder_cache);
   auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
 
   auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
@@ -285,6 +318,16 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
       .WillOnce(Return(true));
   EXPECT_TRUE(router->RouteRequestDartDeferredLibrary(5));
 
+  // Legacy LookupCallbackInformation
+  EXPECT_CALL(*legacy_delegate, LookupCallbackInformation(100L))
+      .WillOnce(Return(DartCallbackInfo{"legacyCallback", "LegacyClass",
+                                        "package:legacy/main.dart"}));
+  auto legacy_cb = router->RouteLookupCallbackInformation(100L);
+  ASSERT_TRUE(legacy_cb.has_value());
+  EXPECT_EQ(legacy_cb->name, "legacyCallback");
+  EXPECT_EQ(legacy_cb->class_name, "LegacyClass");
+  EXPECT_EQ(legacy_cb->library_path, "package:legacy/main.dart");
+
   // Flip global flag to true -> routes to Embedder
   JniRouter::SetGlobalEmbedderEnabled(true);
   EXPECT_TRUE(JniRouter::IsGlobalEmbedderEnabled());
@@ -307,6 +350,15 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
   EXPECT_CALL(*mock_invoker, RequestDartDeferredLibrary(5))
       .WillOnce(Return(true));
   EXPECT_TRUE(router->RouteRequestDartDeferredLibrary(5));
+
+  // Embedder LookupCallbackInformation (routed to embedder_delegate without
+  // legacy)
+  EXPECT_CALL(*legacy_delegate, LookupCallbackInformation(_)).Times(0);
+  auto embedder_cb = router->RouteLookupCallbackInformation(100L);
+  ASSERT_TRUE(embedder_cb.has_value());
+  EXPECT_EQ(embedder_cb->name, "embedderCallback");
+  EXPECT_EQ(embedder_cb->class_name, "EmbedderClass");
+  EXPECT_EQ(embedder_cb->library_path, "package:embedder/main.dart");
 
   // Instance override: override global true with instance false
   router->SetInstanceEmbedderEnabled(false);
@@ -642,6 +694,396 @@ TEST(FlutterEmbedderNativeTest, AssetProviderMultithreadedResolution) {
 
   stop_writers.store(true);
   writer_future.get();
+}
+
+TEST(FlutterEmbedderNativeTest, CallbackCacheProviderLifecycleAndResolution) {
+  auto native = std::make_unique<FlutterEmbedderNative>();
+  native->GetRouter()->SetInstanceEmbedderEnabled(true);
+  EXPECT_NE(native->GetCallbackCache(), nullptr);
+
+  // Default provider with no callbacks loaded returns std::nullopt for unknown
+  // handle
+  EXPECT_FALSE(native->LookupCallbackInformation(12345678L).has_value());
+
+  // Inject a custom in-memory callback provider
+  auto custom_cache = std::make_shared<InMemoryCallbackCacheProvider>();
+  custom_cache->AddCallback(1L, "topLevelCallback", "",
+                            "package:test/top.dart");
+  custom_cache->AddCallback(2L, "instanceCallback", "ServiceHost",
+                            "package:test/service.dart");
+
+  native->SetCallbackCache(custom_cache);
+  EXPECT_EQ(native->GetCallbackCache(), custom_cache);
+
+  // Lookup top-level callback (class_name empty)
+  auto top_cb = native->LookupCallbackInformation(1L);
+  ASSERT_TRUE(top_cb.has_value());
+  if (top_cb.has_value()) {
+    EXPECT_EQ(top_cb->name, "topLevelCallback");
+    EXPECT_EQ(top_cb->class_name, "");
+    EXPECT_EQ(top_cb->library_path, "package:test/top.dart");
+  }
+
+  // Lookup class-scoped callback
+  auto class_cb = native->LookupCallbackInformation(2L);
+  ASSERT_TRUE(class_cb.has_value());
+  if (class_cb.has_value()) {
+    EXPECT_EQ(class_cb->name, "instanceCallback");
+    EXPECT_EQ(class_cb->class_name, "ServiceHost");
+    EXPECT_EQ(class_cb->library_path, "package:test/service.dart");
+  }
+
+  // Non-existent handle returns std::nullopt
+  EXPECT_FALSE(native->LookupCallbackInformation(9999L).has_value());
+}
+
+TEST(FlutterEmbedderNativeTest, CallbackCacheSingleSourceOfTruth) {
+  auto native = std::make_unique<FlutterEmbedderNative>();
+  ASSERT_NE(native->GetCallbackCache(), nullptr);
+  ASSERT_NE(native->GetJniDelegate(), nullptr);
+
+  // 1. Initially, both facades return the exact same cache provider pointer.
+  EXPECT_EQ(native->GetCallbackCache(),
+            native->GetJniDelegate()->GetCallbackCache());
+
+  // 2. Updating via FlutterEmbedderNative reflects identically on JniDelegate.
+  auto custom_cache_1 = std::make_shared<InMemoryCallbackCacheProvider>();
+  native->SetCallbackCache(custom_cache_1);
+  EXPECT_EQ(native->GetCallbackCache(), custom_cache_1);
+  EXPECT_EQ(native->GetJniDelegate()->GetCallbackCache(), custom_cache_1);
+
+  // 3. Updating directly on JniDelegate reflects identically on
+  // FlutterEmbedderNative.
+  auto custom_cache_2 = std::make_shared<InMemoryCallbackCacheProvider>();
+  native->GetJniDelegate()->SetCallbackCache(custom_cache_2);
+  EXPECT_EQ(native->GetCallbackCache(), custom_cache_2);
+  EXPECT_EQ(native->GetJniDelegate()->GetCallbackCache(), custom_cache_2);
+
+  // 4. Resetting with nullptr restores default provider across both.
+  native->SetCallbackCache(nullptr);
+  EXPECT_NE(native->GetCallbackCache(), nullptr);
+  EXPECT_EQ(native->GetCallbackCache(),
+            native->GetJniDelegate()->GetCallbackCache());
+}
+
+TEST(FlutterEmbedderNativeTest,
+     LookupCallbackInformationLegacyRoutingFallback) {
+  auto mock_legacy = std::make_shared<MockLegacyJniDelegate>();
+  auto custom_cache = std::make_shared<InMemoryCallbackCacheProvider>();
+  custom_cache->AddCallback(100L, "embedderMethod", "EmbedderClass",
+                            "package:test/embedder.dart");
+
+  auto native = std::make_unique<FlutterEmbedderNative>(
+      std::make_shared<DefaultJvmInvoker>(), mock_legacy, nullptr, nullptr,
+      custom_cache);
+
+  // Set up mock legacy response.
+  DartCallbackInfo legacy_info{"legacyMethod", "LegacyClass",
+                               "package:test/legacy.dart"};
+  EXPECT_CALL(*mock_legacy, LookupCallbackInformation(200L))
+      .WillOnce(Return(legacy_info));
+
+  // Explicitly disable embedder mode on this instance to force legacy routing.
+  native->GetRouter()->SetInstanceEmbedderEnabled(false);
+  EXPECT_FALSE(native->GetRouter()->IsInstanceEmbedderEnabled());
+
+  // Lookup must be routed to legacy delegate.
+  auto resolved_legacy = native->LookupCallbackInformation(200L);
+  ASSERT_TRUE(resolved_legacy.has_value());
+  EXPECT_EQ(resolved_legacy->name, "legacyMethod");
+  EXPECT_EQ(resolved_legacy->class_name, "LegacyClass");
+  EXPECT_EQ(resolved_legacy->library_path, "package:test/legacy.dart");
+
+  // Re-enable embedder mode and verify lookup resolves from the embedder cache.
+  native->GetRouter()->SetInstanceEmbedderEnabled(true);
+  EXPECT_TRUE(native->GetRouter()->IsInstanceEmbedderEnabled());
+
+  auto resolved_embedder = native->LookupCallbackInformation(100L);
+  ASSERT_TRUE(resolved_embedder.has_value());
+  EXPECT_EQ(resolved_embedder->name, "embedderMethod");
+  EXPECT_EQ(resolved_embedder->class_name, "EmbedderClass");
+  EXPECT_EQ(resolved_embedder->library_path, "package:test/embedder.dart");
+}
+
+TEST(FlutterEmbedderNativeTest, CallbackCacheProviderMultithreadedResolution) {
+  auto custom_cache = std::make_shared<InMemoryCallbackCacheProvider>();
+  for (int i = 0; i < 50; ++i) {
+    custom_cache->AddCallback(
+        static_cast<int64_t>(1000 + i), "callback_" + std::to_string(i),
+        "Class_" + std::to_string(i),
+        "package:test/lib_" + std::to_string(i) + ".dart");
+  }
+
+  auto native = std::make_unique<FlutterEmbedderNative>(
+      std::make_shared<DefaultJvmInvoker>(), nullptr, nullptr, nullptr,
+      custom_cache);
+  native->GetRouter()->SetInstanceEmbedderEnabled(true);
+
+  constexpr size_t kThreadCount = 8;
+  constexpr size_t kIterations = 200;
+  std::vector<std::future<bool>> futures;
+  futures.reserve(kThreadCount);
+
+  for (size_t t = 0; t < kThreadCount; ++t) {
+    futures.push_back(std::async(std::launch::async, [&native, t]() {
+      for (size_t iter = 0; iter < kIterations; ++iter) {
+        int idx = static_cast<int>((t + iter) % 50);
+        int64_t handle = static_cast<int64_t>(1000 + idx);
+        auto cb = native->LookupCallbackInformation(handle);
+        if (!cb.has_value()) {
+          return false;
+        }
+        if (cb->name != "callback_" + std::to_string(idx) ||
+            cb->class_name != "Class_" + std::to_string(idx) ||
+            cb->library_path !=
+                "package:test/lib_" + std::to_string(idx) + ".dart") {
+          return false;
+        }
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
+}
+
+TEST(FlutterEmbedderNativeTest, JniRouterNullDelegateSafety) {
+  auto empty_router = std::make_unique<JniRouter>(nullptr, nullptr);
+
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_FALSE(empty_router->RouteLookupCallbackInformation(42L).has_value());
+  EXPECT_FALSE(empty_router->RouteFirstFrame());
+  EXPECT_FALSE(empty_router->RoutePreEngineRestart());
+
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_FALSE(empty_router->RouteLookupCallbackInformation(42L).has_value());
+  EXPECT_FALSE(empty_router->RouteFirstFrame());
+  EXPECT_FALSE(empty_router->RoutePreEngineRestart());
+
+  JniRouter::SetEmbedderEnabled(false);
+}
+
+// =============================================================================
+// CallbackCacheProvider Unit Tests
+// =============================================================================
+
+TEST(CallbackCacheProviderTest, InMemoryCallbackCacheOperations) {
+  auto provider = std::make_shared<InMemoryCallbackCacheProvider>();
+  EXPECT_EQ(provider->GetSize(), 0u);
+
+  // Lookup on empty cache returns nullopt
+  EXPECT_FALSE(provider->GetCallbackInformation(100L).has_value());
+
+  // Add top-level callback
+  provider->AddCallback(101L, "mainEntry", "", "package:flutter_app/main.dart");
+  EXPECT_EQ(provider->GetSize(), 1u);
+
+  auto cb101 = provider->GetCallbackInformation(101L);
+  ASSERT_TRUE(cb101.has_value());
+  if (cb101.has_value()) {
+    EXPECT_EQ(cb101->name, "mainEntry");
+    EXPECT_EQ(cb101->class_name, "");
+    EXPECT_EQ(cb101->library_path, "package:flutter_app/main.dart");
+  }
+
+  // Add class-scoped callback
+  provider->AddCallback(102L, "handleBackgroundMessage", "FirebasePlugin",
+                        "package:firebase_messaging/firebase.dart");
+  EXPECT_EQ(provider->GetSize(), 2u);
+
+  auto cb102 = provider->GetCallbackInformation(102L);
+  ASSERT_TRUE(cb102.has_value());
+  if (cb102.has_value()) {
+    EXPECT_EQ(cb102->name, "handleBackgroundMessage");
+    EXPECT_EQ(cb102->class_name, "FirebasePlugin");
+    EXPECT_EQ(cb102->library_path, "package:firebase_messaging/firebase.dart");
+  }
+
+  // Overwrite existing callback
+  provider->AddCallback(101L, "mainEntryUpdated", "AppBootstrap",
+                        "package:flutter_app/bootstrap.dart");
+  EXPECT_EQ(provider->GetSize(), 2u);
+
+  auto cb101_updated = provider->GetCallbackInformation(101L);
+  ASSERT_TRUE(cb101_updated.has_value());
+  if (cb101_updated.has_value()) {
+    EXPECT_EQ(cb101_updated->name, "mainEntryUpdated");
+    EXPECT_EQ(cb101_updated->class_name, "AppBootstrap");
+  }
+
+  // Remove single callback
+  provider->RemoveCallback(101L);
+  EXPECT_EQ(provider->GetSize(), 1u);
+  EXPECT_FALSE(provider->GetCallbackInformation(101L).has_value());
+  EXPECT_TRUE(provider->GetCallbackInformation(102L).has_value());
+
+  // Clear all
+  provider->Clear();
+  EXPECT_EQ(provider->GetSize(), 0u);
+  EXPECT_FALSE(provider->GetCallbackInformation(102L).has_value());
+}
+
+TEST(CallbackCacheProviderTest, ThreadSafeConcurrentCacheModifications) {
+  auto provider = std::make_shared<InMemoryCallbackCacheProvider>();
+
+  constexpr size_t kThreadCount = 8;
+  constexpr size_t kEntriesPerThread = 100;
+  std::vector<std::future<bool>> futures;
+  futures.reserve(kThreadCount);
+
+  // Concurrent writes
+  for (size_t t = 0; t < kThreadCount; ++t) {
+    futures.push_back(std::async(std::launch::async, [provider, t]() {
+      for (size_t i = 0; i < kEntriesPerThread; ++i) {
+        int64_t handle = static_cast<int64_t>(t * 1000 + i);
+        provider->AddCallback(
+            handle, "fn_" + std::to_string(handle),
+            "Class_" + std::to_string(t),
+            "package:test/mod_" + std::to_string(t) + ".dart");
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
+
+  EXPECT_EQ(provider->GetSize(), kThreadCount * kEntriesPerThread);
+
+  // Concurrent reads
+  futures.clear();
+  futures.reserve(kThreadCount);
+  for (size_t t = 0; t < kThreadCount; ++t) {
+    futures.push_back(std::async(std::launch::async, [provider, t]() {
+      for (size_t i = 0; i < kEntriesPerThread; ++i) {
+        int64_t handle = static_cast<int64_t>(t * 1000 + i);
+        auto cb = provider->GetCallbackInformation(handle);
+        if (!cb.has_value()) {
+          return false;
+        }
+        if (cb->name != "fn_" + std::to_string(handle) ||
+            cb->class_name != "Class_" + std::to_string(t)) {
+          return false;
+        }
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
+}
+
+TEST(FlutterEmbedderNativeTest,
+     ThreadSafeConcurrentCallbackCacheSwappingAndResolution) {
+  auto native = std::make_unique<FlutterEmbedderNative>();
+  native->GetRouter()->SetInstanceEmbedderEnabled(true);
+
+  constexpr size_t kReaderThreads = 6;
+  constexpr size_t kWriterThreads = 2;
+  constexpr size_t kIterations = 150;
+
+  std::atomic<bool> running{true};
+  std::vector<std::future<bool>> reader_futures;
+  reader_futures.reserve(kReaderThreads);
+
+  for (size_t r = 0; r < kReaderThreads; ++r) {
+    reader_futures.push_back(
+        std::async(std::launch::async, [&native, &running]() {
+          while (running.load()) {
+            auto cache = native->GetCallbackCache();
+            if (!cache) {
+              return false;
+            }
+            native->LookupCallbackInformation(42L);
+          }
+          return true;
+        }));
+  }
+
+  std::vector<std::future<bool>> writer_futures;
+  writer_futures.reserve(kWriterThreads);
+  for (size_t w = 0; w < kWriterThreads; ++w) {
+    writer_futures.push_back(std::async(std::launch::async, [&native, w]() {
+      for (size_t i = 0; i < kIterations; ++i) {
+        auto custom_cache = std::make_shared<InMemoryCallbackCacheProvider>();
+        custom_cache->AddCallback(
+            42L, "cb_" + std::to_string(w) + "_" + std::to_string(i), "Class",
+            "package:test/cb.dart");
+        native->SetCallbackCache(custom_cache);
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : writer_futures) {
+    EXPECT_TRUE(f.get());
+  }
+  running.store(false);
+
+  for (auto& f : reader_futures) {
+    EXPECT_TRUE(f.get());
+  }
+}
+
+TEST(CallbackCacheProviderTest, ConcurrentMixedReadersAndWriters) {
+  auto provider = std::make_shared<InMemoryCallbackCacheProvider>();
+
+  // Prepopulate
+  for (int64_t i = 0; i < 50; ++i) {
+    provider->AddCallback(i, "cb_" + std::to_string(i), "", "lib.dart");
+  }
+
+  constexpr size_t kReaderThreads = 6;
+  constexpr size_t kWriterThreads = 2;
+  constexpr size_t kOperations = 200;
+
+  std::atomic<bool> running{true};
+  std::vector<std::future<bool>> reader_futures;
+  reader_futures.reserve(kReaderThreads);
+
+  for (size_t r = 0; r < kReaderThreads; ++r) {
+    reader_futures.push_back(
+        std::async(std::launch::async, [provider, &running, r]() {
+          while (running.load()) {
+            size_t sz = provider->GetSize();
+            (void)sz;
+            int64_t handle = static_cast<int64_t>(r % 50);
+            provider->GetCallbackInformation(handle);
+          }
+          return true;
+        }));
+  }
+
+  std::vector<std::future<bool>> writer_futures;
+  writer_futures.reserve(kWriterThreads);
+
+  for (size_t w = 0; w < kWriterThreads; ++w) {
+    writer_futures.push_back(std::async(std::launch::async, [provider, w]() {
+      for (size_t i = 0; i < kOperations; ++i) {
+        int64_t handle = static_cast<int64_t>(1000 + w * 1000 + i);
+        provider->AddCallback(handle, "dyn_" + std::to_string(handle),
+                              "DynamicClass", "package:test/dynamic.dart");
+        if (i % 2 == 0) {
+          provider->RemoveCallback(handle);
+        }
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : writer_futures) {
+    EXPECT_TRUE(f.get());
+  }
+  running.store(false);
+
+  for (auto& f : reader_futures) {
+    EXPECT_TRUE(f.get());
+  }
 }
 
 // =============================================================================

@@ -7,6 +7,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <map>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -43,7 +45,8 @@ class FlutterEmbedderNative {
       std::shared_ptr<JvmInvoker> jvm_invoker,
       const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr,
       std::shared_ptr<OSLibraryLoader> library_loader = nullptr,
-      std::shared_ptr<APKAssetProvider> asset_provider = nullptr);
+      std::shared_ptr<APKAssetProvider> asset_provider = nullptr,
+      std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr);
   virtual ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -173,6 +176,17 @@ class FlutterEmbedderNative {
 
   /// @brief Creates a cloned AssetResolver for engine initialization.
   std::unique_ptr<AssetResolver> CreateAssetResolver() const;
+
+  /// @brief Returns the CallbackCacheProvider managed by this native instance.
+  std::shared_ptr<CallbackCacheProvider> GetCallbackCache() const;
+
+  /// @brief Sets or replaces the CallbackCacheProvider managed by this native
+  /// instance.
+  void SetCallbackCache(std::shared_ptr<CallbackCacheProvider> provider);
+
+  /// @brief Looks up Dart callback information for a given callback handle.
+  std::optional<DartCallbackInfo> LookupCallbackInformation(
+      int64_t handle) const;
 
  private:
   static std::mutex default_library_loader_mutex_;

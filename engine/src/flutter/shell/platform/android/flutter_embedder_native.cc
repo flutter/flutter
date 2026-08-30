@@ -33,9 +33,11 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<JvmInvoker> jvm_invoker,
     const std::shared_ptr<LegacyJniDelegate>& legacy_delegate,
     std::shared_ptr<OSLibraryLoader> library_loader,
-    std::shared_ptr<APKAssetProvider> asset_provider)
+    std::shared_ptr<APKAssetProvider> asset_provider,
+    std::shared_ptr<CallbackCacheProvider> callback_cache)
     : jvm_invoker_(std::move(jvm_invoker)),
-      jni_delegate_(std::make_shared<JniDelegate>(jvm_invoker_)),
+      jni_delegate_(std::make_shared<JniDelegate>(jvm_invoker_,
+                                                  std::move(callback_cache))),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, legacy_delegate)),
       library_loader_(library_loader ? std::move(library_loader)
                                      : GetDefaultLibraryLoader()),
@@ -447,6 +449,28 @@ std::unique_ptr<AssetResolver> FlutterEmbedderNative::CreateAssetResolver()
     return nullptr;
   }
   return provider->Clone();
+}
+
+std::shared_ptr<CallbackCacheProvider> FlutterEmbedderNative::GetCallbackCache()
+    const {
+  return jni_delegate_ ? jni_delegate_->GetCallbackCache() : nullptr;
+}
+
+void FlutterEmbedderNative::SetCallbackCache(
+    std::shared_ptr<CallbackCacheProvider> provider) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetCallbackCache");
+  if (jni_delegate_) {
+    jni_delegate_->SetCallbackCache(std::move(provider));
+  }
+}
+
+std::optional<DartCallbackInfo>
+FlutterEmbedderNative::LookupCallbackInformation(int64_t handle) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::LookupCallbackInformation");
+  if (jni_router_) {
+    return jni_router_->RouteLookupCallbackInformation(handle);
+  }
+  return std::nullopt;
 }
 
 }  // namespace android
