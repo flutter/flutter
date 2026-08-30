@@ -61,6 +61,26 @@ TEST(EmbedderProcTable, CallProc) {
   EXPECT_NE(procs.GetCurrentTime(), 0ULL);
 }
 
+// Spot-checks calling deferred library function pointers via proc table.
+TEST(EmbedderProcTable, CallDeferredLibraryProcs) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  EXPECT_NE(procs.LoadDartDeferredLibrary, nullptr);
+  EXPECT_NE(procs.NotifyDartDeferredLibraryLoadError, nullptr);
+  EXPECT_NE(procs.LoadDartDeferredLibraryFailure, nullptr);
+
+  // Calling with invalid arguments returns kInvalidArguments.
+  EXPECT_EQ(procs.LoadDartDeferredLibrary(nullptr, 0, nullptr, 0, nullptr, 0),
+            kInvalidArguments);
+  EXPECT_EQ(
+      procs.NotifyDartDeferredLibraryLoadError(nullptr, 0, nullptr, false),
+      kInvalidArguments);
+  EXPECT_EQ(procs.LoadDartDeferredLibraryFailure(nullptr, 0, nullptr, false),
+            kInvalidArguments);
+}
+
 }  // namespace testing
 }  // namespace flutter
 
