@@ -89,16 +89,9 @@ bool JniRouter::RouteSemanticsUpdate(
     const std::vector<std::string>& strings,
     const std::vector<std::vector<uint8_t>>& string_attribute_args) {
   TRACE_EVENT0("flutter", "JniRouter::RouteSemanticsUpdate");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->UpdateSemantics(buffer, strings,
-                                                 string_attribute_args);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->UpdateSemantics(buffer, strings,
-                                             string_attribute_args);
+  if (embedder_delegate_) {
+    return embedder_delegate_->UpdateSemantics(buffer, strings,
+                                               string_attribute_args);
   }
   return false;
 }
@@ -107,44 +100,25 @@ bool JniRouter::RouteCustomAccessibilityActions(
     const std::vector<uint8_t>& actions_buffer,
     const std::vector<std::string>& action_strings) {
   TRACE_EVENT0("flutter", "JniRouter::RouteCustomAccessibilityActions");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->UpdateCustomAccessibilityActions(
-          actions_buffer, action_strings);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->UpdateCustomAccessibilityActions(actions_buffer,
-                                                              action_strings);
+  if (embedder_delegate_) {
+    return embedder_delegate_->UpdateCustomAccessibilityActions(actions_buffer,
+                                                                action_strings);
   }
   return false;
 }
 
 bool JniRouter::RouteSemanticsUpdate(const FlutterSemanticsUpdate2& update) {
   TRACE_EVENT0("flutter", "JniRouter::RouteSemanticsUpdate(struct)");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->UpdateSemantics(update);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->UpdateSemantics(update);
+  if (embedder_delegate_) {
+    return embedder_delegate_->UpdateSemantics(update);
   }
   return false;
 }
 
 bool JniRouter::RouteSemanticsEnabled(bool enabled) {
   TRACE_EVENT0("flutter", "JniRouter::RouteSemanticsEnabled");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetSemanticsEnabled(enabled);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetSemanticsEnabled(enabled);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSemanticsEnabled(enabled);
   }
   return false;
 }
@@ -154,30 +128,17 @@ bool JniRouter::RouteDispatchSemanticsAction(int32_t node_id,
                                              const std::vector<uint8_t>& data,
                                              int64_t view_id) {
   TRACE_EVENT0("flutter", "JniRouter::RouteDispatchSemanticsAction");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->DispatchSemanticsAction(node_id, action, data,
-                                                         view_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->DispatchSemanticsAction(node_id, action, data,
-                                                     view_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->DispatchSemanticsAction(node_id, action, data,
+                                                       view_id);
   }
   return false;
 }
 
 bool JniRouter::RouteSetAccessibilityFeatures(int32_t flags) {
   TRACE_EVENT0("flutter", "JniRouter::RouteSetAccessibilityFeatures");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetAccessibilityFeatures(flags);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetAccessibilityFeatures(flags);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetAccessibilityFeatures(flags);
   }
   return false;
 }
@@ -388,14 +349,8 @@ int64_t JniRouter::RouteCreatePlatformView(
     PlatformViewCompositionType composition_type) {
   TRACE_EVENT1("flutter", "JniRouter::RouteCreatePlatformView", "view_id",
                std::to_string(params.view_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->CreatePlatformView(params, composition_type);
-    }
-    return -1;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->CreatePlatformView(params, composition_type);
+  if (embedder_delegate_) {
+    return embedder_delegate_->CreatePlatformView(params, composition_type);
   }
   return -1;
 }
@@ -403,14 +358,8 @@ int64_t JniRouter::RouteCreatePlatformView(
 bool JniRouter::RouteDisposePlatformView(int64_t view_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteDisposePlatformView", "view_id",
                std::to_string(view_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->DisposePlatformView(view_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->DisposePlatformView(view_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->DisposePlatformView(view_id);
   }
   return false;
 }
@@ -419,14 +368,8 @@ bool JniRouter::RouteResizePlatformView(
     const PlatformViewResizeRequest& request) {
   TRACE_EVENT1("flutter", "JniRouter::RouteResizePlatformView", "view_id",
                std::to_string(request.view_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->ResizePlatformView(request);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->ResizePlatformView(request);
+  if (embedder_delegate_) {
+    return embedder_delegate_->ResizePlatformView(request);
   }
   return false;
 }
@@ -436,14 +379,8 @@ bool JniRouter::RouteOffsetPlatformView(int64_t view_id,
                                         double left) {
   TRACE_EVENT1("flutter", "JniRouter::RouteOffsetPlatformView", "view_id",
                std::to_string(view_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OffsetPlatformView(view_id, top, left);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OffsetPlatformView(view_id, top, left);
+  if (embedder_delegate_) {
+    return embedder_delegate_->OffsetPlatformView(view_id, top, left);
   }
   return false;
 }
@@ -452,14 +389,8 @@ bool JniRouter::RouteSetPlatformViewDirection(int64_t view_id,
                                               int32_t direction) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetPlatformViewDirection", "view_id",
                std::to_string(view_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetPlatformViewDirection(view_id, direction);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetPlatformViewDirection(view_id, direction);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetPlatformViewDirection(view_id, direction);
   }
   return false;
 }
@@ -467,14 +398,8 @@ bool JniRouter::RouteSetPlatformViewDirection(int64_t view_id,
 bool JniRouter::RouteClearPlatformViewFocus(int64_t view_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteClearPlatformViewFocus", "view_id",
                std::to_string(view_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->ClearPlatformViewFocus(view_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->ClearPlatformViewFocus(view_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->ClearPlatformViewFocus(view_id);
   }
   return false;
 }
@@ -482,14 +407,8 @@ bool JniRouter::RouteClearPlatformViewFocus(int64_t view_id) {
 bool JniRouter::RouteDispatchPlatformViewTouch(const PlatformViewTouch& touch) {
   TRACE_EVENT1("flutter", "JniRouter::RouteDispatchPlatformViewTouch",
                "view_id", std::to_string(touch.view_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->DispatchPlatformViewTouch(touch);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->DispatchPlatformViewTouch(touch);
+  if (embedder_delegate_) {
+    return embedder_delegate_->DispatchPlatformViewTouch(touch);
   }
   return false;
 }
@@ -498,14 +417,8 @@ bool JniRouter::RouteOnDisplayPlatformView(
     const PlatformViewGeometry& geometry) {
   TRACE_EVENT1("flutter", "JniRouter::RouteOnDisplayPlatformView", "view_id",
                std::to_string(geometry.view_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OnDisplayPlatformView(geometry);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OnDisplayPlatformView(geometry);
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnDisplayPlatformView(geometry);
   }
   return false;
 }
@@ -520,15 +433,8 @@ bool JniRouter::RouteOnDisplayPlatformView(
     int32_t view_height) {
   TRACE_EVENT1("flutter", "JniRouter::RouteOnDisplayPlatformView(struct)",
                "view_id", std::to_string(platform_view.identifier).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OnDisplayPlatformView(
-          platform_view, x, y, width, height, view_width, view_height);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OnDisplayPlatformView(
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnDisplayPlatformView(
         platform_view, x, y, width, height, view_width, view_height);
   }
   return false;
@@ -537,84 +443,48 @@ bool JniRouter::RouteOnDisplayPlatformView(
 bool JniRouter::RouteHidePlatformView(int64_t view_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteHidePlatformView", "view_id",
                std::to_string(view_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->HidePlatformView(view_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->HidePlatformView(view_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->HidePlatformView(view_id);
   }
   return false;
 }
 
 bool JniRouter::RouteSynchronizeToNativeViewHierarchy(bool synchronize) {
   TRACE_EVENT0("flutter", "JniRouter::RouteSynchronizeToNativeViewHierarchy");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SynchronizeToNativeViewHierarchy(synchronize);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SynchronizeToNativeViewHierarchy(synchronize);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SynchronizeToNativeViewHierarchy(synchronize);
   }
   return false;
 }
 
 bool JniRouter::RouteBeginFrame() {
   TRACE_EVENT0("flutter", "JniRouter::RouteBeginFrame");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OnBeginFrame();
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OnBeginFrame();
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnBeginFrame();
   }
   return false;
 }
 
 bool JniRouter::RouteEndFrame() {
   TRACE_EVENT0("flutter", "JniRouter::RouteEndFrame");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OnEndFrame();
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OnEndFrame();
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnEndFrame();
   }
   return false;
 }
 
 std::optional<int32_t> JniRouter::RouteCreateOverlaySurface() {
   TRACE_EVENT0("flutter", "JniRouter::RouteCreateOverlaySurface");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->CreateOverlaySurface();
-    }
-    return std::nullopt;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->CreateOverlaySurface();
+  if (embedder_delegate_) {
+    return embedder_delegate_->CreateOverlaySurface();
   }
   return std::nullopt;
 }
 
 bool JniRouter::RouteDestroyOverlaySurfaces() {
   TRACE_EVENT0("flutter", "JniRouter::RouteDestroyOverlaySurfaces");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->DestroyOverlaySurfaces();
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->DestroyOverlaySurfaces();
+  if (embedder_delegate_) {
+    return embedder_delegate_->DestroyOverlaySurfaces();
   }
   return false;
 }
@@ -623,14 +493,8 @@ bool JniRouter::RouteOnDisplayOverlaySurface(
     const PlatformViewOverlay& overlay) {
   TRACE_EVENT1("flutter", "JniRouter::RouteOnDisplayOverlaySurface",
                "surface_id", std::to_string(overlay.surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OnDisplayOverlaySurface(overlay);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OnDisplayOverlaySurface(overlay);
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnDisplayOverlaySurface(overlay);
   }
   return false;
 }
@@ -638,14 +502,8 @@ bool JniRouter::RouteOnDisplayOverlaySurface(
 bool JniRouter::RouteShowOverlaySurface(int32_t surface_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteShowOverlaySurface", "surface_id",
                std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->ShowOverlaySurface(surface_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->ShowOverlaySurface(surface_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->ShowOverlaySurface(surface_id);
   }
   return false;
 }
@@ -653,56 +511,32 @@ bool JniRouter::RouteShowOverlaySurface(int32_t surface_id) {
 bool JniRouter::RouteHideOverlaySurface(int32_t surface_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteHideOverlaySurface", "surface_id",
                std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->HideOverlaySurface(surface_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->HideOverlaySurface(surface_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->HideOverlaySurface(surface_id);
   }
   return false;
 }
 
 bool JniRouter::RouteCreatePlatformViewTransaction() {
   TRACE_EVENT0("flutter", "JniRouter::RouteCreatePlatformViewTransaction");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->CreatePlatformViewTransaction();
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->CreatePlatformViewTransaction();
+  if (embedder_delegate_) {
+    return embedder_delegate_->CreatePlatformViewTransaction();
   }
   return false;
 }
 
 bool JniRouter::RouteSwapPlatformViewTransactions() {
   TRACE_EVENT0("flutter", "JniRouter::RouteSwapPlatformViewTransactions");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SwapPlatformViewTransactions();
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SwapPlatformViewTransactions();
+  if (embedder_delegate_) {
+    return embedder_delegate_->SwapPlatformViewTransactions();
   }
   return false;
 }
 
 bool JniRouter::RouteApplyPlatformViewTransactions() {
   TRACE_EVENT0("flutter", "JniRouter::RouteApplyPlatformViewTransactions");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->ApplyPlatformViewTransactions();
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->ApplyPlatformViewTransactions();
+  if (embedder_delegate_) {
+    return embedder_delegate_->ApplyPlatformViewTransactions();
   }
   return false;
 }
@@ -710,28 +544,16 @@ bool JniRouter::RouteApplyPlatformViewTransactions() {
 bool JniRouter::RouteSetHcppEnabled(bool enabled) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetHcppEnabled", "enabled",
                enabled ? "true" : "false");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetHcppEnabled(enabled);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetHcppEnabled(enabled);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetHcppEnabled(enabled);
   }
   return false;
 }
 
 bool JniRouter::RouteIsHcppEnabled() const {
   TRACE_EVENT0("flutter", "JniRouter::RouteIsHcppEnabled");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->IsHcppEnabled();
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->IsHcppEnabled();
+  if (embedder_delegate_) {
+    return embedder_delegate_->IsHcppEnabled();
   }
   return false;
 }
@@ -740,14 +562,8 @@ bool JniRouter::RouteCreateSurfaceControl(int64_t surface_id,
                                           const std::string& debug_name) {
   TRACE_EVENT1("flutter", "JniRouter::RouteCreateSurfaceControl", "surface_id",
                std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->CreateSurfaceControl(surface_id, debug_name);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->CreateSurfaceControl(surface_id, debug_name);
+  if (embedder_delegate_) {
+    return embedder_delegate_->CreateSurfaceControl(surface_id, debug_name);
   }
   return false;
 }
@@ -755,14 +571,8 @@ bool JniRouter::RouteCreateSurfaceControl(int64_t surface_id,
 bool JniRouter::RouteDestroySurfaceControl(int64_t surface_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteDestroySurfaceControl", "surface_id",
                std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->DestroySurfaceControl(surface_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->DestroySurfaceControl(surface_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->DestroySurfaceControl(surface_id);
   }
   return false;
 }
@@ -771,15 +581,9 @@ bool JniRouter::RouteReparentSurfaceControl(int64_t surface_id,
                                             int64_t new_parent_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteReparentSurfaceControl",
                "surface_id", std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->ReparentSurfaceControl(surface_id,
-                                                        new_parent_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->ReparentSurfaceControl(surface_id, new_parent_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->ReparentSurfaceControl(surface_id,
+                                                      new_parent_id);
   }
   return false;
 }
@@ -791,16 +595,9 @@ bool JniRouter::RouteSetSurfaceControlGeometry(
     int32_t transform) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlGeometry",
                "surface_id", std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetSurfaceControlGeometry(
-          surface_id, source, destination, transform);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetSurfaceControlGeometry(surface_id, source,
-                                                       destination, transform);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlGeometry(
+        surface_id, source, destination, transform);
   }
   return false;
 }
@@ -809,15 +606,8 @@ bool JniRouter::RouteSetSurfaceControlVisibility(int64_t surface_id,
                                                  bool visible) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlVisibility",
                "surface_id", std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetSurfaceControlVisibility(surface_id,
-                                                             visible);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetSurfaceControlVisibility(surface_id, visible);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlVisibility(surface_id, visible);
   }
   return false;
 }
@@ -826,14 +616,8 @@ bool JniRouter::RouteSetSurfaceControlZOrder(int64_t surface_id,
                                              int32_t z_order) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlZOrder",
                "surface_id", std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetSurfaceControlZOrder(surface_id, z_order);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetSurfaceControlZOrder(surface_id, z_order);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlZOrder(surface_id, z_order);
   }
   return false;
 }
@@ -843,15 +627,8 @@ bool JniRouter::RouteSetSurfaceControlDamageRegion(
     const std::vector<AndroidSurfaceControlRect>& rects) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlDamageRegion",
                "surface_id", std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetSurfaceControlDamageRegion(surface_id,
-                                                               rects);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetSurfaceControlDamageRegion(surface_id, rects);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlDamageRegion(surface_id, rects);
   }
   return false;
 }
@@ -861,16 +638,9 @@ bool JniRouter::RouteSetSurfaceControlBuffer(int64_t surface_id,
                                              int fence_fd) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlBuffer",
                "surface_id", std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetSurfaceControlBuffer(surface_id, buffer,
-                                                         fence_fd);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetSurfaceControlBuffer(surface_id, buffer,
-                                                     fence_fd);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlBuffer(surface_id, buffer,
+                                                       fence_fd);
   }
   return false;
 }
@@ -879,15 +649,8 @@ bool JniRouter::RouteSetSurfaceControlBufferAlpha(int64_t surface_id,
                                                   float alpha) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlBufferAlpha",
                "surface_id", std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetSurfaceControlBufferAlpha(surface_id,
-                                                              alpha);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetSurfaceControlBufferAlpha(surface_id, alpha);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlBufferAlpha(surface_id, alpha);
   }
   return false;
 }
@@ -899,15 +662,9 @@ bool JniRouter::RouteSetSurfaceControlColor(int64_t surface_id,
                                             float alpha) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlColor",
                "surface_id", std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetSurfaceControlColor(surface_id, r, g, b,
-                                                        alpha);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetSurfaceControlColor(surface_id, r, g, b, alpha);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlColor(surface_id, r, g, b,
+                                                      alpha);
   }
   return false;
 }
@@ -916,10 +673,8 @@ std::optional<AndroidSurfaceControlState>
 JniRouter::RouteGetSurfaceControlState(int64_t surface_id) const {
   TRACE_EVENT1("flutter", "JniRouter::RouteGetSurfaceControlState",
                "surface_id", std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->GetSurfaceControlState(surface_id);
-    }
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetSurfaceControlState(surface_id);
   }
   return std::nullopt;
 }
@@ -928,10 +683,8 @@ std::shared_ptr<AndroidSurfaceControl> JniRouter::RouteGetSurfaceControl(
     int64_t surface_id) const {
   TRACE_EVENT1("flutter", "JniRouter::RouteGetSurfaceControl", "surface_id",
                std::to_string(surface_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->GetSurfaceControl(surface_id);
-    }
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetSurfaceControl(surface_id);
   }
   return nullptr;
 }

@@ -97,42 +97,6 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               (override));
 
   MOCK_METHOD(bool,
-              UpdateSemantics,
-              (const std::vector<uint8_t>& buffer,
-               const std::vector<std::string>& strings),
-              (override));
-
-  MOCK_METHOD(bool,
-              UpdateSemantics,
-              (const std::vector<uint8_t>& buffer,
-               const std::vector<std::string>& strings,
-               const std::vector<std::vector<uint8_t>>& string_attribute_args),
-              (override));
-
-  MOCK_METHOD(bool,
-              UpdateCustomAccessibilityActions,
-              (const std::vector<uint8_t>& actions_buffer,
-               const std::vector<std::string>& action_strings),
-              (override));
-
-  MOCK_METHOD(bool,
-              UpdateSemantics,
-              (const FlutterSemanticsUpdate2& update),
-              (override));
-
-  MOCK_METHOD(bool, SetSemanticsEnabled, (bool enabled), (override));
-
-  MOCK_METHOD(bool,
-              DispatchSemanticsAction,
-              (int32_t node_id,
-               FlutterSemanticsAction action,
-               const std::vector<uint8_t>& data,
-               int64_t view_id),
-              (override));
-
-  MOCK_METHOD(bool, SetAccessibilityFeatures, (int32_t flags), (override));
-
-  MOCK_METHOD(bool,
               SetApplicationLocale,
               (const std::string& locale),
               (override));
@@ -176,137 +140,6 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
   MOCK_METHOD(bool,
               RequestDartDeferredLibrary,
               (int64_t loading_unit_id),
-              (override));
-
-  MOCK_METHOD(int64_t,
-              CreatePlatformView,
-              (const PlatformViewCreationParams& params,
-               PlatformViewCompositionType composition_type),
-              (override));
-
-  MOCK_METHOD(bool, DisposePlatformView, (int64_t view_id), (override));
-
-  MOCK_METHOD(bool,
-              ResizePlatformView,
-              (const PlatformViewResizeRequest& request),
-              (override));
-
-  MOCK_METHOD(bool,
-              OffsetPlatformView,
-              (int64_t view_id, double top, double left),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetPlatformViewDirection,
-              (int64_t view_id, int32_t direction),
-              (override));
-
-  MOCK_METHOD(bool, ClearPlatformViewFocus, (int64_t view_id), (override));
-
-  MOCK_METHOD(bool,
-              DispatchPlatformViewTouch,
-              (const PlatformViewTouch& touch),
-              (override));
-
-  MOCK_METHOD(bool,
-              OnDisplayPlatformView,
-              (const PlatformViewGeometry& geometry),
-              (override));
-
-  MOCK_METHOD(bool,
-              OnDisplayPlatformView,
-              (const FlutterPlatformView& platform_view,
-               int32_t x,
-               int32_t y,
-               int32_t width,
-               int32_t height,
-               int32_t view_width,
-               int32_t view_height),
-              (override));
-
-  MOCK_METHOD(bool, HidePlatformView, (int64_t view_id), (override));
-
-  MOCK_METHOD(bool,
-              SynchronizeToNativeViewHierarchy,
-              (bool synchronize),
-              (override));
-
-  MOCK_METHOD(bool, OnBeginFrame, (), (override));
-
-  MOCK_METHOD(bool, OnEndFrame, (), (override));
-
-  MOCK_METHOD(std::optional<int32_t>, CreateOverlaySurface, (), (override));
-
-  MOCK_METHOD(bool, DestroyOverlaySurfaces, (), (override));
-
-  MOCK_METHOD(bool,
-              OnDisplayOverlaySurface,
-              (const PlatformViewOverlay& overlay),
-              (override));
-
-  MOCK_METHOD(bool, ShowOverlaySurface, (int32_t surface_id), (override));
-
-  MOCK_METHOD(bool, HideOverlaySurface, (int32_t surface_id), (override));
-
-  MOCK_METHOD(bool, SetHcppEnabled, (bool enabled), (override));
-
-  MOCK_METHOD(bool, CreatePlatformViewTransaction, (), (override));
-
-  MOCK_METHOD(bool, SwapPlatformViewTransactions, (), (override));
-
-  MOCK_METHOD(bool, ApplyPlatformViewTransactions, (), (override));
-
-  MOCK_METHOD(bool, IsHcppEnabled, (), (const, override));
-
-  MOCK_METHOD(bool,
-              CreateSurfaceControl,
-              (int64_t surface_id, const std::string& debug_name),
-              (override));
-
-  MOCK_METHOD(bool, DestroySurfaceControl, (int64_t surface_id), (override));
-
-  MOCK_METHOD(bool,
-              ReparentSurfaceControl,
-              (int64_t surface_id, int64_t new_parent_id),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlGeometry,
-              (int64_t surface_id,
-               const AndroidSurfaceControlRect& source,
-               const AndroidSurfaceControlRect& destination,
-               int32_t transform),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlVisibility,
-              (int64_t surface_id, bool visible),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlZOrder,
-              (int64_t surface_id, int32_t z_order),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlDamageRegion,
-              (int64_t surface_id,
-               const std::vector<AndroidSurfaceControlRect>& rects),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlBuffer,
-              (int64_t surface_id, void* buffer, int fence_fd),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlBufferAlpha,
-              (int64_t surface_id, float alpha),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlColor,
-              (int64_t surface_id, float r, float g, float b, float alpha),
               (override));
 
   MOCK_METHOD(bool, InitVM, (const AndroidVMArgs& args), (override));
@@ -1857,87 +1690,53 @@ TEST(SemanticsAndAccessibilityTest, JniDelegateSemanticsOperations) {
   EXPECT_TRUE(delegate->SetAccessibilityFeatures(7));
 }
 
-TEST(SemanticsAndAccessibilityTest, JniRouterSemanticsRoutingFlip) {
+TEST(SemanticsAndAccessibilityTest, JniRouterSemanticsDirectRouting) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker);
-  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
   auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
 
   std::vector<uint8_t> buffer = {0x11, 0x22};
   std::vector<std::string> strings = {"Hello"};
 
-  // 1. When Embedder is disabled -> routes to legacy_delegate
-  JniRouter::SetEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+  // Across both flag states, semantics routes directly to embedder_delegate
+  // (mock_invoker)
+  for (bool embedder_flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(embedder_flag);
 
-  EXPECT_CALL(
-      *legacy_delegate,
-      UpdateSemantics(buffer, strings, std::vector<std::vector<uint8_t>>{}))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSemanticsUpdate(buffer, strings));
+    EXPECT_CALL(*mock_invoker,
+                InvokeVoidMethod("updateSemantics",
+                                 "([B[Ljava/lang/String;[[B)V", buffer))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteSemanticsUpdate(buffer, strings));
 
-  EXPECT_CALL(*legacy_delegate,
-              UpdateCustomAccessibilityActions(buffer, strings))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteCustomAccessibilityActions(buffer, strings));
+    EXPECT_CALL(*mock_invoker,
+                InvokeVoidMethod("updateCustomAccessibilityActions",
+                                 "([B[Ljava/lang/String;)V", buffer))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteCustomAccessibilityActions(buffer, strings));
 
-  EXPECT_CALL(*legacy_delegate, SetSemanticsEnabled(true))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSemanticsEnabled(true));
+    std::vector<uint8_t> enabled_payload = {1};
+    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setSemanticsEnabled", "(Z)V",
+                                                enabled_payload))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteSemanticsEnabled(true));
 
-  EXPECT_CALL(*legacy_delegate, DispatchSemanticsAction(
-                                    42, kFlutterSemanticsActionTap, buffer, 0))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteDispatchSemanticsAction(
-      42, kFlutterSemanticsActionTap, buffer, 0));
+    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("dispatchSemanticsAction",
+                                                "(IIJ[B)V", ::testing::_))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteDispatchSemanticsAction(
+        42, kFlutterSemanticsActionTap, buffer, 0));
 
-  EXPECT_CALL(*legacy_delegate, SetAccessibilityFeatures(15))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetAccessibilityFeatures(15));
-
-  // 2. When Embedder is enabled -> routes to embedder_delegate (mock_invoker)
-  JniRouter::SetEmbedderEnabled(true);
-  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
-
-  EXPECT_CALL(*legacy_delegate, UpdateSemantics(_, _, _)).Times(0);
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("updateSemantics", "([B[Ljava/lang/String;[[B)V",
-                               buffer))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSemanticsUpdate(buffer, strings));
-
-  EXPECT_CALL(*legacy_delegate, UpdateCustomAccessibilityActions(_, _))
-      .Times(0);
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("updateCustomAccessibilityActions",
-                               "([B[Ljava/lang/String;)V", buffer))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteCustomAccessibilityActions(buffer, strings));
-
-  EXPECT_CALL(*legacy_delegate, SetSemanticsEnabled(_)).Times(0);
-  std::vector<uint8_t> enabled_payload = {1};
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("setSemanticsEnabled", "(Z)V", enabled_payload))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSemanticsEnabled(true));
-
-  EXPECT_CALL(*legacy_delegate, DispatchSemanticsAction(_, _, _, _)).Times(0);
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("dispatchSemanticsAction",
-                                              "(IIJ[B)V", ::testing::_))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteDispatchSemanticsAction(
-      42, kFlutterSemanticsActionTap, buffer, 0));
-
-  EXPECT_CALL(*legacy_delegate, SetAccessibilityFeatures(_)).Times(0);
-  std::vector<uint8_t> features_payload = {0x0F, 0x00, 0x00, 0x00};
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setAccessibilityFeatures",
-                                              "(I)V", features_payload))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetAccessibilityFeatures(15));
+    std::vector<uint8_t> features_payload = {0x0F, 0x00, 0x00, 0x00};
+    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setAccessibilityFeatures",
+                                                "(I)V", features_payload))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteSetAccessibilityFeatures(15));
+  }
 
   // Reset flag
-  JniRouter::SetEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 TEST(SemanticsAndAccessibilityTest, FlutterEmbedderNativeSemanticsIntegration) {
@@ -2600,7 +2399,7 @@ TEST(PlatformViewsTest, JniDelegatePlatformViewsIntegration) {
   EXPECT_FALSE(mem_provider->IsViewCreated(99));
 }
 
-TEST(PlatformViewsTest, JniRouterPlatformViewsRoutingFlip) {
+TEST(PlatformViewsTest, JniRouterPlatformViewsDirectRouting) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker);
   auto mem_provider = std::make_shared<InMemoryPlatformViewsProvider>();
@@ -2619,133 +2418,51 @@ TEST(PlatformViewsTest, JniRouterPlatformViewsRoutingFlip) {
       .view_id = 88, .width = 200.0, .height = 200.0};
   PlatformViewTouch touch = {.view_id = 88};
   PlatformViewGeometry geom = {.view_id = 88};
-  PlatformViewOverlay overlay = {.surface_id = 1};
   AndroidMutatorsStack stack;
 
-  // 1. When Embedder is disabled -> routes to legacy_delegate
-  JniRouter::SetEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+  // Across both flag states (false and true), all platform view methods route
+  // directly to embedder_delegate
+  for (bool embedder_flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(embedder_flag);
 
-  EXPECT_CALL(*legacy_delegate,
-              CreatePlatformView(
-                  params, PlatformViewCompositionType::kHybridComposition))
-      .WillOnce(Return(0));
-  EXPECT_EQ(router->RouteCreatePlatformView(
-                params, PlatformViewCompositionType::kHybridComposition),
-            0);
+    EXPECT_EQ(router->RouteCreatePlatformView(
+                  params, PlatformViewCompositionType::kHybridComposition),
+              0);
+    EXPECT_TRUE(mem_provider->IsViewCreated(88));
 
-  EXPECT_CALL(*legacy_delegate, ResizePlatformView(resize_req))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteResizePlatformView(resize_req));
+    EXPECT_TRUE(router->RouteResizePlatformView(resize_req));
+    EXPECT_TRUE(router->RouteOffsetPlatformView(88, 10.0, 20.0));
+    EXPECT_TRUE(router->RouteSetPlatformViewDirection(88, 1));
+    EXPECT_TRUE(router->RouteClearPlatformViewFocus(88));
+    EXPECT_TRUE(router->RouteDispatchPlatformViewTouch(touch));
+    EXPECT_TRUE(router->RouteOnDisplayPlatformView(geom));
+    EXPECT_TRUE(router->RouteHidePlatformView(88));
+    EXPECT_TRUE(router->RouteSynchronizeToNativeViewHierarchy(true));
+    EXPECT_TRUE(router->RouteBeginFrame());
+    EXPECT_TRUE(router->RouteEndFrame());
 
-  EXPECT_CALL(*legacy_delegate, OffsetPlatformView(88, 10.0, 20.0))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteOffsetPlatformView(88, 10.0, 20.0));
+    auto created_overlay = router->RouteCreateOverlaySurface();
+    ASSERT_TRUE(created_overlay.has_value());
+    if (created_overlay.has_value()) {
+      PlatformViewOverlay routed_overlay = {.surface_id = *created_overlay};
+      EXPECT_TRUE(router->RouteOnDisplayOverlaySurface(routed_overlay));
+      EXPECT_TRUE(router->RouteShowOverlaySurface(*created_overlay));
+      EXPECT_TRUE(router->RouteHideOverlaySurface(*created_overlay));
+    }
+    EXPECT_TRUE(router->RouteDestroyOverlaySurfaces());
 
-  EXPECT_CALL(*legacy_delegate, SetPlatformViewDirection(88, 1))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetPlatformViewDirection(88, 1));
+    EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
+    EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
+    EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
+    EXPECT_FALSE(router->RouteIsHcppEnabled());
 
-  EXPECT_CALL(*legacy_delegate, ClearPlatformViewFocus(88))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteClearPlatformViewFocus(88));
+    EXPECT_TRUE(router->RoutePlatformViewMutators(88, 0, 0, 100, 100, stack));
 
-  EXPECT_CALL(*legacy_delegate, DispatchPlatformViewTouch(touch))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteDispatchPlatformViewTouch(touch));
+    EXPECT_TRUE(router->RouteDisposePlatformView(88));
+    EXPECT_FALSE(mem_provider->IsViewCreated(88));
+  }
 
-  EXPECT_CALL(*legacy_delegate, OnDisplayPlatformView(geom))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteOnDisplayPlatformView(geom));
-
-  EXPECT_CALL(*legacy_delegate, HidePlatformView(88)).WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteHidePlatformView(88));
-
-  EXPECT_CALL(*legacy_delegate, SynchronizeToNativeViewHierarchy(true))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSynchronizeToNativeViewHierarchy(true));
-
-  EXPECT_CALL(*legacy_delegate, OnBeginFrame()).WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteBeginFrame());
-
-  EXPECT_CALL(*legacy_delegate, OnEndFrame()).WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteEndFrame());
-
-  EXPECT_CALL(*legacy_delegate, CreateOverlaySurface()).WillOnce(Return(5));
-  EXPECT_EQ(router->RouteCreateOverlaySurface(), 5);
-
-  EXPECT_CALL(*legacy_delegate, OnDisplayOverlaySurface(overlay))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteOnDisplayOverlaySurface(overlay));
-
-  EXPECT_CALL(*legacy_delegate, ShowOverlaySurface(5)).WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteShowOverlaySurface(5));
-
-  EXPECT_CALL(*legacy_delegate, HideOverlaySurface(5)).WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteHideOverlaySurface(5));
-
-  EXPECT_CALL(*legacy_delegate, DestroyOverlaySurfaces())
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteDestroyOverlaySurfaces());
-
-  EXPECT_CALL(*legacy_delegate, CreatePlatformViewTransaction())
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
-
-  EXPECT_CALL(*legacy_delegate, SwapPlatformViewTransactions())
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
-
-  EXPECT_CALL(*legacy_delegate, ApplyPlatformViewTransactions())
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
-
-  EXPECT_CALL(*legacy_delegate, IsHcppEnabled()).WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteIsHcppEnabled());
-  EXPECT_TRUE(router->RoutePlatformViewMutators(88, 0, 0, 100, 100, stack));
-
-  EXPECT_CALL(*legacy_delegate, DisposePlatformView(88)).WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteDisposePlatformView(88));
-
-  // 2. When Embedder is enabled -> routes to embedder_delegate (mem_provider)
   JniRouter::SetEmbedderEnabled(true);
-  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
-
-  EXPECT_EQ(router->RouteCreatePlatformView(
-                params, PlatformViewCompositionType::kHybridComposition),
-            0);
-  EXPECT_TRUE(mem_provider->IsViewCreated(88));
-
-  EXPECT_TRUE(router->RouteResizePlatformView(resize_req));
-  EXPECT_TRUE(router->RouteOffsetPlatformView(88, 10.0, 20.0));
-  EXPECT_TRUE(router->RouteSetPlatformViewDirection(88, 1));
-  EXPECT_TRUE(router->RouteClearPlatformViewFocus(88));
-  EXPECT_TRUE(router->RouteDispatchPlatformViewTouch(touch));
-  EXPECT_TRUE(router->RouteOnDisplayPlatformView(geom));
-  EXPECT_TRUE(router->RouteHidePlatformView(88));
-  EXPECT_TRUE(router->RouteSynchronizeToNativeViewHierarchy(true));
-  EXPECT_TRUE(router->RouteBeginFrame());
-  EXPECT_TRUE(router->RouteEndFrame());
-
-  auto created_overlay = router->RouteCreateOverlaySurface();
-  ASSERT_TRUE(created_overlay.has_value());
-  PlatformViewOverlay routed_overlay = {.surface_id = *created_overlay};
-  EXPECT_TRUE(router->RouteOnDisplayOverlaySurface(routed_overlay));
-  EXPECT_TRUE(router->RouteShowOverlaySurface(*created_overlay));
-  EXPECT_TRUE(router->RouteHideOverlaySurface(*created_overlay));
-  EXPECT_TRUE(router->RouteDestroyOverlaySurfaces());
-
-  EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
-  EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
-  EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
-  EXPECT_FALSE(router->RouteIsHcppEnabled());
-
-  EXPECT_TRUE(router->RoutePlatformViewMutators(88, 0, 0, 100, 100, stack));
-
-  EXPECT_TRUE(router->RouteDisposePlatformView(88));
-  EXPECT_FALSE(mem_provider->IsViewCreated(88));
-
-  JniRouter::SetEmbedderEnabled(false);
 }
 
 TEST(PlatformViewsTest, FlutterEmbedderNativePlatformViewsIntegration) {
@@ -4030,7 +3747,7 @@ TEST(SurfaceControlHcppTest, JniDelegateLifecycleAndOperations) {
   EXPECT_FALSE(delegate.GetSurfaceControlState(child_id).has_value());
 }
 
-TEST(SurfaceControlHcppTest, JniRouterRoutingFlip) {
+TEST(SurfaceControlHcppTest, JniRouterSurfaceControlDirectRouting) {
   auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
   ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
       .WillByDefault(Return(true));
@@ -4042,92 +3759,45 @@ TEST(SurfaceControlHcppTest, JniRouterRoutingFlip) {
   auto mock_legacy = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
   auto router = std::make_shared<JniRouter>(jni_delegate, mock_legacy);
 
-  // 1. When Embedder is disabled (legacy routing)
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+  // Across both flag states (false and true), all SurfaceControl methods route
+  // directly to jni_delegate
+  for (bool embedder_flag : {false, true}) {
+    FlutterEmbedderNative::SetEmbedderEnabled(embedder_flag);
 
-  EXPECT_CALL(*mock_legacy, SetHcppEnabled(true)).WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetHcppEnabled(true));
+    EXPECT_TRUE(router->RouteSetHcppEnabled(true));
+    EXPECT_TRUE(router->RouteIsHcppEnabled());
+    EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
 
-  EXPECT_CALL(*mock_legacy, IsHcppEnabled()).WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteIsHcppEnabled());
+    int64_t sc_id = embedder_flag ? 300 : 200;
+    EXPECT_TRUE(router->RouteCreateSurfaceControl(sc_id, "direct_sc"));
+    EXPECT_TRUE(router->RouteReparentSurfaceControl(sc_id, 100));
 
-  EXPECT_CALL(*mock_legacy, CreatePlatformViewTransaction())
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
+    AndroidSurfaceControlRect src = {0, 0, 100, 100};
+    AndroidSurfaceControlRect dst = {0, 0, 200, 200};
+    EXPECT_TRUE(router->RouteSetSurfaceControlGeometry(sc_id, src, dst, 0));
+    EXPECT_TRUE(router->RouteSetSurfaceControlVisibility(sc_id, true));
+    EXPECT_TRUE(router->RouteSetSurfaceControlZOrder(sc_id, 10));
 
-  EXPECT_CALL(*mock_legacy, SwapPlatformViewTransactions())
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
+    std::vector<AndroidSurfaceControlRect> rects = {{0, 0, 50, 50}};
+    EXPECT_TRUE(router->RouteSetSurfaceControlDamageRegion(sc_id, rects));
 
-  EXPECT_CALL(*mock_legacy, ApplyPlatformViewTransactions())
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
+    int dummy_buf = 99;
+    EXPECT_TRUE(router->RouteSetSurfaceControlBuffer(sc_id, &dummy_buf, -1));
+    EXPECT_TRUE(router->RouteSetSurfaceControlBufferAlpha(sc_id, 0.5f));
+    EXPECT_TRUE(
+        router->RouteSetSurfaceControlColor(sc_id, 0.1f, 0.2f, 0.3f, 1.0f));
 
-  EXPECT_CALL(*mock_legacy, CreateSurfaceControl(200, "legacy_sc"))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteCreateSurfaceControl(200, "legacy_sc"));
+    EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
+    EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
 
-  EXPECT_CALL(*mock_legacy, ReparentSurfaceControl(200, 100))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteReparentSurfaceControl(200, 100));
+    auto state = router->RouteGetSurfaceControlState(sc_id);
+    ASSERT_TRUE(state.has_value());
+    EXPECT_EQ(state->visibility, AndroidSurfaceControlVisibility::kShow);
+    EXPECT_EQ(state->z_order, 10);
+    EXPECT_TRUE(router->RouteDestroySurfaceControl(sc_id));
+  }
 
-  AndroidSurfaceControlRect src = {0, 0, 100, 100};
-  AndroidSurfaceControlRect dst = {0, 0, 200, 200};
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlGeometry(200, src, dst, 0))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlGeometry(200, src, dst, 0));
-
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlVisibility(200, true))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlVisibility(200, true));
-
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlZOrder(200, 10))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlZOrder(200, 10));
-
-  std::vector<AndroidSurfaceControlRect> rects = {{0, 0, 50, 50}};
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlDamageRegion(200, rects))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlDamageRegion(200, rects));
-
-  int dummy_buf = 99;
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlBuffer(200, &dummy_buf, -1))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlBuffer(200, &dummy_buf, -1));
-
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlBufferAlpha(200, 0.5f))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlBufferAlpha(200, 0.5f));
-
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlColor(200, 0.1f, 0.2f, 0.3f, 1.0f))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlColor(200, 0.1f, 0.2f, 0.3f, 1.0f));
-
-  EXPECT_CALL(*mock_legacy, DestroySurfaceControl(200)).WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteDestroySurfaceControl(200));
-
-  // 2. Flip routing to Embedder enabled
   FlutterEmbedderNative::SetEmbedderEnabled(true);
-  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
-
-  // These should go directly to JniDelegate, NO calls to mock_legacy!
-  EXPECT_TRUE(router->RouteSetHcppEnabled(true));
-  EXPECT_TRUE(router->RouteIsHcppEnabled());
-  EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
-  EXPECT_TRUE(router->RouteCreateSurfaceControl(300, "embedder_sc"));
-  EXPECT_TRUE(router->RouteSetSurfaceControlVisibility(300, true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlZOrder(300, 3));
-  EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
-  EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
-
-  auto state = router->RouteGetSurfaceControlState(300);
-  ASSERT_TRUE(state.has_value());
-  EXPECT_EQ(state->visibility, AndroidSurfaceControlVisibility::kShow);
-  EXPECT_EQ(state->z_order, 3);
-  EXPECT_TRUE(router->RouteDestroySurfaceControl(300));
-
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
 }
 
 TEST(SurfaceControlHcppTest, FlutterEmbedderNativeIntegration) {
@@ -4679,6 +4349,395 @@ TEST(Phase52LegacyDeletionSubsystemsTest,
           return false;
         }
         if (!native.PushPlatformViewMutators(pv, 0, 0, 100, 100)) {
+          return false;
+        }
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
+}
+
+TEST(Phase53LegacyDeletionPlatformViewsSemanticsTest,
+     PlatformViewsAndSemanticsPurgedAndDirectlyRouted) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(::testing::Return(true));
+
+  auto platform_views_provider =
+      std::make_shared<InMemoryPlatformViewsProvider>();
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+
+  auto embedder_delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, platform_views_provider, nullptr, nullptr,
+      nullptr, nullptr, nullptr, sc_provider);
+  auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+
+  auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
+
+  for (bool embedder_flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(embedder_flag);
+
+    // 1. Semantics Subsystem Direct Routing
+    std::vector<uint8_t> buffer = {0x01, 0x02, 0x03};
+    std::vector<std::string> strings = {"SemanticsLabel"};
+    std::vector<std::vector<uint8_t>> string_attrs = {{0xAA}};
+
+    EXPECT_CALL(*mock_invoker,
+                InvokeVoidMethod("updateSemantics",
+                                 "([B[Ljava/lang/String;[[B)V", buffer))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteSemanticsUpdate(buffer, strings, string_attrs));
+
+    EXPECT_CALL(*mock_invoker,
+                InvokeVoidMethod("updateCustomAccessibilityActions",
+                                 "([B[Ljava/lang/String;)V", buffer))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteCustomAccessibilityActions(buffer, strings));
+
+    FlutterSemanticsNode2 node = {};
+    node.struct_size = sizeof(FlutterSemanticsNode2);
+    node.id = 55;
+    node.label = "TestNode";
+    FlutterSemanticsNode2* nodes[] = {&node};
+    FlutterSemanticsUpdate2 sem_update = {
+        .struct_size = sizeof(FlutterSemanticsUpdate2),
+        .node_count = 1,
+        .nodes = nodes,
+        .custom_action_count = 0,
+        .custom_actions = nullptr,
+        .view_id = 0,
+    };
+    EXPECT_CALL(
+        *mock_invoker,
+        InvokeVoidMethod("updateSemantics", "([B[Ljava/lang/String;[[B)V", _))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteSemanticsUpdate(sem_update));
+
+    std::vector<uint8_t> enabled_payload = {1};
+    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setSemanticsEnabled", "(Z)V",
+                                                enabled_payload))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteSemanticsEnabled(true));
+
+    EXPECT_CALL(*mock_invoker,
+                InvokeVoidMethod("dispatchSemanticsAction", "(IIJ[B)V", _))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteDispatchSemanticsAction(
+        55, kFlutterSemanticsActionTap, buffer, 0));
+
+    std::vector<uint8_t> features_payload = {0x03, 0x00, 0x00, 0x00};
+    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setAccessibilityFeatures",
+                                                "(I)V", features_payload))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteSetAccessibilityFeatures(3));
+
+    // 2. Platform Views Subsystem Direct Routing
+    int64_t view_id = embedder_flag ? 201 : 101;
+    PlatformViewCreationParams params = {
+        .view_id = view_id,
+        .view_type = "phase53.view",
+        .width = 400.0,
+        .height = 300.0,
+    };
+    EXPECT_EQ(router->RouteCreatePlatformView(
+                  params, PlatformViewCompositionType::kHybridComposition),
+              0);
+    EXPECT_TRUE(platform_views_provider->IsViewCreated(view_id));
+
+    PlatformViewResizeRequest resize_req = {
+        .view_id = view_id, .width = 500.0, .height = 350.0};
+    EXPECT_TRUE(router->RouteResizePlatformView(resize_req));
+    EXPECT_TRUE(router->RouteOffsetPlatformView(view_id, 15.0, 25.0));
+    EXPECT_TRUE(router->RouteSetPlatformViewDirection(view_id, 2));
+    EXPECT_TRUE(router->RouteClearPlatformViewFocus(view_id));
+
+    PlatformViewTouch touch = {.view_id = view_id};
+    EXPECT_TRUE(router->RouteDispatchPlatformViewTouch(touch));
+
+    PlatformViewGeometry geom = {.view_id = view_id};
+    EXPECT_TRUE(router->RouteOnDisplayPlatformView(geom));
+
+    FlutterPlatformView pv_struct = {
+        .struct_size = sizeof(FlutterPlatformView),
+        .identifier = static_cast<FlutterPlatformViewIdentifier>(view_id),
+        .mutations_count = 0,
+        .mutations = nullptr,
+    };
+    EXPECT_TRUE(router->RouteOnDisplayPlatformView(pv_struct, 10, 20, 500, 350,
+                                                   500, 350));
+
+    EXPECT_TRUE(router->RouteHidePlatformView(view_id));
+    EXPECT_TRUE(router->RouteSynchronizeToNativeViewHierarchy(true));
+    EXPECT_TRUE(router->RouteBeginFrame());
+    EXPECT_TRUE(router->RouteEndFrame());
+
+    auto overlay_id = router->RouteCreateOverlaySurface();
+    ASSERT_TRUE(overlay_id.has_value());
+    PlatformViewOverlay overlay_struct = {.surface_id = *overlay_id};
+    EXPECT_TRUE(router->RouteOnDisplayOverlaySurface(overlay_struct));
+    EXPECT_TRUE(router->RouteShowOverlaySurface(*overlay_id));
+    EXPECT_TRUE(router->RouteHideOverlaySurface(*overlay_id));
+    EXPECT_TRUE(router->RouteDestroyOverlaySurfaces());
+
+    EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
+    EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
+    EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
+    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setHcppEnabled", "(Z)V", _))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteSetHcppEnabled(true));
+    EXPECT_TRUE(router->RouteIsHcppEnabled());
+
+    EXPECT_TRUE(router->RouteDisposePlatformView(view_id));
+    EXPECT_FALSE(platform_views_provider->IsViewCreated(view_id));
+
+    // 3. SurfaceControl Subsystem Direct Routing
+    int64_t sc_id = embedder_flag ? 801 : 701;
+    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("createSurfaceControl",
+                                                "(JLjava/lang/String;)V", _))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteCreateSurfaceControl(sc_id, "phase53_sc"));
+    EXPECT_TRUE(router->RouteReparentSurfaceControl(sc_id, 0));
+
+    AndroidSurfaceControlRect src = {0, 0, 100, 100};
+    AndroidSurfaceControlRect dst = {0, 0, 200, 200};
+    EXPECT_TRUE(router->RouteSetSurfaceControlGeometry(sc_id, src, dst, 0));
+    EXPECT_TRUE(router->RouteSetSurfaceControlVisibility(sc_id, true));
+    EXPECT_TRUE(router->RouteSetSurfaceControlZOrder(sc_id, 5));
+
+    std::vector<AndroidSurfaceControlRect> damage = {{0, 0, 80, 80}};
+    EXPECT_TRUE(router->RouteSetSurfaceControlDamageRegion(sc_id, damage));
+
+    int dummy_buf = 42;
+    EXPECT_TRUE(router->RouteSetSurfaceControlBuffer(sc_id, &dummy_buf, -1));
+    EXPECT_TRUE(router->RouteSetSurfaceControlBufferAlpha(sc_id, 0.8f));
+    EXPECT_TRUE(
+        router->RouteSetSurfaceControlColor(sc_id, 1.0f, 0.5f, 0.0f, 1.0f));
+
+    auto sc_state = router->RouteGetSurfaceControlState(sc_id);
+    ASSERT_TRUE(sc_state.has_value());
+    EXPECT_EQ(sc_state->visibility, AndroidSurfaceControlVisibility::kShow);
+    EXPECT_EQ(sc_state->z_order, 5);
+
+    auto sc_obj = router->RouteGetSurfaceControl(sc_id);
+    ASSERT_NE(sc_obj, nullptr);
+    EXPECT_EQ(sc_obj->GetDebugName(), "phase53_sc");
+
+    EXPECT_CALL(*mock_invoker,
+                InvokeVoidMethod("destroySurfaceControl", "(J)V", _))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteDestroySurfaceControl(sc_id));
+  }
+
+  // Verify graceful handling when embedder_delegate is null
+  auto null_router = std::make_unique<JniRouter>(nullptr, legacy_delegate);
+  EXPECT_FALSE(null_router->RouteSemanticsUpdate({}, {}));
+  EXPECT_FALSE(null_router->RouteCustomAccessibilityActions({}, {}));
+  EXPECT_FALSE(null_router->RouteSemanticsEnabled(true));
+  EXPECT_FALSE(null_router->RouteDispatchSemanticsAction(
+      1, kFlutterSemanticsActionTap, {}));
+  EXPECT_FALSE(null_router->RouteSetAccessibilityFeatures(1));
+
+  PlatformViewCreationParams null_params = {.view_id = 1};
+  EXPECT_EQ(null_router->RouteCreatePlatformView(
+                null_params, PlatformViewCompositionType::kHybridComposition),
+            -1);
+  EXPECT_FALSE(null_router->RouteDisposePlatformView(1));
+  PlatformViewResizeRequest null_resize = {.view_id = 1};
+  EXPECT_FALSE(null_router->RouteResizePlatformView(null_resize));
+  EXPECT_FALSE(null_router->RouteOffsetPlatformView(1, 0, 0));
+  EXPECT_FALSE(null_router->RouteSetPlatformViewDirection(1, 0));
+  EXPECT_FALSE(null_router->RouteClearPlatformViewFocus(1));
+  PlatformViewTouch null_touch = {.view_id = 1};
+  EXPECT_FALSE(null_router->RouteDispatchPlatformViewTouch(null_touch));
+  PlatformViewGeometry null_geom = {.view_id = 1};
+  EXPECT_FALSE(null_router->RouteOnDisplayPlatformView(null_geom));
+  EXPECT_FALSE(null_router->RouteHidePlatformView(1));
+  EXPECT_FALSE(null_router->RouteSynchronizeToNativeViewHierarchy(true));
+  EXPECT_FALSE(null_router->RouteBeginFrame());
+  EXPECT_FALSE(null_router->RouteEndFrame());
+  EXPECT_FALSE(null_router->RouteCreateOverlaySurface().has_value());
+  EXPECT_FALSE(null_router->RouteDestroyOverlaySurfaces());
+  PlatformViewOverlay null_overlay = {.surface_id = 1};
+  EXPECT_FALSE(null_router->RouteOnDisplayOverlaySurface(null_overlay));
+  EXPECT_FALSE(null_router->RouteShowOverlaySurface(1));
+  EXPECT_FALSE(null_router->RouteHideOverlaySurface(1));
+  EXPECT_FALSE(null_router->RouteCreatePlatformViewTransaction());
+  EXPECT_FALSE(null_router->RouteSwapPlatformViewTransactions());
+  EXPECT_FALSE(null_router->RouteApplyPlatformViewTransactions());
+  EXPECT_FALSE(null_router->RouteSetHcppEnabled(true));
+  EXPECT_FALSE(null_router->RouteIsHcppEnabled());
+
+  EXPECT_FALSE(null_router->RouteCreateSurfaceControl(1, ""));
+  EXPECT_FALSE(null_router->RouteDestroySurfaceControl(1));
+  EXPECT_FALSE(null_router->RouteReparentSurfaceControl(1, 0));
+  AndroidSurfaceControlRect rect = {0, 0, 10, 10};
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlGeometry(1, rect, rect, 0));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlVisibility(1, true));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlZOrder(1, 1));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlDamageRegion(1, {rect}));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlBuffer(1, nullptr, -1));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlBufferAlpha(1, 1.0f));
+  EXPECT_FALSE(
+      null_router->RouteSetSurfaceControlColor(1, 1.0f, 1.0f, 1.0f, 1.0f));
+  EXPECT_FALSE(null_router->RouteGetSurfaceControlState(1).has_value());
+  EXPECT_EQ(null_router->RouteGetSurfaceControl(1), nullptr);
+
+  JniRouter::SetEmbedderEnabled(true);
+}
+
+TEST(Phase53LegacyDeletionPlatformViewsSemanticsTest,
+     ConcurrentMultithreadedPlatformViewsAndSemanticsExecution) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(::testing::Return(true));
+
+  auto platform_views_provider =
+      std::make_shared<InMemoryPlatformViewsProvider>();
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, platform_views_provider,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, sc_provider);
+
+  constexpr size_t kWorkers = 8;
+  constexpr size_t kIterations = 50;
+  std::vector<std::future<bool>> futures;
+  futures.reserve(kWorkers);
+
+  for (size_t worker = 0; worker < kWorkers; ++worker) {
+    futures.push_back(std::async(std::launch::async, [&native, worker]() {
+      for (size_t iter = 0; iter < kIterations; ++iter) {
+        int64_t view_id = static_cast<int64_t>(worker * 1000 + iter + 1);
+        int64_t sc_id = static_cast<int64_t>(worker * 2000 + iter + 1);
+
+        // 1. Semantics operations
+        FlutterSemanticsNode2 node = {};
+        node.struct_size = sizeof(FlutterSemanticsNode2);
+        node.id = static_cast<int32_t>(view_id);
+        node.label = "ConcurrentSemantics";
+        FlutterSemanticsNode2* nodes[] = {&node};
+        FlutterSemanticsUpdate2 sem_update = {
+            .struct_size = sizeof(FlutterSemanticsUpdate2),
+            .node_count = 1,
+            .nodes = nodes,
+            .custom_action_count = 0,
+            .custom_actions = nullptr,
+            .view_id = 0,
+        };
+        if (!native.UpdateSemantics(sem_update)) {
+          return false;
+        }
+        if (!native.DispatchSemanticsAction(static_cast<int32_t>(view_id),
+                                            kFlutterSemanticsActionTap, {},
+                                            0)) {
+          return false;
+        }
+
+        // 2. Platform view lifecycle operations
+        PlatformViewCreationParams params = {
+            .view_id = view_id,
+            .view_type = "concurrent.pv",
+            .width = 300.0 + iter,
+            .height = 200.0 + iter,
+        };
+        if (native.CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition) != 0) {
+          return false;
+        }
+
+        PlatformViewResizeRequest resize_req = {
+            .view_id = view_id, .width = 350.0 + iter, .height = 250.0 + iter};
+        if (!native.ResizePlatformView(resize_req)) {
+          return false;
+        }
+        if (!native.OffsetPlatformView(view_id, 10.0, 20.0)) {
+          return false;
+        }
+        if (!native.SetPlatformViewDirection(view_id, 1)) {
+          return false;
+        }
+        PlatformViewTouch touch = {.view_id = view_id};
+        if (!native.DispatchPlatformViewTouch(touch)) {
+          return false;
+        }
+
+        PlatformViewGeometry geom = {.view_id = view_id};
+        if (!native.OnDisplayPlatformView(geom)) {
+          return false;
+        }
+        if (!native.HidePlatformView(view_id)) {
+          return false;
+        }
+        if (!native.DisposePlatformView(view_id)) {
+          return false;
+        }
+
+        // 3. Overlay operations
+        auto overlay_opt = native.CreateOverlaySurface();
+        if (!overlay_opt.has_value()) {
+          return false;
+        }
+        PlatformViewOverlay overlay_geom = {.surface_id = *overlay_opt};
+        if (!native.OnDisplayOverlaySurface(overlay_geom)) {
+          return false;
+        }
+        if (!native.ShowOverlaySurface(*overlay_opt)) {
+          return false;
+        }
+        if (!native.HideOverlaySurface(*overlay_opt)) {
+          return false;
+        }
+        if (!native.DestroyOverlaySurfaces()) {
+          return false;
+        }
+
+        // 4. SurfaceControl operations
+        if (!native.CreateSurfaceControl(sc_id,
+                                         "sc_" + std::to_string(sc_id))) {
+          return false;
+        }
+        AndroidSurfaceControlRect src = {0, 0, 100, 100};
+        AndroidSurfaceControlRect dst = {0, 0, 200, 200};
+        if (!native.SetSurfaceControlGeometry(sc_id, src, dst, 0)) {
+          return false;
+        }
+        if (!native.SetSurfaceControlVisibility(sc_id, true)) {
+          return false;
+        }
+        if (!native.SetSurfaceControlZOrder(sc_id,
+                                            static_cast<int32_t>(iter))) {
+          return false;
+        }
+        if (!native.SetSurfaceControlBufferAlpha(sc_id, 0.95f)) {
+          return false;
+        }
+        if (!native.SetSurfaceControlColor(sc_id, 0.2f, 0.4f, 0.6f, 1.0f)) {
+          return false;
+        }
+        if (!native.CreatePlatformViewTransaction()) {
+          return false;
+        }
+        if (!native.SwapPlatformViewTransactions()) {
+          return false;
+        }
+        if (!native.ApplyPlatformViewTransactions()) {
+          return false;
+        }
+        auto sc_state = native.GetSurfaceControlState(sc_id);
+        if (!sc_state.has_value() ||
+            sc_state->z_order != static_cast<int32_t>(iter)) {
+          return false;
+        }
+        if (!native.DestroySurfaceControl(sc_id)) {
           return false;
         }
       }
