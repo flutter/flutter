@@ -317,7 +317,9 @@ EmbedderThreadHost::EmbedderThreadHost(
   }
 }
 
-EmbedderThreadHost::~EmbedderThreadHost() = default;
+EmbedderThreadHost::~EmbedderThreadHost() {
+  InvalidateActiveRunners();
+}
 
 void EmbedderThreadHost::InvalidateActiveRunners() {
   std::lock_guard guard(active_runners_mutex_);

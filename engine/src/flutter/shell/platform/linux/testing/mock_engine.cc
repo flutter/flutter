@@ -194,6 +194,13 @@ FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                       const FlutterEngineSpawnConfig* config,
+                                       FLUTTER_API_SYMBOL(FlutterEngine) *
+                                           engine_out) {
+  return kSuccess;
+}
+
 }  // namespace
 
 FlutterEngineResult FlutterEngineGetProcAddresses(
@@ -236,5 +243,6 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   table->NotifyDisplayUpdate = &FlutterEngineNotifyDisplayUpdate;
   table->AddView = &FlutterEngineAddView;
   table->RemoveView = &FlutterEngineRemoveView;
+  table->Spawn = &FlutterEngineSpawn;
   return kSuccess;
 }
