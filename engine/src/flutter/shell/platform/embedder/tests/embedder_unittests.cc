@@ -2168,6 +2168,233 @@ TEST(EmbedderArgsTest, FlutterProjectArgsPaddingAndABI) {
 }
 
 //------------------------------------------------------------------------------
+/// Test FlutterEngineScreenshotInfo layout and ABI stability.
+///
+TEST(EmbedderArgsTest, FlutterEngineScreenshotInfoABI) {
+  FlutterEngineScreenshotInfo info = {};
+  info.struct_size = sizeof(FlutterEngineScreenshotInfo);
+#if UINTPTR_MAX == UINT64_MAX
+  EXPECT_EQ(sizeof(FlutterEngineScreenshotInfo), 48u);
+#else
+  EXPECT_EQ(sizeof(FlutterEngineScreenshotInfo), 32u);
+#endif
+  EXPECT_EQ(offsetof(FlutterEngineScreenshotInfo, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterEngineScreenshotInfo, width), sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterEngineScreenshotInfo, height),
+            sizeof(size_t) + sizeof(uint32_t));
+  EXPECT_EQ(offsetof(FlutterEngineScreenshotInfo, row_bytes),
+            sizeof(size_t) + 2 * sizeof(uint32_t));
+  EXPECT_EQ(offsetof(FlutterEngineScreenshotInfo, pixels),
+            offsetof(FlutterEngineScreenshotInfo, row_bytes) + sizeof(size_t));
+  EXPECT_EQ(
+      offsetof(FlutterEngineScreenshotInfo, pixels_size),
+      offsetof(FlutterEngineScreenshotInfo, pixels) + sizeof(const void*));
+  EXPECT_EQ(
+      offsetof(FlutterEngineScreenshotInfo, pixel_format),
+      offsetof(FlutterEngineScreenshotInfo, pixels_size) + sizeof(size_t));
+  EXPECT_EQ(offsetof(FlutterEngineScreenshotInfo, reserved_padding),
+            offsetof(FlutterEngineScreenshotInfo, pixel_format) +
+                sizeof(FlutterSoftwarePixelFormat));
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineScreenshot and FlutterEngineFreeScreenshot reject
+/// invalid arguments.
+///
+TEST_F(EmbedderTest, ScreenshotInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  FlutterEngineScreenshotInfo screenshot = {};
+  screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+
+  // Null engine.
+  EXPECT_EQ(FlutterEngineScreenshot(nullptr, &screenshot), kInvalidArguments);
+
+  // Null screenshot_out.
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), nullptr), kInvalidArguments);
+
+  // Struct size mismatch on screenshot (smaller than base).
+  FlutterEngineScreenshotInfo bad_screenshot = {};
+  bad_screenshot.struct_size =
+      offsetof(FlutterEngineScreenshotInfo, pixel_format) - 1;
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), &bad_screenshot),
+            kInvalidArguments);
+
+  // Base struct_size is accepted for backward compatibility.
+  FlutterEngineScreenshotInfo base_screenshot = {};
+  base_screenshot.struct_size =
+      offsetof(FlutterEngineScreenshotInfo, pixel_format);
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), &base_screenshot),
+            kInternalInconsistency);
+
+  // Larger struct_size is accepted for forward compatibility.
+  FlutterEngineScreenshotInfo larger_screenshot = {};
+  larger_screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo) + 16;
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), &larger_screenshot),
+            kInternalInconsistency);
+
+  // Free with null screenshot.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(nullptr), kInvalidArguments);
+
+  // Free with struct size mismatch (smaller than base).
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&bad_screenshot), kInvalidArguments);
+
+  // Free with larger struct_size and null pixels succeeds.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&larger_screenshot), kSuccess);
+
+  // Free with valid struct_size and null pixels should succeed.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineScreenshot returns kInternalInconsistency when no
+/// frame has been rasterized yet.
+///
+TEST_F(EmbedderTest, ScreenshotWithoutFrameReturnsInternalInconsistency) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  FlutterEngineScreenshotInfo screenshot = {};
+  screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), &screenshot),
+            kInternalInconsistency);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineScreenshot successfully captures a raster screenshot
+/// and FlutterEngineFreeScreenshot frees the buffer.
+///
+TEST_F(EmbedderTest, CanCaptureScreenshot) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetDartEntrypoint("draw_solid_red");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  fml::AutoResetWaitableEvent frame_latch;
+  VoidCallback frame_callback = [](void* user_data) {
+    auto* latch = static_cast<fml::AutoResetWaitableEvent*>(user_data);
+    latch->Signal();
+  };
+
+  ASSERT_EQ(FlutterEngineSetNextFrameCallback(engine.get(), frame_callback,
+                                              &frame_latch),
+            kSuccess);
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  frame_latch.Wait();
+
+  FlutterEngineScreenshotInfo screenshot = {};
+  screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+
+  ASSERT_EQ(FlutterEngineScreenshot(engine.get(), &screenshot), kSuccess);
+  EXPECT_EQ(screenshot.struct_size, sizeof(FlutterEngineScreenshotInfo));
+  EXPECT_EQ(screenshot.width, 800u);
+  EXPECT_EQ(screenshot.height, 600u);
+  EXPECT_GE(screenshot.row_bytes, 800u * 4);
+  EXPECT_NE(screenshot.pixels, nullptr);
+  EXPECT_GE(screenshot.pixels_size, 800u * 600u * 4);
+  EXPECT_EQ(screenshot.pixel_format, kFlutterSoftwarePixelFormatRGBA8888);
+  EXPECT_EQ(screenshot.reserved_padding, 0u);
+
+  // Verify non-zero pixel data and exact RGBA8888 channels for solid red.
+  const uint8_t* pixel_bytes = static_cast<const uint8_t*>(screenshot.pixels);
+  EXPECT_EQ(pixel_bytes[0], 0xFF);  // Red
+  EXPECT_EQ(pixel_bytes[1], 0x00);  // Green
+  EXPECT_EQ(pixel_bytes[2], 0x00);  // Blue
+  EXPECT_EQ(pixel_bytes[3], 0xFF);  // Alpha
+
+  // Verify freeing nullifies pixels and size.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+  EXPECT_EQ(screenshot.pixels, nullptr);
+  EXPECT_EQ(screenshot.pixels_size, 0u);
+
+  // Subsequent call is a safe no-op.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineScreenshot is thread-safe and can be called
+/// concurrently from multiple background threads.
+///
+TEST_F(EmbedderTest, CanCaptureScreenshotConcurrentThreads) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetDartEntrypoint("draw_solid_red");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  fml::AutoResetWaitableEvent frame_latch;
+  VoidCallback frame_callback = [](void* user_data) {
+    auto* latch = static_cast<fml::AutoResetWaitableEvent*>(user_data);
+    latch->Signal();
+  };
+
+  ASSERT_EQ(FlutterEngineSetNextFrameCallback(engine.get(), frame_callback,
+                                              &frame_latch),
+            kSuccess);
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  frame_latch.Wait();
+
+  constexpr size_t kThreadCount = 4;
+  std::vector<std::thread> workers;
+  std::atomic<size_t> success_count{0};
+
+  for (size_t i = 0; i < kThreadCount; ++i) {
+    workers.emplace_back([&]() {
+      FlutterEngineScreenshotInfo screenshot = {};
+      screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+      if (FlutterEngineScreenshot(engine.get(), &screenshot) == kSuccess) {
+        if (screenshot.pixels != nullptr && screenshot.pixels_size > 0 &&
+            screenshot.width == 800u && screenshot.height == 600u) {
+          success_count++;
+        }
+        FlutterEngineFreeScreenshot(&screenshot);
+      }
+    });
+  }
+
+  for (auto& worker : workers) {
+    worker.join();
+  }
+
+  EXPECT_EQ(success_count.load(), kThreadCount);
+}
+
+//------------------------------------------------------------------------------
 /// Test that a view can be added to a running engine.
 ///
 TEST_F(EmbedderTest, CanAddView) {
@@ -5796,6 +6023,66 @@ TEST_P(EmbedderTestMatrix, CanLoadDartDeferredLibraryInMatrix) {
   EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(
                 engine.get(), 10, "Test error in matrix", true),
             kSuccess);
+}
+
+TEST_P(EmbedderTestMatrix, CanCaptureScreenshotInMatrix) {
+  auto& context = GetEmbedderContext();
+  EmbedderConfigBuilder builder(context);
+  ConfigureBuilder(builder);
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetDartEntrypoint("draw_solid_red");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  fml::AutoResetWaitableEvent frame_latch;
+  VoidCallback frame_callback = [](void* user_data) {
+    auto* latch = static_cast<fml::AutoResetWaitableEvent*>(user_data);
+    latch->Signal();
+  };
+
+  ASSERT_EQ(FlutterEngineSetNextFrameCallback(engine.get(), frame_callback,
+                                              &frame_latch),
+            kSuccess);
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  frame_latch.Wait();
+
+  FlutterEngineScreenshotInfo screenshot = {};
+  screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+
+  ASSERT_EQ(FlutterEngineScreenshot(engine.get(), &screenshot), kSuccess);
+  EXPECT_EQ(screenshot.struct_size, sizeof(FlutterEngineScreenshotInfo));
+  EXPECT_EQ(screenshot.width, 800u);
+  EXPECT_EQ(screenshot.height, 600u);
+  EXPECT_GE(screenshot.row_bytes, 800u * 4);
+  EXPECT_NE(screenshot.pixels, nullptr);
+  EXPECT_GE(screenshot.pixels_size, 800u * 600u * 4);
+  EXPECT_EQ(screenshot.pixel_format, kFlutterSoftwarePixelFormatRGBA8888);
+  EXPECT_EQ(screenshot.reserved_padding, 0u);
+
+  // Verify non-zero pixel data and exact RGBA8888 channels for solid red across
+  // all backends.
+  const uint8_t* pixel_bytes = static_cast<const uint8_t*>(screenshot.pixels);
+  EXPECT_EQ(pixel_bytes[0], 0xFF);  // Red
+  EXPECT_EQ(pixel_bytes[1], 0x00);  // Green
+  EXPECT_EQ(pixel_bytes[2], 0x00);  // Blue
+  EXPECT_EQ(pixel_bytes[3], 0xFF);  // Alpha
+
+  // Verify freeing nullifies pixels and size.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+  EXPECT_EQ(screenshot.pixels, nullptr);
+  EXPECT_EQ(screenshot.pixels_size, 0u);
+
+  // Subsequent call is a safe no-op.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
 }
 
 INSTANTIATE_TEST_SUITE_P(AllBackends,

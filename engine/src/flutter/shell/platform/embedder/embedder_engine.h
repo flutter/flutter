@@ -107,6 +107,8 @@ class EmbedderEngine {
                                           const std::string& error_message,
                                           bool transient);
 
+  bool Screenshot(FlutterEngineScreenshotInfo* screenshot_out);
+
   Shell& GetShell();
 
   const std::optional<FlutterRendererConfig>& GetRendererConfig() const;
