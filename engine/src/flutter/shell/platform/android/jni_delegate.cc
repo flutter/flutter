@@ -10,8 +10,10 @@
 namespace flutter {
 namespace android {
 
-JniDelegate::JniDelegate(std::shared_ptr<JvmInvoker> jvm_invoker)
-    : jvm_invoker_(std::move(jvm_invoker)) {
+JniDelegate::JniDelegate(std::shared_ptr<JvmInvoker> jvm_invoker,
+                         std::shared_ptr<CallbackCacheProvider> callback_cache)
+    : jvm_invoker_(std::move(jvm_invoker)),
+      callback_cache_(std::move(callback_cache)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
 }
@@ -128,6 +130,50 @@ bool JniDelegate::OnAssetManagerChanged() {
     return false;
   }
   return jvm_invoker_->InvokeVoidMethod("onAssetManagerChanged", "()V");
+}
+
+static FlutterEngineResult GetCallbackInformationFromEngine(
+    int64_t handle,
+    FlutterCallbackInformation* info) {
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.GetCallbackInformation) {
+    return s_procs.GetCallbackInformation(handle, info);
+  }
+  return kInternalInconsistency;
+}
+
+std::optional<DartCallbackInfo> JniDelegate::LookupCallbackInformation(
+    int64_t handle) {
+  TRACE_EVENT0("flutter", "JniDelegate::LookupCallbackInformation");
+  if (callback_cache_) {
+    return callback_cache_->GetCallbackInformation(handle);
+  }
+
+  FlutterCallbackInformation info = {};
+  info.struct_size = sizeof(FlutterCallbackInformation);
+  if (GetCallbackInformationFromEngine(handle, &info) == kSuccess) {
+    DartCallbackInfo result;
+    result.name = info.name ? info.name : "";
+    result.class_name = info.class_name ? info.class_name : "";
+    result.library_path = info.library_path ? info.library_path : "";
+    return result;
+  }
+  return std::nullopt;
+}
+
+void JniDelegate::SetCallbackCache(
+    std::shared_ptr<CallbackCacheProvider> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetCallbackCache");
+  callback_cache_ = std::move(provider);
+}
+
+std::shared_ptr<CallbackCacheProvider> JniDelegate::GetCallbackCache() const {
+  return callback_cache_;
 }
 
 }  // namespace android

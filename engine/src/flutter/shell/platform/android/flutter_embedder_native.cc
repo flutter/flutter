@@ -13,9 +13,101 @@ namespace android {
 std::shared_ptr<OSLibraryLoader>
     FlutterEmbedderNative::default_library_loader_ = nullptr;
 
+DefaultCallbackCacheProvider::DefaultCallbackCacheProvider() {
+  TRACE_EVENT0("flutter",
+               "DefaultCallbackCacheProvider::DefaultCallbackCacheProvider");
+}
+
+DefaultCallbackCacheProvider::~DefaultCallbackCacheProvider() {
+  TRACE_EVENT0("flutter",
+               "DefaultCallbackCacheProvider::~DefaultCallbackCacheProvider");
+}
+
+static FlutterEngineResult GetCallbackInformationFromEngine(
+    int64_t handle,
+    FlutterCallbackInformation* info) {
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.GetCallbackInformation) {
+    return s_procs.GetCallbackInformation(handle, info);
+  }
+  return kInternalInconsistency;
+}
+
+std::optional<DartCallbackInfo>
+DefaultCallbackCacheProvider::GetCallbackInformation(int64_t handle) {
+  TRACE_EVENT0("flutter",
+               "DefaultCallbackCacheProvider::GetCallbackInformation");
+  FlutterCallbackInformation info = {};
+  info.struct_size = sizeof(FlutterCallbackInformation);
+  if (GetCallbackInformationFromEngine(handle, &info) == kSuccess) {
+    DartCallbackInfo result;
+    result.name = info.name ? info.name : "";
+    result.class_name = info.class_name ? info.class_name : "";
+    result.library_path = info.library_path ? info.library_path : "";
+    return result;
+  }
+  return std::nullopt;
+}
+
+InMemoryCallbackCacheProvider::InMemoryCallbackCacheProvider() {
+  TRACE_EVENT0("flutter",
+               "InMemoryCallbackCacheProvider::InMemoryCallbackCacheProvider");
+}
+
+InMemoryCallbackCacheProvider::~InMemoryCallbackCacheProvider() {
+  TRACE_EVENT0("flutter",
+               "InMemoryCallbackCacheProvider::~InMemoryCallbackCacheProvider");
+}
+
+void InMemoryCallbackCacheProvider::AddCallback(
+    int64_t handle,
+    const std::string& name,
+    const std::string& class_name,
+    const std::string& library_path) {
+  TRACE_EVENT0("flutter", "InMemoryCallbackCacheProvider::AddCallback");
+  std::scoped_lock lock(mutex_);
+  cache_[handle] = DartCallbackInfo{name, class_name, library_path};
+}
+
+void InMemoryCallbackCacheProvider::RemoveCallback(int64_t handle) {
+  TRACE_EVENT0("flutter", "InMemoryCallbackCacheProvider::RemoveCallback");
+  std::scoped_lock lock(mutex_);
+  cache_.erase(handle);
+}
+
+void InMemoryCallbackCacheProvider::Clear() {
+  TRACE_EVENT0("flutter", "InMemoryCallbackCacheProvider::Clear");
+  std::scoped_lock lock(mutex_);
+  cache_.clear();
+}
+
+size_t InMemoryCallbackCacheProvider::GetSize() const {
+  std::scoped_lock lock(mutex_);
+  return cache_.size();
+}
+
+std::optional<DartCallbackInfo>
+InMemoryCallbackCacheProvider::GetCallbackInformation(int64_t handle) {
+  TRACE_EVENT0("flutter",
+               "InMemoryCallbackCacheProvider::GetCallbackInformation");
+  std::scoped_lock lock(mutex_);
+  auto it = cache_.find(handle);
+  if (it != cache_.end()) {
+    return it->second;
+  }
+  return std::nullopt;
+}
+
 FlutterEmbedderNative::FlutterEmbedderNative()
     : jvm_invoker_(std::make_shared<DefaultJvmInvoker>()),
-      jni_delegate_(std::make_shared<JniDelegate>(jvm_invoker_)),
+      callback_cache_(std::make_shared<DefaultCallbackCacheProvider>()),
+      jni_delegate_(
+          std::make_shared<JniDelegate>(jvm_invoker_, callback_cache_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
       library_loader_(GetDefaultLibraryLoader()),
       asset_provider_(std::make_shared<APKAssetProvider>(
@@ -29,9 +121,14 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<JvmInvoker> jvm_invoker,
     const std::shared_ptr<LegacyJniDelegate>& legacy_delegate,
     std::shared_ptr<OSLibraryLoader> library_loader,
-    std::shared_ptr<APKAssetProvider> asset_provider)
+    std::shared_ptr<APKAssetProvider> asset_provider,
+    std::shared_ptr<CallbackCacheProvider> callback_cache)
     : jvm_invoker_(std::move(jvm_invoker)),
-      jni_delegate_(std::make_shared<JniDelegate>(jvm_invoker_)),
+      callback_cache_(callback_cache
+                          ? std::move(callback_cache)
+                          : std::make_shared<DefaultCallbackCacheProvider>()),
+      jni_delegate_(
+          std::make_shared<JniDelegate>(jvm_invoker_, callback_cache_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, legacy_delegate)),
       library_loader_(library_loader ? std::move(library_loader)
                                      : GetDefaultLibraryLoader()),
@@ -146,6 +243,30 @@ FlutterEmbedderNative::ResolveAssetMappings(
     return {};
   }
   return asset_provider_->GetAsMappings(asset_pattern, subdir);
+}
+
+std::shared_ptr<CallbackCacheProvider> FlutterEmbedderNative::GetCallbackCache()
+    const {
+  return callback_cache_;
+}
+
+void FlutterEmbedderNative::SetCallbackCache(
+    std::shared_ptr<CallbackCacheProvider> provider) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetCallbackCache");
+  callback_cache_ = provider ? std::move(provider)
+                             : std::make_shared<DefaultCallbackCacheProvider>();
+  if (jni_delegate_) {
+    jni_delegate_->SetCallbackCache(callback_cache_);
+  }
+}
+
+std::optional<DartCallbackInfo>
+FlutterEmbedderNative::LookupCallbackInformation(int64_t handle) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::LookupCallbackInformation");
+  if (!callback_cache_) {
+    return std::nullopt;
+  }
+  return callback_cache_->GetCallbackInformation(handle);
 }
 
 }  // namespace android

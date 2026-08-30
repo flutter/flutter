@@ -213,5 +213,20 @@ bool JniRouter::RouteAssetManagerChanged() {
   return false;
 }
 
+std::optional<DartCallbackInfo> JniRouter::RouteLookupCallbackInformation(
+    int64_t handle) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteLookupCallbackInformation");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->LookupCallbackInformation(handle);
+    }
+    return std::nullopt;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->LookupCallbackInformation(handle);
+  }
+  return std::nullopt;
+}
+
 }  // namespace android
 }  // namespace flutter

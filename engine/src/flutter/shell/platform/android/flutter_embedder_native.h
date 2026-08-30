@@ -6,7 +6,9 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_FLUTTER_EMBEDDER_NATIVE_H_
 
 #include <cstddef>
+#include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <vector>
@@ -22,6 +24,45 @@
 namespace flutter {
 namespace android {
 
+/// @brief Default C-API backed callback cache provider that calls
+/// FlutterEngineGetCallbackInformation.
+class DefaultCallbackCacheProvider : public CallbackCacheProvider {
+ public:
+  DefaultCallbackCacheProvider();
+  ~DefaultCallbackCacheProvider() override;
+
+  std::optional<DartCallbackInfo> GetCallbackInformation(
+      int64_t handle) override;
+};
+
+/// @brief In-memory mock callback cache provider for unit testing without
+/// Dart VM or disk cache dependencies.
+class InMemoryCallbackCacheProvider : public CallbackCacheProvider {
+ public:
+  InMemoryCallbackCacheProvider();
+  ~InMemoryCallbackCacheProvider() override;
+
+  void AddCallback(int64_t handle,
+                   const std::string& name,
+                   const std::string& class_name,
+                   const std::string& library_path);
+
+  void RemoveCallback(int64_t handle);
+
+  void Clear();
+
+  size_t GetSize() const;
+
+  std::optional<DartCallbackInfo> GetCallbackInformation(
+      int64_t handle) override;
+
+ private:
+  mutable std::mutex mutex_;
+  std::map<int64_t, DartCallbackInfo> cache_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(InMemoryCallbackCacheProvider);
+};
+
 /// @brief Quarantined native entry point and manager for the Android C-API
 /// Embedder.
 ///
@@ -35,7 +76,8 @@ class FlutterEmbedderNative {
       std::shared_ptr<JvmInvoker> jvm_invoker,
       const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr,
       std::shared_ptr<OSLibraryLoader> library_loader = nullptr,
-      std::shared_ptr<APKAssetProvider> asset_provider = nullptr);
+      std::shared_ptr<APKAssetProvider> asset_provider = nullptr,
+      std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr);
   ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -95,10 +137,22 @@ class FlutterEmbedderNative {
       const std::string& asset_pattern,
       const std::optional<std::string>& subdir = std::nullopt) const;
 
+  /// @brief Returns the CallbackCacheProvider managed by this native instance.
+  std::shared_ptr<CallbackCacheProvider> GetCallbackCache() const;
+
+  /// @brief Sets or replaces the CallbackCacheProvider managed by this native
+  /// instance.
+  void SetCallbackCache(std::shared_ptr<CallbackCacheProvider> provider);
+
+  /// @brief Looks up Dart callback information for a given callback handle.
+  std::optional<DartCallbackInfo> LookupCallbackInformation(
+      int64_t handle) const;
+
  private:
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;
 
   std::shared_ptr<JvmInvoker> jvm_invoker_;
+  std::shared_ptr<CallbackCacheProvider> callback_cache_;
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;
   std::shared_ptr<OSLibraryLoader> library_loader_;

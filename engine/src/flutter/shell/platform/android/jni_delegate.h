@@ -7,14 +7,39 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 namespace android {
+
+/// @brief Decoupled representation of Dart callback metadata.
+struct DartCallbackInfo {
+  std::string name;
+  std::string class_name;
+  std::string library_path;
+
+  bool operator==(const DartCallbackInfo& other) const {
+    return name == other.name && class_name == other.class_name &&
+           library_path == other.library_path;
+  }
+};
+
+/// @brief Abstract provider interface for resolving Dart callback
+/// representations.
+class CallbackCacheProvider {
+ public:
+  virtual ~CallbackCacheProvider() = default;
+
+  /// @brief Looks up Dart callback information for a given callback handle.
+  virtual std::optional<DartCallbackInfo> GetCallbackInformation(
+      int64_t handle) = 0;
+};
 
 /// @brief Delegate that adapts Flutter Embedder C-API operations to the JVM.
 ///
@@ -22,7 +47,9 @@ namespace android {
 /// calls, guaranteeing host testability without native JNI dependencies.
 class JniDelegate {
  public:
-  explicit JniDelegate(std::shared_ptr<JvmInvoker> jvm_invoker);
+  explicit JniDelegate(
+      std::shared_ptr<JvmInvoker> jvm_invoker,
+      std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr);
   virtual ~JniDelegate();
 
   /// @brief Handles an incoming platform message dispatch to the JVM.
@@ -66,11 +93,22 @@ class JniDelegate {
   /// @brief Notifies the JVM that the asset manager / bundle has changed.
   virtual bool OnAssetManagerChanged();
 
+  /// @brief Looks up Dart callback information for a given handle.
+  virtual std::optional<DartCallbackInfo> LookupCallbackInformation(
+      int64_t handle);
+
+  /// @brief Sets or replaces the CallbackCacheProvider used for lookups.
+  void SetCallbackCache(std::shared_ptr<CallbackCacheProvider> provider);
+
+  /// @brief Returns the current CallbackCacheProvider.
+  std::shared_ptr<CallbackCacheProvider> GetCallbackCache() const;
+
   /// @brief Returns the underlying JvmInvoker instance.
   std::shared_ptr<JvmInvoker> GetJvmInvoker() const;
 
  private:
   std::shared_ptr<JvmInvoker> jvm_invoker_;
+  std::shared_ptr<CallbackCacheProvider> callback_cache_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniDelegate);
 };
