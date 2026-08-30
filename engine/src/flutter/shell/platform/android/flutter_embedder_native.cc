@@ -236,6 +236,13 @@ FlutterEmbedderNative::FlutterEmbedderNative()
           std::make_shared<DefaultPlatformViewsProvider>(jvm_invoker_)),
       window_metrics_provider_(
           std::make_shared<DefaultWindowMetricsProvider>(jvm_invoker_)),
+      library_loader_(GetDefaultLibraryLoader()),
+      choreographer_provider_(
+          std::make_shared<DefaultAndroidChoreographerProvider>(
+              library_loader_)),
+      vsync_waiter_(
+          std::make_shared<AndroidVsyncWaiter>(choreographer_provider_,
+                                               jvm_invoker_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -245,9 +252,9 @@ FlutterEmbedderNative::FlutterEmbedderNative()
           std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_),
           platform_views_provider_,
           platform_views_controller_,
-          window_metrics_provider_)),
+          window_metrics_provider_,
+          vsync_waiter_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
-      library_loader_(GetDefaultLibraryLoader()),
       asset_provider_(std::make_shared<APKAssetProvider>(
           std::make_shared<InMemoryAPKAssetProviderImpl>())) {
   jni_router_->SetInstanceEmbedderEnabled(true);
@@ -266,7 +273,9 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<ImageDecoderProvider> image_decoder,
     std::shared_ptr<EmbedderImageLRU> image_lru,
     std::shared_ptr<PlatformViewsProvider> platform_views_provider,
-    std::shared_ptr<WindowMetricsProvider> window_metrics_provider)
+    std::shared_ptr<WindowMetricsProvider> window_metrics_provider,
+    std::shared_ptr<AndroidChoreographerProvider> choreographer_provider,
+    std::shared_ptr<AndroidVsyncWaiter> vsync_waiter)
     : jvm_invoker_(std::move(jvm_invoker)),
       image_lru_(image_lru ? std::move(image_lru)
                            : std::make_shared<EmbedderImageLRU>()),
@@ -278,6 +287,17 @@ FlutterEmbedderNative::FlutterEmbedderNative(
           window_metrics_provider
               ? std::move(window_metrics_provider)
               : std::make_shared<DefaultWindowMetricsProvider>(jvm_invoker_)),
+      library_loader_(library_loader ? std::move(library_loader)
+                                     : GetDefaultLibraryLoader()),
+      choreographer_provider_(
+          choreographer_provider
+              ? std::move(choreographer_provider)
+              : std::make_shared<DefaultAndroidChoreographerProvider>(
+                    library_loader_)),
+      vsync_waiter_(vsync_waiter ? std::move(vsync_waiter)
+                                 : std::make_shared<AndroidVsyncWaiter>(
+                                       choreographer_provider_,
+                                       jvm_invoker_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -289,10 +309,9 @@ FlutterEmbedderNative::FlutterEmbedderNative(
               : std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_),
           platform_views_provider_,
           platform_views_controller_,
-          window_metrics_provider_)),
+          window_metrics_provider_,
+          vsync_waiter_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, legacy_delegate)),
-      library_loader_(library_loader ? std::move(library_loader)
-                                     : GetDefaultLibraryLoader()),
       asset_provider_(
           asset_provider
               ? std::move(asset_provider)
@@ -598,11 +617,12 @@ std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
     std::shared_ptr<JvmInvoker> invoker,
     const std::shared_ptr<LegacyJniDelegate>& legacy_delegate,
     std::shared_ptr<PlatformViewsProvider> platform_views_provider,
-    std::shared_ptr<WindowMetricsProvider> window_metrics_provider) {
+    std::shared_ptr<WindowMetricsProvider> window_metrics_provider,
+    std::shared_ptr<AndroidVsyncWaiter> vsync_waiter) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateDefaultRouter");
   auto delegate = std::make_shared<JniDelegate>(
       std::move(invoker), nullptr, nullptr, std::move(platform_views_provider),
-      nullptr, std::move(window_metrics_provider));
+      nullptr, std::move(window_metrics_provider), std::move(vsync_waiter));
   return std::make_shared<JniRouter>(std::move(delegate), legacy_delegate);
 }
 
@@ -1423,6 +1443,12 @@ void FlutterEmbedderNative::SetEngine(FLUTTER_API_SYMBOL(FlutterEngine)
     registered_engine_ = engine;
   }
   AttachWindowMetricsCallbacks();
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    if (vsync_waiter_) {
+      vsync_waiter_->SetEngine(engine);
+    }
+  }
 }
 
 FLUTTER_API_SYMBOL(FlutterEngine) FlutterEmbedderNative::GetEngine() const {
@@ -1656,6 +1682,177 @@ void FlutterEmbedderNative::SetNotifyDisplayUpdateFnForTesting(
     NotifyDisplayUpdateFn fn) {
   std::scoped_lock lock(engine_mutex_);
   notify_display_update_fn_ = std::move(fn);
+}
+
+std::shared_ptr<AndroidChoreographerProvider>
+FlutterEmbedderNative::GetChoreographerProvider() const {
+  std::scoped_lock lock(choreographer_provider_mutex_);
+  return choreographer_provider_;
+}
+
+void FlutterEmbedderNative::SetChoreographerProvider(
+    std::shared_ptr<AndroidChoreographerProvider> provider) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetChoreographerProvider");
+  std::shared_ptr<AndroidChoreographerProvider> new_provider;
+  {
+    std::scoped_lock lock(choreographer_provider_mutex_);
+    choreographer_provider_ =
+        provider ? std::move(provider)
+                 : std::make_shared<DefaultAndroidChoreographerProvider>(
+                       library_loader_);
+    new_provider = choreographer_provider_;
+  }
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    if (vsync_waiter_) {
+      vsync_waiter_->SetChoreographerProvider(new_provider);
+    }
+  }
+}
+
+std::shared_ptr<AndroidVsyncWaiter> FlutterEmbedderNative::GetVsyncWaiter()
+    const {
+  std::scoped_lock lock(vsync_waiter_mutex_);
+  return vsync_waiter_;
+}
+
+void FlutterEmbedderNative::SetVsyncWaiter(
+    std::shared_ptr<AndroidVsyncWaiter> waiter) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetVsyncWaiter");
+  FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+  {
+    std::scoped_lock eng_lock(engine_mutex_);
+    engine = registered_engine_;
+  }
+  std::shared_ptr<AndroidVsyncWaiter> new_waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_, choreographer_provider_mutex_);
+    vsync_waiter_ = waiter ? std::move(waiter)
+                           : std::make_shared<AndroidVsyncWaiter>(
+                                 choreographer_provider_, jvm_invoker_);
+    if (engine && vsync_waiter_) {
+      vsync_waiter_->SetEngine(engine);
+    }
+    if (notify_vsync_fn_ && vsync_waiter_) {
+      vsync_waiter_->SetNotifyVsyncFnForTesting(notify_vsync_fn_);
+    }
+    new_waiter = vsync_waiter_;
+  }
+  if (jni_delegate_) {
+    jni_delegate_->SetVsyncWaiter(new_waiter);
+  }
+}
+
+void FlutterEmbedderNative::OnVsyncCallback(void* user_data, intptr_t baton) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnVsyncCallback");
+  if (!user_data) {
+    return;
+  }
+  auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
+  native->AsyncWaitForVsync(baton);
+}
+
+bool FlutterEmbedderNative::AsyncWaitForVsync(intptr_t baton) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::AsyncWaitForVsync", "baton",
+               std::to_string(baton).c_str());
+  std::shared_ptr<AndroidVsyncWaiter> waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    waiter = vsync_waiter_;
+  }
+  if (waiter) {
+    return waiter->AsyncWaitForVsync(baton);
+  }
+  if (jni_router_) {
+    return jni_router_->RouteAsyncWaitForVsync(baton);
+  }
+  return false;
+}
+
+void FlutterEmbedderNative::UpdateRefreshRate(double refresh_rate_hz) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::UpdateRefreshRate",
+               "refresh_rate", std::to_string(refresh_rate_hz).c_str());
+  if (!std::isfinite(refresh_rate_hz) || refresh_rate_hz <= 0.0) {
+    refresh_rate_hz = 60.0;
+  } else {
+    refresh_rate_hz = std::clamp(refresh_rate_hz, 1.0, 1000.0);
+  }
+  std::shared_ptr<AndroidVsyncWaiter> waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    waiter = vsync_waiter_;
+  }
+  if (waiter) {
+    waiter->UpdateRefreshRate(refresh_rate_hz);
+  }
+}
+
+double FlutterEmbedderNative::GetRefreshRate() const {
+  std::shared_ptr<AndroidVsyncWaiter> waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    waiter = vsync_waiter_;
+  }
+  if (waiter) {
+    return waiter->GetRefreshRate();
+  }
+  return 60.0;
+}
+
+int64_t FlutterEmbedderNative::GetRefreshPeriodNanos() const {
+  std::shared_ptr<AndroidVsyncWaiter> waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    waiter = vsync_waiter_;
+  }
+  if (waiter) {
+    return waiter->GetRefreshPeriodNanos();
+  }
+  return static_cast<int64_t>(1000000000.0 / 60.0);
+}
+
+AndroidVsyncFrameInfo FlutterEmbedderNative::ComputeFramePacing(
+    int64_t frame_time_nanos,
+    double refresh_rate_hz) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::ComputeFramePacing");
+  return AndroidVsyncWaiter::ComputeFramePacing(frame_time_nanos,
+                                                refresh_rate_hz);
+}
+
+FlutterEngineResult FlutterEmbedderNative::NotifyVsync(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    intptr_t baton,
+    int64_t frame_start_time_nanos,
+    int64_t frame_target_time_nanos) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::NotifyVsync");
+  if (!engine || frame_start_time_nanos <= 0 ||
+      frame_target_time_nanos <= frame_start_time_nanos) {
+    return kInvalidArguments;
+  }
+  NotifyVsyncFn fn;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    fn = notify_vsync_fn_;
+  }
+  if (fn) {
+    return fn(engine, baton, static_cast<uint64_t>(frame_start_time_nanos),
+              static_cast<uint64_t>(frame_target_time_nanos));
+  }
+  return AndroidVsyncWaiter::NotifyVsyncToEngine(
+      engine, baton, static_cast<uint64_t>(frame_start_time_nanos),
+      static_cast<uint64_t>(frame_target_time_nanos));
+}
+
+void FlutterEmbedderNative::SetNotifyVsyncFnForTesting(NotifyVsyncFn fn) {
+  std::shared_ptr<AndroidVsyncWaiter> waiter;
+  {
+    std::scoped_lock lock(vsync_waiter_mutex_);
+    notify_vsync_fn_ = fn;
+    waiter = vsync_waiter_;
+  }
+  if (waiter) {
+    waiter->SetNotifyVsyncFnForTesting(std::move(fn));
+  }
 }
 
 }  // namespace android
