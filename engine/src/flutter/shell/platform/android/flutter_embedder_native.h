@@ -17,6 +17,7 @@
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
+#include "flutter/shell/platform/android/android_vm_init.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
 #include "flutter/shell/platform/android/android_window_metrics_mapper.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
@@ -187,7 +188,10 @@ class FlutterEmbedderNative {
       std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr,
       std::shared_ptr<AndroidChoreographerProvider> choreographer_provider =
           nullptr,
-      std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr);
+      std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr,
+      std::shared_ptr<FontCollectionProvider> font_provider = nullptr,
+      std::shared_ptr<AndroidAOTProvider> aot_provider = nullptr,
+      std::shared_ptr<AndroidVMInit> vm_init = nullptr);
   ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -220,7 +224,8 @@ class FlutterEmbedderNative {
       const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr,
       std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr,
       std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr,
-      std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr);
+      std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr,
+      std::shared_ptr<AndroidVMInit> vm_init = nullptr);
 
   /// @brief Returns the JniRouter managed by this native instance.
   std::shared_ptr<JniRouter> GetRouter() const;
@@ -550,6 +555,69 @@ class FlutterEmbedderNative {
                                   int64_t frame_start_time_nanos,
                                   int64_t frame_target_time_nanos) const;
 
+  /// @brief Initializes the Android VM with the specified arguments.
+  bool InitVM(const AndroidVMArgs& args) const;
+
+  /// @brief Prefetches the default font collection.
+  bool PrefetchDefaultFontManager() const;
+
+  /// @brief Sets the Dart VM service URI and updates JVM.
+  bool SetVmServiceUri(const std::string& uri) const;
+
+  /// @brief Returns the last recorded VM service URI.
+  std::string GetVmServiceUri() const;
+
+  /// @brief Returns whether VM initialization has completed.
+  bool IsVMInitialized() const;
+
+  /// @brief Returns the VM arguments if initialized.
+  std::optional<AndroidVMArgs> GetVMArgs() const;
+
+  /// @brief Returns the selected AndroidRenderingAPI.
+  AndroidRenderingAPI GetSelectedRenderingAPI() const;
+
+  /// @brief Returns populated FlutterProjectArgs pointer (valid after InitVM).
+  const FlutterProjectArgs* GetProjectArgs() const;
+
+  /// @brief Initializes a FlutterEngine instance via C-API
+  /// FlutterEngineInitialize.
+  FlutterEngineResult InitializeEngine(const FlutterRendererConfig* config,
+                                       const FlutterProjectArgs* args,
+                                       void* user_data,
+                                       FLUTTER_API_SYMBOL(FlutterEngine) *
+                                           engine_out) const;
+
+  /// @brief Deinitializes a FlutterEngine instance via C-API
+  /// FlutterEngineDeinitialize.
+  FlutterEngineResult DeinitializeEngine(FLUTTER_API_SYMBOL(FlutterEngine)
+                                             engine) const;
+
+  /// @brief Creates AOT data structure via C-API FlutterEngineCreateAOTData.
+  FlutterEngineResult CreateAOTData(const FlutterEngineAOTDataSource* source,
+                                    FlutterEngineAOTData* data_out) const;
+
+  /// @brief Collects AOT data structure via C-API FlutterEngineCollectAOTData.
+  FlutterEngineResult CollectAOTData(FlutterEngineAOTData data) const;
+
+  /// @brief Returns the AndroidVMInit instance managed by this native instance.
+  std::shared_ptr<AndroidVMInit> GetVMInit() const;
+
+  /// @brief Sets or replaces the AndroidVMInit instance.
+  void SetVMInit(std::shared_ptr<AndroidVMInit> vm_init);
+
+  /// @brief Returns the FontCollectionProvider managed by this native instance.
+  std::shared_ptr<FontCollectionProvider> GetFontCollectionProvider() const;
+
+  /// @brief Sets or replaces the FontCollectionProvider.
+  void SetFontCollectionProvider(
+      std::shared_ptr<FontCollectionProvider> provider);
+
+  /// @brief Returns the AndroidAOTProvider managed by this native instance.
+  std::shared_ptr<AndroidAOTProvider> GetAOTProvider() const;
+
+  /// @brief Sets or replaces the AndroidAOTProvider.
+  void SetAOTProvider(std::shared_ptr<AndroidAOTProvider> provider);
+
  private:
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;
 
@@ -562,6 +630,9 @@ class FlutterEmbedderNative {
   std::shared_ptr<OSLibraryLoader> library_loader_;
   std::shared_ptr<AndroidChoreographerProvider> choreographer_provider_;
   std::shared_ptr<AndroidVsyncWaiter> vsync_waiter_;
+  std::shared_ptr<FontCollectionProvider> font_provider_;
+  std::shared_ptr<AndroidAOTProvider> aot_provider_;
+  std::shared_ptr<AndroidVMInit> vm_init_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;

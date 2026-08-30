@@ -316,6 +316,12 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       vsync_waiter_(
           std::make_shared<AndroidVsyncWaiter>(choreographer_provider_,
                                                jvm_invoker_)),
+      font_provider_(
+          std::make_shared<DefaultFontCollectionProvider>(library_loader_)),
+      aot_provider_(std::make_shared<DefaultAndroidAOTProvider>()),
+      vm_init_(std::make_shared<AndroidVMInit>(jvm_invoker_,
+                                               font_provider_,
+                                               aot_provider_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -324,7 +330,8 @@ FlutterEmbedderNative::FlutterEmbedderNative()
                                                   image_decoder_,
                                                   platform_views_provider_,
                                                   window_metrics_provider_,
-                                                  vsync_waiter_)),
+                                                  vsync_waiter_,
+                                                  vm_init_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
       asset_provider_(std::make_shared<APKAssetProvider>(
           std::make_shared<InMemoryAPKAssetProviderImpl>())) {
@@ -344,7 +351,10 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<PlatformViewsProvider> platform_views_provider,
     std::shared_ptr<WindowMetricsProvider> window_metrics_provider,
     std::shared_ptr<AndroidChoreographerProvider> choreographer_provider,
-    std::shared_ptr<AndroidVsyncWaiter> vsync_waiter)
+    std::shared_ptr<AndroidVsyncWaiter> vsync_waiter,
+    std::shared_ptr<FontCollectionProvider> font_provider,
+    std::shared_ptr<AndroidAOTProvider> aot_provider,
+    std::shared_ptr<AndroidVMInit> vm_init)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(callback_cache
                           ? std::move(callback_cache)
@@ -374,6 +384,17 @@ FlutterEmbedderNative::FlutterEmbedderNative(
                                  : std::make_shared<AndroidVsyncWaiter>(
                                        choreographer_provider_,
                                        jvm_invoker_)),
+      font_provider_(font_provider
+                         ? std::move(font_provider)
+                         : std::make_shared<DefaultFontCollectionProvider>(
+                               library_loader_)),
+      aot_provider_(aot_provider
+                        ? std::move(aot_provider)
+                        : std::make_shared<DefaultAndroidAOTProvider>()),
+      vm_init_(vm_init ? std::move(vm_init)
+                       : std::make_shared<AndroidVMInit>(jvm_invoker_,
+                                                         font_provider_,
+                                                         aot_provider_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -382,7 +403,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
                                                   image_decoder_,
                                                   platform_views_provider_,
                                                   window_metrics_provider_,
-                                                  vsync_waiter_)),
+                                                  vsync_waiter_,
+                                                  vm_init_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, legacy_delegate)),
       asset_provider_(
           asset_provider
@@ -444,11 +466,13 @@ std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
     const std::shared_ptr<LegacyJniDelegate>& legacy_delegate,
     std::shared_ptr<PlatformViewsProvider> platform_views_provider,
     std::shared_ptr<WindowMetricsProvider> window_metrics_provider,
-    std::shared_ptr<AndroidVsyncWaiter> vsync_waiter) {
+    std::shared_ptr<AndroidVsyncWaiter> vsync_waiter,
+    std::shared_ptr<AndroidVMInit> vm_init) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateDefaultRouter");
   auto delegate = std::make_shared<JniDelegate>(
       std::move(invoker), nullptr, nullptr, std::move(platform_views_provider),
-      std::move(window_metrics_provider), std::move(vsync_waiter));
+      std::move(window_metrics_provider), std::move(vsync_waiter),
+      std::move(vm_init));
   return std::make_shared<JniRouter>(std::move(delegate), legacy_delegate);
 }
 
@@ -1336,6 +1360,228 @@ FlutterEngineResult FlutterEmbedderNative::NotifyVsync(
   }
   return EngineNotifyVsync(engine, baton, frame_start_time_nanos,
                            frame_target_time_nanos);
+}
+
+bool FlutterEmbedderNative::InitVM(const AndroidVMArgs& args) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::InitVM");
+  if (jni_router_) {
+    return jni_router_->RouteInitVM(args);
+  }
+  if (vm_init_) {
+    return vm_init_->Init(args);
+  }
+  return false;
+}
+
+bool FlutterEmbedderNative::PrefetchDefaultFontManager() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::PrefetchDefaultFontManager");
+  if (jni_router_) {
+    return jni_router_->RoutePrefetchDefaultFontManager();
+  }
+  if (vm_init_) {
+    return vm_init_->PrefetchDefaultFontManager();
+  }
+  return false;
+}
+
+bool FlutterEmbedderNative::SetVmServiceUri(const std::string& uri) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SetVmServiceUri", "uri",
+               uri.c_str());
+  if (jni_router_) {
+    return jni_router_->RouteSetVmServiceUri(uri);
+  }
+  if (vm_init_) {
+    return vm_init_->SetVmServiceUri(uri);
+  }
+  return false;
+}
+
+std::string FlutterEmbedderNative::GetVmServiceUri() const {
+  if (vm_init_) {
+    return vm_init_->GetVmServiceUri();
+  }
+  return "";
+}
+
+bool FlutterEmbedderNative::IsVMInitialized() const {
+  if (vm_init_) {
+    return vm_init_->IsInitialized();
+  }
+  return false;
+}
+
+std::optional<AndroidVMArgs> FlutterEmbedderNative::GetVMArgs() const {
+  if (vm_init_) {
+    return vm_init_->GetVMArgs();
+  }
+  return std::nullopt;
+}
+
+AndroidRenderingAPI FlutterEmbedderNative::GetSelectedRenderingAPI() const {
+  if (vm_init_) {
+    return vm_init_->GetSelectedRenderingAPI();
+  }
+  return AndroidRenderingAPI::kSkiaOpenGLES;
+}
+
+const FlutterProjectArgs* FlutterEmbedderNative::GetProjectArgs() const {
+  if (vm_init_) {
+    return vm_init_->GetProjectArgs();
+  }
+  return nullptr;
+}
+
+static FlutterEngineResult EngineInitialize(size_t version,
+                                            const FlutterRendererConfig* config,
+                                            const FlutterProjectArgs* args,
+                                            void* user_data,
+                                            FLUTTER_API_SYMBOL(FlutterEngine) *
+                                                engine_out) {
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.Initialize) {
+    return s_procs.Initialize(version, config, args, user_data, engine_out);
+  }
+  return kInternalInconsistency;
+}
+
+static FlutterEngineResult EngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                  engine) {
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.Deinitialize) {
+    return s_procs.Deinitialize(engine);
+  }
+  return kInternalInconsistency;
+}
+
+FlutterEngineResult FlutterEmbedderNative::InitializeEngine(
+    const FlutterRendererConfig* config,
+    const FlutterProjectArgs* args,
+    void* user_data,
+    FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::InitializeEngine");
+  if (!config || !args || !engine_out) {
+    return kInvalidArguments;
+  }
+  return EngineInitialize(FLUTTER_ENGINE_VERSION, config, args, user_data,
+                          engine_out);
+}
+
+FlutterEngineResult FlutterEmbedderNative::DeinitializeEngine(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::DeinitializeEngine");
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  return EngineDeinitialize(engine);
+}
+
+static FlutterEngineResult EngineCreateAOTData(
+    const FlutterEngineAOTDataSource* source,
+    FlutterEngineAOTData* data_out) {
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.CreateAOTData) {
+    return s_procs.CreateAOTData(source, data_out);
+  }
+  return kInternalInconsistency;
+}
+
+static FlutterEngineResult EngineCollectAOTData(FlutterEngineAOTData data) {
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.CollectAOTData) {
+    return s_procs.CollectAOTData(data);
+  }
+  return kInternalInconsistency;
+}
+
+FlutterEngineResult FlutterEmbedderNative::CreateAOTData(
+    const FlutterEngineAOTDataSource* source,
+    FlutterEngineAOTData* data_out) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateAOTData");
+  if (!source || !data_out) {
+    return kInvalidArguments;
+  }
+  if (aot_provider_) {
+    return aot_provider_->CreateAOTData(source, data_out);
+  }
+  return EngineCreateAOTData(source, data_out);
+}
+
+FlutterEngineResult FlutterEmbedderNative::CollectAOTData(
+    FlutterEngineAOTData data) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::CollectAOTData");
+  if (!data) {
+    return kInvalidArguments;
+  }
+  if (aot_provider_) {
+    return aot_provider_->CollectAOTData(data);
+  }
+  return EngineCollectAOTData(data);
+}
+
+std::shared_ptr<AndroidVMInit> FlutterEmbedderNative::GetVMInit() const {
+  return vm_init_;
+}
+
+void FlutterEmbedderNative::SetVMInit(std::shared_ptr<AndroidVMInit> vm_init) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetVMInit");
+  vm_init_ = vm_init ? std::move(vm_init)
+                     : std::make_shared<AndroidVMInit>(
+                           jvm_invoker_, font_provider_, aot_provider_);
+  if (jni_delegate_) {
+    jni_delegate_->SetVMInit(vm_init_);
+  }
+}
+
+std::shared_ptr<FontCollectionProvider>
+FlutterEmbedderNative::GetFontCollectionProvider() const {
+  return font_provider_;
+}
+
+void FlutterEmbedderNative::SetFontCollectionProvider(
+    std::shared_ptr<FontCollectionProvider> provider) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetFontCollectionProvider");
+  font_provider_ =
+      provider
+          ? std::move(provider)
+          : std::make_shared<DefaultFontCollectionProvider>(library_loader_);
+  if (vm_init_) {
+    vm_init_->SetFontCollectionProvider(font_provider_);
+  }
+}
+
+std::shared_ptr<AndroidAOTProvider> FlutterEmbedderNative::GetAOTProvider()
+    const {
+  return aot_provider_;
+}
+
+void FlutterEmbedderNative::SetAOTProvider(
+    std::shared_ptr<AndroidAOTProvider> provider) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetAOTProvider");
+  aot_provider_ = provider ? std::move(provider)
+                           : std::make_shared<DefaultAndroidAOTProvider>();
+  if (vm_init_) {
+    vm_init_->SetAOTProvider(aot_provider_);
+  }
 }
 
 }  // namespace android

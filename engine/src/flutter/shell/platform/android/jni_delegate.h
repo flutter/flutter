@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
+#include "flutter/shell/platform/android/android_vm_init.h"
 #include "flutter/shell/platform/android/android_window_metrics_mapper.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -89,7 +90,8 @@ class JniDelegate {
       std::shared_ptr<ImageDecoderProvider> image_decoder = nullptr,
       std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr,
       std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr,
-      std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr);
+      std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr,
+      std::shared_ptr<AndroidVMInit> vm_init = nullptr);
   virtual ~JniDelegate();
 
   /// @brief Handles an incoming platform message dispatch to the JVM.
@@ -324,6 +326,30 @@ class JniDelegate {
   /// @brief Returns the current AndroidVsyncWaiter.
   std::shared_ptr<AndroidVsyncWaiter> GetVsyncWaiter() const;
 
+  /// @brief Initializes the Android VM with the specified arguments.
+  virtual bool InitVM(const AndroidVMArgs& args);
+
+  /// @brief Prefetches the default font collection.
+  virtual bool PrefetchDefaultFontManager();
+
+  /// @brief Sets the Dart VM service URI and updates JVM.
+  virtual bool SetVmServiceUri(const std::string& uri);
+
+  /// @brief Returns the last recorded VM service URI.
+  virtual std::string GetVmServiceUri() const;
+
+  /// @brief Returns whether VM initialization has completed.
+  virtual bool IsVMInitialized() const;
+
+  /// @brief Returns the VM arguments if initialized.
+  virtual std::optional<AndroidVMArgs> GetVMArgs() const;
+
+  /// @brief Sets or replaces the AndroidVMInit coordinator.
+  void SetVMInit(std::shared_ptr<AndroidVMInit> vm_init);
+
+  /// @brief Returns the current AndroidVMInit coordinator.
+  std::shared_ptr<AndroidVMInit> GetVMInit() const;
+
   /// @brief Returns the current AndroidPlatformViewsController.
   std::shared_ptr<AndroidPlatformViewsController> GetPlatformViewsController()
       const;
@@ -338,6 +364,7 @@ class JniDelegate {
   std::shared_ptr<PlatformViewsProvider> platform_views_provider_;
   std::shared_ptr<WindowMetricsProvider> window_metrics_provider_;
   std::shared_ptr<AndroidVsyncWaiter> vsync_waiter_;
+  std::shared_ptr<AndroidVMInit> vm_init_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniDelegate);

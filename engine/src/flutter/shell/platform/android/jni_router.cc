@@ -794,5 +794,48 @@ bool JniRouter::RoutePlatformViewMutators(
   return false;
 }
 
+bool JniRouter::RouteInitVM(const AndroidVMArgs& args) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteInitVM");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->InitVM(args);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->InitVM(args);
+  }
+  return false;
+}
+
+bool JniRouter::RoutePrefetchDefaultFontManager() {
+  TRACE_EVENT0("flutter", "JniRouter::RoutePrefetchDefaultFontManager");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->PrefetchDefaultFontManager();
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->PrefetchDefaultFontManager();
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetVmServiceUri(const std::string& uri) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetVmServiceUri", "uri",
+               uri.c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->SetVmServiceUri(uri);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->SetVmServiceUri(uri);
+  }
+  return false;
+}
+
 }  // namespace android
 }  // namespace flutter
