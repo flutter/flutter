@@ -25,7 +25,7 @@ This document defines the strict multi-agent state machine utilized to migrate t
 
 ### `review-agent` (The Adversarial Reviewer)
 *   **Role**: Enforces structural guardrails (running as the rigorous `reidbaker-agent` archetype).
-*   **Context**: The raw PR diff. Verifies C-ABI invariants, ensures Perfetto trace instrumentation is present, and blocks GN target bleed.
+*   **Context**: The incremental diff strictly bounding the work of the current phase (comparing the current branch against its immediate parent branch or baseline commit—*NOT* the accumulated diff against `master`). Bounding the context prevents review exhaustion. Verifies C-ABI invariants, ensures Perfetto trace instrumentation is present, and blocks GN target bleed.
 
 ## 2. The Execution State Machine
 
