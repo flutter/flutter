@@ -20,14 +20,16 @@ JniDelegate::JniDelegate(
     std::shared_ptr<PlatformViewsProvider> platform_views_provider,
     std::shared_ptr<WindowMetricsProvider> window_metrics_provider,
     std::shared_ptr<AndroidVsyncWaiter> vsync_waiter,
-    std::shared_ptr<AndroidVMInit> vm_init)
+    std::shared_ptr<AndroidVMInit> vm_init,
+    std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(std::move(callback_cache)),
       image_decoder_(std::move(image_decoder)),
       platform_views_provider_(std::move(platform_views_provider)),
       window_metrics_provider_(std::move(window_metrics_provider)),
       vsync_waiter_(std::move(vsync_waiter)),
-      vm_init_(std::move(vm_init)) {
+      vm_init_(std::move(vm_init)),
+      hardware_buffer_provider_(std::move(hardware_buffer_provider)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
   if (!platform_views_provider_) {
@@ -41,12 +43,24 @@ JniDelegate::JniDelegate(
   if (!vm_init_) {
     vm_init_ = std::make_shared<AndroidVMInit>(jvm_invoker_);
   }
+  if (!hardware_buffer_provider_) {
+    hardware_buffer_provider_ =
+        std::make_shared<DefaultAndroidHardwareBufferProvider>();
+  }
   platform_views_controller_ = std::make_shared<AndroidPlatformViewsController>(
       platform_views_provider_);
 }
 
 JniDelegate::~JniDelegate() {
   TRACE_EVENT0("flutter", "JniDelegate::~JniDelegate");
+  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+  for (auto& [id, frame] : hardware_buffer_frames_) {
+    if (frame.destruction_callback) {
+      frame.destruction_callback(frame.user_data);
+    }
+  }
+  hardware_buffer_frames_.clear();
+  hardware_buffer_objects_.clear();
 }
 
 std::shared_ptr<JvmInvoker> JniDelegate::GetJvmInvoker() const {
@@ -728,6 +742,111 @@ void JniDelegate::SetVMInit(std::shared_ptr<AndroidVMInit> vm_init) {
 
 std::shared_ptr<AndroidVMInit> JniDelegate::GetVMInit() const {
   return vm_init_;
+}
+
+bool JniDelegate::RegisterHardwareBufferTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::RegisterHardwareBufferTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+  registered_hardware_textures_.insert(texture_id);
+  return jvm_invoker_->InvokeBooleanMethod("registerHardwareBufferTexture",
+                                           "(J)Z", {});
+}
+
+bool JniDelegate::UnregisterHardwareBufferTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::UnregisterHardwareBufferTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+  registered_hardware_textures_.erase(texture_id);
+  auto it = hardware_buffer_frames_.find(texture_id);
+  if (it != hardware_buffer_frames_.end()) {
+    if (it->second.destruction_callback) {
+      it->second.destruction_callback(it->second.user_data);
+    }
+    hardware_buffer_frames_.erase(it);
+  }
+  hardware_buffer_objects_.erase(texture_id);
+  return jvm_invoker_->InvokeBooleanMethod("unregisterHardwareBufferTexture",
+                                           "(J)Z", {});
+}
+
+bool JniDelegate::SetHardwareBufferFrame(
+    int64_t texture_id,
+    const std::shared_ptr<AndroidHardwareBuffer>& buffer) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetHardwareBufferFrame(object)",
+               "texture_id", std::to_string(texture_id).c_str());
+  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+  auto it = hardware_buffer_frames_.find(texture_id);
+  if (it != hardware_buffer_frames_.end()) {
+    if (it->second.destruction_callback) {
+      it->second.destruction_callback(it->second.user_data);
+    }
+  }
+  if (!buffer || !buffer->IsValid()) {
+    hardware_buffer_frames_.erase(texture_id);
+    hardware_buffer_objects_.erase(texture_id);
+    return false;
+  }
+  hardware_buffer_objects_[texture_id] = buffer;
+  hardware_buffer_frames_[texture_id] = buffer->ToExternalTexture();
+  return true;
+}
+
+bool JniDelegate::SetHardwareBufferFrame(
+    int64_t texture_id,
+    const FlutterHardwareBufferExternalTexture& texture) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetHardwareBufferFrame(struct)",
+               "texture_id", std::to_string(texture_id).c_str());
+  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+  auto it = hardware_buffer_frames_.find(texture_id);
+  if (it != hardware_buffer_frames_.end()) {
+    if (it->second.destruction_callback) {
+      it->second.destruction_callback(it->second.user_data);
+    }
+  }
+  hardware_buffer_frames_[texture_id] = texture;
+  return true;
+}
+
+bool JniDelegate::GetHardwareBufferTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterHardwareBufferExternalTexture* texture_out) {
+  TRACE_EVENT1("flutter", "JniDelegate::GetHardwareBufferTextureFrame",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!texture_out) {
+    return false;
+  }
+  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+  auto it = hardware_buffer_frames_.find(texture_id);
+  if (it != hardware_buffer_frames_.end()) {
+    *texture_out = it->second;
+    if (texture_out->struct_size == 0) {
+      texture_out->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    }
+    return true;
+  }
+  return false;
+}
+
+bool JniDelegate::OnHardwareBufferFrameAvailable(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::OnHardwareBufferFrameAvailable",
+               "texture_id", std::to_string(texture_id).c_str());
+  return jvm_invoker_->InvokeBooleanMethod("onHardwareBufferFrameAvailable",
+                                           "(J)Z", {});
+}
+
+void JniDelegate::SetHardwareBufferProvider(
+    std::shared_ptr<AndroidHardwareBufferProvider> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetHardwareBufferProvider");
+  hardware_buffer_provider_ = std::move(provider);
+}
+
+std::shared_ptr<AndroidHardwareBufferProvider>
+JniDelegate::GetHardwareBufferProvider() const {
+  TRACE_EVENT0("flutter", "JniDelegate::GetHardwareBufferProvider");
+  return hardware_buffer_provider_;
 }
 
 }  // namespace android

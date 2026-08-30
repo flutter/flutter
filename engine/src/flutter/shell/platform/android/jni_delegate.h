@@ -11,7 +11,10 @@
 #include <string>
 #include <vector>
 
+#include <unordered_set>
+
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/android_hardware_buffer.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
@@ -91,7 +94,9 @@ class JniDelegate {
       std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr,
       std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr,
       std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr,
-      std::shared_ptr<AndroidVMInit> vm_init = nullptr);
+      std::shared_ptr<AndroidVMInit> vm_init = nullptr,
+      std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider =
+          nullptr);
   virtual ~JniDelegate();
 
   /// @brief Handles an incoming platform message dispatch to the JVM.
@@ -354,6 +359,42 @@ class JniDelegate {
   std::shared_ptr<AndroidPlatformViewsController> GetPlatformViewsController()
       const;
 
+  /// @brief Registers a hardware buffer texture with texture_id in JVM /
+  /// Delegate.
+  virtual bool RegisterHardwareBufferTexture(int64_t texture_id);
+
+  /// @brief Unregisters a hardware buffer texture by texture_id.
+  virtual bool UnregisterHardwareBufferTexture(int64_t texture_id);
+
+  /// @brief Sets the latest hardware buffer frame for texture_id.
+  virtual bool SetHardwareBufferFrame(
+      int64_t texture_id,
+      const std::shared_ptr<AndroidHardwareBuffer>& buffer);
+
+  /// @brief Sets the latest external texture struct for texture_id.
+  virtual bool SetHardwareBufferFrame(
+      int64_t texture_id,
+      const FlutterHardwareBufferExternalTexture& texture);
+
+  /// @brief Retrieves the latest hardware buffer frame for texture_id.
+  virtual bool GetHardwareBufferTextureFrame(
+      int64_t texture_id,
+      size_t width,
+      size_t height,
+      FlutterHardwareBufferExternalTexture* texture_out);
+
+  /// @brief Notifies that a new hardware buffer frame is available for
+  /// texture_id.
+  virtual bool OnHardwareBufferFrameAvailable(int64_t texture_id);
+
+  /// @brief Sets or replaces the AndroidHardwareBufferProvider.
+  void SetHardwareBufferProvider(
+      std::shared_ptr<AndroidHardwareBufferProvider> provider);
+
+  /// @brief Returns the current AndroidHardwareBufferProvider.
+  std::shared_ptr<AndroidHardwareBufferProvider> GetHardwareBufferProvider()
+      const;
+
   /// @brief Returns the underlying JvmInvoker instance.
   std::shared_ptr<JvmInvoker> GetJvmInvoker() const;
 
@@ -365,7 +406,15 @@ class JniDelegate {
   std::shared_ptr<WindowMetricsProvider> window_metrics_provider_;
   std::shared_ptr<AndroidVsyncWaiter> vsync_waiter_;
   std::shared_ptr<AndroidVMInit> vm_init_;
+  std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
+
+  mutable std::mutex hardware_buffer_mutex_;
+  std::unordered_set<int64_t> registered_hardware_textures_;
+  std::map<int64_t, FlutterHardwareBufferExternalTexture>
+      hardware_buffer_frames_;
+  std::map<int64_t, std::shared_ptr<AndroidHardwareBuffer>>
+      hardware_buffer_objects_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniDelegate);
 };
