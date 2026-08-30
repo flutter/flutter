@@ -129,6 +129,63 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
   EXPECT_TRUE(g_vulkan_proc_info.did_call_queue_submit);
 }
 
+TEST_F(EmbedderTest, CanRegisterAndResolveVulkanExternalTexture) {
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  fml::AutoResetWaitableEvent latch;
+  fml::AutoResetWaitableEvent frame_latch;
+  bool callback_invoked = false;
+  bool destruction_invoked = false;
+
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  context.GetRendererConfig().vulkan.external_texture_frame_callback =
+      [&](void* user_data, int64_t texture_id, size_t width, size_t height,
+          FlutterVulkanExternalTexture* texture) -> bool {
+    callback_invoked = true;
+    texture->struct_size = sizeof(FlutterVulkanExternalTexture);
+    texture->width = width;
+    texture->height = height;
+    texture->image = reinterpret_cast<uint64_t>(context.GetNextImage(
+        {static_cast<int>(width), static_cast<int>(height)}));
+    texture->format = VK_FORMAT_R8G8B8A8_UNORM;
+    texture->image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    texture->user_data = &destruction_invoked;
+    texture->destruction_callback = [](void* data) {
+      if (data) {
+        *static_cast<bool*>(data) = true;
+      }
+    };
+    frame_latch.Signal();
+    return true;
+  };
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetDartEntrypoint("render_texture_impeller_test");
+  builder.SetSurface(DlISize(800, 600));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  constexpr int64_t texture_id = 1;
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  frame_latch.Wait();
+  EXPECT_TRUE(callback_invoked);
+
+  ASSERT_TRUE(embedder_engine->UnregisterTexture(texture_id));
+  engine.reset();
+  EXPECT_TRUE(destruction_invoked);
+}
+
 }  // namespace testing
 }  // namespace flutter
 
