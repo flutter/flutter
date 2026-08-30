@@ -171,14 +171,14 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] *Branch Stub*: `android-embedder-migration-v7/phase-4.3-framework-integration-tests-impeller`
     - [x] `dev/integration_tests/android_views` (Backend: Impeller OpenGLES) - Passed.
     - [x] `dev/integration_tests/android_views` (Backend: Impeller Vulkan) - Passed.
-- [ ] **4.4 DeviceLab Android Lifecycle & Platform Views**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-4.4-devicelab-android-lifecycle-platform-views`
-    - [ ] `dev/devicelab/bin/tasks/android_lifecycles_test.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/android_verified_input_test.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/android_semantics_integration_test.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/android_engine_flags_debug_test.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/android_engine_flags_release_test.dart` - Passed.
+- [x] **4.4 DeviceLab Android Lifecycle & Platform Views**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-4.4-devicelab-android-lifecycle-platform-views`
+    - [x] `dev/devicelab/bin/tasks/android_lifecycles_test.dart` - Passed.
+    - [x] `dev/devicelab/bin/tasks/android_verified_input_test.dart` - Passed.
+    - [x] `dev/devicelab/bin/tasks/android_semantics_integration_test.dart` - Passed.
+    - [x] `dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart` - Passed.
+    - [x] `dev/devicelab/bin/tasks/android_engine_flags_debug_test.dart` - Passed.
+    - [x] `dev/devicelab/bin/tasks/android_engine_flags_release_test.dart` - Passed.
 - [ ] **4.5 DeviceLab Performance & Memory Parity (No Regressions)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-4.5-devicelab-performance-memory-parity-no-regressions`
     - [ ] `dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart` - Passed.
