@@ -307,6 +307,8 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
 
   MOCK_METHOD(bool, HideOverlaySurface, (int32_t surface_id), (override));
 
+  MOCK_METHOD(bool, SetHcppEnabled, (bool enabled), (override));
+
   MOCK_METHOD(bool, CreatePlatformViewTransaction, (), (override));
 
   MOCK_METHOD(bool, SwapPlatformViewTransactions, (), (override));
@@ -314,6 +316,67 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
   MOCK_METHOD(bool, ApplyPlatformViewTransactions, (), (override));
 
   MOCK_METHOD(bool, IsHcppEnabled, (), (const, override));
+
+  MOCK_METHOD(bool,
+              CreateSurfaceControl,
+              (int64_t surface_id, const std::string& debug_name),
+              (override));
+
+  MOCK_METHOD(bool, DestroySurfaceControl, (int64_t surface_id), (override));
+
+  MOCK_METHOD(bool,
+              ReparentSurfaceControl,
+              (int64_t surface_id, int64_t new_parent_id),
+              (override));
+
+  MOCK_METHOD(bool,
+              SetSurfaceControlGeometry,
+              (int64_t surface_id,
+               const AndroidSurfaceControlRect& source,
+               const AndroidSurfaceControlRect& destination,
+               int32_t transform),
+              (override));
+
+  MOCK_METHOD(bool,
+              SetSurfaceControlVisibility,
+              (int64_t surface_id, bool visible),
+              (override));
+
+  MOCK_METHOD(bool,
+              SetSurfaceControlZOrder,
+              (int64_t surface_id, int32_t z_order),
+              (override));
+
+  MOCK_METHOD(bool,
+              SetSurfaceControlDamageRegion,
+              (int64_t surface_id,
+               const std::vector<AndroidSurfaceControlRect>& rects),
+              (override));
+
+  MOCK_METHOD(bool,
+              SetSurfaceControlBuffer,
+              (int64_t surface_id, void* buffer, int fence_fd),
+              (override));
+
+  MOCK_METHOD(bool,
+              SetSurfaceControlBufferAlpha,
+              (int64_t surface_id, float alpha),
+              (override));
+
+  MOCK_METHOD(bool,
+              SetSurfaceControlColor,
+              (int64_t surface_id, float r, float g, float b, float alpha),
+              (override));
+
+  MOCK_METHOD(std::optional<AndroidSurfaceControlState>,
+              GetSurfaceControlState,
+              (int64_t surface_id),
+              (const, override));
+
+  MOCK_METHOD(std::shared_ptr<AndroidSurfaceControl>,
+              GetSurfaceControl,
+              (int64_t surface_id),
+              (const, override));
 
   MOCK_METHOD(bool,
               PushPlatformViewMutators,
@@ -521,6 +584,97 @@ class MockImageDecoderProvider : public ImageDecoderProvider {
               (override));
 
   MOCK_METHOD(void, RemoveImageHeader, (int64_t generator_handle), (override));
+};
+
+class MockSurfaceControlProvider : public AndroidSurfaceControlProvider {
+ public:
+  MOCK_METHOD(bool, IsAvailable, (), (const, override));
+  MOCK_METHOD(std::unique_ptr<AndroidSurfaceControl>,
+              CreateFromWindow,
+              (void* native_window, const std::string& debug_name),
+              (override));
+  MOCK_METHOD(std::unique_ptr<AndroidSurfaceControl>,
+              Create,
+              (AndroidSurfaceControl * parent, const std::string& debug_name),
+              (override));
+  MOCK_METHOD(std::unique_ptr<AndroidSurfaceControl>,
+              CreateFromNativeHandle,
+              (void* handle,
+               const std::string& debug_name,
+               bool take_ownership),
+              (override));
+  MOCK_METHOD(std::unique_ptr<AndroidSurfaceTransaction>,
+              CreateTransaction,
+              (),
+              (override));
+  MOCK_METHOD(std::unique_ptr<AndroidSurfaceTransaction>,
+              CreateTransactionFromNativeHandle,
+              (void* handle, bool take_ownership),
+              (override));
+  MOCK_METHOD(void, Acquire, (void* handle), (override));
+  MOCK_METHOD(void, Release, (void* handle), (override));
+  MOCK_METHOD(void, DeleteTransaction, (void* transaction_handle), (override));
+  MOCK_METHOD(bool, ApplyTransaction, (void* transaction_handle), (override));
+  MOCK_METHOD(bool,
+              Reparent,
+              (void* transaction_handle,
+               void* surface_control_handle,
+               void* new_parent_handle),
+              (override));
+  MOCK_METHOD(bool,
+              SetVisibility,
+              (void* transaction_handle,
+               void* surface_control_handle,
+               int8_t visibility),
+              (override));
+  MOCK_METHOD(bool,
+              SetZOrder,
+              (void* transaction_handle,
+               void* surface_control_handle,
+               int32_t z_order),
+              (override));
+  MOCK_METHOD(bool,
+              SetBuffer,
+              (void* transaction_handle,
+               void* surface_control_handle,
+               void* hardware_buffer,
+               int acquire_fence_fd),
+              (override));
+  MOCK_METHOD(bool,
+              SetGeometry,
+              (void* transaction_handle,
+               void* surface_control_handle,
+               const AndroidSurfaceControlRect* source,
+               const AndroidSurfaceControlRect* destination,
+               int32_t transform),
+              (override));
+  MOCK_METHOD(bool,
+              SetDamageRegion,
+              (void* transaction_handle,
+               void* surface_control_handle,
+               const AndroidSurfaceControlRect* rects,
+               uint32_t count),
+              (override));
+  MOCK_METHOD(bool,
+              SetBufferAlpha,
+              (void* transaction_handle,
+               void* surface_control_handle,
+               float alpha),
+              (override));
+  MOCK_METHOD(bool,
+              SetColor,
+              (void* transaction_handle,
+               void* surface_control_handle,
+               float r,
+               float g,
+               float b,
+               float alpha),
+              (override));
+  MOCK_METHOD(bool,
+              SetOnComplete,
+              (void* transaction_handle,
+               std::function<void(const AndroidSurfaceControlStats&)> callback),
+              (override));
 };
 
 // =============================================================================
@@ -5173,6 +5327,391 @@ TEST(VulkanExternalTextureTest, ThreadSafeConcurrentVulkanOperations) {
   }
 
   FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+// =============================================================================
+// Phase 3.3 SurfaceControl HCPP Tests
+// =============================================================================
+
+TEST(SurfaceControlHcppTest, JniDelegateLifecycleAndOperations) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+
+  JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                       nullptr, nullptr, nullptr, nullptr, nullptr,
+                       sc_provider);
+
+  EXPECT_TRUE(delegate.SetHcppEnabled(true));
+  EXPECT_TRUE(delegate.IsHcppEnabled());
+
+  EXPECT_TRUE(delegate.CreatePlatformViewTransaction());
+
+  int64_t parent_id = 100;
+  int64_t child_id = 101;
+  EXPECT_TRUE(delegate.CreateSurfaceControl(parent_id, "parent_surface"));
+  EXPECT_TRUE(delegate.CreateSurfaceControl(child_id, "child_surface"));
+
+  auto parent_sc = delegate.GetSurfaceControl(parent_id);
+  auto child_sc = delegate.GetSurfaceControl(child_id);
+  ASSERT_NE(parent_sc, nullptr);
+  ASSERT_NE(child_sc, nullptr);
+  EXPECT_EQ(parent_sc->GetDebugName(), "parent_surface");
+  EXPECT_EQ(child_sc->GetDebugName(), "child_surface");
+
+  EXPECT_TRUE(delegate.ReparentSurfaceControl(child_id, parent_id));
+
+  AndroidSurfaceControlRect src = {0, 0, 640, 480};
+  AndroidSurfaceControlRect dst = {10, 20, 1280, 720};
+  EXPECT_TRUE(delegate.SetSurfaceControlGeometry(child_id, src, dst, 0));
+
+  EXPECT_TRUE(delegate.SetSurfaceControlVisibility(child_id, true));
+  EXPECT_TRUE(delegate.SetSurfaceControlZOrder(child_id, 5));
+
+  std::vector<AndroidSurfaceControlRect> damage = {{0, 0, 100, 100},
+                                                   {100, 100, 200, 200}};
+  EXPECT_TRUE(delegate.SetSurfaceControlDamageRegion(child_id, damage));
+
+  int dummy_buf = 42;
+  EXPECT_TRUE(delegate.SetSurfaceControlBuffer(child_id, &dummy_buf, -1));
+  EXPECT_TRUE(delegate.SetSurfaceControlBufferAlpha(child_id, 0.75f));
+  EXPECT_TRUE(
+      delegate.SetSurfaceControlColor(child_id, 1.0f, 0.5f, 0.25f, 0.8f));
+
+  EXPECT_TRUE(delegate.SwapPlatformViewTransactions());
+  EXPECT_TRUE(delegate.ApplyPlatformViewTransactions());
+
+  auto state_opt = delegate.GetSurfaceControlState(child_id);
+  ASSERT_TRUE(state_opt.has_value());
+  if (state_opt.has_value()) {
+    EXPECT_EQ(state_opt->visibility, AndroidSurfaceControlVisibility::kShow);
+    EXPECT_EQ(state_opt->z_order, 5);
+    EXPECT_EQ(state_opt->parent_id, static_cast<uint64_t>(parent_id));
+    EXPECT_FLOAT_EQ(state_opt->alpha, 0.75f);
+    EXPECT_FLOAT_EQ(state_opt->color.r, 1.0f);
+    EXPECT_FLOAT_EQ(state_opt->color.g, 0.5f);
+    EXPECT_FLOAT_EQ(state_opt->color.b, 0.25f);
+    EXPECT_FLOAT_EQ(state_opt->color.a, 0.8f);
+    EXPECT_EQ(state_opt->buffer_handle, &dummy_buf);
+    EXPECT_EQ(state_opt->damage_region.size(), 2u);
+  }
+
+  EXPECT_TRUE(delegate.DestroySurfaceControl(child_id));
+  EXPECT_EQ(delegate.GetSurfaceControl(child_id), nullptr);
+  EXPECT_FALSE(delegate.GetSurfaceControlState(child_id).has_value());
+
+  // Verify direct child creation preserves parent_id in state
+  int64_t child_direct_id = 102;
+  EXPECT_TRUE(delegate.CreateSurfaceControl(child_direct_id, parent_id,
+                                            "child_direct"));
+  auto direct_state = delegate.GetSurfaceControlState(child_direct_id);
+  ASSERT_TRUE(direct_state.has_value());
+  EXPECT_EQ(direct_state->parent_id, static_cast<uint64_t>(parent_id));
+  EXPECT_TRUE(delegate.DestroySurfaceControl(child_direct_id));
+
+  // Verify invalid/non-existent surface_id returns false across all operations
+  int64_t non_existent_id = 9999;
+  EXPECT_FALSE(delegate.DestroySurfaceControl(non_existent_id));
+  EXPECT_FALSE(delegate.ReparentSurfaceControl(non_existent_id, parent_id));
+  EXPECT_FALSE(
+      delegate.SetSurfaceControlGeometry(non_existent_id, src, dst, 0));
+  EXPECT_FALSE(delegate.SetSurfaceControlVisibility(non_existent_id, true));
+  EXPECT_FALSE(delegate.SetSurfaceControlZOrder(non_existent_id, 1));
+  EXPECT_FALSE(delegate.SetSurfaceControlDamageRegion(non_existent_id, damage));
+  EXPECT_FALSE(
+      delegate.SetSurfaceControlBuffer(non_existent_id, &dummy_buf, -1));
+  EXPECT_FALSE(delegate.SetSurfaceControlBufferAlpha(non_existent_id, 0.5f));
+  EXPECT_FALSE(
+      delegate.SetSurfaceControlColor(non_existent_id, 1.0f, 1.0f, 1.0f, 1.0f));
+}
+
+TEST(SurfaceControlHcppTest, JniRouterRoutingFlip) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+  auto jni_delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, sc_provider);
+  auto mock_legacy = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+  auto router = std::make_shared<JniRouter>(jni_delegate, mock_legacy);
+
+  // 1. When Embedder is disabled (legacy routing)
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+
+  EXPECT_CALL(*mock_legacy, SetHcppEnabled(true)).WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSetHcppEnabled(true));
+
+  EXPECT_CALL(*mock_legacy, IsHcppEnabled()).WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteIsHcppEnabled());
+
+  EXPECT_CALL(*mock_legacy, CreatePlatformViewTransaction())
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
+
+  EXPECT_CALL(*mock_legacy, SwapPlatformViewTransactions())
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
+
+  EXPECT_CALL(*mock_legacy, ApplyPlatformViewTransactions())
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
+
+  EXPECT_CALL(*mock_legacy, CreateSurfaceControl(200, "legacy_sc"))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteCreateSurfaceControl(200, "legacy_sc"));
+
+  EXPECT_CALL(*mock_legacy, ReparentSurfaceControl(200, 100))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteReparentSurfaceControl(200, 100));
+
+  AndroidSurfaceControlRect src = {0, 0, 100, 100};
+  AndroidSurfaceControlRect dst = {0, 0, 200, 200};
+  EXPECT_CALL(*mock_legacy, SetSurfaceControlGeometry(200, src, dst, 0))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSetSurfaceControlGeometry(200, src, dst, 0));
+
+  EXPECT_CALL(*mock_legacy, SetSurfaceControlVisibility(200, true))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSetSurfaceControlVisibility(200, true));
+
+  EXPECT_CALL(*mock_legacy, SetSurfaceControlZOrder(200, 10))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSetSurfaceControlZOrder(200, 10));
+
+  std::vector<AndroidSurfaceControlRect> rects = {{0, 0, 50, 50}};
+  EXPECT_CALL(*mock_legacy, SetSurfaceControlDamageRegion(200, rects))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSetSurfaceControlDamageRegion(200, rects));
+
+  int dummy_buf = 99;
+  EXPECT_CALL(*mock_legacy, SetSurfaceControlBuffer(200, &dummy_buf, -1))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSetSurfaceControlBuffer(200, &dummy_buf, -1));
+
+  EXPECT_CALL(*mock_legacy, SetSurfaceControlBufferAlpha(200, 0.5f))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSetSurfaceControlBufferAlpha(200, 0.5f));
+
+  EXPECT_CALL(*mock_legacy, SetSurfaceControlColor(200, 0.1f, 0.2f, 0.3f, 1.0f))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSetSurfaceControlColor(200, 0.1f, 0.2f, 0.3f, 1.0f));
+
+  EXPECT_CALL(*mock_legacy, DestroySurfaceControl(200)).WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteDestroySurfaceControl(200));
+
+  AndroidSurfaceControlState mock_legacy_state;
+  mock_legacy_state.id = 200;
+  mock_legacy_state.z_order = 42;
+  EXPECT_CALL(*mock_legacy, GetSurfaceControlState(200))
+      .WillOnce(Return(mock_legacy_state));
+  auto queried_state = router->RouteGetSurfaceControlState(200);
+  ASSERT_TRUE(queried_state.has_value());
+  EXPECT_EQ(queried_state->id, 200u);
+  EXPECT_EQ(queried_state->z_order, 42);
+
+  EXPECT_CALL(*mock_legacy, GetSurfaceControl(200)).WillOnce(Return(nullptr));
+  EXPECT_EQ(router->RouteGetSurfaceControl(200), nullptr);
+
+  // 2. Flip routing to Embedder enabled
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+
+  // These should go directly to JniDelegate, NO calls to mock_legacy!
+  EXPECT_TRUE(router->RouteSetHcppEnabled(true));
+  EXPECT_TRUE(router->RouteIsHcppEnabled());
+  EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
+  EXPECT_TRUE(router->RouteCreateSurfaceControl(300, "embedder_sc"));
+  EXPECT_TRUE(router->RouteSetSurfaceControlVisibility(300, true));
+  EXPECT_TRUE(router->RouteSetSurfaceControlZOrder(300, 3));
+  EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
+  EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
+
+  auto state = router->RouteGetSurfaceControlState(300);
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->visibility, AndroidSurfaceControlVisibility::kShow);
+  EXPECT_EQ(state->z_order, 3);
+  EXPECT_TRUE(router->RouteDestroySurfaceControl(300));
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+TEST(SurfaceControlHcppTest, FlutterEmbedderNativeIntegration) {
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, sc_provider);
+
+  EXPECT_EQ(native.GetSurfaceControlProvider(), sc_provider);
+
+  EXPECT_TRUE(native.SetHcppEnabled(true));
+  EXPECT_TRUE(native.IsHcppEnabled());
+
+  EXPECT_TRUE(native.CreatePlatformViewTransaction());
+  EXPECT_TRUE(native.CreateSurfaceControl(500, "native_surface"));
+
+  auto sc = native.GetSurfaceControl(500);
+  ASSERT_NE(sc, nullptr);
+  EXPECT_EQ(sc->GetDebugName(), "native_surface");
+
+  EXPECT_TRUE(native.SetSurfaceControlVisibility(500, true));
+  EXPECT_TRUE(native.SetSurfaceControlZOrder(500, 7));
+  EXPECT_TRUE(native.SetSurfaceControlBufferAlpha(500, 0.9f));
+  EXPECT_TRUE(native.SetSurfaceControlColor(500, 0.0f, 1.0f, 0.0f, 1.0f));
+
+  EXPECT_TRUE(native.SwapPlatformViewTransactions());
+  EXPECT_TRUE(native.ApplyPlatformViewTransactions());
+
+  auto state = native.GetSurfaceControlState(500);
+  ASSERT_TRUE(state.has_value());
+  if (state.has_value()) {
+    EXPECT_EQ(state->visibility, AndroidSurfaceControlVisibility::kShow);
+    EXPECT_EQ(state->z_order, 7);
+    EXPECT_FLOAT_EQ(state->alpha, 0.9f);
+    EXPECT_FLOAT_EQ(state->color.g, 1.0f);
+  }
+
+  EXPECT_TRUE(native.DestroySurfaceControl(500));
+  EXPECT_EQ(native.GetSurfaceControl(500), nullptr);
+
+  // Test replacing provider dynamically
+  auto new_sc_provider =
+      std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+  native.SetSurfaceControlProvider(new_sc_provider);
+  EXPECT_EQ(native.GetSurfaceControlProvider(), new_sc_provider);
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+TEST(SurfaceControlHcppTest, ThreadSafeConcurrentSurfaceOperations) {
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, sc_provider);
+
+  constexpr int kThreadCount = 8;
+  constexpr int kIterationsPerThread = 25;
+
+  std::vector<std::future<void>> futures;
+  futures.reserve(kThreadCount);
+
+  for (int t = 0; t < kThreadCount; ++t) {
+    futures.push_back(std::async(std::launch::async, [&native, t]() {
+      for (int i = 0; i < kIterationsPerThread; ++i) {
+        int64_t surface_id = 50000 + (t * 100) + i;
+        std::string name = "surface_" + std::to_string(surface_id);
+
+        EXPECT_TRUE(native.CreatePlatformViewTransaction());
+        EXPECT_TRUE(native.CreateSurfaceControl(surface_id, name));
+        EXPECT_TRUE(native.SetSurfaceControlVisibility(surface_id, true));
+        EXPECT_TRUE(native.SetSurfaceControlZOrder(surface_id, t));
+
+        AndroidSurfaceControlRect src = {0, 0, 100, 100};
+        AndroidSurfaceControlRect dst = {0, 0, 200, 200};
+        EXPECT_TRUE(native.SetSurfaceControlGeometry(surface_id, src, dst, 0));
+
+        EXPECT_TRUE(native.SwapPlatformViewTransactions());
+        EXPECT_TRUE(native.ApplyPlatformViewTransactions());
+
+        auto state = native.GetSurfaceControlState(surface_id);
+        ASSERT_TRUE(state.has_value());
+        EXPECT_EQ(state->visibility, AndroidSurfaceControlVisibility::kShow);
+        EXPECT_EQ(state->z_order, t);
+
+        EXPECT_TRUE(native.DestroySurfaceControl(surface_id));
+      }
+    }));
+  }
+
+  for (auto& f : futures) {
+    f.get();
+  }
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+class FailingApplySurfaceControlProvider
+    : public InMemoryAndroidSurfaceControlProvider {
+ public:
+  bool ApplyTransaction(void* transaction_handle) override { return false; }
+};
+
+TEST(SurfaceControlHcppTest, TransactionRollbackOnApplyFailure) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+
+  auto provider = std::make_shared<FailingApplySurfaceControlProvider>();
+  JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                       nullptr, nullptr, nullptr, nullptr, nullptr, provider);
+
+  int64_t surface_id = 9001;
+  EXPECT_TRUE(delegate.CreateSurfaceControl(surface_id, "test_sc"));
+  auto initial_state = delegate.GetSurfaceControlState(surface_id);
+  ASSERT_TRUE(initial_state.has_value());
+  EXPECT_EQ(initial_state->z_order, 0);
+
+  // Now create a batched transaction
+  EXPECT_TRUE(delegate.CreatePlatformViewTransaction());
+  // Staged update
+  EXPECT_TRUE(delegate.SetSurfaceControlZOrder(surface_id, 99));
+  auto staged_state = delegate.GetSurfaceControlState(surface_id);
+  ASSERT_TRUE(staged_state.has_value());
+  EXPECT_EQ(staged_state->z_order, 99);
+
+  // Apply fails because FailingApplySurfaceControlProvider::ApplyTransaction
+  // returns false
+  EXPECT_FALSE(delegate.ApplyPlatformViewTransactions());
+
+  // State should be rolled back to initial state!
+  auto rolled_back_state = delegate.GetSurfaceControlState(surface_id);
+  ASSERT_TRUE(rolled_back_state.has_value());
+  EXPECT_EQ(rolled_back_state->z_order, 0);
+}
+
+TEST(SurfaceControlHcppTest, WindowPlumbingToJniDelegate) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, sc_provider);
+
+  EXPECT_EQ(native.GetJniDelegate()->GetNativeWindow(), nullptr);
+  native.SetNativeWindow(nullptr);
+  EXPECT_EQ(native.GetJniDelegate()->GetNativeWindow(), nullptr);
+
+  void* dummy_window = reinterpret_cast<void*>(0x88884321);
+  native.GetJniDelegate()->SetNativeWindow(dummy_window);
+  EXPECT_EQ(native.GetJniDelegate()->GetNativeWindow(), dummy_window);
+
+#if !defined(__ANDROID__)
+  native.SetNativeWindow(reinterpret_cast<ANativeWindow*>(dummy_window));
+  EXPECT_EQ(native.GetJniDelegate()->GetNativeWindow(), dummy_window);
+  native.SetNativeWindow(nullptr);
+#endif
 }
 
 }  // namespace testing

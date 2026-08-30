@@ -12,15 +12,15 @@
 #include <optional>
 #include <shared_mutex>
 #include <string>
-#include <vector>
-
 #include <unordered_set>
+#include <vector>
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/android_hardware_buffer.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
+#include "flutter/shell/platform/android/android_surface_control.h"
 #include "flutter/shell/platform/android/android_vm_init.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
 #include "flutter/shell/platform/android/android_vulkan_texture.h"
@@ -147,6 +147,8 @@ class JniDelegate {
       std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider =
           nullptr,
       std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider =
+          nullptr,
+      std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider =
           nullptr);
   virtual ~JniDelegate();
 
@@ -326,6 +328,12 @@ class JniDelegate {
   /// @brief Hides an overlay surface.
   virtual bool HideOverlaySurface(int32_t surface_id);
 
+  /// @brief Sets whether HC++ presentation is supported and enabled.
+  virtual bool SetHcppEnabled(bool enabled);
+
+  /// @brief Checks whether HC++ presentation is supported and enabled.
+  virtual bool IsHcppEnabled() const;
+
   /// @brief Creates a SurfaceControl transaction for HC++.
   virtual bool CreatePlatformViewTransaction();
 
@@ -335,8 +343,77 @@ class JniDelegate {
   /// @brief Applies pending SurfaceControl transactions for HC++.
   virtual bool ApplyPlatformViewTransactions();
 
-  /// @brief Checks whether HC++ presentation is supported and enabled.
-  virtual bool IsHcppEnabled() const;
+  /// @brief Sets the native window pointer for root SurfaceControl creation.
+  void SetNativeWindow(void* window);
+
+  /// @brief Returns the native window pointer.
+  void* GetNativeWindow() const;
+
+  /// @brief Creates a native SurfaceControl node.
+  virtual bool CreateSurfaceControl(int64_t surface_id,
+                                    const std::string& debug_name = "");
+
+  /// @brief Creates a native SurfaceControl node with explicit parent ID.
+  virtual bool CreateSurfaceControl(int64_t surface_id,
+                                    int64_t parent_surface_id,
+                                    const std::string& debug_name = "");
+
+  /// @brief Destroys a native SurfaceControl node.
+  virtual bool DestroySurfaceControl(int64_t surface_id);
+
+  /// @brief Reparents a native SurfaceControl node under a new parent node.
+  virtual bool ReparentSurfaceControl(int64_t surface_id,
+                                      int64_t new_parent_id);
+
+  /// @brief Sets geometry crop, scaling, and transform on a native
+  /// SurfaceControl node.
+  virtual bool SetSurfaceControlGeometry(
+      int64_t surface_id,
+      const AndroidSurfaceControlRect& source,
+      const AndroidSurfaceControlRect& destination,
+      int32_t transform = 0);
+
+  /// @brief Sets visibility on a native SurfaceControl node.
+  virtual bool SetSurfaceControlVisibility(int64_t surface_id, bool visible);
+
+  /// @brief Sets z-order on a native SurfaceControl node.
+  virtual bool SetSurfaceControlZOrder(int64_t surface_id, int32_t z_order);
+
+  /// @brief Sets damage region rects on a native SurfaceControl node.
+  virtual bool SetSurfaceControlDamageRegion(
+      int64_t surface_id,
+      const std::vector<AndroidSurfaceControlRect>& rects);
+
+  /// @brief Sets buffer and fence on a native SurfaceControl node.
+  virtual bool SetSurfaceControlBuffer(int64_t surface_id,
+                                       void* buffer,
+                                       int fence_fd = -1);
+
+  /// @brief Sets buffer alpha transparency on a native SurfaceControl node.
+  virtual bool SetSurfaceControlBufferAlpha(int64_t surface_id, float alpha);
+
+  /// @brief Sets solid background color on a native SurfaceControl node.
+  virtual bool SetSurfaceControlColor(int64_t surface_id,
+                                      float r,
+                                      float g,
+                                      float b,
+                                      float alpha);
+
+  /// @brief Sets or replaces the AndroidSurfaceControlProvider.
+  void SetSurfaceControlProvider(
+      std::shared_ptr<AndroidSurfaceControlProvider> provider);
+
+  /// @brief Returns the current AndroidSurfaceControlProvider.
+  std::shared_ptr<AndroidSurfaceControlProvider> GetSurfaceControlProvider()
+      const;
+
+  /// @brief Returns the state snapshot of a SurfaceControl node.
+  std::optional<AndroidSurfaceControlState> GetSurfaceControlState(
+      int64_t surface_id) const;
+
+  /// @brief Returns the managed AndroidSurfaceControl instance by surface ID.
+  std::shared_ptr<AndroidSurfaceControl> GetSurfaceControl(
+      int64_t surface_id) const;
 
   /// @brief Dispatches platform view mutator stack to the JVM.
   virtual bool PushPlatformViewMutators(
@@ -538,6 +615,18 @@ class JniDelegate {
   std::map<int64_t, FlutterVulkanExternalTexture> vulkan_texture_frames_;
   std::map<int64_t, std::shared_ptr<AndroidVulkanExternalTexture>>
       vulkan_texture_objects_;
+
+  mutable std::mutex surface_control_mutex_;
+  std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider_;
+  std::map<int64_t, std::shared_ptr<AndroidSurfaceControl>> surface_controls_;
+  std::map<int64_t, AndroidSurfaceControlState> surface_control_states_;
+  std::map<int64_t, AndroidSurfaceControlState>
+      committed_surface_control_states_;
+  std::shared_ptr<AndroidSurfaceTransaction> active_transaction_;
+  std::vector<std::shared_ptr<AndroidSurfaceTransaction>> pending_transactions_;
+  void* native_window_ = nullptr;
+  int64_t root_surface_id_ = 0;
+  bool hcpp_enabled_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniDelegate);
 };
