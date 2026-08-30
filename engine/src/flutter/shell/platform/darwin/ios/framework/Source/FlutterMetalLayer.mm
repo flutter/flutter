@@ -176,6 +176,7 @@ FLUTTER_ASSERT_ARC
   if (self = [super init]) {
     self.device = MTLCreateSystemDefaultDevice();
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
+    self.allowsNextDrawableTimeout = YES;
     _availableTextures = [[NSMutableSet alloc] init];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
