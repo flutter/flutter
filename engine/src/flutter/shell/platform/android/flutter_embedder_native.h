@@ -17,6 +17,7 @@
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
+#include "flutter/shell/platform/android/android_vsync_waiter.h"
 #include "flutter/shell/platform/android/android_window_metrics_mapper.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
@@ -183,7 +184,10 @@ class FlutterEmbedderNative {
       std::shared_ptr<ImageDecoderProvider> image_decoder = nullptr,
       std::shared_ptr<EmbedderImageLRU> image_lru = nullptr,
       std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr,
-      std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr);
+      std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr,
+      std::shared_ptr<AndroidChoreographerProvider> choreographer_provider =
+          nullptr,
+      std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr);
   ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -215,7 +219,8 @@ class FlutterEmbedderNative {
       std::shared_ptr<JvmInvoker> invoker,
       const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr,
       std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr,
-      std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr);
+      std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr,
+      std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr);
 
   /// @brief Returns the JniRouter managed by this native instance.
   std::shared_ptr<JniRouter> GetRouter() const;
@@ -503,6 +508,48 @@ class FlutterEmbedderNative {
       FLUTTER_API_SYMBOL(FlutterEngine) engine,
       const AndroidDisplayMetrics& display) const;
 
+  /// @brief Returns the AndroidChoreographerProvider managed by this instance.
+  std::shared_ptr<AndroidChoreographerProvider> GetChoreographerProvider()
+      const;
+
+  /// @brief Sets or replaces the AndroidChoreographerProvider.
+  void SetChoreographerProvider(
+      std::shared_ptr<AndroidChoreographerProvider> provider);
+
+  /// @brief Returns the AndroidVsyncWaiter managed by this instance.
+  std::shared_ptr<AndroidVsyncWaiter> GetVsyncWaiter() const;
+
+  /// @brief Sets or replaces the AndroidVsyncWaiter.
+  void SetVsyncWaiter(std::shared_ptr<AndroidVsyncWaiter> waiter);
+
+  /// @brief Static C-API compatible vsync callback function matching
+  /// FlutterProjectArgs::vsync_callback.
+  static void OnVsyncCallback(void* user_data, intptr_t baton);
+
+  /// @brief Asynchronously requests a VSync signal for the given baton.
+  bool AsyncWaitForVsync(intptr_t baton) const;
+
+  /// @brief Sets the active display refresh rate in Hz.
+  void UpdateRefreshRate(double refresh_rate_hz) const;
+
+  /// @brief Returns the current display refresh rate in Hz.
+  double GetRefreshRate() const;
+
+  /// @brief Returns the calculated refresh period in nanoseconds.
+  int64_t GetRefreshPeriodNanos() const;
+
+  /// @brief Computes frame pacing timestamps for a given frame start time and
+  /// refresh rate.
+  AndroidVsyncFrameInfo ComputeFramePacing(int64_t frame_time_nanos,
+                                           double refresh_rate_hz) const;
+
+  /// @brief Directly notifies the running engine instance of a VSync event
+  /// via FlutterEngineOnVsync.
+  FlutterEngineResult NotifyVsync(FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                  intptr_t baton,
+                                  int64_t frame_start_time_nanos,
+                                  int64_t frame_target_time_nanos) const;
+
  private:
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;
 
@@ -512,10 +559,12 @@ class FlutterEmbedderNative {
   std::shared_ptr<EmbedderImageLRU> image_lru_;
   std::shared_ptr<PlatformViewsProvider> platform_views_provider_;
   std::shared_ptr<WindowMetricsProvider> window_metrics_provider_;
+  std::shared_ptr<OSLibraryLoader> library_loader_;
+  std::shared_ptr<AndroidChoreographerProvider> choreographer_provider_;
+  std::shared_ptr<AndroidVsyncWaiter> vsync_waiter_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;
-  std::shared_ptr<OSLibraryLoader> library_loader_;
   std::shared_ptr<APKAssetProvider> asset_provider_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEmbedderNative);

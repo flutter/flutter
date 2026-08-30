@@ -241,6 +241,21 @@ bool JniRouter::RouteVsync(int64_t frame_time_nanos,
   return false;
 }
 
+bool JniRouter::RouteAsyncWaitForVsync(intptr_t baton) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteAsyncWaitForVsync", "baton",
+               std::to_string(baton).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->AsyncWaitForVsync(baton);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->AsyncWaitForVsync(baton);
+  }
+  return false;
+}
+
 bool JniRouter::RouteSetViewportMetrics(const AndroidViewportMetrics& metrics) {
   TRACE_EVENT0("flutter", "JniRouter::RouteSetViewportMetrics");
   if (IsEmbedderEnabled()) {

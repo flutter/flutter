@@ -22,6 +22,8 @@
 namespace flutter {
 namespace android {
 
+class AndroidVsyncWaiter;
+
 /// @brief Decoupled representation of Dart callback metadata.
 struct DartCallbackInfo {
   std::string name;
@@ -86,7 +88,8 @@ class JniDelegate {
       std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr,
       std::shared_ptr<ImageDecoderProvider> image_decoder = nullptr,
       std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr,
-      std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr);
+      std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr,
+      std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr);
   virtual ~JniDelegate();
 
   /// @brief Handles an incoming platform message dispatch to the JVM.
@@ -142,6 +145,9 @@ class JniDelegate {
   /// @brief Dispatches VSync callback timestamps to the JVM.
   virtual bool OnVsync(int64_t frame_time_nanos,
                        int64_t frame_target_time_nanos);
+
+  /// @brief Asynchronously requests a VSync signal for the given baton.
+  virtual bool AsyncWaitForVsync(intptr_t baton);
 
   /// @brief Sends full viewport metrics.
   virtual bool SetViewportMetrics(const AndroidViewportMetrics& metrics);
@@ -312,6 +318,12 @@ class JniDelegate {
   /// @brief Returns the current WindowMetricsProvider.
   std::shared_ptr<WindowMetricsProvider> GetWindowMetricsProvider() const;
 
+  /// @brief Sets or replaces the AndroidVsyncWaiter.
+  void SetVsyncWaiter(std::shared_ptr<AndroidVsyncWaiter> provider);
+
+  /// @brief Returns the current AndroidVsyncWaiter.
+  std::shared_ptr<AndroidVsyncWaiter> GetVsyncWaiter() const;
+
   /// @brief Returns the current AndroidPlatformViewsController.
   std::shared_ptr<AndroidPlatformViewsController> GetPlatformViewsController()
       const;
@@ -325,6 +337,7 @@ class JniDelegate {
   std::shared_ptr<ImageDecoderProvider> image_decoder_;
   std::shared_ptr<PlatformViewsProvider> platform_views_provider_;
   std::shared_ptr<WindowMetricsProvider> window_metrics_provider_;
+  std::shared_ptr<AndroidVsyncWaiter> vsync_waiter_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniDelegate);
