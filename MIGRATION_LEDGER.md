@@ -157,10 +157,10 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
 
 ## Phase 4: Extreme E2E Parity Validation
 *Before ANY legacy code is deleted in Phase 5, the entire engine, framework, and DeviceLab matrices must be run unconditionally against the new Embedder API logic.*
-- [ ] **4.1 Engine Unit Tests**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-4.1-engine-unit-tests`
-    - [ ] `embedder_unittests` (Host macOS/Linux) - Passed.
-    - [ ] `flutter_shell_native_unittests` (Android Emulator) - Passed.
+- [x] **4.1 Engine Unit Tests**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-4.1-engine-unit-tests`
+    - [x] `embedder_unittests` (Host macOS/Linux) - Passed.
+    - [x] `flutter_shell_native_unittests` (Android Emulator) - Passed.
 - [ ] **4.2 Framework Integration Tests (Skia GL / Software)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-4.2-framework-integration-tests-skia-gl-software`
     - [ ] `dev/integration_tests/android_views` - Passed.
