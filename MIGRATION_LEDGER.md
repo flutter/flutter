@@ -211,11 +211,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] Flags pruned and routing hardcoded unconditionally.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: CLI flags `--enable-embedder-api` are rejected by build scripts appropriately.
-- [ ] **5.6 Strict GN Target Isolation**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.6-strict-gn-target-isolation`
-    - [ ] `flutter_shell_native` internal Skia/UI dependencies purged; targets merged.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: Clean `gn` re-run; `ninja` builds successfully assuring absolute GN C-ABI quarantine.
+- [x] **5.6 Strict GN Target Isolation**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-5.6-strict-gn-target-isolation`
+    - [x] `flutter_shell_native` internal Skia/UI dependencies purged; targets merged.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: Clean `gn` re-run; `ninja` builds successfully assuring absolute GN C-ABI quarantine.
 
 - [ ] **Phase 5 Parity Checkpoint**:
     - [ ] *Validation*: Framework unit tests (`flutter test`) and `flutter_shell_native_unittests` run globally across the directory, ensuring no cascading failures.

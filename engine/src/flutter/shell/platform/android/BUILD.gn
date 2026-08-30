@@ -153,6 +153,7 @@ if (is_android) {
     }
     public_configs = [ "//flutter:config" ]
     deps = [
+      ":flutter_embedder_native_src",
       ":flutter_shell_native_src",
       "//flutter/fml",
       "//flutter/shell/platform/android/jni:jni_mock",
@@ -165,7 +166,10 @@ if (is_android) {
   shared_library("flutter_shell_native") {
     inputs = [ "android_exports.lst" ]
     output_name = "flutter"
-    deps = [ ":flutter_shell_native_src" ]
+    deps = [
+      ":flutter_embedder_native_src",
+      ":flutter_shell_native_src",
+    ]
     ldflags = [ "-Wl,--version-script=" +
                 rebase_path("android_exports.lst", root_build_dir) ]
   }
@@ -194,8 +198,6 @@ if (is_android) {
       "android_egl_surface.h",
       "android_environment_gl.cc",
       "android_environment_gl.h",
-      "android_mutators_mapper.cc",
-      "android_mutators_mapper.h",
       "android_shell_holder.cc",
       "android_shell_holder.h",
       "android_surface_dynamic_impeller.cc",
@@ -204,8 +206,6 @@ if (is_android) {
       "android_surface_gl_impeller.h",
       "android_surface_vk_impeller.cc",
       "android_surface_vk_impeller.h",
-      "apk_asset_provider.cc",
-      "apk_asset_provider.h",
       "flutter_main.cc",
       "flutter_main.h",
       "image_external_texture.cc",
@@ -252,11 +252,9 @@ if (is_android) {
       ]
     }
 
-    sources += get_target_outputs(":icudtl_asm")
-
     public_deps = [
       ":android_gpu_configuration",
-      ":icudtl_asm",
+      ":flutter_embedder_native_src",
       ":image_generator",
       "//flutter/assets",
       "//flutter/common",

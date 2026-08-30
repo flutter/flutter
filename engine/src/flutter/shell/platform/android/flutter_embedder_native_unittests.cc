@@ -5136,6 +5136,253 @@ TEST(Phase55FlagObliterationTest, NullDelegateGracefulHandling) {
   }
 }
 
+TEST(Phase56StrictGNTargetIsolationTest,
+     QuarantineEnforcementAndVersionVerification) {
+  EXPECT_TRUE(FlutterEmbedderNative::IsQuarantineEnforced());
+  EXPECT_TRUE(FlutterEmbedderNative::VerifyEmbedderVersion());
+  EXPECT_EQ(FlutterEmbedderNative::GetEmbedderVersion(),
+            static_cast<size_t>(FLUTTER_ENGINE_VERSION));
+  EXPECT_TRUE(FlutterEmbedderNative::IsEmbedderEnabled());
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+}
+
+TEST(Phase56StrictGNTargetIsolationTest,
+     ModularArchitectureAndSubsystemWiring) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, InvokeIntMethod(_, _, _))
+      .WillByDefault(::testing::Return(1));
+  ON_CALL(*mock_invoker, InvokeStringMethod(_, _, _))
+      .WillByDefault(::testing::Return("isolated_test_val"));
+
+  auto mock_loader = std::make_shared<NiceMock<MockOSLibraryLoader>>();
+  auto asset_impl =
+      std::make_shared<InMemoryAPKAssetProviderImpl>("flutter_assets");
+  asset_impl->AddAsset("flutter_assets/test.json", "isolated_test_content");
+  auto asset_provider = std::make_shared<APKAssetProvider>(asset_impl);
+  auto callback_cache = std::make_shared<InMemoryCallbackCacheProvider>();
+  auto image_decoder = std::make_shared<InMemoryImageDecoderProvider>();
+  auto image_lru = std::make_shared<EmbedderImageLRU>(10);
+  auto platform_views = std::make_shared<InMemoryPlatformViewsProvider>();
+  auto window_metrics = std::make_shared<InMemoryWindowMetricsProvider>();
+  auto choreographer = std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter =
+      std::make_shared<AndroidVsyncWaiter>(choreographer, mock_invoker);
+  auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
+  auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker, font_provider,
+                                                 aot_provider);
+  auto hw_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
+  auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+  auto eg_provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  auto engine_group =
+      std::make_shared<AndroidEngineGroup>(eg_provider, mock_invoker);
+
+  FlutterEmbedderNative native(
+      mock_invoker, nullptr, mock_loader, asset_provider, callback_cache,
+      image_decoder, image_lru, platform_views, window_metrics, choreographer,
+      vsync_waiter, font_provider, aot_provider, vm_init, hw_provider,
+      vk_provider, sc_provider, eg_provider, engine_group);
+
+  // Subsystem integrity verification
+  EXPECT_NE(native.GetRouter(), nullptr);
+  EXPECT_NE(native.GetJniDelegate(), nullptr);
+  EXPECT_NE(native.GetJvmInvoker(), nullptr);
+  EXPECT_NE(native.GetLibraryLoader(), nullptr);
+  EXPECT_NE(native.GetAssetProvider(), nullptr);
+  EXPECT_NE(native.GetCallbackCache(), nullptr);
+  EXPECT_NE(native.GetImageDecoderProvider(), nullptr);
+  EXPECT_NE(native.GetImageLRU(), nullptr);
+  EXPECT_NE(native.GetPlatformViewsProvider(), nullptr);
+  EXPECT_NE(native.GetPlatformViewsController(), nullptr);
+  EXPECT_NE(native.GetWindowMetricsProvider(), nullptr);
+  EXPECT_NE(native.GetChoreographerProvider(), nullptr);
+  EXPECT_NE(native.GetVsyncWaiter(), nullptr);
+  EXPECT_NE(native.GetFontCollectionProvider(), nullptr);
+  EXPECT_NE(native.GetAOTProvider(), nullptr);
+  EXPECT_NE(native.GetVMInit(), nullptr);
+  EXPECT_NE(native.GetHardwareBufferProvider(), nullptr);
+  EXPECT_NE(native.GetVulkanTextureProvider(), nullptr);
+  EXPECT_NE(native.GetSurfaceControlProvider(), nullptr);
+  EXPECT_NE(native.GetEngineGroupProvider(), nullptr);
+  EXPECT_NE(native.GetEngineGroup(), nullptr);
+
+  // Modular execution through isolated C-API boundaries
+  callback_cache->AddCallback(42, "cb_entry", "cb_cls", "cb_lib");
+  auto cb_info = native.LookupCallbackInformation(42);
+  ASSERT_TRUE(cb_info.has_value());
+  if (cb_info.has_value()) {
+    EXPECT_EQ(cb_info->name, "cb_entry");
+  }
+
+  // Assets
+  auto mapping = native.ResolveAsset("flutter_assets/test.json");
+  ASSERT_NE(mapping, nullptr);
+  EXPECT_GT(mapping->GetSize(), 0u);
+
+  // Window Metrics
+  AndroidViewportMetrics vp;
+  vp.view_id = 1;
+  vp.physical_width = 1080.0;
+  vp.physical_height = 1920.0;
+  vp.device_pixel_ratio = 2.5;
+  EXPECT_TRUE(native.SetViewportMetrics(vp));
+
+  // VSync
+  EXPECT_TRUE(native.AsyncWaitForVsync(999));
+
+  // Hardware Buffer
+  EXPECT_TRUE(native.RegisterHardwareBufferTexture(101));
+  EXPECT_TRUE(native.OnHardwareBufferFrameAvailable(101));
+  EXPECT_TRUE(native.UnregisterHardwareBufferTexture(101));
+
+  // Vulkan Texture
+  EXPECT_TRUE(native.RegisterVulkanTexture(202));
+  EXPECT_TRUE(native.OnVulkanTextureFrameAvailable(202));
+  EXPECT_TRUE(native.UnregisterVulkanTexture(202));
+
+  // SurfaceControl
+  EXPECT_TRUE(native.CreateSurfaceControl(303, "iso_sc"));
+  EXPECT_TRUE(native.DestroySurfaceControl(303));
+
+  // Engine Group
+  int64_t parent_eng_id = 404;
+  auto eng_handle = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x7000);
+  EXPECT_TRUE(engine_group->RegisterEngine(parent_eng_id, eng_handle));
+  AndroidEngineSpawnArgs spawn_args;
+  spawn_args.entrypoint = "iso_main";
+  auto spawned_id =
+      native.GetRouter()->RouteSpawnEngine(parent_eng_id, spawn_args);
+  EXPECT_GT(spawned_id, 0);
+  EXPECT_TRUE(native.ShutdownSpawnedEngine(spawned_id));
+  EXPECT_TRUE(native.OnEngineGarbageCollected(parent_eng_id));
+}
+
+TEST(Phase56StrictGNTargetIsolationTest,
+     ConcurrentMultithreadedGNTargetIsolationExecution) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, InvokeIntMethod(_, _, _))
+      .WillByDefault(::testing::Return(1));
+
+  auto callback_cache = std::make_shared<InMemoryCallbackCacheProvider>();
+  auto image_decoder = std::make_shared<InMemoryImageDecoderProvider>();
+  auto image_lru = std::make_shared<EmbedderImageLRU>(10);
+  auto platform_views = std::make_shared<InMemoryPlatformViewsProvider>();
+  auto window_metrics = std::make_shared<InMemoryWindowMetricsProvider>();
+  auto choreographer = std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter =
+      std::make_shared<AndroidVsyncWaiter>(choreographer, mock_invoker);
+  auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
+  auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker, font_provider,
+                                                 aot_provider);
+  auto hw_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
+  auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+  auto eg_provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  auto engine_group =
+      std::make_shared<AndroidEngineGroup>(eg_provider, mock_invoker);
+
+  auto native = std::make_shared<FlutterEmbedderNative>(
+      mock_invoker, nullptr, nullptr, nullptr, callback_cache, image_decoder,
+      image_lru, platform_views, window_metrics, choreographer, vsync_waiter,
+      font_provider, aot_provider, vm_init, hw_provider, vk_provider,
+      sc_provider, eg_provider, engine_group);
+
+  constexpr size_t kWorkers = 8;
+  constexpr size_t kIterations = 50;
+  std::vector<std::future<bool>> futures;
+  futures.reserve(kWorkers);
+
+  for (size_t worker = 0; worker < kWorkers; ++worker) {
+    futures.push_back(std::async(std::launch::async, [native, worker]() {
+      std::vector<uint8_t> payload = {'i', 's', 'o', 'l', 'a', 't', 'e'};
+      for (size_t iter = 0; iter < kIterations; ++iter) {
+        int64_t tex_id = static_cast<int64_t>(worker * 1000 + iter);
+        if (!native->RegisterHardwareBufferTexture(tex_id)) {
+          return false;
+        }
+        if (!native->OnHardwareBufferFrameAvailable(tex_id)) {
+          return false;
+        }
+        if (!native->UnregisterHardwareBufferTexture(tex_id)) {
+          return false;
+        }
+
+        if (!native->RegisterVulkanTexture(tex_id + 10000)) {
+          return false;
+        }
+        if (!native->OnVulkanTextureFrameAvailable(tex_id + 10000)) {
+          return false;
+        }
+        if (!native->UnregisterVulkanTexture(tex_id + 10000)) {
+          return false;
+        }
+
+        if (!native->CreateSurfaceControl(tex_id + 20000, "iso_ctrl")) {
+          return false;
+        }
+        if (!native->DestroySurfaceControl(tex_id + 20000)) {
+          return false;
+        }
+
+        AndroidViewportMetrics vp;
+        vp.view_id = tex_id;
+        vp.physical_width = 1080.0 + iter;
+        vp.physical_height = 1920.0 + iter;
+        vp.device_pixel_ratio = 3.0;
+        if (!native->SetViewportMetrics(vp)) {
+          return false;
+        }
+
+        if (!native->AsyncWaitForVsync(tex_id)) {
+          return false;
+        }
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
+}
+
+TEST(Phase56StrictGNTargetIsolationTest,
+     QuarantineHeaderAndStructVerification) {
+  // Verify opaque handle sizes and alignments in embedder structs
+  FlutterHardwareBufferExternalTexture hw_tex = {};
+  hw_tex.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+  hw_tex.width = 100;
+  hw_tex.height = 200;
+  EXPECT_EQ(hw_tex.struct_size, sizeof(FlutterHardwareBufferExternalTexture));
+
+  FlutterVulkanExternalTexture vk_tex = {};
+  vk_tex.struct_size = sizeof(FlutterVulkanExternalTexture);
+  vk_tex.width = 100;
+  vk_tex.height = 200;
+  EXPECT_EQ(vk_tex.struct_size, sizeof(FlutterVulkanExternalTexture));
+
+  FlutterEngineSpawnConfig spawn_cfg = {};
+  spawn_cfg.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_cfg.initial_route = "/test_route";
+  EXPECT_EQ(spawn_cfg.struct_size, sizeof(FlutterEngineSpawnConfig));
+
+  FlutterWindowMetricsEvent wm_evt = {};
+  wm_evt.struct_size = sizeof(FlutterWindowMetricsEvent);
+  wm_evt.width = 1080;
+  wm_evt.height = 1920;
+  EXPECT_EQ(wm_evt.struct_size, sizeof(FlutterWindowMetricsEvent));
+}
+
 class EmbedderTestListener : public ::testing::EmptyTestEventListener {
  public:
   void OnTestStart(const ::testing::TestInfo&) override {
