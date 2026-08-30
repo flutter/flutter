@@ -11,7 +11,7 @@ This document defines the strict multi-agent state machine utilized to migrate t
 ### `implementation-agent` (The Coder)
 *   **Role**: Writes C++, Java, Dart, and GN logic for a single atomic ledger step.
 *   **Context**: `MIGRATION_PLAN.md`, architectural guardrails, and specific feedback from analyzers/reviewers. 
-*   **Hygiene Rule**: Iterative fixes responding to Validation/Review MUST be committed using `git commit --amend` to ensure atomic, squashable PR history.
+*   **Hygiene Rule**: The Coder MUST execute `git add -A` followed by `git commit` (or `git commit --amend` for iterative fixes) before handing control back. This ensures all new/untracked files are securely snapshotted into the git tree so they are protected from the subsequent `git clean -fd` wipe.
 
 ### `validation-agent` (The Build & Test Engineer)
 *   **Role**: Compiles and executes tests (e.g., `ninja`, `flutter test`, `devicelab`).
@@ -34,7 +34,7 @@ This document defines the strict multi-agent state machine utilized to migrate t
 For every task explicitly laid out in `MIGRATION_LEDGER.md`, the Orchestrator will execute the following loop:
 
 1.  **Checkout Target Branch** -> Branch strictly off the **immediately preceding phase's successful branch** (to cascade structural dependencies), NOT `master`.
-2.  **Spawn Implementation** -> `implementation-agent` writes code and commits.
+2.  **Spawn Implementation** -> `implementation-agent` writes code, stages all files (`git add -A`), and commits.
 3.  **Spawn Validation** -> `validation-agent` runs suite.
     *   *If Pass:* Proceed to step (5).
     *   *If Fail:* Proceed to step (4).
