@@ -40,26 +40,6 @@ class LegacyJniDelegate {
 
   virtual bool OnPreEngineRestart() = 0;
 
-  virtual bool OnVsync(int64_t frame_time_nanos,
-                       int64_t frame_target_time_nanos) = 0;
-
-  virtual bool AsyncWaitForVsync(intptr_t baton) { return true; }
-
-  virtual bool SetViewportMetrics(const AndroidViewportMetrics& metrics) = 0;
-
-  virtual bool UpdateDisplayMetrics(const AndroidDisplayMetrics& metrics) = 0;
-
-  virtual bool UpdateDisplayMetrics(uint64_t display_id,
-                                    double refresh_rate,
-                                    double width,
-                                    double height,
-                                    double device_pixel_ratio) = 0;
-
-  virtual bool DispatchViewportMetrics(int64_t view_id,
-                                       double width,
-                                       double height,
-                                       double pixel_ratio) = 0;
-
   virtual bool RequestDartDeferredLibrary(int64_t loading_unit_id) = 0;
 
   virtual bool InitVM(const AndroidVMArgs& args) = 0;
@@ -67,46 +47,6 @@ class LegacyJniDelegate {
   virtual bool PrefetchDefaultFontManager() = 0;
 
   virtual bool SetVmServiceUri(const std::string& uri) = 0;
-
-  virtual bool RegisterHardwareBufferTexture(int64_t texture_id) = 0;
-
-  virtual bool UnregisterHardwareBufferTexture(int64_t texture_id) = 0;
-
-  virtual bool SetHardwareBufferFrame(
-      int64_t texture_id,
-      const std::shared_ptr<AndroidHardwareBuffer>& buffer) = 0;
-
-  virtual bool SetHardwareBufferFrame(
-      int64_t texture_id,
-      const FlutterHardwareBufferExternalTexture& texture) = 0;
-
-  virtual bool GetHardwareBufferTextureFrame(
-      int64_t texture_id,
-      size_t width,
-      size_t height,
-      FlutterHardwareBufferExternalTexture* texture_out) = 0;
-
-  virtual bool OnHardwareBufferFrameAvailable(int64_t texture_id) = 0;
-
-  virtual bool RegisterVulkanTexture(int64_t texture_id) = 0;
-
-  virtual bool UnregisterVulkanTexture(int64_t texture_id) = 0;
-
-  virtual bool SetVulkanTextureFrame(
-      int64_t texture_id,
-      const std::shared_ptr<AndroidVulkanExternalTexture>& texture) = 0;
-
-  virtual bool SetVulkanTextureFrame(
-      int64_t texture_id,
-      const FlutterVulkanExternalTexture& texture) = 0;
-
-  virtual bool GetVulkanTextureFrame(
-      int64_t texture_id,
-      size_t width,
-      size_t height,
-      FlutterVulkanExternalTexture* texture_out) = 0;
-
-  virtual bool OnVulkanTextureFrameAvailable(int64_t texture_id) = 0;
 
   virtual int64_t SpawnEngine(int64_t parent_engine_id,
                               const AndroidEngineSpawnArgs& args) = 0;
