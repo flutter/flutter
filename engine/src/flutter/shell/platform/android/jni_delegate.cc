@@ -53,12 +53,50 @@ bool JniDelegate::HandlePlatformMessageResponse(
 
 bool JniDelegate::UpdateSemantics(const std::vector<uint8_t>& buffer,
                                   const std::vector<std::string>& strings) {
+  TRACE_EVENT0("flutter", "JniDelegate::UpdateSemantics(legacy)");
+  return UpdateSemantics(buffer, strings, {});
+}
+
+bool JniDelegate::UpdateSemantics(
+    const std::vector<uint8_t>& buffer,
+    const std::vector<std::string>& strings,
+    const std::vector<std::vector<uint8_t>>& string_attribute_args) {
   TRACE_EVENT0("flutter", "JniDelegate::UpdateSemantics");
-  if (!jvm_invoker_) {
+  if (!jvm_invoker_ || buffer.empty()) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("updateSemantics",
-                                        "([B[Ljava/lang/String;)V", buffer);
+  return jvm_invoker_->InvokeVoidMethod(
+      "updateSemantics",
+      "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V",
+      buffer);
+}
+
+bool JniDelegate::UpdateCustomAccessibilityActions(
+    const std::vector<uint8_t>& actions_buffer,
+    const std::vector<std::string>& action_strings) {
+  TRACE_EVENT0("flutter", "JniDelegate::UpdateCustomAccessibilityActions");
+  if (!jvm_invoker_ || actions_buffer.empty()) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod(
+      "updateCustomAccessibilityActions",
+      "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V", actions_buffer);
+}
+
+bool JniDelegate::UpdateSemantics(const FlutterSemanticsUpdate2& update) {
+  TRACE_EVENT0("flutter", "JniDelegate::UpdateSemantics(struct)");
+  EncodedSemanticsBatch batch =
+      AndroidSemanticsMapper::MapSemanticsUpdate(update);
+  bool success = true;
+  if (!batch.custom_actions.empty()) {
+    success &= UpdateCustomAccessibilityActions(batch.custom_actions.buffer,
+                                                batch.custom_actions.strings);
+  }
+  if (!batch.nodes.empty()) {
+    success &= UpdateSemantics(batch.nodes.buffer, batch.nodes.strings,
+                               batch.nodes.string_attribute_args);
+  }
+  return success;
 }
 
 bool JniDelegate::SetSemanticsEnabled(bool enabled) {
@@ -68,6 +106,33 @@ bool JniDelegate::SetSemanticsEnabled(bool enabled) {
   }
   std::vector<uint8_t> payload = {static_cast<uint8_t>(enabled ? 1 : 0)};
   return jvm_invoker_->InvokeVoidMethod("setSemanticsEnabled", "(Z)V", payload);
+}
+
+bool JniDelegate::DispatchSemanticsAction(int32_t node_id,
+                                          FlutterSemanticsAction action,
+                                          const std::vector<uint8_t>& data,
+                                          int64_t view_id) {
+  TRACE_EVENT0("flutter", "JniDelegate::DispatchSemanticsAction");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod("dispatchSemanticsAction", "(II[BI)V",
+                                        data);
+}
+
+bool JniDelegate::SetAccessibilityFeatures(int32_t flags) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetAccessibilityFeatures");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  std::vector<uint8_t> payload = {
+      static_cast<uint8_t>(flags & 0xFF),
+      static_cast<uint8_t>((flags >> 8) & 0xFF),
+      static_cast<uint8_t>((flags >> 16) & 0xFF),
+      static_cast<uint8_t>((flags >> 24) & 0xFF),
+  };
+  return jvm_invoker_->InvokeVoidMethod("setAccessibilityFeatures", "(I)V",
+                                        payload);
 }
 
 bool JniDelegate::SetApplicationLocale(const std::string& locale) {

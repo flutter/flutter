@@ -89,11 +89,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `AndroidMutatorsMapper` implemented.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterMutatorViewTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`android_mutator_unittests.cc`) pass.
-- [ ] **2.5 Accessibility & Semantics**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.5-accessibility-semantics`
-    - [ ] `Accessibility` & `Semantics` natively wired.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `dev/integration_tests/android_semantics` passes across CI matrix.
+- [x] **2.5 Accessibility & Semantics**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-2.5-accessibility-semantics`
+    - [x] `Accessibility` & `Semantics` natively wired.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `dev/integration_tests/android_semantics` passes across CI matrix.
 - [ ] **2.6 Platform Views**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.6-platform-views`
     - [ ] `PlatformViewsController` integrations wired.

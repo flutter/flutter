@@ -97,7 +97,35 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
                const std::vector<std::string>& strings),
               (override));
 
+  MOCK_METHOD(bool,
+              UpdateSemantics,
+              (const std::vector<uint8_t>& buffer,
+               const std::vector<std::string>& strings,
+               const std::vector<std::vector<uint8_t>>& string_attribute_args),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateCustomAccessibilityActions,
+              (const std::vector<uint8_t>& actions_buffer,
+               const std::vector<std::string>& action_strings),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateSemantics,
+              (const FlutterSemanticsUpdate2& update),
+              (override));
+
   MOCK_METHOD(bool, SetSemanticsEnabled, (bool enabled), (override));
+
+  MOCK_METHOD(bool,
+              DispatchSemanticsAction,
+              (int32_t node_id,
+               FlutterSemanticsAction action,
+               const std::vector<uint8_t>& data,
+               int64_t view_id),
+              (override));
+
+  MOCK_METHOD(bool, SetAccessibilityFeatures, (int32_t flags), (override));
 
   MOCK_METHOD(bool,
               SetApplicationLocale,
@@ -262,9 +290,12 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
   // 3. UpdateSemantics
   std::vector<uint8_t> semantics_buffer = {0x01, 0x02};
   std::vector<std::string> semantics_strings = {"label1", "label2"};
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("updateSemantics", "([B[Ljava/lang/String;)V",
-                               semantics_buffer))
+  EXPECT_CALL(
+      *mock_invoker,
+      InvokeVoidMethod(
+          "updateSemantics",
+          "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V",
+          semantics_buffer))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->UpdateSemantics(semantics_buffer, semantics_strings));
 
@@ -1336,6 +1367,239 @@ TEST(MutatorTranslationTest,
       .WillOnce(Return(true));
 
   EXPECT_TRUE(native.PushPlatformViewMutators(pv, 0, 0, 500, 500));
+
+  JniRouter::SetEmbedderEnabled(false);
+}
+
+TEST(SemanticsAndAccessibilityTest, JniDelegateSemanticsOperations) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto delegate = std::make_unique<JniDelegate>(mock_invoker);
+
+  // 1. UpdateSemantics with buffer
+  std::vector<uint8_t> buffer = {0x01, 0x02, 0x03, 0x04};
+  std::vector<std::string> strings = {"Label1"};
+  EXPECT_CALL(
+      *mock_invoker,
+      InvokeVoidMethod(
+          "updateSemantics",
+          "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V",
+          buffer))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->UpdateSemantics(buffer, strings));
+
+  // 2. UpdateCustomAccessibilityActions
+  std::vector<uint8_t> actions_buffer = {0x10, 0x20};
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("updateCustomAccessibilityActions",
+                               "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V",
+                               actions_buffer))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(
+      delegate->UpdateCustomAccessibilityActions(actions_buffer, {"Action1"}));
+
+  // 3. UpdateSemantics with FlutterSemanticsUpdate2
+  FlutterSemanticsFlags flags = {};
+  flags.struct_size = sizeof(FlutterSemanticsFlags);
+  flags.is_button = true;
+
+  FlutterSemanticsNode2 node = {};
+  node.struct_size = sizeof(FlutterSemanticsNode2);
+  node.id = 55;
+  node.label = "Test Node";
+  node.flags2 = &flags;
+
+  FlutterSemanticsCustomAction2 action = {};
+  action.struct_size = sizeof(FlutterSemanticsCustomAction2);
+  action.id = 1;
+  action.label = "Custom Action";
+
+  FlutterSemanticsNode2* node_ptrs[] = {&node};
+  FlutterSemanticsCustomAction2* action_ptrs[] = {&action};
+
+  FlutterSemanticsUpdate2 update = {
+      .struct_size = sizeof(FlutterSemanticsUpdate2),
+      .node_count = 1,
+      .nodes = node_ptrs,
+      .custom_action_count = 1,
+      .custom_actions = action_ptrs,
+      .view_id = 0,
+  };
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("updateCustomAccessibilityActions",
+                               "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V",
+                               ::testing::_))
+      .WillOnce(Return(true));
+  EXPECT_CALL(
+      *mock_invoker,
+      InvokeVoidMethod(
+          "updateSemantics",
+          "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V",
+          ::testing::_))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->UpdateSemantics(update));
+
+  // 4. SetSemanticsEnabled
+  std::vector<uint8_t> enabled_payload = {1};
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("setSemanticsEnabled", "(Z)V", enabled_payload))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->SetSemanticsEnabled(true));
+
+  // 5. DispatchSemanticsAction
+  std::vector<uint8_t> action_data = {0xAA, 0xBB};
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("dispatchSemanticsAction",
+                                              "(II[BI)V", action_data))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->DispatchSemanticsAction(55, kFlutterSemanticsActionTap,
+                                                action_data, 0));
+
+  // 6. SetAccessibilityFeatures
+  std::vector<uint8_t> features_payload = {0x07, 0x00, 0x00, 0x00};
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setAccessibilityFeatures",
+                                              "(I)V", features_payload))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->SetAccessibilityFeatures(7));
+}
+
+TEST(SemanticsAndAccessibilityTest, JniRouterSemanticsRoutingFlip) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker);
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
+
+  std::vector<uint8_t> buffer = {0x11, 0x22};
+  std::vector<std::string> strings = {"Hello"};
+
+  // 1. When Embedder is disabled -> routes to legacy_delegate
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+
+  EXPECT_CALL(
+      *legacy_delegate,
+      UpdateSemantics(buffer, strings, std::vector<std::vector<uint8_t>>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSemanticsUpdate(buffer, strings));
+
+  EXPECT_CALL(*legacy_delegate,
+              UpdateCustomAccessibilityActions(buffer, strings))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteCustomAccessibilityActions(buffer, strings));
+
+  EXPECT_CALL(*legacy_delegate, SetSemanticsEnabled(true))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSemanticsEnabled(true));
+
+  EXPECT_CALL(*legacy_delegate, DispatchSemanticsAction(
+                                    42, kFlutterSemanticsActionTap, buffer, 0))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteDispatchSemanticsAction(
+      42, kFlutterSemanticsActionTap, buffer, 0));
+
+  EXPECT_CALL(*legacy_delegate, SetAccessibilityFeatures(15))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSetAccessibilityFeatures(15));
+
+  // 2. When Embedder is enabled -> routes to embedder_delegate (mock_invoker)
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+
+  EXPECT_CALL(*legacy_delegate, UpdateSemantics(_, _, _)).Times(0);
+  EXPECT_CALL(
+      *mock_invoker,
+      InvokeVoidMethod("updateSemantics",
+                       "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/"
+                       "ByteBuffer;)V",
+                       buffer))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSemanticsUpdate(buffer, strings));
+
+  EXPECT_CALL(*legacy_delegate, UpdateCustomAccessibilityActions(_, _))
+      .Times(0);
+  EXPECT_CALL(
+      *mock_invoker,
+      InvokeVoidMethod("updateCustomAccessibilityActions",
+                       "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V", buffer))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteCustomAccessibilityActions(buffer, strings));
+
+  EXPECT_CALL(*legacy_delegate, SetSemanticsEnabled(_)).Times(0);
+  std::vector<uint8_t> enabled_payload = {1};
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("setSemanticsEnabled", "(Z)V", enabled_payload))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSemanticsEnabled(true));
+
+  EXPECT_CALL(*legacy_delegate, DispatchSemanticsAction(_, _, _, _)).Times(0);
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("dispatchSemanticsAction", "(II[BI)V", buffer))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteDispatchSemanticsAction(
+      42, kFlutterSemanticsActionTap, buffer, 0));
+
+  EXPECT_CALL(*legacy_delegate, SetAccessibilityFeatures(_)).Times(0);
+  std::vector<uint8_t> features_payload = {0x0F, 0x00, 0x00, 0x00};
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setAccessibilityFeatures",
+                                              "(I)V", features_payload))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSetAccessibilityFeatures(15));
+
+  // Reset flag
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+}
+
+TEST(SemanticsAndAccessibilityTest, FlutterEmbedderNativeSemanticsIntegration) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  FlutterEmbedderNative native(mock_invoker);
+
+  JniRouter::SetEmbedderEnabled(true);
+
+  // Semantics update struct through FlutterEmbedderNative
+  FlutterSemanticsNode2 node = {};
+  node.struct_size = sizeof(FlutterSemanticsNode2);
+  node.id = 100;
+  node.label = "Native Semantics Node";
+
+  FlutterSemanticsNode2* nodes[] = {&node};
+  FlutterSemanticsUpdate2 update = {
+      .struct_size = sizeof(FlutterSemanticsUpdate2),
+      .node_count = 1,
+      .nodes = nodes,
+      .custom_action_count = 0,
+      .custom_actions = nullptr,
+      .view_id = 0,
+  };
+
+  EXPECT_CALL(
+      *mock_invoker,
+      InvokeVoidMethod(
+          "updateSemantics",
+          "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V",
+          ::testing::_))
+      .WillOnce(Return(true));
+
+  EXPECT_TRUE(native.UpdateSemantics(update));
+
+  // OnUpdateSemantics2 static callback
+  EXPECT_CALL(
+      *mock_invoker,
+      InvokeVoidMethod(
+          "updateSemantics",
+          "(Ljava/nio/ByteBuffer;[Ljava/lang/String;[Ljava/nio/ByteBuffer;)V",
+          ::testing::_))
+      .WillOnce(Return(true));
+  FlutterEmbedderNative::OnUpdateSemantics2(&update, &native);
+
+  // Engine call validity tests with null engine
+  EXPECT_EQ(native.UpdateSemanticsEnabled(nullptr, true), kInvalidArguments);
+  EXPECT_EQ(native.UpdateAccessibilityFeatures(
+                nullptr, kFlutterAccessibilityFeatureBoldText),
+            kInvalidArguments);
+  EXPECT_EQ(native.SendSemanticsAction(nullptr, nullptr), kInvalidArguments);
+  EXPECT_EQ(native.DispatchSemanticsActionToEngine(
+                nullptr, 100, kFlutterSemanticsActionTap, nullptr, 0),
+            kInvalidArguments);
 
   JniRouter::SetEmbedderEnabled(false);
 }

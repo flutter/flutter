@@ -20,6 +20,8 @@ source_set("flutter_embedder_native_src") {
   sources = [
     "android_mutators_mapper.cc",
     "android_mutators_mapper.h",
+    "android_semantics_mapper.cc",
+    "android_semantics_mapper.h",
     "apk_asset_provider.cc",
     "apk_asset_provider.h",
     "flutter_embedder_native.cc",
@@ -70,6 +72,7 @@ executable("flutter_embedder_native_unittests") {
   testonly = true
   sources = [
     "android_mutator_unittests.cc",
+    "android_semantics_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_embedder_native_unittests.cc",
   ]
