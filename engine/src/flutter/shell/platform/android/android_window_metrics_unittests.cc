@@ -158,23 +158,6 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
               RequestDartDeferredLibrary,
               (int64_t loading_unit_id),
               (override));
-  MOCK_METHOD(bool, OnAssetManagerChanged, (), (override));
-  MOCK_METHOD(std::optional<DartCallbackInfo>,
-              LookupCallbackInformation,
-              (int64_t handle),
-              (override));
-  MOCK_METHOD(bool,
-              DecodeImage,
-              (const uint8_t* data, size_t size, int64_t generator_handle),
-              (override));
-  MOCK_METHOD(void,
-              OnNativeImageHeader,
-              (int64_t generator_handle, int32_t width, int32_t height),
-              (override));
-  MOCK_METHOD(std::optional<ImageHeaderInfo>,
-              GetImageHeader,
-              (int64_t generator_handle),
-              (override));
   MOCK_METHOD(int64_t,
               CreatePlatformView,
               (const PlatformViewCreationParams& params,
@@ -272,23 +255,6 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
   MOCK_METHOD(bool,
               SetSurfaceControlColor,
               (int64_t surface_id, float r, float g, float b, float alpha),
-              (override));
-  MOCK_METHOD(bool,
-              PushPlatformViewMutators,
-              (int64_t view_id,
-               int32_t x,
-               int32_t y,
-               int32_t width,
-               int32_t height,
-               const AndroidMutatorsStack& mutators_stack),
-              (override));
-  MOCK_METHOD(bool,
-              PushPlatformViewMutators,
-              (const FlutterPlatformView& platform_view,
-               int32_t x,
-               int32_t y,
-               int32_t width,
-               int32_t height),
               (override));
   MOCK_METHOD(bool, InitVM, (const AndroidVMArgs& args), (override));
   MOCK_METHOD(bool, PrefetchDefaultFontManager, (), (override));

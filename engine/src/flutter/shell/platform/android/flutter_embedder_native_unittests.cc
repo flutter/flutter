@@ -178,28 +178,6 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               (int64_t loading_unit_id),
               (override));
 
-  MOCK_METHOD(bool, OnAssetManagerChanged, (), (override));
-
-  MOCK_METHOD(std::optional<DartCallbackInfo>,
-              LookupCallbackInformation,
-              (int64_t handle),
-              (override));
-
-  MOCK_METHOD(bool,
-              DecodeImage,
-              (const uint8_t* data, size_t size, int64_t generator_handle),
-              (override));
-
-  MOCK_METHOD(void,
-              OnNativeImageHeader,
-              (int64_t generator_handle, int32_t width, int32_t height),
-              (override));
-
-  MOCK_METHOD(std::optional<ImageHeaderInfo>,
-              GetImageHeader,
-              (int64_t generator_handle),
-              (override));
-
   MOCK_METHOD(int64_t,
               CreatePlatformView,
               (const PlatformViewCreationParams& params,
@@ -329,25 +307,6 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
   MOCK_METHOD(bool,
               SetSurfaceControlColor,
               (int64_t surface_id, float r, float g, float b, float alpha),
-              (override));
-
-  MOCK_METHOD(bool,
-              PushPlatformViewMutators,
-              (int64_t view_id,
-               int32_t x,
-               int32_t y,
-               int32_t width,
-               int32_t height,
-               const AndroidMutatorsStack& mutators_stack),
-              (override));
-
-  MOCK_METHOD(bool,
-              PushPlatformViewMutators,
-              (const FlutterPlatformView& platform_view,
-               int32_t x,
-               int32_t y,
-               int32_t width,
-               int32_t height),
               (override));
 
   MOCK_METHOD(bool, InitVM, (const AndroidVMArgs& args), (override));
@@ -797,19 +756,18 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
       .WillOnce(Return(true));
   EXPECT_TRUE(router->RouteRequestDartDeferredLibrary(5));
 
-  // Legacy Asset Manager Changed
-  EXPECT_CALL(*legacy_delegate, OnAssetManagerChanged()).WillOnce(Return(true));
+  // Asset Manager Changed (purged subsystem: routes directly to embedder)
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onAssetManagerChanged", "()V", _))
+      .WillOnce(Return(true));
   EXPECT_TRUE(router->RouteAssetManagerChanged());
 
-  // Legacy LookupCallbackInformation
-  EXPECT_CALL(*legacy_delegate, LookupCallbackInformation(100L))
-      .WillOnce(Return(DartCallbackInfo{"legacyCallback", "LegacyClass",
-                                        "package:legacy/main.dart"}));
-  auto legacy_cb = router->RouteLookupCallbackInformation(100L);
-  ASSERT_TRUE(legacy_cb.has_value());
-  EXPECT_EQ(legacy_cb->name, "legacyCallback");
-  EXPECT_EQ(legacy_cb->class_name, "LegacyClass");
-  EXPECT_EQ(legacy_cb->library_path, "package:legacy/main.dart");
+  // LookupCallbackInformation (purged subsystem: routes directly to embedder)
+  auto direct_cb = router->RouteLookupCallbackInformation(100L);
+  ASSERT_TRUE(direct_cb.has_value());
+  EXPECT_EQ(direct_cb->name, "embedderCallback");
+  EXPECT_EQ(direct_cb->class_name, "EmbedderClass");
+  EXPECT_EQ(direct_cb->library_path, "package:embedder/main.dart");
 
   // Flip flag to true -> routes to Embedder
   JniRouter::SetEmbedderEnabled(true);
@@ -847,9 +805,7 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
       .WillOnce(Return(true));
   EXPECT_TRUE(router->RouteAssetManagerChanged());
 
-  // Embedder LookupCallbackInformation (routed to embedder_delegate without
-  // legacy)
-  EXPECT_CALL(*legacy_delegate, LookupCallbackInformation(_)).Times(0);
+  // Embedder LookupCallbackInformation (routed directly to embedder_delegate)
   auto embedder_cb = router->RouteLookupCallbackInformation(100L);
   ASSERT_TRUE(embedder_cb.has_value());
   EXPECT_EQ(embedder_cb->name, "embedderCallback");
@@ -1625,7 +1581,7 @@ TEST(ImageDecoderTest, JniDelegateImageDecoderIntegration) {
   }
 }
 
-TEST(ImageDecoderTest, JniRouterImageDecoderRoutingFlip) {
+TEST(ImageDecoderTest, JniRouterImageDecoderDirectRouting) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto in_memory_decoder = std::make_shared<InMemoryImageDecoderProvider>();
   in_memory_decoder->SetHeaderInfo(77L, 1024, 768);
@@ -1638,33 +1594,29 @@ TEST(ImageDecoderTest, JniRouterImageDecoderRoutingFlip) {
 
   std::vector<uint8_t> payload = {10, 20, 30};
 
-  // 1. When Embedder is disabled -> routes to legacy delegate
+  // 1. Even when Embedder flag is disabled, Image Decoder (purged subsystem)
+  // routes directly to embedder delegate
   JniRouter::SetEmbedderEnabled(false);
   EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
 
-  EXPECT_CALL(*legacy_delegate,
-              DecodeImage(payload.data(), payload.size(), 77L))
-      .WillOnce(Return(true));
   EXPECT_TRUE(router->RouteDecodeImage(payload.data(), payload.size(), 77L));
+  EXPECT_EQ(in_memory_decoder->GetDecodeCount(), 1u);
 
-  EXPECT_CALL(*legacy_delegate, OnNativeImageHeader(77L, 1024, 768)).Times(1);
   router->RouteNativeImageHeader(77L, 1024, 768);
+  auto hdr_disabled = router->RouteGetImageHeader(77L);
+  ASSERT_TRUE(hdr_disabled.has_value());
+  if (hdr_disabled.has_value()) {
+    EXPECT_EQ(hdr_disabled->width, 1024);
+    EXPECT_EQ(hdr_disabled->height, 768);
+  }
 
-  EXPECT_CALL(*legacy_delegate, GetImageHeader(77L))
-      .WillOnce(Return(ImageHeaderInfo{1024, 768}));
-  auto legacy_hdr = router->RouteGetImageHeader(77L);
-  ASSERT_TRUE(legacy_hdr.has_value());
-  EXPECT_EQ(legacy_hdr->width, 1024);
-  EXPECT_EQ(legacy_hdr->height, 768);
-
-  // 2. When Embedder is enabled -> routes to embedder delegate
-  // (in_memory_decoder)
+  // 2. When Embedder flag is enabled, routes directly to embedder delegate as
+  // well
   JniRouter::SetEmbedderEnabled(true);
   EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
 
-  EXPECT_CALL(*legacy_delegate, DecodeImage(_, _, _)).Times(0);
   EXPECT_TRUE(router->RouteDecodeImage(payload.data(), payload.size(), 77L));
-  EXPECT_EQ(in_memory_decoder->GetDecodeCount(), 1u);
+  EXPECT_EQ(in_memory_decoder->GetDecodeCount(), 2u);
 
   router->RouteNativeImageHeader(88L, 500, 400);
   auto embedder_hdr = router->RouteGetImageHeader(88L);
@@ -1675,8 +1627,8 @@ TEST(ImageDecoderTest, JniRouterImageDecoderRoutingFlip) {
   }
 
   // Reset flag
-  JniRouter::SetEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
 }
 
 TEST(ImageDecoderTest, FlutterEmbedderNativeImageDecoderAndLRUIntegration) {
@@ -1741,7 +1693,7 @@ TEST(MutatorTranslationTest, JniDelegatePlatformViewMutatorsPush) {
       delegate->PushPlatformViewMutators(101L, 10, 20, 300, 400, stack));
 }
 
-TEST(MutatorTranslationTest, JniRouterPlatformViewMutatorsRoutingFlip) {
+TEST(MutatorTranslationTest, JniRouterPlatformViewMutatorsDirectRouting) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker);
   auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
@@ -1750,12 +1702,16 @@ TEST(MutatorTranslationTest, JniRouterPlatformViewMutatorsRoutingFlip) {
   AndroidMutatorsStack stack;
   stack.PushOpacity(0.8f);
 
-  // 1. When Embedder is disabled -> routes to legacy_delegate
+  std::vector<uint8_t> payload = stack.Serialize();
+
+  // 1. Even when Embedder is disabled, Mutators (purged subsystem) routes
+  // directly to embedder_delegate (mock_invoker)
   JniRouter::SetEmbedderEnabled(false);
   EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
 
-  EXPECT_CALL(*legacy_delegate,
-              PushPlatformViewMutators(1001L, 0, 0, 100, 200, Eq(stack)))
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onDisplayPlatformView",
+                               "(IIIIIIILjava/nio/ByteBuffer;)V", payload))
       .WillOnce(Return(true));
   EXPECT_TRUE(router->RoutePlatformViewMutators(1001L, 0, 0, 100, 200, stack));
 
@@ -1763,19 +1719,15 @@ TEST(MutatorTranslationTest, JniRouterPlatformViewMutatorsRoutingFlip) {
   JniRouter::SetEmbedderEnabled(true);
   EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
 
-  std::vector<uint8_t> payload = stack.Serialize();
-  EXPECT_CALL(*legacy_delegate, PushPlatformViewMutators(1001L, _, _, _, _, _))
-      .Times(0);
   EXPECT_CALL(*mock_invoker,
               InvokeVoidMethod("onDisplayPlatformView",
                                "(IIIIIIILjava/nio/ByteBuffer;)V", payload))
       .WillOnce(Return(true));
-
   EXPECT_TRUE(router->RoutePlatformViewMutators(1001L, 0, 0, 100, 200, stack));
 
   // Reset flag
-  JniRouter::SetEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
 }
 
 TEST(MutatorTranslationTest,
@@ -2750,10 +2702,6 @@ TEST(PlatformViewsTest, JniRouterPlatformViewsRoutingFlip) {
 
   EXPECT_CALL(*legacy_delegate, IsHcppEnabled()).WillOnce(Return(true));
   EXPECT_TRUE(router->RouteIsHcppEnabled());
-
-  EXPECT_CALL(*legacy_delegate,
-              PushPlatformViewMutators(88, 0, 0, 100, 100, stack))
-      .WillOnce(Return(true));
   EXPECT_TRUE(router->RoutePlatformViewMutators(88, 0, 0, 100, 100, stack));
 
   EXPECT_CALL(*legacy_delegate, DisposePlatformView(88)).WillOnce(Return(true));
@@ -4532,6 +4480,215 @@ TEST(MultiEngineAndAddToAppTest,
   EXPECT_EQ(native.GetJniDelegate()->GetEngineGroup(), native.GetEngineGroup());
   EXPECT_EQ(native.GetJniDelegate()->GetEngineGroupProvider(),
             native.GetEngineGroupProvider());
+}
+
+TEST(Phase52LegacyDeletionSubsystemsTest,
+     LegacySubsystemsPurgedAndDirectlyRouted) {
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  auto callback_cache = std::make_shared<InMemoryCallbackCacheProvider>();
+  callback_cache->AddCallback(42L, "phase52Callback", "Phase52Class",
+                              "package:flutter/subsystems.dart");
+
+  auto image_decoder = std::make_shared<InMemoryImageDecoderProvider>();
+  image_decoder->SetHeaderInfo(99L, 1920, 1080);
+
+  auto embedder_delegate = std::make_shared<JniDelegate>(
+      mock_invoker, callback_cache, image_decoder);
+  auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+
+  auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
+
+  // Test across both flag states: Subsystem calls MUST NEVER touch
+  // legacy_delegate
+  for (bool embedder_flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(embedder_flag);
+
+    // 1. Assets Subsystem: RouteAssetManagerChanged routes directly to
+    // JvmInvoker
+    EXPECT_CALL(*mock_invoker,
+                InvokeVoidMethod("onAssetManagerChanged", "()V", _))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RouteAssetManagerChanged());
+
+    // 2. Callbacks Subsystem: RouteLookupCallbackInformation routes directly to
+    // CallbackCacheProvider
+    auto cb = router->RouteLookupCallbackInformation(42L);
+    ASSERT_TRUE(cb.has_value());
+    if (cb.has_value()) {
+      EXPECT_EQ(cb->name, "phase52Callback");
+      EXPECT_EQ(cb->class_name, "Phase52Class");
+      EXPECT_EQ(cb->library_path, "package:flutter/subsystems.dart");
+    }
+    EXPECT_FALSE(router->RouteLookupCallbackInformation(999L).has_value());
+
+    // 3. Images Subsystem: RouteDecodeImage, RouteNativeImageHeader,
+    // RouteGetImageHeader route directly
+    std::vector<uint8_t> img_data = {0xFF, 0xD8, 0xFF, 0xE0};
+    EXPECT_TRUE(
+        router->RouteDecodeImage(img_data.data(), img_data.size(), 99L));
+    EXPECT_EQ(image_decoder->GetDecodeCount(), embedder_flag ? 2u : 1u);
+
+    router->RouteNativeImageHeader(101L, 800, 600);
+    auto hdr = router->RouteGetImageHeader(101L);
+    ASSERT_TRUE(hdr.has_value());
+    if (hdr.has_value()) {
+      EXPECT_EQ(hdr->width, 800);
+      EXPECT_EQ(hdr->height, 600);
+    }
+
+    // 4. Mutators Subsystem: RoutePlatformViewMutators routes directly to
+    // JvmInvoker
+    AndroidMutatorsStack stack;
+    stack.PushOpacity(0.5f);
+    std::vector<uint8_t> stack_bytes = stack.Serialize();
+
+    EXPECT_CALL(
+        *mock_invoker,
+        InvokeVoidMethod("onDisplayPlatformView",
+                         "(IIIIIIILjava/nio/ByteBuffer;)V", stack_bytes))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(
+        router->RoutePlatformViewMutators(777L, 10, 20, 300, 400, stack));
+
+    FlutterPlatformViewMutation m = {
+        .type = kFlutterPlatformViewMutationTypeOpacity,
+        .opacity = 0.5,
+    };
+    const FlutterPlatformViewMutation* mutations[] = {&m};
+    FlutterPlatformView pv = {
+        .struct_size = sizeof(FlutterPlatformView),
+        .identifier = 777,
+        .mutations_count = 1,
+        .mutations = mutations,
+    };
+    EXPECT_CALL(
+        *mock_invoker,
+        InvokeVoidMethod("onDisplayPlatformView",
+                         "(IIIIIIILjava/nio/ByteBuffer;)V", stack_bytes))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router->RoutePlatformViewMutators(pv, 10, 20, 300, 400));
+  }
+
+  // Verify graceful handling when embedder_delegate is null
+  auto null_router = std::make_unique<JniRouter>(nullptr, legacy_delegate);
+  EXPECT_FALSE(null_router->RouteAssetManagerChanged());
+  EXPECT_FALSE(null_router->RouteLookupCallbackInformation(42L).has_value());
+  EXPECT_FALSE(null_router->RouteDecodeImage(nullptr, 0, 1L));
+  null_router->RouteNativeImageHeader(1L, 100, 100);
+  EXPECT_FALSE(null_router->RouteGetImageHeader(1L).has_value());
+  AndroidMutatorsStack empty_stack;
+  EXPECT_FALSE(
+      null_router->RoutePlatformViewMutators(1L, 0, 0, 10, 10, empty_stack));
+
+  JniRouter::SetEmbedderEnabled(true);
+}
+
+TEST(Phase52LegacyDeletionSubsystemsTest,
+     ConcurrentMultithreadedSubsystemsExecution) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _))
+      .WillByDefault(::testing::Return(true));
+  auto callback_cache = std::make_shared<InMemoryCallbackCacheProvider>();
+  auto image_decoder = std::make_shared<InMemoryImageDecoderProvider>();
+  auto image_lru = std::make_shared<EmbedderImageLRU>(20);
+  auto in_memory_assets =
+      std::make_shared<InMemoryAPKAssetProviderImpl>("flutter_assets");
+
+  for (int i = 0; i < 50; ++i) {
+    in_memory_assets->AddAsset("asset_" + std::to_string(i) + ".json",
+                               "{\"index\":" + std::to_string(i) + "}");
+    callback_cache->AddCallback(
+        i, "callback_" + std::to_string(i), "Class_" + std::to_string(i),
+        "package:lib/cb_" + std::to_string(i) + ".dart");
+  }
+
+  auto asset_provider = std::make_shared<APKAssetProvider>(in_memory_assets);
+  auto platform_views_provider =
+      std::make_shared<InMemoryPlatformViewsProvider>();
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, asset_provider,
+                               callback_cache, image_decoder, image_lru,
+                               platform_views_provider);
+
+  constexpr size_t kWorkers = 8;
+  constexpr size_t kIterations = 100;
+  std::vector<std::future<bool>> futures;
+  futures.reserve(kWorkers);
+
+  for (size_t worker = 0; worker < kWorkers; ++worker) {
+    futures.push_back(std::async(std::launch::async, [&native, worker]() {
+      for (size_t iter = 0; iter < kIterations; ++iter) {
+        int idx = static_cast<int>((worker * kIterations + iter) % 50);
+
+        // Subsystem 1: Assets resolution
+        std::string asset_name = "asset_" + std::to_string(idx) + ".json";
+        auto mapping = native.ResolveAsset(asset_name);
+        if (!mapping || mapping->GetSize() == 0) {
+          return false;
+        }
+
+        // Subsystem 2: Dart Callbacks lookup
+        auto cb = native.LookupCallbackInformation(idx);
+        if (!cb.has_value() || cb->name != "callback_" + std::to_string(idx)) {
+          return false;
+        }
+
+        // Subsystem 3: Image decoding & headers & LRU
+        int64_t gen_handle = static_cast<int64_t>(worker * 1000 + iter + 1);
+        std::vector<uint8_t> dummy_bytes = {0x01, 0x02, 0x03, 0x04};
+        if (!native.DecodeImage(dummy_bytes.data(), dummy_bytes.size(),
+                                gen_handle)) {
+          return false;
+        }
+        native.OnNativeImageHeader(gen_handle, 100 + idx, 200 + idx);
+        auto hdr = native.GetImageHeader(gen_handle);
+        if (!hdr.has_value() || hdr->width != 100 + idx ||
+            hdr->height != 200 + idx) {
+          return false;
+        }
+        native.GetImageLRU()->AddImage(gen_handle * 10, gen_handle);
+        if (native.GetImageLRU()->GetSize() == 0) {
+          return false;
+        }
+
+        // Subsystem 4: Mutator translation & routing
+        FlutterPlatformViewMutation mut = {
+            .type = kFlutterPlatformViewMutationTypeTransformation,
+            .transformation =
+                {
+                    .scaleX = 1.0 + idx * 0.1,
+                    .skewX = 0.0,
+                    .transX = static_cast<double>(idx * 5),
+                    .skewY = 0.0,
+                    .scaleY = 1.0 + idx * 0.1,
+                    .transY = static_cast<double>(idx * 10),
+                    .pers0 = 0.0,
+                    .pers1 = 0.0,
+                    .pers2 = 1.0,
+                },
+        };
+        const FlutterPlatformViewMutation* mutations[] = {&mut};
+        FlutterPlatformView pv = {
+            .struct_size = sizeof(FlutterPlatformView),
+            .identifier = static_cast<FlutterPlatformViewIdentifier>(idx),
+            .mutations_count = 1,
+            .mutations = mutations,
+        };
+        AndroidMutatorsStack stack = native.MapPlatformView(pv);
+        if (stack.GetMutatorsCount() != 1) {
+          return false;
+        }
+        if (!native.PushPlatformViewMutators(pv, 0, 0, 100, 100)) {
+          return false;
+        }
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
 }
 
 class EmbedderTestListener : public ::testing::EmptyTestEventListener {

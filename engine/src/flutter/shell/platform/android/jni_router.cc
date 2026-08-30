@@ -340,14 +340,8 @@ bool JniRouter::RouteRequestDartDeferredLibrary(int64_t loading_unit_id) {
 
 bool JniRouter::RouteAssetManagerChanged() {
   TRACE_EVENT0("flutter", "JniRouter::RouteAssetManagerChanged");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OnAssetManagerChanged();
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OnAssetManagerChanged();
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnAssetManagerChanged();
   }
   return false;
 }
@@ -355,14 +349,8 @@ bool JniRouter::RouteAssetManagerChanged() {
 std::optional<DartCallbackInfo> JniRouter::RouteLookupCallbackInformation(
     int64_t handle) {
   TRACE_EVENT0("flutter", "JniRouter::RouteLookupCallbackInformation");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->LookupCallbackInformation(handle);
-    }
-    return std::nullopt;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->LookupCallbackInformation(handle);
+  if (embedder_delegate_) {
+    return embedder_delegate_->LookupCallbackInformation(handle);
   }
   return std::nullopt;
 }
@@ -371,14 +359,8 @@ bool JniRouter::RouteDecodeImage(const uint8_t* data,
                                  size_t size,
                                  int64_t generator_handle) {
   TRACE_EVENT0("flutter", "JniRouter::RouteDecodeImage");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->DecodeImage(data, size, generator_handle);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->DecodeImage(data, size, generator_handle);
+  if (embedder_delegate_) {
+    return embedder_delegate_->DecodeImage(data, size, generator_handle);
   }
   return false;
 }
@@ -387,28 +369,16 @@ void JniRouter::RouteNativeImageHeader(int64_t generator_handle,
                                        int32_t width,
                                        int32_t height) {
   TRACE_EVENT0("flutter", "JniRouter::RouteNativeImageHeader");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      embedder_delegate_->OnNativeImageHeader(generator_handle, width, height);
-    }
-    return;
-  }
-  if (legacy_delegate_) {
-    legacy_delegate_->OnNativeImageHeader(generator_handle, width, height);
+  if (embedder_delegate_) {
+    embedder_delegate_->OnNativeImageHeader(generator_handle, width, height);
   }
 }
 
 std::optional<ImageHeaderInfo> JniRouter::RouteGetImageHeader(
     int64_t generator_handle) {
   TRACE_EVENT0("flutter", "JniRouter::RouteGetImageHeader");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->GetImageHeader(generator_handle);
-    }
-    return std::nullopt;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->GetImageHeader(generator_handle);
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetImageHeader(generator_handle);
   }
   return std::nullopt;
 }
@@ -974,16 +944,9 @@ bool JniRouter::RoutePlatformViewMutators(
     int32_t height,
     const AndroidMutatorsStack& mutators_stack) {
   TRACE_EVENT0("flutter", "JniRouter::RoutePlatformViewMutators");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->PushPlatformViewMutators(
-          view_id, x, y, width, height, mutators_stack);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->PushPlatformViewMutators(view_id, x, y, width,
-                                                      height, mutators_stack);
+  if (embedder_delegate_) {
+    return embedder_delegate_->PushPlatformViewMutators(view_id, x, y, width,
+                                                        height, mutators_stack);
   }
   return false;
 }
@@ -995,16 +958,9 @@ bool JniRouter::RoutePlatformViewMutators(
     int32_t width,
     int32_t height) {
   TRACE_EVENT0("flutter", "JniRouter::RoutePlatformViewMutators(view)");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->PushPlatformViewMutators(platform_view, x, y,
-                                                          width, height);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->PushPlatformViewMutators(platform_view, x, y,
-                                                      width, height);
+  if (embedder_delegate_) {
+    return embedder_delegate_->PushPlatformViewMutators(platform_view, x, y,
+                                                        width, height);
   }
   return false;
 }
