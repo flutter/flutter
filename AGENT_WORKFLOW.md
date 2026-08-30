@@ -10,7 +10,8 @@ This document defines the strict multi-agent state machine utilized to migrate t
 
 ### `implementation-agent` (The Coder)
 *   **Role**: Writes C++, Java, Dart, and GN logic for a single atomic ledger step.
-*   **Context**: `MIGRATION_PLAN.md`, architectural guardrails, and specific feedback from analyzers/reviewers.
+*   **Context**: `MIGRATION_PLAN.md`, architectural guardrails, and specific feedback from analyzers/reviewers. 
+*   **Hygiene Rule**: Iterative fixes responding to Validation/Review MUST be committed using `git commit --amend` to ensure atomic, squashable PR history.
 
 ### `validation-agent` (The Build & Test Engineer)
 *   **Role**: Compiles and executes tests (e.g., `ninja`, `flutter test`, `devicelab`).
@@ -19,6 +20,7 @@ This document defines the strict multi-agent state machine utilized to migrate t
 ### `analyzer-agent` (The Debugger / Triage)
 *   **Role**: Triages complex failures (C++ segfaults, memory leaks, JNI exhaustion) and frame-pacing regressions.
 *   **Context**: 
+    *   **The Incremental Diff**: The specific code changes the Implementation Agent just wrote (essential for mapping crashes back to logic).
     *   Raw compiler logs, stack traces, tombstones, and logcat dumps.
     *   **Perfetto Traces**: Specifically tasked with parsing and analyzing Perfetto timeline profiles. The analyzer uses trace visualization output to debug threading bottlenecks, lock contention, UI/Raster thread synchronization, and Android `AChoreographer` / VSync pacing latency.
 *   **Output**: Produces a synthesized "Root Cause & Fix Plan" to feed back into the Implementation Agent.
@@ -31,12 +33,17 @@ This document defines the strict multi-agent state machine utilized to migrate t
 
 For every task explicitly laid out in `MIGRATION_LEDGER.md`, the Orchestrator will execute the following loop:
 
-1.  **Checkout Target Branch** -> (Based on Ledger branch stub).
+1.  **Checkout Target Branch** -> Branch strictly off the **immediately preceding phase's successful branch** (to cascade structural dependencies), NOT `master`.
 2.  **Spawn Implementation** -> `implementation-agent` writes code and commits.
 3.  **Spawn Validation** -> `validation-agent` runs suite.
     *   *If Pass:* Proceed to step (5).
     *   *If Fail:* Proceed to step (4).
-4.  **Spawn Analyzer** -> `analyzer-agent` parses logs, tombstones, and **Perfetto traces**. Synthesizes a fix plan and sends it to Implementation (Loop back to 2).
+4.  **Spawn Analyzer** -> `analyzer-agent` parses logs, tombstones, the incremental diff, and **Perfetto traces**. Synthesizes a fix plan.
+    *   **Reset State**: Orchestrator executes `git clean -fd` to remove toxic build artifacts/untracked side-effects.
+    *   **Loop**: Send fix plan back to Implementation (Loop back to 2, forcing `--amend`).
 5.  **Spawn Review** -> `review-agent` conducts brutal architectural review on the committed diff.
     *   *If Pass:* Orchestrator marks ledger step complete and pushes branch.
-    *   *If Fail:* Rejects branch; sends architectural corrections back to Implementation (Loop back to 2).
+    *   *If Fail:* Rejects branch, resets state (`git clean -fd`), sends architectural corrections back to Implementation (Loop back to 2, forcing `--amend`).
+
+### The Circuit Breaker
+*   To prevent infinite token burns, if iterative looping between steps 2–5 exceeds **25 round trips** for a single ledger phase, the Orchestrator MUST freeze the state machine, halt autonomous sub-agents, and actively escalate the failure back to the Human Engineer for manual intervention.
