@@ -10,14 +10,23 @@
 namespace flutter {
 namespace android {
 
-JniDelegate::JniDelegate(std::shared_ptr<JvmInvoker> jvm_invoker,
-                         std::shared_ptr<CallbackCacheProvider> callback_cache,
-                         std::shared_ptr<ImageDecoderProvider> image_decoder)
+JniDelegate::JniDelegate(
+    std::shared_ptr<JvmInvoker> jvm_invoker,
+    std::shared_ptr<CallbackCacheProvider> callback_cache,
+    std::shared_ptr<ImageDecoderProvider> image_decoder,
+    std::shared_ptr<PlatformViewsProvider> platform_views_provider)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(std::move(callback_cache)),
-      image_decoder_(std::move(image_decoder)) {
+      image_decoder_(std::move(image_decoder)),
+      platform_views_provider_(std::move(platform_views_provider)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
+  if (!platform_views_provider_) {
+    platform_views_provider_ =
+        std::make_shared<DefaultPlatformViewsProvider>(jvm_invoker_);
+  }
+  platform_views_controller_ = std::make_shared<AndroidPlatformViewsController>(
+      platform_views_provider_);
 }
 
 JniDelegate::~JniDelegate() {
@@ -288,6 +297,211 @@ std::shared_ptr<ImageDecoderProvider> JniDelegate::GetImageDecoderProvider()
   return image_decoder_;
 }
 
+int64_t JniDelegate::CreatePlatformView(
+    const PlatformViewCreationParams& params,
+    PlatformViewCompositionType composition_type) {
+  TRACE_EVENT1("flutter", "JniDelegate::CreatePlatformView", "view_id",
+               std::to_string(params.view_id).c_str());
+  if (!platform_views_controller_) {
+    return -1;
+  }
+  return platform_views_controller_->CreatePlatformView(params,
+                                                        composition_type);
+}
+
+bool JniDelegate::DisposePlatformView(int64_t view_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::DisposePlatformView", "view_id",
+               std::to_string(view_id).c_str());
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->DisposePlatformView(view_id);
+}
+
+bool JniDelegate::ResizePlatformView(const PlatformViewResizeRequest& request) {
+  TRACE_EVENT1("flutter", "JniDelegate::ResizePlatformView", "view_id",
+               std::to_string(request.view_id).c_str());
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->ResizePlatformView(
+      request.view_id, request.width, request.height);
+}
+
+bool JniDelegate::OffsetPlatformView(int64_t view_id, double top, double left) {
+  TRACE_EVENT1("flutter", "JniDelegate::OffsetPlatformView", "view_id",
+               std::to_string(view_id).c_str());
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->OffsetPlatformView(view_id, top, left);
+}
+
+bool JniDelegate::SetPlatformViewDirection(int64_t view_id, int32_t direction) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetPlatformViewDirection", "view_id",
+               std::to_string(view_id).c_str());
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->SetDirection(view_id, direction);
+}
+
+bool JniDelegate::ClearPlatformViewFocus(int64_t view_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::ClearPlatformViewFocus", "view_id",
+               std::to_string(view_id).c_str());
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->ClearFocus(view_id);
+}
+
+bool JniDelegate::DispatchPlatformViewTouch(const PlatformViewTouch& touch) {
+  TRACE_EVENT1("flutter", "JniDelegate::DispatchPlatformViewTouch", "view_id",
+               std::to_string(touch.view_id).c_str());
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->DispatchTouchEvent(touch);
+}
+
+bool JniDelegate::OnDisplayPlatformView(const PlatformViewGeometry& geometry) {
+  TRACE_EVENT1("flutter", "JniDelegate::OnDisplayPlatformView", "view_id",
+               std::to_string(geometry.view_id).c_str());
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->OnDisplayPlatformView(
+      geometry.view_id, geometry.x, geometry.y, geometry.width, geometry.height,
+      geometry.view_width, geometry.view_height, geometry.mutators_stack);
+}
+
+bool JniDelegate::OnDisplayPlatformView(
+    const FlutterPlatformView& platform_view,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    int32_t view_width,
+    int32_t view_height) {
+  TRACE_EVENT1("flutter", "JniDelegate::OnDisplayPlatformView(struct)",
+               "view_id", std::to_string(platform_view.identifier).c_str());
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->OnDisplayPlatformView(
+      platform_view, x, y, width, height, view_width, view_height);
+}
+
+bool JniDelegate::HidePlatformView(int64_t view_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::HidePlatformView", "view_id",
+               std::to_string(view_id).c_str());
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->HidePlatformView(view_id);
+}
+
+bool JniDelegate::SynchronizeToNativeViewHierarchy(bool synchronize) {
+  TRACE_EVENT0("flutter", "JniDelegate::SynchronizeToNativeViewHierarchy");
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->SynchronizeToNativeViewHierarchy(
+      synchronize);
+}
+
+bool JniDelegate::OnBeginFrame() {
+  TRACE_EVENT0("flutter", "JniDelegate::OnBeginFrame");
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->OnBeginFrame();
+}
+
+bool JniDelegate::OnEndFrame() {
+  TRACE_EVENT0("flutter", "JniDelegate::OnEndFrame");
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->OnEndFrame();
+}
+
+std::optional<int32_t> JniDelegate::CreateOverlaySurface() {
+  TRACE_EVENT0("flutter", "JniDelegate::CreateOverlaySurface");
+  if (!platform_views_controller_) {
+    return std::nullopt;
+  }
+  return platform_views_controller_->CreateOverlaySurface();
+}
+
+bool JniDelegate::DestroyOverlaySurfaces() {
+  TRACE_EVENT0("flutter", "JniDelegate::DestroyOverlaySurfaces");
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->DestroyOverlaySurfaces();
+}
+
+bool JniDelegate::OnDisplayOverlaySurface(const PlatformViewOverlay& overlay) {
+  TRACE_EVENT1("flutter", "JniDelegate::OnDisplayOverlaySurface", "surface_id",
+               std::to_string(overlay.surface_id).c_str());
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->OnDisplayOverlaySurface(
+      overlay.surface_id, overlay.x, overlay.y, overlay.width, overlay.height);
+}
+
+bool JniDelegate::ShowOverlaySurface(int32_t surface_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::ShowOverlaySurface", "surface_id",
+               std::to_string(surface_id).c_str());
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->ShowOverlaySurface(surface_id);
+}
+
+bool JniDelegate::HideOverlaySurface(int32_t surface_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::HideOverlaySurface", "surface_id",
+               std::to_string(surface_id).c_str());
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->HideOverlaySurface(surface_id);
+}
+
+bool JniDelegate::CreatePlatformViewTransaction() {
+  TRACE_EVENT0("flutter", "JniDelegate::CreatePlatformViewTransaction");
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->CreateTransaction();
+}
+
+bool JniDelegate::SwapPlatformViewTransactions() {
+  TRACE_EVENT0("flutter", "JniDelegate::SwapPlatformViewTransactions");
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->SwapTransactions();
+}
+
+bool JniDelegate::ApplyPlatformViewTransactions() {
+  TRACE_EVENT0("flutter", "JniDelegate::ApplyPlatformViewTransactions");
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->ApplyTransactions();
+}
+
+bool JniDelegate::IsHcppEnabled() const {
+  TRACE_EVENT0("flutter", "JniDelegate::IsHcppEnabled");
+  if (!platform_views_controller_) {
+    return false;
+  }
+  return platform_views_controller_->IsHcppEnabled();
+}
+
 bool JniDelegate::PushPlatformViewMutators(
     int64_t view_id,
     int32_t x,
@@ -296,6 +510,10 @@ bool JniDelegate::PushPlatformViewMutators(
     int32_t height,
     const AndroidMutatorsStack& mutators_stack) {
   TRACE_EVENT0("flutter", "JniDelegate::PushPlatformViewMutators");
+  if (platform_views_controller_) {
+    return platform_views_controller_->PushPlatformViewMutators(
+        view_id, x, y, width, height, mutators_stack);
+  }
   if (!jvm_invoker_) {
     return false;
   }
@@ -311,10 +529,35 @@ bool JniDelegate::PushPlatformViewMutators(
     int32_t width,
     int32_t height) {
   TRACE_EVENT0("flutter", "JniDelegate::PushPlatformViewMutators(view)");
+  if (platform_views_controller_) {
+    return platform_views_controller_->PushPlatformViewMutators(
+        platform_view, x, y, width, height);
+  }
   AndroidMutatorsStack stack =
       AndroidMutatorsMapper::MapPlatformView(platform_view);
   return PushPlatformViewMutators(platform_view.identifier, x, y, width, height,
                                   stack);
+}
+
+void JniDelegate::SetPlatformViewsProvider(
+    std::shared_ptr<PlatformViewsProvider> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetPlatformViewsProvider");
+  platform_views_provider_ =
+      provider ? std::move(provider)
+               : std::make_shared<DefaultPlatformViewsProvider>(jvm_invoker_);
+  if (platform_views_controller_) {
+    platform_views_controller_->SetProvider(platform_views_provider_);
+  }
+}
+
+std::shared_ptr<PlatformViewsProvider> JniDelegate::GetPlatformViewsProvider()
+    const {
+  return platform_views_provider_;
+}
+
+std::shared_ptr<AndroidPlatformViewsController>
+JniDelegate::GetPlatformViewsController() const {
+  return platform_views_controller_;
 }
 
 }  // namespace android

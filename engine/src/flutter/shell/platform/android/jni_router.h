@@ -86,6 +86,58 @@ class LegacyJniDelegate {
   virtual std::optional<ImageHeaderInfo> GetImageHeader(
       int64_t generator_handle) = 0;
 
+  virtual int64_t CreatePlatformView(
+      const PlatformViewCreationParams& params,
+      PlatformViewCompositionType composition_type) = 0;
+
+  virtual bool DisposePlatformView(int64_t view_id) = 0;
+
+  virtual bool ResizePlatformView(const PlatformViewResizeRequest& request) = 0;
+
+  virtual bool OffsetPlatformView(int64_t view_id, double top, double left) = 0;
+
+  virtual bool SetPlatformViewDirection(int64_t view_id, int32_t direction) = 0;
+
+  virtual bool ClearPlatformViewFocus(int64_t view_id) = 0;
+
+  virtual bool DispatchPlatformViewTouch(const PlatformViewTouch& touch) = 0;
+
+  virtual bool OnDisplayPlatformView(const PlatformViewGeometry& geometry) = 0;
+
+  virtual bool OnDisplayPlatformView(const FlutterPlatformView& platform_view,
+                                     int32_t x,
+                                     int32_t y,
+                                     int32_t width,
+                                     int32_t height,
+                                     int32_t view_width,
+                                     int32_t view_height) = 0;
+
+  virtual bool HidePlatformView(int64_t view_id) = 0;
+
+  virtual bool SynchronizeToNativeViewHierarchy(bool synchronize) = 0;
+
+  virtual bool OnBeginFrame() = 0;
+
+  virtual bool OnEndFrame() = 0;
+
+  virtual std::optional<int32_t> CreateOverlaySurface() = 0;
+
+  virtual bool DestroyOverlaySurfaces() = 0;
+
+  virtual bool OnDisplayOverlaySurface(const PlatformViewOverlay& overlay) = 0;
+
+  virtual bool ShowOverlaySurface(int32_t surface_id) = 0;
+
+  virtual bool HideOverlaySurface(int32_t surface_id) = 0;
+
+  virtual bool CreatePlatformViewTransaction() = 0;
+
+  virtual bool SwapPlatformViewTransactions() = 0;
+
+  virtual bool ApplyPlatformViewTransactions() = 0;
+
+  virtual bool IsHcppEnabled() const = 0;
+
   virtual bool PushPlatformViewMutators(
       int64_t view_id,
       int32_t x,
@@ -189,6 +241,57 @@ class JniRouter {
                               int32_t height);
 
   std::optional<ImageHeaderInfo> RouteGetImageHeader(int64_t generator_handle);
+
+  int64_t RouteCreatePlatformView(const PlatformViewCreationParams& params,
+                                  PlatformViewCompositionType composition_type);
+
+  bool RouteDisposePlatformView(int64_t view_id);
+
+  bool RouteResizePlatformView(const PlatformViewResizeRequest& request);
+
+  bool RouteOffsetPlatformView(int64_t view_id, double top, double left);
+
+  bool RouteSetPlatformViewDirection(int64_t view_id, int32_t direction);
+
+  bool RouteClearPlatformViewFocus(int64_t view_id);
+
+  bool RouteDispatchPlatformViewTouch(const PlatformViewTouch& touch);
+
+  bool RouteOnDisplayPlatformView(const PlatformViewGeometry& geometry);
+
+  bool RouteOnDisplayPlatformView(const FlutterPlatformView& platform_view,
+                                  int32_t x,
+                                  int32_t y,
+                                  int32_t width,
+                                  int32_t height,
+                                  int32_t view_width,
+                                  int32_t view_height);
+
+  bool RouteHidePlatformView(int64_t view_id);
+
+  bool RouteSynchronizeToNativeViewHierarchy(bool synchronize);
+
+  bool RouteBeginFrame();
+
+  bool RouteEndFrame();
+
+  std::optional<int32_t> RouteCreateOverlaySurface();
+
+  bool RouteDestroyOverlaySurfaces();
+
+  bool RouteOnDisplayOverlaySurface(const PlatformViewOverlay& overlay);
+
+  bool RouteShowOverlaySurface(int32_t surface_id);
+
+  bool RouteHideOverlaySurface(int32_t surface_id);
+
+  bool RouteCreatePlatformViewTransaction();
+
+  bool RouteSwapPlatformViewTransactions();
+
+  bool RouteApplyPlatformViewTransactions();
+
+  bool RouteIsHcppEnabled() const;
 
   bool RoutePlatformViewMutators(int64_t view_id,
                                  int32_t x,
