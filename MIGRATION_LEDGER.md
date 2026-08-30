@@ -29,11 +29,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `embedder.h` API extension: Vulkan External Textures (opaque structs).
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `embedder_unittests` covering new structs pass.
-- [ ] **1.6 C-API Extension (AHardwareBuffer)**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.6-c-api-extension-ahardwarebuffer`
-    - [ ] `embedder.h` API extension: AHardwareBuffer (opaque structs).
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `embedder_unittests` covering new structs pass.
+- [x] **1.6 C-API Extension (AHardwareBuffer)**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-1.6-c-api-extension-ahardwarebuffer`
+    - [x] `embedder.h` API extension: AHardwareBuffer (opaque structs).
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `embedder_unittests` covering new structs pass.
 - [ ] **1.7 C-API Extension (Engine Spawn)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.7-c-api-extension-engine-spawn`
     - [ ] `embedder.h` API extension: `FlutterEngineSpawn`.
