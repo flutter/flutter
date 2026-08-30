@@ -49,11 +49,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `embedder.h` API extension: `FlutterEngineScreenshot` and `FlutterEngineFreeScreenshot`.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `embedder_unittests` covering screenshot structs pass.
-- [ ] **1.10 C-API Extension (Raster Context Hooks)**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.10-c-api-extension-raster-context-hooks`
-    - [ ] `embedder.h` API extension: `raster_thread_context_make_current` and `clear_current`.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `embedder_unittests` covering context hooks pass.
+- [x] **1.10 C-API Extension (Raster Context Hooks)**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-1.10-c-api-extension-raster-context-hooks`
+    - [x] `embedder.h` API extension: `raster_thread_context_make_current` and `clear_current`.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `embedder_unittests` covering context hooks pass.
 - [ ] **1.11 C-API Extension (Thread Priorities)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.11-c-api-extension-thread-priorities`
     - [ ] `embedder.h` API extension: `custom_task_runners` with Android thread mapping.

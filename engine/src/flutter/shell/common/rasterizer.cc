@@ -62,7 +62,15 @@ Rasterizer::Rasterizer(Delegate& delegate,
   FML_DCHECK(compositor_context_);
 }
 
-Rasterizer::~Rasterizer() = default;
+void Rasterizer::SetTeardownCallback(fml::closure teardown_callback) {
+  teardown_callback_ = std::move(teardown_callback);
+}
+
+Rasterizer::~Rasterizer() {
+  if (teardown_callback_) {
+    teardown_callback_();
+  }
+}
 
 fml::TaskRunnerAffineWeakPtr<Rasterizer> Rasterizer::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
@@ -79,6 +87,7 @@ void Rasterizer::SetImpellerContext(
 }
 
 void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
+  is_torn_down_ = false;
   surface_ = std::move(surface);
 
   if (max_cache_bytes_.has_value()) {
@@ -118,10 +127,14 @@ void Rasterizer::TeardownExternalViewEmbedder() {
 }
 
 void Rasterizer::Teardown() {
+  TRACE_EVENT0("flutter", "Rasterizer::Teardown");
+  if (is_torn_down_) {
+    return;
+  }
   is_torn_down_ = true;
   if (surface_) {
     auto context_switch = surface_->MakeRenderContextCurrent();
-    if (context_switch->GetResult()) {
+    if (context_switch && context_switch->GetResult()) {
       compositor_context_->OnGrContextDestroyed();
 #if !SLIMPELLER
       if (auto* context = surface_->GetContext()) {

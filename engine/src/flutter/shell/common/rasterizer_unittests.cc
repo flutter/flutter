@@ -1273,6 +1273,63 @@ TEST(RasterizerTest, TeardownNoSurface) {
   rasterizer->Teardown();
 }
 
+TEST(RasterizerTest, RepeatedSetupAndTeardownLifecycle) {
+  std::string test_name =
+      ::testing::UnitTest::GetInstance()->current_test_info()->name();
+  ThreadHost thread_host("io.flutter.test." + test_name + ".",
+                         ThreadHost::Type::kPlatform |
+                             ThreadHost::Type::kRaster | ThreadHost::Type::kIo |
+                             ThreadHost::Type::kUi);
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  EXPECT_CALL(delegate, GetTaskRunners())
+      .WillRepeatedly(ReturnRef(task_runners));
+
+  auto rasterizer = std::make_unique<Rasterizer>(delegate);
+
+  // Cycle 1: Foreground -> Setup -> Background -> Teardown
+  bool context_current_1 = false;
+  auto surface_1 = std::make_unique<NiceMock<MockSurface>>();
+  EXPECT_CALL(*surface_1, MakeRenderContextCurrent()).WillRepeatedly([&]() {
+    context_current_1 = true;
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+  EXPECT_CALL(*surface_1, ClearRenderContext()).WillRepeatedly([&]() {
+    context_current_1 = false;
+    return true;
+  });
+
+  rasterizer->Setup(std::move(surface_1));
+  EXPECT_TRUE(context_current_1);
+  rasterizer->Teardown();
+  EXPECT_FALSE(context_current_1);
+
+  // Cycle 2: Foreground -> Setup -> Background -> Teardown
+  // Verifies that is_torn_down_ is reset to false by Setup so Teardown works on
+  // Cycle 2.
+  bool context_current_2 = false;
+  auto surface_2 = std::make_unique<NiceMock<MockSurface>>();
+  EXPECT_CALL(*surface_2, MakeRenderContextCurrent()).WillRepeatedly([&]() {
+    context_current_2 = true;
+    return std::make_unique<GLContextDefaultResult>(true);
+  });
+  EXPECT_CALL(*surface_2, ClearRenderContext()).WillRepeatedly([&]() {
+    context_current_2 = false;
+    return true;
+  });
+
+  rasterizer->Setup(std::move(surface_2));
+  EXPECT_TRUE(context_current_2);
+  rasterizer->Teardown();
+  EXPECT_FALSE(context_current_2);
+}
+
 TEST(RasterizerTest, presentationTimeSetWhenVsyncTargetInFuture) {
   GTEST_SKIP() << "eglPresentationTime is disabled due to "
                   "https://github.com/flutter/flutter/issues/112503";
