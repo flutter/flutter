@@ -386,6 +386,15 @@ typedef enum {
   kRaster = 3,
 } FlutterThreadPriority;
 
+/// Callback invoked to set thread priority for a thread.
+typedef void (*FlutterThreadPrioritySetter)(
+    FlutterThreadPriority /* priority */);
+
+/// Callback invoked to set thread priority with user data context.
+typedef void (*FlutterThreadPrioritySetterWithUserData)(
+    FlutterThreadPriority /* priority */,
+    void* /* user data */);
+
 typedef struct _FlutterEngine* FLUTTER_API_SYMBOL(FlutterEngine);
 
 /// Unique identifier for views.
@@ -2114,6 +2123,12 @@ typedef struct {
   size_t identifier;
   /// The callback invoked when the task runner is destroyed.
   VoidCallback destruction_callback;
+  /// The thread priority hint or configuration associated with this custom task
+  /// runner.
+  FlutterThreadPriority priority;
+  /// Specify a callback that is used to set the thread priority for this task
+  /// runner.
+  FlutterThreadPrioritySetter thread_priority_setter;
 } FlutterTaskRunnerDescription;
 
 typedef struct {
@@ -2131,11 +2146,16 @@ typedef struct {
   const FlutterTaskRunnerDescription* render_task_runner;
   /// Specify a callback that is used to set the thread priority for embedder
   /// task runners.
-  void (*thread_priority_setter)(FlutterThreadPriority);
+  FlutterThreadPrioritySetter thread_priority_setter;
   /// Specify the task runner for the thread on which the UI tasks will be run.
   /// This may be same as platform_task_runner, in which case the Flutter engine
   /// will run the UI isolate on platform thread.
   const FlutterTaskRunnerDescription* ui_task_runner;
+  /// Specify a callback that is used to set the thread priority for embedder
+  /// task runners with user data context.
+  FlutterThreadPrioritySetterWithUserData thread_priority_setter_with_user_data;
+  /// User data passed to `thread_priority_setter_with_user_data`.
+  void* user_data;
 } FlutterCustomTaskRunners;
 
 typedef struct {

@@ -113,9 +113,12 @@ class EmbedderTestTaskRunner {
                                std::move(on_task_expired),
                                {}) {}
 
-  EmbedderTestTaskRunner(fml::RefPtr<fml::TaskRunner> real_task_runner,
-                         TaskExpiryCallback on_task_expired,
-                         std::function<void()> destruction_callback)
+  EmbedderTestTaskRunner(
+      fml::RefPtr<fml::TaskRunner> real_task_runner,
+      TaskExpiryCallback on_task_expired,
+      std::function<void()> destruction_callback,
+      FlutterThreadPriority priority = FlutterThreadPriority::kNormal,
+      FlutterThreadPrioritySetter thread_priority_setter = nullptr)
       : identifier_(++sEmbedderTaskRunnerIdentifiers),
         real_task_runner_(std::move(real_task_runner)),
         on_task_expired_(std::move(on_task_expired)),
@@ -157,6 +160,20 @@ class EmbedderTestTaskRunner {
       task_runner_description_.destruction_callback = [](void* user_data) {};
     }
     task_runner_description_.identifier = identifier_;
+    task_runner_description_.priority = priority;
+    task_runner_description_.thread_priority_setter = thread_priority_setter;
+  }
+
+  void SetPriority(FlutterThreadPriority priority) {
+    task_runner_description_.priority = priority;
+  }
+
+  void SetThreadPrioritySetter(FlutterThreadPrioritySetter setter) {
+    task_runner_description_.thread_priority_setter = setter;
+  }
+
+  FlutterThreadPriority GetPriority() const {
+    return task_runner_description_.priority;
   }
 
   const FlutterTaskRunnerDescription& GetFlutterTaskRunnerDescription() {
@@ -194,15 +211,30 @@ class EmbedderTestTaskRunnerBuilder {
     return *this;
   }
 
+  EmbedderTestTaskRunnerBuilder& SetPriority(FlutterThreadPriority priority) {
+    priority_ = priority;
+    return *this;
+  }
+
+  EmbedderTestTaskRunnerBuilder& SetThreadPrioritySetter(
+      FlutterThreadPrioritySetter setter) {
+    thread_priority_setter_ = setter;
+    return *this;
+  }
+
   EmbedderTestTaskRunner Build() {
-    return EmbedderTestTaskRunner(real_task_runner_, on_task_expired_,
-                                  destruction_callback_);
+    return EmbedderTestTaskRunner(
+        real_task_runner_, on_task_expired_, destruction_callback_,
+        priority_.value_or(FlutterThreadPriority::kNormal),
+        thread_priority_setter_);
   }
 
  private:
   fml::RefPtr<fml::TaskRunner> real_task_runner_;
   EmbedderTestTaskRunner::TaskExpiryCallback on_task_expired_;
   EmbedderTestTaskRunner::DestructionCallback destruction_callback_;
+  std::optional<FlutterThreadPriority> priority_;
+  FlutterThreadPrioritySetter thread_priority_setter_ = nullptr;
 };
 
 }  // namespace testing

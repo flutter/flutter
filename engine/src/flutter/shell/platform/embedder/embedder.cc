@@ -2568,8 +2568,9 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   auto custom_task_runners = SAFE_ACCESS(args, custom_task_runners, nullptr);
   auto thread_config_callback = [&custom_task_runners](
                                     const fml::Thread::ThreadConfig& config) {
+    TRACE_EVENT0("flutter", "EmbedderSetThreadPriority");
     fml::Thread::SetCurrentThreadName(config);
-    if (!custom_task_runners || !custom_task_runners->thread_priority_setter) {
+    if (!custom_task_runners) {
       return;
     }
     FlutterThreadPriority priority = FlutterThreadPriority::kNormal;
@@ -2587,7 +2588,14 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         priority = FlutterThreadPriority::kRaster;
         break;
     }
-    custom_task_runners->thread_priority_setter(priority);
+    if (SAFE_ACCESS(custom_task_runners, thread_priority_setter_with_user_data,
+                    nullptr) != nullptr) {
+      custom_task_runners->thread_priority_setter_with_user_data(
+          priority, SAFE_ACCESS(custom_task_runners, user_data, nullptr));
+    } else if (SAFE_ACCESS(custom_task_runners, thread_priority_setter,
+                           nullptr) != nullptr) {
+      custom_task_runners->thread_priority_setter(priority);
+    }
   };
   auto thread_host =
       flutter::EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
@@ -3689,6 +3697,7 @@ uint64_t FlutterEngineGetCurrentTime() {
 FlutterEngineResult FlutterEngineRunTask(FLUTTER_API_SYMBOL(FlutterEngine)
                                              engine,
                                          const FlutterTask* task) {
+  TRACE_EVENT0("flutter", "FlutterEngineRunTask");
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
