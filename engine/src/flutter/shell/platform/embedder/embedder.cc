@@ -52,6 +52,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -4186,6 +4187,42 @@ FlutterEngineResult FlutterEngineFreeScreenshot(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineGetCallbackInformation(
+    int64_t handle,
+    FlutterCallbackInformation* callback_info_out) {
+  TRACE_EVENT0("flutter", "FlutterEngineGetCallbackInformation");
+  if (!callback_info_out) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Callback info output pointer was null.");
+  }
+  if (callback_info_out->struct_size != sizeof(FlutterCallbackInformation)) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "FlutterCallbackInformation struct_size mismatch.");
+  }
+
+  auto callback_info =
+      flutter::DartCallbackCache::GetCallbackInformation(handle);
+  if (!callback_info) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not locate callback information.");
+  }
+
+  thread_local static std::string s_name;
+  thread_local static std::string s_class_name;
+  thread_local static std::string s_library_path;
+
+  s_name = callback_info->name;
+  s_class_name = callback_info->class_name;
+  s_library_path = callback_info->library_path;
+
+  callback_info_out->name = s_name.c_str();
+  callback_info_out->class_name =
+      s_class_name.empty() ? nullptr : s_class_name.c_str();
+  callback_info_out->library_path = s_library_path.c_str();
+
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -4250,6 +4287,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
            FlutterEngineLoadDartDeferredLibraryFailure);
   SET_PROC(Screenshot, FlutterEngineScreenshot);
   SET_PROC(FreeScreenshot, FlutterEngineFreeScreenshot);
+  SET_PROC(GetCallbackInformation, FlutterEngineGetCallbackInformation);
 #undef SET_PROC
 
   return kSuccess;

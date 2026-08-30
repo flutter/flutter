@@ -99,6 +99,23 @@ TEST(EmbedderProcTable, CallScreenshotProcs) {
   EXPECT_EQ(procs.FreeScreenshot(&invalid_screenshot), kInvalidArguments);
 }
 
+// Spot-checks calling Dart callback information function pointers via proc
+// table.
+TEST(EmbedderProcTable, CallCallbackInformationProcs) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  EXPECT_NE(procs.GetCallbackInformation, nullptr);
+
+  // Calling with invalid arguments returns kInvalidArguments.
+  EXPECT_EQ(procs.GetCallbackInformation(0, nullptr), kInvalidArguments);
+
+  FlutterCallbackInformation invalid_info = {};
+  invalid_info.struct_size = 0;
+  EXPECT_EQ(procs.GetCallbackInformation(0, &invalid_info), kInvalidArguments);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

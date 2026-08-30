@@ -23,6 +23,7 @@
 #include "flutter/fml/thread.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
+#include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_hb.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
@@ -2174,6 +2175,50 @@ TEST_F(EmbedderTest, ScreenshotInvalidArguments) {
 
   // Free with valid struct_size and null pixels should succeed.
   EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineGetCallbackInformation retrieves callback
+/// representations from DartCallbackCache and validates arguments.
+///
+TEST_F(EmbedderTest, CallbackInformationLookup) {
+  FlutterCallbackInformation info = {};
+  info.struct_size = sizeof(FlutterCallbackInformation);
+
+  // Null output struct pointer.
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(0, nullptr), kInvalidArguments);
+
+  // Struct size mismatch.
+  FlutterCallbackInformation bad_info = {};
+  bad_info.struct_size = sizeof(FlutterCallbackInformation) - 1;
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(0, &bad_info),
+            kInvalidArguments);
+
+  // Non-existent callback handle returns kInternalInconsistency.
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(99999999, &info),
+            kInternalInconsistency);
+
+  // Register a top-level callback into DartCallbackCache.
+  int64_t top_level_handle = DartCallbackCache::GetCallbackHandle(
+      "topLevelMethod", "", "package:test_app/main.dart");
+  EXPECT_NE(top_level_handle, 0);
+
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(top_level_handle, &info),
+            kSuccess);
+  EXPECT_STREQ(info.name, "topLevelMethod");
+  EXPECT_EQ(info.class_name, nullptr);
+  EXPECT_STREQ(info.library_path, "package:test_app/main.dart");
+
+  // Register a class-scoped callback into DartCallbackCache.
+  int64_t class_method_handle = DartCallbackCache::GetCallbackHandle(
+      "classMethod", "TargetClass", "package:test_app/service.dart");
+  EXPECT_NE(class_method_handle, 0);
+
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(class_method_handle, &info),
+            kSuccess);
+  EXPECT_STREQ(info.name, "classMethod");
+  EXPECT_STREQ(info.class_name, "TargetClass");
+  EXPECT_STREQ(info.library_path, "package:test_app/service.dart");
 }
 
 //------------------------------------------------------------------------------
