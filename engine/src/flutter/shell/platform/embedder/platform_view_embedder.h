@@ -50,6 +50,8 @@ class PlatformViewEmbedder final : public PlatformView {
       std::function<void(const ViewFocusChangeRequest&)>;
   using RequestDartDeferredLibraryCallback =
       std::function<void(intptr_t loading_unit_id)>;
+  using RasterThreadContextMakeCurrentCallback = std::function<bool()>;
+  using RasterThreadContextClearCurrentCallback = std::function<bool()>;
 
   struct PlatformDispatchTable {
     UpdateSemanticsCallback update_semantics_callback;  // optional
@@ -64,6 +66,10 @@ class PlatformViewEmbedder final : public PlatformView {
         view_focus_change_request_callback;  // optional
     RequestDartDeferredLibraryCallback
         request_dart_deferred_library_callback;  // optional
+    RasterThreadContextMakeCurrentCallback
+        raster_thread_context_make_current;  // optional
+    RasterThreadContextClearCurrentCallback
+        raster_thread_context_clear_current;  // optional
   };
 
   // Create a platform view that sets up a software rasterizer.

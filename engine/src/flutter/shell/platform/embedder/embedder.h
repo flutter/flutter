@@ -2093,6 +2093,13 @@ typedef void (*FlutterDartDeferredLibraryLoadingUnitCallback)(
     const FlutterDartDeferredLibraryLoadingUnit* /* loading unit */,
     void* /* user data */);
 
+/// Callback invoked on the raster thread in order to give the embedder the
+/// chance to manage thread/graphics context lifetimes (e.g. EGL context
+/// make current or clear current).
+///
+/// Should return true if the operation succeeded, false if an error occurred.
+typedef BoolCallback FlutterRasterThreadContextCallback;
+
 typedef struct _FlutterTaskRunner* FlutterTaskRunner;
 
 typedef struct {
@@ -3027,6 +3034,49 @@ typedef struct {
   /// The callback will be invoked from a task posted to the platform thread.
   FlutterDartDeferredLibraryLoadingUnitCallback
       dart_deferred_library_loading_unit_callback;
+
+#if UINTPTR_MAX == 0xffffffff
+  /// Reserved padding to maintain 8-byte natural alignment boundaries across
+  /// 32-bit architectures, preventing tail-padding overlap with previous
+  /// phases.
+  uint32_t reserved_padding_callback;
+#endif
+
+  /// The callback invoked on the raster thread in order to give the embedder
+  /// the chance to make the rendering context current on the raster thread
+  /// (e.g. EGL context setup on Android).
+  ///
+  /// Unlike `FlutterOpenGLRendererConfig.make_current` which is invoked
+  /// per-frame around rendering operations to bind on-screen surfaces, this
+  /// hook is invoked exactly once on the raster thread when the rasterizer
+  /// subsystem is initialized for engine-managed thread context setup.
+  ///
+  /// The callback will be invoked on the engine-managed raster thread.
+  /// The user data passed to this callback is the `user_data` argument passed
+  /// to `FlutterEngineInitialize` or `FlutterEngineRun`.
+  ///
+  /// This field is optional.
+  FlutterRasterThreadContextCallback raster_thread_context_make_current;
+
+  /// The callback invoked on the raster thread in order to give the embedder
+  /// the chance to clear the rendering context current on the raster thread
+  /// (e.g. EGL context teardown on Android).
+  ///
+  /// Unlike `FlutterOpenGLRendererConfig.clear_current` which is invoked
+  /// per-frame around rendering operations, this hook is invoked exactly once
+  /// on the raster thread when the rasterizer subsystem is torn down.
+  ///
+  /// The callback will be invoked on the engine-managed raster thread.
+  /// The user data passed to this callback is the `user_data` argument passed
+  /// to `FlutterEngineInitialize` or `FlutterEngineRun`.
+  ///
+  /// Note: In spawned engines sharing the parent's task runners, caution must
+  /// be exercised if supplying this callback, as clearing the context on
+  /// spawned engine shutdown will unbind the context on the shared raster
+  /// thread.
+  ///
+  /// This field is optional.
+  FlutterRasterThreadContextCallback raster_thread_context_clear_current;
 } FlutterProjectArgs;
 
 typedef struct {
@@ -3057,6 +3107,11 @@ typedef struct {
   /// Custom project arguments for the spawned engine (e.g. custom entrypoint,
   /// entrypoint arguments, callbacks, engine ID, etc.).
   /// This field is optional; nullptr may be specified.
+  ///
+  /// Note: The spawned engine shares task runners (including the raster thread)
+  /// with the parent engine. If `custom_args` specifies
+  /// `raster_thread_context_clear_current`, shutting down the spawned engine
+  /// will execute the clear callback on the shared raster thread.
   const FlutterProjectArgs* custom_args;
 
   /// Custom renderer configuration for the spawned engine.
