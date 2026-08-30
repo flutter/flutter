@@ -856,9 +856,65 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
   EXPECT_EQ(embedder_cb->class_name, "EmbedderClass");
   EXPECT_EQ(embedder_cb->library_path, "package:embedder/main.dart");
 
-  // Reset flag back to false for test hygiene
-  JniRouter::SetEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+  // Reset flag back to true for default test hygiene in Phase 5.1
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+}
+
+TEST(FlutterEmbedderNativeTest, TargetFlipDefaultEmbedderEnabled) {
+  // Phase 5.1 Target Flip verification: Embedder C-API is enabled by default.
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+  EXPECT_TRUE(FlutterEmbedderNative::IsEmbedderEnabled());
+
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  auto router = std::make_unique<JniRouter>(
+      std::make_shared<JniDelegate>(mock_invoker), legacy_delegate);
+
+  EXPECT_EQ(router->GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
+  EXPECT_NE(router->GetEmbedderDelegate(), nullptr);
+  EXPECT_NE(router->GetLegacyDelegate(), nullptr);
+}
+
+TEST(FlutterEmbedderNativeTest, TargetFlipDefaultRouteExecution) {
+  // Default execution routes directly to embedder delegate without any manual
+  // flag set.
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+
+  FlutterEmbedderNative native(mock_invoker, legacy_delegate);
+  ASSERT_NE(native.GetRouter(), nullptr);
+  EXPECT_EQ(native.GetRouter()->GetActiveRoutingPath(),
+            JniRouter::RoutingPath::kEmbedder);
+
+  std::vector<uint8_t> payload = {'p', 'h', 'a', 's', 'e', '5', '.', '1'};
+
+  // Platform message routing defaults to embedder delegate
+  EXPECT_CALL(*legacy_delegate, HandlePlatformMessage(_, _, _)).Times(0);
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("handlePlatformMessage",
+                               "(Ljava/lang/String;[BI)V", payload))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(
+      native.GetRouter()->RoutePlatformMessage("flutter/default", payload, 42));
+
+  // First frame routing defaults to embedder delegate
+  EXPECT_CALL(*legacy_delegate, OnFirstFrame()).Times(0);
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onFirstFrame", "()V", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(native.GetRouter()->RouteFirstFrame());
+
+  // Vsync routing defaults to embedder delegate
+  EXPECT_CALL(*legacy_delegate, OnVsync(_, _)).Times(0);
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(native.GetRouter()->RouteVsync(1000000L, 2000000L));
+
+  // Async wait for vsync routing defaults to embedder delegate
+  EXPECT_CALL(*legacy_delegate, AsyncWaitForVsync(_)).Times(0);
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("asyncWaitForVsync", "(J)V", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(native.GetRouter()->RouteAsyncWaitForVsync(999L));
 }
 
 TEST(FlutterEmbedderNativeTest, DynamicInstanceRouterWithCustomInvoker) {
@@ -870,15 +926,14 @@ TEST(FlutterEmbedderNativeTest, DynamicInstanceRouterWithCustomInvoker) {
   EXPECT_NE(native.GetJniDelegate(), nullptr);
   EXPECT_NE(native.GetRouter(), nullptr);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(true);
   EXPECT_TRUE(FlutterEmbedderNative::IsEmbedderEnabled());
 
   EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onFirstFrame", "()V", _))
       .WillOnce(Return(true));
   EXPECT_TRUE(native.GetRouter()->RouteFirstFrame());
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
-  EXPECT_FALSE(FlutterEmbedderNative::IsEmbedderEnabled());
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+  EXPECT_TRUE(FlutterEmbedderNative::IsEmbedderEnabled());
 }
 
 TEST(FlutterEmbedderNativeTest, AssetProviderLifecycleAndResolution) {
@@ -4479,11 +4534,23 @@ TEST(MultiEngineAndAddToAppTest,
             native.GetEngineGroupProvider());
 }
 
+class EmbedderTestListener : public ::testing::EmptyTestEventListener {
+ public:
+  void OnTestStart(const ::testing::TestInfo&) override {
+    JniRouter::SetEmbedderEnabled(true);
+  }
+  void OnTestEnd(const ::testing::TestInfo&) override {
+    JniRouter::SetEmbedderEnabled(true);
+  }
+};
+
 }  // namespace testing
 }  // namespace android
 }  // namespace flutter
 
 int main(int argc, char* argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
+  ::testing::UnitTest::GetInstance()->listeners().Append(
+      new flutter::android::testing::EmbedderTestListener());
   return RUN_ALL_TESTS();
 }
