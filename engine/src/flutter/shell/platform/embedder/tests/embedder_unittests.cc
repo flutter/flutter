@@ -24,6 +24,8 @@
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_hb.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
@@ -4440,6 +4442,190 @@ TEST_F(EmbedderTest, VulkanExternalTextureDestructionCallbackInvocation) {
   ASSERT_FALSE(destruction_called);
   texture.destruction_callback(texture.user_data);
   ASSERT_TRUE(destruction_called);
+}
+
+//------------------------------------------------------------------------------
+/// HardwareBuffer External Texture unit tests validating struct sizes, ABI
+/// compatibility, opaque buffer handover, lifecycle registration, and
+/// destruction callbacks.
+
+TEST_F(EmbedderTest, HardwareBufferExternalTextureStructSizesAndABI) {
+  FlutterHardwareBufferExternalTexture texture = {};
+  texture.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+  texture.width = 1920;
+  texture.height = 1080;
+  texture.format = 1;  // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM
+  texture.buffer = reinterpret_cast<FlutterHardwareBufferHandle>(0xDEADBEEF);
+  texture.user_data = reinterpret_cast<void*>(0xBAADF00D);
+  texture.destruction_callback = [](void* user_data) {
+    EXPECT_EQ(user_data, reinterpret_cast<void*>(0xBAADF00D));
+  };
+
+  EXPECT_EQ(texture.struct_size, sizeof(FlutterHardwareBufferExternalTexture));
+  EXPECT_EQ(texture.width, 1920u);
+  EXPECT_EQ(texture.height, 1080u);
+  EXPECT_EQ(texture.format, 1u);
+  EXPECT_EQ(texture.buffer,
+            reinterpret_cast<FlutterHardwareBufferHandle>(0xDEADBEEF));
+  EXPECT_EQ(texture.user_data, reinterpret_cast<void*>(0xBAADF00D));
+  EXPECT_NE(texture.destruction_callback, nullptr);
+  texture.destruction_callback(texture.user_data);
+
+  // Validate FlutterHardwareBufferTexture alias equivalence.
+  FlutterHardwareBufferTexture texture_alias = {};
+  texture_alias.struct_size = sizeof(FlutterHardwareBufferTexture);
+  EXPECT_EQ(texture_alias.struct_size,
+            sizeof(FlutterHardwareBufferExternalTexture));
+
+  // Validate FlutterOpenGLRendererConfig hardware buffer callback field.
+  FlutterOpenGLRendererConfig gl_config = {};
+  gl_config.struct_size = sizeof(FlutterOpenGLRendererConfig);
+  gl_config.hardware_buffer_external_texture_frame_callback =
+      [](void* user_data, int64_t id, size_t width, size_t height,
+         FlutterHardwareBufferExternalTexture* out) -> bool {
+    out->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    return true;
+  };
+  EXPECT_EQ(gl_config.struct_size, sizeof(FlutterOpenGLRendererConfig));
+  EXPECT_NE(gl_config.hardware_buffer_external_texture_frame_callback, nullptr);
+
+  // Validate FlutterVulkanRendererConfig hardware buffer callback field.
+  FlutterVulkanRendererConfig vk_config = {};
+  vk_config.struct_size = sizeof(FlutterVulkanRendererConfig);
+  vk_config.hardware_buffer_external_texture_frame_callback =
+      [](void* user_data, int64_t id, size_t width, size_t height,
+         FlutterHardwareBufferExternalTexture* out) -> bool {
+    out->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    return true;
+  };
+  EXPECT_EQ(vk_config.struct_size, sizeof(FlutterVulkanRendererConfig));
+  EXPECT_NE(vk_config.hardware_buffer_external_texture_frame_callback, nullptr);
+
+  // Validate FlutterHardwareBufferTextureFrameCallback typedef.
+  FlutterHardwareBufferTextureFrameCallback alias_callback =
+      [](void* user_data, int64_t id, size_t width, size_t height,
+         FlutterHardwareBufferTexture* out) -> bool {
+    out->struct_size = sizeof(FlutterHardwareBufferTexture);
+    return true;
+  };
+  EXPECT_NE(alias_callback, nullptr);
+}
+
+TEST_F(EmbedderTest,
+       HardwareBufferExternalTextureDestructionCallbackInvocation) {
+  bool destruction_called = false;
+
+  auto destruction_callback = [](void* user_data) {
+    *static_cast<bool*>(user_data) = true;
+  };
+
+  FlutterHardwareBufferExternalTexture texture = {};
+  texture.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+  texture.width = 100;
+  texture.height = 100;
+  texture.format = 1;
+  texture.buffer = reinterpret_cast<FlutterHardwareBufferHandle>(0x1234);
+  texture.user_data = &destruction_called;
+  texture.destruction_callback = destruction_callback;
+
+  ASSERT_FALSE(destruction_called);
+  texture.destruction_callback(texture.user_data);
+  ASSERT_TRUE(destruction_called);
+}
+
+TEST_F(EmbedderTest, HardwareBufferExternalTextureLifecycleAndFrameRelease) {
+  int destruction_call_count = 0;
+
+  auto destruction_callback = [](void* user_data) {
+    auto* counter = static_cast<int*>(user_data);
+    (*counter)++;
+  };
+
+  int callback_invocation_count = 0;
+  auto frame_callback = [&](int64_t texture_id, size_t width, size_t height)
+      -> std::unique_ptr<FlutterHardwareBufferExternalTexture> {
+    callback_invocation_count++;
+    auto texture = std::make_unique<FlutterHardwareBufferExternalTexture>();
+    texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    texture->width = width != 0 ? width : 100;
+    texture->height = height != 0 ? height : 100;
+    texture->format = 1;
+    texture->buffer = reinterpret_cast<FlutterHardwareBufferHandle>(
+        static_cast<uintptr_t>(0xABC + callback_invocation_count));
+    texture->user_data = &destruction_call_count;
+    texture->destruction_callback = destruction_callback;
+    return texture;
+  };
+
+  {
+    auto hb_texture =
+        std::make_unique<EmbedderExternalTextureHB>(42, frame_callback);
+    ASSERT_EQ(hb_texture->Id(), 42);
+
+    // Initial state: no frame cached
+    EXPECT_EQ(hb_texture->GetCurrentFrame(), nullptr);
+    EXPECT_EQ(destruction_call_count, 0);
+    EXPECT_EQ(callback_invocation_count, 0);
+
+    // Paint to resolve frame 1
+    Texture::PaintContext ctx{};
+    hb_texture->Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false,
+                      DlImageSampling::kLinear);
+
+    EXPECT_EQ(callback_invocation_count, 1);
+    EXPECT_NE(hb_texture->GetCurrentFrame(), nullptr);
+    EXPECT_EQ(destruction_call_count, 0);
+
+    // Repaint without new frame available should NOT call frame_callback again
+    hb_texture->Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false,
+                      DlImageSampling::kLinear);
+    EXPECT_EQ(callback_invocation_count, 1);
+    EXPECT_EQ(destruction_call_count, 0);
+
+    // Signal new frame available
+    hb_texture->MarkNewFrameAvailable();
+    // Old buffer is not destroyed yet until new frame is resolved or
+    // unregistered
+    EXPECT_EQ(destruction_call_count, 0);
+
+    // Paint to resolve frame 2; this should destroy frame 1
+    hb_texture->Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false,
+                      DlImageSampling::kLinear);
+    EXPECT_EQ(callback_invocation_count, 2);
+    EXPECT_EQ(destruction_call_count, 1);
+
+    // Unregister texture should release frame 2
+    hb_texture->OnTextureUnregistered();
+    EXPECT_EQ(destruction_call_count, 2);
+    EXPECT_EQ(hb_texture->GetCurrentFrame(), nullptr);
+  }
+
+  // Final count remains 2 (all frames released)
+  EXPECT_EQ(destruction_call_count, 2);
+}
+
+TEST_F(EmbedderTest, HardwareBufferExternalTextureResolverIntegration) {
+  bool resolver_callback_called = false;
+  auto frame_callback = [&](int64_t texture_id, size_t width, size_t height)
+      -> std::unique_ptr<FlutterHardwareBufferExternalTexture> {
+    resolver_callback_called = true;
+    auto texture = std::make_unique<FlutterHardwareBufferExternalTexture>();
+    texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    texture->width = width;
+    texture->height = height;
+    texture->format = 1;
+    texture->buffer = reinterpret_cast<FlutterHardwareBufferHandle>(0x5678);
+    texture->user_data = nullptr;
+    texture->destruction_callback = nullptr;
+    return texture;
+  };
+
+  EmbedderExternalTextureResolver resolver(frame_callback);
+  EXPECT_TRUE(resolver.SupportsExternalTextures());
+
+  auto texture = resolver.ResolveExternalTexture(100);
+  ASSERT_NE(texture, nullptr);
+  EXPECT_EQ(texture->Id(), 100);
 }
 
 //------------------------------------------------------------------------------
