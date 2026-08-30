@@ -566,5 +566,48 @@ void FlutterEmbedderNative::SetImageLRU(std::shared_ptr<EmbedderImageLRU> lru) {
   image_lru_ = lru ? std::move(lru) : std::make_shared<EmbedderImageLRU>();
 }
 
+AndroidMutatorsStack FlutterEmbedderNative::MapPlatformViewMutations(
+    const FlutterPlatformViewMutation** mutations,
+    size_t count) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::MapPlatformViewMutations");
+  return AndroidMutatorsMapper::MapMutations(mutations, count);
+}
+
+AndroidMutatorsStack FlutterEmbedderNative::MapPlatformView(
+    const FlutterPlatformView& platform_view) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::MapPlatformView");
+  return AndroidMutatorsMapper::MapPlatformView(platform_view);
+}
+
+bool FlutterEmbedderNative::PushPlatformViewMutators(
+    int64_t view_id,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    const AndroidMutatorsStack& mutators_stack) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::PushPlatformViewMutators");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RoutePlatformViewMutators(view_id, x, y, width, height,
+                                                mutators_stack);
+}
+
+bool FlutterEmbedderNative::PushPlatformViewMutators(
+    const FlutterPlatformView& platform_view,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height) const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::PushPlatformViewMutators(view)");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RoutePlatformViewMutators(platform_view, x, y, width,
+                                                height);
+}
+
 }  // namespace android
 }  // namespace flutter

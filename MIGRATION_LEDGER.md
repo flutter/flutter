@@ -84,11 +84,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `AndroidImageGenerator` hooked to `FlutterEngineRegisterImageDecoder`.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `//shell/platform/android:robolectric_tests` (`ImageDecoderDefaultImplTest.java`, `ImageDecoderHeifApi36ImplTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`image_lru_unittests.cc`) pass.
-- [ ] **2.4 Mutator Translation**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.4-mutator-translation`
-    - [ ] `AndroidMutatorsMapper` implemented.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterMutatorViewTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`android_mutator_unittests.cc`) pass.
+- [x] **2.4 Mutator Translation**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-2.4-mutator-translation`
+    - [x] `AndroidMutatorsMapper` implemented.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterMutatorViewTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`android_mutator_unittests.cc`) pass.
 - [ ] **2.5 Accessibility & Semantics**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.5-accessibility-semantics`
     - [ ] `Accessibility` & `Semantics` natively wired.
