@@ -95,6 +95,8 @@ source_set("flutter_embedder_native_src") {
     "jni_router.h",
     "jvm_invoker.cc",
     "jvm_invoker.h",
+    "os_library_loader.cc",
+    "os_library_loader.h",
   ]
 
   defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]

@@ -14,6 +14,7 @@
 #include "flutter/shell/platform/android/jni_delegate.h"
 #include "flutter/shell/platform/android/jni_router.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
+#include "flutter/shell/platform/android/os_library_loader.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 #if defined(__ANDROID__)
@@ -37,7 +38,8 @@ class FlutterEmbedderNative {
   FlutterEmbedderNative();
   explicit FlutterEmbedderNative(
       std::shared_ptr<JvmInvoker> jvm_invoker,
-      std::shared_ptr<LegacyJniDelegate> legacy_delegate = nullptr);
+      std::shared_ptr<LegacyJniDelegate> legacy_delegate = nullptr,
+      std::shared_ptr<OSLibraryLoader> library_loader = nullptr);
   virtual ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -58,6 +60,12 @@ class FlutterEmbedderNative {
   /// @brief Sets the Embedder C-API rollout flag.
   static void SetEmbedderEnabled(bool enabled);
 
+  /// @brief Sets the default global OSLibraryLoader instance.
+  static void SetDefaultLibraryLoader(std::shared_ptr<OSLibraryLoader> loader);
+
+  /// @brief Returns the default global OSLibraryLoader instance.
+  static std::shared_ptr<OSLibraryLoader> GetDefaultLibraryLoader();
+
   /// @brief Creates a default JniRouter instance with an injected JvmInvoker.
   static std::shared_ptr<JniRouter> CreateDefaultRouter(
       std::shared_ptr<JvmInvoker> invoker,
@@ -71,6 +79,9 @@ class FlutterEmbedderNative {
 
   /// @brief Returns the JvmInvoker managed by this native instance.
   std::shared_ptr<JvmInvoker> GetJvmInvoker() const;
+
+  /// @brief Returns the OSLibraryLoader managed by this native instance.
+  std::shared_ptr<OSLibraryLoader> GetLibraryLoader() const;
 
   /// @brief Associates or clears the underlying ANativeWindow surface.
   /// Thread-safe and synchronizes against in-flight presentation.
@@ -132,6 +143,9 @@ class FlutterEmbedderNative {
   bool PresentSoftware(const void* allocation, size_t row_bytes, size_t height);
 
  private:
+  static std::mutex default_library_loader_mutex_;
+  static std::shared_ptr<OSLibraryLoader> default_library_loader_;
+
   std::mutex surface_mutex_;
   std::mutex presentation_mutex_;
   ANativeWindow* native_window_ = nullptr;
@@ -139,6 +153,7 @@ class FlutterEmbedderNative {
   std::shared_ptr<JvmInvoker> jvm_invoker_;
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;
+  std::shared_ptr<OSLibraryLoader> library_loader_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEmbedderNative);
 };
