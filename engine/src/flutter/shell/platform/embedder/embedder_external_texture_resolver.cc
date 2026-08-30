@@ -27,6 +27,10 @@ EmbedderExternalTextureResolver::EmbedderExternalTextureResolver(
     : vulkan_callback_(std::move(vulkan_callback)) {}
 #endif
 
+EmbedderExternalTextureResolver::EmbedderExternalTextureResolver(
+    EmbedderExternalTextureHB::ExternalTextureCallback hardware_buffer_callback)
+    : hardware_buffer_callback_(std::move(hardware_buffer_callback)) {}
+
 std::unique_ptr<Texture>
 EmbedderExternalTextureResolver::ResolveExternalTexture(int64_t texture_id) {
 #ifdef SHELL_ENABLE_GL
@@ -50,6 +54,11 @@ EmbedderExternalTextureResolver::ResolveExternalTexture(int64_t texture_id) {
   }
 #endif
 
+  if (hardware_buffer_callback_) {
+    return std::make_unique<EmbedderExternalTextureHB>(
+        texture_id, hardware_buffer_callback_);
+  }
+
   return nullptr;
 }
 
@@ -71,6 +80,10 @@ bool EmbedderExternalTextureResolver::SupportsExternalTextures() {
     return true;
   }
 #endif
+
+  if (hardware_buffer_callback_) {
+    return true;
+  }
 
   return false;
 }

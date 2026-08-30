@@ -2352,12 +2352,23 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       external_texture_callback;
   if (config->type == kOpenGL) {
     const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
-    if (SAFE_ACCESS(open_gl_config, gl_external_texture_frame_callback,
-                    nullptr) != nullptr) {
+    auto gl_cb = SAFE_ACCESS(open_gl_config, gl_external_texture_frame_callback,
+                             nullptr);
+    auto hb_cb =
+        SAFE_ACCESS(open_gl_config,
+                    hardware_buffer_external_texture_frame_callback, nullptr);
+    if (gl_cb != nullptr && hb_cb != nullptr) {
+      FML_LOG(ERROR)
+          << "Cannot specify both gl_external_texture_frame_callback and "
+             "hardware_buffer_external_texture_frame_callback.";
+      return kInvalidArguments;
+    }
+    if (gl_cb != nullptr) {
       external_texture_callback =
-          [ptr = open_gl_config->gl_external_texture_frame_callback, user_data](
+          [ptr = gl_cb, user_data](
               int64_t texture_identifier, size_t width,
               size_t height) -> std::unique_ptr<FlutterOpenGLTexture> {
+        TRACE_EVENT0("flutter", "OpenGLExternalTextureCallback");
         std::unique_ptr<FlutterOpenGLTexture> texture =
             std::make_unique<FlutterOpenGLTexture>();
         if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
@@ -2367,6 +2378,23 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       };
       external_texture_resolver =
           std::make_unique<ExternalTextureResolver>(external_texture_callback);
+    } else if (hb_cb != nullptr) {
+      flutter::EmbedderExternalTextureHB::ExternalTextureCallback hb_callback =
+          [ptr = hb_cb, user_data](int64_t texture_identifier, size_t width,
+                                   size_t height)
+          -> std::unique_ptr<FlutterHardwareBufferExternalTexture> {
+        TRACE_EVENT0("flutter", "HardwareBufferExternalTextureCallback");
+        std::unique_ptr<FlutterHardwareBufferExternalTexture> texture =
+            std::make_unique<FlutterHardwareBufferExternalTexture>();
+        texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+        texture->fence_fd = -1;
+        if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
+          return nullptr;
+        }
+        return texture;
+      };
+      external_texture_resolver =
+          std::make_unique<ExternalTextureResolver>(hb_callback);
     }
   }
 #endif
@@ -2380,6 +2408,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
           [ptr = metal_config->external_texture_frame_callback, user_data](
               int64_t texture_identifier, size_t width,
               size_t height) -> std::unique_ptr<FlutterMetalExternalTexture> {
+        TRACE_EVENT0("flutter", "MetalExternalTextureCallback");
         std::unique_ptr<FlutterMetalExternalTexture> texture =
             std::make_unique<FlutterMetalExternalTexture>();
         texture->struct_size = sizeof(FlutterMetalExternalTexture);
@@ -2398,9 +2427,20 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       external_texture_vulkan_callback;
   if (config->type == kVulkan) {
     const FlutterVulkanRendererConfig* vulkan_config = &config->vulkan;
-    if (SAFE_ACCESS(vulkan_config, external_texture_frame_callback, nullptr)) {
+    auto vk_cb =
+        SAFE_ACCESS(vulkan_config, external_texture_frame_callback, nullptr);
+    auto hb_cb =
+        SAFE_ACCESS(vulkan_config,
+                    hardware_buffer_external_texture_frame_callback, nullptr);
+    if (vk_cb != nullptr && hb_cb != nullptr) {
+      FML_LOG(ERROR)
+          << "Cannot specify both external_texture_frame_callback and "
+             "hardware_buffer_external_texture_frame_callback.";
+      return kInvalidArguments;
+    }
+    if (vk_cb != nullptr) {
       external_texture_vulkan_callback =
-          [ptr = vulkan_config->external_texture_frame_callback, user_data](
+          [ptr = vk_cb, user_data](
               int64_t texture_identifier, size_t width,
               size_t height) -> std::unique_ptr<FlutterVulkanExternalTexture> {
         TRACE_EVENT0("flutter", "VulkanExternalTextureCallback");
@@ -2414,6 +2454,23 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       };
       external_texture_resolver = std::make_unique<ExternalTextureResolver>(
           external_texture_vulkan_callback);
+    } else if (hb_cb != nullptr) {
+      flutter::EmbedderExternalTextureHB::ExternalTextureCallback hb_callback =
+          [ptr = hb_cb, user_data](int64_t texture_identifier, size_t width,
+                                   size_t height)
+          -> std::unique_ptr<FlutterHardwareBufferExternalTexture> {
+        TRACE_EVENT0("flutter", "HardwareBufferExternalTextureCallback");
+        std::unique_ptr<FlutterHardwareBufferExternalTexture> texture =
+            std::make_unique<FlutterHardwareBufferExternalTexture>();
+        texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+        texture->fence_fd = -1;
+        if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
+          return nullptr;
+        }
+        return texture;
+      };
+      external_texture_resolver =
+          std::make_unique<ExternalTextureResolver>(hb_callback);
     }
   }
 #endif

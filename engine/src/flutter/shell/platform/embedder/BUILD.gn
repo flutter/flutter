@@ -60,6 +60,8 @@ template("embedder_source_set") {
       "embedder.cc",
       "embedder_engine.cc",
       "embedder_engine.h",
+      "embedder_external_texture_hb.cc",
+      "embedder_external_texture_hb.h",
       "embedder_external_texture_resolver.cc",
       "embedder_external_texture_resolver.h",
       "embedder_external_view.cc",
