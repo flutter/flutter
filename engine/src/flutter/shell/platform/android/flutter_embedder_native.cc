@@ -322,6 +322,9 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       vm_init_(std::make_shared<AndroidVMInit>(jvm_invoker_,
                                                font_provider_,
                                                aot_provider_)),
+      hardware_buffer_provider_(
+          std::make_shared<DefaultAndroidHardwareBufferProvider>(
+              library_loader_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -331,7 +334,8 @@ FlutterEmbedderNative::FlutterEmbedderNative()
                                                   platform_views_provider_,
                                                   window_metrics_provider_,
                                                   vsync_waiter_,
-                                                  vm_init_)),
+                                                  vm_init_,
+                                                  hardware_buffer_provider_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
       asset_provider_(std::make_shared<APKAssetProvider>(
           std::make_shared<InMemoryAPKAssetProviderImpl>())) {
@@ -354,7 +358,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<AndroidVsyncWaiter> vsync_waiter,
     std::shared_ptr<FontCollectionProvider> font_provider,
     std::shared_ptr<AndroidAOTProvider> aot_provider,
-    std::shared_ptr<AndroidVMInit> vm_init)
+    std::shared_ptr<AndroidVMInit> vm_init,
+    std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(callback_cache
                           ? std::move(callback_cache)
@@ -395,6 +400,11 @@ FlutterEmbedderNative::FlutterEmbedderNative(
                        : std::make_shared<AndroidVMInit>(jvm_invoker_,
                                                          font_provider_,
                                                          aot_provider_)),
+      hardware_buffer_provider_(
+          hardware_buffer_provider
+              ? std::move(hardware_buffer_provider)
+              : std::make_shared<DefaultAndroidHardwareBufferProvider>(
+                    library_loader_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -404,7 +414,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
                                                   platform_views_provider_,
                                                   window_metrics_provider_,
                                                   vsync_waiter_,
-                                                  vm_init_)),
+                                                  vm_init_,
+                                                  hardware_buffer_provider_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, legacy_delegate)),
       asset_provider_(
           asset_provider
@@ -467,12 +478,13 @@ std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
     std::shared_ptr<PlatformViewsProvider> platform_views_provider,
     std::shared_ptr<WindowMetricsProvider> window_metrics_provider,
     std::shared_ptr<AndroidVsyncWaiter> vsync_waiter,
-    std::shared_ptr<AndroidVMInit> vm_init) {
+    std::shared_ptr<AndroidVMInit> vm_init,
+    std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateDefaultRouter");
   auto delegate = std::make_shared<JniDelegate>(
       std::move(invoker), nullptr, nullptr, std::move(platform_views_provider),
       std::move(window_metrics_provider), std::move(vsync_waiter),
-      std::move(vm_init));
+      std::move(vm_init), std::move(hardware_buffer_provider));
   return std::make_shared<JniRouter>(std::move(delegate), legacy_delegate);
 }
 
@@ -1582,6 +1594,187 @@ void FlutterEmbedderNative::SetAOTProvider(
   if (vm_init_) {
     vm_init_->SetAOTProvider(aot_provider_);
   }
+}
+
+std::shared_ptr<AndroidHardwareBufferProvider>
+FlutterEmbedderNative::GetHardwareBufferProvider() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetHardwareBufferProvider");
+  return hardware_buffer_provider_;
+}
+
+void FlutterEmbedderNative::SetHardwareBufferProvider(
+    std::shared_ptr<AndroidHardwareBufferProvider> provider) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetHardwareBufferProvider");
+  hardware_buffer_provider_ =
+      provider ? std::move(provider)
+               : std::make_shared<DefaultAndroidHardwareBufferProvider>(
+                     library_loader_);
+  if (jni_delegate_) {
+    jni_delegate_->SetHardwareBufferProvider(hardware_buffer_provider_);
+  }
+}
+
+bool FlutterEmbedderNative::RegisterHardwareBufferTexture(
+    int64_t texture_id,
+    const std::shared_ptr<AndroidHardwareBuffer>& initial_buffer) const {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::RegisterHardwareBufferTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  bool registered = jni_router_->RouteRegisterHardwareBufferTexture(texture_id);
+  if (registered && initial_buffer) {
+    jni_router_->RouteSetHardwareBufferFrame(texture_id, initial_buffer);
+  }
+  return registered;
+}
+
+bool FlutterEmbedderNative::UnregisterHardwareBufferTexture(
+    int64_t texture_id) const {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::UnregisterHardwareBufferTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteUnregisterHardwareBufferTexture(texture_id);
+}
+
+bool FlutterEmbedderNative::SetHardwareBufferFrame(
+    int64_t texture_id,
+    const std::shared_ptr<AndroidHardwareBuffer>& buffer) const {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::SetHardwareBufferFrame(object)",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetHardwareBufferFrame(texture_id, buffer);
+}
+
+bool FlutterEmbedderNative::SetHardwareBufferFrame(
+    int64_t texture_id,
+    const FlutterHardwareBufferExternalTexture& texture) const {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::SetHardwareBufferFrame(struct)",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetHardwareBufferFrame(texture_id, texture);
+}
+
+bool FlutterEmbedderNative::GetHardwareBufferTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterHardwareBufferExternalTexture* texture_out) const {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::GetHardwareBufferTextureFrame",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteGetHardwareBufferTextureFrame(texture_id, width,
+                                                         height, texture_out);
+}
+
+bool FlutterEmbedderNative::OnHardwareBufferFrameAvailable(
+    int64_t texture_id) const {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::OnHardwareBufferFrameAvailable",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteOnHardwareBufferFrameAvailable(texture_id);
+}
+
+bool FlutterEmbedderNative::OnHardwareBufferExternalTextureFrameCallback(
+    void* user_data,
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterHardwareBufferExternalTexture* texture_out) {
+  TRACE_EVENT1(
+      "flutter",
+      "FlutterEmbedderNative::OnHardwareBufferExternalTextureFrameCallback",
+      "texture_id", std::to_string(texture_id).c_str());
+  if (!user_data || !texture_out) {
+    return false;
+  }
+  auto* native_instance = static_cast<FlutterEmbedderNative*>(user_data);
+  return native_instance->GetHardwareBufferTextureFrame(texture_id, width,
+                                                        height, texture_out);
+}
+
+FlutterHardwareBufferExternalTextureFrameCallback
+FlutterEmbedderNative::GetHardwareBufferFrameCallback() {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::GetHardwareBufferFrameCallback");
+  return &FlutterEmbedderNative::OnHardwareBufferExternalTextureFrameCallback;
+}
+
+FlutterEngineResult FlutterEmbedderNative::MarkExternalTextureFrameAvailable(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t texture_id) const {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::MarkExternalTextureFrameAvailable",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.MarkExternalTextureFrameAvailable) {
+    return s_procs.MarkExternalTextureFrameAvailable(engine, texture_id);
+  }
+  return kInternalInconsistency;
+}
+
+FlutterEngineResult FlutterEmbedderNative::RegisterExternalTexture(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t texture_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::RegisterExternalTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.RegisterExternalTexture) {
+    return s_procs.RegisterExternalTexture(engine, texture_id);
+  }
+  return kInternalInconsistency;
+}
+
+FlutterEngineResult FlutterEmbedderNative::UnregisterExternalTexture(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t texture_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::UnregisterExternalTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.UnregisterExternalTexture) {
+    return s_procs.UnregisterExternalTexture(engine, texture_id);
+  }
+  return kInternalInconsistency;
 }
 
 }  // namespace android

@@ -837,5 +837,107 @@ bool JniRouter::RouteSetVmServiceUri(const std::string& uri) {
   return false;
 }
 
+bool JniRouter::RouteRegisterHardwareBufferTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteRegisterHardwareBufferTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->RegisterHardwareBufferTexture(texture_id);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->RegisterHardwareBufferTexture(texture_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteUnregisterHardwareBufferTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteUnregisterHardwareBufferTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->UnregisterHardwareBufferTexture(texture_id);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->UnregisterHardwareBufferTexture(texture_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetHardwareBufferFrame(
+    int64_t texture_id,
+    const std::shared_ptr<AndroidHardwareBuffer>& buffer) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetHardwareBufferFrame(object)",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->SetHardwareBufferFrame(texture_id,
+                                                        std::move(buffer));
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->SetHardwareBufferFrame(texture_id,
+                                                    std::move(buffer));
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetHardwareBufferFrame(
+    int64_t texture_id,
+    const FlutterHardwareBufferExternalTexture& texture) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetHardwareBufferFrame(struct)",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->SetHardwareBufferFrame(texture_id, texture);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->SetHardwareBufferFrame(texture_id, texture);
+  }
+  return false;
+}
+
+bool JniRouter::RouteGetHardwareBufferTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterHardwareBufferExternalTexture* texture_out) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteGetHardwareBufferTextureFrame",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->GetHardwareBufferTextureFrame(
+          texture_id, width, height, texture_out);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->GetHardwareBufferTextureFrame(texture_id, width,
+                                                           height, texture_out);
+  }
+  return false;
+}
+
+bool JniRouter::RouteOnHardwareBufferFrameAvailable(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteOnHardwareBufferFrameAvailable",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->OnHardwareBufferFrameAvailable(texture_id);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->OnHardwareBufferFrameAvailable(texture_id);
+  }
+  return false;
+}
+
 }  // namespace android
 }  // namespace flutter

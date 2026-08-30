@@ -243,6 +243,35 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
   MOCK_METHOD(bool, InitVM, (const AndroidVMArgs& args), (override));
   MOCK_METHOD(bool, PrefetchDefaultFontManager, (), (override));
   MOCK_METHOD(bool, SetVmServiceUri, (const std::string& uri), (override));
+  MOCK_METHOD(bool,
+              RegisterHardwareBufferTexture,
+              (int64_t texture_id),
+              (override));
+  MOCK_METHOD(bool,
+              UnregisterHardwareBufferTexture,
+              (int64_t texture_id),
+              (override));
+  MOCK_METHOD(bool,
+              SetHardwareBufferFrame,
+              (int64_t texture_id,
+               const std::shared_ptr<AndroidHardwareBuffer>& buffer),
+              (override));
+  MOCK_METHOD(bool,
+              SetHardwareBufferFrame,
+              (int64_t texture_id,
+               const FlutterHardwareBufferExternalTexture& texture),
+              (override));
+  MOCK_METHOD(bool,
+              GetHardwareBufferTextureFrame,
+              (int64_t texture_id,
+               size_t width,
+               size_t height,
+               FlutterHardwareBufferExternalTexture* texture_out),
+              (override));
+  MOCK_METHOD(bool,
+              OnHardwareBufferFrameAvailable,
+              (int64_t texture_id),
+              (override));
 };
 
 // ---------------------------------------------------------------------------

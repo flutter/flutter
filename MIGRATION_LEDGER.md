@@ -125,11 +125,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] *Review*: Any deviations or failing tests are caught, adversarially root-caused, and pushed back into the specific atomic branches for this phase before proceeding.
 
 ## Phase 3: Advanced Graphics & Multi-Engine Integration
-- [ ] **3.1 AHardwareBuffer**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-3.1-ahardwarebuffer`
-    - [ ] `AHardwareBuffer` wired via Virtualization.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `//shell/platform/android:flutter_shell_native_unittests` (`hardware_buffer_unittests.cc`, `android_surface_unittests.cc`) pass.
+- [x] **3.1 AHardwareBuffer**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-3.1-ahardwarebuffer`
+    - [x] `AHardwareBuffer` wired via Virtualization.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `//shell/platform/android:flutter_shell_native_unittests` (`hardware_buffer_unittests.cc`, `android_surface_unittests.cc`) pass.
 - [ ] **3.2 Vulkan External Textures**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-3.2-vulkan-external-textures`
     - [ ] `Vulkan External Textures` wired.

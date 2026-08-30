@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/android_hardware_buffer.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
@@ -191,7 +192,9 @@ class FlutterEmbedderNative {
       std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr,
       std::shared_ptr<FontCollectionProvider> font_provider = nullptr,
       std::shared_ptr<AndroidAOTProvider> aot_provider = nullptr,
-      std::shared_ptr<AndroidVMInit> vm_init = nullptr);
+      std::shared_ptr<AndroidVMInit> vm_init = nullptr,
+      std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider =
+          nullptr);
   ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -225,7 +228,9 @@ class FlutterEmbedderNative {
       std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr,
       std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr,
       std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr,
-      std::shared_ptr<AndroidVMInit> vm_init = nullptr);
+      std::shared_ptr<AndroidVMInit> vm_init = nullptr,
+      std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider =
+          nullptr);
 
   /// @brief Returns the JniRouter managed by this native instance.
   std::shared_ptr<JniRouter> GetRouter() const;
@@ -618,6 +623,74 @@ class FlutterEmbedderNative {
   /// @brief Sets or replaces the AndroidAOTProvider.
   void SetAOTProvider(std::shared_ptr<AndroidAOTProvider> provider);
 
+  /// @brief Returns the AndroidHardwareBufferProvider managed by this instance.
+  std::shared_ptr<AndroidHardwareBufferProvider> GetHardwareBufferProvider()
+      const;
+
+  /// @brief Sets or replaces the AndroidHardwareBufferProvider.
+  void SetHardwareBufferProvider(
+      std::shared_ptr<AndroidHardwareBufferProvider> provider);
+
+  /// @brief Registers a hardware buffer texture by ID.
+  bool RegisterHardwareBufferTexture(
+      int64_t texture_id,
+      const std::shared_ptr<AndroidHardwareBuffer>& initial_buffer =
+          nullptr) const;
+
+  /// @brief Unregisters a hardware buffer texture by ID.
+  bool UnregisterHardwareBufferTexture(int64_t texture_id) const;
+
+  /// @brief Sets the next hardware buffer frame for a texture.
+  bool SetHardwareBufferFrame(
+      int64_t texture_id,
+      const std::shared_ptr<AndroidHardwareBuffer>& buffer) const;
+
+  /// @brief Sets the next hardware buffer frame from a C-API struct.
+  bool SetHardwareBufferFrame(
+      int64_t texture_id,
+      const FlutterHardwareBufferExternalTexture& texture) const;
+
+  /// @brief Retrieves the latest hardware buffer frame for a texture.
+  bool GetHardwareBufferTextureFrame(
+      int64_t texture_id,
+      size_t width,
+      size_t height,
+      FlutterHardwareBufferExternalTexture* texture_out) const;
+
+  /// @brief Notifies that a hardware buffer frame is available for texture_id.
+  bool OnHardwareBufferFrameAvailable(int64_t texture_id) const;
+
+  /// @brief Static C-API callback entry point for
+  /// FlutterHardwareBufferExternalTextureFrameCallback.
+  static bool OnHardwareBufferExternalTextureFrameCallback(
+      void* user_data,
+      int64_t texture_id,
+      size_t width,
+      size_t height,
+      FlutterHardwareBufferExternalTexture* texture_out);
+
+  /// @brief Returns a function pointer to the C-API frame callback.
+  static FlutterHardwareBufferExternalTextureFrameCallback
+  GetHardwareBufferFrameCallback();
+
+  /// @brief Signals the engine that a texture has a new frame ready via
+  /// FlutterEngineMarkExternalTextureFrameAvailable.
+  FlutterEngineResult MarkExternalTextureFrameAvailable(
+      FLUTTER_API_SYMBOL(FlutterEngine) engine,
+      int64_t texture_id) const;
+
+  /// @brief Registers an external texture on the engine via
+  /// FlutterEngineRegisterExternalTexture.
+  FlutterEngineResult RegisterExternalTexture(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                  engine,
+                                              int64_t texture_id) const;
+
+  /// @brief Unregisters an external texture on the engine via
+  /// FlutterEngineUnregisterExternalTexture.
+  FlutterEngineResult UnregisterExternalTexture(
+      FLUTTER_API_SYMBOL(FlutterEngine) engine,
+      int64_t texture_id) const;
+
  private:
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;
 
@@ -633,6 +706,7 @@ class FlutterEmbedderNative {
   std::shared_ptr<FontCollectionProvider> font_provider_;
   std::shared_ptr<AndroidAOTProvider> aot_provider_;
   std::shared_ptr<AndroidVMInit> vm_init_;
+  std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;
