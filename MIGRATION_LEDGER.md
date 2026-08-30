@@ -69,11 +69,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
 
 ## Phase 2: Decoupled Subsystems
 *For each subsystem, both Java `android_test` and C++ `flutter_shell_native_unittests` must pass before proceeding.*
-- [ ] **2.1 Asset Resolver**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.1-asset-resolver`
-    - [ ] `APKAssetProvider` adapted to Embedder Custom Asset Resolver.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterLoaderTest.java`, `ApplicationInfoLoaderTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`apk_asset_provider_unittests.cc`) pass.
+- [x] **2.1 Asset Resolver**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-2.1-asset-resolver`
+    - [x] `APKAssetProvider` adapted to Embedder Custom Asset Resolver.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterLoaderTest.java`, `ApplicationInfoLoaderTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`apk_asset_provider_unittests.cc`) pass.
 - [ ] **2.2 Dart Callbacks**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.2-dart-callbacks`
     - [ ] Dart Callback lookup API integrated.
