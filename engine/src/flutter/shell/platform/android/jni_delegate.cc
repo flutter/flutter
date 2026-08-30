@@ -21,7 +21,8 @@ JniDelegate::JniDelegate(
     std::shared_ptr<WindowMetricsProvider> window_metrics_provider,
     std::shared_ptr<AndroidVsyncWaiter> vsync_waiter,
     std::shared_ptr<AndroidVMInit> vm_init,
-    std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider)
+    std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider,
+    std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(std::move(callback_cache)),
       image_decoder_(std::move(image_decoder)),
@@ -29,7 +30,8 @@ JniDelegate::JniDelegate(
       window_metrics_provider_(std::move(window_metrics_provider)),
       vsync_waiter_(std::move(vsync_waiter)),
       vm_init_(std::move(vm_init)),
-      hardware_buffer_provider_(std::move(hardware_buffer_provider)) {
+      hardware_buffer_provider_(std::move(hardware_buffer_provider)),
+      vulkan_texture_provider_(std::move(vulkan_texture_provider)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
   if (!platform_views_provider_) {
@@ -47,20 +49,48 @@ JniDelegate::JniDelegate(
     hardware_buffer_provider_ =
         std::make_shared<DefaultAndroidHardwareBufferProvider>();
   }
+  if (!vulkan_texture_provider_) {
+    vulkan_texture_provider_ =
+        std::make_shared<DefaultAndroidVulkanTextureProvider>();
+  }
   platform_views_controller_ = std::make_shared<AndroidPlatformViewsController>(
       platform_views_provider_);
 }
 
 JniDelegate::~JniDelegate() {
   TRACE_EVENT0("flutter", "JniDelegate::~JniDelegate");
-  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
-  for (auto& [id, frame] : hardware_buffer_frames_) {
-    if (frame.destruction_callback) {
-      frame.destruction_callback(frame.user_data);
+  std::vector<std::pair<VoidCallback, void*>> hw_destruction_callbacks;
+  {
+    std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+    for (auto& [id, frame] : hardware_buffer_frames_) {
+      if (frame.destruction_callback) {
+        hw_destruction_callbacks.emplace_back(frame.destruction_callback,
+                                              frame.user_data);
+      }
     }
+    hardware_buffer_frames_.clear();
+    hardware_buffer_objects_.clear();
   }
-  hardware_buffer_frames_.clear();
-  hardware_buffer_objects_.clear();
+  for (const auto& [cb, data] : hw_destruction_callbacks) {
+    cb(data);
+  }
+
+  std::vector<std::pair<VoidCallback, void*>> vk_destruction_callbacks;
+  {
+    std::lock_guard<std::mutex> lock(vulkan_texture_mutex_);
+    for (auto& [id, frame] : vulkan_texture_frames_) {
+      if (frame.destruction_callback) {
+        vk_destruction_callbacks.emplace_back(frame.destruction_callback,
+                                              frame.user_data);
+      }
+    }
+    vulkan_texture_frames_.clear();
+    vulkan_texture_objects_.clear();
+    vulkan_ycbcr_conversions_.clear();
+  }
+  for (const auto& [cb, data] : vk_destruction_callbacks) {
+    cb(data);
+  }
 }
 
 std::shared_ptr<JvmInvoker> JniDelegate::GetJvmInvoker() const {
@@ -756,16 +786,22 @@ bool JniDelegate::RegisterHardwareBufferTexture(int64_t texture_id) {
 bool JniDelegate::UnregisterHardwareBufferTexture(int64_t texture_id) {
   TRACE_EVENT1("flutter", "JniDelegate::UnregisterHardwareBufferTexture",
                "texture_id", std::to_string(texture_id).c_str());
-  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
-  registered_hardware_textures_.erase(texture_id);
-  auto it = hardware_buffer_frames_.find(texture_id);
-  if (it != hardware_buffer_frames_.end()) {
-    if (it->second.destruction_callback) {
-      it->second.destruction_callback(it->second.user_data);
+  VoidCallback destruction_cb = nullptr;
+  void* user_data = nullptr;
+  {
+    std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+    registered_hardware_textures_.erase(texture_id);
+    auto it = hardware_buffer_frames_.find(texture_id);
+    if (it != hardware_buffer_frames_.end()) {
+      destruction_cb = it->second.destruction_callback;
+      user_data = it->second.user_data;
+      hardware_buffer_frames_.erase(it);
     }
-    hardware_buffer_frames_.erase(it);
+    hardware_buffer_objects_.erase(texture_id);
   }
-  hardware_buffer_objects_.erase(texture_id);
+  if (destruction_cb) {
+    destruction_cb(user_data);
+  }
   return jvm_invoker_->InvokeBooleanMethod("unregisterHardwareBufferTexture",
                                            "(J)Z", {});
 }
@@ -775,20 +811,29 @@ bool JniDelegate::SetHardwareBufferFrame(
     const std::shared_ptr<AndroidHardwareBuffer>& buffer) {
   TRACE_EVENT1("flutter", "JniDelegate::SetHardwareBufferFrame(object)",
                "texture_id", std::to_string(texture_id).c_str());
-  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
-  auto it = hardware_buffer_frames_.find(texture_id);
-  if (it != hardware_buffer_frames_.end()) {
-    if (it->second.destruction_callback) {
-      it->second.destruction_callback(it->second.user_data);
+  VoidCallback old_destruction_cb = nullptr;
+  void* old_user_data = nullptr;
+  {
+    std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+    auto it = hardware_buffer_frames_.find(texture_id);
+    if (it != hardware_buffer_frames_.end()) {
+      old_destruction_cb = it->second.destruction_callback;
+      old_user_data = it->second.user_data;
     }
+    if (!buffer || !buffer->IsValid()) {
+      hardware_buffer_frames_.erase(texture_id);
+      hardware_buffer_objects_.erase(texture_id);
+      if (old_destruction_cb) {
+        old_destruction_cb(old_user_data);
+      }
+      return false;
+    }
+    hardware_buffer_objects_[texture_id] = buffer;
+    hardware_buffer_frames_[texture_id] = buffer->ToExternalTexture();
   }
-  if (!buffer || !buffer->IsValid()) {
-    hardware_buffer_frames_.erase(texture_id);
-    hardware_buffer_objects_.erase(texture_id);
-    return false;
+  if (old_destruction_cb) {
+    old_destruction_cb(old_user_data);
   }
-  hardware_buffer_objects_[texture_id] = buffer;
-  hardware_buffer_frames_[texture_id] = buffer->ToExternalTexture();
   return true;
 }
 
@@ -797,14 +842,20 @@ bool JniDelegate::SetHardwareBufferFrame(
     const FlutterHardwareBufferExternalTexture& texture) {
   TRACE_EVENT1("flutter", "JniDelegate::SetHardwareBufferFrame(struct)",
                "texture_id", std::to_string(texture_id).c_str());
-  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
-  auto it = hardware_buffer_frames_.find(texture_id);
-  if (it != hardware_buffer_frames_.end()) {
-    if (it->second.destruction_callback) {
-      it->second.destruction_callback(it->second.user_data);
+  VoidCallback old_destruction_cb = nullptr;
+  void* old_user_data = nullptr;
+  {
+    std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+    auto it = hardware_buffer_frames_.find(texture_id);
+    if (it != hardware_buffer_frames_.end()) {
+      old_destruction_cb = it->second.destruction_callback;
+      old_user_data = it->second.user_data;
     }
+    hardware_buffer_frames_[texture_id] = texture;
   }
-  hardware_buffer_frames_[texture_id] = texture;
+  if (old_destruction_cb) {
+    old_destruction_cb(old_user_data);
+  }
   return true;
 }
 
@@ -847,6 +898,153 @@ std::shared_ptr<AndroidHardwareBufferProvider>
 JniDelegate::GetHardwareBufferProvider() const {
   TRACE_EVENT0("flutter", "JniDelegate::GetHardwareBufferProvider");
   return hardware_buffer_provider_;
+}
+
+bool JniDelegate::RegisterVulkanTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::RegisterVulkanTexture", "texture_id",
+               std::to_string(texture_id).c_str());
+  std::lock_guard<std::mutex> lock(vulkan_texture_mutex_);
+  registered_vulkan_textures_.insert(texture_id);
+  return jvm_invoker_->InvokeBooleanMethod("registerVulkanTexture", "(J)Z", {});
+}
+
+bool JniDelegate::UnregisterVulkanTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::UnregisterVulkanTexture", "texture_id",
+               std::to_string(texture_id).c_str());
+  VoidCallback destruction_cb = nullptr;
+  void* user_data = nullptr;
+  {
+    std::lock_guard<std::mutex> lock(vulkan_texture_mutex_);
+    registered_vulkan_textures_.erase(texture_id);
+    auto it = vulkan_texture_frames_.find(texture_id);
+    if (it != vulkan_texture_frames_.end()) {
+      destruction_cb = it->second.destruction_callback;
+      user_data = it->second.user_data;
+      vulkan_texture_frames_.erase(it);
+    }
+    vulkan_texture_objects_.erase(texture_id);
+    vulkan_ycbcr_conversions_.erase(texture_id);
+  }
+  if (destruction_cb) {
+    destruction_cb(user_data);
+  }
+  return jvm_invoker_->InvokeBooleanMethod("unregisterVulkanTexture", "(J)Z",
+                                           {});
+}
+
+bool JniDelegate::SetVulkanTextureFrame(
+    int64_t texture_id,
+    const std::shared_ptr<AndroidVulkanExternalTexture>& texture) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetVulkanTextureFrame(object)",
+               "texture_id", std::to_string(texture_id).c_str());
+  VoidCallback old_destruction_cb = nullptr;
+  void* old_user_data = nullptr;
+  {
+    std::lock_guard<std::mutex> lock(vulkan_texture_mutex_);
+    auto it = vulkan_texture_frames_.find(texture_id);
+    if (it != vulkan_texture_frames_.end()) {
+      old_destruction_cb = it->second.destruction_callback;
+      old_user_data = it->second.user_data;
+    }
+    if (!texture || !texture->IsValid()) {
+      vulkan_texture_frames_.erase(texture_id);
+      vulkan_texture_objects_.erase(texture_id);
+      vulkan_ycbcr_conversions_.erase(texture_id);
+      if (old_destruction_cb) {
+        old_destruction_cb(old_user_data);
+      }
+      return false;
+    }
+    vulkan_texture_objects_[texture_id] = texture;
+    FlutterVulkanExternalTexture ext_texture = texture->ToExternalTexture();
+    if (texture->HasYcbcrConversion()) {
+      const auto* ycbcr_desc = texture->GetYcbcrConversionDesc();
+      if (ycbcr_desc) {
+        vulkan_ycbcr_conversions_[texture_id] =
+            ycbcr_desc->ToFlutterYcbcrConversionInfo();
+        ext_texture.ycbcr_conversion_info =
+            &vulkan_ycbcr_conversions_[texture_id];
+      }
+    } else {
+      vulkan_ycbcr_conversions_.erase(texture_id);
+    }
+    vulkan_texture_frames_[texture_id] = ext_texture;
+  }
+  if (old_destruction_cb) {
+    old_destruction_cb(old_user_data);
+  }
+  return true;
+}
+
+bool JniDelegate::SetVulkanTextureFrame(
+    int64_t texture_id,
+    const FlutterVulkanExternalTexture& texture) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetVulkanTextureFrame(struct)",
+               "texture_id", std::to_string(texture_id).c_str());
+  VoidCallback old_destruction_cb = nullptr;
+  void* old_user_data = nullptr;
+  {
+    std::lock_guard<std::mutex> lock(vulkan_texture_mutex_);
+    auto it = vulkan_texture_frames_.find(texture_id);
+    if (it != vulkan_texture_frames_.end()) {
+      old_destruction_cb = it->second.destruction_callback;
+      old_user_data = it->second.user_data;
+    }
+    FlutterVulkanExternalTexture copied_texture = texture;
+    if (texture.ycbcr_conversion_info != nullptr) {
+      vulkan_ycbcr_conversions_[texture_id] = *texture.ycbcr_conversion_info;
+      copied_texture.ycbcr_conversion_info =
+          &vulkan_ycbcr_conversions_[texture_id];
+    } else {
+      vulkan_ycbcr_conversions_.erase(texture_id);
+    }
+    vulkan_texture_frames_[texture_id] = copied_texture;
+  }
+  if (old_destruction_cb) {
+    old_destruction_cb(old_user_data);
+  }
+  return true;
+}
+
+bool JniDelegate::GetVulkanTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterVulkanExternalTexture* texture_out) {
+  TRACE_EVENT1("flutter", "JniDelegate::GetVulkanTextureFrame", "texture_id",
+               std::to_string(texture_id).c_str());
+  if (!texture_out) {
+    return false;
+  }
+  std::lock_guard<std::mutex> lock(vulkan_texture_mutex_);
+  auto it = vulkan_texture_frames_.find(texture_id);
+  if (it != vulkan_texture_frames_.end()) {
+    *texture_out = it->second;
+    if (texture_out->struct_size == 0) {
+      texture_out->struct_size = sizeof(FlutterVulkanExternalTexture);
+    }
+    return true;
+  }
+  return false;
+}
+
+bool JniDelegate::OnVulkanTextureFrameAvailable(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::OnVulkanTextureFrameAvailable",
+               "texture_id", std::to_string(texture_id).c_str());
+  return jvm_invoker_->InvokeBooleanMethod("onVulkanTextureFrameAvailable",
+                                           "(J)Z", {});
+}
+
+void JniDelegate::SetVulkanTextureProvider(
+    std::shared_ptr<AndroidVulkanTextureProvider> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetVulkanTextureProvider");
+  vulkan_texture_provider_ = std::move(provider);
+}
+
+std::shared_ptr<AndroidVulkanTextureProvider>
+JniDelegate::GetVulkanTextureProvider() const {
+  TRACE_EVENT0("flutter", "JniDelegate::GetVulkanTextureProvider");
+  return vulkan_texture_provider_;
 }
 
 }  // namespace android

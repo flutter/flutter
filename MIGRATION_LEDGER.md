@@ -130,11 +130,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `AHardwareBuffer` wired via Virtualization.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `//shell/platform/android:flutter_shell_native_unittests` (`hardware_buffer_unittests.cc`, `android_surface_unittests.cc`) pass.
-- [ ] **3.2 Vulkan External Textures**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-3.2-vulkan-external-textures`
-    - [ ] `Vulkan External Textures` wired.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `dev/integration_tests/android_views` AND `dev/devicelab/bin/tasks/plugin_test_android_variants.dart` pass using Impeller Vulkan backend.
+- [x] **3.2 Vulkan External Textures**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-3.2-vulkan-external-textures`
+    - [x] `Vulkan External Textures` wired.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `dev/integration_tests/android_views` AND `dev/devicelab/bin/tasks/plugin_test_android_variants.dart` pass using Impeller Vulkan backend.
 - [ ] **3.3 SurfaceControl HCPP**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-3.3-surfacecontrol-hcpp`
     - [ ] SurfaceControl HCPP dual-mode presentation enabled.
