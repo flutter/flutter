@@ -171,6 +171,7 @@ TEST(FlutterEmbedderNativeTest, LifecycleInstance) {
   EXPECT_NE(native_instance->GetJniDelegate(), nullptr);
   EXPECT_NE(native_instance->GetJvmInvoker(), nullptr);
   EXPECT_NE(native_instance->GetLibraryLoader(), nullptr);
+  EXPECT_NE(native_instance->GetAssetProvider(), nullptr);
 }
 
 TEST(FlutterEmbedderNativeTest, DefaultJvmInvokerOperations) {
@@ -286,7 +287,7 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
 
   // Flip global flag to true -> routes to Embedder
   JniRouter::SetGlobalEmbedderEnabled(true);
-  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+  EXPECT_TRUE(JniRouter::IsGlobalEmbedderEnabled());
   EXPECT_EQ(router->GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
 
   // Expect mock_invoker call via embedder delegate, legacy should not be called
@@ -321,7 +322,7 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
 
   // Reset global flag back to false for test hygiene
   JniRouter::SetGlobalEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+  EXPECT_FALSE(JniRouter::IsGlobalEmbedderEnabled());
 }
 
 TEST(FlutterEmbedderNativeTest, DynamicInstanceRouterWithCustomInvoker) {
@@ -517,6 +518,130 @@ TEST(FlutterEmbedderNativeTest, NativeWindowSelfAssignmentAndLifecycle) {
   EXPECT_EQ(native_instance->GetNativeWindow(), nullptr);
 #endif
 #pragma clang diagnostic pop
+}
+
+TEST(FlutterEmbedderNativeTest, AssetProviderLifecycleAndResolution) {
+  auto native = std::make_unique<FlutterEmbedderNative>();
+  EXPECT_NE(native->GetAssetProvider(), nullptr);
+
+  // Inject a custom in-memory provider
+  auto custom_provider_impl =
+      std::make_shared<InMemoryAPKAssetProviderImpl>("custom_assets");
+  custom_provider_impl->AddAsset("kernel_blob.bin", "MockKernelBytes");
+  custom_provider_impl->AddAsset("shaders/ink_sparkle.frag", "MockShaderBytes");
+
+  auto custom_provider =
+      std::make_shared<APKAssetProvider>(custom_provider_impl);
+  native->SetAssetProvider(custom_provider);
+  EXPECT_EQ(native->GetAssetProvider(), custom_provider);
+
+  // Resolve single asset
+  auto mapping = native->ResolveAsset("kernel_blob.bin");
+  ASSERT_NE(mapping, nullptr);
+  EXPECT_EQ(mapping->GetSize(), 15u);
+  EXPECT_EQ(std::string(reinterpret_cast<const char*>(mapping->GetMapping()),
+                        mapping->GetSize()),
+            "MockKernelBytes");
+
+  // Resolve multiple asset mappings
+  auto shader_mappings =
+      native->ResolveAssetMappings("frag", std::string("shaders"));
+  EXPECT_EQ(shader_mappings.size(), 1u);
+  EXPECT_EQ(std::string(
+                reinterpret_cast<const char*>(shader_mappings[0]->GetMapping()),
+                shader_mappings[0]->GetSize()),
+            "MockShaderBytes");
+
+  // Verify Custom Asset Resolver bridge
+  FlutterCustomAssetResolver custom_resolver =
+      native->CreateCustomAssetResolver();
+  EXPECT_EQ(custom_resolver.struct_size, sizeof(FlutterCustomAssetResolver));
+  ASSERT_NE(custom_resolver.find_asset_callback, nullptr);
+  ASSERT_NE(custom_resolver.is_valid_callback, nullptr);
+  ASSERT_NE(custom_resolver.is_valid_after_change_callback, nullptr);
+  ASSERT_NE(custom_resolver.destruction_callback, nullptr);
+  EXPECT_TRUE(custom_resolver.is_valid_callback(custom_resolver.user_data));
+  EXPECT_TRUE(custom_resolver.is_valid_after_change_callback(
+      custom_resolver.user_data));
+
+  FlutterAsset asset = {};
+  asset.struct_size = sizeof(FlutterAsset);
+  EXPECT_TRUE(custom_resolver.find_asset_callback(custom_resolver.user_data,
+                                                  "kernel_blob.bin", &asset));
+  EXPECT_EQ(asset.size, 15u);
+  EXPECT_EQ(std::string(reinterpret_cast<const char*>(asset.data), asset.size),
+            "MockKernelBytes");
+  ASSERT_NE(asset.asset_free_callback, nullptr);
+  asset.asset_free_callback(asset.user_data);
+
+  custom_resolver.destruction_callback(custom_resolver.user_data);
+
+  // Verify CreateAssetResolver creates a valid clone
+  auto cloned_resolver = native->CreateAssetResolver();
+  ASSERT_NE(cloned_resolver, nullptr);
+  EXPECT_TRUE(cloned_resolver->IsValid());
+  auto cloned_mapping = cloned_resolver->GetAsMapping("kernel_blob.bin");
+  ASSERT_NE(cloned_mapping, nullptr);
+  EXPECT_EQ(cloned_mapping->GetSize(), 15u);
+
+  // UpdateJavaAssetManager with null asset manager is safe
+  native->UpdateJavaAssetManager(nullptr, nullptr, "flutter_assets");
+}
+
+TEST(FlutterEmbedderNativeTest, AssetProviderMultithreadedResolution) {
+  auto custom_provider_impl =
+      std::make_shared<InMemoryAPKAssetProviderImpl>("flutter_assets");
+  for (int i = 0; i < 20; ++i) {
+    custom_provider_impl->AddAsset("data_" + std::to_string(i) + ".bin",
+                                   "DataPayload_" + std::to_string(i));
+  }
+
+  auto custom_provider =
+      std::make_shared<APKAssetProvider>(custom_provider_impl);
+  auto native = std::make_unique<FlutterEmbedderNative>(
+      std::make_shared<DefaultJvmInvoker>(), nullptr, nullptr, custom_provider);
+
+  constexpr size_t kThreadCount = 8;
+  constexpr size_t kIterations = 100;
+  std::atomic<bool> stop_writers{false};
+
+  // Launch background writer thread concurrently mutating provider
+  auto writer_future = std::async(std::launch::async, [&native,
+                                                       &stop_writers]() {
+    int counter = 0;
+    while (!stop_writers.load()) {
+      auto new_impl =
+          std::make_shared<InMemoryAPKAssetProviderImpl>("flutter_assets");
+      new_impl->AddAsset("data_0.bin",
+                         "MutatedPayload_" + std::to_string(counter++));
+      native->SetAssetProvider(std::make_shared<APKAssetProvider>(new_impl));
+      std::this_thread::yield();
+    }
+  });
+
+  std::vector<std::future<bool>> futures;
+  futures.reserve(kThreadCount);
+
+  for (size_t t = 0; t < kThreadCount; ++t) {
+    futures.push_back(std::async(std::launch::async, [&native, t]() {
+      for (size_t iter = 0; iter < kIterations; ++iter) {
+        int idx = static_cast<int>((t + iter) % 20);
+        std::string asset_name = "data_" + std::to_string(idx) + ".bin";
+        auto mapping = native->ResolveAsset(asset_name);
+        // Under concurrent provider replacement, mapping may resolve to either
+        // old or new provider
+        auto mappings = native->ResolveAssetMappings("bin");
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
+
+  stop_writers.store(true);
+  writer_future.get();
 }
 
 // =============================================================================

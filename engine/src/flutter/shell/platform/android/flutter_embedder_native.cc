@@ -21,7 +21,9 @@ FlutterEmbedderNative::FlutterEmbedderNative()
     : jvm_invoker_(std::make_shared<DefaultJvmInvoker>()),
       jni_delegate_(std::make_shared<JniDelegate>(jvm_invoker_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
-      library_loader_(GetDefaultLibraryLoader()) {
+      library_loader_(GetDefaultLibraryLoader()),
+      asset_provider_(std::make_shared<APKAssetProvider>(
+          std::make_shared<InMemoryAPKAssetProviderImpl>())) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
   FML_DLOG(INFO)
       << "Initialized FlutterEmbedderNative with default components.";
@@ -29,14 +31,19 @@ FlutterEmbedderNative::FlutterEmbedderNative()
 
 FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<JvmInvoker> jvm_invoker,
-    std::shared_ptr<LegacyJniDelegate> legacy_delegate,
-    std::shared_ptr<OSLibraryLoader> library_loader)
+    const std::shared_ptr<LegacyJniDelegate>& legacy_delegate,
+    std::shared_ptr<OSLibraryLoader> library_loader,
+    std::shared_ptr<APKAssetProvider> asset_provider)
     : jvm_invoker_(std::move(jvm_invoker)),
       jni_delegate_(std::make_shared<JniDelegate>(jvm_invoker_)),
-      jni_router_(std::make_shared<JniRouter>(jni_delegate_,
-                                              std::move(legacy_delegate))),
+      jni_router_(std::make_shared<JniRouter>(jni_delegate_, legacy_delegate)),
       library_loader_(library_loader ? std::move(library_loader)
-                                     : GetDefaultLibraryLoader()) {
+                                     : GetDefaultLibraryLoader()),
+      asset_provider_(
+          asset_provider
+              ? std::move(asset_provider)
+              : std::make_shared<APKAssetProvider>(
+                    std::make_shared<InMemoryAPKAssetProviderImpl>())) {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterEmbedderNative(custom)");
   FML_DLOG(INFO) << "Initialized FlutterEmbedderNative with custom components.";
@@ -332,11 +339,10 @@ FlutterEmbedderNative::GetDefaultLibraryLoader() {
 
 std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
     std::shared_ptr<JvmInvoker> invoker,
-    std::shared_ptr<LegacyJniDelegate> legacy_delegate) {
+    const std::shared_ptr<LegacyJniDelegate>& legacy_delegate) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateDefaultRouter");
   auto delegate = std::make_shared<JniDelegate>(std::move(invoker));
-  return std::make_shared<JniRouter>(std::move(delegate),
-                                     std::move(legacy_delegate));
+  return std::make_shared<JniRouter>(std::move(delegate), legacy_delegate);
 }
 
 std::shared_ptr<JniRouter> FlutterEmbedderNative::GetRouter() const {
@@ -354,6 +360,93 @@ std::shared_ptr<JvmInvoker> FlutterEmbedderNative::GetJvmInvoker() const {
 std::shared_ptr<OSLibraryLoader> FlutterEmbedderNative::GetLibraryLoader()
     const {
   return library_loader_;
+}
+
+std::shared_ptr<APKAssetProvider> FlutterEmbedderNative::GetAssetProvider()
+    const {
+  std::lock_guard<std::mutex> lock(asset_provider_mutex_);
+  return asset_provider_;
+}
+
+void FlutterEmbedderNative::SetAssetProvider(
+    std::shared_ptr<APKAssetProvider> provider) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetAssetProvider");
+  std::lock_guard<std::mutex> lock(asset_provider_mutex_);
+  asset_provider_ = std::move(provider);
+}
+
+void FlutterEmbedderNative::UpdateJavaAssetManager(
+    JNIEnv* env,
+    jobject jasset_manager,
+    const std::string& asset_bundle_path) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::UpdateJavaAssetManager");
+  if (jasset_manager != nullptr) {
+    auto asset_provider = std::make_shared<APKAssetProvider>(
+        env, jasset_manager, asset_bundle_path);
+    SetAssetProvider(std::move(asset_provider));
+  }
+}
+
+std::unique_ptr<fml::Mapping> FlutterEmbedderNative::ResolveAsset(
+    const std::string& asset_name) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::ResolveAsset", "name",
+               asset_name.c_str());
+  std::shared_ptr<APKAssetProvider> provider;
+  {
+    std::lock_guard<std::mutex> lock(asset_provider_mutex_);
+    provider = asset_provider_;
+  }
+  if (!provider) {
+    return nullptr;
+  }
+  return provider->GetAsMapping(asset_name);
+}
+
+std::vector<std::unique_ptr<fml::Mapping>>
+FlutterEmbedderNative::ResolveAssetMappings(
+    const std::string& asset_pattern,
+    const std::optional<std::string>& subdir) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::ResolveAssetMappings",
+               "pattern", asset_pattern.c_str());
+  std::shared_ptr<APKAssetProvider> provider;
+  {
+    std::lock_guard<std::mutex> lock(asset_provider_mutex_);
+    provider = asset_provider_;
+  }
+  if (!provider) {
+    return {};
+  }
+  return provider->GetAsMappings(asset_pattern, subdir);
+}
+
+FlutterCustomAssetResolver FlutterEmbedderNative::CreateCustomAssetResolver()
+    const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateCustomAssetResolver");
+  std::shared_ptr<APKAssetProvider> provider;
+  {
+    std::lock_guard<std::mutex> lock(asset_provider_mutex_);
+    provider = asset_provider_;
+  }
+  if (!provider) {
+    FlutterCustomAssetResolver resolver = {};
+    resolver.struct_size = sizeof(FlutterCustomAssetResolver);
+    return resolver;
+  }
+  return provider->CreateCustomAssetResolver();
+}
+
+std::unique_ptr<AssetResolver> FlutterEmbedderNative::CreateAssetResolver()
+    const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateAssetResolver");
+  std::shared_ptr<APKAssetProvider> provider;
+  {
+    std::lock_guard<std::mutex> lock(asset_provider_mutex_);
+    provider = asset_provider_;
+  }
+  if (!provider) {
+    return nullptr;
+  }
+  return provider->Clone();
 }
 
 }  // namespace android
