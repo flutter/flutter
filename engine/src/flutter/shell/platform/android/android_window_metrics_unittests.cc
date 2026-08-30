@@ -331,7 +331,6 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
                int32_t width,
                int32_t height),
               (override));
-
   MOCK_METHOD(bool,
               PushPlatformViewMutators,
               (const FlutterPlatformView& platform_view,
@@ -342,6 +341,10 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
                int32_t view_width,
                int32_t view_height),
               (override));
+
+  MOCK_METHOD(bool, InitVM, (const AndroidVMArgs& args), (override));
+  MOCK_METHOD(bool, PrefetchDefaultFontManager, (), (override));
+  MOCK_METHOD(bool, SetVmServiceUri, (const std::string& uri), (override));
 };
 
 // ---------------------------------------------------------------------------
