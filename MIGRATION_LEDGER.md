@@ -3,11 +3,12 @@
 This ledger strictly enforces that **all tests are explicitly run and validated** throughout the atomic migration steps. A phase cannot be marked complete until both the implementation PR has merged and the corresponding test matrix validations are explicitly verified as passing locally and in CI.
 
 ## Phase 1: Foundations, Safety Nets, and C-API Prep
-- [ ] **1.1 Matrix Initialization**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.1-matrix-initialization`
-    - [ ] `TEST_P` Multi-backend test matrix initialized.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `embedder_unittests` pass locally on macOS/Linux hosts.
+- [x] **1.1 Matrix Initialization**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-1.1-matrix-initialization`
+    - [x] `TEST_P` Multi-backend test matrix initialized.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: Multi-backend test fixture isolation verified: `EmbedderAllBackendsTest` separated from `EmbedderTestMultiBackend` preventing cross-test fixture pollution on software backends across Linux/Windows/macOS host builds.
+    - [x] *Validation*: `embedder_unittests` pass locally on macOS/Linux hosts.
 - [ ] **1.2 Pre-Emptive GN Quarantine**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.2-pre-emptive-gn-quarantine`
     - [ ] `flutter_embedder_native` target initialized strictly forbidding Skia/UI headers.
@@ -68,42 +69,42 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
 
 ## Phase 2: Decoupled Subsystems
 *For each subsystem, both Java `android_test` and C++ `flutter_shell_native_unittests` must pass before proceeding.*
-- [ ] **2.1 Asset Resolver**: 
+- [ ] **2.1 Asset Resolver**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.1-asset-resolver`
     - [ ] `APKAssetProvider` adapted to Embedder Custom Asset Resolver.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterLoaderTest.java`, `ApplicationInfoLoaderTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`apk_asset_provider_unittests.cc`) pass.
-- [ ] **2.2 Dart Callbacks**: 
+- [ ] **2.2 Dart Callbacks**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.2-dart-callbacks`
     - [ ] Dart Callback lookup API integrated.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterJNITest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`platform_view_android_delegate_unittests.cc`) pass.
-- [ ] **2.3 Image Generators**: 
+- [ ] **2.3 Image Generators**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.3-image-generators`
     - [ ] `AndroidImageGenerator` hooked to `FlutterEngineRegisterImageDecoder`.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`ImageDecoderDefaultImplTest.java`, `ImageDecoderHeifApi36ImplTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`image_lru_unittests.cc`) pass.
-- [ ] **2.4 Mutator Translation**: 
+- [ ] **2.4 Mutator Translation**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.4-mutator-translation`
     - [ ] `AndroidMutatorsMapper` implemented.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterMutatorViewTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`android_mutator_unittests.cc`) pass.
-- [ ] **2.5 Accessibility & Semantics**: 
+- [ ] **2.5 Accessibility & Semantics**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.5-accessibility-semantics`
     - [ ] `Accessibility` & `Semantics` natively wired.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: `dev/integration_tests/android_semantics` passes across CI matrix.
-- [ ] **2.6 Platform Views**: 
+- [ ] **2.6 Platform Views**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.6-platform-views`
     - [ ] `PlatformViewsController` integrations wired.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: `dev/integration_tests/android_views` passes (texture & hybrid composition).
-- [ ] **2.7 Window Metrics Translation**: 
+- [ ] **2.7 Window Metrics Translation**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.7-window-metrics-translation`
     - [ ] `FlutterEngineSendWindowMetricsEvent` bounds and insets hooked to replace native `android_display`.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: `dev/devicelab/bin/tasks/android_display_cutout.dart` passes.
-- [ ] **2.8 AChoreographer VSync Routing**: 
+- [ ] **2.8 AChoreographer VSync Routing**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.8-achoreographer-vsync-routing`
     - [ ] `AChoreographer_postFrameCallback` mapped to `FlutterProjectArgs::vsync_callback` via `OSLibraryLoader`.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
@@ -185,32 +186,32 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [ ] `dev/devicelab/bin/tasks/flutter_engine_group_performance.dart` - Passed.
 
 ## Phase 5: Emancipation
-- [ ] **5.1 Target Flip**: 
+- [ ] **5.1 Target Flip**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.1-target-flip`
     - [ ] Embedder flags defaulted to `true`.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: CI remains unconditionally green on default runs.
-- [ ] **5.2 Legacy Deletion (Subsystems)**: 
+- [ ] **5.2 Legacy Deletion (Subsystems)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.2-legacy-deletion-subsystems`
-    - [ ] Assets, Images, Callbacks, Mutators wiped. 
+    - [ ] Assets, Images, Callbacks, Mutators wiped.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: `ninja -C out/android_debug_unopt flutter_shell_native_unittests` compiles successfully AND `//shell/platform/android:robolectric_tests` passes entirely without legacy code.
-- [ ] **5.3 Legacy Deletion (Platform Views/Semantics)**: 
+- [ ] **5.3 Legacy Deletion (Platform Views/Semantics)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.3-legacy-deletion-platform-views-semantics`
     - [ ] Platform views and semantics wiped.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: `ninja -C out/android_debug_unopt flutter_shell_native_unittests` compiles successfully AND `//shell/platform/android:robolectric_tests` passes entirely without legacy code.
-- [ ] **5.4 Legacy Deletion (Graphics Pipeline)**: 
+- [ ] **5.4 Legacy Deletion (Graphics Pipeline)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.4-legacy-deletion-graphics-pipeline`
     - [ ] `android_context`, `android_surface` wiped.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: `ninja -C out/android_debug_unopt flutter_shell_native_unittests` compiles successfully AND `//shell/platform/android:robolectric_tests` passes entirely without legacy code.
-- [ ] **5.5 Flag Obliteration**: 
+- [ ] **5.5 Flag Obliteration**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.5-flag-obliteration`
     - [ ] Flags pruned and routing hardcoded unconditionally.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: CLI flags `--enable-embedder-api` are rejected by build scripts appropriately.
-- [ ] **5.6 Strict GN Target Isolation**: 
+- [ ] **5.6 Strict GN Target Isolation**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.6-strict-gn-target-isolation`
     - [ ] `flutter_shell_native` internal Skia/UI dependencies purged; targets merged.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.

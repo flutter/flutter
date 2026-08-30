@@ -4,7 +4,7 @@ This document represents the synthesized blueprint for migrating the Flutter And
 
 ## 1. Architectural Guardrails (The Invariants)
 
-1. **Zero-Regression Feature Parity**: All existing features—including Vulkan External Textures and Add-to-App multi-engine spawning—MUST be fully ported to the new Embedder API *before* the legacy code is deleted. 
+1. **Zero-Regression Feature Parity**: All existing features—including Vulkan External Textures and Add-to-App multi-engine spawning—MUST be fully ported to the new Embedder API *before* the legacy code is deleted.
 2. **Strict C-ABI Protection (Opaque Handles)**: `embedder.h` must remain strictly OS-agnostic. Android-specific OS constructs (`AHardwareBuffer`) must be modeled as opaque handles (e.g., `void* os_handle`) within universal structs, or strictly confined to separate OS-specific extension headers. Do NOT shatter the standard C-ABI.
 3. **JNI Routing Boundary & JvmInvoker**: The structural rollout flip (`if (IsEmbedderEnabled())`) MUST occur natively inside the raw JNI boundary function. If true, the `JniDelegate` handles the call, but it MUST be injected with an abstracted `JvmInvoker` interface. This prevents the raw JNI boundary from becoming a monolithic god-class and allows host tests to inject a mocked `JvmInvoker` to test JVM callback logic.
 4. **Dynamic Decoupling & Host Test Safety**: Use `dlsym`/`dlopen` wrapped in an `OSLibraryLoader` interface for Android native bindings (like `AChoreographer`, `AHardwareBuffer`). This MUST be present before any Android-specific graphics are implemented to protect desktop CI.
@@ -22,7 +22,7 @@ This document represents the synthesized blueprint for migrating the Flutter And
 ## 3. The Phased Blueprint
 
 ### Phase 1: Foundations, Safety Nets, and C-API Prep
-* **1.1 Test Matrix**: Wire up `TEST_P` logic. 
+* **1.1 Test Matrix**: Wire up `TEST_P` logic.
 * **1.2 Pre-Emptive GN Quarantine**: Create `flutter_embedder_native` target dependent strictly on `embedder.h`.
 * **1.3 JNI DI Interface & Inline Routing**: Implement `if (Flags.isEmbedderApiInputEnabled())` inside the raw JNI boundary. Inject `JvmInvoker` into `JniDelegate` for abstracted JVM callbacks.
 * **1.4 Dynamic Virtualization**: Implement `OSLibraryLoader` wrapper to shield desktop host tests.

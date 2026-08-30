@@ -4,8 +4,6 @@
 
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 
-#include <unistd.h>
-
 #include <algorithm>
 #include <sstream>
 #include <utility>
