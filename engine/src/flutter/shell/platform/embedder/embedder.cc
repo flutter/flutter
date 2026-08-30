@@ -2017,7 +2017,14 @@ FlutterEngineResult FlutterEngineRun(size_t version,
     return result;
   }
 
-  return FlutterEngineRunInitialized(*engine_out);
+  result = FlutterEngineRunInitialized(*engine_out);
+  if (result != kSuccess) {
+    FlutterEngineShutdown(*engine_out);
+    *engine_out = nullptr;
+    return result;
+  }
+
+  return kSuccess;
 }
 
 FlutterEngineResult FlutterEngineInitialize(size_t version,
