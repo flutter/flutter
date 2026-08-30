@@ -34,29 +34,6 @@ class LegacyJniDelegate {
       int32_t response_id,
       const std::vector<uint8_t>& data) = 0;
 
-  virtual bool UpdateSemantics(const std::vector<uint8_t>& buffer,
-                               const std::vector<std::string>& strings) = 0;
-
-  virtual bool UpdateSemantics(
-      const std::vector<uint8_t>& buffer,
-      const std::vector<std::string>& strings,
-      const std::vector<std::vector<uint8_t>>& string_attribute_args) = 0;
-
-  virtual bool UpdateCustomAccessibilityActions(
-      const std::vector<uint8_t>& actions_buffer,
-      const std::vector<std::string>& action_strings) = 0;
-
-  virtual bool UpdateSemantics(const FlutterSemanticsUpdate2& update) = 0;
-
-  virtual bool SetSemanticsEnabled(bool enabled) = 0;
-
-  virtual bool DispatchSemanticsAction(int32_t node_id,
-                                       FlutterSemanticsAction action,
-                                       const std::vector<uint8_t>& data = {},
-                                       int64_t view_id = 0) = 0;
-
-  virtual bool SetAccessibilityFeatures(int32_t flags) = 0;
-
   virtual bool SetApplicationLocale(const std::string& locale) = 0;
 
   virtual bool OnFirstFrame() = 0;
@@ -84,96 +61,6 @@ class LegacyJniDelegate {
                                        double pixel_ratio) = 0;
 
   virtual bool RequestDartDeferredLibrary(int64_t loading_unit_id) = 0;
-
-  virtual int64_t CreatePlatformView(
-      const PlatformViewCreationParams& params,
-      PlatformViewCompositionType composition_type) = 0;
-
-  virtual bool DisposePlatformView(int64_t view_id) = 0;
-
-  virtual bool ResizePlatformView(const PlatformViewResizeRequest& request) = 0;
-
-  virtual bool OffsetPlatformView(int64_t view_id, double top, double left) = 0;
-
-  virtual bool SetPlatformViewDirection(int64_t view_id, int32_t direction) = 0;
-
-  virtual bool ClearPlatformViewFocus(int64_t view_id) = 0;
-
-  virtual bool DispatchPlatformViewTouch(const PlatformViewTouch& touch) = 0;
-
-  virtual bool OnDisplayPlatformView(const PlatformViewGeometry& geometry) = 0;
-
-  virtual bool OnDisplayPlatformView(const FlutterPlatformView& platform_view,
-                                     int32_t x,
-                                     int32_t y,
-                                     int32_t width,
-                                     int32_t height,
-                                     int32_t view_width,
-                                     int32_t view_height) = 0;
-
-  virtual bool HidePlatformView(int64_t view_id) = 0;
-
-  virtual bool SynchronizeToNativeViewHierarchy(bool synchronize) = 0;
-
-  virtual bool OnBeginFrame() = 0;
-
-  virtual bool OnEndFrame() = 0;
-
-  virtual std::optional<int32_t> CreateOverlaySurface() = 0;
-
-  virtual bool DestroyOverlaySurfaces() = 0;
-
-  virtual bool OnDisplayOverlaySurface(const PlatformViewOverlay& overlay) = 0;
-
-  virtual bool ShowOverlaySurface(int32_t surface_id) = 0;
-
-  virtual bool HideOverlaySurface(int32_t surface_id) = 0;
-
-  virtual bool SetHcppEnabled(bool enabled) { return true; }
-
-  virtual bool CreatePlatformViewTransaction() = 0;
-
-  virtual bool SwapPlatformViewTransactions() = 0;
-
-  virtual bool ApplyPlatformViewTransactions() = 0;
-
-  virtual bool IsHcppEnabled() const = 0;
-
-  virtual bool CreateSurfaceControl(int64_t surface_id,
-                                    const std::string& debug_name = "") = 0;
-
-  virtual bool DestroySurfaceControl(int64_t surface_id) = 0;
-
-  virtual bool ReparentSurfaceControl(int64_t surface_id,
-                                      int64_t new_parent_id) = 0;
-
-  virtual bool SetSurfaceControlGeometry(
-      int64_t surface_id,
-      const AndroidSurfaceControlRect& source,
-      const AndroidSurfaceControlRect& destination,
-      int32_t transform) = 0;
-
-  virtual bool SetSurfaceControlVisibility(int64_t surface_id,
-                                           bool visible) = 0;
-
-  virtual bool SetSurfaceControlZOrder(int64_t surface_id, int32_t z_order) = 0;
-
-  virtual bool SetSurfaceControlDamageRegion(
-      int64_t surface_id,
-      const std::vector<AndroidSurfaceControlRect>& rects) = 0;
-
-  virtual bool SetSurfaceControlBuffer(int64_t surface_id,
-                                       void* buffer,
-                                       int fence_fd = -1) = 0;
-
-  virtual bool SetSurfaceControlBufferAlpha(int64_t surface_id,
-                                            float alpha) = 0;
-
-  virtual bool SetSurfaceControlColor(int64_t surface_id,
-                                      float r,
-                                      float g,
-                                      float b,
-                                      float alpha) = 0;
 
   virtual bool InitVM(const AndroidVMArgs& args) = 0;
 
