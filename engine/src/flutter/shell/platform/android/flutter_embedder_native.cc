@@ -489,7 +489,7 @@ size_t FlutterEmbedderNative::GetEmbedderVersion() {
 
 bool FlutterEmbedderNative::IsEmbedderEnabled() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::IsEmbedderEnabled");
-  return JniRouter::IsEmbedderEnabled();
+  return true;
 }
 
 void FlutterEmbedderNative::SetEmbedderEnabled(bool enabled) {

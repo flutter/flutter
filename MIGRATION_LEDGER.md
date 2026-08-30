@@ -206,11 +206,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `android_context`, `android_surface` wiped.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `ninja -C out/android_debug_unopt flutter_shell_native_unittests` compiles successfully AND `//shell/platform/android:robolectric_tests` passes entirely without legacy code.
-- [ ] **5.5 Flag Obliteration**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.5-flag-obliteration`
-    - [ ] Flags pruned and routing hardcoded unconditionally.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: CLI flags `--enable-embedder-api` are rejected by build scripts appropriately.
+- [x] **5.5 Flag Obliteration**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-5.5-flag-obliteration`
+    - [x] Flags pruned and routing hardcoded unconditionally.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: CLI flags `--enable-embedder-api` are rejected by build scripts appropriately.
 - [ ] **5.6 Strict GN Target Isolation**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.6-strict-gn-target-isolation`
     - [ ] `flutter_shell_native` internal Skia/UI dependencies purged; targets merged.
