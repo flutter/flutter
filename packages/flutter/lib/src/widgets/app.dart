@@ -422,9 +422,53 @@ class WidgetsApp extends StatefulWidget {
   /// Creates a [WidgetsApp] that uses the [Router] instead of a [Navigator].
   ///
   /// {@template flutter.widgets.WidgetsApp.router}
+  /// Unlike the default constructor, which configures a [Navigator] from
+  /// [home], [routes], and [onGenerateRoute], this constructor configures a
+  /// [Router]. A [Router] lets the app take part in the platform's routing:
+  /// it parses the route information the platform provides (a deep link, or
+  /// the address bar on the web) and reports the app's own route changes back
+  /// to the platform.
+  ///
+  /// The [Router] is configured in one of two ways:
+  ///
+  ///  * With a single [routerConfig], which bundles the delegates listed
+  ///    below into one object. Routing packages typically hand out an object
+  ///    implementing [RouterConfig] for this purpose.
+  ///  * With those delegates passed individually: [routerDelegate] is
+  ///    required, while [routeInformationParser], [routeInformationProvider],
+  ///    and [backButtonDispatcher] are optional.
+  ///
   /// If the [routerConfig] is provided, the other router related delegates,
   /// [routeInformationParser], [routeInformationProvider], [routerDelegate],
   /// and [backButtonDispatcher], must all be null.
+  ///
+  /// When the delegates are passed individually, the omitted ones default as
+  /// follows:
+  ///
+  ///  * Without a [routeInformationParser], no route information is parsed at
+  ///    all, and a [routeInformationProvider] must not be provided either. The
+  ///    app then navigates only in response to the [routerDelegate].
+  ///  * With a [routeInformationParser] but no [routeInformationProvider], a
+  ///    [PlatformRouteInformationProvider] is created, starting at
+  ///    [dart:ui.PlatformDispatcher.defaultRouteName].
+  ///  * Without a [backButtonDispatcher], a [RootBackButtonDispatcher] is
+  ///    created, so that the Android system back button pops the app's routes.
+  ///
+  /// Every other argument behaves as it does on the default constructor. The
+  /// [Navigator] specific arguments ([navigatorKey], [home], [routes],
+  /// [initialRoute], [onGenerateRoute], [onGenerateInitialRoutes],
+  /// [onUnknownRoute], and [navigatorObservers]) are not available here, since
+  /// building the navigating widget is the [routerDelegate]'s job.
+  ///
+  /// See also:
+  ///
+  ///  * [Router], which describes each of these delegates, how they are
+  ///    chained together, and the asynchrony involved.
+  ///  * [RouterConfig], which bundles the delegates into a single object.
+  ///  * [restorationScopeId], which enables state restoration; the [Router]
+  ///    restores its configuration from the [RouteInformation] it saved.
+  ///  * <https://docs.flutter.dev/ui/navigation>, an overview of the routing
+  ///    options a Flutter app has.
   /// {@endtemplate}
   WidgetsApp.router({
     super.key,
