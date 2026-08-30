@@ -59,6 +59,7 @@ FLUTTER_ASSERT_ARC
 @interface FlutterDrawable : NSObject <FlutterMetalDrawable> {
   FlutterTexture* _texture;
   __weak FlutterMetalLayer* _layer;
+  id<CAMetalDrawable> _presentationDrawable;
   NSUInteger _drawableId;
   BOOL _presented;
 }
@@ -102,6 +103,8 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)present {
+  [_presentationDrawable present];
+  _presentationDrawable = nil;
   [_layer presentTexture:self->_texture];
   self->_presented = YES;
 }
@@ -156,7 +159,9 @@ FLUTTER_ASSERT_ARC
          destinationLevel:0
         destinationOrigin:origin];
     [blit endEncoding];
-    [commandBuffer presentDrawable:presentationDrawable];
+    // Defer presentation until the command buffer is scheduled so the native
+    // drawable can join the Core Animation transaction used by platform views.
+    _presentationDrawable = presentationDrawable;
   }
   [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
     texture.waitingForCompletion = NO;
