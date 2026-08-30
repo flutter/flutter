@@ -39,11 +39,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `embedder.h` API extension: `FlutterEngineSpawn`.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `embedder_unittests` covering EngineSpawn pass.
-- [ ] **1.8 C-API Extension (Dart Deferred Components)**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.8-c-api-extension-dart-deferred-components`
-    - [ ] `embedder.h` API extension: `FlutterEngineLoadDartDeferredLibrary`.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `embedder_unittests` covering deferred library loading pass.
+- [x] **1.8 C-API Extension (Dart Deferred Components)**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-1.8-c-api-extension-dart-deferred-components`
+    - [x] `embedder.h` API extension: `FlutterEngineLoadDartDeferredLibrary`.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `embedder_unittests` covering deferred library loading pass.
 - [ ] **1.9 C-API Extension (Screenshot API)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.9-c-api-extension-screenshot-api`
     - [ ] `embedder.h` API extension: `FlutterEngineScreenshot` and `FlutterEngineFreeScreenshot`.

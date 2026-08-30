@@ -98,6 +98,15 @@ class EmbedderEngine {
 
   bool ScheduleFrame();
 
+  bool LoadDartDeferredLibrary(
+      int64_t loading_unit_id,
+      std::unique_ptr<const fml::Mapping> snapshot_data,
+      std::unique_ptr<const fml::Mapping> snapshot_instructions);
+
+  bool NotifyDartDeferredLibraryLoadError(int64_t loading_unit_id,
+                                          const std::string& error_message,
+                                          bool transient);
+
   Shell& GetShell();
 
   const std::optional<FlutterRendererConfig>& GetRendererConfig() const;
