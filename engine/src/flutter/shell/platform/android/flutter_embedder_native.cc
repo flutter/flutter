@@ -252,6 +252,9 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       hardware_buffer_provider_(
           std::make_shared<DefaultAndroidHardwareBufferProvider>(
               library_loader_)),
+      vulkan_texture_provider_(
+          std::make_shared<DefaultAndroidVulkanTextureProvider>(
+              library_loader_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -264,7 +267,8 @@ FlutterEmbedderNative::FlutterEmbedderNative()
           window_metrics_provider_,
           vsync_waiter_,
           vm_init_,
-          hardware_buffer_provider_)),
+          hardware_buffer_provider_,
+          vulkan_texture_provider_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
       asset_provider_(std::make_shared<APKAssetProvider>(
           std::make_shared<InMemoryAPKAssetProviderImpl>())) {
@@ -290,7 +294,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<FontCollectionProvider> font_provider,
     std::shared_ptr<AndroidAOTProvider> aot_provider,
     std::shared_ptr<AndroidVMInit> vm_init,
-    std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider)
+    std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider,
+    std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider)
     : jvm_invoker_(std::move(jvm_invoker)),
       image_lru_(image_lru ? std::move(image_lru)
                            : std::make_shared<EmbedderImageLRU>()),
@@ -329,6 +334,11 @@ FlutterEmbedderNative::FlutterEmbedderNative(
               ? std::move(hardware_buffer_provider)
               : std::make_shared<DefaultAndroidHardwareBufferProvider>(
                     library_loader_)),
+      vulkan_texture_provider_(
+          vulkan_texture_provider
+              ? std::move(vulkan_texture_provider)
+              : std::make_shared<DefaultAndroidVulkanTextureProvider>(
+                    library_loader_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -343,7 +353,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
           window_metrics_provider_,
           vsync_waiter_,
           vm_init_,
-          hardware_buffer_provider_)),
+          hardware_buffer_provider_,
+          vulkan_texture_provider_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, legacy_delegate)),
       asset_provider_(
           asset_provider
@@ -653,12 +664,14 @@ std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
     std::shared_ptr<WindowMetricsProvider> window_metrics_provider,
     std::shared_ptr<AndroidVsyncWaiter> vsync_waiter,
     std::shared_ptr<AndroidVMInit> vm_init,
-    std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider) {
+    std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider,
+    std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateDefaultRouter");
   auto delegate = std::make_shared<JniDelegate>(
       std::move(invoker), nullptr, nullptr, std::move(platform_views_provider),
       nullptr, std::move(window_metrics_provider), std::move(vsync_waiter),
-      std::move(vm_init), std::move(hardware_buffer_provider));
+      std::move(vm_init), std::move(hardware_buffer_provider),
+      std::move(vulkan_texture_provider));
   return std::make_shared<JniRouter>(std::move(delegate), legacy_delegate);
 }
 
@@ -2322,6 +2335,127 @@ FlutterEngineResult FlutterEmbedderNative::UnregisterExternalTexture(
     return s_procs.UnregisterExternalTexture(engine, texture_id);
   }
   return kInternalInconsistency;
+}
+
+std::shared_ptr<AndroidVulkanTextureProvider>
+FlutterEmbedderNative::GetVulkanTextureProvider() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetVulkanTextureProvider");
+  std::lock_guard<std::mutex> lock(vulkan_texture_provider_mutex_);
+  return vulkan_texture_provider_;
+}
+
+void FlutterEmbedderNative::SetVulkanTextureProvider(
+    std::shared_ptr<AndroidVulkanTextureProvider> provider) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetVulkanTextureProvider");
+  std::shared_ptr<AndroidVulkanTextureProvider> resolved_provider =
+      provider ? std::move(provider)
+               : std::make_shared<DefaultAndroidVulkanTextureProvider>(
+                     library_loader_);
+  {
+    std::lock_guard<std::mutex> lock(vulkan_texture_provider_mutex_);
+    vulkan_texture_provider_ = resolved_provider;
+  }
+  if (jni_delegate_) {
+    jni_delegate_->SetVulkanTextureProvider(resolved_provider);
+  }
+}
+
+bool FlutterEmbedderNative::RegisterVulkanTexture(
+    int64_t texture_id,
+    const std::shared_ptr<AndroidVulkanExternalTexture>& initial_texture)
+    const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::RegisterVulkanTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  bool registered = jni_router_->RouteRegisterVulkanTexture(texture_id);
+  if (registered && initial_texture) {
+    jni_router_->RouteSetVulkanTextureFrame(texture_id, initial_texture);
+  }
+  return registered;
+}
+
+bool FlutterEmbedderNative::UnregisterVulkanTexture(int64_t texture_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::UnregisterVulkanTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteUnregisterVulkanTexture(texture_id);
+}
+
+bool FlutterEmbedderNative::SetVulkanTextureFrame(
+    int64_t texture_id,
+    const std::shared_ptr<AndroidVulkanExternalTexture>& texture) const {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::SetVulkanTextureFrame(object)",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetVulkanTextureFrame(texture_id, texture);
+}
+
+bool FlutterEmbedderNative::SetVulkanTextureFrame(
+    int64_t texture_id,
+    const FlutterVulkanExternalTexture& texture) const {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::SetVulkanTextureFrame(struct)",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetVulkanTextureFrame(texture_id, texture);
+}
+
+bool FlutterEmbedderNative::GetVulkanTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterVulkanExternalTexture* texture_out) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::GetVulkanTextureFrame",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteGetVulkanTextureFrame(texture_id, width, height,
+                                                 texture_out);
+}
+
+bool FlutterEmbedderNative::OnVulkanTextureFrameAvailable(
+    int64_t texture_id) const {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::OnVulkanTextureFrameAvailable",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteOnVulkanTextureFrameAvailable(texture_id);
+}
+
+bool FlutterEmbedderNative::OnVulkanExternalTextureFrameCallback(
+    void* user_data,
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterVulkanExternalTexture* texture_out) {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::OnVulkanExternalTextureFrameCallback",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!user_data || !texture_out) {
+    return false;
+  }
+  auto* native_instance = static_cast<FlutterEmbedderNative*>(user_data);
+  return native_instance->GetVulkanTextureFrame(texture_id, width, height,
+                                                texture_out);
+}
+
+FlutterVulkanExternalTextureFrameCallback
+FlutterEmbedderNative::GetVulkanExternalTextureFrameCallback() {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::GetVulkanExternalTextureFrameCallback");
+  return &FlutterEmbedderNative::OnVulkanExternalTextureFrameCallback;
 }
 
 }  // namespace android

@@ -21,6 +21,7 @@
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
 #include "flutter/shell/platform/android/android_vm_init.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
+#include "flutter/shell/platform/android/android_vulkan_texture.h"
 #include "flutter/shell/platform/android/android_window_metrics_mapper.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
@@ -168,6 +169,8 @@ class FlutterEmbedderNative {
       std::shared_ptr<AndroidAOTProvider> aot_provider = nullptr,
       std::shared_ptr<AndroidVMInit> vm_init = nullptr,
       std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider =
+          nullptr,
+      std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider =
           nullptr);
   virtual ~FlutterEmbedderNative();
 
@@ -204,6 +207,8 @@ class FlutterEmbedderNative {
       std::shared_ptr<AndroidVsyncWaiter> vsync_waiter = nullptr,
       std::shared_ptr<AndroidVMInit> vm_init = nullptr,
       std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider =
+          nullptr,
+      std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider =
           nullptr);
 
   /// @brief Returns the JniRouter managed by this native instance.
@@ -803,6 +808,54 @@ class FlutterEmbedderNative {
       FLUTTER_API_SYMBOL(FlutterEngine) engine,
       int64_t texture_id) const;
 
+  /// @brief Returns the AndroidVulkanTextureProvider managed by this instance.
+  std::shared_ptr<AndroidVulkanTextureProvider> GetVulkanTextureProvider()
+      const;
+
+  /// @brief Sets or replaces the AndroidVulkanTextureProvider.
+  void SetVulkanTextureProvider(
+      std::shared_ptr<AndroidVulkanTextureProvider> provider);
+
+  /// @brief Registers a Vulkan external texture by ID.
+  bool RegisterVulkanTexture(
+      int64_t texture_id,
+      const std::shared_ptr<AndroidVulkanExternalTexture>& initial_texture =
+          nullptr) const;
+
+  /// @brief Unregisters a Vulkan external texture by ID.
+  bool UnregisterVulkanTexture(int64_t texture_id) const;
+
+  /// @brief Sets the next Vulkan texture frame for a texture.
+  bool SetVulkanTextureFrame(
+      int64_t texture_id,
+      const std::shared_ptr<AndroidVulkanExternalTexture>& texture) const;
+
+  /// @brief Sets the next Vulkan texture frame from a C-API struct.
+  bool SetVulkanTextureFrame(int64_t texture_id,
+                             const FlutterVulkanExternalTexture& texture) const;
+
+  /// @brief Retrieves the latest Vulkan texture frame for a texture.
+  bool GetVulkanTextureFrame(int64_t texture_id,
+                             size_t width,
+                             size_t height,
+                             FlutterVulkanExternalTexture* texture_out) const;
+
+  /// @brief Notifies that a Vulkan frame is available for texture_id.
+  bool OnVulkanTextureFrameAvailable(int64_t texture_id) const;
+
+  /// @brief Static C-API callback entry point for
+  /// FlutterVulkanExternalTextureFrameCallback.
+  static bool OnVulkanExternalTextureFrameCallback(
+      void* user_data,
+      int64_t texture_id,
+      size_t width,
+      size_t height,
+      FlutterVulkanExternalTexture* texture_out);
+
+  /// @brief Returns a function pointer to the C-API Vulkan frame callback.
+  static FlutterVulkanExternalTextureFrameCallback
+  GetVulkanExternalTextureFrameCallback();
+
  private:
   static std::mutex default_library_loader_mutex_;
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;
@@ -819,6 +872,7 @@ class FlutterEmbedderNative {
   mutable std::mutex aot_provider_mutex_;
   mutable std::mutex vm_init_mutex_;
   mutable std::mutex hardware_buffer_provider_mutex_;
+  mutable std::mutex vulkan_texture_provider_mutex_;
   ANativeWindow* native_window_ = nullptr;
 
   std::shared_ptr<JvmInvoker> jvm_invoker_;
@@ -832,6 +886,7 @@ class FlutterEmbedderNative {
   std::shared_ptr<AndroidAOTProvider> aot_provider_;
   std::shared_ptr<AndroidVMInit> vm_init_;
   std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider_;
+  std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;
