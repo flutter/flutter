@@ -12,6 +12,7 @@ import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -119,6 +120,7 @@ public class FlutterJNI {
     // We cache the main looper so that we can ensure calls are made on the main thread
     // without consistently paying the synchronization cost of getMainLooper().
     mainLooper = Looper.getMainLooper();
+    mainHandler = mainLooper != null ? new Handler(mainLooper) : null;
   }
 
   /**
@@ -249,7 +251,27 @@ public class FlutterJNI {
   private static float displayDensity = -1.0f;
 
   // This is set from native code via JNI.
-  @Nullable private static String vmServiceUri;
+  @Nullable private static volatile String vmServiceUri;
+  @Nullable private volatile String instanceVmServiceUri;
+
+  /**
+   * Sets the VM Service URI for the VM instance.
+   *
+   * <p>Called from native code via JNI.
+   */
+  public static void setVMServiceUri(@NonNull String uri) {
+    vmServiceUri = uri;
+  }
+
+  /**
+   * Sets the VM Service URI for this instance and statically.
+   *
+   * <p>Called by native engine when the VM Service server comes online.
+   */
+  public void setVmServiceUri(@NonNull String uri) {
+    this.instanceVmServiceUri = uri;
+    setVMServiceUri(uri);
+  }
 
   private native boolean nativeGetIsSoftwareRenderingEnabled();
 
@@ -272,6 +294,19 @@ public class FlutterJNI {
   @Nullable
   public static String getVMServiceUri() {
     return vmServiceUri;
+  }
+
+  /**
+   * VM Service URI for the VM instance.
+   *
+   * @return The VM service URI or null if not initialized/available.
+   */
+  @Nullable
+  public String getVmServiceUri() {
+    if (instanceVmServiceUri != null) {
+      return instanceVmServiceUri;
+    }
+    return getVMServiceUri();
   }
 
   /**
@@ -413,6 +448,7 @@ public class FlutterJNI {
   private final Set<FlutterUiResizeListener> flutterUiResizeListeners = new CopyOnWriteArraySet<>();
 
   @NonNull private final Looper mainLooper; // cached to avoid synchronization on repeat access.
+  @Nullable private final Handler mainHandler;
 
   // ------ Start Native Attach/Detach Support ----
   /**
@@ -515,6 +551,9 @@ public class FlutterJNI {
     try {
       nativeDestroy(nativeShellHolderId);
       nativeShellHolderId = null;
+      if (mainHandler != null) {
+        mainHandler.removeCallbacksAndMessages(null);
+      }
     } finally {
       shellHolderLock.writeLock().unlock();
     }
@@ -607,6 +646,12 @@ public class FlutterJNI {
   @VisibleForTesting
   @UiThread
   public void onFirstFrame() {
+    if (mainLooper != null && Looper.myLooper() != mainLooper) {
+      if (mainHandler != null) {
+        mainHandler.post(this::onFirstFrame);
+      }
+      return;
+    }
     ensureRunningOnMainThread();
 
     for (FlutterUiDisplayListener listener : flutterUiDisplayListeners) {
@@ -617,6 +662,15 @@ public class FlutterJNI {
   @VisibleForTesting
   @UiThread
   void onRenderingStopped() {
+    if (mainHandler != null) {
+      mainHandler.removeCallbacksAndMessages(null);
+    }
+    if (mainLooper != null && Looper.myLooper() != mainLooper) {
+      if (mainHandler != null) {
+        mainHandler.post(this::onRenderingStopped);
+      }
+      return;
+    }
     ensureRunningOnMainThread();
 
     for (FlutterUiDisplayListener listener : flutterUiDisplayListeners) {

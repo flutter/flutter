@@ -7,9 +7,13 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <mutex>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/jni_delegate.h"
+#include "flutter/shell/platform/android/jni_router.h"
+#include "flutter/shell/platform/android/jvm_invoker.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 #if defined(__ANDROID__)
@@ -26,11 +30,14 @@ namespace android {
 /// Embedder.
 ///
 /// This class enforces strict GN and C-ABI isolation from legacy Skia /
-/// internal UI headers, serving as the foundational shield for Phase 1.2+ of
+/// internal UI headers, serving as the foundational shield for Phase 1 of
 /// the Android embedder migration.
 class FlutterEmbedderNative {
  public:
   FlutterEmbedderNative();
+  explicit FlutterEmbedderNative(
+      std::shared_ptr<JvmInvoker> jvm_invoker,
+      std::shared_ptr<LegacyJniDelegate> legacy_delegate = nullptr);
   virtual ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -44,6 +51,26 @@ class FlutterEmbedderNative {
 
   /// @brief Returns the version number of the Embedder C-API.
   static size_t GetEmbedderVersion();
+
+  /// @brief Checks whether the Embedder C-API rollout flag is active.
+  static bool IsEmbedderEnabled();
+
+  /// @brief Sets the Embedder C-API rollout flag.
+  static void SetEmbedderEnabled(bool enabled);
+
+  /// @brief Creates a default JniRouter instance with an injected JvmInvoker.
+  static std::shared_ptr<JniRouter> CreateDefaultRouter(
+      std::shared_ptr<JvmInvoker> invoker,
+      std::shared_ptr<LegacyJniDelegate> legacy_delegate = nullptr);
+
+  /// @brief Returns the JniRouter managed by this native instance.
+  std::shared_ptr<JniRouter> GetRouter() const;
+
+  /// @brief Returns the JniDelegate managed by this native instance.
+  std::shared_ptr<JniDelegate> GetJniDelegate() const;
+
+  /// @brief Returns the JvmInvoker managed by this native instance.
+  std::shared_ptr<JvmInvoker> GetJvmInvoker() const;
 
   /// @brief Associates or clears the underlying ANativeWindow surface.
   /// Thread-safe and synchronizes against in-flight presentation.
@@ -108,6 +135,10 @@ class FlutterEmbedderNative {
   std::mutex surface_mutex_;
   std::mutex presentation_mutex_;
   ANativeWindow* native_window_ = nullptr;
+
+  std::shared_ptr<JvmInvoker> jvm_invoker_;
+  std::shared_ptr<JniDelegate> jni_delegate_;
+  std::shared_ptr<JniRouter> jni_router_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEmbedderNative);
 };

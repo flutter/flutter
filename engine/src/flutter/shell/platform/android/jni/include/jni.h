@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_JNI_INCLUDE_JNI_H_
+#define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_INCLUDE_JNI_H_
+
 #ifndef _JNI_H_
 #define _JNI_H_
-
-#pragma once
 
 #include <stdarg.h>
 #include <stdint.h>
@@ -1736,3 +1737,5 @@ JNIEXPORT void JNI_OnUnload(JavaVM* vm, void* reserved);
 #define JNI_ABORT 2  /* free buffer w/o copying back */
 
 #endif  // _JNI_H_
+
+#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_JNI_INCLUDE_JNI_H_
