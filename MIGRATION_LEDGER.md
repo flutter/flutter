@@ -19,11 +19,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `JvmInvoker` abstracted; JNI routing wired to `JniDelegate`.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: Host-side C++ Mocking validates routing flip without crashing.
-- [ ] **1.4 Dynamic Virtualization**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.4-dynamic-virtualization`
-    - [ ] `OSLibraryLoader` implemented for mocked dynamic Android symbol lookups.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: Host desktop CI pipeline is verified completely green (no macOS `dlopen` segfaults).
+- [x] **1.4 Dynamic Virtualization**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-1.4-dynamic-virtualization`
+    - [x] `OSLibraryLoader` implemented for mocked dynamic Android symbol lookups.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: Host desktop CI pipeline is verified completely green (no macOS `dlopen` segfaults).
 - [ ] **1.5 C-API Extension (Vulkan)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.5-c-api-extension-vulkan`
     - [ ] `embedder.h` API extension: Vulkan External Textures (opaque structs).

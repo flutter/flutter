@@ -10,24 +10,32 @@
 namespace flutter {
 namespace android {
 
+std::shared_ptr<OSLibraryLoader>
+    FlutterEmbedderNative::default_library_loader_ = nullptr;
+
 FlutterEmbedderNative::FlutterEmbedderNative()
     : jvm_invoker_(std::make_shared<DefaultJvmInvoker>()),
       jni_delegate_(std::make_shared<JniDelegate>(jvm_invoker_)),
-      jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)) {
+      jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
+      library_loader_(GetDefaultLibraryLoader()) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
-  FML_DLOG(INFO) << "Initialized FlutterEmbedderNative with default invoker.";
+  FML_DLOG(INFO)
+      << "Initialized FlutterEmbedderNative with default components.";
 }
 
 FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<JvmInvoker> jvm_invoker,
-    std::shared_ptr<LegacyJniDelegate> legacy_delegate)
+    const std::shared_ptr<LegacyJniDelegate>& legacy_delegate,
+    std::shared_ptr<OSLibraryLoader> library_loader)
     : jvm_invoker_(std::move(jvm_invoker)),
       jni_delegate_(std::make_shared<JniDelegate>(jvm_invoker_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_,
-                                              std::move(legacy_delegate))) {
+                                              std::move(legacy_delegate))),
+      library_loader_(library_loader ? std::move(library_loader)
+                                     : GetDefaultLibraryLoader()) {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterEmbedderNative(custom)");
-  FML_DLOG(INFO) << "Initialized FlutterEmbedderNative with custom invoker.";
+  FML_DLOG(INFO) << "Initialized FlutterEmbedderNative with custom components.";
 }
 
 FlutterEmbedderNative::~FlutterEmbedderNative() {
@@ -60,6 +68,21 @@ void FlutterEmbedderNative::SetEmbedderEnabled(bool enabled) {
   JniRouter::SetEmbedderEnabled(enabled);
 }
 
+void FlutterEmbedderNative::SetDefaultLibraryLoader(
+    std::shared_ptr<OSLibraryLoader> loader) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetDefaultLibraryLoader");
+  default_library_loader_ = std::move(loader);
+}
+
+std::shared_ptr<OSLibraryLoader>
+FlutterEmbedderNative::GetDefaultLibraryLoader() {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetDefaultLibraryLoader");
+  if (!default_library_loader_) {
+    default_library_loader_ = std::make_shared<DefaultOSLibraryLoader>();
+  }
+  return default_library_loader_;
+}
+
 std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
     std::shared_ptr<JvmInvoker> invoker,
     std::shared_ptr<LegacyJniDelegate> legacy_delegate) {
@@ -79,6 +102,11 @@ std::shared_ptr<JniDelegate> FlutterEmbedderNative::GetJniDelegate() const {
 
 std::shared_ptr<JvmInvoker> FlutterEmbedderNative::GetJvmInvoker() const {
   return jvm_invoker_;
+}
+
+std::shared_ptr<OSLibraryLoader> FlutterEmbedderNative::GetLibraryLoader()
+    const {
+  return library_loader_;
 }
 
 }  // namespace android
