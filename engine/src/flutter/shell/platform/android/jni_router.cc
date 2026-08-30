@@ -143,6 +143,38 @@ bool JniRouter::RouteSemanticsUpdate(
   return false;
 }
 
+bool JniRouter::RouteCustomAccessibilityActions(
+    const std::vector<uint8_t>& actions_buffer,
+    const std::vector<std::string>& action_strings) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteCustomAccessibilityActions");
+  if (IsInstanceEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->UpdateCustomAccessibilityActions(
+          actions_buffer, action_strings);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->UpdateCustomAccessibilityActions(actions_buffer,
+                                                              action_strings);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSemanticsUpdate(const FlutterSemanticsUpdate2& update) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSemanticsUpdate(struct)");
+  if (IsInstanceEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->UpdateSemantics(update);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->UpdateSemantics(update);
+  }
+  return false;
+}
+
 bool JniRouter::RouteSemanticsTreeEnabled(bool enabled) {
   TRACE_EVENT0("flutter", "JniRouter::RouteSemanticsTreeEnabled");
   if (IsInstanceEmbedderEnabled()) {

@@ -50,9 +50,24 @@ class LegacyJniDelegate {
   virtual bool UpdateSemantics(
       const std::vector<uint8_t>& buffer,
       const std::vector<std::string>& strings,
-      const std::vector<std::vector<uint8_t>>& string_attribute_args = {}) = 0;
+      const std::vector<std::vector<uint8_t>>& string_attribute_args) = 0;
+
+  virtual bool UpdateSemantics(const std::vector<uint8_t>& buffer,
+                               const std::vector<std::string>& strings) {
+    return UpdateSemantics(buffer, strings, {});
+  }
+
+  virtual bool UpdateCustomAccessibilityActions(
+      const std::vector<uint8_t>& actions_buffer,
+      const std::vector<std::string>& action_strings) = 0;
+
+  virtual bool UpdateSemantics(const FlutterSemanticsUpdate2& update) = 0;
 
   virtual bool SetSemanticsTreeEnabled(bool enabled) = 0;
+
+  virtual bool SetSemanticsEnabled(bool enabled) {
+    return SetSemanticsTreeEnabled(enabled);
+  }
 
   virtual bool SetApplicationLocale(const std::string& locale) = 0;
 
@@ -153,9 +168,24 @@ class JniRouter {
   bool RouteSemanticsUpdate(
       const std::vector<uint8_t>& buffer,
       const std::vector<std::string>& strings,
-      const std::vector<std::vector<uint8_t>>& string_attribute_args = {});
+      const std::vector<std::vector<uint8_t>>& string_attribute_args);
+
+  bool RouteSemanticsUpdate(const std::vector<uint8_t>& buffer,
+                            const std::vector<std::string>& strings) {
+    return RouteSemanticsUpdate(buffer, strings, {});
+  }
+
+  bool RouteCustomAccessibilityActions(
+      const std::vector<uint8_t>& actions_buffer,
+      const std::vector<std::string>& action_strings);
+
+  bool RouteSemanticsUpdate(const FlutterSemanticsUpdate2& update);
 
   bool RouteSemanticsTreeEnabled(bool enabled);
+
+  bool RouteSemanticsEnabled(bool enabled) {
+    return RouteSemanticsTreeEnabled(enabled);
+  }
 
   bool RouteApplicationLocale(const std::string& locale);
 
