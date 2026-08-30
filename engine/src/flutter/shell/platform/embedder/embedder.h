@@ -3000,6 +3000,29 @@ typedef struct {
   size_t data_length;
 } FlutterSendSemanticsActionInfo;
 
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterEngineSpawnConfig).
+  size_t struct_size;
+
+  /// Custom project arguments for the spawned engine (e.g. custom entrypoint,
+  /// entrypoint arguments, callbacks, engine ID, etc.).
+  /// This field is optional; nullptr may be specified.
+  const FlutterProjectArgs* custom_args;
+
+  /// Custom renderer configuration for the spawned engine.
+  /// This field is optional; if nullptr, renderer configuration from the parent
+  /// engine is inherited.
+  const FlutterRendererConfig* custom_renderer_config;
+
+  /// User data baton passed back to embedders in callbacks for the spawned
+  /// engine. This field is optional.
+  void* user_data;
+
+  /// Initial route for the spawned engine isolate.
+  /// This field is optional; nullptr or empty string defaults to "/".
+  const char* initial_route;
+} FlutterEngineSpawnConfig;
+
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -3144,6 +3167,32 @@ FlutterEngineResult FlutterEngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineRunInitialized(
     FLUTTER_API_SYMBOL(FlutterEngine) engine);
+
+//------------------------------------------------------------------------------
+/// @brief      Spawns a new Flutter engine instance sharing the same Dart VM
+///             and task runners with the parent engine.
+///
+///             The spawned engine runs the isolate specified in the
+///             `FlutterEngineSpawnConfig` (or parent configuration if
+///             unspecified) in the same VM / isolate group. The new engine
+///             starts in a running state.
+///
+/// @param[in]  parent_engine  The parent Flutter engine instance. Must be a
+///                            valid running engine instance.
+/// @param[in]  config         The configuration for spawning the new engine.
+///                            Must not be null and must have a valid
+///                            struct_size.
+/// @param[out] engine_out     The engine handle for the spawned engine on
+///                            success.
+///
+/// @return     The result of the call to spawn the Flutter engine.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
+                                           parent_engine,
+                                       const FlutterEngineSpawnConfig* config,
+                                       FLUTTER_API_SYMBOL(FlutterEngine) *
+                                           engine_out);
 
 //------------------------------------------------------------------------------
 /// @brief      Adds a view.
@@ -3913,6 +3962,10 @@ typedef FlutterEngineResult (*FlutterEngineRemoveViewFnPtr)(
 typedef FlutterEngineResult (*FlutterEngineSendViewFocusEventFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterViewFocusEvent* event);
+typedef FlutterEngineResult (*FlutterEngineSpawnFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) parent_engine,
+    const FlutterEngineSpawnConfig* config,
+    FLUTTER_API_SYMBOL(FlutterEngine) * engine_out);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -3963,6 +4016,7 @@ typedef struct {
   FlutterEngineRemoveViewFnPtr RemoveView;
   FlutterEngineSendViewFocusEventFnPtr SendViewFocusEvent;
   FlutterEngineSendSemanticsActionFnPtr SendSemanticsAction;
+  FlutterEngineSpawnFnPtr Spawn;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------
