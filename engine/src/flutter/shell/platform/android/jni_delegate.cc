@@ -4,8 +4,11 @@
 
 #include "flutter/shell/platform/android/jni_delegate.h"
 
+#include <cstring>
+
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/shell/platform/android/android_vsync_waiter.h"
 
 namespace flutter {
 namespace android {
@@ -15,12 +18,14 @@ JniDelegate::JniDelegate(
     std::shared_ptr<CallbackCacheProvider> callback_cache,
     std::shared_ptr<ImageDecoderProvider> image_decoder,
     std::shared_ptr<PlatformViewsProvider> platform_views_provider,
-    std::shared_ptr<WindowMetricsProvider> window_metrics_provider)
+    std::shared_ptr<WindowMetricsProvider> window_metrics_provider,
+    std::shared_ptr<AndroidVsyncWaiter> vsync_waiter)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(std::move(callback_cache)),
       image_decoder_(std::move(image_decoder)),
       platform_views_provider_(std::move(platform_views_provider)),
-      window_metrics_provider_(std::move(window_metrics_provider)) {
+      window_metrics_provider_(std::move(window_metrics_provider)),
+      vsync_waiter_(std::move(vsync_waiter)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
   if (!platform_views_provider_) {
@@ -184,6 +189,20 @@ bool JniDelegate::OnVsync(int64_t frame_time_nanos,
     return false;
   }
   return jvm_invoker_->InvokeVoidMethod("onVsync", "(JJ)V");
+}
+
+bool JniDelegate::AsyncWaitForVsync(intptr_t baton) {
+  TRACE_EVENT1("flutter", "JniDelegate::AsyncWaitForVsync", "baton",
+               std::to_string(baton).c_str());
+  if (vsync_waiter_) {
+    return vsync_waiter_->AsyncWaitForVsync(baton);
+  }
+  if (!jvm_invoker_) {
+    return false;
+  }
+  std::vector<uint8_t> payload(sizeof(intptr_t));
+  std::memcpy(payload.data(), &baton, sizeof(intptr_t));
+  return jvm_invoker_->InvokeVoidMethod("asyncWaitForVsync", "(J)V", payload);
 }
 
 bool JniDelegate::SetViewportMetrics(const AndroidViewportMetrics& metrics) {
@@ -635,6 +654,15 @@ void JniDelegate::SetWindowMetricsProvider(
 std::shared_ptr<WindowMetricsProvider> JniDelegate::GetWindowMetricsProvider()
     const {
   return window_metrics_provider_;
+}
+
+void JniDelegate::SetVsyncWaiter(std::shared_ptr<AndroidVsyncWaiter> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetVsyncWaiter");
+  vsync_waiter_ = std::move(provider);
+}
+
+std::shared_ptr<AndroidVsyncWaiter> JniDelegate::GetVsyncWaiter() const {
+  return vsync_waiter_;
 }
 
 }  // namespace android

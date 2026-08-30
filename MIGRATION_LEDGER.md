@@ -104,11 +104,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `FlutterEngineSendWindowMetricsEvent` bounds and insets hooked to replace native `android_display`.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `dev/devicelab/bin/tasks/android_display_cutout.dart` passes.
-- [ ] **2.8 AChoreographer VSync Routing**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.8-achoreographer-vsync-routing`
-    - [ ] `AChoreographer_postFrameCallback` mapped to `FlutterProjectArgs::vsync_callback` via `OSLibraryLoader`.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart` passes, and Perfetto traces confirm strict frame pacing correctness.
+- [x] **2.8 AChoreographer VSync Routing**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-2.8-achoreographer-vsync-routing`
+    - [x] `AChoreographer_postFrameCallback` mapped to `FlutterProjectArgs::vsync_callback` via `OSLibraryLoader`.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart` passes, and Perfetto traces confirm strict frame pacing correctness.
 
 
 - [ ] **2.9 Global VM Initialization (`flutter_main.cc`)**:
