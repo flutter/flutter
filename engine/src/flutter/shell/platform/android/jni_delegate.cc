@@ -24,7 +24,9 @@ JniDelegate::JniDelegate(
     std::shared_ptr<AndroidVMInit> vm_init,
     std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider,
     std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider,
-    std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider)
+    std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider,
+    std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider,
+    std::shared_ptr<AndroidEngineGroup> engine_group)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(std::move(callback_cache)),
       image_decoder_(std::move(image_decoder)),
@@ -34,7 +36,9 @@ JniDelegate::JniDelegate(
       vm_init_(std::move(vm_init)),
       hardware_buffer_provider_(std::move(hardware_buffer_provider)),
       vulkan_texture_provider_(std::move(vulkan_texture_provider)),
-      surface_control_provider_(std::move(surface_control_provider)) {
+      surface_control_provider_(std::move(surface_control_provider)),
+      engine_group_provider_(std::move(engine_group_provider)),
+      engine_group_(std::move(engine_group)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
   if (!platform_views_provider_) {
@@ -59,6 +63,14 @@ JniDelegate::JniDelegate(
   if (!surface_control_provider_) {
     surface_control_provider_ =
         std::make_shared<DefaultAndroidSurfaceControlProvider>();
+  }
+  if (!engine_group_provider_) {
+    engine_group_provider_ =
+        std::make_shared<DefaultAndroidEngineGroupProvider>();
+  }
+  if (!engine_group_) {
+    engine_group_ = std::make_shared<AndroidEngineGroup>(engine_group_provider_,
+                                                         jvm_invoker_);
   }
   platform_views_controller_ = std::make_shared<AndroidPlatformViewsController>(
       platform_views_provider_);
@@ -1416,6 +1428,70 @@ std::shared_ptr<AndroidVulkanTextureProvider>
 JniDelegate::GetVulkanTextureProvider() const {
   TRACE_EVENT0("flutter", "JniDelegate::GetVulkanTextureProvider");
   return vulkan_texture_provider_;
+}
+
+int64_t JniDelegate::SpawnEngine(int64_t parent_engine_id,
+                                 const AndroidEngineSpawnArgs& args) {
+  TRACE_EVENT1("flutter", "JniDelegate::SpawnEngine", "parent_engine_id",
+               std::to_string(parent_engine_id).c_str());
+  if (!engine_group_) {
+    return 0;
+  }
+  auto spawned_handle = engine_group_->SpawnEngine(parent_engine_id, args);
+  if (spawned_handle == nullptr) {
+    return 0;
+  }
+  auto id_opt = engine_group_->GetEngineId(spawned_handle);
+  return id_opt.value_or(args.engine_id != 0 ? args.engine_id : 0);
+}
+
+bool JniDelegate::ShutdownSpawnedEngine(int64_t engine_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::ShutdownSpawnedEngine", "engine_id",
+               std::to_string(engine_id).c_str());
+  if (!engine_group_) {
+    return false;
+  }
+  return engine_group_->ShutdownEngine(engine_id);
+}
+
+size_t JniDelegate::GetActiveEngineCount() const {
+  TRACE_EVENT0("flutter", "JniDelegate::GetActiveEngineCount");
+  if (!engine_group_) {
+    return 0;
+  }
+  return engine_group_->GetActiveEngineCount();
+}
+
+bool JniDelegate::OnEngineGarbageCollected(int64_t engine_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::OnEngineGarbageCollected", "engine_id",
+               std::to_string(engine_id).c_str());
+  if (!engine_group_) {
+    return false;
+  }
+  return engine_group_->OnEngineGarbageCollected(engine_id);
+}
+
+std::shared_ptr<AndroidEngineGroup> JniDelegate::GetEngineGroup() const {
+  return engine_group_;
+}
+
+void JniDelegate::SetEngineGroup(std::shared_ptr<AndroidEngineGroup> group) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetEngineGroup");
+  engine_group_ = std::move(group);
+}
+
+std::shared_ptr<AndroidEngineGroupProvider>
+JniDelegate::GetEngineGroupProvider() const {
+  return engine_group_provider_;
+}
+
+void JniDelegate::SetEngineGroupProvider(
+    std::shared_ptr<AndroidEngineGroupProvider> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetEngineGroupProvider");
+  engine_group_provider_ = std::move(provider);
+  if (engine_group_) {
+    engine_group_->SetProvider(engine_group_provider_);
+  }
 }
 
 }  // namespace android

@@ -6,6 +6,7 @@
 #include <thread>
 #include <vector>
 
+#include "flutter/shell/platform/android/android_engine_group.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
 #include "flutter/shell/platform/android/android_vulkan_texture.h"
@@ -417,6 +418,17 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               OnVulkanTextureFrameAvailable,
               (int64_t texture_id),
               (override));
+
+  MOCK_METHOD(int64_t,
+              SpawnEngine,
+              (int64_t parent_engine_id, const AndroidEngineSpawnArgs& args),
+              (override));
+
+  MOCK_METHOD(bool, ShutdownSpawnedEngine, (int64_t engine_id), (override));
+
+  MOCK_METHOD(size_t, GetActiveEngineCount, (), (const, override));
+
+  MOCK_METHOD(bool, OnEngineGarbageCollected, (int64_t engine_id), (override));
 };
 
 class MockVulkanTextureProvider : public AndroidVulkanTextureProvider {
@@ -4223,6 +4235,248 @@ TEST(SurfaceControlHcppTest, ThreadSafeConcurrentSurfaceOperations) {
   }
 
   FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+TEST(MultiEngineAndAddToAppTest, JniDelegateEngineGroupOperations) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+
+  auto provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  auto engine_group =
+      std::make_shared<AndroidEngineGroup>(provider, mock_invoker);
+  JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                       nullptr, nullptr, nullptr, nullptr, nullptr, provider,
+                       engine_group);
+
+  EXPECT_EQ(delegate.GetEngineGroup(), engine_group);
+  EXPECT_EQ(delegate.GetEngineGroupProvider(), provider);
+  EXPECT_EQ(delegate.GetActiveEngineCount(), 0u);
+
+  // Initialize group with a parent engine
+  auto parent_handle =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x1000);
+  EXPECT_TRUE(engine_group->RegisterEngine(1, parent_handle));
+  EXPECT_EQ(delegate.GetActiveEngineCount(), 1u);
+
+  // Spawn a child engine
+  AndroidEngineSpawnArgs args;
+  args.entrypoint = "main";
+  args.initial_route = "/child_route";
+  int64_t spawned_id = delegate.SpawnEngine(1, args);
+  EXPECT_GT(spawned_id, 0);
+  EXPECT_EQ(delegate.GetActiveEngineCount(), 2u);
+
+  // Shut down spawned engine
+  EXPECT_TRUE(delegate.ShutdownSpawnedEngine(spawned_id));
+  EXPECT_EQ(delegate.GetActiveEngineCount(), 1u);
+
+  // GC Cleaner trigger on remaining engine
+  EXPECT_TRUE(delegate.OnEngineGarbageCollected(1));
+  EXPECT_EQ(delegate.GetActiveEngineCount(), 0u);
+
+  // Replacing provider and engine group
+  auto new_provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  auto new_group =
+      std::make_shared<AndroidEngineGroup>(new_provider, mock_invoker);
+  delegate.SetEngineGroupProvider(new_provider);
+  delegate.SetEngineGroup(new_group);
+  EXPECT_EQ(delegate.GetEngineGroupProvider(), new_provider);
+  EXPECT_EQ(delegate.GetEngineGroup(), new_group);
+}
+
+TEST(MultiEngineAndAddToAppTest, JniRouterEngineGroupRoutingFlip) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+
+  auto mock_legacy = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+  auto provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  auto engine_group =
+      std::make_shared<AndroidEngineGroup>(provider, mock_invoker);
+
+  auto jni_delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, provider, engine_group);
+
+  JniRouter router(jni_delegate, mock_legacy);
+
+  AndroidEngineSpawnArgs args;
+  args.entrypoint = "custom_entry";
+
+  // When embedder is disabled -> routes to legacy delegate
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  EXPECT_CALL(*mock_legacy, SpawnEngine(100, Eq(args))).WillOnce(Return(200));
+  EXPECT_CALL(*mock_legacy, ShutdownSpawnedEngine(200)).WillOnce(Return(true));
+  EXPECT_CALL(*mock_legacy, GetActiveEngineCount()).WillOnce(Return(1u));
+  EXPECT_CALL(*mock_legacy, OnEngineGarbageCollected(200))
+      .WillOnce(Return(true));
+
+  EXPECT_EQ(router.RouteSpawnEngine(100, args), 200);
+  EXPECT_TRUE(router.RouteShutdownSpawnedEngine(200));
+  EXPECT_EQ(router.RouteGetActiveEngineCount(), 1u);
+  EXPECT_TRUE(router.RouteOnEngineGarbageCollected(200));
+
+  // When embedder is enabled -> routes to jni_delegate / engine_group
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+  auto parent_handle =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x2000);
+  EXPECT_TRUE(engine_group->RegisterEngine(10, parent_handle));
+  EXPECT_EQ(router.RouteGetActiveEngineCount(), 1u);
+
+  auto new_spawned_id = router.RouteSpawnEngine(10, args);
+  EXPECT_GT(new_spawned_id, 0);
+  EXPECT_EQ(router.RouteGetActiveEngineCount(), 2u);
+
+  EXPECT_TRUE(router.RouteShutdownSpawnedEngine(new_spawned_id));
+  EXPECT_EQ(router.RouteGetActiveEngineCount(), 1u);
+
+  EXPECT_TRUE(router.RouteOnEngineGarbageCollected(10));
+  EXPECT_EQ(router.RouteGetActiveEngineCount(), 0u);
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+TEST(MultiEngineAndAddToAppTest, FlutterEmbedderNativeEngineGroupIntegration) {
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+
+  auto provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, provider);
+
+  EXPECT_NE(native.GetEngineGroup(), nullptr);
+  EXPECT_EQ(native.GetEngineGroupProvider(), provider);
+  EXPECT_EQ(native.GetActiveEngineCount(), 0u);
+
+  auto parent_handle =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x3000);
+  EXPECT_TRUE(native.GetEngineGroup()->RegisterEngine(100, parent_handle));
+  EXPECT_EQ(native.GetActiveEngineCount(), 1u);
+
+  // Spawn with AndroidEngineSpawnArgs
+  AndroidEngineSpawnArgs args;
+  args.entrypoint = "worker_main";
+  args.initial_route = "/worker";
+  auto spawned = native.SpawnEngine(parent_handle, args);
+  EXPECT_NE(spawned, nullptr);
+  EXPECT_EQ(native.GetActiveEngineCount(), 2u);
+
+  // Spawn with raw FlutterEngineSpawnConfig
+  FlutterEngineSpawnConfig raw_config = {};
+  raw_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  raw_config.initial_route = "/raw_route";
+  auto raw_spawned = native.SpawnEngine(parent_handle, &raw_config, 102);
+  EXPECT_NE(raw_spawned, nullptr);
+  EXPECT_EQ(native.GetActiveEngineCount(), 3u);
+
+  // Direct C-API FlutterEngineSpawn
+  FLUTTER_API_SYMBOL(FlutterEngine) direct_spawned = nullptr;
+  EXPECT_EQ(native.SpawnEngine(parent_handle, &raw_config, &direct_spawned),
+            kSuccess);
+  EXPECT_NE(direct_spawned, nullptr);
+
+  // Direct C-API FlutterEngineShutdown
+  EXPECT_EQ(native.ShutdownEngine(direct_spawned), kSuccess);
+
+  // Shutdown spawned by id
+  EXPECT_TRUE(native.ShutdownSpawnedEngine(102));
+  EXPECT_EQ(native.GetActiveEngineCount(), 2u);
+
+  // GC Cleaner trigger
+  auto spawned_id = native.GetEngineGroup()->GetEngineId(spawned);
+  ASSERT_TRUE(spawned_id.has_value());
+  if (spawned_id.has_value()) {
+    EXPECT_TRUE(native.OnEngineGarbageCollected(*spawned_id));
+  }
+  EXPECT_EQ(native.GetActiveEngineCount(), 1u);
+
+  EXPECT_TRUE(native.OnEngineGarbageCollected(100));
+  EXPECT_EQ(native.GetActiveEngineCount(), 0u);
+
+  // Test replacing provider dynamically
+  auto new_provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  native.SetEngineGroupProvider(new_provider);
+  EXPECT_EQ(native.GetEngineGroupProvider(), new_provider);
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+TEST(MultiEngineAndAddToAppTest, ThreadSafeConcurrentMultiEngineOperations) {
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+  ON_CALL(*mock_invoker, InvokeVoidMethod(_, _, _)).WillByDefault(Return(true));
+
+  auto provider = std::make_shared<InMemoryAndroidEngineGroupProvider>();
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, provider);
+
+  auto parent_handle =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(0x5000);
+  EXPECT_TRUE(native.GetEngineGroup()->RegisterEngine(5000, parent_handle));
+
+  constexpr int kThreadCount = 8;
+  constexpr int kIterationsPerThread = 25;
+
+  std::vector<std::future<void>> futures;
+  futures.reserve(kThreadCount);
+
+  for (int t = 0; t < kThreadCount; ++t) {
+    futures.push_back(
+        std::async(std::launch::async, [&native, parent_handle, t]() {
+          for (int i = 0; i < kIterationsPerThread; ++i) {
+            int64_t engine_id = 10000 + (t * 100) + i;
+            AndroidEngineSpawnArgs args;
+            args.entrypoint = "thread_" + std::to_string(t) + "_entry";
+            args.initial_route = "/route_" + std::to_string(engine_id);
+
+            auto spawned = native.SpawnEngine(parent_handle, args);
+            EXPECT_NE(spawned, nullptr);
+
+            auto id = native.GetEngineGroup()->GetEngineId(spawned);
+            ASSERT_TRUE(id.has_value());
+
+            if (i % 2 == 0) {
+              EXPECT_TRUE(native.ShutdownSpawnedEngine(*id));
+            } else {
+              EXPECT_TRUE(native.OnEngineGarbageCollected(*id));
+            }
+          }
+        }));
+  }
+
+  for (auto& f : futures) {
+    f.get();
+  }
+
+  EXPECT_EQ(native.GetActiveEngineCount(), 1u);
+  EXPECT_TRUE(native.ShutdownSpawnedEngine(5000));
+  EXPECT_EQ(native.GetActiveEngineCount(), 0u);
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+TEST(MultiEngineAndAddToAppTest,
+     FlutterEmbedderNativeDefaultConstructorEngineGroup) {
+  FlutterEmbedderNative native;
+  EXPECT_NE(native.GetEngineGroup(), nullptr);
+  EXPECT_NE(native.GetEngineGroupProvider(), nullptr);
+  EXPECT_EQ(native.GetJniDelegate()->GetEngineGroup(), native.GetEngineGroup());
+  EXPECT_EQ(native.GetJniDelegate()->GetEngineGroupProvider(),
+            native.GetEngineGroupProvider());
 }
 
 }  // namespace testing
