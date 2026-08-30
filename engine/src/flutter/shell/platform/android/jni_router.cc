@@ -80,15 +80,57 @@ bool JniRouter::RoutePlatformMessageResponse(int32_t response_id,
 
 bool JniRouter::RouteSemanticsUpdate(const std::vector<uint8_t>& buffer,
                                      const std::vector<std::string>& strings) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSemanticsUpdate(legacy)");
+  return RouteSemanticsUpdate(buffer, strings, {});
+}
+
+bool JniRouter::RouteSemanticsUpdate(
+    const std::vector<uint8_t>& buffer,
+    const std::vector<std::string>& strings,
+    const std::vector<std::vector<uint8_t>>& string_attribute_args) {
   TRACE_EVENT0("flutter", "JniRouter::RouteSemanticsUpdate");
   if (IsEmbedderEnabled()) {
     if (embedder_delegate_) {
-      return embedder_delegate_->UpdateSemantics(buffer, strings);
+      return embedder_delegate_->UpdateSemantics(buffer, strings,
+                                                 string_attribute_args);
     }
     return false;
   }
   if (legacy_delegate_) {
-    return legacy_delegate_->UpdateSemantics(buffer, strings);
+    return legacy_delegate_->UpdateSemantics(buffer, strings,
+                                             string_attribute_args);
+  }
+  return false;
+}
+
+bool JniRouter::RouteCustomAccessibilityActions(
+    const std::vector<uint8_t>& actions_buffer,
+    const std::vector<std::string>& action_strings) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteCustomAccessibilityActions");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->UpdateCustomAccessibilityActions(
+          actions_buffer, action_strings);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->UpdateCustomAccessibilityActions(actions_buffer,
+                                                              action_strings);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSemanticsUpdate(const FlutterSemanticsUpdate2& update) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSemanticsUpdate(struct)");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->UpdateSemantics(update);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->UpdateSemantics(update);
   }
   return false;
 }
@@ -103,6 +145,39 @@ bool JniRouter::RouteSemanticsEnabled(bool enabled) {
   }
   if (legacy_delegate_) {
     return legacy_delegate_->SetSemanticsEnabled(enabled);
+  }
+  return false;
+}
+
+bool JniRouter::RouteDispatchSemanticsAction(int32_t node_id,
+                                             FlutterSemanticsAction action,
+                                             const std::vector<uint8_t>& data,
+                                             int64_t view_id) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteDispatchSemanticsAction");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->DispatchSemanticsAction(node_id, action, data,
+                                                         view_id);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->DispatchSemanticsAction(node_id, action, data,
+                                                     view_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetAccessibilityFeatures(int32_t flags) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSetAccessibilityFeatures");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->SetAccessibilityFeatures(flags);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->SetAccessibilityFeatures(flags);
   }
   return false;
 }

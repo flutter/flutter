@@ -15,6 +15,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
+#include "flutter/shell/platform/android/android_semantics_mapper.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 #include "flutter/shell/platform/android/jni_router.h"
@@ -303,6 +304,60 @@ class FlutterEmbedderNative {
                                 int32_t y,
                                 int32_t width,
                                 int32_t height) const;
+
+  /// @brief Maps semantics updates and dispatches them through JniRouter.
+  bool UpdateSemantics(const FlutterSemanticsUpdate2& update) const;
+
+  /// @brief Dispatches semantics node updates buffer through JniRouter.
+  bool UpdateSemantics(const std::vector<uint8_t>& buffer,
+                       const std::vector<std::string>& strings,
+                       const std::vector<std::vector<uint8_t>>&
+                           string_attribute_args = {}) const;
+
+  /// @brief Dispatches custom accessibility action updates through JniRouter.
+  bool UpdateCustomAccessibilityActions(
+      const std::vector<uint8_t>& buffer,
+      const std::vector<std::string>& strings) const;
+
+  /// @brief Dispatches semantics enabled state change through JniRouter.
+  bool SetSemanticsEnabled(bool enabled) const;
+
+  /// @brief Dispatches a semantics action through JniRouter.
+  bool DispatchSemanticsAction(int32_t node_id,
+                               FlutterSemanticsAction action,
+                               const std::vector<uint8_t>& data = {},
+                               int64_t view_id = 0) const;
+
+  /// @brief Dispatches accessibility features change through JniRouter.
+  bool SetAccessibilityFeatures(int32_t flags) const;
+
+  /// @brief Updates semantics enabled state on the FlutterEngine instance.
+  FlutterEngineResult UpdateSemanticsEnabled(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                 engine,
+                                             bool enabled) const;
+
+  /// @brief Updates accessibility features on the FlutterEngine instance.
+  FlutterEngineResult UpdateAccessibilityFeatures(
+      FLUTTER_API_SYMBOL(FlutterEngine) engine,
+      FlutterAccessibilityFeature features) const;
+
+  /// @brief Sends a semantics action info struct to the FlutterEngine instance.
+  FlutterEngineResult SendSemanticsAction(
+      FLUTTER_API_SYMBOL(FlutterEngine) engine,
+      const FlutterSendSemanticsActionInfo* info) const;
+
+  /// @brief Dispatches a semantics action to the FlutterEngine instance.
+  FlutterEngineResult DispatchSemanticsActionToEngine(
+      FLUTTER_API_SYMBOL(FlutterEngine) engine,
+      uint64_t node_id,
+      FlutterSemanticsAction action,
+      const uint8_t* data = nullptr,
+      size_t data_length = 0) const;
+
+  /// @brief Static C-API callback entry point for
+  /// FlutterUpdateSemanticsCallback2.
+  static void OnUpdateSemantics2(const FlutterSemanticsUpdate2* update,
+                                 void* user_data);
 
  private:
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;

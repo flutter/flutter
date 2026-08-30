@@ -609,5 +609,190 @@ bool FlutterEmbedderNative::PushPlatformViewMutators(
                                                 height);
 }
 
+bool FlutterEmbedderNative::UpdateSemantics(
+    const FlutterSemanticsUpdate2& update) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::UpdateSemantics(struct)");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSemanticsUpdate(update);
+}
+
+bool FlutterEmbedderNative::UpdateSemantics(
+    const std::vector<uint8_t>& buffer,
+    const std::vector<std::string>& strings,
+    const std::vector<std::vector<uint8_t>>& string_attribute_args) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::UpdateSemantics(buffers)");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSemanticsUpdate(buffer, strings,
+                                           string_attribute_args);
+}
+
+bool FlutterEmbedderNative::UpdateCustomAccessibilityActions(
+    const std::vector<uint8_t>& buffer,
+    const std::vector<std::string>& strings) const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::UpdateCustomAccessibilityActions");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteCustomAccessibilityActions(buffer, strings);
+}
+
+bool FlutterEmbedderNative::SetSemanticsEnabled(bool enabled) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetSemanticsEnabled");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSemanticsEnabled(enabled);
+}
+
+bool FlutterEmbedderNative::DispatchSemanticsAction(
+    int32_t node_id,
+    FlutterSemanticsAction action,
+    const std::vector<uint8_t>& data,
+    int64_t view_id) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::DispatchSemanticsAction");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteDispatchSemanticsAction(node_id, action, data,
+                                                   view_id);
+}
+
+bool FlutterEmbedderNative::SetAccessibilityFeatures(int32_t flags) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetAccessibilityFeatures");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetAccessibilityFeatures(flags);
+}
+
+static FlutterEngineResult EngineUpdateSemanticsEnabled(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    bool enabled) {
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.UpdateSemanticsEnabled) {
+    return s_procs.UpdateSemanticsEnabled(engine, enabled);
+  }
+  return kInternalInconsistency;
+}
+
+FlutterEngineResult FlutterEmbedderNative::UpdateSemanticsEnabled(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    bool enabled) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::UpdateSemanticsEnabled");
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  return EngineUpdateSemanticsEnabled(engine, enabled);
+}
+
+static FlutterEngineResult EngineUpdateAccessibilityFeatures(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterAccessibilityFeature features) {
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.UpdateAccessibilityFeatures) {
+    return s_procs.UpdateAccessibilityFeatures(engine, features);
+  }
+  return kInternalInconsistency;
+}
+
+FlutterEngineResult FlutterEmbedderNative::UpdateAccessibilityFeatures(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterAccessibilityFeature features) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::UpdateAccessibilityFeatures");
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  return EngineUpdateAccessibilityFeatures(engine, features);
+}
+
+static FlutterEngineResult EngineSendSemanticsAction(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterSendSemanticsActionInfo* info) {
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.SendSemanticsAction) {
+    return s_procs.SendSemanticsAction(engine, info);
+  }
+  if (s_procs.DispatchSemanticsAction && info) {
+    return s_procs.DispatchSemanticsAction(engine, info->node_id, info->action,
+                                           info->data, info->data_length);
+  }
+  return kInternalInconsistency;
+}
+
+FlutterEngineResult FlutterEmbedderNative::SendSemanticsAction(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterSendSemanticsActionInfo* info) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SendSemanticsAction");
+  if (!engine || !info) {
+    return kInvalidArguments;
+  }
+  return EngineSendSemanticsAction(engine, info);
+}
+
+static FlutterEngineResult EngineDispatchSemanticsAction(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    uint64_t node_id,
+    FlutterSemanticsAction action,
+    const uint8_t* data,
+    size_t data_length) {
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.DispatchSemanticsAction) {
+    return s_procs.DispatchSemanticsAction(engine, node_id, action, data,
+                                           data_length);
+  }
+  return kInternalInconsistency;
+}
+
+FlutterEngineResult FlutterEmbedderNative::DispatchSemanticsActionToEngine(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    uint64_t node_id,
+    FlutterSemanticsAction action,
+    const uint8_t* data,
+    size_t data_length) const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::DispatchSemanticsActionToEngine");
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  return EngineDispatchSemanticsAction(engine, node_id, action, data,
+                                       data_length);
+}
+
+void FlutterEmbedderNative::OnUpdateSemantics2(
+    const FlutterSemanticsUpdate2* update,
+    void* user_data) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::OnUpdateSemantics2");
+  if (!update || !user_data) {
+    return;
+  }
+  auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
+  native->UpdateSemantics(*update);
+}
+
 }  // namespace android
 }  // namespace flutter

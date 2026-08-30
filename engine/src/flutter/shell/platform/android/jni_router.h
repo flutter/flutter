@@ -34,7 +34,25 @@ class LegacyJniDelegate {
   virtual bool UpdateSemantics(const std::vector<uint8_t>& buffer,
                                const std::vector<std::string>& strings) = 0;
 
+  virtual bool UpdateSemantics(
+      const std::vector<uint8_t>& buffer,
+      const std::vector<std::string>& strings,
+      const std::vector<std::vector<uint8_t>>& string_attribute_args) = 0;
+
+  virtual bool UpdateCustomAccessibilityActions(
+      const std::vector<uint8_t>& actions_buffer,
+      const std::vector<std::string>& action_strings) = 0;
+
+  virtual bool UpdateSemantics(const FlutterSemanticsUpdate2& update) = 0;
+
   virtual bool SetSemanticsEnabled(bool enabled) = 0;
+
+  virtual bool DispatchSemanticsAction(int32_t node_id,
+                                       FlutterSemanticsAction action,
+                                       const std::vector<uint8_t>& data = {},
+                                       int64_t view_id = 0) = 0;
+
+  virtual bool SetAccessibilityFeatures(int32_t flags) = 0;
 
   virtual bool SetApplicationLocale(const std::string& locale) = 0;
 
@@ -122,7 +140,25 @@ class JniRouter {
   bool RouteSemanticsUpdate(const std::vector<uint8_t>& buffer,
                             const std::vector<std::string>& strings);
 
+  bool RouteSemanticsUpdate(
+      const std::vector<uint8_t>& buffer,
+      const std::vector<std::string>& strings,
+      const std::vector<std::vector<uint8_t>>& string_attribute_args);
+
+  bool RouteCustomAccessibilityActions(
+      const std::vector<uint8_t>& actions_buffer,
+      const std::vector<std::string>& action_strings);
+
+  bool RouteSemanticsUpdate(const FlutterSemanticsUpdate2& update);
+
   bool RouteSemanticsEnabled(bool enabled);
+
+  bool RouteDispatchSemanticsAction(int32_t node_id,
+                                    FlutterSemanticsAction action,
+                                    const std::vector<uint8_t>& data = {},
+                                    int64_t view_id = 0);
+
+  bool RouteSetAccessibilityFeatures(int32_t flags);
 
   bool RouteApplicationLocale(const std::string& locale);
 
