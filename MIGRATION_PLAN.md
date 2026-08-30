@@ -29,6 +29,10 @@ This document represents the synthesized blueprint for migrating the Flutter And
 * **1.5 C-API Extension (Vulkan)**: Expand `embedder.h` with opaque cross-platform abstractions for Vulkan External Textures.
 * **1.6 C-API Extension (AHardwareBuffer)**: Expand `embedder.h` with opaque abstractions for Android `AHardwareBuffer` zero-copy textures.
 * **1.7 C-API Extension (Engine Spawn)**: Expand `embedder.h` with `FlutterEngineSpawn` support for Add-to-App capabilities.
+* **1.8 C-API Extension (Dart Deferred Components)**: Expand `embedder.h` with `FlutterEngineLoadDartDeferredLibrary` and corresponding struct configurations to map Play Feature Delivery components safely.
+* **1.9 C-API Extension (Screenshot API)**: Expand `embedder.h` with `FlutterEngineScreenshot` and `FlutterEngineFreeScreenshot` to synchronously capture raster bitmaps across the boundary.
+* **1.10 C-API Extension (Raster Context Hooks)**: Expand `FlutterProjectArgs` with `raster_thread_context_make_current` and `clear_current` to explicitly route Thread/EGL context lifetimes.
+* **1.11 C-API Extension (Thread Priorities)**: Expand `FlutterProjectArgs` with `custom_task_runners` mapping Android's `ALooper` and strict thread priorities (e.g. `PRIORITY_DISPLAY`) onto the backend.
 
 ### Phase 2: Decoupled Subsystems
 * **2.1 Asset Resolver**: Adapt `APKAssetProvider`.
@@ -39,6 +43,7 @@ This document represents the synthesized blueprint for migrating the Flutter And
 * **2.6 Platform Views**: Wire `AndroidPlatformView` and `PlatformViewsController` integrations.
 * **2.7 Window Metrics Translation**: The C-API uses `FlutterEngineSendWindowMetricsEvent` to handle display DPI, padding, and cutouts. Route Java metrics here to safely drop `android_display.cc`.
 * **2.8 AChoreographer VSync Routing**: Utilize the Phase 1.4 Virtualization `OSLibraryLoader` to capture `AChoreographer` callbacks and route them into `FlutterProjectArgs::vsync_callback` to fix 120Hz frame pacing before legacy files drop.
+* **2.9 Global VM Initialization (`flutter_main.cc`)**: Migrate global startup (AOT snapshot mapping, ICU data mounting) out of legacy Android singletons into the public `FlutterEngineInitialize` API.
 
 ### Phase 3: Advanced Graphics & Multi-Engine Integration
 * **3.1 AHardwareBuffer**: Wire the Android implementation to the Phase 1 opaque hooks via `OSLibraryLoader`.

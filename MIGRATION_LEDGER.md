@@ -31,6 +31,22 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [ ] `embedder.h` API extension: `FlutterEngineSpawn`.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: `embedder_unittests` covering EngineSpawn pass.
+- [ ] **1.8 C-API Extension (Dart Deferred Components)**:
+    - [ ] `embedder.h` API extension: `FlutterEngineLoadDartDeferredLibrary`.
+    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [ ] *Validation*: `embedder_unittests` covering deferred library loading pass.
+- [ ] **1.9 C-API Extension (Screenshot API)**:
+    - [ ] `embedder.h` API extension: `FlutterEngineScreenshot` and `FlutterEngineFreeScreenshot`.
+    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [ ] *Validation*: `embedder_unittests` covering screenshot structs pass.
+- [ ] **1.10 C-API Extension (Raster Context Hooks)**:
+    - [ ] `embedder.h` API extension: `raster_thread_context_make_current` and `clear_current`.
+    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [ ] *Validation*: `embedder_unittests` covering context hooks pass.
+- [ ] **1.11 C-API Extension (Thread Priorities)**:
+    - [ ] `embedder.h` API extension: `custom_task_runners` with Android thread mapping.
+    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [ ] *Validation*: `embedder_unittests` covering task runners pass.
 
 
 - [ ] **Phase 1 Parity Checkpoint**:
@@ -73,6 +89,12 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [ ] `AChoreographer_postFrameCallback` mapped to `FlutterProjectArgs::vsync_callback` via `OSLibraryLoader`.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [ ] *Validation*: `dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart` passes, and Perfetto traces confirm strict frame pacing correctness.
+
+
+- [ ] **2.9 Global VM Initialization (`flutter_main.cc`)**:
+    - [ ] Route global ICU, font, and AOT snapshot mapping entirely via `FlutterEngineInitialize`.
+    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [ ] *Validation*: `devicelab` App startup does not stall or lose AOT symbol maps.
 
 
 - [ ] **Phase 2 Parity Checkpoint**:
