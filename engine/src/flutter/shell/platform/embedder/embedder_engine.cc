@@ -22,20 +22,34 @@ struct ShellArgs {
 };
 
 EmbedderEngine::EmbedderEngine(
-    std::unique_ptr<EmbedderThreadHost> thread_host,
+    std::shared_ptr<EmbedderThreadHost> thread_host,
     const flutter::TaskRunners& task_runners,
     const flutter::Settings& settings,
     RunConfiguration run_configuration,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
-    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver,
+    std::optional<FlutterRendererConfig> renderer_config)
     : thread_host_(std::move(thread_host)),
       task_runners_(task_runners),
       run_configuration_(std::move(run_configuration)),
       shell_args_(std::make_unique<ShellArgs>(settings,
                                               on_create_platform_view,
                                               on_create_rasterizer)),
-      external_texture_resolver_(std::move(external_texture_resolver)) {}
+      external_texture_resolver_(std::move(external_texture_resolver)),
+      renderer_config_(renderer_config) {}
+
+EmbedderEngine::EmbedderEngine(
+    std::shared_ptr<EmbedderThreadHost> thread_host,
+    const flutter::TaskRunners& task_runners,
+    std::unique_ptr<Shell> shell,
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver,
+    std::optional<FlutterRendererConfig> renderer_config)
+    : thread_host_(std::move(thread_host)),
+      task_runners_(task_runners),
+      shell_(std::move(shell)),
+      external_texture_resolver_(std::move(external_texture_resolver)),
+      renderer_config_(renderer_config) {}
 
 EmbedderEngine::~EmbedderEngine() = default;
 
@@ -70,13 +84,20 @@ void EmbedderEngine::CollectThreadHost() {
     return;
   }
 
-  // Once the collected, EmbedderThreadHost::RunnerIsValid will return false for
-  // all runners belonging to this thread host. This must be done with UI task
-  // runner blocked to prevent possible raciness that could happen when
-  // destroying the thread host in the middle of UI task runner execution. This
-  // is not an issue for other runners, because raster task runner should not
-  // have anything scheduled after engine shutdown and platform task runner is
-  // where this method is called from.
+  // Once collected, EmbedderThreadHost::RunnerIsValid will return false for
+  // all runners belonging to this thread host. If other engines are still
+  // sharing this thread host (e.g. spawned engines), only invalidate and
+  // destroy when the last engine collects it.
+  if (thread_host_.use_count() > 1) {
+    thread_host_.reset();
+    return;
+  }
+
+  // This must be done with UI task runner blocked to prevent possible
+  // raciness that could happen when destroying the thread host in the middle
+  // of UI task runner execution. This is not an issue for other runners,
+  // because raster task runner should not have anything scheduled after engine
+  // shutdown and platform task runner is where this method is called from.
   if (thread_host_->GetTaskRunners().GetUITaskRunner() &&
       !thread_host_->GetTaskRunners()
            .GetUITaskRunner()
@@ -106,10 +127,13 @@ void EmbedderEngine::CollectThreadHost() {
 }
 
 bool EmbedderEngine::RunRootIsolate() {
-  if (!IsValid() || !run_configuration_.IsValid()) {
+  if (!IsValid() || !run_configuration_.has_value() ||
+      !run_configuration_->IsValid()) {
     return false;
   }
-  shell_->RunEngine(std::move(run_configuration_));
+  auto config = std::move(run_configuration_.value());
+  run_configuration_.reset();
+  shell_->RunEngine(std::move(config));
   return true;
 }
 
@@ -347,6 +371,41 @@ bool EmbedderEngine::ScheduleFrame() {
 Shell& EmbedderEngine::GetShell() {
   FML_DCHECK(shell_);
   return *shell_.get();
+}
+
+const std::optional<FlutterRendererConfig>& EmbedderEngine::GetRendererConfig()
+    const {
+  return renderer_config_;
+}
+
+std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
+    RunConfiguration run_configuration,
+    const std::string& initial_route,
+    const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver,
+    std::optional<FlutterRendererConfig> renderer_config) const {
+  TRACE_EVENT0("flutter", "EmbedderEngine::Spawn");
+  if (!IsValid() || !run_configuration.IsValid()) {
+    return nullptr;
+  }
+
+  std::unique_ptr<Shell> spawned_shell =
+      shell_->Spawn(std::move(run_configuration), initial_route,
+                    on_create_platform_view, on_create_rasterizer);
+  if (!spawned_shell) {
+    return nullptr;
+  }
+
+  auto spawned_engine = std::make_unique<EmbedderEngine>(
+      thread_host_, task_runners_, std::move(spawned_shell),
+      std::move(external_texture_resolver), renderer_config);
+
+  if (!spawned_engine->NotifyCreated()) {
+    return nullptr;
+  }
+
+  return spawned_engine;
 }
 
 }  // namespace flutter
