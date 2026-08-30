@@ -8,6 +8,7 @@
 
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
+#include "flutter/shell/platform/android/android_vulkan_texture.h"
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 #include "flutter/shell/platform/android/jni_router.h"
@@ -23,6 +24,7 @@ namespace testing {
 using ::testing::_;
 using ::testing::DoAll;
 using ::testing::Eq;
+using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::SetArgPointee;
 using ::testing::StrictMock;
@@ -334,6 +336,61 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               OnHardwareBufferFrameAvailable,
               (int64_t texture_id),
               (override));
+
+  MOCK_METHOD(bool, RegisterVulkanTexture, (int64_t texture_id), (override));
+
+  MOCK_METHOD(bool, UnregisterVulkanTexture, (int64_t texture_id), (override));
+
+  MOCK_METHOD(bool,
+              SetVulkanTextureFrame,
+              (int64_t texture_id,
+               std::shared_ptr<AndroidVulkanExternalTexture> texture),
+              (override));
+
+  MOCK_METHOD(bool,
+              SetVulkanTextureFrame,
+              (int64_t texture_id, const FlutterVulkanExternalTexture& texture),
+              (override));
+
+  MOCK_METHOD(bool,
+              GetVulkanTextureFrame,
+              (int64_t texture_id,
+               size_t width,
+               size_t height,
+               FlutterVulkanExternalTexture* texture_out),
+              (override));
+
+  MOCK_METHOD(bool,
+              OnVulkanTextureFrameAvailable,
+              (int64_t texture_id),
+              (override));
+};
+
+class MockVulkanTextureProvider : public AndroidVulkanTextureProvider {
+ public:
+  MOCK_METHOD(bool, IsAvailable, (), (const, override));
+  MOCK_METHOD(bool,
+              IsSupported,
+              (const AndroidVulkanImageDesc& desc),
+              (const, override));
+  MOCK_METHOD(std::unique_ptr<AndroidVulkanExternalTexture>,
+              AllocateTexture,
+              (const AndroidVulkanImageDesc& desc),
+              (override));
+  MOCK_METHOD(std::unique_ptr<AndroidVulkanExternalTexture>,
+              CreateFromNativeImage,
+              (uint64_t image_handle,
+               const AndroidVulkanImageDesc& desc,
+               bool take_ownership),
+              (override));
+  MOCK_METHOD(std::unique_ptr<AndroidVulkanExternalTexture>,
+              CreateFromAHardwareBuffer,
+              (const AndroidHardwareBuffer* hardware_buffer,
+               const AndroidVulkanYcbcrConversionDesc* ycbcr_desc),
+              (override));
+  MOCK_METHOD(void, Acquire, (uint64_t image_handle), (override));
+  MOCK_METHOD(void, Release, (uint64_t image_handle), (override));
+  MOCK_METHOD(void*, ResolveVulkanSymbol, (const char* name), (override));
 };
 
 class MockHardwareBufferProvider : public AndroidHardwareBufferProvider {
@@ -3423,6 +3480,343 @@ TEST(HardwareBufferTest, DestructionCallbackLifecycle) {
   // Unregistering texture triggers destruction callback on frame2
   EXPECT_TRUE(delegate.UnregisterHardwareBufferTexture(texture_id));
   EXPECT_EQ(g_destroyed_count, 2);
+}
+
+TEST(VulkanExternalTextureTest, JniDelegateVulkanOperations) {
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("onVulkanTextureFrameAvailable", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("unregisterVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+
+  JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                       nullptr, nullptr, nullptr, vk_provider);
+
+  EXPECT_EQ(delegate.GetVulkanTextureProvider(), vk_provider);
+
+  int64_t texture_id = 999;
+  EXPECT_TRUE(delegate.RegisterVulkanTexture(texture_id));
+
+  // 1. Set frame using AndroidVulkanExternalTexture object
+  auto desc = AndroidVulkanImageDesc::MakeRGBA8(1920, 1080);
+  uint64_t expected_handle = 0;
+  {
+    auto tex_obj = vk_provider->AllocateTexture(desc);
+    ASSERT_NE(tex_obj, nullptr);
+    expected_handle = tex_obj->GetImageHandle();
+    EXPECT_TRUE(delegate.SetVulkanTextureFrame(texture_id, std::move(tex_obj)));
+  }
+
+  FlutterVulkanExternalTexture out_frame = {};
+  EXPECT_TRUE(
+      delegate.GetVulkanTextureFrame(texture_id, 1920, 1080, &out_frame));
+  EXPECT_EQ(out_frame.struct_size, sizeof(FlutterVulkanExternalTexture));
+  EXPECT_EQ(out_frame.width, 1920u);
+  EXPECT_EQ(out_frame.height, 1080u);
+  EXPECT_EQ(out_frame.image, expected_handle);
+
+  // 2. Set frame using FlutterVulkanExternalTexture struct directly
+  FlutterVulkanExternalTexture direct_frame = {};
+  direct_frame.struct_size = sizeof(FlutterVulkanExternalTexture);
+  direct_frame.width = 1280;
+  direct_frame.height = 720;
+  direct_frame.image = 0x5555;
+  direct_frame.format =
+      static_cast<uint32_t>(AndroidVulkanFormat::kR8G8B8A8Unorm);
+  direct_frame.image_layout =
+      static_cast<uint32_t>(AndroidVulkanImageLayout::kShaderReadOnlyOptimal);
+
+  EXPECT_TRUE(delegate.SetVulkanTextureFrame(texture_id, direct_frame));
+
+  FlutterVulkanExternalTexture out_frame2 = {};
+  EXPECT_TRUE(
+      delegate.GetVulkanTextureFrame(texture_id, 1280, 720, &out_frame2));
+  EXPECT_EQ(out_frame2.width, 1280u);
+  EXPECT_EQ(out_frame2.height, 720u);
+  EXPECT_EQ(out_frame2.image, 0x5555u);
+
+  EXPECT_TRUE(delegate.OnVulkanTextureFrameAvailable(texture_id));
+  EXPECT_TRUE(delegate.UnregisterVulkanTexture(texture_id));
+
+  // Verify frame is erased after unregistering
+  FlutterVulkanExternalTexture out_frame3 = {};
+  EXPECT_FALSE(
+      delegate.GetVulkanTextureFrame(texture_id, 1280, 720, &out_frame3));
+}
+
+TEST(VulkanExternalTextureTest, JniRouterVulkanRoutingFlip) {
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  auto mock_legacy = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+  auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+
+  auto embedder_delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+      nullptr, vk_provider);
+
+  JniRouter router(embedder_delegate, mock_legacy);
+
+  int64_t texture_id = 777;
+
+  // --- Path 1: Legacy Routing (Flag = false) ---
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kLegacy);
+
+  EXPECT_CALL(*mock_legacy, RegisterVulkanTexture(texture_id))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_legacy, UnregisterVulkanTexture(texture_id))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_legacy, OnVulkanTextureFrameAvailable(texture_id))
+      .WillOnce(Return(true));
+
+  EXPECT_TRUE(router.RouteRegisterVulkanTexture(texture_id));
+  EXPECT_TRUE(router.RouteOnVulkanTextureFrameAvailable(texture_id));
+  EXPECT_TRUE(router.RouteUnregisterVulkanTexture(texture_id));
+
+  // --- Path 2: Embedder Routing (Flag = true) ---
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("onVulkanTextureFrameAvailable", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("unregisterVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+
+  EXPECT_TRUE(router.RouteRegisterVulkanTexture(texture_id));
+
+  auto desc = AndroidVulkanImageDesc::MakeRGBA8(800, 600);
+  auto tex_obj = vk_provider->AllocateTexture(desc);
+  EXPECT_TRUE(
+      router.RouteSetVulkanTextureFrame(texture_id, std::move(tex_obj)));
+
+  FlutterVulkanExternalTexture out_tex = {};
+  EXPECT_TRUE(
+      router.RouteGetVulkanTextureFrame(texture_id, 800, 600, &out_tex));
+  EXPECT_EQ(out_tex.width, 800u);
+  EXPECT_EQ(out_tex.height, 600u);
+
+  EXPECT_TRUE(router.RouteOnVulkanTextureFrameAvailable(texture_id));
+  EXPECT_TRUE(router.RouteUnregisterVulkanTexture(texture_id));
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+TEST(VulkanExternalTextureTest, FlutterEmbedderNativeVulkanIntegration) {
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("onVulkanTextureFrameAvailable", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("unregisterVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               vk_provider);
+
+  EXPECT_EQ(native.GetVulkanTextureProvider(), vk_provider);
+
+  int64_t texture_id = 888;
+  auto desc = AndroidVulkanImageDesc::MakeRGBA8(1920, 1080);
+  auto initial_texture = vk_provider->AllocateTexture(desc);
+  uint64_t expected_handle = initial_texture->GetImageHandle();
+
+  EXPECT_TRUE(
+      native.RegisterVulkanTexture(texture_id, std::move(initial_texture)));
+
+  FlutterVulkanExternalTexture out_frame = {};
+  EXPECT_TRUE(native.GetVulkanTextureFrame(texture_id, 1920, 1080, &out_frame));
+  EXPECT_EQ(out_frame.width, 1920u);
+  EXPECT_EQ(out_frame.height, 1080u);
+
+  // Test static C-API frame callback
+  auto cb = FlutterEmbedderNative::GetVulkanExternalTextureFrameCallback();
+  ASSERT_NE(cb, nullptr);
+
+  FlutterVulkanExternalTexture cb_out_frame = {};
+  EXPECT_TRUE(cb(&native, texture_id, 1920, 1080, &cb_out_frame));
+  EXPECT_EQ(cb_out_frame.width, 1920u);
+  EXPECT_EQ(cb_out_frame.height, 1080u);
+  EXPECT_EQ(cb_out_frame.image, expected_handle);
+
+  EXPECT_TRUE(native.OnVulkanTextureFrameAvailable(texture_id));
+  EXPECT_TRUE(native.UnregisterVulkanTexture(texture_id));
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+TEST(VulkanExternalTextureTest,
+     FlutterEmbedderNativeVulkanExternalTextureEngineAPIs) {
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  FlutterEmbedderNative native(mock_invoker);
+
+  EXPECT_EQ(native.MarkExternalTextureFrameAvailable(nullptr, 456),
+            kInvalidArguments);
+  EXPECT_EQ(native.RegisterExternalTexture(nullptr, 456), kInvalidArguments);
+  EXPECT_EQ(native.UnregisterExternalTexture(nullptr, 456), kInvalidArguments);
+}
+
+TEST(VulkanExternalTextureTest, VulkanDestructionCallbackLifecycle) {
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("unregisterVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+
+  JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                       nullptr, nullptr, nullptr, vk_provider);
+
+  int64_t texture_id = 444;
+  EXPECT_TRUE(delegate.RegisterVulkanTexture(texture_id));
+
+  static int g_vk_destroyed_count = 0;
+  g_vk_destroyed_count = 0;
+
+  auto callback = [](void* user_data) { g_vk_destroyed_count++; };
+
+  FlutterVulkanExternalTexture frame1 = {};
+  frame1.struct_size = sizeof(FlutterVulkanExternalTexture);
+  frame1.width = 100;
+  frame1.height = 100;
+  frame1.destruction_callback = callback;
+  frame1.user_data = reinterpret_cast<void*>(0x1);
+
+  EXPECT_TRUE(delegate.SetVulkanTextureFrame(texture_id, frame1));
+  EXPECT_EQ(g_vk_destroyed_count, 0);
+
+  // Overwriting frame triggers destruction callback on frame1
+  FlutterVulkanExternalTexture frame2 = {};
+  frame2.struct_size = sizeof(FlutterVulkanExternalTexture);
+  frame2.width = 200;
+  frame2.height = 200;
+  frame2.destruction_callback = callback;
+  frame2.user_data = reinterpret_cast<void*>(0x2);
+
+  EXPECT_TRUE(delegate.SetVulkanTextureFrame(texture_id, frame2));
+  EXPECT_EQ(g_vk_destroyed_count, 1);
+
+  // Unregistering texture triggers destruction callback on frame2
+  EXPECT_TRUE(delegate.UnregisterVulkanTexture(texture_id));
+  EXPECT_EQ(g_vk_destroyed_count, 2);
+}
+
+TEST(VulkanExternalTextureTest, VulkanYCbCrConversionConversionAndSampling) {
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("unregisterVulkanTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+
+  JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                       nullptr, nullptr, nullptr, vk_provider);
+
+  int64_t texture_id = 333;
+  EXPECT_TRUE(delegate.RegisterVulkanTexture(texture_id));
+
+  constexpr uint64_t ext_format_id = 0xCAFEBABE1234ULL;
+  auto ycbcr = AndroidVulkanYcbcrConversionDesc::MakeExternal(
+      ext_format_id, AndroidVulkanYcbcrModel::kYcbcr709,
+      AndroidVulkanYcbcrRange::kItuFull,
+      AndroidVulkanChromaLocation::kCositedEven, AndroidVulkanFilter::kLinear);
+
+  auto desc = AndroidVulkanImageDesc::MakeYcbcr(1920, 1080, ycbcr);
+  auto tex_obj = vk_provider->AllocateTexture(desc);
+  ASSERT_NE(tex_obj, nullptr);
+  EXPECT_TRUE(tex_obj->HasYcbcrConversion());
+
+  EXPECT_TRUE(delegate.SetVulkanTextureFrame(texture_id, std::move(tex_obj)));
+
+  FlutterVulkanExternalTexture out_frame = {};
+  EXPECT_TRUE(
+      delegate.GetVulkanTextureFrame(texture_id, 1920, 1080, &out_frame));
+  EXPECT_EQ(out_frame.width, 1920u);
+  EXPECT_EQ(out_frame.height, 1080u);
+  ASSERT_NE(out_frame.ycbcr_conversion_info, nullptr);
+  EXPECT_EQ(out_frame.ycbcr_conversion_info->struct_size,
+            sizeof(FlutterVulkanYcbcrConversionInfo));
+  EXPECT_EQ(out_frame.ycbcr_conversion_info->external_format, ext_format_id);
+  EXPECT_EQ(out_frame.ycbcr_conversion_info->ycbcr_model,
+            static_cast<uint32_t>(AndroidVulkanYcbcrModel::kYcbcr709));
+  EXPECT_EQ(out_frame.ycbcr_conversion_info->ycbcr_range,
+            static_cast<uint32_t>(AndroidVulkanYcbcrRange::kItuFull));
+
+  EXPECT_TRUE(delegate.UnregisterVulkanTexture(texture_id));
+}
+
+TEST(VulkanExternalTextureTest, ThreadSafeConcurrentVulkanOperations) {
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
+      .WillByDefault(Return(true));
+  auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               vk_provider);
+
+  constexpr int kThreadCount = 8;
+  constexpr int kIterationsPerThread = 25;
+
+  std::vector<std::future<void>> futures;
+  futures.reserve(kThreadCount);
+
+  for (int t = 0; t < kThreadCount; ++t) {
+    futures.push_back(std::async(std::launch::async, [&native, vk_provider,
+                                                      t]() {
+      for (int i = 0; i < kIterationsPerThread; ++i) {
+        int64_t texture_id = 10000 + (t * 100) + i;
+        auto desc = AndroidVulkanImageDesc::MakeRGBA8(800, 600);
+        auto tex = vk_provider->AllocateTexture(desc);
+        ASSERT_NE(tex, nullptr);
+
+        EXPECT_TRUE(native.RegisterVulkanTexture(texture_id, std::move(tex)));
+
+        FlutterVulkanExternalTexture out_tex = {};
+        EXPECT_TRUE(
+            native.GetVulkanTextureFrame(texture_id, 800, 600, &out_tex));
+        EXPECT_EQ(out_tex.width, 800u);
+        EXPECT_EQ(out_tex.height, 600u);
+
+        EXPECT_TRUE(native.OnVulkanTextureFrameAvailable(texture_id));
+        EXPECT_TRUE(native.UnregisterVulkanTexture(texture_id));
+      }
+    }));
+  }
+
+  for (auto& f : futures) {
+    f.get();
+  }
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
 }
 
 }  // namespace testing

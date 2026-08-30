@@ -939,5 +939,107 @@ bool JniRouter::RouteOnHardwareBufferFrameAvailable(int64_t texture_id) {
   return false;
 }
 
+bool JniRouter::RouteRegisterVulkanTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteRegisterVulkanTexture", "texture_id",
+               std::to_string(texture_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->RegisterVulkanTexture(texture_id);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->RegisterVulkanTexture(texture_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteUnregisterVulkanTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteUnregisterVulkanTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->UnregisterVulkanTexture(texture_id);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->UnregisterVulkanTexture(texture_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetVulkanTextureFrame(
+    int64_t texture_id,
+    const std::shared_ptr<AndroidVulkanExternalTexture>& texture) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetVulkanTextureFrame(object)",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->SetVulkanTextureFrame(texture_id,
+                                                       std::move(texture));
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->SetVulkanTextureFrame(texture_id,
+                                                   std::move(texture));
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetVulkanTextureFrame(
+    int64_t texture_id,
+    const FlutterVulkanExternalTexture& texture) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetVulkanTextureFrame(struct)",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->SetVulkanTextureFrame(texture_id, texture);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->SetVulkanTextureFrame(texture_id, texture);
+  }
+  return false;
+}
+
+bool JniRouter::RouteGetVulkanTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterVulkanExternalTexture* texture_out) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteGetVulkanTextureFrame", "texture_id",
+               std::to_string(texture_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->GetVulkanTextureFrame(texture_id, width,
+                                                       height, texture_out);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->GetVulkanTextureFrame(texture_id, width, height,
+                                                   texture_out);
+  }
+  return false;
+}
+
+bool JniRouter::RouteOnVulkanTextureFrameAvailable(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteOnVulkanTextureFrameAvailable",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->OnVulkanTextureFrameAvailable(texture_id);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->OnVulkanTextureFrameAvailable(texture_id);
+  }
+  return false;
+}
+
 }  // namespace android
 }  // namespace flutter

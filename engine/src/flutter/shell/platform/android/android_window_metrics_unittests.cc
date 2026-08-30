@@ -272,6 +272,28 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
               OnHardwareBufferFrameAvailable,
               (int64_t texture_id),
               (override));
+  MOCK_METHOD(bool, RegisterVulkanTexture, (int64_t texture_id), (override));
+  MOCK_METHOD(bool, UnregisterVulkanTexture, (int64_t texture_id), (override));
+  MOCK_METHOD(bool,
+              SetVulkanTextureFrame,
+              (int64_t texture_id,
+               const std::shared_ptr<AndroidVulkanExternalTexture>& texture),
+              (override));
+  MOCK_METHOD(bool,
+              SetVulkanTextureFrame,
+              (int64_t texture_id, const FlutterVulkanExternalTexture& texture),
+              (override));
+  MOCK_METHOD(bool,
+              GetVulkanTextureFrame,
+              (int64_t texture_id,
+               size_t width,
+               size_t height,
+               FlutterVulkanExternalTexture* texture_out),
+              (override));
+  MOCK_METHOD(bool,
+              OnVulkanTextureFrameAvailable,
+              (int64_t texture_id),
+              (override));
 };
 
 // ---------------------------------------------------------------------------
