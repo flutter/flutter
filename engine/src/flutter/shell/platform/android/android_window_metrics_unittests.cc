@@ -24,6 +24,14 @@ using ::testing::StrictMock;
 
 class MockJvmInvokerForMetrics : public JvmInvoker {
  public:
+  MockJvmInvokerForMetrics() {
+    ON_CALL(*this, InvokeVoidMethod(::testing::_, ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this,
+            InvokeBooleanMethod(::testing::_, ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
+  }
+
   MOCK_METHOD(bool, EnsureAttachedToThread, (), (override));
   MOCK_METHOD(void, DetachFromThread, (), (override));
   MOCK_METHOD(bool, HasPendingException, (), (const, override));
@@ -219,10 +227,52 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
               (override));
   MOCK_METHOD(bool, ShowOverlaySurface, (int32_t surface_id), (override));
   MOCK_METHOD(bool, HideOverlaySurface, (int32_t surface_id), (override));
+  MOCK_METHOD(bool, SetHcppEnabled, (bool enabled), (override));
   MOCK_METHOD(bool, CreatePlatformViewTransaction, (), (override));
   MOCK_METHOD(bool, SwapPlatformViewTransactions, (), (override));
   MOCK_METHOD(bool, ApplyPlatformViewTransactions, (), (override));
   MOCK_METHOD(bool, IsHcppEnabled, (), (const, override));
+  MOCK_METHOD(bool,
+              CreateSurfaceControl,
+              (int64_t surface_id, const std::string& debug_name),
+              (override));
+  MOCK_METHOD(bool, DestroySurfaceControl, (int64_t surface_id), (override));
+  MOCK_METHOD(bool,
+              ReparentSurfaceControl,
+              (int64_t surface_id, int64_t new_parent_id),
+              (override));
+  MOCK_METHOD(bool,
+              SetSurfaceControlGeometry,
+              (int64_t surface_id,
+               const AndroidSurfaceControlRect& source,
+               const AndroidSurfaceControlRect& destination,
+               int32_t transform),
+              (override));
+  MOCK_METHOD(bool,
+              SetSurfaceControlVisibility,
+              (int64_t surface_id, bool visible),
+              (override));
+  MOCK_METHOD(bool,
+              SetSurfaceControlZOrder,
+              (int64_t surface_id, int32_t z_order),
+              (override));
+  MOCK_METHOD(bool,
+              SetSurfaceControlDamageRegion,
+              (int64_t surface_id,
+               const std::vector<AndroidSurfaceControlRect>& rects),
+              (override));
+  MOCK_METHOD(bool,
+              SetSurfaceControlBuffer,
+              (int64_t surface_id, void* buffer, int fence_fd),
+              (override));
+  MOCK_METHOD(bool,
+              SetSurfaceControlBufferAlpha,
+              (int64_t surface_id, float alpha),
+              (override));
+  MOCK_METHOD(bool,
+              SetSurfaceControlColor,
+              (int64_t surface_id, float r, float g, float b, float alpha),
+              (override));
   MOCK_METHOD(bool,
               PushPlatformViewMutators,
               (int64_t view_id,

@@ -325,6 +325,12 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       hardware_buffer_provider_(
           std::make_shared<DefaultAndroidHardwareBufferProvider>(
               library_loader_)),
+      vulkan_texture_provider_(
+          std::make_shared<DefaultAndroidVulkanTextureProvider>(
+              library_loader_)),
+      surface_control_provider_(
+          std::make_shared<DefaultAndroidSurfaceControlProvider>(
+              library_loader_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -335,7 +341,9 @@ FlutterEmbedderNative::FlutterEmbedderNative()
                                                   window_metrics_provider_,
                                                   vsync_waiter_,
                                                   vm_init_,
-                                                  hardware_buffer_provider_)),
+                                                  hardware_buffer_provider_,
+                                                  vulkan_texture_provider_,
+                                                  surface_control_provider_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
       asset_provider_(std::make_shared<APKAssetProvider>(
           std::make_shared<InMemoryAPKAssetProviderImpl>())) {
@@ -360,7 +368,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<AndroidAOTProvider> aot_provider,
     std::shared_ptr<AndroidVMInit> vm_init,
     std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider,
-    std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider)
+    std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider,
+    std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(callback_cache
                           ? std::move(callback_cache)
@@ -411,6 +420,11 @@ FlutterEmbedderNative::FlutterEmbedderNative(
               ? std::move(vulkan_texture_provider)
               : std::make_shared<DefaultAndroidVulkanTextureProvider>(
                     library_loader_)),
+      surface_control_provider_(
+          surface_control_provider
+              ? std::move(surface_control_provider)
+              : std::make_shared<DefaultAndroidSurfaceControlProvider>(
+                    library_loader_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -422,7 +436,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
                                                   vsync_waiter_,
                                                   vm_init_,
                                                   hardware_buffer_provider_,
-                                                  vulkan_texture_provider_)),
+                                                  vulkan_texture_provider_,
+                                                  surface_control_provider_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, legacy_delegate)),
       asset_provider_(
           asset_provider
@@ -487,13 +502,14 @@ std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
     std::shared_ptr<AndroidVsyncWaiter> vsync_waiter,
     std::shared_ptr<AndroidVMInit> vm_init,
     std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider,
-    std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider) {
+    std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider,
+    std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateDefaultRouter");
   auto delegate = std::make_shared<JniDelegate>(
       std::move(invoker), nullptr, nullptr, std::move(platform_views_provider),
       std::move(window_metrics_provider), std::move(vsync_waiter),
       std::move(vm_init), std::move(hardware_buffer_provider),
-      std::move(vulkan_texture_provider));
+      std::move(vulkan_texture_provider), std::move(surface_control_provider));
   return std::make_shared<JniRouter>(std::move(delegate), legacy_delegate);
 }
 
@@ -860,6 +876,23 @@ bool FlutterEmbedderNative::HideOverlaySurface(int32_t surface_id) const {
   return jni_router_->RouteHideOverlaySurface(surface_id);
 }
 
+bool FlutterEmbedderNative::SetHcppEnabled(bool enabled) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SetHcppEnabled", "enabled",
+               enabled ? "true" : "false");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetHcppEnabled(enabled);
+}
+
+bool FlutterEmbedderNative::IsHcppEnabled() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::IsHcppEnabled");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteIsHcppEnabled();
+}
+
 bool FlutterEmbedderNative::CreatePlatformViewTransaction() const {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::CreatePlatformViewTransaction");
@@ -887,12 +920,136 @@ bool FlutterEmbedderNative::ApplyPlatformViewTransactions() const {
   return jni_router_->RouteApplyPlatformViewTransactions();
 }
 
-bool FlutterEmbedderNative::IsHcppEnabled() const {
-  TRACE_EVENT0("flutter", "FlutterEmbedderNative::IsHcppEnabled");
+bool FlutterEmbedderNative::CreateSurfaceControl(
+    int64_t surface_id,
+    const std::string& debug_name) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::CreateSurfaceControl",
+               "surface_id", std::to_string(surface_id).c_str());
   if (!jni_router_) {
     return false;
   }
-  return jni_router_->RouteIsHcppEnabled();
+  return jni_router_->RouteCreateSurfaceControl(surface_id, debug_name);
+}
+
+bool FlutterEmbedderNative::DestroySurfaceControl(int64_t surface_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::DestroySurfaceControl",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteDestroySurfaceControl(surface_id);
+}
+
+bool FlutterEmbedderNative::ReparentSurfaceControl(
+    int64_t surface_id,
+    int64_t new_parent_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::ReparentSurfaceControl",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteReparentSurfaceControl(surface_id, new_parent_id);
+}
+
+bool FlutterEmbedderNative::SetSurfaceControlGeometry(
+    int64_t surface_id,
+    const AndroidSurfaceControlRect& source,
+    const AndroidSurfaceControlRect& destination,
+    int32_t transform) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SetSurfaceControlGeometry",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetSurfaceControlGeometry(surface_id, source,
+                                                     destination, transform);
+}
+
+bool FlutterEmbedderNative::SetSurfaceControlVisibility(int64_t surface_id,
+                                                        bool visible) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SetSurfaceControlVisibility",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetSurfaceControlVisibility(surface_id, visible);
+}
+
+bool FlutterEmbedderNative::SetSurfaceControlZOrder(int64_t surface_id,
+                                                    int32_t z_order) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SetSurfaceControlZOrder",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetSurfaceControlZOrder(surface_id, z_order);
+}
+
+bool FlutterEmbedderNative::SetSurfaceControlDamageRegion(
+    int64_t surface_id,
+    const std::vector<AndroidSurfaceControlRect>& rects) const {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::SetSurfaceControlDamageRegion",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetSurfaceControlDamageRegion(surface_id, rects);
+}
+
+bool FlutterEmbedderNative::SetSurfaceControlBuffer(int64_t surface_id,
+                                                    void* buffer,
+                                                    int fence_fd) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SetSurfaceControlBuffer",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetSurfaceControlBuffer(surface_id, buffer,
+                                                   fence_fd);
+}
+
+bool FlutterEmbedderNative::SetSurfaceControlBufferAlpha(int64_t surface_id,
+                                                         float alpha) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SetSurfaceControlBufferAlpha",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetSurfaceControlBufferAlpha(surface_id, alpha);
+}
+
+bool FlutterEmbedderNative::SetSurfaceControlColor(int64_t surface_id,
+                                                   float r,
+                                                   float g,
+                                                   float b,
+                                                   float alpha) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SetSurfaceControlColor",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetSurfaceControlColor(surface_id, r, g, b, alpha);
+}
+
+std::optional<AndroidSurfaceControlState>
+FlutterEmbedderNative::GetSurfaceControlState(int64_t surface_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::GetSurfaceControlState",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return std::nullopt;
+  }
+  return jni_router_->RouteGetSurfaceControlState(surface_id);
+}
+
+std::shared_ptr<AndroidSurfaceControl> FlutterEmbedderNative::GetSurfaceControl(
+    int64_t surface_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::GetSurfaceControl",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (!jni_router_) {
+    return nullptr;
+  }
+  return jni_router_->RouteGetSurfaceControl(surface_id);
 }
 
 AndroidMutatorsStack FlutterEmbedderNative::MapPlatformViewMutations(
@@ -1900,6 +2057,24 @@ FlutterEmbedderNative::GetVulkanExternalTextureFrameCallback() {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::GetVulkanExternalTextureFrameCallback");
   return &FlutterEmbedderNative::OnVulkanExternalTextureFrameCallback;
+}
+
+std::shared_ptr<AndroidSurfaceControlProvider>
+FlutterEmbedderNative::GetSurfaceControlProvider() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetSurfaceControlProvider");
+  return surface_control_provider_;
+}
+
+void FlutterEmbedderNative::SetSurfaceControlProvider(
+    std::shared_ptr<AndroidSurfaceControlProvider> provider) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetSurfaceControlProvider");
+  surface_control_provider_ =
+      provider ? std::move(provider)
+               : std::make_shared<DefaultAndroidSurfaceControlProvider>(
+                     library_loader_);
+  if (jni_delegate_) {
+    jni_delegate_->SetSurfaceControlProvider(surface_control_provider_);
+  }
 }
 
 }  // namespace android
