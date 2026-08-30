@@ -66,6 +66,53 @@ executable("flutter_shell_native_unittests") {
   ]
 }
 
+executable("flutter_embedder_native_unittests") {
+  visibility = [ "*" ]
+  testonly = true
+  sources = [ "flutter_embedder_native_unittests.cc" ]
+  public_configs = [ "//flutter:config" ]
+  deps = [
+    ":flutter_embedder_native_src",
+    "//flutter/fml",
+    "//flutter/third_party/googletest:gmock",
+    "//flutter/third_party/googletest:gtest",
+  ]
+}
+
+source_set("flutter_embedder_native_src") {
+  visibility = [ ":*" ]
+
+  sources = [
+    "flutter_embedder_native.cc",
+    "flutter_embedder_native.h",
+  ]
+
+  defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
+
+  public_deps = [
+    "//flutter/fml",
+    "//flutter/shell/platform/embedder:embedder_headers",
+  ]
+
+  deps = [ "//flutter/shell/platform/embedder:embedder_as_internal_library" ]
+
+  public_configs = [ "//flutter:config" ]
+
+  libs = [
+    "android",
+    "EGL",
+    "GLESv2",
+  ]
+}
+
+shared_library("flutter_embedder_native") {
+  inputs = [ "android_exports.lst" ]
+  output_name = "flutter_embedder"
+  deps = [ ":flutter_embedder_native_src" ]
+  ldflags = [ "-Wl,--version-script=" +
+              rebase_path("android_exports.lst", root_build_dir) ]
+}
+
 shared_library("flutter_shell_native") {
   inputs = [ "android_exports.lst" ]
   output_name = "flutter"

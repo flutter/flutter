@@ -194,6 +194,7 @@ group("unittests") {
       "//flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests",
       "//flutter/impeller/toolkit/android:apk_unittests",
       "//flutter/impeller/toolkit/android:unittests",
+      "//flutter/shell/platform/android:flutter_embedder_native_unittests",
       "//flutter/shell/platform/android:flutter_shell_native_unittests",
     ]
   }
