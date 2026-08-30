@@ -11,11 +11,13 @@ namespace flutter {
 namespace android {
 
 JniDelegate::JniDelegate(std::shared_ptr<JvmInvoker> jvm_invoker,
-                         std::shared_ptr<CallbackCacheProvider> callback_cache)
+                         std::shared_ptr<CallbackCacheProvider> callback_cache,
+                         std::shared_ptr<ImageDecoderProvider> image_decoder)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(callback_cache
                           ? std::move(callback_cache)
-                          : std::make_shared<DefaultCallbackCacheProvider>()) {
+                          : std::make_shared<DefaultCallbackCacheProvider>()),
+      image_decoder_(std::move(image_decoder)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
 }
@@ -234,6 +236,77 @@ void JniDelegate::SetCallbackCache(
 std::shared_ptr<CallbackCacheProvider> JniDelegate::GetCallbackCache() const {
   std::scoped_lock lock(callback_cache_mutex_);
   return callback_cache_;
+}
+
+bool JniDelegate::DecodeImage(const uint8_t* data,
+                              size_t size,
+                              int64_t generator_handle) {
+  TRACE_EVENT0("flutter", "JniDelegate::DecodeImage");
+  std::shared_ptr<ImageDecoderProvider> decoder;
+  {
+    std::scoped_lock lock(image_decoder_mutex_);
+    decoder = image_decoder_;
+  }
+  if (decoder) {
+    return decoder->DecodeImage(data, size, generator_handle);
+  }
+  if (!jvm_invoker_ || !data || size == 0) {
+    return false;
+  }
+  return jvm_invoker_->DecodeImage(data, size, generator_handle);
+}
+
+void JniDelegate::OnNativeImageHeader(int64_t generator_handle,
+                                      int32_t width,
+                                      int32_t height) {
+  TRACE_EVENT0("flutter", "JniDelegate::OnNativeImageHeader");
+  std::shared_ptr<ImageDecoderProvider> decoder;
+  {
+    std::scoped_lock lock(image_decoder_mutex_);
+    decoder = image_decoder_;
+  }
+  if (decoder) {
+    decoder->OnImageHeader(generator_handle, width, height);
+  }
+}
+
+std::optional<ImageHeaderInfo> JniDelegate::GetImageHeader(
+    int64_t generator_handle) {
+  TRACE_EVENT0("flutter", "JniDelegate::GetImageHeader");
+  std::shared_ptr<ImageDecoderProvider> decoder;
+  {
+    std::scoped_lock lock(image_decoder_mutex_);
+    decoder = image_decoder_;
+  }
+  if (decoder) {
+    return decoder->GetImageHeader(generator_handle);
+  }
+  return std::nullopt;
+}
+
+void JniDelegate::RemoveImageHeader(int64_t generator_handle) {
+  TRACE_EVENT0("flutter", "JniDelegate::RemoveImageHeader");
+  std::shared_ptr<ImageDecoderProvider> decoder;
+  {
+    std::scoped_lock lock(image_decoder_mutex_);
+    decoder = image_decoder_;
+  }
+  if (decoder) {
+    decoder->RemoveImageHeader(generator_handle);
+  }
+}
+
+void JniDelegate::SetImageDecoderProvider(
+    std::shared_ptr<ImageDecoderProvider> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetImageDecoderProvider");
+  std::scoped_lock lock(image_decoder_mutex_);
+  image_decoder_ = std::move(provider);
+}
+
+std::shared_ptr<ImageDecoderProvider> JniDelegate::GetImageDecoderProvider()
+    const {
+  std::scoped_lock lock(image_decoder_mutex_);
+  return image_decoder_;
 }
 
 }  // namespace android

@@ -116,6 +116,16 @@ bool DefaultJvmInvoker::RequestDartDeferredLibrary(int loading_unit_id) {
   return true;
 }
 
+bool DefaultJvmInvoker::DecodeImage(const uint8_t* data,
+                                    size_t size,
+                                    int64_t generator_handle) {
+  TRACE_EVENT0("flutter", "DefaultJvmInvoker::DecodeImage");
+  if (pending_exception_.load() || !data || size == 0) {
+    return false;
+  }
+  return true;
+}
+
 bool DefaultJvmInvoker::InvokeVoidMethod(const std::string& method_name,
                                          const std::string& signature,
                                          const std::vector<uint8_t>& payload) {

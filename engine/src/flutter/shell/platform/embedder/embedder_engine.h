@@ -109,6 +109,8 @@ class EmbedderEngine {
 
   bool Screenshot(FlutterEngineScreenshotInfo* screenshot_out);
 
+  bool RegisterImageDecoder(ImageGeneratorFactory factory, int32_t priority);
+
   Shell& GetShell();
 
   const std::optional<FlutterRendererConfig>& GetRendererConfig() const;

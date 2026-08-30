@@ -1803,3 +1803,13 @@ Future<void> a11y_main_multi_view() async {
   await semanticsChanged;
   notifySemanticsEnabled(PlatformDispatcher.instance.semanticsEnabled);
 }
+
+@pragma('vm:entry-point')
+void canRegisterImageDecoders() {
+  decodeImageFromList(Uint8List(1), (Image result) {
+    notifyWidthHeight(result.width, result.height);
+  });
+}
+
+@ffi.Native<ffi.Void Function(ffi.Int32, ffi.Int32)>(symbol: 'NotifyWidthHeight')
+external void notifyWidthHeight(int width, int height);

@@ -492,6 +492,32 @@ bool EmbedderEngine::Screenshot(FlutterEngineScreenshotInfo* screenshot_out) {
   return true;
 }
 
+bool EmbedderEngine::RegisterImageDecoder(ImageGeneratorFactory factory,
+                                          int32_t priority) {
+  TRACE_EVENT0("flutter", "EmbedderEngine::RegisterImageDecoder");
+  if (!IsValid()) {
+    return false;
+  }
+  auto runner = task_runners_.GetPlatformTaskRunner();
+  if (!runner) {
+    return false;
+  }
+  if (runner->RunsTasksOnCurrentThread()) {
+    shell_->RegisterImageDecoder(std::move(factory), priority);
+    return true;
+  }
+  fml::AutoResetWaitableEvent latch;
+  runner->PostTask(
+      [&shell = shell_, factory = std::move(factory), priority, &latch]() {
+        if (shell) {
+          shell->RegisterImageDecoder(std::move(factory), priority);
+        }
+        latch.Signal();
+      });
+  latch.Wait();
+  return true;
+}
+
 Shell& EmbedderEngine::GetShell() {
   FML_DCHECK(shell_);
   return *shell_.get();

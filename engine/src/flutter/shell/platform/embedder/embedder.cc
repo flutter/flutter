@@ -4336,6 +4336,172 @@ FlutterEngineResult FlutterEngineGetCallbackInformation(
   return kSuccess;
 }
 
+namespace {
+
+class EmbedderCustomImageGenerator : public flutter::ImageGenerator {
+ public:
+  explicit EmbedderCustomImageGenerator(const FlutterDecodedImage& image)
+      : image_(image),
+        image_info_(SkImageInfo::Make(image.width,
+                                      image.height,
+                                      kRGBA_8888_SkColorType,
+                                      kPremul_SkAlphaType)) {}
+
+  ~EmbedderCustomImageGenerator() override {
+    if (image_.destruction_callback) {
+      image_.destruction_callback(image_.user_data);
+    }
+  }
+
+  const SkImageInfo& GetInfo() override { return image_info_; }
+
+  unsigned int GetFrameCount() const override { return 1; }
+
+  unsigned int GetPlayCount() const override { return 1; }
+
+  const ImageGenerator::FrameInfo GetFrameInfo(
+      unsigned int frame_index) override {
+    return {.required_frame = std::nullopt,
+            .duration = 0,
+            .disposal_method = SkCodecAnimation::DisposalMethod::kKeep};
+  }
+
+  SkISize GetScaledDimensions(float desired_scale) override {
+    return image_info_.dimensions();
+  }
+
+  bool GetPixels(
+      const SkImageInfo& info,
+      void* pixels,
+      size_t row_bytes,
+      unsigned int frame_index = 0,
+      std::optional<unsigned int> prior_frame = std::nullopt) override {
+    if (!pixels || !image_.raw_pixels) {
+      return false;
+    }
+    if (info.colorType() != kRGBA_8888_SkColorType) {
+      return false;
+    }
+    const size_t copy_width = std::min(static_cast<size_t>(image_info_.width()),
+                                       static_cast<size_t>(info.width()));
+    const size_t copy_height =
+        std::min(static_cast<size_t>(image_info_.height()),
+                 static_cast<size_t>(info.height()));
+    const size_t bytes_per_pixel = 4;
+    const size_t copy_row_bytes = copy_width * bytes_per_pixel;
+
+    const uint8_t* src = reinterpret_cast<const uint8_t*>(image_.raw_pixels);
+    uint8_t* dst = reinterpret_cast<uint8_t*>(pixels);
+    for (size_t y = 0; y < copy_height; ++y) {
+      memcpy(dst + (y * row_bytes), src + (y * image_.row_bytes),
+             copy_row_bytes);
+    }
+    return true;
+  }
+
+ private:
+  FlutterDecodedImage image_;
+  SkImageInfo image_info_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderCustomImageGenerator);
+};
+
+static std::mutex s_image_decoder_registrations_mutex;
+static int64_t s_next_image_decoder_registration = 1;
+static std::map<int64_t, std::shared_ptr<std::atomic<bool>>>
+    s_image_decoder_registrations;
+
+}  // namespace
+
+FlutterEngineResult FlutterEngineRegisterImageDecoder(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterImageDecoderCallback callback,
+    void* user_data,
+    int32_t priority,
+    FlutterImageDecoderRegistration* registration_out) {
+  TRACE_EVENT0("flutter", "FlutterEngineRegisterImageDecoder");
+  if (!engine) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  if (!callback) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Image decoder callback was null.");
+  }
+
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  auto is_valid = std::make_shared<std::atomic<bool>>(true);
+  int64_t reg_id = 0;
+  {
+    std::lock_guard<std::mutex> lock(s_image_decoder_registrations_mutex);
+    reg_id = s_next_image_decoder_registration++;
+    s_image_decoder_registrations[reg_id] = is_valid;
+  }
+  if (registration_out) {
+    *registration_out = reg_id;
+  }
+
+  embedder_engine->RegisterImageDecoder(
+      [callback, user_data, is_valid](const sk_sp<SkData>& buffer)
+          -> std::shared_ptr<flutter::ImageGenerator> {
+        if (!is_valid->load()) {
+          return nullptr;
+        }
+        if (!buffer || buffer->isEmpty()) {
+          return nullptr;
+        }
+        FlutterDecodedImage decoded_image = {};
+        decoded_image.struct_size = sizeof(FlutterDecodedImage);
+        if (!callback(reinterpret_cast<const uint8_t*>(buffer->data()),
+                      buffer->size(), &decoded_image, user_data)) {
+          return nullptr;
+        }
+        if (!is_valid->load()) {
+          if (decoded_image.destruction_callback) {
+            decoded_image.destruction_callback(decoded_image.user_data);
+          }
+          return nullptr;
+        }
+        if (decoded_image.width == 0 || decoded_image.height == 0 ||
+            !decoded_image.raw_pixels || decoded_image.row_bytes == 0) {
+          if (decoded_image.destruction_callback) {
+            decoded_image.destruction_callback(decoded_image.user_data);
+          }
+          return nullptr;
+        }
+        return std::make_shared<EmbedderCustomImageGenerator>(decoded_image);
+      },
+      priority);
+
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineUnregisterImageDecoder(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterImageDecoderRegistration registration) {
+  TRACE_EVENT0("flutter", "FlutterEngineUnregisterImageDecoder");
+  if (!engine) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  std::shared_ptr<std::atomic<bool>> is_valid;
+  {
+    std::lock_guard<std::mutex> lock(s_image_decoder_registrations_mutex);
+    auto it = s_image_decoder_registrations.find(registration);
+    if (it != s_image_decoder_registrations.end()) {
+      is_valid = it->second;
+      s_image_decoder_registrations.erase(it);
+    }
+  }
+  if (is_valid) {
+    is_valid->store(false);
+    return kSuccess;
+  }
+  return LOG_EMBEDDER_ERROR(kInvalidArguments, "Registration ID was invalid.");
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -4399,6 +4565,8 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(Screenshot, FlutterEngineScreenshot);
   SET_PROC(FreeScreenshot, FlutterEngineFreeScreenshot);
   SET_PROC(GetCallbackInformation, FlutterEngineGetCallbackInformation);
+  SET_PROC(RegisterImageDecoder, FlutterEngineRegisterImageDecoder);
+  SET_PROC(UnregisterImageDecoder, FlutterEngineUnregisterImageDecoder);
 #undef SET_PROC
 
   return kSuccess;

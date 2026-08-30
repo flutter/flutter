@@ -33,6 +33,16 @@ struct DartCallbackInfo {
   }
 };
 
+/// @brief Decoupled representation of decoded image header metadata.
+struct ImageHeaderInfo {
+  int32_t width = 0;
+  int32_t height = 0;
+
+  bool operator==(const ImageHeaderInfo& other) const {
+    return width == other.width && height == other.height;
+  }
+};
+
 /// @brief Abstract provider interface for resolving Dart callback
 /// representations.
 class CallbackCacheProvider {
@@ -83,6 +93,29 @@ class InMemoryCallbackCacheProvider : public CallbackCacheProvider {
   FML_DISALLOW_COPY_AND_ASSIGN(InMemoryCallbackCacheProvider);
 };
 
+/// @brief Abstract provider interface for platform/custom image decoding.
+class ImageDecoderProvider {
+ public:
+  virtual ~ImageDecoderProvider() = default;
+
+  /// @brief Decodes image data given raw buffer bytes and generator handle.
+  virtual bool DecodeImage(const uint8_t* data,
+                           size_t size,
+                           int64_t generator_handle) = 0;
+
+  /// @brief Handles native image header notification callback.
+  virtual void OnImageHeader(int64_t generator_handle,
+                             int32_t width,
+                             int32_t height) = 0;
+
+  /// @brief Returns the decoded image header info for a generator handle.
+  virtual std::optional<ImageHeaderInfo> GetImageHeader(
+      int64_t generator_handle) = 0;
+
+  /// @brief Removes image header info for a generator handle to prevent leaks.
+  virtual void RemoveImageHeader(int64_t generator_handle) = 0;
+};
+
 /// @brief Delegate that adapts Flutter Embedder C-API operations to the JVM.
 ///
 /// Holds an injected JvmInvoker instance that abstracts all direct JVM/JNI
@@ -91,7 +124,8 @@ class JniDelegate {
  public:
   explicit JniDelegate(
       std::shared_ptr<JvmInvoker> jvm_invoker,
-      std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr);
+      std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr,
+      std::shared_ptr<ImageDecoderProvider> image_decoder = nullptr);
   virtual ~JniDelegate();
 
   /// @brief Handles an incoming platform message dispatch to the JVM.
@@ -139,11 +173,34 @@ class JniDelegate {
   virtual std::optional<DartCallbackInfo> LookupCallbackInformation(
       int64_t handle);
 
+  /// @brief Decodes an image from buffer bytes.
+  virtual bool DecodeImage(const uint8_t* data,
+                           size_t size,
+                           int64_t generator_handle);
+
+  /// @brief Notifies that image header dimensions are parsed.
+  virtual void OnNativeImageHeader(int64_t generator_handle,
+                                   int32_t width,
+                                   int32_t height);
+
+  /// @brief Gets parsed image header info for a generator handle.
+  virtual std::optional<ImageHeaderInfo> GetImageHeader(
+      int64_t generator_handle);
+
+  /// @brief Removes parsed image header info for a generator handle.
+  virtual void RemoveImageHeader(int64_t generator_handle);
+
   /// @brief Sets or replaces the CallbackCacheProvider used for lookups.
   void SetCallbackCache(std::shared_ptr<CallbackCacheProvider> provider);
 
   /// @brief Returns the current CallbackCacheProvider.
   std::shared_ptr<CallbackCacheProvider> GetCallbackCache() const;
+
+  /// @brief Sets or replaces the ImageDecoderProvider.
+  void SetImageDecoderProvider(std::shared_ptr<ImageDecoderProvider> provider);
+
+  /// @brief Returns the current ImageDecoderProvider.
+  std::shared_ptr<ImageDecoderProvider> GetImageDecoderProvider() const;
 
   /// @brief Returns the underlying JvmInvoker instance.
   std::shared_ptr<JvmInvoker> GetJvmInvoker() const;
@@ -152,6 +209,8 @@ class JniDelegate {
   std::shared_ptr<JvmInvoker> jvm_invoker_;
   mutable std::mutex callback_cache_mutex_;
   std::shared_ptr<CallbackCacheProvider> callback_cache_;
+  mutable std::mutex image_decoder_mutex_;
+  std::shared_ptr<ImageDecoderProvider> image_decoder_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniDelegate);
 };
