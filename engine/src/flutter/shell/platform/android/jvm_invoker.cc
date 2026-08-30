@@ -75,6 +75,17 @@ bool DefaultJvmInvoker::UpdateSemantics(
   return true;
 }
 
+bool DefaultJvmInvoker::UpdateCustomAccessibilityActions(
+    const std::vector<uint8_t>& actions_buffer,
+    const std::vector<std::string>& action_strings) {
+  TRACE_EVENT0("flutter",
+               "DefaultJvmInvoker::UpdateCustomAccessibilityActions");
+  if (pending_exception_.load()) {
+    return false;
+  }
+  return true;
+}
+
 bool DefaultJvmInvoker::SetSemanticsTreeEnabled(bool enabled) {
   TRACE_EVENT0("flutter", "DefaultJvmInvoker::SetSemanticsTreeEnabled");
   if (pending_exception_.load()) {

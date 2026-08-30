@@ -77,7 +77,40 @@ bool JniDelegate::UpdateSemantics(
   if (!jvm_invoker_) {
     return false;
   }
+  if (buffer.empty()) {
+    return true;
+  }
   return jvm_invoker_->UpdateSemantics(buffer, strings, string_attribute_args);
+}
+
+bool JniDelegate::UpdateCustomAccessibilityActions(
+    const std::vector<uint8_t>& actions_buffer,
+    const std::vector<std::string>& action_strings) {
+  TRACE_EVENT0("flutter", "JniDelegate::UpdateCustomAccessibilityActions");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  if (actions_buffer.empty()) {
+    return true;
+  }
+  return jvm_invoker_->UpdateCustomAccessibilityActions(actions_buffer,
+                                                        action_strings);
+}
+
+bool JniDelegate::UpdateSemantics(const FlutterSemanticsUpdate2& update) {
+  TRACE_EVENT0("flutter", "JniDelegate::UpdateSemantics(struct)");
+  EncodedSemanticsBatch batch =
+      AndroidSemanticsMapper::MapSemanticsUpdate(update);
+  bool success = true;
+  if (!batch.custom_actions.empty()) {
+    success &= UpdateCustomAccessibilityActions(batch.custom_actions.buffer,
+                                                batch.custom_actions.strings);
+  }
+  if (!batch.nodes.empty()) {
+    success &= UpdateSemantics(batch.nodes.buffer, batch.nodes.strings,
+                               batch.nodes.string_attribute_args);
+  }
+  return success;
 }
 
 bool JniDelegate::SetSemanticsTreeEnabled(bool enabled) {

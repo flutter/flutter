@@ -16,6 +16,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
+#include "flutter/shell/platform/android/android_semantics_mapper.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -150,13 +151,33 @@ class JniDelegate {
                                              const std::vector<uint8_t>& data);
 
   /// @brief Updates accessibility semantics tree in the JVM.
+  /// @brief Updates accessibility semantics tree with string attributes in the
+  /// JVM.
   virtual bool UpdateSemantics(
       const std::vector<uint8_t>& buffer,
       const std::vector<std::string>& strings,
-      const std::vector<std::vector<uint8_t>>& string_attribute_args = {});
+      const std::vector<std::vector<uint8_t>>& string_attribute_args);
+
+  virtual bool UpdateSemantics(const std::vector<uint8_t>& buffer,
+                               const std::vector<std::string>& strings) {
+    return UpdateSemantics(buffer, strings, {});
+  }
+
+  /// @brief Updates custom accessibility actions in the JVM.
+  virtual bool UpdateCustomAccessibilityActions(
+      const std::vector<uint8_t>& actions_buffer,
+      const std::vector<std::string>& action_strings);
+
+  /// @brief Updates complete semantics tree and custom actions from
+  /// FlutterSemanticsUpdate2.
+  virtual bool UpdateSemantics(const FlutterSemanticsUpdate2& update);
 
   /// @brief Enables or disables accessibility semantics tree in the JVM.
   virtual bool SetSemanticsTreeEnabled(bool enabled);
+
+  virtual bool SetSemanticsEnabled(bool enabled) {
+    return SetSemanticsTreeEnabled(enabled);
+  }
 
   /// @brief Sets application locale in the JVM.
   virtual bool SetApplicationLocale(const std::string& locale);
