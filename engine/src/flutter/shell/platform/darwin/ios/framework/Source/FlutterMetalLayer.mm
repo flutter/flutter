@@ -132,40 +132,36 @@ FLUTTER_ASSERT_ARC
   FlutterTexture* texture = _texture;
   texture.waitingForCompletion = YES;
 
-  // Drain the autorelease from nextDrawable before returning. The ivar retains
-  // a valid drawable until it is presented.
-  @autoreleasepool {
-    id<CAMetalDrawable> presentationDrawable = [_layer acquirePresentationDrawable];
-    id<MTLTexture> presentationTexture = presentationDrawable.texture;
+  id<CAMetalDrawable> presentationDrawable = [_layer acquirePresentationDrawable];
+  id<MTLTexture> presentationTexture = presentationDrawable.texture;
 
-    // A resize can leave an old Flutter texture in flight. Do not copy
-    // it into a drawable created for the new layer configuration.
-    const BOOL canCopy = presentationTexture != nil &&
-                         presentationTexture.width == texture.texture.width &&
-                         presentationTexture.height == texture.texture.height &&
-                         presentationTexture.pixelFormat == texture.texture.pixelFormat;
+  // A resize can leave an old Flutter texture in flight. Do not copy
+  // it into a drawable created for the new layer configuration.
+  const BOOL canCopy = presentationTexture != nil &&
+                       presentationTexture.width == texture.texture.width &&
+                       presentationTexture.height == texture.texture.height &&
+                       presentationTexture.pixelFormat == texture.texture.pixelFormat;
 
-    if (canCopy) {
-      // Copy the IOSurface-backed Flutter result into the drawable owned by this CAMetalLayer.
-      // Encoding the copy and presentation on the render command buffer preserves GPU ordering
-      // without making the CPU wait.
-      id<MTLBlitCommandEncoder> blit = [commandBuffer blitCommandEncoder];
-      MTLOrigin origin = MTLOriginMake(0, 0, 0);
-      MTLSize size = MTLSizeMake(texture.texture.width, texture.texture.height, 1);
-      [blit copyFromTexture:texture.texture
-                sourceSlice:0
-                sourceLevel:0
-               sourceOrigin:origin
-                 sourceSize:size
-                  toTexture:presentationTexture
-           destinationSlice:0
-           destinationLevel:0
-          destinationOrigin:origin];
-      [blit endEncoding];
-      // Defer presentation until the command buffer is scheduled so the native
-      // drawable can join the Core Animation transaction used by platform views.
-      _presentationDrawable = presentationDrawable;
-    }
+  if (canCopy) {
+    // Copy the IOSurface-backed Flutter result into the drawable owned by this CAMetalLayer.
+    // Encoding the copy and presentation on the render command buffer preserves GPU ordering
+    // without making the CPU wait.
+    id<MTLBlitCommandEncoder> blit = [commandBuffer blitCommandEncoder];
+    MTLOrigin origin = MTLOriginMake(0, 0, 0);
+    MTLSize size = MTLSizeMake(texture.texture.width, texture.texture.height, 1);
+    [blit copyFromTexture:texture.texture
+              sourceSlice:0
+              sourceLevel:0
+             sourceOrigin:origin
+               sourceSize:size
+                toTexture:presentationTexture
+         destinationSlice:0
+         destinationLevel:0
+        destinationOrigin:origin];
+    [blit endEncoding];
+    // Defer presentation until the command buffer is scheduled so the native
+    // drawable can join the Core Animation transaction used by platform views.
+    _presentationDrawable = presentationDrawable;
   }
   [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> buffer) {
     texture.waitingForCompletion = NO;
