@@ -3196,6 +3196,21 @@ typedef struct {
   uint32_t reserved_padding;
 } FlutterEngineScreenshotInfo;
 
+/// Callback information structure for Dart callbacks looked up by handle.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterCallbackInformation).
+  size_t struct_size;
+
+  /// The name of the callback.
+  const char* name;
+
+  /// The class name if the callback is a method of a class. Null if top-level.
+  const char* class_name;
+
+  /// The library path where the callback is defined.
+  const char* library_path;
+} FlutterCallbackInformation;
+
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -4116,6 +4131,32 @@ FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineFreeScreenshot(
     FlutterEngineScreenshotInfo* screenshot);
 
+//------------------------------------------------------------------------------
+/// @brief      Looks up Dart callback information for a given callback handle.
+///
+///             The `callback_info_out` struct must be initialized with its
+///             `struct_size` set to at least
+///             `sizeof(FlutterCallbackInformation)` before calling this
+///             function.
+///
+///             The returned string pointers in `callback_info_out` remain
+///             valid for the lifetime of the process.
+///
+/// @param[in]  handle             The Dart callback handle to look up.
+/// @param[out] callback_info_out  Pointer to a `FlutterCallbackInformation`
+///                                struct to be populated. Must not be null.
+///
+/// @return     `kSuccess` if the callback was found and info populated;
+///             `kInvalidArguments` if `callback_info_out` is null or
+///             `struct_size` is less than `sizeof(FlutterCallbackInformation)`;
+///             `kInternalInconsistency` if the callback handle could not be
+///             found.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineGetCallbackInformation(
+    int64_t handle,
+    FlutterCallbackInformation* callback_info_out);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -4272,6 +4313,9 @@ typedef FlutterEngineResult (*FlutterEngineScreenshotFnPtr)(
     FlutterEngineScreenshotInfo* screenshot_out);
 typedef FlutterEngineResult (*FlutterEngineFreeScreenshotFnPtr)(
     FlutterEngineScreenshotInfo* screenshot);
+typedef FlutterEngineResult (*FlutterEngineGetCallbackInformationFnPtr)(
+    int64_t handle,
+    FlutterCallbackInformation* callback_info_out);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -4328,6 +4372,7 @@ typedef struct {
       NotifyDartDeferredLibraryLoadError;
   FlutterEngineScreenshotFnPtr Screenshot;
   FlutterEngineFreeScreenshotFnPtr FreeScreenshot;
+  FlutterEngineGetCallbackInformationFnPtr GetCallbackInformation;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------
