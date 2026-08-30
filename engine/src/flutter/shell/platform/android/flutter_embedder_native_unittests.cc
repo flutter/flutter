@@ -6,6 +6,7 @@
 #include <thread>
 #include <vector>
 
+#include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 #include "flutter/shell/platform/android/jni_router.h"
@@ -173,6 +174,84 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               GetImageHeader,
               (int64_t generator_handle),
               (override));
+
+  MOCK_METHOD(int64_t,
+              CreatePlatformView,
+              (const PlatformViewCreationParams& params,
+               PlatformViewCompositionType composition_type),
+              (override));
+
+  MOCK_METHOD(bool, DisposePlatformView, (int64_t view_id), (override));
+
+  MOCK_METHOD(bool,
+              ResizePlatformView,
+              (const PlatformViewResizeRequest& request),
+              (override));
+
+  MOCK_METHOD(bool,
+              OffsetPlatformView,
+              (int64_t view_id, double top, double left),
+              (override));
+
+  MOCK_METHOD(bool,
+              SetPlatformViewDirection,
+              (int64_t view_id, int32_t direction),
+              (override));
+
+  MOCK_METHOD(bool, ClearPlatformViewFocus, (int64_t view_id), (override));
+
+  MOCK_METHOD(bool,
+              DispatchPlatformViewTouch,
+              (const PlatformViewTouch& touch),
+              (override));
+
+  MOCK_METHOD(bool,
+              OnDisplayPlatformView,
+              (const PlatformViewGeometry& geometry),
+              (override));
+
+  MOCK_METHOD(bool,
+              OnDisplayPlatformView,
+              (const FlutterPlatformView& platform_view,
+               int32_t x,
+               int32_t y,
+               int32_t width,
+               int32_t height,
+               int32_t view_width,
+               int32_t view_height),
+              (override));
+
+  MOCK_METHOD(bool, HidePlatformView, (int64_t view_id), (override));
+
+  MOCK_METHOD(bool,
+              SynchronizeToNativeViewHierarchy,
+              (bool synchronize),
+              (override));
+
+  MOCK_METHOD(bool, OnBeginFrame, (), (override));
+
+  MOCK_METHOD(bool, OnEndFrame, (), (override));
+
+  MOCK_METHOD(std::optional<int32_t>, CreateOverlaySurface, (), (override));
+
+  MOCK_METHOD(bool, DestroyOverlaySurfaces, (), (override));
+
+  MOCK_METHOD(bool,
+              OnDisplayOverlaySurface,
+              (const PlatformViewOverlay& overlay),
+              (override));
+
+  MOCK_METHOD(bool, ShowOverlaySurface, (int32_t surface_id), (override));
+
+  MOCK_METHOD(bool, HideOverlaySurface, (int32_t surface_id), (override));
+
+  MOCK_METHOD(bool, CreatePlatformViewTransaction, (), (override));
+
+  MOCK_METHOD(bool, SwapPlatformViewTransactions, (), (override));
+
+  MOCK_METHOD(bool, ApplyPlatformViewTransactions, (), (override));
+
+  MOCK_METHOD(bool, IsHcppEnabled, (), (const, override));
 
   MOCK_METHOD(bool,
               PushPlatformViewMutators,
@@ -1284,8 +1363,9 @@ TEST(MutatorTranslationTest, JniDelegatePlatformViewMutatorsPush) {
 
   std::vector<uint8_t> expected_payload = stack.Serialize();
 
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("pushPlatformViewMutators",
-                                              "(JIIII[B)V", expected_payload))
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onDisplayPlatformView",
+                                              "(IIIIIIILjava/nio/ByteBuffer;)V",
+                                              expected_payload))
       .WillOnce(Return(true));
 
   EXPECT_TRUE(
@@ -1317,8 +1397,9 @@ TEST(MutatorTranslationTest, JniRouterPlatformViewMutatorsRoutingFlip) {
   std::vector<uint8_t> payload = stack.Serialize();
   EXPECT_CALL(*legacy_delegate, PushPlatformViewMutators(1001L, _, _, _, _, _))
       .Times(0);
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("pushPlatformViewMutators",
-                                              "(JIIII[B)V", payload))
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onDisplayPlatformView",
+                               "(IIIIIIILjava/nio/ByteBuffer;)V", payload))
       .WillOnce(Return(true));
 
   EXPECT_TRUE(router->RoutePlatformViewMutators(1001L, 0, 0, 100, 200, stack));
@@ -1362,8 +1443,9 @@ TEST(MutatorTranslationTest,
   EXPECT_EQ(stack.GetMutatorsCount(), 1u);
 
   std::vector<uint8_t> payload = stack.Serialize();
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("pushPlatformViewMutators",
-                                              "(JIIII[B)V", payload))
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onDisplayPlatformView",
+                               "(IIIIIIILjava/nio/ByteBuffer;)V", payload))
       .WillOnce(Return(true));
 
   EXPECT_TRUE(native.PushPlatformViewMutators(pv, 0, 0, 500, 500));
@@ -1602,6 +1684,895 @@ TEST(SemanticsAndAccessibilityTest, FlutterEmbedderNativeSemanticsIntegration) {
             kInvalidArguments);
 
   JniRouter::SetEmbedderEnabled(false);
+}
+
+// =============================================================================
+// Phase 2.6: Platform Views Unit Tests
+// =============================================================================
+
+TEST(PlatformViewsTest, InMemoryPlatformViewsProviderLifecycle) {
+  InMemoryPlatformViewsProvider provider;
+
+  EXPECT_EQ(provider.GetCreatedViewsCount(), 0u);
+  EXPECT_FALSE(provider.IsHcppEnabled());
+
+  // 1. Create Texture Layer platform view
+  PlatformViewCreationParams params1 = {
+      .view_id = 1,
+      .view_type = "test.platform.view.text",
+      .width = 300.0,
+      .height = 200.0,
+      .direction = 0,
+      .params = {0x01, 0x02, 0x03},
+  };
+  int64_t texture_id = provider.CreatePlatformView(
+      params1, PlatformViewCompositionType::kTextureLayer);
+  EXPECT_GT(texture_id, 0);
+  EXPECT_EQ(provider.GetCreatedViewsCount(), 1u);
+  EXPECT_TRUE(provider.IsViewCreated(1));
+  EXPECT_FALSE(provider.IsViewDisposed(1));
+  EXPECT_EQ(provider.GetCompositionType(1),
+            PlatformViewCompositionType::kTextureLayer);
+  auto stored_params1 = provider.GetCreationParams(1);
+  ASSERT_TRUE(stored_params1.has_value());
+  if (stored_params1.has_value()) {
+    EXPECT_EQ(stored_params1->view_type, "test.platform.view.text");
+    EXPECT_DOUBLE_EQ(stored_params1->width, 300.0);
+    EXPECT_DOUBLE_EQ(stored_params1->height, 200.0);
+  }
+
+  // 2. Create Hybrid Composition platform view
+  PlatformViewCreationParams params2 = {
+      .view_id = 2,
+      .view_type = "test.platform.view.map",
+      .width = 400.0,
+      .height = 400.0,
+      .direction = 1,
+      .params = {},
+  };
+  int64_t res2 = provider.CreatePlatformView(
+      params2, PlatformViewCompositionType::kHybridComposition);
+  EXPECT_EQ(res2, 0);
+  EXPECT_EQ(provider.GetCreatedViewsCount(), 2u);
+  EXPECT_TRUE(provider.IsViewCreated(2));
+  EXPECT_EQ(provider.GetCompositionType(2),
+            PlatformViewCompositionType::kHybridComposition);
+
+  // 3. Create Hybrid Composition++ platform view
+  provider.SetHcppEnabled(true);
+  EXPECT_TRUE(provider.IsHcppEnabled());
+  PlatformViewCreationParams params3 = {
+      .view_id = 3,
+      .view_type = "test.platform.view.video",
+      .width = 1920.0,
+      .height = 1080.0,
+      .direction = 0,
+      .params = {0xFF},
+  };
+  int64_t res3 = provider.CreatePlatformView(
+      params3, PlatformViewCompositionType::kHybridCompositionPlusPlus);
+  EXPECT_EQ(res3, 0);
+  EXPECT_EQ(provider.GetCreatedViewsCount(), 3u);
+  EXPECT_TRUE(provider.IsViewCreated(3));
+
+  // 4. Resize platform view
+  PlatformViewResizeRequest resize_req = {
+      .view_id = 1,
+      .width = 500.0,
+      .height = 350.0,
+  };
+  EXPECT_TRUE(provider.ResizePlatformView(resize_req));
+  auto last_resize = provider.GetLastResizeRequest();
+  ASSERT_TRUE(last_resize.has_value());
+  if (last_resize.has_value()) {
+    EXPECT_EQ(last_resize->view_id, 1);
+    EXPECT_DOUBLE_EQ(last_resize->width, 500.0);
+    EXPECT_DOUBLE_EQ(last_resize->height, 350.0);
+  }
+
+  // 5. Offset platform view
+  EXPECT_TRUE(provider.OffsetPlatformView(1, 15.5, 25.5));
+  auto offsets = provider.GetOffsets(1);
+  ASSERT_TRUE(offsets.has_value());
+  if (offsets.has_value()) {
+    EXPECT_DOUBLE_EQ(offsets->first, 15.5);
+    EXPECT_DOUBLE_EQ(offsets->second, 25.5);
+  }
+
+  // 6. Set direction
+  EXPECT_TRUE(provider.SetDirection(2, 1));
+  auto direction = provider.GetDirection(2);
+  ASSERT_TRUE(direction.has_value());
+  if (direction.has_value()) {
+    EXPECT_EQ(*direction, 1);
+  }
+
+  // 7. Clear focus
+  EXPECT_EQ(provider.GetFocusClearedCount(2), 0u);
+  EXPECT_TRUE(provider.ClearFocus(2));
+  EXPECT_EQ(provider.GetFocusClearedCount(2), 1u);
+  EXPECT_TRUE(provider.ClearFocus(2));
+  EXPECT_EQ(provider.GetFocusClearedCount(2), 2u);
+
+  // 8. Dispose platform views
+  EXPECT_TRUE(provider.DisposePlatformView(1));
+  EXPECT_FALSE(provider.IsViewCreated(1));
+  EXPECT_TRUE(provider.IsViewDisposed(1));
+  EXPECT_FALSE(provider.GetCompositionType(1).has_value());
+  EXPECT_FALSE(provider.GetOffsets(1).has_value());
+  EXPECT_EQ(provider.GetCreatedViewsCount(), 2u);
+
+  EXPECT_TRUE(provider.DisposePlatformView(2));
+  EXPECT_TRUE(provider.DisposePlatformView(3));
+  EXPECT_EQ(provider.GetCreatedViewsCount(), 0u);
+
+  // Clear provider
+  provider.Clear();
+  EXPECT_EQ(provider.GetCreatedViewsCount(), 0u);
+}
+
+TEST(PlatformViewsTest, InMemoryPlatformViewsProviderTouchDispatch) {
+  InMemoryPlatformViewsProvider provider;
+
+  PlatformViewPointerCoords p1 = {
+      .pointer_id = 0,
+      .x = 100.0f,
+      .y = 200.0f,
+      .size = 1.0f,
+      .pressure = 0.8f,
+      .orientation = 0.0f,
+      .tool_type = 1,
+  };
+  PlatformViewPointerCoords p2 = {
+      .pointer_id = 1,
+      .x = 150.0f,
+      .y = 250.0f,
+      .size = 1.0f,
+      .pressure = 0.5f,
+      .orientation = 0.0f,
+      .tool_type = 1,
+  };
+
+  PlatformViewTouch touch = {
+      .view_id = 42,
+      .motion_event_id = 1001,
+      .action = 2,  // ACTION_MOVE
+      .pointer_count = 2,
+      .pointers = {p1, p2},
+      .down_time = 5000000,
+      .event_time = 5000100,
+      .source = 4098,
+      .flags = 0,
+      .meta_state = 0,
+      .button_state = 0,
+      .raw_x = 100.0f,
+      .raw_y = 200.0f,
+  };
+
+  EXPECT_TRUE(provider.DispatchTouchEvent(touch));
+  const auto& touches = provider.GetDispatchedTouches();
+  ASSERT_EQ(touches.size(), 1u);
+  EXPECT_EQ(touches[0].view_id, 42);
+  EXPECT_EQ(touches[0].motion_event_id, 1001);
+  EXPECT_EQ(touches[0].action, 2);
+  EXPECT_EQ(touches[0].pointer_count, 2);
+  ASSERT_EQ(touches[0].pointers.size(), 2u);
+  EXPECT_FLOAT_EQ(touches[0].pointers[0].x, 100.0f);
+  EXPECT_FLOAT_EQ(touches[0].pointers[1].y, 250.0f);
+}
+
+TEST(PlatformViewsTest, InMemoryPlatformViewsProviderMutatorsAndGeometry) {
+  InMemoryPlatformViewsProvider provider;
+
+  AndroidMutatorsStack stack;
+  stack.PushTransform(
+      AndroidMatrix3x3{2.0, 0.0, 10.0, 0.0, 2.0, 20.0, 0.0, 0.0, 1.0});
+  stack.PushClipRect(AndroidRect{10.0, 10.0, 100.0, 100.0});
+  stack.PushOpacity(0.5f);
+
+  PlatformViewGeometry geometry = {
+      .view_id = 101,
+      .x = 10,
+      .y = 20,
+      .width = 300,
+      .height = 400,
+      .view_width = 300,
+      .view_height = 400,
+      .mutators_stack = stack,
+  };
+
+  EXPECT_TRUE(provider.OnDisplayPlatformView(geometry));
+  EXPECT_FALSE(provider.IsViewHidden(101));
+
+  auto last_geom = provider.GetLastGeometry(101);
+  ASSERT_TRUE(last_geom.has_value());
+  if (last_geom.has_value()) {
+    EXPECT_EQ(last_geom->view_id, 101);
+    EXPECT_EQ(last_geom->x, 10);
+    EXPECT_EQ(last_geom->y, 20);
+    EXPECT_EQ(last_geom->width, 300);
+    EXPECT_EQ(last_geom->height, 400);
+    EXPECT_EQ(last_geom->mutators_stack.GetMutatorsCount(), 3u);
+  }
+
+  // Hide view
+  EXPECT_TRUE(provider.HidePlatformView(101));
+  EXPECT_TRUE(provider.IsViewHidden(101));
+
+  // Displaying again clears hidden flag
+  EXPECT_TRUE(provider.OnDisplayPlatformView(geometry));
+  EXPECT_FALSE(provider.IsViewHidden(101));
+}
+
+TEST(PlatformViewsTest, InMemoryPlatformViewsProviderOverlaysAndTransactions) {
+  InMemoryPlatformViewsProvider provider;
+
+  // Frame lifecycle
+  EXPECT_FALSE(provider.IsInFrame());
+  EXPECT_TRUE(provider.OnBeginFrame());
+  EXPECT_TRUE(provider.IsInFrame());
+  EXPECT_TRUE(provider.OnEndFrame());
+  EXPECT_FALSE(provider.IsInFrame());
+
+  // Native view hierarchy sync
+  EXPECT_TRUE(provider.GetSynchronizeToNativeViewHierarchy());
+  EXPECT_TRUE(provider.SynchronizeToNativeViewHierarchy(false));
+  EXPECT_FALSE(provider.GetSynchronizeToNativeViewHierarchy());
+  EXPECT_TRUE(provider.SynchronizeToNativeViewHierarchy(true));
+  EXPECT_TRUE(provider.GetSynchronizeToNativeViewHierarchy());
+
+  // Overlay surfaces
+  EXPECT_EQ(provider.GetOverlaySurfacesCount(), 0u);
+  auto overlay1 = provider.CreateOverlaySurface();
+  ASSERT_TRUE(overlay1.has_value());
+  if (overlay1.has_value()) {
+    EXPECT_EQ(*overlay1, 1);
+  }
+  EXPECT_EQ(provider.GetOverlaySurfacesCount(), 1u);
+  EXPECT_TRUE(provider.IsOverlayVisible(1));
+
+  auto overlay2 = provider.CreateOverlaySurface();
+  ASSERT_TRUE(overlay2.has_value());
+  if (overlay2.has_value()) {
+    EXPECT_EQ(*overlay2, 2);
+  }
+  EXPECT_EQ(provider.GetOverlaySurfacesCount(), 2u);
+
+  // Display overlay
+  PlatformViewOverlay pvo = {
+      .surface_id = 1,
+      .x = 0,
+      .y = 0,
+      .width = 500,
+      .height = 600,
+  };
+  EXPECT_TRUE(provider.OnDisplayOverlaySurface(pvo));
+  const auto& displayed = provider.GetDisplayedOverlays();
+  ASSERT_EQ(displayed.size(), 1u);
+  EXPECT_EQ(displayed.at(1).width, 500);
+
+  // Hide / Show overlay
+  EXPECT_TRUE(provider.HideOverlaySurface(1));
+  EXPECT_FALSE(provider.IsOverlayVisible(1));
+  EXPECT_TRUE(provider.ShowOverlaySurface(1));
+  EXPECT_TRUE(provider.IsOverlayVisible(1));
+
+  // Destroy overlays
+  EXPECT_TRUE(provider.DestroyOverlaySurfaces());
+  EXPECT_EQ(provider.GetOverlaySurfacesCount(), 0u);
+  EXPECT_EQ(provider.GetDisplayedOverlays().size(), 0u);
+
+  // Transactions
+  EXPECT_EQ(provider.GetTransactionCount(), 0u);
+  EXPECT_TRUE(provider.CreateTransaction());
+  EXPECT_EQ(provider.GetTransactionCount(), 1u);
+  EXPECT_TRUE(provider.SwapTransactions());
+  EXPECT_EQ(provider.GetTransactionCount(), 2u);
+  EXPECT_TRUE(provider.ApplyTransactions());
+  EXPECT_EQ(provider.GetTransactionCount(), 3u);
+}
+
+TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  DefaultPlatformViewsProvider provider(mock_invoker);
+
+  // 1. CreatePlatformView (Texture Layer)
+  PlatformViewCreationParams params = {
+      .view_id = 42,
+      .view_type = "test.view",
+      .width = 100.0,
+      .height = 100.0,
+      .direction = 0,
+      .params = {0xAA, 0xBB},
+  };
+  EXPECT_CALL(*mock_invoker,
+              InvokeIntMethod("createForTextureLayer",
+                              "(Ljava/lang/String;IDDILjava/nio/ByteBuffer;)J",
+                              params.params))
+      .WillOnce(Return(777));
+  EXPECT_EQ(provider.CreatePlatformView(
+                params, PlatformViewCompositionType::kTextureLayer),
+            777);
+
+  // 2. CreatePlatformView (Hybrid Composition)
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("createForPlatformViewLayer",
+                               "(Ljava/lang/String;IDDILjava/nio/ByteBuffer;)V",
+                               params.params))
+      .WillOnce(Return(true));
+  EXPECT_EQ(provider.CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+
+  // 3. CreatePlatformView (HC++)
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("createPlatformViewHcpp",
+                               "(Ljava/lang/String;IDDILjava/nio/ByteBuffer;)V",
+                               params.params))
+      .WillOnce(Return(true));
+  EXPECT_EQ(
+      provider.CreatePlatformView(
+          params, PlatformViewCompositionType::kHybridCompositionPlusPlus),
+      0);
+
+  // 4. DisposePlatformView
+  int64_t view_id = 42;
+  std::vector<uint8_t> dispose_payload(sizeof(int64_t));
+  std::memcpy(dispose_payload.data(), &view_id, sizeof(int64_t));
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("disposePlatformView", "(I)V", dispose_payload))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.DisposePlatformView(42));
+
+  // 5. ResizePlatformView
+  PlatformViewResizeRequest resize_req = {
+      .view_id = 42,
+      .width = 200.0,
+      .height = 300.0,
+  };
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("resizePlatformView", "(IDD)V",
+                                              std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.ResizePlatformView(resize_req));
+
+  // 6. OffsetPlatformView
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("offsetPlatformView", "(IDD)V",
+                                              std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.OffsetPlatformView(42, 10.0, 20.0));
+
+  // 7. SetDirection
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setPlatformViewDirection",
+                                              "(II)V", std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.SetDirection(42, 1));
+
+  // 8. ClearFocus
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("clearPlatformViewFocus", "(I)V",
+                                              std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.ClearFocus(42));
+
+  // 9. DispatchTouchEvent
+  PlatformViewTouch touch = {.view_id = 42};
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onTouch",
+                               "(Lio/flutter/embedding/engine/systemchannels/"
+                               "PlatformViewTouch;)V",
+                               std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.DispatchTouchEvent(touch));
+
+  // 10. OnDisplayPlatformView
+  PlatformViewGeometry geom = {.view_id = 42};
+  std::vector<uint8_t> geom_payload = geom.mutators_stack.Serialize();
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onDisplayPlatformView",
+                               "(IIIIIIILjava/nio/ByteBuffer;)V", geom_payload))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.OnDisplayPlatformView(geom));
+
+  // 11. HidePlatformView
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("hidePlatformView", "(I)V",
+                                              std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.HidePlatformView(42));
+
+  // 12. SynchronizeToNativeViewHierarchy
+  std::vector<uint8_t> sync_payload = {1};
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("synchronizeToNativeViewHierarchy", "(Z)V",
+                               sync_payload))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.SynchronizeToNativeViewHierarchy(true));
+
+  // 13. Frame callbacks
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onBeginFrame", "()V", std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.OnBeginFrame());
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onEndFrame", "()V", std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.OnEndFrame());
+
+  // 14. Overlay surfaces
+  EXPECT_CALL(
+      *mock_invoker,
+      InvokeIntMethod("createOverlaySurface",
+                      "()Lio/flutter/embedding/engine/FlutterOverlaySurface;",
+                      std::vector<uint8_t>{}))
+      .WillOnce(Return(9));
+  auto overlay_id = provider.CreateOverlaySurface();
+  ASSERT_TRUE(overlay_id.has_value());
+  if (overlay_id.has_value()) {
+    EXPECT_EQ(*overlay_id, 9);
+  }
+
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("destroyOverlaySurfaces", "()V",
+                                              std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.DestroyOverlaySurfaces());
+
+  PlatformViewOverlay overlay_req = {.surface_id = 9};
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onDisplayOverlaySurface", "(IIIII)V",
+                               std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.OnDisplayOverlaySurface(overlay_req));
+
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("showOverlaySurface", "(I)V",
+                                              std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.ShowOverlaySurface(9));
+
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("hideOverlaySurface", "(I)V",
+                                              std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.HideOverlaySurface(9));
+
+  // 15. Transactions
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("createTransaction",
+                               "()Landroid/view/SurfaceControl$Transaction;",
+                               std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.CreateTransaction());
+
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("swapTransactions", "()V",
+                                              std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.SwapTransactions());
+
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("applyTransactions", "()V",
+                                              std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.ApplyTransactions());
+
+  // 16. HCPP state
+  EXPECT_FALSE(provider.IsHcppEnabled());
+  provider.SetHcppEnabled(true);
+  EXPECT_TRUE(provider.IsHcppEnabled());
+}
+
+TEST(PlatformViewsTest, AndroidPlatformViewsControllerIntegration) {
+  auto provider = std::make_shared<InMemoryPlatformViewsProvider>();
+  AndroidPlatformViewsController controller(provider);
+
+  EXPECT_EQ(controller.GetActiveViewsCount(), 0u);
+  EXPECT_EQ(controller.GetProvider(), provider);
+
+  // Create view
+  PlatformViewCreationParams params = {
+      .view_id = 10,
+      .view_type = "hybrid.view",
+      .width = 640.0,
+      .height = 480.0,
+      .direction = 0,
+      .params = {},
+  };
+  EXPECT_EQ(controller.CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+  EXPECT_EQ(controller.GetActiveViewsCount(), 1u);
+  EXPECT_TRUE(controller.HasPlatformView(10));
+  EXPECT_EQ(controller.GetCompositionType(10),
+            PlatformViewCompositionType::kHybridComposition);
+
+  // Mutators and display
+  FlutterPlatformViewMutation m1 = {
+      .type = kFlutterPlatformViewMutationTypeOpacity,
+      .opacity = 0.75,
+  };
+  const FlutterPlatformViewMutation* mutations[] = {&m1};
+  FlutterPlatformView pv = {
+      .struct_size = sizeof(FlutterPlatformView),
+      .identifier = 10,
+      .mutations_count = 1,
+      .mutations = mutations,
+  };
+
+  EXPECT_TRUE(controller.OnDisplayPlatformView(pv, 0, 0, 640, 480, 640, 480));
+  auto geom = controller.GetPlatformViewGeometry(10);
+  ASSERT_TRUE(geom.has_value());
+  if (geom.has_value()) {
+    EXPECT_EQ(geom->view_id, 10);
+    EXPECT_EQ(geom->width, 640);
+    EXPECT_EQ(geom->height, 480);
+    EXPECT_EQ(geom->mutators_stack.GetMutatorsCount(), 1u);
+
+    // PushPlatformViewMutators
+    EXPECT_TRUE(controller.PushPlatformViewMutators(pv, 0, 0, 640, 480));
+    EXPECT_TRUE(controller.PushPlatformViewMutators(10, 0, 0, 640, 480,
+                                                    geom->mutators_stack));
+  }
+
+  // Hide view
+  EXPECT_TRUE(controller.HidePlatformView(10));
+  EXPECT_TRUE(provider->IsViewHidden(10));
+
+  // Overlay operations through controller
+  auto overlay_id = controller.CreateOverlaySurface();
+  ASSERT_TRUE(overlay_id.has_value());
+  if (overlay_id.has_value()) {
+    EXPECT_TRUE(
+        controller.OnDisplayOverlaySurface(*overlay_id, 0, 0, 640, 480));
+    EXPECT_TRUE(controller.ShowOverlaySurface(*overlay_id));
+    EXPECT_TRUE(controller.HideOverlaySurface(*overlay_id));
+  }
+  EXPECT_TRUE(controller.DestroyOverlaySurfaces());
+
+  // Frame and sync
+  EXPECT_TRUE(controller.OnBeginFrame());
+  EXPECT_TRUE(controller.OnEndFrame());
+  EXPECT_TRUE(controller.SynchronizeToNativeViewHierarchy(true));
+
+  // Transactions
+  EXPECT_TRUE(controller.CreateTransaction());
+  EXPECT_TRUE(controller.SwapTransactions());
+  EXPECT_TRUE(controller.ApplyTransactions());
+
+  // Dispose view
+  EXPECT_TRUE(controller.DisposePlatformView(10));
+  EXPECT_EQ(controller.GetActiveViewsCount(), 0u);
+  EXPECT_FALSE(controller.HasPlatformView(10));
+}
+
+TEST(PlatformViewsTest, JniDelegatePlatformViewsIntegration) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  JniDelegate delegate(mock_invoker);
+
+  auto mem_provider = std::make_shared<InMemoryPlatformViewsProvider>();
+  delegate.SetPlatformViewsProvider(mem_provider);
+  EXPECT_EQ(delegate.GetPlatformViewsProvider(), mem_provider);
+  EXPECT_NE(delegate.GetPlatformViewsController(), nullptr);
+
+  // Test forwarding through JniDelegate
+  PlatformViewCreationParams params = {
+      .view_id = 99,
+      .view_type = "delegate.view",
+      .width = 100.0,
+      .height = 100.0,
+  };
+  EXPECT_EQ(delegate.CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+  EXPECT_TRUE(mem_provider->IsViewCreated(99));
+
+  PlatformViewResizeRequest resize_req = {
+      .view_id = 99, .width = 200.0, .height = 200.0};
+  EXPECT_TRUE(delegate.ResizePlatformView(resize_req));
+  EXPECT_TRUE(delegate.OffsetPlatformView(99, 5.0, 10.0));
+  EXPECT_TRUE(delegate.SetPlatformViewDirection(99, 1));
+  EXPECT_TRUE(delegate.ClearPlatformViewFocus(99));
+
+  PlatformViewTouch touch = {.view_id = 99};
+  EXPECT_TRUE(delegate.DispatchPlatformViewTouch(touch));
+
+  PlatformViewGeometry geom = {.view_id = 99, .width = 200, .height = 200};
+  EXPECT_TRUE(delegate.OnDisplayPlatformView(geom));
+  EXPECT_TRUE(delegate.HidePlatformView(99));
+  EXPECT_TRUE(delegate.SynchronizeToNativeViewHierarchy(true));
+  EXPECT_TRUE(delegate.OnBeginFrame());
+  EXPECT_TRUE(delegate.OnEndFrame());
+
+  auto overlay = delegate.CreateOverlaySurface();
+  ASSERT_TRUE(overlay.has_value());
+  if (overlay.has_value()) {
+    PlatformViewOverlay pvo = {
+        .surface_id = *overlay, .width = 200, .height = 200};
+    EXPECT_TRUE(delegate.OnDisplayOverlaySurface(pvo));
+    EXPECT_TRUE(delegate.ShowOverlaySurface(*overlay));
+    EXPECT_TRUE(delegate.HideOverlaySurface(*overlay));
+  }
+  EXPECT_TRUE(delegate.DestroyOverlaySurfaces());
+
+  EXPECT_TRUE(delegate.CreatePlatformViewTransaction());
+  EXPECT_TRUE(delegate.SwapPlatformViewTransactions());
+  EXPECT_TRUE(delegate.ApplyPlatformViewTransactions());
+  EXPECT_FALSE(delegate.IsHcppEnabled());
+
+  EXPECT_TRUE(delegate.DisposePlatformView(99));
+  EXPECT_FALSE(mem_provider->IsViewCreated(99));
+}
+
+TEST(PlatformViewsTest, JniRouterPlatformViewsRoutingFlip) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker);
+  auto mem_provider = std::make_shared<InMemoryPlatformViewsProvider>();
+  embedder_delegate->SetPlatformViewsProvider(mem_provider);
+
+  auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+  auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
+
+  PlatformViewCreationParams params = {
+      .view_id = 88,
+      .view_type = "routed.view",
+      .width = 100.0,
+      .height = 100.0,
+  };
+  PlatformViewResizeRequest resize_req = {
+      .view_id = 88, .width = 200.0, .height = 200.0};
+  PlatformViewTouch touch = {.view_id = 88};
+  PlatformViewGeometry geom = {.view_id = 88};
+  PlatformViewOverlay overlay = {.surface_id = 1};
+  AndroidMutatorsStack stack;
+
+  // 1. When Embedder is disabled -> routes to legacy_delegate
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+
+  EXPECT_CALL(*legacy_delegate,
+              CreatePlatformView(
+                  params, PlatformViewCompositionType::kHybridComposition))
+      .WillOnce(Return(0));
+  EXPECT_EQ(router->RouteCreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+
+  EXPECT_CALL(*legacy_delegate, ResizePlatformView(resize_req))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteResizePlatformView(resize_req));
+
+  EXPECT_CALL(*legacy_delegate, OffsetPlatformView(88, 10.0, 20.0))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteOffsetPlatformView(88, 10.0, 20.0));
+
+  EXPECT_CALL(*legacy_delegate, SetPlatformViewDirection(88, 1))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSetPlatformViewDirection(88, 1));
+
+  EXPECT_CALL(*legacy_delegate, ClearPlatformViewFocus(88))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteClearPlatformViewFocus(88));
+
+  EXPECT_CALL(*legacy_delegate, DispatchPlatformViewTouch(touch))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteDispatchPlatformViewTouch(touch));
+
+  EXPECT_CALL(*legacy_delegate, OnDisplayPlatformView(geom))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteOnDisplayPlatformView(geom));
+
+  EXPECT_CALL(*legacy_delegate, HidePlatformView(88)).WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteHidePlatformView(88));
+
+  EXPECT_CALL(*legacy_delegate, SynchronizeToNativeViewHierarchy(true))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSynchronizeToNativeViewHierarchy(true));
+
+  EXPECT_CALL(*legacy_delegate, OnBeginFrame()).WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteBeginFrame());
+
+  EXPECT_CALL(*legacy_delegate, OnEndFrame()).WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteEndFrame());
+
+  EXPECT_CALL(*legacy_delegate, CreateOverlaySurface()).WillOnce(Return(5));
+  EXPECT_EQ(router->RouteCreateOverlaySurface(), 5);
+
+  EXPECT_CALL(*legacy_delegate, OnDisplayOverlaySurface(overlay))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteOnDisplayOverlaySurface(overlay));
+
+  EXPECT_CALL(*legacy_delegate, ShowOverlaySurface(5)).WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteShowOverlaySurface(5));
+
+  EXPECT_CALL(*legacy_delegate, HideOverlaySurface(5)).WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteHideOverlaySurface(5));
+
+  EXPECT_CALL(*legacy_delegate, DestroyOverlaySurfaces())
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteDestroyOverlaySurfaces());
+
+  EXPECT_CALL(*legacy_delegate, CreatePlatformViewTransaction())
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
+
+  EXPECT_CALL(*legacy_delegate, SwapPlatformViewTransactions())
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
+
+  EXPECT_CALL(*legacy_delegate, ApplyPlatformViewTransactions())
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
+
+  EXPECT_CALL(*legacy_delegate, IsHcppEnabled()).WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteIsHcppEnabled());
+
+  EXPECT_CALL(*legacy_delegate,
+              PushPlatformViewMutators(88, 0, 0, 100, 100, stack))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RoutePlatformViewMutators(88, 0, 0, 100, 100, stack));
+
+  EXPECT_CALL(*legacy_delegate, DisposePlatformView(88)).WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteDisposePlatformView(88));
+
+  // 2. When Embedder is enabled -> routes to embedder_delegate (mem_provider)
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+
+  EXPECT_EQ(router->RouteCreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+  EXPECT_TRUE(mem_provider->IsViewCreated(88));
+
+  EXPECT_TRUE(router->RouteResizePlatformView(resize_req));
+  EXPECT_TRUE(router->RouteOffsetPlatformView(88, 10.0, 20.0));
+  EXPECT_TRUE(router->RouteSetPlatformViewDirection(88, 1));
+  EXPECT_TRUE(router->RouteClearPlatformViewFocus(88));
+  EXPECT_TRUE(router->RouteDispatchPlatformViewTouch(touch));
+  EXPECT_TRUE(router->RouteOnDisplayPlatformView(geom));
+  EXPECT_TRUE(router->RouteHidePlatformView(88));
+  EXPECT_TRUE(router->RouteSynchronizeToNativeViewHierarchy(true));
+  EXPECT_TRUE(router->RouteBeginFrame());
+  EXPECT_TRUE(router->RouteEndFrame());
+
+  auto created_overlay = router->RouteCreateOverlaySurface();
+  ASSERT_TRUE(created_overlay.has_value());
+  PlatformViewOverlay routed_overlay = {.surface_id = *created_overlay};
+  EXPECT_TRUE(router->RouteOnDisplayOverlaySurface(routed_overlay));
+  EXPECT_TRUE(router->RouteShowOverlaySurface(*created_overlay));
+  EXPECT_TRUE(router->RouteHideOverlaySurface(*created_overlay));
+  EXPECT_TRUE(router->RouteDestroyOverlaySurfaces());
+
+  EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
+  EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
+  EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
+  EXPECT_FALSE(router->RouteIsHcppEnabled());
+
+  EXPECT_TRUE(router->RoutePlatformViewMutators(88, 0, 0, 100, 100, stack));
+
+  EXPECT_TRUE(router->RouteDisposePlatformView(88));
+  EXPECT_FALSE(mem_provider->IsViewCreated(88));
+
+  JniRouter::SetEmbedderEnabled(false);
+}
+
+TEST(PlatformViewsTest, FlutterEmbedderNativePlatformViewsIntegration) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  FlutterEmbedderNative native(mock_invoker);
+  auto mem_provider = std::make_shared<InMemoryPlatformViewsProvider>();
+  native.SetPlatformViewsProvider(mem_provider);
+
+  JniRouter::SetEmbedderEnabled(true);
+
+  EXPECT_EQ(native.GetPlatformViewsProvider(), mem_provider);
+  EXPECT_NE(native.GetPlatformViewsController(), nullptr);
+
+  PlatformViewCreationParams params = {
+      .view_id = 77,
+      .view_type = "embedder.native.view",
+      .width = 320.0,
+      .height = 240.0,
+  };
+  EXPECT_EQ(native.CreatePlatformView(
+                params, PlatformViewCompositionType::kHybridComposition),
+            0);
+  EXPECT_TRUE(mem_provider->IsViewCreated(77));
+
+  PlatformViewResizeRequest resize_req = {
+      .view_id = 77, .width = 400.0, .height = 300.0};
+  EXPECT_TRUE(native.ResizePlatformView(resize_req));
+  EXPECT_TRUE(native.OffsetPlatformView(77, 12.0, 14.0));
+  EXPECT_TRUE(native.SetPlatformViewDirection(77, 0));
+  EXPECT_TRUE(native.ClearPlatformViewFocus(77));
+
+  PlatformViewTouch touch = {.view_id = 77};
+  EXPECT_TRUE(native.DispatchPlatformViewTouch(touch));
+
+  FlutterPlatformViewMutation m1 = {
+      .type = kFlutterPlatformViewMutationTypeOpacity,
+      .opacity = 0.9,
+  };
+  const FlutterPlatformViewMutation* mutations[] = {&m1};
+  FlutterPlatformView pv = {
+      .struct_size = sizeof(FlutterPlatformView),
+      .identifier = 77,
+      .mutations_count = 1,
+      .mutations = mutations,
+  };
+  EXPECT_TRUE(native.OnDisplayPlatformView(pv, 0, 0, 400, 300, 400, 300));
+  EXPECT_TRUE(native.PushPlatformViewMutators(pv, 0, 0, 400, 300));
+
+  EXPECT_TRUE(native.HidePlatformView(77));
+  EXPECT_TRUE(native.SynchronizeToNativeViewHierarchy(true));
+  EXPECT_TRUE(native.OnBeginFrame());
+  EXPECT_TRUE(native.OnEndFrame());
+
+  auto overlay = native.CreateOverlaySurface();
+  ASSERT_TRUE(overlay.has_value());
+  if (overlay.has_value()) {
+    PlatformViewOverlay pvo = {
+        .surface_id = *overlay, .width = 400, .height = 300};
+    EXPECT_TRUE(native.OnDisplayOverlaySurface(pvo));
+    EXPECT_TRUE(native.ShowOverlaySurface(*overlay));
+    EXPECT_TRUE(native.HideOverlaySurface(*overlay));
+  }
+  EXPECT_TRUE(native.DestroyOverlaySurfaces());
+
+  EXPECT_TRUE(native.CreatePlatformViewTransaction());
+  EXPECT_TRUE(native.SwapPlatformViewTransactions());
+  EXPECT_TRUE(native.ApplyPlatformViewTransactions());
+  EXPECT_FALSE(native.IsHcppEnabled());
+
+  EXPECT_TRUE(native.DisposePlatformView(77));
+  EXPECT_FALSE(mem_provider->IsViewCreated(77));
+
+  JniRouter::SetEmbedderEnabled(false);
+}
+
+TEST(PlatformViewsTest, ThreadSafeConcurrentPlatformViewsOperations) {
+  auto mem_provider = std::make_shared<InMemoryPlatformViewsProvider>();
+  AndroidPlatformViewsController controller(mem_provider);
+
+  constexpr int kNumThreads = 8;
+  constexpr int kOpsPerThread = 100;
+  std::vector<std::thread> threads;
+  threads.reserve(kNumThreads);
+
+  for (int t = 0; t < kNumThreads; ++t) {
+    threads.emplace_back([&controller, t]() {
+      for (int i = 0; i < kOpsPerThread; ++i) {
+        int64_t view_id = (t * 1000) + i;
+        PlatformViewCreationParams params = {
+            .view_id = view_id,
+            .view_type = "thread.safe.view",
+            .width = 100.0 + i,
+            .height = 100.0 + i,
+        };
+        controller.CreatePlatformView(
+            params, (i % 2 == 0)
+                        ? PlatformViewCompositionType::kTextureLayer
+                        : PlatformViewCompositionType::kHybridComposition);
+
+        controller.OffsetPlatformView(view_id, i, i);
+        controller.SetDirection(view_id, i % 2);
+        controller.ClearFocus(view_id);
+
+        PlatformViewTouch touch = {
+            .view_id = view_id,
+            .motion_event_id = i,
+            .action = 0,
+        };
+        controller.DispatchTouchEvent(touch);
+
+        AndroidMutatorsStack stack;
+        stack.PushOpacity(0.5f);
+        controller.OnDisplayPlatformView(view_id, 0, 0, 100, 100, 100, 100,
+                                         stack);
+
+        controller.HidePlatformView(view_id);
+        controller.DisposePlatformView(view_id);
+      }
+    });
+  }
+
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  EXPECT_EQ(controller.GetActiveViewsCount(), 0u);
 }
 
 }  // namespace testing

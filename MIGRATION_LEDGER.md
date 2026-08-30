@@ -94,11 +94,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `Accessibility` & `Semantics` natively wired.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `dev/integration_tests/android_semantics` passes across CI matrix.
-- [ ] **2.6 Platform Views**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.6-platform-views`
-    - [ ] `PlatformViewsController` integrations wired.
+- [x] **2.6 Platform Views**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-2.6-platform-views`
+    - [x] `PlatformViewsController` integrations wired.
     - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `dev/integration_tests/android_views` passes (texture & hybrid composition).
+    - [x] *Validation*: `dev/integration_tests/android_views` passes (texture & hybrid composition).
 - [ ] **2.7 Window Metrics Translation**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.7-window-metrics-translation`
     - [ ] `FlutterEngineSendWindowMetricsEvent` bounds and insets hooked to replace native `android_display`.

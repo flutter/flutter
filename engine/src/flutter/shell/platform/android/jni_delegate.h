@@ -13,6 +13,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
+#include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -82,7 +83,8 @@ class JniDelegate {
   explicit JniDelegate(
       std::shared_ptr<JvmInvoker> jvm_invoker,
       std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr,
-      std::shared_ptr<ImageDecoderProvider> image_decoder = nullptr);
+      std::shared_ptr<ImageDecoderProvider> image_decoder = nullptr,
+      std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr);
   virtual ~JniDelegate();
 
   /// @brief Handles an incoming platform message dispatch to the JVM.
@@ -169,6 +171,80 @@ class JniDelegate {
   virtual std::optional<ImageHeaderInfo> GetImageHeader(
       int64_t generator_handle);
 
+  /// @brief Creates a platform view in the JVM.
+  virtual int64_t CreatePlatformView(
+      const PlatformViewCreationParams& params,
+      PlatformViewCompositionType composition_type);
+
+  /// @brief Disposes a platform view by ID.
+  virtual bool DisposePlatformView(int64_t view_id);
+
+  /// @brief Resizes a platform view.
+  virtual bool ResizePlatformView(const PlatformViewResizeRequest& request);
+
+  /// @brief Sets top-left offset for a platform view.
+  virtual bool OffsetPlatformView(int64_t view_id, double top, double left);
+
+  /// @brief Sets layout direction for a platform view.
+  virtual bool SetPlatformViewDirection(int64_t view_id, int32_t direction);
+
+  /// @brief Clears focus from a platform view.
+  virtual bool ClearPlatformViewFocus(int64_t view_id);
+
+  /// @brief Dispatches a touch event to a platform view.
+  virtual bool DispatchPlatformViewTouch(const PlatformViewTouch& touch);
+
+  /// @brief Positions and displays a platform view with geometry.
+  virtual bool OnDisplayPlatformView(const PlatformViewGeometry& geometry);
+
+  /// @brief Positions and displays a platform view with FlutterPlatformView.
+  virtual bool OnDisplayPlatformView(const FlutterPlatformView& platform_view,
+                                     int32_t x,
+                                     int32_t y,
+                                     int32_t width,
+                                     int32_t height,
+                                     int32_t view_width,
+                                     int32_t view_height);
+
+  /// @brief Hides a platform view.
+  virtual bool HidePlatformView(int64_t view_id);
+
+  /// @brief Synchronizes rendering surface to native view hierarchy.
+  virtual bool SynchronizeToNativeViewHierarchy(bool synchronize);
+
+  /// @brief Signals start of a frame for hybrid composition.
+  virtual bool OnBeginFrame();
+
+  /// @brief Signals end of a frame for hybrid composition.
+  virtual bool OnEndFrame();
+
+  /// @brief Instantiates an overlay surface in hybrid composition.
+  virtual std::optional<int32_t> CreateOverlaySurface();
+
+  /// @brief Destroys all active overlay surfaces.
+  virtual bool DestroyOverlaySurfaces();
+
+  /// @brief Positions and sizes an overlay surface.
+  virtual bool OnDisplayOverlaySurface(const PlatformViewOverlay& overlay);
+
+  /// @brief Shows an overlay surface.
+  virtual bool ShowOverlaySurface(int32_t surface_id);
+
+  /// @brief Hides an overlay surface.
+  virtual bool HideOverlaySurface(int32_t surface_id);
+
+  /// @brief Creates a SurfaceControl transaction for HC++.
+  virtual bool CreatePlatformViewTransaction();
+
+  /// @brief Swaps active SurfaceControl transactions for HC++.
+  virtual bool SwapPlatformViewTransactions();
+
+  /// @brief Applies pending SurfaceControl transactions for HC++.
+  virtual bool ApplyPlatformViewTransactions();
+
+  /// @brief Checks whether HC++ presentation is supported and enabled.
+  virtual bool IsHcppEnabled() const;
+
   /// @brief Dispatches platform view mutator stack to the JVM.
   virtual bool PushPlatformViewMutators(
       int64_t view_id,
@@ -199,6 +275,17 @@ class JniDelegate {
   /// @brief Returns the current ImageDecoderProvider.
   std::shared_ptr<ImageDecoderProvider> GetImageDecoderProvider() const;
 
+  /// @brief Sets or replaces the PlatformViewsProvider.
+  void SetPlatformViewsProvider(
+      std::shared_ptr<PlatformViewsProvider> provider);
+
+  /// @brief Returns the current PlatformViewsProvider.
+  std::shared_ptr<PlatformViewsProvider> GetPlatformViewsProvider() const;
+
+  /// @brief Returns the current AndroidPlatformViewsController.
+  std::shared_ptr<AndroidPlatformViewsController> GetPlatformViewsController()
+      const;
+
   /// @brief Returns the underlying JvmInvoker instance.
   std::shared_ptr<JvmInvoker> GetJvmInvoker() const;
 
@@ -206,6 +293,8 @@ class JniDelegate {
   std::shared_ptr<JvmInvoker> jvm_invoker_;
   std::shared_ptr<CallbackCacheProvider> callback_cache_;
   std::shared_ptr<ImageDecoderProvider> image_decoder_;
+  std::shared_ptr<PlatformViewsProvider> platform_views_provider_;
+  std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniDelegate);
 };

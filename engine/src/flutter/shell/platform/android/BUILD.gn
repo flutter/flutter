@@ -20,6 +20,8 @@ source_set("flutter_embedder_native_src") {
   sources = [
     "android_mutators_mapper.cc",
     "android_mutators_mapper.h",
+    "android_platform_views_controller.cc",
+    "android_platform_views_controller.h",
     "android_semantics_mapper.cc",
     "android_semantics_mapper.h",
     "apk_asset_provider.cc",

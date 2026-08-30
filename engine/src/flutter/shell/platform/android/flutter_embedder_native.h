@@ -15,6 +15,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
+#include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
@@ -179,7 +180,8 @@ class FlutterEmbedderNative {
       std::shared_ptr<APKAssetProvider> asset_provider = nullptr,
       std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr,
       std::shared_ptr<ImageDecoderProvider> image_decoder = nullptr,
-      std::shared_ptr<EmbedderImageLRU> image_lru = nullptr);
+      std::shared_ptr<EmbedderImageLRU> image_lru = nullptr,
+      std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr);
   ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -209,7 +211,8 @@ class FlutterEmbedderNative {
   /// @brief Creates a default JniRouter instance with an injected JvmInvoker.
   static std::shared_ptr<JniRouter> CreateDefaultRouter(
       std::shared_ptr<JvmInvoker> invoker,
-      const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr);
+      const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr,
+      std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr);
 
   /// @brief Returns the JniRouter managed by this native instance.
   std::shared_ptr<JniRouter> GetRouter() const;
@@ -279,6 +282,92 @@ class FlutterEmbedderNative {
 
   /// @brief Sets or replaces the EmbedderImageLRU cache.
   void SetImageLRU(std::shared_ptr<EmbedderImageLRU> lru);
+
+  /// @brief Returns the PlatformViewsProvider managed by this native instance.
+  std::shared_ptr<PlatformViewsProvider> GetPlatformViewsProvider() const;
+
+  /// @brief Sets or replaces the PlatformViewsProvider.
+  void SetPlatformViewsProvider(
+      std::shared_ptr<PlatformViewsProvider> provider);
+
+  /// @brief Returns the AndroidPlatformViewsController managed by this
+  /// instance.
+  std::shared_ptr<AndroidPlatformViewsController> GetPlatformViewsController()
+      const;
+
+  /// @brief Creates a platform view in the JVM.
+  int64_t CreatePlatformView(
+      const PlatformViewCreationParams& params,
+      PlatformViewCompositionType composition_type) const;
+
+  /// @brief Disposes a platform view by ID.
+  bool DisposePlatformView(int64_t view_id) const;
+
+  /// @brief Resizes a platform view.
+  bool ResizePlatformView(const PlatformViewResizeRequest& request) const;
+
+  /// @brief Sets top-left offset for a platform view.
+  bool OffsetPlatformView(int64_t view_id, double top, double left) const;
+
+  /// @brief Sets layout direction for a platform view.
+  bool SetPlatformViewDirection(int64_t view_id, int32_t direction) const;
+
+  /// @brief Clears focus from a platform view.
+  bool ClearPlatformViewFocus(int64_t view_id) const;
+
+  /// @brief Dispatches a touch event to a platform view.
+  bool DispatchPlatformViewTouch(const PlatformViewTouch& touch) const;
+
+  /// @brief Positions and displays a platform view with geometry.
+  bool OnDisplayPlatformView(const PlatformViewGeometry& geometry) const;
+
+  /// @brief Positions and displays a platform view with FlutterPlatformView.
+  bool OnDisplayPlatformView(const FlutterPlatformView& platform_view,
+                             int32_t x,
+                             int32_t y,
+                             int32_t width,
+                             int32_t height,
+                             int32_t view_width,
+                             int32_t view_height) const;
+
+  /// @brief Hides a platform view.
+  bool HidePlatformView(int64_t view_id) const;
+
+  /// @brief Synchronizes rendering surface to native view hierarchy.
+  bool SynchronizeToNativeViewHierarchy(bool synchronize) const;
+
+  /// @brief Signals start of a frame for hybrid composition.
+  bool OnBeginFrame() const;
+
+  /// @brief Signals end of a frame for hybrid composition.
+  bool OnEndFrame() const;
+
+  /// @brief Instantiates an overlay surface in hybrid composition.
+  std::optional<int32_t> CreateOverlaySurface() const;
+
+  /// @brief Destroys all active overlay surfaces.
+  bool DestroyOverlaySurfaces() const;
+
+  /// @brief Positions and sizes an overlay surface.
+  bool OnDisplayOverlaySurface(const PlatformViewOverlay& overlay) const;
+
+  /// @brief Shows an overlay surface.
+  bool ShowOverlaySurface(int32_t surface_id) const;
+
+  /// @brief Hides an overlay surface.
+  bool HideOverlaySurface(int32_t surface_id) const;
+
+  /// @brief Creates a SurfaceControl transaction for HC++.
+  bool CreatePlatformViewTransaction() const;
+
+  /// @brief Swaps active SurfaceControl transactions for HC++.
+  bool SwapPlatformViewTransactions() const;
+
+  /// @brief Applies pending SurfaceControl transactions for HC++.
+  bool ApplyPlatformViewTransactions() const;
+
+  /// @brief Checks whether HC++ presentation is supported and enabled.
+  bool IsHcppEnabled() const;
 
   /// @brief Maps raw platform view mutations into an AndroidMutatorsStack.
   AndroidMutatorsStack MapPlatformViewMutations(
@@ -366,6 +455,8 @@ class FlutterEmbedderNative {
   std::shared_ptr<CallbackCacheProvider> callback_cache_;
   std::shared_ptr<ImageDecoderProvider> image_decoder_;
   std::shared_ptr<EmbedderImageLRU> image_lru_;
+  std::shared_ptr<PlatformViewsProvider> platform_views_provider_;
+  std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;
   std::shared_ptr<OSLibraryLoader> library_loader_;
