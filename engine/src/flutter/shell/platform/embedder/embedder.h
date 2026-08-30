@@ -3211,6 +3211,38 @@ typedef struct {
   const char* library_path;
 } FlutterCallbackInformation;
 
+/// Decoded image descriptor returned by a custom image decoder callback.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterDecodedImage).
+  size_t struct_size;
+  /// Width of the decoded image in pixels.
+  uint32_t width;
+  /// Height of the decoded image in pixels.
+  uint32_t height;
+  /// Number of bytes per row (stride).
+  size_t row_bytes;
+  /// Pointer to decoded pixel data (RGBA 8888 premultiplied).
+  const void* raw_pixels;
+  /// Context pointer passed to destruction_callback.
+  void* user_data;
+  /// Optional callback invoked when the engine is done with raw_pixels.
+  void (*destruction_callback)(void* user_data);
+} FlutterDecodedImage;
+
+/// Callback for decoding an image from raw buffer bytes.
+///
+/// If the callback recognizes and decodes the image, it populates
+/// [decoded_image_out] and returns true. If it cannot decode the image,
+/// it returns false (allowing subsequent decoders or built-in decoders to try).
+typedef bool (*FlutterImageDecoderCallback)(
+    const uint8_t* /* data */,
+    size_t /* data_size */,
+    FlutterDecodedImage* /* decoded_image_out */,
+    void* /* user_data */);
+
+/// Opaque identifier representing a registered image decoder.
+typedef int64_t FlutterImageDecoderRegistration;
+
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -4157,6 +4189,50 @@ FlutterEngineResult FlutterEngineGetCallbackInformation(
     int64_t handle,
     FlutterCallbackInformation* callback_info_out);
 
+//------------------------------------------------------------------------------
+/// @brief      Registers a platform/custom image decoder callback with the
+///             engine.
+///
+///             The registered image decoder callback will be invoked on
+///             decoding threads when processing image assets.
+///
+/// @param[in]  engine            The engine handle.
+/// @param[in]  callback          The image decoder callback to invoke.
+/// @param[in]  user_data         User data passed to the callback.
+/// @param[in]  priority          Priority for the image decoder. Higher
+/// priority
+///                               decoders are tried before lower priority ones.
+/// @param[out] registration_out  Optional pointer to receive the registration
+///                               identifier, which can be passed to
+///                               `FlutterEngineUnregisterImageDecoder`.
+///
+/// @return     `kSuccess` if the image decoder was successfully registered;
+///             `kInvalidArguments` if the engine handle or callback is null.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineRegisterImageDecoder(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterImageDecoderCallback callback,
+    void* user_data,
+    int32_t priority,
+    FlutterImageDecoderRegistration* registration_out);
+
+//------------------------------------------------------------------------------
+/// @brief      Unregisters a previously registered image decoder callback.
+///
+/// @param[in]  engine        The engine handle.
+/// @param[in]  registration  The registration identifier returned by
+///                           `FlutterEngineRegisterImageDecoder`.
+///
+/// @return     `kSuccess` if the image decoder was unregistered;
+///             `kInvalidArguments` if the engine handle or registration is
+///             invalid.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineUnregisterImageDecoder(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterImageDecoderRegistration registration);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -4316,6 +4392,15 @@ typedef FlutterEngineResult (*FlutterEngineFreeScreenshotFnPtr)(
 typedef FlutterEngineResult (*FlutterEngineGetCallbackInformationFnPtr)(
     int64_t handle,
     FlutterCallbackInformation* callback_info_out);
+typedef FlutterEngineResult (*FlutterEngineRegisterImageDecoderFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterImageDecoderCallback callback,
+    void* user_data,
+    int32_t priority,
+    FlutterImageDecoderRegistration* registration_out);
+typedef FlutterEngineResult (*FlutterEngineUnregisterImageDecoderFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterImageDecoderRegistration registration);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -4373,6 +4458,8 @@ typedef struct {
   FlutterEngineScreenshotFnPtr Screenshot;
   FlutterEngineFreeScreenshotFnPtr FreeScreenshot;
   FlutterEngineGetCallbackInformationFnPtr GetCallbackInformation;
+  FlutterEngineRegisterImageDecoderFnPtr RegisterImageDecoder;
+  FlutterEngineUnregisterImageDecoderFnPtr UnregisterImageDecoder;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------
