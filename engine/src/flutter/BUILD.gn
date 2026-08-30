@@ -217,6 +217,7 @@ group("unittests") {
       "//flutter/shell/common:shell_unittests",
       "//flutter/shell/geometry:geometry_unittests",
       "//flutter/shell/gpu:gpu_surface_unittests",
+      "//flutter/shell/platform/android:flutter_embedder_native_unittests",
       "//flutter/shell/platform/embedder:embedder_a11y_unittests",
       "//flutter/shell/platform/embedder:embedder_proctable_unittests",
       "//flutter/shell/platform/embedder:embedder_unittests",
