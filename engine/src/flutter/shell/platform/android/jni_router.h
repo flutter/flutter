@@ -75,6 +75,21 @@ class LegacyJniDelegate {
 
   virtual bool OnPreEngineRestart() = 0;
 
+  virtual bool SetViewportMetrics(const AndroidViewportMetrics& metrics) = 0;
+
+  virtual bool UpdateDisplayMetrics(const AndroidDisplayMetrics& metrics) = 0;
+
+  virtual bool UpdateDisplayMetrics(uint64_t display_id,
+                                    double refresh_rate,
+                                    double width,
+                                    double height,
+                                    double device_pixel_ratio) = 0;
+
+  virtual bool DispatchViewportMetrics(int64_t view_id,
+                                       double width,
+                                       double height,
+                                       double pixel_ratio) = 0;
+
   virtual bool RequestDartDeferredLibrary(int loading_unit_id) = 0;
 
   virtual std::optional<DartCallbackInfo> LookupCallbackInformation(
@@ -268,6 +283,21 @@ class JniRouter {
   bool RouteFirstFrame();
 
   bool RoutePreEngineRestart();
+
+  bool RouteSetViewportMetrics(const AndroidViewportMetrics& metrics);
+
+  bool RouteUpdateDisplayMetrics(const AndroidDisplayMetrics& metrics);
+
+  bool RouteUpdateDisplayMetrics(uint64_t display_id,
+                                 double refresh_rate,
+                                 double width,
+                                 double height,
+                                 double device_pixel_ratio);
+
+  bool RouteViewportMetrics(int64_t view_id,
+                            double width,
+                            double height,
+                            double pixel_ratio);
 
   bool RouteRequestDartDeferredLibrary(int loading_unit_id);
 
