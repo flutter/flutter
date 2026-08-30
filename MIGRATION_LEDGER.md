@@ -186,11 +186,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `dev/devicelab/bin/tasks/flutter_engine_group_performance.dart` - Passed.
 
 ## Phase 5: Emancipation
-- [ ] **5.1 Target Flip**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.1-target-flip`
-    - [ ] Embedder flags defaulted to `true`.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: CI remains unconditionally green on default runs.
+- [x] **5.1 Target Flip**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-5.1-target-flip`
+    - [x] Embedder flags defaulted to `true`.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: CI remains unconditionally green on default runs.
 - [ ] **5.2 Legacy Deletion (Subsystems)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.2-legacy-deletion-subsystems`
     - [ ] Assets, Images, Callbacks, Mutators wiped.
