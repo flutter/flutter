@@ -228,5 +228,51 @@ std::optional<DartCallbackInfo> JniRouter::RouteLookupCallbackInformation(
   return std::nullopt;
 }
 
+bool JniRouter::RouteDecodeImage(const uint8_t* data,
+                                 size_t size,
+                                 int64_t generator_handle) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteDecodeImage");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->DecodeImage(data, size, generator_handle);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->DecodeImage(data, size, generator_handle);
+  }
+  return false;
+}
+
+void JniRouter::RouteNativeImageHeader(int64_t generator_handle,
+                                       int32_t width,
+                                       int32_t height) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteNativeImageHeader");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      embedder_delegate_->OnNativeImageHeader(generator_handle, width, height);
+    }
+    return;
+  }
+  if (legacy_delegate_) {
+    legacy_delegate_->OnNativeImageHeader(generator_handle, width, height);
+  }
+}
+
+std::optional<ImageHeaderInfo> JniRouter::RouteGetImageHeader(
+    int64_t generator_handle) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteGetImageHeader");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->GetImageHeader(generator_handle);
+    }
+    return std::nullopt;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->GetImageHeader(generator_handle);
+  }
+  return std::nullopt;
+}
+
 }  // namespace android
 }  // namespace flutter

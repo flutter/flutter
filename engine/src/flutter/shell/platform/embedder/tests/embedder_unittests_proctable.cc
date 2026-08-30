@@ -116,6 +116,19 @@ TEST(EmbedderProcTable, CallCallbackInformationProcs) {
   EXPECT_EQ(procs.GetCallbackInformation(0, &invalid_info), kInvalidArguments);
 }
 
+// Spot-checks calling RegisterImageDecoder function pointer via proc table.
+TEST(EmbedderProcTable, CallRegisterImageDecoderProcs) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  EXPECT_NE(procs.RegisterImageDecoder, nullptr);
+
+  // Calling with invalid arguments returns kInvalidArguments.
+  EXPECT_EQ(procs.RegisterImageDecoder(nullptr, nullptr, nullptr, 0),
+            kInvalidArguments);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

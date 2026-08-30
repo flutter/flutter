@@ -11,9 +11,11 @@ namespace flutter {
 namespace android {
 
 JniDelegate::JniDelegate(std::shared_ptr<JvmInvoker> jvm_invoker,
-                         std::shared_ptr<CallbackCacheProvider> callback_cache)
+                         std::shared_ptr<CallbackCacheProvider> callback_cache,
+                         std::shared_ptr<ImageDecoderProvider> image_decoder)
     : jvm_invoker_(std::move(jvm_invoker)),
-      callback_cache_(std::move(callback_cache)) {
+      callback_cache_(std::move(callback_cache)),
+      image_decoder_(std::move(image_decoder)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
 }
@@ -174,6 +176,51 @@ void JniDelegate::SetCallbackCache(
 
 std::shared_ptr<CallbackCacheProvider> JniDelegate::GetCallbackCache() const {
   return callback_cache_;
+}
+
+bool JniDelegate::DecodeImage(const uint8_t* data,
+                              size_t size,
+                              int64_t generator_handle) {
+  TRACE_EVENT0("flutter", "JniDelegate::DecodeImage");
+  if (image_decoder_) {
+    return image_decoder_->DecodeImage(data, size, generator_handle);
+  }
+  if (!jvm_invoker_ || !data || size == 0) {
+    return false;
+  }
+  std::vector<uint8_t> payload(data, data + size);
+  return jvm_invoker_->InvokeBooleanMethod(
+      "decodeImage", "(Ljava/nio/ByteBuffer;J)Landroid/graphics/Bitmap;",
+      payload);
+}
+
+void JniDelegate::OnNativeImageHeader(int64_t generator_handle,
+                                      int32_t width,
+                                      int32_t height) {
+  TRACE_EVENT0("flutter", "JniDelegate::OnNativeImageHeader");
+  if (image_decoder_) {
+    image_decoder_->OnImageHeader(generator_handle, width, height);
+  }
+}
+
+std::optional<ImageHeaderInfo> JniDelegate::GetImageHeader(
+    int64_t generator_handle) {
+  TRACE_EVENT0("flutter", "JniDelegate::GetImageHeader");
+  if (image_decoder_) {
+    return image_decoder_->GetImageHeader(generator_handle);
+  }
+  return std::nullopt;
+}
+
+void JniDelegate::SetImageDecoderProvider(
+    std::shared_ptr<ImageDecoderProvider> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetImageDecoderProvider");
+  image_decoder_ = std::move(provider);
+}
+
+std::shared_ptr<ImageDecoderProvider> JniDelegate::GetImageDecoderProvider()
+    const {
+  return image_decoder_;
 }
 
 }  // namespace android

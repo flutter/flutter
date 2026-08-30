@@ -63,6 +63,104 @@ class InMemoryCallbackCacheProvider : public CallbackCacheProvider {
   FML_DISALLOW_COPY_AND_ASSIGN(InMemoryCallbackCacheProvider);
 };
 
+/// @brief Default JNI/C-API backed ImageDecoderProvider that dispatches to JVM
+/// decodeImage.
+class DefaultImageDecoderProvider : public ImageDecoderProvider {
+ public:
+  explicit DefaultImageDecoderProvider(
+      std::shared_ptr<JvmInvoker> jvm_invoker = nullptr);
+  ~DefaultImageDecoderProvider() override;
+
+  bool DecodeImage(const uint8_t* data,
+                   size_t size,
+                   int64_t generator_handle) override;
+
+  void OnImageHeader(int64_t generator_handle,
+                     int32_t width,
+                     int32_t height) override;
+
+  std::optional<ImageHeaderInfo> GetImageHeader(
+      int64_t generator_handle) override;
+
+ private:
+  std::shared_ptr<JvmInvoker> jvm_invoker_;
+  mutable std::mutex mutex_;
+  std::map<int64_t, ImageHeaderInfo> headers_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(DefaultImageDecoderProvider);
+};
+
+/// @brief In-memory mock image decoder provider for unit testing without JVM
+/// or Android SDK dependencies.
+class InMemoryImageDecoderProvider : public ImageDecoderProvider {
+ public:
+  InMemoryImageDecoderProvider();
+  ~InMemoryImageDecoderProvider() override;
+
+  void SetDecodeResult(bool success);
+  void SetHeaderInfo(int64_t generator_handle, int32_t width, int32_t height);
+  size_t GetDecodeCount() const;
+  size_t GetLastDecodedSize() const;
+  void Clear();
+
+  bool DecodeImage(const uint8_t* data,
+                   size_t size,
+                   int64_t generator_handle) override;
+
+  void OnImageHeader(int64_t generator_handle,
+                     int32_t width,
+                     int32_t height) override;
+
+  std::optional<ImageHeaderInfo> GetImageHeader(
+      int64_t generator_handle) override;
+
+ private:
+  mutable std::mutex mutex_;
+  bool decode_result_ = true;
+  size_t decode_count_ = 0;
+  size_t last_decoded_size_ = 0;
+  std::map<int64_t, ImageHeaderInfo> headers_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(InMemoryImageDecoderProvider);
+};
+
+/// @brief Decoupled, C-ABI quarantined LRU cache for platform texture and
+/// image handles.
+class EmbedderImageLRU {
+ public:
+  static constexpr size_t kDefaultCapacity = 6u;
+
+  explicit EmbedderImageLRU(size_t capacity = kDefaultCapacity);
+  ~EmbedderImageLRU();
+
+  /// @brief Finds the handle associated with [key], or 0 if absent.
+  uint64_t FindImage(uint64_t key);
+
+  /// @brief Adds an image handle to the cache, returning the evicted key (or 0
+  /// if none evicted).
+  uint64_t AddImage(uint64_t image_handle, uint64_t key);
+
+  /// @brief Clears all entries from the LRU cache.
+  void Clear();
+
+  /// @brief Returns the current number of cached items.
+  size_t GetSize() const;
+
+ private:
+  void UpdateKey(uint64_t image_handle, uint64_t key);
+
+  struct Entry {
+    uint64_t key = 0u;
+    uint64_t image_handle = 0u;
+  };
+
+  mutable std::mutex mutex_;
+  size_t capacity_;
+  std::vector<Entry> entries_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderImageLRU);
+};
+
 /// @brief Quarantined native entry point and manager for the Android C-API
 /// Embedder.
 ///
@@ -77,7 +175,9 @@ class FlutterEmbedderNative {
       const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr,
       std::shared_ptr<OSLibraryLoader> library_loader = nullptr,
       std::shared_ptr<APKAssetProvider> asset_provider = nullptr,
-      std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr);
+      std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr,
+      std::shared_ptr<ImageDecoderProvider> image_decoder = nullptr,
+      std::shared_ptr<EmbedderImageLRU> image_lru = nullptr);
   ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -148,11 +248,43 @@ class FlutterEmbedderNative {
   std::optional<DartCallbackInfo> LookupCallbackInformation(
       int64_t handle) const;
 
+  /// @brief Returns the ImageDecoderProvider managed by this native instance.
+  std::shared_ptr<ImageDecoderProvider> GetImageDecoderProvider() const;
+
+  /// @brief Sets or replaces the ImageDecoderProvider.
+  void SetImageDecoderProvider(std::shared_ptr<ImageDecoderProvider> provider);
+
+  /// @brief Decodes an image using the managed image decoder provider.
+  bool DecodeImage(const uint8_t* data,
+                   size_t size,
+                   int64_t generator_handle) const;
+
+  /// @brief Notifies that image header dimensions are parsed.
+  void OnNativeImageHeader(int64_t generator_handle,
+                           int32_t width,
+                           int32_t height) const;
+
+  /// @brief Gets parsed image header info for a generator handle.
+  std::optional<ImageHeaderInfo> GetImageHeader(int64_t generator_handle) const;
+
+  /// @brief Registers this instance's image decoder with the engine.
+  FlutterEngineResult RegisterImageDecoder(FLUTTER_API_SYMBOL(FlutterEngine)
+                                               engine,
+                                           int32_t priority = -1);
+
+  /// @brief Returns the EmbedderImageLRU cache managed by this instance.
+  std::shared_ptr<EmbedderImageLRU> GetImageLRU() const;
+
+  /// @brief Sets or replaces the EmbedderImageLRU cache.
+  void SetImageLRU(std::shared_ptr<EmbedderImageLRU> lru);
+
  private:
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;
 
   std::shared_ptr<JvmInvoker> jvm_invoker_;
   std::shared_ptr<CallbackCacheProvider> callback_cache_;
+  std::shared_ptr<ImageDecoderProvider> image_decoder_;
+  std::shared_ptr<EmbedderImageLRU> image_lru_;
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;
   std::shared_ptr<OSLibraryLoader> library_loader_;

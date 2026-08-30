@@ -440,6 +440,16 @@ bool EmbedderEngine::Screenshot(FlutterEngineScreenshotInfo* screenshot_out) {
   return true;
 }
 
+bool EmbedderEngine::RegisterImageDecoder(ImageGeneratorFactory factory,
+                                          int32_t priority) {
+  TRACE_EVENT0("flutter", "EmbedderEngine::RegisterImageDecoder");
+  if (!IsValid()) {
+    return false;
+  }
+  shell_->RegisterImageDecoder(std::move(factory), priority);
+  return true;
+}
+
 Shell& EmbedderEngine::GetShell() {
   FML_DCHECK(shell_);
   return *shell_.get();

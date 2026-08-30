@@ -54,5 +54,40 @@ TEST(ImageLRU, CanClear) {
   }
 }
 
+TEST(ImageLRU, NullKeyReturnsNullptr) {
+  ImageLRU image_lru;
+  EXPECT_EQ(image_lru.FindImage(std::nullopt), nullptr);
+}
+
+TEST(ImageLRU, RepeatedAccessUpdatesMRU) {
+  auto image = DlImageSkia::Make(nullptr);
+  ImageLRU image_lru;
+
+  for (auto i = 0u; i < kImageReaderSwapchainSize; i++) {
+    EXPECT_EQ(image_lru.AddImage(image, i + 1), 0u);
+  }
+
+  // Access key 1, making it MRU (most recently used)
+  EXPECT_EQ(image_lru.FindImage(1), image);
+
+  // Now key 2 should be the LRU, so inserting a new key evicts 2 instead of 1
+  EXPECT_EQ(image_lru.AddImage(image, 999), 2u);
+  EXPECT_EQ(image_lru.FindImage(1), image);
+  EXPECT_EQ(image_lru.FindImage(2), nullptr);
+}
+
+TEST(ImageLRU, UpdateExistingKey) {
+  auto image1 = DlImageSkia::Make(nullptr);
+  auto image2 = DlImageSkia::Make(nullptr);
+  ImageLRU image_lru;
+
+  EXPECT_EQ(image_lru.AddImage(image1, 10), 0u);
+  EXPECT_EQ(image_lru.FindImage(10), image1);
+
+  // Re-inserting key 10 updates the image without eviction
+  EXPECT_EQ(image_lru.AddImage(image2, 10), 0u);
+  EXPECT_EQ(image_lru.FindImage(10), image2);
+}
+
 }  // namespace testing
 }  // namespace flutter

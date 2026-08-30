@@ -56,6 +56,17 @@ class LegacyJniDelegate {
 
   virtual std::optional<DartCallbackInfo> LookupCallbackInformation(
       int64_t handle) = 0;
+
+  virtual bool DecodeImage(const uint8_t* data,
+                           size_t size,
+                           int64_t generator_handle) = 0;
+
+  virtual void OnNativeImageHeader(int64_t generator_handle,
+                                   int32_t width,
+                                   int32_t height) = 0;
+
+  virtual std::optional<ImageHeaderInfo> GetImageHeader(
+      int64_t generator_handle) = 0;
 };
 
 /// @brief Native JNI Routing Boundary that dispatches calls based on
@@ -117,6 +128,16 @@ class JniRouter {
 
   std::optional<DartCallbackInfo> RouteLookupCallbackInformation(
       int64_t handle);
+
+  bool RouteDecodeImage(const uint8_t* data,
+                        size_t size,
+                        int64_t generator_handle);
+
+  void RouteNativeImageHeader(int64_t generator_handle,
+                              int32_t width,
+                              int32_t height);
+
+  std::optional<ImageHeaderInfo> RouteGetImageHeader(int64_t generator_handle);
 
   std::shared_ptr<JniDelegate> GetEmbedderDelegate() const;
   std::shared_ptr<LegacyJniDelegate> GetLegacyDelegate() const;
