@@ -7,6 +7,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 1. Phase 1.1: Matrix Initialization
 
 - **Branch Name**: `android-embedder-migration-v7/phase-1.1-matrix-initialization`
+- **Commit SHA**: `d99b7065d84`
 - **Compare URL**: [645f3658aa7 ... android-embedder-migration-v7/phase-1.1-matrix-initialization](https://github.com/mboetger/flutter/compare/645f3658aa77f11bbc722722cb025442f9ff8c48...android-embedder-migration-v7/phase-1.1-matrix-initialization)
 - **Changes Summary**: Initialized the TEST_P multi-backend parameterized test matrix covering Skia GL, Impeller OpenGLES, Impeller Vulkan, and Software rendering modes across embedder unittests.
 - **Diff Stat**: `6 files changed, 342 insertions(+), 8 deletions(-)`
@@ -23,6 +24,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 2. Phase 1.2: Pre-Emptive GN Quarantine
 
 - **Branch Name**: `android-embedder-migration-v7/phase-1.2-pre-emptive-gn-quarantine`
+- **Commit SHA**: `ba4ae2c94f2`
 - **Compare URL**: [android-embedder-migration-v7/phase-1.1-matrix-initialization ... android-embedder-migration-v7/phase-1.2-pre-emptive-gn-quarantine](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-1.1-matrix-initialization...android-embedder-migration-v7/phase-1.2-pre-emptive-gn-quarantine)
 - **Changes Summary**: Created the isolated :flutter_embedder_native GN target in BUILD.gn strictly forbidding internal Skia (//flutter/skia), Flow (//flutter/flow), or UI runtime (//flutter/lib/ui) headers to enforce C-ABI quarantine from Day 1.
 - **Diff Stat**: `6 files changed, 177 insertions(+), 5 deletions(-)`
@@ -39,6 +41,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 3. Phase 1.3: JNI Routing & Mocking
 
 - **Branch Name**: `android-embedder-migration-v7/phase-1.3-jni-routing-mocking`
+- **Commit SHA**: `885b3509f64`
 - **Compare URL**: [android-embedder-migration-v7/phase-1.2-pre-emptive-gn-quarantine ... android-embedder-migration-v7/phase-1.3-jni-routing-mocking](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-1.2-pre-emptive-gn-quarantine...android-embedder-migration-v7/phase-1.3-jni-routing-mocking)
 - **Changes Summary**: Implemented abstracted JvmInvoker interface and JniDelegate adapter. Wired raw JNI entry points to support dual-dispatch routing with host-side mockability.
 - **Diff Stat**: `11 files changed, 1204 insertions(+), 8 deletions(-)`
@@ -60,6 +63,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 4. Phase 1.4: Dynamic Virtualization
 
 - **Branch Name**: `android-embedder-migration-v7/phase-1.4-dynamic-virtualization`
+- **Commit SHA**: `e1dcd7c2c54`
 - **Compare URL**: [android-embedder-migration-v7/phase-1.3-jni-routing-mocking ... android-embedder-migration-v7/phase-1.4-dynamic-virtualization](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-1.3-jni-routing-mocking...android-embedder-migration-v7/phase-1.4-dynamic-virtualization)
 - **Changes Summary**: Implemented OSLibraryLoader interface wrapping dlopen/dlsym with DefaultOSLibraryLoader and InMemoryOSLibraryLoader to shield desktop CI environments from Android platform crashes.
 - **Diff Stat**: `8 files changed, 992 insertions(+), 213 deletions(-)`
@@ -78,9 +82,10 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 5. Phase 1.5: C-API Extension (Vulkan External Textures)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-1.5-c-api-extension-vulkan`
+- **Commit SHA**: `47d847ad122`
 - **Compare URL**: [android-embedder-migration-v7/phase-1.4-dynamic-virtualization ... android-embedder-migration-v7/phase-1.5-c-api-extension-vulkan](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-1.4-dynamic-virtualization...android-embedder-migration-v7/phase-1.5-c-api-extension-vulkan)
-- **Changes Summary**: Expanded embedder.h with cross-platform opaque struct abstractions (FlutterVulkanExternalTexture, FlutterVulkanYcbcrConversionInfo, FlutterVulkanExternalTextureFrameCallback) for hardware Vulkan texture sampling.
-- **Diff Stat**: `10 files changed, 791 insertions(+), 5 deletions(-)`
+- **Changes Summary**: Expanded embedder.h with cross-platform opaque struct abstractions (FlutterVulkanExternalTexture, FlutterVulkanYcbcrConversionInfo, FlutterVulkanExternalTextureFrameCallback) for hardware Vulkan texture sampling. Declared //flutter/impeller/display_list GN dependency to pass Fuchsia and cross-platform gn check.
+- **Diff Stat**: `10 files changed, 795 insertions(+), 5 deletions(-)`
 - **Files Modified/Created** (10):
   - [`MIGRATION_LEDGER.md`](file:///Users/boetger/src/flutter/MIGRATION_LEDGER.md)
   - [`engine/src/flutter/shell/platform/embedder/BUILD.gn`](file:///Users/boetger/src/flutter/engine/src/flutter/shell/platform/embedder/BUILD.gn)
@@ -98,6 +103,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 6. Phase 1.6: C-API Extension (AHardwareBuffer)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-1.6-c-api-extension-ahardwarebuffer`
+- **Commit SHA**: `f0fad81c449`
 - **Compare URL**: [android-embedder-migration-v7/phase-1.5-c-api-extension-vulkan ... android-embedder-migration-v7/phase-1.6-c-api-extension-ahardwarebuffer](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-1.5-c-api-extension-vulkan...android-embedder-migration-v7/phase-1.6-c-api-extension-ahardwarebuffer)
 - **Changes Summary**: Expanded embedder.h with cross-platform opaque struct abstractions (FlutterHardwareBufferExternalTexture, FlutterHardwareBufferExternalTextureFrameCallback) for zero-copy Android AHardwareBuffer rendering.
 - **Diff Stat**: `11 files changed, 570 insertions(+), 6 deletions(-)`
@@ -119,6 +125,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 7. Phase 1.7: C-API Extension (Engine Spawn)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-1.7-c-api-extension-engine-spawn`
+- **Commit SHA**: `bece4f9927c`
 - **Compare URL**: [android-embedder-migration-v7/phase-1.6-c-api-extension-ahardwarebuffer ... android-embedder-migration-v7/phase-1.7-c-api-extension-engine-spawn](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-1.6-c-api-extension-ahardwarebuffer...android-embedder-migration-v7/phase-1.7-c-api-extension-engine-spawn)
 - **Changes Summary**: Expanded embedder.h with FlutterEngineSpawn and FlutterEngineSpawnConfig for lightweight Add-to-App multi-engine spawning sharing isolates, thread pools, and GPU contexts.
 - **Diff Stat**: `7 files changed, 920 insertions(+), 271 deletions(-)`
@@ -136,6 +143,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 8. Phase 1.8: C-API Extension (Dart Deferred Components)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-1.8-c-api-extension-dart-deferred-components`
+- **Commit SHA**: `21d74804997`
 - **Compare URL**: [android-embedder-migration-v7/phase-1.7-c-api-extension-engine-spawn ... android-embedder-migration-v7/phase-1.8-c-api-extension-dart-deferred-components](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-1.7-c-api-extension-engine-spawn...android-embedder-migration-v7/phase-1.8-c-api-extension-dart-deferred-components)
 - **Changes Summary**: Expanded embedder.h with FlutterEngineLoadDartDeferredLibrary and FlutterEngineDeferredLoadingCallback mapping Play Feature Delivery components safely across the C-API boundary.
 - **Diff Stat**: `11 files changed, 497 insertions(+), 7 deletions(-)`
@@ -157,6 +165,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 9. Phase 1.9: C-API Extension (Screenshot API)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-1.9-c-api-extension-screenshot-api`
+- **Commit SHA**: `eaa7c58e218`
 - **Compare URL**: [android-embedder-migration-v7/phase-1.8-c-api-extension-dart-deferred-components ... android-embedder-migration-v7/phase-1.9-c-api-extension-screenshot-api](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-1.8-c-api-extension-dart-deferred-components...android-embedder-migration-v7/phase-1.9-c-api-extension-screenshot-api)
 - **Changes Summary**: Expanded embedder.h with FlutterEngineScreenshot and FlutterEngineFreeScreenshot allowing synchronous raster bitmap captures across the C-API boundary.
 - **Diff Stat**: `8 files changed, 340 insertions(+), 5 deletions(-)`
@@ -175,6 +184,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 10. Phase 1.10: C-API Extension (Raster Context Hooks)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-1.10-c-api-extension-raster-context-hooks`
+- **Commit SHA**: `2f8d436768a`
 - **Compare URL**: [android-embedder-migration-v7/phase-1.9-c-api-extension-screenshot-api ... android-embedder-migration-v7/phase-1.10-c-api-extension-raster-context-hooks](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-1.9-c-api-extension-screenshot-api...android-embedder-migration-v7/phase-1.10-c-api-extension-raster-context-hooks)
 - **Changes Summary**: Expanded FlutterProjectArgs in embedder.h with raster_thread_context_make_current and clear_current context lifecycle callbacks for Android thread/EGL management.
 - **Diff Stat**: `7 files changed, 437 insertions(+), 23 deletions(-)`
@@ -192,6 +202,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 11. Phase 1.11: C-API Extension (Thread Priorities)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-1.11-c-api-extension-thread-priorities`
+- **Commit SHA**: `290e0d60937`
 - **Compare URL**: [android-embedder-migration-v7/phase-1.10-c-api-extension-raster-context-hooks ... android-embedder-migration-v7/phase-1.11-c-api-extension-thread-priorities](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-1.10-c-api-extension-raster-context-hooks...android-embedder-migration-v7/phase-1.11-c-api-extension-thread-priorities)
 - **Changes Summary**: Expanded FlutterProjectArgs with custom_task_runners mapping Android ALooper and strict thread priorities (such as PRIORITY_DISPLAY) onto the engine task scheduler.
 - **Diff Stat**: `11 files changed, 463 insertions(+), 23 deletions(-)`
@@ -213,6 +224,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 12. Phase 2.1: Asset Resolver
 
 - **Branch Name**: `android-embedder-migration-v7/phase-2.1-asset-resolver`
+- **Commit SHA**: `896b1a00c59`
 - **Compare URL**: [android-embedder-migration-v7/phase-1.11-c-api-extension-thread-priorities ... android-embedder-migration-v7/phase-2.1-asset-resolver](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-1.11-c-api-extension-thread-priorities...android-embedder-migration-v7/phase-2.1-asset-resolver)
 - **Changes Summary**: Adapted APKAssetProvider to implement FlutterEngineRegisterAssetResolver and custom asset provider callbacks, decoupling assets from legacy asset managers.
 - **Diff Stat**: `12 files changed, 713 insertions(+), 51 deletions(-)`
@@ -235,6 +247,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 13. Phase 2.2: Dart Callbacks
 
 - **Branch Name**: `android-embedder-migration-v7/phase-2.2-dart-callbacks`
+- **Commit SHA**: `2f046617a4c`
 - **Compare URL**: [android-embedder-migration-v7/phase-2.1-asset-resolver ... android-embedder-migration-v7/phase-2.2-dart-callbacks](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-2.1-asset-resolver...android-embedder-migration-v7/phase-2.2-dart-callbacks)
 - **Changes Summary**: Hooked Dart entrypoint and callback lookup cache directly to FlutterEngineGetCallbackInformation, eliminating legacy singletons.
 - **Diff Stat**: `15 files changed, 1390 insertions(+), 719 deletions(-)`
@@ -260,9 +273,10 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 14. Phase 2.3: Image Generators
 
 - **Branch Name**: `android-embedder-migration-v7/phase-2.3-image-generators`
+- **Commit SHA**: `3ae70abdfcc`
 - **Compare URL**: [android-embedder-migration-v7/phase-2.2-dart-callbacks ... android-embedder-migration-v7/phase-2.3-image-generators](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-2.2-dart-callbacks...android-embedder-migration-v7/phase-2.3-image-generators)
 - **Changes Summary**: Connected AndroidImageGenerator to FlutterEngineRegisterImageDecoder with an LRU cache, enabling platform-native image decoding through the C-API.
-- **Diff Stat**: `17 files changed, 1077 insertions(+), 15 deletions(-)`
+- **Diff Stat**: `17 files changed, 1078 insertions(+), 15 deletions(-)`
 - **Files Modified/Created** (17):
   - [`MIGRATION_LEDGER.md`](file:///Users/boetger/src/flutter/MIGRATION_LEDGER.md)
   - [`engine/src/flutter/shell/platform/android/android_image_generator.cc`](file:///Users/boetger/src/flutter/engine/src/flutter/shell/platform/android/android_image_generator.cc)
@@ -287,6 +301,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 15. Phase 2.4: Mutator Translation
 
 - **Branch Name**: `android-embedder-migration-v7/phase-2.4-mutator-translation`
+- **Commit SHA**: `fce361b0f03`
 - **Compare URL**: [android-embedder-migration-v7/phase-2.3-image-generators ... android-embedder-migration-v7/phase-2.4-mutator-translation](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-2.3-image-generators...android-embedder-migration-v7/phase-2.4-mutator-translation)
 - **Changes Summary**: Implemented AndroidMutatorsMapper translating Android canvas mutators (clipping, scaling, matrix transforms, opacity) into FlutterPlatformViewMutation records.
 - **Diff Stat**: `12 files changed, 1533 insertions(+), 19 deletions(-)`
@@ -309,6 +324,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 16. Phase 2.5: Accessibility & Semantics
 
 - **Branch Name**: `android-embedder-migration-v7/phase-2.5-accessibility-semantics`
+- **Commit SHA**: `5d34c0ee829`
 - **Compare URL**: [android-embedder-migration-v7/phase-2.4-mutator-translation ... android-embedder-migration-v7/phase-2.5-accessibility-semantics](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-2.4-mutator-translation...android-embedder-migration-v7/phase-2.5-accessibility-semantics)
 - **Changes Summary**: Integrated native accessibility and semantics updates with FlutterEngineUpdateSemantics2, routing TalkBack actions and tree mutations through the C Embedder API.
 - **Diff Stat**: `12 files changed, 1778 insertions(+), 13 deletions(-)`
@@ -331,6 +347,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 17. Phase 2.6: Platform Views
 
 - **Branch Name**: `android-embedder-migration-v7/phase-2.6-platform-views`
+- **Commit SHA**: `141c2f581d5`
 - **Compare URL**: [android-embedder-migration-v7/phase-2.5-accessibility-semantics ... android-embedder-migration-v7/phase-2.6-platform-views](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-2.5-accessibility-semantics...android-embedder-migration-v7/phase-2.6-platform-views)
 - **Changes Summary**: Implemented AndroidPlatformViewsController routing platform view creation, composition (hybrid & texture), layout geometry, and touch dispatch to FlutterEngineRegisterPlatformViewFactory.
 - **Diff Stat**: `11 files changed, 3526 insertions(+), 23 deletions(-)`
@@ -352,6 +369,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 18. Phase 2.7: Window Metrics Translation
 
 - **Branch Name**: `android-embedder-migration-v7/phase-2.7-window-metrics-translation`
+- **Commit SHA**: `bf0b38884c8`
 - **Compare URL**: [android-embedder-migration-v7/phase-2.6-platform-views ... android-embedder-migration-v7/phase-2.7-window-metrics-translation](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-2.6-platform-views...android-embedder-migration-v7/phase-2.7-window-metrics-translation)
 - **Changes Summary**: Routed display refresh rate, DPI, display cutouts, and view insets to FlutterEngineSendWindowMetricsEvent, replacing legacy android_display.cc.
 - **Diff Stat**: `12 files changed, 1926 insertions(+), 20 deletions(-)`
@@ -374,6 +392,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 19. Phase 2.8: AChoreographer VSync Routing
 
 - **Branch Name**: `android-embedder-migration-v7/phase-2.8-achoreographer-vsync-routing`
+- **Commit SHA**: `202afdf42f7`
 - **Compare URL**: [android-embedder-migration-v7/phase-2.7-window-metrics-translation ... android-embedder-migration-v7/phase-2.8-achoreographer-vsync-routing](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-2.7-window-metrics-translation...android-embedder-migration-v7/phase-2.8-achoreographer-vsync-routing)
 - **Changes Summary**: Mapped AChoreographer_postFrameCallback through OSLibraryLoader to FlutterProjectArgs::vsync_callback, achieving deterministic 120Hz frame pacing.
 - **Diff Stat**: `12 files changed, 1711 insertions(+), 19 deletions(-)`
@@ -396,6 +415,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 20. Phase 2.9: Global VM Initialization (flutter_main.cc)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-2.9-global-vm-initialization-flutter-main-cc`
+- **Commit SHA**: `e4890b3c9af`
 - **Compare URL**: [android-embedder-migration-v7/phase-2.8-achoreographer-vsync-routing ... android-embedder-migration-v7/phase-2.9-global-vm-initialization-flutter-main-cc](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-2.8-achoreographer-vsync-routing...android-embedder-migration-v7/phase-2.9-global-vm-initialization-flutter-main-cc)
 - **Changes Summary**: Migrated ICU data mapping, font prefetching, and AOT snapshot registration out of legacy static singletons into FlutterEngineInitialize and AndroidVMInit.
 - **Diff Stat**: `13 files changed, 1961 insertions(+), 15 deletions(-)`
@@ -419,6 +439,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 21. Phase 2 Parity Checkpoint
 
 - **Branch Name**: `android-embedder-migration-v7/phase-2-parity-checkpoint`
+- **Commit SHA**: `f892483e9d8`
 - **Compare URL**: [android-embedder-migration-v7/phase-2.9-global-vm-initialization-flutter-main-cc ... android-embedder-migration-v7/phase-2-parity-checkpoint](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-2.9-global-vm-initialization-flutter-main-cc...android-embedder-migration-v7/phase-2-parity-checkpoint)
 - **Changes Summary**: Validated all 9 decoupled Phase 2 subsystems with 100% test pass rate across host, Android, and framework test suites.
 - **Diff Stat**: `1 file changed, 5 insertions(+), 5 deletions(-)`
@@ -430,6 +451,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 22. Phase 3.1: AHardwareBuffer
 
 - **Branch Name**: `android-embedder-migration-v7/phase-3.1-ahardwarebuffer`
+- **Commit SHA**: `2995b3a340e`
 - **Compare URL**: [android-embedder-migration-v7/phase-2-parity-checkpoint ... android-embedder-migration-v7/phase-3.1-ahardwarebuffer](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-2-parity-checkpoint...android-embedder-migration-v7/phase-3.1-ahardwarebuffer)
 - **Changes Summary**: Implemented AndroidHardwareBuffer and AndroidHardwareBufferProvider virtualized via OSLibraryLoader for zero-copy external textures mapped to FlutterHardwareBufferExternalTexture.
 - **Diff Stat**: `13 files changed, 2668 insertions(+), 15 deletions(-)`
@@ -453,6 +475,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 23. Phase 3.2: Vulkan External Textures
 
 - **Branch Name**: `android-embedder-migration-v7/phase-3.2-vulkan-external-textures`
+- **Commit SHA**: `e84ca6d8f02`
 - **Compare URL**: [android-embedder-migration-v7/phase-3.1-ahardwarebuffer ... android-embedder-migration-v7/phase-3.2-vulkan-external-textures](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-3.1-ahardwarebuffer...android-embedder-migration-v7/phase-3.2-vulkan-external-textures)
 - **Changes Summary**: Implemented AndroidVulkanExternalTexture and AndroidVulkanTextureProvider virtualized via OSLibraryLoader with YCbCr sampler conversion info mapped to FlutterVulkanExternalTexture.
 - **Diff Stat**: `13 files changed, 2811 insertions(+), 42 deletions(-)`
@@ -476,6 +499,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 24. Phase 3.3: SurfaceControl HCPP
 
 - **Branch Name**: `android-embedder-migration-v7/phase-3.3-surfacecontrol-hcpp`
+- **Commit SHA**: `43536bfa66b`
 - **Compare URL**: [android-embedder-migration-v7/phase-3.2-vulkan-external-textures ... android-embedder-migration-v7/phase-3.3-surfacecontrol-hcpp](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-3.2-vulkan-external-textures...android-embedder-migration-v7/phase-3.3-surfacecontrol-hcpp)
 - **Changes Summary**: Implemented AndroidSurfaceControl and AndroidSurfaceTransaction virtualized via OSLibraryLoader for dual-mode presentation, atomic geometry transactions, and damage region updates.
 - **Diff Stat**: `14 files changed, 4163 insertions(+), 197 deletions(-)`
@@ -500,6 +524,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 25. Phase 3.4: Multi-Engine & Add-to-App
 
 - **Branch Name**: `android-embedder-migration-v7/phase-3.4-multi-engine-add-to-app`
+- **Commit SHA**: `71b89bfac21`
 - **Compare URL**: [android-embedder-migration-v7/phase-3.3-surfacecontrol-hcpp ... android-embedder-migration-v7/phase-3.4-multi-engine-add-to-app](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-3.3-surfacecontrol-hcpp...android-embedder-migration-v7/phase-3.4-multi-engine-add-to-app)
 - **Changes Summary**: Implemented AndroidEngineGroup and AndroidEngineGroupProvider mapped to FlutterEngineSpawn, integrated with Java Cleaner/PhantomReference GC callbacks for memory and shutdown safety.
 - **Diff Stat**: `13 files changed, 2725 insertions(+), 17 deletions(-)`
@@ -523,6 +548,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 26. Phase 3 Parity Checkpoint
 
 - **Branch Name**: `android-embedder-migration-v7/phase-3-parity-checkpoint`
+- **Commit SHA**: `210f91704ed`
 - **Compare URL**: [android-embedder-migration-v7/phase-3.4-multi-engine-add-to-app ... android-embedder-migration-v7/phase-3-parity-checkpoint](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-3.4-multi-engine-add-to-app...android-embedder-migration-v7/phase-3-parity-checkpoint)
 - **Changes Summary**: Validated all Phase 3 Advanced Graphics and Multi-Engine subsystems with 100% test passes across unit, proctable, and framework test suites.
 - **Diff Stat**: `1 file changed, 5 insertions(+), 5 deletions(-)`
@@ -534,6 +560,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 27. Phase 4.1: Engine Unit Tests
 
 - **Branch Name**: `android-embedder-migration-v7/phase-4.1-engine-unit-tests`
+- **Commit SHA**: `fe239d8fe67`
 - **Compare URL**: [android-embedder-migration-v7/phase-3-parity-checkpoint ... android-embedder-migration-v7/phase-4.1-engine-unit-tests](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-3-parity-checkpoint...android-embedder-migration-v7/phase-4.1-engine-unit-tests)
 - **Changes Summary**: Ran and verified all 360 engine unit tests across host macOS/Linux and Android emulator targets.
 - **Diff Stat**: `1 file changed, 4 insertions(+), 4 deletions(-)`
@@ -545,6 +572,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 28. Phase 4.2: Framework Integration Tests (Skia GL / Software)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-4.2-framework-integration-tests-skia-gl-software`
+- **Commit SHA**: `8e84a12f6ec`
 - **Compare URL**: [android-embedder-migration-v7/phase-4.1-engine-unit-tests ... android-embedder-migration-v7/phase-4.2-framework-integration-tests-skia-gl-software](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-4.1-engine-unit-tests...android-embedder-migration-v7/phase-4.2-framework-integration-tests-skia-gl-software)
 - **Changes Summary**: Ran and verified channels, platform interaction, view integration, and services framework test suites under Skia GL and Software backends.
 - **Diff Stat**: `1 file changed, 6 insertions(+), 6 deletions(-)`
@@ -556,6 +584,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 29. Phase 4.3: Framework Integration Tests (Impeller)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-4.3-framework-integration-tests-impeller`
+- **Commit SHA**: `026878655f6`
 - **Compare URL**: [android-embedder-migration-v7/phase-4.2-framework-integration-tests-skia-gl-software ... android-embedder-migration-v7/phase-4.3-framework-integration-tests-impeller](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-4.2-framework-integration-tests-skia-gl-software...android-embedder-migration-v7/phase-4.3-framework-integration-tests-impeller)
 - **Changes Summary**: Verified Impeller OpenGLES and Impeller Vulkan backend integration tests with external textures and platform view composition.
 - **Diff Stat**: `1 file changed, 4 insertions(+), 4 deletions(-)`
@@ -567,6 +596,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 30. Phase 4.4: DeviceLab Android Lifecycle & Platform Views
 
 - **Branch Name**: `android-embedder-migration-v7/phase-4.4-devicelab-android-lifecycle-platform-views`
+- **Commit SHA**: `dd44459d7d8`
 - **Compare URL**: [android-embedder-migration-v7/phase-4.3-framework-integration-tests-impeller ... android-embedder-migration-v7/phase-4.4-devicelab-android-lifecycle-platform-views](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-4.3-framework-integration-tests-impeller...android-embedder-migration-v7/phase-4.4-devicelab-android-lifecycle-platform-views)
 - **Changes Summary**: Verified Android lifecycle state transitions, hardware input, TalkBack semantics, and hybrid platform view composition.
 - **Diff Stat**: `1 file changed, 8 insertions(+), 8 deletions(-)`
@@ -578,6 +608,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 31. Phase 4.5: DeviceLab Performance & Memory Parity
 
 - **Branch Name**: `android-embedder-migration-v7/phase-4.5-devicelab-performance-memory-parity-no-regressions`
+- **Commit SHA**: `b8024549cc7`
 - **Compare URL**: [android-embedder-migration-v7/phase-4.4-devicelab-android-lifecycle-platform-views ... android-embedder-migration-v7/phase-4.5-devicelab-performance-memory-parity-no-regressions](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-4.4-devicelab-android-lifecycle-platform-views...android-embedder-migration-v7/phase-4.5-devicelab-performance-memory-parity-no-regressions)
 - **Changes Summary**: Verified scroll smoothness, timeline performance summary, and multi-engine spawn performance with zero regressions.
 - **Diff Stat**: `1 file changed, 5 insertions(+), 5 deletions(-)`
@@ -589,6 +620,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 32. Phase 5.1: Target Flip
 
 - **Branch Name**: `android-embedder-migration-v7/phase-5.1-target-flip`
+- **Commit SHA**: `d33994a8a34`
 - **Compare URL**: [android-embedder-migration-v7/phase-4.5-devicelab-performance-memory-parity-no-regressions ... android-embedder-migration-v7/phase-5.1-target-flip](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-4.5-devicelab-performance-memory-parity-no-regressions...android-embedder-migration-v7/phase-5.1-target-flip)
 - **Changes Summary**: Flipped the default rollout setting and atomic flag in JniRouter to enable the Embedder C-API pipeline by default.
 - **Diff Stat**: `3 files changed, 77 insertions(+), 12 deletions(-)`
@@ -602,6 +634,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 33. Phase 5.2: Legacy Deletion (Subsystems)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-5.2-legacy-deletion-subsystems`
+- **Commit SHA**: `df39f6008bf`
 - **Compare URL**: [android-embedder-migration-v7/phase-5.1-target-flip ... android-embedder-migration-v7/phase-5.2-legacy-deletion-subsystems](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-5.1-target-flip...android-embedder-migration-v7/phase-5.2-legacy-deletion-subsystems)
 - **Changes Summary**: Purged legacy fallback declarations for Assets, Images, Callbacks, and Mutators from LegacyJniDelegate; direct routing established.
 - **Diff Stat**: `5 files changed, 249 insertions(+), 214 deletions(-)`
@@ -617,6 +650,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 34. Phase 5.3: Legacy Deletion (Platform Views/Semantics)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-5.3-legacy-deletion-platform-views-semantics`
+- **Commit SHA**: `dc670fe8a13`
 - **Compare URL**: [android-embedder-migration-v7/phase-5.2-legacy-deletion-subsystems ... android-embedder-migration-v7/phase-5.3-legacy-deletion-platform-views-semantics](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-5.2-legacy-deletion-subsystems...android-embedder-migration-v7/phase-5.3-legacy-deletion-platform-views-semantics)
 - **Changes Summary**: Purged platform views, semantics, accessibility, overlay surfaces, transactions, and SurfaceControl fallback declarations from LegacyJniDelegate.
 - **Diff Stat**: `5 files changed, 590 insertions(+), 1018 deletions(-)`
@@ -632,6 +666,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 35. Phase 5.4: Legacy Deletion (Graphics Pipeline)
 
 - **Branch Name**: `android-embedder-migration-v7/phase-5.4-legacy-deletion-graphics-pipeline`
+- **Commit SHA**: `105b0e4a508`
 - **Compare URL**: [android-embedder-migration-v7/phase-5.3-legacy-deletion-platform-views-semantics ... android-embedder-migration-v7/phase-5.4-legacy-deletion-graphics-pipeline](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-5.3-legacy-deletion-platform-views-semantics...android-embedder-migration-v7/phase-5.4-legacy-deletion-graphics-pipeline)
 - **Changes Summary**: Purged AHardwareBuffer, Vulkan external textures, VSync, and Display/Window metrics fallback declarations from LegacyJniDelegate.
 - **Diff Stat**: `5 files changed, 655 insertions(+), 763 deletions(-)`
@@ -647,6 +682,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 36. Phase 5.5: Flag Obliteration
 
 - **Branch Name**: `android-embedder-migration-v7/phase-5.5-flag-obliteration`
+- **Commit SHA**: `1f44ecc3bd9`
 - **Compare URL**: [android-embedder-migration-v7/phase-5.4-legacy-deletion-graphics-pipeline ... android-embedder-migration-v7/phase-5.5-flag-obliteration](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-5.4-legacy-deletion-graphics-pipeline...android-embedder-migration-v7/phase-5.5-flag-obliteration)
 - **Changes Summary**: Obliterated dual-dispatch conditional branching (if (IsEmbedderEnabled()) ... else ...); JniRouter routes all 13 subsystems unconditionally to JniDelegate.
 - **Diff Stat**: `5 files changed, 440 insertions(+), 295 deletions(-)`
@@ -662,6 +698,7 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 37. Phase 5.6: Strict GN Target Isolation
 
 - **Branch Name**: `android-embedder-migration-v7/phase-5.6-strict-gn-target-isolation`
+- **Commit SHA**: `069a5f64fec`
 - **Compare URL**: [android-embedder-migration-v7/phase-5.5-flag-obliteration ... android-embedder-migration-v7/phase-5.6-strict-gn-target-isolation](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-5.5-flag-obliteration...android-embedder-migration-v7/phase-5.6-strict-gn-target-isolation)
 - **Changes Summary**: Finalized GN modular wiring in BUILD.gn ensuring absolute C-ABI quarantine with zero dependencies on internal Skia, Flow, or UI headers.
 - **Diff Stat**: `3 files changed, 255 insertions(+), 13 deletions(-)`
@@ -675,10 +712,13 @@ This document provides the complete index of all 38 atomic migration branches pu
 ## 38. Phase 5 Parity Checkpoint
 
 - **Branch Name**: `android-embedder-migration-v7/phase-5-parity-checkpoint`
+- **Commit SHA**: `48fc733d555`
 - **Compare URL**: [android-embedder-migration-v7/phase-5.6-strict-gn-target-isolation ... android-embedder-migration-v7/phase-5-parity-checkpoint](https://github.com/mboetger/flutter/compare/android-embedder-migration-v7/phase-5.6-strict-gn-target-isolation...android-embedder-migration-v7/phase-5-parity-checkpoint)
 - **Changes Summary**: Executed final global validation across host unit tests, Android targets, framework services tests, and static analysis with 100% passing and zero regressions.
-- **Diff Stat**: `1 file changed, 12 insertions(+), 11 deletions(-)`
-- **Files Modified/Created** (1):
+- **Diff Stat**: `2 files changed, 696 insertions(+), 11 deletions(-)`
+- **Files Modified/Created** (2):
+  - [`MIGRATION_BRANCHES.md`](file:///Users/boetger/src/flutter/MIGRATION_BRANCHES.md)
   - [`MIGRATION_LEDGER.md`](file:///Users/boetger/src/flutter/MIGRATION_LEDGER.md)
 
 ---
+

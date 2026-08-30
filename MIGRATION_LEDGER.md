@@ -1,6 +1,6 @@
 # Migration Ledger: Detailed Execution & Validation Tracking
 
-This ledger strictly enforces that **all tests are explicitly run and validated** throughout the atomic migration steps. A phase cannot be marked complete until both the implementation PR has merged and the corresponding test matrix validations are explicitly verified as passing locally and in CI.
+This ledger strictly enforces that **all tests are explicitly run and validated** throughout the atomic migration steps. A phase cannot be marked complete until both the implementation PR has merged and the corresponding test matrix validations are explicitly verified as passing locally and in CI (including multi-platform `gn check` across Fuchsia, Android, and host toolchains).
 
 ## Phase 1: Foundations, Safety Nets, and C-API Prep
 - [x] **1.1 Matrix Initialization**:
@@ -29,6 +29,7 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `embedder.h` API extension: Vulkan External Textures (opaque structs).
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `embedder_unittests` covering new structs pass.
+    - [x] *Validation*: Multi-platform `gn check` passes cleanly across all targets including Fuchsia (`//flutter/impeller/display_list` dependency declared).
 - [x] **1.6 C-API Extension (AHardwareBuffer)**:
     - [x] *Branch Stub*: `android-embedder-migration-v7/phase-1.6-c-api-extension-ahardwarebuffer`
     - [x] `embedder.h` API extension: AHardwareBuffer (opaque structs).
