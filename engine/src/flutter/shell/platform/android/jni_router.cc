@@ -1256,5 +1256,65 @@ bool JniRouter::RouteOnVulkanTextureFrameAvailable(int64_t texture_id) {
   return false;
 }
 
+int64_t JniRouter::RouteSpawnEngine(int64_t parent_engine_id,
+                                    const AndroidEngineSpawnArgs& args) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSpawnEngine", "parent_engine_id",
+               std::to_string(parent_engine_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->SpawnEngine(parent_engine_id, args);
+    }
+    return 0;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->SpawnEngine(parent_engine_id, args);
+  }
+  return 0;
+}
+
+bool JniRouter::RouteShutdownSpawnedEngine(int64_t engine_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteShutdownSpawnedEngine", "engine_id",
+               std::to_string(engine_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->ShutdownSpawnedEngine(engine_id);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->ShutdownSpawnedEngine(engine_id);
+  }
+  return false;
+}
+
+size_t JniRouter::RouteGetActiveEngineCount() const {
+  TRACE_EVENT0("flutter", "JniRouter::RouteGetActiveEngineCount");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->GetActiveEngineCount();
+    }
+    return 0;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->GetActiveEngineCount();
+  }
+  return 0;
+}
+
+bool JniRouter::RouteOnEngineGarbageCollected(int64_t engine_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteOnEngineGarbageCollected",
+               "engine_id", std::to_string(engine_id).c_str());
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->OnEngineGarbageCollected(engine_id);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->OnEngineGarbageCollected(engine_id);
+  }
+  return false;
+}
+
 }  // namespace android
 }  // namespace flutter

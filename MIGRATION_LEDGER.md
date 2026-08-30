@@ -140,13 +140,13 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] SurfaceControl HCPP dual-mode presentation enabled.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: Native presentation path tests pass in `android_views`.
-- [ ] **3.4 Multi-Engine & Add-to-App**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-3.4-multi-engine-add-to-app`
-    - [ ] Add-to-App capabilities wired to `FlutterEngineSpawn` with Java `Cleaner`/`PhantomReference` bindings.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `dev/devicelab/bin/tasks/build_android_host_app_with_module_source.dart` succeeds.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterEngineGroupTest.java`, `FlutterEngineTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`android_shell_holder_unittests.cc`) pass.
+- [x] **3.4 Multi-Engine & Add-to-App**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-3.4-multi-engine-add-to-app`
+    - [x] Add-to-App capabilities wired to `FlutterEngineSpawn` with Java `Cleaner`/`PhantomReference` bindings.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `dev/devicelab/bin/tasks/build_android_host_app_with_module_source.dart` succeeds.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `//shell/platform/android:robolectric_tests` (`FlutterEngineGroupTest.java`, `FlutterEngineTest.java`) AND `//shell/platform/android:flutter_shell_native_unittests` (`android_shell_holder_unittests.cc`) pass.
 
 
 - [ ] **Phase 3 Parity Checkpoint**:

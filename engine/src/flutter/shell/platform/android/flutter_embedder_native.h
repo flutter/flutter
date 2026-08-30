@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/android_engine_group.h"
 #include "flutter/shell/platform/android/android_hardware_buffer.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
@@ -200,7 +201,10 @@ class FlutterEmbedderNative {
       std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider =
           nullptr,
       std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider =
-          nullptr);
+          nullptr,
+      std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider =
+          nullptr,
+      std::shared_ptr<AndroidEngineGroup> engine_group = nullptr);
   ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -240,7 +244,10 @@ class FlutterEmbedderNative {
       std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider =
           nullptr,
       std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider =
-          nullptr);
+          nullptr,
+      std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider =
+          nullptr,
+      std::shared_ptr<AndroidEngineGroup> engine_group = nullptr);
 
   /// @brief Returns the JniRouter managed by this native instance.
   std::shared_ptr<JniRouter> GetRouter() const;
@@ -810,6 +817,53 @@ class FlutterEmbedderNative {
   static FlutterVulkanExternalTextureFrameCallback
   GetVulkanExternalTextureFrameCallback();
 
+  /// @brief Returns the AndroidEngineGroup managed by this native instance.
+  std::shared_ptr<AndroidEngineGroup> GetEngineGroup() const;
+
+  /// @brief Sets or replaces the AndroidEngineGroup.
+  void SetEngineGroup(std::shared_ptr<AndroidEngineGroup> group);
+
+  /// @brief Returns the AndroidEngineGroupProvider managed by this native
+  /// instance.
+  std::shared_ptr<AndroidEngineGroupProvider> GetEngineGroupProvider() const;
+
+  /// @brief Sets or replaces the AndroidEngineGroupProvider.
+  void SetEngineGroupProvider(
+      std::shared_ptr<AndroidEngineGroupProvider> provider);
+
+  /// @brief Spawns a new FlutterEngine from parent with spawn args via C-API.
+  FLUTTER_API_SYMBOL(FlutterEngine)
+  SpawnEngine(FLUTTER_API_SYMBOL(FlutterEngine) parent_engine,
+              const AndroidEngineSpawnArgs& args) const;
+
+  /// @brief Spawns a new FlutterEngine from parent with raw config via C-API.
+  FLUTTER_API_SYMBOL(FlutterEngine)
+  SpawnEngine(FLUTTER_API_SYMBOL(FlutterEngine) parent_engine,
+              const FlutterEngineSpawnConfig* config,
+              int64_t engine_id = 0) const;
+
+  /// @brief Spawns a new FlutterEngine instance via direct C-API
+  /// FlutterEngineSpawn.
+  FlutterEngineResult SpawnEngine(FLUTTER_API_SYMBOL(FlutterEngine)
+                                      parent_engine,
+                                  const FlutterEngineSpawnConfig* config,
+                                  FLUTTER_API_SYMBOL(FlutterEngine) *
+                                      engine_out) const;
+
+  /// @brief Shuts down a FlutterEngine instance via direct C-API
+  /// FlutterEngineShutdown.
+  FlutterEngineResult ShutdownEngine(FLUTTER_API_SYMBOL(FlutterEngine)
+                                         engine) const;
+
+  /// @brief Shuts down a spawned engine by engine ID.
+  bool ShutdownSpawnedEngine(int64_t engine_id) const;
+
+  /// @brief Handles JVM GC cleaner callback for an engine ID.
+  bool OnEngineGarbageCollected(int64_t engine_id) const;
+
+  /// @brief Returns active engine count in the group.
+  size_t GetActiveEngineCount() const;
+
  private:
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;
 
@@ -828,6 +882,8 @@ class FlutterEmbedderNative {
   std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider_;
   std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider_;
   std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider_;
+  std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider_;
+  std::shared_ptr<AndroidEngineGroup> engine_group_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;

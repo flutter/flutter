@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/android_engine_group.h"
 #include "flutter/shell/platform/android/android_hardware_buffer.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
@@ -102,7 +103,10 @@ class JniDelegate {
       std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider =
           nullptr,
       std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider =
-          nullptr);
+          nullptr,
+      std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider =
+          nullptr,
+      std::shared_ptr<AndroidEngineGroup> engine_group = nullptr);
   virtual ~JniDelegate();
 
   /// @brief Handles an incoming platform message dispatch to the JVM.
@@ -500,6 +504,33 @@ class JniDelegate {
   std::shared_ptr<AndroidVulkanTextureProvider> GetVulkanTextureProvider()
       const;
 
+  /// @brief Spawns a child FlutterEngine instance in the engine group.
+  virtual int64_t SpawnEngine(int64_t parent_engine_id,
+                              const AndroidEngineSpawnArgs& args);
+
+  /// @brief Shuts down a spawned FlutterEngine instance by ID.
+  virtual bool ShutdownSpawnedEngine(int64_t engine_id);
+
+  /// @brief Returns the count of active engines in the group.
+  virtual size_t GetActiveEngineCount() const;
+
+  /// @brief Callback invoked by Java Cleaner / PhantomReference when an engine
+  /// is GC'd.
+  virtual bool OnEngineGarbageCollected(int64_t engine_id);
+
+  /// @brief Returns the underlying AndroidEngineGroup instance.
+  virtual std::shared_ptr<AndroidEngineGroup> GetEngineGroup() const;
+
+  /// @brief Sets or replaces the AndroidEngineGroup instance.
+  void SetEngineGroup(std::shared_ptr<AndroidEngineGroup> group);
+
+  /// @brief Returns the underlying AndroidEngineGroupProvider.
+  std::shared_ptr<AndroidEngineGroupProvider> GetEngineGroupProvider() const;
+
+  /// @brief Sets or replaces the AndroidEngineGroupProvider.
+  void SetEngineGroupProvider(
+      std::shared_ptr<AndroidEngineGroupProvider> provider);
+
   /// @brief Returns the underlying JvmInvoker instance.
   std::shared_ptr<JvmInvoker> GetJvmInvoker() const;
 
@@ -514,6 +545,8 @@ class JniDelegate {
   std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider_;
   std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider_;
   std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider_;
+  std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider_;
+  std::shared_ptr<AndroidEngineGroup> engine_group_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
   bool hcpp_enabled_ = false;
 

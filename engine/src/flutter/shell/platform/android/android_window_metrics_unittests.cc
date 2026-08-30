@@ -344,6 +344,17 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
               OnVulkanTextureFrameAvailable,
               (int64_t texture_id),
               (override));
+
+  MOCK_METHOD(int64_t,
+              SpawnEngine,
+              (int64_t parent_engine_id, const AndroidEngineSpawnArgs& args),
+              (override));
+
+  MOCK_METHOD(bool, ShutdownSpawnedEngine, (int64_t engine_id), (override));
+
+  MOCK_METHOD(size_t, GetActiveEngineCount, (), (const, override));
+
+  MOCK_METHOD(bool, OnEngineGarbageCollected, (int64_t engine_id), (override));
 };
 
 // ---------------------------------------------------------------------------
