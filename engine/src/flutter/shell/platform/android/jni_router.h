@@ -85,22 +85,6 @@ class LegacyJniDelegate {
 
   virtual bool RequestDartDeferredLibrary(int64_t loading_unit_id) = 0;
 
-  virtual bool OnAssetManagerChanged() = 0;
-
-  virtual std::optional<DartCallbackInfo> LookupCallbackInformation(
-      int64_t handle) = 0;
-
-  virtual bool DecodeImage(const uint8_t* data,
-                           size_t size,
-                           int64_t generator_handle) = 0;
-
-  virtual void OnNativeImageHeader(int64_t generator_handle,
-                                   int32_t width,
-                                   int32_t height) = 0;
-
-  virtual std::optional<ImageHeaderInfo> GetImageHeader(
-      int64_t generator_handle) = 0;
-
   virtual int64_t CreatePlatformView(
       const PlatformViewCreationParams& params,
       PlatformViewCompositionType composition_type) = 0;
@@ -190,21 +174,6 @@ class LegacyJniDelegate {
                                       float g,
                                       float b,
                                       float alpha) = 0;
-
-  virtual bool PushPlatformViewMutators(
-      int64_t view_id,
-      int32_t x,
-      int32_t y,
-      int32_t width,
-      int32_t height,
-      const AndroidMutatorsStack& mutators_stack) = 0;
-
-  virtual bool PushPlatformViewMutators(
-      const FlutterPlatformView& platform_view,
-      int32_t x,
-      int32_t y,
-      int32_t width,
-      int32_t height) = 0;
 
   virtual bool InitVM(const AndroidVMArgs& args) = 0;
 

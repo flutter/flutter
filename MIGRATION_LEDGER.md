@@ -191,11 +191,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] Embedder flags defaulted to `true`.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: CI remains unconditionally green on default runs.
-- [ ] **5.2 Legacy Deletion (Subsystems)**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.2-legacy-deletion-subsystems`
-    - [ ] Assets, Images, Callbacks, Mutators wiped.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `ninja -C out/android_debug_unopt flutter_shell_native_unittests` compiles successfully AND `//shell/platform/android:robolectric_tests` passes entirely without legacy code.
+- [x] **5.2 Legacy Deletion (Subsystems)**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-5.2-legacy-deletion-subsystems`
+    - [x] Assets, Images, Callbacks, Mutators wiped.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `ninja -C out/android_debug_unopt flutter_shell_native_unittests` compiles successfully AND `//shell/platform/android:robolectric_tests` passes entirely without legacy code.
 - [ ] **5.3 Legacy Deletion (Platform Views/Semantics)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.3-legacy-deletion-platform-views-semantics`
     - [ ] Platform views and semantics wiped.
