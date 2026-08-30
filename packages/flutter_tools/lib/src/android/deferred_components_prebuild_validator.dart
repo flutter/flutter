@@ -34,6 +34,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
     super.platform, {
     super.exitOnFail,
     super.title,
+    super.outputDir,
     Directory? templatesDir,
   }) : _templatesDir = templatesDir;
 
@@ -201,10 +202,7 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
 
   /// Deletes all files inside of the validator's output directory.
   void clearOutputDir() {
-    final Directory dir = projectDir
-        .childDirectory('build')
-        .childDirectory(DeferredComponentsValidator.kDeferredComponentsTempDirectory);
-    ErrorHandlingFileSystem.deleteIfExists(dir, recursive: true);
+    ErrorHandlingFileSystem.deleteIfExists(outputDir, recursive: true);
   }
 }
 
@@ -285,8 +283,8 @@ class _DeferredComponentAndroidFiles {
     }
     final context = <String, Object>{
       'androidIdentifier':
-          FlutterProject.current().manifest.androidPackage ??
-          'com.example.${FlutterProject.current().manifest.appName}',
+          FlutterProject.fromDirectory(projectDir).manifest.androidPackage ??
+          'com.example.${FlutterProject.fromDirectory(projectDir).manifest.appName}',
       'componentName': name,
     };
 

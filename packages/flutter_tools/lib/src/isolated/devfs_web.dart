@@ -243,6 +243,16 @@ class WebDevFS implements DevFS {
     return baseUri;
   }
 
+  /// Signal that the underlying web asset server is ready to handle requests.
+  ///
+  /// The HTTP server starts listening early during [create] so the port and URI
+  /// are known before compilation. However, incoming HTTP requests are held
+  /// until initial compilation completes and the DWDS connection listener is
+  /// registered so clients do not load incomplete assets or miss connection events.
+  void markReady() {
+    webAssetServer.markReady();
+  }
+
   @override
   Future<void> destroy() async {
     await webAssetServer.dispose();

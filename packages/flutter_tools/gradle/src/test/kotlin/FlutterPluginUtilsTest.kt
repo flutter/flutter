@@ -5,7 +5,10 @@
 package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
+import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.DynamicFeatureBuildType
+import com.android.build.api.dsl.LibraryBuildType
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
@@ -21,6 +24,7 @@ import com.flutter.gradle.FlutterPluginUtils.detectApplyingKotlinGradlePlugin
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.EnableHcppManifestTask
 import com.flutter.gradle.tasks.PrintTask
+import com.flutter.gradle.testing.setUpMockAndroidExtension
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
@@ -51,7 +55,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
-import testing.setUpMockAndroidExtension
 import java.io.File
 import java.io.IOException
 import java.nio.file.Path
@@ -505,6 +508,7 @@ class FlutterPluginUtilsTest {
     fun `buildModeFor returns profile if the BuildType has name profile`() {
         val buildType = mockk<BuildType>()
         every { buildType.name } returns "profile"
+        every { buildType.isDebuggable } returns false
 
         val result = FlutterPluginUtils.buildModeFor(buildType)
         assertEquals("profile", result)
@@ -528,6 +532,49 @@ class FlutterPluginUtilsTest {
 
         val result = FlutterPluginUtils.buildModeFor(buildType)
         assertEquals("release", result)
+    }
+
+    @Test
+    fun `buildModeFor with a name and debuggable flag prefers the profile name over debuggability`() {
+        assertEquals("profile", FlutterPluginUtils.buildModeFor("profile", isDebuggable = true))
+        assertEquals("debug", FlutterPluginUtils.buildModeFor("staging", isDebuggable = true))
+        assertEquals("release", FlutterPluginUtils.buildModeFor("staging", isDebuggable = false))
+    }
+
+    @Test
+    fun `buildModeFor reads isDebuggable from new-DSL application build types`() {
+        val buildType = mockk<ApplicationBuildType>()
+        every { buildType.name } returns "staging"
+        every { buildType.isDebuggable } returns true
+
+        assertEquals("debug", FlutterPluginUtils.buildModeFor(buildType))
+    }
+
+    @Test
+    fun `buildModeFor reads isDebuggable from new-DSL dynamic feature build types`() {
+        val buildType = mockk<DynamicFeatureBuildType>()
+        every { buildType.name } returns "staging"
+        every { buildType.isDebuggable } returns true
+
+        assertEquals("debug", FlutterPluginUtils.buildModeFor(buildType))
+    }
+
+    @Test
+    fun `buildModeFor falls back to the conventional debug name for new-DSL library build types`() {
+        // LibraryBuildType has no public isDebuggable flag at DSL scope, so the name is the only signal.
+        // For custom build types (e.g. host app 'staging'), DSL-scope loops fall back to "release"
+        // until unified with Component.debuggable at variant scope in PR 8.
+        val profileBuildType = mockk<LibraryBuildType>()
+        every { profileBuildType.name } returns "profile"
+        assertEquals("profile", FlutterPluginUtils.buildModeFor(profileBuildType))
+
+        val debugBuildType = mockk<LibraryBuildType>()
+        every { debugBuildType.name } returns "debug"
+        assertEquals("debug", FlutterPluginUtils.buildModeFor(debugBuildType))
+
+        val customBuildType = mockk<LibraryBuildType>()
+        every { customBuildType.name } returns "staging"
+        assertEquals("release", FlutterPluginUtils.buildModeFor(customBuildType))
     }
 
     // supportsBuildMode
@@ -633,6 +680,18 @@ class FlutterPluginUtilsTest {
         val androidExtension = mockk<ApplicationExtension>()
         every { project.extensions.findByName("android") } returns androidExtension
         every { androidExtension.compileSdk } returns null
+        every { androidExtension.compileSdkPreview } returns "Baklava"
+        val result = FlutterPluginUtils.getCompileSdkFromProject(project)
+        assertEquals(CompileSdkVersion(apiLevel = null, previewCodename = "Baklava"), result)
+        assertEquals("Baklava", result.toString())
+    }
+
+    @Test
+    fun `getCompileSdkFromProject prioritizes preview and sanitizes when both compileSdk and compileSdkPreview are set`() {
+        val project = mockk<Project>()
+        val androidExtension = mockk<ApplicationExtension>()
+        every { project.extensions.findByName("android") } returns androidExtension
+        every { androidExtension.compileSdk } returns 35
         every { androidExtension.compileSdkPreview } returns "Baklava"
         val result = FlutterPluginUtils.getCompileSdkFromProject(project)
         assertEquals(CompileSdkVersion(apiLevel = null, previewCodename = "Baklava"), result)
@@ -2548,7 +2607,7 @@ class FlutterPluginUtilsTest {
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
         every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithoutDevDependency
-        val buildType: BuildType = mockk<BuildType>()
+        val buildType = mockk<ApplicationBuildType>()
         every { buildType.name } returns "debug"
         every { buildType.isDebuggable } returns true
         every { project.hasProperty("local-engine-repo") } returns true
@@ -2580,7 +2639,7 @@ class FlutterPluginUtilsTest {
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
         every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithoutDevDependency
-        val buildType: BuildType = mockk<BuildType>()
+        val buildType = mockk<ApplicationBuildType>()
         val engineVersion = EXAMPLE_ENGINE_VERSION
         every { buildType.name } returns "debug"
         every { buildType.isDebuggable } returns true
@@ -2618,7 +2677,7 @@ class FlutterPluginUtilsTest {
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
         every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithSingleDevDependency
-        val buildType: BuildType = mockk<BuildType>()
+        val buildType = mockk<ApplicationBuildType>()
         val engineVersion = EXAMPLE_ENGINE_VERSION
         every { buildType.name } returns "release"
         every { buildType.isDebuggable } returns false
@@ -2672,7 +2731,7 @@ class FlutterPluginUtilsTest {
         val pluginHandler = PluginHandler(project)
         mockkObject(NativePluginLoaderReflectionBridge)
         every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithSingleDevDependency
-        val buildType: BuildType = mockk<BuildType>()
+        val buildType = mockk<ApplicationBuildType>()
         val engineVersion = EXAMPLE_ENGINE_VERSION
         every { buildType.name } returns "debug"
         every { buildType.isDebuggable } returns true
