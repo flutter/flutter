@@ -5876,6 +5876,18 @@ TEST_F(EmbedderTest, CanSendPointerWithEmbedderIdAndLegacyTruncation) {
             kSuccess);
 }
 
+TEST_F(EmbedderTest, SemanticsNode2StructLayoutAndRoleVerification) {
+  EXPECT_EQ(offsetof(FlutterSemanticsNode2, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterSemanticsNode2, role),
+            offsetof(FlutterSemanticsNode2, identifier) + sizeof(const char*));
+  EXPECT_EQ(
+      offsetof(FlutterSemanticsNode2, reserved_padding),
+      offsetof(FlutterSemanticsNode2, role) + sizeof(FlutterSemanticsRole));
+  EXPECT_EQ(
+      sizeof(FlutterSemanticsNode2),
+      offsetof(FlutterSemanticsNode2, reserved_padding) + sizeof(uint32_t));
+}
+
 TEST_F(EmbedderTest, WindowMetricsEventDefaultsToImplicitView) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   EmbedderConfigBuilder builder(context);

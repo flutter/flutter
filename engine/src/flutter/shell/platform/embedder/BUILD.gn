@@ -82,7 +82,6 @@ template("embedder_source_set") {
       "embedder_render_target_skia.h",
       "embedder_semantics_update.cc",
       "embedder_semantics_update.h",
-      "embedder_struct_macros.h",
       "embedder_surface.cc",
       "embedder_surface.h",
       "embedder_surface_software.cc",
@@ -217,7 +216,10 @@ embedder_source_set("embedder_as_internal_library") {
 }
 
 source_set("embedder_headers") {
-  public = [ "embedder.h" ]
+  public = [
+    "embedder.h",
+    "embedder_struct_macros.h",
+  ]
 
   public_configs = [ "//flutter:config" ]
 }

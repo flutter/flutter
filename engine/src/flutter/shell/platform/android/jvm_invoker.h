@@ -65,6 +65,12 @@ class JvmInvoker {
       const std::vector<std::string>& strings,
       const std::vector<std::vector<uint8_t>>& string_attribute_args) = 0;
 
+  /// @brief Dispatches custom accessibility actions to
+  /// FlutterJNI.updateCustomAccessibilityActions.
+  virtual bool UpdateCustomAccessibilityActions(
+      const std::vector<uint8_t>& actions_buffer,
+      const std::vector<std::string>& action_strings) = 0;
+
   /// @brief Enables or disables accessibility tree via
   /// FlutterJNI.setSemanticsTreeEnabled.
   virtual bool SetSemanticsTreeEnabled(bool enabled) = 0;
@@ -187,6 +193,10 @@ class DefaultJvmInvoker : public JvmInvoker {
       const std::vector<uint8_t>& buffer,
       const std::vector<std::string>& strings,
       const std::vector<std::vector<uint8_t>>& string_attribute_args) override;
+
+  bool UpdateCustomAccessibilityActions(
+      const std::vector<uint8_t>& actions_buffer,
+      const std::vector<std::string>& action_strings) override;
 
   bool SetSemanticsTreeEnabled(bool enabled) override;
   bool SetApplicationLocale(const std::string& locale) override;

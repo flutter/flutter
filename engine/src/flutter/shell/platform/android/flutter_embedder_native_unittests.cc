@@ -53,6 +53,12 @@ class MockJvmInvoker : public JvmInvoker {
                const std::vector<std::vector<uint8_t>>& string_attribute_args),
               (override));
 
+  MOCK_METHOD(bool,
+              UpdateCustomAccessibilityActions,
+              (const std::vector<uint8_t>& actions_buffer,
+               const std::vector<std::string>& action_strings),
+              (override));
+
   MOCK_METHOD(bool, SetSemanticsTreeEnabled, (bool enabled), (override));
   MOCK_METHOD(bool,
               SetApplicationLocale,
@@ -146,6 +152,17 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               (const std::vector<uint8_t>& buffer,
                const std::vector<std::string>& strings,
                const std::vector<std::vector<uint8_t>>& string_attribute_args),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateCustomAccessibilityActions,
+              (const std::vector<uint8_t>& actions_buffer,
+               const std::vector<std::string>& action_strings),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateSemantics,
+              (const FlutterSemanticsUpdate2& update),
               (override));
 
   MOCK_METHOD(bool, SetSemanticsTreeEnabled, (bool enabled), (override));
@@ -1916,6 +1933,74 @@ TEST(MutatorTranslationTest,
   JniRouter::SetEmbedderEnabled(false);
 }
 
+TEST(SemanticsAndAccessibilityTest, JniDelegateSemanticsOperations) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto delegate = std::make_unique<JniDelegate>(mock_invoker);
+
+  // 1. UpdateSemantics with buffer
+  std::vector<uint8_t> buffer = {0x01, 0x02, 0x03, 0x04};
+  std::vector<std::string> strings = {"Label1"};
+  EXPECT_CALL(
+      *mock_invoker,
+      UpdateSemantics(buffer, strings, std::vector<std::vector<uint8_t>>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->UpdateSemantics(buffer, strings));
+
+  // 2. UpdateCustomAccessibilityActions
+  std::vector<uint8_t> actions_buffer = {0x10, 0x20};
+  std::vector<std::string> action_strings = {"Action1"};
+  EXPECT_CALL(*mock_invoker,
+              UpdateCustomAccessibilityActions(actions_buffer, action_strings))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->UpdateCustomAccessibilityActions(actions_buffer,
+                                                         action_strings));
+
+  // 3. UpdateSemantics with FlutterSemanticsUpdate2
+  FlutterSemanticsFlags flags = {};
+  flags.struct_size = sizeof(FlutterSemanticsFlags);
+  flags.is_button = true;
+
+  FlutterSemanticsNode2 node = {};
+  node.struct_size = sizeof(FlutterSemanticsNode2);
+  node.id = 55;
+  node.label = "Test Node";
+  node.flags2 = &flags;
+
+  FlutterSemanticsCustomAction2 action = {};
+  action.struct_size = sizeof(FlutterSemanticsCustomAction2);
+  action.id = 1;
+  action.label = "Custom Action";
+
+  FlutterSemanticsNode2* node_ptrs[] = {&node};
+  FlutterSemanticsCustomAction2* action_ptrs[] = {&action};
+
+  FlutterSemanticsUpdate2 update = {
+      .struct_size = sizeof(FlutterSemanticsUpdate2),
+      .node_count = 1,
+      .nodes = node_ptrs,
+      .custom_action_count = 1,
+      .custom_actions = action_ptrs,
+      .view_id = 0,
+  };
+
+  EXPECT_CALL(*mock_invoker,
+              UpdateCustomAccessibilityActions(::testing::_, ::testing::_))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              UpdateSemantics(::testing::_, ::testing::_, ::testing::_))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->UpdateSemantics(update));
+
+  // 4. SetSemanticsEnabled
+  EXPECT_CALL(*mock_invoker, SetSemanticsTreeEnabled(true))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->SetSemanticsEnabled(true));
+
+  // 5. Empty buffers return true as successful no-ops without invoking JVM
+  EXPECT_TRUE(delegate->UpdateSemantics({}, {}));
+  EXPECT_TRUE(delegate->UpdateCustomAccessibilityActions({}, {}));
+}
+
 TEST(MutatorTranslationTest, InvalidStructSizeRejected) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker);
@@ -1931,6 +2016,115 @@ TEST(MutatorTranslationTest, InvalidStructSizeRejected) {
   // Rejection in delegate
   EXPECT_FALSE(
       embedder_delegate->PushPlatformViewMutators(invalid_pv, 0, 0, 100, 100));
+}
+
+TEST(SemanticsAndAccessibilityTest, JniRouterSemanticsRoutingFlip) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker);
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
+
+  std::vector<uint8_t> buffer = {0x11, 0x22};
+  std::vector<std::string> strings = {"Hello"};
+
+  // 1. When Embedder is disabled -> routes to legacy_delegate
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+
+  EXPECT_CALL(
+      *legacy_delegate,
+      UpdateSemantics(buffer, strings, std::vector<std::vector<uint8_t>>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSemanticsUpdate(buffer, strings));
+
+  EXPECT_CALL(*legacy_delegate,
+              UpdateCustomAccessibilityActions(buffer, strings))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteCustomAccessibilityActions(buffer, strings));
+
+  EXPECT_CALL(*legacy_delegate, SetSemanticsTreeEnabled(true))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSemanticsEnabled(true));
+
+  // 2. When Embedder is enabled -> routes to embedder_delegate (mock_invoker)
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+
+  EXPECT_CALL(*legacy_delegate, UpdateSemantics(_, _, _)).Times(0);
+  EXPECT_CALL(
+      *mock_invoker,
+      UpdateSemantics(buffer, strings, std::vector<std::vector<uint8_t>>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSemanticsUpdate(buffer, strings));
+
+  EXPECT_CALL(*legacy_delegate, UpdateCustomAccessibilityActions(_, _))
+      .Times(0);
+  EXPECT_CALL(*mock_invoker, UpdateCustomAccessibilityActions(buffer, strings))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteCustomAccessibilityActions(buffer, strings));
+
+  EXPECT_CALL(*legacy_delegate, SetSemanticsTreeEnabled(_)).Times(0);
+  EXPECT_CALL(*mock_invoker, SetSemanticsTreeEnabled(true))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteSemanticsEnabled(true));
+
+  // Reset flag
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+}
+
+TEST(SemanticsAndAccessibilityTest, FlutterEmbedderNativeSemanticsIntegration) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  FlutterEmbedderNative native(mock_invoker);
+
+  JniRouter::SetEmbedderEnabled(true);
+
+  // Semantics update struct through FlutterEmbedderNative
+  FlutterSemanticsNode2 node = {};
+  node.struct_size = sizeof(FlutterSemanticsNode2);
+  node.id = 100;
+  node.label = "Native Semantics Node";
+
+  FlutterSemanticsNode2* nodes[] = {&node};
+  FlutterSemanticsUpdate2 update = {
+      .struct_size = sizeof(FlutterSemanticsUpdate2),
+      .node_count = 1,
+      .nodes = nodes,
+      .custom_action_count = 0,
+      .custom_actions = nullptr,
+      .view_id = 0,
+  };
+
+  EXPECT_CALL(*mock_invoker,
+              UpdateSemantics(::testing::_, ::testing::_, ::testing::_))
+      .WillOnce(Return(true));
+
+  EXPECT_TRUE(native.UpdateSemantics(update));
+
+  // OnUpdateSemantics2 static callback
+  EXPECT_CALL(*mock_invoker,
+              UpdateSemantics(::testing::_, ::testing::_, ::testing::_))
+      .WillOnce(Return(true));
+  FlutterEmbedderNative::OnUpdateSemantics2(&update, &native);
+
+  // Engine call validity tests with null engine
+  EXPECT_EQ(native.UpdateSemanticsEnabled(nullptr, true), kInvalidArguments);
+  EXPECT_EQ(native.UpdateAccessibilityFeatures(
+                nullptr, kFlutterAccessibilityFeatureBoldText),
+            kInvalidArguments);
+  EXPECT_EQ(native.SendSemanticsAction(nullptr, nullptr), kInvalidArguments);
+
+  // Validate rejection on undersized struct_size
+  FlutterSendSemanticsActionInfo invalid_action_info = {};
+  invalid_action_info.struct_size = sizeof(FlutterSendSemanticsActionInfo) - 1;
+  EXPECT_EQ(native.SendSemanticsAction(nullptr, &invalid_action_info),
+            kInvalidArguments);
+
+  EXPECT_EQ(native.DispatchSemanticsActionToEngine(
+                nullptr, 100, kFlutterSemanticsActionTap, nullptr, 0),
+            kInvalidArguments);
+
+  JniRouter::SetEmbedderEnabled(false);
 }
 
 }  // namespace testing
