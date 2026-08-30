@@ -386,6 +386,15 @@ typedef enum {
   kRaster = 3,
 } FlutterThreadPriority;
 
+/// Callback invoked to set thread priority for a thread.
+typedef void (*FlutterThreadPrioritySetter)(
+    FlutterThreadPriority /* priority */);
+
+/// Callback invoked to set thread priority with user data context.
+typedef void (*FlutterThreadPrioritySetterWithUserData)(
+    FlutterThreadPriority /* priority */,
+    void* /* user data */);
+
 typedef struct _FlutterEngine* FLUTTER_API_SYMBOL(FlutterEngine);
 
 /// Unique identifier for views.
@@ -2141,6 +2150,25 @@ typedef struct {
   size_t identifier;
   /// The callback invoked when the task runner is destroyed.
   VoidCallback destruction_callback;
+  /// The thread priority hint or configuration associated with this custom task
+  /// runner.
+  FlutterThreadPriority priority;
+#if UINTPTR_MAX == 0xffffffffffffffff
+  /// Explicit padding to ensure 8-byte alignment and eliminate implicit padding
+  /// holes.
+  uint32_t reserved_priority_padding;
+#endif
+  /// Specify a callback that is used to set the thread priority for this task
+  /// runner.
+  FlutterThreadPrioritySetter thread_priority_setter;
+  /// Specify a callback that is used to set the thread priority for this task
+  /// runner with user data context.
+  FlutterThreadPrioritySetterWithUserData thread_priority_setter_with_user_data;
+#if UINTPTR_MAX == 0xffffffff
+  /// Explicit padding on 32-bit platforms to ensure 8-byte natural alignment
+  /// and eliminate padding holes for future 64-bit field additions.
+  uint32_t reserved_user_data_padding;
+#endif
 } FlutterTaskRunnerDescription;
 
 typedef struct {
@@ -2158,11 +2186,21 @@ typedef struct {
   const FlutterTaskRunnerDescription* render_task_runner;
   /// Specify a callback that is used to set the thread priority for embedder
   /// task runners.
-  void (*thread_priority_setter)(FlutterThreadPriority);
+  FlutterThreadPrioritySetter thread_priority_setter;
   /// Specify the task runner for the thread on which the UI tasks will be run.
   /// This may be same as platform_task_runner, in which case the Flutter engine
   /// will run the UI isolate on platform thread.
   const FlutterTaskRunnerDescription* ui_task_runner;
+  /// Specify a callback that is used to set the thread priority for embedder
+  /// task runners with user data context.
+  FlutterThreadPrioritySetterWithUserData thread_priority_setter_with_user_data;
+  /// User data passed to `thread_priority_setter_with_user_data`.
+  void* user_data;
+#if UINTPTR_MAX == 0xffffffff
+  /// Explicit padding on 32-bit platforms to ensure 8-byte natural alignment
+  /// and eliminate padding holes for future 64-bit field additions.
+  uint32_t reserved_user_data_padding;
+#endif
 } FlutterCustomTaskRunners;
 
 typedef struct {
