@@ -82,6 +82,11 @@ class JvmInvoker {
   /// FlutterJNI.requestDartDeferredLibrary.
   virtual bool RequestDartDeferredLibrary(int loading_unit_id) = 0;
 
+  /// @brief Decodes an image from buffer bytes via FlutterJNI.decodeImage.
+  virtual bool DecodeImage(const uint8_t* data,
+                           size_t size,
+                           int64_t generator_handle) = 0;
+
   /// @brief Invokes a void JVM method.
   /// @param method_name Name of the JVM method.
   /// @param signature JNI signature of the method.
@@ -178,6 +183,9 @@ class DefaultJvmInvoker : public JvmInvoker {
   bool OnFirstFrame() override;
   bool OnPreEngineRestart() override;
   bool RequestDartDeferredLibrary(int loading_unit_id) override;
+  bool DecodeImage(const uint8_t* data,
+                   size_t size,
+                   int64_t generator_handle) override;
 
   bool InvokeVoidMethod(const std::string& method_name,
                         const std::string& signature,

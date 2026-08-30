@@ -2851,6 +2851,105 @@ TEST_F(EmbedderTest, CallbackInformationWorkerThreadResolutionAndLifetime) {
 }
 
 //------------------------------------------------------------------------------
+/// Test that FlutterEngineRegisterImageDecoder validates its arguments and
+/// registers custom decoder callbacks on a running engine.
+///
+TEST_F(EmbedderTest, RegisterImageDecoderValidation) {
+  FlutterImageDecoderRegistration registration = 0;
+  // Null engine handle.
+  EXPECT_EQ(FlutterEngineRegisterImageDecoder(
+                nullptr,
+                [](const uint8_t* data, size_t size,
+                   FlutterDecodedImage* decoded_image_out,
+                   void* user_data) { return true; },
+                nullptr, 0, &registration),
+            kInvalidArguments);
+
+  // Null callback pointer.
+  EXPECT_EQ(
+      FlutterEngineRegisterImageDecoder(reinterpret_cast<FlutterEngine>(0x1234),
+                                        nullptr, nullptr, 0, &registration),
+      kInvalidArguments);
+
+  // Unregister with null engine handle.
+  EXPECT_EQ(FlutterEngineUnregisterImageDecoder(nullptr, 1), kInvalidArguments);
+
+  // Unregister with invalid registration ID.
+  EXPECT_EQ(FlutterEngineUnregisterImageDecoder(
+                reinterpret_cast<FlutterEngine>(0x1234), 99999),
+            kInvalidArguments);
+
+  struct DecoderBaton {
+    bool callback_called = false;
+    bool destruction_called = false;
+    std::vector<uint32_t> pixels = std::vector<uint32_t>(100, 0xFF00FF00);
+  };
+  auto baton = std::make_shared<DecoderBaton>();
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent isolate_latch;
+  fml::AutoResetWaitableEvent decode_latch;
+  context.AddIsolateCreateCallback(
+      [&isolate_latch]() { isolate_latch.Signal(); });
+  context.AddFfiNativeCallback(
+      "NotifyWidthHeight",
+      CREATE_FFI_LAMBDA([&decode_latch](int32_t width, int32_t height) {
+        EXPECT_EQ(width, 10);
+        EXPECT_EQ(height, 10);
+        decode_latch.Signal();
+      }));
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("canRegisterImageDecoders");
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  isolate_latch.Wait();
+
+  auto decoder_cb = [](const uint8_t* data, size_t size,
+                       FlutterDecodedImage* decoded_image_out,
+                       void* user_data) -> bool {
+    auto* b = reinterpret_cast<DecoderBaton*>(user_data);
+    if (!b || !decoded_image_out) {
+      return false;
+    }
+    b->callback_called = true;
+    decoded_image_out->width = 10;
+    decoded_image_out->height = 10;
+    decoded_image_out->row_bytes = 10 * sizeof(uint32_t);
+    decoded_image_out->raw_pixels = b->pixels.data();
+    decoded_image_out->user_data = b;
+    decoded_image_out->destruction_callback = [](void* ud) {
+      auto* inner = reinterpret_cast<DecoderBaton*>(ud);
+      if (inner) {
+        inner->destruction_called = true;
+      }
+    };
+    return true;
+  };
+
+  FlutterImageDecoderRegistration reg_id = 0;
+  EXPECT_EQ(FlutterEngineRegisterImageDecoder(
+                reinterpret_cast<FlutterEngine>(engine.get()), decoder_cb,
+                baton.get(), 100, &reg_id),
+            kSuccess);
+  EXPECT_GT(reg_id, 0);
+
+  decode_latch.Wait();
+  EXPECT_TRUE(baton->callback_called);
+
+  // Unregister the decoder.
+  EXPECT_EQ(FlutterEngineUnregisterImageDecoder(
+                reinterpret_cast<FlutterEngine>(engine.get()), reg_id),
+            kSuccess);
+
+  // Unregistering the same registration again returns kInvalidArguments.
+  EXPECT_EQ(FlutterEngineUnregisterImageDecoder(
+                reinterpret_cast<FlutterEngine>(engine.get()), reg_id),
+            kInvalidArguments);
+}
+
+//------------------------------------------------------------------------------
 /// Test that FlutterEngineScreenshot returns kInternalInconsistency when no
 /// frame has been rasterized yet.
 ///
