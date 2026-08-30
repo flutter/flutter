@@ -13,6 +13,7 @@
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
@@ -132,18 +133,23 @@ class EmbedderTestTaskRunner {
     task_runner_description_.post_task_callback = [](FlutterTask task,
                                                      uint64_t target_time_nanos,
                                                      void* user_data) -> void {
+      TRACE_EVENT0("flutter", "EmbedderTestTaskRunner::PostTaskCallback");
       auto thiz = reinterpret_cast<EmbedderTestTaskRunner*>(user_data);
 
       auto target_time = fml::TimePoint::FromEpochDelta(
           fml::TimeDelta::FromNanoseconds(target_time_nanos));
       auto on_task_expired = thiz->on_task_expired_;
-      auto invoke_task = [task, on_task_expired]() { on_task_expired(task); };
+      auto invoke_task = [task, on_task_expired]() {
+        TRACE_EVENT0("flutter", "EmbedderTestTaskRunner::InvokeTask");
+        on_task_expired(task);
+      };
       auto real_task_runner = thiz->real_task_runner_;
 
       real_task_runner->PostTaskForTime(invoke_task, target_time);
     };
     if (destruction_callback_) {
       task_runner_description_.destruction_callback = [](void* user_data) {
+        TRACE_EVENT0("flutter", "EmbedderTestTaskRunner::DestructionCallback");
         auto thiz = reinterpret_cast<EmbedderTestTaskRunner*>(user_data);
         thiz->destruction_callback_();
       };
