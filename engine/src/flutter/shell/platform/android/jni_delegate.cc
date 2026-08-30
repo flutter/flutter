@@ -122,5 +122,13 @@ bool JniDelegate::RequestDartDeferredLibrary(int64_t loading_unit_id) {
                                            "(I)Z");
 }
 
+bool JniDelegate::OnAssetManagerChanged() {
+  TRACE_EVENT0("flutter", "JniDelegate::OnAssetManagerChanged");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod("onAssetManagerChanged", "()V");
+}
+
 }  // namespace android
 }  // namespace flutter

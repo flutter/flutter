@@ -63,6 +63,9 @@ class JniDelegate {
   /// @brief Requests loading of a Dart deferred library component.
   virtual bool RequestDartDeferredLibrary(int64_t loading_unit_id);
 
+  /// @brief Notifies the JVM that the asset manager / bundle has changed.
+  virtual bool OnAssetManagerChanged();
+
   /// @brief Returns the underlying JvmInvoker instance.
   std::shared_ptr<JvmInvoker> GetJvmInvoker() const;
 

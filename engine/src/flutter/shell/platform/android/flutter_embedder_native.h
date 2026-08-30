@@ -7,8 +7,12 @@
 
 #include <cstddef>
 #include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 #include "flutter/shell/platform/android/jni_router.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
@@ -22,7 +26,7 @@ namespace android {
 /// Embedder.
 ///
 /// This class enforces strict GN and C-ABI isolation from legacy Skia /
-/// internal UI headers, serving as the foundational shield for Phase 1 of
+/// internal UI headers, serving as the foundational shield for Phase 1 & 2 of
 /// the Android embedder migration.
 class FlutterEmbedderNative {
  public:
@@ -30,7 +34,8 @@ class FlutterEmbedderNative {
   explicit FlutterEmbedderNative(
       std::shared_ptr<JvmInvoker> jvm_invoker,
       const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr,
-      std::shared_ptr<OSLibraryLoader> library_loader = nullptr);
+      std::shared_ptr<OSLibraryLoader> library_loader = nullptr,
+      std::shared_ptr<APKAssetProvider> asset_provider = nullptr);
   ~FlutterEmbedderNative();
 
   /// @brief Checks whether the embedder C-API quarantine is active.
@@ -60,7 +65,7 @@ class FlutterEmbedderNative {
   /// @brief Creates a default JniRouter instance with an injected JvmInvoker.
   static std::shared_ptr<JniRouter> CreateDefaultRouter(
       std::shared_ptr<JvmInvoker> invoker,
-      std::shared_ptr<LegacyJniDelegate> legacy_delegate = nullptr);
+      const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr);
 
   /// @brief Returns the JniRouter managed by this native instance.
   std::shared_ptr<JniRouter> GetRouter() const;
@@ -74,6 +79,22 @@ class FlutterEmbedderNative {
   /// @brief Returns the OSLibraryLoader managed by this native instance.
   std::shared_ptr<OSLibraryLoader> GetLibraryLoader() const;
 
+  /// @brief Returns the APKAssetProvider managed by this native instance.
+  std::shared_ptr<APKAssetProvider> GetAssetProvider() const;
+
+  /// @brief Sets or replaces the APKAssetProvider managed by this native
+  /// instance.
+  void SetAssetProvider(std::shared_ptr<APKAssetProvider> provider);
+
+  /// @brief Resolves an asset by name using the managed asset provider.
+  std::unique_ptr<fml::Mapping> ResolveAsset(
+      const std::string& asset_name) const;
+
+  /// @brief Resolves asset mappings by pattern and optional subdirectory.
+  std::vector<std::unique_ptr<fml::Mapping>> ResolveAssetMappings(
+      const std::string& asset_pattern,
+      const std::optional<std::string>& subdir = std::nullopt) const;
+
  private:
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;
 
@@ -81,6 +102,7 @@ class FlutterEmbedderNative {
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;
   std::shared_ptr<OSLibraryLoader> library_loader_;
+  std::shared_ptr<APKAssetProvider> asset_provider_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEmbedderNative);
 };
