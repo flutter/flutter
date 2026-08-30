@@ -372,6 +372,33 @@ bool EmbedderEngine::ScheduleFrame() {
   return true;
 }
 
+bool EmbedderEngine::LoadDartDeferredLibrary(
+    int64_t loading_unit_id,
+    std::unique_ptr<const fml::Mapping> snapshot_data,
+    std::unique_ptr<const fml::Mapping> snapshot_instructions) {
+  TRACE_EVENT0("flutter", "EmbedderEngine::LoadDartDeferredLibrary");
+  if (!IsValid() || !snapshot_data || !snapshot_instructions) {
+    return false;
+  }
+  shell_->LoadDartDeferredLibrary(static_cast<intptr_t>(loading_unit_id),
+                                  std::move(snapshot_data),
+                                  std::move(snapshot_instructions));
+  return true;
+}
+
+bool EmbedderEngine::NotifyDartDeferredLibraryLoadError(
+    int64_t loading_unit_id,
+    const std::string& error_message,
+    bool transient) {
+  TRACE_EVENT0("flutter", "EmbedderEngine::NotifyDartDeferredLibraryLoadError");
+  if (!IsValid()) {
+    return false;
+  }
+  shell_->LoadDartDeferredLibraryError(static_cast<intptr_t>(loading_unit_id),
+                                       error_message, transient);
+  return true;
+}
+
 Shell& EmbedderEngine::GetShell() {
   FML_DCHECK(shell_);
   return *shell_.get();

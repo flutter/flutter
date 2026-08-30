@@ -1962,6 +1962,212 @@ TEST_F(EmbedderTest, SpawnMultipleEngines) {
 }
 
 //------------------------------------------------------------------------------
+/// Test argument validation for FlutterEngineLoadDartDeferredLibrary and
+/// related error notification functions.
+///
+TEST_F(EmbedderTest, DartDeferredLibraryInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  const uint8_t dummy_data[] = {0x01, 0x02};
+  const uint8_t dummy_instructions[] = {0x03, 0x04};
+
+  // Null engine for load.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(
+                nullptr, 1, dummy_data, sizeof(dummy_data), dummy_instructions,
+                sizeof(dummy_instructions)),
+            kInvalidArguments);
+
+  // Null snapshot_data for load.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(
+                engine.get(), 1, nullptr, sizeof(dummy_data),
+                dummy_instructions, sizeof(dummy_instructions)),
+            kInvalidArguments);
+
+  // Null snapshot_instructions for load.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), 1, dummy_data,
+                                                 sizeof(dummy_data), nullptr,
+                                                 sizeof(dummy_instructions)),
+            kInvalidArguments);
+
+  // Negative loading unit id for load.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(
+                engine.get(), -1, dummy_data, sizeof(dummy_data),
+                dummy_instructions, sizeof(dummy_instructions)),
+            kInvalidArguments);
+
+  // Null engine for notify error.
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(nullptr, 1,
+                                                            "test error", true),
+            kInvalidArguments);
+
+  // Negative loading unit id for notify error.
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(engine.get(), -1,
+                                                            "test error", true),
+            kInvalidArguments);
+
+  // Null error message for notify error.
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(engine.get(), 1,
+                                                            nullptr, true),
+            kInvalidArguments);
+
+#if INTPTR_MAX < INT64_MAX
+  int64_t overflow_id =
+      static_cast<int64_t>(std::numeric_limits<intptr_t>::max()) + 1LL;
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(
+                engine.get(), overflow_id, dummy_data, sizeof(dummy_data),
+                dummy_instructions, sizeof(dummy_instructions)),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(
+                engine.get(), overflow_id, "test error", true),
+            kInvalidArguments);
+#endif
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineLoadDartDeferredLibrary can be called successfully on
+/// a running engine instance.
+///
+TEST_F(EmbedderTest, CanLoadDartDeferredLibrary) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  const uint8_t dummy_data[] = {0x00};
+  const uint8_t dummy_instructions[] = {0x00};
+
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(
+                engine.get(), 42, dummy_data, sizeof(dummy_data),
+                dummy_instructions, sizeof(dummy_instructions)),
+            kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineNotifyDartDeferredLibraryLoadError and
+/// FlutterEngineLoadDartDeferredLibraryFailure notify load failures.
+///
+TEST_F(EmbedderTest, CanNotifyDartDeferredLibraryLoadError) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(
+                engine.get(), 42, "Failed to load component", true),
+            kSuccess);
+
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(
+                engine.get(), 43, "Permanent load failure", false),
+            kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that dart_deferred_library_loading_unit_callback is invoked on the
+/// platform thread when a loading unit is requested.
+///
+TEST_F(EmbedderTest, DartDeferredLibraryLoadingUnitCallbackInvoked) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+  latch.Wait();
+
+  struct CallbackCaptures {
+    fml::AutoResetWaitableEvent callback_latch;
+    int64_t requested_loading_unit_id = -1;
+    size_t received_struct_size = 0;
+    void* received_user_data = nullptr;
+  };
+  CallbackCaptures captures;
+
+  FlutterProjectArgs custom_args = {};
+  custom_args.struct_size = sizeof(FlutterProjectArgs);
+  custom_args.dart_deferred_library_loading_unit_callback =
+      [](const FlutterDartDeferredLibraryLoadingUnit* unit, void* user_data) {
+        auto* caps = reinterpret_cast<CallbackCaptures*>(user_data);
+        caps->received_user_data = user_data;
+        if (unit != nullptr) {
+          caps->received_struct_size = unit->struct_size;
+          caps->requested_loading_unit_id = unit->loading_unit_id;
+        }
+        caps->callback_latch.Signal();
+      };
+
+  FlutterEngine spawned_engine = nullptr;
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.user_data = &captures;
+  spawn_config.custom_args = &custom_args;
+
+  ASSERT_EQ(
+      FlutterEngineSpawn(parent_engine.get(), &spawn_config, &spawned_engine),
+      kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+
+  auto platform_view = reinterpret_cast<EmbedderEngine*>(spawned_engine)
+                           ->GetShell()
+                           .GetPlatformView();
+  ASSERT_TRUE(platform_view);
+  platform_view->RequestDartDeferredLibrary(123);
+  captures.callback_latch.Wait();
+
+  EXPECT_EQ(captures.received_user_data, &captures);
+  EXPECT_EQ(captures.received_struct_size,
+            sizeof(FlutterDartDeferredLibraryLoadingUnit));
+  EXPECT_EQ(captures.requested_loading_unit_id, 123);
+
+  ASSERT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that requesting a deferred library without a registered callback fails
+/// fast.
+///
+TEST_F(EmbedderTest, DartDeferredLibraryRequestWithoutCallbackFailsFast) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  // Notice: no dart_deferred_library_loading_unit_callback set in project args.
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  auto platform_view = reinterpret_cast<EmbedderEngine*>(engine.get())
+                           ->GetShell()
+                           .GetPlatformView();
+  ASSERT_TRUE(platform_view);
+  // RequestDartDeferredLibrary must not hang or crash when callback is omitted.
+  platform_view->RequestDartDeferredLibrary(456);
+}
+
+//------------------------------------------------------------------------------
+/// Test FlutterProjectArgs padding and ABI stability.
+///
+TEST(EmbedderArgsTest, FlutterProjectArgsPaddingAndABI) {
+  FlutterProjectArgs args = {};
+  args.struct_size = sizeof(FlutterProjectArgs);
+  EXPECT_EQ(sizeof(args.reserved_padding), 7u);
+  EXPECT_GE(sizeof(FlutterProjectArgs), 184u);
+}
+
+//------------------------------------------------------------------------------
 /// Test that a view can be added to a running engine.
 ///
 TEST_F(EmbedderTest, CanAddView) {
@@ -5566,6 +5772,30 @@ TEST_P(EmbedderTestMatrix, CanSpawnEngineInMatrix) {
   ASSERT_NE(spawned_engine, nullptr);
 
   ASSERT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+}
+
+TEST_P(EmbedderTestMatrix, CanLoadDartDeferredLibraryInMatrix) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  ConfigureBuilder(builder);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  const uint8_t dummy_data[] = {0x00};
+  const uint8_t dummy_instructions[] = {0x00};
+
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(
+                engine.get(), 10, dummy_data, sizeof(dummy_data),
+                dummy_instructions, sizeof(dummy_instructions)),
+            kSuccess);
+
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(
+                engine.get(), 10, "Test error in matrix", true),
+            kSuccess);
 }
 
 INSTANTIATE_TEST_SUITE_P(AllBackends,

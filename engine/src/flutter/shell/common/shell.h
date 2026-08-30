@@ -459,6 +459,22 @@ class Shell final : public PlatformView::Delegate,
   static std::pair<DartVMRef, fml::RefPtr<const DartSnapshot>>
   InferVmInitDataFromSettings(Settings& settings);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Loads a Dart deferred library into the running engine.
+  // |PlatformView::Delegate|
+  void LoadDartDeferredLibrary(
+      intptr_t loading_unit_id,
+      std::unique_ptr<const fml::Mapping> snapshot_data,
+      std::unique_ptr<const fml::Mapping> snapshot_instructions) override;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Notifies the engine that loading a Dart deferred library
+  /// failed.
+  // |PlatformView::Delegate|
+  void LoadDartDeferredLibraryError(intptr_t loading_unit_id,
+                                    const std::string error_message,
+                                    bool transient) override;
+
  private:
   using ServiceProtocolHandler =
       std::function<bool(const ServiceProtocol::Handler::ServiceProtocolMap&,
@@ -667,16 +683,6 @@ class Shell final : public PlatformView::Delegate,
   // |PlatformView::Delegate|
   std::shared_ptr<fml::BasicTaskRunner>
   OnPlatformViewGetShutdownSafeIOTaskRunner() const override;
-
-  // |PlatformView::Delegate|
-  void LoadDartDeferredLibrary(
-      intptr_t loading_unit_id,
-      std::unique_ptr<const fml::Mapping> snapshot_data,
-      std::unique_ptr<const fml::Mapping> snapshot_instructions) override;
-
-  void LoadDartDeferredLibraryError(intptr_t loading_unit_id,
-                                    const std::string error_message,
-                                    bool transient) override;
 
   // |PlatformView::Delegate|
   void UpdateAssetResolverByType(
