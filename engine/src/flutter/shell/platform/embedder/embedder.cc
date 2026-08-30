@@ -2145,6 +2145,28 @@ CreatePlatformDispatchTable(const FlutterProjectArgs* args, void* user_data) {
         };
   }
 
+  flutter::PlatformViewEmbedder::RasterThreadContextMakeCurrentCallback
+      raster_thread_context_make_current = nullptr;
+  if (args != nullptr && SAFE_ACCESS(args, raster_thread_context_make_current,
+                                     nullptr) != nullptr) {
+    raster_thread_context_make_current =
+        [ptr = args->raster_thread_context_make_current, user_data]() -> bool {
+      TRACE_EVENT0("flutter", "RasterThreadContextMakeCurrentCallback");
+      return ptr(user_data);
+    };
+  }
+
+  flutter::PlatformViewEmbedder::RasterThreadContextClearCurrentCallback
+      raster_thread_context_clear_current = nullptr;
+  if (args != nullptr && SAFE_ACCESS(args, raster_thread_context_clear_current,
+                                     nullptr) != nullptr) {
+    raster_thread_context_clear_current =
+        [ptr = args->raster_thread_context_clear_current, user_data]() -> bool {
+      TRACE_EVENT0("flutter", "RasterThreadContextClearCurrentCallback");
+      return ptr(user_data);
+    };
+  }
+
   return {
       update_semantics_callback,                  //
       platform_message_response_callback,         //
@@ -2154,6 +2176,52 @@ CreatePlatformDispatchTable(const FlutterProjectArgs* args, void* user_data) {
       channel_update_callback,                    //
       view_focus_change_request_callback,         //
       request_dart_deferred_library_callback,     //
+      raster_thread_context_make_current,         //
+      raster_thread_context_clear_current,        //
+  };
+}
+
+namespace {
+
+class EmbedderRasterizer final : public flutter::Rasterizer {
+ public:
+  EmbedderRasterizer(
+      flutter::Rasterizer::Delegate& delegate,
+      flutter::PlatformViewEmbedder::RasterThreadContextClearCurrentCallback
+          clear_current_callback)
+      : flutter::Rasterizer(delegate),
+        clear_current_callback_(std::move(clear_current_callback)) {}
+
+  ~EmbedderRasterizer() override {
+    Teardown();
+    if (clear_current_callback_) {
+      clear_current_callback_();
+    }
+  }
+
+ private:
+  flutter::PlatformViewEmbedder::RasterThreadContextClearCurrentCallback
+      clear_current_callback_;
+};
+
+}  // namespace
+
+static flutter::Shell::CreateCallback<flutter::Rasterizer>
+InferRasterizerCreationCallback(
+    const flutter::PlatformViewEmbedder::PlatformDispatchTable&
+        platform_dispatch_table) {
+  return [make_current =
+              platform_dispatch_table.raster_thread_context_make_current,
+          clear_current =
+              platform_dispatch_table.raster_thread_context_clear_current](
+             flutter::Shell& shell) -> std::unique_ptr<flutter::Rasterizer> {
+    if (make_current) {
+      if (!make_current()) {
+        FML_LOG(ERROR) << "Failed to make raster thread context current.";
+        return nullptr;
+      }
+    }
+    return std::make_unique<EmbedderRasterizer>(shell, clear_current);
   };
 }
 
@@ -2491,10 +2559,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         "Could not infer platform view creation callback.");
   }
 
-  flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
-      [](flutter::Shell& shell) {
-        return std::make_unique<flutter::Rasterizer>(shell);
-      };
+  auto on_create_rasterizer =
+      InferRasterizerCreationCallback(platform_dispatch_table);
 
   auto external_texture_resolver =
       CreateExternalTextureResolver(config, user_data);
@@ -2739,10 +2805,8 @@ FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
         "Could not infer platform view creation callback.");
   }
 
-  flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
-      [](flutter::Shell& shell) {
-        return std::make_unique<flutter::Rasterizer>(shell);
-      };
+  auto on_create_rasterizer =
+      InferRasterizerCreationCallback(platform_dispatch_table);
 
   auto external_texture_resolver =
       CreateExternalTextureResolver(renderer_config, user_data);

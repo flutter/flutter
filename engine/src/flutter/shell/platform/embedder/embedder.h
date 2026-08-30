@@ -2066,6 +2066,13 @@ typedef void (*FlutterDartDeferredLibraryLoadingUnitCallback)(
     const FlutterDartDeferredLibraryLoadingUnit* /* loading unit */,
     void* /* user data */);
 
+/// Callback invoked on the raster thread in order to give the embedder the
+/// chance to manage thread/graphics context lifetimes (e.g. EGL context
+/// make current or clear current).
+///
+/// Should return true if the operation succeeded, false if an error occurred.
+typedef bool (*FlutterRasterThreadContextCallback)(void* /* user data */);
+
 typedef struct _FlutterTaskRunner* FlutterTaskRunner;
 
 typedef struct {
@@ -2997,6 +3004,28 @@ typedef struct {
   /// The callback will be invoked from a task posted to the platform thread.
   FlutterDartDeferredLibraryLoadingUnitCallback
       dart_deferred_library_loading_unit_callback;
+
+  /// The callback invoked on the raster thread in order to give the embedder
+  /// the chance to make the rendering context current on the raster thread
+  /// (e.g. EGL context setup on Android).
+  ///
+  /// The callback will be invoked on the engine-managed raster thread.
+  /// The user data passed to this callback is the `user_data` argument passed
+  /// to `FlutterEngineInitialize` or `FlutterEngineRun`.
+  ///
+  /// This field is optional.
+  FlutterRasterThreadContextCallback raster_thread_context_make_current;
+
+  /// The callback invoked on the raster thread in order to give the embedder
+  /// the chance to clear the rendering context current on the raster thread
+  /// (e.g. EGL context teardown on Android).
+  ///
+  /// The callback will be invoked on the engine-managed raster thread.
+  /// The user data passed to this callback is the `user_data` argument passed
+  /// to `FlutterEngineInitialize` or `FlutterEngineRun`.
+  ///
+  /// This field is optional.
+  FlutterRasterThreadContextCallback raster_thread_context_clear_current;
 } FlutterProjectArgs;
 
 typedef struct {
