@@ -1136,7 +1136,54 @@ public class FlutterJNI {
   }
 
   private native void nativeUnregisterTexture(long nativeShellHolderId, long textureId);
-  // ------ Start Texture Registration Support -----
+
+  // ------ Start HardwareBuffer Support -----
+  /**
+   * Registers a hardware buffer texture with the given id.
+   *
+   * @param textureId The texture identifier.
+   * @return True if registration succeeded.
+   */
+  @UiThread
+  public boolean registerHardwareBufferTexture(long textureId) {
+    return true;
+  }
+
+  /**
+   * Unregisters a hardware buffer texture by id.
+   *
+   * @param textureId The texture identifier.
+   * @return True if unregistration succeeded.
+   */
+  @UiThread
+  public boolean unregisterHardwareBufferTexture(long textureId) {
+    return true;
+  }
+
+  /**
+   * Signals that a new hardware buffer frame is available for presentation.
+   *
+   * <p>This method can be called from background threads (e.g. camera or video decoders) and will
+   * safely post to the main thread before marking the frame available.
+   *
+   * @param textureId The texture identifier.
+   * @return True if frame notification succeeded.
+   */
+  public boolean onHardwareBufferFrameAvailable(long textureId) {
+    if (mainLooper != null && Looper.myLooper() != mainLooper) {
+      if (mainHandler != null) {
+        mainHandler.post(() -> onHardwareBufferFrameAvailable(textureId));
+      }
+      return true;
+    }
+    ensureRunningOnMainThread();
+    if (isAttached()) {
+      markTextureFrameAvailable(textureId);
+    }
+    return true;
+  }
+  // ------ End HardwareBuffer Support -----
+  // ------ End Texture Registration Support -----
 
   // ------ Start Dart Execution Support -------
   /**

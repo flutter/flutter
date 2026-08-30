@@ -208,6 +208,38 @@ class LegacyJniDelegate {
   virtual bool PrefetchDefaultFontManager() { return true; }
 
   virtual bool SetVmServiceUri(const std::string& uri) { return true; }
+
+  virtual bool RegisterHardwareBufferTexture(int64_t texture_id) {
+    return false;
+  }
+
+  virtual bool UnregisterHardwareBufferTexture(int64_t texture_id) {
+    return false;
+  }
+
+  virtual bool SetHardwareBufferFrame(
+      int64_t texture_id,
+      const std::shared_ptr<AndroidHardwareBuffer>& buffer) {
+    return false;
+  }
+
+  virtual bool SetHardwareBufferFrame(
+      int64_t texture_id,
+      const FlutterHardwareBufferExternalTexture& texture) {
+    return false;
+  }
+
+  virtual bool GetHardwareBufferTextureFrame(
+      int64_t texture_id,
+      size_t width,
+      size_t height,
+      FlutterHardwareBufferExternalTexture* texture_out) {
+    return false;
+  }
+
+  virtual bool OnHardwareBufferFrameAvailable(int64_t texture_id) {
+    return false;
+  }
 };
 
 /// @brief Native JNI Routing Boundary that dispatches calls based on
@@ -417,6 +449,26 @@ class JniRouter {
   bool RoutePrefetchDefaultFontManager();
 
   bool RouteSetVmServiceUri(const std::string& uri);
+
+  bool RouteRegisterHardwareBufferTexture(int64_t texture_id);
+
+  bool RouteUnregisterHardwareBufferTexture(int64_t texture_id);
+
+  bool RouteSetHardwareBufferFrame(
+      int64_t texture_id,
+      const std::shared_ptr<AndroidHardwareBuffer>& buffer);
+
+  bool RouteSetHardwareBufferFrame(
+      int64_t texture_id,
+      const FlutterHardwareBufferExternalTexture& texture);
+
+  bool RouteGetHardwareBufferTextureFrame(
+      int64_t texture_id,
+      size_t width,
+      size_t height,
+      FlutterHardwareBufferExternalTexture* texture_out);
+
+  bool RouteOnHardwareBufferFrameAvailable(int64_t texture_id);
 
   std::shared_ptr<JniDelegate> GetEmbedderDelegate() const;
   std::shared_ptr<LegacyJniDelegate> GetLegacyDelegate() const;
