@@ -5,12 +5,12 @@ This document defines the strict multi-agent state machine utilized to migrate t
 ## 1. Agent Archetypes & Context Boundaries
 
 ### The Orchestrator (Main Agent)
-*   **Role**: Maintains the `MIGRATION_LEDGER.md` state tracking, checks out git branch stubs, and spawns the sub-agents. 
+*   **Role**: Maintains the `MIGRATION_LEDGER.md` state tracking, checks out git branch stubs, and spawns the sub-agents.
 *   **Context**: The ledger structure and overall git tree state.
 
 ### `implementation-agent` (The Coder)
 *   **Role**: Writes C++, Java, Dart, and GN logic for a single atomic ledger step.
-*   **Context**: `MIGRATION_PLAN.md`, architectural guardrails, and specific feedback from analyzers/reviewers. 
+*   **Context**: `MIGRATION_PLAN.md`, architectural guardrails, and specific feedback from analyzers/reviewers.
 *   **Hygiene Rule**: The Coder MUST execute `git add -A` followed by `git commit` (or `git commit --amend` for iterative fixes) before handing control back. This ensures all new/untracked files are securely snapshotted into the git tree so they are protected from the subsequent `git clean -fd` wipe.
 
 ### `validation-agent` (The Build & Test Engineer)
@@ -19,7 +19,7 @@ This document defines the strict multi-agent state machine utilized to migrate t
 
 ### `analyzer-agent` (The Debugger / Triage)
 *   **Role**: Triages complex failures (C++ segfaults, memory leaks, JNI exhaustion) and frame-pacing regressions.
-*   **Context**: 
+*   **Context**:
     *   **The Incremental Diff**: The specific code changes the Implementation Agent just wrote (essential for mapping crashes back to logic).
     *   Raw compiler logs, stack traces, tombstones, and logcat dumps.
     *   **Perfetto Traces**: Specifically tasked with parsing and analyzing Perfetto timeline profiles. The analyzer uses trace visualization output to debug threading bottlenecks, lock contention, UI/Raster thread synchronization, and Android `AChoreographer` / VSync pacing latency.
