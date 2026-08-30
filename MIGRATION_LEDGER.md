@@ -111,11 +111,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] *Validation*: `dev/devicelab/bin/tasks/android_choreographer_do_frame_test.dart` passes, and Perfetto traces confirm strict frame pacing correctness.
 
 
-- [ ] **2.9 Global VM Initialization (`flutter_main.cc`)**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-2.9-global-vm-initialization-flutter-main-cc`
-    - [ ] Route global ICU, font, and AOT snapshot mapping entirely via `FlutterEngineInitialize`.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `devicelab` App startup does not stall or lose AOT symbol maps.
+- [x] **2.9 Global VM Initialization (`flutter_main.cc`)**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-2.9-global-vm-initialization-flutter-main-cc`
+    - [x] Route global ICU, font, and AOT snapshot mapping entirely via `FlutterEngineInitialize`.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `devicelab` App startup does not stall or lose AOT symbol maps.
 
 
 - [ ] **Phase 2 Parity Checkpoint**:

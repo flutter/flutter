@@ -24,6 +24,8 @@ source_set("flutter_embedder_native_src") {
     "android_platform_views_controller.h",
     "android_semantics_mapper.cc",
     "android_semantics_mapper.h",
+    "android_vm_init.cc",
+    "android_vm_init.h",
     "android_vsync_waiter.cc",
     "android_vsync_waiter.h",
     "android_window_metrics_mapper.cc",
@@ -79,6 +81,7 @@ executable("flutter_embedder_native_unittests") {
   sources = [
     "android_mutator_unittests.cc",
     "android_semantics_unittests.cc",
+    "android_vm_init_unittests.cc",
     "android_vsync_waiter_unittests.cc",
     "android_window_metrics_unittests.cc",
     "apk_asset_provider_unittests.cc",

@@ -19,13 +19,15 @@ JniDelegate::JniDelegate(
     std::shared_ptr<ImageDecoderProvider> image_decoder,
     std::shared_ptr<PlatformViewsProvider> platform_views_provider,
     std::shared_ptr<WindowMetricsProvider> window_metrics_provider,
-    std::shared_ptr<AndroidVsyncWaiter> vsync_waiter)
+    std::shared_ptr<AndroidVsyncWaiter> vsync_waiter,
+    std::shared_ptr<AndroidVMInit> vm_init)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(std::move(callback_cache)),
       image_decoder_(std::move(image_decoder)),
       platform_views_provider_(std::move(platform_views_provider)),
       window_metrics_provider_(std::move(window_metrics_provider)),
-      vsync_waiter_(std::move(vsync_waiter)) {
+      vsync_waiter_(std::move(vsync_waiter)),
+      vm_init_(std::move(vm_init)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
   if (!platform_views_provider_) {
@@ -35,6 +37,9 @@ JniDelegate::JniDelegate(
   if (!window_metrics_provider_) {
     window_metrics_provider_ =
         std::make_shared<DefaultWindowMetricsProvider>(jvm_invoker_);
+  }
+  if (!vm_init_) {
+    vm_init_ = std::make_shared<AndroidVMInit>(jvm_invoker_);
   }
   platform_views_controller_ = std::make_shared<AndroidPlatformViewsController>(
       platform_views_provider_);
@@ -663,6 +668,66 @@ void JniDelegate::SetVsyncWaiter(std::shared_ptr<AndroidVsyncWaiter> provider) {
 
 std::shared_ptr<AndroidVsyncWaiter> JniDelegate::GetVsyncWaiter() const {
   return vsync_waiter_;
+}
+
+bool JniDelegate::InitVM(const AndroidVMArgs& args) {
+  TRACE_EVENT0("flutter", "JniDelegate::InitVM");
+  if (vm_init_) {
+    return vm_init_->Init(args);
+  }
+  return false;
+}
+
+bool JniDelegate::PrefetchDefaultFontManager() {
+  TRACE_EVENT0("flutter", "JniDelegate::PrefetchDefaultFontManager");
+  if (vm_init_) {
+    return vm_init_->PrefetchDefaultFontManager();
+  }
+  return false;
+}
+
+bool JniDelegate::SetVmServiceUri(const std::string& uri) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetVmServiceUri", "uri", uri.c_str());
+  if (vm_init_) {
+    return vm_init_->SetVmServiceUri(uri);
+  }
+  if (jvm_invoker_) {
+    std::vector<uint8_t> payload(uri.begin(), uri.end());
+    return jvm_invoker_->InvokeVoidMethod("setVmServiceUri",
+                                          "(Ljava/lang/String;)V", payload);
+  }
+  return false;
+}
+
+std::string JniDelegate::GetVmServiceUri() const {
+  if (vm_init_) {
+    return vm_init_->GetVmServiceUri();
+  }
+  return "";
+}
+
+bool JniDelegate::IsVMInitialized() const {
+  if (vm_init_) {
+    return vm_init_->IsInitialized();
+  }
+  return false;
+}
+
+std::optional<AndroidVMArgs> JniDelegate::GetVMArgs() const {
+  if (vm_init_) {
+    return vm_init_->GetVMArgs();
+  }
+  return std::nullopt;
+}
+
+void JniDelegate::SetVMInit(std::shared_ptr<AndroidVMInit> vm_init) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetVMInit");
+  vm_init_ = vm_init ? std::move(vm_init)
+                     : std::make_shared<AndroidVMInit>(jvm_invoker_);
+}
+
+std::shared_ptr<AndroidVMInit> JniDelegate::GetVMInit() const {
+  return vm_init_;
 }
 
 }  // namespace android

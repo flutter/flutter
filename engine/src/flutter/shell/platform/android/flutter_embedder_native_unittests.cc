@@ -293,6 +293,12 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
                int32_t width,
                int32_t height),
               (override));
+
+  MOCK_METHOD(bool, InitVM, (const AndroidVMArgs& args), (override));
+
+  MOCK_METHOD(bool, PrefetchDefaultFontManager, (), (override));
+
+  MOCK_METHOD(bool, SetVmServiceUri, (const std::string& uri), (override));
 };
 
 class MockCallbackCacheProvider : public CallbackCacheProvider {
@@ -2901,6 +2907,234 @@ TEST(VsyncRoutingTest, FlutterEmbedderNativeVsync120HzPacing) {
   EXPECT_TRUE(native.AsyncWaitForVsync(120));
   mock_choreographer->TriggerPendingCallbacks(50000000LL);
   EXPECT_EQ(result_target, 50000000LL + 8333333LL);
+}
+
+// ---------------------------------------------------------------------------
+// GlobalVMInitializationTest (Phase 2.9 Global VM Initialization)
+// ---------------------------------------------------------------------------
+
+TEST(GlobalVMInitializationTest, JniDelegateVMOperations) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
+  auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker, font_provider,
+                                                 aot_provider);
+
+  auto delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, vm_init);
+
+  EXPECT_EQ(delegate->GetVMInit(), vm_init);
+  EXPECT_FALSE(delegate->IsVMInitialized());
+  EXPECT_FALSE(delegate->GetVMArgs().has_value());
+
+  AndroidVMArgs args;
+  args.command_line_args = {"--enable-impeller=true", "--verbose-logging"};
+  args.aot_library_path = "/data/app/lib/arm64/libapp.so";
+  args.icu_data_path = "/data/flutter/icudtl.dat";
+  args.engine_caches_path = "/data/user/cache";
+  args.api_level = 34;
+
+  EXPECT_TRUE(delegate->InitVM(args));
+  EXPECT_TRUE(delegate->IsVMInitialized());
+  auto vm_args = delegate->GetVMArgs();
+  ASSERT_TRUE(vm_args.has_value());
+  if (vm_args.has_value()) {
+    EXPECT_EQ(vm_args.value(), args);
+  }
+
+  // Prefetch fonts
+  EXPECT_TRUE(delegate->PrefetchDefaultFontManager());
+  EXPECT_TRUE(font_provider->IsPrefetched());
+  EXPECT_EQ(font_provider->GetPrefetchCount(), 1u);
+
+  // Set VM Service URI -> dispatches to JVM
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("setVmServiceUri", "(Ljava/lang/String;)V", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->SetVmServiceUri("http://127.0.0.1:54321/auth/"));
+  EXPECT_EQ(delegate->GetVmServiceUri(), "http://127.0.0.1:54321/auth/");
+}
+
+TEST(GlobalVMInitializationTest, JniRouterVMRoutingFlip) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
+  auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker, font_provider,
+                                                 aot_provider);
+
+  auto embedder_delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, vm_init);
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+
+  JniRouter router(embedder_delegate, legacy_delegate);
+
+  AndroidVMArgs args;
+  args.command_line_args = {"--test-arg"};
+  args.api_level = 34;
+
+  // 1. Legacy routing (Embedder disabled)
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kLegacy);
+
+  EXPECT_CALL(*legacy_delegate, InitVM(args)).WillOnce(Return(true));
+  EXPECT_CALL(*legacy_delegate, PrefetchDefaultFontManager())
+      .WillOnce(Return(true));
+  EXPECT_CALL(*legacy_delegate, SetVmServiceUri("http://legacy:8181/"))
+      .WillOnce(Return(true));
+
+  EXPECT_TRUE(router.RouteInitVM(args));
+  EXPECT_TRUE(router.RoutePrefetchDefaultFontManager());
+  EXPECT_TRUE(router.RouteSetVmServiceUri("http://legacy:8181/"));
+
+  // 2. Embedder routing (Embedder enabled)
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
+
+  EXPECT_TRUE(router.RouteInitVM(args));
+  EXPECT_TRUE(embedder_delegate->IsVMInitialized());
+
+  EXPECT_TRUE(router.RoutePrefetchDefaultFontManager());
+  EXPECT_TRUE(font_provider->IsPrefetched());
+  EXPECT_EQ(font_provider->GetPrefetchCount(), 1u);
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("setVmServiceUri", "(Ljava/lang/String;)V", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router.RouteSetVmServiceUri("http://embedder:8181/"));
+  EXPECT_EQ(embedder_delegate->GetVmServiceUri(), "http://embedder:8181/");
+
+  JniRouter::SetEmbedderEnabled(false);
+}
+
+TEST(GlobalVMInitializationTest, FlutterEmbedderNativeVMIntegration) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
+  auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  auto vm_init = std::make_shared<AndroidVMInit>(mock_invoker, font_provider,
+                                                 aot_provider);
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, font_provider, aot_provider, vm_init);
+
+  EXPECT_EQ(native.GetVMInit(), vm_init);
+  EXPECT_EQ(native.GetFontCollectionProvider(), font_provider);
+  EXPECT_EQ(native.GetAOTProvider(), aot_provider);
+
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+
+  AndroidVMArgs args;
+  args.command_line_args = {"--enable-impeller=true"};
+  args.aot_library_path = "/data/app/lib/arm64/libapp.so";
+  args.icu_data_path = "/data/flutter/icudtl.dat";
+  args.engine_caches_path = "/data/user/cache";
+  args.api_level = 34;
+
+  EXPECT_TRUE(native.InitVM(args));
+  EXPECT_TRUE(native.IsVMInitialized());
+  EXPECT_TRUE(native.GetVMArgs().has_value());
+  EXPECT_EQ(native.GetSelectedRenderingAPI(),
+            AndroidRenderingAPI::kImpellerAutoselect);
+
+  const FlutterProjectArgs* project_args = native.GetProjectArgs();
+  ASSERT_NE(project_args, nullptr);
+  EXPECT_STREQ(project_args->icu_data_path, "/data/flutter/icudtl.dat");
+  EXPECT_NE(project_args->aot_data, nullptr);
+
+  // Font prefetching
+  EXPECT_TRUE(native.PrefetchDefaultFontManager());
+  EXPECT_TRUE(font_provider->IsPrefetched());
+  EXPECT_EQ(font_provider->GetPrefetchCount(), 1u);
+
+  // Set VM Service URI
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("setVmServiceUri", "(Ljava/lang/String;)V", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(native.SetVmServiceUri("http://127.0.0.1:4321/auth/"));
+  EXPECT_EQ(native.GetVmServiceUri(), "http://127.0.0.1:4321/auth/");
+
+  // Engine initialization error checking
+  EXPECT_EQ(native.InitializeEngine(nullptr, nullptr, nullptr, nullptr),
+            kInvalidArguments);
+  EXPECT_EQ(native.DeinitializeEngine(nullptr), kInvalidArguments);
+
+  // AOT data operations
+  FlutterEngineAOTDataSource source = {};
+  source.type = kFlutterEngineAOTDataSourceTypeElfPath;
+  source.elf_path = "/data/app/lib/arm64/libapp.so";
+
+  FlutterEngineAOTData aot_handle = nullptr;
+  EXPECT_EQ(native.CreateAOTData(&source, &aot_handle), kSuccess);
+  EXPECT_NE(aot_handle, nullptr);
+  EXPECT_EQ(native.CollectAOTData(aot_handle), kSuccess);
+
+  EXPECT_EQ(native.CreateAOTData(nullptr, nullptr), kInvalidArguments);
+  EXPECT_EQ(native.CollectAOTData(nullptr), kInvalidArguments);
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+TEST(GlobalVMInitializationTest,
+     FlutterEmbedderNativeAOTAndProjectArgsGeneration) {
+  auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
+  auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
+
+  FlutterEmbedderNative native(std::make_shared<DefaultJvmInvoker>(), nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr,
+                               font_provider, aot_provider);
+
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+
+  const uint8_t vm_data[] = {1, 2, 3};
+  const uint8_t vm_instr[] = {4, 5, 6};
+  const uint8_t iso_data[] = {7, 8, 9};
+  const uint8_t iso_instr[] = {10, 11, 12};
+
+  AndroidVMArgs args;
+  args.command_line_args = {"--flag1", "--flag2=value"};
+  args.icu_data_path = "/system/etc/icudtl.dat";
+  args.engine_caches_path = "/data/user/persistent_cache";
+  args.is_persistent_cache_read_only = true;
+  args.dart_old_gen_heap_size = 1024;
+  args.log_tag = "test_engine_tag";
+  args.aot_vm_snapshot_data = vm_data;
+  args.aot_vm_snapshot_data_size = sizeof(vm_data);
+  args.aot_vm_snapshot_instructions = vm_instr;
+  args.aot_vm_snapshot_instructions_size = sizeof(vm_instr);
+  args.aot_isolate_snapshot_data = iso_data;
+  args.aot_isolate_snapshot_data_size = sizeof(iso_data);
+  args.aot_isolate_snapshot_instructions = iso_instr;
+  args.aot_isolate_snapshot_instructions_size = sizeof(iso_instr);
+  args.api_level = 34;
+
+  EXPECT_TRUE(native.InitVM(args));
+
+  const FlutterProjectArgs* project_args = native.GetProjectArgs();
+  ASSERT_NE(project_args, nullptr);
+  EXPECT_EQ(project_args->struct_size, sizeof(FlutterProjectArgs));
+  EXPECT_STREQ(project_args->icu_data_path, "/system/etc/icudtl.dat");
+  EXPECT_STREQ(project_args->persistent_cache_path,
+               "/data/user/persistent_cache");
+  EXPECT_TRUE(project_args->is_persistent_cache_read_only);
+  EXPECT_EQ(project_args->dart_old_gen_heap_size, 1024);
+  EXPECT_STREQ(project_args->log_tag, "test_engine_tag");
+  EXPECT_EQ(project_args->command_line_argc, 3);
+  EXPECT_STREQ(project_args->command_line_argv[0], "flutter");
+  EXPECT_STREQ(project_args->command_line_argv[1], "--flag1");
+  EXPECT_STREQ(project_args->command_line_argv[2], "--flag2=value");
+
+  EXPECT_EQ(project_args->vm_snapshot_data, vm_data);
+  EXPECT_EQ(project_args->vm_snapshot_data_size, sizeof(vm_data));
+  EXPECT_EQ(project_args->vm_snapshot_instructions, vm_instr);
+  EXPECT_EQ(project_args->vm_snapshot_instructions_size, sizeof(vm_instr));
+  EXPECT_EQ(project_args->isolate_snapshot_data, iso_data);
+  EXPECT_EQ(project_args->isolate_snapshot_data_size, sizeof(iso_data));
+  EXPECT_EQ(project_args->isolate_snapshot_instructions, iso_instr);
+  EXPECT_EQ(project_args->isolate_snapshot_instructions_size,
+            sizeof(iso_instr));
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
 }
 
 }  // namespace testing
