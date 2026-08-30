@@ -144,6 +144,19 @@ bool DefaultJvmInvoker::PushPlatformViewMutators(
     int32_t width,
     int32_t height,
     const std::vector<uint8_t>& payload) {
+  return PushPlatformViewMutators(view_id, x, y, width, height, width, height,
+                                  payload);
+}
+
+bool DefaultJvmInvoker::PushPlatformViewMutators(
+    int64_t view_id,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    int32_t view_width,
+    int32_t view_height,
+    const std::vector<uint8_t>& payload) {
   TRACE_EVENT0("flutter", "DefaultJvmInvoker::PushPlatformViewMutators");
   if (pending_exception_.load()) {
     return false;
