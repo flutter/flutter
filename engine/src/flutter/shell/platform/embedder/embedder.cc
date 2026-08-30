@@ -4178,6 +4178,51 @@ FlutterEngineResult FlutterEngineNotifyDartDeferredLibraryLoadError(
       "Could not notify Dart deferred library load error.");
 }
 
+FlutterEngineResult FlutterEngineScreenshot(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineScreenshotInfo* screenshot_out) {
+  TRACE_EVENT0("flutter", "FlutterEngineScreenshot");
+  if (!engine) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  if (!screenshot_out) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Screenshot output pointer was null.");
+  }
+  if (screenshot_out->struct_size <
+      offsetof(FlutterEngineScreenshotInfo, pixel_format)) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "FlutterEngineScreenshotInfo struct_size mismatch.");
+  }
+
+  if (reinterpret_cast<flutter::EmbedderEngine*>(engine)->Screenshot(
+          screenshot_out)) {
+    return kSuccess;
+  }
+  return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                            "Could not capture screenshot.");
+}
+
+FlutterEngineResult FlutterEngineFreeScreenshot(
+    FlutterEngineScreenshotInfo* screenshot) {
+  TRACE_EVENT0("flutter", "FlutterEngineFreeScreenshot");
+  if (!screenshot) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Screenshot pointer was null.");
+  }
+  if (screenshot->struct_size <
+      offsetof(FlutterEngineScreenshotInfo, pixel_format)) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "FlutterEngineScreenshotInfo struct_size mismatch.");
+  }
+  if (screenshot->pixels != nullptr) {
+    std::free(const_cast<void*>(screenshot->pixels));
+    screenshot->pixels = nullptr;
+    screenshot->pixels_size = 0;
+  }
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -4238,6 +4283,8 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(LoadDartDeferredLibrary, FlutterEngineLoadDartDeferredLibrary);
   SET_PROC(NotifyDartDeferredLibraryLoadError,
            FlutterEngineNotifyDartDeferredLibraryLoadError);
+  SET_PROC(Screenshot, FlutterEngineScreenshot);
+  SET_PROC(FreeScreenshot, FlutterEngineFreeScreenshot);
 #undef SET_PROC
 
   return kSuccess;

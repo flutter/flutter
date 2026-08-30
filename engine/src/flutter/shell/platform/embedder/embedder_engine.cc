@@ -4,8 +4,18 @@
 
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 
+#include <cstdlib>
+#include <cstring>
+#include <utility>
+
 #include "flutter/fml/make_copyable.h"
+#include "flutter/shell/platform/embedder/embedder_struct_macros.h"
+#include "flutter/shell/platform/embedder/pixel_formats.h"
 #include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
+
+#if !SLIMPELLER
+#include "third_party/skia/include/core/SkColorType.h"
+#endif
 
 namespace flutter {
 
@@ -396,6 +406,88 @@ bool EmbedderEngine::NotifyDartDeferredLibraryLoadError(
   }
   shell_->LoadDartDeferredLibraryError(static_cast<intptr_t>(loading_unit_id),
                                        error_message, transient);
+  return true;
+}
+
+bool EmbedderEngine::Screenshot(FlutterEngineScreenshotInfo* screenshot_out) {
+  TRACE_EVENT0("flutter", "EmbedderEngine::Screenshot");
+  if (!IsValid() || !screenshot_out) {
+    return false;
+  }
+  if (!shell_) {
+    return false;
+  }
+  auto raster_screenshot =
+      shell_->Screenshot(Rasterizer::ScreenshotType::UncompressedImage, false);
+  if (!raster_screenshot.data || raster_screenshot.data->size() == 0) {
+    return false;
+  }
+  if (raster_screenshot.frame_size.width <= 0 ||
+      raster_screenshot.frame_size.height <= 0) {
+    return false;
+  }
+
+  const uint32_t width =
+      static_cast<uint32_t>(raster_screenshot.frame_size.width);
+  const uint32_t height =
+      static_cast<uint32_t>(raster_screenshot.frame_size.height);
+  const size_t size = raster_screenshot.data->size();
+
+  // Validate that buffer size is sufficient for 4 bytes per pixel and evenly
+  // divisible by height.
+  if (size < static_cast<size_t>(width) * height * 4 || size % height != 0) {
+    return false;
+  }
+
+  const size_t row_bytes = size / height;
+  if (row_bytes < static_cast<size_t>(width) * 4) {
+    return false;
+  }
+
+  TRACE_EVENT0("flutter", "EmbedderEngine::ScreenshotBufferAlloc");
+  void* pixels = std::malloc(size);
+  if (!pixels) {
+    return false;
+  }
+  std::memcpy(pixels, raster_screenshot.data->data(), size);
+
+  // Normalize pixel format to RGBA8888.
+  bool is_bgra = false;
+  if (raster_screenshot.pixel_format ==
+      Rasterizer::ScreenshotFormat::kB8G8R8A8UNormInt) {
+    is_bgra = true;
+  } else if (raster_screenshot.pixel_format ==
+             Rasterizer::ScreenshotFormat::kUnknown) {
+#if !SLIMPELLER
+    if constexpr (kN32_SkColorType == kBGRA_8888_SkColorType) {
+      is_bgra = true;
+    }
+#endif
+  }
+
+  if (is_bgra) {
+    TRACE_EVENT0("flutter", "EmbedderEngine::ScreenshotSwizzleBGRAtoRGBA");
+    uint8_t* byte_ptr = static_cast<uint8_t*>(pixels);
+    for (uint32_t y = 0; y < height; ++y) {
+      uint8_t* row = byte_ptr + (y * row_bytes);
+      for (uint32_t x = 0; x < width; ++x) {
+        std::swap(row[x * 4 + 0], row[x * 4 + 2]);
+      }
+    }
+  }
+
+  screenshot_out->width = width;
+  screenshot_out->height = height;
+  screenshot_out->row_bytes = row_bytes;
+  screenshot_out->pixels = pixels;
+  screenshot_out->pixels_size = size;
+  if (STRUCT_HAS_MEMBER(screenshot_out, pixel_format)) {
+    screenshot_out->pixel_format = kFlutterSoftwarePixelFormatRGBA8888;
+  }
+  if (STRUCT_HAS_MEMBER(screenshot_out, reserved_padding)) {
+    screenshot_out->reserved_padding = 0;
+  }
+
   return true;
 }
 

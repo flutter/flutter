@@ -3073,6 +3073,36 @@ typedef struct {
   const char* initial_route;
 } FlutterEngineSpawnConfig;
 
+/// Describes a screenshot captured from the engine.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterEngineScreenshotInfo).
+  size_t struct_size;
+
+  /// The width of the screenshot in physical pixels.
+  uint32_t width;
+
+  /// The height of the screenshot in physical pixels.
+  uint32_t height;
+
+  /// The number of bytes per row of pixels (stride).
+  size_t row_bytes;
+
+  /// Pointer to the raw uncompressed 32-bit RGBA raster pixel buffer.
+  /// The memory is allocated by the engine via `std::malloc` and must be freed
+  /// by passing this screenshot struct to `FlutterEngineFreeScreenshot`.
+  const void* pixels;
+
+  /// The size in bytes of the buffer pointed to by `pixels`.
+  size_t pixels_size;
+
+  /// The pixel format of the screenshot buffer. Guaranteed to be
+  /// `kFlutterSoftwarePixelFormatRGBA8888`.
+  FlutterSoftwarePixelFormat pixel_format;
+
+  /// Reserved for future use and 8-byte natural alignment padding. Must be 0.
+  uint32_t reserved_padding;
+} FlutterEngineScreenshotInfo;
+
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -3940,6 +3970,59 @@ FlutterEngineResult FlutterEngineNotifyDartDeferredLibraryLoadError(
     const char* error_message,
     bool transient);
 
+//------------------------------------------------------------------------------
+/// @brief      Captures a synchronous uncompressed raster screenshot from the
+///             engine.
+///
+///             The `screenshot_out` struct must be initialized with its
+///             `struct_size` set to `sizeof(FlutterEngineScreenshotInfo)`
+///             before calling this function.
+///
+///             If successful, the `screenshot_out` fields will be populated
+///             with the screenshot dimensions and raw uncompressed 32-bit RGBA
+///             pixel buffer. The caller is responsible for releasing the pixel
+///             buffer by calling `FlutterEngineFreeScreenshot`.
+///
+///             Note: This captures the Flutter rasterizer surface. Platform
+///             views rendered natively outside Flutter (e.g. Android Hybrid
+///             Composition) are not included in this raster buffer.
+///
+///             This function is thread-safe and may be called from any thread.
+///
+/// @param[in]  engine          The running engine instance.
+/// @param[out] screenshot_out  Pointer to a `FlutterEngineScreenshotInfo`
+///                             struct to be populated. Must not be null.
+///
+/// @return     `kSuccess` if the screenshot was successfully captured;
+///             `kInvalidArguments` if arguments are invalid or `struct_size`
+///             is less than `sizeof(FlutterEngineScreenshotInfo)`;
+///             `kInternalInconsistency` if engine is not running or
+///             rasterizer has no frame available.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineScreenshot(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineScreenshotInfo* screenshot_out);
+
+//------------------------------------------------------------------------------
+/// @brief      Frees the pixel buffer allocated by `FlutterEngineScreenshot`.
+///
+///             This function is thread-safe and may be called from any thread.
+///             Upon freeing, `screenshot->pixels` is set to `NULL` and
+///             `screenshot->pixels_size` is set to 0, making subsequent calls
+///             with the same struct a safe no-op.
+///
+/// @param[in,out] screenshot  The screenshot struct whose pixel buffer is to be
+///                            freed. Must not be null.
+///
+/// @return     `kSuccess` if the screenshot buffer was successfully freed;
+///             `kInvalidArguments` if `screenshot` is null or `struct_size` is
+///             less than `offsetof(FlutterEngineScreenshotInfo, pixel_format)`.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineFreeScreenshot(
+    FlutterEngineScreenshotInfo* screenshot);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -4091,6 +4174,11 @@ typedef FlutterEngineResult (
     int64_t loading_unit_id,
     const char* error_message,
     bool transient);
+typedef FlutterEngineResult (*FlutterEngineScreenshotFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineScreenshotInfo* screenshot_out);
+typedef FlutterEngineResult (*FlutterEngineFreeScreenshotFnPtr)(
+    FlutterEngineScreenshotInfo* screenshot);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -4145,6 +4233,8 @@ typedef struct {
   FlutterEngineLoadDartDeferredLibraryFnPtr LoadDartDeferredLibrary;
   FlutterEngineNotifyDartDeferredLibraryLoadErrorFnPtr
       NotifyDartDeferredLibraryLoadError;
+  FlutterEngineScreenshotFnPtr Screenshot;
+  FlutterEngineFreeScreenshotFnPtr FreeScreenshot;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------
