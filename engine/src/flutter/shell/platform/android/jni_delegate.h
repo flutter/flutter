@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_semantics_mapper.h"
+#include "flutter/shell/platform/android/android_window_metrics_mapper.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -84,7 +85,8 @@ class JniDelegate {
       std::shared_ptr<JvmInvoker> jvm_invoker,
       std::shared_ptr<CallbackCacheProvider> callback_cache = nullptr,
       std::shared_ptr<ImageDecoderProvider> image_decoder = nullptr,
-      std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr);
+      std::shared_ptr<PlatformViewsProvider> platform_views_provider = nullptr,
+      std::shared_ptr<WindowMetricsProvider> window_metrics_provider = nullptr);
   virtual ~JniDelegate();
 
   /// @brief Handles an incoming platform message dispatch to the JVM.
@@ -141,7 +143,28 @@ class JniDelegate {
   virtual bool OnVsync(int64_t frame_time_nanos,
                        int64_t frame_target_time_nanos);
 
-  /// @brief Updates display metrics for a view in the JVM.
+  /// @brief Sends full viewport metrics.
+  virtual bool SetViewportMetrics(const AndroidViewportMetrics& metrics);
+
+  /// @brief Updates display metrics.
+  virtual bool UpdateDisplayMetrics(const AndroidDisplayMetrics& metrics);
+
+  /// @brief Updates display metrics with individual parameters.
+  virtual bool UpdateDisplayMetrics(uint64_t display_id,
+                                    double refresh_rate,
+                                    double width,
+                                    double height,
+                                    double device_pixel_ratio);
+
+  /// @brief Returns the last received viewport metrics for view_id.
+  virtual std::optional<AndroidViewportMetrics> GetViewportMetrics(
+      int64_t view_id = 0) const;
+
+  /// @brief Returns the last received display metrics for display_id.
+  virtual std::optional<AndroidDisplayMetrics> GetDisplayMetrics(
+      uint64_t display_id = 0) const;
+
+  /// @brief Updates display metrics for a view in the JVM (legacy helper).
   virtual bool DispatchViewportMetrics(int64_t view_id,
                                        double width,
                                        double height,
@@ -282,6 +305,13 @@ class JniDelegate {
   /// @brief Returns the current PlatformViewsProvider.
   std::shared_ptr<PlatformViewsProvider> GetPlatformViewsProvider() const;
 
+  /// @brief Sets or replaces the WindowMetricsProvider.
+  void SetWindowMetricsProvider(
+      std::shared_ptr<WindowMetricsProvider> provider);
+
+  /// @brief Returns the current WindowMetricsProvider.
+  std::shared_ptr<WindowMetricsProvider> GetWindowMetricsProvider() const;
+
   /// @brief Returns the current AndroidPlatformViewsController.
   std::shared_ptr<AndroidPlatformViewsController> GetPlatformViewsController()
       const;
@@ -294,6 +324,7 @@ class JniDelegate {
   std::shared_ptr<CallbackCacheProvider> callback_cache_;
   std::shared_ptr<ImageDecoderProvider> image_decoder_;
   std::shared_ptr<PlatformViewsProvider> platform_views_provider_;
+  std::shared_ptr<WindowMetricsProvider> window_metrics_provider_;
   std::shared_ptr<AndroidPlatformViewsController> platform_views_controller_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniDelegate);

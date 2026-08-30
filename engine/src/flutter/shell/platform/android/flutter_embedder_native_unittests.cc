@@ -142,6 +142,25 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               (int64_t frame_time_nanos, int64_t frame_target_time_nanos),
               (override));
 
+  MOCK_METHOD(bool,
+              SetViewportMetrics,
+              (const AndroidViewportMetrics& metrics),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateDisplayMetrics,
+              (const AndroidDisplayMetrics& metrics),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateDisplayMetrics,
+              (uint64_t display_id,
+               double refresh_rate,
+               double width,
+               double height,
+               double device_pixel_ratio),
+              (override));
+
   MOCK_METHOD(
       bool,
       DispatchViewportMetrics,
@@ -2573,6 +2592,163 @@ TEST(PlatformViewsTest, ThreadSafeConcurrentPlatformViewsOperations) {
   }
 
   EXPECT_EQ(controller.GetActiveViewsCount(), 0u);
+}
+
+// ---------------------------------------------------------------------------
+// WindowMetricsTranslationTest (Phase 2.7)
+// ---------------------------------------------------------------------------
+
+TEST(WindowMetricsTranslationTest, JniDelegateWindowMetricsOperations) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto delegate = std::make_shared<JniDelegate>(mock_invoker);
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onViewportMetrics", "(IDDD)V", _))
+      .Times(2)
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onDisplayMetrics", "(JDDDF)V", _))
+      .Times(2)
+      .WillRepeatedly(Return(true));
+
+  AndroidViewportMetrics vp;
+  vp.view_id = 0;
+  vp.physical_width = 1080.0;
+  vp.physical_height = 1920.0;
+  vp.device_pixel_ratio = 2.625;
+
+  AndroidDisplayMetrics disp;
+  disp.display_id = 0;
+  disp.refresh_rate = 60.0;
+  disp.width = 1080.0;
+  disp.height = 1920.0;
+  disp.device_pixel_ratio = 2.625;
+
+  EXPECT_TRUE(delegate->SetViewportMetrics(vp));
+  EXPECT_TRUE(delegate->UpdateDisplayMetrics(disp));
+  EXPECT_TRUE(delegate->UpdateDisplayMetrics(0, 90.0, 1080.0, 1920.0, 2.625));
+  EXPECT_TRUE(delegate->DispatchViewportMetrics(0, 1080.0, 1920.0, 2.625));
+
+  auto cached_vp = delegate->GetViewportMetrics(0);
+  ASSERT_TRUE(cached_vp.has_value());
+  if (cached_vp.has_value()) {
+    EXPECT_EQ(cached_vp.value(), vp);
+  }
+
+  auto cached_disp = delegate->GetDisplayMetrics(0);
+  ASSERT_TRUE(cached_disp.has_value());
+  if (cached_disp.has_value()) {
+    EXPECT_DOUBLE_EQ(cached_disp->refresh_rate, 90.0);
+  }
+}
+
+TEST(WindowMetricsTranslationTest, JniRouterWindowMetricsRoutingFlip) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto in_memory_provider = std::make_shared<InMemoryWindowMetricsProvider>();
+  auto embedder_delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, nullptr, in_memory_provider);
+  auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+
+  JniRouter router(embedder_delegate, legacy_delegate);
+
+  AndroidViewportMetrics vp;
+  vp.view_id = 7;
+  vp.physical_width = 1440.0;
+  vp.physical_height = 3040.0;
+  vp.device_pixel_ratio = 3.5;
+
+  AndroidDisplayMetrics disp;
+  disp.display_id = 1;
+  disp.refresh_rate = 120.0;
+  disp.width = 1440.0;
+  disp.height = 3040.0;
+  disp.device_pixel_ratio = 3.5;
+
+  // 1. Legacy routing
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kLegacy);
+
+  EXPECT_CALL(*legacy_delegate, SetViewportMetrics(vp)).WillOnce(Return(true));
+  EXPECT_CALL(*legacy_delegate, UpdateDisplayMetrics(disp))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*legacy_delegate,
+              UpdateDisplayMetrics(1, 120.0, 1440.0, 3040.0, 3.5))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*legacy_delegate, DispatchViewportMetrics(7, 1440.0, 3040.0, 3.5))
+      .WillOnce(Return(true));
+
+  EXPECT_TRUE(router.RouteSetViewportMetrics(vp));
+  EXPECT_TRUE(router.RouteUpdateDisplayMetrics(disp));
+  EXPECT_TRUE(router.RouteUpdateDisplayMetrics(1, 120.0, 1440.0, 3040.0, 3.5));
+  EXPECT_TRUE(router.RouteViewportMetrics(7, 1440.0, 3040.0, 3.5));
+
+  // 2. Embedder routing
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
+
+  EXPECT_TRUE(router.RouteSetViewportMetrics(vp));
+  EXPECT_TRUE(router.RouteUpdateDisplayMetrics(disp));
+  EXPECT_TRUE(router.RouteUpdateDisplayMetrics(1, 120.0, 1440.0, 3040.0, 3.5));
+  EXPECT_TRUE(router.RouteViewportMetrics(7, 1440.0, 3040.0, 3.5));
+
+  EXPECT_EQ(in_memory_provider->GetSendCount(), 2u);
+  EXPECT_EQ(in_memory_provider->GetUpdateCount(), 2u);
+
+  JniRouter::SetEmbedderEnabled(false);
+}
+
+TEST(WindowMetricsTranslationTest,
+     FlutterEmbedderNativeWindowMetricsIntegration) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto in_memory_provider = std::make_shared<InMemoryWindowMetricsProvider>();
+
+  FlutterEmbedderNative native(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, in_memory_provider);
+
+  AndroidViewportMetrics vp;
+  vp.view_id = 0;
+  vp.physical_width = 1080.0;
+  vp.physical_height = 2400.0;
+  vp.device_pixel_ratio = 2.75;
+  vp.physical_min_width = 800.0;
+  vp.physical_max_width = 1200.0;
+
+  AndroidDisplayMetrics disp;
+  disp.display_id = 0;
+  disp.refresh_rate = 90.0;
+  disp.width = 1080.0;
+  disp.height = 2400.0;
+  disp.device_pixel_ratio = 2.75;
+
+  FlutterWindowMetricsEvent c_event = native.TranslateViewportMetrics(vp);
+  EXPECT_EQ(c_event.width, 1080u);
+  EXPECT_EQ(c_event.height, 2400u);
+  EXPECT_TRUE(c_event.has_constraints);
+  EXPECT_EQ(c_event.min_width_constraint, 800u);
+  EXPECT_EQ(c_event.max_width_constraint, 1200u);
+
+  FlutterEngineDisplay c_disp = native.TranslateDisplayMetrics(disp);
+  EXPECT_EQ(c_disp.width, 1080u);
+  EXPECT_EQ(c_disp.height, 2400u);
+  EXPECT_DOUBLE_EQ(c_disp.refresh_rate, 90.0);
+
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+  EXPECT_TRUE(native.SetViewportMetrics(vp));
+  EXPECT_TRUE(native.UpdateDisplayMetrics(disp));
+  EXPECT_TRUE(native.UpdateDisplayMetrics(0, 120.0, 1080.0, 2400.0, 2.75));
+
+  EXPECT_EQ(in_memory_provider->GetSendCount(), 1u);
+  EXPECT_EQ(in_memory_provider->GetUpdateCount(), 2u);
+
+  EXPECT_EQ(native.SendWindowMetricsEvent(nullptr, &c_event),
+            kInvalidArguments);
+  EXPECT_EQ(native.SendWindowMetricsEvent(nullptr, vp), kInvalidArguments);
+  EXPECT_EQ(native.NotifyDisplayUpdate(
+                nullptr, kFlutterEngineDisplaysUpdateTypeStartup, &c_disp, 1),
+            kInvalidArguments);
+  EXPECT_EQ(native.NotifyDisplayUpdate(nullptr, disp), kInvalidArguments);
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
 }
 
 }  // namespace testing

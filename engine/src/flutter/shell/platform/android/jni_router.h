@@ -63,6 +63,16 @@ class LegacyJniDelegate {
   virtual bool OnVsync(int64_t frame_time_nanos,
                        int64_t frame_target_time_nanos) = 0;
 
+  virtual bool SetViewportMetrics(const AndroidViewportMetrics& metrics) = 0;
+
+  virtual bool UpdateDisplayMetrics(const AndroidDisplayMetrics& metrics) = 0;
+
+  virtual bool UpdateDisplayMetrics(uint64_t display_id,
+                                    double refresh_rate,
+                                    double width,
+                                    double height,
+                                    double device_pixel_ratio) = 0;
+
   virtual bool DispatchViewportMetrics(int64_t view_id,
                                        double width,
                                        double height,
@@ -219,6 +229,16 @@ class JniRouter {
   bool RoutePreEngineRestart();
 
   bool RouteVsync(int64_t frame_time_nanos, int64_t frame_target_time_nanos);
+
+  bool RouteSetViewportMetrics(const AndroidViewportMetrics& metrics);
+
+  bool RouteUpdateDisplayMetrics(const AndroidDisplayMetrics& metrics);
+
+  bool RouteUpdateDisplayMetrics(uint64_t display_id,
+                                 double refresh_rate,
+                                 double width,
+                                 double height,
+                                 double device_pixel_ratio);
 
   bool RouteViewportMetrics(int64_t view_id,
                             double width,

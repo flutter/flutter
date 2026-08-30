@@ -241,6 +241,55 @@ bool JniRouter::RouteVsync(int64_t frame_time_nanos,
   return false;
 }
 
+bool JniRouter::RouteSetViewportMetrics(const AndroidViewportMetrics& metrics) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSetViewportMetrics");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->SetViewportMetrics(metrics);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->SetViewportMetrics(metrics);
+  }
+  return false;
+}
+
+bool JniRouter::RouteUpdateDisplayMetrics(
+    const AndroidDisplayMetrics& metrics) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteUpdateDisplayMetrics(struct)");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->UpdateDisplayMetrics(metrics);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->UpdateDisplayMetrics(metrics);
+  }
+  return false;
+}
+
+bool JniRouter::RouteUpdateDisplayMetrics(uint64_t display_id,
+                                          double refresh_rate,
+                                          double width,
+                                          double height,
+                                          double device_pixel_ratio) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteUpdateDisplayMetrics(params)");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->UpdateDisplayMetrics(
+          display_id, refresh_rate, width, height, device_pixel_ratio);
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->UpdateDisplayMetrics(
+        display_id, refresh_rate, width, height, device_pixel_ratio);
+  }
+  return false;
+}
+
 bool JniRouter::RouteViewportMetrics(int64_t view_id,
                                      double width,
                                      double height,
