@@ -95,12 +95,26 @@ class JvmInvoker {
 
   /// @brief Dispatches platform view mutators stack to
   /// FlutterJNI.pushPlatformViewMutators.
+  virtual bool PushPlatformViewMutators(int64_t view_id,
+                                        int32_t x,
+                                        int32_t y,
+                                        int32_t width,
+                                        int32_t height,
+                                        const std::vector<uint8_t>& payload) {
+    return PushPlatformViewMutators(view_id, x, y, width, height, width, height,
+                                    payload);
+  }
+
+  /// @brief Dispatches platform view mutators stack and layout bounds to
+  /// FlutterJNI.onDisplayPlatformView / onDisplayPlatformView2.
   virtual bool PushPlatformViewMutators(
       int64_t view_id,
       int32_t x,
       int32_t y,
       int32_t width,
       int32_t height,
+      int32_t view_width,
+      int32_t view_height,
       const std::vector<uint8_t>& payload) = 0;
 
   /// @brief Invokes a void JVM method.
@@ -211,6 +225,14 @@ class DefaultJvmInvoker : public JvmInvoker {
                                 int32_t y,
                                 int32_t width,
                                 int32_t height,
+                                const std::vector<uint8_t>& payload) override;
+  bool PushPlatformViewMutators(int64_t view_id,
+                                int32_t x,
+                                int32_t y,
+                                int32_t width,
+                                int32_t height,
+                                int32_t view_width,
+                                int32_t view_height,
                                 const std::vector<uint8_t>& payload) override;
 
   bool InvokeVoidMethod(const std::string& method_name,

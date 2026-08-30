@@ -1392,6 +1392,13 @@ public class FlutterJNI {
 
   @SuppressWarnings("unused")
   @UiThread
+  public int createOverlaySurfaceId() {
+    FlutterOverlaySurface surface = createOverlaySurface();
+    return surface != null ? surface.getId() : -1;
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
   public void destroyOverlaySurfaces() {
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
@@ -1425,6 +1432,17 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
   @UiThread
+  public boolean createPlatformViewTransaction() {
+    if (platformViewsController2 == null) {
+      return false;
+    }
+    SurfaceControl.Transaction transaction = platformViewsController2.createTransaction();
+    return transaction != null;
+  }
+
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  @UiThread
   public void swapTransactions() {
     if (platformViewsController2 == null) {
       throw new RuntimeException("");
@@ -1451,6 +1469,14 @@ public class FlutterJNI {
           "platformViewsController must be set before attempting to position an overlay surface");
     }
     return platformViewsController2.createOverlaySurface();
+  }
+
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  @UiThread
+  public int createOverlaySurface2Id() {
+    FlutterOverlaySurface surface = createOverlaySurface2();
+    return surface != null ? surface.getId() : -1;
   }
 
   @SuppressWarnings("unused")
