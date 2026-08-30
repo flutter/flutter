@@ -237,6 +237,9 @@ class PlatformViewsProvider {
 
   /// @brief Returns whether HC++ presentation is supported and enabled.
   virtual bool IsHcppEnabled() const = 0;
+
+  /// @brief Sets whether HC++ presentation is supported and enabled.
+  virtual void SetHcppEnabled(bool enabled) {}
 };
 
 /// @brief Default JNI/JVM backed PlatformViewsProvider.
@@ -271,7 +274,7 @@ class DefaultPlatformViewsProvider : public PlatformViewsProvider {
   bool ApplyTransactions() override;
   bool IsHcppEnabled() const override;
 
-  void SetHcppEnabled(bool enabled);
+  void SetHcppEnabled(bool enabled) override;
 
  private:
   std::shared_ptr<JvmInvoker> jvm_invoker_;
@@ -311,7 +314,7 @@ class InMemoryPlatformViewsProvider : public PlatformViewsProvider {
   bool ApplyTransactions() override;
   bool IsHcppEnabled() const override;
 
-  void SetHcppEnabled(bool enabled);
+  void SetHcppEnabled(bool enabled) override;
   void SetNextTextureId(int64_t texture_id);
   void Clear();
 
@@ -449,6 +452,7 @@ class AndroidPlatformViewsController {
   bool SwapTransactions();
   bool ApplyTransactions();
   bool IsHcppEnabled() const;
+  void SetHcppEnabled(bool enabled);
 
   size_t GetActiveViewsCount() const;
   bool HasPlatformView(int64_t view_id) const;
