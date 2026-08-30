@@ -1,0 +1,126 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "flutter/shell/platform/android/jni_delegate.h"
+
+#include "flutter/fml/logging.h"
+#include "flutter/fml/trace_event.h"
+
+namespace flutter {
+namespace android {
+
+JniDelegate::JniDelegate(std::shared_ptr<JvmInvoker> jvm_invoker)
+    : jvm_invoker_(std::move(jvm_invoker)) {
+  TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
+  FML_DCHECK(jvm_invoker_ != nullptr);
+}
+
+JniDelegate::~JniDelegate() {
+  TRACE_EVENT0("flutter", "JniDelegate::~JniDelegate");
+}
+
+std::shared_ptr<JvmInvoker> JniDelegate::GetJvmInvoker() const {
+  return jvm_invoker_;
+}
+
+bool JniDelegate::HandlePlatformMessage(const std::string& channel,
+                                        const std::vector<uint8_t>& message,
+                                        int32_t response_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::HandlePlatformMessage", "channel",
+               channel.c_str());
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod("handlePlatformMessage",
+                                        "(Ljava/lang/String;[BI)V", message);
+}
+
+bool JniDelegate::HandlePlatformMessageResponse(
+    int32_t response_id,
+    const std::vector<uint8_t>& data) {
+  TRACE_EVENT0("flutter", "JniDelegate::HandlePlatformMessageResponse");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod("handlePlatformMessageResponse",
+                                        "(I[B)V", data);
+}
+
+bool JniDelegate::UpdateSemantics(const std::vector<uint8_t>& buffer,
+                                  const std::vector<std::string>& strings) {
+  TRACE_EVENT0("flutter", "JniDelegate::UpdateSemantics");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod("updateSemantics",
+                                        "([B[Ljava/lang/String;)V", buffer);
+}
+
+bool JniDelegate::SetSemanticsEnabled(bool enabled) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetSemanticsEnabled");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  std::vector<uint8_t> payload = {static_cast<uint8_t>(enabled ? 1 : 0)};
+  return jvm_invoker_->InvokeVoidMethod("setSemanticsEnabled", "(Z)V", payload);
+}
+
+bool JniDelegate::SetApplicationLocale(const std::string& locale) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetApplicationLocale", "locale",
+               locale.c_str());
+  if (!jvm_invoker_) {
+    return false;
+  }
+  std::vector<uint8_t> payload(locale.begin(), locale.end());
+  return jvm_invoker_->InvokeVoidMethod("setApplicationLocale",
+                                        "(Ljava/lang/String;)V", payload);
+}
+
+bool JniDelegate::OnFirstFrame() {
+  TRACE_EVENT0("flutter", "JniDelegate::OnFirstFrame");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod("onFirstFrame", "()V");
+}
+
+bool JniDelegate::OnPreEngineRestart() {
+  TRACE_EVENT0("flutter", "JniDelegate::OnPreEngineRestart");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod("onPreEngineRestart", "()V");
+}
+
+bool JniDelegate::OnVsync(int64_t frame_time_nanos,
+                          int64_t frame_target_time_nanos) {
+  TRACE_EVENT0("flutter", "JniDelegate::OnVsync");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod("onVsync", "(JJ)V");
+}
+
+bool JniDelegate::DispatchViewportMetrics(int64_t view_id,
+                                          double width,
+                                          double height,
+                                          double pixel_ratio) {
+  TRACE_EVENT0("flutter", "JniDelegate::DispatchViewportMetrics");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeVoidMethod("onViewportMetrics", "(IDDD)V");
+}
+
+bool JniDelegate::RequestDartDeferredLibrary(int64_t loading_unit_id) {
+  TRACE_EVENT0("flutter", "JniDelegate::RequestDartDeferredLibrary");
+  if (!jvm_invoker_) {
+    return false;
+  }
+  return jvm_invoker_->InvokeBooleanMethod("requestDartDeferredLibrary",
+                                           "(I)Z");
+}
+
+}  // namespace android
+}  // namespace flutter

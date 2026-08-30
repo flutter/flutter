@@ -14,11 +14,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `flutter_embedder_native` target initialized strictly forbidding Skia/UI headers.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `ninja -C out/android_debug_unopt flutter_embedder_native` builds successfully.
-- [ ] **1.3 JNI Routing & Mocking**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.3-jni-routing-mocking`
-    - [ ] `JvmInvoker` abstracted; JNI routing wired to `JniDelegate`.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: Host-side C++ Mocking validates routing flip without crashing.
+- [x] **1.3 JNI Routing & Mocking**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-1.3-jni-routing-mocking`
+    - [x] `JvmInvoker` abstracted; JNI routing wired to `JniDelegate`.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: Host-side C++ Mocking validates routing flip without crashing.
 - [ ] **1.4 Dynamic Virtualization**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-1.4-dynamic-virtualization`
     - [ ] `OSLibraryLoader` implemented for mocked dynamic Android symbol lookups.

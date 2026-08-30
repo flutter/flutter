@@ -85,6 +85,12 @@ source_set("flutter_embedder_native_src") {
   sources = [
     "flutter_embedder_native.cc",
     "flutter_embedder_native.h",
+    "jni_delegate.cc",
+    "jni_delegate.h",
+    "jni_router.cc",
+    "jni_router.h",
+    "jvm_invoker.cc",
+    "jvm_invoker.h",
   ]
 
   defines = [ "FLUTTER_ENGINE_NO_PROTOTYPES" ]
