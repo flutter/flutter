@@ -199,5 +199,19 @@ bool JniRouter::RouteRequestDartDeferredLibrary(int64_t loading_unit_id) {
   return false;
 }
 
+bool JniRouter::RouteAssetManagerChanged() {
+  TRACE_EVENT0("flutter", "JniRouter::RouteAssetManagerChanged");
+  if (IsEmbedderEnabled()) {
+    if (embedder_delegate_) {
+      return embedder_delegate_->OnAssetManagerChanged();
+    }
+    return false;
+  }
+  if (legacy_delegate_) {
+    return legacy_delegate_->OnAssetManagerChanged();
+  }
+  return false;
+}
+
 }  // namespace android
 }  // namespace flutter

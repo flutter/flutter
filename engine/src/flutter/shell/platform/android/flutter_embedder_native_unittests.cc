@@ -123,6 +123,8 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               RequestDartDeferredLibrary,
               (int64_t loading_unit_id),
               (override));
+
+  MOCK_METHOD(bool, OnAssetManagerChanged, (), (override));
 };
 
 // =============================================================================
@@ -146,6 +148,7 @@ TEST(FlutterEmbedderNativeTest, LifecycleInstance) {
   EXPECT_NE(native_instance->GetJniDelegate(), nullptr);
   EXPECT_NE(native_instance->GetJvmInvoker(), nullptr);
   EXPECT_NE(native_instance->GetLibraryLoader(), nullptr);
+  EXPECT_NE(native_instance->GetAssetProvider(), nullptr);
 }
 
 TEST(FlutterEmbedderNativeTest, DefaultJvmInvokerOperations) {
@@ -240,6 +243,12 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
               InvokeBooleanMethod("requestDartDeferredLibrary", "(I)Z", _))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->RequestDartDeferredLibrary(101));
+
+  // 11. OnAssetManagerChanged
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onAssetManagerChanged", "()V", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->OnAssetManagerChanged());
 }
 
 TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
@@ -277,6 +286,10 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
       .WillOnce(Return(true));
   EXPECT_TRUE(router->RouteRequestDartDeferredLibrary(5));
 
+  // Legacy Asset Manager Changed
+  EXPECT_CALL(*legacy_delegate, OnAssetManagerChanged()).WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteAssetManagerChanged());
+
   // Flip flag to true -> routes to Embedder
   JniRouter::SetEmbedderEnabled(true);
   EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
@@ -307,6 +320,12 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
       .WillOnce(Return(true));
   EXPECT_TRUE(router->RouteRequestDartDeferredLibrary(5));
 
+  // Embedder Asset Manager Changed
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("onAssetManagerChanged", "()V", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteAssetManagerChanged());
+
   // Reset flag back to false for test hygiene
   JniRouter::SetEmbedderEnabled(false);
   EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
@@ -330,6 +349,76 @@ TEST(FlutterEmbedderNativeTest, DynamicInstanceRouterWithCustomInvoker) {
 
   FlutterEmbedderNative::SetEmbedderEnabled(false);
   EXPECT_FALSE(FlutterEmbedderNative::IsEmbedderEnabled());
+}
+
+TEST(FlutterEmbedderNativeTest, AssetProviderLifecycleAndResolution) {
+  auto native = std::make_unique<FlutterEmbedderNative>();
+  EXPECT_NE(native->GetAssetProvider(), nullptr);
+
+  // Inject a custom in-memory provider
+  auto custom_provider_impl =
+      std::make_shared<InMemoryAPKAssetProviderImpl>("custom_assets");
+  custom_provider_impl->AddAsset("kernel_blob.bin", "MockKernelBytes");
+  custom_provider_impl->AddAsset("shaders/ink_sparkle.frag", "MockShaderBytes");
+
+  auto custom_provider =
+      std::make_shared<APKAssetProvider>(custom_provider_impl);
+  native->SetAssetProvider(custom_provider);
+  EXPECT_EQ(native->GetAssetProvider(), custom_provider);
+
+  // Resolve single asset
+  auto mapping = native->ResolveAsset("kernel_blob.bin");
+  ASSERT_NE(mapping, nullptr);
+  EXPECT_EQ(mapping->GetSize(), 15u);
+  EXPECT_EQ(std::string(reinterpret_cast<const char*>(mapping->GetMapping()),
+                        mapping->GetSize()),
+            "MockKernelBytes");
+
+  // Resolve multiple asset mappings
+  auto shader_mappings =
+      native->ResolveAssetMappings("frag", std::string("shaders"));
+  EXPECT_EQ(shader_mappings.size(), 1u);
+  EXPECT_EQ(std::string(
+                reinterpret_cast<const char*>(shader_mappings[0]->GetMapping()),
+                shader_mappings[0]->GetSize()),
+            "MockShaderBytes");
+}
+
+TEST(FlutterEmbedderNativeTest, AssetProviderMultithreadedResolution) {
+  auto custom_provider_impl =
+      std::make_shared<InMemoryAPKAssetProviderImpl>("flutter_assets");
+  for (int i = 0; i < 20; ++i) {
+    custom_provider_impl->AddAsset("data_" + std::to_string(i) + ".bin",
+                                   "DataPayload_" + std::to_string(i));
+  }
+
+  auto custom_provider =
+      std::make_shared<APKAssetProvider>(custom_provider_impl);
+  auto native = std::make_unique<FlutterEmbedderNative>(
+      std::make_shared<DefaultJvmInvoker>(), nullptr, nullptr, custom_provider);
+
+  constexpr size_t kThreadCount = 8;
+  constexpr size_t kIterations = 100;
+  std::vector<std::future<bool>> futures;
+  futures.reserve(kThreadCount);
+
+  for (size_t t = 0; t < kThreadCount; ++t) {
+    futures.push_back(std::async(std::launch::async, [&native, t]() {
+      for (size_t iter = 0; iter < kIterations; ++iter) {
+        int idx = static_cast<int>((t + iter) % 20);
+        std::string asset_name = "data_" + std::to_string(idx) + ".bin";
+        auto mapping = native->ResolveAsset(asset_name);
+        if (!mapping || mapping->GetSize() == 0) {
+          return false;
+        }
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
 }
 
 // =============================================================================
