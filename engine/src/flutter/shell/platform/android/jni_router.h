@@ -20,8 +20,8 @@
 namespace flutter {
 namespace android {
 
-/// @brief Abstract legacy delegate interface allowing fallback execution
-/// when the embedder C-API rollout flag is disabled.
+/// @brief Legacy delegate interface retained as a deprecated compatibility stub
+/// following Phase 5.5 Flag Obliteration.
 class LegacyJniDelegate {
  public:
   virtual ~LegacyJniDelegate() = default;
@@ -58,12 +58,12 @@ class LegacyJniDelegate {
   virtual bool OnEngineGarbageCollected(int64_t engine_id) = 0;
 };
 
-/// @brief Native JNI Routing Boundary that dispatches calls based on
-/// IsEmbedderEnabled() flag.
+/// @brief Native JNI Routing Boundary that unconditionally executes through
+/// the modern C-API Embedder JniDelegate.
 ///
-/// Implements the structural rollout flip: if IsEmbedderEnabled() is true,
-/// dispatches to JniDelegate (injected with JvmInvoker). If false, dispatches
-/// to LegacyJniDelegate.
+/// Post-Phase 5.5 Flag Obliteration, all dual-dispatch fallback logic and
+/// rollout flags are obliterated. Routing is hardcoded unconditionally to
+/// JniDelegate.
 class JniRouter {
  public:
   enum class RoutingPath {
@@ -71,18 +71,21 @@ class JniRouter {
     kEmbedder,
   };
 
-  JniRouter(
+  explicit JniRouter(
       std::shared_ptr<JniDelegate> embedder_delegate,
       const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr);
   virtual ~JniRouter();
 
-  /// @brief Checks whether the Embedder C-API pipeline is active.
+  /// @brief Checks whether the Embedder C-API pipeline is active
+  /// (unconditionally true).
   static bool IsEmbedderEnabled();
 
-  /// @brief Sets whether the Embedder C-API pipeline is active.
+  /// @brief Sets whether the Embedder C-API pipeline is active (no-op post
+  /// Phase 5.5).
   static void SetEmbedderEnabled(bool enabled);
 
-  /// @brief Returns the active routing path according to current flag.
+  /// @brief Returns the active routing path (unconditionally
+  /// RoutingPath::kEmbedder).
   RoutingPath GetActiveRoutingPath() const;
 
   // Routing entry points:
@@ -320,10 +323,7 @@ class JniRouter {
   std::shared_ptr<LegacyJniDelegate> GetLegacyDelegate() const;
 
  private:
-  static std::atomic<bool> embedder_enabled_;
-
   std::shared_ptr<JniDelegate> embedder_delegate_;
-  std::shared_ptr<LegacyJniDelegate> legacy_delegate_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniRouter);
 };
