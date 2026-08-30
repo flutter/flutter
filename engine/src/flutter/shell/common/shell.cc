@@ -18,6 +18,7 @@
 #include "flutter/common/constants.h"
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/fml/base32.h"
+#include "flutter/fml/closure.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/icu_util.h"
 #include "flutter/fml/log_settings.h"
@@ -2388,11 +2389,11 @@ Rasterizer::Screenshot Shell::Screenshot(
                                             screenshot_type,               //
                                             base64_encode                  //
   ]() {
+        fml::ScopedCleanupClosure cleanup([&latch]() { latch.Signal(); });
         if (rasterizer) {
           screenshot = rasterizer->ScreenshotLastLayerTree(screenshot_type,
                                                            base64_encode);
         }
-        latch.Signal();
       });
   latch.Wait();
   return screenshot;

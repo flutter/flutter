@@ -219,6 +219,20 @@ FlutterEngineResult FlutterEngineNotifyDartDeferredLibraryLoadError(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineScreenshot(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineScreenshotInfo* screenshot_out) {
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineFreeScreenshot(
+    FlutterEngineScreenshotInfo* screenshot) {
+  if (screenshot) {
+    screenshot->pixels = nullptr;
+    screenshot->pixels_size = 0;
+  }
+  return kSuccess;
+}
 }  // namespace
 
 FlutterEngineResult FlutterEngineGetProcAddresses(
@@ -265,5 +279,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   table->LoadDartDeferredLibrary = &FlutterEngineLoadDartDeferredLibrary;
   table->NotifyDartDeferredLibraryLoadError =
       &FlutterEngineNotifyDartDeferredLibraryLoadError;
+  table->Screenshot = &FlutterEngineScreenshot;
+  table->FreeScreenshot = &FlutterEngineFreeScreenshot;
   return kSuccess;
 }
