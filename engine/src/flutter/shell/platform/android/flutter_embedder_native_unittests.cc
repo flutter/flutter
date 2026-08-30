@@ -360,6 +360,82 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
   MOCK_METHOD(bool, PrefetchDefaultFontManager, (), (override));
 
   MOCK_METHOD(bool, SetVmServiceUri, (const std::string& uri), (override));
+
+  MOCK_METHOD(bool,
+              RegisterHardwareBufferTexture,
+              (int64_t texture_id),
+              (override));
+
+  MOCK_METHOD(bool,
+              UnregisterHardwareBufferTexture,
+              (int64_t texture_id),
+              (override));
+
+  MOCK_METHOD(bool,
+              SetHardwareBufferFrame,
+              (int64_t texture_id,
+               const std::shared_ptr<AndroidHardwareBuffer>& buffer),
+              (override));
+
+  MOCK_METHOD(bool,
+              SetHardwareBufferFrame,
+              (int64_t texture_id,
+               const FlutterHardwareBufferExternalTexture& texture),
+              (override));
+
+  MOCK_METHOD(bool,
+              GetHardwareBufferTextureFrame,
+              (int64_t texture_id,
+               size_t width,
+               size_t height,
+               FlutterHardwareBufferExternalTexture* texture_out),
+              (override));
+
+  MOCK_METHOD(bool,
+              OnHardwareBufferFrameAvailable,
+              (int64_t texture_id),
+              (override));
+};
+
+class MockHardwareBufferProvider : public AndroidHardwareBufferProvider {
+ public:
+  MOCK_METHOD(bool, IsAvailable, (), (const, override));
+  MOCK_METHOD(bool,
+              IsSupported,
+              (const AndroidHardwareBufferDesc& desc),
+              (const, override));
+  MOCK_METHOD(std::unique_ptr<AndroidHardwareBuffer>,
+              Allocate,
+              (const AndroidHardwareBufferDesc& desc),
+              (override));
+  MOCK_METHOD(std::unique_ptr<AndroidHardwareBuffer>,
+              CreateFromNativeHandle,
+              (void* handle, bool take_ownership),
+              (override));
+  MOCK_METHOD(std::unique_ptr<AndroidHardwareBuffer>,
+              CreateFromJavaHardwareBuffer,
+              (void* env, void* java_hardware_buffer),
+              (override));
+  MOCK_METHOD(void*,
+              ToJavaHardwareBuffer,
+              (void* env, void* handle),
+              (override));
+  MOCK_METHOD(bool,
+              Describe,
+              (void* handle, AndroidHardwareBufferDesc* out_desc),
+              (override));
+  MOCK_METHOD(void, Acquire, (void* handle), (override));
+  MOCK_METHOD(void, Release, (void* handle), (override));
+  MOCK_METHOD(int,
+              Lock,
+              (void* handle,
+               uint64_t usage,
+               int32_t fence,
+               const AndroidHardwareBufferRect* rect,
+               void** out_address),
+              (override));
+  MOCK_METHOD(int, Unlock, (void* handle, int32_t* fence), (override));
+  MOCK_METHOD(uint64_t, GetId, (void* handle), (override));
 };
 
 class MockCallbackCacheProvider : public CallbackCacheProvider {
@@ -4177,6 +4253,331 @@ TEST(GlobalVMInitializationTest,
             sizeof(iso_instr));
 
   FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+// =============================================================================
+// HardwareBuffer Tests (Phase 3.1)
+// =============================================================================
+
+TEST(HardwareBufferTest, JniDelegateHardwareBufferOperations) {
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  auto hw_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerHardwareBufferTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("unregisterHardwareBufferTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("onHardwareBufferFrameAvailable", "(J)Z", _))
+      .WillOnce(Return(true));
+
+  JniDelegate delegate(mock_invoker, nullptr, nullptr, nullptr, nullptr,
+                       nullptr, nullptr, nullptr, hw_provider);
+
+  int64_t texture_id = 42;
+  EXPECT_TRUE(delegate.RegisterHardwareBufferTexture(texture_id));
+
+  // Allocate buffer and set frame
+  auto desc = AndroidHardwareBufferDesc::MakeRGBA8(1280, 720);
+  auto buffer = hw_provider->Allocate(desc);
+  ASSERT_NE(buffer, nullptr);
+
+  EXPECT_TRUE(delegate.SetHardwareBufferFrame(texture_id, std::move(buffer)));
+
+  FlutterHardwareBufferExternalTexture frame_out = {};
+  EXPECT_TRUE(delegate.GetHardwareBufferTextureFrame(texture_id, 1280, 720,
+                                                     &frame_out));
+  EXPECT_EQ(frame_out.width, 1280u);
+  EXPECT_EQ(frame_out.height, 720u);
+  EXPECT_EQ(frame_out.format, desc.format);
+  EXPECT_NE(frame_out.buffer, nullptr);
+
+  EXPECT_TRUE(delegate.OnHardwareBufferFrameAvailable(texture_id));
+  EXPECT_TRUE(delegate.UnregisterHardwareBufferTexture(texture_id));
+
+  // Verify frame is cleared after unregister
+  FlutterHardwareBufferExternalTexture cleared_frame = {};
+  EXPECT_FALSE(delegate.GetHardwareBufferTextureFrame(texture_id, 1280, 720,
+                                                      &cleared_frame));
+}
+
+TEST(HardwareBufferTest, JniRouterHardwareBufferRoutingFlip) {
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  auto mock_legacy = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+  auto hw_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
+
+  auto delegate = std::make_shared<JniDelegate>(mock_invoker, nullptr, nullptr,
+                                                nullptr, nullptr, nullptr,
+                                                nullptr, nullptr, hw_provider);
+  JniRouter router(delegate, mock_legacy);
+
+  int64_t texture_id = 101;
+
+  // Test with embedder flag = true
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerHardwareBufferTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router.RouteRegisterHardwareBufferTexture(texture_id));
+
+  auto desc = AndroidHardwareBufferDesc::MakeRGBA8(1920, 1080);
+  auto buffer = hw_provider->Allocate(desc);
+  EXPECT_TRUE(
+      router.RouteSetHardwareBufferFrame(texture_id, std::move(buffer)));
+
+  FlutterHardwareBufferExternalTexture out_frame = {};
+  EXPECT_TRUE(router.RouteGetHardwareBufferTextureFrame(texture_id, 1920, 1080,
+                                                        &out_frame));
+  EXPECT_EQ(out_frame.width, 1920u);
+  EXPECT_EQ(out_frame.height, 1080u);
+
+  // Test with embedder flag = false (legacy routing)
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  EXPECT_CALL(*mock_legacy, RegisterHardwareBufferTexture(texture_id))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router.RouteRegisterHardwareBufferTexture(texture_id));
+
+  EXPECT_CALL(*mock_legacy, OnHardwareBufferFrameAvailable(texture_id))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router.RouteOnHardwareBufferFrameAvailable(texture_id));
+
+  EXPECT_CALL(*mock_legacy, UnregisterHardwareBufferTexture(texture_id))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router.RouteUnregisterHardwareBufferTexture(texture_id));
+}
+
+TEST(HardwareBufferTest, FlutterEmbedderNativeHardwareBufferIntegration) {
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  auto mock_legacy = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+  auto hw_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerHardwareBufferTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("onHardwareBufferFrameAvailable", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("unregisterHardwareBufferTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+
+  FlutterEmbedderNative native(mock_invoker, mock_legacy, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               nullptr, nullptr, nullptr, nullptr, nullptr,
+                               hw_provider);
+
+  EXPECT_EQ(native.GetHardwareBufferProvider(), hw_provider);
+
+  int64_t texture_id = 999;
+  auto desc = AndroidHardwareBufferDesc::MakeRGBA8(800, 600);
+  auto buffer = hw_provider->Allocate(desc);
+
+  EXPECT_TRUE(
+      native.RegisterHardwareBufferTexture(texture_id, std::move(buffer)));
+
+  FlutterHardwareBufferExternalTexture frame_out = {};
+  EXPECT_TRUE(
+      native.GetHardwareBufferTextureFrame(texture_id, 800, 600, &frame_out));
+  EXPECT_EQ(frame_out.width, 800u);
+  EXPECT_EQ(frame_out.height, 600u);
+  EXPECT_EQ(frame_out.struct_size,
+            sizeof(FlutterHardwareBufferExternalTexture));
+
+  // Static C-API callback entry point
+  FlutterHardwareBufferExternalTexture cb_frame_out = {};
+  EXPECT_TRUE(
+      FlutterEmbedderNative::OnHardwareBufferExternalTextureFrameCallback(
+          &native, texture_id, 800, 600, &cb_frame_out));
+  EXPECT_EQ(cb_frame_out.width, 800u);
+  EXPECT_EQ(cb_frame_out.height, 600u);
+
+  // Callback function pointer getter
+  auto cb_fn = FlutterEmbedderNative::GetHardwareBufferFrameCallback();
+  ASSERT_NE(cb_fn, nullptr);
+  FlutterHardwareBufferExternalTexture fn_frame_out = {};
+  EXPECT_TRUE(cb_fn(&native, texture_id, 800, 600, &fn_frame_out));
+  EXPECT_EQ(fn_frame_out.width, 800u);
+
+  EXPECT_TRUE(native.OnHardwareBufferFrameAvailable(texture_id));
+  EXPECT_TRUE(native.UnregisterHardwareBufferTexture(texture_id));
+
+  FlutterEmbedderNative::SetEmbedderEnabled(false);
+}
+
+TEST(HardwareBufferTest, FlutterEmbedderNativeExternalTextureEngineAPIs) {
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  FlutterEmbedderNative native(mock_invoker);
+
+  // Pass nullptr engine to verify argument validation
+  EXPECT_EQ(native.MarkExternalTextureFrameAvailable(nullptr, 123),
+            kInvalidArguments);
+  EXPECT_EQ(native.RegisterExternalTexture(nullptr, 123), kInvalidArguments);
+  EXPECT_EQ(native.UnregisterExternalTexture(nullptr, 123), kInvalidArguments);
+}
+
+TEST(HardwareBufferTest, DestructionCallbackLifecycle) {
+  auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
+  auto hw_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
+
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerHardwareBufferTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("unregisterHardwareBufferTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+
+  auto delegate = std::make_shared<JniDelegate>(mock_invoker, nullptr, nullptr,
+                                                nullptr, nullptr, nullptr,
+                                                nullptr, nullptr, hw_provider);
+
+  int64_t texture_id = 555;
+
+  // Setting frame on unregistered texture must fail
+  FlutterHardwareBufferExternalTexture unregistered_frame = {};
+  unregistered_frame.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+  EXPECT_FALSE(
+      delegate->SetHardwareBufferFrame(texture_id, unregistered_frame));
+
+  EXPECT_TRUE(delegate->RegisterHardwareBufferTexture(texture_id));
+
+  static int g_destroyed_count = 0;
+  g_destroyed_count = 0;
+
+  // Callback invokes method on delegate to prove no self-deadlock occurs
+  auto reentrant_callback = [](void* user_data) {
+    auto* del = static_cast<JniDelegate*>(user_data);
+    if (del) {
+      del->GetHardwareBufferProvider();
+    }
+    g_destroyed_count++;
+  };
+
+  FlutterHardwareBufferExternalTexture frame1 = {};
+  frame1.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+  frame1.width = 100;
+  frame1.height = 100;
+  frame1.destruction_callback = reentrant_callback;
+  frame1.user_data = delegate.get();
+
+  EXPECT_TRUE(delegate->SetHardwareBufferFrame(texture_id, frame1));
+  EXPECT_EQ(g_destroyed_count, 0);
+
+  // Overwriting frame triggers destruction callback on frame1 outside lock
+  FlutterHardwareBufferExternalTexture frame2 = {};
+  frame2.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+  frame2.width = 200;
+  frame2.height = 200;
+  frame2.destruction_callback = reentrant_callback;
+  frame2.user_data = delegate.get();
+
+  EXPECT_TRUE(delegate->SetHardwareBufferFrame(texture_id, frame2));
+  EXPECT_EQ(g_destroyed_count, 1);
+
+  // When engine reads frame, ownership of destruction_callback is transferred
+  FlutterHardwareBufferExternalTexture retrieved_frame = {};
+  EXPECT_TRUE(delegate->GetHardwareBufferTextureFrame(texture_id, 200, 200,
+                                                      &retrieved_frame));
+  EXPECT_EQ(retrieved_frame.destruction_callback, reentrant_callback);
+  EXPECT_EQ(retrieved_frame.user_data, delegate.get());
+
+  // Unregistering texture does NOT invoke callback on frame2 because ownership
+  // was transferred to the engine
+  EXPECT_TRUE(delegate->UnregisterHardwareBufferTexture(texture_id));
+  EXPECT_EQ(g_destroyed_count, 1);
+
+  // Engine releases the retrieved frame, invoking the callback once
+  retrieved_frame.destruction_callback(retrieved_frame.user_data);
+  EXPECT_EQ(g_destroyed_count, 2);
+
+  // --- Test Object Setter Keeper Callback & Null/Invalid Buffer Reentrancy ---
+  int64_t texture_id2 = 777;
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("registerHardwareBufferTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker,
+              InvokeBooleanMethod("unregisterHardwareBufferTexture", "(J)Z", _))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->RegisterHardwareBufferTexture(texture_id2));
+
+  // Calling OnHardwareBufferFrameAvailable on unregistered texture fails
+  EXPECT_FALSE(delegate->OnHardwareBufferFrameAvailable(99999));
+
+  auto desc = AndroidHardwareBufferDesc::MakeRGBA8(300, 300);
+  std::shared_ptr<AndroidHardwareBuffer> buf = hw_provider->Allocate(desc);
+  std::weak_ptr<AndroidHardwareBuffer> weak_buf = buf;
+
+  // Set frame with object: should attach keeper callback
+  EXPECT_TRUE(delegate->SetHardwareBufferFrame(texture_id2, buf));
+  buf.reset();
+  // Keeper inside JniDelegate keeps buffer alive
+  EXPECT_FALSE(weak_buf.expired());
+
+  FlutterHardwareBufferExternalTexture obj_retrieved = {};
+  EXPECT_TRUE(delegate->GetHardwareBufferTextureFrame(texture_id2, 300, 300,
+                                                      &obj_retrieved));
+  EXPECT_NE(obj_retrieved.destruction_callback, nullptr);
+  EXPECT_NE(obj_retrieved.user_data, nullptr);
+
+  // Setting an invalid/null buffer triggers reentrant callback without deadlock
+  FlutterHardwareBufferExternalTexture frame3 = {};
+  frame3.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+  frame3.width = 150;
+  frame3.height = 150;
+  frame3.destruction_callback = reentrant_callback;
+  frame3.user_data = delegate.get();
+  EXPECT_TRUE(delegate->SetHardwareBufferFrame(texture_id2, frame3));
+
+  // Setting nullptr buffer fails and invokes frame3's callback reentrantly
+  // without deadlock
+  EXPECT_FALSE(delegate->SetHardwareBufferFrame(
+      texture_id2, std::shared_ptr<AndroidHardwareBuffer>(nullptr)));
+  EXPECT_EQ(g_destroyed_count, 3);
+
+  // Engine releases obj_retrieved frame, keeper is deleted and buffer is freed
+  EXPECT_FALSE(weak_buf.expired());
+  obj_retrieved.destruction_callback(obj_retrieved.user_data);
+  EXPECT_TRUE(weak_buf.expired());
+
+  EXPECT_TRUE(delegate->UnregisterHardwareBufferTexture(texture_id2));
+}
+
+TEST(HardwareBufferTest, ConcurrentProviderReplacementInNative) {
+  FlutterEmbedderNative native;
+  std::atomic<bool> running{true};
+  std::vector<std::thread> threads;
+
+  for (int i = 0; i < 2; ++i) {
+    threads.emplace_back([&]() {
+      while (running.load()) {
+        auto provider = native.GetHardwareBufferProvider();
+        if (provider) {
+          EXPECT_TRUE(provider->IsAvailable() || !provider->IsAvailable());
+        }
+      }
+    });
+  }
+
+  threads.emplace_back([&]() {
+    for (int i = 0; i < 200; ++i) {
+      if (i % 2 == 0) {
+        native.SetHardwareBufferProvider(
+            std::make_shared<InMemoryAndroidHardwareBufferProvider>());
+      } else {
+        native.SetHardwareBufferProvider(
+            std::make_shared<DefaultAndroidHardwareBufferProvider>());
+      }
+      std::this_thread::yield();
+    }
+    running.store(false);
+  });
+
+  for (auto& t : threads) {
+    t.join();
+  }
 }
 
 }  // namespace testing

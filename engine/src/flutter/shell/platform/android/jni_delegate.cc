@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/android/jni_delegate.h"
 
+#include <unistd.h>
 #include <cstring>
 
 #include "flutter/fml/logging.h"
@@ -21,7 +22,8 @@ JniDelegate::JniDelegate(
     std::shared_ptr<AndroidPlatformViewsController> platform_views_controller,
     std::shared_ptr<WindowMetricsProvider> window_metrics_provider,
     std::shared_ptr<AndroidVsyncWaiter> vsync_waiter,
-    std::shared_ptr<AndroidVMInit> vm_init)
+    std::shared_ptr<AndroidVMInit> vm_init,
+    std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider)
     : jvm_invoker_(std::move(jvm_invoker)),
       callback_cache_(callback_cache
                           ? std::move(callback_cache)
@@ -31,7 +33,8 @@ JniDelegate::JniDelegate(
       platform_views_controller_(std::move(platform_views_controller)),
       window_metrics_provider_(std::move(window_metrics_provider)),
       vsync_waiter_(std::move(vsync_waiter)),
-      vm_init_(std::move(vm_init)) {
+      vm_init_(std::move(vm_init)),
+      hardware_buffer_provider_(std::move(hardware_buffer_provider)) {
   TRACE_EVENT0("flutter", "JniDelegate::JniDelegate");
   FML_DCHECK(jvm_invoker_ != nullptr);
   if (!platform_views_provider_) {
@@ -50,10 +53,37 @@ JniDelegate::JniDelegate(
   if (!vm_init_) {
     vm_init_ = std::make_shared<AndroidVMInit>(jvm_invoker_);
   }
+  if (!hardware_buffer_provider_) {
+    hardware_buffer_provider_ =
+        std::make_shared<DefaultAndroidHardwareBufferProvider>();
+  }
 }
 
 JniDelegate::~JniDelegate() {
   TRACE_EVENT0("flutter", "JniDelegate::~JniDelegate");
+  std::vector<std::pair<VoidCallback, void*>> callbacks_to_invoke;
+  std::vector<int32_t> fences_to_close;
+  {
+    std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+    for (auto& [id, frame] : hardware_buffer_frames_) {
+      if (frame.destruction_callback) {
+        callbacks_to_invoke.emplace_back(frame.destruction_callback,
+                                         frame.user_data);
+      }
+      if (frame.fence_fd >= 0) {
+        fences_to_close.push_back(frame.fence_fd);
+      }
+    }
+    hardware_buffer_frames_.clear();
+    hardware_buffer_objects_.clear();
+    registered_hardware_textures_.clear();
+  }
+  for (int32_t fd : fences_to_close) {
+    close(fd);
+  }
+  for (const auto& [cb, data] : callbacks_to_invoke) {
+    cb(data);
+  }
 }
 
 std::shared_ptr<JvmInvoker> JniDelegate::GetJvmInvoker() const {
@@ -911,6 +941,199 @@ void JniDelegate::SetVMInit(std::shared_ptr<AndroidVMInit> vm_init) {
 std::shared_ptr<AndroidVMInit> JniDelegate::GetVMInit() const {
   std::scoped_lock lock(vm_init_mutex_);
   return vm_init_;
+}
+
+bool JniDelegate::RegisterHardwareBufferTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::RegisterHardwareBufferTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  std::vector<uint8_t> payload(sizeof(int64_t));
+  std::memcpy(payload.data(), &texture_id, sizeof(int64_t));
+  bool success = jvm_invoker_->InvokeBooleanMethod(
+      "registerHardwareBufferTexture", "(J)Z", payload);
+  if (!success) {
+    return false;
+  }
+  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+  registered_hardware_textures_.insert(texture_id);
+  return true;
+}
+
+bool JniDelegate::UnregisterHardwareBufferTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::UnregisterHardwareBufferTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  VoidCallback callback_to_invoke = nullptr;
+  void* user_data_to_invoke = nullptr;
+  int32_t fence_to_close = -1;
+  {
+    std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+    registered_hardware_textures_.erase(texture_id);
+    auto it = hardware_buffer_frames_.find(texture_id);
+    if (it != hardware_buffer_frames_.end()) {
+      callback_to_invoke = it->second.destruction_callback;
+      user_data_to_invoke = it->second.user_data;
+      fence_to_close = it->second.fence_fd;
+      it->second.destruction_callback = nullptr;
+      it->second.fence_fd = -1;
+      hardware_buffer_frames_.erase(it);
+    }
+    hardware_buffer_objects_.erase(texture_id);
+  }
+  if (fence_to_close >= 0) {
+    close(fence_to_close);
+  }
+  if (callback_to_invoke) {
+    callback_to_invoke(user_data_to_invoke);
+  }
+  std::vector<uint8_t> payload(sizeof(int64_t));
+  std::memcpy(payload.data(), &texture_id, sizeof(int64_t));
+  return jvm_invoker_->InvokeBooleanMethod("unregisterHardwareBufferTexture",
+                                           "(J)Z", payload);
+}
+
+bool JniDelegate::SetHardwareBufferFrame(
+    int64_t texture_id,
+    const std::shared_ptr<AndroidHardwareBuffer>& buffer) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetHardwareBufferFrame(object)",
+               "texture_id", std::to_string(texture_id).c_str());
+  VoidCallback callback_to_invoke = nullptr;
+  void* user_data_to_invoke = nullptr;
+  int32_t fence_to_close = -1;
+  bool is_valid = false;
+  {
+    std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+    if (registered_hardware_textures_.find(texture_id) ==
+        registered_hardware_textures_.end()) {
+      return false;
+    }
+    auto it = hardware_buffer_frames_.find(texture_id);
+    if (it != hardware_buffer_frames_.end()) {
+      callback_to_invoke = it->second.destruction_callback;
+      user_data_to_invoke = it->second.user_data;
+      fence_to_close = it->second.fence_fd;
+      it->second.destruction_callback = nullptr;
+      it->second.fence_fd = -1;
+      hardware_buffer_frames_.erase(it);
+    }
+    hardware_buffer_objects_.erase(texture_id);
+
+    if (buffer && buffer->IsValid()) {
+      is_valid = true;
+      hardware_buffer_objects_[texture_id] = buffer;
+      // Attach destruction callback holding a heap keeper of the shared_ptr to
+      // ensure the GPU does not encounter use-after-free when sampling the
+      // frame.
+      auto* keeper = new std::shared_ptr<AndroidHardwareBuffer>(buffer);
+      FlutterHardwareBufferExternalTexture ext =
+          buffer->ToExternalTexture(keeper, [](void* user_data) {
+            delete static_cast<std::shared_ptr<AndroidHardwareBuffer>*>(
+                user_data);
+          });
+      hardware_buffer_frames_[texture_id] = ext;
+    }
+  }
+  if (fence_to_close >= 0) {
+    close(fence_to_close);
+  }
+  if (callback_to_invoke) {
+    callback_to_invoke(user_data_to_invoke);
+  }
+  return is_valid;
+}
+
+bool JniDelegate::SetHardwareBufferFrame(
+    int64_t texture_id,
+    const FlutterHardwareBufferExternalTexture& texture) {
+  TRACE_EVENT1("flutter", "JniDelegate::SetHardwareBufferFrame(struct)",
+               "texture_id", std::to_string(texture_id).c_str());
+  VoidCallback callback_to_invoke = nullptr;
+  void* user_data_to_invoke = nullptr;
+  int32_t fence_to_close = -1;
+  {
+    std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+    if (registered_hardware_textures_.find(texture_id) ==
+        registered_hardware_textures_.end()) {
+      return false;
+    }
+    auto it = hardware_buffer_frames_.find(texture_id);
+    if (it != hardware_buffer_frames_.end()) {
+      callback_to_invoke = it->second.destruction_callback;
+      user_data_to_invoke = it->second.user_data;
+      fence_to_close = it->second.fence_fd;
+      it->second.destruction_callback = nullptr;
+      it->second.fence_fd = -1;
+    }
+    // Release any previous C++ buffer object to prevent memory leaks
+    hardware_buffer_objects_.erase(texture_id);
+    hardware_buffer_frames_[texture_id] = texture;
+  }
+  if (fence_to_close >= 0) {
+    close(fence_to_close);
+  }
+  if (callback_to_invoke) {
+    callback_to_invoke(user_data_to_invoke);
+  }
+  return true;
+}
+
+bool JniDelegate::GetHardwareBufferTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterHardwareBufferExternalTexture* texture_out) {
+  TRACE_EVENT1("flutter", "JniDelegate::GetHardwareBufferTextureFrame",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (!texture_out) {
+    return false;
+  }
+  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+  if (registered_hardware_textures_.find(texture_id) ==
+      registered_hardware_textures_.end()) {
+    return false;
+  }
+  auto it = hardware_buffer_frames_.find(texture_id);
+  if (it != hardware_buffer_frames_.end()) {
+    *texture_out = it->second;
+    if (texture_out->struct_size == 0) {
+      texture_out->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    }
+    // Hand ownership of fence_fd and destruction_callback to the engine caller.
+    // This prevents double close of fence_fd and duplicate invocation of
+    // destruction_callback.
+    it->second.destruction_callback = nullptr;
+    it->second.fence_fd = -1;
+    return true;
+  }
+  return false;
+}
+
+bool JniDelegate::OnHardwareBufferFrameAvailable(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniDelegate::OnHardwareBufferFrameAvailable",
+               "texture_id", std::to_string(texture_id).c_str());
+  {
+    std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+    if (registered_hardware_textures_.find(texture_id) ==
+        registered_hardware_textures_.end()) {
+      return false;
+    }
+  }
+  std::vector<uint8_t> payload(sizeof(int64_t));
+  std::memcpy(payload.data(), &texture_id, sizeof(int64_t));
+  return jvm_invoker_->InvokeBooleanMethod("onHardwareBufferFrameAvailable",
+                                           "(J)Z", payload);
+}
+
+void JniDelegate::SetHardwareBufferProvider(
+    std::shared_ptr<AndroidHardwareBufferProvider> provider) {
+  TRACE_EVENT0("flutter", "JniDelegate::SetHardwareBufferProvider");
+  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+  hardware_buffer_provider_ = std::move(provider);
+}
+
+std::shared_ptr<AndroidHardwareBufferProvider>
+JniDelegate::GetHardwareBufferProvider() const {
+  TRACE_EVENT0("flutter", "JniDelegate::GetHardwareBufferProvider");
+  std::lock_guard<std::mutex> lock(hardware_buffer_mutex_);
+  return hardware_buffer_provider_;
 }
 
 }  // namespace android
