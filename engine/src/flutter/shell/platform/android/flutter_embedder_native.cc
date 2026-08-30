@@ -234,6 +234,8 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       image_lru_(std::make_shared<EmbedderImageLRU>()),
       platform_views_provider_(
           std::make_shared<DefaultPlatformViewsProvider>(jvm_invoker_)),
+      window_metrics_provider_(
+          std::make_shared<DefaultWindowMetricsProvider>(jvm_invoker_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -242,12 +244,14 @@ FlutterEmbedderNative::FlutterEmbedderNative()
           std::make_shared<DefaultCallbackCacheProvider>(),
           std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_),
           platform_views_provider_,
-          platform_views_controller_)),
+          platform_views_controller_,
+          window_metrics_provider_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
       library_loader_(GetDefaultLibraryLoader()),
       asset_provider_(std::make_shared<APKAssetProvider>(
           std::make_shared<InMemoryAPKAssetProviderImpl>())) {
   jni_router_->SetInstanceEmbedderEnabled(true);
+  AttachWindowMetricsCallbacks();
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
   FML_DLOG(INFO)
       << "Initialized FlutterEmbedderNative with default components.";
@@ -261,7 +265,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<CallbackCacheProvider> callback_cache,
     std::shared_ptr<ImageDecoderProvider> image_decoder,
     std::shared_ptr<EmbedderImageLRU> image_lru,
-    std::shared_ptr<PlatformViewsProvider> platform_views_provider)
+    std::shared_ptr<PlatformViewsProvider> platform_views_provider,
+    std::shared_ptr<WindowMetricsProvider> window_metrics_provider)
     : jvm_invoker_(std::move(jvm_invoker)),
       image_lru_(image_lru ? std::move(image_lru)
                            : std::make_shared<EmbedderImageLRU>()),
@@ -269,6 +274,10 @@ FlutterEmbedderNative::FlutterEmbedderNative(
           platform_views_provider
               ? std::move(platform_views_provider)
               : std::make_shared<DefaultPlatformViewsProvider>(jvm_invoker_)),
+      window_metrics_provider_(
+          window_metrics_provider
+              ? std::move(window_metrics_provider)
+              : std::make_shared<DefaultWindowMetricsProvider>(jvm_invoker_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -279,7 +288,8 @@ FlutterEmbedderNative::FlutterEmbedderNative(
               ? std::move(image_decoder)
               : std::make_shared<DefaultImageDecoderProvider>(jvm_invoker_),
           platform_views_provider_,
-          platform_views_controller_)),
+          platform_views_controller_,
+          window_metrics_provider_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, legacy_delegate)),
       library_loader_(library_loader ? std::move(library_loader)
                                      : GetDefaultLibraryLoader()),
@@ -289,6 +299,7 @@ FlutterEmbedderNative::FlutterEmbedderNative(
               : std::make_shared<APKAssetProvider>(
                     std::make_shared<InMemoryAPKAssetProviderImpl>())) {
   jni_router_->SetInstanceEmbedderEnabled(true);
+  AttachWindowMetricsCallbacks();
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterEmbedderNative(custom)");
   FML_DLOG(INFO) << "Initialized FlutterEmbedderNative with custom components.";
@@ -586,10 +597,12 @@ FlutterEmbedderNative::GetDefaultLibraryLoader() {
 std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
     std::shared_ptr<JvmInvoker> invoker,
     const std::shared_ptr<LegacyJniDelegate>& legacy_delegate,
-    std::shared_ptr<PlatformViewsProvider> platform_views_provider) {
+    std::shared_ptr<PlatformViewsProvider> platform_views_provider,
+    std::shared_ptr<WindowMetricsProvider> window_metrics_provider) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateDefaultRouter");
   auto delegate = std::make_shared<JniDelegate>(
-      std::move(invoker), nullptr, nullptr, std::move(platform_views_provider));
+      std::move(invoker), nullptr, nullptr, std::move(platform_views_provider),
+      nullptr, std::move(window_metrics_provider));
   return std::make_shared<JniRouter>(std::move(delegate), legacy_delegate);
 }
 
@@ -808,7 +821,7 @@ FlutterEngineResult FlutterEmbedderNative::RegisterImageDecoder(
   if (!engine) {
     return kInvalidArguments;
   }
-  std::lock_guard<std::mutex> lock(decoder_registration_mutex_);
+  std::scoped_lock lock(decoder_registration_mutex_, engine_mutex_);
   if (registered_engine_ && decoder_registration_ != 0) {
     UnregisterImageDecoderWithEngine(registered_engine_, decoder_registration_);
     registered_engine_ = nullptr;
@@ -858,7 +871,7 @@ FlutterEngineResult FlutterEmbedderNative::RegisterImageDecoder(
 
 FlutterEngineResult FlutterEmbedderNative::UnregisterImageDecoder() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::UnregisterImageDecoder");
-  std::lock_guard<std::mutex> lock(decoder_registration_mutex_);
+  std::scoped_lock lock(decoder_registration_mutex_, engine_mutex_);
   if (!registered_engine_ || decoder_registration_ == 0) {
     return kSuccess;
   }
@@ -1356,6 +1369,293 @@ void FlutterEmbedderNative::OnUpdateSemantics2(
   }
   auto* native = reinterpret_cast<FlutterEmbedderNative*>(user_data);
   native->UpdateSemantics(*update);
+}
+
+static FlutterEngineResult EngineSendWindowMetricsEvent(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterWindowMetricsEvent* event) {
+  if (!engine || !event ||
+      event->struct_size < sizeof(FlutterWindowMetricsEvent)) {
+    return kInvalidArguments;
+  }
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.SendWindowMetricsEvent) {
+    return s_procs.SendWindowMetricsEvent(engine, event);
+  }
+  return kInternalInconsistency;
+}
+
+static FlutterEngineResult EngineNotifyDisplayUpdate(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineDisplaysUpdateType update_type,
+    const FlutterEngineDisplay* displays,
+    size_t display_count) {
+  if (!engine || !displays || display_count == 0) {
+    return kInvalidArguments;
+  }
+  for (size_t i = 0; i < display_count; ++i) {
+    if (displays[i].struct_size < sizeof(FlutterEngineDisplay)) {
+      return kInvalidArguments;
+    }
+  }
+  static FlutterEngineProcTable s_procs = []() {
+    FlutterEngineProcTable procs = {};
+    procs.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&procs);
+    return procs;
+  }();
+  if (s_procs.NotifyDisplayUpdate) {
+    return s_procs.NotifyDisplayUpdate(engine, update_type, displays,
+                                       display_count);
+  }
+  return kInternalInconsistency;
+}
+
+void FlutterEmbedderNative::SetEngine(FLUTTER_API_SYMBOL(FlutterEngine)
+                                          engine) {
+  {
+    std::scoped_lock lock(engine_mutex_);
+    registered_engine_ = engine;
+  }
+  AttachWindowMetricsCallbacks();
+}
+
+FLUTTER_API_SYMBOL(FlutterEngine) FlutterEmbedderNative::GetEngine() const {
+  std::scoped_lock lock(engine_mutex_);
+  return registered_engine_;
+}
+
+void FlutterEmbedderNative::AttachWindowMetricsCallbacks() {
+  std::scoped_lock lock(window_metrics_provider_mutex_);
+  if (!window_metrics_provider_) {
+    return;
+  }
+  window_metrics_provider_->SetMetricsCallback(
+      [this](const AndroidViewportMetrics& metrics) -> bool {
+        FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+        {
+          std::scoped_lock eng_lock(engine_mutex_);
+          engine = registered_engine_;
+        }
+        if (!engine) {
+          return true;
+        }
+        return SendWindowMetricsEvent(engine, metrics) == kSuccess;
+      });
+
+  window_metrics_provider_->SetDisplayUpdateCallback(
+      [this](const AndroidDisplayMetrics& metrics) -> bool {
+        FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+        {
+          std::scoped_lock eng_lock(engine_mutex_);
+          engine = registered_engine_;
+        }
+        if (!engine) {
+          return true;
+        }
+        return NotifyDisplayUpdate(engine, metrics) == kSuccess;
+      });
+}
+
+std::shared_ptr<WindowMetricsProvider>
+FlutterEmbedderNative::GetWindowMetricsProvider() const {
+  std::scoped_lock lock(window_metrics_provider_mutex_);
+  return window_metrics_provider_;
+}
+
+void FlutterEmbedderNative::SetWindowMetricsProvider(
+    std::shared_ptr<WindowMetricsProvider> provider) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetWindowMetricsProvider");
+  {
+    std::scoped_lock lock(window_metrics_provider_mutex_);
+    window_metrics_provider_ =
+        provider ? std::move(provider)
+                 : std::make_shared<DefaultWindowMetricsProvider>(jvm_invoker_);
+  }
+  AttachWindowMetricsCallbacks();
+  if (jni_delegate_) {
+    std::shared_ptr<WindowMetricsProvider> current_provider;
+    {
+      std::scoped_lock lock(window_metrics_provider_mutex_);
+      current_provider = window_metrics_provider_;
+    }
+    jni_delegate_->SetWindowMetricsProvider(current_provider);
+  }
+}
+
+bool FlutterEmbedderNative::SetViewportMetrics(
+    const AndroidViewportMetrics& metrics) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetViewportMetrics");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteSetViewportMetrics(metrics);
+}
+
+bool FlutterEmbedderNative::UpdateDisplayMetrics(
+    const AndroidDisplayMetrics& metrics) const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::UpdateDisplayMetrics(struct)");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteUpdateDisplayMetrics(metrics);
+}
+
+bool FlutterEmbedderNative::UpdateDisplayMetrics(
+    uint64_t display_id,
+    double refresh_rate,
+    double width,
+    double height,
+    double device_pixel_ratio) const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::UpdateDisplayMetrics(params)");
+  if (!jni_router_) {
+    return false;
+  }
+  return jni_router_->RouteUpdateDisplayMetrics(display_id, refresh_rate, width,
+                                                height, device_pixel_ratio);
+}
+
+FlutterWindowMetricsEvent FlutterEmbedderNative::TranslateViewportMetrics(
+    const AndroidViewportMetrics& metrics) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::TranslateViewportMetrics");
+  return AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(metrics);
+}
+
+FlutterEngineDisplay FlutterEmbedderNative::TranslateDisplayMetrics(
+    const AndroidDisplayMetrics& metrics) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::TranslateDisplayMetrics");
+  return AndroidWindowMetricsMapper::ToFlutterEngineDisplay(metrics);
+}
+
+FlutterEngineResult FlutterEmbedderNative::SendWindowMetricsEvent(
+    const FlutterWindowMetricsEvent* event) const {
+  FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+  {
+    std::scoped_lock lock(engine_mutex_);
+    engine = registered_engine_;
+  }
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  return SendWindowMetricsEvent(engine, event);
+}
+
+FlutterEngineResult FlutterEmbedderNative::SendWindowMetricsEvent(
+    const AndroidViewportMetrics& metrics) const {
+  FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+  {
+    std::scoped_lock lock(engine_mutex_);
+    engine = registered_engine_;
+  }
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  return SendWindowMetricsEvent(engine, metrics);
+}
+
+FlutterEngineResult FlutterEmbedderNative::SendWindowMetricsEvent(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterWindowMetricsEvent* event) const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::SendWindowMetricsEvent(event)");
+  if (!engine || !event ||
+      event->struct_size < sizeof(FlutterWindowMetricsEvent)) {
+    return kInvalidArguments;
+  }
+  SendWindowMetricsEventFn test_fn;
+  {
+    std::scoped_lock lock(engine_mutex_);
+    test_fn = send_window_metrics_event_fn_;
+  }
+  if (test_fn) {
+    return test_fn(engine, event);
+  }
+  return EngineSendWindowMetricsEvent(engine, event);
+}
+
+FlutterEngineResult FlutterEmbedderNative::SendWindowMetricsEvent(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const AndroidViewportMetrics& metrics) const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::SendWindowMetricsEvent(metrics)");
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  FlutterWindowMetricsEvent event = TranslateViewportMetrics(metrics);
+  return SendWindowMetricsEvent(engine, &event);
+}
+
+FlutterEngineResult FlutterEmbedderNative::NotifyDisplayUpdate(
+    const AndroidDisplayMetrics& display,
+    FlutterEngineDisplaysUpdateType update_type) const {
+  FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
+  {
+    std::scoped_lock lock(engine_mutex_);
+    engine = registered_engine_;
+  }
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  return NotifyDisplayUpdate(engine, display, update_type);
+}
+
+FlutterEngineResult FlutterEmbedderNative::NotifyDisplayUpdate(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineDisplaysUpdateType update_type,
+    const FlutterEngineDisplay* displays,
+    size_t display_count) const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::NotifyDisplayUpdate(displays)");
+  if (!engine || (!displays && display_count > 0)) {
+    return kInvalidArguments;
+  }
+  for (size_t i = 0; i < display_count; ++i) {
+    if (displays[i].struct_size < sizeof(FlutterEngineDisplay)) {
+      return kInvalidArguments;
+    }
+  }
+  NotifyDisplayUpdateFn test_fn;
+  {
+    std::scoped_lock lock(engine_mutex_);
+    test_fn = notify_display_update_fn_;
+  }
+  if (test_fn) {
+    return test_fn(engine, update_type, displays, display_count);
+  }
+  return EngineNotifyDisplayUpdate(engine, update_type, displays,
+                                   display_count);
+}
+
+FlutterEngineResult FlutterEmbedderNative::NotifyDisplayUpdate(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const AndroidDisplayMetrics& display,
+    FlutterEngineDisplaysUpdateType update_type) const {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::NotifyDisplayUpdate(display)");
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  FlutterEngineDisplay engine_display = TranslateDisplayMetrics(display);
+  return NotifyDisplayUpdate(engine, update_type, &engine_display, 1);
+}
+
+void FlutterEmbedderNative::SetSendWindowMetricsEventFnForTesting(
+    SendWindowMetricsEventFn fn) {
+  std::scoped_lock lock(engine_mutex_);
+  send_window_metrics_event_fn_ = std::move(fn);
+}
+
+void FlutterEmbedderNative::SetNotifyDisplayUpdateFnForTesting(
+    NotifyDisplayUpdateFn fn) {
+  std::scoped_lock lock(engine_mutex_);
+  notify_display_update_fn_ = std::move(fn);
 }
 
 }  // namespace android
