@@ -4072,6 +4072,47 @@ FlutterEngineResult FlutterEngineLoadDartDeferredLibraryFailure(
       engine, loading_unit_id, error_message, transient);
 }
 
+FlutterEngineResult FlutterEngineScreenshot(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineScreenshotInfo* screenshot_out) {
+  TRACE_EVENT0("flutter", "FlutterEngineScreenshot");
+  if (!engine) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  if (!screenshot_out) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Screenshot output pointer was null.");
+  }
+  if (screenshot_out->struct_size != sizeof(FlutterEngineScreenshotInfo)) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "FlutterEngineScreenshotInfo struct_size mismatch.");
+  }
+
+  if (reinterpret_cast<flutter::EmbedderEngine*>(engine)->Screenshot(
+          screenshot_out)) {
+    return kSuccess;
+  }
+  return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                            "Could not capture screenshot.");
+}
+
+FlutterEngineResult FlutterEngineFreeScreenshot(
+    const FlutterEngineScreenshotInfo* screenshot) {
+  TRACE_EVENT0("flutter", "FlutterEngineFreeScreenshot");
+  if (!screenshot) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Screenshot pointer was null.");
+  }
+  if (screenshot->struct_size != sizeof(FlutterEngineScreenshotInfo)) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "FlutterEngineScreenshotInfo struct_size mismatch.");
+  }
+  if (screenshot->pixels != nullptr) {
+    std::free(const_cast<void*>(screenshot->pixels));
+  }
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -4134,6 +4175,8 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
            FlutterEngineNotifyDartDeferredLibraryLoadError);
   SET_PROC(LoadDartDeferredLibraryFailure,
            FlutterEngineLoadDartDeferredLibraryFailure);
+  SET_PROC(Screenshot, FlutterEngineScreenshot);
+  SET_PROC(FreeScreenshot, FlutterEngineFreeScreenshot);
 #undef SET_PROC
 
   return kSuccess;

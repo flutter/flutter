@@ -81,6 +81,24 @@ TEST(EmbedderProcTable, CallDeferredLibraryProcs) {
             kInvalidArguments);
 }
 
+// Spot-checks calling screenshot function pointers via proc table.
+TEST(EmbedderProcTable, CallScreenshotProcs) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  EXPECT_NE(procs.Screenshot, nullptr);
+  EXPECT_NE(procs.FreeScreenshot, nullptr);
+
+  // Calling with invalid arguments returns kInvalidArguments.
+  EXPECT_EQ(procs.Screenshot(nullptr, nullptr), kInvalidArguments);
+  EXPECT_EQ(procs.FreeScreenshot(nullptr), kInvalidArguments);
+
+  FlutterEngineScreenshotInfo invalid_screenshot = {};
+  invalid_screenshot.struct_size = 0;
+  EXPECT_EQ(procs.FreeScreenshot(&invalid_screenshot), kInvalidArguments);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

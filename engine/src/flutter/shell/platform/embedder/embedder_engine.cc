@@ -4,6 +4,9 @@
 
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 
+#include <cstdlib>
+#include <cstring>
+
 #include "flutter/fml/make_copyable.h"
 #include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
 
@@ -400,6 +403,39 @@ bool EmbedderEngine::NotifyDartDeferredLibraryLoadError(
   }
   platform_view->LoadDartDeferredLibraryError(
       static_cast<intptr_t>(loading_unit_id), error_message, transient);
+  return true;
+}
+
+bool EmbedderEngine::Screenshot(FlutterEngineScreenshotInfo* screenshot_out) {
+  TRACE_EVENT0("flutter", "EmbedderEngine::Screenshot");
+  if (!IsValid() || !screenshot_out) {
+    return false;
+  }
+  if (!shell_) {
+    return false;
+  }
+  auto raster_screenshot =
+      shell_->Screenshot(Rasterizer::ScreenshotType::UncompressedImage, false);
+  if (!raster_screenshot.data || raster_screenshot.data->size() == 0) {
+    return false;
+  }
+
+  TRACE_EVENT0("flutter", "EmbedderEngine::ScreenshotBufferAlloc");
+  const size_t size = raster_screenshot.data->size();
+  void* pixels = std::malloc(size);
+  if (!pixels) {
+    return false;
+  }
+  std::memcpy(pixels, raster_screenshot.data->data(), size);
+
+  screenshot_out->width = raster_screenshot.frame_size.width;
+  screenshot_out->height = raster_screenshot.frame_size.height;
+  screenshot_out->row_bytes = raster_screenshot.frame_size.height > 0
+                                  ? (size / raster_screenshot.frame_size.height)
+                                  : (raster_screenshot.frame_size.width * 4);
+  screenshot_out->pixels = pixels;
+  screenshot_out->pixels_size = size;
+
   return true;
 }
 

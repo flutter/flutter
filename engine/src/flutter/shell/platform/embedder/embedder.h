@@ -3043,6 +3043,29 @@ typedef struct {
   const char* initial_route;
 } FlutterEngineSpawnConfig;
 
+/// Describes a screenshot captured from the engine.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterEngineScreenshotInfo).
+  size_t struct_size;
+
+  /// The width of the screenshot in physical pixels.
+  uint32_t width;
+
+  /// The height of the screenshot in physical pixels.
+  uint32_t height;
+
+  /// The number of bytes per row of pixels (stride).
+  size_t row_bytes;
+
+  /// Pointer to the raw uncompressed raster pixel buffer.
+  /// The memory is allocated by the engine and must be freed by passing this
+  /// screenshot struct to `FlutterEngineFreeScreenshot`.
+  const void* pixels;
+
+  /// The size in bytes of the buffer pointed to by `pixels`.
+  size_t pixels_size;
+} FlutterEngineScreenshotInfo;
+
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -3918,6 +3941,48 @@ FlutterEngineResult FlutterEngineLoadDartDeferredLibraryFailure(
     const char* error_message,
     bool transient);
 
+//------------------------------------------------------------------------------
+/// @brief      Captures a synchronous uncompressed raster screenshot from the
+///             engine.
+///
+///             The `screenshot_out` struct must be initialized with its
+///             `struct_size` set to `sizeof(FlutterEngineScreenshotInfo)`
+///             before calling this function.
+///
+///             If successful, the `screenshot_out` fields will be populated
+///             with the screenshot dimensions and raw uncompressed pixel
+///             buffer. The caller is responsible for releasing the pixel buffer
+///             by calling `FlutterEngineFreeScreenshot`.
+///
+/// @param[in]  engine          The running engine instance.
+/// @param[out] screenshot_out  Pointer to a `FlutterEngineScreenshotInfo`
+/// struct
+///                             to be populated. Must not be null.
+///
+/// @return     `kSuccess` if the screenshot was successfully captured;
+///             `kInvalidArguments` if arguments are invalid or `struct_size`
+///             does not match; `kInternalInconsistency` if engine is not
+///             running or rasterizer has no frame available.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineScreenshot(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineScreenshotInfo* screenshot_out);
+
+//------------------------------------------------------------------------------
+/// @brief      Frees the pixel buffer allocated by `FlutterEngineScreenshot`.
+///
+/// @param[in]  screenshot  The screenshot struct whose pixel buffer is to be
+///                         freed. Must not be null.
+///
+/// @return     `kSuccess` if the screenshot buffer was successfully freed;
+///             `kInvalidArguments` if `screenshot` is null or `struct_size` is
+///             invalid.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineFreeScreenshot(
+    const FlutterEngineScreenshotInfo* screenshot);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -4074,6 +4139,11 @@ typedef FlutterEngineResult (*FlutterEngineLoadDartDeferredLibraryFailureFnPtr)(
     int64_t loading_unit_id,
     const char* error_message,
     bool transient);
+typedef FlutterEngineResult (*FlutterEngineScreenshotFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineScreenshotInfo* screenshot_out);
+typedef FlutterEngineResult (*FlutterEngineFreeScreenshotFnPtr)(
+    const FlutterEngineScreenshotInfo* screenshot);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -4130,6 +4200,8 @@ typedef struct {
       NotifyDartDeferredLibraryLoadError;
   FlutterEngineLoadDartDeferredLibraryFailureFnPtr
       LoadDartDeferredLibraryFailure;
+  FlutterEngineScreenshotFnPtr Screenshot;
+  FlutterEngineFreeScreenshotFnPtr FreeScreenshot;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------
