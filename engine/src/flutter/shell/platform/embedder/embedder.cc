@@ -4223,6 +4223,42 @@ FlutterEngineResult FlutterEngineGetCallbackInformation(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineRegisterImageDecoder(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterImageDecoderCallback callback,
+    void* user_data,
+    int32_t priority) {
+  TRACE_EVENT0("flutter", "FlutterEngineRegisterImageDecoder");
+  if (!engine) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  if (!callback) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Image decoder callback was null.");
+  }
+
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  embedder_engine->RegisterImageDecoder(
+      [callback, user_data](const sk_sp<SkData>& buffer)
+          -> std::shared_ptr<flutter::ImageGenerator> {
+        if (!buffer || buffer->isEmpty()) {
+          return nullptr;
+        }
+        if (callback(reinterpret_cast<const uint8_t*>(buffer->data()),
+                     buffer->size(), user_data)) {
+          return flutter::BuiltinSkiaCodecImageGenerator::MakeFromData(buffer);
+        }
+        return nullptr;
+      },
+      priority);
+
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -4288,6 +4324,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(Screenshot, FlutterEngineScreenshot);
   SET_PROC(FreeScreenshot, FlutterEngineFreeScreenshot);
   SET_PROC(GetCallbackInformation, FlutterEngineGetCallbackInformation);
+  SET_PROC(RegisterImageDecoder, FlutterEngineRegisterImageDecoder);
 #undef SET_PROC
 
   return kSuccess;

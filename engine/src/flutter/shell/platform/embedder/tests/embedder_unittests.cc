@@ -2222,6 +2222,50 @@ TEST_F(EmbedderTest, CallbackInformationLookup) {
 }
 
 //------------------------------------------------------------------------------
+/// Test that FlutterEngineRegisterImageDecoder validates its arguments and
+/// registers custom decoder callbacks on a running engine.
+///
+TEST_F(EmbedderTest, RegisterImageDecoderValidation) {
+  // Null engine handle.
+  EXPECT_EQ(FlutterEngineRegisterImageDecoder(
+                nullptr,
+                [](const uint8_t* data, size_t size, void* user_data) {
+                  return true;
+                },
+                nullptr, 0),
+            kInvalidArguments);
+
+  // Null callback pointer.
+  EXPECT_EQ(FlutterEngineRegisterImageDecoder(
+                reinterpret_cast<FlutterEngine>(0x1234), nullptr, nullptr, 0),
+            kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  bool callback_called = false;
+  auto decoder_cb = [](const uint8_t* data, size_t size,
+                       void* user_data) -> bool {
+    auto* called_ptr = reinterpret_cast<bool*>(user_data);
+    if (called_ptr) {
+      *called_ptr = true;
+    }
+    return false;
+  };
+
+  EXPECT_EQ(FlutterEngineRegisterImageDecoder(
+                reinterpret_cast<FlutterEngine>(engine.get()), decoder_cb,
+                &callback_called, 1),
+            kSuccess);
+}
+
+//------------------------------------------------------------------------------
 /// Test that FlutterEngineScreenshot returns kInternalInconsistency when no
 /// frame has been rasterized yet.
 ///

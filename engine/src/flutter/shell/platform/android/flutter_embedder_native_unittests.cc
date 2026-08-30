@@ -130,6 +130,21 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
               LookupCallbackInformation,
               (int64_t handle),
               (override));
+
+  MOCK_METHOD(bool,
+              DecodeImage,
+              (const uint8_t* data, size_t size, int64_t generator_handle),
+              (override));
+
+  MOCK_METHOD(void,
+              OnNativeImageHeader,
+              (int64_t generator_handle, int32_t width, int32_t height),
+              (override));
+
+  MOCK_METHOD(std::optional<ImageHeaderInfo>,
+              GetImageHeader,
+              (int64_t generator_handle),
+              (override));
 };
 
 class MockCallbackCacheProvider : public CallbackCacheProvider {
@@ -137,6 +152,24 @@ class MockCallbackCacheProvider : public CallbackCacheProvider {
   MOCK_METHOD(std::optional<DartCallbackInfo>,
               GetCallbackInformation,
               (int64_t handle),
+              (override));
+};
+
+class MockImageDecoderProvider : public ImageDecoderProvider {
+ public:
+  MOCK_METHOD(bool,
+              DecodeImage,
+              (const uint8_t* data, size_t size, int64_t generator_handle),
+              (override));
+
+  MOCK_METHOD(void,
+              OnImageHeader,
+              (int64_t generator_handle, int32_t width, int32_t height),
+              (override));
+
+  MOCK_METHOD(std::optional<ImageHeaderInfo>,
+              GetImageHeader,
+              (int64_t generator_handle),
               (override));
 };
 
@@ -917,6 +950,267 @@ TEST(OSLibraryLoaderTest, ThreadSafeConcurrentSymbolResolution) {
   for (auto& f : futures) {
     EXPECT_TRUE(f.get());
   }
+}
+
+// =============================================================================
+// Phase 2.3 Image Generators & LRU Cache Unit Tests
+// =============================================================================
+
+TEST(ImageDecoderTest, InMemoryImageDecoderProviderOperations) {
+  auto provider = std::make_shared<InMemoryImageDecoderProvider>();
+  EXPECT_EQ(provider->GetDecodeCount(), 0u);
+  EXPECT_EQ(provider->GetLastDecodedSize(), 0u);
+
+  // Set and check image header
+  provider->SetHeaderInfo(100L, 800, 600);
+  auto header = provider->GetImageHeader(100L);
+  ASSERT_TRUE(header.has_value());
+  if (header.has_value()) {
+    EXPECT_EQ(header->width, 800);
+    EXPECT_EQ(header->height, 600);
+  }
+  EXPECT_FALSE(provider->GetImageHeader(999L).has_value());
+
+  // Decode success
+  std::vector<uint8_t> dummy_data = {0xFF, 0xD8, 0xFF, 0xE0};  // JPEG magic
+  EXPECT_TRUE(
+      provider->DecodeImage(dummy_data.data(), dummy_data.size(), 100L));
+  EXPECT_EQ(provider->GetDecodeCount(), 1u);
+  EXPECT_EQ(provider->GetLastDecodedSize(), dummy_data.size());
+
+  // OnImageHeader notification
+  provider->OnImageHeader(101L, 1920, 1080);
+  auto header101 = provider->GetImageHeader(101L);
+  ASSERT_TRUE(header101.has_value());
+  if (header101.has_value()) {
+    EXPECT_EQ(header101->width, 1920);
+    EXPECT_EQ(header101->height, 1080);
+  }
+
+  // Decode failure simulation
+  provider->SetDecodeResult(false);
+  EXPECT_FALSE(
+      provider->DecodeImage(dummy_data.data(), dummy_data.size(), 100L));
+  EXPECT_EQ(provider->GetDecodeCount(), 2u);
+
+  // Clear
+  provider->Clear();
+  EXPECT_EQ(provider->GetDecodeCount(), 0u);
+  EXPECT_EQ(provider->GetLastDecodedSize(), 0u);
+  EXPECT_FALSE(provider->GetImageHeader(100L).has_value());
+}
+
+TEST(ImageDecoderTest, DefaultImageDecoderProviderWithInvoker) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto provider = std::make_shared<DefaultImageDecoderProvider>(mock_invoker);
+
+  std::vector<uint8_t> test_bytes = {1, 2, 3, 4, 5};
+  EXPECT_CALL(
+      *mock_invoker,
+      InvokeBooleanMethod("decodeImage",
+                          "(Ljava/nio/ByteBuffer;J)Landroid/graphics/Bitmap;",
+                          test_bytes))
+      .WillOnce(Return(true));
+
+  EXPECT_TRUE(provider->DecodeImage(test_bytes.data(), test_bytes.size(), 42L));
+
+  // Invalid data checks
+  EXPECT_FALSE(provider->DecodeImage(nullptr, 0, 42L));
+  EXPECT_FALSE(provider->DecodeImage(test_bytes.data(), 0, 42L));
+
+  // Header notifications and lookup
+  provider->OnImageHeader(42L, 640, 480);
+  auto header = provider->GetImageHeader(42L);
+  ASSERT_TRUE(header.has_value());
+  if (header.has_value()) {
+    EXPECT_EQ(header->width, 640);
+    EXPECT_EQ(header->height, 480);
+  }
+  EXPECT_FALSE(provider->GetImageHeader(999L).has_value());
+}
+
+TEST(ImageDecoderTest, EmbedderImageLRUOperations) {
+  EmbedderImageLRU lru(4);
+  EXPECT_EQ(lru.GetSize(), 0u);
+
+  // Query empty cache
+  EXPECT_EQ(lru.FindImage(1), 0u);
+
+  // Add items
+  EXPECT_EQ(lru.AddImage(0x1000, 1), 0u);
+  EXPECT_EQ(lru.GetSize(), 1u);
+  EXPECT_EQ(lru.FindImage(1), 0x1000u);
+
+  EXPECT_EQ(lru.AddImage(0x2000, 2), 0u);
+  EXPECT_EQ(lru.AddImage(0x3000, 3), 0u);
+  EXPECT_EQ(lru.AddImage(0x4000, 4), 0u);
+  EXPECT_EQ(lru.GetSize(), 4u);
+
+  // All 4 keys exist
+  EXPECT_EQ(lru.FindImage(1), 0x1000u);
+  EXPECT_EQ(lru.FindImage(2), 0x2000u);
+  EXPECT_EQ(lru.FindImage(3), 0x3000u);
+  EXPECT_EQ(lru.FindImage(4), 0x4000u);
+
+  // Access key 1 to make it most recently used.
+  EXPECT_EQ(lru.FindImage(1), 0x1000u);
+
+  // Adding 5th item should evict key 2 (the least recently used)
+  uint64_t evicted = lru.AddImage(0x5000, 5);
+  EXPECT_EQ(evicted, 2u);
+  EXPECT_EQ(lru.FindImage(2), 0u);
+  EXPECT_EQ(lru.FindImage(1), 0x1000u);
+  EXPECT_EQ(lru.FindImage(5), 0x5000u);
+
+  // Clear
+  lru.Clear();
+  EXPECT_EQ(lru.GetSize(), 0u);
+  EXPECT_EQ(lru.FindImage(1), 0u);
+  EXPECT_EQ(lru.FindImage(5), 0u);
+}
+
+TEST(ImageDecoderTest, EmbedderImageLRUMultithreaded) {
+  auto lru = std::make_shared<EmbedderImageLRU>(16);
+
+  constexpr size_t kThreadCount = 8;
+  constexpr size_t kIterations = 200;
+  std::vector<std::future<bool>> futures;
+  futures.reserve(kThreadCount);
+
+  for (size_t t = 0; t < kThreadCount; ++t) {
+    futures.push_back(std::async(std::launch::async, [lru, t]() {
+      for (size_t iter = 0; iter < kIterations; ++iter) {
+        uint64_t key = (t * 100 + iter) % 30 + 1;
+        uint64_t handle = 0xAAAA0000 + key;
+        lru->AddImage(handle, key);
+        uint64_t found = lru->FindImage(key);
+        if (found != 0 && found != handle) {
+          return false;
+        }
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
+}
+
+TEST(ImageDecoderTest, JniDelegateImageDecoderIntegration) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto mock_decoder = std::make_shared<MockImageDecoderProvider>();
+
+  auto delegate =
+      std::make_unique<JniDelegate>(mock_invoker, nullptr, mock_decoder);
+  EXPECT_EQ(delegate->GetImageDecoderProvider(), mock_decoder);
+
+  std::vector<uint8_t> data = {0x0A, 0x0B, 0x0C};
+
+  // DecodeImage calls mock_decoder
+  EXPECT_CALL(*mock_decoder, DecodeImage(data.data(), data.size(), 55L))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(delegate->DecodeImage(data.data(), data.size(), 55L));
+
+  // OnNativeImageHeader calls mock_decoder
+  EXPECT_CALL(*mock_decoder, OnImageHeader(55L, 300, 200)).Times(1);
+  delegate->OnNativeImageHeader(55L, 300, 200);
+
+  // GetImageHeader calls mock_decoder
+  EXPECT_CALL(*mock_decoder, GetImageHeader(55L))
+      .WillOnce(Return(ImageHeaderInfo{300, 200}));
+  auto header = delegate->GetImageHeader(55L);
+  ASSERT_TRUE(header.has_value());
+  if (header.has_value()) {
+    EXPECT_EQ(header->width, 300);
+    EXPECT_EQ(header->height, 200);
+  }
+}
+
+TEST(ImageDecoderTest, JniRouterImageDecoderRoutingFlip) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto in_memory_decoder = std::make_shared<InMemoryImageDecoderProvider>();
+  in_memory_decoder->SetHeaderInfo(77L, 1024, 768);
+
+  auto embedder_delegate =
+      std::make_shared<JniDelegate>(mock_invoker, nullptr, in_memory_decoder);
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+
+  auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
+
+  std::vector<uint8_t> payload = {10, 20, 30};
+
+  // 1. When Embedder is disabled -> routes to legacy delegate
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+
+  EXPECT_CALL(*legacy_delegate,
+              DecodeImage(payload.data(), payload.size(), 77L))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(router->RouteDecodeImage(payload.data(), payload.size(), 77L));
+
+  EXPECT_CALL(*legacy_delegate, OnNativeImageHeader(77L, 1024, 768)).Times(1);
+  router->RouteNativeImageHeader(77L, 1024, 768);
+
+  EXPECT_CALL(*legacy_delegate, GetImageHeader(77L))
+      .WillOnce(Return(ImageHeaderInfo{1024, 768}));
+  auto legacy_hdr = router->RouteGetImageHeader(77L);
+  ASSERT_TRUE(legacy_hdr.has_value());
+  EXPECT_EQ(legacy_hdr->width, 1024);
+  EXPECT_EQ(legacy_hdr->height, 768);
+
+  // 2. When Embedder is enabled -> routes to embedder delegate
+  // (in_memory_decoder)
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+
+  EXPECT_CALL(*legacy_delegate, DecodeImage(_, _, _)).Times(0);
+  EXPECT_TRUE(router->RouteDecodeImage(payload.data(), payload.size(), 77L));
+  EXPECT_EQ(in_memory_decoder->GetDecodeCount(), 1u);
+
+  router->RouteNativeImageHeader(88L, 500, 400);
+  auto embedder_hdr = router->RouteGetImageHeader(88L);
+  ASSERT_TRUE(embedder_hdr.has_value());
+  if (embedder_hdr.has_value()) {
+    EXPECT_EQ(embedder_hdr->width, 500);
+    EXPECT_EQ(embedder_hdr->height, 400);
+  }
+
+  // Reset flag
+  JniRouter::SetEmbedderEnabled(false);
+  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+}
+
+TEST(ImageDecoderTest, FlutterEmbedderNativeImageDecoderAndLRUIntegration) {
+  auto custom_decoder = std::make_shared<InMemoryImageDecoderProvider>();
+  auto custom_lru = std::make_shared<EmbedderImageLRU>(10);
+
+  FlutterEmbedderNative native(std::make_shared<DefaultJvmInvoker>(), nullptr,
+                               nullptr, nullptr, nullptr, custom_decoder,
+                               custom_lru);
+
+  EXPECT_EQ(native.GetImageDecoderProvider(), custom_decoder);
+  EXPECT_EQ(native.GetImageLRU(), custom_lru);
+
+  // Decode through FlutterEmbedderNative
+  std::vector<uint8_t> data = {0x11, 0x22, 0x33};
+  EXPECT_TRUE(native.DecodeImage(data.data(), data.size(), 1L));
+  EXPECT_EQ(custom_decoder->GetDecodeCount(), 1u);
+
+  native.OnNativeImageHeader(1L, 1280, 720);
+  auto hdr = native.GetImageHeader(1L);
+  ASSERT_TRUE(hdr.has_value());
+  if (hdr.has_value()) {
+    EXPECT_EQ(hdr->width, 1280);
+    EXPECT_EQ(hdr->height, 720);
+  }
+
+  // LRU operations through FlutterEmbedderNative
+  EXPECT_EQ(native.GetImageLRU()->AddImage(0xBEEF, 1), 0u);
+  EXPECT_EQ(native.GetImageLRU()->FindImage(1), 0xBEEFu);
+
+  // RegisterImageDecoder with null engine returns kInvalidArguments
+  EXPECT_EQ(native.RegisterImageDecoder(nullptr), kInvalidArguments);
 }
 
 }  // namespace testing
