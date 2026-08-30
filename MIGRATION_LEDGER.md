@@ -201,11 +201,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] Platform views and semantics wiped.
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
     - [x] *Validation*: `ninja -C out/android_debug_unopt flutter_shell_native_unittests` compiles successfully AND `//shell/platform/android:robolectric_tests` passes entirely without legacy code.
-- [ ] **5.4 Legacy Deletion (Graphics Pipeline)**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.4-legacy-deletion-graphics-pipeline`
-    - [ ] `android_context`, `android_surface` wiped.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `ninja -C out/android_debug_unopt flutter_shell_native_unittests` compiles successfully AND `//shell/platform/android:robolectric_tests` passes entirely without legacy code.
+- [x] **5.4 Legacy Deletion (Graphics Pipeline)**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-5.4-legacy-deletion-graphics-pipeline`
+    - [x] `android_context`, `android_surface` wiped.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [x] *Validation*: `ninja -C out/android_debug_unopt flutter_shell_native_unittests` compiles successfully AND `//shell/platform/android:robolectric_tests` passes entirely without legacy code.
 - [ ] **5.5 Flag Obliteration**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-5.5-flag-obliteration`
     - [ ] Flags pruned and routing hardcoded unconditionally.

@@ -189,15 +189,9 @@ bool JniRouter::RoutePreEngineRestart() {
 bool JniRouter::RouteVsync(int64_t frame_time_nanos,
                            int64_t frame_target_time_nanos) {
   TRACE_EVENT0("flutter", "JniRouter::RouteVsync");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OnVsync(frame_time_nanos,
-                                         frame_target_time_nanos);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OnVsync(frame_time_nanos, frame_target_time_nanos);
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnVsync(frame_time_nanos,
+                                       frame_target_time_nanos);
   }
   return false;
 }
@@ -205,28 +199,16 @@ bool JniRouter::RouteVsync(int64_t frame_time_nanos,
 bool JniRouter::RouteAsyncWaitForVsync(intptr_t baton) {
   TRACE_EVENT1("flutter", "JniRouter::RouteAsyncWaitForVsync", "baton",
                std::to_string(baton).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->AsyncWaitForVsync(baton);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->AsyncWaitForVsync(baton);
+  if (embedder_delegate_) {
+    return embedder_delegate_->AsyncWaitForVsync(baton);
   }
   return false;
 }
 
 bool JniRouter::RouteSetViewportMetrics(const AndroidViewportMetrics& metrics) {
   TRACE_EVENT0("flutter", "JniRouter::RouteSetViewportMetrics");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetViewportMetrics(metrics);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetViewportMetrics(metrics);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetViewportMetrics(metrics);
   }
   return false;
 }
@@ -234,14 +216,8 @@ bool JniRouter::RouteSetViewportMetrics(const AndroidViewportMetrics& metrics) {
 bool JniRouter::RouteUpdateDisplayMetrics(
     const AndroidDisplayMetrics& metrics) {
   TRACE_EVENT0("flutter", "JniRouter::RouteUpdateDisplayMetrics(struct)");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->UpdateDisplayMetrics(metrics);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->UpdateDisplayMetrics(metrics);
+  if (embedder_delegate_) {
+    return embedder_delegate_->UpdateDisplayMetrics(metrics);
   }
   return false;
 }
@@ -252,15 +228,8 @@ bool JniRouter::RouteUpdateDisplayMetrics(uint64_t display_id,
                                           double height,
                                           double device_pixel_ratio) {
   TRACE_EVENT0("flutter", "JniRouter::RouteUpdateDisplayMetrics(params)");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->UpdateDisplayMetrics(
-          display_id, refresh_rate, width, height, device_pixel_ratio);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->UpdateDisplayMetrics(
+  if (embedder_delegate_) {
+    return embedder_delegate_->UpdateDisplayMetrics(
         display_id, refresh_rate, width, height, device_pixel_ratio);
   }
   return false;
@@ -271,16 +240,9 @@ bool JniRouter::RouteViewportMetrics(int64_t view_id,
                                      double height,
                                      double pixel_ratio) {
   TRACE_EVENT0("flutter", "JniRouter::RouteViewportMetrics");
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->DispatchViewportMetrics(view_id, width, height,
-                                                         pixel_ratio);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->DispatchViewportMetrics(view_id, width, height,
-                                                     pixel_ratio);
+  if (embedder_delegate_) {
+    return embedder_delegate_->DispatchViewportMetrics(view_id, width, height,
+                                                       pixel_ratio);
   }
   return false;
 }
@@ -764,14 +726,8 @@ bool JniRouter::RouteSetVmServiceUri(const std::string& uri) {
 bool JniRouter::RouteRegisterHardwareBufferTexture(int64_t texture_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteRegisterHardwareBufferTexture",
                "texture_id", std::to_string(texture_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->RegisterHardwareBufferTexture(texture_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->RegisterHardwareBufferTexture(texture_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->RegisterHardwareBufferTexture(texture_id);
   }
   return false;
 }
@@ -779,14 +735,8 @@ bool JniRouter::RouteRegisterHardwareBufferTexture(int64_t texture_id) {
 bool JniRouter::RouteUnregisterHardwareBufferTexture(int64_t texture_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteUnregisterHardwareBufferTexture",
                "texture_id", std::to_string(texture_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->UnregisterHardwareBufferTexture(texture_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->UnregisterHardwareBufferTexture(texture_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->UnregisterHardwareBufferTexture(texture_id);
   }
   return false;
 }
@@ -796,16 +746,8 @@ bool JniRouter::RouteSetHardwareBufferFrame(
     const std::shared_ptr<AndroidHardwareBuffer>& buffer) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetHardwareBufferFrame(object)",
                "texture_id", std::to_string(texture_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetHardwareBufferFrame(texture_id,
-                                                        std::move(buffer));
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetHardwareBufferFrame(texture_id,
-                                                    std::move(buffer));
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetHardwareBufferFrame(texture_id, buffer);
   }
   return false;
 }
@@ -815,14 +757,8 @@ bool JniRouter::RouteSetHardwareBufferFrame(
     const FlutterHardwareBufferExternalTexture& texture) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetHardwareBufferFrame(struct)",
                "texture_id", std::to_string(texture_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetHardwareBufferFrame(texture_id, texture);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetHardwareBufferFrame(texture_id, texture);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetHardwareBufferFrame(texture_id, texture);
   }
   return false;
 }
@@ -834,16 +770,9 @@ bool JniRouter::RouteGetHardwareBufferTextureFrame(
     FlutterHardwareBufferExternalTexture* texture_out) {
   TRACE_EVENT1("flutter", "JniRouter::RouteGetHardwareBufferTextureFrame",
                "texture_id", std::to_string(texture_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->GetHardwareBufferTextureFrame(
-          texture_id, width, height, texture_out);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->GetHardwareBufferTextureFrame(texture_id, width,
-                                                           height, texture_out);
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetHardwareBufferTextureFrame(
+        texture_id, width, height, texture_out);
   }
   return false;
 }
@@ -851,14 +780,8 @@ bool JniRouter::RouteGetHardwareBufferTextureFrame(
 bool JniRouter::RouteOnHardwareBufferFrameAvailable(int64_t texture_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteOnHardwareBufferFrameAvailable",
                "texture_id", std::to_string(texture_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OnHardwareBufferFrameAvailable(texture_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OnHardwareBufferFrameAvailable(texture_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnHardwareBufferFrameAvailable(texture_id);
   }
   return false;
 }
@@ -866,14 +789,8 @@ bool JniRouter::RouteOnHardwareBufferFrameAvailable(int64_t texture_id) {
 bool JniRouter::RouteRegisterVulkanTexture(int64_t texture_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteRegisterVulkanTexture", "texture_id",
                std::to_string(texture_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->RegisterVulkanTexture(texture_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->RegisterVulkanTexture(texture_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->RegisterVulkanTexture(texture_id);
   }
   return false;
 }
@@ -881,14 +798,8 @@ bool JniRouter::RouteRegisterVulkanTexture(int64_t texture_id) {
 bool JniRouter::RouteUnregisterVulkanTexture(int64_t texture_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteUnregisterVulkanTexture",
                "texture_id", std::to_string(texture_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->UnregisterVulkanTexture(texture_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->UnregisterVulkanTexture(texture_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->UnregisterVulkanTexture(texture_id);
   }
   return false;
 }
@@ -898,16 +809,8 @@ bool JniRouter::RouteSetVulkanTextureFrame(
     const std::shared_ptr<AndroidVulkanExternalTexture>& texture) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetVulkanTextureFrame(object)",
                "texture_id", std::to_string(texture_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetVulkanTextureFrame(texture_id,
-                                                       std::move(texture));
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetVulkanTextureFrame(texture_id,
-                                                   std::move(texture));
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetVulkanTextureFrame(texture_id, texture);
   }
   return false;
 }
@@ -917,14 +820,8 @@ bool JniRouter::RouteSetVulkanTextureFrame(
     const FlutterVulkanExternalTexture& texture) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetVulkanTextureFrame(struct)",
                "texture_id", std::to_string(texture_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetVulkanTextureFrame(texture_id, texture);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetVulkanTextureFrame(texture_id, texture);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetVulkanTextureFrame(texture_id, texture);
   }
   return false;
 }
@@ -936,16 +833,9 @@ bool JniRouter::RouteGetVulkanTextureFrame(
     FlutterVulkanExternalTexture* texture_out) {
   TRACE_EVENT1("flutter", "JniRouter::RouteGetVulkanTextureFrame", "texture_id",
                std::to_string(texture_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->GetVulkanTextureFrame(texture_id, width,
-                                                       height, texture_out);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->GetVulkanTextureFrame(texture_id, width, height,
-                                                   texture_out);
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetVulkanTextureFrame(texture_id, width, height,
+                                                     texture_out);
   }
   return false;
 }
@@ -953,14 +843,8 @@ bool JniRouter::RouteGetVulkanTextureFrame(
 bool JniRouter::RouteOnVulkanTextureFrameAvailable(int64_t texture_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteOnVulkanTextureFrameAvailable",
                "texture_id", std::to_string(texture_id).c_str());
-  if (IsEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OnVulkanTextureFrameAvailable(texture_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OnVulkanTextureFrameAvailable(texture_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnVulkanTextureFrameAvailable(texture_id);
   }
   return false;
 }

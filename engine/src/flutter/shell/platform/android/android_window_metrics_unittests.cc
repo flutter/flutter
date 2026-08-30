@@ -101,88 +101,12 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
   MOCK_METHOD(bool, OnFirstFrame, (), (override));
   MOCK_METHOD(bool, OnPreEngineRestart, (), (override));
   MOCK_METHOD(bool,
-              OnVsync,
-              (int64_t frame_time_nanos, int64_t frame_target_time_nanos),
-              (override));
-  MOCK_METHOD(bool,
-              SetViewportMetrics,
-              (const AndroidViewportMetrics& metrics),
-              (override));
-  MOCK_METHOD(bool,
-              UpdateDisplayMetrics,
-              (const AndroidDisplayMetrics& metrics),
-              (override));
-  MOCK_METHOD(bool,
-              UpdateDisplayMetrics,
-              (uint64_t display_id,
-               double refresh_rate,
-               double width,
-               double height,
-               double device_pixel_ratio),
-              (override));
-  MOCK_METHOD(
-      bool,
-      DispatchViewportMetrics,
-      (int64_t view_id, double width, double height, double pixel_ratio),
-      (override));
-  MOCK_METHOD(bool,
               RequestDartDeferredLibrary,
               (int64_t loading_unit_id),
               (override));
   MOCK_METHOD(bool, InitVM, (const AndroidVMArgs& args), (override));
   MOCK_METHOD(bool, PrefetchDefaultFontManager, (), (override));
   MOCK_METHOD(bool, SetVmServiceUri, (const std::string& uri), (override));
-  MOCK_METHOD(bool,
-              RegisterHardwareBufferTexture,
-              (int64_t texture_id),
-              (override));
-  MOCK_METHOD(bool,
-              UnregisterHardwareBufferTexture,
-              (int64_t texture_id),
-              (override));
-  MOCK_METHOD(bool,
-              SetHardwareBufferFrame,
-              (int64_t texture_id,
-               const std::shared_ptr<AndroidHardwareBuffer>& buffer),
-              (override));
-  MOCK_METHOD(bool,
-              SetHardwareBufferFrame,
-              (int64_t texture_id,
-               const FlutterHardwareBufferExternalTexture& texture),
-              (override));
-  MOCK_METHOD(bool,
-              GetHardwareBufferTextureFrame,
-              (int64_t texture_id,
-               size_t width,
-               size_t height,
-               FlutterHardwareBufferExternalTexture* texture_out),
-              (override));
-  MOCK_METHOD(bool,
-              OnHardwareBufferFrameAvailable,
-              (int64_t texture_id),
-              (override));
-  MOCK_METHOD(bool, RegisterVulkanTexture, (int64_t texture_id), (override));
-  MOCK_METHOD(bool, UnregisterVulkanTexture, (int64_t texture_id), (override));
-  MOCK_METHOD(bool,
-              SetVulkanTextureFrame,
-              (int64_t texture_id,
-               const std::shared_ptr<AndroidVulkanExternalTexture>& texture),
-              (override));
-  MOCK_METHOD(bool,
-              SetVulkanTextureFrame,
-              (int64_t texture_id, const FlutterVulkanExternalTexture& texture),
-              (override));
-  MOCK_METHOD(bool,
-              GetVulkanTextureFrame,
-              (int64_t texture_id,
-               size_t width,
-               size_t height,
-               FlutterVulkanExternalTexture* texture_out),
-              (override));
-  MOCK_METHOD(bool,
-              OnVulkanTextureFrameAvailable,
-              (int64_t texture_id),
-              (override));
 
   MOCK_METHOD(int64_t,
               SpawnEngine,
@@ -493,12 +417,13 @@ TEST(JniDelegateWindowMetricsTest, RoutesThroughWindowMetricsProvider) {
 // 5. JniRouter Routing Flip Tests
 // ---------------------------------------------------------------------------
 
-TEST(JniRouterWindowMetricsTest, RoutingFlipLegacyAndEmbedder) {
+TEST(JniRouterWindowMetricsTest, DirectWindowMetricsRouting) {
   auto mock_invoker = std::make_shared<MockJvmInvokerForMetrics>();
   auto in_memory_provider = std::make_shared<InMemoryWindowMetricsProvider>();
   auto embedder_delegate = std::make_shared<JniDelegate>(
       mock_invoker, nullptr, nullptr, nullptr, in_memory_provider);
-  auto legacy_delegate = std::make_shared<MockLegacyJniDelegateForMetrics>();
+  auto legacy_delegate =
+      std::make_shared<StrictMock<MockLegacyJniDelegateForMetrics>>();
 
   JniRouter router(embedder_delegate, legacy_delegate);
 
@@ -515,38 +440,22 @@ TEST(JniRouterWindowMetricsTest, RoutingFlipLegacyAndEmbedder) {
   disp.height = 2400.0;
   disp.device_pixel_ratio = 2.75;
 
-  // 1. Rollout flag disabled -> legacy path
-  JniRouter::SetEmbedderEnabled(false);
-  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kLegacy);
+  // Across both flag states (false and true), window & display metrics route
+  // directly to embedder_delegate
+  for (bool embedder_flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(embedder_flag);
 
-  EXPECT_CALL(*legacy_delegate, SetViewportMetrics(vp)).WillOnce(Return(true));
-  EXPECT_CALL(*legacy_delegate, UpdateDisplayMetrics(disp))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*legacy_delegate,
-              UpdateDisplayMetrics(1, 120.0, 1080.0, 2400.0, 2.75))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*legacy_delegate,
-              DispatchViewportMetrics(1, 1080.0, 2400.0, 2.75))
-      .WillOnce(Return(true));
+    EXPECT_TRUE(router.RouteSetViewportMetrics(vp));
+    EXPECT_TRUE(router.RouteUpdateDisplayMetrics(disp));
+    EXPECT_TRUE(
+        router.RouteUpdateDisplayMetrics(1, 120.0, 1080.0, 2400.0, 2.75));
+    EXPECT_TRUE(router.RouteViewportMetrics(1, 1080.0, 2400.0, 2.75));
+  }
 
-  EXPECT_TRUE(router.RouteSetViewportMetrics(vp));
-  EXPECT_TRUE(router.RouteUpdateDisplayMetrics(disp));
-  EXPECT_TRUE(router.RouteUpdateDisplayMetrics(1, 120.0, 1080.0, 2400.0, 2.75));
-  EXPECT_TRUE(router.RouteViewportMetrics(1, 1080.0, 2400.0, 2.75));
+  EXPECT_EQ(in_memory_provider->GetSendCount(), 4u);
+  EXPECT_EQ(in_memory_provider->GetUpdateCount(), 4u);
 
-  // 2. Rollout flag enabled -> embedder path
   JniRouter::SetEmbedderEnabled(true);
-  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
-
-  EXPECT_TRUE(router.RouteSetViewportMetrics(vp));
-  EXPECT_TRUE(router.RouteUpdateDisplayMetrics(disp));
-  EXPECT_TRUE(router.RouteUpdateDisplayMetrics(1, 120.0, 1080.0, 2400.0, 2.75));
-  EXPECT_TRUE(router.RouteViewportMetrics(1, 1080.0, 2400.0, 2.75));
-
-  EXPECT_EQ(in_memory_provider->GetSendCount(), 2u);
-  EXPECT_EQ(in_memory_provider->GetUpdateCount(), 2u);
-
-  JniRouter::SetEmbedderEnabled(false);
 }
 
 // ---------------------------------------------------------------------------
