@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/android/android_engine_group.h"
 #include "flutter/shell/platform/android/android_surface_control.h"
 #include "flutter/shell/platform/android/android_vulkan_texture.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
@@ -318,6 +319,17 @@ class LegacyJniDelegate {
   virtual bool OnVulkanTextureFrameAvailable(int64_t texture_id) {
     return false;
   }
+
+  virtual int64_t SpawnEngine(int64_t parent_engine_id,
+                              const AndroidEngineSpawnArgs& args) {
+    return 0;
+  }
+
+  virtual bool ShutdownSpawnedEngine(int64_t engine_id) { return false; }
+
+  virtual size_t GetActiveEngineCount() const { return 0; }
+
+  virtual bool OnEngineGarbageCollected(int64_t engine_id) { return false; }
 };
 
 /// @brief Native JNI Routing Boundary that dispatches calls based on
@@ -606,6 +618,15 @@ class JniRouter {
                                   FlutterVulkanExternalTexture* texture_out);
 
   bool RouteOnVulkanTextureFrameAvailable(int64_t texture_id);
+
+  int64_t RouteSpawnEngine(int64_t parent_engine_id,
+                           const AndroidEngineSpawnArgs& args);
+
+  bool RouteShutdownSpawnedEngine(int64_t engine_id);
+
+  size_t RouteGetActiveEngineCount() const;
+
+  bool RouteOnEngineGarbageCollected(int64_t engine_id);
 
   std::shared_ptr<JniDelegate> GetEmbedderDelegate() const;
   std::shared_ptr<LegacyJniDelegate> GetLegacyDelegate() const;
