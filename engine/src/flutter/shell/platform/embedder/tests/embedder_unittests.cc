@@ -5168,6 +5168,224 @@ TEST_F(EmbedderTest, HardwareBufferExternalTextureResolverIntegration) {
   EXPECT_EQ(texture->Id(), 100);
 }
 
+TEST_F(EmbedderTest, RasterThreadContextStructABI) {
+  FlutterProjectArgs args = {};
+  args.struct_size = sizeof(FlutterProjectArgs);
+  EXPECT_EQ(args.struct_size, sizeof(FlutterProjectArgs));
+  EXPECT_GE(args.struct_size,
+            offsetof(FlutterProjectArgs, raster_thread_context_clear_current) +
+                sizeof(args.raster_thread_context_clear_current));
+}
+
+TEST_F(EmbedderTest, RasterThreadContextHooksInvoked) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  struct HookData {
+    std::atomic<int> make_current_count{0};
+    std::atomic<int> clear_current_count{0};
+    std::thread::id make_current_thread_id;
+    std::thread::id clear_current_thread_id;
+    void* make_current_user_data = nullptr;
+    void* clear_current_user_data = nullptr;
+
+    void Reset() {
+      make_current_count = 0;
+      clear_current_count = 0;
+      make_current_thread_id = std::thread::id();
+      clear_current_thread_id = std::thread::id();
+      make_current_user_data = nullptr;
+      clear_current_user_data = nullptr;
+    }
+  };
+
+  static HookData s_hook_data;
+  s_hook_data.Reset();
+
+  builder.GetProjectArgs().raster_thread_context_make_current =
+      [](void* user_data) -> bool {
+    s_hook_data.make_current_count++;
+    s_hook_data.make_current_thread_id = std::this_thread::get_id();
+    s_hook_data.make_current_user_data = user_data;
+    return true;
+  };
+
+  builder.GetProjectArgs().raster_thread_context_clear_current =
+      [](void* user_data) -> bool {
+    s_hook_data.clear_current_count++;
+    s_hook_data.clear_current_thread_id = std::this_thread::get_id();
+    s_hook_data.clear_current_user_data = user_data;
+    return true;
+  };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  EXPECT_EQ(s_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_hook_data.clear_current_count.load(), 0);
+  EXPECT_NE(s_hook_data.make_current_thread_id, std::this_thread::get_id());
+  EXPECT_EQ(s_hook_data.make_current_user_data, &context);
+
+  engine.reset();
+
+  EXPECT_EQ(s_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_hook_data.clear_current_count.load(), 1);
+  EXPECT_EQ(s_hook_data.clear_current_thread_id,
+            s_hook_data.make_current_thread_id);
+  EXPECT_EQ(s_hook_data.clear_current_user_data, &context);
+}
+
+TEST_F(EmbedderTest, RasterThreadContextMakeCurrentFailure) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  builder.GetProjectArgs().raster_thread_context_make_current =
+      [](void* user_data) -> bool { return false; };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_FALSE(engine.is_valid());
+}
+
+TEST_F(EmbedderTest, RasterThreadContextHooksCustomTaskRunners) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  UniqueEngine engine;
+  auto render_thread = CreateNewThread("custom_render_thread");
+  EmbedderTestTaskRunner render_task_runner(
+      render_thread, [&](FlutterTask task) {
+        if (engine.is_valid()) {
+          FlutterEngineRunTask(engine.get(), &task);
+        }
+      });
+
+  struct HookData {
+    std::atomic<int> make_current_count{0};
+    std::atomic<int> clear_current_count{0};
+    bool make_current_on_runner = false;
+    bool clear_current_on_runner = false;
+
+    void Reset() {
+      make_current_count = 0;
+      clear_current_count = 0;
+      make_current_on_runner = false;
+      clear_current_on_runner = false;
+    }
+  };
+
+  static HookData s_hook_data;
+  s_hook_data.Reset();
+  static fml::RefPtr<fml::TaskRunner> s_render_runner;
+  s_render_runner = render_thread;
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  const auto task_runner_description =
+      render_task_runner.GetFlutterTaskRunnerDescription();
+  builder.SetRenderTaskRunner(&task_runner_description);
+
+  builder.GetProjectArgs().raster_thread_context_make_current =
+      [](void* user_data) -> bool {
+    s_hook_data.make_current_count++;
+    s_hook_data.make_current_on_runner =
+        s_render_runner->RunsTasksOnCurrentThread();
+    return true;
+  };
+
+  builder.GetProjectArgs().raster_thread_context_clear_current =
+      [](void* user_data) -> bool {
+    s_hook_data.clear_current_count++;
+    s_hook_data.clear_current_on_runner =
+        s_render_runner->RunsTasksOnCurrentThread();
+    return true;
+  };
+
+  engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+  ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+  latch.Wait();
+
+  EXPECT_EQ(s_hook_data.make_current_count.load(), 1);
+  EXPECT_TRUE(s_hook_data.make_current_on_runner);
+  EXPECT_EQ(s_hook_data.clear_current_count.load(), 0);
+
+  engine.reset();
+
+  EXPECT_EQ(s_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_hook_data.clear_current_count.load(), 1);
+  EXPECT_TRUE(s_hook_data.clear_current_on_runner);
+}
+
+TEST_F(EmbedderTest, RasterThreadContextHooksSpawnEngine) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+  latch.Wait();
+
+  struct SpawnHookData {
+    std::atomic<int> make_current_count{0};
+    std::atomic<int> clear_current_count{0};
+    void* make_current_user_data = nullptr;
+    void* clear_current_user_data = nullptr;
+
+    void Reset() {
+      make_current_count = 0;
+      clear_current_count = 0;
+      make_current_user_data = nullptr;
+      clear_current_user_data = nullptr;
+    }
+  };
+  static SpawnHookData s_spawn_hook_data;
+  s_spawn_hook_data.Reset();
+
+  FlutterProjectArgs custom_args = {};
+  custom_args.struct_size = sizeof(FlutterProjectArgs);
+  custom_args.raster_thread_context_make_current = [](void* user_data) -> bool {
+    s_spawn_hook_data.make_current_count++;
+    s_spawn_hook_data.make_current_user_data = user_data;
+    return true;
+  };
+  custom_args.raster_thread_context_clear_current =
+      [](void* user_data) -> bool {
+    s_spawn_hook_data.clear_current_count++;
+    s_spawn_hook_data.clear_current_user_data = user_data;
+    return true;
+  };
+
+  FlutterEngine spawned_engine = nullptr;
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.custom_args = &custom_args;
+  void* const kSpawnUserData = reinterpret_cast<void*>(0x12345678);
+  spawn_config.user_data = kSpawnUserData;
+
+  ASSERT_EQ(
+      FlutterEngineSpawn(parent_engine.get(), &spawn_config, &spawned_engine),
+      kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+  EXPECT_EQ(s_spawn_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_spawn_hook_data.clear_current_count.load(), 0);
+  EXPECT_EQ(s_spawn_hook_data.make_current_user_data, kSpawnUserData);
+
+  ASSERT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+  EXPECT_EQ(s_spawn_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_spawn_hook_data.clear_current_count.load(), 1);
+  EXPECT_EQ(s_spawn_hook_data.clear_current_user_data, kSpawnUserData);
+}
+
 //------------------------------------------------------------------------------
 /// Multi-backend matrix initialization tests verifying consistent behavior
 /// across all available rendering backends and engine configurations.
@@ -5386,6 +5604,59 @@ TEST_P(EmbedderTestMatrix, CanCaptureScreenshotInMatrix) {
   EXPECT_GE(screenshot.pixels_size, 800u * 600u * 4);
 
   EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+}
+
+TEST_P(EmbedderTestMatrix, CanInvokeRasterThreadContextHooksInMatrix) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  ConfigureBuilder(builder);
+  builder.SetSurface(DlISize(1, 1));
+
+  struct MatrixHookData {
+    std::atomic<int> make_current_count{0};
+    std::atomic<int> clear_current_count{0};
+    std::thread::id make_current_thread_id;
+    std::thread::id clear_current_thread_id;
+
+    void Reset() {
+      make_current_count = 0;
+      clear_current_count = 0;
+      make_current_thread_id = std::thread::id();
+      clear_current_thread_id = std::thread::id();
+    }
+  };
+  static MatrixHookData s_matrix_hook_data;
+  s_matrix_hook_data.Reset();
+
+  builder.GetProjectArgs().raster_thread_context_make_current =
+      [](void* user_data) -> bool {
+    s_matrix_hook_data.make_current_count++;
+    s_matrix_hook_data.make_current_thread_id = std::this_thread::get_id();
+    return true;
+  };
+
+  builder.GetProjectArgs().raster_thread_context_clear_current =
+      [](void* user_data) -> bool {
+    s_matrix_hook_data.clear_current_count++;
+    s_matrix_hook_data.clear_current_thread_id = std::this_thread::get_id();
+    return true;
+  };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  EXPECT_EQ(s_matrix_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_matrix_hook_data.clear_current_count.load(), 0);
+
+  engine.reset();
+
+  EXPECT_EQ(s_matrix_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_matrix_hook_data.clear_current_count.load(), 1);
+  EXPECT_EQ(s_matrix_hook_data.clear_current_thread_id,
+            s_matrix_hook_data.make_current_thread_id);
 }
 
 INSTANTIATE_TEST_SUITE_P(AllBackends,
