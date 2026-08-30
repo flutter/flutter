@@ -258,6 +258,10 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       surface_control_provider_(
           std::make_shared<DefaultAndroidSurfaceControlProvider>(
               library_loader_)),
+      engine_group_provider_(
+          std::make_shared<DefaultAndroidEngineGroupProvider>()),
+      engine_group_(std::make_shared<AndroidEngineGroup>(engine_group_provider_,
+                                                         jvm_invoker_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -272,7 +276,9 @@ FlutterEmbedderNative::FlutterEmbedderNative()
           vm_init_,
           hardware_buffer_provider_,
           vulkan_texture_provider_,
-          surface_control_provider_)),
+          surface_control_provider_,
+          engine_group_provider_,
+          engine_group_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
       asset_provider_(std::make_shared<APKAssetProvider>(
           std::make_shared<InMemoryAPKAssetProviderImpl>())) {
@@ -300,7 +306,9 @@ FlutterEmbedderNative::FlutterEmbedderNative(
     std::shared_ptr<AndroidVMInit> vm_init,
     std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider,
     std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider,
-    std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider)
+    std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider,
+    std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider,
+    std::shared_ptr<AndroidEngineGroup> engine_group)
     : jvm_invoker_(std::move(jvm_invoker)),
       image_lru_(image_lru ? std::move(image_lru)
                            : std::make_shared<EmbedderImageLRU>()),
@@ -349,6 +357,14 @@ FlutterEmbedderNative::FlutterEmbedderNative(
               ? std::move(surface_control_provider)
               : std::make_shared<DefaultAndroidSurfaceControlProvider>(
                     library_loader_)),
+      engine_group_provider_(
+          engine_group_provider
+              ? std::move(engine_group_provider)
+              : std::make_shared<DefaultAndroidEngineGroupProvider>()),
+      engine_group_(engine_group ? std::move(engine_group)
+                                 : std::make_shared<AndroidEngineGroup>(
+                                       engine_group_provider_,
+                                       jvm_invoker_)),
       platform_views_controller_(
           std::make_shared<AndroidPlatformViewsController>(
               platform_views_provider_)),
@@ -365,7 +381,9 @@ FlutterEmbedderNative::FlutterEmbedderNative(
           vm_init_,
           hardware_buffer_provider_,
           vulkan_texture_provider_,
-          surface_control_provider_)),
+          surface_control_provider_,
+          engine_group_provider_,
+          engine_group_)),
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, legacy_delegate)),
       asset_provider_(
           asset_provider
@@ -680,13 +698,16 @@ std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
     std::shared_ptr<AndroidVMInit> vm_init,
     std::shared_ptr<AndroidHardwareBufferProvider> hardware_buffer_provider,
     std::shared_ptr<AndroidVulkanTextureProvider> vulkan_texture_provider,
-    std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider) {
+    std::shared_ptr<AndroidSurfaceControlProvider> surface_control_provider,
+    std::shared_ptr<AndroidEngineGroupProvider> engine_group_provider,
+    std::shared_ptr<AndroidEngineGroup> engine_group) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::CreateDefaultRouter");
   auto delegate = std::make_shared<JniDelegate>(
       std::move(invoker), nullptr, nullptr, std::move(platform_views_provider),
       nullptr, std::move(window_metrics_provider), std::move(vsync_waiter),
       std::move(vm_init), std::move(hardware_buffer_provider),
-      std::move(vulkan_texture_provider), std::move(surface_control_provider));
+      std::move(vulkan_texture_provider), std::move(surface_control_provider),
+      std::move(engine_group_provider), std::move(engine_group));
   return std::make_shared<JniRouter>(std::move(delegate), legacy_delegate);
 }
 
@@ -2632,6 +2653,231 @@ void FlutterEmbedderNative::SetSurfaceControlProvider(
   if (jni_delegate_) {
     jni_delegate_->SetSurfaceControlProvider(surface_control_provider_);
   }
+}
+
+std::shared_ptr<AndroidEngineGroup> FlutterEmbedderNative::GetEngineGroup()
+    const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetEngineGroup");
+  std::scoped_lock lock(engine_group_mutex_);
+  return engine_group_;
+}
+
+void FlutterEmbedderNative::SetEngineGroup(
+    std::shared_ptr<AndroidEngineGroup> group) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetEngineGroup");
+  {
+    std::scoped_lock lock(engine_group_mutex_);
+    engine_group_ = group;
+  }
+  if (jni_delegate_) {
+    jni_delegate_->SetEngineGroup(group);
+  }
+}
+
+std::shared_ptr<AndroidEngineGroupProvider>
+FlutterEmbedderNative::GetEngineGroupProvider() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetEngineGroupProvider");
+  std::scoped_lock lock(engine_group_provider_mutex_);
+  return engine_group_provider_;
+}
+
+void FlutterEmbedderNative::SetEngineGroupProvider(
+    std::shared_ptr<AndroidEngineGroupProvider> provider) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetEngineGroupProvider");
+  std::shared_ptr<AndroidEngineGroup> group;
+  {
+    std::scoped_lock lock(engine_group_provider_mutex_, engine_group_mutex_);
+    engine_group_provider_ = provider;
+    group = engine_group_;
+  }
+  if (group) {
+    group->SetProvider(provider);
+  }
+  if (jni_delegate_) {
+    jni_delegate_->SetEngineGroupProvider(provider);
+  }
+}
+
+FLUTTER_API_SYMBOL(FlutterEngine)
+FlutterEmbedderNative::SpawnEngine(FLUTTER_API_SYMBOL(FlutterEngine)
+                                       parent_engine,
+                                   const AndroidEngineSpawnArgs& args) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SpawnEngine", "entrypoint",
+               args.entrypoint.c_str());
+  std::shared_ptr<AndroidEngineGroup> group;
+  std::shared_ptr<AndroidEngineGroupProvider> provider;
+  {
+    std::scoped_lock lock(engine_group_mutex_, engine_group_provider_mutex_);
+    group = engine_group_;
+    provider = engine_group_provider_;
+  }
+  if (group) {
+    return group->SpawnEngine(parent_engine, args);
+  }
+  if (!parent_engine || !provider) {
+    return nullptr;
+  }
+  AndroidEngineGroupSpawnConfigHolder holder;
+  holder.Build(args);
+  FLUTTER_API_SYMBOL(FlutterEngine) spawned_engine = nullptr;
+  if (provider->SpawnEngine(parent_engine, holder.GetSpawnConfig(),
+                            &spawned_engine) == kSuccess) {
+    return spawned_engine;
+  }
+  return nullptr;
+}
+
+int64_t FlutterEmbedderNative::SpawnEngine(
+    int64_t parent_engine_id,
+    const AndroidEngineSpawnArgs& args) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SpawnEngine(id)",
+               "entrypoint", args.entrypoint.c_str());
+  if (jni_router_) {
+    return jni_router_->RouteSpawnEngine(parent_engine_id, args);
+  }
+  std::shared_ptr<AndroidEngineGroup> group;
+  {
+    std::scoped_lock lock(engine_group_mutex_);
+    group = engine_group_;
+  }
+  if (group) {
+    auto handle = group->SpawnEngine(parent_engine_id, args);
+    if (handle) {
+      auto id_opt = group->GetEngineId(handle);
+      return id_opt.value_or(args.engine_id != 0 ? args.engine_id : 0);
+    }
+  }
+  return 0;
+}
+
+FLUTTER_API_SYMBOL(FlutterEngine)
+FlutterEmbedderNative::SpawnEngine(FLUTTER_API_SYMBOL(FlutterEngine)
+                                       parent_engine,
+                                   const FlutterEngineSpawnConfig* config,
+                                   int64_t engine_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::SpawnEngine(config)",
+               "engine_id", std::to_string(engine_id).c_str());
+  if (!parent_engine || !config ||
+      config->struct_size < sizeof(FlutterEngineSpawnConfig)) {
+    return nullptr;
+  }
+  std::shared_ptr<AndroidEngineGroup> group;
+  std::shared_ptr<AndroidEngineGroupProvider> provider;
+  {
+    std::scoped_lock lock(engine_group_mutex_, engine_group_provider_mutex_);
+    group = engine_group_;
+    provider = engine_group_provider_;
+  }
+  if (group) {
+    return group->SpawnEngineWithConfig(parent_engine, config, engine_id);
+  }
+  if (!provider) {
+    return nullptr;
+  }
+  FLUTTER_API_SYMBOL(FlutterEngine) spawned_engine = nullptr;
+  if (provider->SpawnEngine(parent_engine, config, &spawned_engine) ==
+      kSuccess) {
+    return spawned_engine;
+  }
+  return nullptr;
+}
+
+FlutterEngineResult FlutterEmbedderNative::SpawnEngine(
+    FLUTTER_API_SYMBOL(FlutterEngine) parent_engine,
+    const FlutterEngineSpawnConfig* config,
+    FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::SpawnEngine(raw)");
+  if (!parent_engine || !config || !engine_out ||
+      config->struct_size < sizeof(FlutterEngineSpawnConfig)) {
+    return kInvalidArguments;
+  }
+  std::shared_ptr<AndroidEngineGroup> group;
+  std::shared_ptr<AndroidEngineGroupProvider> provider;
+  {
+    std::scoped_lock lock(engine_group_mutex_, engine_group_provider_mutex_);
+    group = engine_group_;
+    provider = engine_group_provider_;
+  }
+  if (group) {
+    *engine_out = group->SpawnEngineWithConfig(parent_engine, config);
+    return *engine_out ? kSuccess : kInvalidArguments;
+  }
+  if (!provider) {
+    return kInternalInconsistency;
+  }
+  return provider->SpawnEngine(parent_engine, config, engine_out);
+}
+
+FlutterEngineResult FlutterEmbedderNative::ShutdownEngine(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine) const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::ShutdownEngine");
+  if (!engine) {
+    return kInvalidArguments;
+  }
+  std::shared_ptr<AndroidEngineGroup> group;
+  std::shared_ptr<AndroidEngineGroupProvider> provider;
+  {
+    std::scoped_lock lock(engine_group_mutex_, engine_group_provider_mutex_);
+    group = engine_group_;
+    provider = engine_group_provider_;
+  }
+  if (group) {
+    return group->ShutdownEngine(engine) ? kSuccess : kInvalidArguments;
+  }
+  if (provider) {
+    return provider->ShutdownEngine(engine);
+  }
+  return kInternalInconsistency;
+}
+
+bool FlutterEmbedderNative::ShutdownSpawnedEngine(int64_t engine_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::ShutdownSpawnedEngine",
+               "engine_id", std::to_string(engine_id).c_str());
+  if (jni_router_) {
+    return jni_router_->RouteShutdownSpawnedEngine(engine_id);
+  }
+  std::shared_ptr<AndroidEngineGroup> group;
+  {
+    std::scoped_lock lock(engine_group_mutex_);
+    group = engine_group_;
+  }
+  if (group) {
+    return group->ShutdownEngine(engine_id);
+  }
+  return false;
+}
+
+bool FlutterEmbedderNative::OnEngineGarbageCollected(int64_t engine_id) const {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::OnEngineGarbageCollected",
+               "engine_id", std::to_string(engine_id).c_str());
+  if (jni_router_) {
+    return jni_router_->RouteOnEngineGarbageCollected(engine_id);
+  }
+  std::shared_ptr<AndroidEngineGroup> group;
+  {
+    std::scoped_lock lock(engine_group_mutex_);
+    group = engine_group_;
+  }
+  if (group) {
+    return group->OnEngineGarbageCollected(engine_id);
+  }
+  return false;
+}
+
+size_t FlutterEmbedderNative::GetActiveEngineCount() const {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::GetActiveEngineCount");
+  if (jni_router_) {
+    return jni_router_->RouteGetActiveEngineCount();
+  }
+  std::shared_ptr<AndroidEngineGroup> group;
+  {
+    std::scoped_lock lock(engine_group_mutex_);
+    group = engine_group_;
+  }
+  if (group) {
+    return group->GetActiveEngineCount();
+  }
+  return 0;
 }
 
 }  // namespace android
