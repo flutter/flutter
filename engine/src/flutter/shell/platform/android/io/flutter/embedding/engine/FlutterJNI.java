@@ -846,6 +846,19 @@ public class FlutterJNI {
 
   // ----- End Render Surface Support -----
 
+  @SuppressWarnings("unused")
+  @UiThread
+  public void onViewportMetrics(long viewId, double width, double height, double devicePixelRatio) {
+    // Callback invoked when embedder sends viewport metrics.
+  }
+
+  @SuppressWarnings("unused")
+  @UiThread
+  public void onDisplayMetrics(
+      long displayId, double refreshRate, double width, double height, double devicePixelRatio) {
+    // Callback invoked when embedder sends display metrics.
+  }
+
   // ------ Start Touch Interaction Support ---
   /** Sends a packet of pointer data to Flutter's engine. */
   @UiThread
