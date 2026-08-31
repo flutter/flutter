@@ -1237,23 +1237,19 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       IsCompatibleWithSDFRendering(paint)) {
-    auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
-        round_superellipse.GetBounds(), round_superellipse.GetRadii());
+    // Try to draw using UberSDF.
+    auto params = UberSDFParameters::MakeRoundedSuperellipse(
+        /*color=*/paint.color, /*round_superellipse=*/round_superellipse,
+        /*stroke=*/paint.GetStroke());
 
-    if (round_superellipse_params.all_corners_same) {
-      auto params = UberSDFParameters::MakeRoundedSuperellipse(
-          /*color=*/paint.color,
-          /*bounds=*/round_superellipse.GetBounds(),
-          /*round_superellipse_params=*/round_superellipse_params,
-          /*stroke=*/paint.GetStroke());
-
-      AddRenderSDFEntityToCurrentPass(paint, params);
+    if (params) {
+      AddRenderSDFEntityToCurrentPass(paint, *params);
       return;
     } else {
+      // Fall back to ComplexRoundSuperellipse.
       auto contents = ComplexRoundedSuperellipseContents::Make(
           /*color=*/paint.color_source ? Color::White() : paint.color,
-          /*bounds=*/round_superellipse.GetBounds(),
-          /*round_superellipse_params=*/round_superellipse_params,
+          /*round_superellipse=*/round_superellipse,
           /*stroke=*/paint.GetStroke());
 
       const Geometry* geom = contents->GetGeometry();
@@ -1890,6 +1886,8 @@ void Canvas::SaveLayer(const Paint& paint,
                   FilterInput::Make(std::move(input_texture)));
     backdrop_filter_contents->SetEffectTransform(
         transform_stack_.back().transform.Basis());
+    backdrop_filter_contents->SetLocalToPassTransform(
+        transform_stack_.back().transform);
     backdrop_filter_contents->SetRenderingMode(
         transform_stack_.back().transform.HasTranslation()
             ? Entity::RenderingMode::kSubpassPrependSnapshotTransform
@@ -2142,15 +2140,9 @@ bool Canvas::AttemptBlurredTextOptimization(
           FilterInput::Make(text_contents),
           /*is_solid_color=*/true, GetCurrentTransform());
 
-  std::optional<Glyph> maybe_glyph = text_frame->AsSingleGlyph();
-  TextFrameFingerprint fingerprint =
-      maybe_glyph.has_value()
-          ? TextFrameFingerprint{.full_hash = PackGlyphId(maybe_glyph.value())}
-          : ComputeTextFrameFingerprint(*text_frame);
+  TextFrameFingerprint fingerprint = ComputeTextFrameFingerprint(*text_frame);
   TextShadowCache::TextShadowCacheKey cache_key(
       /*p_max_basis=*/entity.GetTransform().GetMaxBasisLengthXY(),
-      /*p_is_single_glyph=*/maybe_glyph.has_value(),
-      /*p_font=*/text_frame->GetFont(),
       /*p_sigma=*/paint.mask_blur_descriptor->sigma,
       /*p_color=*/paint.color,
       /*p_fingerprint=*/fingerprint);
@@ -2174,7 +2166,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
   Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
-  if (max_scale * text_frame->GetFont().GetMetrics().point_size >
+  if (max_scale * text_frame->GetRuns()[0].GetFont().GetMetrics().point_size >
       kMaxTextScale) {
     fml::StatusOr<flutter::DlPath> path = text_frame->GetPath();
     if (path.ok()) {
