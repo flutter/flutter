@@ -1,10 +1,14 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
+import 'package:path/path.dart' as path;
 
 import '../framework/devices.dart';
 import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
-import 'package:path/path.dart' as path;
 
 TaskFunction createAndroidIntentFlagsTest() {
   return () async {
@@ -13,10 +17,12 @@ TaskFunction createAndroidIntentFlagsTest() {
     final String deviceId = device.deviceId;
     final String testDirectory = path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ui');
 
+    const String testPackageName = 'com.yourcompany.integration_ui';
+    const String mainActivityName = '$testPackageName/.MainActivity';
+
     Future<void> testMode({required String mode, required bool expectVerbose}) async {
-      print('\n--- Testing $mode mode ---');
+      print('--- Testing $mode mode ---');
       await inDirectory<void>(testDirectory, () async {
-        // Build the APK
         await exec('flutter', <String>['build', 'apk', '--$mode']);
         final String apkPath = path.join('build', 'app', 'outputs', 'flutter-apk', 'app-$mode.apk');
 
@@ -25,14 +31,11 @@ TaskFunction createAndroidIntentFlagsTest() {
           '-s',
           deviceId,
           'uninstall',
-          'com.yourcompany.integration_ui',
+          testPackageName,
         ], canFail: true);
         await exec('adb', <String>['-s', deviceId, 'install', '-r', apkPath]);
-
-        // Clear logcat
         await exec('adb', <String>['-s', deviceId, 'logcat', '-c']);
 
-        // Launch via intent with verbose-logging flag
         await exec('adb', <String>[
           '-s',
           deviceId,
@@ -40,7 +43,7 @@ TaskFunction createAndroidIntentFlagsTest() {
           'am',
           'start',
           '-n',
-          'com.yourcompany.integration_ui/.MainActivity',
+          mainActivityName,
           '-a',
           'android.intent.action.RUN',
           '--ez',
