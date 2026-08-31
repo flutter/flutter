@@ -50,6 +50,7 @@ import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
+import io.flutter.embedding.engine.flags.FlutterEngineFlagsProviderImpl;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
@@ -1042,8 +1043,18 @@ public class FlutterActivity extends Activity
    */
   @NonNull
   @Override
+  public List<String> getFlutterEngineFlags() {
+    return FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(getIntent());
+  }
+
+  @NonNull
+  @Override
+  @Deprecated
   public FlutterShellArgs getFlutterShellArgs() {
-    return io.flutter.embedding.engine.launchargs.FlutterLaunchArgsSupport.toFlutterShellArgs(getIntent());
+    Log.w(
+        TAG,
+        "FlutterShellArgs is deprecated. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries");
+    return new FlutterShellArgs(getFlutterEngineFlags());
   }
 
   /**

@@ -1119,8 +1119,19 @@ import java.util.Set;
     @NonNull
     Lifecycle getLifecycle();
 
-    /** Returns the {@link FlutterShellArgs} that should be used when initializing Flutter. */
+    /** Returns the engine arguments that should be used when initializing Flutter. */
     @NonNull
+    default List<String> getFlutterEngineFlags() {
+      return Arrays.asList(getFlutterShellArgs().toArray());
+    }
+
+    /**
+     * Returns the {@link FlutterShellArgs} that should be used when initializing Flutter.
+     *
+     * @deprecated Use {@link #getFlutterEngineFlags()} instead.
+     */
+    @NonNull
+    @Deprecated
     FlutterShellArgs getFlutterShellArgs();
 
     /**

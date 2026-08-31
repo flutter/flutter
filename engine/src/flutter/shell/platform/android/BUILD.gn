@@ -263,11 +263,9 @@ android_java_sources = [
   "io/flutter/embedding/engine/dart/DartMessenger.java",
   "io/flutter/embedding/engine/dart/PlatformMessageHandler.java",
   "io/flutter/embedding/engine/dart/PlatformTaskQueue.java",
-  "io/flutter/embedding/engine/launchargs/FlutterLaunchArgs.java",
-  "io/flutter/embedding/engine/launchargs/FlutterLaunchArgsProvider.java",
-  "io/flutter/embedding/engine/launchargs/FlutterLaunchArgsSupport.java",
   "io/flutter/embedding/engine/deferredcomponents/DeferredComponentManager.java",
   "io/flutter/embedding/engine/deferredcomponents/PlayStoreDeferredComponentManager.java",
+  "io/flutter/embedding/engine/flags/FlutterEngineFlagsProvider.java",
   "io/flutter/embedding/engine/image/BitmapMetadataReader.java",
   "io/flutter/embedding/engine/image/ExifMetadataReader.java",
   "io/flutter/embedding/engine/image/FlutterImageDecoder.java",
@@ -397,10 +395,11 @@ android_java_sources = [
   "io/flutter/view/VsyncWaiter.java",
 ]
 
-if (flutter_runtime_mode == "release" || flutter_runtime_mode == "jit_release") {
-  android_java_sources += [ "../android_release/io/flutter/embedding/engine/launchargs/FlutterLaunchArgsProviderImpl.java" ]
+if (flutter_runtime_mode == "release" ||
+    flutter_runtime_mode == "jit_release") {
+  android_java_sources += [ "release/io/flutter/embedding/engine/flags/FlutterEngineFlagsProviderImpl.java" ]
 } else {
-  android_java_sources += [ "../android_debug/io/flutter/embedding/engine/launchargs/FlutterLaunchArgsProviderImpl.java" ]
+  android_java_sources += [ "debug/io/flutter/embedding/engine/flags/FlutterEngineFlagsProviderImpl.java" ]
 }
 
 embedding_dependencies_jars = [

@@ -32,6 +32,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -1353,10 +1354,19 @@ public class FlutterFragment extends Fragment
    */
   @Override
   @NonNull
-  public FlutterShellArgs getFlutterShellArgs() {
+  public List<String> getFlutterEngineFlags() {
     String[] flutterShellArgsArray = getArguments().getStringArray(ARG_FLUTTER_INITIALIZATION_ARGS);
-    return new FlutterShellArgs(
-        flutterShellArgsArray != null ? flutterShellArgsArray : new String[] {});
+    return Arrays.asList(flutterShellArgsArray != null ? flutterShellArgsArray : new String[] {});
+  }
+
+  @Override
+  @NonNull
+  @Deprecated
+  public FlutterShellArgs getFlutterShellArgs() {
+    Log.w(
+        TAG,
+        "FlutterShellArgs is deprecated. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries");
+    return new FlutterShellArgs(getFlutterEngineFlags());
   }
 
   /**
