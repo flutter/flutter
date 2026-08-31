@@ -1098,7 +1098,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// This constructor overrides the [debugPrint] global hook to point to
   /// [debugPrintOverride], which can be overridden by subclasses.
   TestWidgetsFlutterBinding()
-    : platformDispatcher = TestPlatformDispatcher(platformDispatcher: PlatformDispatcher.instance) {
+    : // The dispatcher is wrapped by debugApplyViewMetricsOverrides first, so
+      // that debugViewMetricsOverrides applies in widget tests the same way it
+      // does in a running application. BindingBase.platformDispatcher, which
+      // normally installs that wrapper, is overridden here.
+      platformDispatcher = TestPlatformDispatcher(
+        platformDispatcher: debugApplyViewMetricsOverrides(PlatformDispatcher.instance),
+      ) {
     platformDispatcher.defaultRouteNameTestValue = '/';
     debugPrint = debugPrintOverride;
     debugDisableShadows = disableShadows;

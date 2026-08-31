@@ -1414,6 +1414,73 @@ void main() {
     testedExtensions.add(FoundationServiceExtensions.brightnessOverride.name);
   });
 
+  test('Service extensions - viewMetricsOverride', () async {
+    final int viewId = binding.platformDispatcher.views.single.viewId;
+    addTearDown(debugClearViewMetricsOverrides);
+
+    // Reading with no override installed.
+    Map<String, dynamic> result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '$viewId'},
+    );
+    expect(result['overrides'], <String, Object?>{});
+    expect(result['overriddenViewIds'], <int>[]);
+
+    // Installing an override.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"boldText": true, "devicePixelRatio": 3.5}',
+      },
+    );
+    expect(result['overrides'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+    expect(result['overriddenViewIds'], <int>[viewId]);
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(devicePixelRatio: 3.5, boldText: true),
+    );
+
+    // Reading it back.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '$viewId'},
+    );
+    expect(result['overrides'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+
+    // A malformed payload is rejected and leaves the installed override alone.
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"devicePixelRatio": 0}',
+      }),
+      throwsA(isA<FormatException>()),
+    );
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(devicePixelRatio: 3.5, boldText: true),
+    );
+
+    // An unparsable viewId is rejected.
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'viewId': 'not-a-number',
+      }),
+      throwsA(isA<Exception>()),
+    );
+
+    // Clearing everything.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'clearAll': 'true'},
+    );
+    expect(result['overrides'], <String, Object?>{});
+    expect(result['overriddenViewIds'], <int>[]);
+    expect(debugViewMetricsOverrides, isEmpty);
+
+    testedExtensions.add(FoundationServiceExtensions.viewMetricsOverride.name);
+  });
+
   test('Service extensions - activeDevToolsServerAddress', () async {
     Map<String, dynamic> result;
     result = await binding.testExtension(

@@ -1,0 +1,873 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+/// An override in which every metric is set, and set to something other than
+/// what the test environment reports, so that a metric that fails to round trip
+/// or to compare cannot hide behind a coincidence.
+const DebugViewMetricsOverride _fullyPopulated = DebugViewMetricsOverride(
+  devicePixelRatio: 3.5,
+  physicalSize: ui.Size(1170, 2532),
+  textScaleFactor: 1.75,
+  platformBrightness: ui.Brightness.dark,
+  padding: DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4),
+  viewPadding: DebugViewPadding(left: 5, top: 6, right: 7, bottom: 8),
+  viewInsets: DebugViewPadding(left: 9, top: 10, right: 11, bottom: 12),
+  alwaysUse24HourFormat: true,
+  accessibleNavigation: true,
+  invertColors: true,
+  disableAnimations: true,
+  boldText: true,
+  reduceMotion: true,
+  highContrast: true,
+  onOffSwitchLabels: true,
+  supportsAnnounce: false,
+  autoPlayAnimatedImages: false,
+  autoPlayVideos: false,
+  deterministicCursor: true,
+);
+
+/// Every metric [_fullyPopulated] sets, paired with a way to change just that
+/// one metric.
+///
+/// Used as the completeness guard: a metric that is threaded through the
+/// constructor but forgotten in `copyWith`, `toJson`, `fromJson` or `==` shows
+/// up here rather than as a metric that quietly never applies.
+final Map<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> _perMetricChange =
+    <String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)>{
+      'devicePixelRatio': (DebugViewMetricsOverride o) => o.copyWith(devicePixelRatio: 2.0),
+      'physicalSize': (DebugViewMetricsOverride o) =>
+          o.copyWith(physicalSize: const ui.Size(10, 20)),
+      'textScaleFactor': (DebugViewMetricsOverride o) => o.copyWith(textScaleFactor: 0.5),
+      'platformBrightness': (DebugViewMetricsOverride o) =>
+          o.copyWith(platformBrightness: ui.Brightness.light),
+      'padding': (DebugViewMetricsOverride o) =>
+          o.copyWith(padding: const DebugViewPadding.all(99)),
+      'viewPadding': (DebugViewMetricsOverride o) =>
+          o.copyWith(viewPadding: const DebugViewPadding.all(99)),
+      'viewInsets': (DebugViewMetricsOverride o) =>
+          o.copyWith(viewInsets: const DebugViewPadding.all(99)),
+      'alwaysUse24HourFormat': (DebugViewMetricsOverride o) =>
+          o.copyWith(alwaysUse24HourFormat: false),
+      'accessibleNavigation': (DebugViewMetricsOverride o) =>
+          o.copyWith(accessibleNavigation: false),
+      'invertColors': (DebugViewMetricsOverride o) => o.copyWith(invertColors: false),
+      'disableAnimations': (DebugViewMetricsOverride o) => o.copyWith(disableAnimations: false),
+      'boldText': (DebugViewMetricsOverride o) => o.copyWith(boldText: false),
+      'reduceMotion': (DebugViewMetricsOverride o) => o.copyWith(reduceMotion: false),
+      'highContrast': (DebugViewMetricsOverride o) => o.copyWith(highContrast: false),
+      'onOffSwitchLabels': (DebugViewMetricsOverride o) => o.copyWith(onOffSwitchLabels: false),
+      'supportsAnnounce': (DebugViewMetricsOverride o) => o.copyWith(supportsAnnounce: true),
+      'autoPlayAnimatedImages': (DebugViewMetricsOverride o) =>
+          o.copyWith(autoPlayAnimatedImages: true),
+      'autoPlayVideos': (DebugViewMetricsOverride o) => o.copyWith(autoPlayVideos: true),
+      'deterministicCursor': (DebugViewMetricsOverride o) => o.copyWith(deterministicCursor: false),
+    };
+
+/// A [ui.PlatformDispatcher] with two views, so that per-view resolution can be
+/// tested: the engine the framework's own tests run against only ever has one.
+class _TwoViewPlatformDispatcher implements ui.PlatformDispatcher {
+  _TwoViewPlatformDispatcher() {
+    _views[1] = _FakeView(this, 1, 2.0);
+    _views[2] = _FakeView(this, 2, 4.0);
+  }
+
+  final Map<int, _FakeView> _views = <int, _FakeView>{};
+
+  /// Stands in for `PlatformDispatcher._removeView`, which the engine calls
+  /// when a window is closed.
+  void removeView(int id) => _views.remove(id);
+
+  /// Stands in for `PlatformDispatcher._addView`.
+  void addView(int id, double devicePixelRatio) =>
+      _views[id] = _FakeView(this, id, devicePixelRatio);
+
+  @override
+  Iterable<ui.FlutterView> get views => _views.values;
+
+  @override
+  ui.FlutterView? view({required int id}) => _views[id];
+
+  @override
+  ui.FlutterView? get implicitView => _views[1];
+
+  @override
+  double get textScaleFactor => 1.0;
+
+  @override
+  double scaleFontSize(double unscaledFontSize) => unscaledFontSize;
+
+  @override
+  ui.Brightness get platformBrightness => ui.Brightness.light;
+
+  @override
+  bool get alwaysUse24HourFormat => false;
+
+  @override
+  ui.AccessibilityFeatures get accessibilityFeatures => const _NoAccessibilityFeatures();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
+}
+
+class _FakeView implements ui.FlutterView {
+  _FakeView(this.platformDispatcher, this.viewId, this.devicePixelRatio);
+
+  @override
+  List<ui.DisplayFeature> get displayFeatures => const <ui.DisplayFeature>[
+    ui.DisplayFeature(
+      bounds: ui.Rect.fromLTRB(20, 0, 30, 100),
+      type: ui.DisplayFeatureType.hinge,
+      state: ui.DisplayFeatureState.postureFlat,
+    ),
+  ];
+
+  @override
+  final ui.PlatformDispatcher platformDispatcher;
+
+  @override
+  final int viewId;
+
+  @override
+  final double devicePixelRatio;
+
+  @override
+  ui.Size get physicalSize => const ui.Size(100, 200);
+
+  @override
+  ui.ViewConstraints get physicalConstraints => const ui.ViewConstraints();
+
+  @override
+  ui.ViewPadding get padding => ui.ViewPadding.zero;
+
+  @override
+  ui.ViewPadding get viewInsets => ui.ViewPadding.zero;
+
+  @override
+  ui.ViewPadding get viewPadding => ui.ViewPadding.zero;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
+}
+
+class _NoAccessibilityFeatures implements ui.AccessibilityFeatures {
+  const _NoAccessibilityFeatures();
+
+  @override
+  bool get boldText => false;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
+}
+
+void main() {
+  group('DebugViewMetricsOverride', () {
+    test('an empty override overrides nothing', () {
+      expect(const DebugViewMetricsOverride().isEmpty, isTrue);
+      expect(const DebugViewMetricsOverride(devicePixelRatio: 2.0).isEmpty, isFalse);
+      expect(const DebugViewMetricsOverride(boldText: false).isEmpty, isFalse);
+      expect(_fullyPopulated.isEmpty, isFalse);
+    });
+
+    test('is usable in a const expression', () {
+      // Identical, not just equal: two const expressions with the same
+      // arguments are canonicalized to the same instance only if they really
+      // were evaluated at compile time. This pins the constructor's asserts to
+      // expressions that a const evaluation can perform, which `Size.isFinite`
+      // and the like cannot.
+      const copy = DebugViewMetricsOverride(
+        devicePixelRatio: 3.5,
+        physicalSize: ui.Size(1170, 2532),
+        textScaleFactor: 1.75,
+        platformBrightness: ui.Brightness.dark,
+        padding: DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4),
+        viewPadding: DebugViewPadding(left: 5, top: 6, right: 7, bottom: 8),
+        viewInsets: DebugViewPadding(left: 9, top: 10, right: 11, bottom: 12),
+        alwaysUse24HourFormat: true,
+        accessibleNavigation: true,
+        invertColors: true,
+        disableAnimations: true,
+        boldText: true,
+        reduceMotion: true,
+        highContrast: true,
+        onOffSwitchLabels: true,
+        supportsAnnounce: false,
+        autoPlayAnimatedImages: false,
+        autoPlayVideos: false,
+        deterministicCursor: true,
+      );
+      expect(identical(copy, _fullyPopulated), isTrue);
+    });
+
+    test('rejects a device pixel ratio that would break layout', () {
+      expect(() => DebugViewMetricsOverride(devicePixelRatio: 0.0), throwsAssertionError);
+      expect(() => DebugViewMetricsOverride(devicePixelRatio: -1.0), throwsAssertionError);
+      expect(
+        () => DebugViewMetricsOverride(devicePixelRatio: double.infinity),
+        throwsAssertionError,
+      );
+      expect(() => DebugViewMetricsOverride(devicePixelRatio: double.nan), throwsAssertionError);
+    });
+
+    test('rejects a text scale factor that would break text layout', () {
+      expect(() => DebugViewMetricsOverride(textScaleFactor: -1.0), throwsAssertionError);
+      expect(
+        () => DebugViewMetricsOverride(textScaleFactor: double.infinity),
+        throwsAssertionError,
+      );
+      expect(() => DebugViewMetricsOverride(textScaleFactor: double.nan), throwsAssertionError);
+      // Zero is a legitimate setting: it hides text entirely.
+      expect(const DebugViewMetricsOverride(textScaleFactor: 0.0).textScaleFactor, 0.0);
+    });
+
+    test('copyWith replaces only what it is given', () {
+      const original = DebugViewMetricsOverride(devicePixelRatio: 2.0, boldText: true);
+      expect(original.copyWith(boldText: false).devicePixelRatio, 2.0);
+      expect(original.copyWith(boldText: false).boldText, isFalse);
+      // A null argument means "leave it alone", not "clear it".
+      expect(original.copyWith().boldText, isTrue);
+    });
+
+    test('equality covers every metric', () {
+      expect(_fullyPopulated, equals(_fullyPopulated.copyWith()));
+      expect(_fullyPopulated.hashCode, _fullyPopulated.copyWith().hashCode);
+      expect(const DebugViewMetricsOverride(), equals(const DebugViewMetricsOverride()));
+      expect(_fullyPopulated, isNot(equals(const DebugViewMetricsOverride())));
+      for (final MapEntry<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> entry
+          in _perMetricChange.entries) {
+        expect(
+          entry.value(_fullyPopulated),
+          isNot(equals(_fullyPopulated)),
+          reason: 'Changing ${entry.key} did not change equality.',
+        );
+      }
+    });
+
+    test('debugFillProperties lists every overridden metric', () {
+      List<String> shownNames(DebugViewMetricsOverride override) {
+        final builder = DiagnosticPropertiesBuilder();
+        override.debugFillProperties(builder);
+        return builder.properties
+            .where((DiagnosticsNode node) => node.level.index >= DiagnosticLevel.info.index)
+            .map((DiagnosticsNode node) => node.name!)
+            .toList();
+      }
+
+      expect(shownNames(_fullyPopulated), unorderedEquals(_perMetricChange.keys));
+      // Metrics that are not overridden are not shown at all.
+      expect(shownNames(const DebugViewMetricsOverride()), isEmpty);
+      expect(shownNames(const DebugViewMetricsOverride(boldText: false)), <String>['boldText']);
+    });
+  });
+
+  group('DebugViewMetricsOverride serialization', () {
+    test('round trips every metric and emits exactly the expected keys', () {
+      final Map<String, Object?> json = _fullyPopulated.toJson();
+      expect(json.keys, unorderedEquals(_perMetricChange.keys));
+      expect(DebugViewMetricsOverride.fromJson(json), equals(_fullyPopulated));
+
+      // Each individually changed metric survives a round trip too, which
+      // catches a metric that is serialized but read back into the wrong field.
+      for (final MapEntry<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> entry
+          in _perMetricChange.entries) {
+        final DebugViewMetricsOverride changed = entry.value(_fullyPopulated);
+        expect(
+          DebugViewMetricsOverride.fromJson(changed.toJson()),
+          equals(changed),
+          reason: '${entry.key} did not survive a round trip.',
+        );
+      }
+    });
+
+    test('omits metrics that are not overridden', () {
+      expect(const DebugViewMetricsOverride().toJson(), isEmpty);
+      expect(const DebugViewMetricsOverride(boldText: false).toJson(), <String, Object?>{
+        'boldText': false,
+      });
+    });
+
+    test('an empty object is an empty override', () {
+      expect(DebugViewMetricsOverride.fromJson(const <String, Object?>{}).isEmpty, isTrue);
+    });
+
+    test('accepts integers where doubles are expected', () {
+      final override = DebugViewMetricsOverride.fromJson(const <String, Object?>{
+        'devicePixelRatio': 3,
+        'textScaleFactor': 2,
+        'physicalSize': <String, Object?>{'width': 100, 'height': 200},
+        'padding': <String, Object?>{'left': 1, 'top': 2, 'right': 3, 'bottom': 4},
+      });
+      expect(override.devicePixelRatio, 3.0);
+      expect(override.textScaleFactor, 2.0);
+      expect(override.physicalSize, const ui.Size(100, 200));
+      expect(override.padding, const DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4));
+    });
+
+    test('rejects unknown metrics rather than silently dropping them', () {
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <String, Object?>{'boldTextt': true}),
+        throwsA(
+          isA<FormatException>().having(
+            (FormatException e) => e.message,
+            'message',
+            contains('boldTextt'),
+          ),
+        ),
+      );
+    });
+
+    test('rejects values of the wrong type', () {
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <String, Object?>{'devicePixelRatio': '3.0'}),
+        throwsFormatException,
+      );
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <String, Object?>{'boldText': 'true'}),
+        throwsFormatException,
+      );
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <String, Object?>{'physicalSize': 100}),
+        throwsFormatException,
+      );
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'physicalSize': <String, Object?>{'width': 100},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <String, Object?>{'padding': 4}),
+        throwsFormatException,
+      );
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'padding': <String, Object?>{'left': 1, 'top': 2, 'right': 3},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'platformBrightness': 'DARK',
+        }),
+        throwsFormatException,
+      );
+    });
+
+    test('rejects out of range values', () {
+      for (final value in <Object>[0, -1, double.infinity, double.nan]) {
+        expect(
+          () => DebugViewMetricsOverride.fromJson(<String, Object?>{'devicePixelRatio': value}),
+          throwsFormatException,
+          reason: 'devicePixelRatio: $value was accepted.',
+        );
+      }
+      for (final value in <Object>[-1, double.infinity, double.nan]) {
+        expect(
+          () => DebugViewMetricsOverride.fromJson(<String, Object?>{'textScaleFactor': value}),
+          throwsFormatException,
+          reason: 'textScaleFactor: $value was accepted.',
+        );
+        expect(
+          () => DebugViewMetricsOverride.fromJson(<String, Object?>{
+            'physicalSize': <String, Object?>{'width': value, 'height': 100},
+          }),
+          throwsFormatException,
+          reason: 'physicalSize.width: $value was accepted.',
+        );
+        expect(
+          () => DebugViewMetricsOverride.fromJson(<String, Object?>{
+            'physicalSize': <String, Object?>{'width': 100, 'height': value},
+          }),
+          throwsFormatException,
+          reason: 'physicalSize.height: $value was accepted.',
+        );
+        for (final edge in <String>['left', 'top', 'right', 'bottom']) {
+          expect(
+            () => DebugViewMetricsOverride.fromJson(<String, Object?>{
+              'viewInsets': <String, Object?>{
+                'left': 0,
+                'top': 0,
+                'right': 0,
+                'bottom': 0,
+                edge: value,
+              },
+            }),
+            throwsFormatException,
+            reason: 'viewInsets.$edge: $value was accepted.',
+          );
+        }
+      }
+      // Zero extents are legal, they just mean "nothing there".
+      expect(
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'physicalSize': <String, Object?>{'width': 0, 'height': 0},
+        }).physicalSize,
+        ui.Size.zero,
+      );
+    });
+  });
+
+  group('DebugViewPadding', () {
+    test('defaults every edge to zero', () {
+      // Deliberately not DebugViewPadding.zero: the point is that the unnamed
+      // constructor defaults every edge, which is what makes them equal.
+      // ignore: use_named_constants
+      const padding = DebugViewPadding();
+      expect(padding.left, 0.0);
+      expect(padding.top, 0.0);
+      expect(padding.right, 0.0);
+      expect(padding.bottom, 0.0);
+      expect(padding, DebugViewPadding.zero);
+      expect(const DebugViewPadding.all(3).bottom, 3.0);
+    });
+
+    test('is a ui.ViewPadding with value equality', () {
+      const padding = DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4);
+      expect(padding, isA<ui.ViewPadding>());
+      expect(padding, const DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4));
+      expect(
+        padding.hashCode,
+        const DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4).hashCode,
+      );
+      expect(padding, isNot(const DebugViewPadding(left: 1, top: 2, right: 3, bottom: 5)));
+    });
+  });
+
+  group('debugViewMetricsOverrides', () {
+    tearDown(debugClearViewMetricsOverrides);
+
+    test('starts empty and cannot be mutated directly', () {
+      expect(debugViewMetricsOverrides, isEmpty);
+      expect(
+        () => debugViewMetricsOverrides[0] = const DebugViewMetricsOverride(boldText: true),
+        throwsUnsupportedError,
+      );
+      expect(() => debugViewMetricsOverrides.clear(), throwsUnsupportedError);
+    });
+
+    test('reports whether anything actually changed', () {
+      const override = DebugViewMetricsOverride(boldText: true);
+      expect(debugSetViewMetricsOverride(7, override), isTrue);
+      expect(debugViewMetricsOverrides, <int, DebugViewMetricsOverride>{7: override});
+
+      // Setting an equal but distinct instance is not a change.
+      expect(
+        debugSetViewMetricsOverride(7, const DebugViewMetricsOverride(boldText: true)),
+        isFalse,
+      );
+      expect(
+        debugSetViewMetricsOverride(7, const DebugViewMetricsOverride(boldText: false)),
+        isTrue,
+      );
+
+      expect(debugSetViewMetricsOverride(7, null), isTrue);
+      expect(debugSetViewMetricsOverride(7, null), isFalse);
+      expect(debugViewMetricsOverrides, isEmpty);
+    });
+
+    test('an empty override removes the entry rather than storing it', () {
+      expect(
+        debugSetViewMetricsOverride(7, const DebugViewMetricsOverride(boldText: true)),
+        isTrue,
+      );
+      expect(debugSetViewMetricsOverride(7, const DebugViewMetricsOverride()), isTrue);
+      expect(debugViewMetricsOverrides, isEmpty);
+      // ...and installing an empty override where there was none is a no-op.
+      expect(debugSetViewMetricsOverride(7, const DebugViewMetricsOverride()), isFalse);
+    });
+
+    test('keeps views independent', () {
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(boldText: true));
+      debugSetViewMetricsOverride(2, const DebugViewMetricsOverride(highContrast: true));
+      expect(debugViewMetricsOverrides[1]!.boldText, isTrue);
+      expect(debugViewMetricsOverrides[1]!.highContrast, isNull);
+      expect(debugViewMetricsOverrides[2]!.boldText, isNull);
+      expect(debugViewMetricsOverrides[2]!.highContrast, isTrue);
+    });
+
+    test('debugClearViewMetricsOverrides reports whether anything was removed', () {
+      expect(debugClearViewMetricsOverrides(), isFalse);
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(boldText: true));
+      debugSetViewMetricsOverride(2, const DebugViewMetricsOverride(boldText: true));
+      expect(debugClearViewMetricsOverrides(), isTrue);
+      expect(debugViewMetricsOverrides, isEmpty);
+      expect(debugClearViewMetricsOverrides(), isFalse);
+    });
+
+    test('debugAssertAllFoundationVarsUnset treats a leftover override as a leak', () {
+      expect(debugAssertAllFoundationVarsUnset('leak'), isTrue);
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(boldText: true));
+      expect(() => debugAssertAllFoundationVarsUnset('leak'), throwsFlutterError);
+      debugClearViewMetricsOverrides();
+      expect(debugAssertAllFoundationVarsUnset('leak'), isTrue);
+    });
+  });
+
+  group('debugApplyViewMetricsOverrides', () {
+    test('is idempotent and stable', () {
+      final ui.PlatformDispatcher real = ui.PlatformDispatcher.instance;
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(real);
+      expect(wrapped, isNot(same(real)));
+      expect(debugApplyViewMetricsOverrides(real), same(wrapped));
+      expect(debugApplyViewMetricsOverrides(wrapped), same(wrapped));
+    });
+
+    test('vends views with a stable identity', () {
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(
+        ui.PlatformDispatcher.instance,
+      );
+      final ui.FlutterView implicitView = wrapped.implicitView!;
+      expect(wrapped.implicitView, same(implicitView));
+      expect(wrapped.view(id: implicitView.viewId), same(implicitView));
+      expect(wrapped.views, contains(same(implicitView)));
+      expect(implicitView, isNot(same(ui.PlatformDispatcher.instance.implicitView)));
+
+      // Installing and removing an override does not change it: RenderView and
+      // the widgets layer hold on to view objects and compare them by identity.
+      debugSetViewMetricsOverride(
+        implicitView.viewId,
+        const DebugViewMetricsOverride(devicePixelRatio: 7.0),
+      );
+      expect(wrapped.implicitView, same(implicitView));
+      debugClearViewMetricsOverrides();
+      expect(wrapped.implicitView, same(implicitView));
+    });
+
+    test('returns null for a view that does not exist', () {
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(
+        ui.PlatformDispatcher.instance,
+      );
+      expect(wrapped.view(id: 123456), isNull);
+    });
+  });
+
+  group('the wrapper delegates when nothing is overridden', () {
+    late ui.PlatformDispatcher real;
+    late ui.PlatformDispatcher wrapped;
+    late ui.FlutterView realView;
+    late ui.FlutterView wrappedView;
+
+    setUp(() {
+      real = ui.PlatformDispatcher.instance;
+      wrapped = debugApplyViewMetricsOverrides(real);
+      realView = real.implicitView!;
+      wrappedView = wrapped.implicitView!;
+      expect(debugViewMetricsOverrides, isEmpty);
+    });
+
+    test('every overridable PlatformDispatcher metric', () {
+      expect(wrapped.accessibilityFeatures, same(real.accessibilityFeatures));
+      expect(wrapped.alwaysUse24HourFormat, real.alwaysUse24HourFormat);
+      expect(wrapped.platformBrightness, real.platformBrightness);
+      expect(wrapped.textScaleFactor, real.textScaleFactor);
+      expect(wrapped.scaleFontSize(14.0), real.scaleFontSize(14.0));
+      expect(wrapped.scaleFontSize(14.5), real.scaleFontSize(14.5));
+    });
+
+    test('every forwarded PlatformDispatcher member', () {
+      expect(wrapped.defaultRouteName, real.defaultRouteName);
+      expect(wrapped.displays, real.displays);
+      expect(wrapped.engineId, real.engineId);
+      expect(wrapped.frameData.frameNumber, real.frameData.frameNumber);
+      expect(wrapped.initialLifecycleState, real.initialLifecycleState);
+      expect(wrapped.letterSpacingOverride, real.letterSpacingOverride);
+      expect(wrapped.lineHeightScaleFactorOverride, real.lineHeightScaleFactorOverride);
+      expect(wrapped.locale, real.locale);
+      expect(wrapped.locales, real.locales);
+      expect(wrapped.nativeSpellCheckServiceDefined, real.nativeSpellCheckServiceDefined);
+      expect(wrapped.brieflyShowPassword, real.brieflyShowPassword);
+      expect(wrapped.paragraphSpacingOverride, real.paragraphSpacingOverride);
+      expect(wrapped.semanticsEnabled, real.semanticsEnabled);
+      expect(wrapped.supportsShowingSystemContextMenu, real.supportsShowingSystemContextMenu);
+      expect(wrapped.systemFontFamily, real.systemFontFamily);
+      expect(wrapped.wordSpacingOverride, real.wordSpacingOverride);
+      expect(wrapped.views.length, real.views.length);
+      expect(
+        wrapped.views.map((ui.FlutterView view) => view.viewId),
+        real.views.map((ui.FlutterView view) => view.viewId),
+      );
+    });
+
+    test('callback registration goes straight through to the platform', () {
+      // The wrapper must not hold onto callbacks: the entries that
+      // debugSetViewMetricsOverride replays are read back off the real
+      // dispatcher, and the engine delivers real platform events to it.
+      void handler() {}
+      final ui.VoidCallback? previous = real.onSemanticsEnabledChanged;
+      addTearDown(() => real.onSemanticsEnabledChanged = previous);
+
+      wrapped.onSemanticsEnabledChanged = handler;
+      expect(real.onSemanticsEnabledChanged, same(handler));
+      expect(wrapped.onSemanticsEnabledChanged, same(handler));
+    });
+
+    test('every overridable FlutterView metric', () {
+      expect(wrappedView.viewId, realView.viewId);
+      expect(wrappedView.devicePixelRatio, realView.devicePixelRatio);
+      expect(wrappedView.physicalSize, realView.physicalSize);
+      expect(wrappedView.physicalConstraints, realView.physicalConstraints);
+      expect(wrappedView.padding, same(realView.padding));
+      expect(wrappedView.viewInsets, same(realView.viewInsets));
+      expect(wrappedView.viewPadding, same(realView.viewPadding));
+    });
+
+    test('every forwarded FlutterView member', () {
+      expect(wrappedView.display, same(realView.display));
+      expect(wrappedView.displayCornerRadii, realView.displayCornerRadii);
+      expect(wrappedView.gestureSettings, realView.gestureSettings);
+      expect(wrappedView.systemGestureInsets, same(realView.systemGestureInsets));
+      // Display features are only rewritten when the device pixel ratio is
+      // overridden; otherwise the platform's own list is handed straight back.
+      expect(wrappedView.displayFeatures, same(realView.displayFeatures));
+    });
+
+    test('the view reports a dispatcher that resolves that view', () {
+      // Not the same object as the wrapper the binding hands out: a view's
+      // dispatcher resolves the platform-wide metrics from that view's own
+      // override.
+      expect(wrappedView.platformDispatcher, isNot(same(wrapped)));
+      expect(wrappedView.platformDispatcher.textScaleFactor, real.textScaleFactor);
+      expect(wrappedView.platformDispatcher.implicitView, same(wrappedView));
+      expect(wrappedView.platformDispatcher.view(id: wrappedView.viewId), same(wrappedView));
+    });
+  });
+
+  group('the wrapper resolves each view separately', () {
+    tearDown(debugClearViewMetricsOverrides);
+
+    test('view metrics and platform metrics both follow the view they belong to', () {
+      final dispatcher = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
+      final ui.FlutterView first = wrapped.view(id: 1)!;
+      final ui.FlutterView second = wrapped.view(id: 2)!;
+
+      debugSetViewMetricsOverride(
+        1,
+        const DebugViewMetricsOverride(
+          devicePixelRatio: 7.0,
+          textScaleFactor: 3.0,
+          boldText: true,
+          platformBrightness: ui.Brightness.dark,
+        ),
+      );
+
+      expect(first.devicePixelRatio, 7.0);
+      expect(second.devicePixelRatio, 4.0);
+
+      // Metrics that dart:ui exposes on the dispatcher rather than on the view
+      // are resolved through the dispatcher each view reports, so they are
+      // per-view too.
+      expect(first.platformDispatcher.textScaleFactor, 3.0);
+      expect(second.platformDispatcher.textScaleFactor, 1.0);
+      expect(first.platformDispatcher.scaleFontSize(10.0), 30.0);
+      expect(second.platformDispatcher.scaleFontSize(10.0), 10.0);
+      expect(first.platformDispatcher.accessibilityFeatures.boldText, isTrue);
+      expect(second.platformDispatcher.accessibilityFeatures.boldText, isFalse);
+      expect(first.platformDispatcher.platformBrightness, ui.Brightness.dark);
+      expect(second.platformDispatcher.platformBrightness, ui.Brightness.light);
+
+      // The dispatcher that is not tied to a view resolves the implicit view's
+      // override, for consumers such as SemanticsBinding that have no view.
+      expect(wrapped.textScaleFactor, 3.0);
+      expect(wrapped.accessibilityFeatures.boldText, isTrue);
+
+      // Every dispatcher vends the same view wrappers.
+      expect(first.platformDispatcher.view(id: 2), same(second));
+      expect(second.platformDispatcher.implicitView, same(first));
+    });
+
+    test('follows views as they are added and removed', () {
+      final dispatcher = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
+      final ui.FlutterView second = wrapped.view(id: 2)!;
+      expect(wrapped.views.map((ui.FlutterView view) => view.viewId), <int>[1, 2]);
+
+      dispatcher.removeView(2);
+      expect(wrapped.view(id: 2), isNull);
+      expect(wrapped.views.map((ui.FlutterView view) => view.viewId), <int>[1]);
+      // A wrapper the framework is still holding keeps working; it reports what
+      // the view it wraps last reported.
+      expect(second.devicePixelRatio, 4.0);
+
+      dispatcher.addView(3, 6.0);
+      final ui.FlutterView third = wrapped.view(id: 3)!;
+      expect(third.devicePixelRatio, 6.0);
+      expect(wrapped.view(id: 3), same(third));
+      expect(wrapped.views.map((ui.FlutterView view) => view.viewId), <int>[1, 3]);
+
+      debugSetViewMetricsOverride(3, const DebugViewMetricsOverride(devicePixelRatio: 9.0));
+      expect(third.devicePixelRatio, 9.0);
+      expect(wrapped.view(id: 3), same(third));
+    });
+
+    test('moves display features into the overridden logical space', () {
+      final dispatcher = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
+      final ui.FlutterView first = wrapped.view(id: 1)!;
+
+      // dart:ui reports DisplayFeature.bounds in logical pixels, unlike every
+      // other FlutterView metric, so overriding the device pixel ratio has to
+      // move them: at 2.0 the hinge spans logical 20..30, and at 4.0 the same
+      // physical pixels are logical 10..15.
+      expect(first.displayFeatures.single.bounds, const ui.Rect.fromLTRB(20, 0, 30, 100));
+
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(devicePixelRatio: 4.0));
+      expect(first.displayFeatures.single.bounds, const ui.Rect.fromLTRB(10, 0, 15, 50));
+      expect(first.displayFeatures.single.type, ui.DisplayFeatureType.hinge);
+      expect(first.displayFeatures.single.state, ui.DisplayFeatureState.postureFlat);
+
+      // A different view, and a metric that is not the ratio, leave them alone.
+      expect(
+        wrapped.view(id: 2)!.displayFeatures.single.bounds,
+        const ui.Rect.fromLTRB(20, 0, 30, 100),
+      );
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(boldText: true));
+      expect(first.displayFeatures.single.bounds, const ui.Rect.fromLTRB(20, 0, 30, 100));
+    });
+
+    test('an override on a non implicit view leaves the implicit one alone', () {
+      final dispatcher = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
+
+      debugSetViewMetricsOverride(
+        2,
+        const DebugViewMetricsOverride(devicePixelRatio: 7.0, textScaleFactor: 3.0),
+      );
+
+      expect(wrapped.view(id: 1)!.devicePixelRatio, 2.0);
+      expect(wrapped.view(id: 2)!.devicePixelRatio, 7.0);
+      expect(wrapped.view(id: 1)!.platformDispatcher.textScaleFactor, 1.0);
+      expect(wrapped.view(id: 2)!.platformDispatcher.textScaleFactor, 3.0);
+      expect(wrapped.textScaleFactor, 1.0);
+    });
+  });
+
+  group('the wrapper applies overrides', () {
+    late ui.PlatformDispatcher real;
+    late ui.PlatformDispatcher wrapped;
+    late ui.FlutterView wrappedView;
+    late int viewId;
+
+    setUp(() {
+      real = ui.PlatformDispatcher.instance;
+      wrapped = debugApplyViewMetricsOverrides(real);
+      wrappedView = wrapped.implicitView!;
+      viewId = wrappedView.viewId;
+    });
+
+    tearDown(debugClearViewMetricsOverrides);
+
+    test('to the view metrics', () {
+      debugSetViewMetricsOverride(
+        viewId,
+        const DebugViewMetricsOverride(
+          devicePixelRatio: 7.0,
+          physicalSize: ui.Size(1170, 2532),
+          padding: DebugViewPadding(top: 141),
+          viewPadding: DebugViewPadding(top: 141, bottom: 34),
+          viewInsets: DebugViewPadding(bottom: 700),
+        ),
+      );
+      expect(wrappedView.devicePixelRatio, 7.0);
+      expect(wrappedView.physicalSize, const ui.Size(1170, 2532));
+      expect(wrappedView.physicalConstraints, ui.ViewConstraints.tight(const ui.Size(1170, 2532)));
+      expect(wrappedView.padding.top, 141);
+      expect(wrappedView.viewPadding.bottom, 34);
+      expect(wrappedView.viewInsets.bottom, 700);
+      // Metrics that were not overridden still come from the platform.
+      expect(wrappedView.systemGestureInsets, same(real.implicitView!.systemGestureInsets));
+      expect(wrappedView.displayFeatures, real.implicitView!.displayFeatures);
+    });
+
+    test('to the platform metrics', () {
+      debugSetViewMetricsOverride(
+        viewId,
+        const DebugViewMetricsOverride(
+          textScaleFactor: 2.5,
+          platformBrightness: ui.Brightness.dark,
+          alwaysUse24HourFormat: true,
+          boldText: true,
+          highContrast: true,
+          supportsAnnounce: false,
+        ),
+      );
+      expect(wrapped.textScaleFactor, 2.5);
+      expect(wrapped.platformBrightness, ui.Brightness.dark);
+      expect(wrapped.alwaysUse24HourFormat, isTrue);
+      expect(wrapped.accessibilityFeatures.boldText, isTrue);
+      expect(wrapped.accessibilityFeatures.highContrast, isTrue);
+      expect(wrapped.accessibilityFeatures.supportsAnnounce, isFalse);
+      // Flags that were not overridden still come from the platform.
+      expect(wrapped.accessibilityFeatures.invertColors, real.accessibilityFeatures.invertColors);
+      expect(
+        wrapped.accessibilityFeatures.accessibleNavigation,
+        real.accessibilityFeatures.accessibleNavigation,
+      );
+    });
+
+    test('to font sizes, linearly', () {
+      debugSetViewMetricsOverride(viewId, const DebugViewMetricsOverride(textScaleFactor: 2.5));
+      // An overridden text scale factor has to reach scaleFontSize too:
+      // SystemTextScaler.scale calls it, so overriding only textScaleFactor
+      // would change what MediaQuery reports without changing any text.
+      expect(wrapped.scaleFontSize(14.0), 35.0);
+      expect(wrapped.scaleFontSize(14.5), 36.25);
+      expect(wrappedView.platformDispatcher.scaleFontSize(10.0), 25.0);
+    });
+
+    test('to the accessibility features, for consumers that pattern match them', () {
+      // Cupertino's menu anchor switches on the features object with an
+      // `AccessibilityFeatures(disableAnimations: true)` object pattern, which
+      // only matches if the overridden object is still an AccessibilityFeatures.
+      debugSetViewMetricsOverride(viewId, const DebugViewMetricsOverride(disableAnimations: true));
+      final ui.AccessibilityFeatures features = wrapped.accessibilityFeatures;
+      expect(features, isA<ui.AccessibilityFeatures>());
+      expect(switch (features) {
+        ui.AccessibilityFeatures(disableAnimations: true) => 'disableAnimations',
+        ui.AccessibilityFeatures(reduceMotion: true) => 'reduceMotion',
+        _ => 'neither',
+      }, 'disableAnimations');
+    });
+
+    test('to the accessibility features, without disturbing equality', () {
+      final ui.AccessibilityFeatures platformFeatures = real.accessibilityFeatures;
+      debugSetViewMetricsOverride(viewId, const DebugViewMetricsOverride(boldText: true));
+      final ui.AccessibilityFeatures overridden = wrapped.accessibilityFeatures;
+      expect(overridden, isNot(same(platformFeatures)));
+      expect(overridden == platformFeatures, isFalse);
+      expect(platformFeatures == overridden, isFalse);
+      expect(overridden, equals(wrapped.accessibilityFeatures));
+      expect(overridden.hashCode, wrapped.accessibilityFeatures.hashCode);
+      expect(overridden.toString(), contains('boldText'));
+    });
+
+    test('only to the view they name', () {
+      // 1 is not a real view id in this test environment, so the implicit view
+      // must be unaffected by an override registered for it.
+      final double realRatio = real.implicitView!.devicePixelRatio;
+      debugSetViewMetricsOverride(
+        viewId + 1000,
+        const DebugViewMetricsOverride(devicePixelRatio: 7.0),
+      );
+      expect(wrappedView.devicePixelRatio, realRatio);
+    });
+
+    test('overriding a size makes the view a fixed size view', () {
+      debugSetViewMetricsOverride(
+        viewId,
+        const DebugViewMetricsOverride(physicalSize: ui.Size(400, 800)),
+      );
+      expect(wrappedView.physicalConstraints.isTight, isTrue);
+      expect(wrappedView.physicalConstraints.isSatisfiedBy(const ui.Size(400, 800)), isTrue);
+      expect(wrappedView.physicalConstraints.isSatisfiedBy(const ui.Size(10, 10)), isFalse);
+    });
+  });
+}
