@@ -677,11 +677,11 @@ class EnginePath implements ui.Path, Collectable {
   // when [collect] is called by the [FrameArena]. Disposing them immediately
   // here can cause premature deallocation while recorded display list operations
   // are being rasterized concurrently on the worker thread.
-  final List<BackendPath> _stalePaths = [];
+  List<BackendPath>? _stalePaths;
 
   void _invalidateCachedPath() {
     if (_cachedPath != null) {
-      _stalePaths.add(_cachedPath!);
+      (_stalePaths ??= <BackendPath>[]).add(_cachedPath!);
       _cachedPath = null;
     }
   }
@@ -883,10 +883,12 @@ class EnginePath implements ui.Path, Collectable {
 
   @override
   void collect() {
-    for (final BackendPath path in _stalePaths) {
-      path.dispose();
+    if (_stalePaths != null) {
+      for (final BackendPath path in _stalePaths!) {
+        path.dispose();
+      }
+      _stalePaths = null;
     }
-    _stalePaths.clear();
     _cachedPath?.dispose();
     if (!identical(_cachedBuilder, _cachedPath)) {
       _cachedBuilder?.dispose();
