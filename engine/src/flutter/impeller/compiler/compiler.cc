@@ -397,7 +397,39 @@ void CanonicalizeUniformBlockInstanceNamesForGL(
   }
 }
 
+static std::string StripComments(const std::string& source) {
+  std::string result;
+  result.reserve(source.size());
+  size_t pos = 0;
+  while (pos < source.size()) {
+    if (pos + 1 < source.size() && source[pos] == '/' &&
+        source[pos + 1] == '/') {
+      pos = source.find('\n', pos + 2);
+      if (pos == std::string::npos) {
+        break;
+      }
+      result += '\n';
+      pos++;
+      continue;
+    }
+    if (pos + 1 < source.size() && source[pos] == '/' &&
+        source[pos + 1] == '*') {
+      pos = source.find("*/", pos + 2);
+      if (pos == std::string::npos) {
+        break;
+      }
+      pos += 2;
+      result += ' ';
+      continue;
+    }
+    result += source[pos];
+    pos++;
+  }
+  return result;
+}
+
 static bool CheckHasEarlyReturnsInMain(const std::string& source) {
+  std::string clean_source = StripComments(source);
   auto is_id_char = [](char c) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
            (c >= '0' && c <= '9') || c == '_';
@@ -409,16 +441,18 @@ static bool CheckHasEarlyReturnsInMain(const std::string& source) {
   // Find "main" as a whole word followed by '('
   size_t pos = 0;
   size_t main_decl = std::string::npos;
-  while ((pos = source.find("main", pos)) != std::string::npos) {
-    bool prev_is_id = pos > 0 && is_id_char(source[pos - 1]);
+  while ((pos = clean_source.find("main", pos)) != std::string::npos) {
+    bool prev_is_id = pos > 0 && is_id_char(clean_source[pos - 1]);
     size_t next_pos = pos + 4;
-    bool next_is_id = next_pos < source.size() && is_id_char(source[next_pos]);
+    bool next_is_id =
+        next_pos < clean_source.size() && is_id_char(clean_source[next_pos]);
     if (!prev_is_id && !next_is_id) {
       size_t paren_pos = next_pos;
-      while (paren_pos < source.size() && is_space(source[paren_pos])) {
+      while (paren_pos < clean_source.size() &&
+             is_space(clean_source[paren_pos])) {
         paren_pos++;
       }
-      if (paren_pos < source.size() && source[paren_pos] == '(') {
+      if (paren_pos < clean_source.size() && clean_source[paren_pos] == '(') {
         main_decl = pos;
         break;
       }
@@ -430,44 +464,26 @@ static bool CheckHasEarlyReturnsInMain(const std::string& source) {
     return false;
   }
 
-  size_t open_brace = source.find('{', main_decl);
+  size_t open_brace = clean_source.find('{', main_decl);
   if (open_brace == std::string::npos) {
     return false;
   }
 
   int brace_depth = 1;
   pos = open_brace + 1;
-  while (pos < source.size() && brace_depth > 0) {
-    // Skip single-line comments
-    if (source.compare(pos, 2, "//") == 0) {
-      pos = source.find('\n', pos);
-      if (pos == std::string::npos) {
-        break;
-      }
-      continue;
-    }
-    // Skip multi-line comments
-    if (source.compare(pos, 2, "/*") == 0) {
-      pos = source.find("*/", pos);
-      if (pos == std::string::npos) {
-        break;
-      }
-      pos += 2;
-      continue;
-    }
-
-    char c = source[pos];
+  while (pos < clean_source.size() && brace_depth > 0) {
+    char c = clean_source[pos];
     if (c == '{') {
       brace_depth++;
     } else if (c == '}') {
       brace_depth--;
     } else {
       // Check for "return" as a whole word.
-      if (source.compare(pos, 6, "return") == 0) {
-        bool prev_is_id = pos > 0 && is_id_char(source[pos - 1]);
+      if (clean_source.compare(pos, 6, "return") == 0) {
+        bool prev_is_id = pos > 0 && is_id_char(clean_source[pos - 1]);
         size_t next_pos = pos + 6;
-        bool next_is_id =
-            next_pos < source.size() && is_id_char(source[next_pos]);
+        bool next_is_id = next_pos < clean_source.size() &&
+                          is_id_char(clean_source[next_pos]);
         if (!prev_is_id && !next_is_id) {
           return true;
         }
