@@ -1166,7 +1166,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     if (buildOwner == null) {
       return;
     }
-    buildOwner!.focusManager.listenToApplicationLifecycleChangesIfSupported(); // ignore: invalid_use_of_visible_for_testing_member
+    buildOwner!.focusManager
+        .listenToApplicationLifecycleChangesIfSupported(); // ignore: invalid_use_of_visible_for_testing_member
   }
 
   @override
@@ -1734,7 +1735,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // our main future completing.
       assert(Zone.current == _parentZone);
       if (_pendingExceptionDetails != null) {
-        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+        debugPrint =
+            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(_pendingExceptionDetails!, testDescription);
         _pendingExceptionDetails = null;
       }
@@ -1797,7 +1799,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     var exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
       if (_pendingExceptionDetails != null) {
-        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
+        debugPrint =
+            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
         if (exceptionCount == 0) {
           exceptionCount = 2;
           FlutterError.dumpErrorToConsole(_pendingExceptionDetails!, forceReport: true);
@@ -1842,7 +1845,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // However, if someone tries hard enough they could get in a state where this happens.
         // If we silently dropped these errors on the ground, nobody would ever know. So instead
         // we raise them and fail the test after it has already completed.
-        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+        debugPrint =
+            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(
           FlutterErrorDetails(
             exception: exception,

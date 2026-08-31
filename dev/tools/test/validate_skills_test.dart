@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:io';
-
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:skills_lint/skills_lint.dart';

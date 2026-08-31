@@ -18,7 +18,6 @@ import 'dart:convert';
 import 'dart:ffi' as ffi;
 import 'dart:io';
 import 'dart:ui' show Display, FlutterView;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
@@ -1101,8 +1100,9 @@ class _GdkWindow extends _GObject {
     int rectAnchorDx = 0,
     int rectAnchorDy = 0,
   }) {
-    final ffi.Pointer<_GdkRectangle> rect = _gMalloc0(ffi.sizeOf<_GdkRectangle>())
-        .cast<_GdkRectangle>();
+    final ffi.Pointer<_GdkRectangle> rect = _gMalloc0(
+      ffi.sizeOf<_GdkRectangle>(),
+    ).cast<_GdkRectangle>();
     final _GdkRectangle r = rect.ref;
     r.x = x;
     r.y = y;
@@ -1256,8 +1256,9 @@ class _GtkWindow extends _GtkContainer {
 
   /// Set minimum and maximum size of the window.
   void setGeometryHints({int? minWidth, int? minHeight, int? maxWidth, int? maxHeight}) {
-    final ffi.Pointer<_GdkGeometry> geometry = _gMalloc0(ffi.sizeOf<_GdkGeometry>())
-        .cast<_GdkGeometry>();
+    final ffi.Pointer<_GdkGeometry> geometry = _gMalloc0(
+      ffi.sizeOf<_GdkGeometry>(),
+    ).cast<_GdkGeometry>();
     final _GdkGeometry g = geometry.ref;
     var geometryMask = 0;
     if (minWidth != null || minHeight != null) {

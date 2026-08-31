@@ -175,7 +175,8 @@ void main() {
   for (final test in <_PlatformAnnounceScenario>[
     _PlatformAnnounceScenario(
       supportsAnnounce: false,
-      testName: 'Should announce only the first error message when validate returns errors and announce = false',
+      testName:
+          'Should announce only the first error message when validate returns errors and announce = false',
     ),
     _PlatformAnnounceScenario(
       supportsAnnounce: true,

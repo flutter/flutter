@@ -301,9 +301,9 @@ ArgResults _handleArguments(List<String> args) {
 }
 
 Map<String, String> stringToTokenPairMap(String codepointData) {
-  final Iterable<String> cleanData = LineSplitter.split(codepointData)
-      .map((String line) => line.trim())
-      .where((String line) => line.isNotEmpty);
+  final Iterable<String> cleanData = LineSplitter.split(
+    codepointData,
+  ).map((String line) => line.trim()).where((String line) => line.isNotEmpty);
 
   final pairs = <String, String>{};
 
