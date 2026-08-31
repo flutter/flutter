@@ -95,6 +95,11 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
+    if (!jni_facade_->HasActivePlatformViews() &&
+        views_visible_last_frame_.empty()) {
+      return;
+    }
+
     task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
         [this, jni_facade = jni_facade_,
          views_visible_last_frame = views_visible_last_frame_]() {

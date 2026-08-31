@@ -864,6 +864,9 @@ public class PlatformViewsController2Test {
     }
 
     @Implementation
+    public void nativeSetHasActivePlatformViews(long nativeShellHolderId, boolean hasViews) {}
+
+    @Implementation
     public void dispatchPlatformMessage(
         String channel, ByteBuffer message, int position, int responseId) {}
 

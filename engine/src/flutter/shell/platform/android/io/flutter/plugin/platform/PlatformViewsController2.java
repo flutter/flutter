@@ -98,6 +98,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   /** Whether the SurfaceControl swapchain mode is enabled. */
   public void setFlutterJNI(FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
+    if (flutterJNI != null && platformViews.size() > 0) {
+      flutterJNI.setHasActivePlatformViews(true);
+    }
   }
 
   @Override
@@ -126,6 +129,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
     embeddedView.setLayoutDirection(request.direction);
     platformViews.put(request.viewId, platformView);
+    if (flutterJNI != null && platformViews.size() > 0) {
+      flutterJNI.setHasActivePlatformViews(true);
+    }
     maybeInvokeOnFlutterViewAttached(platformView);
     return platformView;
   }
@@ -799,6 +805,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
             }
           }
           platformViews.remove(viewId);
+          if (flutterJNI != null && platformViews.size() == 0) {
+            flutterJNI.setHasActivePlatformViews(false);
+          }
           try {
             platformView.dispose();
           } catch (RuntimeException exception) {

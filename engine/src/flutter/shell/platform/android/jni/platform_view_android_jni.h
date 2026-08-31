@@ -231,6 +231,10 @@ class PlatformViewAndroidJNI {
   // New Platform View Support.
   virtual ASurfaceTransaction* createTransaction() = 0;
 
+  virtual bool HasActivePlatformViews() const = 0;
+
+  virtual void SetHasActivePlatformViews(bool has_views) = 0;
+
   virtual void swapTransaction() = 0;
 
   virtual void applyTransaction() = 0;

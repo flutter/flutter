@@ -444,6 +444,13 @@ static bool IsSurfaceControlEnabled(JNIEnv* env,
   return ANDROID_SHELL_HOLDER->IsSurfaceControlEnabled();
 }
 
+static void SetHasActivePlatformViews(JNIEnv* env,
+                                      jobject jcaller,
+                                      jlong shell_holder,
+                                      jboolean has_views) {
+  ANDROID_SHELL_HOLDER->SetHasActivePlatformViews(has_views);
+}
+
 static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
   auto screenshot = ANDROID_SHELL_HOLDER->Screenshot(
       Rasterizer::ScreenshotType::UncompressedImage, false);
@@ -954,6 +961,11 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeIsSurfaceControlEnabled",
           .signature = "(J)Z",
           .fnPtr = reinterpret_cast<void*>(&IsSurfaceControlEnabled),
+      },
+      {
+          .name = "nativeSetHasActivePlatformViews",
+          .signature = "(JZ)V",
+          .fnPtr = reinterpret_cast<void*>(&SetHasActivePlatformViews),
       }};
 
   if (env->RegisterNatives(g_flutter_jni_class->obj(), flutter_jni_methods,
