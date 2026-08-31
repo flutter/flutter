@@ -9,6 +9,7 @@
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
+#include "display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "display_list/geometry/dl_geometry_types.h"
 #include "display_list/geometry/dl_path_builder.h"
 #include "display_list/image/dl_image.h"
@@ -1234,6 +1235,48 @@ TEST_P(AiksTest, SaveLayerWithClipsAllocatesDepthStencilInRenderTargetCache) {
     }
   }
   EXPECT_TRUE(found_depth_stencil);
+}
+
+TEST_P(AiksTest, SaveLayerWithBlurAndConcavePath) {
+  DisplayListBuilder builder;
+  const DlISize size = {200, 200};
+
+  // 1. Force a subpass
+  DlPaint save_paint;
+  save_paint.setImageFilter(
+      DlBlurImageFilter::Make(0.5f, 0.5f, DlTileMode::kClamp));
+  builder.SaveLayer(DlRect::MakeWH(size.width, size.height), &save_paint);
+
+  // 2. Construct a concave path (5-pointed star)
+  DlPathBuilder star_builder;
+  const DlScalar center_x = size.width / 2.0f;
+  const DlScalar center_y = size.height / 2.0f;
+  const DlScalar outer_radius = size.width * 0.45f;
+  const DlScalar inner_radius = outer_radius * 0.4f;
+  constexpr int points = 5;
+
+  for (int i = 0; i < points * 2; i++) {
+    const DlScalar r = (i % 2 == 0) ? outer_radius : inner_radius;
+    const DlScalar angle = i * kPi / points - kPi / 2;
+    const DlScalar x = center_x + r * cos(angle);
+    const DlScalar y = center_y + r * sin(angle);
+    if (i == 0) {
+      star_builder.MoveTo(DlPoint(x, y));
+    } else {
+      star_builder.LineTo(DlPoint(x, y));
+    }
+  }
+  star_builder.Close();
+
+  // 3. Draw the filled concave path inside the subpass
+  DlPaint draw_paint;
+  draw_paint.setColor(DlColor::kBlue());
+  draw_paint.setDrawStyle(DlDrawStyle::kFill);
+  builder.DrawPath(star_builder.TakePath(), draw_paint);
+
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 }  // namespace testing
