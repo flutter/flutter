@@ -5147,7 +5147,7 @@ targets:
       task_name: run_release_test
 
   # mac mokey test
-  - name: Mac_mokey android_intent_flags_test
+  - name: Mac_mokey android_strips_intent_parsing_in_release_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
@@ -5159,10 +5159,10 @@ targets:
     properties:
       tags: >
         ["devicelab", "android", "mac", "mokey"]
-      task_name: android_intent_flags_test
+      task_name: android_strips_intent_parsing_in_release_test
 
   # mac mokey test
-  - name: Mac_arm64_mokey android_intent_flags_test
+  - name: Mac_arm64_mokey android_strips_intent_parsing_in_release_test
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
@@ -5174,7 +5174,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "android", "mac", "arm64", "mokey"]
-      task_name: android_intent_flags_test
+      task_name: android_strips_intent_parsing_in_release_test
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone

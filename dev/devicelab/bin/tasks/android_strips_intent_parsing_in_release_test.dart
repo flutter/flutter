@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/tasks/android_intent_flags_test.dart';
+import 'package:flutter_devicelab/tasks/android_strips_intent_parsing_in_release_test.dart';
 
 void main() {
-  task(createAndroidIntentFlagsTest());
+  task(createAndroidStripsIntentParsingInReleaseTest());
 }

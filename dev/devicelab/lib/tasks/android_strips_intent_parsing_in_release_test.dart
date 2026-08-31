@@ -10,15 +10,15 @@ import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-TaskFunction createAndroidIntentFlagsTest() {
+TaskFunction createAndroidStripsIntentParsingInReleaseTest() {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
     final String deviceId = device.deviceId;
     final String testDirectory = path.join(flutterDirectory.path, 'dev', 'integration_tests', 'ui');
 
-    const String testPackageName = 'com.yourcompany.integration_ui';
-    const String mainActivityName = '$testPackageName/.MainActivity';
+    const testPackageName = 'com.yourcompany.integration_ui';
+    const mainActivityName = '$testPackageName/.MainActivity';
 
     Future<void> testMode({required String mode, required bool expectVerbose}) async {
       print('--- Testing $mode mode ---');
@@ -27,12 +27,7 @@ TaskFunction createAndroidIntentFlagsTest() {
         final String apkPath = path.join('build', 'app', 'outputs', 'flutter-apk', 'app-$mode.apk');
 
         // Ensure clean state
-        await exec('adb', <String>[
-          '-s',
-          deviceId,
-          'uninstall',
-          testPackageName,
-        ], canFail: true);
+        await exec('adb', <String>['-s', deviceId, 'uninstall', testPackageName], canFail: true);
         await exec('adb', <String>['-s', deviceId, 'install', '-r', apkPath]);
         await exec('adb', <String>['-s', deviceId, 'logcat', '-c']);
 
@@ -54,7 +49,7 @@ TaskFunction createAndroidIntentFlagsTest() {
 
         // The app is fully launched. Give logcat a tiny buffer to flush.
         await Future<void>.delayed(const Duration(seconds: 1));
-        
+
         final String logcat = await eval('adb', <String>['-s', deviceId, 'logcat', '-d']);
         final bool foundInfoLog = logcat.contains('[INFO:flutter');
 
