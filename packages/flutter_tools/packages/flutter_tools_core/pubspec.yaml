@@ -1,5 +1,5 @@
 name: flutter_tools_core
-description: Core definitions, data models, and host adapters for Flutter tools extensibility.
+description: Core shared data models, interfaces, and DTO contracts for Flutter tool extensions.
 resolution: workspace
 
 environment:

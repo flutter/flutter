@@ -345,6 +345,64 @@ void main() {
     });
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/190833.
+  test('RenderAndroidView does not set the platform view offset when not laid out', () {
+    final viewController = FakeAndroidViewController(0);
+    final renderBox = RenderAndroidView(
+      viewController: viewController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    // Attached but not laid out, the state the render box is in when the
+    // platform view is mounted while a route transition is still in flight.
+    renderBox.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    expect(renderBox.debugNeedsLayout, isTrue);
+
+    binding.pumpCompleteFrame();
+
+    // The post frame callback ran and left the platform view alone, because
+    // the render box has no position on screen to report yet.
+    expect(viewController.offsets, isEmpty);
+
+    renderBox.detach();
+    layout(renderBox);
+    binding.pumpCompleteFrame();
+
+    expect(viewController.offsets, <Offset>[Offset.zero]);
+
+    renderBox.dispose();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/190833.
+  test('RenderAndroidView does not size the platform view when not laid out', () async {
+    final renderBox = RenderAndroidView(
+      viewController: FakeAndroidViewController(0),
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    // Attached but not laid out, the state the render box is in when the
+    // platform view is mounted while a route transition is still in flight.
+    renderBox.attach(TestRenderingFlutterBinding.instance.pipelineOwner);
+    expect(renderBox.debugNeedsLayout, isTrue);
+
+    final viewController = FakeAndroidViewController(1);
+    renderBox.controller = viewController;
+    // The setter does not await the future it starts, so let it complete here.
+    await null;
+
+    // Swapping the controller left the platform view unsized, because the
+    // render box has no size to give it yet.
+    expect(viewController.sizes, isEmpty);
+
+    renderBox.detach();
+    layout(renderBox);
+
+    // performResize does the initial sizing once there is a size to send.
+    expect(viewController.sizes, <Size>[const Size(800, 600)]);
+
+    renderBox.dispose();
+  });
+
   test('markNeedsPaint does not get called when setting the same viewController', () {
     FakeAsync().run((FakeAsync async) {
       final viewCreation = Completer<void>();

@@ -1,5 +1,5 @@
 name: flutter_tools_extension_linux_prototype
-description: Prototype Linux extension for Flutter tools extensibility.
+description: Prototype Linux platform extension package for Flutter tools extensibility.
 resolution: workspace
 
 environment:

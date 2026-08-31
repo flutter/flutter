@@ -200,7 +200,7 @@ class Xcode {
   /// to run it. `devicectl` is made available in Xcode 15.
   bool get isDevicectlInstalled {
     if (_isDevicectlInstalled == null) {
-      if (currentVersion == null || currentVersion!.major < 15) {
+      if (currentVersion == null) {
         _isDevicectlInstalled = false;
         return _isDevicectlInstalled!;
       }
