@@ -52,6 +52,61 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
+  testWidgets('options stay hidden after Escape when a pending async optionsBuilder completes', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/191928.
+    // Escape during a pending async optionsBuilder should keep the options
+    // hidden when that build later completes.
+    final GlobalKey optionsKey = GlobalKey();
+    late FocusNode focusNode;
+    late TextEditingController controller;
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          optionsBuilder: (TextEditingValue value) async {
+            await Future<void>.delayed(const Duration(seconds: 1));
+            return kOptions.where((String option) => option.contains(value.text.toLowerCase()));
+          },
+          fieldViewBuilder: (context, fieldController, fieldFocusNode, onFieldSubmitted) {
+            focusNode = fieldFocusNode;
+            controller = fieldController;
+            return TestTextField(focusNode: focusNode, controller: controller);
+          },
+          optionsViewBuilder: (context, onSelected, options) => Container(key: optionsKey),
+        ),
+      ),
+    );
+
+    // Type once and let the build complete so the options view is shown.
+    focusNode.requestFocus();
+    controller.value = const TextEditingValue(
+      text: 'e',
+      selection: TextSelection.collapsed(offset: 1),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byKey(optionsKey), findsOneWidget);
+
+    // Type again to start a new build. It is still pending, so the view stays.
+    controller.value = const TextEditingValue(
+      text: 'el',
+      selection: TextSelection.collapsed(offset: 2),
+    );
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+
+    // Press Escape before the pending build completes. The view hides.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+
+    // The pending build completes. The view must stay hidden.
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byKey(optionsKey), findsNothing);
+  });
+
   testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();

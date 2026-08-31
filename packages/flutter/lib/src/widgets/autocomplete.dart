@@ -471,6 +471,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   // situation where _options is updated by an older call when multiple
   // _onChangedField calls are running simultaneously.
   int _onChangedCallId = 0;
+  // Bumped when the user dismisses the options (e.g. with Escape), so a slow
+  // optionsBuilder call that finishes afterward doesn't reopen the view.
+  int _hideCallId = 0;
   // Called when _textEditingController changes.
   Future<void> _onChangedField() async {
     // During a selection, changes to the field text should not trigger
@@ -488,6 +491,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
     _lastFieldText = value.text;
     final int callId = _onChangedCallId;
+    final int hideId = _hideCallId;
     final Iterable<T> options = await widget.optionsBuilder(value);
 
     if (!mounted) {
@@ -508,6 +512,11 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       _selection = null;
     }
 
+    // The user dismissed the options while this call was pending, so don't
+    // reopen them.
+    if (hideId != _hideCallId) {
+      return;
+    }
     _updateOptionsViewVisibility();
   }
 
@@ -575,6 +584,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   Object? _hideOptions(DismissIntent intent) {
     if (_optionsViewController.isShowing) {
+      _hideCallId += 1;
       _optionsViewController.hide();
       return null;
     } else {
