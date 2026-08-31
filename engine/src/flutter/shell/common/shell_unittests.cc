@@ -2629,6 +2629,53 @@ TEST_F(ShellTest, RasterizerMakeSkiaSnapshot) {
   DestroyShell(std::move(shell), task_runners);
 }
 
+TEST_F(ShellTest, RasterizerMakeImpellerSnapshotDoesNotGenerateMipmaps) {
+#if !SHELL_ENABLE_METAL
+  // This test uses the Metal backend.
+  GTEST_SKIP();
+#else
+  Settings settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  auto task_runner = CreateNewThread();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+  std::unique_ptr<Shell> shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback = ShellTestPlatformViewBuilder({
+          .rendering_backend =
+              ShellTestPlatformView::BackendType::kMetalBackend,
+      }),
+  });
+
+  ASSERT_TRUE(ValidateShell(shell.get()));
+  PlatformViewNotifyCreated(shell.get());
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  auto latch = std::make_shared<fml::AutoResetWaitableEvent>();
+
+  PumpOneFrame(shell.get());
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetRasterTaskRunner(), [&shell, &latch]() {
+        SnapshotDelegate* delegate =
+            reinterpret_cast<Rasterizer*>(shell->GetRasterizer().get());
+        std::shared_ptr<impeller::Texture> texture =
+            delegate->MakeImpellerSnapshotSync(MakeSizedDisplayList(50, 50),
+                                               DlISize(50, 50),
+                                               SnapshotPixelFormat::kDontCare);
+        ASSERT_NE(texture, nullptr);
+        EXPECT_EQ(texture->GetTextureDescriptor().mip_count, 1u);
+
+        latch->Signal();
+      });
+  latch->Wait();
+  DestroyShell(std::move(shell), task_runners);
+#endif  // !SHELL_ENABLE_METAL
+}
+
 TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
   Settings settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
