@@ -357,6 +357,10 @@ class DisplayList : public SkRefCnt {
   /// be required for the indicated blend mode to do its work.
   DlBlendMode max_root_blend_mode() const { return max_root_blend_mode_; }
 
+  /// @brief    Indicates if there are any clip operations at the root
+  ///           surface level of the DisplayList.
+  bool root_has_clips() const { return root_has_clips_; }
+
   /// @brief   Iterator utility class used for the |DisplayList::begin|
   ///          and |DisplayList::end| methods. It implements just the
   ///          basic methods to enable iteration-style for loops.
@@ -523,6 +527,7 @@ class DisplayList : public SkRefCnt {
               DlBlendMode max_root_blend_mode,
               bool root_has_backdrop_filter,
               bool root_is_unbounded,
+              bool root_has_clips,
               sk_sp<const DlRTree> rtree);
 
   static uint32_t next_unique_id();
@@ -547,6 +552,7 @@ class DisplayList : public SkRefCnt {
   const bool modifies_transparent_black_;
   const bool root_has_backdrop_filter_;
   const bool root_is_unbounded_;
+  const bool root_has_clips_;
   const DlBlendMode max_root_blend_mode_;
 
   const sk_sp<const DlRTree> rtree_;

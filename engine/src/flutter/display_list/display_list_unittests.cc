@@ -1802,6 +1802,49 @@ TEST_F(DisplayListTest, SaveLayerWithoutClipsDoesNotSetContainsClips) {
   EXPECT_TRUE(expector.all_expectations_checked());
 }
 
+TEST_F(DisplayListTest,
+       SaveLayerWithNestedDisplayListWithClipsSetsContainsClips) {
+  DisplayListBuilder child_builder;
+  child_builder.ClipRect(DlRect::MakeLTRB(10, 10, 20, 20), DlClipOp::kIntersect,
+                         true);
+  child_builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+  auto child_dl = child_builder.Build();
+  EXPECT_TRUE(child_dl->root_has_clips());
+
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(
+      SaveLayerOptions::kNoAttributes.with_can_distribute_opacity()
+          .with_contains_clips());
+
+  DisplayListBuilder builder;
+  builder.SaveLayer(std::nullopt, nullptr);
+  builder.DrawDisplayList(child_dl);
+  builder.Restore();
+
+  builder.Build()->Dispatch(expector);
+  EXPECT_TRUE(expector.all_expectations_checked());
+}
+
+TEST_F(DisplayListTest,
+       SaveLayerWithNestedDisplayListWithoutClipsDoesNotSetContainsClips) {
+  DisplayListBuilder child_builder;
+  child_builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
+  auto child_dl = child_builder.Build();
+  EXPECT_FALSE(child_dl->root_has_clips());
+
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(
+      SaveLayerOptions::kNoAttributes.with_can_distribute_opacity());
+
+  DisplayListBuilder builder;
+  builder.SaveLayer(std::nullopt, nullptr);
+  builder.DrawDisplayList(child_dl);
+  builder.Restore();
+
+  builder.Build()->Dispatch(expector);
+  EXPECT_TRUE(expector.all_expectations_checked());
+}
+
 TEST_F(DisplayListTest, SaveLayerColorFilterOnChildDoesNotInheritOpacity) {
   SAVE_LAYER_EXPECTOR(expector);
   expector.addExpectation(SaveLayerOptions::kWithAttributes);
@@ -4686,6 +4729,32 @@ TEST_F(DisplayListTest, DrawDisplayListForwardsBackdropFlag) {
   auto parent_dl = parent_builder.Build();
   EXPECT_EQ(parent_dl->max_root_blend_mode(), DlBlendMode::kSrcOver);
   EXPECT_TRUE(parent_dl->root_has_backdrop_filter());
+}
+
+TEST_F(DisplayListTest, DrawDisplayListForwardsClipFlag) {
+  DisplayListBuilder child_builder;
+  child_builder.ClipRect(DlRect::MakeLTRB(10, 10, 20, 20), DlClipOp::kIntersect,
+                         true);
+  child_builder.DrawRect(DlRect::MakeLTRB(0, 0, 10, 10), DlPaint());
+  auto child_dl = child_builder.Build();
+  EXPECT_TRUE(child_dl->root_has_clips());
+
+  DisplayListBuilder parent_builder;
+  parent_builder.DrawDisplayList(child_dl);
+  auto parent_dl = parent_builder.Build();
+  EXPECT_TRUE(parent_dl->root_has_clips());
+}
+
+TEST_F(DisplayListTest, RootHasClipsNestedSaveLayerIsolation) {
+  DisplayListBuilder builder;
+  builder.SaveLayer(std::nullopt, nullptr);
+  builder.ClipRect(DlRect::MakeLTRB(10, 10, 20, 20), DlClipOp::kIntersect,
+                   true);
+  builder.DrawRect(DlRect::MakeLTRB(0, 0, 10, 10), DlPaint());
+  builder.Restore();
+  auto dl = builder.Build();
+  // Clip was inside SaveLayer, not on the root layer itself.
+  EXPECT_FALSE(dl->root_has_clips());
 }
 
 #define CLIP_EXPECTOR(name) ClipExpector name(__FILE__, __LINE__)

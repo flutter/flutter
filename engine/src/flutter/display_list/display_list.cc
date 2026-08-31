@@ -26,6 +26,7 @@ DisplayList::DisplayList()
       modifies_transparent_black_(false),
       root_has_backdrop_filter_(false),
       root_is_unbounded_(false),
+      root_has_clips_(false),
       max_root_blend_mode_(DlBlendMode::kClear) {
   FML_DCHECK(offsets_.size() == 0u);
   FML_DCHECK(storage_.size() == 0u);
@@ -44,6 +45,7 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
                          DlBlendMode max_root_blend_mode,
                          bool root_has_backdrop_filter,
                          bool root_is_unbounded,
+                         bool root_has_clips,
                          sk_sp<const DlRTree> rtree)
     : storage_(std::move(storage)),
       offsets_(std::move(offsets)),
@@ -58,6 +60,7 @@ DisplayList::DisplayList(DisplayListStorage&& storage,
       modifies_transparent_black_(modifies_transparent_black),
       root_has_backdrop_filter_(root_has_backdrop_filter),
       root_is_unbounded_(root_is_unbounded),
+      root_has_clips_(root_has_clips),
       max_root_blend_mode_(max_root_blend_mode),
       rtree_(std::move(rtree)) {
   FML_DCHECK(storage_.capacity() == storage_.size());

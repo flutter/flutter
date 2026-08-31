@@ -173,6 +173,7 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
   bool root_has_backdrop_filter = current_layer().contains_backdrop_filter;
   bool root_is_unbounded = current_layer().is_unbounded;
   DlBlendMode max_root_blend_mode = current_layer().max_blend_mode;
+  bool root_has_clips = current_layer().contains_clips;
 
   sk_sp<DlRTree> rtree;
   DlRect bounds;
@@ -211,7 +212,7 @@ sk_sp<DisplayList> DisplayListBuilder::Build() {
       std::move(storage), std::move(offsets), count, nested_bytes, nested_count,
       total_depth, bounds, opacity_compatible, is_safe, affects_transparency,
       max_root_blend_mode, root_has_backdrop_filter, root_is_unbounded,
-      std::move(rtree)));
+      root_has_clips, std::move(rtree)));
 }
 
 static constexpr DlRect kEmpty = DlRect();
@@ -1834,6 +1835,9 @@ void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
                     display_list->max_root_blend_mode());
   if (display_list->root_has_backdrop_filter()) {
     current_layer().contains_backdrop_filter = true;
+  }
+  if (display_list->root_has_clips()) {
+    current_layer().contains_clips = true;
   }
 }
 

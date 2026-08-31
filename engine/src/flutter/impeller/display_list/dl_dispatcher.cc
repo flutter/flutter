@@ -810,10 +810,11 @@ void DlDispatcherBase::drawDisplayList(
   if (opacity < SK_Scalar1) {
     Paint save_paint;
     save_paint.color = Color(0, 0, 0, opacity);
-    GetCanvas().SaveLayer(save_paint, display_list->GetBounds(), nullptr,
-                          ContentBoundsPromise::kContainsContents,
-                          display_list->total_depth(),
-                          display_list->can_apply_group_opacity());
+    GetCanvas().SaveLayer(
+        save_paint, display_list->GetBounds(), nullptr,
+        ContentBoundsPromise::kContainsContents, display_list->total_depth(),
+        display_list->can_apply_group_opacity(),
+        /*backdrop_id=*/std::nullopt, display_list->root_has_clips());
   } else {
     // The display list may alter the clip, which must be restored to the
     // current clip at the end of playback.
