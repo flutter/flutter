@@ -5146,6 +5146,36 @@ targets:
         ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: run_release_test
 
+  # mac mokey test
+  - name: Mac_mokey android_intent_flags_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    runIf:
+      - .ci.yaml
+      - engine/**
+      - DEPS
+      - dev/**
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "mac", "mokey"]
+      task_name: android_intent_flags_test
+
+  # mac mokey test
+  - name: Mac_arm64_mokey android_intent_flags_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    runIf:
+      - .ci.yaml
+      - engine/**
+      - DEPS
+      - dev/**
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "mac", "arm64", "mokey"]
+      task_name: android_intent_flags_test
+
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
