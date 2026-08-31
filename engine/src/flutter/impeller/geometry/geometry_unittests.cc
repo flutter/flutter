@@ -1842,8 +1842,8 @@ TEST(GeometryTest, Gradient) {
 
     auto gradient = CreateGradientBuffer(colors, stops);
 
-    ASSERT_COLORS_NEAR(gradient.colors, colors);
-    ASSERT_EQ(gradient.colors.size(), 2u);
+    EXPECT_COLORS_NEAR(gradient.colors, colors);
+    EXPECT_EQ(gradient.colors.size(), 2u);
   }
 
   {
@@ -1853,7 +1853,7 @@ TEST(GeometryTest, Gradient) {
     std::vector<Scalar> stops = {0.0, 0.25, 0.25, 1.0};
 
     auto gradient = CreateGradientBuffer(colors, stops);
-    ASSERT_EQ(gradient.colors.size(), 1024u);
+    EXPECT_EQ(gradient.colors.size(), 1024u);
 
     std::vector<Color> expected_colors(1024);
     for (size_t i = 0; i < 1024; i++) {
@@ -1868,7 +1868,7 @@ TEST(GeometryTest, Gradient) {
             Color::Lerp(Color::Black(), Color::Blue(), (t - 0.25) / 0.75);
       }
     }
-    ASSERT_COLORS_NEAR(gradient.colors, expected_colors);
+    EXPECT_COLORS_NEAR(gradient.colors, expected_colors);
   }
 
   {
@@ -1880,8 +1880,8 @@ TEST(GeometryTest, Gradient) {
 
     auto gradient = CreateGradientBuffer(colors, stops);
 
-    ASSERT_COLORS_NEAR(gradient.colors, colors);
-    ASSERT_EQ(gradient.colors.size(), 4u);
+    EXPECT_COLORS_NEAR(gradient.colors, colors);
+    EXPECT_EQ(gradient.colors.size(), 4u);
   }
 
   {
@@ -1898,8 +1898,8 @@ TEST(GeometryTest, Gradient) {
         Color::Lerp(Color::Blue(), Color::Green(), 0.6666),
         Color::Green(),
     };
-    ASSERT_COLORS_NEAR(gradient.colors, lerped_colors);
-    ASSERT_EQ(gradient.colors.size(), 5u);
+    EXPECT_COLORS_NEAR(gradient.colors, lerped_colors);
+    EXPECT_EQ(gradient.colors.size(), 5u);
   }
 
   {
@@ -1913,7 +1913,7 @@ TEST(GeometryTest, Gradient) {
 
     auto gradient = CreateGradientBuffer(colors, stops);
 
-    ASSERT_EQ(gradient.colors.size(), 1024u);
+    EXPECT_EQ(gradient.colors.size(), 1024u);
   }
 
   {
@@ -1926,8 +1926,8 @@ TEST(GeometryTest, Gradient) {
 
     auto gradient = CreateGradientBuffer(colors, stops);
 
-    ASSERT_EQ(gradient.colors.size(), 2u);
-    ASSERT_COLORS_NEAR(gradient.colors, colors);
+    EXPECT_EQ(gradient.colors.size(), 2u);
+    EXPECT_COLORS_NEAR(gradient.colors, colors);
   }
 
   {
@@ -1939,8 +1939,8 @@ TEST(GeometryTest, Gradient) {
 
     auto gradient = CreateGradientBuffer(colors, stops);
 
-    ASSERT_EQ(gradient.colors.size(), 3u);
-    ASSERT_COLORS_NEAR(gradient.colors, colors);
+    EXPECT_EQ(gradient.colors.size(), 3u);
+    EXPECT_COLORS_NEAR(gradient.colors, colors);
   }
 }
 
