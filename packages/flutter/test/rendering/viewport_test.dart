@@ -615,6 +615,373 @@ void main() {
     expect(revealed.offset, -200 + 6 * (100 + 22 + 23) - 22 - 1);
   });
 
+  group('Viewport getOffsetToReveal Sliver - pinned', () {
+    testWidgets('down, forward growth', (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      const headerKey = Key('pinned-header');
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 300.0,
+              child: CustomScrollView(
+                controller: controller,
+                slivers: <Widget>[
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 300.0, child: Text('Preceding content')),
+                  ),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _TestSliverPersistentHeaderDelegate(
+                      key: headerKey,
+                      minExtent: 50.0,
+                      maxExtent: 50.0,
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) =>
+                          SizedBox(height: 50.0, child: Text('Tile $index')),
+                      childCount: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
+
+      final RenderObject target = tester.renderObject(find.byKey(headerKey, skipOffstage: false));
+
+      // When the viewport is at offset 0.0 (unpinned):
+      RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+      expect(revealed.offset, 300.0);
+      expect(revealed.rect, const Rect.fromLTWH(0.0, 0.0, 300.0, 50.0));
+
+      // When the viewport is at offset 500.0 (already pinned at leading edge):
+      controller.jumpTo(500.0);
+      await tester.pumpAndSettle();
+
+      revealed = viewport.getOffsetToReveal(target, 0.0);
+      expect(revealed.offset, 500.0);
+      expect(revealed.rect, const Rect.fromLTWH(0.0, 0.0, 300.0, 50.0));
+    });
+
+    testWidgets('up, forward growth', (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      const headerKey = Key('pinned-header');
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 300.0,
+              child: CustomScrollView(
+                controller: controller,
+                reverse: true,
+                slivers: <Widget>[
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 300.0, child: Text('Preceding content')),
+                  ),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _TestSliverPersistentHeaderDelegate(
+                      key: headerKey,
+                      minExtent: 50.0,
+                      maxExtent: 50.0,
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) =>
+                          SizedBox(height: 50.0, child: Text('Tile $index')),
+                      childCount: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
+
+      final RenderObject target = tester.renderObject(find.byKey(headerKey, skipOffstage: false));
+
+      // When the viewport is at offset 0.0 (unpinned):
+      RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+      expect(revealed.offset, 300.0);
+      expect(revealed.rect, const Rect.fromLTWH(0.0, 350.0, 300.0, 50.0));
+
+      // When the viewport is at offset 500.0 (already pinned at leading edge):
+      controller.jumpTo(500.0);
+      await tester.pumpAndSettle();
+
+      revealed = viewport.getOffsetToReveal(target, 0.0);
+      expect(revealed.offset, 500.0);
+      expect(revealed.rect, const Rect.fromLTWH(0.0, 350.0, 300.0, 50.0));
+    });
+
+    testWidgets('right, forward growth', (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      const headerKey = Key('pinned-header');
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              height: 300.0,
+              width: 400.0,
+              child: CustomScrollView(
+                scrollDirection: Axis.horizontal,
+                controller: controller,
+                slivers: <Widget>[
+                  const SliverToBoxAdapter(
+                    child: SizedBox(width: 300.0, child: Text('Preceding content')),
+                  ),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _TestSliverPersistentHeaderDelegate(
+                      key: headerKey,
+                      minExtent: 50.0,
+                      maxExtent: 50.0,
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) =>
+                          SizedBox(width: 50.0, child: Text('Tile $index')),
+                      childCount: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
+
+      final RenderObject target = tester.renderObject(find.byKey(headerKey, skipOffstage: false));
+
+      // When the viewport is at offset 0.0 (unpinned):
+      RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+      expect(revealed.offset, 300.0);
+      expect(revealed.rect, const Rect.fromLTWH(0.0, 0.0, 50.0, 300.0));
+
+      // When the viewport is at offset 500.0 (already pinned at leading edge):
+      controller.jumpTo(500.0);
+      await tester.pumpAndSettle();
+
+      revealed = viewport.getOffsetToReveal(target, 0.0);
+      expect(revealed.offset, 500.0);
+      expect(revealed.rect, const Rect.fromLTWH(0.0, 0.0, 50.0, 300.0));
+    });
+
+    testWidgets('left, forward growth', (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      const headerKey = Key('pinned-header');
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              height: 300.0,
+              width: 400.0,
+              child: CustomScrollView(
+                scrollDirection: Axis.horizontal,
+                reverse: true,
+                controller: controller,
+                slivers: <Widget>[
+                  const SliverToBoxAdapter(
+                    child: SizedBox(width: 300.0, child: Text('Preceding content')),
+                  ),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _TestSliverPersistentHeaderDelegate(
+                      key: headerKey,
+                      minExtent: 50.0,
+                      maxExtent: 50.0,
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) =>
+                          SizedBox(width: 50.0, child: Text('Tile $index')),
+                      childCount: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
+
+      final RenderObject target = tester.renderObject(find.byKey(headerKey, skipOffstage: false));
+
+      // When the viewport is at offset 0.0 (unpinned):
+      RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+      expect(revealed.offset, 300.0);
+      expect(revealed.rect, const Rect.fromLTWH(350.0, 0.0, 50.0, 300.0));
+
+      // When the viewport is at offset 500.0 (already pinned at leading edge):
+      controller.jumpTo(500.0);
+      await tester.pumpAndSettle();
+
+      revealed = viewport.getOffsetToReveal(target, 0.0);
+      expect(revealed.offset, 500.0);
+      expect(revealed.rect, const Rect.fromLTWH(350.0, 0.0, 50.0, 300.0));
+    });
+
+    testWidgets('up, reverse growth', (WidgetTester tester) async {
+      const Key centerKey = ValueKey<String>('center');
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      const headerKey = Key('pinned-header');
+
+      const Widget centerSliver = SliverToBoxAdapter(
+        key: centerKey,
+        child: SizedBox(height: 100.0, child: Text('Tile center')),
+      );
+      final Widget pinnedHeader = SliverPersistentHeader(
+        pinned: true,
+        delegate: _TestSliverPersistentHeaderDelegate(
+          key: headerKey,
+          minExtent: 50.0,
+          maxExtent: 50.0,
+        ),
+      );
+      const Widget precedingSliver = SliverToBoxAdapter(
+        child: SizedBox(height: 300.0, child: Text('Preceding content')),
+      );
+      const Widget trailingSliver = SliverToBoxAdapter(
+        child: SizedBox(height: 500.0, child: Text('Trailing content')),
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 300.0,
+              child: CustomScrollView(
+                controller: controller,
+                center: centerKey,
+                slivers: <Widget>[trailingSliver, pinnedHeader, precedingSliver, centerSliver],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
+
+      final RenderObject target = tester.renderObject(find.byKey(headerKey, skipOffstage: false));
+
+      // When viewport is at offset 0.0 (unpinned):
+      RevealedOffset revealed = viewport.getOffsetToReveal(target, 1.0);
+      expect(revealed.offset, -300.0);
+
+      // When viewport is at offset -500.0 (pinned at reverse leading edge):
+      controller.jumpTo(-500.0);
+      await tester.pumpAndSettle();
+
+      revealed = viewport.getOffsetToReveal(target, 1.0);
+      expect(revealed.offset, -500.0);
+    });
+
+    testWidgets('left, reverse growth', (WidgetTester tester) async {
+      const Key centerKey = ValueKey<String>('center');
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      const headerKey = Key('pinned-header');
+
+      const Widget centerSliver = SliverToBoxAdapter(
+        key: centerKey,
+        child: SizedBox(width: 100.0, child: Text('Tile center')),
+      );
+      final Widget pinnedHeader = SliverPersistentHeader(
+        pinned: true,
+        delegate: _TestSliverPersistentHeaderDelegate(
+          key: headerKey,
+          minExtent: 50.0,
+          maxExtent: 50.0,
+        ),
+      );
+      const Widget precedingSliver = SliverToBoxAdapter(
+        child: SizedBox(width: 300.0, child: Text('Preceding content')),
+      );
+      const Widget trailingSliver = SliverToBoxAdapter(
+        child: SizedBox(width: 500.0, child: Text('Trailing content')),
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              height: 300.0,
+              width: 400.0,
+              child: CustomScrollView(
+                scrollDirection: Axis.horizontal,
+                controller: controller,
+                center: centerKey,
+                slivers: <Widget>[trailingSliver, pinnedHeader, precedingSliver, centerSliver],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderAbstractViewport viewport = tester.allRenderObjects
+          .whereType<RenderAbstractViewport>()
+          .first;
+
+      final RenderObject target = tester.renderObject(find.byKey(headerKey, skipOffstage: false));
+
+      // When viewport is at offset 0.0 (unpinned):
+      RevealedOffset revealed = viewport.getOffsetToReveal(target, 1.0);
+      expect(revealed.offset, -300.0);
+
+      // When viewport is at offset -500.0 (pinned at reverse leading edge):
+      controller.jumpTo(-500.0);
+      await tester.pumpAndSettle();
+
+      revealed = viewport.getOffsetToReveal(target, 1.0);
+      expect(revealed.offset, -500.0);
+    });
+  });
+
   testWidgets('Nested Viewports showOnScreen', (WidgetTester tester) async {
     final controllersX = List<ScrollController>.generate(
       10,
