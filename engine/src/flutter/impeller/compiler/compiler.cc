@@ -472,6 +472,20 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
         spirv_options.macro_definitions.push_back("IMPELLER_GRAPHICS_BACKEND");
         spirv_options.relaxed_vulkan_rules = true;
       }
+
+      // When optimization is enabled, loop-carried phi merges are sunk into the
+      // SPIR-V continue block. SPIRV-Cross cannot fold those back into a for
+      // increment, so it emits `for (int i = 0; i < n; ) { ...; i++; continue;
+      // }` instead. Vivante's shader compiler (libVSC.so) segfaults inside
+      // glLinkProgram on that form, taking down the whole process. Building
+      // GLES shaders unoptimized keeps the loops in their `for (...; i++)`
+      // form, which the driver handles. Same class of problem the SkSL target
+      // works around below.
+      if (source_options.target_platform == TargetPlatform::kOpenGLES) {
+        spirv_options.optimization_level =
+            shaderc_optimization_level::shaderc_optimization_level_zero;
+      }
+
       spirv_options.target = target;
     } break;
     case TargetPlatform::kRuntimeStageMetal:
@@ -493,6 +507,10 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
         // Flutter <= 3.44 before the OpenGLES flip was removed.
         spirv_options.macro_definitions.push_back(
             "IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED");
+        // User fragment programs reach the same Vivante link crash as the
+        // built-in GLES shaders; see the kOpenGLES case above.
+        spirv_options.optimization_level =
+            shaderc_optimization_level::shaderc_optimization_level_zero;
       }
     } break;
     case TargetPlatform::kSkSL: {

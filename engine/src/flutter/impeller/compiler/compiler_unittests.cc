@@ -179,6 +179,62 @@ TEST(CompilerTest, YFlipInjectionForGLESVertexShaders) {
       << mtl_vert;
 }
 
+TEST(CompilerTest, GLESLoopsKeepTheirIncrementClause) {
+  // The Vivante GLES compiler segfaults while linking a loop that SPIRV-Cross
+  // emits as `for (int i = 0; i < 5; ) { ...; i++; continue; }`, which is what
+  // it produces once the optimizer sinks loop-carried phi merges into the
+  // SPIR-V continue block. GLES shaders are therefore built unoptimized; this
+  // guards that. See flutter/flutter#167850.
+  auto compile = [](TargetPlatform platform) -> std::string {
+    std::shared_ptr<fml::Mapping> fixture =
+        flutter::testing::OpenFixtureAsMapping("loop_continue.frag");
+    FML_CHECK(fixture);
+
+    SourceOptions options("loop_continue.frag", SourceType::kFragmentShader);
+    options.source_language = SourceLanguage::kGLSL;
+    options.target_platform = platform;
+    options.working_directory = std::make_shared<fml::UniqueFD>(
+        flutter::testing::OpenFixturesDirectory());
+    options.entry_point_name = "main";
+
+    Reflector::Options reflector_options;
+    reflector_options.target_platform = platform;
+    reflector_options.header_file_name = "loop_continue.h";
+    reflector_options.shader_name = "shader";
+
+    Compiler compiler(fixture, options, reflector_options);
+    if (!compiler.IsValid()) {
+      return "";
+    }
+    auto sl = compiler.GetSLShaderSource();
+    if (!sl || !sl->GetMapping()) {
+      return "";
+    }
+    return std::string(reinterpret_cast<const char*>(sl->GetMapping()),
+                       sl->GetSize());
+  };
+
+  const std::string gl_frag = compile(TargetPlatform::kOpenGLES);
+  ASSERT_FALSE(gl_frag.empty());
+
+  // A `continue;` closing a block is the signature of the crashing form.
+  constexpr std::string_view kContinue = "continue;";
+  for (size_t pos = gl_frag.find(kContinue); pos != std::string::npos;
+       pos = gl_frag.find(kContinue, pos + 1)) {
+    const size_t next =
+        gl_frag.find_first_not_of(" \t\r\n", pos + kContinue.size());
+    EXPECT_TRUE(next == std::string::npos || gl_frag[next] != '}')
+        << "Loop emitted in the form that crashes Vivante:\n"
+        << gl_frag;
+  }
+
+  // The counter must be incremented in the loop header, not the body.
+  EXPECT_NE(gl_frag.find("for ("), std::string::npos) << gl_frag;
+  EXPECT_EQ(gl_frag.find("; )"), std::string::npos)
+      << "Loop has an empty increment clause:\n"
+      << gl_frag;
+}
+
 TEST(CompilerTest, YFlipInjectionHandlesEarlyReturnsInGLESVertexShader) {
   // `y_flip_early_return.vert` has an early `return` before main's implicit
   // exit; the wrap-main injection must flip on both paths.
