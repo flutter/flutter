@@ -1964,17 +1964,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(inTest);
     // So that we can assert that it remains the same after the test finishes.
     _beforeTestCheckIntrinsicSizes = debugCheckIntrinsicSizes;
+    _beforeTestAutoUpdateGoldens = autoUpdateGoldenFiles && !isBrowser;
+    _beforeTestReportTestException = reportTestException;
+    _beforeTestErrorWidgetBuilder = ErrorWidget.builder;
+    _beforeTestShouldPropagateDevicePointerEvents = shouldPropagateDevicePointerEvents;
+    _shouldVerifyInvariants = false;
 
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
     // Pretend that the first frame produced in the test body is the first frame
     // sent to the engine.
     resetFirstFrameSent();
-
-    final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles && !isBrowser;
-    final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
-    final ErrorWidgetBuilder errorWidgetBuilderBeforeTest = ErrorWidget.builder;
-    final bool shouldPropagateDevicePointerEventsBeforeTest = shouldPropagateDevicePointerEvents;
 
     // run the test
     await testBody();
@@ -1994,18 +1994,26 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         _testTextInput.unregister();
       }
       invariantTester();
-      _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
-      _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
-      _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
-      _verifyShouldPropagateDevicePointerEventsUnset(shouldPropagateDevicePointerEventsBeforeTest);
-      _verifyInvariants();
+      _shouldVerifyInvariants = true;
     }
 
     assert(inTest);
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
   }
 
+  bool _beforeTestAutoUpdateGoldens = false;
+  late TestExceptionReporter _beforeTestReportTestException;
+  late ErrorWidgetBuilder _beforeTestErrorWidgetBuilder;
+  bool _beforeTestShouldPropagateDevicePointerEvents = false;
   late bool _beforeTestCheckIntrinsicSizes;
+
+  // Whether post-test invariant verifications should run in [postTest].
+  //
+  // Set to true only if the test body completed without exceptions and the
+  // widget tree was unmounted. If the test encountered an exception, invariant
+  // checks are skipped to avoid spurious errors (e.g., active animations or
+  // unreset debug flags from aborted tests) from obscuring the real failure.
+  bool _shouldVerifyInvariants = false;
 
   void _verifyInvariants() {
     assert(
@@ -2062,13 +2070,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void _verifyAutoUpdateGoldensUnset(bool valueBeforeTest) {
     assert(() {
       if (autoUpdateGoldenFiles != valueBeforeTest) {
-        FlutterError.reportError(
-          FlutterErrorDetails(
-            exception: FlutterError('The value of autoUpdateGoldenFiles was changed by the test.'),
-            stack: StackTrace.current,
-            library: 'Flutter test framework',
-          ),
-        );
+        throw FlutterError('The value of autoUpdateGoldenFiles was changed by the test.');
       }
       return true;
     }());
@@ -2082,13 +2084,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // So we reset the error reporter to its initial value and then report
         // this error.
         reportTestException = valueBeforeTest;
-        FlutterError.reportError(
-          FlutterErrorDetails(
-            exception: FlutterError('The value of reportTestException was changed by the test.'),
-            stack: StackTrace.current,
-            library: 'Flutter test framework',
-          ),
-        );
+        throw FlutterError('The value of reportTestException was changed by the test.');
       }
       return true;
     }());
@@ -2097,13 +2093,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void _verifyErrorWidgetBuilderUnset(ErrorWidgetBuilder valueBeforeTest) {
     assert(() {
       if (ErrorWidget.builder != valueBeforeTest) {
-        FlutterError.reportError(
-          FlutterErrorDetails(
-            exception: FlutterError('The value of ErrorWidget.builder was changed by the test.'),
-            stack: StackTrace.current,
-            library: 'Flutter test framework',
-          ),
-        );
+        throw FlutterError('The value of ErrorWidget.builder was changed by the test.');
       }
       return true;
     }());
@@ -2112,14 +2102,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void _verifyShouldPropagateDevicePointerEventsUnset(bool valueBeforeTest) {
     assert(() {
       if (shouldPropagateDevicePointerEvents != valueBeforeTest) {
-        FlutterError.reportError(
-          FlutterErrorDetails(
-            exception: FlutterError(
-              'The value of shouldPropagateDevicePointerEvents was changed by the test.',
-            ),
-            stack: StackTrace.current,
-            library: 'Flutter test framework',
-          ),
+        throw FlutterError(
+          'The value of shouldPropagateDevicePointerEvents was changed by the test.',
         );
       }
       return true;
@@ -2159,41 +2143,54 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Called by the [testWidgets] function after a test is executed.
   void postTest() {
     assert(inTest);
-    FlutterError.onError = _oldExceptionHandler;
-    FlutterError.demangleStackTrace = _oldStackTraceDemangler;
-    _pendingExceptionDetails = null;
-    _parentZone = null;
-    _testZone = null;
-    buildOwner!.focusManager.dispose();
+    try {
+      if (_shouldVerifyInvariants) {
+        _shouldVerifyInvariants = false;
+        _verifyAutoUpdateGoldensUnset(_beforeTestAutoUpdateGoldens && !isBrowser);
+        _verifyReportTestExceptionUnset(_beforeTestReportTestException);
+        _verifyErrorWidgetBuilderUnset(_beforeTestErrorWidgetBuilder);
+        _verifyShouldPropagateDevicePointerEventsUnset(
+          _beforeTestShouldPropagateDevicePointerEvents,
+        );
+        _verifyInvariants();
+      }
+    } finally {
+      FlutterError.onError = _oldExceptionHandler;
+      FlutterError.demangleStackTrace = _oldStackTraceDemangler;
+      _pendingExceptionDetails = null;
+      _parentZone = null;
+      _testZone = null;
+      buildOwner!.focusManager.dispose();
 
-    if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(
-      SystemChannels.accessibility.name,
-      _announcementHandler,
-    )) {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockDecodedMessageHandler(SystemChannels.accessibility, null);
-      _announcementHandler = null;
+      if (TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(
+        SystemChannels.accessibility.name,
+        _announcementHandler,
+      )) {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockDecodedMessageHandler(SystemChannels.accessibility, null);
+        _announcementHandler = null;
+      }
+      _announcements = <CapturedAccessibilityAnnouncement>[];
+
+      ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
+      buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
+
+      // Disabling the warning because @visibleForTesting doesn't take the testing
+      // framework itself into account, but we don't want it visible outside of
+      // tests.
+      // ignore: invalid_use_of_visible_for_testing_member
+      RawKeyboard.instance.clearKeysPressed();
+      // ignore: invalid_use_of_visible_for_testing_member
+      HardwareKeyboard.instance.clearState();
+      // ignore: invalid_use_of_visible_for_testing_member
+      keyEventManager.clearState();
+      // ignore: invalid_use_of_visible_for_testing_member
+      RendererBinding.instance.initMouseTracker();
+
+      assert(ServicesBinding.instance == WidgetsBinding.instance);
+      // ignore: invalid_use_of_visible_for_testing_member
+      ServicesBinding.instance.resetInternalState();
     }
-    _announcements = <CapturedAccessibilityAnnouncement>[];
-
-    ServicesBinding.instance.keyEventManager.keyMessageHandler = null;
-    buildOwner!.focusManager = FocusManager()..registerGlobalHandlers();
-
-    // Disabling the warning because @visibleForTesting doesn't take the testing
-    // framework itself into account, but we don't want it visible outside of
-    // tests.
-    // ignore: invalid_use_of_visible_for_testing_member
-    RawKeyboard.instance.clearKeysPressed();
-    // ignore: invalid_use_of_visible_for_testing_member
-    HardwareKeyboard.instance.clearState();
-    // ignore: invalid_use_of_visible_for_testing_member
-    keyEventManager.clearState();
-    // ignore: invalid_use_of_visible_for_testing_member
-    RendererBinding.instance.initMouseTracker();
-
-    assert(ServicesBinding.instance == WidgetsBinding.instance);
-    // ignore: invalid_use_of_visible_for_testing_member
-    ServicesBinding.instance.resetInternalState();
   }
 }
 
@@ -2574,11 +2571,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void postTest() {
-    super.postTest();
-    assert(_currentFakeAsync != null);
-    assert(_clock != null);
-    _clock = null;
-    _currentFakeAsync = null;
+    try {
+      super.postTest();
+    } finally {
+      assert(_currentFakeAsync != null);
+      assert(_clock != null);
+      _clock = null;
+      _currentFakeAsync = null;
+    }
   }
 }
 
@@ -3129,10 +3129,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   void postTest() {
-    super.postTest();
-    assert(!_expectingFrame);
-    assert(_pendingFrame == null);
-    _inTest = false;
+    try {
+      super.postTest();
+    } finally {
+      assert(!_expectingFrame);
+      assert(_pendingFrame == null);
+      _inTest = false;
+    }
   }
 
   @override
