@@ -18,6 +18,10 @@ namespace {
 
 std::vector<uint8_t> ToR32G32B32A32FloatBytes(
     const std::vector<Color>& colors) {
+  static_assert(sizeof(Color) == sizeof(float) * 4,
+                "Color must be exactly 4 floats with no padding.");
+  static_assert(std::is_standard_layout_v<Color>,
+                "Color must be standard layout.");
   // `Color` is a standard-layout struct of 4 contiguous 32-bit floats (RGBA),
   // directly matching the `kR32G32B32A32Float` pixel format layout.
   const auto* bytes = reinterpret_cast<const uint8_t*>(colors.data());

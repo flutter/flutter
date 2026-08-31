@@ -38,17 +38,12 @@ GradientData CreateGradientBuffer(const std::vector<Color>& colors,
     }
     texture_size = static_cast<uint32_t>(std::round(1.0 / minimum_delta)) + 1;
   }
-  GradientData result = {
-      .colors = {},
-  };
-  result.colors.reserve(texture_size);
-
+  GradientData result;
   if (texture_size == colors.size() &&
       colors.size() <= kMaxGradientTextureSize) {
-    for (auto i = 0u; i < colors.size(); i++) {
-      result.colors.push_back(colors[i]);
-    }
+    result.colors = colors;
   } else {
+    result.colors.reserve(texture_size);
     Color previous_color = colors[0];
     auto previous_stop = 0.0;
     auto previous_color_index = 0;

@@ -223,8 +223,9 @@ struct Color {
   /// @brief Returns true if any color channel lies outside the standard
   ///        [0.0, 1.0] sRGB gamut.
   constexpr bool IsWideGamut() const {
-    return red < 0.0f || red > 1.0f || green < 0.0f || green > 1.0f ||
-           blue < 0.0f || blue > 1.0f;
+    return red < -kEhCloseEnough || red > 1.0f + kEhCloseEnough ||
+           green < -kEhCloseEnough || green > 1.0f + kEhCloseEnough ||
+           blue < -kEhCloseEnough || blue > 1.0f + kEhCloseEnough;
   }
 
   /**
