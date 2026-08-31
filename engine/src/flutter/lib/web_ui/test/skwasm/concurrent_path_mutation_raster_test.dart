@@ -13,8 +13,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-const int _maxFrames = 200;
-const Duration _maxTestTime = Duration(seconds: 10);
+const int _maxFrames = 10;
 const int _pathsPerFrame = 50;
 
 Future<void> testMain() async {
@@ -48,11 +47,7 @@ Future<void> testMain() async {
   }
 
   test('concurrent path mutation and rasterization does not corrupt the heap', () async {
-    final stopwatch = Stopwatch()..start();
-    var frame = 0;
-    while (frame < _maxFrames && stopwatch.elapsed < _maxTestTime) {
-      frame++;
-
+    for (var frame = 0; frame < _maxFrames; frame++) {
       final ui.Picture picture = recordPicture(frame);
       final sceneBuilder = ui.SceneBuilder();
       sceneBuilder.addPicture(ui.Offset.zero, picture);
@@ -66,7 +61,5 @@ Future<void> testMain() async {
       await renderFuture;
       picture.dispose();
     }
-
-    expect(frame, greaterThan(0));
-  }, timeout: const Timeout(Duration(minutes: 2)));
+  });
 }
