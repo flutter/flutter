@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_api_samples/widgets/basic/absorb_pointer.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
 
 void main() {
   testWidgets('AbsorbPointer absorbs taps over the overlapping region', (
