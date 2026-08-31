@@ -156,19 +156,6 @@ class L10nParserException extends L10nException {
   final int charNumber;
 }
 
-class L10nMissingPlaceholderException extends L10nParserException {
-  L10nMissingPlaceholderException(
-    super.error,
-    super.fileName,
-    super.messageId,
-    super.messageString,
-    super.charNumber,
-    this.placeholderName,
-  );
-
-  final String placeholderName;
-}
-
 // One optional named parameter to be used by a NumberFormat.
 //
 // Some of the NumberFormat factory constructors have optional named parameters.
