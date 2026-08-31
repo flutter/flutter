@@ -73,6 +73,7 @@ bool ClipContents::Render(const ContentContext& renderer,
   if (!clip_geometry_.vertex_buffer) {
     return true;
   }
+  FML_DCHECK(pass.HasStencilAttachment());
 
   using VS = ClipPipeline::VertexShader;
 

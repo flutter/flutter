@@ -131,6 +131,7 @@ class ColorSourceContents : public Contents {
     }
 
     if (is_stencil_then_cover) {
+      FML_DCHECK(pass.HasStencilAttachment());
       pass.SetStencilReference(0);
 
       /// Stencil preparation draw.

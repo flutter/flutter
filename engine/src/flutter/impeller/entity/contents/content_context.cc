@@ -437,6 +437,11 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   }
   desc.SetColorAttachmentDescriptor(0u, color0);
 
+  FML_DCHECK(stencil_mode == StencilMode::kIgnore ||
+             has_depth_stencil_attachments)
+      << "Attempted to use stencil mode " << static_cast<int>(stencil_mode)
+      << " on a pass without depth/stencil attachments.";
+
   if (!has_depth_stencil_attachments) {
     desc.ClearDepthAttachment();
     desc.ClearStencilAttachments();
