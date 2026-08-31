@@ -1742,6 +1742,69 @@ TEST_F(DisplayListTest, SaveLayerWithClipPathSetsContainsClips) {
   }
 }
 
+TEST_F(DisplayListTest, SaveLayerWithDrawPathSetsContainsClips) {
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(
+      SaveLayerOptions::kNoAttributes.with_can_distribute_opacity()
+          .with_contains_clips());
+
+  DisplayListBuilder builder;
+  builder.SaveLayer(std::nullopt, nullptr);
+  builder.DrawPath(kTestPath1, DlPaint());
+  builder.Restore();
+
+  builder.Build()->Dispatch(expector);
+  EXPECT_TRUE(expector.all_expectations_checked());
+}
+
+TEST_F(DisplayListTest, SaveLayerWithDrawDiffRoundRectSetsContainsClips) {
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(
+      SaveLayerOptions::kNoAttributes.with_can_distribute_opacity()
+          .with_contains_clips());
+
+  DisplayListBuilder builder;
+  builder.SaveLayer(std::nullopt, nullptr);
+  builder.DrawDiffRoundRect(kTestRRect, kTestInnerRRect, DlPaint());
+  builder.Restore();
+
+  builder.Build()->Dispatch(expector);
+  EXPECT_TRUE(expector.all_expectations_checked());
+}
+
+TEST_F(DisplayListTest,
+       SaveLayerWithStrokedDrawRoundSuperellipseSetsContainsClips) {
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(
+      SaveLayerOptions::kNoAttributes.with_can_distribute_opacity()
+          .with_contains_clips());
+
+  DisplayListBuilder builder;
+  builder.SaveLayer(std::nullopt, nullptr);
+  DlPaint stroke_paint = DlPaint().setDrawStyle(DlDrawStyle::kStroke);
+  builder.DrawRoundSuperellipse(kTestRSuperellipse, stroke_paint);
+  builder.Restore();
+
+  builder.Build()->Dispatch(expector);
+  EXPECT_TRUE(expector.all_expectations_checked());
+}
+
+TEST_F(DisplayListTest,
+       SaveLayerWithFilledDrawRoundSuperellipseDoesNotSetContainsClips) {
+  SAVE_LAYER_EXPECTOR(expector);
+  expector.addExpectation(
+      SaveLayerOptions::kNoAttributes.with_can_distribute_opacity());
+
+  DisplayListBuilder builder;
+  builder.SaveLayer(std::nullopt, nullptr);
+  DlPaint fill_paint = DlPaint().setDrawStyle(DlDrawStyle::kFill);
+  builder.DrawRoundSuperellipse(kTestRSuperellipse, fill_paint);
+  builder.Restore();
+
+  builder.Build()->Dispatch(expector);
+  EXPECT_TRUE(expector.all_expectations_checked());
+}
+
 TEST_F(DisplayListTest, SaveLayerNestedClipsLayerIsolation) {
   // Outer layer has no clips, inner layer has clips
   {
@@ -4735,7 +4798,7 @@ TEST_F(DisplayListTest, DrawDisplayListForwardsClipFlag) {
   DisplayListBuilder child_builder;
   child_builder.ClipRect(DlRect::MakeLTRB(10, 10, 20, 20), DlClipOp::kIntersect,
                          true);
-  child_builder.DrawRect(DlRect::MakeLTRB(0, 0, 10, 10), DlPaint());
+  child_builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), DlPaint());
   auto child_dl = child_builder.Build();
   EXPECT_TRUE(child_dl->root_has_clips());
 

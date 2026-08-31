@@ -1351,6 +1351,7 @@ void DisplayListBuilder::drawDiffRoundRect(const DlRoundRect& outer,
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect &&
       AccumulateOpBounds(outer.GetBounds(), flags)) {
+    current_layer().contains_clips = true;
     Push<DrawDiffRoundRectOp>(0, outer, inner);
     CheckLayerOpacityCompatibility();
     UpdateLayerResult(result);
@@ -1381,6 +1382,7 @@ void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
       if (current_.getDrawStyle() == DlDrawStyle::kFill) {
         Push<DrawRoundSuperellipseOp>(0, rse);
       } else {
+        current_layer().contains_clips = true;
         DlPathBuilder builder;
         builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(
             rse.GetBounds(), rse.GetRadii()));
@@ -1402,6 +1404,7 @@ void DisplayListBuilder::drawPath(const DlPath& path) {
   if (result != OpResult::kNoEffect) {
     bool is_visible = AccumulateOpBounds(path.GetBounds(), flags);
     if (is_visible) {
+      current_layer().contains_clips = true;
       Push<DrawPathOp>(0, path);
       CheckLayerOpacityHairlineCompatibility();
       UpdateLayerResult(result);
