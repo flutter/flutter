@@ -106,11 +106,11 @@ class EdgeInsetsOverlay extends StatelessWidget {
     );
 
     Widget? buildSlot(EdgeInsetsOverlaySlot slot) => switch (slot) {
-      .left => left != null ? LayoutId(id: EdgeInsetsOverlaySlot.left, child: left!) : null,
-      .top => top != null ? LayoutId(id: EdgeInsetsOverlaySlot.top, child: top!) : null,
-      .right => right != null ? LayoutId(id: EdgeInsetsOverlaySlot.right, child: right!) : null,
-      .bottom => bottom != null ? LayoutId(id: EdgeInsetsOverlaySlot.bottom, child: bottom!) : null,
-      .child => LayoutId(id: EdgeInsetsOverlaySlot.child, child: finalChild),
+      .left => left != null ? LayoutId(id: slot, child: left!) : null,
+      .top => top != null ? LayoutId(id: slot, child: top!) : null,
+      .right => right != null ? LayoutId(id: slot, child: right!) : null,
+      .bottom => bottom != null ? LayoutId(id: slot, child: bottom!) : null,
+      .child => LayoutId(id: slot, child: finalChild),
     };
 
     final orderedSlots = <EdgeInsetsOverlaySlot>{...paintOrder, ...EdgeInsetsOverlaySlot.values};
