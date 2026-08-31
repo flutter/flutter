@@ -241,6 +241,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   NSAssert(self, @"Super init cannot be nil");
   NSAssert(labelPrefix, @"labelPrefix is required");
 
+  // Reading the UIApplication lifecycle state and registering for UIKit notifications below both
+  // require the main thread, as does running the engine.
+  FML_DCHECK(NSThread.isMainThread) << "FlutterEngine must be created on the main thread.";
+
   _restorationEnabled = restorationEnabled;
   _allowHeadlessExecution = allowHeadlessExecution;
   _labelPrefix = [labelPrefix copy];
@@ -276,6 +280,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
                object:nil];
 
   [self setUpLifecycleNotifications:center];
+  [self updateGpuAvailabilityFromLifecycleState];
 
   [center addObserver:self
              selector:@selector(onLocaleUpdated:)
@@ -288,8 +293,43 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 + (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
-  NSAssert([[NSThread currentThread] isMainThread], @"Must be called on the main thread.");
+  NSAssert(NSThread.isMainThread, @"Must be called on the main thread.");
   return (__bridge FlutterEngine*)reinterpret_cast<void*>(identifier);
+}
+
+// Updates `isGpuDisabled` from the current lifecycle state and propagates to shell if available.
+//
+// This is process-level state that controls whether or not it's safe to submit work to the GPU.
+// Submitting GPU work while the app is backgrounded results in immediate process termination.
+//
+// For apps, we can read the state from `UIApplication.sharedApplication`.
+//
+// In an app extension, the state may be unreadable: there is no `UIApplication`, and the scene is
+// nil until the attached view controller's view is attached to a window's view hierarchy. In these
+// cases, we leave `isGpuDisabled` unmodified. This avoids the possibility of a crash from
+// incorrectly re-enabling the GPU on an engine that was disabled during backgrounding.
+//
+// Aside from on state transitions, the state has to be manually read and updated at the following
+// points:
+//
+// * When the engine is created, to determine if background or foreground.
+// * In app extensions, when a view controller is attached or detached.
+//
+- (void)updateGpuAvailabilityFromLifecycleState {
+  // When UIApplication.sharedApplication is available, it's authoritative for
+  // the process.
+  UIApplication* application = FlutterSharedApplication.application;
+  if (application) {
+    self.isGpuDisabled = application.applicationState == UIApplicationStateBackground;
+    return;
+  }
+
+  // Otherwise, we're in an app extension.
+  // Check if the view is attached to a Window, and query the scene.
+  UIWindowScene* scene = self.viewController.viewIfLoaded.window.windowScene;
+  if (scene) {
+    self.isGpuDisabled = scene.activationState == UISceneActivationStateBackground;
+  }
 }
 
 - (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
@@ -520,6 +560,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 - (void)setViewController:(FlutterViewController*)viewController {
   FML_DCHECK(self.platformView);
   _viewController = viewController;
+
+  // Attaching a view controller makes it possible for app extensions to check GPU availability.
+  [self updateGpuAvailabilityFromLifecycleState];
+
   self.platformView->SetOwnerViewController(_viewController);
   [self maybeSetupPlatformViewChannels];
   [self updateDisplays];
@@ -878,6 +922,18 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (BOOL)createShell:(NSString*)entrypoint
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute {
+  // MakeThreadHost below adopts the calling thread as this engine's platform/UI thread, which
+  // must be the main thread. The engine relies on UIApplicationMain to pump the platform thread's
+  // run loop, and the platform thread reads UIKit state (UIScreen, CADisplayLink) and runs all
+  // plugin and platform channel callbacks.
+  //
+  // Engines spawned from this one inherit these task runners, so this applies to every engine in a
+  // FlutterEngineGroup.
+  FML_CHECK(NSThread.isMainThread)
+      << "FlutterEngine must be run on the main thread. The engine adopts the calling thread as "
+         "its platform and UI thread, both of which must be the main thread. To start an engine "
+         "from a background queue, dispatch to the main queue first.";
+
   if (_shell != nullptr) {
     [FlutterLogger logWarning:@"This FlutterEngine was already invoked."];
     return NO;
@@ -927,13 +983,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                     platform_runner,                              // ui
                                     _threadHost->io_thread->GetTaskRunner()       // io
   );
-
-  // Disable GPU if the app or scene is running in the background.
-  self.isGpuDisabled = self.viewController
-                           ? self.viewController.stateIsBackground
-                           : FlutterSharedApplication.application &&
-                                 FlutterSharedApplication.application.applicationState ==
-                                     UIApplicationStateBackground;
 
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
@@ -1474,6 +1523,12 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)setIsGpuDisabled:(BOOL)value {
+  // `fml::SyncSwitch::SetSwitch` notifies its observers whether or not the value changed and is a
+  // blocking call. The Metal backend observes it to drain pending image uploads or flush tasks
+  // awaiting the GPU. Bail out early if unchanged so we only propagate state changes.
+  if (value == _isGpuDisabled) {
+    return;
+  }
   if (_shell) {
     _shell->SetGpuAvailability(value ? flutter::GpuAvailability::kUnavailable
                                      : flutter::GpuAvailability::kAvailable);
@@ -1566,6 +1621,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                            libraryURI:(/*nullable*/ NSString*)libraryURI
                          initialRoute:(/*nullable*/ NSString*)initialRoute
                        entrypointArgs:(/*nullable*/ NSArray<NSString*>*)entrypointArgs {
+  FML_CHECK(NSThread.isMainThread) << "FlutterEngine must be spawned on the iOS main thread.";
+
   NSAssert(_shell, @"Spawning from an engine without a shell (possibly not run).");
   FlutterEngine* result = [[FlutterEngine alloc] initWithName:self.labelPrefix
                                                       project:self.dartProject

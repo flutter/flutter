@@ -240,6 +240,13 @@ public final class FlutterEngineFlags {
   private static final Flag IMPELLER_LAZY_SHADER_MODER =
       new Flag("--impeller-lazy-shader-mode", "ImpellerLazyShaderInitialization", true);
 
+  /**
+   * Fake flag used for integration testing of the Android embedding processing engine flags.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
+  @VisibleForTesting public static final Flag TEST_FLAG = new Flag("--test-flag", "TestFlag", true);
+
   // Manifest flags NOT allowed in release mode:
 
   /**
@@ -295,13 +302,6 @@ public final class FlutterEngineFlags {
    */
   private static final Flag ENABLE_VULKAN_VALIDATION =
       new Flag("--enable-vulkan-validation", "EnableVulkanValidation");
-
-  /**
-   * Fake flag used for integration testing of the Android embedding processing engine flags.
-   *
-   * <p>Only settable via the manifest.
-   */
-  @VisibleForTesting public static final Flag TEST_FLAG = new Flag("--test-flag", "TestFlag");
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's

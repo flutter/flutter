@@ -39,9 +39,8 @@ TEST_F(FlViewTest, StateUpdateDoesNotHappenInInit) {
   FlView* view = fl_view_new(project);
   // Check that creating a view doesn't try to query the window state in
   // initialization, causing a critical log to be issued.
-  EXPECT_EQ(
-      flutter::testing::fl_get_received_gtk_log_levels() & G_LOG_LEVEL_CRITICAL,
-      (GLogLevelFlags)0x0);
+  EXPECT_FALSE(
+      flutter::testing::fl_has_received_gtk_log_level(G_LOG_LEVEL_CRITICAL));
 
   (void)view;
 }

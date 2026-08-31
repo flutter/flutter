@@ -8,6 +8,7 @@
 #include <variant>
 
 #include "flutter/fml/make_copyable.h"
+#include "impeller/display_list/aiks_context.h"
 
 // Disable a warning on Windows about use of deprecated atomic operations
 // on std::shared_ptr.  These functions are used because libcxx does not
@@ -175,9 +176,11 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
                        content)) {
           std::unique_ptr<LayerTree> layer_tree =
               std::get<std::unique_ptr<LayerTree>>(std::move(content));
+          auto aiks_context = snapshot_delegate->GetAiksContext();
           display_list = layer_tree->Flatten(
               DlRect::MakeWH(wrapper->size_.width, wrapper->size_.height),
-              snapshot_delegate->GetTextureRegistry());
+              snapshot_delegate->GetTextureRegistry(),
+              /*gr_context=*/nullptr, aiks_context.get());
         }
 
         auto texture = snapshot_delegate->MakeImpellerSnapshotSync(

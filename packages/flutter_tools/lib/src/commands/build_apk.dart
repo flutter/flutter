@@ -112,8 +112,7 @@ class BuildApkCommand extends BuildSubCommand {
       buildApkBuildMode: _buildMode.cliName,
       buildApkSplitPerAbi: boolArg('split-per-abi'),
       buildApkEnableHcpp:
-          explicitEnableHcpp ??
-          FlutterProject.current().android.computeHcppEnabled(ifAbsent: enableHcpp),
+          explicitEnableHcpp ?? project.android.computeHcppEnabled(ifAbsent: enableHcpp),
     );
   }
 
@@ -131,7 +130,6 @@ class BuildApkCommand extends BuildSubCommand {
     );
     validateBuild(androidBuildInfo);
     globals.terminal.usesTerminalUi = true;
-    final FlutterProject project = FlutterProject.current();
     await androidBuilder?.buildApk(
       project: project,
       target: targetFile,

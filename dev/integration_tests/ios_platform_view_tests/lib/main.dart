@@ -4,15 +4,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_driver/driver_extension.dart';
 
 void main() {
-  // enableFlutterDriverExtension() will disable keyboard,
-  // which is required for flutter_driver tests
-  // But breaks the XCUITests
-  if (const bool.fromEnvironment('ENABLE_DRIVER_EXTENSION')) {
-    enableFlutterDriverExtension();
-  }
   runApp(const MyApp());
 }
 
@@ -48,24 +41,6 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(title: Text(widget.title ?? '')),
       body: Column(
         children: <Widget>[
-          TextButton(
-            key: const ValueKey<String>('platform_view_button'),
-            child: const Text('show platform view'),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute<MergeThreadTestPage>(
-                  builder: (BuildContext context) => const MergeThreadTestPage(),
-                ),
-              );
-            },
-          ),
-          // Push this button to perform an animation, which ensure the threads are unmerged after the animation.
-          ElevatedButton(
-            key: const ValueKey<String>('unmerge_button'),
-            child: const Text('Tap to unmerge threads'),
-            onPressed: () {},
-          ),
           TextButton(
             key: const ValueKey<String>('platform_view_focus_test'),
             child: const Text('platform view focus test'),
@@ -127,28 +102,6 @@ class _MyHomePageState extends State<MyHomePage> {
               );
             },
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A page to test thread merge for platform view.
-class MergeThreadTestPage extends StatelessWidget {
-  const MergeThreadTestPage({super.key});
-
-  static Key button = const ValueKey<String>('plus_button');
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Platform View Thread Merge Tests')),
-      body: Column(
-        children: <Widget>[
-          const Expanded(
-            child: SizedBox(width: 300, child: UiKitView(viewType: 'platform_view')),
-          ),
-          ElevatedButton(key: button, child: const Text('button'), onPressed: () {}),
         ],
       ),
     );
