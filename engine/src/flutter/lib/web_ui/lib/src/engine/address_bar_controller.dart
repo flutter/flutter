@@ -204,14 +204,14 @@ class AddressBarController {
 
   void _setupTouchTranslation() {
     final options = DomEventListenerOptions(passive: true);
-    _touchEventChanges.forEach((String touchEventType, ui.PointerChange change) {
+    for (final MapEntry<String, ui.PointerChange> entry in _touchEventChanges.entries) {
       _addListener(
         _view.dom.rootElement,
-        touchEventType,
-        (DomEvent event) => _translateTouchEvent(event as DomTouchEvent, change),
+        entry.key,
+        (DomEvent event) => _translateTouchEvent(event as DomTouchEvent, entry.value),
         options,
       );
-    });
+    }
     // On the window, where [PointerBinding] also listens for moves in full-page
     // mode.
     _addListener(domWindow, 'pointerrawupdate', _translateRawUpdate, options);
