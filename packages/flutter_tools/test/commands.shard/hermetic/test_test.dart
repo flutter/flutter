@@ -595,6 +595,46 @@ resolution: workspace
         Cache: () => Cache.test(processManager: FakeProcessManager.any()),
       },
     );
+
+    testUsingContext(
+      'passes --preset through to package:test',
+      () async {
+        final fakePackageTest = FakePackageTest();
+        final testCommand = TestCommand(testWrapper: fakePackageTest);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(<String>['test', '--no-pub', '--preset=foo', '--preset=bar']);
+        expect(
+          fakePackageTest.lastArgs,
+          containsAllInOrder(<String>['--preset', 'foo', '--preset', 'bar']),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      },
+    );
+
+    testUsingContext(
+      'passes -P through to package:test',
+      () async {
+        final fakePackageTest = FakePackageTest();
+        final testCommand = TestCommand(testWrapper: fakePackageTest);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(<String>['test', '--no-pub', '-Pfoo', '-Pbar']);
+        expect(
+          fakePackageTest.lastArgs,
+          containsAllInOrder(<String>['--preset', 'foo', '--preset', 'bar']),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      },
+    );
   });
 
   testUsingContext(
@@ -711,6 +751,7 @@ resolution: workspace
           '--test-randomize-ordering-seed=random',
           '--tags=tag1',
           '--exclude-tags=tag2',
+          '--preset=preset1',
           '--fail-fast',
           '--run-skipped',
           '--total-shards=1',
@@ -749,6 +790,8 @@ const List<String> packageTestArgs = <String>[
   'tag1',
   '--exclude-tags',
   'tag2',
+  '--preset',
+  'preset1',
   '--fail-fast',
   '--run-skipped',
   '--total-shards=1',
@@ -1567,6 +1610,40 @@ dev_dependencies:
     );
 
     testUsingContext(
+      'forwards an explicit --[no-]enable-hcpp as a launch override',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+
+        final testCommand = TestCommand(testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>['test', '--no-pub', '--no-enable-hcpp']);
+        expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'sends no hcpp launch override when --enable-hcpp was not passed',
+      () async {
+        final testRunner = FakeFlutterTestRunner(0);
+
+        final testCommand = TestCommand(testRunner: testRunner);
+        final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+        await commandRunner.run(const <String>['test', '--no-pub']);
+        expect(testRunner.lastDebuggingOptionsValue.enableHcpp, isNull);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
       'uninstallApp defaults to true',
       () async {
         final testRunner = FakeFlutterTestRunner(0);
@@ -1714,6 +1791,24 @@ resolution: workspace
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
+
+  testUsingContext(
+    'passes regular expression lookahead in --name argument to test runner',
+    () async {
+      final testRunner = FakeFlutterTestRunner(0);
+
+      final testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>['test', '--name', r'^(?!Golden).+', '--no-pub']);
+
+      expect(testRunner.lastNames, <String>[r'^(?!Golden).+']);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 }
 
 class FakeFlutterTestRunner implements FlutterTestRunner {
@@ -1728,6 +1823,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
   int? lastConcurrency;
   TestWatcher? lastTestWatcher;
   FakeVmServiceHost? fakeVmServiceHost;
+  List<String> lastNames = const <String>[];
+  List<String> lastPlainNames = const <String>[];
 
   @override
   Future<int> runTests(
@@ -1738,6 +1835,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     List<String> plainNames = const <String>[],
     List<String> tags = const <String>[],
     List<String> excludeTags = const <String>[],
+    List<String> presets = const <String>[],
     bool enableVmService = false,
     bool ipv6 = false,
     bool machine = false,
@@ -1773,6 +1871,8 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     lastReporterOption = reporter;
     lastConcurrency = concurrency;
     lastTestWatcher = watcher;
+    lastNames = names;
+    lastPlainNames = plainNames;
 
     if (leastRunTime != null) {
       await Future<void>.delayed(leastRunTime!);
@@ -1796,6 +1896,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     List<String> plainNames = const <String>[],
     List<String> tags = const <String>[],
     List<String> excludeTags = const <String>[],
+    List<String> presets = const <String>[],
     bool machine = false,
     bool updateGoldens = false,
     required int? concurrency,

@@ -505,13 +505,21 @@ class BackdropGroup extends InheritedWidget {
 /// {@endtemplate}
 ///
 /// Multiple backdrop filters can be combined into a single rendering operation
-/// by the Flutter engine if these backdrop filters widgets all share a common
-/// [BackdropKey]. The backdrop key uniquely identifies the input for a backdrop
-/// filter, and when shared, indicates the filtering can be performed once. This
-/// can significantly reduce the overhead of using multiple backdrop filters in
-/// a scene. The key can either be provided manually via the `backdropKey`
-/// constructor parameter or looked up from a [BackdropGroup] inherited widget
-/// via the `.grouped` constructor.
+/// by the Flutter engine if these backdrop filter widgets all share a common
+/// [BackdropKey] and have equivalent filter configurations. The backdrop key
+/// uniquely identifies the input for a backdrop filter, and when shared, indicates
+/// that the backdrop capture can be shared and filtering can be performed once
+/// if the filters are identical. This can significantly reduce the overhead of
+/// using multiple backdrop filters in a scene. The key can either be provided
+/// manually via the `backdropKey` constructor parameter or looked up from a
+/// [BackdropGroup] inherited widget via the `.grouped` constructor.
+///
+/// To combine the filter passes into a single operation, the resolved filters
+/// across the group must have identical properties. For example, using a "bounded"
+/// blur ([ImageFilterConfig.blur] with `bounded: true` or [ui.ImageFilter.blur]
+/// with non-null `bounds`) assigns unique layout bounds to each widget, which
+/// prevents the engine from collapsing them into a single blur pass (though the
+/// initial backdrop capture is still shared across the group).
 ///
 /// Backdrop filters that overlap with each other should not use the same
 /// backdrop key, otherwise the results may look as if only one filter is
@@ -3955,6 +3963,8 @@ class IgnoreBaseline extends SingleChildRenderObjectWidget {
 
 /// A sliver that contains a single box widget.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=vWec9DrAbHE}
+///
 /// Slivers are special-purpose widgets that can be combined using a
 /// [CustomScrollView] to create custom scroll effects. A [SliverToBoxAdapter]
 /// is a basic sliver that creates a bridge back to one of the usual box-based
@@ -4397,6 +4407,9 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
 ///
 /// {@macro flutter.widgets.SemanticsBase}
 ///  * [Semantics], the widget variant of this sliver.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=lPWrd08swlw}
+///
 @immutable
 class SliverSemantics extends _SemanticsBase {
   /// Creates a semantic annotation.
@@ -5317,10 +5330,9 @@ class Flex extends MultiChildRenderObjectWidget {
     this.spacing = 0.0,
     super.children,
   }) : assert(
-         !identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null,
+         (crossAxisAlignment != CrossAxisAlignment.baseline) || textBaseline != null,
          'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline',
        );
-  // Cannot use == in the assert above instead of identical because of https://github.com/dart-lang/language/issues/1811.
 
   /// The direction to use as the main axis.
   ///
@@ -6987,7 +6999,9 @@ class RawImage extends LeafRenderObjectWidget {
     );
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
-    properties.add(EnumProperty<BlendMode>('blendMode', blendMode, defaultValue: BlendMode.srcOver));
+    properties.add(
+      EnumProperty<BlendMode>('blendMode', blendMode, defaultValue: BlendMode.srcOver),
+    );
   }
 }
 
@@ -7598,6 +7612,19 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/ignore_pointer.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// The following sample shows an [IgnorePointer] and an [AbsorbPointer] side
+/// by side, each wrapping a box that partially covers a tappable target
+/// behind it in a stack. Tapping the overlapping region on the
+/// [IgnorePointer] side taps the target behind: the [IgnorePointer] is
+/// invisible to hit testing, so the pointer event goes through to the next
+/// target in the stack. Tapping the same region on the [AbsorbPointer] side
+/// does nothing: the [AbsorbPointer] absorbs the pointer events itself, so
+/// neither its child nor the target behind it receives the tap.
+///
+/// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
+/// {@end-tool}
+///
 /// ## Semantics
 ///
 /// Using this class may also affect how the semantics subtree underneath is
@@ -7705,9 +7732,14 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
 ///
 /// {@tool dartpad}
-/// The following sample has an [AbsorbPointer] widget wrapping the button on
-/// top of the stack, which absorbs pointer events, preventing its child button
-/// __and__ the button below it in the stack from receiving the pointer events.
+/// The following sample shows an [AbsorbPointer] and an [IgnorePointer] side
+/// by side, each wrapping a box that partially covers a tappable target
+/// behind it in a stack. Tapping the overlapping region on the
+/// [AbsorbPointer] side does nothing: the [AbsorbPointer] absorbs the pointer
+/// events itself, so neither its child nor the target behind it receives the
+/// tap. Tapping the same region on the [IgnorePointer] side taps the target
+/// behind: the [IgnorePointer] is invisible to hit testing, so the pointer
+/// event goes through to the next target in the stack.
 ///
 /// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
 /// {@end-tool}
