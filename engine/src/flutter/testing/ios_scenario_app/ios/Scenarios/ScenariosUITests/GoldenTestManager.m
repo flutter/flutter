@@ -25,17 +25,7 @@ const double kDefaultRmseThreshold = 0.5;
     _identifier = [[launchArg substringFromIndex:2] stringByReplacingOccurrencesOfString:@"-"
                                                                               withString:@"_"];
 
-    NSString* impeller = @"impeller_";
-    NSNumber* enableImpeller = [[NSBundle bundleWithIdentifier:@"dev.flutter.Scenarios"]
-        objectForInfoDictionaryKey:@"FLTEnableImpeller"];
-    if (enableImpeller != nil && !enableImpeller.boolValue) {
-      impeller = @"";
-      NSLog(@"Testing Skia: FLTEnableImpeller is NO");
-    } else {
-      NSLog(@"Testing Impeller");
-    }
-
-    NSString* prefix = [NSString stringWithFormat:@"golden_%@_%@", _identifier, impeller];
+    NSString* prefix = [NSString stringWithFormat:@"golden_%@_impeller_", _identifier];
     _goldenImage = [[GoldenImage alloc] initWithGoldenNamePrefix:prefix];
     _launchArg = launchArg;
   }

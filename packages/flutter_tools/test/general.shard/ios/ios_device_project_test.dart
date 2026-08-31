@@ -100,6 +100,7 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
   return IOSDevice(
     'test',
     fileSystem: fileSystem,
+    fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: platform),
     logger: logger,
     processUtils: ProcessUtils(processManager: processManager, logger: logger),
     xcode: null,

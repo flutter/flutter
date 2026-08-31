@@ -20,12 +20,12 @@ std::size_t TypefaceSkia::GetHash() const {
     return 0u;
   }
 
-  return reinterpret_cast<size_t>(typeface_.get());
+  return typeface_->uniqueID();
 }
 
 bool TypefaceSkia::IsEqual(const Typeface& other) const {
   auto sk_other = reinterpret_cast<const TypefaceSkia*>(&other);
-  return sk_other->typeface_ == typeface_;
+  return SkTypeface::Equal(sk_other->typeface_.get(), typeface_.get());
 }
 
 const sk_sp<SkTypeface>& TypefaceSkia::GetSkiaTypeface() const {

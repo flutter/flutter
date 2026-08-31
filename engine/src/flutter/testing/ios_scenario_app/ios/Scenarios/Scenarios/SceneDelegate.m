@@ -64,6 +64,8 @@
     @"--locale-initialization",
     @"--non-full-screen-flutter-view-platform-view",
     @"--platform-view",
+    @"--platform-view-clip-rsuperellipse",
+    @"--platform-view-clip-rsuperellipse-multiple-clips",
     @"--platform-view-clippath",
     @"--platform-view-clippath-multiple-clips",
     @"--platform-view-clippath-with-transform",

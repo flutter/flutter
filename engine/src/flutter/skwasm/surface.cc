@@ -41,16 +41,6 @@
 //    the Dart code, which will complete the future that was returned by the
 //    original Dart method call.
 
-// See https://github.com/flutter/flutter/pull/190048
-extern bool
-    gSkUseThreadLocalStrikeCaches_IAcknowledgeThisIsIncrediblyExperimental;
-
-namespace {
-__attribute__((constructor)) void UseThreadLocalStrikeCaches() {
-  gSkUseThreadLocalStrikeCaches_IAcknowledgeThisIsIncrediblyExperimental = true;
-}
-}  // namespace
-
 unsigned long Skwasm::GetRasterThread() {
   static unsigned long thread = []() {
     if (skwasm_isSingleThreaded()) {
