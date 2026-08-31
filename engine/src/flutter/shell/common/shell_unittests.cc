@@ -2666,8 +2666,10 @@ TEST_F(ShellTest, RasterizerMakeImpellerSnapshotDoesNotGenerateMipmaps) {
             delegate->MakeImpellerSnapshotSync(MakeSizedDisplayList(50, 50),
                                                DlISize(50, 50),
                                                SnapshotPixelFormat::kDontCare);
-        ASSERT_NE(texture, nullptr);
-        EXPECT_EQ(texture->GetTextureDescriptor().mip_count, 1u);
+        EXPECT_NE(texture, nullptr);
+        if (texture != nullptr) {
+          EXPECT_EQ(texture->GetTextureDescriptor().mip_count, 1u);
+        }
 
         latch->Signal();
       });
