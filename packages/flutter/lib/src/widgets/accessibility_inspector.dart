@@ -92,7 +92,7 @@ class AccessibilityInspector {
     if (renderView != null) {
       final List<Violation> tapTargetViolations = MinimumTapTargetEvaluation(
         size: minSize,
-      ).traverse(renderView.flutterView, root);
+      ).traverse(root, view: renderView.flutterView);
       for (final violation in tapTargetViolations) {
         nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
           <String, Object?>{'rule': 'tapTargetSize', 'description': violation.reason},
@@ -128,7 +128,7 @@ class AccessibilityInspector {
       }
 
       nodes[node.id.toString()] = <String, Object?>{
-        ...node.toJson(),
+        'node': node.toJson(),
         'issues': nodeIssues[node.id] ?? <Map<String, Object?>>[],
       };
 
@@ -151,7 +151,7 @@ class AccessibilityInspector {
     return <String, Object?>{'data': nodes};
   }
 
-  // TODO(hannah-hyj): This returns the first RenderView with a SemanticsOwner.
+  // TODO(hannah-hyj): https://github.com/flutter/devtools/issues/9991 - This returns the first RenderView with a SemanticsOwner.
   // This getSemanticsTree feature is used in DevTools, which currently only supports
   // single-view inspection. Add multi-view support when DevTools needs it.
   RenderView? _findRenderView() {

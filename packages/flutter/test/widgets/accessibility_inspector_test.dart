@@ -103,7 +103,8 @@ void main() {
 
     Map<String, Object?> findNodeWithLabel(Map<String, Object?> nodes, String label) {
       for (final Object? value in nodes.values) {
-        final node = value! as Map<String, Object?>;
+        final entry = value! as Map<String, Object?>;
+        final node = entry['node']! as Map<String, Object?>;
         if ((node['label']! as String).contains(label)) {
           return node;
         }
@@ -144,10 +145,11 @@ void main() {
       containsAll(<Object?>[child1['id'], child2['id'], child3['id']]),
     );
 
-    // Verify issues list is present on all nodes.
+    // Verify issues list and node object are present on all entries.
     for (final Object? value in nodes.values) {
-      final node = value! as Map<String, Object?>;
-      expect(node['issues'], isA<List<Object?>>());
+      final entry = value! as Map<String, Object?>;
+      expect(entry['node'], isA<Map<String, Object?>>());
+      expect(entry['issues'], isA<List<Object?>>());
     }
 
     // Calling disposeSemantics succeeds and cleans up semantics handle.
@@ -246,7 +248,9 @@ void main() {
     expect(tapTargetNodes, isNotEmpty);
     expect(missingLabelNodes, isNotEmpty);
     // The small unlabeled tap target node should contain multiple issues.
-    expect(tapTargetNodes.first['id'], missingLabelNodes.first['id']);
+    final tapTargetNode = tapTargetNodes.first['node']! as Map<String, Object?>;
+    final missingLabelNode = missingLabelNodes.first['node']! as Map<String, Object?>;
+    expect(tapTargetNode['id'], missingLabelNode['id']);
     final List<Map<String, Object?>> multiIssueList =
         (tapTargetNodes.first['issues']! as List<Object?>).cast<Map<String, Object?>>();
     expect(
@@ -282,7 +286,8 @@ void main() {
     final Map<String, Object?> accessibleButton = nodes.values
         .map((Object? v) => v! as Map<String, Object?>)
         .firstWhere(
-          (Map<String, Object?> node) => (node['label'] as String?) == 'Accessible Button',
+          (Map<String, Object?> node) =>
+              (node['node']! as Map<String, Object?>)['label'] == 'Accessible Button',
         );
     expect(accessibleButton['issues']! as List<Object?>, isEmpty);
 
