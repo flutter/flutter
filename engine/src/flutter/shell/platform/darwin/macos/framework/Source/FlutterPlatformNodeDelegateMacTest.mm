@@ -62,8 +62,7 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   NSAccessibilityElement* native_accessibility =
       root_platform_node_delegate->GetNativeViewAccessible();
   ASSERT_NE(native_accessibility, nil);
-  std::string value = [native_accessibility.accessibilityValue UTF8String];
-  EXPECT_TRUE(value == "accessibility");
+  EXPECT_TRUE([native_accessibility.accessibilityValue isEqualToString:@"accessibility"]);
   EXPECT_TRUE(
       [native_accessibility.accessibilityRole isEqualToString:NSAccessibilityStaticTextRole]);
   EXPECT_EQ([native_accessibility.accessibilityChildren count], 0u);
@@ -104,16 +103,14 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   NSAccessibilityElement* native_accessibility =
       root_platform_node_delegate->GetNativeViewAccessible();
   ASSERT_NE(native_accessibility, nil);
-  std::string value = [native_accessibility.accessibilityValue UTF8String];
-  EXPECT_EQ(value, "selectable text");
+  EXPECT_TRUE([native_accessibility.accessibilityValue isEqualToString:@"selectable text"]);
   EXPECT_TRUE(
       [native_accessibility.accessibilityRole isEqualToString:NSAccessibilityStaticTextRole]);
   EXPECT_EQ([native_accessibility.accessibilityChildren count], 0u);
   NSRange selection = native_accessibility.accessibilitySelectedTextRange;
   EXPECT_EQ(selection.location, 1u);
   EXPECT_EQ(selection.length, 2u);
-  std::string selected_text = [native_accessibility.accessibilitySelectedText UTF8String];
-  EXPECT_EQ(selected_text, "el");
+  EXPECT_TRUE([native_accessibility.accessibilitySelectedText isEqualToString:@"el"]);
 }
 
 TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRange) {

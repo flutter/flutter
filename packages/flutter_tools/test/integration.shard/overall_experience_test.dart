@@ -22,10 +22,6 @@
 // To aid in debugging, consider passing the `debug: true` argument
 // to the runFlutter function.
 
-// This file intentionally assumes the tests run in order.
-@Tags(<String>['no-shuffle'])
-library;
-
 import 'dart:io';
 
 import '../src/common.dart';

@@ -544,12 +544,81 @@ void main() {
       '/': (BuildContext context) => const Text('/'),
       '/second': (BuildContext context) => const Text('/second'),
     };
-    await tester.pumpWidget(MaterialApp(navigatorKey: nav, routes: routes));
+    await tester.pumpWidget(TestWidgetsApp(navigatorKey: nav, routes: routes));
     expect(find.text('/'), findsOneWidget);
     nav.currentState!.pushNamed<Object>('/second');
     await tester.pumpAndSettle();
     expect(find.text('/'), findsNothing);
     expect(find.text('/second'), findsOneWidget);
+  });
+
+  testWidgets('pushNamed can handle subtype of Object as type argument', (
+    WidgetTester tester,
+  ) async {
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('/'),
+      '/second': (BuildContext context) => const Text('/second'),
+    };
+
+    await tester.pumpWidget(TestWidgetsApp(routes: routes));
+    expect(find.text('/'), findsOneWidget);
+
+    final NavigatorState navigator = Navigator.of(tester.element(find.text('/')));
+    final Future<bool?> result = navigator.pushNamed<bool>('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/second'), findsOneWidget);
+
+    navigator.pop<bool>(true);
+    await tester.pumpAndSettle();
+    expect(await result, isTrue);
+  });
+
+  testWidgets('pushReplacementNamed can handle subtype of Object as type argument', (
+    WidgetTester tester,
+  ) async {
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('/'),
+      '/second': (BuildContext context) => const Text('/second'),
+    };
+
+    await tester.pumpWidget(TestWidgetsApp(routes: routes));
+    expect(find.text('/'), findsOneWidget);
+
+    final NavigatorState navigator = Navigator.of(tester.element(find.text('/')));
+    final Future<bool?> result = navigator.pushReplacementNamed<bool, void>('/second');
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/second'), findsOneWidget);
+
+    navigator.pop<bool>(true);
+    await tester.pumpAndSettle();
+    expect(await result, isTrue);
+  });
+
+  testWidgets('pushNamedAndRemoveUntil can handle subtype of Object as type argument', (
+    WidgetTester tester,
+  ) async {
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('/'),
+      '/second': (BuildContext context) => const Text('/second'),
+    };
+
+    await tester.pumpWidget(TestWidgetsApp(routes: routes));
+    expect(find.text('/'), findsOneWidget);
+
+    final NavigatorState navigator = Navigator.of(tester.element(find.text('/')));
+    final Future<bool?> result = navigator.pushNamedAndRemoveUntil<bool>(
+      '/second',
+      (Route<dynamic> route) => false,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('/second'), findsOneWidget);
+
+    navigator.pop<bool>(true);
+    await tester.pumpAndSettle();
+    expect(await result, isTrue);
   });
 
   testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
