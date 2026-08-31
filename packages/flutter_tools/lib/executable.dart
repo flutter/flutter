@@ -284,7 +284,13 @@ List<FlutterCommand> generateCommands({
     xcode: toolDependencies.appleContext.xcode,
     xcodeProjectInterpreter: toolDependencies.appleContext.xcodeProjectInterpreter,
   ),
-  ConfigCommand(verboseHelp: verboseHelp, extensionManager: extensionManager),
+  ConfigCommand(
+    verboseHelp: verboseHelp,
+    androidContext: toolDependencies.androidContext,
+    toolContext: toolDependencies.toolContext,
+    featureFlags: featureFlags,
+    extensionManager: extensionManager,
+  ),
   CustomDevicesCommand(
     customDevicesConfig: toolDependencies.toolContext.customDevicesConfig,
     operatingSystemUtils: toolDependencies.toolContext.os,
@@ -350,10 +356,7 @@ List<FlutterCommand> generateCommands({
     terminal: toolDependencies.toolContext.terminal,
   ),
   UpgradeCommand(verboseHelp: verboseHelp),
-  SymbolizeCommand(
-    stdio: toolDependencies.toolContext.stdio,
-    fileSystem: toolDependencies.toolContext.fs,
-  ),
+  SymbolizeCommand(toolContext: toolDependencies.toolContext),
   // Development-only commands. These are always hidden,
   IdeConfigCommand(),
   UpdatePackagesCommand(verboseHelp: verboseHelp),
