@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Build.API_LEVELS;
 import io.flutter.Log;
@@ -137,5 +138,28 @@ class IntentUtils {
       }
     }
     return false;
+  }
+
+  /**
+   * Safe accessors for intent extras that automatically check the intent is self-sent. If the
+   * intent is not self-sent, these return null or default values.
+   */
+  @Nullable
+  public static String safeGetStringExtra(@NonNull Activity activity, @NonNull String key) {
+    Intent intent = activity.getIntent();
+    if (intent == null || !isIntentSelfSent(activity)) {
+      return null;
+    }
+    return intent.getStringExtra(key);
+  }
+
+  @Nullable
+  public static java.io.Serializable safeGetSerializableExtra(
+      @NonNull Activity activity, @NonNull String key) {
+    Intent intent = activity.getIntent();
+    if (intent == null || !isIntentSelfSent(activity)) {
+      return null;
+    }
+    return intent.getSerializableExtra(key);
   }
 }

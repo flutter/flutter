@@ -682,6 +682,7 @@ public class FlutterFragmentActivity extends FragmentActivity
    * cached {@link io.flutter.embedding.engine.FlutterEngine} was provided.
    */
   public boolean shouldDestroyEngineWithHost() {
+    // TODO(camsim99): Migrate to IntentUtils.safeGetBooleanExtra()
     return getIntent().getBooleanExtra(EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, false);
   }
 
@@ -823,11 +824,8 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @NonNull
   public String getDartEntrypointFunctionName() {
-    Intent intent = getIntent();
-    if (intent != null
-        && intent.hasExtra(EXTRA_DART_ENTRYPOINT)
-        && IntentUtils.isIntentSelfSent(this)) {
-      return intent.getStringExtra(EXTRA_DART_ENTRYPOINT);
+    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT)) {
+      return IntentUtils.safeGetStringExtra(this, EXTRA_DART_ENTRYPOINT);
     }
 
     try {
@@ -849,11 +847,8 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Nullable
   public List<String> getDartEntrypointArgs() {
-    Intent intent = getIntent();
-    if (intent != null
-        && intent.hasExtra(EXTRA_DART_ENTRYPOINT_ARGS)
-        && IntentUtils.isIntentSelfSent(this)) {
-      return (List<String>) intent.getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT_ARGS)) {
+      return (List<String>) IntentUtils.safeGetSerializableExtra(this, EXTRA_DART_ENTRYPOINT_ARGS);
     }
     return null;
   }
@@ -909,11 +904,8 @@ public class FlutterFragmentActivity extends FragmentActivity
    * initial route is derived from the {@code Intent} through the Intent.getData() instead.
    */
   protected String getInitialRoute() {
-    Intent intent = getIntent();
-    if (intent != null
-        && intent.hasExtra(EXTRA_INITIAL_ROUTE)
-        && IntentUtils.isIntentSelfSent(this)) {
-      return intent.getStringExtra(EXTRA_INITIAL_ROUTE);
+    if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
+      return IntentUtils.safeGetStringExtra(this, EXTRA_INITIAL_ROUTE);
     }
 
     try {
@@ -934,22 +926,16 @@ public class FlutterFragmentActivity extends FragmentActivity
    */
   @Nullable
   protected String getCachedEngineId() {
-    Intent intent = getIntent();
-    if (intent != null
-        && IntentUtils.isIntentSelfSent(this)
-        && intent.hasExtra(EXTRA_CACHED_ENGINE_ID)) {
-      return intent.getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_ID)) {
+      return IntentUtils.safeGetStringExtra(this, EXTRA_CACHED_ENGINE_ID);
     }
     return null;
   }
 
   @Nullable
   protected String getCachedEngineGroupId() {
-    Intent intent = getIntent();
-    if (intent != null
-        && intent.hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID)
-        && IntentUtils.isIntentSelfSent(this)) {
-      return intent.getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID)) {
+      return IntentUtils.safeGetStringExtra(this, EXTRA_CACHED_ENGINE_GROUP_ID);
     }
     return null;
   }
@@ -961,6 +947,7 @@ public class FlutterFragmentActivity extends FragmentActivity
   @NonNull
   protected BackgroundMode getBackgroundMode() {
     if (getIntent().hasExtra(EXTRA_BACKGROUND_MODE)) {
+      // TODO(camsim99): Migrate to IntentUtils.safeGetStringExtra()
       return BackgroundMode.valueOf(getIntent().getStringExtra(EXTRA_BACKGROUND_MODE));
     } else {
       return BackgroundMode.opaque;
