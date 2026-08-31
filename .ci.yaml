@@ -3203,6 +3203,14 @@ targets:
         ["devicelab", "linux"]
       task_name: android_engine_flags_release_test
 
+  - name: Linux_android_emu android_strips_intent_parsing_in_release_test
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "linux"]
+      task_name: android_strips_intent_parsing_in_release_test
+
   # linux mokey benchmark
   - name: Linux_mokey new_gallery__crane_perf
     recipe: devicelab/devicelab_drone
@@ -5146,34 +5154,6 @@ targets:
         ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: run_release_test
 
-  # mac mokey test
-  - name: Mac_mokey android_strips_intent_parsing_in_release_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    runIf:
-      - .ci.yaml
-      - engine/**
-      - DEPS
-      - dev/**
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "mac", "mokey"]
-      task_name: android_strips_intent_parsing_in_release_test
-
-  # mac mokey test
-  - name: Mac_arm64_mokey android_strips_intent_parsing_in_release_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    runIf:
-      - .ci.yaml
-      - engine/**
-      - DEPS
-      - dev/**
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "mac", "arm64", "mokey"]
       task_name: android_strips_intent_parsing_in_release_test
 
   - name: Mac_ios animation_with_microtasks_perf_ios__timeline_summary
