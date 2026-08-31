@@ -11,6 +11,10 @@ analyzer:
     - linux/**
 include: ../../analysis_options.yaml
 
+plugins:
+  flutter_analyzer_plugin:
+    path: ../../dev/flutter_analyzer_plugin
+
 linter:
   rules:
     # Samples want to print things pretty often.

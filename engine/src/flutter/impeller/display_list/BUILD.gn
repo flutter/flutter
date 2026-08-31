@@ -57,6 +57,8 @@ impeller_component("display_list") {
     "//flutter/skia",
   ]
 
+  deps = [ "//third_party/abseil-cpp/absl/hash" ]
+
   if (impeller_supports_rendering) {
     public_deps += [ "//flutter/impeller/runtime_stage" ]
   }
