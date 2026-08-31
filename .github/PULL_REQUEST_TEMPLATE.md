@@ -18,7 +18,7 @@ To learn more about code review, see our documentation on Tree Hygiene: https://
 - [ ] I read and followed the [Flutter Style Guide], including [Features we expect every widget to implement].
 - [ ] I signed the [CLA].
 - [ ] I listed at least one issue that this PR fixes in the description above.
-- [ ] I updated/added relevant documentation (doc comments with `///`).
+- [ ] I updated/added relevant in-code documentation (doc comments with `///`).
 - [ ] If this PR introduces a new feature or capability, I linked a [flutter/website] issue or PR (or verified none is needed).
 - [ ] I added new tests to check the change I am making, or this PR is [test-exempt].
 - [ ] I followed the [breaking change policy] and added [Data Driven Fixes] where supported.
