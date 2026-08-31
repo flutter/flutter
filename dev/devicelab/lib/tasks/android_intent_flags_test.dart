@@ -42,6 +42,7 @@ TaskFunction createAndroidIntentFlagsTest() {
           'shell',
           'am',
           'start',
+          '-W', // Wait for the app to finish launching
           '-n',
           mainActivityName,
           '-a',
@@ -51,17 +52,11 @@ TaskFunction createAndroidIntentFlagsTest() {
           'true',
         ]);
 
-        // Poll logcat for engine INFO logs
-        bool foundInfoLog = false;
-        for (int i = 0; i < 20; i++) {
-          await Future<void>.delayed(const Duration(seconds: 1));
-          final String logcat = await eval('adb', <String>['-s', deviceId, 'logcat', '-d']);
-          // The C++ engine logs format as "[INFO:..." when verbose-logging is enabled.
-          if (logcat.contains('[INFO:flutter')) {
-            foundInfoLog = true;
-            break;
-          }
-        }
+        // The app is fully launched. Give logcat a tiny buffer to flush.
+        await Future<void>.delayed(const Duration(seconds: 1));
+        
+        final String logcat = await eval('adb', <String>['-s', deviceId, 'logcat', '-d']);
+        final bool foundInfoLog = logcat.contains('[INFO:flutter');
 
         if (expectVerbose && !foundInfoLog) {
           throw 'Expected [INFO:] logs to be present in $mode mode when passing verbose-logging intent, but they were not found in logcat.';
