@@ -342,26 +342,16 @@ class Shell final : public PlatformView::Delegate,
   /// @brief      Invokes a callback when the first frame has been presented.
   ///
   /// @param[in]  callback  A callback that will be invoked on an arbitrary
-  ///                       thread when the first frame is presented.  If the
-  ///                       first frame has already been presented, then the
-  ///                       callback will be invoked immediately.
+  ///                       thread when the first frame is presented.  The
+  ///                       callback may be run the raster thread, so it should
+  ///                       not do anything expensive.
+  ///
+  ///                       If the first frame has already been presented,
+  ///                       then the callback will be invoked immediately.
+  ///                       If the first frame is never drawn, then the
+  ///                       callback will not be invoked.
   ///
   void AddFirstFrameCallback(std::function<void()> callback);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Unblocks any call to WaitForFirstFrame(), causing it to
-  ///             immediately return 'kAborted' instead of blocking for the
-  ///             full timeout.
-  ///
-  ///             Embedders that pass a reference to the Shell to a thread they
-  ///             do not otherwise synchronize with the shell's destruction
-  ///             must call this, and wait for that thread to finish with the
-  ///             shell, before destroying it. This method only prevents
-  ///             WaitForFirstFrame() from blocking; it does not by itself
-  ///             make it safe to destroy the Shell out from under a caller
-  ///             that has not yet returned from WaitForFirstFrame().
-  ///
-  void CancelWaitForFirstFrame();
 
   //----------------------------------------------------------------------------
   /// @brief      Used by embedders to reload the system fonts in
@@ -522,10 +512,11 @@ class Shell final : public PlatformView::Delegate,
   // True if a first frame has not yet been rendered.
   //
   // This is read and written lock-free on the raster thread, and read under
-  // waiting_for_first_frame_mutex_ in WaitForFirstFrame.
+  // waiting_for_first_frame_mutex_ in AddFirstFrameCallback.
   std::atomic<bool> waiting_for_first_frame_ = true;
 
   std::mutex waiting_for_first_frame_mutex_;
+  // Guarded by waiting_for_first_frame_mutex_.
   std::vector<std::function<void()>> waiting_for_first_frame_callbacks_;
 
   // Written in the UI thread and read from the raster thread. Hence make it

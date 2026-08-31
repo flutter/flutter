@@ -1778,6 +1778,24 @@ TEST_F(ShellTest, WaitForFirstFrameInlined) {
   DestroyShell(std::move(shell), task_runners);
 }
 
+TEST_F(ShellTest, AddFirstFrameCallbackSkippedIfNoFrame) {
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  // Check that a first frame callback is never invoked if the shell is
+  // destroyed before any frames are rendered.
+  RunEngine(shell.get(), std::move(configuration));
+  shell->AddFirstFrameCallback([] { ASSERT_TRUE(false); });
+
+  DestroyShell(std::move(shell));
+}
+
 static size_t GetRasterizerResourceCacheBytesSync(const Shell& shell) {
   size_t bytes = 0;
   fml::AutoResetWaitableEvent latch;

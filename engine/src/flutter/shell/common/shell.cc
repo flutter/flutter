@@ -1445,11 +1445,18 @@ void Shell::OnAnimatorDraw(std::shared_ptr<FramePipeline> pipeline) {
             rasterizer->Draw(pipeline);
           }
 
+          // waiting_for_first_frame is set to true during shell startup, and
+          // after the first frame is drawn it is set fo false and will remain
+          // false.
+          // AddFirstFrameCallback reads waiting_for_first_frame while holding
+          // the waiting_for_first_frame_mutex, and it adds entries to
+          // waiting_for_first_frame_callbacks only if waiting_for_first_frame
+          // is true.
           if (waiting_for_first_frame.load()) {
-            waiting_for_first_frame.store(false);
             std::vector<std::function<void()>> callbacks;
             {
               std::scoped_lock lock(waiting_for_first_frame_mutex);
+              waiting_for_first_frame.store(false);
               std::swap(waiting_for_first_frame_callbacks, callbacks);
             }
             for (const auto& callback : callbacks) {
