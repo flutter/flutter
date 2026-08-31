@@ -362,7 +362,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: true,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -391,7 +391,7 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
@@ -419,7 +419,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: true,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.skwasm,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -448,7 +448,7 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
@@ -476,7 +476,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost', baseHref: '/preview/'),
+        webDevServerConfig: const WebDevServerConfig(baseHref: '/preview/'),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -502,7 +502,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -528,7 +528,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -558,7 +558,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -596,7 +596,7 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: true,
           useLocalCanvasKit: false,
@@ -650,7 +650,7 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
@@ -729,7 +729,7 @@ void main() {
             Uri.base,
             null,
             crossOriginIsolation: false,
-            webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+            webDevServerConfig: const WebDevServerConfig(),
             webRenderer: WebRendererMode.canvaskit,
             isWasm: false,
             useLocalCanvasKit: false,
@@ -769,6 +769,109 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
         },
       );
+    });
+  });
+
+  group('host validation', () {
+    testWithoutContext('isHostAllowed allows loopback hosts', () {
+      const hosts = <String>[
+        'localhost',
+        'localhost:8080',
+        'LOCALHOST:8080',
+        'localhost.',
+        '127.0.0.1',
+        '127.0.0.1:8080',
+        '0.0.0.0',
+        '0.0.0.0:8080',
+        '::1',
+        '[::1]',
+        '[::1]:8080',
+      ];
+      for (final host in hosts) {
+        expect(WebAssetServer.isHostAllowed(host, hostname: 'localhost'), isTrue, reason: host);
+      }
+    });
+
+    testWithoutContext('isHostAllowed allows the configured hostname and IP literals', () {
+      expect(
+        WebAssetServer.isHostAllowed('my-machine.local:8080', hostname: 'my-machine.local'),
+        isTrue,
+      );
+      expect(WebAssetServer.isHostAllowed('MY-MACHINE.LOCAL:8080', hostname: 'my-machine.local'), isTrue);
+      // Direct access from another device when deliberately bound to all interfaces.
+      expect(WebAssetServer.isHostAllowed('192.168.1.5:8080', hostname: 'any'), isTrue);
+      expect(WebAssetServer.isHostAllowed('[2001:db8::1]:8080', hostname: 'any'), isTrue);
+    });
+
+    testWithoutContext('isHostAllowed rejects unconfigured DNS names', () {
+      // A rebound page necessarily sends its own DNS name in the Host header.
+      expect(WebAssetServer.isHostAllowed('evil.example.com:8080', hostname: 'any'), isFalse);
+      expect(WebAssetServer.isHostAllowed('evil.example.com', hostname: 'localhost'), isFalse);
+      expect(WebAssetServer.isHostAllowed('my-machine.local', hostname: 'any'), isFalse);
+      expect(WebAssetServer.isHostAllowed('sub.localhost', hostname: 'localhost'), isFalse);
+      expect(WebAssetServer.isHostAllowed(null, hostname: 'localhost'), isFalse);
+      expect(WebAssetServer.isHostAllowed('', hostname: 'localhost'), isFalse);
+    });
+
+    testWithoutContext('isHostAllowed rejects malformed host:port headers', () {
+      // A non-numeric port suffix or trailing garbage must be rejected, not
+      // truncated to the allowed part in front of it.
+      const malformed = <String>[
+        'localhost:evil.com',
+        'localhost:8080:9090',
+        '127.0.0.1:x',
+        '[::1].evil.com:8080',
+        '[::1]junk',
+        '[::1',
+        '[::1]:',
+        '[::1]:abc',
+        'example.com:8080:extra',
+      ];
+      for (final host in malformed) {
+        expect(WebAssetServer.isHostAllowed(host, hostname: 'localhost'), isFalse, reason: host);
+      }
+    });
+
+    testWithoutContext('middleware blocks requests with a foreign Host header', () async {
+      final Handler handler =
+          WebAssetServer.hostValidationMiddleware(hostname: 'localhost')(
+            (Request request) async => Response.ok('served'),
+          );
+
+      final Response allowed = await handler(
+        Request(
+          'GET',
+          Uri.parse('http://localhost:8080/'),
+          headers: <String, String>{'Host': 'localhost:8080'},
+        ),
+      );
+      expect(allowed.statusCode, HttpStatus.ok);
+      expect(await allowed.readAsString(), 'served');
+
+      final Response blocked = await handler(
+        Request(
+          'GET',
+          Uri.parse('http://localhost:8080/'),
+          headers: <String, String>{'Host': 'evil.example.com:8080'},
+        ),
+      );
+      expect(blocked.statusCode, HttpStatus.forbidden);
+    });
+
+    testWithoutContext('middleware can be disabled for tunneled servers', () async {
+      final Handler handler =
+          WebAssetServer.hostValidationMiddleware(hostname: 'localhost', enabled: false)(
+            (Request request) async => Response.ok('served'),
+          );
+
+      final Response response = await handler(
+        Request(
+          'GET',
+          Uri.parse('http://localhost:8080/'),
+          headers: <String, String>{'Host': 'tunnel.example.dev'},
+        ),
+      );
+      expect(response.statusCode, HttpStatus.ok);
     });
   });
 }

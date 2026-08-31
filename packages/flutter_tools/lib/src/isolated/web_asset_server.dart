@@ -245,6 +245,14 @@ class WebAssetServer implements AssetReader {
     } else {
       address = (await InternetAddress.lookup(hostname)).first;
     }
+    if (!address.isLoopback) {
+      logger.printWarning(
+        'The web development server is bound to "$hostname" and is reachable '
+        'from other devices on this network. Those devices will be able to '
+        'access the server and the files it serves. To serve on loopback only, '
+        'omit --web-hostname or pass a loopback host such as "localhost".',
+      );
+    }
     HttpServer? httpServer;
     const kMaxRetries = 4;
     for (var i = 0; i <= kMaxRetries; i++) {
@@ -334,6 +342,9 @@ class WebAssetServer implements AssetReader {
         needsCoopCoep: crossOriginIsolation,
       );
       final shelf.Handler releaseHandler = const shelf.Pipeline()
+          .addMiddleware(
+            hostValidationMiddleware(hostname: hostname, enabled: urlTunneller == null),
+          )
           .addMiddleware(waitMiddleware)
           .addHandler(releaseAssetServer.handle);
       runZonedGuarded(
@@ -416,6 +427,9 @@ class WebAssetServer implements AssetReader {
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
     final shelf.Handler serverHandler = const shelf.Pipeline()
+        .addMiddleware(
+          hostValidationMiddleware(hostname: hostname, enabled: urlTunneller == null),
+        )
         .addMiddleware(waitMiddleware)
         .addHandler(cascade.handler);
     runZonedGuarded(
@@ -462,6 +476,111 @@ class WebAssetServer implements AssetReader {
   @visibleForTesting
   @override
   String basePath;
+
+  /// Hosts that may always reach the web development server.
+  static const Set<String> _kAlwaysAllowedHosts = <String>{
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
+    '::1',
+    '[::1]',
+  };
+
+  /// Whether a request with [hostHeader] may be served by a web development
+  /// server that was configured for [hostname].
+  ///
+  /// Loopback hosts, the hostname the server was explicitly configured with
+  /// (via `--web-hostname` or `web_dev_config.yaml`), and IP literals are
+  /// allowed. Every other DNS name is rejected, which prevents a DNS
+  /// rebinding page from reading server responses same-origin: a rebound
+  /// request necessarily carries the attacker's DNS name in its Host header.
+  /// Allowing IP literals keeps direct access from other devices working when
+  /// the server has deliberately been bound to all interfaces.
+  @visibleForTesting
+  static bool isHostAllowed(String? hostHeader, {required String hostname}) {
+    if (hostHeader == null || hostHeader.isEmpty) {
+      return false;
+    }
+    String host = hostHeader.toLowerCase();
+    if (host.startsWith('[')) {
+      // An IPv6 literal, for example `[::1]`, optionally with a port, for
+      // example `[::1]:8080`. Anything after the closing bracket that is not
+      // an optional numeric port makes the header malformed; reject rather
+      // than truncate, so `[::1].evil.com` can never pass as `[::1]`.
+      final int end = host.indexOf(']');
+      if (end == -1 || !_isOptionalPortSuffix(host.substring(end + 1))) {
+        return false;
+      }
+      host = host.substring(0, end + 1);
+    } else {
+      final int colon = host.indexOf(':');
+      if (colon != -1 && host.indexOf(':', colon + 1) == -1) {
+        // A single colon must introduce a numeric port, for example
+        // `localhost:8080`. A non-numeric suffix such as `localhost:evil.com`
+        // is malformed; reject rather than truncate.
+        if (!_isOptionalPortSuffix(host.substring(colon))) {
+          return false;
+        }
+        host = host.substring(0, colon);
+      }
+      // Multiple colons without brackets is a bare IPv6 literal such as
+      // `::1`; keep it intact.
+    }
+    // Tolerate a fully qualified trailing dot, for example `localhost.`.
+    if (host.length > 1 && host.endsWith('.')) {
+      host = host.substring(0, host.length - 1);
+    }
+    if (_kAlwaysAllowedHosts.contains(host)) {
+      return true;
+    }
+    if (hostname != webDevAnyHostDefault && hostname.toLowerCase() == host) {
+      return true;
+    }
+    final String literal = host.startsWith('[') && host.endsWith(']')
+        ? host.substring(1, host.length - 1)
+        : host;
+    return InternetAddress.tryParse(literal) != null;
+  }
+
+  /// Whether [suffix] is empty or a well-formed `:port` with decimal digits
+  /// only, as required for a strict `host[:port]` parse.
+  static bool _isOptionalPortSuffix(String suffix) {
+    if (suffix.isEmpty) {
+      return true;
+    }
+    if (!suffix.startsWith(':') || suffix.length == 1) {
+      return false;
+    }
+    for (final int codeUnit in suffix.codeUnits.skip(1)) {
+      if (codeUnit < 0x30 || codeUnit > 0x39) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Middleware that rejects requests whose Host header is not allowed by
+  /// [isHostAllowed].
+  ///
+  /// [enabled] is false when the server is exposed through a URL tunneller,
+  /// because tunneled requests arrive with the tunnel's public hostname.
+  @visibleForTesting
+  static shelf.Middleware hostValidationMiddleware({
+    required String hostname,
+    bool enabled = true,
+  }) {
+    return (shelf.Handler innerHandler) {
+      if (!enabled) {
+        return innerHandler;
+      }
+      return (shelf.Request request) async {
+        if (isHostAllowed(request.headers[HttpHeaders.hostHeader], hostname: hostname)) {
+          return await innerHandler(request);
+        }
+        return shelf.Response.forbidden('Invalid Host header.');
+      };
+    };
+  }
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
   @visibleForTesting
