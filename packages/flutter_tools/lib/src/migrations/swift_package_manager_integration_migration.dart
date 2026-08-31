@@ -296,15 +296,12 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           );
         }
       }
-      if (optionalOnly) {
-        _analytics.send(
-          Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'optional'),
-        );
-      } else {
-        _analytics.send(
-          Event.appleUsageEvent(workflow: 'swiftpm-migration-success', parameter: 'full'),
-        );
-      }
+      _analytics.send(
+        Event.appleUsageEvent(
+          workflow: 'swiftpm-migration-success',
+          parameter: optionalOnly ? 'optional' : 'full',
+        ),
+      );
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
       if (e is SwiftPackageManagerMigrationException) {
@@ -360,9 +357,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
     final File schemeFile = _xcodeProject.xcodeProjectSchemeFile(scheme: scheme);
     if (!schemeFile.existsSync()) {
-      throw SwiftPackageManagerMigrationException(
-        'Unable to get scheme file for $scheme.',
-        analyticsMessage: 'Unable to get scheme file for ${_replaceCustomNames(scheme)}.',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) => 'Unable to get scheme file for ${sanitize(scheme, .name)}.',
       );
     }
 
@@ -398,10 +394,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     try {
       document = XmlDocument.parse(schemeContent);
     } on XmlException catch (exception) {
-      throw SwiftPackageManagerMigrationException(
-        'Failed to parse ${schemeFile.basename}: Invalid xml: $exception',
-        analyticsMessage:
-            'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Invalid xml',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) =>
+            'Failed to parse ${sanitize(schemeFile.basename, .basename)}: Invalid xml${sanitize(': $exception', .error)}',
       );
     }
 
@@ -414,44 +409,36 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       }
     }
     if (targetReference == null) {
-      throw SwiftPackageManagerMigrationException(
-        'Failed to parse ${schemeFile.basename}: Could not find BuildableReference '
-        'for ${_xcodeProject.hostAppProjectName}.',
-        analyticsMessage:
-            'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
-            'find BuildableReference for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)}',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) =>
+            'Failed to parse ${sanitize(schemeFile.basename, .basename)}: Could not find BuildableReference '
+            'for ${sanitize(_xcodeProject.hostAppProjectName, .name)}.',
       );
     }
 
     final String? buildableNameAttr = targetReference.getAttribute('BuildableName');
     if (buildableNameAttr == null) {
-      throw SwiftPackageManagerMigrationException(
-        'Failed to parse ${schemeFile.basename}: Could not find BuildableName.',
-        analyticsMessage:
-            'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
-            'find BuildableName.',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) =>
+            'Failed to parse ${sanitize(schemeFile.basename, .basename)}: Could not find BuildableName.',
       );
     }
     final buildableName = 'BuildableName = "$buildableNameAttr"';
 
     final String? blueprintNameAttr = targetReference.getAttribute('BlueprintName');
     if (blueprintNameAttr == null) {
-      throw SwiftPackageManagerMigrationException(
-        'Failed to parse ${schemeFile.basename}: Could not find BlueprintName.',
-        analyticsMessage:
-            'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
-            'find BlueprintName.',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) =>
+            'Failed to parse ${sanitize(schemeFile.basename, .basename)}: Could not find BlueprintName.',
       );
     }
     final blueprintName = 'BlueprintName = "$blueprintNameAttr"';
 
     final String? referencedContainerAttr = targetReference.getAttribute('ReferencedContainer');
     if (referencedContainerAttr == null) {
-      throw SwiftPackageManagerMigrationException(
-        'Failed to parse ${schemeFile.basename}: Could not find ReferencedContainer.',
-        analyticsMessage:
-            'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
-            'find ReferencedContainer.',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) =>
+            'Failed to parse ${sanitize(schemeFile.basename, .basename)}: Could not find ReferencedContainer.',
       );
     }
     final referencedContainer = 'ReferencedContainer = "$referencedContainerAttr"';
@@ -508,11 +495,9 @@ $newContent
             .firstOrNull;
 
         if (buildAction == null) {
-          throw SwiftPackageManagerMigrationException(
-            'Failed to parse ${schemeFile.basename}: Could not find BuildAction.',
-            analyticsMessage:
-                'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme: Could not '
-                'find BuildAction.',
+          throw SwiftPackageManagerMigrationException.sanitized(
+            (sanitize) =>
+                'Failed to parse ${sanitize(schemeFile.basename, .basename)}: Could not find BuildAction.',
           );
         }
       }
@@ -523,11 +508,9 @@ $newContent
     try {
       XmlDocument.parse(newScheme);
     } on XmlException catch (exception) {
-      throw SwiftPackageManagerMigrationException(
-        'Failed to parse ${schemeFile.basename} after upgrading: Invalid xml: $newScheme\n$exception',
-        analyticsMessage:
-            'Failed to parse ${_replaceCustomNames(schemeInfo.schemeName)}.xcscheme after updating: '
-            'Invalid xml',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) =>
+            'Failed to parse ${sanitize(schemeFile.basename, .basename)} after updating: Invalid xml${sanitize(': $newScheme\n$exception', .error)}',
       );
     }
   }
@@ -873,10 +856,9 @@ $newContent
     );
     if (runnerFrameworksPhaseStartIndex == -1 ||
         runnerFrameworksPhaseStartIndex > endSectionIndex) {
-      throw SwiftPackageManagerMigrationException(
-        'Unable to find PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} target.',
-        analyticsMessage:
-            'Unable to find PBXFrameworksBuildPhase for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) =>
+            'Unable to find PBXFrameworksBuildPhase for ${sanitize(_xcodeProject.hostAppProjectName, .name)} target.',
       );
     }
 
@@ -891,10 +873,9 @@ $newContent
         .toList()
         .firstOrNull;
     if (runnerFrameworksPhase == null) {
-      throw SwiftPackageManagerMigrationException(
-        'Unable to find parsed PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} target.',
-        analyticsMessage:
-            'Unable to find parsed PBXFrameworksBuildPhase for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) =>
+            'Unable to find parsed PBXFrameworksBuildPhase for ${sanitize(_xcodeProject.hostAppProjectName, .name)} target.',
       );
     }
 
@@ -913,10 +894,9 @@ $newContent
         runnerFrameworksPhaseStartIndex,
       );
       if (startFilesIndex == -1 || startFilesIndex > endSectionIndex) {
-        throw SwiftPackageManagerMigrationException(
-          'Unable to files for PBXFrameworksBuildPhase ${_xcodeProject.hostAppProjectName} target.',
-          analyticsMessage:
-              'Unable to find files for PBXFrameworksBuildPhase for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
+        throw SwiftPackageManagerMigrationException.sanitized(
+          (sanitize) =>
+              'Unable to find files for PBXFrameworksBuildPhase for ${sanitize(_xcodeProject.hostAppProjectName, .name)} target.',
         );
       }
       const newContent =
@@ -961,10 +941,9 @@ $newContent
         .where((ParsedNativeTarget target) => target.identifier == _runnerNativeTargetIdentifier)
         .firstOrNull;
     if (runnerNativeTarget == null) {
-      throw SwiftPackageManagerMigrationException(
-        'Unable to find parsed PBXNativeTarget for ${_xcodeProject.hostAppProjectName} target.',
-        analyticsMessage:
-            'Unable to find parsed PBXNativeTarget for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) =>
+            'Unable to find parsed PBXNativeTarget for ${sanitize(_xcodeProject.hostAppProjectName, .name)} target.',
       );
     }
     final String subsectionLineStart = runnerNativeTarget.name != null
@@ -975,10 +954,9 @@ $newContent
       startSectionIndex,
     );
     if (runnerNativeTargetStartIndex == -1 || runnerNativeTargetStartIndex > endSectionIndex) {
-      throw SwiftPackageManagerMigrationException(
-        'Unable to find PBXNativeTarget for ${_xcodeProject.hostAppProjectName} target.',
-        analyticsMessage:
-            'Unable to find PBXNativeTarget for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} target.',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) =>
+            'Unable to find PBXNativeTarget for ${sanitize(_xcodeProject.hostAppProjectName, .name)} target.',
       );
     }
 
@@ -998,10 +976,9 @@ $newContent
       );
       if (packageProductDependenciesIndex == -1 ||
           packageProductDependenciesIndex > endSectionIndex) {
-        throw SwiftPackageManagerMigrationException(
-          'Unable to find packageProductDependencies for ${_xcodeProject.hostAppProjectName} PBXNativeTarget.',
-          analyticsMessage:
-              'Unable to find packageProductDependencies for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} PBXNativeTarget.',
+        throw SwiftPackageManagerMigrationException.sanitized(
+          (sanitize) =>
+              'Unable to find packageProductDependencies for ${sanitize(_xcodeProject.hostAppProjectName, .name)} PBXNativeTarget.',
         );
       }
       const newContent =
@@ -1117,10 +1094,9 @@ $newContent
       startSectionIndex,
     );
     if (projectStartIndex == -1 || projectStartIndex > endSectionIndex) {
-      throw SwiftPackageManagerMigrationException(
-        'Unable to find PBXProject for ${_xcodeProject.hostAppProjectName}.',
-        analyticsMessage:
-            'Unable to find PBXProject for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)}.',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) =>
+            'Unable to find PBXProject for ${sanitize(_xcodeProject.hostAppProjectName, .name)}.',
       );
     }
 
@@ -1130,10 +1106,9 @@ $newContent
         .toList()
         .firstOrNull;
     if (projectObject == null) {
-      throw SwiftPackageManagerMigrationException(
-        'Unable to find parsed PBXProject for ${_xcodeProject.hostAppProjectName}.',
-        analyticsMessage:
-            'Unable to find parsed PBXProject for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)}.',
+      throw SwiftPackageManagerMigrationException.sanitized(
+        (sanitize) =>
+            'Unable to find parsed PBXProject for ${sanitize(_xcodeProject.hostAppProjectName, .name)}.',
       );
     }
 
@@ -1152,10 +1127,9 @@ $newContent
         projectStartIndex,
       );
       if (packageReferencesIndex == -1 || packageReferencesIndex > endSectionIndex) {
-        throw SwiftPackageManagerMigrationException(
-          'Unable to find packageReferences for ${_xcodeProject.hostAppProjectName} PBXProject.',
-          analyticsMessage:
-              'Unable to find packageReferences for ${_replaceCustomNames(_xcodeProject.hostAppProjectName)} PBXProject.',
+        throw SwiftPackageManagerMigrationException.sanitized(
+          (sanitize) =>
+              'Unable to find packageReferences for ${sanitize(_xcodeProject.hostAppProjectName, .name)} PBXProject.',
         );
       }
       const newContent =
@@ -1417,14 +1391,6 @@ $newContent
     }
     return null;
   }
-
-  /// If the [name] is not the default, anonymize it for analytics purposes.
-  String _replaceCustomNames(String name) {
-    if (name == 'Runner') {
-      return 'Runner';
-    }
-    return 'custom';
-  }
 }
 
 class SchemeInfo {
@@ -1591,12 +1557,63 @@ class ParsedProject {
 class SwiftPackageManagerMigrationException implements Exception {
   SwiftPackageManagerMigrationException(this.userMessage, {this.analyticsMessage});
 
+  /// Creates a [SwiftPackageManagerMigrationException] where both [userMessage]
+  /// and [analyticsMessage] are built by [builder].
+  ///
+  /// The [userMessage] is created by evaluating [builder] without sanitization.
+  /// The [analyticsMessage] is created by evaluating [builder] with [sanitizer]
+  /// to anonymize user-specific identifiers and strip sensitive error details
+  /// for analytics reporting.
+  factory SwiftPackageManagerMigrationException.sanitized(
+    String Function(String Function(String, SanitizeType type) sanitize) builder, {
+    String Function(String, SanitizeType type) sanitizer = _defaultSanitizer,
+  }) {
+    return SwiftPackageManagerMigrationException(
+      builder((value, type) => value),
+      analyticsMessage: builder(sanitizer),
+    );
+  }
+
+  /// Default sanitizer used to redact names, file basenames, or error details
+  /// for analytics reporting.
+  static String _defaultSanitizer(String name, SanitizeType type) {
+    switch (type) {
+      case SanitizeType.name:
+        return name == 'Runner' ? 'Runner' : 'custom';
+      case SanitizeType.basename:
+        if (name.startsWith('Runner.')) {
+          return name;
+        }
+        final List<String> parts = name.split('.');
+        if (parts.length >= 2) {
+          return 'custom.${parts.last}';
+        }
+        return 'custom';
+      case SanitizeType.error:
+        return '';
+    }
+  }
+
   /// The message to display to the user.
   final String userMessage;
 
-  /// An optional message for analytics/reporting.
+  /// An optional sanitized message for analytics reporting.
   final String? analyticsMessage;
 
   @override
   String toString() => userMessage;
+}
+
+/// The type of data to sanitize for analytics reporting in
+/// [SwiftPackageManagerMigrationException].
+@visibleForTesting
+enum SanitizeType {
+  /// A target or scheme name.
+  name,
+
+  /// A file basename (e.g. `Runner.xcscheme`).
+  basename,
+
+  /// An error message or stack trace.
+  error,
 }

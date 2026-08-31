@@ -4712,6 +4712,61 @@ void main() {
         expect(exception.analyticsMessage, isNull);
         expect(exception.toString(), 'user message');
       });
+
+      test('sanitized creates sanitized analyticsMessage', () {
+        final exception = SwiftPackageManagerMigrationException.sanitized(
+          (sanitize) =>
+              'Error for ${sanitize('MyName', SanitizeType.name)}: ${sanitize('some error details', SanitizeType.error)}',
+        );
+        expect(exception.userMessage, 'Error for MyName: some error details');
+        expect(exception.analyticsMessage, 'Error for custom: ');
+        expect(exception.toString(), 'Error for MyName: some error details');
+      });
+
+      test('sanitized preserves Runner for name', () {
+        final exception = SwiftPackageManagerMigrationException.sanitized(
+          (sanitize) => 'Error for ${sanitize('Runner', SanitizeType.name)}',
+        );
+        expect(exception.userMessage, 'Error for Runner');
+        expect(exception.analyticsMessage, 'Error for Runner');
+        expect(exception.toString(), 'Error for Runner');
+      });
+
+      test('sanitized preserves Runner.xcscheme for basename', () {
+        final exception = SwiftPackageManagerMigrationException.sanitized(
+          (sanitize) => 'Error for ${sanitize('Runner.xcscheme', SanitizeType.basename)}',
+        );
+        expect(exception.userMessage, 'Error for Runner.xcscheme');
+        expect(exception.analyticsMessage, 'Error for Runner.xcscheme');
+        expect(exception.toString(), 'Error for Runner.xcscheme');
+      });
+
+      test('sanitized replaces custom scheme for basename', () {
+        final exception = SwiftPackageManagerMigrationException.sanitized(
+          (sanitize) => 'Error for ${sanitize('MyName.xcscheme', SanitizeType.basename)}',
+        );
+        expect(exception.userMessage, 'Error for MyName.xcscheme');
+        expect(exception.analyticsMessage, 'Error for custom.xcscheme');
+        expect(exception.toString(), 'Error for MyName.xcscheme');
+      });
+
+      test('sanitized replaces custom scheme for unexpected basename', () {
+        // Verify basename with multiple "." in the path
+        final exception = SwiftPackageManagerMigrationException.sanitized(
+          (sanitize) => 'Error for ${sanitize('MyName.debug.xcscheme', SanitizeType.basename)}',
+        );
+        expect(exception.userMessage, 'Error for MyName.debug.xcscheme');
+        expect(exception.analyticsMessage, 'Error for custom.xcscheme');
+        expect(exception.toString(), 'Error for MyName.debug.xcscheme');
+
+        // Verify basename with no "." in the path
+        final exception2 = SwiftPackageManagerMigrationException.sanitized(
+          (sanitize) => 'Error for ${sanitize('MyName', SanitizeType.basename)}',
+        );
+        expect(exception2.userMessage, 'Error for MyName');
+        expect(exception2.analyticsMessage, 'Error for custom');
+        expect(exception2.toString(), 'Error for MyName');
+      });
     });
   });
 }
