@@ -274,15 +274,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.3"
-  dart_skills_lint:
-    dependency: transitive
-    description:
-      path: "tool/dart_skills_lint"
-      ref: "05e5a45fa412ddbdd1d694eee0c71f4bbaea2617"
-      resolved-ref: "05e5a45fa412ddbdd1d694eee0c71f4bbaea2617"
-      url: "https://github.com/flutter/skills"
-    source: git
-    version: "0.4.0"
   dart_style:
     dependency: "direct main"
     description:
@@ -1039,6 +1030,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
+  skills_lint:
+    dependency: transitive
+    description:
+      name: skills_lint
+      sha256: "5daeff89c8c9d812cfa811e119ae88a32bb81d28c73aa7e899155885b2e63a63"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.1"
   sky_engine:
     dependency: transitive
     description: flutter
