@@ -48,6 +48,8 @@ static void fl_gl_fence_init(FlGLFence* self) {
 }
 
 FlGLFence* fl_gl_fence_new(FlOpenGLManager* opengl_manager) {
+  g_return_val_if_fail(FL_IS_OPENGL_MANAGER(opengl_manager), nullptr);
+
   FlGLFence* self = FL_GL_FENCE(g_object_new(fl_gl_fence_get_type(), nullptr));
 
   EGLDisplay display = fl_opengl_manager_get_display(opengl_manager);
