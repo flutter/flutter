@@ -2717,7 +2717,7 @@ public class AccessibilityBridgeTest {
   public void itAddsRangeInfoToSlider_withPercentage() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 33; // SemanticsRole::kSlider
+    testSemanticsNode.role = AccessibilityBridge.Role.SLIDER.value;
     testSemanticsNode.value = "50%";
     testSemanticsNode.minValue = "0.0";
     testSemanticsNode.maxValue = "5.0";
@@ -2736,7 +2736,7 @@ public class AccessibilityBridgeTest {
   public void itAddsActionSetProgressForSlider() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 33; // SemanticsRole::kSlider
+    testSemanticsNode.role = AccessibilityBridge.Role.SLIDER.value;
     testSemanticsNode.value = "50%";
     TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
@@ -2753,7 +2753,7 @@ public class AccessibilityBridgeTest {
   public void itOmitsActionSetProgressForProgressBar() {
     AccessibilityBridge accessibilityBridge = setUpBridge();
     TestSemanticsNode testSemanticsNode = new TestSemanticsNode();
-    testSemanticsNode.role = 23; // SemanticsRole::kProgressBar
+    testSemanticsNode.role = AccessibilityBridge.Role.PROGRESS_BAR.value;
     testSemanticsNode.value = "50";
     TestSemanticsUpdate testSemanticsUpdate = testSemanticsNode.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
