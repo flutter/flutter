@@ -5,15 +5,11 @@
 precision mediump float;
 
 #include <impeller/color.glsl>
-#include <impeller/gradient.glsl>
-#include <impeller/texture.glsl>
 #include <impeller/types.glsl>
 
 #include "rse_sdf.glsl"
 #include "sdf_functions.glsl"
 #include "sdf_utils.glsl"
-
-uniform sampler2D color_source_sampler;
 
 uniform FragInfo {
   // FragInfo fields are sorted by size (vec4 -> vec2 -> float) to optimize
@@ -23,7 +19,7 @@ uniform FragInfo {
   // vec4 fields
   // ===========================================================================
 
-  /// The RGBA color of the shape (or paint opacity in color.a for gradients).
+  /// The RGBA color of the shape.
   vec4 color;
   /// Corner radii for rounded rects (top-left, top-right, bottom-left,
   /// bottom-right), or the circular cap radii for rounded superellipses in
@@ -53,17 +49,6 @@ uniform FragInfo {
   /// rounded superellipse.
   vec2 circle_center_right;
 
-  // --- Gradient Parameters ---
-  /// The starting point of a linear gradient, or the center point of a radial
-  /// gradient.
-  vec2 gradient_start;
-  /// The ending point of a linear gradient, or (radius, 0.0) for a radial
-  /// gradient.
-  vec2 gradient_end;
-  /// Half the size of a single gradient texel in normalized texture
-  /// coordinates.
-  vec2 half_texel;
-
   // ===========================================================================
   // float fields
   // ===========================================================================
@@ -76,11 +61,6 @@ uniform FragInfo {
   ///   3: RoundRect
   ///   4: Rounded Superellipse (must have uniform circular corner radii)
   float type;
-  /// The type of color source:
-  ///   0: Solid color
-  ///   1: Linear gradient
-  ///   2: Radial gradient
-  float color_source_type;
   /// The width in device pixels over which to apply antialiasing.
   float aa_pixels;
 
@@ -94,43 +74,12 @@ uniform FragInfo {
   ///   1: Bevel
   ///   2: Round
   float stroke_join;
-
-  // --- Gradient Parameters ---
-  /// The tile mode for gradient sampling:
-  ///   0: Clamp
-  ///   1: Repeat
-  ///   2: Mirror
-  ///   3: Decal
-  float tile_mode;
 }
 frag_info;
 
 out vec4 frag_color;
 
 highp in vec2 v_position;
-
-// Gets the color to use at v_position based on frag_info properties.
-vec4 getColor() {
-  vec4 color;
-  if (frag_info.color_source_type < 0.5) {
-    // Solid color
-    color = frag_info.color;
-  } else if (frag_info.color_source_type < 1.5) {
-    // Linear gradient
-    vec4 gradient_color = IPSampleLinearGradient(
-        color_source_sampler, frag_info.gradient_start, frag_info.gradient_end,
-        v_position, frag_info.half_texel, frag_info.tile_mode, vec4(0.0));
-    color = vec4(gradient_color.rgb, gradient_color.a * frag_info.color.a);
-  } else {
-    // Radial gradient
-    vec4 gradient_color = IPSampleRadialGradient(
-        color_source_sampler, frag_info.gradient_start,
-        frag_info.gradient_end.x, v_position, frag_info.half_texel,
-        frag_info.tile_mode, vec4(0.0));
-    color = vec4(gradient_color.rgb, gradient_color.a * frag_info.color.a);
-  }
-  return color;
-}
 
 float distanceFromCircle(vec2 p, float radius) {
   return length(p) - radius;
@@ -355,9 +304,8 @@ float gammaCorrectedAlpha(float alpha, vec3 foreground_rgb) {
 }
 
 void main() {
-  vec4 color = getColor();
-
   vec2 p = v_position - frag_info.center;
+
   vec2 sdf_and_pixel_size =
       (frag_info.stroked < 0.5) ? filledSDF(p) : strokedSDF(p);
   float sdf = sdf_and_pixel_size.x;
@@ -367,8 +315,8 @@ void main() {
   // Clamp alpha in case floating point precision errors cause it to be outside
   // [0.0, 1.0].
   alpha = clamp(alpha, 0.0, 1.0);
-  alpha = gammaCorrectedAlpha(alpha, color.rgb);
+  alpha = gammaCorrectedAlpha(alpha, frag_info.color.rgb);
 
-  frag_color = vec4(color.rgb, color.a * alpha);
+  frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
   frag_color = IPPremultiply(frag_color);
 }
