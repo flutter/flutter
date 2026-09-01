@@ -112,12 +112,7 @@ Future<void> main(List<String> args) async {
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
-      final manager = ExtensionManager(
-        hostPlatform: globals.os.hostPlatform,
-        logger: globals.logger,
-        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-        featureFlags: featureFlags,
-      );
+      final ExtensionManager manager = context.get<ExtensionManager>()!;
       final templateManager = ExtensionTemplateManager(
         extensionManager: manager,
         fileSystem: toolDependencies.toolContext.fs,
@@ -180,6 +175,12 @@ Future<void> main(List<String> args) async {
       },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
       TestCompilerNativeAssetsBuilder: () => const TestCompilerNativeAssetsBuilderImpl(),
+      ExtensionManager: () => ExtensionManager(
+        hostPlatform: globals.os.hostPlatform,
+        logger: globals.logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      ),
     },
     shutdownHooks: globals.shutdownHooks,
   );
@@ -313,7 +314,7 @@ List<FlutterCommand> generateCommands({
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
-  DevicesCommand(verboseHelp: verboseHelp, extensionManager: extensionManager),
+  DevicesCommand(verboseHelp: verboseHelp),
   DoctorCommand(verbose: verbose, extensionManager: extensionManager),
   DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
   DriveCommand(

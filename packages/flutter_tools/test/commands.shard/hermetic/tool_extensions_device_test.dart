@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -55,7 +56,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final devicesCommand = DevicesCommand(extensionManager: disabledManager);
+        final devicesCommand = DevicesCommand();
         final CommandRunner<void> commandRunner = createTestCommandRunner(devicesCommand);
 
         await commandRunner.run(<String>['devices']);
@@ -65,6 +66,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(),
+        ExtensionManager: () => disabledManager,
         DeviceManager: () => TestDeviceManager(),
       },
     );
@@ -111,7 +113,7 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final devicesCommand = DevicesCommand(extensionManager: enabledManager);
+        final devicesCommand = DevicesCommand();
         final CommandRunner<void> commandRunner = createTestCommandRunner(devicesCommand);
 
         await commandRunner.run(<String>['devices']);
@@ -121,6 +123,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
+        ExtensionManager: () => enabledManager,
         DeviceManager: () => TestDeviceManager(),
       },
     );
@@ -128,8 +131,14 @@ void main() {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({List<DeviceDiscovery>? discoverers})
-    : deviceDiscoverers = discoverers ?? <DeviceDiscovery>[],
+  TestDeviceManager({List<DeviceDiscovery>? discoverers, ExtensionManager? extensionManager})
+    : deviceDiscoverers =
+          discoverers ??
+          <DeviceDiscovery>[
+            if (extensionManager ?? context.get<ExtensionManager>()
+                case final ExtensionManager manager)
+              ExtensionDeviceDiscovery(extensionManager: manager, logger: testLogger),
+          ],
       super(logger: testLogger);
 
   @override

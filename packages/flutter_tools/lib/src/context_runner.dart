@@ -36,6 +36,7 @@ import 'device.dart';
 import 'devtools_launcher.dart';
 import 'doctor.dart';
 import 'emulator.dart';
+import 'experimental/extension_manager.dart';
 import 'features.dart';
 import 'flutter_application_package.dart';
 import 'flutter_cache.dart';
@@ -202,6 +203,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         operatingSystemUtils: globals.os,
         customDevicesConfig: globals.customDevicesConfig,
         nativeAssetsBuilder: globals.nativeAssetsBuilder,
+        extensionManager: context.get<ExtensionManager>(),
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
