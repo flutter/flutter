@@ -904,20 +904,14 @@ Future<void> pipeHarnessToRemote({
       globals.printTrace('test $id: Test process is no longer needed by test harness');
     }),
     remoteChannel.stream
-        .transform(
-          StreamTransformer<String, Object?>.fromHandlers(
-            handleData: (String message, EventSink<Object?> sink) {
-              try {
-                sink.add(json.decode(message));
-              } on FormatException catch (error) {
-                globals.printWarning(
-                  'Received unexpected non-JSON output from test runner: $message',
-                );
-                globals.printTrace('test $id: JSON decoding failed: $error');
-              }
-            },
-          ),
-        )
+        .map<Object?>(json.decode)
+        .handleError((Object error) {
+          final formatException = error as FormatException;
+          globals.printWarning(
+            'Received unexpected non-JSON output from test runner: ${formatException.source}',
+          );
+          globals.printTrace('test $id: JSON decoding failed: $formatException');
+        }, test: (error) => error is FormatException)
         .pipe(harnessChannel.sink)
         .then<void>((void value) {
           globals.printTrace('test $id: Test harness is no longer needed by test process');

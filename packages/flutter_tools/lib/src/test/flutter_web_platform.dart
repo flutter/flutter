@@ -793,44 +793,28 @@ class BrowserManager {
       }
     })..cancel();
 
-    final safeJsonTransformer = StreamChannelTransformer<Object?, Object?>(
-      StreamTransformer<Object?, Object?>.fromHandlers(
-        handleData: (Object? data, EventSink<Object?> sink) {
-          if (data is String) {
-            try {
-              sink.add(json.decode(data));
-            } on FormatException catch (err) {
-              _logger.printWarning(
-                'Received unexpected non-JSON message from browser WebSocket: $data',
-              );
-              _logger.printTrace('JSON decode error: $err');
-            }
-          } else {
-            sink.add(data);
-          }
-        },
-      ),
-      StreamSinkTransformer<Object?, Object?>.fromHandlers(
-        handleData: (Object? data, EventSink<Object?> sink) {
-          sink.add(json.encode(data));
-        },
-      ),
-    );
-
     // Whenever we get a message, no matter which child channel it's for, we know
     // the browser is still running code which means the user isn't debugging.
     _channel = MultiChannel<dynamic>(
-      webSocket.transform(safeJsonTransformer).changeStream((Stream<Object?> stream) {
-        return stream.map((Object? message) {
-          if (!_closed) {
-            _timer.reset();
-          }
-          for (final RunnerSuiteController controller in _controllers) {
-            controller.setDebugging(false);
-          }
+      webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object?> stream) {
+        return stream
+            .handleError((Object error) {
+              final formatException = error as FormatException;
+              _logger.printWarning(
+                'Received unexpected non-JSON message from browser WebSocket: ${formatException.source}',
+              );
+              _logger.printTrace('JSON decode error: $formatException');
+            }, test: (error) => error is FormatException)
+            .map((Object? message) {
+              if (!_closed) {
+                _timer.reset();
+              }
+              for (final RunnerSuiteController controller in _controllers) {
+                controller.setDebugging(false);
+              }
 
-          return message;
-        });
+              return message;
+            });
       }),
     );
 
