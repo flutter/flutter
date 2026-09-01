@@ -1236,6 +1236,13 @@ class _RecordingWidgetsBinding extends BindingBase
     }
     try {
       _recorder?.frameWillDraw();
+      // Flutter will not render views that don't need compositing,
+      // but this recorder expect preroll/applyFrame for every frame,
+      // even if the views don't change otherwise it stalls.
+      // See https://github.com/flutter/flutter/issues/191251
+      for (final RenderView renderView in renderViews) {
+        renderView.markNeedsCompositeFrame();
+      }
       super.handleDrawFrame();
       _recorder?.frameDidDraw();
     } catch (error, stackTrace) {
