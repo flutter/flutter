@@ -386,7 +386,15 @@ shared_library("create_flutter_framework_dylib") {
 
   output_name = "Flutter"
 
-  ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter" ]
+  inputs = [ "//flutter/shell/platform/darwin/common/unexported_symbols.sym" ]
+
+  ldflags = [
+    "-Wl,-install_name,@rpath/Flutter.framework/Flutter",
+    "-Xlinker",
+    "-unexported_symbols_list",
+    "-Xlinker",
+    rebase_path(inputs[0], root_build_dir),
+  ]
 
   public = _flutter_framework_headers
 

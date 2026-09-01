@@ -180,9 +180,15 @@ shared_library("flutter_framework_dylib") {
   visibility = [ ":*" ]
   output_name = "$_flutter_framework_name"
 
+  inputs = [ "//flutter/shell/platform/darwin/common/unexported_symbols.sym" ]
+
   ldflags = [
     "-Wl,-install_name,@rpath/$_flutter_framework_filename/$_framework_binary_subpath",
     "-fapplication-extension",
+    "-Xlinker",
+    "-unexported_symbols_list",
+    "-Xlinker",
+    rebase_path(inputs[0], root_build_dir),
   ]
 
   deps = [ ":flutter_framework_source" ]

@@ -13,7 +13,7 @@ import Foundation
 
   func encode(_ message: Any?) -> Data? {
     assert(message is Data?, "Message must be NSData or nil")
-    return message as? Data?
+    return message as? Data
   }
 
   func decode(_ message: Data?) -> Any? {
@@ -33,7 +33,7 @@ import Foundation
       return nil
     }
     guard let string = message as? String else {
-      assert("Message must be NSString or nil")
+      assertionFailure("Message must be NSString or nil")
       return nil
     }
     return string.data(using: .utf8)
@@ -95,7 +95,7 @@ import Foundation
     }
 
     guard let decoded = try? JSONSerialization.jsonObject(with: dataToDecode, options: []) else {
-      assert("Invalid JSON message, decoding failed")
+      assertionFailure("Invalid JSON message, decoding failed")
       return nil
     }
 
@@ -142,7 +142,7 @@ import Foundation
       let method = dictionary["method"] as? String
     else {
       // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/192122
-      assertion("Invalid JSON method call")
+      assertionFailure("Invalid JSON method call")
       return FlutterMethodCall(methodName: "", arguments: nil)
     }
     let arguments = unwrapNil(dictionary["args"])
@@ -157,7 +157,7 @@ import Foundation
       return unwrapNil(array[0])
     }
     guard array.count == 3, let code = array[0] as? String else {
-      assertion("Invalid JSON envelope")
+      assertionFailure("Invalid JSON envelope")
       return nil
     }
     let message = unwrapNil(array[1]) as? String
