@@ -1860,5 +1860,36 @@ TEST_P(DisplayListTest,
   EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(10, 20, 60, 80));
 }
 
+TEST_P(DisplayListTest,
+       FirstPassDispatcherSaveLayerMaximalBoundsDoesNotClipCullRect) {
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  // A perspective transform where homogeneous coordinates (w) flip sign for
+  // distant points if maximal bounds are transformed.
+  Matrix transform(1.0f, 0.0f, 0.0f, 0.0001f,  //
+                   0.0f, 1.0f, 0.0f, 0.0f,     //
+                   0.0f, 0.0f, 1.0f, 0.0f,     //
+                   0.0f, 0.0f, 0.0f, 1.0f);
+  FirstPassDispatcher collector(GetContentContext(), transform,
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  flutter::SaveLayerOptions options;
+  options = options.with_bounds_from_caller();
+
+  // Maximal bounds with bounds_from_caller.
+  collector.saveLayer(DlRect::MakeMaximum(), options, nullptr, std::nullopt);
+  // Inner layer with backdrop filter.
+  collector.saveLayer(DlRect(), flutter::SaveLayerOptions(), blur.get(),
+                      /*backdrop_id=*/1);
+  collector.restore();
+  collector.restore();
+
+  auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 1u);
+  auto it = backdrop_data.find(1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_FALSE(it->second.coverage_union.IsEmpty());
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(0, 0, 1000, 1000));
+}
+
 }  // namespace testing
 }  // namespace impeller

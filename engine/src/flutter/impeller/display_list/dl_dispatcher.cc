@@ -999,21 +999,18 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
                                     std::optional<int64_t> backdrop_id) {
   save();
 
+  const bool has_layer_bounds =
+      !bounds.IsMaximum() &&
+      (!bounds.IsEmpty() || options.bounds_from_caller());
+
   backdrop_count_ += (backdrop == nullptr ? 0 : 1);
   if (backdrop != nullptr && backdrop_id.has_value()) {
     std::shared_ptr<flutter::DlImageFilter> shared_backdrop =
         backdrop->shared();
     Rect layer_coverage = cull_rect_state_.back();
-    if (options.bounds_from_caller()) {
-      if (!bounds.IsMaximum()) {
-        layer_coverage =
-            layer_coverage.IntersectionOrEmpty(bounds.TransformBounds(matrix_));
-      }
-    } else {
-      if (!bounds.IsEmpty() && !bounds.IsMaximum()) {
-        layer_coverage =
-            layer_coverage.IntersectionOrEmpty(bounds.TransformBounds(matrix_));
-      }
+    if (has_layer_bounds) {
+      layer_coverage =
+          layer_coverage.IntersectionOrEmpty(bounds.TransformBounds(matrix_));
     }
     std::unordered_map<int64_t, BackdropData>::iterator existing =
         backdrop_data_.find(backdrop_id.value());
@@ -1041,15 +1038,9 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
   auto global_cull_rect = cull_rect_state_.back();
   if (has_image_filter_ || global_cull_rect.IsMaximum()) {
     cull_rect_state_.back() = Rect::MakeMaximum();
-  } else if (options.bounds_from_caller() ||
-             (!bounds.IsEmpty() && !bounds.IsMaximum())) {
-    auto global_save_bounds = bounds.TransformBounds(matrix_);
-    auto new_cull_rect = global_cull_rect.Intersection(global_save_bounds);
-    if (new_cull_rect.has_value()) {
-      cull_rect_state_.back() = new_cull_rect.value();
-    } else {
-      cull_rect_state_.back() = Rect::MakeLTRB(0, 0, 0, 0);
-    }
+  } else if (has_layer_bounds) {
+    cull_rect_state_.back() =
+        global_cull_rect.IntersectionOrEmpty(bounds.TransformBounds(matrix_));
   }
 }
 
