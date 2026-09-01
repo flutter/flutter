@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -45,28 +44,26 @@ void main() {
       overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
     );
 
-    ExtensionManager? disabledManager;
     testUsingContext(
       'DevicesCommand output does not include custom extension devices when feature flag disabled',
       () async {
         final featureFlags = TestFeatureFlags();
-        disabledManager = ExtensionManager(
+        final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: testLogger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final devicesCommand = DevicesCommand();
+        final devicesCommand = DevicesCommand(extensionManager: manager);
         final CommandRunner<void> commandRunner = createTestCommandRunner(devicesCommand);
 
         await commandRunner.run(<String>['devices']);
         expect(testLogger.statusText, isNot(contains('Linux Custom Extension Prototype Device')));
 
-        await disabledManager?.dispose();
+        await manager.dispose();
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(),
-        ExtensionManager: () => disabledManager,
         DeviceManager: () => TestDeviceManager(),
       },
     );
@@ -102,28 +99,26 @@ void main() {
       },
     );
 
-    ExtensionManager? enabledManager;
     testUsingContext(
       'DevicesCommand output includes custom extension device when feature flag enabled',
       () async {
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-        enabledManager = ExtensionManager(
+        final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: testLogger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final devicesCommand = DevicesCommand();
+        final devicesCommand = DevicesCommand(extensionManager: manager);
         final CommandRunner<void> commandRunner = createTestCommandRunner(devicesCommand);
 
         await commandRunner.run(<String>['devices']);
         expect(testLogger.statusText, contains('Linux Custom Extension Prototype Device'));
 
-        await enabledManager?.dispose();
+        await manager.dispose();
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-        ExtensionManager: () => enabledManager,
         DeviceManager: () => TestDeviceManager(),
       },
     );
@@ -131,14 +126,8 @@ void main() {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({List<DeviceDiscovery>? discoverers, ExtensionManager? extensionManager})
-    : deviceDiscoverers =
-          discoverers ??
-          <DeviceDiscovery>[
-            if (extensionManager ?? context.get<ExtensionManager>()
-                case final ExtensionManager manager)
-              ExtensionDeviceDiscovery(extensionManager: manager, logger: testLogger),
-          ],
+  TestDeviceManager({List<DeviceDiscovery>? discoverers})
+    : deviceDiscoverers = discoverers ?? <DeviceDiscovery>[],
       super(logger: testLogger);
 
   @override

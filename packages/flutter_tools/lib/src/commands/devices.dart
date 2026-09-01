@@ -9,11 +9,14 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../experimental/extension_device_manager.dart';
+import '../experimental/extension_manager.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {
-  DevicesCommand({bool verboseHelp = false}) {
+  DevicesCommand({bool verboseHelp = false, ExtensionManager? extensionManager})
+    : _extensionManager = extensionManager {
     addMachineOutputFlag(verboseHelp: verboseHelp);
     argParser.addOption(
       'timeout',
@@ -24,6 +27,8 @@ class DevicesCommand extends FlutterCommand {
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
   }
+
+  final ExtensionManager? _extensionManager;
 
   @override
   String get name => 'devices';
@@ -64,6 +69,17 @@ class DevicesCommand extends FlutterCommand {
         'information about installing additional components.',
         exitCode: 1,
       );
+    }
+
+    if (_extensionManager case final extensionManager?) {
+      if (globals.deviceManager?.deviceDiscoverers.any(
+            (DeviceDiscovery d) => d is ExtensionDeviceDiscovery,
+          ) !=
+          true) {
+        globals.deviceManager?.deviceDiscoverers.add(
+          ExtensionDeviceDiscovery(extensionManager: extensionManager, logger: globals.logger),
+        );
+      }
     }
 
     final output = DevicesCommandOutput(
