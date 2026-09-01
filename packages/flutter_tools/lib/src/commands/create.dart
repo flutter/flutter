@@ -216,18 +216,19 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         final Map<String, String>? allowedHelp = opt.allowedHelp != null
             ? Map<String, String>.of(opt.allowedHelp!)
             : null;
-        final allowed = <String>[
-          ...ParsedFlutterTemplateType.enabledValues(
-            featureFlags,
-            extensionTemplateManager: null,
-          ).map((ParsedFlutterTemplateType t) => t.cliName),
-          ...projectTemplates.map((ProjectTemplate t) => t.name),
-        ];
+        final List<String>? allowed = opt.allowed != null ? List<String>.of(opt.allowed!) : null;
         if (allowedHelp != null) {
           for (final template in projectTemplates) {
             if (!template.hidden) {
               allowedHelp[template.name] =
                   'Generate a project using the ${template.name} template.';
+            }
+          }
+        }
+        if (allowed != null) {
+          for (final template in projectTemplates) {
+            if (!allowed.contains(template.name)) {
+              allowed.add(template.name);
             }
           }
         }

@@ -94,14 +94,10 @@ base class ExtensionTemplateManager extends TemplateService {
   /// 'package:flutter_tools_extension_linux_prototype/' URIs, resolving them
   /// relative to the Flutter SDK root.
   Directory resolveTemplateDirectory(String templatePath) {
-    final String? flutterRoot = Cache.flutterRoot;
-    if (flutterRoot == null) {
-      throw StateError('Cache.flutterRoot is not initialized.');
-    }
     if (templatePath.startsWith('package:flutter_tools/')) {
       final String relativePath = templatePath.substring('package:flutter_tools/'.length);
       final String absolutePath = _fileSystem.path.join(
-        flutterRoot,
+        Cache.flutterRoot!,
         'packages',
         'flutter_tools',
         'lib',
@@ -115,7 +111,7 @@ base class ExtensionTemplateManager extends TemplateService {
         'package:flutter_tools_extension_linux_prototype/'.length,
       );
       final String absolutePath = _fileSystem.path.join(
-        flutterRoot,
+        Cache.flutterRoot!,
         'packages',
         'flutter_tools',
         'packages',
