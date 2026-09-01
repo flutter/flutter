@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -12,13 +10,14 @@ String _initialRoute = 'Home Page';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChannels.navigation.setMethodCallHandler((MethodCall call) async {
-    stderr.writeln('Engine sent: ${call.method} ${call.arguments}');
     if (call.method == 'pushRouteInformation' || call.method == 'pushRoute') {
       final dynamic args = call.arguments;
       var location = '';
       if (args is Map) {
+        // pushRouteInformation provides a map with 'location'
         location = (args['location'] as String?) ?? args.toString();
       } else if (args is String) {
+        // pushRoute provides a string
         location = args;
       } else if (args != null) {
         location = args.toString();
@@ -47,7 +46,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _route = _initialRoute;
-  String _pluginEvents = 'No Plugin Events';
 
   @override
   void initState() {
@@ -59,29 +57,12 @@ class _MyAppState extends State<MyApp> {
         });
       }
     };
-    _pollPluginEvents();
   }
 
   @override
   void dispose() {
     _notifyRoute = null;
     super.dispose();
-  }
-
-  Future<void> _pollPluginEvents() async {
-    const channel = MethodChannel('lifecycle_detector');
-    while (mounted) {
-      try {
-        final List<dynamic>? events = await channel.invokeListMethod<dynamic>('getEvents');
-        if (events != null && events.isNotEmpty) {
-          setState(() {
-            // Keep as a list of strings
-            _pluginEvents = events.join('\n');
-          });
-        }
-      } catch (_) {}
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-    }
   }
 
   @override
@@ -93,10 +74,7 @@ class _MyAppState extends State<MyApp> {
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(_route, key: const Key('routeText')),
-              ..._pluginEvents.split('\n').map((String event) => Text(event)),
-            ],
+            children: <Widget>[Text(_route, key: const Key('routeText'))],
           ),
         ),
       ),

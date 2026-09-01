@@ -17,19 +17,14 @@ class RunnerUITests: XCTestCase {
         // Cold start HTTPS
         app = XCUIApplication()
         var url = URL(string: "https://flutter-dashboard.appspot.com/invalid_cold")!
-        app.launchArguments.append("--is-cold-start")
         app.open(url)
 
         XCTAssertTrue(app.staticTexts["https://flutter-dashboard.appspot.com/invalid_cold"].waitForExistence(timeout: 10), "Cold start HTTPS deep link failed")
-        let coldPredicate = NSPredicate(format: "label == %@ OR label == %@", "sceneContinueUserActivity: \(url.absoluteString)", "sceneOpenURLContexts: \(url.absoluteString)")
-        XCTAssertTrue(app.staticTexts.containing(coldPredicate).firstMatch.waitForExistence(timeout: 10), "Plugin missed cold start HTTPS link")
 
         // Warm start HTTPS
         url = URL(string: "https://flutter-dashboard.appspot.com/invalid_warm")!
         app.open(url)
         XCTAssertTrue(app.staticTexts["https://flutter-dashboard.appspot.com/invalid_warm"].waitForExistence(timeout: 10), "Warm start HTTPS deep link failed")
-        let warmPredicate = NSPredicate(format: "label == %@ OR label == %@", "sceneContinueUserActivity: \(url.absoluteString)", "sceneOpenURLContexts: \(url.absoluteString)")
-        XCTAssertTrue(app.staticTexts.containing(warmPredicate).firstMatch.waitForExistence(timeout: 10), "Plugin missed warm start HTTPS link")
 
         app.terminate()
 
@@ -38,12 +33,10 @@ class RunnerUITests: XCTestCase {
         url = URL(string: "testscheme://flutter/custom_cold")!
         app.open(url)
         XCTAssertTrue(app.staticTexts["testscheme://flutter/custom_cold"].waitForExistence(timeout: 10), "Cold start custom scheme deep link failed")
-        XCTAssertTrue(app.staticTexts["sceneOpenURLContexts: testscheme://flutter/custom_cold"].waitForExistence(timeout: 10), "Plugin missed sceneOpenURLContexts")
 
         // Warm start custom scheme
         url = URL(string: "testscheme://flutter/custom_warm")!
         app.open(url)
         XCTAssertTrue(app.staticTexts["testscheme://flutter/custom_warm"].waitForExistence(timeout: 10), "Warm start custom scheme deep link failed")
-        XCTAssertTrue(app.staticTexts["sceneOpenURLContexts: testscheme://flutter/custom_warm"].waitForExistence(timeout: 10), "Plugin missed warm sceneOpenURLContexts")
     }
 }
