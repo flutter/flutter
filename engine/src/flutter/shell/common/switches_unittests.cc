@@ -122,6 +122,46 @@ TEST(SwitchesTest, NoEnableImpeller) {
   }
 }
 
+TEST(SwitchesTest, EnableAndroidHcppAndSurfaceControl) {
+  const std::string flag =
+      std::string(FlagForSwitch(Switch::EnableAndroidHcppAndSurfaceControl));
+  {
+    // flag present without value -> true
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList<std::string>(
+            {"command", "--" + flag});
+    EXPECT_TRUE(command_line.HasOption(flag));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_TRUE(settings.enable_surface_control);
+  }
+  {
+    // flag present with =true -> true
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList<std::string>(
+            {"command", "--" + flag + "=true"});
+    EXPECT_TRUE(command_line.HasOption(flag));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_TRUE(settings.enable_surface_control);
+  }
+  {
+    // flag present with =false -> false
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList<std::string>(
+            {"command", "--" + flag + "=false"});
+    EXPECT_TRUE(command_line.HasOption(flag));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_FALSE(settings.enable_surface_control);
+  }
+  {
+    // default/absent -> false
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList<std::string>({"command"});
+    EXPECT_FALSE(command_line.HasOption(flag));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_FALSE(settings.enable_surface_control);
+  }
+}
+
 TEST(SwitchesTest, ProfileStartup) {
   {
     fml::CommandLine command_line =

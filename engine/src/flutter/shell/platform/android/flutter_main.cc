@@ -25,6 +25,7 @@
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_vm_init.h"
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
@@ -75,6 +76,14 @@ bool FlutterMain::IsInitialized() {
   return g_flutter_main != nullptr;
 }
 
+void FlutterMain::ResetForTesting() {
+  g_flutter_main.reset();
+  if (g_flutter_jni_class) {
+    delete g_flutter_jni_class;
+    g_flutter_jni_class = nullptr;
+  }
+}
+
 FlutterMain& FlutterMain::Get() {
   TRACE_EVENT0("flutter", "FlutterMain::Get");
   FML_CHECK(g_flutter_main) << "ensureInitializationComplete must have already "
@@ -115,7 +124,8 @@ void FlutterMain::Init(JNIEnv* env,
     }
   }
 
-  flutter::Settings settings;
+  auto command_line = fml::CommandLineFromIterators(args.begin(), args.end());
+  flutter::Settings settings = flutter::SettingsFromCommandLine(command_line);
   settings.enable_platform_isolates = true;
 
 #if defined(__ANDROID__)
