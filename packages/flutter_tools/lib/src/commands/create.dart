@@ -209,41 +209,41 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     return ExtensionArgParserMixin.cloneParser(
       baseArgParser,
       optionCloner: (ArgParser newParser, Option opt) {
-        if (opt.name == 'template') {
-          final Map<String, String>? allowedHelp = opt.allowedHelp != null
-              ? Map<String, String>.of(opt.allowedHelp!)
-              : null;
-          final List<String>? allowed = opt.allowed != null ? List<String>.of(opt.allowed!) : null;
-          if (allowedHelp != null) {
-            for (final template in projectTemplates) {
-              if (!template.hidden) {
-                allowedHelp[template.name] =
-                    'Generate a project using the ${template.name} template.';
-              }
-            }
-          }
-          if (allowed != null) {
-            for (final template in projectTemplates) {
-              if (!allowed.contains(template.name)) {
-                allowed.add(template.name);
-              }
-            }
-          }
-          newParser.addOption(
-            opt.name,
-            abbr: opt.abbr,
-            aliases: opt.aliases,
-            allowed: allowed,
-            allowedHelp: allowedHelp,
-            defaultsTo: opt.defaultsTo as String?,
-            help: opt.help,
-            hide: opt.hide,
-            mandatory: opt.mandatory,
-            valueHelp: opt.valueHelp,
-          );
+        if (opt.name != 'template') {
+          ExtensionArgParserMixin.copyOption(newParser, opt);
           return;
         }
-        ExtensionArgParserMixin.copyOption(newParser, opt);
+        final Map<String, String>? allowedHelp = opt.allowedHelp != null
+            ? Map<String, String>.of(opt.allowedHelp!)
+            : null;
+        final List<String>? allowed = opt.allowed != null ? List<String>.of(opt.allowed!) : null;
+        if (allowedHelp != null) {
+          for (final template in projectTemplates) {
+            if (!template.hidden) {
+              allowedHelp[template.name] =
+                  'Generate a project using the ${template.name} template.';
+            }
+          }
+        }
+        if (allowed != null) {
+          for (final template in projectTemplates) {
+            if (!allowed.contains(template.name)) {
+              allowed.add(template.name);
+            }
+          }
+        }
+        newParser.addOption(
+          opt.name,
+          abbr: opt.abbr,
+          aliases: opt.aliases,
+          allowed: allowed,
+          allowedHelp: allowedHelp,
+          defaultsTo: opt.defaultsTo as String?,
+          help: opt.help,
+          hide: opt.hide,
+          mandatory: opt.mandatory,
+          valueHelp: opt.valueHelp,
+        );
       },
     );
   }
@@ -339,8 +339,12 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         extensionTemplateManager: _extensionTemplateManager,
       );
       if (parsedTemplate == null) {
+        final Iterable<String> enabledTemplateNames = ParsedFlutterTemplateType.enabledValues(
+          featureFlags,
+          extensionTemplateManager: _extensionTemplateManager,
+        ).map((ParsedFlutterTemplateType t) => t.cliName);
         throwToolExit(
-          'Expected one of ${ParsedFlutterTemplateType.enabledValues(featureFlags, extensionTemplateManager: _extensionTemplateManager).map((ParsedFlutterTemplateType t) => t.cliName).join(', ')} '
+          'Expected one of ${enabledTemplateNames.join(', ')} '
           'for option "--template", but got "$templateArgument"',
         );
       }
