@@ -65,7 +65,7 @@ sk_sp<flutter::DisplayList> DoGradientOvalStrokeMaskBlur(
     Scalar sigma,
     DlBlurStyle style,
     Vector2 translation = Vector2(100.0f, 100.0f),
-    Scalar rotation = 0.0) {
+    Scalar rotation = 0.0f) {
   DisplayListBuilder builder;
   builder.Scale(content_Scale.x, content_Scale.y);
 
@@ -134,35 +134,35 @@ TEST_P(AiksTest, GradientOvalStrokeMaskBlurTranslatedAndRotated) {
   ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
       GetContentScale(), /*sigma=*/10, DlBlurStyle::kNormal,
       /*translation=*/Vector2(GetWindowSize().width - 150.0f, 100.0f),
-      /*rotation=*/45)));
+      /*rotation=*/45.0f)));
 }
 
 TEST_P(AiksTest, GradientOvalStrokeMaskBlurSigmaZeroTranslatedAndRotated) {
   ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
       GetContentScale(), /*sigma=*/0, DlBlurStyle::kNormal,
       /*translation=*/Vector2(GetWindowSize().width - 150.0f, 100.0f),
-      /*rotation=*/45)));
+      /*rotation=*/45.0f)));
 }
 
 TEST_P(AiksTest, GradientOvalStrokeMaskBlurOuterTranslatedAndRotated) {
   ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
       GetContentScale(), /*sigma=*/10, DlBlurStyle::kOuter,
       /*translation=*/Vector2(GetWindowSize().width - 150.0f, 100.0f),
-      /*rotation=*/45)));
+      /*rotation=*/45.0f)));
 }
 
 TEST_P(AiksTest, GradientOvalStrokeMaskBlurInnerTranslatedAndRotated) {
   ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
       GetContentScale(), /*sigma=*/10, DlBlurStyle::kInner,
       /*translation=*/Vector2(GetWindowSize().width - 150.0f, 100.0f),
-      /*rotation=*/45)));
+      /*rotation=*/45.0f)));
 }
 
 TEST_P(AiksTest, GradientOvalStrokeMaskBlurSolidTranslatedAndRotated) {
   ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
       GetContentScale(), /*sigma=*/10, DlBlurStyle::kSolid,
       /*translation=*/Vector2(GetWindowSize().width - 150.0f, 100.0f),
-      /*rotation=*/45)));
+      /*rotation=*/45.0f)));
 }
 
 TEST_P(AiksTest, SolidColorCircleMaskBlurTinySigma) {
