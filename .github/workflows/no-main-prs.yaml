@@ -1,22 +1,59 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 name: No PRs on main
 
 on:
-  pull_request:
+  # Safe because this workflow does not check out code or run arbitrary scripts.
+  # It only checks the PR target branch and comments/fails if targeting main.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [opened, synchronize, reopened, edited]
 
-permissions:
-  contents: read
+permissions: read-all
 
 jobs:
   reject-main-prs:
     runs-on: ubuntu-latest
+    if: ${{ github.repository == 'flutter/flutter' }}
+    permissions:
+      contents: read
+      pull-requests: write
+
     steps:
+      - name: Comment on PRs targeting main
+        if: github.base_ref == 'main'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const issueNumber = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+            });
+            const docUrl = 'https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-base-branch-of-a-pull-request';
+            const alreadyCommented = comments.some(comment =>
+              comment.body && comment.body.includes(docUrl)
+            );
+            if (!alreadyCommented) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: 'This pull request targets the `main` branch, but the primary branch for this repository is `master`.\n\n' +
+                  'Please change the base branch of this pull request to `master`.\n\n' +
+                  `See: ${docUrl}`,
+              });
+            }
+
       - name: Check base branch
         env:
           # Explicitly fallback to an empty string if it doesn't exist
           TARGET_BRANCH: ${{ github.base_ref || ''}}
         run: |
           if [ "$TARGET_BRANCH" = "main" ]; then
-            echo "::error::Do not open PRs on `main`. The primary branch is `master`. You can change the base branch of this PR to `master`. See: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-base-branch-of-a-pull-request"
+            echo "::error::Do not open PRs on \`main\`. The primary branch is \`master\`. You can change the base branch of this PR to \`master\`. See: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-base-branch-of-a-pull-request"
             exit 1
           fi
