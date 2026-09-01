@@ -60,9 +60,12 @@ TEST_P(AiksTest, SolidColorOvalsMaskBlurTinySigma) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-sk_sp<flutter::DisplayList> DoGradientOvalStrokeMaskBlur(Vector2 content_Scale,
-                                                         Scalar sigma,
-                                                         DlBlurStyle style) {
+sk_sp<flutter::DisplayList> DoGradientOvalStrokeMaskBlur(
+    Vector2 content_Scale,
+    Scalar sigma,
+    DlBlurStyle style,
+    Vector2 translation = Vector2(100.0f, 100.0f),
+    Scalar rotation = 0.0) {
   DisplayListBuilder builder;
   builder.Scale(content_Scale.x, content_Scale.y);
 
@@ -83,7 +86,8 @@ sk_sp<flutter::DisplayList> DoGradientOvalStrokeMaskBlur(Vector2 content_Scale,
   paint.setStrokeWidth(20);
 
   builder.Save();
-  builder.Translate(100, 100);
+  builder.Translate(translation.x, translation.y);
+  builder.Rotate(rotation);
 
   {
     DlPaint line_paint;
@@ -124,6 +128,41 @@ TEST_P(AiksTest, GradientOvalStrokeMaskBlurInner) {
 TEST_P(AiksTest, GradientOvalStrokeMaskBlurSolid) {
   ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
       GetContentScale(), /*sigma=*/10, DlBlurStyle::kSolid)));
+}
+
+TEST_P(AiksTest, GradientOvalStrokeMaskBlurTranslatedAndRotated) {
+  ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
+      GetContentScale(), /*sigma=*/10, DlBlurStyle::kNormal,
+      /*translation=*/Vector2(GetWindowSize().width - 150.0f, 100.0f),
+      /*rotation=*/45)));
+}
+
+TEST_P(AiksTest, GradientOvalStrokeMaskBlurSigmaZeroTranslatedAndRotated) {
+  ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
+      GetContentScale(), /*sigma=*/0, DlBlurStyle::kNormal,
+      /*translation=*/Vector2(GetWindowSize().width - 150.0f, 100.0f),
+      /*rotation=*/45)));
+}
+
+TEST_P(AiksTest, GradientOvalStrokeMaskBlurOuterTranslatedAndRotated) {
+  ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
+      GetContentScale(), /*sigma=*/10, DlBlurStyle::kOuter,
+      /*translation=*/Vector2(GetWindowSize().width - 150.0f, 100.0f),
+      /*rotation=*/45)));
+}
+
+TEST_P(AiksTest, GradientOvalStrokeMaskBlurInnerTranslatedAndRotated) {
+  ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
+      GetContentScale(), /*sigma=*/10, DlBlurStyle::kInner,
+      /*translation=*/Vector2(GetWindowSize().width - 150.0f, 100.0f),
+      /*rotation=*/45)));
+}
+
+TEST_P(AiksTest, GradientOvalStrokeMaskBlurSolidTranslatedAndRotated) {
+  ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
+      GetContentScale(), /*sigma=*/10, DlBlurStyle::kSolid,
+      /*translation=*/Vector2(GetWindowSize().width - 150.0f, 100.0f),
+      /*rotation=*/45)));
 }
 
 TEST_P(AiksTest, SolidColorCircleMaskBlurTinySigma) {
