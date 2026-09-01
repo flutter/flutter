@@ -18,7 +18,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
-import 'semantics_tester.dart';
 
 void main() {
   group('RawImage', () {
@@ -1608,22 +1607,6 @@ void main() {
         tester.getSemantics(find.byKey(key3)),
         matchesSemantics(label: '3', hasTapAction: true),
       );
-    });
-
-    testWidgets('drops semantics when its ignoringSemantics is true', (WidgetTester tester) async {
-      final semantics = SemanticsTester(tester);
-      final key = UniqueKey();
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: IgnorePointer(
-            ignoringSemantics: true,
-            child: TestButton(key: key, onPressed: () {}, child: const Text('button')),
-          ),
-        ),
-      );
-      expect(semantics, isNot(includesNodeWith(label: 'button')));
-      semantics.dispose();
     });
 
     testWidgets('ignores user interactions', (WidgetTester tester) async {

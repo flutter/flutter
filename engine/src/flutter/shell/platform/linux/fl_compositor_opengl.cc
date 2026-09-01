@@ -45,41 +45,6 @@ static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
 
 static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {}
 
-// Checks if the current OpenGL driver is known to have a broken or unsupported
-// glBlitFramebuffer implementation.
-static gboolean driver_supports_blit() {
-  const gchar* vendor = reinterpret_cast<const gchar*>(glGetString(GL_VENDOR));
-  if (vendor == nullptr) {
-    return TRUE;
-  }
-
-  // Note: List of unsupported vendors due to issue
-  // https://github.com/flutter/flutter/issues/152099
-  const char* unsupported_vendors_exact[] = {"Vivante Corporation", "ARM"};
-  const char* unsupported_vendors_fuzzy[] = {"NVIDIA"};
-
-  for (const char* unsupported : unsupported_vendors_fuzzy) {
-    if (strstr(vendor, unsupported) != nullptr) {
-      return FALSE;
-    }
-  }
-  for (const char* unsupported : unsupported_vendors_exact) {
-    if (strcmp(vendor, unsupported) == 0) {
-      return FALSE;
-    }
-  }
-  return TRUE;
-}
-
-// Checks if glBlitFramebuffer can be used. It is a GLES3 / OpenGL 3.0 function
-// and may not be present on older drivers, so treat it as optional and fall
-// back to compositing with the shader when it is unavailable.
-static gboolean can_blit_framebuffer() {
-  return driver_supports_blit() &&
-         (epoxy_gl_version() >= 30 ||
-          epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
-}
-
 FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
       g_object_new(fl_compositor_opengl_get_type(), nullptr));
@@ -89,7 +54,7 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager) {
 
   // Determine once whether glBlitFramebuffer is available on this driver.
   fl_opengl_manager_make_current(opengl_manager);
-  self->can_blit = can_blit_framebuffer();
+  self->can_blit = fl_opengl_manager_can_blit(opengl_manager);
 
   return self;
 }
@@ -216,4 +181,30 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   glUseProgram(saved_current_program);
   glBlendFuncSeparate(saved_src_rgb, saved_dst_rgb, saved_src_alpha,
                       saved_dst_alpha);
+}
+
+GLint fl_compositor_opengl_get_frame_format(const FlutterLayer** layers,
+                                            size_t layers_count) {
+  // Every backing store in a frame is created by the same engine code from
+  // context-wide capabilities, so they all share a format and the first one
+  // describes the frame. Layers that aren't OpenGL framebuffer backing stores,
+  // e.g. platform views, don't have a format to match; fl_engine.cc only
+  // creates framebuffers, so there is nothing else to read a format from.
+  for (size_t i = 0; i < layers_count; i++) {
+    const FlutterLayer* layer = layers[i];
+    if (layer == nullptr ||
+        layer->type != kFlutterLayerContentTypeBackingStore ||
+        layer->backing_store == nullptr ||
+        layer->backing_store->type != kFlutterBackingStoreTypeOpenGL ||
+        layer->backing_store->open_gl.type !=
+            kFlutterOpenGLTargetTypeFramebuffer) {
+      continue;
+    }
+
+    return layer->backing_store->open_gl.framebuffer.target == GL_BGRA8_EXT
+               ? GL_BGRA_EXT
+               : GL_RGBA;
+  }
+
+  return GL_RGBA;
 }
