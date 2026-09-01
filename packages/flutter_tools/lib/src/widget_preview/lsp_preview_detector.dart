@@ -185,11 +185,17 @@ class LspPreviewDetector {
       onPubspecChangeDetected(filePath);
       return;
     }
-    await _analysisServer?.waitForAnalysis();
+    if (!filePath.isDartFile) {
+      return;
+    }
+    previewAnalytics.startPreviewReloadStopwatch();
     try {
+      await _analysisServer?.waitForAnalysis();
       final FlutterWidgetPreviews result = await dtd.getFlutterWidgetPreviews();
       onChangeDetected(result);
+      previewAnalytics.reportPreviewReloadTiming();
     } catch (e) {
+      previewAnalytics.resetPreviewReloadStopwatch();
       if (_disposed || shutdownHooks.isShuttingDown) {
         logger.printTrace('Failed to get widget previews during shutdown: $e');
       } else if (e is StateError || e is Exception) {
