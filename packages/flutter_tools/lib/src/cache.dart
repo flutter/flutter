@@ -151,10 +151,11 @@ class DevelopmentArtifact {
 class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
+  /// [artifactUpdater] is configurable for testing.
   Cache({
     @protected Directory? rootOverride,
     @protected List<ArtifactSet>? artifacts,
-    ArtifactUpdater? artifactUpdater,
+    @visibleForTesting ArtifactUpdater? artifactUpdater,
     required Logger logger,
     required FileSystem fileSystem,
     required Platform platform,
@@ -807,38 +808,41 @@ class Cache {
         .where((ArtifactSet artifact) => artifact.downloadCount > 0)
         .length;
     var current = 0;
-    for (final artifact in artifactsToUpdate) {
-      if (artifact.downloadCount > 0) {
-        current += 1;
+    try {
+      for (final artifact in artifactsToUpdate) {
+        if (artifact.downloadCount > 0) {
+          current += 1;
 
-        // Set progress context for the artifact updater
-        _artifactUpdater.setProgressContext(
-          artifactIndex: current,
-          artifactTotal: total,
-          downloadTotal: artifact.downloadCount,
-        );
-
-        // For artifacts containing multiple downloads, print the artifact name
-        if (artifact.downloadCount > 1) {
-          _logger.printStatus('[$current/$total] ${artifact.displayName}');
-        }
-      }
-
-      try {
-        await artifact.update(_artifactUpdater, _logger, _fileSystem, _osUtils, offline: offline);
-      } on SocketException catch (e) {
-        if (_hostsBlockedInChina.contains(e.address?.host)) {
-          _logger.printError(
-            'Failed to retrieve Flutter tool dependencies: ${e.message}.\n'
-            "If you're in China, please see this page: "
-            'https://flutter.dev/to/china-setup',
-            emphasis: true,
+          // Set progress context for the artifact updater
+          _artifactUpdater.setProgressContext(
+            artifactIndex: current,
+            artifactTotal: total,
+            downloadTotal: artifact.downloadCount,
           );
+
+          // For artifacts containing multiple downloads, print the artifact name
+          if (artifact.downloadCount > 1) {
+            _logger.printStatus('[$current/$total] ${artifact.displayName}');
+          }
         }
-        rethrow;
+
+        try {
+          await artifact.update(_artifactUpdater, _logger, _fileSystem, _osUtils, offline: offline);
+        } on SocketException catch (e) {
+          if (_hostsBlockedInChina.contains(e.address?.host)) {
+            _logger.printError(
+              'Failed to retrieve Flutter tool dependencies: ${e.message}.\n'
+              "If you're in China, please see this page: "
+              'https://flutter.dev/to/china-setup',
+              emphasis: true,
+            );
+          }
+          rethrow;
+        }
       }
+    } finally {
+      _artifactUpdater.resetProgressContext();
     }
-    _artifactUpdater.resetProgressContext();
   }
 
   Future<bool> areRemoteArtifactsAvailable({
@@ -922,6 +926,9 @@ abstract class CachedArtifact extends ArtifactSet {
   @override
   final String name;
 
+  /// The number of individual downloads this artifact will perform.
+  ///
+  /// Defaults to 1 for cached artifacts.
   @override
   int get downloadCount => 1;
 
