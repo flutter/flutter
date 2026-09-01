@@ -9,5 +9,8 @@
 /// and service handler interfaces implemented by extension authors.
 library flutter_tools_extension;
 
+export 'src/config.dart';
+export 'src/diagnostics.dart';
 export 'src/protocol_base/provider.dart';
 export 'src/protocol_base/service.dart';
+export 'src/templates.dart';
