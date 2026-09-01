@@ -151,6 +151,7 @@ import Foundation
 
   func decodeEnvelope(_ envelope: Data) -> Any? {
     guard let array = FlutterJSONMessageCodec.sharedInstance().decode(envelope) as? [Any] else {
+      assertionFailure("Invalid JSON envelope")
       return nil
     }
     if array.count == 1 {
