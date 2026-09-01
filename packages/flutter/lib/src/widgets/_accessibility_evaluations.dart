@@ -69,7 +69,7 @@ abstract class AccessibilityEvaluation {
   ///
   /// The [view] parameter provides the [ui.FlutterView] context for evaluations
   /// that require physical metrics (such as tap target size).
-  List<Violation> traverse(SemanticsNode node, {ui.FlutterView? view}) {
+  List<Violation> traverse(SemanticsNode node, {required ui.FlutterView view}) {
     return const <Violation>[];
   }
 
@@ -116,7 +116,7 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   }
 
   @override
-  List<Violation> traverse(SemanticsNode node, {ui.FlutterView? view}) {
+  List<Violation> traverse(SemanticsNode node, {required ui.FlutterView view}) {
     final violations = <Violation>[];
     node.visitChildren((SemanticsNode child) {
       violations.addAll(traverse(child, view: view));
@@ -145,23 +145,13 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
       current = current.parent;
     }
 
-    final ui.FlutterView? flutterView =
-        view ??
-        (RendererBinding.instance.renderViews.isNotEmpty
-            ? RendererBinding.instance.renderViews.first.flutterView
-            : null) ??
-        ui.PlatformDispatcher.instance.views.firstOrNull;
-    if (flutterView == null) {
-      return violations;
-    }
-
-    final Rect viewRect = Offset.zero & flutterView.physicalSize;
+    final Rect viewRect = Offset.zero & view.physicalSize;
     if (_isAtBoundary(paintBounds, viewRect)) {
       return violations;
     }
 
     // Shrink by device pixel ratio.
-    final Size candidateSize = paintBounds.size / flutterView.devicePixelRatio;
+    final Size candidateSize = paintBounds.size / view.devicePixelRatio;
     if (candidateSize.width < size.width - precisionErrorTolerance ||
         candidateSize.height < size.height - precisionErrorTolerance) {
       violations.add(
@@ -218,14 +208,16 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
     final violations = <Violation>[];
 
     for (final RenderView view in binding.renderViews) {
-      violations.addAll(traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
+      violations.addAll(
+        traverse(view.owner!.semanticsOwner!.rootSemanticsNode!, view: view.flutterView),
+      );
     }
 
     return EvaluationResult(violations);
   }
 
   @override
-  List<Violation> traverse(SemanticsNode node, {ui.FlutterView? view}) {
+  List<Violation> traverse(SemanticsNode node, {required ui.FlutterView view}) {
     final violations = <Violation>[];
     node.visitChildren((SemanticsNode child) {
       violations.addAll(traverse(child, view: view));
@@ -803,13 +795,15 @@ class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
   FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
     final violations = <Violation>[];
     for (final RenderView view in binding.renderViews) {
-      violations.addAll(traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
+      violations.addAll(
+        traverse(view.owner!.semanticsOwner!.rootSemanticsNode!, view: view.flutterView),
+      );
     }
     return EvaluationResult(violations);
   }
 
   @override
-  List<Violation> traverse(SemanticsNode node, {ui.FlutterView? view}) {
+  List<Violation> traverse(SemanticsNode node, {required ui.FlutterView view}) {
     final violations = <Violation>[];
     var hasChildren = false;
     node.visitChildren((SemanticsNode child) {

@@ -68,7 +68,7 @@ class AccessibilityInspector {
     final RenderView? renderView = _findRenderView();
     final PipelineOwner? pipelineOwner = renderView?.owner;
     final SemanticsOwner? semanticsOwner = pipelineOwner?.semanticsOwner;
-    if (semanticsOwner == null) {
+    if (renderView == null || semanticsOwner == null) {
       return <String, Object?>{'error': 'No PipelineOwner with SemanticsOwner found'};
     }
     final SemanticsNode? root = semanticsOwner.rootSemanticsNode;
@@ -89,19 +89,18 @@ class AccessibilityInspector {
 
     final nodeIssues = <int, List<Map<String, Object?>>>{};
 
-    if (renderView != null) {
-      final List<Violation> tapTargetViolations = MinimumTapTargetEvaluation(
-        size: minSize,
-      ).traverse(root, view: renderView.flutterView);
-      for (final violation in tapTargetViolations) {
-        nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
-          <String, Object?>{'rule': 'tapTargetSize', 'description': violation.reason},
-        );
-      }
+    final List<Violation> tapTargetViolations = MinimumTapTargetEvaluation(
+      size: minSize,
+    ).traverse(root, view: renderView.flutterView);
+    for (final violation in tapTargetViolations) {
+      nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
+        <String, Object?>{'rule': 'tapTargetSize', 'description': violation.reason},
+      );
     }
 
     final List<Violation> labeledTapTargetViolations = const LabeledTapTargetEvaluation().traverse(
       root,
+      view: renderView.flutterView,
     );
     for (final violation in labeledTapTargetViolations) {
       nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
@@ -111,6 +110,7 @@ class AccessibilityInspector {
 
     final List<Violation> unlabeledLeafViolations = const UnlabeledLeafNodeEvaluation().traverse(
       root,
+      view: renderView.flutterView,
     );
     for (final violation in unlabeledLeafViolations) {
       nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
