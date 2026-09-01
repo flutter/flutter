@@ -608,6 +608,43 @@ void main() {
     expect(copied.gestureSettings, data.gestureSettings);
     expect(copied.displayFeatures, data.displayFeatures);
     expect(copied.displayCornerRadii, data.displayCornerRadii);
+    expect(copied.persistentScrollbars, data.persistentScrollbars);
+  });
+
+  testWidgets('MediaQueryData.persistentScrollbars round trips', (WidgetTester tester) async {
+    const data = MediaQueryData();
+    expect(data.persistentScrollbars, isFalse);
+
+    // No embedder reports the preference yet, so fromView keeps the historical
+    // default unless platformData overrides it.
+    expect(MediaQueryData.fromView(tester.view).persistentScrollbars, isFalse);
+    expect(
+      MediaQueryData.fromView(
+        tester.view,
+        platformData: const MediaQueryData(persistentScrollbars: true),
+      ).persistentScrollbars,
+      isTrue,
+    );
+
+    final MediaQueryData copied = data.copyWith(persistentScrollbars: true);
+    expect(copied.persistentScrollbars, isTrue);
+    expect(data.copyWith().persistentScrollbars, isFalse);
+    expect(copied, isNot(data));
+    expect(copied.hashCode, isNot(data.hashCode));
+    expect(copied.toString(), contains('persistentScrollbars: true'));
+    expect(
+      copied
+          .applyTextStyleOverrides(
+            lineHeightScaleFactorOverride: null,
+            letterSpacingOverride: null,
+            wordSpacingOverride: null,
+            paragraphSpacingOverride: null,
+          )
+          .persistentScrollbars,
+      isTrue,
+    );
+    expect(copied.applyDisplayCornerRadii(null).persistentScrollbars, isTrue);
+    expect(copied.removePadding(removeTop: true).persistentScrollbars, isTrue);
   });
 
   testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
@@ -1940,6 +1977,14 @@ void main() {
         const _MediaQueryAspectCase(
           MediaQuery.maybeOnOffSwitchLabelsOf,
           MediaQueryData(onOffSwitchLabels: true),
+        ),
+        const _MediaQueryAspectCase(
+          MediaQuery.persistentScrollbarsOf,
+          MediaQueryData(persistentScrollbars: true),
+        ),
+        const _MediaQueryAspectCase(
+          MediaQuery.maybePersistentScrollbarsOf,
+          MediaQueryData(persistentScrollbars: true),
         ),
         const _MediaQueryAspectCase(
           MediaQuery.supportsAnnounceOf,
