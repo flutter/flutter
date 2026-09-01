@@ -383,7 +383,7 @@ targets:
     timeout: 60
     properties:
       os: Linux
-      device_type: none
+      device_type: "mokey"
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
@@ -393,7 +393,7 @@ targets:
           {"dependency": "gradle_dists", "version": "8.4-bin:8.13-rc-1-bin:8.14-bin:9.3.1-bin:9.3.1-all"}
         ]
       tags: >
-        ["devicelab", "android", "linux"]
+        ["devicelab", "android", "linux", "mokey"]
       task_name: analyzer_benchmark
 
   - name: Linux coverage
