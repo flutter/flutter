@@ -14,9 +14,7 @@ import("//flutter/shell/version/version.gni")
 import("//flutter/vulkan/config.gni")
 
 config("jni_headers_config") {
-  include_dirs = [
-    "//flutter/third_party/dart/third_party/pkg/native/pkgs/jni/third_party",
-  ]
+  include_dirs = [ "//flutter/shell/platform/android/jni/include" ]
 }
 
 source_set("flutter_embedder_native_src") {
