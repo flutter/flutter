@@ -22,49 +22,55 @@ class TargetDevice {
 
   /// Deserializes a [TargetDevice] from a JSON-serializable map.
   factory TargetDevice.fromJson(Map<String, Object?> json) {
-    if (json case {
-      'category': final String category,
-      'id': final String id,
-      'name': final String name,
-      'platformType': final String platformType,
-    }) {
-      return TargetDevice(
-        category: category,
-        id: id,
-        name: name,
-        platformType: platformType,
-        ephemeral: json['ephemeral'] as bool? ?? true,
-        isSupported: json['isSupported'] as bool? ?? true,
-        isSupportedForProject: json['isSupportedForProject'] as bool? ?? true,
-        sdkNameAndVersion: json['sdkNameAndVersion'] as String?,
-        targetPlatform: json['targetPlatform'] as String?,
-      );
-    }
     return TargetDevice(
-      category: json['category'] as String? ?? '',
-      id: json['id'] as String? ?? '',
-      name: json['name'] as String? ?? '',
-      platformType: json['platformType'] as String? ?? '',
-      ephemeral: json['ephemeral'] as bool? ?? true,
-      isSupported: json['isSupported'] as bool? ?? true,
-      isSupportedForProject: json['isSupportedForProject'] as bool? ?? true,
-      sdkNameAndVersion: json['sdkNameAndVersion'] as String?,
-      targetPlatform: json['targetPlatform'] as String?,
+      category: json[categoryKey] as String? ?? '',
+      id: json[idKey] as String? ?? '',
+      name: json[nameKey] as String? ?? '',
+      platformType: json[platformTypeKey] as String? ?? '',
+      ephemeral: json[ephemeralKey] as bool? ?? true,
+      isSupported: json[isSupportedKey] as bool? ?? true,
+      isSupportedForProject: json[isSupportedForProjectKey] as bool? ?? true,
+      sdkNameAndVersion: json[sdkNameAndVersionKey] as String?,
+      targetPlatform: json[targetPlatformKey] as String?,
     );
   }
 
+  /// Map key for [category].
+  static const String categoryKey = 'category';
+
+  /// Map key for [id].
+  static const String idKey = 'id';
+
+  /// Map key for [name].
+  static const String nameKey = 'name';
+
+  /// Map key for [platformType].
+  static const String platformTypeKey = 'platformType';
+
+  /// Map key for [ephemeral].
+  static const String ephemeralKey = 'ephemeral';
+
+  /// Map key for [isSupported].
+  static const String isSupportedKey = 'isSupported';
+
+  /// Map key for [isSupportedForProject].
+  static const String isSupportedForProjectKey = 'isSupportedForProject';
+
+  /// Map key for [sdkNameAndVersion].
+  static const String sdkNameAndVersionKey = 'sdkNameAndVersion';
+
+  /// Map key for [targetPlatform].
+  static const String targetPlatformKey = 'targetPlatform';
+
   /// Deserializes a list of [TargetDevice] objects from RPC response data.
   static List<TargetDevice> listFromJson(Object? rpcResult) {
-    if (rpcResult is! List<Object?>) {
-      return const <TargetDevice>[];
+    if (rpcResult case final List<Object?> list) {
+      return <TargetDevice>[
+        for (final item in list)
+          if (item case final Map<String, Object?> map) TargetDevice.fromJson(map),
+      ];
     }
-    return <TargetDevice>[
-      for (final Object? item in rpcResult)
-        if (item is Map<String, Object?>)
-          TargetDevice.fromJson(item)
-        else if (item is Map)
-          TargetDevice.fromJson(item.cast<String, Object?>()),
-    ];
+    return const <TargetDevice>[];
   }
 
   /// Device category (e.g. `'desktop'`, `'mobile'`, `'web'`).
@@ -96,15 +102,15 @@ class TargetDevice {
 
   /// Serializes the target device to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
-    'category': category,
-    'id': id,
-    'name': name,
-    'platformType': platformType,
-    'ephemeral': ephemeral,
-    'isSupported': isSupported,
-    'isSupportedForProject': isSupportedForProject,
-    'sdkNameAndVersion': ?sdkNameAndVersion,
-    'targetPlatform': ?targetPlatform,
+    categoryKey: category,
+    idKey: id,
+    nameKey: name,
+    platformTypeKey: platformType,
+    ephemeralKey: ephemeral,
+    isSupportedKey: isSupported,
+    isSupportedForProjectKey: isSupportedForProject,
+    sdkNameAndVersionKey: ?sdkNameAndVersion,
+    targetPlatformKey: ?targetPlatform,
   };
 
   @override
