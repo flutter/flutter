@@ -154,6 +154,7 @@ class Cache {
   Cache({
     @protected Directory? rootOverride,
     @protected List<ArtifactSet>? artifacts,
+    ArtifactUpdater? artifactUpdater,
     required Logger logger,
     required FileSystem fileSystem,
     required Platform platform,
@@ -167,7 +168,8 @@ class Cache {
        _stdio = stdio,
        _net = Net(logger: logger, platform: platform),
        _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-       _artifacts = artifacts ?? <ArtifactSet>[];
+       _artifacts = artifacts ?? <ArtifactSet>[],
+       _artifactUpdaterOverride = artifactUpdater;
 
   /// Create a [Cache] for testing.
   ///
@@ -177,6 +179,7 @@ class Cache {
   factory Cache.test({
     Directory? rootOverride,
     List<ArtifactSet>? artifacts,
+    ArtifactUpdater? artifactUpdater,
     Logger? logger,
     FileSystem? fileSystem,
     Platform? platform,
@@ -199,6 +202,7 @@ class Cache {
     return Cache(
       rootOverride: rootOverride ?? fileSystem.currentDirectory,
       artifacts: artifacts ?? <ArtifactSet>[],
+      artifactUpdater: artifactUpdater,
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
@@ -224,7 +228,8 @@ class Cache {
   final Net _net;
   final FileSystemUtils _fsUtils;
 
-  late final ArtifactUpdater _artifactUpdater = _createUpdater();
+  final ArtifactUpdater? _artifactUpdaterOverride;
+  late final ArtifactUpdater _artifactUpdater = _artifactUpdaterOverride ?? _createUpdater();
 
   @visibleForTesting
   @protected
@@ -798,21 +803,26 @@ class Cache {
     }
 
     // Download artifacts and display progress
-    final int total = artifactsToUpdate.length;
-    for (var i = 0; i < artifactsToUpdate.length; i++) {
-      final ArtifactSet artifact = artifactsToUpdate[i];
-      final int current = i + 1;
+    final List<ArtifactSet> downloadableArtifacts = artifactsToUpdate
+        .where((ArtifactSet artifact) => artifact.downloadCount > 0)
+        .toList();
+    final int total = downloadableArtifacts.length;
+    var current = 0;
+    for (final artifact in artifactsToUpdate) {
+      if (artifact.downloadCount > 0) {
+        current += 1;
 
-      // Set progress context for the artifact updater
-      _artifactUpdater.setProgressContext(
-        artifactIndex: current,
-        artifactTotal: total,
-        downloadTotal: artifact.downloadCount,
-      );
+        // Set progress context for the artifact updater
+        _artifactUpdater.setProgressContext(
+          artifactIndex: current,
+          artifactTotal: total,
+          downloadTotal: artifact.downloadCount,
+        );
 
-      // For artifacts containing multiple downloads, print the artifact name
-      if (artifact.downloadCount > 1) {
-        _logger.printStatus('[$current/$total] ${artifact.displayName}');
+        // For artifacts containing multiple downloads, print the artifact name
+        if (artifact.downloadCount > 1) {
+          _logger.printStatus('[$current/$total] ${artifact.displayName}');
+        }
       }
 
       try {
@@ -899,8 +909,8 @@ abstract class ArtifactSet {
 
   /// The number of individual downloads this artifact will perform.
   ///
-  /// Defaults to 1.
-  int get downloadCount => 1;
+  /// Defaults to 0.
+  int get downloadCount => 0;
 }
 
 /// An artifact set managed by the cache.
@@ -912,6 +922,9 @@ abstract class CachedArtifact extends ArtifactSet {
 
   @override
   final String name;
+
+  @override
+  int get downloadCount => 1;
 
   @override
   String get stampName => name;

@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
+import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
@@ -452,11 +453,46 @@ void main() {
     expect(artifact.displayName, 'fake');
   });
 
-  testWithoutContext('ArtifactSet.downloadCount defaults to 1', () {
+  testWithoutContext('ArtifactSet.downloadCount defaults to 0', () {
+    final artifact = _FakeArtifactSet();
+
+    expect(artifact.downloadCount, 0);
+  });
+
+  testWithoutContext('CachedArtifact.downloadCount defaults to 1', () {
     final cache = Cache.test(processManager: FakeProcessManager.any());
     final artifact = FakeSimpleArtifact(cache);
 
     expect(artifact.downloadCount, 1);
+  });
+
+  testUsingContext('Cache.updateAll calculates progress only for downloading artifacts', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final artifactUpdater = _FakeProgressRecordingArtifactUpdater();
+    final artifact1 = FakeSecondaryCachedArtifact()
+      ..upToDate = false
+      ..artifactName = 'downloading_1';
+    final artifact2 = _FakeArtifactSet(name: 'non_downloading')..upToDate = false;
+    final artifact3 = FakeSecondaryCachedArtifact()
+      ..upToDate = false
+      ..artifactName = 'downloading_2';
+
+    final cacheWithArtifacts = Cache.test(
+      fileSystem: fileSystem,
+      artifacts: <ArtifactSet>[artifact1, artifact2, artifact3],
+      artifactUpdater: artifactUpdater,
+      processManager: FakeProcessManager.any(),
+    );
+
+    await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+
+    expect(artifact1.didUpdate, true);
+    expect(artifact2.didUpdate, true);
+    expect(artifact3.didUpdate, true);
+    expect(artifactUpdater.progressContexts, <ProgressContext>[
+      const ProgressContext(artifactIndex: 1, artifactTotal: 2, downloadTotal: 1),
+      const ProgressContext(artifactIndex: 2, artifactTotal: 2, downloadTotal: 1),
+    ]);
   });
 
   testWithoutContext(
@@ -1841,9 +1877,10 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   bool upToDate = false;
   bool didUpdate = false;
   Exception? updateException;
+  String artifactName = 'fake';
 
   @override
-  String get name => 'fake';
+  String get name => artifactName;
 
   @override
   Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
@@ -2095,4 +2132,83 @@ class FakeArtifactUpdaterDownload extends ArtifactUpdater {
   void addFiles(List<File> files) {
     downloadedFiles.addAll(files);
   }
+}
+
+class _FakeArtifactSet extends ArtifactSet {
+  _FakeArtifactSet({this.name = 'fake_set'}) : super(DevelopmentArtifact.universal);
+
+  @override
+  final String name;
+
+  bool didUpdate = false;
+  bool upToDate = false;
+
+  @override
+  Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
+
+  @override
+  Future<void> update(
+    ArtifactUpdater artifactUpdater,
+    Logger logger,
+    FileSystem fileSystem,
+    OperatingSystemUtils operatingSystemUtils, {
+    bool offline = false,
+  }) async {
+    didUpdate = true;
+  }
+}
+
+@immutable
+class ProgressContext {
+  const ProgressContext({
+    required this.artifactIndex,
+    required this.artifactTotal,
+    required this.downloadTotal,
+    this.downloadIndex = 0,
+  });
+
+  final int artifactIndex;
+  final int artifactTotal;
+  final int downloadTotal;
+  final int downloadIndex;
+
+  @override
+  bool operator ==(Object other) {
+    return other is ProgressContext &&
+        other.artifactIndex == artifactIndex &&
+        other.artifactTotal == artifactTotal &&
+        other.downloadTotal == downloadTotal &&
+        other.downloadIndex == downloadIndex;
+  }
+
+  @override
+  int get hashCode => Object.hash(artifactIndex, artifactTotal, downloadTotal, downloadIndex);
+
+  @override
+  String toString() =>
+      'ProgressContext(artifactIndex: $artifactIndex, artifactTotal: $artifactTotal, downloadTotal: $downloadTotal, downloadIndex: $downloadIndex)';
+}
+
+class _FakeProgressRecordingArtifactUpdater extends Fake implements ArtifactUpdater {
+  final progressContexts = <ProgressContext>[];
+
+  @override
+  void setProgressContext({
+    required int artifactIndex,
+    required int artifactTotal,
+    required int downloadTotal,
+    int downloadIndex = 0,
+  }) {
+    progressContexts.add(
+      ProgressContext(
+        artifactIndex: artifactIndex,
+        artifactTotal: artifactTotal,
+        downloadTotal: downloadTotal,
+        downloadIndex: downloadIndex,
+      ),
+    );
+  }
+
+  @override
+  void resetProgressContext() {}
 }
