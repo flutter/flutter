@@ -32,12 +32,10 @@ sealed class ParsedFlutterTemplateType {
   ///
   /// If no match was found in standard templates, it queries the
   /// [ExtensionTemplateManager] to check if it matches a custom template.
-  /// If no match is found, `null` is returned (or an [ExtensionProjectTemplateType]
-  /// if [fallbackToCustom] is true).
+  /// If no match is found, `null` is returned.
   static ParsedFlutterTemplateType? fromCliName(
     String cliName, {
     required ExtensionTemplateManager? extensionTemplateManager,
-    bool fallbackToCustom = false,
   }) {
     for (final ParsedFlutterTemplateType type in _values) {
       if (cliName == type.cliName) {
@@ -51,9 +49,6 @@ sealed class ParsedFlutterTemplateType {
           return ExtensionProjectTemplateType(cliName: cliName);
         }
       }
-    }
-    if (fallbackToCustom) {
-      return ExtensionProjectTemplateType(cliName: cliName);
     }
     return null;
   }

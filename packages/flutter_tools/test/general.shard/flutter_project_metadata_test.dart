@@ -324,26 +324,10 @@ project_type: custom-linux-app
     },
   );
 
-  testWithoutContext('ParsedFlutterTemplateType.fromCliName respects fallbackToCustom', () {
+  testWithoutContext('ParsedFlutterTemplateType.fromCliName returns null when not found', () {
     expect(
       ParsedFlutterTemplateType.fromCliName('custom-template', extensionTemplateManager: null),
       isNull,
-    );
-    expect(
-      ParsedFlutterTemplateType.fromCliName(
-        'custom-template',
-        extensionTemplateManager: null,
-        fallbackToCustom: true,
-      ),
-      isA<ExtensionProjectTemplateType>(),
-    );
-    expect(
-      ParsedFlutterTemplateType.fromCliName(
-        'custom-template',
-        extensionTemplateManager: null,
-        fallbackToCustom: true,
-      )?.cliName,
-      'custom-template',
     );
   });
 }

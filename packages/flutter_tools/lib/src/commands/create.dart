@@ -696,18 +696,12 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         final templateSources = <Directory>[];
         final imageSources = <Directory>[];
         for (final String depName in customTemplate.templateDependencies) {
-          ProjectTemplate? depTemplate;
-          for (final ProjectTemplate cached in manager.cachedTemplates) {
-            if (cached.name == depName) {
-              depTemplate = cached;
-              break;
-            }
-          }
-          if (depTemplate != null) {
-            templateSources.add(manager.resolveTemplateDirectory(depTemplate.templatePath));
-          } else {
-            // Fallback to internal templates.
-            templateSources.add(templatePathProvider.directoryInPackage(depName, globals.fs));
+          final Directory internalDir = templatePathProvider.directoryInPackage(
+            depName,
+            globals.fs,
+          );
+          if (internalDir.existsSync()) {
+            templateSources.add(internalDir);
             final Directory imageDir = await templatePathProvider.imageDirectory(
               depName,
               globals.fs,
@@ -715,6 +709,27 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
             );
             if (imageDir.existsSync()) {
               imageSources.add(imageDir);
+            }
+          } else {
+            ProjectTemplate? depTemplate;
+            for (final ProjectTemplate cached in manager.cachedTemplates) {
+              if (cached.name == depName) {
+                depTemplate = cached;
+                break;
+              }
+            }
+            if (depTemplate != null) {
+              final Directory depDir = manager.resolveTemplateDirectory(depTemplate.templatePath);
+              if (!depDir.existsSync()) {
+                throwToolExit(
+                  'Custom template dependency "$depName" source directory does not exist: ${depDir.path}',
+                );
+              }
+              templateSources.add(depDir);
+            } else {
+              throwToolExit(
+                'Template dependency "$depName" not found in internal templates or active extensions.',
+              );
             }
           }
         }
