@@ -6,7 +6,7 @@
 
 #if defined(__linux__) || defined(__ANDROID__)
 #include <sys/prctl.h>
-#else
+#elif defined(__APPLE__)
 #include <pthread.h>
 #endif
 
