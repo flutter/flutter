@@ -16,7 +16,7 @@ abstract base class ProjectTemplate {
   /// Whether this template is hidden from help displays.
   bool get hidden;
 
-  /// Dependent template names.
+  /// Template names (e.g. 'app' or 'plugin') whose sources this template depends on.
   Set<String> get templateDependencies;
 
   /// The template source files, relative to [templatePath].

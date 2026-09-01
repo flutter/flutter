@@ -37,7 +37,6 @@ import 'devtools_launcher.dart';
 import 'doctor.dart';
 import 'emulator.dart';
 import 'features.dart';
-
 import 'flutter_application_package.dart';
 import 'flutter_cache.dart';
 import 'flutter_device_manager.dart';
