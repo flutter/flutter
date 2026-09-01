@@ -1107,6 +1107,89 @@ void main() {
         expect(fileSystem.file('android/AndroidManifest.xml').existsSync(), false);
       },
     );
+
+    testWithoutContext(
+      'AndroidDevice.startApp does not pass intent extras (--ez, --es) in release mode even when flags, route, and startup tracing are provided',
+      () async {
+        final device = AndroidDevice(
+          '1234',
+          modelID: 'TestModel',
+          fileSystem: fileSystem,
+          processManager: processManager,
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          androidSdk: androidSdk,
+        );
+        final File apkFile = fileSystem.file('app-release.apk')..createSync();
+        final apk = AndroidApk(
+          id: 'FlutterApp',
+          applicationPackage: apkFile,
+          launchActivity: 'FlutterActivity',
+          versionCode: 1,
+        );
+
+        processManager.addCommand(kAdbVersionCommand);
+        processManager.addCommand(kStartServer);
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+            stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-release.apk'],
+          ),
+        );
+        processManager.addCommand(kShaCommand);
+        processManager.addCommand(
+          FakeCommand(
+            command: const <String>[
+              'adb',
+              '-s',
+              '1234',
+              'shell',
+              'am',
+              'start',
+              '-a',
+              'android.intent.action.MAIN',
+              '-c',
+              'android.intent.category.LAUNCHER',
+              '-f',
+              '0x20000000',
+              'FlutterActivity',
+            ],
+            onRun: (List<String> command) {
+              expect(command, isNot(anyOf(contains('--ez'), contains('--es'))));
+            },
+          ),
+        );
+
+        final LaunchResult launchResult = await device.startApp(
+          apk,
+          prebuiltApplication: true,
+          route: '/custom/route',
+          debuggingOptions: DebuggingOptions.disabled(
+            BuildInfo.release,
+            enableImpeller: ImpellerStatus.enabled,
+            enableDartProfiling: false,
+            traceAllowlist: 'foo,bar',
+            enableHcpp: true,
+            enableFlutterGpu: true,
+            enableVulkanValidation: true,
+          ),
+          platformArgs: <String, dynamic>{'trace-startup': true},
+        );
+
+        expect(launchResult.started, true);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
   });
 }
 

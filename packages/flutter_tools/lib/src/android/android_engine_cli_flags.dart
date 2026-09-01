@@ -6,7 +6,7 @@
 // defined cross-language; see https://github.com/flutter/flutter/pull/190236.
 /// The command line flags that are passed directly to the Android engine.
 abstract final class AndroidEngineCliFlags {
-  // Flags that represent both the flutter CLI option key and the Android engine shell argument.
+  // Flags that represent both the Flutter CLI option key and the Android engine shell argument.
   static const String traceStartup = 'trace-startup';
   static const String profileStartup = 'profile-startup';
   static const String route = 'route';
@@ -31,11 +31,11 @@ abstract final class AndroidEngineCliFlags {
   static const String dartFlags = 'dart-flags';
   static const String useTestFonts = 'use-test-fonts';
 
-  // Flags that represent only the flutter CLI option key. These are mapped to a different Android engine shell argument.
+  // Flags that represent only the Flutter CLI option key. These are mapped to a different Android engine shell argument.
   static const String enableHcpp = 'enable-hcpp';
   static const String verboseSystemLogs = 'verbose-system-logs';
 
-  // Flags that represent only the Android engine shell argument. These are mapped from a different flutter CLI option key.
+  // Flags that represent only the Android engine shell argument. These are mapped from a different Flutter CLI option key.
   static const String enableHcppAndSurfaceControl = 'enable-hcpp-and-surface-control';
   static const String verboseLogging = 'verbose-logging';
 
