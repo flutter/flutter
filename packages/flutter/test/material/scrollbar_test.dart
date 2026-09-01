@@ -1862,4 +1862,111 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     );
     expect(tester.getSize(find.byType(Scrollbar)), Size.zero);
   });
+
+  group('MediaQueryData.persistentScrollbars', () {
+    Widget buildFrame(
+      ScrollController controller, {
+      required bool persistentScrollbars,
+      ScrollbarThemeData? scrollbarTheme,
+      bool? thumbVisibility,
+    }) {
+      return MaterialApp(
+        theme: ThemeData(
+          useMaterial3: false,
+          platform: TargetPlatform.macOS,
+          scrollbarTheme: scrollbarTheme,
+        ),
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: Builder(
+            builder: (BuildContext context) {
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(persistentScrollbars: persistentScrollbars),
+                child: Scrollbar(
+                  controller: controller,
+                  thumbVisibility: thumbVisibility,
+                  child: SingleChildScrollView(
+                    controller: controller,
+                    child: const SizedBox(width: 4000.0, height: 4000.0),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    PaintPattern paintsVisibleThumb() => paints
+      ..rrect(
+        rrect: RRect.fromRectAndRadius(
+          getStartingThumbRect(isAndroid: false),
+          _kDefaultThumbRadius,
+        ),
+        color: _kDefaultIdleThumbColor,
+      );
+
+    testWidgets('is used when no thumb visibility is set', (WidgetTester tester) async {
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(buildFrame(scrollController, persistentScrollbars: true));
+      await tester.pumpAndSettle();
+      expect(find.byType(Scrollbar), paintsVisibleThumb());
+
+      await tester.pumpWidget(buildFrame(scrollController, persistentScrollbars: false));
+      await tester.pumpAndSettle();
+      expect(find.byType(Scrollbar), isNot(paintsVisibleThumb()));
+    });
+
+    testWidgets('is overridden by a false ScrollbarThemeData.thumbVisibility', (
+      WidgetTester tester,
+    ) async {
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        buildFrame(
+          scrollController,
+          persistentScrollbars: true,
+          scrollbarTheme: ScrollbarThemeData(thumbVisibility: WidgetStateProperty.all(false)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(Scrollbar), isNot(paintsVisibleThumb()));
+    });
+
+    testWidgets('is not consulted when ScrollbarThemeData.thumbVisibility is true', (
+      WidgetTester tester,
+    ) async {
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        buildFrame(
+          scrollController,
+          persistentScrollbars: false,
+          scrollbarTheme: ScrollbarThemeData(thumbVisibility: WidgetStateProperty.all(true)),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(Scrollbar), paintsVisibleThumb());
+    });
+
+    testWidgets('is overridden by Scrollbar.thumbVisibility', (WidgetTester tester) async {
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        buildFrame(
+          scrollController,
+          persistentScrollbars: true,
+          scrollbarTheme: ScrollbarThemeData(thumbVisibility: WidgetStateProperty.all(true)),
+          thumbVisibility: false,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(Scrollbar), isNot(paintsVisibleThumb()));
+    });
+  });
 }

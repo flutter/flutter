@@ -3801,4 +3801,91 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       expect(scrollController.offset, greaterThan(0.0));
     },
   );
+
+  group('MediaQueryData.persistentScrollbars', () {
+    const trackRect = Rect.fromLTRB(794.0, 0.0, 800.0, 600.0);
+    const thumbRect = Rect.fromLTRB(794.0, 0.0, 800.0, 360.0);
+    const visibleThumbColor = Color(0x66BCBCBC);
+
+    Widget buildFrame(
+      ScrollController controller, {
+      required bool persistentScrollbars,
+      bool? thumbVisibility,
+    }) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(persistentScrollbars: persistentScrollbars),
+          child: RawScrollbar(
+            controller: controller,
+            thumbVisibility: thumbVisibility,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(width: 1000.0, height: 1000.0),
+            ),
+          ),
+        ),
+      );
+    }
+
+    PaintPattern paintsVisibleThumb() => paints
+      ..rect(rect: trackRect)
+      ..rect(rect: thumbRect, color: visibleThumbColor);
+
+    testWidgets('is used when RawScrollbar.thumbVisibility is null', (WidgetTester tester) async {
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(buildFrame(scrollController, persistentScrollbars: true));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RawScrollbar), paintsVisibleThumb());
+    });
+
+    testWidgets('leaves the fade out behavior alone when false', (WidgetTester tester) async {
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(buildFrame(scrollController, persistentScrollbars: false));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(RawScrollbar), isNot(paintsVisibleThumb()));
+    });
+
+    testWidgets('is overridden by RawScrollbar.thumbVisibility', (WidgetTester tester) async {
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        buildFrame(scrollController, persistentScrollbars: true, thumbVisibility: false),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(RawScrollbar), isNot(paintsVisibleThumb()));
+
+      await tester.pumpWidget(
+        buildFrame(scrollController, persistentScrollbars: false, thumbVisibility: true),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(RawScrollbar), paintsVisibleThumb());
+    });
+
+    testWidgets('is re-read when it changes at runtime', (WidgetTester tester) async {
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(buildFrame(scrollController, persistentScrollbars: false));
+      await tester.pumpAndSettle();
+      expect(find.byType(RawScrollbar), isNot(paintsVisibleThumb()));
+
+      // The preference, not the widget, changes. The scrollbar must not cache
+      // the value it saw when it was first built.
+      await tester.pumpWidget(buildFrame(scrollController, persistentScrollbars: true));
+      await tester.pumpAndSettle();
+      expect(find.byType(RawScrollbar), paintsVisibleThumb());
+
+      await tester.pumpWidget(buildFrame(scrollController, persistentScrollbars: false));
+      await tester.pumpAndSettle();
+      expect(find.byType(RawScrollbar), isNot(paintsVisibleThumb()));
+    });
+  });
 }
