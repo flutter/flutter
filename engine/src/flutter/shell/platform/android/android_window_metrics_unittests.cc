@@ -92,7 +92,9 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
               (override));
   MOCK_METHOD(bool,
               HandlePlatformMessageResponse,
-              (int32_t response_id, const std::vector<uint8_t>& data),
+              (int32_t response_id,
+               const std::vector<uint8_t>& data,
+               bool has_data),
               (override));
   MOCK_METHOD(bool,
               SetApplicationLocale,
@@ -334,16 +336,8 @@ TEST(InMemoryWindowMetricsProviderTest, ResultOverrides) {
 // 3. DefaultWindowMetricsProvider Tests
 // ---------------------------------------------------------------------------
 
-TEST(DefaultWindowMetricsProviderTest, InvokesJvmMethods) {
-  auto mock_invoker = std::make_shared<MockJvmInvokerForMetrics>();
-  DefaultWindowMetricsProvider provider(mock_invoker);
-
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("onViewportMetrics", "(IDDD)V", _))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("onDisplayMetrics", "(JDDDF)V", _))
-      .WillOnce(Return(true));
+TEST(DefaultWindowMetricsProviderTest, RecordsAndCachesMetrics) {
+  DefaultWindowMetricsProvider provider;
 
   AndroidViewportMetrics viewport;
   viewport.view_id = 0;

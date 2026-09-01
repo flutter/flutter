@@ -280,6 +280,26 @@ TEST(AndroidSemanticsTest, SemanticsNodePackingAndBinaryVerification) {
       .flags2 = &flags,
       .heading_level = 1,
       .identifier = "submit_btn_42",
+      .role = kFlutterSemanticsRoleNone,
+      .link_url = nullptr,
+      .locale = nullptr,
+      .min_value = nullptr,
+      .max_value = nullptr,
+      .max_value_length = 0,
+      .current_value_length = static_cast<int32_t>(std::strlen("Active")),
+      .traversal_parent = -1,
+      .hit_test_transform =
+          {
+              .scaleX = 1.0,
+              .skewX = 0.0,
+              .transX = 15.0,
+              .skewY = 0.0,
+              .scaleY = 1.0,
+              .transY = 25.0,
+              .pers0 = 0.0,
+              .pers1 = 0.0,
+              .pers2 = 1.0,
+          },
   };
 
   const FlutterSemanticsNode2* nodes[] = {&node};

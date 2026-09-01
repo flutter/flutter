@@ -374,6 +374,43 @@ typedef enum {
   kFlutterTextDirectionLTR = 2,
 } FlutterTextDirection;
 
+/// Valid values for accessibility role of SemanticsNode.
+typedef enum {
+  kFlutterSemanticsRoleNone = 0,
+  kFlutterSemanticsRoleTab = 1,
+  kFlutterSemanticsRoleTabBar = 2,
+  kFlutterSemanticsRoleTabPanel = 3,
+  kFlutterSemanticsRoleDialog = 4,
+  kFlutterSemanticsRoleAlertDialog = 5,
+  kFlutterSemanticsRoleTable = 6,
+  kFlutterSemanticsRoleCell = 7,
+  kFlutterSemanticsRoleRow = 8,
+  kFlutterSemanticsRoleColumnHeader = 9,
+  kFlutterSemanticsRoleDragHandle = 10,
+  kFlutterSemanticsRoleSpinButton = 11,
+  kFlutterSemanticsRoleComboBox = 12,
+  kFlutterSemanticsRoleMenuBar = 13,
+  kFlutterSemanticsRoleMenu = 14,
+  kFlutterSemanticsRoleMenuItem = 15,
+  kFlutterSemanticsRoleMenuItemCheckbox = 16,
+  kFlutterSemanticsRoleMenuItemRadio = 17,
+  kFlutterSemanticsRoleList = 18,
+  kFlutterSemanticsRoleListItem = 19,
+  kFlutterSemanticsRoleForm = 20,
+  kFlutterSemanticsRoleTooltip = 21,
+  kFlutterSemanticsRoleLoadingSpinner = 22,
+  kFlutterSemanticsRoleProgressBar = 23,
+  kFlutterSemanticsRoleHotKey = 24,
+  kFlutterSemanticsRoleRadioGroup = 25,
+  kFlutterSemanticsRoleStatus = 26,
+  kFlutterSemanticsRoleAlert = 27,
+  kFlutterSemanticsRoleComplementary = 28,
+  kFlutterSemanticsRoleContentInfo = 29,
+  kFlutterSemanticsRoleMain = 30,
+  kFlutterSemanticsRoleNavigation = 31,
+  kFlutterSemanticsRoleRegion = 32,
+} FlutterSemanticsRole;
+
 /// Valid values for priority of Thread.
 typedef enum {
   /// Suitable for threads that shouldn't disrupt high priority work.
@@ -1928,6 +1965,24 @@ typedef struct {
   /// This is usually used for UI testing with tools that work by querying the
   /// native accessibility, like UI Automator, XCUITest, or Appium.
   const char* identifier;
+  /// The accessibility role for this node.
+  FlutterSemanticsRole role;
+  /// The link URL for this node.
+  const char* link_url;
+  /// The BCP 47 locale string for this node.
+  const char* locale;
+  /// The minimum string value.
+  const char* min_value;
+  /// The maximum string value.
+  const char* max_value;
+  /// Maximum text length.
+  int32_t max_value_length;
+  /// Current text length.
+  int32_t current_value_length;
+  /// Traversal parent node ID.
+  int32_t traversal_parent;
+  /// The hit test transform for this node.
+  FlutterTransformation hit_test_transform;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a
@@ -2699,9 +2754,50 @@ typedef void (*FlutterLogMessageCallback)(const char* /* tag */,
                                           const char* /* message */,
                                           void* /* user_data */);
 
+/// Callback to get the scaled font size for nonlinear font scaling on platforms
+/// that support it (e.g. Android API 34+).
+///
+/// Parameters:
+/// * unscaled_font_size: Font size in SP/logical pixels before scaling.
+/// * configuration_id: Platform configuration ID corresponding to the window
+/// metrics.
+/// * user_data: User data baton passed in FlutterProjectArgs.
+///
+/// Returns the scaled font size in pixels, or -1 if the configuration_id is
+/// invalid.
+typedef double (*FlutterGetScaledFontSizeCallback)(
+    double /* unscaled_font_size */,
+    int /* configuration_id */,
+    void* /* user_data */);
+
 /// An opaque object that describes the AOT data that can be used to launch a
 /// FlutterEngine instance in AOT mode.
 typedef struct _FlutterEngineAOTData* FlutterEngineAOTData;
+
+/// Callback to resolve an asset given its name.
+/// Returns true if the asset was found and populated, false otherwise.
+/// If true, `buffer_out`, `size_out`, and `allocation_baton_out` must be
+/// populated.
+typedef bool (*FlutterAssetResolverCallback)(const char* /* asset_name */,
+                                             const uint8_t** /* buffer_out */,
+                                             size_t* /* size_out */,
+                                             void** /* allocation_baton_out */,
+                                             void* /* user_data */);
+
+/// Callback to free an asset buffer returned by `FlutterAssetResolverCallback`.
+typedef void (*FlutterAssetResolverFreeCallback)(void* /* allocation_baton */,
+                                                 void* /* user_data */);
+
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterCustomAssetResolver).
+  size_t struct_size;
+  /// User data passed to the callbacks.
+  void* user_data;
+  /// Callback to resolve an asset mapping.
+  FlutterAssetResolverCallback get_asset;
+  /// Callback to free an asset mapping.
+  FlutterAssetResolverFreeCallback free_asset;
+} FlutterCustomAssetResolver;
 
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterProjectArgs).
@@ -3046,6 +3142,16 @@ typedef struct {
   ///
   /// This field is optional.
   FlutterRasterThreadContextCallback raster_thread_context_clear_current;
+
+  /// The custom asset resolver configuration. This allows the embedder to
+  /// provide assets from custom sources (such as Android APK assets or virtual
+  /// filesystems). This field is optional.
+  const FlutterCustomAssetResolver* custom_asset_resolver;
+
+  /// Callback to compute the scaled font size for nonlinear font scaling on
+  /// platforms that support it (e.g. Android API 34+).
+  /// This field is optional.
+  FlutterGetScaledFontSizeCallback get_scaled_font_size_callback;
 } FlutterProjectArgs;
 
 typedef struct {
@@ -4102,6 +4208,20 @@ FlutterEngineResult FlutterEngineRegisterImageDecoder(
     void* user_data,
     int32_t priority);
 
+//------------------------------------------------------------------------------
+/// @brief      Updates the custom asset resolver on a running engine.
+///
+/// @param[in]  engine    A running engine handle.
+/// @param[in]  resolver  The custom asset resolver configuration.
+///
+/// @return     `kSuccess` if the asset resolver was updated;
+///             `kInvalidArguments` if the engine handle or resolver is null.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineUpdateAssetResolver(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterCustomAssetResolver* resolver);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -4271,6 +4391,9 @@ typedef FlutterEngineResult (*FlutterEngineRegisterImageDecoderFnPtr)(
     FlutterImageDecoderCallback callback,
     void* user_data,
     int32_t priority);
+typedef FlutterEngineResult (*FlutterEngineUpdateAssetResolverFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterCustomAssetResolver* resolver);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -4331,6 +4454,7 @@ typedef struct {
   FlutterEngineFreeScreenshotFnPtr FreeScreenshot;
   FlutterEngineGetCallbackInformationFnPtr GetCallbackInformation;
   FlutterEngineRegisterImageDecoderFnPtr RegisterImageDecoder;
+  FlutterEngineUpdateAssetResolverFnPtr UpdateAssetResolver;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

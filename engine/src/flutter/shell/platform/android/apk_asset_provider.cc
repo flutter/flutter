@@ -127,10 +127,24 @@ std::unique_ptr<fml::Mapping> InMemoryAPKAssetProviderImpl::GetAsMapping(
   TRACE_EVENT1("flutter", "InMemoryAPKAssetProviderImpl::GetAsMapping", "name",
                asset_name.c_str());
   auto it = assets_.find(asset_name);
-  if (it == assets_.end()) {
-    return nullptr;
+  if (it != assets_.end()) {
+    return std::make_unique<fml::DataMapping>(it->second);
   }
-  return std::make_unique<fml::DataMapping>(it->second);
+  if (!directory_.empty()) {
+    std::string prefixed = directory_ + "/" + asset_name;
+    it = assets_.find(prefixed);
+    if (it != assets_.end()) {
+      return std::make_unique<fml::DataMapping>(it->second);
+    }
+    if (asset_name.rfind(directory_ + "/", 0) == 0) {
+      std::string stripped = asset_name.substr(directory_.length() + 1);
+      it = assets_.find(stripped);
+      if (it != assets_.end()) {
+        return std::make_unique<fml::DataMapping>(it->second);
+      }
+    }
+  }
+  return nullptr;
 }
 
 std::vector<std::unique_ptr<fml::Mapping>>
@@ -185,13 +199,16 @@ class APKAssetProviderImpl : public APKAssetProviderInternal {
     if (!asset_manager_) {
       return nullptr;
     }
-    std::stringstream ss;
-    if (!directory_.empty()) {
-      ss << directory_ << "/";
+    std::string candidate_path = asset_name;
+    if (!directory_.empty() && asset_name.rfind(directory_ + "/", 0) != 0) {
+      candidate_path = directory_ + "/" + asset_name;
     }
-    ss << asset_name;
-    AAsset* asset = AAssetManager_open(asset_manager_, ss.str().c_str(),
+    AAsset* asset = AAssetManager_open(asset_manager_, candidate_path.c_str(),
                                        AASSET_MODE_BUFFER);
+    if (!asset && candidate_path != asset_name) {
+      asset = AAssetManager_open(asset_manager_, asset_name.c_str(),
+                                 AASSET_MODE_BUFFER);
+    }
     if (!asset) {
       return nullptr;
     }

@@ -43,21 +43,24 @@ std::shared_ptr<LegacyJniDelegate> JniRouter::GetLegacyDelegate() const {
 
 bool JniRouter::RoutePlatformMessage(const std::string& channel,
                                      const std::vector<uint8_t>& message,
-                                     int32_t response_id) {
+                                     int32_t response_id,
+                                     bool has_data) {
   TRACE_EVENT1("flutter", "JniRouter::RoutePlatformMessage", "channel",
                channel.c_str());
   if (embedder_delegate_) {
     return embedder_delegate_->HandlePlatformMessage(channel, message,
-                                                     response_id);
+                                                     response_id, has_data);
   }
   return false;
 }
 
 bool JniRouter::RoutePlatformMessageResponse(int32_t response_id,
-                                             const std::vector<uint8_t>& data) {
+                                             const std::vector<uint8_t>& data,
+                                             bool has_data) {
   TRACE_EVENT0("flutter", "JniRouter::RoutePlatformMessageResponse");
   if (embedder_delegate_) {
-    return embedder_delegate_->HandlePlatformMessageResponse(response_id, data);
+    return embedder_delegate_->HandlePlatformMessageResponse(response_id, data,
+                                                             has_data);
   }
   return false;
 }
@@ -227,6 +230,16 @@ bool JniRouter::RouteAssetManagerChanged() {
     return embedder_delegate_->OnAssetManagerChanged();
   }
   return false;
+}
+
+double JniRouter::RouteGetScaledFontSize(double unscaled_font_size,
+                                         int configuration_id) const {
+  TRACE_EVENT0("flutter", "JniRouter::RouteGetScaledFontSize");
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetScaledFontSize(unscaled_font_size,
+                                                 configuration_id);
+  }
+  return unscaled_font_size;
 }
 
 std::optional<DartCallbackInfo> JniRouter::RouteLookupCallbackInformation(

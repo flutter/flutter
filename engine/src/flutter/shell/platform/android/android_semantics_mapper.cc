@@ -291,20 +291,22 @@ EncodedSemanticsUpdate AndroidSemanticsMapper::MapNodes(
     std::memcpy(&buffer_int32[position], &flags, sizeof(int64_t));
     position += 2;
     buffer_int32[position++] = node->actions;
-    buffer_int32[position++] = 0;  // maxValueLength
+    buffer_int32[position++] = node->max_value_length;
     buffer_int32[position++] =
-        node->value ? static_cast<int32_t>(std::strlen(node->value))
-                    : 0;  // currentValueLength
+        node->current_value_length >= 0
+            ? node->current_value_length
+            : (node->value ? static_cast<int32_t>(std::strlen(node->value))
+                           : -1);
     buffer_int32[position++] = node->text_selection_base;
     buffer_int32[position++] = node->text_selection_extent;
     buffer_int32[position++] = static_cast<int32_t>(node->platform_view_id);
     buffer_int32[position++] = node->scroll_child_count;
     buffer_int32[position++] = node->scroll_index;
-    buffer_int32[position++] = -1;  // traversalParent
+    buffer_int32[position++] = node->traversal_parent;
     buffer_float32[position++] = static_cast<float>(node->scroll_position);
     buffer_float32[position++] = static_cast<float>(node->scroll_extent_max);
     buffer_float32[position++] = static_cast<float>(node->scroll_extent_min);
-    buffer_int32[position++] = 0;  // role
+    buffer_int32[position++] = static_cast<int32_t>(node->role);
 
     PutStringIntoBuffer(node->identifier, buffer_int32, &position,
                         result.strings);
@@ -337,14 +339,13 @@ EncodedSemanticsUpdate AndroidSemanticsMapper::MapNodes(
                                   &position, result.string_attribute_args);
 
     PutStringIntoBuffer(node->tooltip, buffer_int32, &position, result.strings);
-    PutStringIntoBuffer(nullptr, buffer_int32, &position,
-                        result.strings);  // linkUrl
-    PutStringIntoBuffer(nullptr, buffer_int32, &position,
-                        result.strings);  // locale
-    PutStringIntoBuffer(nullptr, buffer_int32, &position,
-                        result.strings);  // minValue
-    PutStringIntoBuffer(nullptr, buffer_int32, &position,
-                        result.strings);  // maxValue
+    PutStringIntoBuffer(node->link_url, buffer_int32, &position,
+                        result.strings);
+    PutStringIntoBuffer(node->locale, buffer_int32, &position, result.strings);
+    PutStringIntoBuffer(node->min_value, buffer_int32, &position,
+                        result.strings);
+    PutStringIntoBuffer(node->max_value, buffer_int32, &position,
+                        result.strings);
 
     buffer_int32[position++] = node->heading_level;
     buffer_int32[position++] = static_cast<int32_t>(node->text_direction);
@@ -355,7 +356,7 @@ EncodedSemanticsUpdate AndroidSemanticsMapper::MapNodes(
 
     EncodeTransformation(node->transform, &buffer_float32[position]);
     position += 16;
-    EncodeTransformation(node->transform, &buffer_float32[position]);
+    EncodeTransformation(node->hit_test_transform, &buffer_float32[position]);
     position += 16;
 
     if (node->children_in_traversal_order && node->child_count > 0) {

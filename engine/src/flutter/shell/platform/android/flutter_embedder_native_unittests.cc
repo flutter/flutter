@@ -35,6 +35,32 @@ using ::testing::StrictMock;
 
 class MockJvmInvoker : public JvmInvoker {
  public:
+  MockJvmInvoker() {
+    ON_CALL(*this, EnsureAttachedToThread())
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this, InvokeVoidMethod(::testing::_, ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this,
+            InvokeBooleanMethod(::testing::_, ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this, HandlePlatformMessage(::testing::_, ::testing::_,
+                                         ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this, HandlePlatformMessageResponse(::testing::_, ::testing::_,
+                                                 ::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this, UpdateSemantics(::testing::_, ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this, UpdateCustomAccessibilityActions(::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this, SetSemanticsTreeEnabled(::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this, SetApplicationLocale(::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this, PostJvmTask(::testing::_))
+        .WillByDefault(::testing::Return(true));
+  }
+
   MOCK_METHOD(bool, EnsureAttachedToThread, (), (override));
   MOCK_METHOD(void, DetachFromThread, (), (override));
   MOCK_METHOD(bool, HasPendingException, (), (const, override));
@@ -83,6 +109,41 @@ class MockJvmInvoker : public JvmInvoker {
               (override));
 
   MOCK_METHOD(bool, PostJvmTask, (std::function<void()> task), (override));
+
+  MOCK_METHOD(bool,
+              HandlePlatformMessage,
+              (const std::string& channel,
+               const std::vector<uint8_t>& message,
+               int32_t response_id,
+               bool has_data),
+              (override));
+
+  MOCK_METHOD(bool,
+              HandlePlatformMessageResponse,
+              (int32_t response_id,
+               const std::vector<uint8_t>& data,
+               bool has_data),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateSemantics,
+              (const std::vector<uint8_t>& buffer,
+               const std::vector<std::string>& strings,
+               const std::vector<std::vector<uint8_t>>& string_attribute_args),
+              (override));
+
+  MOCK_METHOD(bool,
+              UpdateCustomAccessibilityActions,
+              (const std::vector<uint8_t>& actions_buffer,
+               const std::vector<std::string>& action_strings),
+              (override));
+
+  MOCK_METHOD(bool, SetSemanticsTreeEnabled, (bool enabled), (override));
+
+  MOCK_METHOD(bool,
+              SetApplicationLocale,
+              (const std::string& locale),
+              (override));
 };
 
 class MockLegacyJniDelegate : public LegacyJniDelegate {
@@ -96,7 +157,9 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
 
   MOCK_METHOD(bool,
               HandlePlatformMessageResponse,
-              (int32_t response_id, const std::vector<uint8_t>& data),
+              (int32_t response_id,
+               const std::vector<uint8_t>& data,
+               bool has_data),
               (override));
 
   MOCK_METHOD(bool,
@@ -371,15 +434,14 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
 
   // 1. HandlePlatformMessage
   std::vector<uint8_t> msg = {'h', 'e', 'l', 'l', 'o'};
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("handlePlatformMessage",
-                                              "(Ljava/lang/String;[BI)V", msg))
+  EXPECT_CALL(*mock_invoker,
+              HandlePlatformMessage("flutter/test", msg, 42, true))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->HandlePlatformMessage("flutter/test", msg, 42));
 
   // 2. HandlePlatformMessageResponse
   std::vector<uint8_t> resp = {'o', 'k'};
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("handlePlatformMessageResponse", "(I[B)V", resp))
+  EXPECT_CALL(*mock_invoker, HandlePlatformMessageResponse(42, resp, true))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->HandlePlatformMessageResponse(42, resp));
 
@@ -387,23 +449,19 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
   std::vector<uint8_t> semantics_buffer = {0x01, 0x02};
   std::vector<std::string> semantics_strings = {"label1", "label2"};
   EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("updateSemantics", "([B[Ljava/lang/String;)V",
-                               semantics_buffer))
+              UpdateSemantics(semantics_buffer, semantics_strings,
+                              std::vector<std::vector<uint8_t>>{}))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->UpdateSemantics(semantics_buffer, semantics_strings));
 
   // 4. SetSemanticsEnabled
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setSemanticsEnabled", "(Z)V",
-                                              std::vector<uint8_t>{1}))
+  EXPECT_CALL(*mock_invoker, SetSemanticsTreeEnabled(true))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->SetSemanticsEnabled(true));
 
   // 5. SetApplicationLocale
   std::string locale = "en_US";
-  std::vector<uint8_t> locale_payload(locale.begin(), locale.end());
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("setApplicationLocale", "(Ljava/lang/String;)V",
-                               locale_payload))
+  EXPECT_CALL(*mock_invoker, SetApplicationLocale(locale))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->SetApplicationLocale(locale));
 
@@ -423,9 +481,6 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
   EXPECT_TRUE(delegate->OnVsync(1000000L, 2000000L));
 
   // 9. DispatchViewportMetrics
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("onViewportMetrics", "(IDDD)V", _))
-      .WillOnce(Return(true));
   EXPECT_TRUE(delegate->DispatchViewportMetrics(0, 1080.0, 1920.0, 2.5));
 
   // 10. RequestDartDeferredLibrary
@@ -481,8 +536,7 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
 
     // Platform Message routing -> embedder delegate
     EXPECT_CALL(*mock_invoker,
-                InvokeVoidMethod("handlePlatformMessage",
-                                 "(Ljava/lang/String;[BI)V", payload))
+                HandlePlatformMessage("flutter/lifecycle", payload, 1, true))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RoutePlatformMessage("flutter/lifecycle", payload, 1));
 
@@ -552,8 +606,7 @@ TEST(FlutterEmbedderNativeTest, TargetFlipDefaultRouteExecution) {
   // Platform message routing defaults to embedder delegate
   EXPECT_CALL(*legacy_delegate, HandlePlatformMessage(_, _, _)).Times(0);
   EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("handlePlatformMessage",
-                               "(Ljava/lang/String;[BI)V", payload))
+              HandlePlatformMessage("flutter/default", payload, 42, true))
       .WillOnce(Return(true));
   EXPECT_TRUE(
       native.GetRouter()->RoutePlatformMessage("flutter/default", payload, 42));
@@ -1478,18 +1531,18 @@ TEST(SemanticsAndAccessibilityTest, JniDelegateSemanticsOperations) {
   std::vector<std::string> strings = {"Label1"};
   EXPECT_CALL(
       *mock_invoker,
-      InvokeVoidMethod("updateSemantics", "([B[Ljava/lang/String;)V", buffer))
+      UpdateSemantics(buffer, strings, std::vector<std::vector<uint8_t>>{}))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->UpdateSemantics(buffer, strings));
 
   // 2. UpdateCustomAccessibilityActions
   std::vector<uint8_t> actions_buffer = {0x10, 0x20};
+  std::vector<std::string> action_strings = {"Action1"};
   EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("updateCustomAccessibilityActions",
-                               "([B[Ljava/lang/String;)V", actions_buffer))
+              UpdateCustomAccessibilityActions(actions_buffer, action_strings))
       .WillOnce(Return(true));
-  EXPECT_TRUE(
-      delegate->UpdateCustomAccessibilityActions(actions_buffer, {"Action1"}));
+  EXPECT_TRUE(delegate->UpdateCustomAccessibilityActions(actions_buffer,
+                                                         action_strings));
 
   // 3. UpdateSemantics with FlutterSemanticsUpdate2
   FlutterSemanticsFlags flags = {};
@@ -1520,35 +1573,24 @@ TEST(SemanticsAndAccessibilityTest, JniDelegateSemanticsOperations) {
   };
 
   EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("updateCustomAccessibilityActions",
-                               "([B[Ljava/lang/String;)V", ::testing::_))
+              UpdateCustomAccessibilityActions(::testing::_, ::testing::_))
       .WillOnce(Return(true));
   EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("updateSemantics", "([B[Ljava/lang/String;[[B)V",
-                               ::testing::_))
+              UpdateSemantics(::testing::_, ::testing::_, ::testing::_))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->UpdateSemantics(update));
 
   // 4. SetSemanticsEnabled
-  std::vector<uint8_t> enabled_payload = {1};
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("setSemanticsEnabled", "(Z)V", enabled_payload))
+  EXPECT_CALL(*mock_invoker, SetSemanticsTreeEnabled(true))
       .WillOnce(Return(true));
   EXPECT_TRUE(delegate->SetSemanticsEnabled(true));
 
   // 5. DispatchSemanticsAction
   std::vector<uint8_t> action_data = {0xAA, 0xBB};
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("dispatchSemanticsAction",
-                                              "(IIJ[B)V", ::testing::_))
-      .WillOnce(Return(true));
   EXPECT_TRUE(delegate->DispatchSemanticsAction(55, kFlutterSemanticsActionTap,
                                                 action_data, 0));
 
   // 6. SetAccessibilityFeatures
-  std::vector<uint8_t> features_payload = {0x07, 0x00, 0x00, 0x00};
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setAccessibilityFeatures",
-                                              "(I)V", features_payload))
-      .WillOnce(Return(true));
   EXPECT_TRUE(delegate->SetAccessibilityFeatures(7));
 }
 
@@ -1566,34 +1608,24 @@ TEST(SemanticsAndAccessibilityTest, JniRouterSemanticsDirectRouting) {
   for (bool embedder_flag : {false, true}) {
     JniRouter::SetEmbedderEnabled(embedder_flag);
 
-    EXPECT_CALL(*mock_invoker,
-                InvokeVoidMethod("updateSemantics",
-                                 "([B[Ljava/lang/String;[[B)V", buffer))
+    EXPECT_CALL(
+        *mock_invoker,
+        UpdateSemantics(buffer, strings, std::vector<std::vector<uint8_t>>{}))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteSemanticsUpdate(buffer, strings));
 
     EXPECT_CALL(*mock_invoker,
-                InvokeVoidMethod("updateCustomAccessibilityActions",
-                                 "([B[Ljava/lang/String;)V", buffer))
+                UpdateCustomAccessibilityActions(buffer, strings))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteCustomAccessibilityActions(buffer, strings));
 
-    std::vector<uint8_t> enabled_payload = {1};
-    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setSemanticsEnabled", "(Z)V",
-                                                enabled_payload))
+    EXPECT_CALL(*mock_invoker, SetSemanticsTreeEnabled(true))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteSemanticsEnabled(true));
 
-    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("dispatchSemanticsAction",
-                                                "(IIJ[B)V", ::testing::_))
-        .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteDispatchSemanticsAction(
         42, kFlutterSemanticsActionTap, buffer, 0));
 
-    std::vector<uint8_t> features_payload = {0x0F, 0x00, 0x00, 0x00};
-    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setAccessibilityFeatures",
-                                                "(I)V", features_payload))
-        .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteSetAccessibilityFeatures(15));
   }
 
@@ -1624,16 +1656,14 @@ TEST(SemanticsAndAccessibilityTest, FlutterEmbedderNativeSemanticsIntegration) {
   };
 
   EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("updateSemantics", "([B[Ljava/lang/String;[[B)V",
-                               ::testing::_))
+              UpdateSemantics(::testing::_, ::testing::_, ::testing::_))
       .WillOnce(Return(true));
 
   EXPECT_TRUE(native.UpdateSemantics(update));
 
   // OnUpdateSemantics2 static callback
   EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("updateSemantics", "([B[Ljava/lang/String;[[B)V",
-                               ::testing::_))
+              UpdateSemantics(::testing::_, ::testing::_, ::testing::_))
       .WillOnce(Return(true));
   FlutterEmbedderNative::OnUpdateSemantics2(&update, &native);
 
@@ -2460,15 +2490,6 @@ TEST(PlatformViewsTest, ThreadSafeConcurrentPlatformViewsOperations) {
 TEST(WindowMetricsTranslationTest, JniDelegateWindowMetricsOperations) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto delegate = std::make_shared<JniDelegate>(mock_invoker);
-
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("onViewportMetrics", "(IDDD)V", _))
-      .Times(2)
-      .WillRepeatedly(Return(true));
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("onDisplayMetrics", "(JDDDF)V", _))
-      .Times(2)
-      .WillRepeatedly(Return(true));
 
   AndroidViewportMetrics vp;
   vp.view_id = 0;
@@ -4194,15 +4215,12 @@ TEST(Phase53LegacyDeletionPlatformViewsSemanticsTest,
     std::vector<std::string> strings = {"SemanticsLabel"};
     std::vector<std::vector<uint8_t>> string_attrs = {{0xAA}};
 
-    EXPECT_CALL(*mock_invoker,
-                InvokeVoidMethod("updateSemantics",
-                                 "([B[Ljava/lang/String;[[B)V", buffer))
+    EXPECT_CALL(*mock_invoker, UpdateSemantics(buffer, strings, string_attrs))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteSemanticsUpdate(buffer, strings, string_attrs));
 
     EXPECT_CALL(*mock_invoker,
-                InvokeVoidMethod("updateCustomAccessibilityActions",
-                                 "([B[Ljava/lang/String;)V", buffer))
+                UpdateCustomAccessibilityActions(buffer, strings))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteCustomAccessibilityActions(buffer, strings));
 
@@ -4219,28 +4237,18 @@ TEST(Phase53LegacyDeletionPlatformViewsSemanticsTest,
         .custom_actions = nullptr,
         .view_id = 0,
     };
-    EXPECT_CALL(
-        *mock_invoker,
-        InvokeVoidMethod("updateSemantics", "([B[Ljava/lang/String;[[B)V", _))
+    EXPECT_CALL(*mock_invoker,
+                UpdateSemantics(::testing::_, ::testing::_, ::testing::_))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteSemanticsUpdate(sem_update));
 
-    std::vector<uint8_t> enabled_payload = {1};
-    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setSemanticsEnabled", "(Z)V",
-                                                enabled_payload))
+    EXPECT_CALL(*mock_invoker, SetSemanticsTreeEnabled(true))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteSemanticsEnabled(true));
 
-    EXPECT_CALL(*mock_invoker,
-                InvokeVoidMethod("dispatchSemanticsAction", "(IIJ[B)V", _))
-        .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteDispatchSemanticsAction(
         55, kFlutterSemanticsActionTap, buffer, 0));
 
-    std::vector<uint8_t> features_payload = {0x03, 0x00, 0x00, 0x00};
-    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setAccessibilityFeatures",
-                                                "(I)V", features_payload))
-        .WillOnce(Return(true));
     EXPECT_TRUE(router->RouteSetAccessibilityFeatures(3));
 
     // 2. Platform Views Subsystem Direct Routing
@@ -4850,6 +4858,10 @@ TEST(Phase55FlagObliterationTest, UnconditionalDirectRoutingAcrossAllMethods) {
       .WillByDefault(::testing::Return(true));
   ON_CALL(*mock_invoker, InvokeIntMethod(_, _, _))
       .WillByDefault(::testing::Return(1));
+  ON_CALL(*mock_invoker, HandlePlatformMessage(_, _, _, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, HandlePlatformMessageResponse(_, _, _))
+      .WillByDefault(::testing::Return(true));
 
   auto callback_cache = std::make_shared<InMemoryCallbackCacheProvider>();
   callback_cache->AddCallback(42L, "phase55Callback", "Phase55Class",
@@ -5016,6 +5028,10 @@ TEST(Phase55FlagObliterationTest,
       .WillByDefault(::testing::Return(true));
   ON_CALL(*mock_invoker, InvokeIntMethod(_, _, _))
       .WillByDefault(::testing::Return(1));
+  ON_CALL(*mock_invoker, HandlePlatformMessage(_, _, _, _))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker, HandlePlatformMessageResponse(_, _, _))
+      .WillByDefault(::testing::Return(true));
 
   auto callback_cache = std::make_shared<InMemoryCallbackCacheProvider>();
   auto image_decoder = std::make_shared<InMemoryImageDecoderProvider>();
@@ -5409,10 +5425,17 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
   const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
   const jclass kLongClass = reinterpret_cast<jclass>(101);
   const jclass kCallbackInfoClass = reinterpret_cast<jclass>(102);
+  const jclass kWeakRefClass = reinterpret_cast<jclass>(103);
+  const jclass kSurfaceTextureWrapperClass = reinterpret_cast<jclass>(104);
   const jfieldID kShellHolderField = reinterpret_cast<jfieldID>(200);
   const jmethodID kJniConstructor = reinterpret_cast<jmethodID>(300);
   const jmethodID kLongConstructor = reinterpret_cast<jmethodID>(301);
   const jmethodID kCallbackConstructor = reinterpret_cast<jmethodID>(302);
+  const jmethodID kWeakRefGet = reinterpret_cast<jmethodID>(303);
+  const jmethodID kAttachToGL = reinterpret_cast<jmethodID>(304);
+  const jmethodID kUpdateTexImage = reinterpret_cast<jmethodID>(305);
+  const jmethodID kDetachFromGL = reinterpret_cast<jmethodID>(306);
+  const jmethodID kRelease = reinterpret_cast<jmethodID>(307);
 
   EXPECT_CALL(mock_env_, FindClass(_))
       .WillRepeatedly([&](const char* name) -> jclass {
@@ -5424,6 +5447,15 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
         }
         if (strcmp(name, "io/flutter/view/FlutterCallbackInformation") == 0) {
           return kCallbackInfoClass;
+        }
+        if (strcmp(name, "java/lang/ref/WeakReference") == 0) {
+          return kWeakRefClass;
+        }
+        if (strcmp(
+                name,
+                "io/flutter/embedding/engine/renderer/SurfaceTextureWrapper") ==
+            0) {
+          return kSurfaceTextureWrapperClass;
         }
         return reinterpret_cast<jclass>(109);
       });
@@ -5441,6 +5473,21 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
       GetMethodID(kCallbackInfoClass, "<init>",
                   "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"))
       .WillRepeatedly(Return(kCallbackConstructor));
+  EXPECT_CALL(mock_env_,
+              GetMethodID(kWeakRefClass, "get", "()Ljava/lang/Object;"))
+      .WillRepeatedly(Return(kWeakRefGet));
+  EXPECT_CALL(mock_env_, GetMethodID(kSurfaceTextureWrapperClass,
+                                     "attachToGLContext", "(I)V"))
+      .WillRepeatedly(Return(kAttachToGL));
+  EXPECT_CALL(mock_env_,
+              GetMethodID(kSurfaceTextureWrapperClass, "updateTexImage", "()V"))
+      .WillRepeatedly(Return(kUpdateTexImage));
+  EXPECT_CALL(mock_env_, GetMethodID(kSurfaceTextureWrapperClass,
+                                     "detachFromGLContext", "()V"))
+      .WillRepeatedly(Return(kDetachFromGL));
+  EXPECT_CALL(mock_env_,
+              GetMethodID(kSurfaceTextureWrapperClass, "release", "()V"))
+      .WillRepeatedly(Return(kRelease));
 
   EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
   EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
@@ -5458,7 +5505,7 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
 
   bool result = FlutterEmbedderNative::RegisterJni(&mock_env_);
   EXPECT_TRUE(result);
-  EXPECT_EQ(registered_methods.size(), 38u);
+  EXPECT_EQ(registered_methods.size(), 40u);
 
   // Verify all essential methods are present and bound to valid function
   // pointers
@@ -5471,6 +5518,8 @@ TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
     return false;
   };
 
+  EXPECT_TRUE(has_method("nativeUpdateRefreshRate"));
+  EXPECT_TRUE(has_method("nativeOnVsync"));
   EXPECT_TRUE(has_method("nativeAttach"));
   EXPECT_TRUE(has_method("nativeDestroy"));
   EXPECT_TRUE(has_method("nativeSpawn"));

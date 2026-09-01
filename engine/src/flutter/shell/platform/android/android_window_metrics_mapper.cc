@@ -284,27 +284,17 @@ DefaultWindowMetricsProvider::~DefaultWindowMetricsProvider() {
 bool DefaultWindowMetricsProvider::SendViewportMetrics(
     const AndroidViewportMetrics& metrics) {
   TRACE_EVENT0("flutter", "DefaultWindowMetricsProvider::SendViewportMetrics");
-  {
-    std::scoped_lock lock(mutex_);
-    viewport_metrics_map_[metrics.view_id] = metrics;
-  }
-  if (!jvm_invoker_) {
-    return true;
-  }
-  return jvm_invoker_->InvokeVoidMethod("onViewportMetrics", "(IDDD)V");
+  std::scoped_lock lock(mutex_);
+  viewport_metrics_map_[metrics.view_id] = metrics;
+  return true;
 }
 
 bool DefaultWindowMetricsProvider::UpdateDisplayMetrics(
     const AndroidDisplayMetrics& metrics) {
   TRACE_EVENT0("flutter", "DefaultWindowMetricsProvider::UpdateDisplayMetrics");
-  {
-    std::scoped_lock lock(mutex_);
-    display_metrics_map_[metrics.display_id] = metrics;
-  }
-  if (!jvm_invoker_) {
-    return true;
-  }
-  return jvm_invoker_->InvokeVoidMethod("onDisplayMetrics", "(JDDDF)V");
+  std::scoped_lock lock(mutex_);
+  display_metrics_map_[metrics.display_id] = metrics;
+  return true;
 }
 
 std::optional<AndroidViewportMetrics>

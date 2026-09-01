@@ -47,6 +47,8 @@ source_set("flutter_embedder_native_src") {
     "apk_asset_provider.h",
     "flutter_embedder_native.cc",
     "flutter_embedder_native.h",
+    "flutter_main.cc",
+    "flutter_main.h",
     "jni_delegate.cc",
     "jni_delegate.h",
     "jni_router.cc",
@@ -61,6 +63,7 @@ source_set("flutter_embedder_native_src") {
 
   public_deps = [
     "//flutter/assets",
+    "//flutter/common",
     "//flutter/fml",
     "//flutter/shell/platform/embedder:embedder_headers",
   ]
@@ -124,11 +127,12 @@ if (is_android) {
       "android_image_generator.h",
     ]
 
-    deps = [
-      "//flutter/fml",
+    public_deps = [
       "//flutter/lib/ui",
       "//flutter/skia",
     ]
+
+    deps = [ "//flutter/fml" ]
 
     libs = [
       "android",
@@ -177,11 +181,7 @@ if (is_android) {
   source_set("flutter_shell_native_src") {
     visibility = [ ":*" ]
 
-    sources = [
-      "flutter_main.cc",
-      "flutter_main.h",
-      "library_loader.cc",
-    ]
+    sources = [ "library_loader.cc" ]
 
     public_deps = [
       ":flutter_embedder_native_src",

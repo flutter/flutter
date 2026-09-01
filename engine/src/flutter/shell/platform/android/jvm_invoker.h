@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_JVM_INVOKER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_JVM_INVOKER_H_
 
+#include <jni.h>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -12,6 +13,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/platform/android/scoped_java_ref.h"
 
 namespace flutter {
 namespace android {
@@ -102,12 +104,56 @@ class JvmInvoker {
   /// @param task Closure to execute.
   /// @return True if task was successfully scheduled.
   virtual bool PostJvmTask(std::function<void()> task) = 0;
+
+  /// @brief Routes platform message to JVM.
+  virtual bool HandlePlatformMessage(const std::string& channel,
+                                     const std::vector<uint8_t>& message,
+                                     int32_t response_id,
+                                     bool has_data = true) {
+    return true;
+  }
+
+  /// @brief Routes platform message response to JVM.
+  virtual bool HandlePlatformMessageResponse(int32_t response_id,
+                                             const std::vector<uint8_t>& data,
+                                             bool has_data = true) {
+    return true;
+  }
+
+  /// @brief Routes semantics update with nodes, strings, and string attributes
+  /// to JVM.
+  virtual bool UpdateSemantics(
+      const std::vector<uint8_t>& buffer,
+      const std::vector<std::string>& strings,
+      const std::vector<std::vector<uint8_t>>& string_attribute_args) {
+    return true;
+  }
+
+  /// @brief Routes custom accessibility actions to JVM.
+  virtual bool UpdateCustomAccessibilityActions(
+      const std::vector<uint8_t>& actions_buffer,
+      const std::vector<std::string>& action_strings) {
+    return true;
+  }
+
+  /// @brief Notifies JVM whether semantics tree compilation is enabled.
+  virtual bool SetSemanticsTreeEnabled(bool enabled) { return true; }
+
+  /// @brief Sets application locale in JVM.
+  virtual bool SetApplicationLocale(const std::string& locale) { return true; }
+
+  /// @brief Gets scaled font size for nonlinear font scaling.
+  virtual double GetScaledFontSize(double unscaled_font_size,
+                                   int configuration_id) {
+    return unscaled_font_size;
+  }
 };
 
 /// @brief Default in-memory / host-safe implementation of JvmInvoker.
 class DefaultJvmInvoker : public JvmInvoker {
  public:
   DefaultJvmInvoker();
+  DefaultJvmInvoker(JNIEnv* env, jobject java_object);
   ~DefaultJvmInvoker() override;
 
   bool EnsureAttachedToThread() override;
@@ -131,6 +177,9 @@ class DefaultJvmInvoker : public JvmInvoker {
                             const std::string& signature,
                             const std::vector<uint8_t>& payload = {}) override;
 
+  double GetScaledFontSize(double unscaled_font_size,
+                           int configuration_id) override;
+
   std::string InvokeStringMethod(
       const std::string& method_name,
       const std::string& signature,
@@ -143,9 +192,32 @@ class DefaultJvmInvoker : public JvmInvoker {
 
   bool PostJvmTask(std::function<void()> task) override;
 
+  bool HandlePlatformMessage(const std::string& channel,
+                             const std::vector<uint8_t>& message,
+                             int32_t response_id,
+                             bool has_data = true) override;
+
+  bool HandlePlatformMessageResponse(int32_t response_id,
+                                     const std::vector<uint8_t>& data,
+                                     bool has_data = true) override;
+
+  bool UpdateSemantics(
+      const std::vector<uint8_t>& buffer,
+      const std::vector<std::string>& strings,
+      const std::vector<std::vector<uint8_t>>& string_attribute_args) override;
+
+  bool UpdateCustomAccessibilityActions(
+      const std::vector<uint8_t>& actions_buffer,
+      const std::vector<std::string>& action_strings) override;
+
+  bool SetSemanticsTreeEnabled(bool enabled) override;
+
+  bool SetApplicationLocale(const std::string& locale) override;
+
  private:
   bool attached_ = false;
   bool pending_exception_ = false;
+  std::unique_ptr<fml::jni::ScopedJavaGlobalRef<jobject>> java_object_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(DefaultJvmInvoker);
 };

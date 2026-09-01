@@ -43,6 +43,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
 }
 
+#include "flutter/assets/asset_resolver.h"
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/graphics/persistent_cache.h"
 #include "flutter/common/task_runners.h"
@@ -157,6 +158,55 @@ static FlutterEngineResult LogEmbedderError(FlutterEngineResult code,
 
 #define LOG_EMBEDDER_ERROR(code, reason) \
   LogEmbedderError(code, reason, #code, __FUNCTION__, __FILE__, __LINE__)
+
+class CustomAssetResolver final : public flutter::AssetResolver {
+ public:
+  explicit CustomAssetResolver(FlutterCustomAssetResolver resolver)
+      : resolver_(resolver) {}
+
+  ~CustomAssetResolver() override = default;
+
+  bool IsValid() const override { return resolver_.get_asset != nullptr; }
+
+  bool IsValidAfterAssetManagerChange() const override { return true; }
+
+  AssetResolverType GetType() const override {
+    return AssetResolverType::kCustomAssetResolver;
+  }
+
+  std::unique_ptr<fml::Mapping> GetAsMapping(
+      const std::string& asset_name) const override {
+    if (!resolver_.get_asset) {
+      return nullptr;
+    }
+    const uint8_t* buffer = nullptr;
+    size_t size = 0;
+    void* baton = nullptr;
+    if (!resolver_.get_asset(asset_name.c_str(), &buffer, &size, &baton,
+                             resolver_.user_data) ||
+        buffer == nullptr) {
+      return nullptr;
+    }
+    auto free_asset = resolver_.free_asset;
+    auto user_data = resolver_.user_data;
+    return std::make_unique<fml::NonOwnedMapping>(
+        buffer, size,
+        [free_asset, baton, user_data](const uint8_t* ptr, size_t size) {
+          if (free_asset) {
+            free_asset(baton, user_data);
+          }
+        });
+  }
+
+  bool operator==(const AssetResolver& other) const override {
+    return other.GetType() == GetType();
+  }
+
+ private:
+  FlutterCustomAssetResolver resolver_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(CustomAssetResolver);
+};
 
 static bool IsOpenGLRendererConfigValid(const FlutterRendererConfig* config) {
   if (config->type != kOpenGL) {
@@ -2168,6 +2218,17 @@ CreatePlatformDispatchTable(const FlutterProjectArgs* args, void* user_data) {
     };
   }
 
+  flutter::PlatformViewEmbedder::GetScaledFontSizeCallback
+      get_scaled_font_size_callback = nullptr;
+  if (args != nullptr &&
+      SAFE_ACCESS(args, get_scaled_font_size_callback, nullptr) != nullptr) {
+    get_scaled_font_size_callback =
+        [ptr = args->get_scaled_font_size_callback, user_data](
+            double unscaled_font_size, int configuration_id) -> double {
+      return ptr(unscaled_font_size, configuration_id, user_data);
+    };
+  }
+
   return {
       update_semantics_callback,                  //
       platform_message_response_callback,         //
@@ -2179,6 +2240,7 @@ CreatePlatformDispatchTable(const FlutterProjectArgs* args, void* user_data) {
       request_dart_deferred_library_callback,     //
       raster_thread_context_make_current,         //
       raster_thread_context_clear_current,        //
+      get_scaled_font_size_callback,              //
   };
 }
 
@@ -2661,6 +2723,12 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   if (SAFE_ACCESS(args, engine_id, 0) != 0) {
     run_configuration.SetEngineId(args->engine_id);
+  }
+
+  if (SAFE_ACCESS(args, custom_asset_resolver, nullptr) != nullptr &&
+      args->custom_asset_resolver->get_asset != nullptr) {
+    run_configuration.AddAssetResolver(
+        std::make_unique<CustomAssetResolver>(*args->custom_asset_resolver));
   }
 
   if (!run_configuration.IsValid()) {
@@ -3393,7 +3461,7 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
   }
 
   std::unique_ptr<flutter::PlatformMessage> message;
-  if (message_size == 0) {
+  if (message_data == nullptr) {
     message = std::make_unique<flutter::PlatformMessage>(
         flutter_message->channel, response);
   } else {
@@ -3474,11 +3542,11 @@ FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
   auto response = handle->message->response();
 
   if (response) {
-    if (data_length == 0) {
+    if (data == nullptr) {
       response->CompleteEmpty();
     } else {
       response->Complete(std::make_unique<fml::DataMapping>(
-          std::vector<uint8_t>({data, data + data_length})));
+          std::vector<uint8_t>(data, data + data_length)));
     }
   }
 
@@ -3499,7 +3567,7 @@ FlutterEngineResult FlutterEngineRegisterExternalTexture(
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
-  if (texture_identifier == 0) {
+  if (texture_identifier < 0) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments,
                               "Texture identifier was invalid.");
   }
@@ -3518,7 +3586,7 @@ FlutterEngineResult FlutterEngineUnregisterExternalTexture(
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
-  if (texture_identifier == 0) {
+  if (texture_identifier < 0) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments,
                               "Texture identifier was invalid.");
   }
@@ -3538,7 +3606,7 @@ FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
-  if (texture_identifier == 0) {
+  if (texture_identifier < 0) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid texture identifier.");
   }
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)
@@ -4259,6 +4327,30 @@ FlutterEngineResult FlutterEngineRegisterImageDecoder(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineUpdateAssetResolver(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterCustomAssetResolver* resolver) {
+  TRACE_EVENT0("flutter", "FlutterEngineUpdateAssetResolver");
+  if (!engine) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  if (!resolver || !resolver->get_asset) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Custom asset resolver was null or invalid.");
+  }
+
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  embedder_engine->UpdateAssetResolverByType(
+      std::make_unique<CustomAssetResolver>(*resolver),
+      flutter::AssetResolver::AssetResolverType::kCustomAssetResolver);
+
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -4325,6 +4417,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(FreeScreenshot, FlutterEngineFreeScreenshot);
   SET_PROC(GetCallbackInformation, FlutterEngineGetCallbackInformation);
   SET_PROC(RegisterImageDecoder, FlutterEngineRegisterImageDecoder);
+  SET_PROC(UpdateAssetResolver, FlutterEngineUpdateAssetResolver);
 #undef SET_PROC
 
   return kSuccess;

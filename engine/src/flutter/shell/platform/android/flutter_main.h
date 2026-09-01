@@ -10,6 +10,7 @@
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
+#include "flutter/shell/platform/android/android_vm_init.h"
 
 namespace flutter {
 
@@ -28,12 +29,17 @@ class FlutterMain {
       const flutter::Settings& settings,
       int api_level);
 
+  static bool IsInitialized();
+  const flutter::android::AndroidVMArgs& GetVMArgs() const;
+
  private:
   const flutter::Settings settings_;
   const flutter::AndroidRenderingAPI android_rendering_api_;
+  const flutter::android::AndroidVMArgs vm_args_;
 
   explicit FlutterMain(const flutter::Settings& settings,
-                       flutter::AndroidRenderingAPI android_rendering_api);
+                       flutter::AndroidRenderingAPI android_rendering_api,
+                       const flutter::android::AndroidVMArgs& vm_args);
 
   static void Init(JNIEnv* env,
                    jclass clazz,

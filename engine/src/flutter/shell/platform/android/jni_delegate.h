@@ -112,11 +112,13 @@ class JniDelegate {
   /// @brief Handles an incoming platform message dispatch to the JVM.
   virtual bool HandlePlatformMessage(const std::string& channel,
                                      const std::vector<uint8_t>& message,
-                                     int32_t response_id);
+                                     int32_t response_id,
+                                     bool has_data = true);
 
   /// @brief Handles a platform message response back to the JVM.
   virtual bool HandlePlatformMessageResponse(int32_t response_id,
-                                             const std::vector<uint8_t>& data);
+                                             const std::vector<uint8_t>& data,
+                                             bool has_data = true);
 
   /// @brief Updates accessibility semantics tree in the JVM.
   virtual bool UpdateSemantics(const std::vector<uint8_t>& buffer,
@@ -198,6 +200,10 @@ class JniDelegate {
 
   /// @brief Notifies the JVM that the asset manager / bundle has changed.
   virtual bool OnAssetManagerChanged();
+
+  /// @brief Computes scaled font size for nonlinear font scaling.
+  virtual double GetScaledFontSize(double unscaled_font_size,
+                                   int configuration_id) const;
 
   /// @brief Looks up Dart callback information for a given handle.
   virtual std::optional<DartCallbackInfo> LookupCallbackInformation(

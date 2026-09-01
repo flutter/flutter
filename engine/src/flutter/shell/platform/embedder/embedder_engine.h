@@ -111,6 +111,10 @@ class EmbedderEngine {
 
   bool RegisterImageDecoder(ImageGeneratorFactory factory, int32_t priority);
 
+  bool UpdateAssetResolverByType(
+      std::unique_ptr<AssetResolver> updated_asset_resolver,
+      AssetResolver::AssetResolverType type);
+
   Shell& GetShell();
 
   const std::optional<FlutterRendererConfig>& GetRendererConfig() const;
