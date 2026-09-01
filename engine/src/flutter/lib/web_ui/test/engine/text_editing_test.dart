@@ -789,6 +789,10 @@ Future<void> testMain() async {
       final DomHTMLElement input = textEditing.strategy.domElement!;
       debugEmulateIosSafari = true;
       textEditing.strategy.debugDocumentHasFocusOverride = true;
+      // Pinned so a browser reporting the page hidden cannot make this pass for
+      // the wrong reason: the refocus is what must skip the close, not the
+      // visibility bail-out.
+      textEditing.strategy.debugDocumentVisibilityStateOverride = 'visible';
       try {
         // The blur schedules a deferred close; the immediate refocus, as WebKit
         // does mid-drag, must skip it.
@@ -800,6 +804,7 @@ Future<void> testMain() async {
       } finally {
         debugEmulateIosSafari = false;
         textEditing.strategy.debugDocumentHasFocusOverride = null;
+        textEditing.strategy.debugDocumentVisibilityStateOverride = null;
       }
 
       spy.tearDown();
@@ -824,13 +829,23 @@ Future<void> testMain() async {
       final DomHTMLElement input = textEditing.strategy.domElement!;
       debugEmulateIosSafari = true;
       textEditing.strategy.debugDocumentHasFocusOverride = true;
+      // Pin visibility as well. The deferred close bails out when the page
+      // reports hidden, and headless browsers disagree about what an offscreen
+      // test page reports, so leaving it unpinned makes the result depend on
+      // the host browser.
+      textEditing.strategy.debugDocumentVisibilityStateOverride = 'visible';
       try {
         input.blur();
+        // The deferral also bails out if the input regained focus, so assert the
+        // blur took effect. A browser that refocuses fails here with a clear
+        // message instead of an empty message list below.
+        expect(domDocument.activeElement, isNot(input));
         await Future<void>.delayed(const Duration(milliseconds: 150));
         expect(connectionClosedMessages(spy), hasLength(1));
       } finally {
         debugEmulateIosSafari = false;
         textEditing.strategy.debugDocumentHasFocusOverride = null;
+        textEditing.strategy.debugDocumentVisibilityStateOverride = null;
       }
 
       spy.tearDown();
