@@ -1016,6 +1016,7 @@ config("optimize") {
     cflags = [ "/O1" ] + common_optimize_on_cflags + [ "/Oi" ]
   } else if (is_ios) {
     cflags = [ "-Os" ] + common_optimize_on_cflags  # Favor size over speed.
+    swiftflags = [ "-Osize" ]
   } else if (is_android || is_fuchsia) {
     cflags = [ "-Oz" ] + common_optimize_on_cflags  # Favor size over speed.
   } else if (is_wasm) {
@@ -1027,8 +1028,10 @@ config("optimize") {
   } else {
     if (optimize_for_size) {
       cflags = [ "-Os" ] + common_optimize_on_cflags
+      swiftflags = [ "-Osize" ]
     } else {
       cflags = [ "-O2" ] + common_optimize_on_cflags
+      swiftflags = [ "-O" ]
     }
   }
 
@@ -1070,6 +1073,7 @@ config("no_optimize") {
     ldflags = common_optimize_on_ldflags
   } else {
     cflags = [ "-O0" ]
+    swiftflags = [ "-Onone" ]
   }
 }
 
