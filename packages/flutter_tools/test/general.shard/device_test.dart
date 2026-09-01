@@ -1249,8 +1249,8 @@ void main() {
 
         const knownExceptions = <String>{'enable-checked-mode', 'verify-entry-points'};
         const switchAliases = <String, String>{
-          'enable-hcpp-and-surface-control': AndroidEngineCliFlags.enableHcpp,
-          'verbose-logging': AndroidEngineCliFlags.verboseSystemLogs,
+          AndroidEngineCliFlags.enableHcppAndSurfaceControl: AndroidEngineCliFlags.enableHcpp,
+          AndroidEngineCliFlags.verboseLogging: AndroidEngineCliFlags.verboseSystemLogs,
         };
 
         final Set<String> launchKeys = original

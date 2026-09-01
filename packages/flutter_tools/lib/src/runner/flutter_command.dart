@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../android/android_engine_cli_flags.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -2001,34 +2000,8 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   @protected
-  void validatePrebuiltAndroidApplicationFlags() {
-    final String? applicationBinary =
-        argParser.options.containsKey(FlutterOptions.kUseApplicationBinary)
-        ? stringArg(FlutterOptions.kUseApplicationBinary)
-        : null;
-    if (applicationBinary != null && applicationBinary.toLowerCase().endsWith('.apk')) {
-      final BuildMode buildMode = getBuildMode();
-      if (buildMode == BuildMode.release) {
-        final Iterable<String> intentFlags = AndroidEngineCliFlags.allFlags.where(
-          (String flag) =>
-              argParser.options.containsKey(flag) && argResults?.wasParsed(flag) == true,
-        );
-
-        if (intentFlags.isNotEmpty) {
-          throwToolExit(
-            'Running a prebuilt APK with --${FlutterOptions.kUseApplicationBinary} in release mode with flags used to configure the Flutter Android engine '
-            '(${intentFlags.join(', ')}) is no longer supported. Define the required flags via the Android manifest instead. See '
-            'https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries for more details.',
-          );
-        }
-      }
-    }
-  }
-
-  @protected
   @mustCallSuper
   Future<void> validateCommand() async {
-    validatePrebuiltAndroidApplicationFlags();
     if (_requiresPubspecYaml && globalResults?.wasParsed('packages') != true) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit package_config.json file path.
 

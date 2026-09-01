@@ -1446,7 +1446,7 @@ class DebuggingOptions {
       if (enableImpeller == ImpellerStatus.disabled) AndroidEngineCliFlags.enableImpeller: false,
       if (enableFlutterGpu) AndroidEngineCliFlags.enableFlutterGpu: true,
       if (enableVulkanValidation) AndroidEngineCliFlags.enableVulkanValidation: true,
-      if (enableHcpp != null) 'enable-hcpp-and-surface-control': enableHcpp,
+      if (enableHcpp != null) AndroidEngineCliFlags.enableHcppAndSurfaceControl: enableHcpp,
       if (testFlag) AndroidEngineCliFlags.testFlag: true,
       if (debuggingEnabled) ...<String, Object?>{
         // TODO(camsim99): Determine if we should even forward these to the Android embedding since Android
@@ -1471,12 +1471,14 @@ class DebuggingOptions {
     for (final MapEntry<String, Object?> entry in configs.entries) {
       final Object? value = entry.value;
       if (entry.key == AndroidEngineCliFlags.enableImpeller ||
-          entry.key == 'enable-hcpp-and-surface-control') {
+          entry.key == AndroidEngineCliFlags.enableHcppAndSurfaceControl) {
         args.add('--${entry.key}=$value');
       } else if (value is bool) {
         args.add(value ? '--${entry.key}' : '--${entry.key}=false');
-      } else {
+      } else if (value is String) {
         args.add('--${entry.key}=$value');
+      } else {
+        assert(false, 'Unsupported engine config value type ${value.runtimeType} for ${entry.key}');
       }
     }
     return args;
@@ -1493,6 +1495,8 @@ class DebuggingOptions {
         args.addAll(<String>['--ez', entry.key, value.toString()]);
       } else if (value is String) {
         args.addAll(<String>['--es', entry.key, value]);
+      } else {
+        assert(false, 'Unsupported engine config value type ${value.runtimeType} for ${entry.key}');
       }
     }
     return args;
