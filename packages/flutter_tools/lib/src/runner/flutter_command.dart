@@ -195,8 +195,7 @@ abstract class FlutterCommand extends Command<void> {
   final OutputPreferences? _outputPreferences;
 
   /// The [ToolContext] providing explicit dependency injection for this command.
-  ToolContext? get toolContext =>
-      _explicitToolContext ?? (super.runner as FlutterCommandRunner?)?.toolContext;
+  ToolContext? get toolContext => _explicitToolContext ?? runner?.toolContext;
 
   SystemClock get _clock => _explicitToolContext?.systemClock ?? globals.systemClock;
   Logger get _logger => _explicitToolContext?.logger ?? globals.logger;
@@ -211,8 +210,7 @@ abstract class FlutterCommand extends Command<void> {
   FileSystem get _fs => _explicitToolContext?.fs ?? globals.fs;
   FlutterProjectFactory get _projectFactory =>
       _explicitToolContext?.projectFactory ?? globals.projectFactory;
-  Analytics get _analytics =>
-      (super.runner as FlutterCommandRunner?)?.analytics ?? globals.analytics;
+  Analytics get _analytics => runner?.analytics ?? globals.analytics;
   Cache get _cache => _explicitToolContext?.cache ?? globals.cache;
   FlutterVersion get _flutterVersion =>
       _explicitToolContext?.flutterVersion ?? globals.flutterVersion;

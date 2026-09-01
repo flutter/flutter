@@ -84,6 +84,14 @@ projects. That opt-out dies with AGP 10.
    signal (the library-plugin build-type copy in `PluginHandler`). This
    preserves add-to-app custom-debuggable matching (a host `staging`
    debuggable build type maps to debug engine artifacts).
+6. **P3 pre-spike / PR 4 (afterEvaluate DSL mutation under newDsl).** The planned scratch-app
+   spike (AGP 9.1 + `newDsl=true` + custom build type, verifying that build-type
+   creation from `pluginProject.afterEvaluate` still works) could not run in the
+   implementation sandbox (no AGP artifact access). The `initWith` copy landed on the
+   primary approach; the `android_plugin_example_app_build` integration test and a
+   custom-build-type scratch build must confirm it in CI. Documented fallback if
+   `afterEvaluate` mutation is rejected under newDsl: perform the copy in
+   `androidComponents.finalizeDsl` on the plugin project instead.
 
 ## Replacement map
 
