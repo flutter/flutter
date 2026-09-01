@@ -167,6 +167,16 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
   uint64_t last_logical_record =
       had_record ? last_logical_record_iter->second : 0;
 
+  const bool is_event_down = action == WM_KEYDOWN || action == WM_SYSKEYDOWN;
+
+  if (is_event_down && key == VK_PROCESSKEY && had_record && !was_down) {
+    // A native modal loop can leave a key recorded as pressed. Release that
+    // stale state before filtering the IME's fresh key-down.
+    SendSynthesizeUpEvent(physical_key, last_logical_record);
+    callback(true);
+    return;
+  }
+
   // The logical key for the current "tap sequence".
   //
   // Key events are formed in tap sequences: down, repeats, up. The logical key
@@ -182,8 +192,6 @@ void KeyboardKeyEmbedderHandler::KeyboardHookImpl(
     callback(true);
     return;
   }
-
-  const bool is_event_down = action == WM_KEYDOWN || action == WM_SYSKEYDOWN;
 
   bool event_key_can_be_repeat = true;
   UpdateLastSeenCriticalKey(key, physical_key, sequence_logical_key);
