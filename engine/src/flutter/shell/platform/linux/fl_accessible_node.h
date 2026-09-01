@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_ACCESSIBLE_NODE_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_ACCESSIBLE_NODE_H_
 
-#include <atk/atk.h>
+#include "flutter/shell/platform/linux/fl_atk_compat.h"
 #include <gio/gio.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
