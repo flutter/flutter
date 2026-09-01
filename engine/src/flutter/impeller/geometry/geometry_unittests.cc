@@ -1460,6 +1460,15 @@ TEST(GeometryTest, ColorClamp01) {
   }
 }
 
+TEST(GeometryTest, ColorGetLuma) {
+  EXPECT_NEAR(Color::Black().GetLuma(), 0.0f, 1e-6f);
+  EXPECT_NEAR(Color::White().GetLuma(), 1.0f, 1e-6f);
+  EXPECT_NEAR(Color::Red().GetLuma(), 0.2126f, 1e-6f);
+  EXPECT_NEAR(Color::Green().GetLuma(), 0.7152f, 1e-6f);
+  EXPECT_NEAR(Color::Blue().GetLuma(), 0.0722f, 1e-6f);
+  EXPECT_NEAR(Color(0.5f, 0.5f, 0.5f, 1.0f).GetLuma(), 0.5f, 1e-6f);
+}
+
 TEST(GeometryTest, ColorMakeRGBA8) {
   {
     Color a = Color::MakeRGBA8(0, 0, 0, 0);

@@ -69,8 +69,10 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
   frag_info.type = ToShaderType(params_.type);
-  frag_info.color =
+  Color color =
       params_.color.WithAlpha(params_.color.alpha * GetOpacityFactor());
+  frag_info.color = color;
+  frag_info.luma = color.GetLuma();
   frag_info.center = params_.center;
   frag_info.size = params_.size;
   frag_info.stroked = params_.stroke ? 1.0f : 0.0f;

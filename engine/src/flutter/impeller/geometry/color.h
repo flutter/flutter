@@ -246,6 +246,11 @@ struct Color {
                  std::clamp(blue, 0.0f, 1.0f), std::clamp(alpha, 0.0f, 1.0f));
   }
 
+  /// @brief Calculate relative luminance using Rec. 709 luma coefficients.
+  constexpr Scalar GetLuma() const {
+    return red * 0.2126f + green * 0.7152f + blue * 0.0722f;
+  }
+
   /**
    * @brief Convert to R8G8B8A8 representation.
    *
