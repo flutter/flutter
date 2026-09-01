@@ -1822,8 +1822,8 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   ///
-  /// The returned list is cached, and returns the same instance as long as the
-  /// text layout has not changed.
+  /// The returned list is cached, and this method returns the same instance as
+  /// long as the text layout has not changed.
   List<ui.LineMetrics> computeLineMetrics() {
     assert(_debugAssertTextLayoutIsValid);
     assert(!_debugNeedsRelayout);
