@@ -6034,24 +6034,21 @@ TEST_F(Phase63FinalGNIntegrationTest, FlutterMainHcppPlumbing) {
     EXPECT_CALL(mock_env_, GetObjectRefType(_))
         .WillRepeatedly(Return(JNILocalRefType));
     EXPECT_CALL(mock_env_, GetObjectArrayElement(fake_array, _))
-        .WillRepeatedly(
-            ::testing::Invoke([utf16_args](jobjectArray, jsize idx) -> jobject {
-              return reinterpret_cast<jobject>(static_cast<uintptr_t>(idx + 1));
-            }));
+        .WillRepeatedly([utf16_args](jobjectArray, jsize idx) -> jobject {
+          return reinterpret_cast<jobject>(static_cast<uintptr_t>(idx + 1));
+        });
     EXPECT_CALL(mock_env_, GetStringLength(_))
-        .WillRepeatedly(::testing::Invoke([utf16_args](jstring s) -> jsize {
+        .WillRepeatedly([utf16_args](jstring s) -> jsize {
           size_t idx = static_cast<size_t>(reinterpret_cast<uintptr_t>(s) - 1);
           return idx < utf16_args->size() ? (*utf16_args)[idx].length() : 0;
-        }));
+        });
     EXPECT_CALL(mock_env_, GetStringChars(_, _))
-        .WillRepeatedly(::testing::Invoke(
-            [utf16_args](jstring s, jboolean*) -> const jchar* {
-              size_t idx =
-                  static_cast<size_t>(reinterpret_cast<uintptr_t>(s) - 1);
-              return idx < utf16_args->size() ? reinterpret_cast<const jchar*>(
-                                                    (*utf16_args)[idx].data())
-                                              : nullptr;
-            }));
+        .WillRepeatedly([utf16_args](jstring s, jboolean*) -> const jchar* {
+          size_t idx = static_cast<size_t>(reinterpret_cast<uintptr_t>(s) - 1);
+          return idx < utf16_args->size()
+                     ? reinterpret_cast<const jchar*>((*utf16_args)[idx].data())
+                     : nullptr;
+        });
     EXPECT_CALL(mock_env_, ReleaseStringChars(_, _)).WillRepeatedly(Return());
     return fake_array;
   };
