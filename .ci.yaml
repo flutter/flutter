@@ -375,15 +375,15 @@ targets:
       tags: >
         ["framework","hostonly","shard","linux"]
 
-  # This is a benchmark that does not require an attached device. However, we
-  # are intentionally running it in the devicelab to ensure that it does not
-  # run on a VM in order to avoid noisy results from the benchmark.
+  # This is a benchmark that does not require an attached device. It runs on a
+  # devicelab drone VM with 32 GB RAM to prevent premature termination during
+  # repo-wide analysis.
   - name: Linux analyzer_benchmark
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
       os: Linux
-      device_type: "mokey"
+      device_type: none
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
@@ -393,7 +393,7 @@ targets:
           {"dependency": "gradle_dists", "version": "8.4-bin:8.13-rc-1-bin:8.14-bin:9.3.1-bin:9.3.1-all"}
         ]
       tags: >
-        ["devicelab", "android", "linux", "mokey"]
+        ["devicelab", "android", "linux"]
       task_name: analyzer_benchmark
 
   - name: Linux coverage
