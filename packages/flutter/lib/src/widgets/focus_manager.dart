@@ -2066,13 +2066,11 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     final FocusScopeNode scope = previousFocus?.nearestScope ?? rootScope;
     FocusNode? fallbackFocus;
 
-    if (scope.descendants.isNotEmpty) {
-      // Get all traversable descendants, and give the focus to the first one if found any
-      // [traversalDescendants] filters [canRequestFocus]
-      final Iterable<FocusNode> traversalDescendants = scope.traversalDescendants;
-      if (traversalDescendants.isNotEmpty) {
-        fallbackFocus = traversalDescendants.first;
-      }
+    // Get all traversable descendants, and give the focus to the first one if found any.
+    // [traversalDescendants] filters [canRequestFocus].
+    final Iterable<FocusNode> traversalDescendants = scope.traversalDescendants;
+    if (traversalDescendants.isNotEmpty) {
+      fallbackFocus = traversalDescendants.first;
     }
 
     // Return fallback focus or restore to [rootScope] as a safe and last option
