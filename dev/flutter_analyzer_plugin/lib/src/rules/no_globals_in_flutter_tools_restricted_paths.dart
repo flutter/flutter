@@ -8,6 +8,9 @@
 
 /// Default set of file paths relative to `packages/flutter_tools/` that must
 /// not import `globals.dart`.
+///
+/// Part of the flutter_tools dependency injection migration effort
+/// (https://github.com/flutter/flutter/issues/47161).
 const Set<String> defaultRestrictedPaths = <String>{
   'lib/src/android/adb.dart',
   'lib/src/android/android_builder.dart',

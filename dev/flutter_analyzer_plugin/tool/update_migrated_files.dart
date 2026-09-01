@@ -59,23 +59,25 @@ bool importsGlobals(File file) {
 /// Generates Dart source content for `no_globals_in_flutter_tools_restricted_paths.dart`.
 String generateRestrictedPathsContent(Set<String> files) {
   final List<String> sortedFiles = files.toList()..sort();
-  final buffer = StringBuffer();
-  buffer.writeln('// Copyright 2014 The Flutter Authors. All rights reserved.');
-  buffer.writeln('// Use of this source code is governed by a BSD-style license that can be');
-  buffer.writeln('// found in the LICENSE file.');
-  buffer.writeln();
-  buffer.writeln('// AUTO-GENERATED FILE. DO NOT MODIFY MANUALLY.');
-  buffer.writeln('// To update, run:');
-  buffer.writeln('//   dart dev/flutter_analyzer_plugin/tool/update_migrated_files.dart');
-  buffer.writeln();
-  buffer.writeln('/// Default set of file paths relative to `packages/flutter_tools/` that must');
-  buffer.writeln('/// not import `globals.dart`.');
-  buffer.writeln('const Set<String> defaultRestrictedPaths = <String>{');
-  for (final file in sortedFiles) {
-    buffer.writeln("  '$file',");
-  }
-  buffer.writeln('};');
-  return buffer.toString();
+  final String pathsContent = sortedFiles.map((String file) => "  '$file',").join('\n');
+  return '''
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// AUTO-GENERATED FILE. DO NOT MODIFY MANUALLY.
+// To update, run:
+//   dart dev/flutter_analyzer_plugin/tool/update_migrated_files.dart
+
+/// Default set of file paths relative to `packages/flutter_tools/` that must
+/// not import `globals.dart`.
+///
+/// Part of the flutter_tools dependency injection migration effort
+/// (https://github.com/flutter/flutter/issues/47161).
+const Set<String> defaultRestrictedPaths = <String>{
+$pathsContent
+};
+''';
 }
 
 /// Locates `packages/flutter_tools` starting from the current directory or script location.

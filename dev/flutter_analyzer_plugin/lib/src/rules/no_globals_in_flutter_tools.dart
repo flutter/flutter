@@ -18,10 +18,11 @@ const String _packageScheme = 'package';
 
 /// Verifies that `globals.dart` is not imported in migrated `flutter_tools` files.
 ///
-/// As part of the modular dependency injection refactoring in `flutter_tools`,
-/// commands, runners, and services are being migrated to receive dependencies
-/// explicitly via constructor injection rather than accessing ambient singleton
-/// services exported by `packages/flutter_tools/lib/src/globals.dart`.
+/// As part of the modular dependency injection refactoring in `flutter_tools`
+/// (https://github.com/flutter/flutter/issues/47161), commands, runners, and
+/// services are being migrated to receive dependencies explicitly via constructor
+/// injection rather than accessing ambient singleton services exported by
+/// `packages/flutter_tools/lib/src/globals.dart`.
 ///
 /// This rule acts as a migration ratchet: any file listed in [restrictedPaths]
 /// (by default [defaultRestrictedPaths]) that imports `globals.dart` either
@@ -58,7 +59,8 @@ class NoGlobalsInFlutterTools extends AnalysisRule {
     'no_globals_in_flutter_tools',
     'Do not import globals.dart in this file.',
     correctionMessage:
-        'Pass dependencies explicitly via constructor parameters rather than accessing ambient globals.',
+        'Pass dependencies explicitly via constructor parameters rather than accessing ambient globals '
+        '(https://github.com/flutter/flutter/issues/47161).',
     severity: DiagnosticSeverity.ERROR,
   );
 
