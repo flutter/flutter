@@ -14,6 +14,12 @@ import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/version/version.gni")
 import("//flutter/vulkan/config.gni")
 
+config("jni_headers_config") {
+  include_dirs = [
+    "//flutter/third_party/dart/third_party/pkg/native/pkgs/jni/third_party",
+  ]
+}
+
 source_set("flutter_embedder_native_src") {
   visibility = [ ":*" ]
 
@@ -62,7 +68,10 @@ source_set("flutter_embedder_native_src") {
 
   deps = [ "//flutter/shell/platform/embedder:embedder_as_internal_library" ]
 
-  public_configs = [ "//flutter:config" ]
+  public_configs = [
+    "//flutter:config",
+    ":jni_headers_config",
+  ]
 
   if (is_android) {
     libs = [
@@ -103,6 +112,7 @@ executable("flutter_embedder_native_unittests") {
   deps = [
     ":flutter_embedder_native_src",
     "//flutter/fml",
+    "//flutter/shell/platform/android/jni:mock_jni_env",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
   ]

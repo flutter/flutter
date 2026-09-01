@@ -6,11 +6,13 @@
 #include <thread>
 #include <vector>
 
+#include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/shell/platform/android/android_engine_group.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
 #include "flutter/shell/platform/android/android_vulkan_texture.h"
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
+#include "flutter/shell/platform/android/jni/mock_jni_env.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 #include "flutter/shell/platform/android/jni_router.h"
 #include "flutter/shell/platform/android/jvm_invoker.h"
@@ -27,6 +29,7 @@ using ::testing::DoAll;
 using ::testing::Eq;
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::ReturnArg;
 using ::testing::SetArgPointee;
 using ::testing::StrictMock;
 
@@ -5381,6 +5384,421 @@ TEST(Phase56StrictGNTargetIsolationTest,
   wm_evt.width = 1080;
   wm_evt.height = 1920;
   EXPECT_EQ(wm_evt.struct_size, sizeof(FlutterWindowMetricsEvent));
+}
+
+class Phase61JniRegistrationCutoverTest : public ::testing::Test {
+ public:
+  static void SetUpTestSuite() {
+    static std::once_flag jvm_init_flag;
+    std::call_once(jvm_init_flag, []() { fml::jni::InitJavaVM(&jvm_); });
+  }
+
+  void SetUp() override { jvm_.SetJNIEnv(&mock_env_); }
+
+  void TearDown() override { jvm_.SetJNIEnv(nullptr); }
+
+  MockJNIEnv& mock_env() { return mock_env_; }
+
+  static MockJavaVM jvm_;
+  MockJNIEnv mock_env_;
+};
+
+MockJavaVM Phase61JniRegistrationCutoverTest::jvm_;
+
+TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  const jclass kLongClass = reinterpret_cast<jclass>(101);
+  const jclass kCallbackInfoClass = reinterpret_cast<jclass>(102);
+  const jfieldID kShellHolderField = reinterpret_cast<jfieldID>(200);
+  const jmethodID kJniConstructor = reinterpret_cast<jmethodID>(300);
+  const jmethodID kLongConstructor = reinterpret_cast<jmethodID>(301);
+  const jmethodID kCallbackConstructor = reinterpret_cast<jmethodID>(302);
+
+  EXPECT_CALL(mock_env_, FindClass(_))
+      .WillRepeatedly([&](const char* name) -> jclass {
+        if (strcmp(name, "io/flutter/embedding/engine/FlutterJNI") == 0) {
+          return kFlutterJNIClass;
+        }
+        if (strcmp(name, "java/lang/Long") == 0) {
+          return kLongClass;
+        }
+        if (strcmp(name, "io/flutter/view/FlutterCallbackInformation") == 0) {
+          return kCallbackInfoClass;
+        }
+        return reinterpret_cast<jclass>(109);
+      });
+
+  EXPECT_CALL(mock_env_, GetFieldID(kFlutterJNIClass, "nativeShellHolderId",
+                                    "Ljava/lang/Long;"))
+      .WillRepeatedly(Return(kShellHolderField));
+  EXPECT_CALL(mock_env_, GetMethodID(kFlutterJNIClass, "<init>", "()V"))
+      .WillRepeatedly(Return(kJniConstructor));
+  EXPECT_CALL(mock_env_,
+              GetStaticMethodID(kLongClass, "valueOf", "(J)Ljava/lang/Long;"))
+      .WillRepeatedly(Return(kLongConstructor));
+  EXPECT_CALL(
+      mock_env_,
+      GetMethodID(kCallbackInfoClass, "<init>",
+                  "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"))
+      .WillRepeatedly(Return(kCallbackConstructor));
+
+  EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env_, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  std::vector<JNINativeMethod> registered_methods;
+  EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
+      .WillOnce(
+          [&](jclass clazz, const JNINativeMethod* methods, jint nMethods) {
+            registered_methods.assign(methods, methods + nMethods);
+            return 0;
+          });
+
+  bool result = FlutterEmbedderNative::RegisterJni(&mock_env_);
+  EXPECT_TRUE(result);
+  EXPECT_EQ(registered_methods.size(), 38u);
+
+  // Verify all essential methods are present and bound to valid function
+  // pointers
+  auto has_method = [&](const char* name) {
+    for (const auto& method : registered_methods) {
+      if (strcmp(method.name, name) == 0 && method.fnPtr != nullptr) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  EXPECT_TRUE(has_method("nativeAttach"));
+  EXPECT_TRUE(has_method("nativeDestroy"));
+  EXPECT_TRUE(has_method("nativeSpawn"));
+  EXPECT_TRUE(has_method("nativeRunBundleAndSnapshotFromLibrary"));
+  EXPECT_TRUE(has_method("nativeDispatchEmptyPlatformMessage"));
+  EXPECT_TRUE(has_method("nativeCleanupMessageData"));
+  EXPECT_TRUE(has_method("nativeDispatchPlatformMessage"));
+  EXPECT_TRUE(has_method("nativeInvokePlatformMessageResponseCallback"));
+  EXPECT_TRUE(has_method("nativeInvokePlatformMessageEmptyResponseCallback"));
+  EXPECT_TRUE(has_method("nativeNotifyLowMemoryWarning"));
+  EXPECT_TRUE(has_method("nativeGetBitmap"));
+  EXPECT_TRUE(has_method("nativeSurfaceCreated"));
+  EXPECT_TRUE(has_method("nativeSurfaceWindowChanged"));
+  EXPECT_TRUE(has_method("nativeSurfaceChanged"));
+  EXPECT_TRUE(has_method("nativeSurfaceDestroyed"));
+  EXPECT_TRUE(has_method("nativeSetViewportMetrics"));
+  EXPECT_TRUE(has_method("nativeDispatchPointerDataPacket"));
+  EXPECT_TRUE(has_method("nativeDispatchSemanticsAction"));
+  EXPECT_TRUE(has_method("nativeSetSemanticsEnabled"));
+  EXPECT_TRUE(has_method("nativeSetAccessibilityFeatures"));
+  EXPECT_TRUE(has_method("nativeGetIsSoftwareRenderingEnabled"));
+  EXPECT_TRUE(has_method("nativeRegisterTexture"));
+  EXPECT_TRUE(has_method("nativeRegisterImageTexture"));
+  EXPECT_TRUE(has_method("nativeMarkTextureFrameAvailable"));
+  EXPECT_TRUE(has_method("nativeScheduleFrame"));
+  EXPECT_TRUE(has_method("nativeUnregisterTexture"));
+  EXPECT_TRUE(has_method("nativeLookupCallbackInformation"));
+  EXPECT_TRUE(has_method("nativeFlutterTextUtilsIsEmoji"));
+  EXPECT_TRUE(has_method("nativeFlutterTextUtilsIsEmojiModifier"));
+  EXPECT_TRUE(has_method("nativeFlutterTextUtilsIsEmojiModifierBase"));
+  EXPECT_TRUE(has_method("nativeFlutterTextUtilsIsVariationSelector"));
+  EXPECT_TRUE(has_method("nativeFlutterTextUtilsIsRegionalIndicator"));
+  EXPECT_TRUE(has_method("nativeLoadDartDeferredLibrary"));
+  EXPECT_TRUE(has_method("nativeUpdateJavaAssetManager"));
+  EXPECT_TRUE(has_method("nativeDeferredComponentInstallFailure"));
+  EXPECT_TRUE(has_method("nativeUpdateDisplayMetrics"));
+  EXPECT_TRUE(has_method("nativeIsSurfaceControlEnabled"));
+  EXPECT_TRUE(has_method("nativePrefetchDefaultFontManager"));
+}
+
+TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniNullOrFailureHandling) {
+  // Test null env
+  EXPECT_FALSE(FlutterEmbedderNative::RegisterJni(nullptr));
+
+  // Test FindClass failure
+  EXPECT_CALL(
+      mock_env_,
+      FindClass(Eq(std::string("io/flutter/embedding/engine/FlutterJNI"))))
+      .WillOnce(Return(nullptr));
+  EXPECT_FALSE(FlutterEmbedderNative::RegisterJni(&mock_env_));
+
+  // Test RegisterNatives failure
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  EXPECT_CALL(
+      mock_env_,
+      FindClass(Eq(std::string("io/flutter/embedding/engine/FlutterJNI"))))
+      .WillOnce(Return(kFlutterJNIClass));
+  EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
+      .WillOnce(Return(-1));
+  EXPECT_FALSE(FlutterEmbedderNative::RegisterJni(&mock_env_));
+}
+
+TEST_F(Phase61JniRegistrationCutoverTest, AttachAndDestroyJNI) {
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  EXPECT_CALL(mock_env_, FindClass(_)).WillRepeatedly(Return(kFlutterJNIClass));
+  EXPECT_CALL(mock_env_, GetFieldID(_, _, _))
+      .WillRepeatedly(Return(reinterpret_cast<jfieldID>(200)));
+  EXPECT_CALL(mock_env_, GetMethodID(_, _, _))
+      .WillRepeatedly(Return(reinterpret_cast<jmethodID>(300)));
+  EXPECT_CALL(mock_env_, GetStaticMethodID(_, _, _))
+      .WillRepeatedly(Return(reinterpret_cast<jmethodID>(301)));
+  EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env_, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  using AttachFn = jlong (*)(JNIEnv*, jclass, jobject);
+  using DestroyFn = void (*)(JNIEnv*, jobject, jlong);
+  AttachFn attach_fn = nullptr;
+  DestroyFn destroy_fn = nullptr;
+
+  EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
+      .WillOnce(
+          [&](jclass clazz, const JNINativeMethod* methods, jint nMethods) {
+            for (jint i = 0; i < nMethods; ++i) {
+              if (strcmp(methods[i].name, "nativeAttach") == 0) {
+                attach_fn = reinterpret_cast<AttachFn>(methods[i].fnPtr);
+              } else if (strcmp(methods[i].name, "nativeDestroy") == 0) {
+                destroy_fn = reinterpret_cast<DestroyFn>(methods[i].fnPtr);
+              }
+            }
+            return 0;
+          });
+
+  ASSERT_TRUE(FlutterEmbedderNative::RegisterJni(&mock_env_));
+  ASSERT_NE(attach_fn, nullptr);
+  ASSERT_NE(destroy_fn, nullptr);
+
+  jobject flutter_jni_obj = reinterpret_cast<jobject>(500);
+  jlong native_handle =
+      attach_fn(&mock_env_, kFlutterJNIClass, flutter_jni_obj);
+  EXPECT_NE(native_handle, 0);
+
+  auto* native_ptr = reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  ASSERT_NE(native_ptr, nullptr);
+  EXPECT_NE(native_ptr->GetRouter(), nullptr);
+
+  destroy_fn(&mock_env_, flutter_jni_obj, native_handle);
+}
+
+TEST_F(Phase61JniRegistrationCutoverTest,
+       DirectJNIRoutingAndDataTransformations) {
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  EXPECT_CALL(mock_env_, FindClass(_)).WillRepeatedly(Return(kFlutterJNIClass));
+  EXPECT_CALL(mock_env_, GetFieldID(_, _, _))
+      .WillRepeatedly(Return(reinterpret_cast<jfieldID>(200)));
+  EXPECT_CALL(mock_env_, GetMethodID(_, _, _))
+      .WillRepeatedly(Return(reinterpret_cast<jmethodID>(300)));
+  EXPECT_CALL(mock_env_, GetStaticMethodID(_, _, _))
+      .WillRepeatedly(Return(reinterpret_cast<jmethodID>(301)));
+  EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env_, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  using AttachFn = jlong (*)(JNIEnv*, jclass, jobject);
+  using DestroyFn = void (*)(JNIEnv*, jobject, jlong);
+  using SetViewportMetricsFn = void (*)(
+      JNIEnv*, jobject, jlong, jfloat, jint, jint, jint, jint, jint, jint, jint,
+      jint, jint, jint, jint, jint, jint, jint, jint, jintArray, jintArray,
+      jintArray, jint, jint, jint, jint, jint, jint, jint, jint);
+  using IsEmojiFn = jboolean (*)(JNIEnv*, jobject, jint);
+  using SurfaceCreatedFn = void (*)(JNIEnv*, jobject, jlong, jobject);
+  using SurfaceChangedFn = void (*)(JNIEnv*, jobject, jlong, jint, jint);
+  using RegisterTextureFn = void (*)(JNIEnv*, jobject, jlong, jlong, jobject);
+  using MarkTextureFrameAvailableFn = void (*)(JNIEnv*, jobject, jlong, jlong);
+  using UnregisterTextureFn = void (*)(JNIEnv*, jobject, jlong, jlong);
+  using IsSurfaceControlEnabledFn = jboolean (*)(JNIEnv*, jobject, jlong);
+  using PrefetchFontManagerFn = void (*)(JNIEnv*, jclass);
+
+  AttachFn attach_fn = nullptr;
+  DestroyFn destroy_fn = nullptr;
+  SetViewportMetricsFn set_viewport_metrics_fn = nullptr;
+  IsEmojiFn is_emoji_fn = nullptr;
+  SurfaceCreatedFn surface_created_fn = nullptr;
+  SurfaceChangedFn surface_changed_fn = nullptr;
+  RegisterTextureFn register_texture_fn = nullptr;
+  MarkTextureFrameAvailableFn mark_frame_fn = nullptr;
+  UnregisterTextureFn unregister_texture_fn = nullptr;
+  IsSurfaceControlEnabledFn is_sc_enabled_fn = nullptr;
+  PrefetchFontManagerFn prefetch_font_fn = nullptr;
+
+  EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
+      .WillOnce([&](jclass clazz, const JNINativeMethod* methods,
+                    jint nMethods) {
+        for (jint i = 0; i < nMethods; ++i) {
+          if (strcmp(methods[i].name, "nativeAttach") == 0) {
+            attach_fn = reinterpret_cast<AttachFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeDestroy") == 0) {
+            destroy_fn = reinterpret_cast<DestroyFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeSetViewportMetrics") == 0) {
+            set_viewport_metrics_fn =
+                reinterpret_cast<SetViewportMetricsFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeFlutterTextUtilsIsEmoji") ==
+                     0) {
+            is_emoji_fn = reinterpret_cast<IsEmojiFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeSurfaceCreated") == 0) {
+            surface_created_fn =
+                reinterpret_cast<SurfaceCreatedFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeSurfaceChanged") == 0) {
+            surface_changed_fn =
+                reinterpret_cast<SurfaceChangedFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeRegisterTexture") == 0) {
+            register_texture_fn =
+                reinterpret_cast<RegisterTextureFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name,
+                            "nativeMarkTextureFrameAvailable") == 0) {
+            mark_frame_fn =
+                reinterpret_cast<MarkTextureFrameAvailableFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeUnregisterTexture") == 0) {
+            unregister_texture_fn =
+                reinterpret_cast<UnregisterTextureFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeIsSurfaceControlEnabled") ==
+                     0) {
+            is_sc_enabled_fn =
+                reinterpret_cast<IsSurfaceControlEnabledFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name,
+                            "nativePrefetchDefaultFontManager") == 0) {
+            prefetch_font_fn =
+                reinterpret_cast<PrefetchFontManagerFn>(methods[i].fnPtr);
+          }
+        }
+        return 0;
+      });
+
+  ASSERT_TRUE(FlutterEmbedderNative::RegisterJni(&mock_env_));
+  ASSERT_NE(attach_fn, nullptr);
+  ASSERT_NE(destroy_fn, nullptr);
+  ASSERT_NE(set_viewport_metrics_fn, nullptr);
+  ASSERT_NE(is_emoji_fn, nullptr);
+  ASSERT_NE(surface_created_fn, nullptr);
+  ASSERT_NE(surface_changed_fn, nullptr);
+  ASSERT_NE(register_texture_fn, nullptr);
+  ASSERT_NE(mark_frame_fn, nullptr);
+  ASSERT_NE(unregister_texture_fn, nullptr);
+  ASSERT_NE(is_sc_enabled_fn, nullptr);
+  ASSERT_NE(prefetch_font_fn, nullptr);
+
+  // Test emoji detection logic
+  EXPECT_TRUE(is_emoji_fn(&mock_env_, nullptr, 0x1F600));  // Grinning face
+  EXPECT_TRUE(is_emoji_fn(&mock_env_, nullptr, 0x1F680));  // Rocket
+  EXPECT_FALSE(is_emoji_fn(&mock_env_, nullptr, 0x0041));  // 'A'
+
+  // Test native attach & component calls
+  jobject flutter_jni_obj = reinterpret_cast<jobject>(500);
+  jlong native_handle =
+      attach_fn(&mock_env_, kFlutterJNIClass, flutter_jni_obj);
+  ASSERT_NE(native_handle, 0);
+
+  // Surface lifecycle calls
+  surface_created_fn(&mock_env_, flutter_jni_obj, native_handle,
+                     reinterpret_cast<jobject>(600));
+  surface_changed_fn(&mock_env_, flutter_jni_obj, native_handle, 1080, 1920);
+
+  // Texture registration calls
+  register_texture_fn(&mock_env_, flutter_jni_obj, native_handle, 101,
+                      reinterpret_cast<jobject>(700));
+  mark_frame_fn(&mock_env_, flutter_jni_obj, native_handle, 101);
+  unregister_texture_fn(&mock_env_, flutter_jni_obj, native_handle, 101);
+
+  // Surface control check
+  EXPECT_FALSE(is_sc_enabled_fn(&mock_env_, flutter_jni_obj, native_handle));
+
+  // Prefetch font manager
+  prefetch_font_fn(&mock_env_, kFlutterJNIClass);
+
+  // Set viewport metrics with null display features
+  set_viewport_metrics_fn(&mock_env_, flutter_jni_obj, native_handle, 2.0f,
+                          1080, 1920, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10,
+                          nullptr, nullptr, nullptr, 0, 0, 0, 0, -1, -1, -1,
+                          -1);
+
+  destroy_fn(&mock_env_, flutter_jni_obj, native_handle);
+}
+
+TEST_F(Phase61JniRegistrationCutoverTest, ConcurrentMultithreadedJNIExecution) {
+  const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
+  EXPECT_CALL(mock_env_, FindClass(_)).WillRepeatedly(Return(kFlutterJNIClass));
+  EXPECT_CALL(mock_env_, GetFieldID(_, _, _))
+      .WillRepeatedly(Return(reinterpret_cast<jfieldID>(200)));
+  EXPECT_CALL(mock_env_, GetMethodID(_, _, _))
+      .WillRepeatedly(Return(reinterpret_cast<jmethodID>(300)));
+  EXPECT_CALL(mock_env_, GetStaticMethodID(_, _, _))
+      .WillRepeatedly(Return(reinterpret_cast<jmethodID>(301)));
+  EXPECT_CALL(mock_env_, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(mock_env_, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env_, GetObjectRefType(_))
+      .WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(mock_env_, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+
+  using AttachFn = jlong (*)(JNIEnv*, jclass, jobject);
+  using DestroyFn = void (*)(JNIEnv*, jobject, jlong);
+  using SurfaceChangedFn = void (*)(JNIEnv*, jobject, jlong, jint, jint);
+  using RegisterTextureFn = void (*)(JNIEnv*, jobject, jlong, jlong, jobject);
+  using UnregisterTextureFn = void (*)(JNIEnv*, jobject, jlong, jlong);
+
+  AttachFn attach_fn = nullptr;
+  DestroyFn destroy_fn = nullptr;
+  SurfaceChangedFn surface_changed_fn = nullptr;
+  RegisterTextureFn register_texture_fn = nullptr;
+  UnregisterTextureFn unregister_texture_fn = nullptr;
+
+  EXPECT_CALL(mock_env_, RegisterNatives(kFlutterJNIClass, _, _))
+      .WillOnce([&](jclass clazz, const JNINativeMethod* methods,
+                    jint nMethods) {
+        for (jint i = 0; i < nMethods; ++i) {
+          if (strcmp(methods[i].name, "nativeAttach") == 0) {
+            attach_fn = reinterpret_cast<AttachFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeDestroy") == 0) {
+            destroy_fn = reinterpret_cast<DestroyFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeSurfaceChanged") == 0) {
+            surface_changed_fn =
+                reinterpret_cast<SurfaceChangedFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeRegisterTexture") == 0) {
+            register_texture_fn =
+                reinterpret_cast<RegisterTextureFn>(methods[i].fnPtr);
+          } else if (strcmp(methods[i].name, "nativeUnregisterTexture") == 0) {
+            unregister_texture_fn =
+                reinterpret_cast<UnregisterTextureFn>(methods[i].fnPtr);
+          }
+        }
+        return 0;
+      });
+
+  ASSERT_TRUE(FlutterEmbedderNative::RegisterJni(&mock_env_));
+  ASSERT_NE(attach_fn, nullptr);
+  ASSERT_NE(destroy_fn, nullptr);
+
+  const size_t kThreadCount = 8;
+  const size_t kIterationsPerThread = 50;
+  std::vector<std::future<bool>> futures;
+  futures.reserve(kThreadCount);
+
+  for (size_t t = 0; t < kThreadCount; ++t) {
+    futures.push_back(std::async(std::launch::async, [&, t]() {
+      for (size_t i = 0; i < kIterationsPerThread; ++i) {
+        jobject jcaller = reinterpret_cast<jobject>(1000 + t * 100 + i);
+        jlong handle = attach_fn(&mock_env_, kFlutterJNIClass, jcaller);
+        if (handle == 0) {
+          return false;
+        }
+
+        surface_changed_fn(&mock_env_, jcaller, handle, 1080, 1920);
+        int64_t texture_id = static_cast<int64_t>(t * 1000 + i);
+        register_texture_fn(&mock_env_, jcaller, handle, texture_id, nullptr);
+        unregister_texture_fn(&mock_env_, jcaller, handle, texture_id);
+
+        destroy_fn(&mock_env_, jcaller, handle);
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
 }
 
 class EmbedderTestListener : public ::testing::EmptyTestEventListener {

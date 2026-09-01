@@ -226,11 +226,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] *Review*: Any deviations or failing tests are caught, adversarially root-caused, and pushed back into the specific atomic branches for this phase before proceeding.
 
 ## Phase 6: Complete Legacy Purge & Final JNI Cutover
-- [ ] **6.1 JNI Registration Cutover**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-6.1-jni-registration-cutover`
-    - [ ] Native JNI methods in `library_loader.cc` and `FlutterJNI` registration table rewired directly to `FlutterEmbedderNative` and `JniRouter`.
-    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
-    - [ ] *Validation*: `ninja -C out/host_debug_unopt flutter_embedder_native_unittests` compiles successfully AND all 201 host unit tests pass.
+- [x] **6.1 JNI Registration Cutover**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-6.1-jni-registration-cutover`
+    - [x] Native JNI methods in `library_loader.cc` and `FlutterJNI` registration table rewired directly to `FlutterEmbedderNative` and `JniRouter`.
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and passed with PASS verdict.
+    - [x] *Validation*: `ninja -C out/host_debug_unopt flutter_embedder_native_unittests` compiles successfully AND all 206 host unit tests (across 41 test suites) pass. `flutter analyze --flutter-repo` passes with 0 issues.
 - [ ] **6.2 Legacy Class Purge**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-6.2-legacy-class-purge`
     - [ ] `android_shell_holder.{h,cc}`, `platform_view_android.{h,cc}`, `android_surface*`, `android_context*`, `image_external_texture*`, `surface_texture_external_texture*`, `vsync_waiter_android.{h,cc}`, `android_display.{h,cc}`, and legacy subdirectories purged.

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_FLUTTER_EMBEDDER_NATIVE_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_FLUTTER_EMBEDDER_NATIVE_H_
 
+#include <jni.h>
 #include <cstddef>
 #include <map>
 #include <memory>
@@ -224,6 +225,13 @@ class FlutterEmbedderNative {
 
   /// @brief Sets the Embedder C-API rollout flag.
   static void SetEmbedderEnabled(bool enabled);
+
+  /// @brief Registers all JNI native methods for
+  /// io.flutter.embedding.engine.FlutterJNI directly with FlutterEmbedderNative
+  /// and JniRouter.
+  /// @param env JNIEnv pointer.
+  /// @return True if JNI native registration succeeded.
+  static bool RegisterJni(JNIEnv* env);
 
   /// @brief Sets the default global OSLibraryLoader instance.
   static void SetDefaultLibraryLoader(std::shared_ptr<OSLibraryLoader> loader);

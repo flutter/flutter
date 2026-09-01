@@ -7,6 +7,8 @@
 
 #include <jni.h>
 
+#include "gmock/gmock.h"
+
 namespace flutter {
 
 class MockJavaVM : public JavaVM {
