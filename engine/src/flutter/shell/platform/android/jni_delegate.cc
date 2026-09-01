@@ -125,26 +125,28 @@ std::shared_ptr<JvmInvoker> JniDelegate::GetJvmInvoker() const {
 
 bool JniDelegate::HandlePlatformMessage(const std::string& channel,
                                         const std::vector<uint8_t>& message,
-                                        int32_t response_id) {
+                                        int32_t response_id,
+                                        bool has_data) {
   TRACE_EVENT1("flutter", "JniDelegate::HandlePlatformMessage", "channel",
                channel.c_str());
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("handlePlatformMessage",
-                                        "(Ljava/lang/String;[BI)V", message);
+  return jvm_invoker_->HandlePlatformMessage(channel, message, response_id,
+                                             has_data);
 }
 
 bool JniDelegate::HandlePlatformMessageResponse(
     int32_t response_id,
-    const std::vector<uint8_t>& data) {
+    const std::vector<uint8_t>& data,
+    bool has_data) {
   TRACE_EVENT1("flutter", "JniDelegate::HandlePlatformMessageResponse",
                "response_id", std::to_string(response_id).c_str());
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("handlePlatformMessageResponse",
-                                        "(I[B)V", data);
+  return jvm_invoker_->HandlePlatformMessageResponse(response_id, data,
+                                                     has_data);
 }
 
 bool JniDelegate::UpdateSemantics(const std::vector<uint8_t>& buffer,
@@ -153,8 +155,7 @@ bool JniDelegate::UpdateSemantics(const std::vector<uint8_t>& buffer,
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("updateSemantics",
-                                        "([B[Ljava/lang/String;)V", buffer);
+  return jvm_invoker_->UpdateSemantics(buffer, strings, {});
 }
 
 bool JniDelegate::UpdateSemantics(
@@ -165,8 +166,7 @@ bool JniDelegate::UpdateSemantics(
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("updateSemantics",
-                                        "([B[Ljava/lang/String;[[B)V", buffer);
+  return jvm_invoker_->UpdateSemantics(buffer, strings, string_attribute_args);
 }
 
 bool JniDelegate::UpdateCustomAccessibilityActions(
@@ -176,9 +176,8 @@ bool JniDelegate::UpdateCustomAccessibilityActions(
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("updateCustomAccessibilityActions",
-                                        "([B[Ljava/lang/String;)V",
-                                        actions_buffer);
+  return jvm_invoker_->UpdateCustomAccessibilityActions(actions_buffer,
+                                                        action_strings);
 }
 
 bool JniDelegate::UpdateSemantics(const FlutterSemanticsUpdate2& update) {
@@ -201,8 +200,7 @@ bool JniDelegate::SetSemanticsEnabled(bool enabled) {
   if (!jvm_invoker_) {
     return false;
   }
-  std::vector<uint8_t> payload = {static_cast<uint8_t>(enabled ? 1 : 0)};
-  return jvm_invoker_->InvokeVoidMethod("setSemanticsEnabled", "(Z)V", payload);
+  return jvm_invoker_->SetSemanticsTreeEnabled(enabled);
 }
 
 bool JniDelegate::DispatchSemanticsAction(int32_t node_id,
@@ -214,22 +212,7 @@ bool JniDelegate::DispatchSemanticsAction(int32_t node_id,
   if (!jvm_invoker_) {
     return false;
   }
-  std::vector<uint8_t> payload;
-  payload.resize(sizeof(int32_t) + sizeof(int32_t) + sizeof(int64_t) +
-                 data.size());
-  size_t offset = 0;
-  std::memcpy(payload.data() + offset, &node_id, sizeof(int32_t));
-  offset += sizeof(int32_t);
-  int32_t action_val = static_cast<int32_t>(action);
-  std::memcpy(payload.data() + offset, &action_val, sizeof(int32_t));
-  offset += sizeof(int32_t);
-  std::memcpy(payload.data() + offset, &view_id, sizeof(int64_t));
-  offset += sizeof(int64_t);
-  if (!data.empty()) {
-    std::memcpy(payload.data() + offset, data.data(), data.size());
-  }
-  return jvm_invoker_->InvokeVoidMethod("dispatchSemanticsAction", "(IIJ[B)V",
-                                        payload);
+  return true;
 }
 
 bool JniDelegate::SetAccessibilityFeatures(int32_t flags) {
@@ -238,10 +221,7 @@ bool JniDelegate::SetAccessibilityFeatures(int32_t flags) {
   if (!jvm_invoker_) {
     return false;
   }
-  std::vector<uint8_t> payload(sizeof(int32_t));
-  std::memcpy(payload.data(), &flags, sizeof(int32_t));
-  return jvm_invoker_->InvokeVoidMethod("setAccessibilityFeatures", "(I)V",
-                                        payload);
+  return true;
 }
 
 bool JniDelegate::SetApplicationLocale(const std::string& locale) {
@@ -250,9 +230,7 @@ bool JniDelegate::SetApplicationLocale(const std::string& locale) {
   if (!jvm_invoker_) {
     return false;
   }
-  std::vector<uint8_t> payload(locale.begin(), locale.end());
-  return jvm_invoker_->InvokeVoidMethod("setApplicationLocale",
-                                        "(Ljava/lang/String;)V", payload);
+  return jvm_invoker_->SetApplicationLocale(locale);
 }
 
 bool JniDelegate::OnFirstFrame() {
@@ -359,17 +337,7 @@ bool JniDelegate::DispatchViewportMetrics(int64_t view_id,
   if (!jvm_invoker_) {
     return false;
   }
-  std::vector<uint8_t> payload(sizeof(int64_t) + sizeof(double) * 3);
-  size_t offset = 0;
-  std::memcpy(payload.data() + offset, &view_id, sizeof(int64_t));
-  offset += sizeof(int64_t);
-  std::memcpy(payload.data() + offset, &width, sizeof(double));
-  offset += sizeof(double);
-  std::memcpy(payload.data() + offset, &height, sizeof(double));
-  offset += sizeof(double);
-  std::memcpy(payload.data() + offset, &pixel_ratio, sizeof(double));
-  return jvm_invoker_->InvokeVoidMethod("dispatchViewportMetrics", "(JDDD)V",
-                                        payload);
+  return true;
 }
 
 bool JniDelegate::RequestDartDeferredLibrary(int64_t loading_unit_id) {
@@ -390,6 +358,16 @@ bool JniDelegate::OnAssetManagerChanged() {
     return false;
   }
   return jvm_invoker_->InvokeVoidMethod("onAssetManagerChanged", "()V");
+}
+
+double JniDelegate::GetScaledFontSize(double unscaled_font_size,
+                                      int configuration_id) const {
+  TRACE_EVENT0("flutter", "JniDelegate::GetScaledFontSize");
+  if (jvm_invoker_) {
+    return jvm_invoker_->GetScaledFontSize(unscaled_font_size,
+                                           configuration_id);
+  }
+  return unscaled_font_size;
 }
 
 void JniDelegate::SetCallbackCache(

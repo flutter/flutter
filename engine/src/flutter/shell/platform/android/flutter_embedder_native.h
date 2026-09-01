@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_FLUTTER_EMBEDDER_NATIVE_H_
 
 #include <jni.h>
+#include <atomic>
 #include <cstddef>
 #include <map>
 #include <memory>
@@ -15,6 +16,7 @@
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/shell/platform/android/android_engine_group.h"
 #include "flutter/shell/platform/android/android_hardware_buffer.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
@@ -31,6 +33,12 @@
 #include "flutter/shell/platform/android/jvm_invoker.h"
 #include "flutter/shell/platform/android/os_library_loader.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+
+#if defined(__ANDROID__)
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#include <android/native_window.h>
+#endif
 
 namespace flutter {
 namespace android {
@@ -239,6 +247,12 @@ class FlutterEmbedderNative {
   /// @brief Returns the default global OSLibraryLoader instance.
   static std::shared_ptr<OSLibraryLoader> GetDefaultLibraryLoader();
 
+  /// @brief Sets the default global AndroidVsyncWaiter instance.
+  static void SetDefaultVsyncWaiter(std::shared_ptr<AndroidVsyncWaiter> waiter);
+
+  /// @brief Returns the default global AndroidVsyncWaiter instance.
+  static std::shared_ptr<AndroidVsyncWaiter> GetDefaultVsyncWaiter();
+
   /// @brief Creates a default JniRouter instance with an injected JvmInvoker.
   static std::shared_ptr<JniRouter> CreateDefaultRouter(
       std::shared_ptr<JvmInvoker> invoker,
@@ -275,6 +289,15 @@ class FlutterEmbedderNative {
   /// @brief Sets or replaces the APKAssetProvider managed by this native
   /// instance.
   void SetAssetProvider(std::shared_ptr<APKAssetProvider> provider);
+
+  /// @brief Updates the APKAssetProvider from Java JNI parameters and notifies
+  /// the running engine.
+  void UpdateAssetManager(JNIEnv* env,
+                          jobject jasset_manager,
+                          const std::string& bundle_path);
+
+  /// @brief Creates a FlutterCustomAssetResolver referencing this instance.
+  FlutterCustomAssetResolver CreateCustomAssetResolver();
 
   /// @brief Resolves an asset by name using the managed asset provider.
   std::unique_ptr<fml::Mapping> ResolveAsset(
@@ -765,6 +788,37 @@ class FlutterEmbedderNative {
       FLUTTER_API_SYMBOL(FlutterEngine) engine,
       int64_t texture_id) const;
 
+  /// @brief Schedules a frame to be rendered by the engine via
+  /// FlutterEngineScheduleFrame.
+  FlutterEngineResult ScheduleFrame(FLUTTER_API_SYMBOL(FlutterEngine)
+                                        engine) const;
+
+  /// @brief Registers a surface texture with the weak reference.
+  void RegisterSurfaceTexture(JNIEnv* env,
+                              int64_t texture_id,
+                              jobject surface_texture);
+
+  /// @brief Unregisters a surface texture by ID.
+  void UnregisterSurfaceTexture(JNIEnv* env, int64_t texture_id);
+
+  /// @brief Retrieves the latest GL external texture frame for a texture.
+  bool GetGlExternalTextureFrame(int64_t texture_id,
+                                 size_t width,
+                                 size_t height,
+                                 FlutterOpenGLTexture* texture_out) const;
+
+  /// @brief Static C-API callback entry point for
+  /// FlutterOpenGLRendererConfig::gl_external_texture_frame_callback.
+  static bool OnGlExternalTextureFrameCallback(
+      void* user_data,
+      int64_t texture_id,
+      size_t width,
+      size_t height,
+      FlutterOpenGLTexture* texture_out);
+
+  /// @brief Marks all registered surface textures as having a frame available.
+  void MarkAllTexturesFrameAvailable() const;
+
   /// @brief Registers an external texture on the engine via
   /// FlutterEngineRegisterExternalTexture.
   FlutterEngineResult RegisterExternalTexture(FLUTTER_API_SYMBOL(FlutterEngine)
@@ -872,9 +926,95 @@ class FlutterEmbedderNative {
   /// @brief Returns active engine count in the group.
   size_t GetActiveEngineCount() const;
 
+  /// @brief Returns the underlying C-API FlutterEngine instance.
+  FLUTTER_API_SYMBOL(FlutterEngine) GetEngine() const;
+
+  /// @brief Runs the FlutterEngine with the given bundle path and entrypoint.
+  FlutterEngineResult RunEngineWithBundle(
+      const std::string& bundle_path,
+      const std::string& entrypoint,
+      const std::vector<std::string>& entrypoint_args,
+      int64_t engine_id);
+
+  /// @brief Sends a platform message to the FlutterEngine.
+  FlutterEngineResult SendPlatformMessage(const std::string& channel,
+                                          const uint8_t* message_data,
+                                          size_t message_size,
+                                          int32_t response_id = 0) const;
+
+  /// @brief Sends a platform message to the FlutterEngine.
+  FlutterEngineResult SendPlatformMessage(const std::string& channel,
+                                          const std::vector<uint8_t>& message,
+                                          int32_t response_id) const;
+
+  /// @brief Sends a platform message response to the FlutterEngine.
+  FlutterEngineResult SendPlatformMessageResponse(int32_t response_id,
+                                                  const uint8_t* data,
+                                                  size_t data_length) const;
+
+  /// @brief Sends a platform message response to the FlutterEngine.
+  FlutterEngineResult SendPlatformMessageResponse(
+      int32_t response_id,
+      const std::vector<uint8_t>& data) const;
+
+  /// @brief Sends pointer events to the FlutterEngine.
+  FlutterEngineResult SendPointerEvents(FLUTTER_API_SYMBOL(FlutterEngine)
+                                            engine,
+                                        const FlutterPointerEvent* events,
+                                        size_t events_count) const;
+
+  /// @brief Dispatches a raw pointer data packet buffer to the engine.
+  void DispatchPointerDataPacket(const uint8_t* buffer, size_t size);
+
+  /// @brief Initializes EGL display, config, context, and surfaces.
+  bool EnsureEGLInitialized();
+
+  /// @brief Tears down EGL context and surface state.
+  void TeardownEGL();
+
+  /// @brief OpenGL make_current callback.
+  bool MakeCurrent();
+
+  /// @brief OpenGL clear_current callback.
+  bool ClearCurrent();
+
+  /// @brief OpenGL make_resource_current callback.
+  bool MakeResourceCurrent();
+
+  /// @brief OpenGL present callback.
+  bool Present();
+
+  /// @brief OpenGL fbo_callback.
+  uint32_t FboCallback() const;
+
+  /// @brief OpenGL gl_proc_resolver callback.
+  void* GlProcResolver(const char* name) const;
+
+  /// @brief Android SurfaceCreated handler.
+  void SurfaceCreated(JNIEnv* env, jobject jsurface);
+
+  /// @brief Android SurfaceWindowChanged handler.
+  void SurfaceWindowChanged(JNIEnv* env, jobject jsurface);
+
+  /// @brief Android SurfaceChanged handler.
+  void SurfaceChanged(int32_t width, int32_t height);
+
+  /// @brief Android SurfaceDestroyed handler.
+  void SurfaceDestroyed();
+
+  /// @brief Static C-API callback entry point for
+  /// FlutterPlatformMessageCallback.
+  static void OnPlatformMessageCallback(const FlutterPlatformMessage* message,
+                                        void* user_data);
+
  private:
   static std::shared_ptr<OSLibraryLoader> default_library_loader_;
 
+  FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
+  mutable std::mutex response_mutex_;
+  mutable std::atomic<int32_t> next_response_id_{1};
+  mutable std::map<int32_t, const FlutterPlatformMessageResponseHandle*>
+      pending_responses_;
   std::shared_ptr<JvmInvoker> jvm_invoker_;
   std::shared_ptr<CallbackCacheProvider> callback_cache_;
   std::shared_ptr<ImageDecoderProvider> image_decoder_;
@@ -896,6 +1036,27 @@ class FlutterEmbedderNative {
   std::shared_ptr<JniDelegate> jni_delegate_;
   std::shared_ptr<JniRouter> jni_router_;
   std::shared_ptr<APKAssetProvider> asset_provider_;
+
+  struct SurfaceTextureEntry {
+    fml::jni::ScopedJavaGlobalRef<jobject> weak_surface_texture;
+    uint32_t gl_texture_id = 0;
+    bool attached = false;
+  };
+  mutable std::mutex surface_textures_mutex_;
+  mutable std::map<int64_t, std::unique_ptr<SurfaceTextureEntry>>
+      surface_textures_;
+
+#if defined(__ANDROID__)
+  EGLDisplay display_ = EGL_NO_DISPLAY;
+  EGLConfig config_ = nullptr;
+  EGLContext render_context_ = EGL_NO_CONTEXT;
+  EGLContext resource_context_ = EGL_NO_CONTEXT;
+  EGLSurface pbuffer_surface_ = EGL_NO_SURFACE;
+  EGLSurface window_surface_ = EGL_NO_SURFACE;
+  ANativeWindow* native_window_ = nullptr;
+  bool egl_initialized_ = false;
+  mutable std::mutex surface_mutex_;
+#endif
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterEmbedderNative);
 };

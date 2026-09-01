@@ -30,9 +30,9 @@ class LegacyJniDelegate {
                                      const std::vector<uint8_t>& message,
                                      int32_t response_id) = 0;
 
-  virtual bool HandlePlatformMessageResponse(
-      int32_t response_id,
-      const std::vector<uint8_t>& data) = 0;
+  virtual bool HandlePlatformMessageResponse(int32_t response_id,
+                                             const std::vector<uint8_t>& data,
+                                             bool has_data = true) = 0;
 
   virtual bool SetApplicationLocale(const std::string& locale) = 0;
 
@@ -91,10 +91,12 @@ class JniRouter {
   // Routing entry points:
   bool RoutePlatformMessage(const std::string& channel,
                             const std::vector<uint8_t>& message,
-                            int32_t response_id);
+                            int32_t response_id,
+                            bool has_data = true);
 
   bool RoutePlatformMessageResponse(int32_t response_id,
-                                    const std::vector<uint8_t>& data);
+                                    const std::vector<uint8_t>& data,
+                                    bool has_data = true);
 
   bool RouteSemanticsUpdate(const std::vector<uint8_t>& buffer,
                             const std::vector<std::string>& strings);
@@ -147,6 +149,9 @@ class JniRouter {
   bool RouteRequestDartDeferredLibrary(int64_t loading_unit_id);
 
   bool RouteAssetManagerChanged();
+
+  double RouteGetScaledFontSize(double unscaled_font_size,
+                                int configuration_id) const;
 
   std::optional<DartCallbackInfo> RouteLookupCallbackInformation(
       int64_t handle);

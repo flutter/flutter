@@ -6,11 +6,12 @@
 
 #include "flutter/shell/platform/android/flutter_main.h"
 
-#include <android/log.h>
 #if defined(__ANDROID__)
+#include <android/log.h>
 #include <sys/system_properties.h>
 #endif
 #include <cstring>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
@@ -56,8 +57,11 @@ bool IsVivante() {
 }  // anonymous namespace
 
 FlutterMain::FlutterMain(const flutter::Settings& settings,
-                         flutter::AndroidRenderingAPI android_rendering_api)
-    : settings_(settings), android_rendering_api_(android_rendering_api) {
+                         flutter::AndroidRenderingAPI android_rendering_api,
+                         const flutter::android::AndroidVMArgs& vm_args)
+    : settings_(settings),
+      android_rendering_api_(android_rendering_api),
+      vm_args_(vm_args) {
   TRACE_EVENT0("flutter", "FlutterMain::FlutterMain");
 }
 
@@ -66,6 +70,10 @@ FlutterMain::~FlutterMain() {
 }
 
 static std::unique_ptr<FlutterMain> g_flutter_main;
+
+bool FlutterMain::IsInitialized() {
+  return g_flutter_main != nullptr;
+}
 
 FlutterMain& FlutterMain::Get() {
   TRACE_EVENT0("flutter", "FlutterMain::Get");
@@ -82,6 +90,11 @@ const flutter::Settings& FlutterMain::GetSettings() const {
 flutter::AndroidRenderingAPI FlutterMain::GetAndroidRenderingAPI() {
   TRACE_EVENT0("flutter", "FlutterMain::GetAndroidRenderingAPI");
   return android_rendering_api_;
+}
+
+const flutter::android::AndroidVMArgs& FlutterMain::GetVMArgs() const {
+  TRACE_EVENT0("flutter", "FlutterMain::GetVMArgs");
+  return vm_args_;
 }
 
 void FlutterMain::Init(JNIEnv* env,
@@ -105,10 +118,12 @@ void FlutterMain::Init(JNIEnv* env,
   flutter::Settings settings;
   settings.enable_platform_isolates = true;
 
+#if defined(__ANDROID__)
   if (engineCachesPath != nullptr) {
     fml::paths::InitializeAndroidCachesPath(
         fml::jni::JavaStringToString(env, engineCachesPath));
   }
+#endif
 
   if (kernelPath != nullptr) {
     auto application_kernel_path =
@@ -120,8 +135,15 @@ void FlutterMain::Init(JNIEnv* env,
 
   settings.log_message_callback = [](const std::string& tag,
                                      const std::string& message) {
+#if defined(__ANDROID__)
     __android_log_print(ANDROID_LOG_INFO, tag.c_str(), "%.*s",
                         static_cast<int>(message.size()), message.c_str());
+#else
+    if (!tag.empty()) {
+      std::cout << tag << ": ";
+    }
+    std::cout << message << std::endl;
+#endif
   };
 
   AndroidRenderingAPI android_rendering_api =
@@ -144,7 +166,8 @@ void FlutterMain::Init(JNIEnv* env,
   vm_args.init_time_millis = initTimeMillis;
   vm_args.api_level = api_level;
 
-  g_flutter_main.reset(new FlutterMain(settings, android_rendering_api));
+  g_flutter_main.reset(
+      new FlutterMain(settings, android_rendering_api, vm_args));
   g_flutter_main->SetupDartVMServiceUriCallback(env);
 }
 

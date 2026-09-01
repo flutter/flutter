@@ -20,7 +20,7 @@ using ::testing::_;
 using ::testing::Eq;
 using ::testing::Return;
 
-class MockJvmInvoker : public JvmInvoker {
+class MockJvmInvokerForVMInit : public JvmInvoker {
  public:
   MOCK_METHOD(bool, EnsureAttachedToThread, (), (override));
   MOCK_METHOD(void, DetachFromThread, (), (override));
@@ -262,7 +262,7 @@ TEST(AndroidVMInitTest, AndroidProjectArgsHolderPopulation) {
 // ---------------------------------------------------------------------------
 
 TEST(AndroidVMInitTest, AndroidVMInitLifecycleAndDispatch) {
-  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto mock_invoker = std::make_shared<MockJvmInvokerForVMInit>();
   auto font_provider = std::make_shared<InMemoryFontCollectionProvider>();
   auto aot_provider = std::make_shared<InMemoryAndroidAOTProvider>();
 

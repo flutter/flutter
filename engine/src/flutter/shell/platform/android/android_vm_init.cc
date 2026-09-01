@@ -6,6 +6,10 @@
 
 #include <algorithm>
 #include <cstring>
+#include <iostream>
+#if defined(__ANDROID__)
+#include <android/log.h>
+#endif
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -290,7 +294,10 @@ void AndroidProjectArgsHolder::Populate(const AndroidVMArgs& args,
   argv_ptrs_.clear();
 
   // Executable name must be first entry in command_line_argv.
-  argv_strings_.push_back("flutter");
+  if (args.command_line_args.empty() ||
+      args.command_line_args.front() != "flutter") {
+    argv_strings_.push_back("flutter");
+  }
   for (const auto& arg : args.command_line_args) {
     argv_strings_.push_back(arg);
   }
@@ -332,6 +339,20 @@ void AndroidProjectArgsHolder::Populate(const AndroidVMArgs& args,
   project_args_.vsync_callback = &FlutterEmbedderNative::OnVsyncCallback;
   project_args_.update_semantics_callback2 =
       &FlutterEmbedderNative::OnUpdateSemantics2;
+  project_args_.log_message_callback = [](const char* tag, const char* message,
+                                          void* user_data) {
+#if defined(__ANDROID__)
+    __android_log_print(ANDROID_LOG_INFO, tag ? tag : "flutter", "%s",
+                        message ? message : "");
+#else
+    if (tag && strlen(tag) > 0) {
+      std::cout << tag << ": ";
+    }
+    if (message) {
+      std::cout << message << std::endl;
+    }
+#endif
+  };
 }
 
 const FlutterProjectArgs* AndroidProjectArgsHolder::GetProjectArgs() const {

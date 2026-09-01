@@ -450,6 +450,22 @@ bool EmbedderEngine::RegisterImageDecoder(ImageGeneratorFactory factory,
   return true;
 }
 
+bool EmbedderEngine::UpdateAssetResolverByType(
+    std::unique_ptr<AssetResolver> updated_asset_resolver,
+    AssetResolver::AssetResolverType type) {
+  TRACE_EVENT0("flutter", "EmbedderEngine::UpdateAssetResolverByType");
+  if (!IsValid()) {
+    return false;
+  }
+  auto platform_view = shell_->GetPlatformView();
+  if (!platform_view) {
+    return false;
+  }
+  platform_view->UpdateAssetResolverByType(std::move(updated_asset_resolver),
+                                           type);
+  return true;
+}
+
 Shell& EmbedderEngine::GetShell() {
   FML_DCHECK(shell_);
   return *shell_.get();

@@ -52,6 +52,8 @@ class PlatformViewEmbedder final : public PlatformView {
       std::function<void(intptr_t loading_unit_id)>;
   using RasterThreadContextMakeCurrentCallback = std::function<bool()>;
   using RasterThreadContextClearCurrentCallback = std::function<bool()>;
+  using GetScaledFontSizeCallback =
+      std::function<double(double unscaled_font_size, int configuration_id)>;
 
   struct PlatformDispatchTable {
     UpdateSemanticsCallback update_semantics_callback;  // optional
@@ -69,7 +71,8 @@ class PlatformViewEmbedder final : public PlatformView {
     RasterThreadContextMakeCurrentCallback
         raster_thread_context_make_current;  // optional
     RasterThreadContextClearCurrentCallback
-        raster_thread_context_clear_current;  // optional
+        raster_thread_context_clear_current;                  // optional
+    GetScaledFontSizeCallback get_scaled_font_size_callback;  // optional
   };
 
   // Create a platform view that sets up a software rasterizer.
@@ -166,6 +169,10 @@ class PlatformViewEmbedder final : public PlatformView {
 
   // |PlatformView|
   void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
+
+  // |PlatformView|
+  double GetScaledFontSize(double unscaled_font_size,
+                           int configuration_id) const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
 };
