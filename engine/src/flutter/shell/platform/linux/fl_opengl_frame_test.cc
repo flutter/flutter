@@ -17,7 +17,7 @@ class FlOpenGLFrameTest : public flutter::testing::LinuxTest {
  protected:
   void SetUp() override {
     opengl_manager = fl_opengl_manager_new();
-    compositor = fl_compositor_opengl_new(opengl_manager);
+    compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
   }
 
   ~FlOpenGLFrameTest() override {

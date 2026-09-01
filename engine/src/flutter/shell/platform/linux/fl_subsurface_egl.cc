@@ -202,6 +202,12 @@ FlSubsurfaceEGL* fl_subsurface_egl_new(FlOpenGLManager* opengl_manager,
   return self;
 }
 
+gboolean fl_subsurface_egl_is_ready(FlSubsurfaceEGL* self) {
+  g_return_val_if_fail(FL_IS_SUBSURFACE_EGL(self), FALSE);
+  return self->egl_context != EGL_NO_CONTEXT &&
+         self->egl_surface != EGL_NO_SURFACE;
+}
+
 void fl_subsurface_egl_resize(FlSubsurfaceEGL* self,
                               size_t width,
                               size_t height) {

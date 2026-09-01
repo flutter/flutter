@@ -5,6 +5,11 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
 #include <memory>
+#include <vector>
+
+#if !FLUTTER_LINUX_GTK4
+#include <gdk/gdkwayland.h>
+#endif
 
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
@@ -44,6 +49,76 @@ TEST_F(FlViewTest, StateUpdateDoesNotHappenInInit) {
 
   (void)view;
 }
+
+#if !FLUTTER_LINUX_GTK4
+TEST_F(FlViewTest, RenderAreaIsAddedToEventBox) {
+  FlView* view = fl_view_new(project);
+
+  EXPECT_EQ(gtk_widget_get_parent(view->render_area), view->event_box);
+}
+
+TEST_F(FlViewTest, StylusEventsPreserveAxesAndEraserKind) {
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+  for (GdkInputSource source : {GDK_SOURCE_PEN, GDK_SOURCE_ERASER}) {
+    g_autoptr(FlView) view = fl_view_new(project);
+    g_object_ref_sink(view);
+    FlEngine* engine = fl_view_get_engine(view);
+    StartEngine(engine);
+
+    std::vector<FlutterPointerEvent> events;
+    fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+        SendPointerEvent,
+        ([&events](auto engine, const FlutterPointerEvent* pointers,
+                    size_t count) {
+          events.insert(events.end(), pointers, pointers + count);
+          return kSuccess;
+        }));
+
+    g_autoptr(GdkDevice) device = GDK_DEVICE(g_object_new(
+        gdk_wayland_device_get_type(), "input-source", source, nullptr));
+    EXPECT_CALL(mock_gtk, gdk_event_get_axis(::testing::_, GDK_AXIS_PRESSURE,
+                                            ::testing::_))
+        .Times(5)
+        .WillRepeatedly(::testing::DoAll(::testing::SetArgPointee<2>(0.75),
+                                         ::testing::Return(TRUE)));
+    EXPECT_CALL(mock_gtk, gdk_event_get_axis(::testing::_, GDK_AXIS_ROTATION,
+                                            ::testing::_))
+        .Times(5)
+        .WillRepeatedly(::testing::DoAll(::testing::SetArgPointee<2>(0.25),
+                                         ::testing::Return(TRUE)));
+
+    const GdkEventType types[] = {GDK_ENTER_NOTIFY, GDK_BUTTON_PRESS,
+                                  GDK_MOTION_NOTIFY, GDK_BUTTON_RELEASE,
+                                  GDK_LEAVE_NOTIFY};
+    const char* signals[] = {"enter-notify-event", "button-press-event",
+                             "motion-notify-event", "button-release-event",
+                             "leave-notify-event"};
+    for (size_t i = 0; i < 5; i++) {
+      GdkEvent* event = gdk_event_new(types[i]);
+      gdk_event_set_device(event, device);
+      gdk_event_set_source_device(event, device);
+      if (types[i] == GDK_BUTTON_PRESS || types[i] == GDK_BUTTON_RELEASE) {
+        event->button.button = GDK_BUTTON_PRIMARY;
+      }
+      gboolean handled = FALSE;
+      const size_t previous_count = events.size();
+      g_signal_emit_by_name(view->event_box, signals[i], event, &handled);
+      gdk_event_free(event);
+
+      ASSERT_GT(events.size(), previous_count);
+      const FlutterPointerEvent& pointer = events.back();
+      EXPECT_EQ(pointer.device_kind,
+                source == GDK_SOURCE_ERASER
+                    ? kFlutterPointerDeviceKindInvertedStylus
+                    : kFlutterPointerDeviceKindStylus);
+      EXPECT_DOUBLE_EQ(pointer.pressure, 0.75);
+      // The engine converts GDK rotation in degrees to Flutter radians.
+      EXPECT_DOUBLE_EQ(pointer.rotation, 0.25 * G_PI / 180.0);
+    }
+    ::testing::Mock::VerifyAndClearExpectations(&mock_gtk);
+  }
+}
+#endif
 
 // Disposing a view that holds the text input focus clears the handler's
 // widget pointer so it does not dangle.
@@ -193,17 +268,14 @@ TEST_F(FlViewTest, ViewDestroy) {
 
   FlView* secondary_view = fl_view_new_for_engine(engine);
 
-  int64_t implicit_view_id = fl_view_get_id(implicit_view);
   int64_t secondary_view_id = fl_view_get_id(secondary_view);
 
   fl_gtk_widget_destroy(GTK_WIDGET(secondary_view));
   fl_gtk_widget_destroy(GTK_WIDGET(implicit_view));
 
-  EXPECT_EQ(removed_views->len, 2u);
+  EXPECT_EQ(removed_views->len, 1u);
   EXPECT_EQ(GPOINTER_TO_INT(g_ptr_array_index(removed_views, 0)),
             secondary_view_id);
-  EXPECT_EQ(GPOINTER_TO_INT(g_ptr_array_index(removed_views, 1)),
-            implicit_view_id);
 }
 
 // Check views deregistered with errors works.

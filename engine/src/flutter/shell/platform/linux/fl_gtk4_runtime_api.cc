@@ -11,7 +11,7 @@
 #include <mutex>
 #endif
 
-#include "flutter/shell/platform/linux/fl_linux_debug.h"
+#include "flutter/shell/platform/linux/fl_linux_gtk4_debug.h"
 
 static gboolean gtk_runtime_at_least(int major, int minor, int micro) {
   return gtk_check_version(major, minor, micro) == nullptr;
@@ -35,8 +35,8 @@ static void log_fallback_once(const char* symbol, const char* fallback) {
     return;
   }
   g_hash_table_add(warned_symbols, const_cast<char*>(symbol));
-  flutter_linux_dbg("gtk4_runtime_api", "%s unavailable, using %s", symbol,
-                    fallback);
+  flutter_linux_gtk4_dbg("gtk4_runtime_api", "%s unavailable, using %s", symbol,
+                         fallback);
 }
 #endif
 

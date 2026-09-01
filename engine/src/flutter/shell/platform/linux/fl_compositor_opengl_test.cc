@@ -42,8 +42,9 @@ class FlCompositorOpenGLTest : public flutter::testing::LinuxTest {
 TEST_F(FlCompositorOpenGLTest, Composite) {
   constexpr size_t width = 100;
   constexpr size_t height = 100;
-  compositor = fl_compositor_opengl_new(opengl_manager);
-  g_autoptr(FlFramebuffer) target = fl_framebuffer_new(GL_RGBA, width, height);
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height);
   FlutterBackingStore backing_store = {
@@ -72,9 +73,10 @@ TEST_F(FlCompositorOpenGLTest, RestoresGLState) {
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   ON_CALL(epoxy, epoxy_gl_version).WillByDefault(::testing::Return(30));
 
-  compositor = fl_compositor_opengl_new(opengl_manager);
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
 
-  g_autoptr(FlFramebuffer) target = fl_framebuffer_new(GL_RGBA, width, height);
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height);
   FlutterBackingStore backing_store = {
@@ -118,9 +120,10 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebuffer) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
-  compositor = fl_compositor_opengl_new(opengl_manager);
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
 
-  g_autoptr(FlFramebuffer) target = fl_framebuffer_new(GL_RGBA, width, height);
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height);
   FlutterBackingStore backing_store = {
@@ -156,9 +159,10 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferExtension) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
-  compositor = fl_compositor_opengl_new(opengl_manager);
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
 
-  g_autoptr(FlFramebuffer) target = fl_framebuffer_new(GL_RGBA, width, height);
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height);
   FlutterBackingStore backing_store = {
@@ -189,9 +193,10 @@ TEST_F(FlCompositorOpenGLTest, NoBlitFramebuffer) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer).Times(0);
 
-  compositor = fl_compositor_opengl_new(opengl_manager);
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
 
-  g_autoptr(FlFramebuffer) target = fl_framebuffer_new(GL_RGBA, width, height);
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height);
   FlutterBackingStore backing_store = {
@@ -223,9 +228,10 @@ TEST_F(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
 
   EXPECT_CALL(epoxy, glBlitFramebuffer).Times(0);
 
-  compositor = fl_compositor_opengl_new(opengl_manager);
+  compositor = fl_compositor_opengl_new(opengl_manager, FALSE);
 
-  g_autoptr(FlFramebuffer) target = fl_framebuffer_new(GL_RGBA, width, height);
+  g_autoptr(FlFramebuffer) target =
+      fl_framebuffer_new(GL_RGBA, width, height);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, width, height);
   FlutterBackingStore backing_store = {

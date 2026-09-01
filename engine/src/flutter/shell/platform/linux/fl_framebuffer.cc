@@ -6,6 +6,11 @@
 
 #include <epoxy/gl.h>
 
+#if FLUTTER_LINUX_GTK4
+#include <epoxy/egl.h>
+#include "flutter/shell/platform/linux/fl_egl_image.h"
+#endif
+
 struct _FlFramebuffer {
   GObject parent_instance;
 
@@ -26,6 +31,11 @@ struct _FlFramebuffer {
 
   // Depth and stencil renderbuffer associated with this framebuffer.
   GLuint depth_stencil;
+
+#if FLUTTER_LINUX_GTK4
+  // EGL image for this texture.
+  FlEGLImage* image;
+#endif
 };
 
 G_DEFINE_TYPE(FlFramebuffer, fl_framebuffer, G_TYPE_OBJECT)
@@ -49,6 +59,9 @@ static void fl_framebuffer_dispose(GObject* object) {
     glDeleteRenderbuffers(1, &self->depth_stencil);
     self->depth_stencil = 0;
   }
+#if FLUTTER_LINUX_GTK4
+  g_clear_object(&self->image);
+#endif
 
   G_OBJECT_CLASS(fl_framebuffer_parent_class)->dispose(object);
 }
@@ -73,6 +86,15 @@ static bool check_supports_offscreen_msaa() {
 }
 
 static GLuint create_texture(GLint format, size_t width, size_t height) {
+  GLint internal_format = format;
+  if (format == GL_RGBA) {
+    internal_format = GL_RGBA8;
+#ifdef GL_BGRA8_EXT
+  } else if (format == GL_BGRA_EXT) {
+    internal_format = GL_BGRA8_EXT;
+#endif
+  }
+
   GLuint texture_id;
   glGenTextures(1, &texture_id);
   glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -80,7 +102,7 @@ static GLuint create_texture(GLint format, size_t width, size_t height) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
+  glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, format,
                GL_UNSIGNED_BYTE, nullptr);
   glBindTexture(GL_TEXTURE_2D, 0);
   return texture_id;
@@ -93,10 +115,12 @@ static void attach_depth_stencil(GLuint depth_stencil) {
                             GL_RENDERBUFFER, depth_stencil);
 }
 
-FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
+static FlFramebuffer* fl_framebuffer_new_internal(GLint format,
+                                                   size_t width,
+                                                   size_t height,
+                                                   gboolean shareable) {
   FlFramebuffer* self =
       FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
-
   self->width = width;
   self->height = height;
 
@@ -104,6 +128,14 @@ FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
   glBindFramebuffer(GL_FRAMEBUFFER, self->framebuffer_id);
 
   self->texture_id = create_texture(format, width, height);
+
+#if FLUTTER_LINUX_GTK4
+  if (shareable) {
+    self->image = fl_egl_image_new(self->texture_id);
+  }
+#else
+  (void)shareable;
+#endif
 
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                          self->texture_id, 0);
@@ -115,6 +147,18 @@ FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
 
   return self;
 }
+
+FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
+  return fl_framebuffer_new_internal(format, width, height, FALSE);
+}
+
+#if FLUTTER_LINUX_GTK4
+FlFramebuffer* fl_framebuffer_new_shareable(GLint format,
+                                             size_t width,
+                                             size_t height) {
+  return fl_framebuffer_new_internal(format, width, height, TRUE);
+}
+#endif
 
 FlFramebuffer* fl_framebuffer_new_multisample(GLint format,
                                               size_t width,
@@ -185,6 +229,49 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint format,
 
   return self;
 }
+
+#if FLUTTER_LINUX_GTK4
+gboolean fl_framebuffer_get_shareable(FlFramebuffer* self) {
+  g_return_val_if_fail(FL_IS_FRAMEBUFFER(self), FALSE);
+  return self->image != nullptr &&
+         fl_egl_image_get_image(self->image) != EGL_NO_IMAGE_KHR;
+}
+
+FlEGLImage* fl_framebuffer_get_egl_image(FlFramebuffer* self) {
+  g_return_val_if_fail(FL_IS_FRAMEBUFFER(self), nullptr);
+  return self->image;
+}
+
+FlFramebuffer* fl_framebuffer_create_sibling(FlFramebuffer* self) {
+  g_return_val_if_fail(FL_IS_FRAMEBUFFER(self), nullptr);
+  g_return_val_if_fail(fl_framebuffer_get_shareable(self), nullptr);
+
+  FlFramebuffer* sibling =
+      FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
+
+  sibling->width = self->width;
+  sibling->height = self->height;
+  sibling->image = FL_EGL_IMAGE(g_object_ref(self->image));
+
+  // Make texture from existing image.
+  glGenTextures(1, &sibling->texture_id);
+  glBindTexture(GL_TEXTURE_2D, sibling->texture_id);
+  glEGLImageTargetTexture2DOES(GL_TEXTURE_2D,
+                               fl_egl_image_get_image(self->image));
+
+  // Make framebuffer that uses this texture.
+  glGenFramebuffers(1, &sibling->framebuffer_id);
+  GLint saved_framebuffer_binding;
+  glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_framebuffer_binding);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sibling->framebuffer_id);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                         sibling->texture_id, 0);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_framebuffer_binding);
+
+  return sibling;
+}
+
+#endif
 
 GLuint fl_framebuffer_get_id(FlFramebuffer* self) {
   return self->framebuffer_id;

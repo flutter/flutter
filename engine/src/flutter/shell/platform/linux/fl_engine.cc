@@ -942,6 +942,13 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   return TRUE;
 }
 
+gboolean fl_engine_schedule_frame(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
+  g_return_val_if_fail(self->engine != nullptr, FALSE);
+
+  return self->embedder_api.ScheduleFrame(self->engine) == kSuccess;
+}
+
 FlutterEngineProcTable* fl_engine_get_embedder_api(FlEngine* self) {
   return &(self->embedder_api);
 }

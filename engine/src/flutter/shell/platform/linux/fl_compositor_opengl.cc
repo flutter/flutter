@@ -2,65 +2,195 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "fl_compositor_opengl.h"
+#include "flutter/shell/platform/linux/fl_compositor_opengl_private.h"
 
 #include <epoxy/egl.h>
 #include <epoxy/gl.h>
 
-#include <cstring>
-
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/linux/fl_compositor_opengl_shader.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
+#include "flutter/shell/platform/linux/fl_gl_fence.h"
+#include "flutter/shell/platform/linux/fl_gtk.h"
 
-struct _FlCompositorOpenGL {
-  GObject parent_instance;
+// Vertex shader to draw Flutter window contents.
+static const char* vertex_shader_src =
+    "attribute vec2 position;\n"
+    "attribute vec2 in_texcoord;\n"
+    "uniform vec2 offset;\n"
+    "uniform vec2 scale;\n"
+    "varying vec2 texcoord;\n"
+    "\n"
+    "void main() {\n"
+    "  gl_Position = vec4(offset + position * scale, 0, 1);\n"
+    "  texcoord = in_texcoord;\n"
+    "}\n";
 
-  // TRUE if glBlitFramebuffer can be used to composite the first layer.
-  gboolean can_blit;
+// Fragment shader to draw Flutter window contents.
+static const char* fragment_shader_src =
+    "#ifdef GL_ES\n"
+    "precision mediump float;\n"
+    "#endif\n"
+    "\n"
+    "uniform sampler2D texture;\n"
+    "varying vec2 texcoord;\n"
+    "\n"
+    "void main() {\n"
+    "  gl_FragColor = texture2D(texture, texcoord);\n"
+    "}\n";
 
-  // TRUE if fences can be used to synchronize frames with other contexts.
-  gboolean can_fence;
+G_DEFINE_TYPE(FlCompositorOpenGL,
+              fl_compositor_opengl,
+              fl_compositor_get_type())
 
-  // Flutter OpenGL contexts.
-  FlOpenGLManager* opengl_manager;
+gboolean fl_compositor_opengl_ensure_pixel_buffer(FlCompositorOpenGL* self,
+                                                  size_t width,
+                                                  size_t height) {
+  const size_t data_length = width * height * 4;
+  if (self->pixels_length >= data_length) {
+    return true;
+  }
 
-  // Shader program used to composite layers.
-  FlCompositorOpenGLShader* shader;
-};
+  uint8_t* pixels =
+      static_cast<uint8_t*>(g_try_realloc(self->pixels, data_length));
+  if (pixels == nullptr) {
+    return false;
+  }
 
-G_DEFINE_TYPE(FlCompositorOpenGL, fl_compositor_opengl, G_TYPE_OBJECT)
-
-static void fl_compositor_opengl_dispose(GObject* object) {
-  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(object);
-
-  g_clear_object(&self->shader);
-  g_clear_object(&self->opengl_manager);
-
-  G_OBJECT_CLASS(fl_compositor_opengl_parent_class)->dispose(object);
+  self->pixels = pixels;
+  self->pixels_length = data_length;
+  return true;
 }
 
-static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = fl_compositor_opengl_dispose;
+// Checks whether the current driver exposes a reliable framebuffer blit path.
+// Some drivers expose the symbol but have known issues using it, so fall back
+// to the compositor shader for those vendors.
+static gboolean driver_supports_blit() {
+  const gchar* vendor = reinterpret_cast<const gchar*>(glGetString(GL_VENDOR));
+  if (vendor == nullptr) {
+    return TRUE;
+  }
+
+  const char* unsupported_vendors_exact[] = {"Vivante Corporation", "ARM"};
+  const char* unsupported_vendors_fuzzy[] = {"NVIDIA"};
+  for (const char* unsupported : unsupported_vendors_fuzzy) {
+    if (strstr(vendor, unsupported) != nullptr) {
+      return FALSE;
+    }
+  }
+  for (const char* unsupported : unsupported_vendors_exact) {
+    if (strcmp(vendor, unsupported) == 0) {
+      return FALSE;
+    }
+  }
+  return TRUE;
 }
 
-static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {}
+static gboolean can_blit_framebuffer() {
+  return driver_supports_blit() &&
+         (epoxy_gl_version() >= 30 ||
+          epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
+}
 
-FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager) {
-  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
-      g_object_new(fl_compositor_opengl_get_type(), nullptr));
+static gchar* get_shader_log(GLuint shader) {
+  GLint log_length;
+  gchar* log;
 
-  self->opengl_manager = FL_OPENGL_MANAGER(g_object_ref(opengl_manager));
-  self->shader = fl_compositor_opengl_shader_new(opengl_manager);
+  glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
 
-  // Determine once whether glBlitFramebuffer is available on this driver.
-  fl_opengl_manager_make_current(opengl_manager);
-  self->can_blit = fl_opengl_manager_can_blit(opengl_manager);
-  self->can_fence = fl_opengl_manager_can_fence(opengl_manager);
+  log = static_cast<gchar*>(g_malloc(log_length + 1));
+  glGetShaderInfoLog(shader, log_length, nullptr, log);
 
-  return self;
+  return log;
+}
+
+// Returns the log for the given OpenGL program. Must be freed by the caller.
+static gchar* get_program_log(GLuint program) {
+  GLint log_length;
+  gchar* log;
+
+  glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
+
+  log = static_cast<gchar*>(g_malloc(log_length + 1));
+  glGetProgramInfoLog(program, log_length, nullptr, log);
+
+  return log;
+}
+
+static void setup_shader(FlCompositorOpenGL* self) {
+  if (!fl_opengl_manager_make_platform_current(self->opengl_manager)) {
+    g_warning(
+        "Failed to setup compositor shaders, unable to make OpenGL context "
+        "current");
+    return;
+  }
+
+  GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(vertex_shader, 1, &vertex_shader_src, nullptr);
+  glCompileShader(vertex_shader);
+  GLint vertex_compile_status;
+  glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &vertex_compile_status);
+  if (vertex_compile_status == GL_FALSE) {
+    g_autofree gchar* shader_log = get_shader_log(vertex_shader);
+    g_warning("Failed to compile vertex shader: %s", shader_log);
+  }
+
+  GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(fragment_shader, 1, &fragment_shader_src, nullptr);
+  glCompileShader(fragment_shader);
+  GLint fragment_compile_status;
+  glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &fragment_compile_status);
+  if (fragment_compile_status == GL_FALSE) {
+    g_autofree gchar* shader_log = get_shader_log(fragment_shader);
+    g_warning("Failed to compile fragment shader: %s", shader_log);
+  }
+
+  self->program = glCreateProgram();
+  glAttachShader(self->program, vertex_shader);
+  glAttachShader(self->program, fragment_shader);
+  glLinkProgram(self->program);
+
+  GLint link_status;
+  glGetProgramiv(self->program, GL_LINK_STATUS, &link_status);
+  if (link_status == GL_FALSE) {
+    g_autofree gchar* program_log = get_program_log(self->program);
+    g_warning("Failed to link program: %s", program_log);
+  }
+
+  self->offset_location = glGetUniformLocation(self->program, "offset");
+  self->scale_location = glGetUniformLocation(self->program, "scale");
+
+  glDeleteShader(vertex_shader);
+  glDeleteShader(fragment_shader);
+
+  // The uniform square abcd in two triangles cba + cdb
+  // a--b
+  // |  |
+  // c--d
+  GLfloat vertex_data[] = {-1, -1, 0, 0, 1, 1,  1, 1, -1, 1, 0, 1,
+                           -1, -1, 0, 0, 1, -1, 1, 0, 1,  1, 1, 1};
+
+  glGenBuffers(1, &self->vertex_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data,
+               GL_STATIC_DRAW);
+}
+
+static void cleanup_shader(FlCompositorOpenGL* self) {
+  if (!fl_opengl_manager_make_platform_current(self->opengl_manager)) {
+    g_warning(
+        "Failed to cleanup compositor shaders, unable to make OpenGL context "
+        "current");
+    return;
+  }
+
+  if (self->program != 0) {
+    glDeleteProgram(self->program);
+  }
+  if (self->vertex_buffer != 0) {
+    glDeleteBuffers(1, &self->vertex_buffer);
+  }
 }
 
 static void composite_layer(FlCompositorOpenGL* self,
@@ -71,10 +201,10 @@ static void composite_layer(FlCompositorOpenGL* self,
                             int height) {
   size_t texture_width = fl_framebuffer_get_width(framebuffer);
   size_t texture_height = fl_framebuffer_get_height(framebuffer);
-  fl_compositor_opengl_shader_set_offset(self->shader, (2 * x / width) - 1.0,
-                                         (2 * y / height) - 1.0);
-  fl_compositor_opengl_shader_set_scale(self->shader, texture_width / width,
-                                        texture_height / height);
+  glUniform2f(self->offset_location, (2 * x / width) - 1.0,
+              (2 * y / height) - 1.0);
+  glUniform2f(self->scale_location, texture_width / width,
+              texture_height / height);
 
   GLuint texture_id = fl_framebuffer_get_texture_id(framebuffer);
   glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -82,16 +212,257 @@ static void composite_layer(FlCompositorOpenGL* self,
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
-                                           const FlutterLayer** layers,
-                                           size_t layers_count) {
+static void draw_texture_to_cairo(cairo_t* cr,
+                                  FlGdkSurface* surface,
+                                  GLuint texture_id,
+                                  gint scale_factor,
+                                  size_t width,
+                                  size_t height) {
+#if FLUTTER_LINUX_GTK4
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
+  gdk_cairo_draw_from_gl(cr, surface, texture_id, GL_TEXTURE, scale_factor, 0,
+                         0, width, height);
+#if FLUTTER_LINUX_GTK4
+  G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
+}
+
+#if FLUTTER_LINUX_GTK4
+static void paint_shareable_framebuffer(FlFramebuffer* framebuffer,
+                                        cairo_t* cr,
+                                        FlGdkSurface* surface,
+                                        gint scale_factor,
+                                        size_t width,
+                                        size_t height) {
+  g_autoptr(FlFramebuffer) sibling = fl_framebuffer_create_sibling(framebuffer);
+  draw_texture_to_cairo(cr, surface, fl_framebuffer_get_texture_id(sibling),
+                        scale_factor, width, height);
+}
+#endif
+
+static void paint_readback_framebuffer(FlCompositorOpenGL* self,
+                                       cairo_t* cr,
+                                       FlGdkSurface* surface,
+                                       gint scale_factor,
+                                       size_t width,
+                                       size_t height) {
+  GLint saved_texture_binding;
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
+
+  GLuint texture_id;
+  glGenTextures(1, &texture_id);
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+  const GLsizei framebuffer_width =
+      static_cast<GLsizei>(fl_framebuffer_get_width(self->framebuffer));
+  const GLsizei framebuffer_height =
+      static_cast<GLsizei>(fl_framebuffer_get_height(self->framebuffer));
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, framebuffer_width, framebuffer_height,
+               0, GL_RGBA, GL_UNSIGNED_BYTE, self->pixels);
+
+  draw_texture_to_cairo(cr, surface, texture_id, scale_factor, width, height);
+
+  glDeleteTextures(1, &texture_id);
+  glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
+}
+
+static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
+                                                    const FlutterLayer** layers,
+                                                    size_t layers_count) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
+  g_mutex_lock(&self->frame_mutex);
   if (layers_count == 0) {
-    return;
+    g_mutex_unlock(&self->frame_mutex);
+    return TRUE;
   }
+
+  GLint general_format = GL_RGBA;
+#if !FLUTTER_LINUX_GTK4
+  if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
+    general_format = GL_BGRA_EXT;
+  }
+#endif
 
   // Save bindings that are set by this function.  All bindings must be restored
   // to their original values because Skia expects that its bindings have not
   // been altered.
+  GLint saved_texture_binding;
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
+  GLint saved_vao_binding;
+  glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &saved_vao_binding);
+  GLint saved_array_buffer_binding;
+  glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &saved_array_buffer_binding);
+  GLint saved_draw_framebuffer_binding;
+  glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &saved_draw_framebuffer_binding);
+  GLint saved_read_framebuffer_binding;
+  glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &saved_read_framebuffer_binding);
+  GLint saved_current_program;
+  glGetIntegerv(GL_CURRENT_PROGRAM, &saved_current_program);
+  GLboolean saved_scissor_test = glIsEnabled(GL_SCISSOR_TEST);
+  GLboolean saved_blend = glIsEnabled(GL_BLEND);
+  GLint saved_src_rgb;
+  glGetIntegerv(GL_BLEND_SRC_RGB, &saved_src_rgb);
+  GLint saved_src_alpha;
+  glGetIntegerv(GL_BLEND_SRC_ALPHA, &saved_src_alpha);
+  GLint saved_dst_rgb;
+  glGetIntegerv(GL_BLEND_DST_RGB, &saved_dst_rgb);
+  GLint saved_dst_alpha;
+  glGetIntegerv(GL_BLEND_DST_ALPHA, &saved_dst_alpha);
+
+  // Update framebuffer to write into.
+  size_t width = layers[0]->size.width;
+  size_t height = layers[0]->size.height;
+  if (self->framebuffer == nullptr ||
+      fl_framebuffer_get_width(self->framebuffer) != width ||
+      fl_framebuffer_get_height(self->framebuffer) != height) {
+    g_clear_object(&self->framebuffer);
+#if FLUTTER_LINUX_GTK4
+    fl_compositor_opengl_gtk4_reset_frame_failure(self);
+#endif
+#if FLUTTER_LINUX_GTK4
+    self->framebuffer = self->shareable
+                        ? fl_framebuffer_new_shareable(general_format, width, height)
+                        : fl_framebuffer_new(general_format, width, height);
+#else
+    self->framebuffer = fl_framebuffer_new(general_format, width, height);
+#endif
+
+    // If not shareable make buffer to copy frame pixels into.
+    if (!self->shareable) {
+      if (!fl_compositor_opengl_ensure_pixel_buffer(self, width, height)) {
+        g_warning("Failed to allocate OpenGL compositor pixel buffer");
+        g_mutex_unlock(&self->frame_mutex);
+        return FALSE;
+      }
+    }
+  }
+
+  self->had_first_frame = true;
+
+  // FIXME(robert-ancell): The vertex array is the same for all views, but
+  // cannot be shared in OpenGL. Find a way to not generate this every time.
+  GLuint vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+  glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
+  GLint position_location = glGetAttribLocation(self->program, "position");
+  glEnableVertexAttribArray(position_location);
+  glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE,
+                        sizeof(GLfloat) * 4, 0);
+  GLint texcoord_location = glGetAttribLocation(self->program, "in_texcoord");
+  glEnableVertexAttribArray(texcoord_location);
+  glVertexAttribPointer(texcoord_location, 2, GL_FLOAT, GL_FALSE,
+                        sizeof(GLfloat) * 4,
+                        reinterpret_cast<void*>(sizeof(GLfloat) * 2));
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  glUseProgram(self->program);
+
+  // Disable the scissor test as it can affect blit operations.
+  // Prevents regressions like: https://github.com/flutter/flutter/issues/140828
+  // See OpenGL specification version 4.6, section 18.3.1.
+  glDisable(GL_SCISSOR_TEST);
+
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
+                    fl_framebuffer_get_id(self->framebuffer));
+  gboolean first_layer = TRUE;
+  for (size_t i = 0; i < layers_count; ++i) {
+    const FlutterLayer* layer = layers[i];
+    switch (layer->type) {
+      case kFlutterLayerContentTypeBackingStore: {
+        const FlutterBackingStore* backing_store = layer->backing_store;
+        FlFramebuffer* framebuffer =
+            FL_FRAMEBUFFER(backing_store->open_gl.framebuffer.user_data);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER,
+                          fl_framebuffer_get_id(framebuffer));
+        // The first layer can use a fast framebuffer blit when available;
+        // otherwise composite it with the shader like subsequent layers.
+        if (first_layer && self->can_blit) {
+          glBlitFramebuffer(layer->offset.x, layer->offset.y, layer->size.width,
+                            layer->size.height, layer->offset.x,
+                            layer->offset.y, layer->size.width,
+                            layer->size.height, GL_COLOR_BUFFER_BIT,
+                            GL_NEAREST);
+          first_layer = FALSE;
+        } else {
+          composite_layer(self, framebuffer, layer->offset.x, layer->offset.y,
+                          width, height);
+        }
+      } break;
+      case kFlutterLayerContentTypePlatformView: {
+        // TODO(robert-ancell) Not implemented -
+        // https://github.com/flutter/flutter/issues/41724
+      } break;
+    }
+  }
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+#if FLUTTER_LINUX_GTK4
+  fl_compositor_opengl_gtk4_finish_present(self, general_format, width, height);
+#else
+  glFlush();
+#endif
+
+  glDeleteVertexArrays(1, &vao);
+
+  if (saved_blend) {
+    glEnable(GL_BLEND);
+  } else {
+    glDisable(GL_BLEND);
+  }
+  if (saved_scissor_test) {
+    glEnable(GL_SCISSOR_TEST);
+  } else {
+    glDisable(GL_SCISSOR_TEST);
+  }
+
+  glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
+  glBindVertexArray(saved_vao_binding);
+  glBindBuffer(GL_ARRAY_BUFFER, saved_array_buffer_binding);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
+  glUseProgram(saved_current_program);
+  glBlendFuncSeparate(saved_src_rgb, saved_dst_rgb, saved_src_alpha,
+                      saved_dst_alpha);
+
+  if (!self->shareable) {
+    glBindFramebuffer(GL_READ_FRAMEBUFFER,
+                      fl_framebuffer_get_id(self->framebuffer));
+    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, self->pixels);
+    self->pixels_are_bgra = FALSE;
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+  }
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, saved_read_framebuffer_binding);
+
+  g_mutex_unlock(&self->frame_mutex);
+
+  fl_task_runner_stop_wait(self->task_runner);
+
+  return TRUE;
+}
+
+#if !FLUTTER_LINUX_GTK4
+
+// GTK3 renderers own the destination frame. The compositor only draws into
+// the framebuffer bound by the caller and does not retain a frame for later
+// presentation.
+static gboolean fl_compositor_opengl_present_layers_gtk3(
+    FlCompositor* compositor,
+    const FlutterLayer** layers,
+    size_t layers_count) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
+  if (layers_count == 0) {
+    return TRUE;
+  }
+
+  const size_t width = layers[0]->size.width;
+  const size_t height = layers[0]->size.height;
+  if (width == 0 || height == 0) {
+    return TRUE;
+  }
+
   GLint saved_texture_binding;
   glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
   GLint saved_vao_binding;
@@ -113,58 +484,48 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   GLint saved_dst_alpha;
   glGetIntegerv(GL_BLEND_DST_ALPHA, &saved_dst_alpha);
 
-  size_t width = layers[0]->size.width;
-  size_t height = layers[0]->size.height;
-
-  // FIXME(robert-ancell): The vertex array is the same for all views, but
-  // cannot be shared in OpenGL. Find a way to not generate this every time.
   GLuint vao;
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
+  glBindBuffer(GL_ARRAY_BUFFER, self->vertex_buffer);
+  GLint position_location = glGetAttribLocation(self->program, "position");
+  glEnableVertexAttribArray(position_location);
+  glVertexAttribPointer(position_location, 2, GL_FLOAT, GL_FALSE,
+                        sizeof(GLfloat) * 4, 0);
+  GLint texcoord_location = glGetAttribLocation(self->program, "in_texcoord");
+  glEnableVertexAttribArray(texcoord_location);
+  glVertexAttribPointer(texcoord_location, 2, GL_FLOAT, GL_FALSE,
+                        sizeof(GLfloat) * 4,
+                        reinterpret_cast<void*>(sizeof(GLfloat) * 2));
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  fl_compositor_opengl_shader_use(self->shader);
-
-  // Disable the scissor test as it can affect blit operations.
-  // Prevents regressions like: https://github.com/flutter/flutter/issues/140828
-  // See OpenGL specification version 4.6, section 18.3.1.
+  glUseProgram(self->program);
   glDisable(GL_SCISSOR_TEST);
 
   gboolean first_layer = TRUE;
   for (size_t i = 0; i < layers_count; ++i) {
     const FlutterLayer* layer = layers[i];
-    switch (layer->type) {
-      case kFlutterLayerContentTypeBackingStore: {
-        const FlutterBackingStore* backing_store = layer->backing_store;
-        FlFramebuffer* layer_framebuffer =
-            FL_FRAMEBUFFER(backing_store->open_gl.framebuffer.user_data);
-        // The first layer can be blitted, and following layers composited with
-        // this. If glBlitFramebuffer is unavailable, composite the first layer
-        // with the shader instead.
-        if (first_layer && self->can_blit) {
-          glBindFramebuffer(GL_READ_FRAMEBUFFER,
-                            fl_framebuffer_get_id(layer_framebuffer));
-          glBlitFramebuffer(layer->offset.x, layer->offset.y, layer->size.width,
-                            layer->size.height, layer->offset.x,
-                            layer->offset.y, layer->size.width,
-                            layer->size.height, GL_COLOR_BUFFER_BIT,
-                            GL_NEAREST);
-        } else {
-          composite_layer(self, layer_framebuffer, layer->offset.x,
-                          layer->offset.y, width, height);
-        }
-        first_layer = FALSE;
-      } break;
-      case kFlutterLayerContentTypePlatformView: {
-        // TODO(robert-ancell) Not implemented -
-        // https://github.com/flutter/flutter/issues/41724
-      } break;
+    if (layer->type != kFlutterLayerContentTypeBackingStore) {
+      continue;
     }
+
+    const FlutterBackingStore* backing_store = layer->backing_store;
+    FlFramebuffer* framebuffer =
+        FL_FRAMEBUFFER(backing_store->open_gl.framebuffer.user_data);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(framebuffer));
+    if (first_layer && self->can_blit) {
+      glBlitFramebuffer(layer->offset.x, layer->offset.y, layer->size.width,
+                        layer->size.height, layer->offset.x, layer->offset.y,
+                        layer->size.width, layer->size.height,
+                        GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    } else {
+      composite_layer(self, framebuffer, layer->offset.x, layer->offset.y,
+                      width, height);
+    }
+    first_layer = FALSE;
   }
   glFlush();
-
   glDeleteVertexArrays(1, &vao);
 
   if (saved_blend) {
@@ -177,7 +538,6 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   } else {
     glDisable(GL_SCISSOR_TEST);
   }
-
   glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
   glBindVertexArray(saved_vao_binding);
   glBindBuffer(GL_ARRAY_BUFFER, saved_array_buffer_binding);
@@ -185,6 +545,210 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   glUseProgram(saved_current_program);
   glBlendFuncSeparate(saved_src_rgb, saved_dst_rgb, saved_src_alpha,
                       saved_dst_alpha);
+  return TRUE;
+}
+
+#endif
+
+static void fl_compositor_opengl_get_frame_size_impl(FlCompositor* compositor,
+                                                     size_t* width,
+                                                     size_t* height) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+
+  if (width != nullptr) {
+    *width = self->framebuffer != nullptr
+                 ? fl_framebuffer_get_width(self->framebuffer)
+                 : 0;
+  }
+  if (height != nullptr) {
+    *height = self->framebuffer != nullptr
+                  ? fl_framebuffer_get_height(self->framebuffer)
+                  : 0;
+  }
+}
+
+static gboolean fl_compositor_opengl_render_impl(FlCompositor* compositor,
+                                                 cairo_t* cr,
+                                                 FlGdkSurface* surface,
+                                                 gboolean wait_for_frame) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
+  g_mutex_lock(&self->frame_mutex);
+  if (self->framebuffer == nullptr) {
+    g_mutex_unlock(&self->frame_mutex);
+    return FALSE;
+  }
+
+  // If frame not ready, then wait for it.
+  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
+  size_t width, height;
+  gint64 expiry_time =
+      g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
+  while (true) {
+    width = fl_gtk_surface_get_width(surface) * scale_factor;
+    height = fl_gtk_surface_get_height(surface) * scale_factor;
+    if (!wait_for_frame) {
+      break;
+    }
+
+    size_t framebuffer_width = fl_framebuffer_get_width(self->framebuffer);
+    size_t framebuffer_height = fl_framebuffer_get_height(self->framebuffer);
+    if (framebuffer_width == width && framebuffer_height == height) {
+      break;
+    }
+
+    if (g_get_monotonic_time() > expiry_time) {
+      g_warning(
+          "Timed out waiting for OpenGL frame of size %zdx%zd (have %zdx%zd)",
+          width, height, framebuffer_width, framebuffer_height);
+      break;
+    }
+
+    g_mutex_unlock(&self->frame_mutex);
+    fl_task_runner_wait(self->task_runner, expiry_time);
+    g_mutex_lock(&self->frame_mutex);
+  }
+
+#if FLUTTER_LINUX_GTK4
+  if (fl_framebuffer_get_shareable(self->framebuffer)) {
+    paint_shareable_framebuffer(self->framebuffer, cr, surface, scale_factor,
+                                width, height);
+  } else {
+    paint_readback_framebuffer(self, cr, surface, scale_factor, width, height);
+  }
+#else
+  paint_readback_framebuffer(self, cr, surface, scale_factor, width, height);
+#endif
+
+  glFlush();
+
+  g_mutex_unlock(&self->frame_mutex);
+
+  return TRUE;
+}
+
+static void fl_compositor_opengl_dispose(GObject* object) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(object);
+
+  cleanup_shader(self);
+
+  g_clear_object(&self->task_runner);
+  g_clear_object(&self->framebuffer);
+  g_clear_pointer(&self->pixels, g_free);
+#if FLUTTER_LINUX_GTK4
+  fl_compositor_opengl_gtk4_dispose(self);
+#endif
+  g_clear_object(&self->opengl_manager);
+  g_mutex_clear(&self->frame_mutex);
+
+  G_OBJECT_CLASS(fl_compositor_opengl_parent_class)->dispose(object);
+}
+
+static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
+  FL_COMPOSITOR_CLASS(klass)->present_layers =
+      fl_compositor_opengl_present_layers;
+  FL_COMPOSITOR_CLASS(klass)->get_frame_size =
+      fl_compositor_opengl_get_frame_size_impl;
+  FL_COMPOSITOR_CLASS(klass)->render = fl_compositor_opengl_render_impl;
+#if FLUTTER_LINUX_GTK4
+  FL_COMPOSITOR_CLASS(klass)->acquire_texture =
+      fl_compositor_opengl_acquire_texture;
+#endif
+
+  G_OBJECT_CLASS(klass)->dispose = fl_compositor_opengl_dispose;
+}
+
+static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {
+  g_mutex_init(&self->frame_mutex);
+#if FLUTTER_LINUX_GTK4
+  fl_compositor_opengl_gtk4_init(self);
+#endif
+}
+
+FlCompositorOpenGL* fl_compositor_opengl_new(FlTaskRunner* task_runner,
+                                             FlOpenGLManager* opengl_manager,
+                                             gboolean shareable) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
+      g_object_new(fl_compositor_opengl_get_type(), nullptr));
+
+  self->task_runner = FL_TASK_RUNNER(g_object_ref(task_runner));
+  self->shareable = shareable;
+  self->opengl_manager = FL_OPENGL_MANAGER(g_object_ref(opengl_manager));
+
+  setup_shader(self);
+  // setup_shader made the Flutter OpenGL context current, so capability
+  // detection is performed once during compositor construction.
+  self->can_blit = can_blit_framebuffer();
+  self->can_fence = fl_opengl_manager_can_fence(opengl_manager);
+
+  return self;
+}
+
+#if FLUTTER_LINUX_GTK4
+gboolean fl_compositor_opengl_present_to_subsurface(
+    FlCompositorOpenGL* self,
+    FlSubsurfaceEGL* subsurface_egl) {
+  g_return_val_if_fail(FL_IS_COMPOSITOR_OPENGL(self), FALSE);
+  g_return_val_if_fail(FL_IS_SUBSURFACE_EGL(subsurface_egl), FALSE);
+
+  g_mutex_lock(&self->frame_mutex);
+  if (self->framebuffer == nullptr) {
+    g_mutex_unlock(&self->frame_mutex);
+    return FALSE;
+  }
+
+  g_autoptr(FlGLFence) fence = nullptr;
+  if (self->can_fence) {
+    fence = fl_gl_fence_new(self->opengl_manager);
+  } else {
+    // The subsurface samples this texture from another EGL context.
+    glFinish();
+  }
+
+  fl_subsurface_egl_present(subsurface_egl,
+                            fl_framebuffer_get_texture_id(self->framebuffer),
+                            fl_framebuffer_get_width(self->framebuffer),
+                            fl_framebuffer_get_height(self->framebuffer),
+                            fence);
+  g_mutex_unlock(&self->frame_mutex);
+  return TRUE;
+}
+#endif
+
+#if !FLUTTER_LINUX_GTK4
+FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager,
+                                             gboolean shareable) {
+  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(nullptr);
+  return fl_compositor_opengl_new(task_runner, opengl_manager, shareable);
+}
+
+gboolean fl_compositor_opengl_composite_layers(FlCompositorOpenGL* compositor,
+                                               const FlutterLayer** layers,
+                                               size_t layers_count) {
+#if !FLUTTER_LINUX_GTK4
+  // The GTK3 frame object binds its destination framebuffer before calling
+  // this wrapper. Keep the normal FlView path on the compositor-owned frame.
+  return fl_compositor_opengl_present_layers_gtk3(FL_COMPOSITOR(compositor),
+                                                  layers, layers_count);
+#else
+  return fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers,
+                                      layers_count);
+#endif
+}
+
+void fl_compositor_opengl_get_frame_size(FlCompositorOpenGL* compositor,
+                                         size_t* width,
+                                         size_t* height) {
+  fl_compositor_get_frame_size(FL_COMPOSITOR(compositor), width, height);
+}
+
+gboolean fl_compositor_opengl_render(FlCompositorOpenGL* compositor,
+                                     cairo_t* cr,
+                                     GdkWindow* window) {
+  return fl_compositor_opengl_render_impl(FL_COMPOSITOR(compositor), cr, window,
+                                          FALSE);
 }
 
 FlOpenGLManager* fl_compositor_opengl_get_opengl_manager(
@@ -223,3 +787,4 @@ GLint fl_compositor_opengl_get_frame_format(const FlutterLayer** layers,
 
   return GL_RGBA;
 }
+#endif

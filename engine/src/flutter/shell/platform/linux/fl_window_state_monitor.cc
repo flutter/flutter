@@ -8,6 +8,7 @@
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
 
+#if !FLUTTER_LINUX_GTK4
 static constexpr const char* kFlutterLifecycleChannel = "flutter/lifecycle";
 
 static constexpr const char* kAppLifecycleStateResumed =
@@ -16,6 +17,7 @@ static constexpr const char* kAppLifecycleStateInactive =
     "AppLifecycleState.inactive";
 static constexpr const char* kAppLifecycleStateHidden =
     "AppLifecycleState.hidden";
+#endif
 
 struct _FlWindowStateMonitor {
   GObject parent_instance;
@@ -27,11 +29,17 @@ struct _FlWindowStateMonitor {
   GtkWindow* window;
 
   // Current state information.
+#if !FLUTTER_LINUX_GTK4
   GdkWindowState window_state;
+#endif
+
+  // Signal connection ID for window-state-changed
+  gulong window_state_event_cb_id;
 };
 
 G_DEFINE_TYPE(FlWindowStateMonitor, fl_window_state_monitor, G_TYPE_OBJECT);
 
+#if !FLUTTER_LINUX_GTK4
 static void send_lifecycle_state(FlWindowStateMonitor* self,
                                  const gchar* lifecycle_state) {
   g_autoptr(FlValue) value = fl_value_new_string(lifecycle_state);
@@ -78,11 +86,16 @@ static gboolean window_state_event_cb(FlWindowStateMonitor* self,
 
   return FALSE;
 }
+#endif
 
 static void fl_window_state_monitor_dispose(GObject* object) {
   FlWindowStateMonitor* self = FL_WINDOW_STATE_MONITOR(object);
 
   g_clear_object(&self->messenger);
+  if (self->window_state_event_cb_id != 0) {
+    g_signal_handler_disconnect(self->window, self->window_state_event_cb_id);
+    self->window_state_event_cb_id = 0;
+  }
 
   G_OBJECT_CLASS(fl_window_state_monitor_parent_class)->dispose(object);
 }
@@ -102,11 +115,15 @@ FlWindowStateMonitor* fl_window_state_monitor_new(FlBinaryMessenger* messenger,
   self->window = window;
 
   // Listen to window state changes.
-  g_signal_connect_object(self->window, "window-state-event",
-                          G_CALLBACK(window_state_event_cb), self,
-                          G_CONNECT_SWAPPED);
+#if !FLUTTER_LINUX_GTK4
+  self->window_state_event_cb_id =
+      g_signal_connect_swapped(self->window, "window-state-event",
+                               G_CALLBACK(window_state_event_cb), self);
   self->window_state =
       gdk_window_get_state(gtk_widget_get_window(GTK_WIDGET(self->window)));
+#else
+  self->window_state_event_cb_id = 0;
+#endif
 
   return self;
 }

@@ -106,6 +106,16 @@ FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* engine);
 gboolean fl_engine_start(FlEngine* engine, GError** error);
 
 /**
+ * fl_engine_schedule_frame:
+ * @engine: an #FlEngine.
+ *
+ * Requests that the engine render another frame.
+ *
+ * Returns: %TRUE if the request was accepted.
+ */
+gboolean fl_engine_schedule_frame(FlEngine* engine);
+
+/**
  * fl_engine_get_embedder_api:
  * @engine: an #FlEngine.
  *

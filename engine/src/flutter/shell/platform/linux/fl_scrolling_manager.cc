@@ -69,7 +69,11 @@ void fl_scrolling_manager_set_last_mouse_position(FlScrollingManager* self,
 }
 
 void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
+#if FLUTTER_LINUX_GTK4
+                                              GdkEvent* event,
+#else
                                               GdkEventScroll* scroll_event,
+#endif
                                               gdouble event_x,
                                               gdouble event_y,
                                               gboolean position_valid,
@@ -83,7 +87,9 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
     return;
   }
 
+#if !FLUTTER_LINUX_GTK4
   GdkEvent* event = reinterpret_cast<GdkEvent*>(scroll_event);
+#endif
 
   guint event_time = gdk_event_get_time(event);
 
@@ -98,12 +104,20 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
   scroll_delta_x *= kScrollOffsetMultiplier * scale_factor;
   scroll_delta_y *= kScrollOffsetMultiplier * scale_factor;
 
+#if FLUTTER_LINUX_GTK4
+  GdkDevice* source_device = gdk_event_get_device(event);
+#else
   GdkDevice* source_device = gdk_event_get_source_device(event);
+#endif
   if (source_device != nullptr &&
       gdk_device_get_source(source_device) == GDK_SOURCE_TOUCHPAD) {
     scroll_delta_x *= -1;
     scroll_delta_y *= -1;
+#if FLUTTER_LINUX_GTK4
+    if (gdk_scroll_event_is_stop(event)) {
+#else
     if (gdk_event_is_scroll_stop_event(event)) {
+#endif
       fl_engine_send_pointer_pan_zoom_event(
           engine, self->view_id, event_time * kMicrosecondsPerMillisecond,
           self->last_x, self->last_y, kPanZoomEnd, self->pan_x, self->pan_y, 0,

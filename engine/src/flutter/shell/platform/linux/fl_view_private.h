@@ -5,59 +5,63 @@
 #ifndef FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_PRIVATE_H_
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_PRIVATE_H_
 
-#include "flutter/shell/platform/linux/fl_view_accessible.h"
-#include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
-
+#include "flutter/shell/platform/linux/fl_compositor.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
-#include "flutter/shell/platform/linux/fl_view_renderer.h"
 #include "flutter/shell/platform/linux/fl_window_state_monitor.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_subsurface.h"
+#include "flutter/shell/platform/linux/fl_subsurface_egl.h"
+#endif
+#if !FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_view_accessible.h"
+#include "flutter/shell/platform/linux/fl_view_renderer.h"
+#endif
 
 G_BEGIN_DECLS
 
 struct _FlView {
   GtkBox parent_instance;
 
-  // Event box the render area goes inside.
   GtkWidget* event_box;
-
-  // Handle zoom gestures.
   GtkGesture* zoom_gesture;
-
-  // Handle rotation gestures.
   GtkGesture* rotate_gesture;
-
-  // The widget rendering the Flutter view.
-  FlViewRenderer* renderer;
-
-  // Engine this view is showing.
+  GtkWidget* render_area;
+  GdkGLContext* render_context;
   FlEngine* engine;
-
-  // ID for this view.
+  FlCompositor* compositor;
   FlutterViewId view_id;
-
-  // Monitor to track window state.
+  GdkRGBA* background_color;
+  gboolean have_first_frame;
+  gboolean needs_frame_after_realize;
   FlWindowStateMonitor* window_state_monitor;
-
-  // Manages scrolling events.
   FlScrollingManager* scrolling_manager;
-
-  // Manages pointer events.
   FlPointerManager* pointer_manager;
-
-  // Manages touch events.
   FlTouchManager* touch_manager;
-
-  // Accessible tree from Flutter, exposed as an AtkPlug.
+#if !FLUTTER_LINUX_GTK4
+  // GTK3 retains the upstream renderer-owned OpenGL frame lifecycle.
+  FlViewRenderer* renderer;
   FlViewAccessible* view_accessible;
-
-  // TRUE if the view size should be controlled by Flutter.
+#endif
+  guint cursor_changed_cb_id;
+  guint on_pre_engine_restart_cb_id;
+  guint update_semantics_cb_id;
   gboolean sized_to_content;
-
+#if FLUTTER_LINUX_GTK4
+  gboolean native_texture_ready;
+  guint native_texture_retry_source_id;
+  GMutex subsurface_mutex;
+  FlSubsurface* subsurface;
+  FlSubsurfaceEGL* subsurface_egl;
+  gboolean subsurface_enabled;
+#endif
   GCancellable* cancellable;
 };
 
+#if !FLUTTER_LINUX_GTK4
 /**
  * fl_view_get_accessible:
  * @view: an #FlView.
@@ -67,8 +71,13 @@ struct _FlView {
  * Returns: an #FlViewAccessible.
  */
 FlViewAccessible* fl_view_get_accessible(FlView* view);
-
-void fl_view_input_gtk3_setup(FlView* self);
+void fl_view_input_gtk3_setup(FlView* view);
+#else
+GtkWidget* fl_view_gtk4_get_toplevel_window(FlView* view);
+void fl_view_gtk4_set_cursor(FlView* view, const gchar* cursor_name);
+gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event);
+void fl_view_gtk4_setup(FlView* view);
+#endif
 
 G_END_DECLS
 

@@ -8,6 +8,10 @@
 #include <epoxy/gl.h>
 #include <glib-object.h>
 
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_egl_image.h"
+#endif
+
 G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE(FlFramebuffer, fl_framebuffer, FL, FRAMEBUFFER, GObject)
@@ -30,6 +34,12 @@ G_DECLARE_FINAL_TYPE(FlFramebuffer, fl_framebuffer, FL, FRAMEBUFFER, GObject)
  * Returns: a new #FlFramebuffer.
  */
 FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height);
+
+#if FLUTTER_LINUX_GTK4
+FlFramebuffer* fl_framebuffer_new_shareable(GLint format,
+                                             size_t width,
+                                             size_t height);
+#endif
 
 /**
  * fl_framebuffer_new_multisample:
@@ -60,6 +70,41 @@ FlFramebuffer* fl_framebuffer_new_multisample(GLint format,
                                               size_t height,
                                               gboolean use_msaa);
 
+#if FLUTTER_LINUX_GTK4
+/**
+ * fl_framebuffer_get_shareable:
+ * @framebuffer: an #FlFramebuffer.
+ *
+ * Checks if this framebuffer can be shared between contexts (using
+ * fl_framebuffer_create_sibling).
+ *
+ * Returns: %TRUE if this framebuffer can be shared.
+ */
+gboolean fl_framebuffer_get_shareable(FlFramebuffer* framebuffer);
+
+/**
+ * fl_framebuffer_get_egl_image:
+ * @framebuffer: an #FlFramebuffer.
+ *
+ * Gets the EGL image backing a shareable framebuffer.
+ *
+ * Returns: (transfer none) (nullable): the backing EGL image.
+ */
+FlEGLImage* fl_framebuffer_get_egl_image(FlFramebuffer* framebuffer);
+
+/**
+ * fl_framebuffer_create_sibling:
+ * @framebuffer: an #FlFramebuffer.
+ *
+ * Creates a new framebuffer with the same backing texture as the original. This
+ * uses EGLImage to share the texture and allows a framebuffer created in one
+ * OpenGL context to be used in another.
+ *
+ * Returns: a new #FlFramebuffer.
+ */
+FlFramebuffer* fl_framebuffer_create_sibling(FlFramebuffer* framebuffer);
+
+#endif  // FLUTTER_LINUX_GTK4
 /**
  * fl_framebuffer_get_id:
  * @framebuffer: an #FlFramebuffer.
