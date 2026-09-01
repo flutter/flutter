@@ -148,25 +148,17 @@ if (is_android) {
     visibility = [ "*" ]
     testonly = true
     sources = [
-      "android_context_gl_impeller_unittests.cc",
       "android_image_generator_unittests.cc",
       "android_mutator_unittests.cc",
-      "android_shell_holder_unittests.cc",
       "apk_asset_provider_unittests.cc",
       "flutter_shell_native_unittests.cc",
       "image_lru_unittests.cc",
-      "platform_view_android_jni_impl_unittests.cc",
-      "platform_view_android_unittests.cc",
     ]
-    if (!slimpeller) {
-      sources += [ "android_context_gl_unittests.cc" ]
-    }
     public_configs = [ "//flutter:config" ]
     deps = [
       ":flutter_embedder_native_src",
       ":flutter_shell_native_src",
       "//flutter/fml",
-      "//flutter/shell/platform/android/jni:jni_mock",
       "//flutter/shell/platform/android/jni:mock_jni_env",
       "//flutter/third_party/googletest:gmock",
       "//flutter/third_party/googletest:gtest",
@@ -196,71 +188,12 @@ if (is_android) {
     visibility = [ ":*" ]
 
     sources = [
-      "android_context_dynamic_impeller.cc",
-      "android_context_dynamic_impeller.h",
-      "android_context_gl_impeller.cc",
-      "android_context_gl_impeller.h",
-      "android_context_vk_impeller.cc",
-      "android_context_vk_impeller.h",
-      "android_display.cc",
-      "android_display.h",
-      "android_egl_surface.cc",
-      "android_egl_surface.h",
-      "android_environment_gl.cc",
-      "android_environment_gl.h",
-      "android_shell_holder.cc",
-      "android_shell_holder.h",
-      "android_surface_dynamic_impeller.cc",
-      "android_surface_dynamic_impeller.h",
-      "android_surface_gl_impeller.cc",
-      "android_surface_gl_impeller.h",
-      "android_surface_vk_impeller.cc",
-      "android_surface_vk_impeller.h",
       "flutter_main.cc",
       "flutter_main.h",
-      "image_external_texture.cc",
-      "image_external_texture.h",
-      "image_external_texture_gl.cc",
-      "image_external_texture_gl.h",
-      "image_external_texture_gl_impeller.cc",
-      "image_external_texture_gl_impeller.h",
-      "image_external_texture_vk_impeller.cc",
-      "image_external_texture_vk_impeller.h",
       "image_lru.cc",
       "image_lru.h",
       "library_loader.cc",
-      "platform_message_handler_android.cc",
-      "platform_message_handler_android.h",
-      "platform_message_response_android.cc",
-      "platform_message_response_android.h",
-      "platform_view_android.cc",
-      "platform_view_android.h",
-      "platform_view_android_jni_impl.cc",
-      "platform_view_android_jni_impl.h",
-      "surface_texture_external_texture.cc",
-      "surface_texture_external_texture.h",
-      "surface_texture_external_texture_gl_impeller.cc",
-      "surface_texture_external_texture_gl_impeller.h",
-      "surface_texture_external_texture_vk_impeller.cc",
-      "surface_texture_external_texture_vk_impeller.h",
-      "vsync_waiter_android.cc",
-      "vsync_waiter_android.h",
     ]
-
-    if (!slimpeller) {
-      sources += [
-        "android_context_gl_skia.cc",
-        "android_context_gl_skia.h",
-        "android_surface_gl_skia.cc",
-        "android_surface_gl_skia.h",
-        "android_surface_software.cc",
-        "android_surface_software.h",
-        "image_external_texture_gl_skia.cc",
-        "image_external_texture_gl_skia.h",
-        "surface_texture_external_texture_gl_skia.cc",
-        "surface_texture_external_texture_gl_skia.h",
-      ]
-    }
 
     public_deps = [
       ":android_gpu_configuration",
@@ -280,12 +213,7 @@ if (is_android) {
       "//flutter/runtime",
       "//flutter/runtime:libdart",
       "//flutter/shell/common",
-      "//flutter/shell/platform/android/context",
-      "//flutter/shell/platform/android/external_view_embedder",
-      "//flutter/shell/platform/android/jni",
-      "//flutter/shell/platform/android/platform_view_android_delegate",
-      "//flutter/shell/platform/android/surface",
-      "//flutter/shell/platform/android/surface:native_window",
+      "//flutter/shell/platform/android/jni:mock_jni_env",
       "//flutter/skia",
       "//flutter/txt",
       "//flutter/vulkan",
