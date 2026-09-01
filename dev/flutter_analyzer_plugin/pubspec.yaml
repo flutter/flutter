@@ -10,7 +10,7 @@ environment:
 
 dependencies:
   analysis_server_plugin: any
-  analyzer: 14.1.0
+  analyzer: 14.2.0
   path: ^1.9.1
 
 dev_dependencies:
@@ -18,4 +18,4 @@ dev_dependencies:
   test: any
   test_reflective_loader: any
 
-# PUBSPEC CHECKSUM: r65cgs
+# PUBSPEC CHECKSUM: l65tvk

@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: _fe_analyzer_shared
-      sha256: "9a3386eea899815698dd55995277cf7cb8572ee52b399a6edfb7ae2b50e5fc19"
+      sha256: "739258fc1504144e55b639fa6c6fe4c1d10ae71c20f25973c12af118699723fa"
       url: "https://pub.dev"
     source: hosted
-    version: "105.0.0"
+    version: "106.0.0"
   adaptive_breakpoints:
     dependency: "direct main"
     description:
@@ -29,34 +29,34 @@ packages:
     dependency: transitive
     description:
       name: analysis_server_plugin
-      sha256: "0ba6a701c8d926f548a736ac3da8536f63f75fd49ad803f9dfcd091b869ef753"
+      sha256: d8d56859902ef8a161fadd8a93972687194d32be93af07f72fb641c23f0e3fdf
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.20"
+    version: "0.3.21"
   analyzer:
     dependency: "direct main"
     description:
       name: analyzer
-      sha256: "62993bed6eadbe9596c5c20d5c167e7bc563c5fe266657a04ddeb93bdb84f4c9"
+      sha256: "76c74350a63a37635d01dc2dd6850cc9642218c9f7291659d073e697e4450bc1"
       url: "https://pub.dev"
     source: hosted
-    version: "14.1.0"
+    version: "14.2.0"
   analyzer_plugin:
     dependency: transitive
     description:
       name: analyzer_plugin
-      sha256: "8c988c96836e59db019930c603dd1493797a7aaf97ba71469ea13724602be4dd"
+      sha256: "30cd04ad5e90bee9f2ab77f55e43cd05221271b1942c5c4b36b9da56cf83b2f0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.14.14"
+    version: "0.14.15"
   analyzer_testing:
     dependency: transitive
     description:
       name: analyzer_testing
-      sha256: f46f72b79c4a0fd8c38a71f4cdc604799bfe438c2ef75e7a54dc36cec27d0af6
+      sha256: "26abe5124b8f57c52aeb4b31967342e63f8db4e8b709a79c88de0f02e6c25d27"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.4"
+    version: "0.4.0"
   animations:
     dependency: "direct main"
     description:
@@ -166,10 +166,10 @@ packages:
     dependency: "direct main"
     description:
       name: clock
-      sha256: fddb70d9b5277016c77a80201021d40a2247104d9f4aa7bab7157b7e3f05b84b
+      sha256: e51d50bca3217c9a9fa2b41a30e4a38971133f5f9ec7a3d57bae095007f1d28e
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "1.1.3"
   code_assets:
     dependency: "direct main"
     description:
@@ -1088,10 +1088,10 @@ packages:
     dependency: "direct main"
     description:
       name: stack_trace
-      sha256: "8b27215b45d22309b5cddda1aa2b19bdfec9df0e765f2de506401c071d38d1b1"
+      sha256: "277654b3034d17ac6f9f1cb5595db011b1d5d41e8806866db28e0abaa101c490"
       url: "https://pub.dev"
     source: hosted
-    version: "1.12.1"
+    version: "1.12.2"
   standard_message_codec:
     dependency: "direct main"
     description:
