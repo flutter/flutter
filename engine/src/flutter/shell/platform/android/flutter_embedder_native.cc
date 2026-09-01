@@ -398,6 +398,10 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       asset_provider_(std::make_shared<APKAssetProvider>(
           std::make_shared<InMemoryAPKAssetProviderImpl>())) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
+  if (FlutterMain::IsInitialized() && platform_views_provider_) {
+    platform_views_provider_->SetHcppEnabled(
+        FlutterMain::Get().GetSettings().enable_surface_control);
+  }
   FML_DLOG(INFO)
       << "Initialized FlutterEmbedderNative with default components.";
 }
@@ -508,6 +512,10 @@ FlutterEmbedderNative::FlutterEmbedderNative(
                     std::make_shared<InMemoryAPKAssetProviderImpl>())) {
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterEmbedderNative(custom)");
+  if (FlutterMain::IsInitialized() && platform_views_provider_) {
+    platform_views_provider_->SetHcppEnabled(
+        FlutterMain::Get().GetSettings().enable_surface_control);
+  }
   FML_DLOG(INFO) << "Initialized FlutterEmbedderNative with custom components.";
 }
 
@@ -837,6 +845,10 @@ void FlutterEmbedderNative::SetPlatformViewsProvider(
   platform_views_provider_ =
       provider ? std::move(provider)
                : std::make_shared<DefaultPlatformViewsProvider>(jvm_invoker_);
+  if (FlutterMain::IsInitialized() && platform_views_provider_) {
+    platform_views_provider_->SetHcppEnabled(
+        FlutterMain::Get().GetSettings().enable_surface_control);
+  }
   if (platform_views_controller_) {
     platform_views_controller_->SetProvider(platform_views_provider_);
   }

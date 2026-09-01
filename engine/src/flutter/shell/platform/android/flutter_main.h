@@ -32,15 +32,6 @@ class FlutterMain {
   static bool IsInitialized();
   const flutter::android::AndroidVMArgs& GetVMArgs() const;
 
- private:
-  const flutter::Settings settings_;
-  const flutter::AndroidRenderingAPI android_rendering_api_;
-  const flutter::android::AndroidVMArgs vm_args_;
-
-  explicit FlutterMain(const flutter::Settings& settings,
-                       flutter::AndroidRenderingAPI android_rendering_api,
-                       const flutter::android::AndroidVMArgs& vm_args);
-
   static void Init(JNIEnv* env,
                    jclass clazz,
                    jobject context,
@@ -50,6 +41,17 @@ class FlutterMain {
                    jstring engineCachesPath,
                    jlong initTimeMillis,
                    jint api_level);
+
+  static void ResetForTesting();
+
+ private:
+  const flutter::Settings settings_;
+  const flutter::AndroidRenderingAPI android_rendering_api_;
+  const flutter::android::AndroidVMArgs vm_args_;
+
+  explicit FlutterMain(const flutter::Settings& settings,
+                       flutter::AndroidRenderingAPI android_rendering_api,
+                       const flutter::android::AndroidVMArgs& vm_args);
 
   void SetupDartVMServiceUriCallback(JNIEnv* env);
 

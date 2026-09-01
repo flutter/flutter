@@ -7,11 +7,13 @@
 #include <vector>
 
 #include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/fml/string_conversion.h"
 #include "flutter/shell/platform/android/android_engine_group.h"
 #include "flutter/shell/platform/android/android_platform_views_controller.h"
 #include "flutter/shell/platform/android/android_vsync_waiter.h"
 #include "flutter/shell/platform/android/android_vulkan_texture.h"
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
+#include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
 #include "flutter/shell/platform/android/jni_delegate.h"
 #include "flutter/shell/platform/android/jni_router.h"
@@ -5402,24 +5404,26 @@ TEST(Phase56StrictGNTargetIsolationTest,
   EXPECT_EQ(wm_evt.struct_size, sizeof(FlutterWindowMetricsEvent));
 }
 
+namespace {
+MockJavaVM g_mock_jvm;
+std::once_flag g_jvm_init_flag;
+void EnsureJavaVMInitialized() {
+  std::call_once(g_jvm_init_flag, []() { fml::jni::InitJavaVM(&g_mock_jvm); });
+}
+}  // namespace
+
 class Phase61JniRegistrationCutoverTest : public ::testing::Test {
  public:
-  static void SetUpTestSuite() {
-    static std::once_flag jvm_init_flag;
-    std::call_once(jvm_init_flag, []() { fml::jni::InitJavaVM(&jvm_); });
-  }
+  static void SetUpTestSuite() { EnsureJavaVMInitialized(); }
 
-  void SetUp() override { jvm_.SetJNIEnv(&mock_env_); }
+  void SetUp() override { g_mock_jvm.SetJNIEnv(&mock_env_); }
 
-  void TearDown() override { jvm_.SetJNIEnv(nullptr); }
+  void TearDown() override { g_mock_jvm.SetJNIEnv(nullptr); }
 
   MockJNIEnv& mock_env() { return mock_env_; }
 
-  static MockJavaVM jvm_;
   MockJNIEnv mock_env_;
 };
-
-MockJavaVM Phase61JniRegistrationCutoverTest::jvm_;
 
 TEST_F(Phase61JniRegistrationCutoverTest, RegisterJniSuccess) {
   const jclass kFlutterJNIClass = reinterpret_cast<jclass>(100);
@@ -5855,14 +5859,20 @@ TEST_F(Phase61JniRegistrationCutoverTest, ConcurrentMultithreadedJNIExecution) {
 // ---------------------------------------------------------------------------
 
 class Phase63FinalGNIntegrationTest : public ::testing::Test {
+ public:
+  static void SetUpTestSuite() { EnsureJavaVMInitialized(); }
+
  protected:
   void SetUp() override {
+    g_mock_jvm.SetJNIEnv(&mock_env_);
     mock_invoker_ = std::make_shared<NiceMock<MockJvmInvoker>>();
     font_provider_ = std::make_shared<InMemoryFontCollectionProvider>();
     aot_provider_ = std::make_shared<InMemoryAndroidAOTProvider>();
     vm_init_ = std::make_shared<AndroidVMInit>(mock_invoker_, font_provider_,
                                                aot_provider_);
   }
+
+  void TearDown() override { g_mock_jvm.SetJNIEnv(nullptr); }
 
   std::shared_ptr<NiceMock<MockJvmInvoker>> mock_invoker_;
   std::shared_ptr<InMemoryFontCollectionProvider> font_provider_;
@@ -6000,6 +6010,133 @@ TEST_F(Phase63FinalGNIntegrationTest, ConcurrentMultithreadedOperations) {
   for (auto& f : futures) {
     EXPECT_TRUE(f.get());
   }
+}
+
+TEST_F(Phase63FinalGNIntegrationTest, FlutterMainHcppPlumbing) {
+  FlutterMain::ResetForTesting();
+  EXPECT_FALSE(FlutterMain::IsInitialized());
+
+  // Test uninitialized FlutterMain behavior
+  {
+    FlutterEmbedderNative embedder_uninit;
+    EXPECT_FALSE(embedder_uninit.IsHcppEnabled());
+  }
+
+  auto setup_mock_args =
+      [this](const std::vector<std::string>& args) -> jobjectArray {
+    auto utf16_args = std::make_shared<std::vector<std::u16string>>();
+    for (const auto& arg : args) {
+      utf16_args->push_back(fml::Utf8ToUtf16(arg));
+    }
+    jobjectArray fake_array = reinterpret_cast<jobjectArray>(0x1000);
+    EXPECT_CALL(mock_env_, GetArrayLength(fake_array))
+        .WillRepeatedly(Return(args.size()));
+    EXPECT_CALL(mock_env_, GetObjectRefType(_))
+        .WillRepeatedly(Return(JNILocalRefType));
+    EXPECT_CALL(mock_env_, GetObjectArrayElement(fake_array, _))
+        .WillRepeatedly(
+            ::testing::Invoke([utf16_args](jobjectArray, jsize idx) -> jobject {
+              return reinterpret_cast<jobject>(static_cast<uintptr_t>(idx + 1));
+            }));
+    EXPECT_CALL(mock_env_, GetStringLength(_))
+        .WillRepeatedly(::testing::Invoke([utf16_args](jstring s) -> jsize {
+          size_t idx = static_cast<size_t>(reinterpret_cast<uintptr_t>(s) - 1);
+          return idx < utf16_args->size() ? (*utf16_args)[idx].length() : 0;
+        }));
+    EXPECT_CALL(mock_env_, GetStringChars(_, _))
+        .WillRepeatedly(::testing::Invoke(
+            [utf16_args](jstring s, jboolean*) -> const jchar* {
+              size_t idx =
+                  static_cast<size_t>(reinterpret_cast<uintptr_t>(s) - 1);
+              return idx < utf16_args->size() ? reinterpret_cast<const jchar*>(
+                                                    (*utf16_args)[idx].data())
+                                              : nullptr;
+            }));
+    EXPECT_CALL(mock_env_, ReleaseStringChars(_, _)).WillRepeatedly(Return());
+    return fake_array;
+  };
+
+  // Test with --enable-hcpp-and-surface-control=true
+  {
+    jobjectArray jargs_true =
+        setup_mock_args({"--enable-hcpp-and-surface-control=true"});
+    FlutterMain::Init(&mock_env_, nullptr, nullptr, jargs_true, nullptr,
+                      nullptr, nullptr, 0, 34);
+
+    ASSERT_TRUE(FlutterMain::IsInitialized());
+    EXPECT_TRUE(FlutterMain::Get().GetSettings().enable_surface_control);
+
+    FlutterEmbedderNative embedder_default;
+    EXPECT_TRUE(embedder_default.IsHcppEnabled());
+
+    FlutterEmbedderNative embedder_custom(mock_invoker_);
+    EXPECT_TRUE(embedder_custom.IsHcppEnabled());
+
+    // Test SetPlatformViewsProvider dynamically propagates HCPP flag
+    auto new_provider =
+        std::make_shared<DefaultPlatformViewsProvider>(mock_invoker_);
+    embedder_default.SetPlatformViewsProvider(new_provider);
+    EXPECT_TRUE(embedder_default.IsHcppEnabled());
+  }
+
+  ::testing::Mock::VerifyAndClearExpectations(&mock_env_);
+  FlutterMain::ResetForTesting();
+  EXPECT_FALSE(FlutterMain::IsInitialized());
+
+  // Test with bare --enable-hcpp-and-surface-control (no value)
+  {
+    jobjectArray jargs_bare =
+        setup_mock_args({"--enable-hcpp-and-surface-control"});
+    FlutterMain::Init(&mock_env_, nullptr, nullptr, jargs_bare, nullptr,
+                      nullptr, nullptr, 0, 34);
+
+    ASSERT_TRUE(FlutterMain::IsInitialized());
+    EXPECT_TRUE(FlutterMain::Get().GetSettings().enable_surface_control);
+
+    FlutterEmbedderNative embedder_default;
+    EXPECT_TRUE(embedder_default.IsHcppEnabled());
+  }
+
+  ::testing::Mock::VerifyAndClearExpectations(&mock_env_);
+  FlutterMain::ResetForTesting();
+  EXPECT_FALSE(FlutterMain::IsInitialized());
+
+  // Test with --enable-hcpp-and-surface-control=false
+  {
+    jobjectArray jargs_false =
+        setup_mock_args({"--enable-hcpp-and-surface-control=false"});
+    FlutterMain::Init(&mock_env_, nullptr, nullptr, jargs_false, nullptr,
+                      nullptr, nullptr, 0, 34);
+
+    ASSERT_TRUE(FlutterMain::IsInitialized());
+    EXPECT_FALSE(FlutterMain::Get().GetSettings().enable_surface_control);
+
+    FlutterEmbedderNative embedder_default;
+    EXPECT_FALSE(embedder_default.IsHcppEnabled());
+
+    FlutterEmbedderNative embedder_custom(mock_invoker_);
+    EXPECT_FALSE(embedder_custom.IsHcppEnabled());
+  }
+
+  ::testing::Mock::VerifyAndClearExpectations(&mock_env_);
+  FlutterMain::ResetForTesting();
+  EXPECT_FALSE(FlutterMain::IsInitialized());
+
+  // Test with nullptr jargs (defaults to disabled)
+  {
+    FlutterMain::Init(&mock_env_, nullptr, nullptr, nullptr, nullptr, nullptr,
+                      nullptr, 0, 34);
+
+    ASSERT_TRUE(FlutterMain::IsInitialized());
+    EXPECT_FALSE(FlutterMain::Get().GetSettings().enable_surface_control);
+
+    FlutterEmbedderNative embedder_default;
+    EXPECT_FALSE(embedder_default.IsHcppEnabled());
+  }
+
+  ::testing::Mock::VerifyAndClearExpectations(&mock_env_);
+  FlutterMain::ResetForTesting();
+  EXPECT_FALSE(FlutterMain::IsInitialized());
 }
 
 class EmbedderTestListener : public ::testing::EmptyTestEventListener {
