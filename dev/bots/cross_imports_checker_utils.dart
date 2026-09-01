@@ -26,7 +26,8 @@ abstract interface class CrossImportCheckedLibrary {
 
   /// The short name of the library.
   ///
-  /// For example `packages/flutter/test/widgets` or `examples/api/foo`.
+  /// For example `packages/flutter/test/widgets` or
+  /// `packages/flutter/examples/api/foo`.
   String get libraryName;
 
   /// The message that instructs how to remove now-fixed cross imports for this library,

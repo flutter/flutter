@@ -57,6 +57,28 @@ abstract class UnpackDarwin extends Target {
         '${result.stdout}\n---\n${result.stderr}',
       );
     }
+    final String copiedPath = environment.outputDir
+        .childDirectory(environment.fileSystem.path.basename(basePath))
+        .path;
+    try {
+      final ProcessResult chmodResult = await environment.processManager.run(<String>[
+        'chmod',
+        '-R',
+        'u+w',
+        copiedPath,
+      ]);
+      if (chmodResult.exitCode != 0) {
+        printXcodeWarning(
+          'Failed to make the framework writable. This may cause the build to '
+          'fail when using lipo.\nError: $copiedPath: ${chmodResult.stderr}',
+        );
+      }
+    } on ProcessException catch (e) {
+      printXcodeWarning(
+        'Failed to make the framework writable. This may cause the build to '
+        'fail when using lipo.\nError: $copiedPath: $e',
+      );
+    }
   }
 
   /// Verifies and destructively thins the framework binary found at [frameworkBinaryPath]

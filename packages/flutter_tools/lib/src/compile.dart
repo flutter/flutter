@@ -23,6 +23,7 @@ import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart';
 import 'convert.dart';
+import 'dart/package_map.dart';
 
 /// Opt-in changes to the dart compilers.
 const kDartCompilerExperiments = <String>[];
@@ -291,7 +292,7 @@ class KernelCompiler {
       final File mainFile = _fileSystem.file(mainPath);
       final Uri mainFileUri = mainFile.uri;
       if (packagesPath != null) {
-        mainUri = packageConfig.toPackageUri(mainFileUri)?.toString();
+        mainUri = packageConfig.toPackageUriForWorkspace(mainFileUri)?.toString();
       }
       mainUri ??= toMultiRootPath(
         mainFileUri,
@@ -314,7 +315,7 @@ class KernelCompiler {
     if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
       final Uri dartPluginRegistrantFileUri = dartPluginRegistrant.uri;
       dartPluginRegistrantUri =
-          packageConfig.toPackageUri(dartPluginRegistrantFileUri)?.toString() ??
+          packageConfig.toPackageUriForWorkspace(dartPluginRegistrantFileUri)?.toString() ??
           toMultiRootPath(
             dartPluginRegistrantFileUri,
             _fileSystemScheme,
@@ -853,13 +854,15 @@ class DefaultResidentCompiler implements ResidentCompiler {
     _stdoutHandler._suppressCompilerMessages = request.suppressErrors;
 
     final String mainUri =
-        request.packageConfig.toPackageUri(request.mainUri)?.toString() ??
+        request.packageConfig.toPackageUriForWorkspace(request.mainUri)?.toString() ??
         toMultiRootPath(request.mainUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
 
     String? additionalSourceUri;
     if (request.additionalSourceUri != null) {
       additionalSourceUri =
-          request.packageConfig.toPackageUri(request.additionalSourceUri!)?.toString() ??
+          request.packageConfig
+              .toPackageUriForWorkspace(request.additionalSourceUri!)
+              ?.toString() ??
           toMultiRootPath(
             request.additionalSourceUri!,
             fileSystemScheme,
@@ -898,7 +901,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
           message = fileUri.toString();
         } else {
           message =
-              request.packageConfig.toPackageUri(fileUri)?.toString() ??
+              request.packageConfig.toPackageUriForWorkspace(fileUri)?.toString() ??
               toMultiRootPath(fileUri, fileSystemScheme, fileSystemRoots, _platform.isWindows);
         }
         server.stdin.writeln(message);
@@ -1079,25 +1082,25 @@ class DefaultResidentCompiler implements ResidentCompiler {
       return null;
     }
 
-    final String inputKey = const Uuid().v4();
     server.stdin
-      ..writeln('compile-expression $inputKey')
-      ..writeln(request.expression);
-    request.definitions?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.definitionTypes?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.typeDefinitions?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.typeBounds?.forEach(server.stdin.writeln);
-    server.stdin.writeln(inputKey);
-    request.typeDefaults?.forEach(server.stdin.writeln);
-    server.stdin
-      ..writeln(inputKey)
-      ..writeln(request.libraryUri ?? '')
-      ..writeln(request.klass ?? '')
-      ..writeln(request.method ?? '')
-      ..writeln(request.isStatic);
+      ..writeln('JSON_INPUT')
+      ..writeln(
+        json.encode(<String, Object?>{
+          'type': 'COMPILE_EXPRESSION',
+          'data': <String, Object?>{
+            'expression': request.expression,
+            'definitions': request.definitions ?? <String>[],
+            'definitionTypes': request.definitionTypes ?? <String>[],
+            'typeDefinitions': request.typeDefinitions ?? <String>[],
+            'typeBounds': request.typeBounds ?? <String>[],
+            'typeDefaults': request.typeDefaults ?? <String>[],
+            'libraryUri': request.libraryUri ?? '',
+            'class': request.klass,
+            'method': request.method,
+            'static': request.isStatic,
+          },
+        }),
+      );
 
     return _stdoutHandler.compilerOutput?.future;
   }

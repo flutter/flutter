@@ -848,5 +848,62 @@ flutter:
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    testUsingContext(
+      'Assets from a package directory are bundled when the app lists the package directory in its pubspec',
+      () async {
+        final assetEntries = <String>['packages/test_package/a/'];
+        writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
+        writePackageConfigFiles(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'test',
+          packages: <String, String>{'test_package': 'p/p/'},
+        );
+        writePubspecFile('p/p/pubspec.yaml', 'test_package');
+
+        final assets = <String>['a/foo', 'a/bar'];
+        writeAssets('p/p/lib/', assets);
+
+        const expectedAssetManifest = <Object, Object>{
+          'packages/test_package/a/bar': <Map<String, Object>>[
+            <String, Object>{'asset': 'packages/test_package/a/bar'},
+          ],
+          'packages/test_package/a/foo': <Map<String, Object>>[
+            <String, Object>{'asset': 'packages/test_package/a/foo'},
+          ],
+        };
+
+        await buildAndVerifyAssets(assets, <String>['test_package'], expectedAssetManifest);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    testUsingContext(
+      'Directory asset path consisting only of packages/ does not crash when directory does not exist',
+      () async {
+        final assetEntries = <String>['packages/'];
+        writePubspecFile('pubspec.yaml', 'test', assets: assetEntries);
+        writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'test');
+
+        final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
+        await bundle.build(
+          packageConfigPath: '.dart_tool/package_config.json',
+          targetPlatform: TargetPlatform.tester,
+        );
+
+        expect(
+          testLogger.errorText,
+          contains('Error: unable to find directory entry in pubspec.yaml:'),
+        );
+        expect(testLogger.errorText, isNot(contains('Could not resolve package for asset')));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
   });
 }

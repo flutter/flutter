@@ -42,6 +42,8 @@ typedef NestedScrollViewHeaderSliversBuilder =
 /// A scrolling view inside of which can be nested other scrolling views, with
 /// their scroll positions being intrinsically linked.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DeB2kyLfvfo}
+///
 /// The most common use case for this widget is a scrollable view with a
 /// flexible [SliverAppBar] containing a [TabBar] in the header (built by
 /// [headerSliverBuilder]), and with a [TabBarView] in the [body], such that the

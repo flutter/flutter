@@ -215,6 +215,7 @@ class Plugin {
     bool isDirectDependency, {
     required bool isDevDependency,
   }) {
+    // SAFETY: This constructor is only invoked from .fromYaml, which validates.
     final platforms = <String, PluginPlatform>{};
     final pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
     if (pluginClass != null) {
@@ -349,11 +350,31 @@ class Plugin {
   }
 
   static List<String> _validateLegacyYaml(YamlMap yaml) {
+    final Object? androidPackage = yaml['androidPackage'];
+    final Object? iosPrefix = yaml['iosPrefix'];
+    final Object? pluginClass = yaml['pluginClass'];
+
+    // As in the `platforms:` format, every identifier is checked here: they are
+    // interpolated verbatim into the generated GeneratedPluginRegistrant source
+    // files, so anything that is not a plain identifier would let a (possibly
+    // transitive) dependency inject native code into the consuming app's build.
+    const identifierRequirement =
+        'must be a valid identifier, optionally with dot-separated segments';
+
     return <String>[
-      if (yaml['androidPackage'] is! String?)
-        'The "androidPackage" must either be null or a string.',
-      if (yaml['iosPrefix'] is! String?) 'The "iosPrefix" must either be null or a string.',
-      if (yaml['pluginClass'] is! String?) 'The "pluginClass" must either be null or a string.',
+      if (androidPackage is! String?)
+        'The "androidPackage" must either be null or a string.'
+      else if (androidPackage != null && !isValidPluginIdentifier(androidPackage))
+        'The "androidPackage" $identifierRequirement.',
+      if (iosPrefix is! String?)
+        'The "iosPrefix" must either be null or a string.'
+      // An empty prefix is the default for a legacy plugin that does not set one.
+      else if (iosPrefix != null && iosPrefix.isNotEmpty && !isValidPluginIdentifier(iosPrefix))
+        'The "iosPrefix" $identifierRequirement.',
+      if (pluginClass is! String?)
+        'The "pluginClass" must either be null or a string.'
+      else if (pluginClass != null && !isValidPluginIdentifier(pluginClass))
+        'The "pluginClass" $identifierRequirement.',
     ];
   }
 

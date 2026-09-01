@@ -212,6 +212,14 @@ class Context {
     FML_CHECK(false && "not supported in this context");
   }
 
+  /// Tracks the scheduling receipt for an image upload submitted while GPU
+  /// access is enabled. Callers must invoke this before leaving the enabled
+  /// SyncSwitch handler that protects the submission.
+  ///
+  /// Threadsafe. Backends without a lifecycle scheduling barrier ignore it.
+  virtual void TrackPendingImageUpload(
+      const std::shared_ptr<CommandBufferSchedulingReceipt>&) {}
+
   /// Run backend specific additional setup and create common shader variants.
   ///
   /// This bootstrap is intended to improve the performance of several

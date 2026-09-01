@@ -93,7 +93,7 @@ On several lines.
 ''');
       final String examplePath = path.join(
         configuration.flutterRoot.path,
-        'examples/api/widgets/foo/foo_example.0.dart',
+        'packages/flutter/examples/api/widgets/foo/foo_example.0.dart',
       );
       final File exampleFile = memoryFileSystem.file(examplePath);
       await exampleFile.create(recursive: true);
@@ -199,7 +199,7 @@ On several lines.
 ''');
       final String examplePath = path.join(
         configuration.flutterRoot.path,
-        'examples/api/widgets/foo/foo_example.0.dart',
+        'packages/flutter/examples/api/widgets/foo/foo_example.0.dart',
       );
       final File exampleFile = memoryFileSystem.file(examplePath);
       await exampleFile.create(recursive: true);
