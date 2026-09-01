@@ -28,7 +28,6 @@ using ::testing::Args;
 using ::testing::ElementsAreArray;
 using ::testing::NiceMock;
 using ::testing::Return;
-using ::testing::SetArgPointee;
 using ::testing::TestWithParam;
 
 class TestReactorGLES : public ReactorGLES {
@@ -108,7 +107,7 @@ TEST_P(RenderPassGLESWithDiscardFrameBufferExtTest, DiscardFramebufferExt) {
   const auto render_pass = command_buffer->CreateRenderPass(render_target);
 
   EXPECT_CALL(mock_gl_impl_ref, GetIntegerv(GL_FRAMEBUFFER_BINDING, _))
-      .WillOnce(SetArgPointee<1>(test_params.frame_buffer_id));
+      .Times(0);
 
   EXPECT_CALL(mock_gl_impl_ref, DiscardFramebufferEXT(GL_FRAMEBUFFER, _, _))
       .With(Args<2, 1>(ElementsAreArray(test_params.expected_attachments)))
@@ -157,7 +156,7 @@ TEST_P(RenderPassGLESWithDiscardFrameBufferExtTest, InvalidateFramebuffer) {
   const auto render_pass = command_buffer->CreateRenderPass(render_target);
 
   EXPECT_CALL(mock_gl_impl_ref, GetIntegerv(GL_FRAMEBUFFER_BINDING, _))
-      .WillOnce(SetArgPointee<1>(test_params.frame_buffer_id));
+      .Times(0);
 
   // InvalidateFramebuffer should be called instead of DiscardFramebufferEXT
   EXPECT_CALL(mock_gl_impl_ref, InvalidateFramebuffer(GL_FRAMEBUFFER, _, _))
@@ -320,6 +319,46 @@ TEST_F(RenderPassGLESCommandTest, ViewportCachedAcrossCommands) {
   EXPECT_CALL(mock_gl_impl_ref, Viewport(_, _, _, _)).Times(0);
   EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 100, 100)).Times(1);
   EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 50, 50)).Times(1);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+TEST_F(RenderPassGLESCommandTest, OffscreenFramebufferBindingIsKnown) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  EXPECT_CALL(mock_gl_impl_ref, GetIntegerv(GL_FRAMEBUFFER_BINDING, _))
+      .Times(0);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+TEST_F(RenderPassGLESCommandTest, PipelineStateCachedAcrossCommands) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  for (size_t i = 0; i < 3; i++) {
+    render_pass->SetPipeline(PipelineRef(pipeline));
+    render_pass->SetElementCount(1);
+    render_pass->SetIndexBuffer({}, IndexType::kNone);
+    EXPECT_TRUE(render_pass->Draw().ok());
+  }
+
+  EXPECT_CALL(mock_gl_impl_ref, UseProgram(_)).Times(1);
+  // ResetGLState configures each of these once. The first command configures
+  // the pipeline state once more; subsequent commands reuse it.
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_BLEND)).Times(2);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_STENCIL_TEST)).Times(2);
+  EXPECT_CALL(mock_gl_impl_ref, Disable(GL_DEPTH_TEST)).Times(2);
+  EXPECT_CALL(mock_gl_impl_ref, ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE))
+      .Times(2);
 
   EXPECT_TRUE(render_pass->EncodeCommands());
   EXPECT_TRUE(reactor->React());

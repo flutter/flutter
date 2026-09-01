@@ -260,12 +260,13 @@ static void EncodeViewport(const ProcTableGLES& gl,
 
   TextureGLES& color_gles = TextureGLES::Cast(*pass_data.color_attachment);
   const bool is_wrapped_fbo = color_gles.IsWrapped();
+  std::optional<bool> is_default_fbo;
 
   std::optional<GLuint> fbo = 0;
   if (is_wrapped_fbo) {
-    if (color_gles.GetFBO().has_value()) {
-      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
-      gl.BindFramebuffer(GL_FRAMEBUFFER, *color_gles.GetFBO());
+    if (auto wrapped_fbo = color_gles.GetFBO(); wrapped_fbo.has_value()) {
+      gl.BindFramebuffer(GL_FRAMEBUFFER, wrapped_fbo.value());
+      is_default_fbo = wrapped_fbo.value() == 0u;
     }
   } else {
     // Create (once) and bind an offscreen FBO. The cached FBO remembers which
@@ -318,6 +319,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
       color_gles.SetCachedFBOSubresource(pass_data.color_mip_level,
                                          pass_data.color_slice);
     }
+    is_default_fbo = false;
   }
 
   gl.ClearColor(pass_data.clear_color.red,    // red
@@ -362,8 +364,11 @@ static void EncodeViewport(const ProcTableGLES& gl,
   const float y_flip_value = flip_y ? -1.0f : 1.0f;
 
   std::optional<Viewport> current_viewport;
+  std::optional<IRect32> current_scissor;
   CullMode current_cull_mode = CullMode::kNone;
   WindingOrder current_winding_order = WindingOrder::kClockwise;
+  const PipelineGLES* current_pipeline = nullptr;
+  std::optional<uint32_t> current_stencil_reference;
   // Inverted to keep front-facing consistent under the vertex y-flip.
   gl.FrontFace(flip_y ? GL_CCW : GL_CW);
 
@@ -387,28 +392,37 @@ static void EncodeViewport(const ProcTableGLES& gl,
           << "Color attachment is too complicated for a legacy renderer.";
       return false;
     }
+    const bool pipeline_changed = current_pipeline != &pipeline;
 
     //--------------------------------------------------------------------------
     /// Configure blending.
     ///
-    ConfigureBlending(gl, color_attachment);
+    if (pipeline_changed) {
+      ConfigureBlending(gl, color_attachment);
+    }
 
     //--------------------------------------------------------------------------
     /// Setup stencil.
     ///
-    ConfigureStencil(gl, pipeline.GetDescriptor(), command.stencil_reference);
+    if (pipeline_changed ||
+        current_stencil_reference != command.stencil_reference) {
+      ConfigureStencil(gl, pipeline.GetDescriptor(), command.stencil_reference);
+      current_stencil_reference = command.stencil_reference;
+    }
 
     //--------------------------------------------------------------------------
     /// Configure depth.
     ///
-    if (auto depth =
-            pipeline.GetDescriptor().GetDepthStencilAttachmentDescriptor();
-        depth.has_value()) {
-      gl.Enable(GL_DEPTH_TEST);
-      gl.DepthFunc(ToCompareFunction(depth->depth_compare));
-      gl.DepthMask(depth->depth_write_enabled ? GL_TRUE : GL_FALSE);
-    } else {
-      gl.Disable(GL_DEPTH_TEST);
+    if (pipeline_changed) {
+      if (auto depth =
+              pipeline.GetDescriptor().GetDepthStencilAttachmentDescriptor();
+          depth.has_value()) {
+        gl.Enable(GL_DEPTH_TEST);
+        gl.DepthFunc(ToCompareFunction(depth->depth_compare));
+        gl.DepthMask(depth->depth_write_enabled ? GL_TRUE : GL_FALSE);
+      } else {
+        gl.Disable(GL_DEPTH_TEST);
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -425,16 +439,21 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Setup the scissor rect.
     ///
-    if (command.scissor.has_value()) {
-      const auto& scissor = command.scissor.value();
-      gl.Enable(GL_SCISSOR_TEST);
-      // Same flip handling as the viewport above.
-      const auto scissor_y_gl =
-          flip_y ? scissor.GetY()
-                 : target_size.height - scissor.GetY() - scissor.GetHeight();
-      gl.Scissor(scissor.GetX(),  // x
-                 scissor_y_gl,    // y
-                 scissor.GetWidth(), scissor.GetHeight());
+    if (current_scissor != command.scissor) {
+      current_scissor = command.scissor;
+      if (command.scissor.has_value()) {
+        const auto& scissor = command.scissor.value();
+        gl.Enable(GL_SCISSOR_TEST);
+        // Same flip handling as the viewport above.
+        const auto scissor_y_gl =
+            flip_y ? scissor.GetY()
+                   : target_size.height - scissor.GetY() - scissor.GetHeight();
+        gl.Scissor(scissor.GetX(),  // x
+                   scissor_y_gl,    // y
+                   scissor.GetWidth(), scissor.GetHeight());
+      } else {
+        gl.Disable(GL_SCISSOR_TEST);
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -496,15 +515,20 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Bind the pipeline program.
     ///
-    if (!pipeline.BindProgram()) {
-      return false;
+    if (pipeline_changed) {
+      if (!pipeline.BindProgram()) {
+        return false;
+      }
+      current_pipeline = &pipeline;
     }
 
     //--------------------------------------------------------------------------
     /// Bind the y-flip uniform if the vertex shader declares it.
-    const GLint y_flip_loc = pipeline.GetYFlipUniformLocation();
-    if (y_flip_loc >= 0) {
-      gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);
+    if (pipeline_changed) {
+      const GLint y_flip_loc = pipeline.GetYFlipUniformLocation();
+      if (y_flip_loc >= 0) {
+        gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -693,29 +717,32 @@ static void EncodeViewport(const ProcTableGLES& gl,
     gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
   }
 
-  GLint framebuffer_id = 0;
-  gl.GetIntegerv(GL_FRAMEBUFFER_BINDING, &framebuffer_id);
-  const bool is_default_fbo = framebuffer_id == 0;
+  if (!is_default_fbo.has_value()) {
+    GLint framebuffer_id = 0;
+    gl.GetIntegerv(GL_FRAMEBUFFER_BINDING, &framebuffer_id);
+    is_default_fbo = framebuffer_id == 0;
+  }
+  const bool default_fbo = is_default_fbo.value();
 
   if (gl.InvalidateFramebuffer.IsAvailable()) {
     std::array<GLenum, 3> attachments;
     size_t attachment_count = 0;
 
-    bool angle_safe = gl.GetCapabilities()->IsANGLE() ? !is_default_fbo : true;
+    bool angle_safe = gl.GetCapabilities()->IsANGLE() ? !default_fbo : true;
 
     if (pass_data.discard_color_attachment) {
       attachments[attachment_count++] =
-          (is_default_fbo ? GL_COLOR_EXT : GL_COLOR_ATTACHMENT0);
+          (default_fbo ? GL_COLOR_EXT : GL_COLOR_ATTACHMENT0);
     }
 
     if (pass_data.discard_depth_attachment && angle_safe) {
       attachments[attachment_count++] =
-          (is_default_fbo ? GL_DEPTH_EXT : GL_DEPTH_ATTACHMENT);
+          (default_fbo ? GL_DEPTH_EXT : GL_DEPTH_ATTACHMENT);
     }
 
     if (pass_data.discard_stencil_attachment && angle_safe) {
       attachments[attachment_count++] =
-          (is_default_fbo ? GL_STENCIL_EXT : GL_STENCIL_ATTACHMENT);
+          (default_fbo ? GL_STENCIL_EXT : GL_STENCIL_ATTACHMENT);
     }
     gl.InvalidateFramebuffer(GL_FRAMEBUFFER,     // target
                              attachment_count,   // attachments to discard
@@ -728,21 +755,21 @@ static void EncodeViewport(const ProcTableGLES& gl,
     // TODO(130048): discarding stencil or depth on the default fbo causes Angle
     // to discard the entire render target. Until we know the reason, default to
     // storing.
-    bool angle_safe = gl.GetCapabilities()->IsANGLE() ? !is_default_fbo : true;
+    bool angle_safe = gl.GetCapabilities()->IsANGLE() ? !default_fbo : true;
 
     if (pass_data.discard_color_attachment) {
       attachments[attachment_count++] =
-          (is_default_fbo ? GL_COLOR_EXT : GL_COLOR_ATTACHMENT0);
+          (default_fbo ? GL_COLOR_EXT : GL_COLOR_ATTACHMENT0);
     }
 
     if (pass_data.discard_depth_attachment && angle_safe) {
       attachments[attachment_count++] =
-          (is_default_fbo ? GL_DEPTH_EXT : GL_DEPTH_ATTACHMENT);
+          (default_fbo ? GL_DEPTH_EXT : GL_DEPTH_ATTACHMENT);
     }
 
     if (pass_data.discard_stencil_attachment && angle_safe) {
       attachments[attachment_count++] =
-          (is_default_fbo ? GL_STENCIL_EXT : GL_STENCIL_ATTACHMENT);
+          (default_fbo ? GL_STENCIL_EXT : GL_STENCIL_ATTACHMENT);
     }
     gl.DiscardFramebufferEXT(GL_FRAMEBUFFER,     // target
                              attachment_count,   // attachments to discard
@@ -751,7 +778,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
   }
 
 #ifdef IMPELLER_DEBUG
-  if (is_default_fbo) {
+  if (default_fbo) {
     tracer->MarkFrameEnd(gl);
   }
 #endif  // IMPELLER_DEBUG
