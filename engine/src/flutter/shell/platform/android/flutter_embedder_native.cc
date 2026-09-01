@@ -5,6 +5,8 @@
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/trace_event.h"
 
 namespace flutter {
@@ -2235,6 +2237,981 @@ size_t FlutterEmbedderNative::GetActiveEngineCount() const {
     return engine_group_->GetActiveEngineCount();
   }
   return 0;
+}
+
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
+static jfieldID g_jni_shell_holder_field = nullptr;
+static jmethodID g_jni_constructor = nullptr;
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_java_long_class = nullptr;
+static jmethodID g_long_constructor = nullptr;
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_callback_info_class =
+    nullptr;
+static jmethodID g_flutter_callback_info_constructor = nullptr;
+
+static jlong FlutterJNI_Attach(JNIEnv* env, jclass clazz, jobject flutterJNI) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterJNI_Attach");
+  auto native_instance = std::make_unique<FlutterEmbedderNative>();
+  return reinterpret_cast<jlong>(native_instance.release());
+}
+
+static void FlutterJNI_Destroy(JNIEnv* env,
+                               jobject jcaller,
+                               jlong native_handle) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterJNI_Destroy");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  delete native_instance;
+}
+
+static jobject FlutterJNI_Spawn(JNIEnv* env,
+                                jobject jcaller,
+                                jlong native_handle,
+                                jstring jEntrypoint,
+                                jstring jLibraryUrl,
+                                jstring jInitialRoute,
+                                jobject jEntrypointArgs,
+                                jlong engineId) {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::FlutterJNI_Spawn",
+               "engine_id", std::to_string(engineId).c_str());
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return nullptr;
+  }
+
+  AndroidEngineSpawnArgs spawn_args;
+  if (jEntrypoint != nullptr) {
+    spawn_args.entrypoint = fml::jni::JavaStringToString(env, jEntrypoint);
+  }
+  if (jLibraryUrl != nullptr) {
+    spawn_args.library_url = fml::jni::JavaStringToString(env, jLibraryUrl);
+  }
+  if (jInitialRoute != nullptr) {
+    spawn_args.initial_route = fml::jni::JavaStringToString(env, jInitialRoute);
+  }
+  if (jEntrypointArgs != nullptr) {
+    spawn_args.entrypoint_args =
+        fml::jni::StringListToVector(env, jEntrypointArgs);
+  }
+  spawn_args.engine_id = engineId;
+
+  native_instance->GetRouter()->RouteSpawnEngine(engineId, spawn_args);
+  auto spawned_instance = std::make_unique<FlutterEmbedderNative>();
+
+  if (!g_flutter_jni_class || g_flutter_jni_class->is_null() ||
+      !g_jni_constructor) {
+    return nullptr;
+  }
+
+  jobject jni = env->NewObject(g_flutter_jni_class->obj(), g_jni_constructor);
+  if (!jni) {
+    return nullptr;
+  }
+
+  if (g_java_long_class && !g_java_long_class->is_null() &&
+      g_long_constructor && g_jni_shell_holder_field) {
+    jobject javaLong = env->CallStaticObjectMethod(
+        g_java_long_class->obj(), g_long_constructor,
+        reinterpret_cast<jlong>(spawned_instance.release()));
+    if (javaLong != nullptr) {
+      env->SetObjectField(jni, g_jni_shell_holder_field, javaLong);
+    }
+  }
+
+  return jni;
+}
+
+static void FlutterJNI_RunBundleAndSnapshotFromLibrary(JNIEnv* env,
+                                                       jobject jcaller,
+                                                       jlong native_handle,
+                                                       jstring jBundlePath,
+                                                       jstring jEntrypoint,
+                                                       jstring jLibraryUrl,
+                                                       jobject jAssetManager,
+                                                       jobject jEntrypointArgs,
+                                                       jlong engineId) {
+  TRACE_EVENT1(
+      "flutter",
+      "FlutterEmbedderNative::FlutterJNI_RunBundleAndSnapshotFromLibrary",
+      "engine_id", std::to_string(engineId).c_str());
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  std::string bundle_path =
+      jBundlePath ? fml::jni::JavaStringToString(env, jBundlePath) : "";
+  if (jAssetManager != nullptr) {
+    auto asset_provider =
+        std::make_shared<APKAssetProvider>(env, jAssetManager, bundle_path);
+    native_instance->SetAssetProvider(std::move(asset_provider));
+  }
+  native_instance->GetRouter()->RouteAssetManagerChanged();
+}
+
+static void FlutterJNI_DispatchEmptyPlatformMessage(JNIEnv* env,
+                                                    jobject jcaller,
+                                                    jlong native_handle,
+                                                    jstring channel,
+                                                    jint responseId) {
+  TRACE_EVENT0(
+      "flutter",
+      "FlutterEmbedderNative::FlutterJNI_DispatchEmptyPlatformMessage");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  std::string str_channel =
+      channel ? fml::jni::JavaStringToString(env, channel) : "";
+  native_instance->GetRouter()->RoutePlatformMessage(
+      str_channel, std::vector<uint8_t>(), responseId);
+}
+
+static void FlutterJNI_CleanupMessageData(JNIEnv* env,
+                                          jobject jcaller,
+                                          jlong message_data) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_CleanupMessageData");
+  free(reinterpret_cast<void*>(message_data));
+}
+
+static void FlutterJNI_DispatchPlatformMessage(JNIEnv* env,
+                                               jobject jcaller,
+                                               jlong native_handle,
+                                               jstring channel,
+                                               jobject message,
+                                               jint position,
+                                               jint responseId) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_DispatchPlatformMessage");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  std::string str_channel =
+      channel ? fml::jni::JavaStringToString(env, channel) : "";
+  std::vector<uint8_t> data;
+  if (message != nullptr && position > 0) {
+    const uint8_t* buffer =
+        static_cast<const uint8_t*>(env->GetDirectBufferAddress(message));
+    if (buffer != nullptr) {
+      data.assign(buffer, buffer + position);
+    }
+  }
+  native_instance->GetRouter()->RoutePlatformMessage(str_channel, data,
+                                                     responseId);
+}
+
+static void FlutterJNI_InvokePlatformMessageResponseCallback(
+    JNIEnv* env,
+    jobject jcaller,
+    jlong native_handle,
+    jint responseId,
+    jobject message,
+    jint position) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_"
+               "InvokePlatformMessageResponseCallback");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  std::vector<uint8_t> data;
+  if (message != nullptr && position > 0) {
+    const uint8_t* buffer =
+        static_cast<const uint8_t*>(env->GetDirectBufferAddress(message));
+    if (buffer != nullptr) {
+      data.assign(buffer, buffer + position);
+    }
+  }
+  native_instance->GetRouter()->RoutePlatformMessageResponse(responseId, data);
+}
+
+static void FlutterJNI_InvokePlatformMessageEmptyResponseCallback(
+    JNIEnv* env,
+    jobject jcaller,
+    jlong native_handle,
+    jint responseId) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_"
+               "InvokePlatformMessageEmptyResponseCallback");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  native_instance->GetRouter()->RoutePlatformMessageResponse(
+      responseId, std::vector<uint8_t>());
+}
+
+static void FlutterJNI_NotifyLowMemoryWarning(JNIEnv* env,
+                                              jobject obj,
+                                              jlong native_handle) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_NotifyLowMemoryWarning");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+}
+
+static jobject FlutterJNI_GetBitmap(JNIEnv* env,
+                                    jobject jcaller,
+                                    jlong native_handle) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterJNI_GetBitmap");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return nullptr;
+  }
+  return nullptr;
+}
+
+static void FlutterJNI_SurfaceCreated(JNIEnv* env,
+                                      jobject jcaller,
+                                      jlong native_handle,
+                                      jobject jsurface) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterJNI_SurfaceCreated");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  native_instance->GetRouter()->RouteFirstFrame();
+}
+
+static void FlutterJNI_SurfaceWindowChanged(JNIEnv* env,
+                                            jobject jcaller,
+                                            jlong native_handle,
+                                            jobject jsurface) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_SurfaceWindowChanged");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+}
+
+static void FlutterJNI_SurfaceChanged(JNIEnv* env,
+                                      jobject jcaller,
+                                      jlong native_handle,
+                                      jint width,
+                                      jint height) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterJNI_SurfaceChanged");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  AndroidViewportMetrics metrics;
+  metrics.physical_width = width;
+  metrics.physical_height = height;
+  native_instance->SetViewportMetrics(metrics);
+}
+
+static void FlutterJNI_SurfaceDestroyed(JNIEnv* env,
+                                        jobject jcaller,
+                                        jlong native_handle) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterJNI_SurfaceDestroyed");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+}
+
+static void FlutterJNI_SetViewportMetrics(
+    JNIEnv* env,
+    jobject jcaller,
+    jlong native_handle,
+    jfloat devicePixelRatio,
+    jint physicalWidth,
+    jint physicalHeight,
+    jint physicalPaddingTop,
+    jint physicalPaddingRight,
+    jint physicalPaddingBottom,
+    jint physicalPaddingLeft,
+    jint physicalViewInsetTop,
+    jint physicalViewInsetRight,
+    jint physicalViewInsetBottom,
+    jint physicalViewInsetLeft,
+    jint systemGestureInsetTop,
+    jint systemGestureInsetRight,
+    jint systemGestureInsetBottom,
+    jint systemGestureInsetLeft,
+    jint physicalTouchSlop,
+    jintArray javaDisplayFeaturesBounds,
+    jintArray javaDisplayFeaturesType,
+    jintArray javaDisplayFeaturesState,
+    jint physicalMinWidth,
+    jint physicalMaxWidth,
+    jint physicalMinHeight,
+    jint physicalMaxHeight,
+    jint physicalDisplayCornerRadiusTopLeft,
+    jint physicalDisplayCornerRadiusTopRight,
+    jint physicalDisplayCornerRadiusBottomRight,
+    jint physicalDisplayCornerRadiusBottomLeft) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_SetViewportMetrics");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+
+  AndroidViewportMetrics metrics;
+  metrics.device_pixel_ratio = devicePixelRatio;
+  metrics.physical_width = physicalWidth;
+  metrics.physical_height = physicalHeight;
+  metrics.physical_padding_top = physicalPaddingTop;
+  metrics.physical_padding_right = physicalPaddingRight;
+  metrics.physical_padding_bottom = physicalPaddingBottom;
+  metrics.physical_padding_left = physicalPaddingLeft;
+  metrics.physical_view_inset_top = physicalViewInsetTop;
+  metrics.physical_view_inset_right = physicalViewInsetRight;
+  metrics.physical_view_inset_bottom = physicalViewInsetBottom;
+  metrics.physical_view_inset_left = physicalViewInsetLeft;
+  metrics.system_gesture_inset_top = systemGestureInsetTop;
+  metrics.system_gesture_inset_right = systemGestureInsetRight;
+  metrics.system_gesture_inset_bottom = systemGestureInsetBottom;
+  metrics.system_gesture_inset_left = systemGestureInsetLeft;
+  metrics.physical_touch_slop = physicalTouchSlop;
+  metrics.physical_min_width = physicalMinWidth;
+  metrics.physical_max_width = physicalMaxWidth;
+  metrics.physical_min_height = physicalMinHeight;
+  metrics.physical_max_height = physicalMaxHeight;
+  metrics.physical_display_corner_radius_top_left =
+      physicalDisplayCornerRadiusTopLeft;
+  metrics.physical_display_corner_radius_top_right =
+      physicalDisplayCornerRadiusTopRight;
+  metrics.physical_display_corner_radius_bottom_right =
+      physicalDisplayCornerRadiusBottomRight;
+  metrics.physical_display_corner_radius_bottom_left =
+      physicalDisplayCornerRadiusBottomLeft;
+
+  if (javaDisplayFeaturesBounds != nullptr) {
+    jsize rectSize = env->GetArrayLength(javaDisplayFeaturesBounds);
+    if (rectSize > 0) {
+      std::vector<int> bounds(rectSize);
+      env->GetIntArrayRegion(javaDisplayFeaturesBounds, 0, rectSize,
+                             &bounds[0]);
+      metrics.display_features_bounds.assign(bounds.begin(), bounds.end());
+    }
+  }
+
+  if (javaDisplayFeaturesType != nullptr) {
+    jsize typeSize = env->GetArrayLength(javaDisplayFeaturesType);
+    if (typeSize > 0) {
+      std::vector<int> types(typeSize);
+      env->GetIntArrayRegion(javaDisplayFeaturesType, 0, typeSize, &types[0]);
+      metrics.display_features_type.assign(types.begin(), types.end());
+    }
+  }
+
+  if (javaDisplayFeaturesState != nullptr) {
+    jsize stateSize = env->GetArrayLength(javaDisplayFeaturesState);
+    if (stateSize > 0) {
+      std::vector<int> states(stateSize);
+      env->GetIntArrayRegion(javaDisplayFeaturesState, 0, stateSize,
+                             &states[0]);
+      metrics.display_features_state.assign(states.begin(), states.end());
+    }
+  }
+
+  native_instance->SetViewportMetrics(metrics);
+}
+
+static void FlutterJNI_DispatchPointerDataPacket(JNIEnv* env,
+                                                 jobject jcaller,
+                                                 jlong native_handle,
+                                                 jobject buffer,
+                                                 jint position) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_DispatchPointerDataPacket");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+}
+
+static void FlutterJNI_DispatchSemanticsAction(JNIEnv* env,
+                                               jobject jcaller,
+                                               jlong native_handle,
+                                               jint id,
+                                               jint action,
+                                               jobject args,
+                                               jint args_position) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_DispatchSemanticsAction");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  std::vector<uint8_t> action_data;
+  if (args != nullptr && args_position > 0) {
+    const uint8_t* buffer =
+        static_cast<const uint8_t*>(env->GetDirectBufferAddress(args));
+    if (buffer != nullptr) {
+      action_data.assign(buffer, buffer + args_position);
+    }
+  }
+  native_instance->DispatchSemanticsAction(
+      id, static_cast<FlutterSemanticsAction>(action), action_data);
+}
+
+static void FlutterJNI_SetSemanticsEnabled(JNIEnv* env,
+                                           jobject jcaller,
+                                           jlong native_handle,
+                                           jboolean enabled) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_SetSemanticsEnabled");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  native_instance->SetSemanticsEnabled(enabled);
+}
+
+static void FlutterJNI_SetAccessibilityFeatures(JNIEnv* env,
+                                                jobject jcaller,
+                                                jlong native_handle,
+                                                jint flags) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_SetAccessibilityFeatures");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  native_instance->SetAccessibilityFeatures(flags);
+}
+
+static jboolean FlutterJNI_GetIsSoftwareRendering(JNIEnv* env,
+                                                  jobject jcaller) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_GetIsSoftwareRendering");
+  return false;
+}
+
+static void FlutterJNI_RegisterTexture(JNIEnv* env,
+                                       jobject jcaller,
+                                       jlong native_handle,
+                                       jlong texture_id,
+                                       jobject surface_texture) {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::FlutterJNI_RegisterTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  native_instance->RegisterHardwareBufferTexture(texture_id);
+}
+
+static void FlutterJNI_RegisterImageTexture(JNIEnv* env,
+                                            jobject jcaller,
+                                            jlong native_handle,
+                                            jlong texture_id,
+                                            jobject image_texture_entry,
+                                            jboolean reset_on_background) {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::FlutterJNI_RegisterImageTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  native_instance->RegisterHardwareBufferTexture(texture_id);
+}
+
+static void FlutterJNI_MarkTextureFrameAvailable(JNIEnv* env,
+                                                 jobject jcaller,
+                                                 jlong native_handle,
+                                                 jlong texture_id) {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::FlutterJNI_MarkTextureFrameAvailable",
+               "texture_id", std::to_string(texture_id).c_str());
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  native_instance->OnHardwareBufferFrameAvailable(texture_id);
+}
+
+static void FlutterJNI_ScheduleFrame(JNIEnv* env,
+                                     jobject jcaller,
+                                     jlong native_handle) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterJNI_ScheduleFrame");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+}
+
+static void FlutterJNI_UnregisterTexture(JNIEnv* env,
+                                         jobject jcaller,
+                                         jlong native_handle,
+                                         jlong texture_id) {
+  TRACE_EVENT1("flutter", "FlutterEmbedderNative::FlutterJNI_UnregisterTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  native_instance->UnregisterHardwareBufferTexture(texture_id);
+}
+
+static jobject FlutterJNI_LookupCallbackInformation(JNIEnv* env,
+                                                    jobject jcaller,
+                                                    jlong handle) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_LookupCallbackInformation");
+  DefaultCallbackCacheProvider provider;
+  auto info = provider.GetCallbackInformation(handle);
+  if (!info.has_value() || !g_flutter_callback_info_class ||
+      g_flutter_callback_info_class->is_null() ||
+      !g_flutter_callback_info_constructor) {
+    return nullptr;
+  }
+  return env->NewObject(g_flutter_callback_info_class->obj(),
+                        g_flutter_callback_info_constructor,
+                        env->NewStringUTF(info->name.c_str()),
+                        env->NewStringUTF(info->class_name.c_str()),
+                        env->NewStringUTF(info->library_path.c_str()));
+}
+
+static jboolean FlutterJNI_FlutterTextUtilsIsEmoji(JNIEnv* env,
+                                                   jobject obj,
+                                                   jint codePoint) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsEmoji");
+  return (codePoint >= 0x1F600 && codePoint <= 0x1F64F) ||
+         (codePoint >= 0x1F300 && codePoint <= 0x1F5FF) ||
+         (codePoint >= 0x1F680 && codePoint <= 0x1F6FF) ||
+         (codePoint >= 0x1F700 && codePoint <= 0x1F77F) ||
+         (codePoint >= 0x1F780 && codePoint <= 0x1F7FF) ||
+         (codePoint >= 0x1F800 && codePoint <= 0x1F8FF) ||
+         (codePoint >= 0x1F900 && codePoint <= 0x1F9FF) ||
+         (codePoint >= 0x1FA00 && codePoint <= 0x1FA6F) ||
+         (codePoint >= 0x1FA70 && codePoint <= 0x1FAFF) ||
+         (codePoint >= 0x2600 && codePoint <= 0x26FF) ||
+         (codePoint >= 0x2700 && codePoint <= 0x27BF) ||
+         (codePoint >= 0xFE00 && codePoint <= 0xFE0F) ||
+         (codePoint >= 0x1F1E6 && codePoint <= 0x1F1FF);
+}
+
+static jboolean FlutterJNI_FlutterTextUtilsIsEmojiModifier(JNIEnv* env,
+                                                           jobject obj,
+                                                           jint codePoint) {
+  TRACE_EVENT0(
+      "flutter",
+      "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsEmojiModifier");
+  return codePoint >= 0x1F3FB && codePoint <= 0x1F3FF;
+}
+
+static jboolean FlutterJNI_FlutterTextUtilsIsEmojiModifierBase(JNIEnv* env,
+                                                               jobject obj,
+                                                               jint codePoint) {
+  TRACE_EVENT0(
+      "flutter",
+      "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsEmojiModifierBase");
+  return (codePoint >= 0x1F3C2 && codePoint <= 0x1F3C4) ||
+         (codePoint >= 0x1F3C7 && codePoint <= 0x1F3CC) ||
+         (codePoint >= 0x1F442 && codePoint <= 0x1F443) ||
+         (codePoint >= 0x1F446 && codePoint <= 0x1F450) ||
+         (codePoint >= 0x1F466 && codePoint <= 0x1F478) ||
+         (codePoint >= 0x1F47C && codePoint <= 0x1F487) ||
+         (codePoint == 0x1F4AA) ||
+         (codePoint >= 0x1F574 && codePoint <= 0x1F57A) ||
+         (codePoint >= 0x1F590 && codePoint <= 0x1F596) ||
+         (codePoint >= 0x1F645 && codePoint <= 0x1F647) ||
+         (codePoint >= 0x1F64B && codePoint <= 0x1F64F) ||
+         (codePoint >= 0x1F6A3 && codePoint <= 0x1F6B6) ||
+         (codePoint >= 0x1F6C0 && codePoint <= 0x1F6CC) ||
+         (codePoint >= 0x1F90F && codePoint <= 0x1F93E) ||
+         (codePoint == 0x1F977) ||
+         (codePoint >= 0x1F9B5 && codePoint <= 0x1F9B9) ||
+         (codePoint >= 0x1F9CD && codePoint <= 0x1F9CF) ||
+         (codePoint >= 0x1F9D1 && codePoint <= 0x1F9DD) ||
+         (codePoint == 0x261D) || (codePoint == 0x26F9) ||
+         (codePoint >= 0x270A && codePoint <= 0x270D);
+}
+
+static jboolean FlutterJNI_FlutterTextUtilsIsVariationSelector(JNIEnv* env,
+                                                               jobject obj,
+                                                               jint codePoint) {
+  TRACE_EVENT0(
+      "flutter",
+      "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsVariationSelector");
+  return (codePoint >= 0xFE00 && codePoint <= 0xFE0F) ||
+         (codePoint >= 0xE0100 && codePoint <= 0xE01EF);
+}
+
+static jboolean FlutterJNI_FlutterTextUtilsIsRegionalIndicator(JNIEnv* env,
+                                                               jobject obj,
+                                                               jint codePoint) {
+  TRACE_EVENT0(
+      "flutter",
+      "FlutterEmbedderNative::FlutterJNI_FlutterTextUtilsIsRegionalIndicator");
+  return codePoint >= 0x1F1E6 && codePoint <= 0x1F1FF;
+}
+
+static void FlutterJNI_LoadDartDeferredLibrary(JNIEnv* env,
+                                               jobject obj,
+                                               jlong native_handle,
+                                               jint jLoadingUnitId,
+                                               jobjectArray jSearchPaths) {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::FlutterJNI_LoadDartDeferredLibrary",
+               "loading_unit_id", std::to_string(jLoadingUnitId).c_str());
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  native_instance->GetRouter()->RouteRequestDartDeferredLibrary(
+      static_cast<int64_t>(jLoadingUnitId));
+}
+
+static void FlutterJNI_UpdateJavaAssetManager(JNIEnv* env,
+                                              jobject obj,
+                                              jlong native_handle,
+                                              jobject jAssetManager,
+                                              jstring jAssetBundlePath) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_UpdateJavaAssetManager");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  std::string bundle_path =
+      jAssetBundlePath ? fml::jni::JavaStringToString(env, jAssetBundlePath)
+                       : "";
+  if (jAssetManager != nullptr) {
+    auto asset_provider =
+        std::make_shared<APKAssetProvider>(env, jAssetManager, bundle_path);
+    native_instance->SetAssetProvider(std::move(asset_provider));
+  }
+  native_instance->GetRouter()->RouteAssetManagerChanged();
+}
+
+static void FlutterJNI_DeferredComponentInstallFailure(JNIEnv* env,
+                                                       jobject obj,
+                                                       jint jLoadingUnitId,
+                                                       jstring jError,
+                                                       jboolean jTransient) {
+  TRACE_EVENT1("flutter",
+               "FlutterEmbedderNative::"
+               "FlutterJNI_DeferredComponentInstallFailure",
+               "loading_unit_id", std::to_string(jLoadingUnitId).c_str());
+}
+
+static void FlutterJNI_UpdateDisplayMetrics(JNIEnv* env,
+                                            jobject jcaller,
+                                            jlong native_handle) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_UpdateDisplayMetrics");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return;
+  }
+  AndroidDisplayMetrics metrics;
+  native_instance->GetRouter()->RouteUpdateDisplayMetrics(metrics);
+}
+
+static jboolean FlutterJNI_IsSurfaceControlEnabled(JNIEnv* env,
+                                                   jobject jcaller,
+                                                   jlong native_handle) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_IsSurfaceControlEnabled");
+  auto* native_instance =
+      reinterpret_cast<FlutterEmbedderNative*>(native_handle);
+  if (!native_instance) {
+    return false;
+  }
+  return native_instance->IsHcppEnabled();
+}
+
+static void FlutterJNI_PrefetchDefaultFontManager(JNIEnv* env, jclass clazz) {
+  TRACE_EVENT0("flutter",
+               "FlutterEmbedderNative::FlutterJNI_PrefetchDefaultFontManager");
+  DefaultFontCollectionProvider font_provider(
+      FlutterEmbedderNative::GetDefaultLibraryLoader());
+  font_provider.PrefetchDefaultFontManager();
+}
+
+bool FlutterEmbedderNative::RegisterJni(JNIEnv* env) {
+  TRACE_EVENT0("flutter", "FlutterEmbedderNative::RegisterJni");
+  if (!env) {
+    FML_LOG(ERROR)
+        << "No JNIEnv provided to FlutterEmbedderNative::RegisterJni";
+    return false;
+  }
+
+  static const JNINativeMethod flutter_jni_methods[] = {
+      {
+          .name = "nativeAttach",
+          .signature = "(Lio/flutter/embedding/engine/FlutterJNI;)J",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_Attach),
+      },
+      {
+          .name = "nativeDestroy",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_Destroy),
+      },
+      {
+          .name = "nativeSpawn",
+          .signature = "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/"
+                       "String;Ljava/util/List;J)Lio/flutter/"
+                       "embedding/engine/FlutterJNI;",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_Spawn),
+      },
+      {
+          .name = "nativeRunBundleAndSnapshotFromLibrary",
+          .signature = "(JLjava/lang/String;Ljava/lang/String;"
+                       "Ljava/lang/String;Landroid/content/res/"
+                       "AssetManager;Ljava/util/List;J)V",
+          .fnPtr = reinterpret_cast<void*>(
+              &FlutterJNI_RunBundleAndSnapshotFromLibrary),
+      },
+      {
+          .name = "nativeDispatchEmptyPlatformMessage",
+          .signature = "(JLjava/lang/String;I)V",
+          .fnPtr =
+              reinterpret_cast<void*>(&FlutterJNI_DispatchEmptyPlatformMessage),
+      },
+      {
+          .name = "nativeCleanupMessageData",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_CleanupMessageData),
+      },
+      {
+          .name = "nativeDispatchPlatformMessage",
+          .signature = "(JLjava/lang/String;Ljava/nio/ByteBuffer;II)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_DispatchPlatformMessage),
+      },
+      {
+          .name = "nativeInvokePlatformMessageResponseCallback",
+          .signature = "(JILjava/nio/ByteBuffer;I)V",
+          .fnPtr = reinterpret_cast<void*>(
+              &FlutterJNI_InvokePlatformMessageResponseCallback),
+      },
+      {
+          .name = "nativeInvokePlatformMessageEmptyResponseCallback",
+          .signature = "(JI)V",
+          .fnPtr = reinterpret_cast<void*>(
+              &FlutterJNI_InvokePlatformMessageEmptyResponseCallback),
+      },
+      {
+          .name = "nativeNotifyLowMemoryWarning",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_NotifyLowMemoryWarning),
+      },
+      {
+          .name = "nativeGetBitmap",
+          .signature = "(J)Landroid/graphics/Bitmap;",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_GetBitmap),
+      },
+      {
+          .name = "nativeSurfaceCreated",
+          .signature = "(JLandroid/view/Surface;)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_SurfaceCreated),
+      },
+      {
+          .name = "nativeSurfaceWindowChanged",
+          .signature = "(JLandroid/view/Surface;)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_SurfaceWindowChanged),
+      },
+      {
+          .name = "nativeSurfaceChanged",
+          .signature = "(JII)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_SurfaceChanged),
+      },
+      {
+          .name = "nativeSurfaceDestroyed",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_SurfaceDestroyed),
+      },
+      {
+          .name = "nativeSetViewportMetrics",
+          .signature = "(JFIIIIIIIIIIIIIII[I[I[IIIIIIIII)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_SetViewportMetrics),
+      },
+      {
+          .name = "nativeDispatchPointerDataPacket",
+          .signature = "(JLjava/nio/ByteBuffer;I)V",
+          .fnPtr =
+              reinterpret_cast<void*>(&FlutterJNI_DispatchPointerDataPacket),
+      },
+      {
+          .name = "nativeDispatchSemanticsAction",
+          .signature = "(JIILjava/nio/ByteBuffer;I)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_DispatchSemanticsAction),
+      },
+      {
+          .name = "nativeSetSemanticsEnabled",
+          .signature = "(JZ)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_SetSemanticsEnabled),
+      },
+      {
+          .name = "nativeSetAccessibilityFeatures",
+          .signature = "(JI)V",
+          .fnPtr =
+              reinterpret_cast<void*>(&FlutterJNI_SetAccessibilityFeatures),
+      },
+      {
+          .name = "nativeGetIsSoftwareRenderingEnabled",
+          .signature = "()Z",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_GetIsSoftwareRendering),
+      },
+      {
+          .name = "nativeRegisterTexture",
+          .signature = "(JJLjava/lang/ref/WeakReference;)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_RegisterTexture),
+      },
+      {
+          .name = "nativeRegisterImageTexture",
+          .signature = "(JJLjava/lang/ref/WeakReference;Z)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_RegisterImageTexture),
+      },
+      {
+          .name = "nativeMarkTextureFrameAvailable",
+          .signature = "(JJ)V",
+          .fnPtr =
+              reinterpret_cast<void*>(&FlutterJNI_MarkTextureFrameAvailable),
+      },
+      {
+          .name = "nativeScheduleFrame",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_ScheduleFrame),
+      },
+      {
+          .name = "nativeUnregisterTexture",
+          .signature = "(JJ)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_UnregisterTexture),
+      },
+      {
+          .name = "nativeLookupCallbackInformation",
+          .signature = "(J)Lio/flutter/view/FlutterCallbackInformation;",
+          .fnPtr =
+              reinterpret_cast<void*>(&FlutterJNI_LookupCallbackInformation),
+      },
+      {
+          .name = "nativeFlutterTextUtilsIsEmoji",
+          .signature = "(I)Z",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_FlutterTextUtilsIsEmoji),
+      },
+      {
+          .name = "nativeFlutterTextUtilsIsEmojiModifier",
+          .signature = "(I)Z",
+          .fnPtr = reinterpret_cast<void*>(
+              &FlutterJNI_FlutterTextUtilsIsEmojiModifier),
+      },
+      {
+          .name = "nativeFlutterTextUtilsIsEmojiModifierBase",
+          .signature = "(I)Z",
+          .fnPtr = reinterpret_cast<void*>(
+              &FlutterJNI_FlutterTextUtilsIsEmojiModifierBase),
+      },
+      {
+          .name = "nativeFlutterTextUtilsIsVariationSelector",
+          .signature = "(I)Z",
+          .fnPtr = reinterpret_cast<void*>(
+              &FlutterJNI_FlutterTextUtilsIsVariationSelector),
+      },
+      {
+          .name = "nativeFlutterTextUtilsIsRegionalIndicator",
+          .signature = "(I)Z",
+          .fnPtr = reinterpret_cast<void*>(
+              &FlutterJNI_FlutterTextUtilsIsRegionalIndicator),
+      },
+      {
+          .name = "nativeLoadDartDeferredLibrary",
+          .signature = "(JI[Ljava/lang/String;)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_LoadDartDeferredLibrary),
+      },
+      {
+          .name = "nativeUpdateJavaAssetManager",
+          .signature =
+              "(JLandroid/content/res/AssetManager;Ljava/lang/String;)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_UpdateJavaAssetManager),
+      },
+      {
+          .name = "nativeDeferredComponentInstallFailure",
+          .signature = "(ILjava/lang/String;Z)V",
+          .fnPtr = reinterpret_cast<void*>(
+              &FlutterJNI_DeferredComponentInstallFailure),
+      },
+      {
+          .name = "nativeUpdateDisplayMetrics",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_UpdateDisplayMetrics),
+      },
+      {
+          .name = "nativeIsSurfaceControlEnabled",
+          .signature = "(J)Z",
+          .fnPtr = reinterpret_cast<void*>(&FlutterJNI_IsSurfaceControlEnabled),
+      },
+      {
+          .name = "nativePrefetchDefaultFontManager",
+          .signature = "()V",
+          .fnPtr =
+              reinterpret_cast<void*>(&FlutterJNI_PrefetchDefaultFontManager),
+      },
+  };
+
+  jclass clazz = env->FindClass("io/flutter/embedding/engine/FlutterJNI");
+  if (!clazz) {
+    FML_LOG(ERROR) << "Failed to find FlutterJNI Class in "
+                      "FlutterEmbedderNative::RegisterJni.";
+    return false;
+  }
+
+  if (env->RegisterNatives(clazz, flutter_jni_methods,
+                           std::size(flutter_jni_methods)) != 0) {
+    FML_LOG(ERROR) << "Failed to RegisterNatives with FlutterJNI in "
+                      "FlutterEmbedderNative::RegisterJni.";
+    return false;
+  }
+
+  g_flutter_jni_class = new fml::jni::ScopedJavaGlobalRef<jclass>(env, clazz);
+  g_jni_shell_holder_field =
+      env->GetFieldID(clazz, "nativeShellHolderId", "Ljava/lang/Long;");
+  g_jni_constructor = env->GetMethodID(clazz, "<init>", "()V");
+
+  jclass java_long_class = env->FindClass("java/lang/Long");
+  if (java_long_class) {
+    g_java_long_class =
+        new fml::jni::ScopedJavaGlobalRef<jclass>(env, java_long_class);
+    g_long_constructor = env->GetStaticMethodID(java_long_class, "valueOf",
+                                                "(J)Ljava/lang/Long;");
+  }
+
+  jclass callback_info_class =
+      env->FindClass("io/flutter/view/FlutterCallbackInformation");
+  if (callback_info_class) {
+    g_flutter_callback_info_class =
+        new fml::jni::ScopedJavaGlobalRef<jclass>(env, callback_info_class);
+    g_flutter_callback_info_constructor = env->GetMethodID(
+        callback_info_class, "<init>",
+        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+  }
+
+  return true;
 }
 
 }  // namespace android
