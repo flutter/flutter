@@ -86,6 +86,8 @@ source_set("flutter_linux_sources") {
              "fl_atk_compat.h",
              "fl_binary_messenger_private.h",
              "fl_engine_private.h",
+             "fl_gtk.h",
+             "fl_gtk_gtk3.h",
              "fl_key_channel_responder.h",
              "fl_key_embedder_responder.h",
              "fl_key_event.h",
