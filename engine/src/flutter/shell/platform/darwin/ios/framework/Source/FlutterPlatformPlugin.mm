@@ -453,7 +453,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
                                    completion:nil];
 }
 
-- (CGRect)popoverBoundsForCurrentSelection {
+- (CGRect)popoverSourceRectForCurrentSelection {
   FlutterTextInputPlugin* textInputPlugin = [self.engine textInputPlugin];
   UITextRange* range = textInputPlugin.textInputView.selectedTextRange;
   FlutterTextInputView* textInputView = (FlutterTextInputView*)textInputPlugin.textInputView;
@@ -485,14 +485,16 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
       // On iPad, the translate screen is presented in a popover view, and requires a rect to use as
-      // bounds
-      CGRect ipadBounds = [self popoverBoundsForCurrentSelection];
-      translateViewController = [[FlutterTranslateViewController alloc] initWithTerm:term
-                                                                          ipadBounds:ipadBounds];
+      // source rect
+      CGRect popoverSourceRect = [self popoverSourceRectForCurrentSelection];
+      translateViewController =
+          [[FlutterTranslateViewController alloc] initWithTerm:term
+                                             popoverSourceRect:popoverSourceRect];
     } else {
       translateViewController = [[FlutterTranslateViewController alloc] initWithTerm:term];
     }
 
+    translateViewController.view.frame = flutterViewController.view.bounds;
     [flutterViewController addChildViewController:translateViewController];
     [flutterViewController.view addSubview:translateViewController.view];
     [translateViewController didMoveToParentViewController:flutterViewController];

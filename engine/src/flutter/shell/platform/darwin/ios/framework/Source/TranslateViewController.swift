@@ -13,20 +13,20 @@ import UIKit
 /// be imported directly into Objective-C.
 @available(iOS 17.4, *)
 @objc(FlutterTranslateViewController)
-class TranslateViewController: UIViewController {
+final class TranslateViewController: UIViewController {
 
   private let termToTranslate: String
-  private let ipadBounds: CGRect?
+  private let popoverSourceRect: CGRect?
 
   @objc init(term: String) {
     self.termToTranslate = term
-    self.ipadBounds = nil
+    self.popoverSourceRect = nil
     super.init(nibName: nil, bundle: nil)
   }
 
-  @objc init(term: String, ipadBounds: CGRect) {
+  @objc init(term: String, popoverSourceRect: CGRect) {
     self.termToTranslate = term
-    self.ipadBounds = ipadBounds
+    self.popoverSourceRect = popoverSourceRect
     super.init(nibName: nil, bundle: nil)
   }
 
@@ -63,7 +63,7 @@ class TranslateViewController: UIViewController {
   private func makeTranslateHostingController(termToTranslate: String) -> UIViewController {
     var contentView = TranslateContentView(
       termToTranslate: termToTranslate,
-      ipadBounds: ipadBounds
+      popoverSourceRect: popoverSourceRect
     )
     contentView.onDismiss = { [weak self] in
       DispatchQueue.main.async {
@@ -81,17 +81,18 @@ class TranslateViewController: UIViewController {
 }
 
 @available(iOS 17.4, *)
-fileprivate struct TranslateContentView: View {
+private struct TranslateContentView: View {
   fileprivate let termToTranslate: String
-  fileprivate let ipadBounds: CGRect?
+  fileprivate let popoverSourceRect: CGRect?
 
   fileprivate var onDismiss: (() -> Void)?
 
   private var anchorSource: Anchor<CGRect>.Source {
-    // On iPad, the translate screen is presented in a popover view
-    // anchored to the text selection. On iPhone, it is presented as a sheet
-    // and uses the entire view bounds.
-    if let rect = ipadBounds {
+    // When a popoverSourceRect is provided (e.g. on iPad), the translate
+    // screen is presented in a popover view anchored to the source rect.
+    // Otherwise (e.g. on iPhone), it is presented as a sheet and uses the
+    // entire view bounds.
+    if let rect = popoverSourceRect {
       return .rect(rect)
     }
     return .bounds
@@ -100,12 +101,17 @@ fileprivate struct TranslateContentView: View {
   var body: some View {
     Color.clear
       .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .allowsHitTesting(false)
       .translationPresentation(
         isPresented: Binding(
           get: { true },
           set: { shown in
             if !shown {
               onDismiss?()
+              // If presenting the translation sheet/popover ever fails, this view
+              // will not receive a dismissal event and would remain in the view hierarchy.
+              // We make it transparent to touches via allowsHitTesting(false) above
+              // to prevent the app from becoming unresponsive.
             }
           }
         ),
@@ -114,4 +120,3 @@ fileprivate struct TranslateContentView: View {
       )
   }
 }
-
