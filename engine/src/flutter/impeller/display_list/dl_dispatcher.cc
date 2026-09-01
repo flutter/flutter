@@ -993,6 +993,33 @@ void FirstPassDispatcher::save() {
   cull_rect_state_.push_back(cull_rect_state_.back());
 }
 
+namespace {
+void RecordBackdropData(
+    std::unordered_map<int64_t, BackdropData>* backdrop_data,
+    int64_t backdrop_id,
+    const std::shared_ptr<flutter::DlImageFilter>& shared_backdrop,
+    const Rect& layer_coverage) {
+  auto existing = backdrop_data->find(backdrop_id);
+  if (existing == backdrop_data->end()) {
+    (*backdrop_data)[backdrop_id] =
+        BackdropData{.backdrop_count = 1,
+                     .all_filters_equal = true,
+                     .texture_slot = nullptr,
+                     .shared_filter_snapshot = std::nullopt,
+                     .last_backdrop = shared_backdrop,
+                     .coverage_union = layer_coverage};
+  } else {
+    BackdropData& data = existing->second;
+    data.backdrop_count++;
+    if (data.all_filters_equal) {
+      data.all_filters_equal = (*data.last_backdrop == *shared_backdrop);
+      data.last_backdrop = shared_backdrop;
+    }
+    data.coverage_union = data.coverage_union.Union(layer_coverage);
+  }
+}
+}  // namespace
+
 void FirstPassDispatcher::saveLayer(const DlRect& bounds,
                                     const flutter::SaveLayerOptions options,
                                     const flutter::DlImageFilter* backdrop,
@@ -1005,32 +1032,13 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
 
   backdrop_count_ += (backdrop == nullptr ? 0 : 1);
   if (backdrop != nullptr && backdrop_id.has_value()) {
-    std::shared_ptr<flutter::DlImageFilter> shared_backdrop =
-        backdrop->shared();
     Rect layer_coverage = cull_rect_state_.back();
     if (has_layer_bounds) {
       layer_coverage =
           layer_coverage.IntersectionOrEmpty(bounds.TransformBounds(matrix_));
     }
-    std::unordered_map<int64_t, BackdropData>::iterator existing =
-        backdrop_data_.find(backdrop_id.value());
-    if (existing == backdrop_data_.end()) {
-      backdrop_data_[backdrop_id.value()] =
-          BackdropData{.backdrop_count = 1,
-                       .all_filters_equal = true,
-                       .texture_slot = nullptr,
-                       .shared_filter_snapshot = std::nullopt,
-                       .last_backdrop = shared_backdrop,
-                       .coverage_union = layer_coverage};
-    } else {
-      BackdropData& data = existing->second;
-      data.backdrop_count++;
-      if (data.all_filters_equal) {
-        data.all_filters_equal = (*data.last_backdrop == *shared_backdrop);
-        data.last_backdrop = shared_backdrop;
-      }
-      data.coverage_union = data.coverage_union.Union(layer_coverage);
-    }
+    RecordBackdropData(&backdrop_data_, backdrop_id.value(), backdrop->shared(),
+                       layer_coverage);
   }
 
   // This dispatcher does not track enough state to accurately compute
