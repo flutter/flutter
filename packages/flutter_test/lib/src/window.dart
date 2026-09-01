@@ -204,6 +204,20 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   TestPlatformDispatcher get _testValues => _testValuesOwner ?? this;
 
+  /// A dispatcher that resolves debug view metric overrides for [viewId] while
+  /// sharing this dispatcher's test values.
+  ///
+  /// [TestFlutterView] builds its own from its own [FlutterView.viewId], so
+  /// that a subclass which reports a different id than the view it wraps still
+  /// resolves the overrides registered for the id it reports.
+  TestPlatformDispatcher _forViewId(int viewId) {
+    final TestPlatformDispatcher owner = _testValues;
+    return TestPlatformDispatcher._forView(
+      platformDispatcher: debugApplyViewMetricsOverridesForView(owner._platformDispatcher, viewId),
+      testValuesOwner: owner,
+    );
+  }
+
   @override
   TestFlutterView? get implicitView {
     final TestPlatformDispatcher owner = _testValues;
@@ -883,6 +897,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   Iterable<TestDisplay> get displays => _testValues._testDisplays.values;
 
   void _updateViewsAndDisplays() {
+    assert(
+      _testValuesOwner == null,
+      'The view and display registries belong to the root TestPlatformDispatcher; '
+      'a per-view dispatcher reads them through _testValues and must not build its own.',
+    );
     final extraDisplayKeys = <Object>[..._testDisplays.keys];
     for (final Display display in _platformDispatcher.displays) {
       extraDisplayKeys.remove(display.id);
@@ -916,13 +935,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       if (!_testViews.containsKey(view.viewId)) {
         _testViews[view.viewId] = TestFlutterView(
           view: view,
-          platformDispatcher: TestPlatformDispatcher._forView(
-            platformDispatcher: debugApplyViewMetricsOverridesForView(
-              _platformDispatcher,
-              view.viewId,
-            ),
-            testValuesOwner: this,
-          ),
+          platformDispatcher: this,
           display: display,
         );
       }
@@ -937,12 +950,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// The added view will be associated with the first display in the list of
   /// displays managed by this [TestPlatformDispatcher].
   void addTestView(FlutterView view) {
+    assert(
+      _testValuesOwner == null,
+      'Add test views through the root TestPlatformDispatcher. A per-view '
+      "dispatcher vends the root's views, so a view added to one would never be reported.",
+    );
     _testViews[view.viewId] = TestFlutterView(
       view: view,
-      platformDispatcher: TestPlatformDispatcher._forView(
-        platformDispatcher: debugApplyViewMetricsOverridesForView(_platformDispatcher, view.viewId),
-        testValuesOwner: this,
-      ),
+      platformDispatcher: this,
       display: displays.first,
     );
     _updateViewsAndDisplays();
@@ -1052,15 +1067,28 @@ class TestFlutterView implements FlutterView {
     required TestPlatformDispatcher platformDispatcher,
     required TestDisplay display,
   }) : _view = view,
-       _platformDispatcher = platformDispatcher,
+       _ownerPlatformDispatcher = platformDispatcher,
        _display = display;
 
   /// The [FlutterView] backing this [TestFlutterView].
   final FlutterView _view;
 
+  /// The [TestPlatformDispatcher] this view was constructed with, which owns
+  /// the test values [platformDispatcher] shares.
+  final TestPlatformDispatcher _ownerPlatformDispatcher;
+
   @override
   TestPlatformDispatcher get platformDispatcher => _platformDispatcher;
-  final TestPlatformDispatcher _platformDispatcher;
+
+  // Bound to this view's own [viewId] rather than to whatever the dispatcher
+  // passed to the constructor resolves, so that a subclass which reports a
+  // different id than the view it wraps — FakeView, which wraps view 0 and
+  // reports 100 — resolves the overrides registered for the id it reports
+  // instead of the wrapped view's. Resolved lazily because `viewId` may be
+  // overridden by such a subclass and is not readable during construction.
+  late final TestPlatformDispatcher _platformDispatcher = _ownerPlatformDispatcher._forViewId(
+    viewId,
+  );
 
   @override
   TestDisplay get display => _display;

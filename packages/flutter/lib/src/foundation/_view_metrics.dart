@@ -55,14 +55,21 @@ ui.PlatformDispatcher debugApplyViewMetricsOverrides(ui.PlatformDispatcher dispa
   return result;
 }
 
-/// Returns a dispatcher that resolves platform metrics for [viewId].
+/// Returns a dispatcher that resolves the override registered for [viewId].
 ///
-/// This is the per-view counterpart to [debugApplyViewMetricsOverrides]. It is
-/// used by wrappers such as `TestPlatformDispatcher`, which vend their own view
-/// objects and therefore cannot use the dispatcher attached to the wrapped
-/// [ui.FlutterView] directly.
+/// This is the per-view counterpart to [debugApplyViewMetricsOverrides], for
+/// wrappers such as `TestPlatformDispatcher` that vend their own
+/// [ui.FlutterView] objects and so cannot reuse the dispatcher attached to the
+/// view they wrap.
 ///
-/// Returns [dispatcher] unchanged in release mode.
+/// [viewId] must be the id of the view that will report the result, or the two
+/// will resolve different overrides. Prefer `view.platformDispatcher` on a view
+/// this library produced, which is bound correctly by construction; this is for
+/// views it did not produce.
+///
+/// Like [debugApplyViewMetricsOverrides], this returns the same wrapper every
+/// time it is called with the same dispatcher and view id, and returns
+/// [dispatcher] unchanged in release mode.
 ui.PlatformDispatcher debugApplyViewMetricsOverridesForView(
   ui.PlatformDispatcher dispatcher,
   int viewId,
@@ -72,7 +79,7 @@ ui.PlatformDispatcher debugApplyViewMetricsOverridesForView(
     final wrapped =
         debugApplyViewMetricsOverrides(dispatcher) as _DebugViewMetricsPlatformDispatcher;
     final _DebugViewMetricsPlatformDispatcher root = wrapped._root ?? wrapped;
-    result = _DebugViewMetricsPlatformDispatcher._forView(root, viewId);
+    result = root._dispatcherForView(viewId);
     return true;
   }());
   return result;
@@ -127,6 +134,22 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   // Only the root dispatcher ever populates this; the per-view ones resolve
   // through [_root], so `late` keeps them from allocating an Expando each.
   late final Expando<_DebugViewMetricsFlutterView> _views = Expando<_DebugViewMetricsFlutterView>();
+
+  // The dispatcher each view resolves its platform-wide metrics through, keyed
+  // by view id. Both the views this library vends and
+  // debugApplyViewMetricsOverridesForView read it, so a view and a caller
+  // asking about that view's id get the same object. Only the root populates
+  // it, and it holds one small object per id anything asks about.
+  late final Map<int, _DebugViewMetricsPlatformDispatcher> _dispatchersForView =
+      <int, _DebugViewMetricsPlatformDispatcher>{};
+
+  _DebugViewMetricsPlatformDispatcher _dispatcherForView(int viewId) {
+    assert(_root == null, 'Per-view dispatchers are owned by the root dispatcher.');
+    return _dispatchersForView[viewId] ??= _DebugViewMetricsPlatformDispatcher._forView(
+      this,
+      viewId,
+    );
+  }
 
   DebugViewMetricsOverride? get _override {
     final int? viewId = _viewId ?? _dispatcher.implicitView?.viewId;
@@ -458,7 +481,7 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
 /// classified rather than silently reporting null.
 class _DebugViewMetricsFlutterView implements ui.FlutterView {
   _DebugViewMetricsFlutterView(this._view, _DebugViewMetricsPlatformDispatcher root)
-    : platformDispatcher = _DebugViewMetricsPlatformDispatcher._forView(root, _view.viewId);
+    : platformDispatcher = root._dispatcherForView(_view.viewId);
 
   /// The view whose metrics are being overridden.
   final ui.FlutterView _view;

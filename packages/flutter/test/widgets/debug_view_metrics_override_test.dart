@@ -11,6 +11,53 @@ import 'package:flutter/src/widgets/_accessibility_evaluations.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'multi_view_testing.dart';
+
+/// A [ui.FlutterView] that reports an id its [platformDispatcher] does not
+/// resolve, standing in for a view the framework did not produce.
+class _UnboundView implements ui.FlutterView {
+  _UnboundView(this._view, this.viewId);
+
+  final ui.FlutterView _view;
+
+  @override
+  final int viewId;
+
+  @override
+  ui.PlatformDispatcher get platformDispatcher => _view.platformDispatcher;
+
+  @override
+  double get devicePixelRatio => _view.devicePixelRatio;
+
+  @override
+  ui.Size get physicalSize => _view.physicalSize;
+
+  @override
+  ui.ViewPadding get padding => _view.padding;
+
+  @override
+  ui.ViewPadding get viewPadding => _view.viewPadding;
+
+  @override
+  ui.ViewPadding get viewInsets => _view.viewInsets;
+
+  @override
+  ui.ViewPadding get systemGestureInsets => _view.systemGestureInsets;
+
+  @override
+  List<ui.DisplayFeature> get displayFeatures => _view.displayFeatures;
+
+  @override
+  ui.DisplayCornerRadii? get displayCornerRadii => _view.displayCornerRadii;
+
+  @override
+  ui.GestureSettings get gestureSettings => _view.gestureSettings;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
+}
+
 /// Records which [WidgetsBindingObserver] notifications the framework sends.
 class _NotificationRecorder with WidgetsBindingObserver {
   int metrics = 0;
@@ -270,6 +317,87 @@ void main() {
       expect(data.alwaysUse24HourFormat, isFalse);
       expect(data.boldText, isFalse);
       expect(data.highContrast, isTrue);
+    });
+
+    testWidgets("a nested view resolves its own override, not the wrapped view's", (
+      WidgetTester tester,
+    ) async {
+      // FakeView reports viewId 100 while wrapping the implicit view, which is
+      // exactly the case where the override registered for a view and the
+      // dispatcher that reports its metrics can disagree. The value a metric
+      // takes has to come from the override registered for the id the view
+      // reports.
+      final nested = FakeView(tester.view);
+      expect(nested.viewId, isNot(tester.view.viewId));
+
+      late MediaQueryData data;
+      final MediaQueryData inherited = MediaQueryData.fromView(
+        tester.view,
+      ).copyWith(textScaler: const TextScaler.linear(4.0), boldText: false, highContrast: true);
+      await tester.pumpWidget(
+        MediaQuery(
+          data: inherited,
+          child: MediaQuery.fromView(
+            view: nested,
+            child: _capture((MediaQueryData value) => data = value),
+          ),
+        ),
+      );
+      expect(data.textScaler.scale(10), 40);
+      expect(data.boldText, isFalse);
+
+      // An override on the nested view wins over the inherited data, and takes
+      // the value that was registered for it.
+      debugSetViewMetricsOverride(
+        nested.viewId,
+        const DebugViewMetricsOverride(textScaleFactor: 5.0, boldText: true),
+      );
+      await tester.pump();
+      expect(data.textScaler.scale(10), 50);
+      expect(data.boldText, isTrue);
+      expect(data.highContrast, isTrue, reason: 'the parent still supplies unnamed metrics');
+      debugClearViewMetricsOverrides();
+      await tester.pump();
+
+      // An override on the wrapped view must not reach the nested one.
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(textScaleFactor: 7.0, boldText: true),
+      );
+      await tester.pump();
+      expect(data.textScaler.scale(10), 40, reason: 'view ${tester.view.viewId} must not leak');
+      expect(data.boldText, isFalse, reason: 'view ${tester.view.viewId} must not leak');
+      expect(
+        nested.platformDispatcher.textScaleFactor,
+        1.0,
+        reason: 'the nested view resolves its own id',
+      );
+      debugClearViewMetricsOverrides();
+      await tester.pump();
+    });
+
+    testWidgets('an overridden metric takes its value from the override itself', (
+      WidgetTester tester,
+    ) async {
+      // A FlutterView whose dispatcher resolves a different id than the view
+      // reports. The overridden value has to come from the override registered
+      // for the reported id, not from a dispatcher read, or the result would be
+      // neither the override's value nor the inherited one.
+      final unbound = _UnboundView(tester.view, tester.view.viewId + 999);
+      final MediaQueryData inherited = MediaQueryData.fromView(
+        tester.view,
+      ).copyWith(textScaler: const TextScaler.linear(4.0), boldText: false, highContrast: true);
+
+      debugSetViewMetricsOverride(
+        unbound.viewId,
+        const DebugViewMetricsOverride(textScaleFactor: 5.0, boldText: true),
+      );
+      final data = MediaQueryData.fromView(unbound, platformData: inherited);
+      debugClearViewMetricsOverrides();
+
+      expect(data.textScaler.scale(10), 50, reason: 'the override supplies the value');
+      expect(data.boldText, isTrue, reason: 'the override supplies the value');
+      expect(data.highContrast, isTrue, reason: 'the parent supplies unnamed metrics');
     });
   });
 
