@@ -813,6 +813,46 @@ dependencies:
       );
 
       testUsingContext(
+        '.flutter-plugins-dependencies forces swift_package_manager_enabled if forceSwiftPM is true',
+        () async {
+          createPlugin(
+            name: 'plugin-a',
+            platforms: const <String, _PluginPlatformInfo>{
+              'ios': _PluginPlatformInfo(
+                pluginClass: 'Foo',
+                dartPluginClass: 'Bar',
+                sharedDarwinSource: true,
+              ),
+            },
+          );
+          iosProject.testExists = true;
+
+          final dateCreated = DateTime(1970);
+          systemClock.currentTime = dateCreated;
+
+          iosProject.usesSwiftPackageManager = false;
+          macosProject.usesSwiftPackageManager = false;
+
+          await refreshPluginsList(flutterProject, forceSwiftPM: true);
+
+          expect(flutterProject.flutterPluginsDependenciesFile, exists);
+          final String pluginsString = flutterProject.flutterPluginsDependenciesFile
+              .readAsStringSync();
+          final jsonContent = json.decode(pluginsString) as Map<String, dynamic>;
+
+          final expectedSwiftPackageManagerEnabled = <String, dynamic>{'ios': true, 'macos': true};
+          expect(jsonContent['swift_package_manager_enabled'], expectedSwiftPackageManagerEnabled);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          SystemClock: () => systemClock,
+          FlutterVersion: () => flutterVersion,
+          Pub: ThrowingPub.new,
+        },
+      );
+
+      testUsingContext(
         '.flutter-plugins-dependencies can have different swift_package_manager_enabled values for iOS and macoS',
         () async {
           createPlugin(
@@ -1969,6 +2009,71 @@ flutter:
           FeatureFlags: () => featureFlags,
         },
       );
+
+      testUsingContext(
+        'createPluginSymlinks repairs broken symlinks without failing',
+        () async {
+          linuxProject.exists = true;
+          windowsProject.exists = true;
+          final Directory pluginDir = createFakePlugin(fs);
+          await refreshPluginsList(flutterProject);
+
+          final links = <Link>[
+            linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
+            windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
+          ];
+          for (final link in links) {
+            link.deleteSync();
+            link.createSync('/non_existent_target_path');
+          }
+          createPluginSymlinks(flutterProject);
+
+          for (final link in links) {
+            expect(link, exists);
+            expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => featureFlags,
+        },
+      );
+
+      testUsingContext(
+        'createPluginSymlinks replaces existing files with symlinks without failing',
+        () async {
+          linuxProject.exists = true;
+          windowsProject.exists = true;
+          final Directory pluginDir = createFakePlugin(fs);
+          await refreshPluginsList(flutterProject);
+
+          final files = <File>[
+            linuxProject.pluginSymlinkDirectory.childFile('some_plugin'),
+            windowsProject.pluginSymlinkDirectory.childFile('some_plugin'),
+          ];
+          for (final file in files) {
+            ErrorHandlingFileSystem.deleteIfExists(file, recursive: true);
+            file.createSync(recursive: true);
+            file.writeAsStringSync('stale content');
+          }
+          createPluginSymlinks(flutterProject);
+
+          final links = <Link>[
+            linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
+            windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
+          ];
+          for (final link in links) {
+            expect(link, exists);
+            expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: () => featureFlags,
+        },
+      );
     });
 
     group('pubspec', () {
@@ -2826,82 +2931,6 @@ iosPrefix: FLT
           Pub: () => const ThrowingPub(),
         },
       );
-    });
-
-    group('flutterPluginsListHasDevDependencies', () {
-      testWithoutContext('throws if file does not exist', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        expect(
-          () => flutterPluginsListHasDevDependencies(pluginsFile),
-          throwsA(isA<FileSystemException>()),
-        );
-      });
-
-      testWithoutContext('throws if file is malformed', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('This is not JSON');
-
-        expect(
-          () => flutterPluginsListHasDevDependencies(pluginsFile),
-          throwsA(isA<FormatException>()),
-        );
-      });
-
-      testWithoutContext('Returns false if has no dependencies', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('''
-{
-  "plugins": {}
-}
-''');
-        expect(flutterPluginsListHasDevDependencies(pluginsFile), isFalse);
-      });
-
-      testWithoutContext('Returns false if has no dev dependencies', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('''
-{
-  "plugins": {
-    "ios": [
-      {
-        "name": "foo_package",
-        "dev_dependency": false
-      }
-    ]
-  }
-}
-''');
-
-        expect(flutterPluginsListHasDevDependencies(pluginsFile), isFalse);
-      });
-
-      testWithoutContext('Returns true if has dev dependencies', () {
-        final fileSystem = MemoryFileSystem.test();
-        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
-
-        pluginsFile.writeAsStringSync('''
-{
-  "plugins": {
-    "ios": [
-      {
-        "name": "foo_package",
-        "dev_dependency": true
-      }
-    ]
-  }
-}
-''');
-
-        expect(flutterPluginsListHasDevDependencies(pluginsFile), isTrue);
-      });
     });
   });
 
