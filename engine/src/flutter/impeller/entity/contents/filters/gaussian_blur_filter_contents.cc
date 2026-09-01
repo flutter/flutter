@@ -742,7 +742,10 @@ GaussianBlurFilterContents::GaussianBlurFilterContents(
       mask_blur_style_(mask_blur_style),
       mask_geometry_(mask_geometry) {
   // This is supposed to be enforced at a higher level.
-  FML_DCHECK(mask_blur_style == BlurStyle::kNormal || mask_geometry);
+  FML_DCHECK(mask_blur_style == BlurStyle::kNormal ||
+             mask_blur_style == BlurStyle::kSolid ||
+             // mask_geometry is used for Inner and Outer modes only
+             mask_geometry);
 }
 
 // This value was extracted from Skia, see:
@@ -844,7 +847,8 @@ std::optional<Entity> GaussianBlurFilterContents::RenderFilter(
 
   std::optional<Quad> source_bounds;
   if (bounds_.has_value()) {
-    Matrix transform = snapshot_entity.GetTransform() * effect_transform;
+    Matrix transform =
+        snapshot_entity.GetTransform() * GetLocalToPassTransform();
     source_bounds = bounds_->GetTransformedPoints(transform);
   }
 

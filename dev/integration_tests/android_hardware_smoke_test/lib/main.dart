@@ -59,7 +59,9 @@ class _MyState extends State<MyWidget> {
   String _message = 'Waiting for message...';
   late Future<String?> _goldenVariantFuture;
   ui.Image? _loadedImage;
-  Completer<void>? _platformViewCreatedCompleter;
+
+  // Completes when the native platform view has been drawn.
+  Completer<void>? _platformViewDrawnCompleter;
 
   Future<ui.Image> _loadImage() async {
     return widget.imageLoader();
@@ -133,9 +135,9 @@ class _MyState extends State<MyWidget> {
 
     final bool isPlatformView = testName?.startsWith(platformViewPrefix) ?? false;
     if (isPlatformView) {
-      _platformViewCreatedCompleter = Completer<void>();
+      _platformViewDrawnCompleter = Completer<void>();
     } else {
-      _platformViewCreatedCompleter = null;
+      _platformViewDrawnCompleter = null;
     }
 
     setState(() {
@@ -150,7 +152,7 @@ class _MyState extends State<MyWidget> {
           performAppSideGoldenCompare,
           targetKey,
           _goldenVariantFuture,
-          settleFuture: _platformViewCreatedCompleter?.future,
+          settleFuture: _platformViewDrawnCompleter?.future,
         );
       } else {
         completer.complete(<String, Object?>{
@@ -168,38 +170,38 @@ class _MyState extends State<MyWidget> {
     super.initState();
 
     _goldenVariantFuture = _nativeChannel.invokeMethod<String>(methodImpellerBackend);
+    _nativeChannel.setMethodCallHandler((MethodCall call) async {
+      if (call.method == 'onDraw') {
+        if (_platformViewDrawnCompleter?.isCompleted == false) {
+          _platformViewDrawnCompleter?.complete();
+        }
+      }
+    });
     _testChannel.setMessageHandler(_handler);
   }
 
   @override
   void dispose() {
     _loadedImage?.dispose();
+    _nativeChannel.setMethodCallHandler(null);
     _testChannel.setMessageHandler(null);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    void onPlatformViewCreated() {
-      if (_platformViewCreatedCompleter?.isCompleted == false) {
-        _platformViewCreatedCompleter?.complete();
-      }
-    }
-
     final Widget testContent = switch (_message) {
       kBackdropFilterBlurTest => const BackdropFilterBlur(),
-      kPlatformViewTextureLayerTest => AndroidPlatformView(
+      kPlatformViewTextureLayerTest => const AndroidPlatformView(
         mode: PlatformViewMode.textureLayer,
-        onCreated: onPlatformViewCreated,
       ),
-      kPlatformViewHybridCompositionTest => AndroidPlatformView(
+      kPlatformViewHybridCompositionTest => const AndroidPlatformView(
         mode: PlatformViewMode.hybridComposition,
-        onCreated: onPlatformViewCreated,
       ),
-      kPlatformViewHybridCompositionPlusPlusTest => AndroidPlatformView(
+      kPlatformViewHybridCompositionPlusPlusTest => const AndroidPlatformView(
         mode: PlatformViewMode.hybridCompositionPlusPlus,
-        onCreated: onPlatformViewCreated,
       ),
+
       kTextTest => const TextDrawingCanvas(),
       kImageTest => ImageDrawingCanvas(image: _loadedImage),
       _ => VectorDrawingsCanvas(message: _message),

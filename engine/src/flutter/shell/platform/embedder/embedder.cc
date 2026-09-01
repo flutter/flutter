@@ -495,6 +495,7 @@ InferOpenGLPlatformViewCreationCallback(
               shell.GetTaskRunners(),  // task runners
               std::make_unique<flutter::EmbedderSurfaceGLImpeller>(
                   gl_dispatch_table, fbo_reset_after_present, view_embedder,
+                  shell.GetShutdownSafeIOTaskRunner(),
                   impeller_flags),      // embedder_surface
               platform_dispatch_table,  // embedder platform dispatch table
               view_embedder             // external view embedder
@@ -2318,7 +2319,6 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   impeller::Flags impeller_flags;
   impeller_flags.use_sdfs = settings.impeller_use_sdfs;
-  impeller_flags.antialiased_lines = settings.impeller_antialiased_lines;
 
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,

@@ -22,12 +22,10 @@ void testMain() {
     });
 
     Future<DomImageBitmap> newBitmap(int width, int height) async {
-      return createImageBitmap(createBlankDomImageData(width, height) as JSAny, (
-        x: 0,
-        y: 0,
-        width: width,
-        height: height,
-      ));
+      return createImageBitmap(
+        createBlankDomImageData(width, height) as JSAny,
+        bounds: (x: 0, y: 0, width: width, height: height),
+      );
     }
 
     // Regression test for https://github.com/flutter/flutter/issues/75286
@@ -57,6 +55,60 @@ void testMain() {
       expect(canvas.canvasElement.height, 16);
       expect(canvas.canvasElement.style.width, '20px');
       expect(canvas.canvasElement.style.height, '32px');
+    });
+
+    test('repairs canvas logical size when inline CSS size drifts', () async {
+      final canvas = RenderCanvas();
+
+      final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
+      addTearDown(() {
+        EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
+      });
+
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(3.0);
+      canvas.render(await newBitmap(1206, 2142));
+
+      expect(canvas.canvasElement.width, 1206);
+      expect(canvas.canvasElement.height, 2142);
+      expect(canvas.canvasElement.style.width, '402px');
+      expect(canvas.canvasElement.style.height, '714px');
+
+      canvas.canvasElement.style
+        ..width = '0.333333px'
+        ..height = '0.333333px';
+
+      canvas.render(await newBitmap(1206, 2142));
+
+      expect(canvas.canvasElement.width, 1206);
+      expect(canvas.canvasElement.height, 2142);
+      expect(canvas.canvasElement.style.width, '402px');
+      expect(canvas.canvasElement.style.height, '714px');
+    });
+
+    test('preserves canvas logical size when inline CSS size is within tolerance', () async {
+      final canvas = RenderCanvas();
+
+      final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
+      addTearDown(() {
+        EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
+      });
+
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(3.0);
+      canvas.render(await newBitmap(1201, 2143));
+
+      expect(canvas.canvasElement.width, 1201);
+      expect(canvas.canvasElement.height, 2143);
+
+      canvas.canvasElement.style
+        ..width = '400.33px'
+        ..height = '714.34px';
+
+      canvas.render(await newBitmap(1201, 2143));
+
+      expect(canvas.canvasElement.width, 1201);
+      expect(canvas.canvasElement.height, 2143);
+      expect(canvas.canvasElement.style.width, '400.33px');
+      expect(canvas.canvasElement.style.height, '714.34px');
     });
 
     test('rounds physical size to nearest integer size', () async {

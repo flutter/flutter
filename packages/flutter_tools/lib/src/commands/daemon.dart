@@ -599,11 +599,7 @@ class DaemonDomain extends Domain {
 
       PlatformType.values.forEach(handlePlatformType);
 
-      return <String, Object>{
-        // TODO(fujino): delete this key https://github.com/flutter/flutter/issues/140473
-        'platforms': platformTypes,
-        'platformTypes': platformTypesMap,
-      };
+      return <String, Object>{'platformTypes': platformTypesMap};
     } on Exception catch (err, stackTrace) {
       sendEvent('log', <String, Object?>{
         'log': 'Failed to parse project metadata',
@@ -613,7 +609,6 @@ class DaemonDomain extends Domain {
       // On any sort of failure, fall back to Android and iOS for backwards
       // compatibility.
       return const <String, Object>{
-        'platforms': <String>['android', 'ios'],
         'platformTypes': <String, Object>{
           'android': <String, Object>{'isSupported': true},
           'ios': <String, Object>{'isSupported': true},
@@ -844,6 +839,13 @@ class AppDomain extends Domain {
       }),
       appRunFuture,
     ]);
+
+    // If appRunFuture completes early due to a fatal initialization error
+    // without actually starting the app, we must explicitly throw an exception
+    // to prevent the IDE/client from hanging indefinitely.
+    if (!appStartedCompleter.isCompleted) {
+      throw DaemonException('App failed to start');
+    }
     return app;
   }
 
@@ -906,14 +908,10 @@ class AppDomain extends Domain {
     );
   }
 
-  /// Returns an error, or the service extension result (a map with two fixed
-  /// keys, `type` and `method`). The result may have one or more additional keys,
-  /// depending on the specific service extension end-point. For example:
+  /// Returns an error, or the service extension result. For example:
   ///
   ///     {
-  ///       "value":"android",
-  ///       "type":"_extensionType",
-  ///       "method":"ext.flutter.platformOverride"
+  ///       "value":"android"
   ///     }
   Future<Map<String, Object?>> callServiceExtension(Map<String, Object?> args) async {
     final String? appId = _getStringArg(args, 'appId', required: true);
@@ -1413,6 +1411,7 @@ Future<Map<String, Object?>> _deviceToMap(Device device) async {
     'emulator': await device.isLocalEmulator,
     'category': device.category?.toString(),
     'platformType': device.platformType?.toString(),
+    'cpuArch': (await device.cpuArch).name,
     'ephemeral': device.ephemeral,
     'emulatorId': await device.emulatorId,
     'sdk': await device.sdkNameAndVersion,

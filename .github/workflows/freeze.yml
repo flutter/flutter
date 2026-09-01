@@ -5,7 +5,9 @@
 name: Material and Cupertino Code Freeze
 
 on:
-  pull_request_target:
+  # Safe because this workflow does not check out code or run arbitrary scripts.
+  # It only runs a metadata-based path filter to enforce freeze restrictions.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [opened, reopened, synchronize, ready_for_review, labeled, unlabeled]
     branches:
       - master
@@ -20,33 +22,63 @@ jobs:
     name: Check Code Freeze
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'flutter/flutter' }}
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - name: Check for changes in frozen folders
         if: github.event_name != 'merge_group'
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
         id: filter
         with:
           token: ${{ github.token }}
           filters: |
             frozen:
+              - 'packages/flutter/examples/api/lib/material/**'
+              - 'packages/flutter/examples/api/lib/cupertino/**'
+              - 'packages/flutter/examples/api/test/material/**'
+              - 'packages/flutter/examples/api/test/cupertino/**'
               - 'packages/flutter/lib/src/material/**'
               - 'packages/flutter/lib/src/cupertino/**'
               - 'packages/flutter/test/material/**'
               - 'packages/flutter/test/cupertino/**'
-              - 'examples/api/lib/material/**'
-              - 'examples/api/lib/cupertino/**'
-              - 'examples/api/test/material/**'
-              - 'examples/api/test/cupertino/**'
               - 'packages/flutter/lib/fix_data/fix_cupertino.yaml'
               - 'packages/flutter/lib/fix_data/fix_material/**'
               - 'packages/flutter/test_fixes/material/**'
               - 'packages/flutter/test_fixes/cupertino/**'
 
+      - name: Comment on frozen changes
+        if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true' && !contains(github.event.pull_request.labels.*.name, 'override code freeze')
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const issueNumber = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+            });
+            const issueUrl = 'https://github.com/flutter/flutter/issues/188444';
+            const alreadyCommented = comments.some(comment =>
+              comment.body && comment.body.includes(issueUrl)
+            );
+            if (!alreadyCommented) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: 'This pull request contains changes to Material or Cupertino, which are currently frozen in this repository.\n\n' +
+                  'Changes should be made in `material_ui` and/or `cupertino_ui` in the [flutter/packages](https://github.com/flutter/packages) repository.\n\n' +
+                  'Please refer to https://github.com/flutter/flutter/issues/188444 for instructions.',
+              });
+            }
+
       - name: Fail on frozen changes
         if: github.event_name != 'merge_group' && steps.filter.outputs.frozen == 'true' && !contains(github.event.pull_request.labels.*.name, 'override code freeze')
         run: |
           echo "Error: Code changes detected during the current code freeze."
-          echo "If this is a critical fix that must land, please file an issue for team-design."
-          echo "Info: https://github.com/flutter/flutter/issues/184093"
+          echo "Changes to Material and Cupertino should be made in material_ui and/or cupertino_ui in the flutter/packages repository."
+          echo "Info: https://github.com/flutter/flutter/issues/188444"
           exit 1

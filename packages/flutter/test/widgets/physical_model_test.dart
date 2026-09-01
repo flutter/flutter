@@ -11,8 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 const Color _debugBlack = Color(0xFF000000);
 const Color _debugCanvas = Color(0xFFFAFAFA);
 const Color _debugText = Color(0xDD000000);

@@ -16,7 +16,13 @@ import 'utils.dart';
 
 final String _scriptLocation = path.fromUri(Platform.script);
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(_scriptLocation)));
-final String _exampleDirectoryPath = path.join(_flutterRoot, 'examples', 'api');
+final String _exampleDirectoryPath = path.join(
+  _flutterRoot,
+  'packages',
+  'flutter',
+  'examples',
+  'api',
+);
 final String _packageDirectoryPath = path.join(_flutterRoot, 'packages');
 final String _dartUIDirectoryPath = path.join(
   _flutterRoot,
@@ -127,6 +133,10 @@ class SampleChecker {
   final Directory dartUIPath;
   final Directory flutterRoot;
   final FileSystem filesystem;
+
+  // The `exampleBase` is where the paths in "See code in" are relative to.
+  // Defaults to <flutter_root>/packages/flutter.
+  Directory get exampleBase => examples.parent.parent;
 
   bool checkCodeSamples() {
     filesystem.currentDirectory = flutterRoot;
@@ -258,7 +268,7 @@ class SampleChecker {
   List<String> checkForMissingLinks(List<File> exampleFilenames, Set<String> searchStrings) {
     final missingFilenames = <String>[];
     for (final example in exampleFilenames) {
-      final String relativePath = getRelativePath(example);
+      final String relativePath = getRelativePath(example, exampleBase);
       if (!searchStrings.contains(relativePath)) {
         missingFilenames.add(relativePath);
       }

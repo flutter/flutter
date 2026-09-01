@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
-import 'widgets_app_tester.dart';
 
 class TestCustomPainter extends CustomPainter {
   TestCustomPainter({required this.log, required this.name});

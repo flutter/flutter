@@ -998,13 +998,20 @@ class _StretchController extends Listenable {
       ..addListener(() {
         final double newOverscroll = _controller?.value ?? 0.0;
         overscroll = newOverscroll;
-      })
-      ..animateWith(simulation).whenComplete(() {
+      });
+    controller.animateWith(simulation).whenComplete(() {
+      // Only clean up if this controller is still the active one. A later
+      // pull(), animate(), or dispose() may have already replaced and disposed
+      // it, in which case that path owns the cleanup and this stale completion
+      // callback must not touch the shared state (or double dispose the
+      // controller).
+      if (_controller == controller) {
         overscroll = 0.0;
         _interruptedOverscroll = 0.0;
-        _controller!.dispose();
+        controller.dispose();
         _controller = null;
-      });
+      }
+    });
 
     _controller?.dispose();
     _controller = controller;
@@ -1035,6 +1042,7 @@ class _StretchController extends Listenable {
 
   void dispose() {
     _controller?.dispose();
+    _controller = null;
     _overscrollNotifier.dispose();
   }
 

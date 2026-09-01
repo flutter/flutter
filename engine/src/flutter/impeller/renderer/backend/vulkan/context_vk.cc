@@ -524,6 +524,16 @@ std::shared_ptr<Allocator> ContextVK::GetResourceAllocator() const {
   return allocator_;
 }
 
+std::shared_ptr<const GpuSubmissionTracker> ContextVK::GetSubmissionTracker()
+    const {
+  return submission_tracker_;
+}
+
+const std::shared_ptr<GpuSubmissionTracker>&
+ContextVK::GetMutableSubmissionTracker() const {
+  return submission_tracker_;
+}
+
 std::shared_ptr<ShaderLibrary> ContextVK::GetShaderLibrary() const {
   return shader_library_;
 }

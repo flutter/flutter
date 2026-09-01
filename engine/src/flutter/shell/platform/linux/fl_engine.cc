@@ -287,15 +287,16 @@ static bool create_opengl_backing_store(
     return false;
   }
 
-  GLint sized_format = GL_RGBA8;
   GLint general_format = GL_RGBA;
+  GLint sized_format = GL_RGBA8;
   if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
-    sized_format = GL_BGRA8_EXT;
     general_format = GL_BGRA_EXT;
+    sized_format = GL_BGRA8_EXT;
   }
 
-  FlFramebuffer* framebuffer = fl_framebuffer_new(
-      general_format, config->size.width, config->size.height, FALSE);
+  FlFramebuffer* framebuffer = fl_framebuffer_new_multisample(
+      general_format, config->size.width, config->size.height,
+      fl_dart_project_get_enable_impeller(self->project));
   if (!framebuffer) {
     g_warning("Failed to create backing store");
     return false;
@@ -306,7 +307,8 @@ static bool create_opengl_backing_store(
   backing_store_out->open_gl.framebuffer.user_data = framebuffer;
   backing_store_out->open_gl.framebuffer.name =
       fl_framebuffer_get_id(framebuffer);
-  backing_store_out->open_gl.framebuffer.target = sized_format;
+  backing_store_out->open_gl.framebuffer.target =
+      fl_framebuffer_get_texture_id(framebuffer) != 0 ? sized_format : GL_RGBA8;
   backing_store_out->open_gl.framebuffer.destruction_callback = [](void* p) {
     // Backing store destroyed in fl_compositor_opengl_collect_backing_store(),
     // set on FlutterCompositor.collect_backing_store_callback during engine
@@ -812,9 +814,12 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       break;
   }
 
+  const std::vector<std::string> env_switches =
+      flutter::GetSwitchesFromEnvironment();
+
   gboolean enable_impeller = fl_dart_project_get_enable_impeller(self->project);
   gboolean has_enable_impeller = FALSE;
-  for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
+  for (const auto& env_switch : env_switches) {
     if (env_switch == "--enable-impeller" ||
         env_switch == "--enable-impeller=true") {
       enable_impeller = TRUE;
@@ -828,7 +833,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   g_autoptr(GPtrArray) command_line_args =
       g_ptr_array_new_with_free_func(g_free);
   g_ptr_array_insert(command_line_args, 0, g_strdup("flutter"));
-  for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
+  for (const auto& env_switch : env_switches) {
     g_ptr_array_add(command_line_args, g_strdup(env_switch.c_str()));
   }
   // Linux (and other desktop platforms) always uses SDFs.
@@ -836,6 +841,23 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
 
   if (enable_impeller && !has_enable_impeller) {
     g_ptr_array_add(command_line_args, g_strdup("--enable-impeller"));
+  }
+
+  // Forward the project's Flutter GPU setting unless an environment switch
+  // already carries it (the switch is presence based, so it is only ever
+  // added, never negated).
+  if (fl_dart_project_get_enable_flutter_gpu(self->project)) {
+    gboolean has_enable_flutter_gpu = FALSE;
+    for (const auto& env_switch : env_switches) {
+      if (env_switch == "--enable-flutter-gpu" ||
+          env_switch == "--enable-flutter-gpu=true") {
+        has_enable_flutter_gpu = TRUE;
+        break;
+      }
+    }
+    if (!has_enable_flutter_gpu) {
+      g_ptr_array_add(command_line_args, g_strdup("--enable-flutter-gpu"));
+    }
   }
 
   gchar** dart_entrypoint_args =

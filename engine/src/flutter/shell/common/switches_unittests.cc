@@ -161,6 +161,19 @@ TEST(SwitchesTest, RequireMergedPlatformUIThread) {
                             "This platform does not support the "
                             "merged-platform-ui-thread=disabled flag");
 }
+
+// Ensure mergeAfterLaunch is passed correctly.
+//
+// This is a supported threading model even on some platforms (e.g. Android)
+// that enforce a merged platform/UI thread. For embedders where this isn't a
+// supported behavior, it can be blocked in the embedder itself.
+TEST(SwitchesTest, RequireMergedPlatformUIThreadAllowsMergeAfterLaunch) {
+  fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+      {"command", "--merged-platform-ui-thread=mergeAfterLaunch"});
+  Settings settings = SettingsFromCommandLine(command_line, true);
+  EXPECT_EQ(settings.merged_platform_ui_thread,
+            Settings::MergedPlatformUIThread::kMergeAfterLaunch);
+}
 #endif  // !OS_FUCHSIA
 
 }  // namespace testing

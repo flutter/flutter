@@ -4,6 +4,8 @@
 
 /// @docImport 'package:flutter/material.dart';
 /// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'debug.dart';
 library;
 
 import 'dart:async';
@@ -26,6 +28,12 @@ import 'framework.dart';
 /// Can be used to debug focus issues: each time the focus changes, the focus
 /// tree will be printed and requests for focus and other focus operations will
 /// be logged.
+///
+/// This has no effect in release builds.
+///
+/// See also:
+///
+/// * [debugPaintFocusBoxes], which draws boxes around focus nodes.
 bool debugFocusChanges = false;
 
 // When using _focusDebug, always call it like so:

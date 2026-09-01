@@ -112,9 +112,8 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 ///
 /// Use [ChildSemanticsConfigurationsResultBuilder] to generate the return
 /// value.
-typedef ChildSemanticsConfigurationsDelegate = ChildSemanticsConfigurationsResult Function(
-  List<SemanticsConfiguration>,
-);
+typedef ChildSemanticsConfigurationsDelegate =
+    ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
 /// Controls how accessibility focus is blocked.
 ///
@@ -1376,6 +1375,38 @@ class SemanticsData with Diagnosticable {
 
   /// Whether [actions] contains the given action.
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
+
+  /// Returns a JSON-compatible map representation of this object.
+  ///
+  /// Used by debugging tools and VM service extensions such as
+  /// `ext.flutter.accessibility.getSemanticsTree`.
+  Map<String, Object?> toJson() {
+    final flagsList = <String>[
+      for (final SemanticsFlag flag in SemanticsFlag.values)
+        if (hasFlag(flag)) flag.name,
+    ];
+    final actionsList = <String>[
+      for (final SemanticsAction action in SemanticsAction.values)
+        if (hasAction(action)) action.name,
+    ];
+    return <String, Object?>{
+      'label': label,
+      'value': value,
+      'hint': hint,
+      'tooltip': tooltip,
+      'increasedValue': increasedValue,
+      'decreasedValue': decreasedValue,
+      'flags': flagsList,
+      'actions': actionsList,
+      'rect': <String, double>{
+        'left': rect.left,
+        'top': rect.top,
+        'width': rect.width,
+        'height': rect.height,
+      },
+      'transform': ?transform?.storage.toList(),
+    };
+  }
 
   @override
   String toStringShort() => objectRuntimeType(this, 'SemanticsData');
@@ -4566,6 +4597,29 @@ class SemanticsNode with DiagnosticableTreeMixin {
       DebugSemanticsDumpOrder.traversalOrder => _childrenInTraversalOrder(),
     };
   }
+
+  /// Returns a JSON-compatible map representation of this node and its children
+  /// identifiers.
+  ///
+  /// Used by debugging tools and VM service extensions such as
+  /// `ext.flutter.accessibility.getSemanticsTree`.
+  Map<String, Object?> toJson() {
+    final SemanticsData data = getSemanticsData();
+    final List<SemanticsNode> traversalChildren = debugListChildrenInOrder(
+      DebugSemanticsDumpOrder.traversalOrder,
+    );
+    final List<SemanticsNode> hitTestChildren = debugListChildrenInOrder(
+      DebugSemanticsDumpOrder.inverseHitTest,
+    );
+    return <String, Object?>{
+      'id': id,
+      ...data.toJson(),
+      'childrenInTraversalOrder': <int>[
+        for (final SemanticsNode child in traversalChildren) child.id,
+      ],
+      'childrenInHitTestOrder': <int>[for (final SemanticsNode child in hitTestChildren) child.id],
+    };
+  }
 }
 
 /// An edge of a box, such as top, bottom, left or right, used to compute
@@ -6406,6 +6460,9 @@ class SemanticsConfiguration {
   /// is blocked in the a11y focus (different from input focus).
   AccessibilityFocusBlockType get accessibilityFocusBlockType => _accessibilityFocusBlockType;
   set accessibilityFocusBlockType(AccessibilityFocusBlockType value) {
+    if (_accessibilityFocusBlockType == value) {
+      return;
+    }
     _accessibilityFocusBlockType = value;
     _flags = _flags.copyWith(
       isAccessibilityFocusBlocked: value != AccessibilityFocusBlockType.none,

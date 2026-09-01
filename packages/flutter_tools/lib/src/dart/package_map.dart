@@ -5,15 +5,51 @@
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../globals.dart' as globals;
+
+/// Whether to ignore [Isolate.packageConfigSync] and force the fallback
+/// path in [currentPackageConfig].
+@visibleForTesting
+bool debugIgnorePackageConfigSync = false;
+
+const String _fileScheme = 'file';
 
 /// Loads the package configuration of the current isolate.
 Future<PackageConfig> currentPackageConfig() async {
-  return loadPackageConfigUri(Isolate.packageConfigSync!);
+  final Uri? packageConfigUri = debugIgnorePackageConfigSync ? null : Isolate.packageConfigSync;
+  if (packageConfigUri != null) {
+    return loadPackageConfigUri(packageConfigUri);
+  }
+
+  final FileSystem fileSystem = globals.fs;
+  final Directory cwd = fileSystem.currentDirectory;
+  File? packageConfigFile = findPackageConfigFile(cwd);
+
+  if (packageConfigFile == null) {
+    final Uri scriptUri = globals.platform.script;
+    if (scriptUri.scheme == _fileScheme) {
+      final File scriptFile = fileSystem.file(scriptUri);
+      packageConfigFile = findPackageConfigFile(scriptFile.parent);
+    }
+  }
+
+  if (packageConfigFile == null) {
+    throwToolExit(
+      'Failed to resolve package configuration.\n'
+      'Isolate.packageConfigSync was null, and no .dart_tool/package_config.json '
+      'could be found in the current working directory (${cwd.path}) or '
+      'relative to the script (${globals.platform.script}).\n'
+      'Did you run "flutter pub get"?',
+    );
+  }
+
+  return loadPackageConfigWithLogging(packageConfigFile, logger: globals.logger);
 }
 
 /// Locates the `.dart_tool/package_config.json` relevant to [dir].
@@ -94,4 +130,39 @@ Future<PackageConfig> loadPackageConfigWithLogging(
     throwToolExit('');
   }
   return result;
+}
+
+extension PackageConfigWorkspaceExtension on PackageConfig {
+  /// Converts a [fileUri] to a `package:` URI, finding the most specific
+  /// package whose [Package.packageUriRoot] is a prefix of [fileUri].
+  ///
+  /// The default [PackageConfig.toPackageUri] may match an outer package first
+  /// when pub workspace member packages are located under the workspace root
+  /// package's `lib/` directory.
+  Uri? toPackageUriForWorkspace(Uri fileUri) {
+    if (fileUri.isScheme('package')) {
+      return fileUri;
+    }
+    final path = fileUri.toString();
+    Package? bestMatch;
+    String? bestMatchRoot;
+
+    for (final Package package in packages) {
+      final rootPath = package.packageUriRoot.toString();
+      final rootPathWithSlash = rootPath.endsWith('/') ? rootPath : '$rootPath/';
+      if (path.startsWith(rootPathWithSlash)) {
+        if (bestMatchRoot == null || rootPathWithSlash.length > bestMatchRoot.length) {
+          bestMatch = package;
+          bestMatchRoot = rootPathWithSlash;
+        }
+      }
+    }
+
+    if (bestMatch == null || bestMatchRoot == null) {
+      return null;
+    }
+
+    final String rest = path.substring(bestMatchRoot.length);
+    return Uri(scheme: 'package', path: '${bestMatch.name}/$rest');
+  }
 }

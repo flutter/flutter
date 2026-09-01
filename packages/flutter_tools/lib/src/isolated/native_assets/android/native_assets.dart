@@ -24,7 +24,8 @@ Future<List<File>> copyNativeCodeAssetsAndroid(
   assert(assetTargetLocations.isNotEmpty);
   final installedFiles = <File>[];
   final jniArchDirs = <String>[
-    for (final AndroidArch androidArch in AndroidArch.values) androidArch.archName,
+    for (final CpuArch cpuArch in <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64])
+      cpuArch.androidArchName,
   ];
   for (final jniArchDir in jniArchDirs) {
     final Uri archUri = targetUri.resolve('jniLibs/lib/$jniArchDir/');
@@ -33,8 +34,8 @@ Future<List<File>> copyNativeCodeAssetsAndroid(
   for (final MapEntry<FlutterCodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
     final Uri source = assetMapping.key.codeAsset.file!;
     final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
-    final AndroidArch androidArch = _getAndroidArch(assetMapping.value.target.architecture);
-    final String jniArchDir = androidArch.archName;
+    final CpuArch cpuArch = _getAndroidArch(assetMapping.value.target.architecture);
+    final String jniArchDir = cpuArch.androidArchName;
     final Uri archUri = targetUri.resolve('jniLibs/lib/$jniArchDir/');
     final Uri assetTargetUri = archUri.resolveUri(target);
     final String targetFullPath = assetTargetUri.toFilePath();
@@ -44,21 +45,24 @@ Future<List<File>> copyNativeCodeAssetsAndroid(
   return installedFiles;
 }
 
-/// Get the [Architecture] for [androidArch].
-Architecture getNativeAndroidArchitecture(AndroidArch androidArch) {
-  return switch (androidArch) {
-    AndroidArch.armeabi_v7a => Architecture.arm,
-    AndroidArch.arm64_v8a => Architecture.arm64,
-    AndroidArch.x86_64 => Architecture.x64,
+/// Get the [Architecture] for [cpuArch].
+Architecture getNativeAndroidArchitecture(CpuArch cpuArch) {
+  return switch (cpuArch) {
+    CpuArch.armv7 => Architecture.arm,
+    CpuArch.arm64 => Architecture.arm64,
+    CpuArch.x64 => Architecture.x64,
+    CpuArch.x86 ||
+    CpuArch.riscv64 ||
+    CpuArch.unknown => throwToolExit('Invalid Android arch: $cpuArch.'),
   };
 }
 
-/// Get the [AndroidArch] for [architecture].
-AndroidArch _getAndroidArch(Architecture architecture) {
+/// Get the [CpuArch] for [architecture].
+CpuArch _getAndroidArch(Architecture architecture) {
   return switch (architecture) {
-    Architecture.arm => AndroidArch.armeabi_v7a,
-    Architecture.arm64 => AndroidArch.arm64_v8a,
-    Architecture.x64 => AndroidArch.x86_64,
+    Architecture.arm => CpuArch.armv7,
+    Architecture.arm64 => CpuArch.arm64,
+    Architecture.x64 => CpuArch.x64,
     Architecture.riscv64 => throwToolExit('Android RISC-V not yet supported.'),
     _ => throwToolExit('Invalid architecture: $architecture.'),
   };

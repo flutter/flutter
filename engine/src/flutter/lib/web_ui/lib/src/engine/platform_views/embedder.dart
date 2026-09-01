@@ -454,6 +454,19 @@ class PlatformViewEmbedder {
       // The composition has not changed, so no DOM manipulation is needed.
       return;
     }
+    // A canvas needs to be stacked as an overlay (and thus styled with
+    // `position: absolute`) whenever it shares the composition with a
+    // platform view, since the platform view's DOM element sits between
+    // canvases in the stacking order. It also needs overlay positioning
+    // whenever there's more than one canvas, even without platform views,
+    // since multiple canvases need to occupy the same area without
+    // affecting each other's layout. A single canvas with no platform
+    // views can use normal positioning, which is cheaper for the browser
+    // to scroll.
+    final bool hasPlatformViews = composition.entities.any(
+      (CompositionEntity entity) => entity is CompositionPlatformView,
+    );
+    final bool needsOverlayPositioning = hasPlatformViews || composition.canvases.length > 1;
     final List<int> indexMap = _getIndexMapFromPreviousComposition(_activeComposition, composition);
     final List<int> existingIndexMap = indexMap.where((int index) => index != -1).toList();
 
@@ -501,7 +514,12 @@ class PlatformViewEmbedder {
         // canvas needs a display canvas.
         canvas.displayCanvas = rasterizer.getOverlay();
       }
+      canvas.displayCanvas!.setIsOverlay(needsOverlayPositioning);
     }
+
+    // Platform views which were disposed while they were still being
+    // composited. They are left out of the DOM.
+    final missingViewIds = <int>{};
 
     // At this point, the DOM contains the static elements and the elements from
     // the previous composition which need to move. We iterate over the static
@@ -510,16 +528,27 @@ class PlatformViewEmbedder {
     var nextCompositionIndex = 0;
     while (staticElementIndex < staticElements.length) {
       final int staticElementIndexInActiveComposition = staticElements[staticElementIndex];
-      final DomElement staticDomElement = _getElement(
+      final DomElement? staticDomElement = _getElement(
         _activeComposition.entities[staticElementIndexInActiveComposition],
       );
+      if (staticDomElement == null) {
+        // This view is not in the DOM, so it can't position other elements.
+        // Use the next static element instead.
+        staticElementIndex++;
+        continue;
+      }
       // Go through next composition elements until we reach the static element.
       while (indexMap[nextCompositionIndex] != staticElementIndexInActiveComposition) {
         final CompositionEntity nextEntity = composition.entities[nextCompositionIndex];
         if (nextEntity is CompositionCanvas) {
           updateCompositionCanvasWithDisplay(nextEntity, nextCompositionIndex);
         }
-        sceneHost.insertBefore(_getElement(nextEntity), staticDomElement);
+        final DomElement? nextDomElement = _getElement(nextEntity);
+        if (nextDomElement != null) {
+          sceneHost.insertBefore(nextDomElement, staticDomElement);
+        } else if (nextEntity is CompositionPlatformView) {
+          missingViewIds.add(nextEntity.viewId);
+        }
         nextCompositionIndex++;
       }
       if (composition.entities[nextCompositionIndex] is CompositionCanvas) {
@@ -540,15 +569,35 @@ class PlatformViewEmbedder {
       if (nextEntity is CompositionCanvas) {
         updateCompositionCanvasWithDisplay(nextEntity, nextCompositionIndex);
       }
-      sceneHost.append(_getElement(nextEntity));
+      final DomElement? nextDomElement = _getElement(nextEntity);
+      if (nextDomElement != null) {
+        sceneHost.append(nextDomElement);
+      } else if (nextEntity is CompositionPlatformView) {
+        missingViewIds.add(nextEntity.viewId);
+      }
       nextCompositionIndex++;
+    }
+
+    if (missingViewIds.isNotEmpty) {
+      // Drop the skipped views, so the next frame doesn't expect them to be
+      // in the DOM.
+      composition.entities.removeWhere(
+        (CompositionEntity entity) =>
+            entity is CompositionPlatformView && missingViewIds.contains(entity.viewId),
+      );
+      printWarning(
+        'Cannot render platform views: ${missingViewIds.join(', ')}. '
+        'These views were disposed while they were being composited.',
+      );
     }
   }
 
-  DomElement _getElement(CompositionEntity entity) {
+  /// Returns the DOM element for [entity], or null if the platform view no
+  /// longer has a clip chain because it was disposed.
+  DomElement? _getElement(CompositionEntity entity) {
     return switch (entity) {
       CompositionCanvas() => entity.displayCanvas!.hostElement,
-      CompositionPlatformView() => _viewClipChains[entity.viewId]!.root,
+      CompositionPlatformView() => _viewClipChains[entity.viewId]?.root,
     };
   }
 

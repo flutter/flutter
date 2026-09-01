@@ -1,0 +1,66 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/common/config.gni")
+import("//flutter/impeller/tools/impeller.gni")
+
+impeller_component("screenshot") {
+  testonly = true
+
+  sources = [
+    "screenshot.h",
+    "screenshotter.cc",
+    "screenshotter.h",
+  ]
+
+  deps = [ "//flutter/impeller/display_list" ]
+}
+
+impeller_component("golden_digest_manager") {
+  testonly = true
+
+  sources = [
+    "golden_digest_manager.cc",
+    "golden_digest_manager.h",
+  ]
+
+  deps = [ "//flutter/fml" ]
+}
+
+impeller_component("impeller_unittest_suite") {
+  testonly = true
+
+  sources = [
+    "impeller_unittest_suite.cc",
+    "impeller_unittest_suite.h",
+  ]
+
+  deps = [
+    "//flutter/fml",
+    "//flutter/impeller/playground:playground_test",
+  ]
+}
+
+if (is_mac) {
+  impeller_component("metal_screenshot") {
+    testonly = true
+
+    sources = [
+      "metal/metal_screenshot.h",
+      "metal/metal_screenshot.mm",
+      "metal/metal_screenshotter.h",
+      "metal/metal_screenshotter.mm",
+      "vulkan/vulkan_screenshotter.h",
+      "vulkan/vulkan_screenshotter.mm",
+    ]
+
+    deps = [
+      ":screenshot",
+      "//flutter/fml",
+      "//flutter/impeller/display_list",
+      "//flutter/impeller/renderer/backend/metal",
+      "//flutter/impeller/renderer/backend/vulkan",
+    ]
+  }
+}

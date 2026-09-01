@@ -143,14 +143,15 @@ class TargetDevices {
   /// partial match. If an exact match or a single partial match is found,
   /// return it immediately.
   ///
-  /// When multiple devices are found and there is a terminal attached to
-  /// stdin, allow the user to select which device to use. When a terminal
-  /// with stdin is not available, print a list of available devices and
-  /// return null.
+  /// When multiple devices are found, [canPrompt] is true, and there is a
+  /// terminal attached to stdin, allow the user to select which device to use.
+  /// When a terminal with stdin is not available or [canPrompt] is false, print
+  /// a list of available devices and return null.
   ///
   /// When no devices meet user specifications, print a list of unsupported
   /// devices and return null.
   Future<List<Device>?> findAllTargetDevices({
+    bool canPrompt = true,
     Duration? deviceDiscoveryTimeout,
     bool includeDevicesUnsupportedByProject = false,
   }) async {
@@ -190,7 +191,7 @@ class TargetDevices {
     } else if (_deviceManager.hasSpecifiedAllDevices) {
       return allDevices;
     } else if (allDevices.length > 1) {
-      return _handleMultipleDevices(attachedDevices, wirelessDevices);
+      return _handleMultipleDevices(attachedDevices, wirelessDevices, canPrompt: canPrompt);
     }
     return allDevices;
   }
@@ -228,13 +229,15 @@ class TargetDevices {
   /// ephemeral devices. If a single ephemeral device is found, return it
   /// immediately.
   ///
-  /// Otherwise, prompt the user to select a device if there is a terminal
-  /// with stdin. If there is not a terminal, display the list of devices with
-  /// instructions to use a device selection flag.
+  /// Otherwise, prompt the user to select a device if [canPrompt] is true and
+  /// there is a terminal with stdin. If [canPrompt] is false or there is not a
+  /// terminal, display the list of devices with instructions to use a device
+  /// selection flag.
   Future<List<Device>?> _handleMultipleDevices(
     List<Device> attachedDevices,
-    List<Device> wirelessDevices,
-  ) async {
+    List<Device> wirelessDevices, {
+    bool canPrompt = true,
+  }) async {
     final List<Device> allDevices = attachedDevices + wirelessDevices;
 
     final Device? ephemeralDevice = _deviceManager.getSingleEphemeralDevice(allDevices);
@@ -242,7 +245,7 @@ class TargetDevices {
       return <Device>[ephemeralDevice];
     }
 
-    if (globals.terminal.stdinHasTerminal) {
+    if (canPrompt && globals.terminal.stdinHasTerminal) {
       return _selectFromMultipleDevices(attachedDevices, wirelessDevices);
     } else {
       return _printMultipleDevices(attachedDevices, wirelessDevices);
@@ -460,15 +463,16 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   /// single partial match is found and the device is not connected and it's
   /// an iOS device, wait for it to connect.
   ///
-  /// When multiple devices are found and there is a terminal attached to
-  /// stdin, allow the user to select which device to use. When a terminal
-  /// with stdin is not available, print a list of available devices and
-  /// return null.
+  /// When multiple devices are found, [canPrompt] is true, and there is a
+  /// terminal attached to stdin, allow the user to select which device to use.
+  /// When a terminal with stdin is not available or [canPrompt] is false, print
+  /// a list of available devices and return null.
   ///
   /// When no devices meet user specifications, print a list of unsupported
   /// devices and return null.
   @override
   Future<List<Device>?> findAllTargetDevices({
+    bool canPrompt = true,
     Duration? deviceDiscoveryTimeout,
     bool includeDevicesUnsupportedByProject = false,
   }) async {
@@ -484,6 +488,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       if (deviceDiscoveryTimeout != null ||
           deviceConnectionInterface == DeviceConnectionInterface.attached) {
         return await super.findAllTargetDevices(
+          canPrompt: canPrompt,
           deviceDiscoveryTimeout: deviceDiscoveryTimeout,
           includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
         );
@@ -557,14 +562,22 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       );
 
       if (attachedDevices.isEmpty) {
-        return await _handleNoAttachedDevices(attachedDevices, futureWirelessDevices);
+        return await _handleNoAttachedDevices(
+          attachedDevices,
+          futureWirelessDevices,
+          canPrompt: canPrompt,
+        );
       } else if (_deviceManager.hasSpecifiedAllDevices) {
         return await _handleAllDevices(attachedDevices, futureWirelessDevices);
       }
       // Even if there's only a single attached device, continue to
       // `_handleRemainingDevices` since there might be wireless devices
       // that are not loaded yet.
-      return await _handleRemainingDevices(attachedDevices, futureWirelessDevices);
+      return await _handleRemainingDevices(
+        attachedDevices,
+        futureWirelessDevices,
+        canPrompt: canPrompt,
+      );
     } finally {
       stopExtendedWirelessDeviceDiscovery();
     }
@@ -578,8 +591,9 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   /// If wireless devices are found, continue to `_handleMultipleDevices`.
   Future<List<Device>?> _handleNoAttachedDevices(
     List<Device> attachedDevices,
-    Future<List<Device>> futureWirelessDevices,
-  ) async {
+    Future<List<Device>> futureWirelessDevices, {
+    bool canPrompt = true,
+  }) async {
     if (_includeAttachedDevices) {
       _logger.printStatus(_noAttachedCheckForWirelessMessage);
     } else {
@@ -596,7 +610,7 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       return allDevices;
     } else if (allDevices.length > 1) {
       _logger.printStatus('');
-      return _handleMultipleDevices(attachedDevices, wirelessDevices);
+      return _handleMultipleDevices(attachedDevices, wirelessDevices, canPrompt: canPrompt);
     }
     return allDevices;
   }
@@ -618,19 +632,21 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
   /// ephemeral devices. If a single ephemeral device is found, return it
   /// immediately.
   ///
-  /// Otherwise, prompt the user to select a device if there is a terminal
-  /// with stdin. If there is not a terminal, display the list of devices with
-  /// instructions to use a device selection flag.
+  /// Otherwise, prompt the user to select a device if [canPrompt] is true and
+  /// there is a terminal with stdin. If [canPrompt] is false or there is not a
+  /// terminal, display the list of devices with instructions to use a device
+  /// selection flag.
   Future<List<Device>?> _handleRemainingDevices(
     List<Device> attachedDevices,
-    Future<List<Device>> futureWirelessDevices,
-  ) async {
+    Future<List<Device>> futureWirelessDevices, {
+    bool canPrompt = true,
+  }) async {
     final Device? ephemeralDevice = _deviceManager.getSingleEphemeralDevice(attachedDevices);
     if (ephemeralDevice != null) {
       return <Device>[ephemeralDevice];
     }
 
-    if (!globals.terminal.stdinHasTerminal || !_logger.supportsColor) {
+    if (!canPrompt || !globals.terminal.stdinHasTerminal || !_logger.supportsColor) {
       _logger.printStatus(_checkingForWirelessDevicesMessage);
       final List<Device> wirelessDevices = await futureWirelessDevices;
       if (attachedDevices.length + wirelessDevices.length == 1) {
@@ -639,8 +655,8 @@ class TargetDevicesWithExtendedWirelessDeviceDiscovery extends TargetDevices {
       _logger.printStatus('');
       // If the terminal has stdin but does not support color/ANSI (which is
       // needed to clear lines), fallback to standard selection of device.
-      if (globals.terminal.stdinHasTerminal && !_logger.supportsColor) {
-        return _handleMultipleDevices(attachedDevices, wirelessDevices);
+      if (canPrompt && globals.terminal.stdinHasTerminal && !_logger.supportsColor) {
+        return _handleMultipleDevices(attachedDevices, wirelessDevices, canPrompt: canPrompt);
       }
       // If terminal does not have stdin, print out device list.
       final List<Device>? devices = await _printMultipleDevices(attachedDevices, wirelessDevices);

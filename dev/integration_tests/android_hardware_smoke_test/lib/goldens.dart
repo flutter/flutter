@@ -33,7 +33,12 @@ Future<void> handleGoldenRequest(
 }) async {
   try {
     if (testName.startsWith(platformViewPrefix)) {
-      await _handlePlatformViewRequest(testName, completer, targetKey, settleFuture: settleFuture);
+      await _handlePlatformViewRequest(
+        testName,
+        completer,
+        targetKey,
+        settleFuture: settleFuture,
+      );
     } else {
       final String? goldenVariantValue = await goldenVariant;
       await _handleStandardViewRequest(
@@ -47,7 +52,8 @@ Future<void> handleGoldenRequest(
   } catch (e, stackTrace) {
     // Guarantee that the completer completes even under unhandled exceptions
     completer.complete(<String, Object?>{
-      keyMessage: 'Error occurred during golden request handling: $e\n$stackTrace',
+      keyMessage:
+          'Error occurred during golden request handling: $e\n$stackTrace',
     });
   }
 }
@@ -64,9 +70,8 @@ Future<void> _handlePlatformViewRequest(
   if (settleFuture != null) {
     await settleFuture;
   }
-  for (var i = 0; i < 3; i++) {
-    await WidgetsBinding.instance.endOfFrame;
-  }
+  // Wait 1 frame to ensure the platform view composite is fully submitted.
+  await WidgetsBinding.instance.endOfFrame;
 
   final BuildContext? context = targetKey.currentContext;
   if (context == null || !context.mounted) {
@@ -84,7 +89,8 @@ Future<void> _handlePlatformViewRequest(
   final Offset position = renderObject.localToGlobal(Offset.zero);
   final Size size = renderObject.size;
   // We can assume one window for these tests since they are android-only.
-  final double devicePixelRatio = ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
+  final double devicePixelRatio =
+      ui.PlatformDispatcher.instance.views.first.devicePixelRatio;
 
   final int x = (position.dx * devicePixelRatio).round();
   final int y = (position.dy * devicePixelRatio).round();
@@ -115,7 +121,9 @@ Future<void> _handleStandardViewRequest(
       resultImageBytes,
       goldenVariantValue,
     );
-    completer.complete(<String, Object?>{keyMessage: failureMessage ?? 'Rendered $testName'});
+    completer.complete(<String, Object?>{
+      keyMessage: failureMessage ?? 'Rendered $testName',
+    });
   } else {
     completer.complete(<String, Object?>{
       keyMessage: 'Rendered $testName',
@@ -191,7 +199,9 @@ Future<Uint8List> _capturePng(String testName, GlobalKey targetKey) async {
   final RenderRepaintBoundary boundary = renderObject;
   final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
   try {
-    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData? byteData = await image.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
     if (byteData == null) {
       throw StateError(
         'Failed to capture screenshot for $testName: ui.Image.toByteData returned null.',
