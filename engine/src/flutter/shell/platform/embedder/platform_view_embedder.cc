@@ -224,6 +224,16 @@ void PlatformViewEmbedder::RequestViewFocusChange(
   }
 }
 
+void PlatformViewEmbedder::RequestDartDeferredLibrary(
+    intptr_t loading_unit_id) {
+  TRACE_EVENT0("flutter", "PlatformViewEmbedder::RequestDartDeferredLibrary");
+  if (platform_dispatch_table_.request_dart_deferred_library_callback !=
+      nullptr) {
+    platform_dispatch_table_.request_dart_deferred_library_callback(
+        loading_unit_id);
+  }
+}
+
 std::shared_ptr<PlatformMessageHandler>
 PlatformViewEmbedder::GetPlatformMessageHandler() const {
   return platform_message_handler_;

@@ -61,6 +61,74 @@ TEST(EmbedderProcTable, CallProc) {
   EXPECT_NE(procs.GetCurrentTime(), 0ULL);
 }
 
+// Spot-checks calling deferred library function pointers via proc table.
+TEST(EmbedderProcTable, CallDeferredLibraryProcs) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  EXPECT_NE(procs.LoadDartDeferredLibrary, nullptr);
+  EXPECT_NE(procs.NotifyDartDeferredLibraryLoadError, nullptr);
+  EXPECT_NE(procs.LoadDartDeferredLibraryFailure, nullptr);
+
+  // Calling with invalid arguments returns kInvalidArguments.
+  EXPECT_EQ(procs.LoadDartDeferredLibrary(nullptr, 0, nullptr, 0, nullptr, 0),
+            kInvalidArguments);
+  EXPECT_EQ(
+      procs.NotifyDartDeferredLibraryLoadError(nullptr, 0, nullptr, false),
+      kInvalidArguments);
+  EXPECT_EQ(procs.LoadDartDeferredLibraryFailure(nullptr, 0, nullptr, false),
+            kInvalidArguments);
+}
+
+// Spot-checks calling screenshot function pointers via proc table.
+TEST(EmbedderProcTable, CallScreenshotProcs) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  EXPECT_NE(procs.Screenshot, nullptr);
+  EXPECT_NE(procs.FreeScreenshot, nullptr);
+
+  // Calling with invalid arguments returns kInvalidArguments.
+  EXPECT_EQ(procs.Screenshot(nullptr, nullptr), kInvalidArguments);
+  EXPECT_EQ(procs.FreeScreenshot(nullptr), kInvalidArguments);
+
+  FlutterEngineScreenshotInfo invalid_screenshot = {};
+  invalid_screenshot.struct_size = 0;
+  EXPECT_EQ(procs.FreeScreenshot(&invalid_screenshot), kInvalidArguments);
+}
+
+// Spot-checks calling Dart callback information function pointers via proc
+// table.
+TEST(EmbedderProcTable, CallCallbackInformationProcs) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  EXPECT_NE(procs.GetCallbackInformation, nullptr);
+
+  // Calling with invalid arguments returns kInvalidArguments.
+  EXPECT_EQ(procs.GetCallbackInformation(0, nullptr), kInvalidArguments);
+
+  FlutterCallbackInformation invalid_info = {};
+  invalid_info.struct_size = 0;
+  EXPECT_EQ(procs.GetCallbackInformation(0, &invalid_info), kInvalidArguments);
+}
+
+// Spot-checks calling RegisterImageDecoder function pointer via proc table.
+TEST(EmbedderProcTable, CallRegisterImageDecoderProcs) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+
+  EXPECT_NE(procs.RegisterImageDecoder, nullptr);
+
+  // Calling with invalid arguments returns kInvalidArguments.
+  EXPECT_EQ(procs.RegisterImageDecoder(nullptr, nullptr, nullptr, 0),
+            kInvalidArguments);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

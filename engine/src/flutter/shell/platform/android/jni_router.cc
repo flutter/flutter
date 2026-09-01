@@ -1,0 +1,831 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "flutter/shell/platform/android/jni_router.h"
+
+#include "flutter/fml/logging.h"
+#include "flutter/fml/trace_event.h"
+
+namespace flutter {
+namespace android {
+
+JniRouter::JniRouter(std::shared_ptr<JniDelegate> embedder_delegate,
+                     const std::shared_ptr<LegacyJniDelegate>& legacy_delegate)
+    : embedder_delegate_(std::move(embedder_delegate)) {
+  TRACE_EVENT0("flutter", "JniRouter::JniRouter");
+}
+
+JniRouter::~JniRouter() {
+  TRACE_EVENT0("flutter", "JniRouter::~JniRouter");
+}
+
+bool JniRouter::IsEmbedderEnabled() {
+  return true;
+}
+
+void JniRouter::SetEmbedderEnabled(bool enabled) {
+  // Post-Phase 5.5 Flag Obliteration: No-op. The embedder C-API is permanently
+  // enabled.
+}
+
+JniRouter::RoutingPath JniRouter::GetActiveRoutingPath() const {
+  return RoutingPath::kEmbedder;
+}
+
+std::shared_ptr<JniDelegate> JniRouter::GetEmbedderDelegate() const {
+  return embedder_delegate_;
+}
+
+std::shared_ptr<LegacyJniDelegate> JniRouter::GetLegacyDelegate() const {
+  return nullptr;
+}
+
+bool JniRouter::RoutePlatformMessage(const std::string& channel,
+                                     const std::vector<uint8_t>& message,
+                                     int32_t response_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RoutePlatformMessage", "channel",
+               channel.c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->HandlePlatformMessage(channel, message,
+                                                     response_id);
+  }
+  return false;
+}
+
+bool JniRouter::RoutePlatformMessageResponse(int32_t response_id,
+                                             const std::vector<uint8_t>& data) {
+  TRACE_EVENT0("flutter", "JniRouter::RoutePlatformMessageResponse");
+  if (embedder_delegate_) {
+    return embedder_delegate_->HandlePlatformMessageResponse(response_id, data);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSemanticsUpdate(const std::vector<uint8_t>& buffer,
+                                     const std::vector<std::string>& strings) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSemanticsUpdate(legacy)");
+  return RouteSemanticsUpdate(buffer, strings, {});
+}
+
+bool JniRouter::RouteSemanticsUpdate(
+    const std::vector<uint8_t>& buffer,
+    const std::vector<std::string>& strings,
+    const std::vector<std::vector<uint8_t>>& string_attribute_args) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSemanticsUpdate");
+  if (embedder_delegate_) {
+    return embedder_delegate_->UpdateSemantics(buffer, strings,
+                                               string_attribute_args);
+  }
+  return false;
+}
+
+bool JniRouter::RouteCustomAccessibilityActions(
+    const std::vector<uint8_t>& actions_buffer,
+    const std::vector<std::string>& action_strings) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteCustomAccessibilityActions");
+  if (embedder_delegate_) {
+    return embedder_delegate_->UpdateCustomAccessibilityActions(actions_buffer,
+                                                                action_strings);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSemanticsUpdate(const FlutterSemanticsUpdate2& update) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSemanticsUpdate(struct)");
+  if (embedder_delegate_) {
+    return embedder_delegate_->UpdateSemantics(update);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSemanticsEnabled(bool enabled) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSemanticsEnabled");
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSemanticsEnabled(enabled);
+  }
+  return false;
+}
+
+bool JniRouter::RouteDispatchSemanticsAction(int32_t node_id,
+                                             FlutterSemanticsAction action,
+                                             const std::vector<uint8_t>& data,
+                                             int64_t view_id) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteDispatchSemanticsAction");
+  if (embedder_delegate_) {
+    return embedder_delegate_->DispatchSemanticsAction(node_id, action, data,
+                                                       view_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetAccessibilityFeatures(int32_t flags) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSetAccessibilityFeatures");
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetAccessibilityFeatures(flags);
+  }
+  return false;
+}
+
+bool JniRouter::RouteApplicationLocale(const std::string& locale) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteApplicationLocale", "locale",
+               locale.c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetApplicationLocale(locale);
+  }
+  return false;
+}
+
+bool JniRouter::RouteFirstFrame() {
+  TRACE_EVENT0("flutter", "JniRouter::RouteFirstFrame");
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnFirstFrame();
+  }
+  return false;
+}
+
+bool JniRouter::RoutePreEngineRestart() {
+  TRACE_EVENT0("flutter", "JniRouter::RoutePreEngineRestart");
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnPreEngineRestart();
+  }
+  return false;
+}
+
+bool JniRouter::RouteVsync(int64_t frame_time_nanos,
+                           int64_t frame_target_time_nanos) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteVsync");
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnVsync(frame_time_nanos,
+                                       frame_target_time_nanos);
+  }
+  return false;
+}
+
+bool JniRouter::RouteAsyncWaitForVsync(intptr_t baton) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteAsyncWaitForVsync", "baton",
+               std::to_string(baton).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->AsyncWaitForVsync(baton);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetViewportMetrics(const AndroidViewportMetrics& metrics) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSetViewportMetrics");
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetViewportMetrics(metrics);
+  }
+  return false;
+}
+
+bool JniRouter::RouteUpdateDisplayMetrics(
+    const AndroidDisplayMetrics& metrics) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteUpdateDisplayMetrics(struct)");
+  if (embedder_delegate_) {
+    return embedder_delegate_->UpdateDisplayMetrics(metrics);
+  }
+  return false;
+}
+
+bool JniRouter::RouteUpdateDisplayMetrics(uint64_t display_id,
+                                          double refresh_rate,
+                                          double width,
+                                          double height,
+                                          double device_pixel_ratio) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteUpdateDisplayMetrics(params)");
+  if (embedder_delegate_) {
+    return embedder_delegate_->UpdateDisplayMetrics(
+        display_id, refresh_rate, width, height, device_pixel_ratio);
+  }
+  return false;
+}
+
+bool JniRouter::RouteViewportMetrics(int64_t view_id,
+                                     double width,
+                                     double height,
+                                     double pixel_ratio) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteViewportMetrics");
+  if (embedder_delegate_) {
+    return embedder_delegate_->DispatchViewportMetrics(view_id, width, height,
+                                                       pixel_ratio);
+  }
+  return false;
+}
+
+bool JniRouter::RouteRequestDartDeferredLibrary(int64_t loading_unit_id) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteRequestDartDeferredLibrary");
+  if (embedder_delegate_) {
+    return embedder_delegate_->RequestDartDeferredLibrary(loading_unit_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteAssetManagerChanged() {
+  TRACE_EVENT0("flutter", "JniRouter::RouteAssetManagerChanged");
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnAssetManagerChanged();
+  }
+  return false;
+}
+
+std::optional<DartCallbackInfo> JniRouter::RouteLookupCallbackInformation(
+    int64_t handle) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteLookupCallbackInformation");
+  if (embedder_delegate_) {
+    return embedder_delegate_->LookupCallbackInformation(handle);
+  }
+  return std::nullopt;
+}
+
+bool JniRouter::RouteDecodeImage(const uint8_t* data,
+                                 size_t size,
+                                 int64_t generator_handle) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteDecodeImage");
+  if (embedder_delegate_) {
+    return embedder_delegate_->DecodeImage(data, size, generator_handle);
+  }
+  return false;
+}
+
+void JniRouter::RouteNativeImageHeader(int64_t generator_handle,
+                                       int32_t width,
+                                       int32_t height) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteNativeImageHeader");
+  if (embedder_delegate_) {
+    embedder_delegate_->OnNativeImageHeader(generator_handle, width, height);
+  }
+}
+
+std::optional<ImageHeaderInfo> JniRouter::RouteGetImageHeader(
+    int64_t generator_handle) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteGetImageHeader");
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetImageHeader(generator_handle);
+  }
+  return std::nullopt;
+}
+
+int64_t JniRouter::RouteCreatePlatformView(
+    const PlatformViewCreationParams& params,
+    PlatformViewCompositionType composition_type) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteCreatePlatformView", "view_id",
+               std::to_string(params.view_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->CreatePlatformView(params, composition_type);
+  }
+  return -1;
+}
+
+bool JniRouter::RouteDisposePlatformView(int64_t view_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteDisposePlatformView", "view_id",
+               std::to_string(view_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->DisposePlatformView(view_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteResizePlatformView(
+    const PlatformViewResizeRequest& request) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteResizePlatformView", "view_id",
+               std::to_string(request.view_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->ResizePlatformView(request);
+  }
+  return false;
+}
+
+bool JniRouter::RouteOffsetPlatformView(int64_t view_id,
+                                        double top,
+                                        double left) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteOffsetPlatformView", "view_id",
+               std::to_string(view_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->OffsetPlatformView(view_id, top, left);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetPlatformViewDirection(int64_t view_id,
+                                              int32_t direction) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetPlatformViewDirection", "view_id",
+               std::to_string(view_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetPlatformViewDirection(view_id, direction);
+  }
+  return false;
+}
+
+bool JniRouter::RouteClearPlatformViewFocus(int64_t view_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteClearPlatformViewFocus", "view_id",
+               std::to_string(view_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->ClearPlatformViewFocus(view_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteDispatchPlatformViewTouch(const PlatformViewTouch& touch) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteDispatchPlatformViewTouch",
+               "view_id", std::to_string(touch.view_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->DispatchPlatformViewTouch(touch);
+  }
+  return false;
+}
+
+bool JniRouter::RouteOnDisplayPlatformView(
+    const PlatformViewGeometry& geometry) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteOnDisplayPlatformView", "view_id",
+               std::to_string(geometry.view_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnDisplayPlatformView(geometry);
+  }
+  return false;
+}
+
+bool JniRouter::RouteOnDisplayPlatformView(
+    const FlutterPlatformView& platform_view,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    int32_t view_width,
+    int32_t view_height) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteOnDisplayPlatformView(struct)",
+               "view_id", std::to_string(platform_view.identifier).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnDisplayPlatformView(
+        platform_view, x, y, width, height, view_width, view_height);
+  }
+  return false;
+}
+
+bool JniRouter::RouteHidePlatformView(int64_t view_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteHidePlatformView", "view_id",
+               std::to_string(view_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->HidePlatformView(view_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSynchronizeToNativeViewHierarchy(bool synchronize) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSynchronizeToNativeViewHierarchy");
+  if (embedder_delegate_) {
+    return embedder_delegate_->SynchronizeToNativeViewHierarchy(synchronize);
+  }
+  return false;
+}
+
+bool JniRouter::RouteBeginFrame() {
+  TRACE_EVENT0("flutter", "JniRouter::RouteBeginFrame");
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnBeginFrame();
+  }
+  return false;
+}
+
+bool JniRouter::RouteEndFrame() {
+  TRACE_EVENT0("flutter", "JniRouter::RouteEndFrame");
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnEndFrame();
+  }
+  return false;
+}
+
+std::optional<int32_t> JniRouter::RouteCreateOverlaySurface() {
+  TRACE_EVENT0("flutter", "JniRouter::RouteCreateOverlaySurface");
+  if (embedder_delegate_) {
+    return embedder_delegate_->CreateOverlaySurface();
+  }
+  return std::nullopt;
+}
+
+bool JniRouter::RouteDestroyOverlaySurfaces() {
+  TRACE_EVENT0("flutter", "JniRouter::RouteDestroyOverlaySurfaces");
+  if (embedder_delegate_) {
+    return embedder_delegate_->DestroyOverlaySurfaces();
+  }
+  return false;
+}
+
+bool JniRouter::RouteOnDisplayOverlaySurface(
+    const PlatformViewOverlay& overlay) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteOnDisplayOverlaySurface",
+               "surface_id", std::to_string(overlay.surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnDisplayOverlaySurface(overlay);
+  }
+  return false;
+}
+
+bool JniRouter::RouteShowOverlaySurface(int32_t surface_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteShowOverlaySurface", "surface_id",
+               std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->ShowOverlaySurface(surface_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteHideOverlaySurface(int32_t surface_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteHideOverlaySurface", "surface_id",
+               std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->HideOverlaySurface(surface_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteCreatePlatformViewTransaction() {
+  TRACE_EVENT0("flutter", "JniRouter::RouteCreatePlatformViewTransaction");
+  if (embedder_delegate_) {
+    return embedder_delegate_->CreatePlatformViewTransaction();
+  }
+  return false;
+}
+
+bool JniRouter::RouteSwapPlatformViewTransactions() {
+  TRACE_EVENT0("flutter", "JniRouter::RouteSwapPlatformViewTransactions");
+  if (embedder_delegate_) {
+    return embedder_delegate_->SwapPlatformViewTransactions();
+  }
+  return false;
+}
+
+bool JniRouter::RouteApplyPlatformViewTransactions() {
+  TRACE_EVENT0("flutter", "JniRouter::RouteApplyPlatformViewTransactions");
+  if (embedder_delegate_) {
+    return embedder_delegate_->ApplyPlatformViewTransactions();
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetHcppEnabled(bool enabled) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetHcppEnabled", "enabled",
+               enabled ? "true" : "false");
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetHcppEnabled(enabled);
+  }
+  return false;
+}
+
+bool JniRouter::RouteIsHcppEnabled() const {
+  TRACE_EVENT0("flutter", "JniRouter::RouteIsHcppEnabled");
+  if (embedder_delegate_) {
+    return embedder_delegate_->IsHcppEnabled();
+  }
+  return false;
+}
+
+bool JniRouter::RouteCreateSurfaceControl(int64_t surface_id,
+                                          const std::string& debug_name) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteCreateSurfaceControl", "surface_id",
+               std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->CreateSurfaceControl(surface_id, debug_name);
+  }
+  return false;
+}
+
+bool JniRouter::RouteDestroySurfaceControl(int64_t surface_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteDestroySurfaceControl", "surface_id",
+               std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->DestroySurfaceControl(surface_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteReparentSurfaceControl(int64_t surface_id,
+                                            int64_t new_parent_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteReparentSurfaceControl",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->ReparentSurfaceControl(surface_id,
+                                                      new_parent_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetSurfaceControlGeometry(
+    int64_t surface_id,
+    const AndroidSurfaceControlRect& source,
+    const AndroidSurfaceControlRect& destination,
+    int32_t transform) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlGeometry",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlGeometry(
+        surface_id, source, destination, transform);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetSurfaceControlVisibility(int64_t surface_id,
+                                                 bool visible) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlVisibility",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlVisibility(surface_id, visible);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetSurfaceControlZOrder(int64_t surface_id,
+                                             int32_t z_order) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlZOrder",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlZOrder(surface_id, z_order);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetSurfaceControlDamageRegion(
+    int64_t surface_id,
+    const std::vector<AndroidSurfaceControlRect>& rects) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlDamageRegion",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlDamageRegion(surface_id, rects);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetSurfaceControlBuffer(int64_t surface_id,
+                                             void* buffer,
+                                             int fence_fd) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlBuffer",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlBuffer(surface_id, buffer,
+                                                       fence_fd);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetSurfaceControlBufferAlpha(int64_t surface_id,
+                                                  float alpha) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlBufferAlpha",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlBufferAlpha(surface_id, alpha);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetSurfaceControlColor(int64_t surface_id,
+                                            float r,
+                                            float g,
+                                            float b,
+                                            float alpha) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetSurfaceControlColor",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetSurfaceControlColor(surface_id, r, g, b,
+                                                      alpha);
+  }
+  return false;
+}
+
+std::optional<AndroidSurfaceControlState>
+JniRouter::RouteGetSurfaceControlState(int64_t surface_id) const {
+  TRACE_EVENT1("flutter", "JniRouter::RouteGetSurfaceControlState",
+               "surface_id", std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetSurfaceControlState(surface_id);
+  }
+  return std::nullopt;
+}
+
+std::shared_ptr<AndroidSurfaceControl> JniRouter::RouteGetSurfaceControl(
+    int64_t surface_id) const {
+  TRACE_EVENT1("flutter", "JniRouter::RouteGetSurfaceControl", "surface_id",
+               std::to_string(surface_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetSurfaceControl(surface_id);
+  }
+  return nullptr;
+}
+
+bool JniRouter::RoutePlatformViewMutators(
+    int64_t view_id,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height,
+    const AndroidMutatorsStack& mutators_stack) {
+  TRACE_EVENT0("flutter", "JniRouter::RoutePlatformViewMutators");
+  if (embedder_delegate_) {
+    return embedder_delegate_->PushPlatformViewMutators(view_id, x, y, width,
+                                                        height, mutators_stack);
+  }
+  return false;
+}
+
+bool JniRouter::RoutePlatformViewMutators(
+    const FlutterPlatformView& platform_view,
+    int32_t x,
+    int32_t y,
+    int32_t width,
+    int32_t height) {
+  TRACE_EVENT0("flutter", "JniRouter::RoutePlatformViewMutators(view)");
+  if (embedder_delegate_) {
+    return embedder_delegate_->PushPlatformViewMutators(platform_view, x, y,
+                                                        width, height);
+  }
+  return false;
+}
+
+bool JniRouter::RouteInitVM(const AndroidVMArgs& args) {
+  TRACE_EVENT0("flutter", "JniRouter::RouteInitVM");
+  if (embedder_delegate_) {
+    return embedder_delegate_->InitVM(args);
+  }
+  return false;
+}
+
+bool JniRouter::RoutePrefetchDefaultFontManager() {
+  TRACE_EVENT0("flutter", "JniRouter::RoutePrefetchDefaultFontManager");
+  if (embedder_delegate_) {
+    return embedder_delegate_->PrefetchDefaultFontManager();
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetVmServiceUri(const std::string& uri) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetVmServiceUri", "uri",
+               uri.c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetVmServiceUri(uri);
+  }
+  return false;
+}
+
+bool JniRouter::RouteRegisterHardwareBufferTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteRegisterHardwareBufferTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->RegisterHardwareBufferTexture(texture_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteUnregisterHardwareBufferTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteUnregisterHardwareBufferTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->UnregisterHardwareBufferTexture(texture_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetHardwareBufferFrame(
+    int64_t texture_id,
+    const std::shared_ptr<AndroidHardwareBuffer>& buffer) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetHardwareBufferFrame(object)",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetHardwareBufferFrame(texture_id, buffer);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetHardwareBufferFrame(
+    int64_t texture_id,
+    const FlutterHardwareBufferExternalTexture& texture) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetHardwareBufferFrame(struct)",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetHardwareBufferFrame(texture_id, texture);
+  }
+  return false;
+}
+
+bool JniRouter::RouteGetHardwareBufferTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterHardwareBufferExternalTexture* texture_out) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteGetHardwareBufferTextureFrame",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetHardwareBufferTextureFrame(
+        texture_id, width, height, texture_out);
+  }
+  return false;
+}
+
+bool JniRouter::RouteOnHardwareBufferFrameAvailable(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteOnHardwareBufferFrameAvailable",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnHardwareBufferFrameAvailable(texture_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteRegisterVulkanTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteRegisterVulkanTexture", "texture_id",
+               std::to_string(texture_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->RegisterVulkanTexture(texture_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteUnregisterVulkanTexture(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteUnregisterVulkanTexture",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->UnregisterVulkanTexture(texture_id);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetVulkanTextureFrame(
+    int64_t texture_id,
+    const std::shared_ptr<AndroidVulkanExternalTexture>& texture) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetVulkanTextureFrame(object)",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetVulkanTextureFrame(texture_id, texture);
+  }
+  return false;
+}
+
+bool JniRouter::RouteSetVulkanTextureFrame(
+    int64_t texture_id,
+    const FlutterVulkanExternalTexture& texture) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSetVulkanTextureFrame(struct)",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetVulkanTextureFrame(texture_id, texture);
+  }
+  return false;
+}
+
+bool JniRouter::RouteGetVulkanTextureFrame(
+    int64_t texture_id,
+    size_t width,
+    size_t height,
+    FlutterVulkanExternalTexture* texture_out) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteGetVulkanTextureFrame", "texture_id",
+               std::to_string(texture_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetVulkanTextureFrame(texture_id, width, height,
+                                                     texture_out);
+  }
+  return false;
+}
+
+bool JniRouter::RouteOnVulkanTextureFrameAvailable(int64_t texture_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteOnVulkanTextureFrameAvailable",
+               "texture_id", std::to_string(texture_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnVulkanTextureFrameAvailable(texture_id);
+  }
+  return false;
+}
+
+int64_t JniRouter::RouteSpawnEngine(int64_t parent_engine_id,
+                                    const AndroidEngineSpawnArgs& args) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteSpawnEngine", "parent_engine_id",
+               std::to_string(parent_engine_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->SpawnEngine(parent_engine_id, args);
+  }
+  return 0;
+}
+
+bool JniRouter::RouteShutdownSpawnedEngine(int64_t engine_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteShutdownSpawnedEngine", "engine_id",
+               std::to_string(engine_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->ShutdownSpawnedEngine(engine_id);
+  }
+  return false;
+}
+
+size_t JniRouter::RouteGetActiveEngineCount() const {
+  TRACE_EVENT0("flutter", "JniRouter::RouteGetActiveEngineCount");
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetActiveEngineCount();
+  }
+  return 0;
+}
+
+bool JniRouter::RouteOnEngineGarbageCollected(int64_t engine_id) {
+  TRACE_EVENT1("flutter", "JniRouter::RouteOnEngineGarbageCollected",
+               "engine_id", std::to_string(engine_id).c_str());
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnEngineGarbageCollected(engine_id);
+  }
+  return false;
+}
+
+}  // namespace android
+}  // namespace flutter

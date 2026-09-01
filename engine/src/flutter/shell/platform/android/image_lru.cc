@@ -4,10 +4,13 @@
 
 #include "flutter/shell/platform/android/image_lru.h"
 
+#include "flutter/fml/trace_event.h"
+
 namespace flutter {
 
 sk_sp<flutter::DlImage> ImageLRU::FindImage(
     std::optional<HardwareBufferKey> key) {
+  TRACE_EVENT0("flutter", "ImageLRU::FindImage");
   if (!key.has_value()) {
     return nullptr;
   }
@@ -24,6 +27,7 @@ sk_sp<flutter::DlImage> ImageLRU::FindImage(
 
 void ImageLRU::UpdateKey(const sk_sp<flutter::DlImage>& image,
                          HardwareBufferKey key) {
+  TRACE_EVENT0("flutter", "ImageLRU::UpdateKey");
   if (images_[0].key == key) {
     return;
   }
@@ -41,6 +45,7 @@ void ImageLRU::UpdateKey(const sk_sp<flutter::DlImage>& image,
 
 HardwareBufferKey ImageLRU::AddImage(const sk_sp<flutter::DlImage>& image,
                                      HardwareBufferKey key) {
+  TRACE_EVENT0("flutter", "ImageLRU::AddImage");
   HardwareBufferKey lru_key = images_[kImageReaderSwapchainSize - 1].key;
   bool updated_image = false;
   for (size_t i = 0u; i < kImageReaderSwapchainSize; i++) {
@@ -58,6 +63,7 @@ HardwareBufferKey ImageLRU::AddImage(const sk_sp<flutter::DlImage>& image,
 }
 
 void ImageLRU::Clear() {
+  TRACE_EVENT0("flutter", "ImageLRU::Clear");
   for (size_t i = 0u; i < kImageReaderSwapchainSize; i++) {
     images_[i] = Data{.key = 0u, .value = nullptr};
   }
