@@ -237,7 +237,6 @@
                 "targets": [
                     "flutter/impeller",
                     "flutter/shell/platform/android:android_jar",
-                    "flutter/shell/platform/android:robolectric_tests"
                 ]
             },
             "tests": [
@@ -331,7 +330,6 @@
                     "flutter/lib/gpu/dist:zip_old_location",
                     "flutter/shell/platform/android:embedding_jars",
                     "flutter/shell/platform/android:abi_jars",
-                    "flutter/shell/platform/android:robolectric_tests"
                 ]
             },
             "tests": [
