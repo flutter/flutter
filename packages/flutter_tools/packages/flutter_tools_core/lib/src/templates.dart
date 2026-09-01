@@ -23,6 +23,8 @@ abstract base class ProjectTemplate {
   Set<String> get templateSources;
 
   /// The package URI string or directory path to the template sources.
+  ///
+  /// For example: `package:my_custom_extension/templates/`
   String get templatePath;
 
   /// Generates the variable mappings for the template.
