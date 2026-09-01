@@ -63,6 +63,26 @@ This document represents the synthesized blueprint for migrating the Flutter And
 * **5.5 Flag Obliteration**: Obliterate the `IsEmbedderEnabled` flag entirely and hardcode unconditionally to the new Embedder API.
 * **5.6 Final GN Integration**: Migrate `flutter_embedder_native` into `flutter_shell_native` AND explicitly purge all legacy UI/Skia dependencies from `flutter_shell_native`'s `BUILD.gn` to prevent Post-Migration Relapse.
 
+### Phase 6: Complete Legacy Purge & Final JNI Cutover
+* **6.1 JNI Registration Cutover**: Update `FlutterJNI` native registration in `library_loader.cc` and `platform_view_android_jni_impl.cc` to bind directly to `FlutterEmbedderNative` and `JniRouter` (`nativeAttach`, `nativeDestroy`, `nativeSpawn`, `nativeDispatchPlatformMessage`, `onSurfaceCreated`, `onSurfaceChanged`, `onSurfaceDestroyed`).
+* **6.2 Legacy Class Purge**: Physically delete legacy files:
+  - `android_shell_holder.{h,cc}`
+  - `platform_view_android.{h,cc}`
+  - `platform_view_android_jni_impl.{h,cc}`
+  - `android_surface*.{h,cc}`
+  - `android_context*.{h,cc}`
+  - `image_external_texture*.{h,cc}`
+  - `surface_texture_external_texture*.{h,cc}`
+  - `vsync_waiter_android.{h,cc}`
+  - `android_display.{h,cc}`
+  - Legacy directories: `external_view_embedder/`, `surface/`, `context/`, `platform_view_android_delegate/`.
+* **6.3 Final GN Integration & Dependency Severing**: Remove `source_set("flutter_shell_native_src")` from `BUILD.gn`, wire `shared_library("flutter_shell_native")` to depend solely on `:flutter_embedder_native_src`, and strip all legacy UI/Skia/Flow/Runtime dependencies.
+* **6.4 Parity Checkpoint & Verification**: Execute the full test suite:
+  - Unit tests: `flutter_embedder_native_unittests`, `embedder_unittests`, `embedder_proctable_unittests`.
+  - Integration tests: `dev/integration_tests/android_views`, `dev/integration_tests/channels`, `dev/integration_tests/platform_interaction`, `dev/integration_tests/android_engine_test`.
+  - Golden tests: verified with strict baseline validation rule (zero pixel regressions).
+  - DeviceLab tests: `android_lifecycles_test`, `hybrid_android_views_integration_test`, `android_semantics_integration_test`.
+
 ---
 
 ## 4. Key Architectural Decisions & Rationale
@@ -137,6 +157,20 @@ This document represents the synthesized blueprint for migrating the Flutter And
     - *Pros*: Traditional Java object cleanup approach.
     - *Cons*: Deprecated since Java 9, causes GC pauses, suffers from object resurrection issues, and offers no ordering guarantees.
 
+### 4.6 Decision 6: Clean-Room JNI Binding Direct to C-API Embedder vs In-Place Legacy Mutation
+- **Context & Decision**: In Phase 6, replace the JNI native method registration in `library_loader.cc` to bind `io.flutter.embedding.engine.FlutterJNI` directly to `FlutterEmbedderNative` and `JniRouter`, physically deleting `android_shell_holder.{h,cc}`, `platform_view_android.{h,cc}`, `android_surface*`, `android_context*`, and all internal engine dependencies from `BUILD.gn`.
+- **Reasoning**:
+  - Eliminates thousands of lines of obsolete, tightly coupled C++ code that leaks internal Engine (`Shell`, `Rasterizer`, Skia, Impeller) symbols into the platform layer.
+  - Ensures that `libflutter.so` depends solely on `:flutter_embedder_native_src` and public C-ABI headers (`embedder.h`).
+  - Guarantees complete architectural symmetry across desktop (macOS, Windows, Linux) and mobile (Android) embedders.
+- **Alternatives Considered**:
+  - **Alternative A: In-Place Mutation of `AndroidShellHolder` to Wrap `embedder.h`**.
+    - *Pros*: Preserves existing class names and JNI entry point wiring without updating `library_loader.cc`.
+    - *Cons*: Retains legacy technical debt and confusing class hierarchies; creates an unnecessary wrapper layer around `FlutterEmbedderNative`; risks accidental re-introduction of direct engine header includes.
+  - **Alternative B: Retaining Legacy Files as Inactive Dead Code**.
+    - *Pros*: Zero risk of missing symbol errors during intermediate builds.
+    - *Cons*: Adds binary bloat; increases cognitive load for engineers navigating the engine codebase; leads to code rot where uncompiled/unlinked code slowly breaks over time.
+
 ---
 
 ## 5. Traps, Pitfalls & Invariants to Look Out For
@@ -172,3 +206,10 @@ Strict Clang-Tidy analysis is enforced across all Android embedder source files.
   - Run `bin/flutter analyze --flutter-repo` to verify zero Dart analysis issues.
   - Run `engine/src/flutter/ci/clang_tidy.sh` across modified C++ files to guarantee 100% clean static analysis.
   - Run `dart format` on all modified Dart code.
+
+### 5.5 JNI Signature & Native Method Table Invariants
+- **JNI Signature Hygiene**: When registering native methods with `env->RegisterNatives`, all Java method signatures (e.g., `"(Ljava/lang/String;Ljava/nio/ByteBuffer;IJ)V"`) must strictly match the corresponding Java method declarations in `io.flutter.embedding.engine.FlutterJNI`. Any mismatch triggers fatal runtime `NoSuchMethodError` or `UnsatisfiedLinkError`.
+- **Thread-Affinity & Local Frame Management**: Always ensure JNI environment handles (`JNIEnv*`) are attached per-thread using `fml::jni::AttachCurrentThread()`. Never pass `JNIEnv*` across thread boundaries. Ensure local references are cleaned via `fml::jni::ScopedJavaLocalFrame` in tight loops.
+
+### 5.6 Golden Test Strict Baseline Invariant
+- **Baseline Engine Validation**: Local engine builds must be tested against the baseline framework. Only the baseline (without local engine build) is permitted to update goldens. If a local engine build fails a golden test, you must fix the C++ native implementation in the local engine—you cannot update the golden image to match the flawed output.
