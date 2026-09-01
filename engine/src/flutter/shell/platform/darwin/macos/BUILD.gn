@@ -435,6 +435,17 @@ generated_file("macos_framework_without_entitlement_config") {
   deps = [ ":_generate_symlinks" ]
 }
 
+source_set("_generate_symlinks_and_verify_framework_module_swift") {
+  visibility = [ ":*" ]
+  swiftflags = [
+    "-F",
+    rebase_path(root_out_dir),
+  ]
+  sources = [ "framework/Source/FlutterUmbrellaImportTests.swift" ]
+  deps = [ ":_generate_symlinks" ]
+  configs += [ "//flutter/shell/platform/darwin/common:config" ]
+}
+
 shared_library("_generate_symlinks_and_verify_framework_module") {
   framework_search_path = rebase_path("$root_out_dir")
   visibility = [ ":*" ]
@@ -450,5 +461,10 @@ shared_library("_generate_symlinks_and_verify_framework_module") {
 
   sources = [ "framework/Source/FlutterUmbrellaImportTests.m" ]
 
-  deps = [ ":_generate_symlinks" ]
+  deps = [
+    ":_generate_symlinks",
+    ":_generate_symlinks_and_verify_framework_module_swift",
+  ]
+
+  configs += [ "//flutter/shell/platform/darwin/common:config" ]
 }
