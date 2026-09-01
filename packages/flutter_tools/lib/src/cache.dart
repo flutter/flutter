@@ -803,10 +803,9 @@ class Cache {
     }
 
     // Download artifacts and display progress
-    final List<ArtifactSet> downloadableArtifacts = artifactsToUpdate
+    final int total = artifactsToUpdate
         .where((ArtifactSet artifact) => artifact.downloadCount > 0)
-        .toList();
-    final int total = downloadableArtifacts.length;
+        .length;
     var current = 0;
     for (final artifact in artifactsToUpdate) {
       if (artifact.downloadCount > 0) {
