@@ -2,52 +2,65 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
+
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../android/java.dart';
 import '../base/common.dart';
 import '../convert.dart';
+import '../experimental/config.dart';
+import '../experimental/extension_arg_parser.dart';
+import '../experimental/extension_manager.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 
-class ConfigCommand extends FlutterCommand {
-  ConfigCommand({bool verboseHelp = false}) {
-    argParser.addFlag(
-      'list',
-      help: 'List all settings and their current values.',
-      negatable: false,
-    );
-    argParser.addFlag(
+class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
+  ConfigCommand({bool verboseHelp = false, ExtensionManager? extensionManager})
+    : _verboseHelp = verboseHelp,
+      _extensionManager = extensionManager;
+
+  final bool _verboseHelp;
+
+  var _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
+
+  @override
+  ArgParser createBaseArgParser() {
+    final ArgParser parser = super.createBaseArgParser();
+    parser.addFlag('list', help: 'List all settings and their current values.', negatable: false);
+    parser.addFlag(
       'analytics',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
       help:
           'Enable or disable reporting anonymously tool usage statistics and crash reports.\n'
           '(An alias for "--${FlutterGlobalOptions.kEnableAnalyticsFlag}" '
           'and "--${FlutterGlobalOptions.kDisableAnalyticsFlag}" top level flags.)',
     );
-    argParser.addFlag(
+    parser.addFlag(
       'clear-ios-signing-settings',
       negatable: false,
       aliases: <String>['clear-ios-signing-cert'],
       help:
           'Clear the saved development certificate or provisioning profile choice used to sign apps for iOS device deployment.',
     );
-    argParser.addFlag(
+    parser.addFlag(
       'select-ios-signing-settings',
       negatable: false,
       help:
           'Complete prompt to select and save code signing settings used to sign apps for iOS device deployment.',
     );
-    argParser.addOption('android-sdk', help: 'The Android SDK directory.');
-    argParser.addOption(
+    parser.addOption('android-sdk', help: 'The Android SDK directory.');
+    parser.addOption(
       'android-studio-dir',
       help:
           'The Android Studio installation directory. If unset, flutter will search for valid installations at well-known locations.',
     );
-    argParser.addOption(
+    parser.addOption(
       'jdk-dir',
       help:
           'The Java Development Kit (JDK) installation directory. '
@@ -56,29 +69,83 @@ class ConfigCommand extends FlutterCommand {
           '    2) the JDK found at the directory found in the JAVA_HOME environment variable, and\n'
           "    3) the directory containing the java binary found in the user's path.",
     );
-    argParser.addOption(
+    parser.addOption(
       'build-dir',
       help: 'The relative path to override a projects build directory.',
       valueHelp: 'out/',
     );
-    addMachineOutputFlag(verboseHelp: verboseHelp);
+    parser.addFlag(
+      FlutterGlobalOptions.kMachineFlag,
+      negatable: false,
+      help: 'Outputs in a machine readable structured JSON format.',
+      hide: !_verboseHelp,
+    );
     for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
       }
       final String channel = globals.flutterVersion.channel;
-      argParser.addFlag(
+      parser.addFlag(
         configSetting,
         help: feature.generateHelpMessage(),
         defaultsTo: feature.getSettingForChannel(channel).enabledByDefault,
       );
     }
-    argParser.addFlag(
+    parser.addFlag(
       'clear-features',
       help: 'Remove all configured features and restore them to the default values.',
       negatable: false,
     );
+    return parser;
+  }
+
+  final ExtensionManager? _extensionManager;
+
+  Future<ExtensionConfiguration?> get _activeExtensionConfig async {
+    if (_extensionManager case final extensionManager?) {
+      await extensionManager.ensureInitialized();
+      final List<ConfigurationExtension> extensions = extensionManager.configurationExtensions;
+      if (extensions.isNotEmpty) {
+        return ExtensionConfiguration(extensions: extensions, logger: globals.logger);
+      }
+    }
+    return null;
+  }
+
+  @override
+  Future<void> initializeDynamicOptions() async {
+    if (await _activeExtensionConfig case final activeConfig?) {
+      _extensionSettingsGroups = await activeConfig.fetchExtensionSettings();
+      if (_extensionSettingsGroups.isNotEmpty) {
+        rebuildDynamicArgParser();
+      }
+    }
+  }
+
+  @override
+  ArgParser buildDynamicArgParser(ArgParser dynamicParser) {
+    for (final ExtensionSettingsGroup(:featureFlags, :configOptions) in _extensionSettingsGroups) {
+      for (final FeatureFlag(:name, :help, :enabledByDefault) in featureFlags) {
+        if (!dynamicParser.options.containsKey(name)) {
+          dynamicParser.addFlag(name, help: help, defaultsTo: enabledByDefault);
+        } else {
+          globals.printTrace(
+            'Extension feature flag "$name" conflicts with an existing option and was skipped.',
+          );
+        }
+      }
+      for (final ConfigOption(:name, :help, :value) in configOptions) {
+        if (!dynamicParser.options.containsKey(name)) {
+          dynamicParser.addOption(name, help: help, defaultsTo: value);
+        } else {
+          globals.printTrace(
+            'Extension config option "$name" conflicts with an existing option and was skipped.',
+          );
+        }
+      }
+    }
+    return dynamicParser;
   }
 
   @override
@@ -122,7 +189,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (boolArg('list')) {
-      globals.printStatus(settingsText);
+      globals.printStatus(await settingsText);
       return FlutterCommandResult.success();
     }
 
@@ -138,6 +205,15 @@ class ConfigCommand extends FlutterCommand {
           globals.config.removeValue(configSetting);
         }
       }
+      final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
+      final List<ExtensionSettingsGroup> groups = _extensionSettingsGroups.isNotEmpty
+          ? _extensionSettingsGroups
+          : await activeConfig?.fetchExtensionSettings() ?? const <ExtensionSettingsGroup>[];
+      for (final ExtensionSettingsGroup(:featureFlags) in groups) {
+        for (final FeatureFlag(:name) in featureFlags) {
+          globals.config.removeValue(name);
+        }
+      }
       globals.printStatus(requireReloadTipText);
       return FlutterCommandResult.success();
     }
@@ -150,15 +226,15 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults!.wasParsed('android-sdk')) {
-      _updateConfig('android-sdk', stringArg('android-sdk')!);
+      _updateConfig('android-sdk', stringArg('android-sdk'));
     }
 
     if (argResults!.wasParsed('android-studio-dir')) {
-      _updateConfig('android-studio-dir', stringArg('android-studio-dir')!);
+      _updateConfig('android-studio-dir', stringArg('android-studio-dir'));
     }
 
     if (argResults!.wasParsed('jdk-dir')) {
-      _updateConfig('jdk-dir', stringArg('jdk-dir')!);
+      _updateConfig('jdk-dir', stringArg('jdk-dir'));
     }
 
     if (argResults!.wasParsed('clear-ios-signing-settings')) {
@@ -197,6 +273,24 @@ class ConfigCommand extends FlutterCommand {
         final bool keyValue = boolArg(configSetting);
         globals.config.setValue(configSetting, keyValue);
         globals.printStatus('Setting "$configSetting" value to "$keyValue".');
+        if (!keyValue && feature.warningMessageOnDisable != null) {
+          globals.printWarning(feature.warningMessageOnDisable!);
+        }
+      }
+    }
+
+    for (final ExtensionSettingsGroup(:featureFlags, :configOptions) in _extensionSettingsGroups) {
+      for (final FeatureFlag(:name) in featureFlags) {
+        if (argResults!.wasParsed(name)) {
+          final bool keyValue = boolArg(name);
+          globals.config.setValue(name, keyValue);
+          globals.printStatus('Setting "$name" value to "$keyValue".');
+        }
+      }
+      for (final ConfigOption(:name) in configOptions) {
+        if (argResults!.wasParsed(name)) {
+          _updateConfig(name, stringArg(name));
+        }
       }
     }
 
@@ -211,10 +305,9 @@ class ConfigCommand extends FlutterCommand {
 
   Future<void> handleMachine() async {
     // Get all the current values.
-    final results = <String, Object?>{};
-    for (final String key in globals.config.keys) {
-      results[key] = globals.config.getValue(key);
-    }
+    final results = <String, Object?>{
+      for (final String key in globals.config.keys) key: globals.config.getValue(key),
+    };
 
     // Ensure we send any calculated ones, if overrides don't exist.
     final AndroidStudio? androidStudio = globals.androidStudio;
@@ -233,8 +326,8 @@ class ConfigCommand extends FlutterCommand {
     globals.printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
-  void _updateConfig(String keyName, String keyValue) {
-    if (keyValue.isEmpty) {
+  void _updateConfig(String keyName, String? keyValue) {
+    if (keyValue == null || keyValue.isEmpty) {
       globals.config.removeValue(keyName);
       globals.printStatus('Removing "$keyName" value.');
     } else {
@@ -244,15 +337,12 @@ class ConfigCommand extends FlutterCommand {
   }
 
   /// List all config settings. for feature flags, include whether they are available.
-  String get settingsText {
-    final featuresByName = <String, Feature>{};
+  Future<String> get settingsText async {
+    final featuresByName = <String, Feature>{
+      for (final feature in featureFlags.allFeatures)
+        if (feature.configSetting case final configSetting?) configSetting: feature,
+    };
     final String channel = globals.flutterVersion.channel;
-    for (final Feature feature in featureFlags.allFeatures) {
-      final String? configSetting = feature.configSetting;
-      if (configSetting != null) {
-        featuresByName[configSetting] = feature;
-      }
-    }
     final keys = <String>{
       ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
       ...globals.config.keys,
@@ -261,8 +351,8 @@ class ConfigCommand extends FlutterCommand {
       Object? value = globals.config.getValue(key);
       value ??= '(Not set)';
       final buffer = StringBuffer('  $key: $value');
-      if (featuresByName.containsKey(key)) {
-        final FeatureChannelSetting setting = featuresByName[key]!.getSettingForChannel(channel);
+      if (featuresByName[key] case final feature?) {
+        final FeatureChannelSetting setting = feature.getSettingForChannel(channel);
         if (!setting.available) {
           buffer.write(' (Unavailable)');
         }
@@ -276,6 +366,30 @@ class ConfigCommand extends FlutterCommand {
     } else {
       buffer.writeln(settings.join('\n'));
     }
+
+    final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
+    final List<ExtensionSettingsGroup> groups = _extensionSettingsGroups.isNotEmpty
+        ? _extensionSettingsGroups
+        : (await activeConfig?.fetchExtensionSettings()) ?? const <ExtensionSettingsGroup>[];
+    if (groups.any((ExtensionSettingsGroup g) => g.isNotEmpty)) {
+      buffer.writeln('\nExtension Settings:');
+      for (final ExtensionSettingsGroup(:title, :featureFlags, :configOptions, :isEmpty)
+          in groups) {
+        if (isEmpty) {
+          continue;
+        }
+        buffer.writeln('  $title:');
+        for (final FeatureFlag(:name, :enabledByDefault) in featureFlags) {
+          final Object val = globals.config.getValue(name) ?? enabledByDefault;
+          buffer.writeln('    $name: $val');
+        }
+        for (final ConfigOption(:name, :value) in configOptions) {
+          final Object val = globals.config.getValue(name) ?? value ?? '(Not set)';
+          buffer.writeln('    $name: $val');
+        }
+      }
+    }
+
     return buffer.toString();
   }
 

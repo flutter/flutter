@@ -3,18 +3,18 @@
 // found in the LICENSE file.
 
 import Foundation
-import InternalFlutterSwiftCommon
+@testable import InternalFlutterSwiftCommon
 
 /// An `OutputWriter` that stores the most recently logged output in a string.
 @objc(FlutterStringOutputWriter)
-public final class StringOutputWriter: NSObject, OutputWriter, @unchecked Sendable {
-  @objc public var didLog = false
-  public var lastLevel: LogLevel!
-  @objc public var lastLine: String!
-  @objc public var expectedOutput: String?
-  @objc public var gotExpectedOutput = false
+final class StringOutputWriter: NSObject, OutputWriter, @unchecked Sendable {
+  @objc var didLog = false
+  var lastLevel: LogLevel!
+  @objc var lastLine: String!
+  @objc var expectedOutput: String?
+  @objc var gotExpectedOutput = false
 
-  public func writeLine(level: LogLevel, _ message: String) {
+  func writeLine(level: LogLevel, _ message: String) {
     didLog = true
     lastLevel = level
     lastLine = message
@@ -23,7 +23,7 @@ public final class StringOutputWriter: NSObject, OutputWriter, @unchecked Sendab
     }
   }
 
-  @objc public func reset() {
+  @objc func reset() {
     didLog = false
     lastLevel = nil
     lastLine = nil

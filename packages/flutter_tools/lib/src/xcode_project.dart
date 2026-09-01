@@ -222,10 +222,8 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       return false;
     }
 
-    // Swift Package Manager requires Xcode 15 or greater.
     final Xcode? xcode = globals.xcode;
-    final Version? xcodeVersion = xcode?.currentVersion;
-    if (xcodeVersion == null || xcodeVersion.major < 15) {
+    if (xcode == null || !xcode.isInstalled) {
       return false;
     }
 

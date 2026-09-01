@@ -4,7 +4,6 @@
 
 import '../base/file_system.dart';
 import '../base/project_migrator.dart';
-import '../base/version.dart';
 import '../ios/xcodeproj.dart';
 import '../xcode_project.dart';
 
@@ -34,13 +33,9 @@ class CocoaPodsToolchainDirectoryMigration extends ProjectMigrator {
       return;
     }
 
-    final Version? version = _xcodeProjectInterpreter.version;
-
-    // If Xcode not installed or less than 15, skip this migration.
-    if (version == null || version < Version(15, 0, 0)) {
-      logger.printTrace(
-        'Detected Xcode version is $version, below 15.0, skipping TOOLCHAIN_DIR workaround.',
-      );
+    // If Xcode not installed, skip this migration.
+    if (!_xcodeProjectInterpreter.isInstalled) {
+      logger.printTrace('Xcode is not installed, skipping TOOLCHAIN_DIR workaround.');
       return;
     }
 

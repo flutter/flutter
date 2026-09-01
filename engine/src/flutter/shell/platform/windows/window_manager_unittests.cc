@@ -55,11 +55,10 @@ class WindowManagerTest : public WindowsTest {
     ASSERT_TRUE(engine_->Run("testWindowController"));
 
     bool signalled = false;
-    context.AddNativeFunction(
-        "Signal", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-          isolate_ = flutter::Isolate::Current();
-          signalled = true;
-        }));
+    context.AddFfiNativeFunction("Signal", CREATE_FFI_LAMBDA([&]() {
+                                   isolate_ = flutter::Isolate::Current();
+                                   signalled = true;
+                                 }));
     while (!signalled) {
       engine_->task_runner()->ProcessTasks();
     }

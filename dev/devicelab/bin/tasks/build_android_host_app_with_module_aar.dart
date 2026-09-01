@@ -16,7 +16,6 @@ import 'package:pub_semver/pub_semver.dart';
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
-final String fileReadWriteMode = Platform.isWindows ? 'rw-rw-rw-' : 'rw-r--r--';
 
 /// Combines several TaskFunctions with trivial success value into one.
 TaskFunction combine(List<TaskFunction> tasks) {
@@ -330,7 +329,7 @@ class ModuleTest {
 
       String modes = readonlyDebugAssetFile.statSync().modeString();
       print('\nread-only.txt file access modes = $modes');
-      if (modes.compareTo(fileReadWriteMode) != 0) {
+      if (!modes.startsWith('rw')) {
         return TaskResult.failure('Failed to make assets user-readable and writable');
       }
 
@@ -424,7 +423,7 @@ class ModuleTest {
 
       modes = readonlyReleaseAssetFile.statSync().modeString();
       print('\nread-only.txt file access modes = $modes');
-      if (modes.compareTo(fileReadWriteMode) != 0) {
+      if (!modes.startsWith('rw')) {
         return TaskResult.failure('Failed to make assets user-readable and writable');
       }
 

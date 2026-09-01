@@ -85,6 +85,8 @@ class EmbedderTestContext {
 
   void AddNativeCallback(const char* name, Dart_NativeFunction function);
 
+  void AddFfiNativeCallback(const char* name, void* function);
+
   void SetSemanticsNodeCallback(SemanticsNodeCallback update_semantics_node);
 
   void SetSemanticsCustomActionCallback(

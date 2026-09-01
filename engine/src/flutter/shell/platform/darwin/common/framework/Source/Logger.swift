@@ -9,7 +9,7 @@ import Foundation
 ///
 /// These levels are used by `Logger` to determine if a message should be output.
 /// They are ordered by increasing severity.
-@objc(FlutterLogLevel) public enum LogLevel: Int, Sendable {
+@objc(FlutterLogLevel) enum LogLevel: Int, Sendable {
   /// Informational messages that are helpful for tracing application flow.
   case info
 
@@ -38,13 +38,13 @@ import Foundation
 /// Logger.logLevel = .warning  // Only show warnings and above
 /// Logger.logError("Failed to load asset: \(assetKey)")
 /// ```
-@objc(FlutterLogger) public final class Logger: NSObject, @unchecked Sendable {
+@objc(FlutterLogger) final class Logger: NSObject, @unchecked Sendable {
   private static let shared = Logger()
   private let lock = NSLock()
   private var _outputWriter: OutputWriter
   private var _logLevel: LogLevel
 
-  public var outputWriter: OutputWriter {
+  var outputWriter: OutputWriter {
     get {
       return lock.withLock { _outputWriter }
     }
@@ -55,7 +55,7 @@ import Foundation
     }
   }
 
-  public var logLevel: LogLevel {
+  var logLevel: LogLevel {
     get {
       return lock.withLock { _logLevel }
     }
@@ -66,13 +66,13 @@ import Foundation
     }
   }
 
-  public init(outputWriter: OutputWriter, logLevel: LogLevel) {
+  init(outputWriter: OutputWriter, logLevel: LogLevel) {
     self._outputWriter = outputWriter
     self._logLevel = logLevel
     super.init()
   }
 
-  public override convenience init() {
+  override convenience init() {
     #if os(iOS)
       // On iOS, the user has no access to stdout.
       // Output can be read from the log by the user or the `flutter` tool.
@@ -83,7 +83,7 @@ import Foundation
     #endif
   }
 
-  public func log(level: LogLevel, _ message: @autoclosure () -> String) {
+  func log(level: LogLevel, _ message: @autoclosure () -> String) {
     guard level.rawValue >= logLevel.rawValue else { return }
 
     // Evaluate outside the lock keep lock time minimal and to guard against the possibility of
@@ -94,7 +94,7 @@ import Foundation
     }
   }
 
-  public func logDirect(_ message: String) {
+  func logDirect(_ message: String) {
     lock.withLock {
       _outputWriter.writeLine(level: .important, message)
     }
@@ -103,82 +103,82 @@ import Foundation
 
 extension Logger {
   /// Sets the minimum log level.
-  @objc public static var outputWriter: OutputWriter {
+  @objc static var outputWriter: OutputWriter {
     get { return shared.outputWriter }
     set(newValue) { shared.outputWriter = newValue }
   }
 
   /// Sets the minimum log level.
-  @objc public static var logLevel: LogLevel {
+  @objc static var logLevel: LogLevel {
     get { return shared.logLevel }
     set(newValue) { shared.logLevel = newValue }
   }
 
   /// Logs a message at `LogLevel.info`.
   @available(swift, obsoleted: 1.0)
-  @objc(logInfo:) public static func objcLogInfo(_ message: String) {
+  @objc(logInfo:) static func objcLogInfo(_ message: String) {
     shared.log(level: .info, message)
   }
 
   /// Logs a message at `LogLevel.info`.
-  public static func logInfo(_ message: @autoclosure () -> String) {
+  static func logInfo(_ message: @autoclosure () -> String) {
     shared.log(level: .info, message())
   }
 
   /// Logs a message at `LogLevel.important`.
   @available(swift, obsoleted: 1.0)
-  @objc(logImportant:) public static func objcLogImportant(_ message: String) {
+  @objc(logImportant:) static func objcLogImportant(_ message: String) {
     shared.log(level: .important, message)
   }
 
   /// Logs a message at `LogLevel.important`.
-  public static func logImportant(_ message: @autoclosure () -> String) {
+  static func logImportant(_ message: @autoclosure () -> String) {
     shared.log(level: .important, message())
   }
 
   /// Logs a message at `LogLevel.warning`.
   @available(swift, obsoleted: 1.0)
-  @objc(logWarning:) public static func objcLogWarning(_ message: String) {
+  @objc(logWarning:) static func objcLogWarning(_ message: String) {
     shared.log(level: .warning, message)
   }
 
   /// Logs a message at `LogLevel.warning`.
-  public static func logWarning(_ message: @autoclosure () -> String) {
+  static func logWarning(_ message: @autoclosure () -> String) {
     shared.log(level: .warning, message())
   }
 
   /// Logs a message at `LogLevel.error`.
   @available(swift, obsoleted: 1.0)
-  @objc(logError:) public static func objcLogError(_ message: String) {
+  @objc(logError:) static func objcLogError(_ message: String) {
     shared.log(level: .error, message)
   }
 
   /// Logs a message at `LogLevel.error`.
-  public static func logError(_ message: @autoclosure () -> String) {
+  static func logError(_ message: @autoclosure () -> String) {
     shared.log(level: .error, message())
   }
 
   /// Logs a message at `LogLevel.fatal` and immediately terminates the application.
   @available(swift, obsoleted: 1.0)
-  @objc(logFatal:) public static func objcLogFatal(_ message: String) {
+  @objc(logFatal:) static func objcLogFatal(_ message: String) {
     shared.log(level: .fatal, message)
     abort()
   }
 
   /// Logs a message at `LogLevel.fatal` and immediately terminates the application.
-  public static func logFatal(_ message: @autoclosure () -> String) {
+  static func logFatal(_ message: @autoclosure () -> String) {
     shared.log(level: .fatal, message())
     abort()
   }
 
   /// Logs a message unconditionally.
-  @objc public static func logDirect(_ message: String) {
+  @objc static func logDirect(_ message: String) {
     shared.logDirect(message)
   }
 }
 
 @objc(FlutterOutputWriter)
-public protocol OutputWriter: Sendable {
+protocol OutputWriter: Sendable {
   func writeLine(level: LogLevel, _ message: String)
 }
 

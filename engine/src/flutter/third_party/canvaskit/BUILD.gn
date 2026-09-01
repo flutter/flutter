@@ -138,6 +138,9 @@ template("skwasm_toolchain") {
       skia_use_no_png_encode = true
       skia_use_libpng_encode = false
 
+      # Always use thread local strike caches, since we use workers for multithreading
+      skia_enable_threadlocal_strikecache = true
+
       # skwasm is multithreaded
       wasm_use_workers = true
       wasm_prioritize_size = true

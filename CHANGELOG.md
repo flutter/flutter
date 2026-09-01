@@ -30,6 +30,27 @@ More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 
+## Flutter 3.47 Changes
+
+### [3.47.1](https://github.com/flutter/flutter/releases/tag/3.47.1)
+- [flutter/190871](https://github.com/flutter/flutter/issues/190871) Flutter GPU could not be enabled in release builds on Linux and Windows, since those embedders had no project-level opt-in and release builds ignore engine switches from the environment.
+- [flutter/188446](https://github.com/flutter/flutter/issues/188446) When building multi-target applications in parallel on iOS and macOS, a race condition in SwiftPM integration causes `FileSystemException`.
+- [flutter/189550](https://github.com/flutter/flutter/issues/189550) When running `flutter pub get` in a Dart workspace, platform tooling regeneration and analysis options migration are skipped for packages that do not depend on Flutter.
+- [flutter/190234](https://github.com/flutter/flutter/issues/190234) Avoid crashing with `PathNotFoundException` when cleaning up native assets if files are removed concurrently.
+- [flutter/189128](https://github.com/flutter/flutter/issues/189128) Invalidate `WebEntrypointTarget` and regenerate `web_plugin_registrant.dart` when web plugins are added or removed.
+- [flutter/186445](https://github.com/flutter/flutter/issues/186445) Fix hot restart for WASM web builds.
+- [flutter/190284](https://github.com/flutter/flutter/issues/190284) Fix hot reload failing to reload edits in nested Pub workspace member packages located under root `lib/`.
+- [flutter/191056](https://github.com/flutter/flutter/issues/191056) Recursively resolve includes in `AnalysisOptionsMigration` to prevent redundant rewrites of `analysis_options.yaml`.
+- [flutter/189156](https://github.com/flutter/flutter/issues/189156) Validate plugin class and package identifiers to prevent arbitrary code injection into `GeneratedPluginRegistrant`.
+- [flutter/190721](https://github.com/flutter/flutter/issues/190721) Fix deadlock in debug adapters when the target process exits early during startup before VM service connection.
+- [flutter/189972](https://github.com/flutter/flutter/issues/189972) Fix ADB device list parsing for long wireless mDNS serials separated from state by a single space.
+- [flutter/190233](https://github.com/flutter/flutter/issues/190233) Fix `impellerc` crash on Windows when paths contain Unicode characters, and improve shader compiler error diagnostics.
+
+### [3.47.0](https://github.com/flutter/flutter/releases/tag/3.47.0)
+
+Learn about what's new in this release in [the blog post](https://flutter.dev/blog/whats-new-in-flutter-3-47), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.47.0) for a detailed list of all the new changes.
+
+
 ## Flutter 3.44 Changes
 
 ### [3.44.7](https://github.com/flutter/flutter/releases/tag/3.44.7)

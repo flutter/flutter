@@ -40,12 +40,6 @@ export 'basic_types.dart' show AsyncCallback, AsyncValueGetter, AsyncValueSetter
 // mixin BarBinding on BindingBase { }
 
 /// Signature for service extensions.
-///
-/// The returned map must not contain the keys "type" or "method", as
-/// they will be replaced before the value is sent to the client. The
-/// "type" key will be set to the string `_extensionType` to indicate
-/// that this is a return value from a service extension, and the
-/// "method" key will be set to the full name of the method.
 typedef ServiceExtensionCallback =
     Future<Map<String, dynamic>> Function(Map<String, String> parameters);
 
@@ -886,8 +880,6 @@ abstract class BindingBase {
   /// case of failure, the failure is reported to the remote caller and is
   /// dumped to the logs.
   ///
-  /// The returned map will be mutated.
-  ///
   /// {@template flutter.foundation.BindingBase.registerServiceExtension}
   /// A registered service extension can only be activated if the vm-service
   /// is included in the build, which only happens in debug and profile mode.
@@ -956,9 +948,9 @@ abstract class BindingBase {
         return Future<void>.delayed(Duration.zero);
       });
 
-      late Map<String, dynamic> result;
       try {
-        result = await callback(parameters);
+        final Map<String, dynamic> result = await callback(parameters);
+        return developer.ServiceExtensionResponse.result(json.encode(result));
       } catch (exception, stack) {
         FlutterError.reportError(
           FlutterErrorDetails(
@@ -976,9 +968,6 @@ abstract class BindingBase {
           }),
         );
       }
-      result['type'] = '_extensionType';
-      result['method'] = method;
-      return developer.ServiceExtensionResponse.result(json.encode(result));
     });
   }
 

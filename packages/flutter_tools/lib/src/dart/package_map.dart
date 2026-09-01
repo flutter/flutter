@@ -131,3 +131,38 @@ Future<PackageConfig> loadPackageConfigWithLogging(
   }
   return result;
 }
+
+extension PackageConfigWorkspaceExtension on PackageConfig {
+  /// Converts a [fileUri] to a `package:` URI, finding the most specific
+  /// package whose [Package.packageUriRoot] is a prefix of [fileUri].
+  ///
+  /// The default [PackageConfig.toPackageUri] may match an outer package first
+  /// when pub workspace member packages are located under the workspace root
+  /// package's `lib/` directory.
+  Uri? toPackageUriForWorkspace(Uri fileUri) {
+    if (fileUri.isScheme('package')) {
+      return fileUri;
+    }
+    final path = fileUri.toString();
+    Package? bestMatch;
+    String? bestMatchRoot;
+
+    for (final Package package in packages) {
+      final rootPath = package.packageUriRoot.toString();
+      final rootPathWithSlash = rootPath.endsWith('/') ? rootPath : '$rootPath/';
+      if (path.startsWith(rootPathWithSlash)) {
+        if (bestMatchRoot == null || rootPathWithSlash.length > bestMatchRoot.length) {
+          bestMatch = package;
+          bestMatchRoot = rootPathWithSlash;
+        }
+      }
+    }
+
+    if (bestMatch == null || bestMatchRoot == null) {
+      return null;
+    }
+
+    final String rest = path.substring(bestMatchRoot.length);
+    return Uri(scheme: 'package', path: '${bestMatch.name}/$rest');
+  }
+}

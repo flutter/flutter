@@ -5,6 +5,11 @@ homepage: https://flutter.dev
 environment:
   sdk: ^3.11.0-0
 
+workspace:
+  - packages/flutter_tools_core
+  - packages/flutter_tools_extension
+  - packages/flutter_tools_extension_linux_prototype
+
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   #
@@ -13,6 +18,7 @@ dependencies:
   analyzer: 10.1.0
   archive: 3.6.1
   args: 2.7.0
+  dap_adapters: 1.0.0
   dds: 5.4.0
   dwds: 27.1.2
   code_builder: 4.11.1
@@ -22,6 +28,12 @@ dependencies:
   crypto: 3.0.7
   ffi: 2.2.0
   file: 7.0.1
+  flutter_tools_core:
+    path: packages/flutter_tools_core
+  flutter_tools_extension:
+    path: packages/flutter_tools_extension
+  flutter_tools_extension_linux_prototype:
+    path: packages/flutter_tools_extension_linux_prototype
   flutter_template_images: 5.0.0
   html: 0.15.6
   http: 1.6.0
@@ -53,15 +65,15 @@ dependencies:
   http_multi_server: 3.2.2
   convert: 3.1.2
   async: 2.13.1
-  unified_analytics: 8.0.16
+  unified_analytics: 8.0.17
   pubspec_parse: 1.5.0
 
   graphs: 2.3.2
-  hooks_runner: 1.6.1
-  hooks: 2.1.0
-  code_assets: 1.2.1
+  hooks_runner: 1.6.3
+  hooks: 2.2.0
+  code_assets: 2.0.0
   data_assets: 0.20.0
-  record_use: 1.0.0
+  record_use: 1.1.1
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
@@ -69,7 +81,7 @@ dependencies:
   test_api: 0.7.12
   test_core: 0.6.18
 
-  vm_service: 15.2.0
+  vm_service: 15.3.0
 
   standard_message_codec: 0.0.1+5
 
@@ -101,7 +113,7 @@ dependencies:
   shelf_packages_handler: 3.0.2
   shelf_proxy: 1.0.5
   source_map_stack_trace: 2.1.2
-  source_maps: 0.10.13
+  source_maps: 0.10.14
   source_span: 1.10.2
   sprintf: 7.0.0
   sse: 4.2.0
@@ -128,5 +140,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-
-# PUBSPEC CHECKSUM: 9v55jf
+# PUBSPEC CHECKSUM: 66bahq

@@ -4,6 +4,7 @@
 
 import '../base/common.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../cache.dart';
 import '../features.dart';
@@ -81,6 +82,12 @@ class PrecacheCommand extends FlutterCommand {
     argParser.addFlag(
       'use-unsigned-mac-binaries',
       help: 'Precache the unsigned macOS binaries when available.',
+      hide: !verboseHelp,
+    );
+    argParser.addOption(
+      'host-arch',
+      allowed: const <String>['x64', 'arm64'],
+      help: 'Override the architecture of host artifacts to precache.',
       hide: !verboseHelp,
     );
   }
@@ -170,6 +177,19 @@ class PrecacheCommand extends FlutterCommand {
     }
     if (boolArg('use-unsigned-mac-binaries')) {
       _cache.useUnsignedMacBinaries = true;
+    }
+    final String? hostArch = stringArg('host-arch');
+    if (hostArch != null) {
+      final HostPlatform? overridePlatform = HostPlatform.fromOsAndArch(
+        _platform.operatingSystem,
+        hostArch,
+      );
+      if (overridePlatform == null) {
+        throwToolExit(
+          'Unsupported host architecture "$hostArch" for OS "${_platform.operatingSystem}"',
+        );
+      }
+      _cache.osUtils.hostPlatformOverride = overridePlatform;
     }
     final Set<String> explicitlyEnabled = _explicitArtifactSelections();
     _cache.platformOverrideArtifacts = explicitlyEnabled;

@@ -22,21 +22,30 @@ TaskFunction createPlatformInteractionTest() {
   ).call;
 }
 
-TaskFunction createFlavorsTest({Map<String, String>? environment, List<String>? extraOptions}) {
+TaskFunction createFlavorsTest({
+  Map<String, String>? environment,
+  List<String>? extraOptions,
+  String? deviceIdOverride,
+}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'lib/main.dart',
     extraOptions: extraOptions ?? <String>['--flavor', 'paid'],
     environment: environment,
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createIntegrationTestFlavorsTest({Map<String, String>? environment}) {
+TaskFunction createIntegrationTestFlavorsTest({
+  Map<String, String>? environment,
+  String? deviceIdOverride,
+}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'integration_test/integration_test.dart',
     extraOptions: <String>['--flavor', 'paid'],
     environment: environment,
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
@@ -58,10 +67,11 @@ TaskFunction createPlatformChannelSampleTest({String? deviceIdOverride}) {
   ).call;
 }
 
-TaskFunction createPlatformChannelSwiftSampleTest() {
+TaskFunction createPlatformChannelSwiftSampleTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/examples/platform_channel_swift',
     'test_driver/button_tap.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
@@ -88,39 +98,39 @@ TaskFunction createIOSPlatformViewTests() {
   ).call;
 }
 
-TaskFunction createEndToEndKeyboardTest() {
+TaskFunction createEndToEndKeyboardTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/keyboard_resize.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createEndToEndFrameNumberTest() {
+TaskFunction createEndToEndFrameNumberTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/frame_number.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createEndToEndDriverTest({Map<String, String>? environment}) {
+TaskFunction createEndToEndDriverTest({
+  Map<String, String>? environment,
+  String? deviceIdOverride,
+}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/driver.dart',
     environment: environment,
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createEndToEndScreenshotTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/ui',
-    'lib/screenshot.dart',
-  ).call;
-}
-
-TaskFunction createEndToEndKeyboardTextfieldTest() {
+TaskFunction createEndToEndKeyboardTextfieldTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/keyboard_textfield.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
@@ -186,10 +196,11 @@ TaskFunction createDisplayCutoutTest() {
   ).call;
 }
 
-TaskFunction dartDefinesTask() {
+TaskFunction dartDefinesTask({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/defines.dart',
+    deviceIdOverride: deviceIdOverride,
     extraOptions: <String>[
       '--dart-define=test.valueA=Example,A',
       '--dart-define=test.valueB=Value',
@@ -208,17 +219,19 @@ TaskFunction featureFlagsTask() {
   };
 }
 
-TaskFunction createEndToEndIntegrationTest() {
+TaskFunction createEndToEndIntegrationTest({String? deviceIdOverride}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'integration_test/integration_test.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createSpellCheckIntegrationTest() {
+TaskFunction createSpellCheckIntegrationTest({String? deviceIdOverride}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/spell_check',
     'integration_test/integration_test.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
@@ -230,10 +243,10 @@ TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
   ).call;
 }
 
-TaskFunction createPrimitiveShapeTest() {
+TaskFunction createEngineIntegrationGoldenTest() {
   return IntegrationTest(
-    '${flutterDirectory.path}/dev/integration_tests/primitive_shape_test',
-    'integration_test/primitive_shape_test.dart',
+    '${flutterDirectory.path}/dev/integration_tests/engine_integration_golden_test',
+    'integration_test/engine_integration_golden_test.dart',
     createPlatforms: <String>['windows'],
   ).call;
 }
@@ -333,6 +346,7 @@ class IntegrationTest {
     this.environment,
     this.setup,
     this.tearDown,
+    this.deviceIdOverride,
   });
 
   final String testDirectory;
@@ -341,6 +355,7 @@ class IntegrationTest {
   final List<String> createPlatforms;
   final bool withTalkBack;
   final Map<String, String>? environment;
+  final String? deviceIdOverride;
 
   /// Run before flutter drive with the result from devices.workingDevice.
   final Future<void> Function(Device device)? setup;
@@ -350,9 +365,15 @@ class IntegrationTest {
 
   Future<TaskResult> call() {
     return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
+      String deviceId;
+      Device? selectedDevice;
+      if (deviceIdOverride != null) {
+        deviceId = deviceIdOverride!;
+      } else {
+        selectedDevice = await devices.workingDevice;
+        await selectedDevice.unlock();
+        deviceId = selectedDevice.deviceId;
+      }
       await flutter('packages', options: <String>['get']);
       await setup?.call(await devices.workingDevice);
 
@@ -364,7 +385,7 @@ class IntegrationTest {
       }
 
       if (withTalkBack) {
-        if (device is! AndroidDevice) {
+        if (selectedDevice is! AndroidDevice) {
           return TaskResult.failure(
             'A test that enables TalkBack can only be run on Android devices',
           );
