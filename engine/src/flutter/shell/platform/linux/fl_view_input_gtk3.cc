@@ -119,11 +119,35 @@ static gboolean button_release_event_cb(FlView* self,
 
 // Signal handler for GtkWidget::scroll-event
 static gboolean scroll_event_cb(FlView* self, GdkEventScroll* event) {
-  // TODO(robert-ancell): Update to use GtkEventControllerScroll when we can
-  // depend on GTK 3.24.
+  GdkEvent* gdk_event = reinterpret_cast<GdkEvent*>(event);
+  gdouble x = 0.0, y = 0.0;
+  gdk_event_get_coords(gdk_event, &x, &y);
+
+  gdouble delta_x = 0.0, delta_y = 0.0;
+  GdkScrollDirection direction;
+  if (gdk_event_get_scroll_direction(gdk_event, &direction)) {
+    switch (direction) {
+      case GDK_SCROLL_UP:
+        delta_y = -1.0;
+        break;
+      case GDK_SCROLL_DOWN:
+        delta_y = 1.0;
+        break;
+      case GDK_SCROLL_LEFT:
+        delta_x = -1.0;
+        break;
+      case GDK_SCROLL_RIGHT:
+        delta_x = 1.0;
+        break;
+      case GDK_SCROLL_SMOOTH:
+        break;
+    }
+  } else {
+    gdk_event_get_scroll_deltas(gdk_event, &delta_x, &delta_y);
+  }
 
   fl_scrolling_manager_handle_scroll_event(
-      self->scrolling_manager, event,
+      self->scrolling_manager, event, x, y, TRUE, delta_x, delta_y,
       gtk_widget_get_scale_factor(GTK_WIDGET(self)));
   return TRUE;
 }
