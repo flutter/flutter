@@ -309,33 +309,28 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// If `ignoreCurrentFocus` is false or not given, this function returns the
   /// [FocusScopeNode.focusedChild], if set, on the nearest scope of the
   /// `currentNode`, otherwise, returns the last node from [sortDescendants],
-  /// or the given `currentNode` if there are no descendants and the current node
-  /// can request focus. Otherwise returns null.
+  /// or the given `currentNode` if there are no descendants.
   ///
   /// If `ignoreCurrentFocus` is true, then the algorithm returns the last node
   /// from [sortDescendants], or the given `currentNode` if there are no
-  /// descendants and the current node can request focus. Returns null if no
-  /// focusable node is found.
+  /// descendants.
   ///
   /// See also:
   ///
   ///  * [previous], the function that is called to move the focus to the previous node.
   ///  * [DirectionalFocusTraversalPolicyMixin.findFirstFocusInDirection], a
   ///    function that finds the first focusable widget in a particular direction.
-  FocusNode? findLastFocus(FocusNode currentNode, {bool ignoreCurrentFocus = false}) {
+  FocusNode findLastFocus(FocusNode currentNode, {bool ignoreCurrentFocus = false}) {
     return _findInitialFocus(currentNode, fromEnd: true, ignoreCurrentFocus: ignoreCurrentFocus);
   }
 
-  FocusNode? _findInitialFocus(
+  FocusNode _findInitialFocus(
     FocusNode currentNode, {
     bool fromEnd = false,
     bool ignoreCurrentFocus = false,
   }) {
     final FocusScopeNode scope = currentNode.nearestScope!;
     FocusNode? candidate = scope.focusedChild;
-    if (candidate != null && !_canRequestTraversalFocus(candidate)) {
-      candidate = null;
-    }
     if (ignoreCurrentFocus || candidate == null && scope.descendants.isNotEmpty) {
       final Iterable<FocusNode> sorted = _sortAllDescendants(
         scope,
@@ -348,10 +343,9 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       }
     }
 
-    if (candidate == null && _canRequestTraversalFocus(currentNode)) {
-      return currentNode;
-    }
-
+    // If we still didn't find any candidate, use the current node as a
+    // fallback.
+    candidate ??= currentNode;
     return candidate;
   }
 
