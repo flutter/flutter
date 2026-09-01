@@ -70,10 +70,8 @@ MockEpoxy::MockEpoxy() {
   mock = this;
 
   // Assume a driver that supports fences; tests that care override this.
-  ON_CALL(*this, eglQueryString(::testing::_, EGL_EXTENSIONS))
-      .WillByDefault(::testing::Return("EGL_KHR_fence_sync EGL_KHR_wait_sync"));
-  ON_CALL(*this, eglQueryString(::testing::_, ::testing::Ne(EGL_EXTENSIONS)))
-      .WillByDefault(::testing::Return(""));
+  ON_CALL(*this, epoxy_has_egl_extension)
+      .WillByDefault(::testing::Return(true));
   ON_CALL(*this, eglCreateSyncKHR).WillByDefault(::testing::Return(&mock_sync));
   ON_CALL(*this, eglDestroySyncKHR).WillByDefault(::testing::Return(EGL_TRUE));
   ON_CALL(*this, eglClientWaitSyncKHR)
@@ -446,10 +444,6 @@ EGLBoolean _eglDestroyImageKHR(EGLDisplay dpy, EGLImage image) {
   return mock->eglDestroyImageKHR(dpy, image);
 }
 
-const char* _eglQueryString(EGLDisplay dpy, EGLint name) {
-  return mock->eglQueryString(dpy, name);
-}
-
 EGLSyncKHR _eglCreateSyncKHR(EGLDisplay dpy,
                              EGLenum type,
                              const EGLint* attrib_list) {
@@ -754,6 +748,10 @@ void _glShaderSource(GLuint shader,
                      const GLchar* const* string,
                      const GLint* length) {}
 
+bool epoxy_has_egl_extension(EGLDisplay dpy, const char* extension) {
+  return mock->epoxy_has_egl_extension(dpy, extension);
+}
+
 bool epoxy_has_gl_extension(const char* extension) {
   return mock->epoxy_has_gl_extension(extension);
 }
@@ -832,7 +830,6 @@ EGLImageKHR (*epoxy_eglCreateImageKHR)(EGLDisplay dpy,
                                        EGLClientBuffer buffer,
                                        const EGLint* attrib_list);
 EGLBoolean (*epoxy_eglDestroyImageKHR)(EGLDisplay dpy, EGLImage image);
-const char* (*epoxy_eglQueryString)(EGLDisplay dpy, EGLint name);
 EGLSyncKHR (*epoxy_eglCreateSyncKHR)(EGLDisplay dpy,
                                      EGLenum type,
                                      const EGLint* attrib_list);
@@ -941,7 +938,6 @@ static void library_init() {
   epoxy_eglSwapInterval = _eglSwapInterval;
   epoxy_eglCreateImageKHR = _eglCreateImageKHR;
   epoxy_eglDestroyImageKHR = _eglDestroyImageKHR;
-  epoxy_eglQueryString = _eglQueryString;
   epoxy_eglCreateSyncKHR = _eglCreateSyncKHR;
   epoxy_eglDestroySyncKHR = _eglDestroySyncKHR;
   epoxy_eglClientWaitSyncKHR = _eglClientWaitSyncKHR;

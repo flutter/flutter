@@ -204,8 +204,9 @@ TEST_F(FlOpenGLFrameTest, ShareableFrameSynchronizedWithoutFences) {
   const FlutterLayer* layers[1] = {&layer};
 
   // The compositor checks for fence support when it is created.
-  EXPECT_CALL(epoxy, eglQueryString(::testing::_, EGL_EXTENSIONS))
-      .WillRepeatedly(::testing::Return("EGL_KHR_image_base"));
+  EXPECT_CALL(epoxy, epoxy_has_egl_extension(
+                         ::testing::_, ::testing::StrEq("EGL_KHR_fence_sync")))
+      .WillRepeatedly(::testing::Return(false));
   g_autoptr(FlCompositorOpenGL) unfenced_compositor =
       fl_compositor_opengl_new(opengl_manager);
 

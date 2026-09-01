@@ -171,24 +171,7 @@ gboolean fl_opengl_manager_has_extension(FlOpenGLManager* self,
     return FALSE;
   }
 
-  const char* extensions = eglQueryString(self->display, EGL_EXTENSIONS);
-  if (extensions == nullptr) {
-    return FALSE;
-  }
-
-  // Match whole entries in the space separated list, so that an extension isn't
-  // reported because its name is a prefix of another one.
-  size_t length = strlen(extension);
-  const char* e = extensions;
-  while ((e = strstr(e, extension)) != nullptr) {
-    if ((e == extensions || e[-1] == ' ') &&
-        (e[length] == '\0' || e[length] == ' ')) {
-      return TRUE;
-    }
-    e += length;
-  }
-
-  return FALSE;
+  return epoxy_has_egl_extension(self->display, extension);
 }
 
 gboolean fl_opengl_manager_can_fence(FlOpenGLManager* self) {

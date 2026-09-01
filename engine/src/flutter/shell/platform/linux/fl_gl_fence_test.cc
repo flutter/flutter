@@ -72,8 +72,9 @@ TEST_F(FlGLFenceTest, WaitGpu) {
 // Drivers that can create fences but can't wait on them without blocking fall
 // back to blocking, which is slower but still correct.
 TEST_F(FlGLFenceTest, WaitGpuUnsupported) {
-  EXPECT_CALL(epoxy, eglQueryString(::testing::_, EGL_EXTENSIONS))
-      .WillRepeatedly(::testing::Return("EGL_KHR_fence_sync"));
+  EXPECT_CALL(epoxy, epoxy_has_egl_extension(
+                         ::testing::_, ::testing::StrEq("EGL_KHR_wait_sync")))
+      .WillRepeatedly(::testing::Return(false));
 
   g_autoptr(FlGLFence) fence = fl_gl_fence_new(opengl_manager);
   ASSERT_NE(fence, nullptr);
