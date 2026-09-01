@@ -14,6 +14,7 @@
 #include <iostream>
 #include <memory>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -25,7 +26,6 @@
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_vm_init.h"
 #include "flutter/shell/platform/android/flutter_embedder_native.h"
@@ -125,8 +125,74 @@ void FlutterMain::Init(JNIEnv* env,
   }
 
   auto command_line = fml::CommandLineFromIterators(args.begin(), args.end());
-  flutter::Settings settings = flutter::SettingsFromCommandLine(command_line);
+  flutter::Settings settings;
   settings.enable_platform_isolates = true;
+
+  std::string enable_surface_control_value;
+  if (command_line.GetOptionValue("enable-hcpp-and-surface-control",
+                                  &enable_surface_control_value)) {
+    settings.enable_surface_control = enable_surface_control_value.empty() ||
+                                      "true" == enable_surface_control_value;
+  }
+
+  std::string enable_impeller_value;
+  if (command_line.GetOptionValue("enable-impeller", &enable_impeller_value)) {
+    settings.enable_impeller =
+        enable_impeller_value.empty() || "true" == enable_impeller_value;
+  }
+
+  if (command_line.HasOption("enable-software-rendering")) {
+    settings.enable_software_rendering = true;
+  }
+
+  std::string requested_rendering_backend;
+  if (command_line.GetOptionValue("requested-rendering-backend",
+                                  &requested_rendering_backend) ||
+      command_line.GetOptionValue("impeller-backend",
+                                  &requested_rendering_backend)) {
+    settings.requested_rendering_backend = requested_rendering_backend;
+  }
+
+  if (command_line.HasOption("prefetched-default-font-manager")) {
+    settings.prefetched_default_font_manager = true;
+  }
+
+  if (command_line.HasOption("leak-vm")) {
+    std::string leak_vm_value;
+    command_line.GetOptionValue("leak-vm", &leak_vm_value);
+    settings.leak_vm = leak_vm_value.empty() || "true" == leak_vm_value;
+  }
+
+  if (command_line.HasOption("log-tag")) {
+    command_line.GetOptionValue("log-tag", &settings.log_tag);
+  }
+
+  if (command_line.HasOption("resource-cache-max-bytes-threshold")) {
+    std::string threshold;
+    command_line.GetOptionValue("resource-cache-max-bytes-threshold",
+                                &threshold);
+    settings.resource_cache_max_bytes_threshold =
+        std::strtoull(threshold.c_str(), nullptr, 10);
+  }
+
+  if (command_line.HasOption("enable-vulkan-validation")) {
+    settings.enable_vulkan_validation = true;
+  }
+
+  if (command_line.HasOption("verbose-logging")) {
+    settings.verbose_logging = true;
+  }
+
+  std::string all_dart_flags;
+  if (command_line.GetOptionValue("dart-flags", &all_dart_flags)) {
+    std::stringstream ss(all_dart_flags);
+    std::string flag;
+    while (std::getline(ss, flag, ',')) {
+      if (!flag.empty()) {
+        settings.dart_flags.push_back(flag);
+      }
+    }
+  }
 
 #if defined(__ANDROID__)
   if (engineCachesPath != nullptr) {
