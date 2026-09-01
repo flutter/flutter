@@ -866,9 +866,8 @@ abstract class TooltipWindowController extends BaseWindowController {
   ///
   /// This requests that the tooltip be repositioned according to the new [anchorRect] and/or [positioner].
   ///
-  /// On Linux due to a platform limitation this has no effect and only the
-  /// positioner passed in the constructor is used. This means that tooltips
-  /// that resize on Linux will remain in their original location.
+  /// Platforms may adjust the requested placement or decline to expose the
+  /// final position. Do not depend on an exact global position for correctness.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal
@@ -1006,9 +1005,13 @@ abstract class PopupWindowController extends BaseWindowController {
   @internal
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner});
 
-  /// Returns the offset of the popup's top-left corner in the parent window client area.
+  /// Returns the requested offset of the popup in the parent window client area.
   ///
   /// The offset is in logical coordinates.
+  ///
+  /// Compositor-managed transient surfaces may adjust their actual placement and
+  /// cannot always report that final position. Do not depend on this value for
+  /// exact placement or hit testing.
   ///
   /// {@macro flutter.widgets.windowing.experimental}
   @internal

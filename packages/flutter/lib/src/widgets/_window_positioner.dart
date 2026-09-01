@@ -273,6 +273,12 @@ class WindowPositionerConstraintAdjustment {
 /// changes its position, such as sliding along an axis, or flipping around a
 /// rectangle.
 ///
+/// Placement is a platform request, not an exact-coordinate contract.
+/// Compositor-managed transient surfaces may adjust, flip, or ignore requested
+/// anchors and offsets to keep the child visible, and may not expose the final
+/// placement to Flutter. Applications must not depend on an exact global
+/// position or a reported final offset for correctness.
+///
 /// See also:
 ///
 ///  * [TooltipWindowController], a subclass of [BaseWindowController] that
