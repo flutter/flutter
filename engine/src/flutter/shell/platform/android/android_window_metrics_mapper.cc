@@ -81,6 +81,44 @@ AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(
   event.display_id = metrics.display_id;
   event.view_id = metrics.view_id;
 
+  event.physical_padding_top = metrics.physical_padding_top;
+  event.physical_padding_right = metrics.physical_padding_right;
+  event.physical_padding_bottom = metrics.physical_padding_bottom;
+  event.physical_padding_left = metrics.physical_padding_left;
+  event.physical_system_gesture_inset_top = metrics.system_gesture_inset_top;
+  event.physical_system_gesture_inset_right =
+      metrics.system_gesture_inset_right;
+  event.physical_system_gesture_inset_bottom =
+      metrics.system_gesture_inset_bottom;
+  event.physical_system_gesture_inset_left = metrics.system_gesture_inset_left;
+  event.physical_touch_slop = metrics.physical_touch_slop;
+  event.physical_display_corner_radius_top_left =
+      metrics.physical_display_corner_radius_top_left;
+  event.physical_display_corner_radius_top_right =
+      metrics.physical_display_corner_radius_top_right;
+  event.physical_display_corner_radius_bottom_right =
+      metrics.physical_display_corner_radius_bottom_right;
+  event.physical_display_corner_radius_bottom_left =
+      metrics.physical_display_corner_radius_bottom_left;
+
+  if (!metrics.display_features_type.empty() &&
+      metrics.display_features_bounds.size() ==
+          4 * metrics.display_features_type.size() &&
+      metrics.display_features_state.size() ==
+          metrics.display_features_type.size()) {
+    event.display_features_count = metrics.display_features_type.size();
+    event.display_features_bounds = metrics.display_features_bounds.data();
+    event.display_features_type =
+        reinterpret_cast<const int32_t*>(metrics.display_features_type.data());
+    event.display_features_state =
+        reinterpret_cast<const int32_t*>(metrics.display_features_state.data());
+  } else {
+    event.display_features_count = 0;
+    event.display_features_bounds = nullptr;
+    event.display_features_type = nullptr;
+    event.display_features_state = nullptr;
+  }
+
   bool has_explicit_constraints =
       metrics.physical_min_width > 0.0 || metrics.physical_max_width > 0.0 ||
       metrics.physical_min_height > 0.0 || metrics.physical_max_height > 0.0;

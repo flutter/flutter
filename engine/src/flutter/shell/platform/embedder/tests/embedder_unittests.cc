@@ -3958,6 +3958,70 @@ TEST_F(EmbedderTest, InvalidFlutterWindowMetricsEvent) {
   // Left/right insets cannot be greater than width.
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kInvalidArguments);
+
+  event.physical_view_inset_top = 0.0;
+  event.physical_view_inset_right = 0.0;
+  event.physical_view_inset_bottom = 0.0;
+  event.physical_view_inset_left = 0.0;
+
+  // Physical padding must be non-negative.
+  event.physical_padding_top = -1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
+  event.physical_padding_top = 0.0;
+
+  // Physical system gesture insets must be non-negative.
+  event.physical_system_gesture_inset_top = -1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
+  event.physical_system_gesture_inset_top = 0.0;
+
+  // Display features count > 0 with null arrays must fail.
+  event.display_features_count = 1;
+  event.display_features_bounds = nullptr;
+  event.display_features_type = nullptr;
+  event.display_features_state = nullptr;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, WindowMetricsEventWithPaddingAndDisplayFeatures) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+
+  double bounds[] = {0.0, 100.0, 800.0, 150.0};
+  int32_t types[] = {1};
+  int32_t states[] = {2};
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  event.physical_padding_top = 24.0;
+  event.physical_padding_bottom = 48.0;
+  event.physical_padding_left = 12.0;
+  event.physical_padding_right = 12.0;
+  event.physical_system_gesture_inset_top = 10.0;
+  event.physical_system_gesture_inset_bottom = 20.0;
+  event.physical_system_gesture_inset_left = 30.0;
+  event.physical_system_gesture_inset_right = 40.0;
+  event.physical_touch_slop = 8.0;
+  event.physical_display_corner_radius_top_left = 16.0;
+  event.physical_display_corner_radius_top_right = 16.0;
+  event.physical_display_corner_radius_bottom_right = 16.0;
+  event.physical_display_corner_radius_bottom_left = 16.0;
+  event.display_features_count = 1;
+  event.display_features_bounds = bounds;
+  event.display_features_type = types;
+  event.display_features_state = states;
+
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
 }
 
 TEST_F(EmbedderTest, WindowMetricsEventWithConstraints) {

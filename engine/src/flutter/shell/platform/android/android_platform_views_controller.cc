@@ -134,8 +134,10 @@ bool DefaultPlatformViewsProvider::OnDisplayPlatformView(
     return false;
   }
   std::vector<uint8_t> payload = geometry.mutators_stack.Serialize();
+  const char* method_name =
+      hcpp_enabled_ ? "onDisplayPlatformView2" : "onDisplayPlatformView";
   return jvm_invoker_->InvokeVoidMethod(
-      "onDisplayPlatformView", "(IIIIIIILjava/nio/ByteBuffer;)V", payload);
+      method_name, "(IIIIIIILjava/nio/ByteBuffer;)V", payload);
 }
 
 bool DefaultPlatformViewsProvider::HidePlatformView(int64_t view_id) {
@@ -144,7 +146,13 @@ bool DefaultPlatformViewsProvider::HidePlatformView(int64_t view_id) {
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("hidePlatformView", "(I)V");
+  if (hcpp_enabled_) {
+    std::vector<uint8_t> payload(sizeof(int32_t));
+    int32_t id = static_cast<int32_t>(view_id);
+    std::memcpy(payload.data(), &id, sizeof(id));
+    return jvm_invoker_->InvokeVoidMethod("hidePlatformView2", "(I)V", payload);
+  }
+  return true;  // Safe no-op in non-HCPP mode
 }
 
 bool DefaultPlatformViewsProvider::SynchronizeToNativeViewHierarchy(
@@ -165,6 +173,9 @@ bool DefaultPlatformViewsProvider::OnBeginFrame() {
   if (!jvm_invoker_) {
     return false;
   }
+  if (hcpp_enabled_) {
+    return true;  // Safe no-op in HCPP mode
+  }
   return jvm_invoker_->InvokeVoidMethod("onBeginFrame", "()V");
 }
 
@@ -172,6 +183,9 @@ bool DefaultPlatformViewsProvider::OnEndFrame() {
   TRACE_EVENT0("flutter", "DefaultPlatformViewsProvider::OnEndFrame");
   if (!jvm_invoker_) {
     return false;
+  }
+  if (hcpp_enabled_) {
+    return jvm_invoker_->InvokeVoidMethod("endFrame2", "()V");
   }
   return jvm_invoker_->InvokeVoidMethod("onEndFrame", "()V");
 }
@@ -181,9 +195,16 @@ std::optional<int32_t> DefaultPlatformViewsProvider::CreateOverlaySurface() {
   if (!jvm_invoker_) {
     return std::nullopt;
   }
-  int64_t id = jvm_invoker_->InvokeIntMethod(
-      "createOverlaySurface",
-      "()Lio/flutter/embedding/engine/FlutterOverlaySurface;");
+  int64_t id = -1;
+  if (hcpp_enabled_) {
+    id = jvm_invoker_->InvokeIntMethod(
+        "createOverlaySurface2",
+        "()Lio/flutter/embedding/engine/FlutterOverlaySurface;");
+  } else {
+    id = jvm_invoker_->InvokeIntMethod(
+        "createOverlaySurface",
+        "()Lio/flutter/embedding/engine/FlutterOverlaySurface;");
+  }
   if (id < 0) {
     return std::nullopt;
   }
@@ -195,6 +216,9 @@ bool DefaultPlatformViewsProvider::DestroyOverlaySurfaces() {
                "DefaultPlatformViewsProvider::DestroyOverlaySurfaces");
   if (!jvm_invoker_) {
     return false;
+  }
+  if (hcpp_enabled_) {
+    return jvm_invoker_->InvokeVoidMethod("destroyOverlaySurface2", "()V");
   }
   return jvm_invoker_->InvokeVoidMethod("destroyOverlaySurfaces", "()V");
 }
@@ -216,7 +240,10 @@ bool DefaultPlatformViewsProvider::ShowOverlaySurface(int32_t surface_id) {
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("showOverlaySurface", "(I)V");
+  if (hcpp_enabled_) {
+    return jvm_invoker_->InvokeVoidMethod("showOverlaySurface2", "()V");
+  }
+  return true;  // Safe no-op in non-HCPP mode
 }
 
 bool DefaultPlatformViewsProvider::HideOverlaySurface(int32_t surface_id) {
@@ -225,7 +252,10 @@ bool DefaultPlatformViewsProvider::HideOverlaySurface(int32_t surface_id) {
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("hideOverlaySurface", "(I)V");
+  if (hcpp_enabled_) {
+    return jvm_invoker_->InvokeVoidMethod("hideOverlaySurface2", "()V");
+  }
+  return true;  // Safe no-op in non-HCPP mode
 }
 
 bool DefaultPlatformViewsProvider::CreateTransaction() {
