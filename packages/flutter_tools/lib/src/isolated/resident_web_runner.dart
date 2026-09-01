@@ -367,6 +367,13 @@ class ResidentWebRunner extends ResidentRunner {
         final Future<ConnectionResult?>? connectDebug = supportsServiceProtocol
             ? webDevFS.connect(useDebugExtension)
             : null;
+        // Unpause incoming HTTP requests now that:
+        // 1. Initial compilation has finished and WebMemoryFS has received the
+        //    compiled modules and merged metadata (preventing DWDS from memoizing
+        //    an empty module list).
+        // 2. `webDevFS.connect()` has begun listening for connected applications
+        //    so early connections are not dropped.
+        webDevFS.markReady();
         await flutterDevice!.device!.startApp(
           package,
           mainPath: target,
