@@ -111,9 +111,9 @@ using FramePipeline = Pipeline<FrameItem>;
 /// and the on-screen render surface. The compositor context has all the GPU
 /// state necessary to render frames to the render surface.
 ///
-class Rasterizer final : public SnapshotDelegate,
-                         public Stopwatch::RefreshRateUpdater,
-                         public SnapshotController::Delegate {
+class Rasterizer : public SnapshotDelegate,
+                   public Stopwatch::RefreshRateUpdater,
+                   public SnapshotController::Delegate {
  public:
   //----------------------------------------------------------------------------
   /// @brief      Used to forward events from the rasterizer to interested
@@ -203,7 +203,7 @@ class Rasterizer final : public SnapshotDelegate,
   ///             returns. Any context set up by the embedder to hold these
   ///             resources can be immediately collected as well.
   ///
-  ~Rasterizer();
+  virtual ~Rasterizer();
 
   void SetImpellerContext(
       std::shared_ptr<impeller::ImpellerContextFuture> impeller_context);

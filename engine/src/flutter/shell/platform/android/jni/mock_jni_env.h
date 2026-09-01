@@ -7,6 +7,8 @@
 
 #include <jni.h>
 
+#include "gmock/gmock.h"
+
 namespace flutter {
 
 class MockJavaVM : public JavaVM {
@@ -28,16 +30,24 @@ class MockJavaVM : public JavaVM {
   static jint DoAttachCurrentThread(JavaVM* vm,
                                     JNIEnv** p_env,
                                     void* thr_args) {
+    if (p_env) {
+      *p_env = static_cast<MockJavaVM*>(vm)->env_;
+    }
     return JNI_OK;
   }
   static jint DoDetachCurrentThread(JavaVM* vm) { return JNI_OK; }
   static jint DoGetEnv(JavaVM* vm, void** env, jint version) {
-    *env = static_cast<MockJavaVM*>(vm)->env_;
+    if (env) {
+      *env = static_cast<MockJavaVM*>(vm)->env_;
+    }
     return JNI_OK;
   }
   static jint DoAttachCurrentThreadAsDaemon(JavaVM* vm,
                                             JNIEnv** p_env,
                                             void* thr_args) {
+    if (p_env) {
+      *p_env = static_cast<MockJavaVM*>(vm)->env_;
+    }
     return JNI_OK;
   }
 
@@ -70,6 +80,10 @@ class MockableJNIEnv : public JNIEnv {
     jni_.RegisterNatives = WrapRegisterNatives;
     jni_.GetArrayLength = WrapGetArrayLength;
     jni_.GetIntArrayRegion = WrapGetIntArrayRegion;
+    jni_.GetObjectArrayElement = WrapGetObjectArrayElement;
+    jni_.GetStringLength = WrapGetStringLength;
+    jni_.GetStringChars = WrapGetStringChars;
+    jni_.ReleaseStringChars = WrapReleaseStringChars;
   }
 
   virtual jobject CallObjectMethodV(jobject, jmethodID, va_list) = 0;
@@ -90,6 +104,10 @@ class MockableJNIEnv : public JNIEnv {
   virtual jint RegisterNatives(jclass, const JNINativeMethod*, jint) = 0;
   virtual jsize GetArrayLength(jarray) = 0;
   virtual void GetIntArrayRegion(jintArray, jsize, jsize, jint*) = 0;
+  virtual jobject GetObjectArrayElement(jobjectArray, jsize) = 0;
+  virtual jsize GetStringLength(jstring) = 0;
+  virtual const jchar* GetStringChars(jstring, jboolean*) = 0;
+  virtual void ReleaseStringChars(jstring, const jchar*) = 0;
 
  private:
   static jobject WrapCallObjectMethod(JNIEnv* env,
@@ -183,6 +201,25 @@ class MockableJNIEnv : public JNIEnv {
     static_cast<MockableJNIEnv*>(env)->GetIntArrayRegion(array, start, len,
                                                          buf);
   }
+  static jobject WrapGetObjectArrayElement(JNIEnv* env,
+                                           jobjectArray array,
+                                           jsize index) {
+    return static_cast<MockableJNIEnv*>(env)->GetObjectArrayElement(array,
+                                                                    index);
+  }
+  static jsize WrapGetStringLength(JNIEnv* env, jstring string) {
+    return static_cast<MockableJNIEnv*>(env)->GetStringLength(string);
+  }
+  static const jchar* WrapGetStringChars(JNIEnv* env,
+                                         jstring string,
+                                         jboolean* is_copy) {
+    return static_cast<MockableJNIEnv*>(env)->GetStringChars(string, is_copy);
+  }
+  static void WrapReleaseStringChars(JNIEnv* env,
+                                     jstring string,
+                                     const jchar* chars) {
+    static_cast<MockableJNIEnv*>(env)->ReleaseStringChars(string, chars);
+  }
 
   JNINativeInterface jni_ = {};
 };
@@ -228,6 +265,13 @@ class MockJNIEnv : public MockableJNIEnv {
               GetIntArrayRegion,
               (jintArray, jsize, jsize, jint*),
               (override));
+  MOCK_METHOD(jobject,
+              GetObjectArrayElement,
+              (jobjectArray, jsize),
+              (override));
+  MOCK_METHOD(jsize, GetStringLength, (jstring), (override));
+  MOCK_METHOD(const jchar*, GetStringChars, (jstring, jboolean*), (override));
+  MOCK_METHOD(void, ReleaseStringChars, (jstring, const jchar*), (override));
 };
 
 }  // namespace flutter

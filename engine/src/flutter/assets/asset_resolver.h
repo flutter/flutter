@@ -30,7 +30,8 @@ class AssetResolver {
   enum AssetResolverType {
     kAssetManager,
     kApkAssetProvider,
-    kDirectoryAssetBundle
+    kDirectoryAssetBundle,
+    kCustomAssetResolver,
   };
 
   virtual const AssetManager* as_asset_manager() const { return nullptr; }

@@ -10,6 +10,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/task_runner.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 
@@ -43,6 +44,10 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
     //--------------------------------------------------------------------------
     /// Performs user-designated cleanup on destruction.
     std::function<void()> destruction_callback;
+
+    //--------------------------------------------------------------------------
+    /// Sets the thread priority for the custom task runner thread.
+    std::function<void(FlutterThreadPriority priority)> thread_priority_setter;
   };
 
   //----------------------------------------------------------------------------
@@ -56,8 +61,12 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
   ///
   /// @param[in]  table                The task runner dispatch table.
   /// @param[in]  embedder_identifier  The embedder identifier
+  /// @param[in]  priority             The thread priority for this task runner
   ///
-  EmbedderTaskRunner(DispatchTable table, size_t embedder_identifier);
+  EmbedderTaskRunner(
+      DispatchTable table,
+      size_t embedder_identifier,
+      FlutterThreadPriority priority = FlutterThreadPriority::kNormal);
 
   // |fml::TaskRunner|
   ~EmbedderTaskRunner() override;
@@ -73,6 +82,12 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
   ///
   size_t GetEmbedderIdentifier() const;
 
+  /// Returns the configured thread priority for this task runner.
+  FlutterThreadPriority GetThreadPriority() const { return priority_; }
+
+  /// Sets the thread priority for this task runner and notifies the dispatcher.
+  void SetThreadPriority(FlutterThreadPriority priority);
+
   bool PostTask(uint64_t baton);
 
   intptr_t unique_id() const { return unique_id_; }
@@ -85,6 +100,7 @@ class EmbedderTaskRunner final : public fml::TaskRunner {
   std::unordered_map<uint64_t, fml::closure> pending_tasks_;
   fml::TaskQueueId placeholder_id_;
   intptr_t unique_id_;
+  FlutterThreadPriority priority_;
 
   static std::atomic_intptr_t next_unique_id_;
 
