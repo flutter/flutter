@@ -302,11 +302,11 @@ typedef Finalizer = Future<void> Function();
 /// The flutter test platform used to integrate with package:test.
 class FlutterPlatform extends PlatformPlugin {
   FlutterPlatform({
-    required this.flutterTesterBinPath,
-    required this.debuggingOptions,
     required this.buildInfo,
-    required this.logger,
+    required this.debuggingOptions,
     required FileSystem fileSystem,
+    required this.flutterTesterBinPath,
+    required this.logger,
     required ProcessManager processManager,
     this.watcher,
     this.enableVmService,
@@ -324,7 +324,8 @@ class FlutterPlatform extends PlatformPlugin {
     this.testTimeRecorder,
     this.nativeAssetsBuilder,
     this.shutdownHooks,
-  }) {
+  }) : _fileSystem = fileSystem,
+       _processManager = processManager {
     _testGoldenComparator = TestGoldenComparator(
       flutterTesterBinPath: flutterTesterBinPath,
       compilerFactory: () =>
@@ -335,6 +336,8 @@ class FlutterPlatform extends PlatformPlugin {
     );
   }
 
+  final FileSystem _fileSystem;
+  final ProcessManager _processManager;
   final String flutterTesterBinPath;
   final DebuggingOptions debuggingOptions;
   final TestWatcher? watcher;
@@ -491,9 +494,9 @@ class FlutterPlatform extends PlatformPlugin {
     return FlutterTesterTestDevice(
       id: ourTestCount,
       platform: globals.platform,
-      fileSystem: globals.fs,
-      processManager: globals.processManager,
-      logger: globals.logger,
+      fileSystem: _fileSystem,
+      processManager: _processManager,
+      logger: logger,
       flutterTesterBinPath: flutterTesterBinPath,
       enableVmService: enableVmService!,
       machine: machine,
@@ -628,7 +631,7 @@ class FlutterPlatform extends PlatformPlugin {
             precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
           );
-          final Uri uri = globals.fs.file(path).uri;
+          final Uri uri = _fileSystem.file(path).uri;
           // Trigger a compilation to initialize the resident compiler.
           unawaited(compiler!.compile(uri));
         }
@@ -654,7 +657,7 @@ class FlutterPlatform extends PlatformPlugin {
             flutterProject,
             testTimeRecorder: testTimeRecorder,
           );
-          switch (await compiler!.compile(globals.fs.file(mainDart).uri)) {
+          switch (await compiler!.compile(_fileSystem.file(mainDart).uri)) {
             case TestCompilerComplete(:final String outputPath):
               mainDart = outputPath;
             case TestCompilerFailure(:final String? error):
@@ -782,12 +785,12 @@ class FlutterPlatform extends PlatformPlugin {
     if (flutterProject != null) {
       directory = flutterProject!.buildDirectory.childDirectory('test');
     } else if (projectRootDirectory != null) {
-      directory = globals.fs
-          .directory(projectRootDirectory)
-          .childDirectory(getBuildDirectory())
+      directory = _fileSystem
+          .directory(_fileSystem.path.fromUri(projectRootDirectory))
+          .childDirectory(getBuildDirectory(null, _fileSystem))
           .childDirectory('test');
     } else {
-      directory = globals.fs.systemTempDirectory.createTempSync('flutter_test_listener.');
+      directory = _fileSystem.systemTempDirectory.createTempSync('flutter_test_listener.');
       finalizers.add(() async {
         globals.printTrace('test $ourTestCount: deleting temporary directory');
         directory.deleteSync(recursive: true);
@@ -799,7 +802,7 @@ class FlutterPlatform extends PlatformPlugin {
     // Prepare the Dart file that will talk to us and start the test.
     final File listenerFile = directory.childFile('listener_$ourTestCount.dart')
       ..writeAsStringSync(
-        _generateTestMain(testUrl: globals.fs.path.toUri(globals.fs.path.absolute(testPath))),
+        _generateTestMain(testUrl: _fileSystem.path.toUri(_fileSystem.path.absolute(testPath))),
       );
     if (flutterProject != null || projectRootDirectory != null) {
       finalizers.add(() async {
@@ -818,7 +821,7 @@ class FlutterPlatform extends PlatformPlugin {
 
   String _generateTestMain({required Uri testUrl}) {
     assert(testUrl.scheme == 'file');
-    final File file = globals.fs.file(testUrl);
+    final File file = _fileSystem.file(_fileSystem.path.fromUri(testUrl));
     final PackageConfig packageConfig = debuggingOptions.buildInfo.packageConfig;
 
     final String? appName = flutterProject?.manifest.appName;
@@ -830,9 +833,9 @@ class FlutterPlatform extends PlatformPlugin {
     );
     return generateTestBootstrap(
       testUrl: testUrl,
-      testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
+      testConfigFile: findTestConfigFile(file, logger),
       // This MUST be a file URI.
-      packageConfigUri: globals.fs.path.toUri(buildInfo.packageConfigPath),
+      packageConfigUri: _fileSystem.path.toUri(buildInfo.packageConfigPath),
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,
