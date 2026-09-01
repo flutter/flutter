@@ -130,6 +130,7 @@ void BinaryMessengerImpl::SetMessageHandler(const std::string& channel,
     return;
   }
   if (!engine_available) {
+    handlers_.erase(channel);
     return;
   }
   // Save the handler, to keep it alive.
