@@ -110,20 +110,15 @@ class _Visitor extends SimpleAstVisitor<void> {
   @override
   void visitImportDirective(ImportDirective node) {
     if (node.uri.stringValue case final String uriStr) {
-      final Uri? uri = Uri.tryParse(uriStr);
-      if (uri == null || uri.pathSegments.isEmpty) {
-        return;
-      }
-
-      // Check whether the imported target file is globals.dart.
-      if (uri.pathSegments.last != _globalsFileName) {
-        return;
-      }
-
-      // Flag relative imports (no scheme) or package:flutter_tools imports.
-      // Third-party packages (e.g. package:other_pkg/globals.dart) are ignored.
-      if (!uri.hasScheme ||
-          (uri.isScheme(_packageScheme) && uri.pathSegments.first == _flutterToolsPackageName)) {
+      // Flag relative imports (no scheme) or package:flutter_tools imports
+      // targeting globals.dart. Third-party packages (e.g. package:other_pkg/globals.dart)
+      // are ignored.
+      if (Uri.tryParse(uriStr)
+          case Uri(hasScheme: false, pathSegments: [..., _globalsFileName]) ||
+              Uri(
+                scheme: _packageScheme,
+                pathSegments: [_flutterToolsPackageName, ..., _globalsFileName],
+              )) {
         rule.reportAtNode(node.uri);
       }
     }

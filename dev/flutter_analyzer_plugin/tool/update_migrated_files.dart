@@ -20,20 +20,15 @@ Set<String> findMigratedFiles(Directory flutterToolsDir) {
       continue;
     }
     for (final FileSystemEntity entity in dir.listSync(recursive: true)) {
-      if (entity is! File || !entity.path.endsWith('.dart')) {
-        continue;
-      }
-      final String relativePath = entity.path
-          .replaceAll(r'\', '/')
-          .substring('${flutterToolsDir.path.replaceAll(r'\', '/')}/'.length);
+      if (entity case File(:final String path) when path.endsWith('.dart')) {
+        final String relativePath = path
+            .replaceAll(r'\', '/')
+            .substring('${flutterToolsDir.path.replaceAll(r'\', '/')}/'.length);
 
-      // Exclude globals.dart itself since it defines ambient globals.
-      if (relativePath == 'lib/src/globals.dart') {
-        continue;
-      }
-
-      if (!importsGlobals(entity)) {
-        cleanFiles.add(relativePath);
+        // Exclude globals.dart itself since it defines ambient globals.
+        if (relativePath != 'lib/src/globals.dart' && !importsGlobals(entity)) {
+          cleanFiles.add(relativePath);
+        }
       }
     }
   }
@@ -43,17 +38,12 @@ Set<String> findMigratedFiles(Directory flutterToolsDir) {
 
 /// Checks whether [file] imports `globals.dart` via relative import or `package:flutter_tools/src/globals.dart`.
 bool importsGlobals(File file) {
-  final List<String> lines = file.readAsLinesSync();
-  for (final line in lines) {
+  return file.readAsLinesSync().any((String line) {
     final String trimmed = line.trim();
-    if (trimmed.startsWith('//') || trimmed.startsWith('/*')) {
-      continue;
-    }
-    if (_globalsImportPattern.hasMatch(trimmed)) {
-      return true;
-    }
-  }
-  return false;
+    return !trimmed.startsWith('//') &&
+        !trimmed.startsWith('/*') &&
+        _globalsImportPattern.hasMatch(trimmed);
+  });
 }
 
 /// Generates Dart source content for `no_globals_in_flutter_tools_restricted_paths.dart`.
@@ -80,42 +70,33 @@ $pathsContent
 ''';
 }
 
-/// Locates `packages/flutter_tools` starting from the current directory or script location.
-Directory findFlutterToolsDirectory() {
+/// Locates the Flutter repository root directory starting from the current directory
+/// or script location.
+Directory findFlutterRepoRoot() {
   Directory current = Directory.current;
   while (current.path != current.parent.path) {
-    final candidate = Directory('${current.path}/packages/flutter_tools');
-    if (candidate.existsSync()) {
-      return candidate;
+    if (Directory('${current.path}/packages/flutter_tools').existsSync() &&
+        Directory('${current.path}/dev/flutter_analyzer_plugin').existsSync()) {
+      return current;
     }
     current = current.parent;
   }
   // Fallback to relative navigation from script location
-  final String scriptDir = File(Platform.script.toFilePath()).parent.path;
-  final candidate = Directory('$scriptDir/../../../packages/flutter_tools');
-  if (candidate.existsSync()) {
+  final Directory scriptDir = File(Platform.script.toFilePath()).parent;
+  final Directory candidate = scriptDir.parent.parent;
+  if (Directory('${candidate.path}/packages/flutter_tools').existsSync()) {
     return candidate;
   }
-  throw StateError('Could not find packages/flutter_tools directory');
+  throw StateError('Could not find Flutter repository root directory');
 }
 
+/// Locates `packages/flutter_tools` starting from the current directory or script location.
+Directory findFlutterToolsDirectory() =>
+    Directory('${findFlutterRepoRoot().path}/packages/flutter_tools');
+
 /// Locates `dev/flutter_analyzer_plugin` starting from the current directory or script location.
-Directory findAnalyzerPluginDirectory() {
-  Directory current = Directory.current;
-  while (current.path != current.parent.path) {
-    final candidate = Directory('${current.path}/dev/flutter_analyzer_plugin');
-    if (candidate.existsSync()) {
-      return candidate;
-    }
-    current = current.parent;
-  }
-  final String scriptDir = File(Platform.script.toFilePath()).parent.path;
-  final candidate = Directory('$scriptDir/..');
-  if (candidate.existsSync()) {
-    return candidate;
-  }
-  throw StateError('Could not find dev/flutter_analyzer_plugin directory');
-}
+Directory findAnalyzerPluginDirectory() =>
+    Directory('${findFlutterRepoRoot().path}/dev/flutter_analyzer_plugin');
 
 void main(List<String> args) {
   final Directory toolsDir = findFlutterToolsDirectory();
