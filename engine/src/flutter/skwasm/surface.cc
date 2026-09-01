@@ -41,6 +41,16 @@
 //    the Dart code, which will complete the future that was returned by the
 //    original Dart method call.
 
+// See https://github.com/flutter/flutter/pull/190048
+extern bool
+    gSkUseThreadLocalStrikeCaches_IAcknowledgeThisIsIncrediblyExperimental;
+
+namespace {
+__attribute__((constructor)) void UseThreadLocalStrikeCaches() {
+  gSkUseThreadLocalStrikeCaches_IAcknowledgeThisIsIncrediblyExperimental = true;
+}
+}  // namespace
+
 unsigned long Skwasm::GetRasterThread() {
   static unsigned long thread = []() {
     if (skwasm_isSingleThreaded()) {
@@ -86,6 +96,11 @@ void Skwasm::Surface::Dispose() {
 uint32_t Skwasm::Surface::SetCanvas(SkwasmObject canvas) {
   assert(emscripten_is_main_browser_thread());
   uint32_t callback_id = ++current_callback_id_;
+
+  // Allocated here instead of on the worker so that current_callback_id_ is
+  // only ever modified on the main thread.
+  context_lost_callback_id_ = ++current_callback_id_;
+
   skwasm_dispatchTransferCanvas(GetRasterThread(), this, canvas, callback_id);
   return callback_id;
 }
@@ -129,9 +144,11 @@ void Skwasm::Surface::ReceiveCanvasOnWorker(SkwasmObject canvas,
   render_context_ = Skwasm::RenderContext::Make(sample_count, stencil);
   render_context_->Resize(canvas_width_, canvas_height_);
 
-  context_lost_callback_id_ = ++current_callback_id_;
+  if (resource_cache_limit_) {
+    render_context_->SetResourceCacheLimit(*resource_cache_limit_);
+  }
 
-  skwasm_reportInitialized(this, context_lost_callback_id_, callback_id);
+  skwasm_reportInitialized(this, callback_id);
 }
 
 // Resizing
@@ -288,8 +305,20 @@ void Skwasm::Surface::OnContextLost() {
 
 // Other
 
+// Main thread only
 void Skwasm::Surface::SetResourceCacheLimit(int bytes) {
-  render_context_->SetResourceCacheLimit(bytes);
+  assert(emscripten_is_main_browser_thread());
+  skwasm_dispatchSetResourceCacheLimit(GetRasterThread(), this, bytes);
+}
+
+// Worker thread only
+void Skwasm::Surface::SetResourceCacheLimitOnWorker(int bytes) {
+  // Always stored so ReceiveCanvasOnWorker can reapply it whenever the
+  // render context is (re)created.
+  resource_cache_limit_ = bytes;
+  if (render_context_) {
+    render_context_->SetResourceCacheLimit(bytes);
+  }
 }
 
 std::unique_ptr<Skwasm::TextureSourceWrapper>
@@ -410,7 +439,14 @@ SKWASM_EXPORT void surface_dispose(Skwasm::Surface* surface) {
 
 SKWASM_EXPORT void surface_setResourceCacheLimitBytes(Skwasm::Surface* surface,
                                                       int bytes) {
+  // Dispatch to the worker, which owns the render context.
   surface->SetResourceCacheLimit(bytes);
+}
+
+SKWASM_EXPORT void surface_setResourceCacheLimitOnWorker(
+    Skwasm::Surface* surface,
+    int bytes) {
+  surface->SetResourceCacheLimitOnWorker(bytes);
 }
 
 SKWASM_EXPORT uint32_t surface_renderPictures(Skwasm::Surface* surface,
