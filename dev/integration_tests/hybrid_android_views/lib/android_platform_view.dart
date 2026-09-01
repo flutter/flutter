@@ -53,12 +53,14 @@ class AndroidPlatformView extends StatelessWidget {
             id: params.id,
             viewType: params.viewType,
             layoutDirection: TextDirection.ltr,
+            onFocus: () => params.onFocusChanged(true),
           );
         } else {
           controller = PlatformViewsService.initSurfaceAndroidView(
             id: params.id,
             viewType: params.viewType,
             layoutDirection: TextDirection.ltr,
+            onFocus: () => params.onFocusChanged(true),
           );
         }
         if (onPlatformViewCreated != null) {

@@ -16,18 +16,25 @@ typedef DriverHandler = Future<String> Function();
 class FutureDataHandler {
   final Map<String, Completer<DriverHandler>> _handlers = <String, Completer<DriverHandler>>{};
 
+  Completer<DriverHandler> _getCompleter(String key) {
+    return _handlers.putIfAbsent(key, () => Completer<DriverHandler>());
+  }
+
   /// Registers a lazy handler that will be invoked on the next message from the driver.
   Completer<DriverHandler> registerHandler(String key) {
-    _handlers[key] = Completer<DriverHandler>();
-    return _handlers[key]!;
+    final Completer<DriverHandler> completer = _getCompleter(key);
+    if (completer.isCompleted) {
+      _handlers[key] = Completer<DriverHandler>();
+      return _handlers[key]!;
+    }
+    return completer;
   }
 
   Future<String> handleMessage(String? message) async {
-    if (_handlers[message] == null) {
-      return 'Unsupported driver message: $message.\n'
-          'Supported messages are: ${_handlers.keys}.';
+    if (message == null) {
+      return 'null message';
     }
-    final DriverHandler handler = await _handlers[message]!.future;
+    final DriverHandler handler = await _getCompleter(message).future;
     return handler();
   }
 }
