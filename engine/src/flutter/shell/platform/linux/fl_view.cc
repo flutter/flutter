@@ -33,6 +33,7 @@
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #include "flutter/shell/platform/linux/fl_subsurface.h"
 #include "flutter/shell/platform/linux/fl_subsurface_egl.h"
+#include "flutter/shell/platform/linux/fl_view_gtk4_accessibility.h"
 #include "flutter/shell/platform/linux/fl_wayland_display.h"
 #endif
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
@@ -63,6 +64,8 @@ static void handle_geometry_changed_with_size(FlView* self,
                                               int height);
 #if FLUTTER_LINUX_GTK4
 static gboolean retry_native_texture_cb(gpointer user_data);
+static void fl_view_gtk4_update_accessible_name(FlView* self);
+static void fl_view_gtk4_update_accessible_tree(FlView* self);
 static void fl_view_gtk4_setup_subsurface(FlView* self);
 static void fl_view_gtk4_resize_subsurface(FlView* self, int width, int height);
 #endif
@@ -82,7 +85,19 @@ G_DEFINE_TYPE_WITH_CODE(
                               fl_view_plugin_registry_iface_init))
 
 #if FLUTTER_LINUX_GTK4
+static void fl_view_gtk4_update_accessible_name(FlView* self) {
+  if (self->accessibility_backend != nullptr) {
+    fl_view_gtk4_accessibility_update_accessible_name(
+        self->accessibility_backend);
+  }
+}
 
+static void fl_view_gtk4_update_accessible_tree(FlView* self) {
+  if (self->accessibility_backend != nullptr) {
+    fl_view_gtk4_accessibility_update_accessible_tree(
+        self->accessibility_backend);
+  }
+}
 
 static gboolean gtk4_subsurface_enabled() {
   return g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_SUBSURFACE"), "1") == 0;
@@ -448,7 +463,10 @@ static void update_semantics_cb(FlView* self,
 #if !FLUTTER_LINUX_GTK4
   fl_view_accessible_handle_update_semantics(self->view_accessible, update);
 #else
-
+  if (self->accessibility_backend != nullptr) {
+    fl_view_gtk4_accessibility_handle_update(self->accessibility_backend,
+                                             update);
+  }
 #endif
 }
 
@@ -736,6 +754,8 @@ static void fl_view_dispose(GObject* object) {
   g_clear_object(&self->subsurface_egl);
   g_clear_object(&self->subsurface);
   g_mutex_unlock(&self->subsurface_mutex);
+  fl_view_gtk4_accessibility_dispose(self->accessibility_backend);
+  self->accessibility_backend = nullptr;
   if (self->native_texture_retry_source_id != 0) {
     g_source_remove(self->native_texture_retry_source_id);
     self->native_texture_retry_source_id = 0;
@@ -861,6 +881,8 @@ static void setup_engine(FlView* self) {
       FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
       atk_plug_get_id(ATK_PLUG(self->view_accessible)));
 #else
+  self->accessibility_backend =
+      fl_view_gtk4_accessibility_new(self, self->view_id);
 #endif
 
   self->pointer_manager = fl_pointer_manager_new(self->view_id, self->engine);
@@ -916,9 +938,11 @@ static void fl_view_init(FlView* self) {
 #if FLUTTER_LINUX_GTK4
   g_mutex_init(&self->subsurface_mutex);
   self->render_area = fl_render_texture_gtk4_new();
+  fl_view_gtk4_update_accessible_name(self);
   gtk_widget_set_hexpand(GTK_WIDGET(self->render_area), TRUE);
   gtk_widget_set_vexpand(GTK_WIDGET(self->render_area), TRUE);
   fl_view_gtk4_setup(self);
+  fl_view_gtk4_update_accessible_tree(self);
   gtk_widget_set_visible(GTK_WIDGET(self->render_area), TRUE);
   g_signal_connect_swapped(self->render_area, "realize", G_CALLBACK(realize_cb),
                            self);

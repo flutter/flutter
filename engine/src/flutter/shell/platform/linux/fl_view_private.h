@@ -15,6 +15,7 @@
 #if FLUTTER_LINUX_GTK4
 #include "flutter/shell/platform/linux/fl_subsurface.h"
 #include "flutter/shell/platform/linux/fl_subsurface_egl.h"
+#include "flutter/shell/platform/linux/fl_view_gtk4_accessibility.h"
 #endif
 #if !FLUTTER_LINUX_GTK4
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
@@ -53,6 +54,7 @@ struct _FlView {
 #if FLUTTER_LINUX_GTK4
   gboolean native_texture_ready;
   guint native_texture_retry_source_id;
+  FlViewGtk4Accessibility* accessibility_backend;
   GMutex subsurface_mutex;
   FlSubsurface* subsurface;
   FlSubsurfaceEGL* subsurface_egl;

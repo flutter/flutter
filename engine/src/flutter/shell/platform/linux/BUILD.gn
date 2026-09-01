@@ -338,6 +338,7 @@ source_set("flutter_linux_sources_gtk4") {
     "fl_value.cc",
     "fl_view.cc",
     "fl_view_gtk4.cc",
+    "fl_view_gtk4_accessibility.cc",
     "fl_view_monitor.cc",
     "fl_wayland_display.cc",
     "fl_window_monitor.cc",
@@ -562,6 +563,7 @@ executable("flutter_linux_gtk4_unittests") {
 
     # fl_touch_manager_test.cc is GTK3-only (uses GdkEventTouch, gdkwayland)
     "fl_value_test.cc",
+    "fl_view_gtk4_accessibility_test.cc",
 
     # fl_window_state_monitor_test.cc is GTK3-only (uses mock_gtk.h)
     "testing/fl_mock_binary_messenger.cc",
