@@ -4,7 +4,7 @@
 
 // ignore_for_file: avoid_print
 
-import 'dart:ffi';
+import 'dart:ffi' hide Size;
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
