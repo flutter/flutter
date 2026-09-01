@@ -219,12 +219,6 @@ DEF_SWITCH(DisableDartAsserts,
            "disabled. This flag may be specified if the user wishes to run "
            "with assertions disabled in the debug product mode (i.e. with JIT "
            "or DBC).")
-DEF_SWITCH(EnableSerialGC,
-           "enable-serial-gc",
-           "On low power devices with low core counts, running concurrent "
-           "GC tasks on threads can cause them to contend with the UI thread "
-           "which could potentially lead to jank. This option turns off all "
-           "concurrent GC activities")
 DEF_SWITCH(DisallowInsecureConnections,
            "disallow-insecure-connections",
            "By default, dart:io allows all socket connections. If this switch "
@@ -298,9 +292,6 @@ DEF_SWITCH(ImpellerLazyShaderMode,
            "impeller-lazy-shader-mode",
            "Whether to defer initialization of all required PSOs for the "
            "Impeller backend. Defaults to false.")
-DEF_SWITCH(ImpellerAntialiasLines,
-           "impeller-antialias-lines",
-           "Experimental flag to test drawing lines with antialiasing.")
 DEF_SWITCH(ImpellerUseSDFs,
            "impeller-use-sdfs",
            "Whether to use SDFs for rendering in Impeller.")

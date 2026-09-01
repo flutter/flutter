@@ -308,7 +308,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     };
     image_info.samples = ToVKSampleCount(desc.sample_count);
     image_info.mipLevels = desc.mip_count;
-    image_info.arrayLayers = ToArrayLayerCount(desc.type);
+    image_info.arrayLayers = ToArrayLayerCount(desc);
     image_info.tiling = vk::ImageTiling::eOptimal;
     image_info.initialLayout = vk::ImageLayout::eUndefined;
     image_info.usage = AllocatorVK::ToVKImageUsageFlags(
@@ -412,7 +412,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     view_info.format = image_info.format;
     view_info.subresourceRange.aspectMask = ToVKImageAspectFlags(desc.format);
     view_info.subresourceRange.levelCount = image_info.mipLevels;
-    view_info.subresourceRange.layerCount = ToArrayLayerCount(desc.type);
+    view_info.subresourceRange.layerCount = ToArrayLayerCount(desc);
 
     // Vulkan does not have an image format that is equivalent to
     // `MTLPixelFormatA8Unorm`, so we use `R8Unorm` instead. Given that the
@@ -439,7 +439,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     const bool is_render_target = !!(desc.usage & TextureUsage::kRenderTarget);
     const uint32_t rt_mip_count = is_render_target ? image_info.mipLevels : 1u;
     const uint32_t rt_layer_count =
-        is_render_target ? ToArrayLayerCount(desc.type) : 1u;
+        is_render_target ? ToArrayLayerCount(desc) : 1u;
     std::vector<vk::UniqueImageView> rt_image_views;
     rt_image_views.reserve(rt_mip_count * rt_layer_count);
     for (uint32_t mip = 0; mip < rt_mip_count; mip++) {
@@ -480,7 +480,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     if (views.empty()) {
       return VK_NULL_HANDLE;
     }
-    const uint32_t layer_count = ToArrayLayerCount(GetTextureDescriptor().type);
+    const uint32_t layer_count = ToArrayLayerCount(GetTextureDescriptor());
     const size_t index =
         static_cast<size_t>(mip_level) * layer_count + array_layer;
     return index < views.size() ? views[index].get() : views[0].get();

@@ -125,7 +125,6 @@ void main() {
         expect(response.data['id'], 0);
         expect(response.data['result'], isNotEmpty);
         expect(response.data['result']! as Map<String, Object?>, const <String, Object>{
-          'platforms': <String>['macos', 'windows'],
           'platformTypes': <String, Map<String, Object>>{
             'web': <String, Object>{
               'isSupported': false,
@@ -1219,8 +1218,11 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   late DeviceLogReader logReader;
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
-      logReader;
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) => logReader;
 
   ApplicationPackage? startAppPackage;
   late LaunchResult launchResult;

@@ -261,6 +261,9 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       if (type.isDecimal) {
         textType |= InputType.TYPE_NUMBER_FLAG_DECIMAL;
       }
+      if (type.isPassword) {
+        textType |= InputType.TYPE_NUMBER_VARIATION_PASSWORD;
+      }
       return textType;
     } else if (type.type == TextInputChannel.TextInputType.PHONE) {
       return InputType.TYPE_CLASS_PHONE;

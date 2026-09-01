@@ -238,6 +238,84 @@ adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    device product:vantage_ge mod
         'expectedId': '127.0.0.1:5555',
         'expectedStatus': 'success',
       },
+      // ADB long listings use a minimum-width serial column, so a serial that
+      // is 22 characters or longer can be followed by only one space.
+      <String, String>{
+        'input':
+            'adb-0123456789abcdef._adb-tls-connect._tcp device product:socrates model:22127RK46C device:socrates transport_id:1',
+        'expectedId': 'adb-0123456789abcdef._adb-tls-connect._tcp',
+        'expectedStatus': 'success',
+      },
+      // mDNS conflict suffixes introduce whitespace into the serial itself.
+      <String, String>{
+        'input':
+            'adb-0123456789abcdef (2)._adb-tls-connect._tcp device product:socrates model:22127RK46C device:socrates transport_id:1',
+        'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp offline',
+        'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'offline',
+      },
+      // Serial contents may themselves include known ADB state names.
+      <String, String>{
+        'input': 'my device offline device',
+        'expectedId': 'my device offline',
+        'expectedStatus': 'success',
+      },
+      // Exercise every state currently recognized by Flutter with the ADB
+      // single-space form and a serial containing whitespace.
+      <String, String>{
+        'input': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp unauthorized',
+        'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'unauthorized',
+      },
+      <String, String>{
+        'input': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp no permissions',
+        'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'no permissions',
+      },
+      <String, String>{
+        'input': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp bootloader',
+        'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp recovery',
+        'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp sideload',
+        'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp rescue',
+        'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp connecting',
+        'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp authorizing',
+        'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp host',
+        'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp unknown',
+        'expectedId': 'adb-0123456789abcdef (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'success',
+      },
       // States that should go to diagnostics
       <String, String>{
         'input': '015d172c98400a03       offline',

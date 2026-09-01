@@ -25,6 +25,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
+#include "flutter/fml/task_runner_util.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/base64.h"
@@ -545,6 +546,15 @@ Shell::Shell(DartVMRef vm,
   resource_cache_limit_calculator->AddResourceCacheLimitItem(
       weak_factory_.GetWeakPtr());
 
+  std::shared_future<fml::WeakPtr<ShellIOManager>> weak_io_manager_future(
+      weak_io_manager_promise_.get_future());
+  shutdown_safe_io_task_runner_ =
+      std::make_shared<fml::ConditionalBasicTaskRunner>(
+          task_runners_.GetIOTaskRunner(),
+          [weak_io_manager_future = std::move(weak_io_manager_future)] {
+            return static_cast<bool>(weak_io_manager_future.get());
+          });
+
   // Generate a WeakPtrFactory for use with the raster thread. This does not
   // need to wait on a latch because it can only ever be used from the raster
   // thread from this class, so we have ordering guarantees.
@@ -873,6 +883,7 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   engine_ = std::move(engine);
   rasterizer_ = std::move(rasterizer);
   io_manager_ = io_manager;
+  weak_io_manager_promise_.set_value(io_manager_->GetWeakPtr());
 
   // Set the external view embedder for the rasterizer.
   auto view_embedder = platform_view_->CreateExternalViewEmbedder();
@@ -949,6 +960,10 @@ fml::WeakPtr<PlatformView> Shell::GetPlatformView() {
 fml::WeakPtr<ShellIOManager> Shell::GetIOManager() {
   FML_DCHECK(is_set_up_);
   return io_manager_->GetWeakPtr();
+}
+
+std::shared_ptr<fml::BasicTaskRunner> Shell::GetShutdownSafeIOTaskRunner() {
+  return shutdown_safe_io_task_runner_;
 }
 
 DartVM* Shell::GetDartVM() {
@@ -1367,6 +1382,12 @@ const Settings& Shell::OnPlatformViewGetSettings() const {
   return settings_;
 }
 
+// |PlatformView::Delegate|
+std::shared_ptr<fml::BasicTaskRunner>
+Shell::OnPlatformViewGetShutdownSafeIOTaskRunner() const {
+  return shutdown_safe_io_task_runner_;
+}
+
 // |Animator::Delegate|
 void Shell::OnAnimatorBeginFrame(fml::TimePoint frame_target_time,
                                  uint64_t frame_number) {
@@ -1414,7 +1435,8 @@ void Shell::OnAnimatorDraw(std::shared_ptr<FramePipeline> pipeline) {
 
   task_runners_.GetRasterTaskRunner()->PostTask(fml::MakeCopyable(
       [&waiting_for_first_frame = waiting_for_first_frame_,
-       &waiting_for_first_frame_condition = waiting_for_first_frame_condition_,
+       &waiting_for_first_frame_mutex = waiting_for_first_frame_mutex_,
+       &waiting_for_first_frame_callbacks = waiting_for_first_frame_callbacks_,
        rasterizer = rasterizer_->GetWeakPtr(),
        weak_pipeline = std::weak_ptr<FramePipeline>(pipeline)]() mutable {
         if (rasterizer) {
@@ -1423,9 +1445,23 @@ void Shell::OnAnimatorDraw(std::shared_ptr<FramePipeline> pipeline) {
             rasterizer->Draw(pipeline);
           }
 
+          // waiting_for_first_frame is set to true during shell startup, and
+          // after the first frame is drawn it is set fo false and will remain
+          // false.
+          // AddFirstFrameCallback reads waiting_for_first_frame while holding
+          // the waiting_for_first_frame_mutex, and it adds entries to
+          // waiting_for_first_frame_callbacks only if waiting_for_first_frame
+          // is true.
           if (waiting_for_first_frame.load()) {
-            waiting_for_first_frame.store(false);
-            waiting_for_first_frame_condition.notify_all();
+            std::vector<std::function<void()>> callbacks;
+            {
+              std::scoped_lock lock(waiting_for_first_frame_mutex);
+              waiting_for_first_frame.store(false);
+              std::swap(waiting_for_first_frame_callbacks, callbacks);
+            }
+            for (const auto& callback : callbacks) {
+              callback();
+            }
           }
         }
       }));
@@ -2363,32 +2399,16 @@ Rasterizer::Screenshot Shell::Screenshot(
   return screenshot;
 }
 
-fml::Status Shell::WaitForFirstFrame(fml::TimeDelta timeout) {
-  FML_DCHECK(is_set_up_);
-  if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() ||
-      task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread()) {
-    return fml::Status(fml::StatusCode::kFailedPrecondition,
-                       "WaitForFirstFrame called from thread that can't wait "
-                       "because it is responsible for generating the frame.");
+void Shell::AddFirstFrameCallback(std::function<void()> callback) {
+  {
+    std::scoped_lock lock(waiting_for_first_frame_mutex_);
+    if (waiting_for_first_frame_.load()) {
+      waiting_for_first_frame_callbacks_.push_back(std::move(callback));
+      return;
+    }
   }
-
-  // Check for overflow.
-  auto now = std::chrono::steady_clock::now();
-  auto max_duration = std::chrono::steady_clock::time_point::max() - now;
-  auto desired_duration = std::chrono::milliseconds(timeout.ToMilliseconds());
-  auto duration =
-      now + (desired_duration > max_duration ? max_duration : desired_duration);
-
-  std::unique_lock<std::mutex> lock(waiting_for_first_frame_mutex_);
-  bool success = waiting_for_first_frame_condition_.wait_until(
-      lock, duration, [&waiting_for_first_frame = waiting_for_first_frame_] {
-        return !waiting_for_first_frame.load();
-      });
-  if (success) {
-    return fml::Status();
-  } else {
-    return fml::Status(fml::StatusCode::kDeadlineExceeded, "timeout");
-  }
+  // Invoke the callback now because the first frame has already been rendered.
+  callback();
 }
 
 bool Shell::ReloadSystemFonts() {

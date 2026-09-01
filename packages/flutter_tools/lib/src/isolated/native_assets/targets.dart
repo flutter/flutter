@@ -10,14 +10,12 @@ import 'package:hooks/hooks.dart';
 import '../../base/common.dart' show throwToolExit;
 import '../../build_info.dart'
     show
-        AndroidArch,
         BuildMode,
-        DarwinArch,
+        CpuArch,
         EnvironmentType,
         TargetPlatform,
-        getAndroidArchForName,
-        getDarwinArchsFromEnv,
-        getIOSArchForName,
+        getCpuArchForName,
+        getCpuArchsFromEnv,
         kAndroidArchs,
         kIosArchs,
         kSdkRoot;
@@ -136,7 +134,7 @@ sealed class AssetBuildTarget {
     Map<String, String> environmentDefines,
     List<SupportedAssetTypes> supportedAssetTypes,
   ) {
-    return getDarwinArchsFromEnv(environmentDefines)
+    return getCpuArchsFromEnv(environmentDefines)
         .map(getNativeMacOSArchitecture)
         .map(
           (Architecture architecture) => MacOSAssetTarget(
@@ -169,10 +167,10 @@ sealed class AssetBuildTarget {
     FileSystem fileSystem,
     List<SupportedAssetTypes> supportedAssetTypes,
   ) {
-    final List<DarwinArch> iosArchitectures =
-        _emptyToNull(environmentDefines[kIosArchs])?.split(' ').map(getIOSArchForName).toList() ??
-        <DarwinArch>[DarwinArch.arm64];
-    return iosArchitectures
+    final List<CpuArch> cpuArchs =
+        _emptyToNull(environmentDefines[kIosArchs])?.split(' ').map(getCpuArchForName).toList() ??
+        <CpuArch>[CpuArch.arm64];
+    return cpuArchs
         .map(getNativeIOSArchitecture)
         .map(
           (Architecture architecture) => IOSAssetTarget(
@@ -420,19 +418,19 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
       subtarget.setCCompilerConfig(mustMatchAppBuild: false);
 }
 
-List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {
+List<CpuArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {
   switch (targetPlatform) {
     case TargetPlatform.android_arm:
-      return <AndroidArch>[AndroidArch.armeabi_v7a];
+      return <CpuArch>[CpuArch.armv7];
     case TargetPlatform.android_arm64:
-      return <AndroidArch>[AndroidArch.arm64_v8a];
+      return <CpuArch>[CpuArch.arm64];
     case TargetPlatform.android_x64:
-      return <AndroidArch>[AndroidArch.x86_64];
+      return <CpuArch>[CpuArch.x64];
     case TargetPlatform.android:
       if (androidArchsEnvironment == null) {
         throw MissingDefineException(kAndroidArchs, 'native_assets');
       }
-      return androidArchsEnvironment.split(' ').map(getAndroidArchForName).toList();
+      return androidArchsEnvironment.split(' ').map(getCpuArchForName).toList();
     case TargetPlatform.darwin:
     case TargetPlatform.fuchsia_arm64:
     case TargetPlatform.fuchsia_x64:

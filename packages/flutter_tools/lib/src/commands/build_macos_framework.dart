@@ -60,7 +60,12 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
         stringArg('output') ??
-        globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'macos', 'framework');
+        globals.fs.path.join(
+          globals.fs.currentDirectory.path,
+          getBuildDirectory(globals.config, globals.fs),
+          'macos',
+          'framework',
+        );
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');
@@ -261,7 +266,7 @@ end
           kTargetPlatform: TargetPlatform.darwin.getName(),
           kDarwinArchs: defaultMacOSArchsForEnvironment(
             globals.artifacts!,
-          ).map((DarwinArch e) => e.name).join(' '),
+          ).map((CpuArch e) => e.darwinArchName).join(' '),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: globals.artifacts!,

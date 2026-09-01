@@ -9,7 +9,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'sensitive_content_utils.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   const ContentSensitivity defaultContentSensitivitySetting = ContentSensitivity.autoSensitive;

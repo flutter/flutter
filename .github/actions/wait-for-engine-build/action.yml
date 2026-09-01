@@ -17,40 +17,16 @@ runs:
   steps:
     - name: Check Engine Changes
       id: check_engine
+      uses: ./.github/actions/has-engine-changes
+
+    - name: Log wait requirement
+      if: steps.check_engine.outputs.changed == 'true'
       shell: bash
       env:
-        EVENT_NAME: ${{ github.event_name }}
-        PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
-        PUSH_BEFORE_SHA: ${{ github.event.before }}
         INPUTS_CHECK_NAME: ${{ inputs.check-name }}
         INPUTS_CHECK_REGEXP: ${{ inputs.check-regexp }}
       run: |
-        # 1. Determine local base tracking SHA
-        if [ "$EVENT_NAME" = "pull_request" ]; then
-          BASE_REF="$PR_BASE_SHA"
-        elif [ "$EVENT_NAME" = "merge_group" ]; then
-          BASE_REF="$MERGE_GROUP_BASE_SHA"
-        elif [ "$EVENT_NAME" = "push" ] && [ "$PUSH_BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
-          BASE_REF="$PUSH_BEFORE_SHA"
-        else
-          BASE_REF="origin/master"
-        fi
-
-        echo "Comparing against base SHA: $BASE_REF"
-
-        # 2. Get the changed files using the helper script
-        CHANGED_FILES=$(.github/scripts/git_files_changed.sh "$BASE_REF")
-        echo "Changed files in this branch:"
-        echo "$CHANGED_FILES"
-
-        # 3. Check if any file matches engine pattern using the helper script:
-        if [ "$(printf '%s\n' "$CHANGED_FILES" | .github/scripts/did_engine_change.sh)" = "true" ]; then
-          echo "Engine file changed - forced to wait for check-name: '${INPUTS_CHECK_NAME}', check-regexp: '${INPUTS_CHECK_REGEXP}'"
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "changed=false" >> "$GITHUB_OUTPUT"
-        fi
+        echo "Engine file changed - forced to wait for check-name: '${INPUTS_CHECK_NAME}', check-regexp: '${INPUTS_CHECK_REGEXP}'"
 
     # Note: Use the Cocoon wait-for-tests action to poll the Cocoon API.
     - name: Wait for test check-in

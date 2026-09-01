@@ -1616,6 +1616,39 @@ TEST_P(RendererTest, BindingNullTexturesDoesNotCrash) {
   EXPECT_FALSE(FS::BindContents2(*pass, nullptr, sampler));
 }
 
+// Creating and uploading per-layer contents of a 2D array texture. The GLES
+// path requires ES 3.0 and is covered separately in the GLES texture unit
+// tests, so this skips the GLES backends to avoid an ES 2.0 failure.
+TEST_P(RendererTest, CanCreateAndUpload2DArrayTexture) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
+    GTEST_SKIP() << "Covered by the GLES-specific texture array test.";
+  }
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kHostVisible;
+  desc.type = TextureType::kTexture2DArray;
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {2, 2};
+  desc.array_layer_count = 4;
+  desc.mip_count = 1;
+
+  auto texture = context->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+  EXPECT_EQ(static_cast<int>(texture->GetTextureDescriptor().array_layer_count),
+            4);
+  EXPECT_TRUE(texture->IsSliceValid(3));
+  EXPECT_FALSE(texture->IsSliceValid(4));
+
+  std::vector<uint8_t> layer(2u * 2u * 4u, 0xFF);
+  for (size_t slice = 0; slice < static_cast<size_t>(desc.array_layer_count);
+       ++slice) {
+    EXPECT_TRUE(texture->SetContents(layer.data(), layer.size(), slice));
+  }
+}
+
 // Clears a single cube map face by attaching it as a render target slice.
 // Rendering to cube faces is portable down to OpenGL ES 2.0, so this runs on
 // every backend.

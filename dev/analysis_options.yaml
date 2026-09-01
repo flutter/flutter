@@ -1,5 +1,9 @@
 include: ../analysis_options.yaml
 
+plugins:
+  flutter_analyzer_plugin:
+    path: flutter_analyzer_plugin
+
 linter:
   rules:
     avoid_print: false # We use prints as debugging tools here a lot.

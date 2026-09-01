@@ -2944,6 +2944,62 @@ void main() {
     );
   });
 
+  testWidgets('Image.network forwards useLogicalCacheSize to ResizeImage', (
+    WidgetTester tester,
+  ) async {
+    for (final flag in <bool>[false, true]) {
+      expect(
+        Image.network(
+          'https://example.com/test.png',
+          cacheWidth: 100,
+          cacheHeight: 100,
+          useLogicalCacheSize: flag,
+        ).image,
+        isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
+      );
+    }
+  });
+
+  testWidgets('Image.asset forwards useLogicalCacheSize to ResizeImage', (
+    WidgetTester tester,
+  ) async {
+    for (final flag in <bool>[false, true]) {
+      expect(
+        Image.asset(
+          'asset.png',
+          cacheWidth: 100,
+          cacheHeight: 100,
+          useLogicalCacheSize: flag,
+        ).image,
+        isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
+      );
+    }
+  });
+
+  testWidgets('Image.memory forwards useLogicalCacheSize to ResizeImage', (
+    WidgetTester tester,
+  ) async {
+    final bytes = Uint8List.fromList(kTransparentImage);
+    for (final flag in <bool>[false, true]) {
+      expect(
+        Image.memory(bytes, cacheWidth: 100, cacheHeight: 100, useLogicalCacheSize: flag).image,
+        isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
+      );
+    }
+  });
+
+  testWidgets('Image.file forwards useLogicalCacheSize to ResizeImage', (
+    WidgetTester tester,
+  ) async {
+    final file = File.fromUri(Uri.parse('/home/flutter/dash.png'));
+    for (final flag in <bool>[false, true]) {
+      expect(
+        Image.file(file, cacheWidth: 100, cacheHeight: 100, useLogicalCacheSize: flag).image,
+        isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
+      );
+    }
+  }, skip: kIsWeb); // Image.file is not supported on Flutter Web.
+
   testWidgets(
     'Animated GIFs do not require layout for subsequent frames',
     experimentalLeakTesting: LeakTesting.settings
@@ -3123,6 +3179,29 @@ void main() {
     );
     // Also check takeException as a standard backup.
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('RawImage forwards default blendMode to RenderImage', (WidgetTester tester) async {
+    final ui.Image image = await createTestImage(width: 10, height: 10);
+    addTearDown(image.dispose);
+
+    await tester.pumpWidget(RawImage(image: image));
+
+    final RenderImage renderImage = tester.renderObject(find.byType(RawImage));
+    expect(renderImage.blendMode, BlendMode.srcOver);
+  });
+
+  testWidgets('RawImage forwards custom blendMode to RenderImage', (WidgetTester tester) async {
+    final ui.Image image = await createTestImage(width: 10, height: 10);
+    addTearDown(image.dispose);
+
+    await tester.pumpWidget(RawImage(image: image, blendMode: BlendMode.plus));
+
+    final RenderImage renderImage = tester.renderObject(find.byType(RawImage));
+    expect(renderImage.blendMode, BlendMode.plus);
+
+    await tester.pumpWidget(RawImage(image: image, blendMode: BlendMode.multiply));
+    expect(renderImage.blendMode, BlendMode.multiply);
   });
 }
 

@@ -1444,10 +1444,18 @@ TEST(RectTest, RectExpandToMinTransformedSizeNullForScaledToZero) {
             std::nullopt);
 }
 
-TEST(RectTest,
-     RectExpandToMinTransformedSizeRectReturnsUnmodifiedWhenLargeEnough) {
+TEST(RectTest, RectExpandToMinTransformedSizeReturnsUnmodifiedWhenLargeEnough) {
   Rect rect = Rect::MakeXYWH(0, 0, 10, 20);
   auto transform = Matrix::MakeScale(Vector3(0.5f, 0.5f));
+  EXPECT_EQ(rect.ExpandToMinTransformedSize({1.0f, 1.0f}, transform), rect);
+}
+
+TEST(
+    RectTest,
+    RectExpandToMinTransformedSizeReturnsUnmodifiedWhenLargeEnoughWithFractionalSize) {
+  // Regression test for https://github.com/flutter/flutter/issues/189807.
+  Rect rect = Rect::MakeXYWH(100.0f, 50.0f, 64.2f, 40.0f);
+  auto transform = Matrix();
   EXPECT_EQ(rect.ExpandToMinTransformedSize({1.0f, 1.0f}, transform), rect);
 }
 

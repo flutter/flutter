@@ -5,9 +5,11 @@
 import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -95,21 +97,21 @@ void main() {
   });
 
   testWithoutContext('getDartNameForDarwinArch returns name used in Dart SDK', () {
-    expect(DarwinArch.armv7.dartName, 'armv7');
-    expect(DarwinArch.arm64.dartName, 'arm64');
-    expect(DarwinArch.x86_64.dartName, 'x64');
+    expect(CpuArch.armv7.dartName, 'armv7');
+    expect(CpuArch.arm64.dartName, 'arm64');
+    expect(CpuArch.x64.dartName, 'x64');
   });
 
-  testWithoutContext('getNameForDarwinArch returns Apple names', () {
-    expect(DarwinArch.armv7.name, 'armv7');
-    expect(DarwinArch.arm64.name, 'arm64');
-    expect(DarwinArch.x86_64.name, 'x86_64');
+  testWithoutContext('darwinArchName returns Apple names', () {
+    expect(CpuArch.armv7.darwinArchName, 'armv7');
+    expect(CpuArch.arm64.darwinArchName, 'arm64');
+    expect(CpuArch.x64.darwinArchName, 'x86_64');
   });
 
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
-    expect(TargetPlatform.ios.getName(darwinArch: DarwinArch.arm64), 'ios-arm64');
-    expect(TargetPlatform.ios.getName(darwinArch: DarwinArch.armv7), 'ios-armv7');
-    expect(TargetPlatform.ios.getName(darwinArch: DarwinArch.x86_64), 'ios-x86_64');
+    expect(TargetPlatform.ios.getName(cpuArch: CpuArch.arm64), 'ios-arm64');
+    expect(TargetPlatform.ios.getName(cpuArch: CpuArch.armv7), 'ios-armv7');
+    expect(TargetPlatform.ios.getName(cpuArch: CpuArch.x64), 'ios-x86_64');
     expect(TargetPlatform.android.getName(), isNot(contains('ios')));
   });
 
@@ -124,7 +126,7 @@ void main() {
             localEngine: 'ios_debug_unopt',
           ),
         ).single,
-        DarwinArch.arm64,
+        CpuArch.arm64,
       );
 
       expect(
@@ -135,7 +137,7 @@ void main() {
             localEngine: 'ios_debug_sim_unopt',
           ),
         ).single,
-        DarwinArch.x86_64,
+        CpuArch.x64,
       );
 
       expect(
@@ -146,18 +148,18 @@ void main() {
             localEngine: 'ios_debug_sim_unopt_arm64',
           ),
         ).single,
-        DarwinArch.arm64,
+        CpuArch.arm64,
       );
 
       expect(
         defaultIOSArchsForEnvironment(EnvironmentType.physical, Artifacts.test()).single,
-        DarwinArch.arm64,
+        CpuArch.arm64,
       );
 
-      expect(
-        defaultIOSArchsForEnvironment(EnvironmentType.simulator, Artifacts.test()),
-        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64],
-      );
+      expect(defaultIOSArchsForEnvironment(EnvironmentType.simulator, Artifacts.test()), <CpuArch>[
+        CpuArch.x64,
+        CpuArch.arm64,
+      ]);
     },
     overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
@@ -175,7 +177,7 @@ void main() {
             localEngine: 'host_debug_unopt',
           ),
         ).single,
-        DarwinArch.x86_64,
+        CpuArch.x64,
       );
 
       expect(
@@ -185,12 +187,12 @@ void main() {
             localEngine: 'host_debug_unopt_arm64',
           ),
         ).single,
-        DarwinArch.arm64,
+        CpuArch.arm64,
       );
 
-      expect(defaultMacOSArchsForEnvironment(Artifacts.test()), <DarwinArch>[
-        DarwinArch.x86_64,
-        DarwinArch.arm64,
+      expect(defaultMacOSArchsForEnvironment(Artifacts.test()), <CpuArch>[
+        CpuArch.x64,
+        CpuArch.arm64,
       ]);
     },
     overrides: <Type, Generator>{
@@ -199,12 +201,15 @@ void main() {
     },
   );
 
-  testWithoutContext('getIOSArchForName on Darwin arches', () {
-    expect(getIOSArchForName('armv7'), DarwinArch.armv7);
-    expect(getIOSArchForName('arm64'), DarwinArch.arm64);
-    expect(getIOSArchForName('arm64e'), DarwinArch.arm64);
-    expect(getIOSArchForName('x86_64'), DarwinArch.x86_64);
-    expect(() => getIOSArchForName('bogus'), throwsException);
+  testWithoutContext('getCpuArchForName on Darwin and Android arches', () {
+    expect(getCpuArchForName('armv7'), CpuArch.armv7);
+    expect(getCpuArchForName('arm64'), CpuArch.arm64);
+    expect(getCpuArchForName('arm64e'), CpuArch.arm64);
+    expect(getCpuArchForName('x86_64'), CpuArch.x64);
+    expect(getCpuArchForName('android-arm'), CpuArch.armv7);
+    expect(getCpuArchForName('android-arm64'), CpuArch.arm64);
+    expect(getCpuArchForName('android-x64'), CpuArch.x64);
+    expect(() => getCpuArchForName('bogus'), throwsException);
   });
 
   testWithoutContext('named BuildInfo has correct defaults', () {
@@ -289,6 +294,20 @@ void main() {
     });
   });
 
+  testWithoutContext('toEnvironmentConfig includes build name and build number', () {
+    const buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      buildName: '4.5.6',
+      buildNumber: '7',
+      treeShakeIcons: false,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+    );
+
+    expect(buildInfo.toEnvironmentConfig()['BUILD_NAME'], '4.5.6');
+    expect(buildInfo.toEnvironmentConfig()['BUILD_NUMBER'], '7');
+  });
+
   testWithoutContext('toGradleConfig encoding of standard values', () {
     const buildInfo = BuildInfo(
       BuildMode.debug,
@@ -319,6 +338,58 @@ void main() {
       '-Pfoo=bar',
       '-Pfizz=bazz',
     ]);
+  });
+
+  testWithoutContext('toGradleConfig encoding of androidEnableHcpp', () {
+    const buildInfo = BuildInfo(
+      BuildMode.debug,
+      '',
+      treeShakeIcons: true,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+      androidEnableHcpp: true,
+      explicitAndroidEnableHcpp: true,
+    );
+
+    expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=true'));
+    expect(buildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
+    expect(
+      buildInfo.copyWith().androidEnableHcpp,
+      isTrue,
+      reason: 'copyWith should preserve androidEnableHcpp',
+    );
+    expect(
+      buildInfo.copyWith().explicitAndroidEnableHcpp,
+      isTrue,
+      reason: 'copyWith should preserve explicitAndroidEnableHcpp',
+    );
+
+    const disabledBuildInfo = BuildInfo(
+      BuildMode.debug,
+      '',
+      treeShakeIcons: true,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+      androidEnableHcpp: false,
+      explicitAndroidEnableHcpp: false,
+    );
+    expect(disabledBuildInfo.toGradleConfig(), contains('-Penable-hcpp=false'));
+    expect(disabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=false'));
+
+    const unsetBuildInfo = BuildInfo(
+      BuildMode.debug,
+      '',
+      treeShakeIcons: true,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+    );
+    expect(
+      unsetBuildInfo.toGradleConfig(),
+      isNot(anyElement(contains('-Penable-hcpp'))),
+      reason: 'no property should be passed when unset',
+    );
+    expect(
+      unsetBuildInfo.toGradleConfig(),
+      isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
+      reason: 'no property should be passed when unset',
+    );
   });
 
   testWithoutContext('encodeDartDefines encodes define values with base64 encoded components', () {
@@ -389,7 +460,8 @@ void main() {
     expect(CpuArch.fromName('armv7'), CpuArch.armv7);
     expect(CpuArch.fromName('arm64'), CpuArch.arm64);
     expect(CpuArch.fromName('x86'), CpuArch.x86);
-    expect(CpuArch.fromName('x86_64'), CpuArch.x86_64);
+    expect(CpuArch.fromName('x64'), CpuArch.x64);
+    expect(CpuArch.fromName('x86_64'), CpuArch.x64);
     expect(CpuArch.fromName('riscv64'), CpuArch.riscv64);
     expect(() => CpuArch.fromName('bogus'), throwsException);
 
@@ -397,7 +469,38 @@ void main() {
     expect(CpuArch.armv7.name, 'armv7');
     expect(CpuArch.arm64.name, 'arm64');
     expect(CpuArch.x86.name, 'x86');
-    expect(CpuArch.x86_64.name, 'x86_64');
+    expect(CpuArch.x64.name, 'x64');
     expect(CpuArch.riscv64.name, 'riscv64');
+  });
+
+  group('getBuildDirectory', () {
+    testWithoutContext('defaults to "build" when config does not specify build-dir', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      expect(getBuildDirectory(config, fileSystem), 'build');
+    });
+
+    testWithoutContext('uses passed in config', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      config.setValue('build-dir', 'custom_build_out');
+      expect(getBuildDirectory(config, fileSystem), 'custom_build_out');
+    });
+
+    testWithoutContext('throws exception when configured build-dir is absolute', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      config.setValue('build-dir', '/absolute/path/to/build');
+      expect(() => getBuildDirectory(config, fileSystem), throwsException);
+    });
+
+    testUsingContext('defaults to "build" when config does not specify build-dir in context', () {
+      expect(getBuildDirectory(), 'build');
+    }, overrides: <Type, Generator>{Config: () => Config.test()});
+
+    testUsingContext('uses zone injected config', () {
+      globals.config.setValue('build-dir', 'injected_build_dir');
+      expect(getBuildDirectory(), 'injected_build_dir');
+    }, overrides: <Type, Generator>{Config: () => Config.test()});
   });
 }

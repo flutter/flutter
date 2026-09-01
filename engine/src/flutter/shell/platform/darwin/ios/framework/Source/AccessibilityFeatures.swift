@@ -28,9 +28,9 @@ struct AccessibilityFeatureFlag: OptionSet {
 
 /// A wrapper for native iOS accessibility settings.
 @objc(FlutterAccessibilityFeatures)
-public class AccessibilityFeatures: NSObject {
+class AccessibilityFeatures: NSObject {
     /// Returns the current accessibility flags as a bitmask.
-    @objc public var flags: Int32 {
+    @objc var flags: Int32 {
         var flags: AccessibilityFeatureFlag = []
         
         if self.isVoiceOverRunning() || self.isSwitchControlRunning() {
@@ -66,7 +66,7 @@ public class AccessibilityFeatures: NSObject {
     
     /// Returns an array of notification names to observe for accessibility
     /// changes.
-    @objc public var observedNotificationNames: [String] {
+    @objc var observedNotificationNames: [String] {
         var names: [String] = [
             AccessibilityFeatures.voiceOverStatusDidChangeNotification,
             AccessibilityFeatures.switchControlStatusDidChangeNotification,
@@ -90,95 +90,95 @@ public class AccessibilityFeatures: NSObject {
     }
     
     /// Notification name for changes to `VoiceOver` status.
-    @objc public static var voiceOverStatusDidChangeNotification: String {
+    @objc static var voiceOverStatusDidChangeNotification: String {
         return UIAccessibility.voiceOverStatusDidChangeNotification.rawValue
     }
     
     /// Whether `VoiceOver` is running.
-    @objc public func isVoiceOverRunning() -> Bool {
+    @objc func isVoiceOverRunning() -> Bool {
         return UIAccessibility.isVoiceOverRunning
     }
     
     /// Notification name for changes to `Switch Control` status.
-    @objc public static var switchControlStatusDidChangeNotification: String {
+    @objc static var switchControlStatusDidChangeNotification: String {
         return UIAccessibility.switchControlStatusDidChangeNotification.rawValue
     }
     
     /// Whether `Switch Control` is running.
-    @objc public func isSwitchControlRunning() -> Bool {
+    @objc func isSwitchControlRunning() -> Bool {
         return UIAccessibility.isSwitchControlRunning
     }
     
     /// Notification name for changes to `Speak Screen` setting.
-    @objc public static var speakScreenStatusDidChangeNotification: String {
+    @objc static var speakScreenStatusDidChangeNotification: String {
         return UIAccessibility.speakScreenStatusDidChangeNotification.rawValue
     }
     
     /// Whether `Speak Screen` setting is enabled.
-    @objc public func isSpeakScreenEnabled() -> Bool {
+    @objc func isSpeakScreenEnabled() -> Bool {
         return UIAccessibility.isSpeakScreenEnabled
     }
     
     /// Notification name for changes to `Classic Invert` setting.
-    @objc public static var invertColorsStatusDidChangeNotification: String {
+    @objc static var invertColorsStatusDidChangeNotification: String {
         return UIAccessibility.invertColorsStatusDidChangeNotification.rawValue
     }
     
     /// Whether `Classic Invert` setting is enabled.
-    @objc public func isInvertColorsEnabled() -> Bool {
+    @objc func isInvertColorsEnabled() -> Bool {
         return UIAccessibility.isInvertColorsEnabled
     }
     
     /// Notification name for changes to `Reduce Motion` setting.
-    @objc public static var reduceMotionStatusDidChangeNotification: String {
+    @objc static var reduceMotionStatusDidChangeNotification: String {
         return UIAccessibility.reduceMotionStatusDidChangeNotification.rawValue
     }
     
     /// Whether `Reduce Motion` setting is enabled.
-    @objc public func isReduceMotionEnabled() -> Bool {
+    @objc func isReduceMotionEnabled() -> Bool {
         return UIAccessibility.isReduceMotionEnabled
     }
     
     /// Notification name for changes to `Bold Text` setting.
-    @objc public static var boldTextStatusDidChangeNotification: String {
+    @objc static var boldTextStatusDidChangeNotification: String {
         return UIAccessibility.boldTextStatusDidChangeNotification.rawValue
     }
     
     /// Whether `Bold Text` setting is enabled.
-    @objc public func isBoldTextEnabled() -> Bool {
+    @objc func isBoldTextEnabled() -> Bool {
         return UIAccessibility.isBoldTextEnabled
     }
     
     /// Notification name for changes to `Increase Contrast` setting.
-    @objc public static var darkerSystemColorsStatusDidChangeNotification: String {
+    @objc static var darkerSystemColorsStatusDidChangeNotification: String {
         return UIAccessibility.darkerSystemColorsStatusDidChangeNotification.rawValue
     }
     
     /// Whether `Increase Contrast` setting is enabled.
-    @objc public func isDarkerSystemColorsEnabled() -> Bool {
+    @objc func isDarkerSystemColorsEnabled() -> Bool {
         return UIAccessibility.isDarkerSystemColorsEnabled
     }
     
     /// Notification name for changes to `On/Off Labels` setting.
-    @objc public static var onOffSwitchLabelsDidChangeNotification: String {
+    @objc static var onOffSwitchLabelsDidChangeNotification: String {
         return UIAccessibility.onOffSwitchLabelsDidChangeNotification.rawValue
     }
     
     /// Whether `On/Off Labels` setting is enabled.
-    @objc public func isOnOffSwitchLabelsEnabled() -> Bool {
+    @objc func isOnOffSwitchLabelsEnabled() -> Bool {
         return UIAccessibility.isOnOffSwitchLabelsEnabled
     }
     
     /// Notification name for changes to `Auto-Play Animated Images` setting.
     @available(iOS 18.0, *)
-    @objc public static var animatedImagesAutoPlayStatusDidChangeNotification: String {
+    @objc static var animatedImagesAutoPlayStatusDidChangeNotification: String {
         return AccessibilitySettings.animatedImagesEnabledDidChangeNotification.rawValue
     }
     
     /// Whether `Auto-Play Animated Images` setting is enabled.
     ///
     /// Defaults to `true` on iOS versions earlier than 18.
-    @objc public func isAnimatedImagesAutoPlayEnabled() -> Bool {
+    @objc func isAnimatedImagesAutoPlayEnabled() -> Bool {
         if #available(iOS 18.0, *) {
             return AccessibilitySettings.animatedImagesEnabled
         }
@@ -186,25 +186,25 @@ public class AccessibilityFeatures: NSObject {
     }
     
     /// Notification name for changes to `Auto-Play Video Previews` setting.
-    @objc public static var videosAutoPlayStatusDidChangeNotification: String {
+    @objc static var videosAutoPlayStatusDidChangeNotification: String {
         return UIAccessibility.videoAutoplayStatusDidChangeNotification.rawValue
     }
     
     /// Whether `Auto-Play Video Previews` setting is enabled.
-    @objc public func isVideosAutoPlayEnabled() -> Bool {
+    @objc func isVideosAutoPlayEnabled() -> Bool {
         return UIAccessibility.isVideoAutoplayEnabled
     }
     
     /// Notification name for changes to `Prefer Non-Blinking Cursor` setting.
     @available(iOS 18.0, *)
-    @objc public static var deterministicCursorStatusDidChangeNotification: String {
+    @objc static var deterministicCursorStatusDidChangeNotification: String {
         return AccessibilitySettings.prefersNonBlinkingTextInsertionIndicatorDidChangeNotification.rawValue
     }
     
     /// Whether `Prefer Non-Blinking Cursor` setting is enabled.
     ///
     /// Defaults to `false` on iOS versions earlier than 18.
-    @objc public func isDeterministicCursorEnabled() -> Bool {
+    @objc func isDeterministicCursorEnabled() -> Bool {
         if #available(iOS 18.0, *) {
             return AccessibilitySettings.prefersNonBlinkingTextInsertionIndicator
         }

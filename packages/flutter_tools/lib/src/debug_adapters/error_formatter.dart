@@ -12,18 +12,26 @@ typedef _OutputSender =
       int? variablesReference,
     });
 
-/// A formatter for improving the display of Flutter structured errors over DAP.
+/// Deserializes and formats a Flutter structured error.
 ///
-/// The formatter deserializes a `Flutter.Error` event and produces output
-/// similar to the `renderedErrorText` field, but may include ansi color codes
-/// to provide improved formatting (such as making stack frames from non-user
-/// code faint) if the client indicated support.
+/// Produces output similar to the `renderedErrorText` field, but may include
+/// ansi color codes to provide improved formatting (such as making stack frames
+/// from non-user code faint) if the client indicated support.
 ///
 /// Lines that look like stack frames will be marked so they can be parsed by
 /// the base adapter and attached as `Source`s to allow them to be clickable
 /// in the client.
+///
+/// If the error contains a `DevToolsDeepLinkProperty` node, its URL will be
+/// extracted into [devToolsDeepLinkUrl].
 class FlutterErrorFormatter {
   final batchedOutput = <_BatchedOutput>[];
+
+  /// The text of the ErrorSummary node, if exists.
+  String? errorSummary;
+
+  /// The url of any DevTools deep link node.
+  String? devToolsDeepLinkUrl;
 
   /// Formats a Flutter error.
   ///
@@ -89,6 +97,14 @@ class FlutterErrorFormatter {
   /// Writes [node] to the output using [indent], recursing unless [recursive]
   /// is `false`.
   void _writeNode(_ErrorNode node, {int indent = 0, bool recursive = true}) {
+    if (node.type == _DiagnosticsNodeType.ErrorSummary) {
+      // Probably there is only one error summary, but keep the first
+      // (outer-most) if not.
+      errorSummary ??= node.description;
+    } else if (node.type == _DiagnosticsNodeType.DevToolsDeepLinkProperty) {
+      _parseDevToolsDeepLink(node);
+    }
+
     // Errors, summaries and lines starting "Exception:" are marked as errors so
     // they go to stderr instead of stdout (this may cause the client to colour
     // them like errors).
@@ -138,6 +154,17 @@ class FlutterErrorFormatter {
       );
     }
   }
+
+  /// Parse the DevTools deep link URL out of a
+  /// [_DiagnosticsNodeType.DevToolsDeepLinkProperty] node.
+  void _parseDevToolsDeepLink(_ErrorNode node) {
+    assert(node.type == _DiagnosticsNodeType.DevToolsDeepLinkProperty);
+    if (node.value case final url?) {
+      // Probably there is only one deep link, but keep the first
+      // (outer-most) if not.
+      devToolsDeepLinkUrl ??= url;
+    }
+  }
 }
 
 /// A container for output to be sent to the client.
@@ -160,7 +187,7 @@ enum _DiagnosticsNodeLevel { error, summary }
 
 enum _DiagnosticsNodeStyle { flat }
 
-enum _DiagnosticsNodeType { DiagnosticsBlock }
+enum _DiagnosticsNodeType { ErrorSummary, DevToolsDeepLinkProperty, DiagnosticsBlock }
 
 class _ErrorData extends _ErrorNode {
   _ErrorData(super.data);
@@ -182,6 +209,7 @@ class _ErrorNode {
   bool get showName => data['showName'] != false;
   _DiagnosticsNodeStyle? get style => asEnum('style', _DiagnosticsNodeStyle.values);
   _DiagnosticsNodeType? get type => asEnum('type', _DiagnosticsNodeType.values);
+  String? get value => asString('value');
 
   String? asString(String field) {
     final Object? value = data[field];

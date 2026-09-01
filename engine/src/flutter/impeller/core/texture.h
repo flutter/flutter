@@ -55,6 +55,11 @@ class Texture {
   /// modified and the mipmaps hasn't been regenerated.
   bool NeedsMipmapGeneration() const;
 
+  /// Returns true if `slice` addresses a valid layer for this texture's type
+  /// (0 for 2D textures, 0-5 for cube maps, and below the descriptor's
+  /// `array_layer_count` for 2D array textures).
+  bool IsSliceValid(size_t slice) const;
+
  protected:
   explicit Texture(TextureDescriptor desc);
 
@@ -71,8 +76,6 @@ class Texture {
  private:
   const TextureDescriptor desc_;
   bool is_opaque_ = false;
-
-  bool IsSliceValid(size_t slice) const;
 
   Texture(const Texture&) = delete;
 

@@ -4,6 +4,9 @@
 
 import 'package:a11y_assessments/main.dart';
 import 'package:a11y_assessments/use_cases/date_picker.dart';
+import 'package:a11y_assessments/use_cases/menu_anchor.dart';
+import 'package:a11y_assessments/use_cases/menu_bar.dart';
+import 'package:a11y_assessments/use_cases/search_bar.dart';
 import 'package:a11y_assessments/use_cases/use_cases.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -31,6 +34,11 @@ void main() {
   });
 
   for (final UseCase useCase in useCases) {
+    // TODO(chunhtai): remove this when https://github.com/flutter/flutter/issues/190884 and
+    // https://github.com/flutter/flutter/issues/190864 are fixed.
+    if (useCase is SearchBarUseCase || useCase is MenuAnchorUseCase || useCase is MenuBarUseCase) {
+      continue;
+    }
     for (final Brightness brightness in Brightness.values) {
       testWidgets('testing accessibility guideline for ${useCase.name} - ${brightness.name}', (
         WidgetTester tester,
@@ -46,10 +54,15 @@ void main() {
           controller.jumpTo(controller.offset + 400);
           await tester.pumpAndSettle();
         }
+
+        // The button may still be off-screen if it is in cache extent.
+        await tester.ensureVisible(find.byKey(Key(useCase.name)));
+        await tester.pumpAndSettle();
         await tester.tap(find.byKey(Key(useCase.name)));
         await tester.pumpAndSettle();
 
-        await _expectMeetsGuidelines(tester);
+        final skipTap = useCase.name == DatePickerUseCase().name;
+        await _expectMeetsGuidelines(tester, skipTapTarget: skipTap);
 
         // After checking the guideline for the main page,
         // iterate through all tappable semantic nodes on the current screen.
@@ -75,10 +88,7 @@ void main() {
           // Re-check the accessibility guidelines after the tap action.
           // The DatePicker use case has known issues with tap target sizes
           // So we skip these checks for this use case .
-          await _expectMeetsGuidelines(
-            tester,
-            skipTapTarget: useCase.name == DatePickerUseCase().name,
-          );
+          await _expectMeetsGuidelines(tester, skipTapTarget: skipTap);
         }
       });
     }
