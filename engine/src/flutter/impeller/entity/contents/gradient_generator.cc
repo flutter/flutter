@@ -14,21 +14,61 @@
 
 namespace impeller {
 
+namespace {
+
+std::vector<uint8_t> ToR32G32B32A32FloatBytes(
+    const std::vector<Color>& colors) {
+  static_assert(sizeof(Color) == sizeof(float) * 4,
+                "Color must be exactly 4 floats with no padding.");
+  static_assert(std::is_standard_layout_v<Color>,
+                "Color must be standard layout.");
+  // `Color` is a standard-layout struct of 4 contiguous 32-bit floats (RGBA),
+  // directly matching the `kR32G32B32A32Float` pixel format layout.
+  const auto* bytes = reinterpret_cast<const uint8_t*>(colors.data());
+  return std::vector<uint8_t>(bytes, bytes + colors.size() * sizeof(Color));
+}
+
+std::vector<uint8_t> ToR8G8B8A8Bytes(const std::vector<Color>& colors) {
+  std::vector<uint8_t> bytes;
+  bytes.reserve(colors.size() * 4);
+  for (const auto& color : colors) {
+    auto converted = color.ToR8G8B8A8();
+    bytes.push_back(converted[0]);
+    bytes.push_back(converted[1]);
+    bytes.push_back(converted[2]);
+    bytes.push_back(converted[3]);
+  }
+  return bytes;
+}
+
+}  // namespace
+
 std::shared_ptr<Texture> CreateGradientTexture(
     const GradientData& gradient_data,
     const std::shared_ptr<impeller::Context>& context) {
-  if (gradient_data.texture_size == 0) {
+  if (gradient_data.colors.empty()) {
     FML_DLOG(ERROR) << "Invalid gradient data.";
     return nullptr;
   }
 
   impeller::TextureDescriptor texture_descriptor;
   texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
-  texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
-  texture_descriptor.size = {gradient_data.texture_size, 1};
+  texture_descriptor.size = ISize(gradient_data.colors.size(), 1);
 
-  return CreateTexture(texture_descriptor, gradient_data.color_bytes, context,
-                       "Gradient");
+  bool is_wide_gamut =
+      std::any_of(gradient_data.colors.begin(), gradient_data.colors.end(),
+                  [](const Color& c) { return c.IsWideGamut(); });
+
+  std::vector<uint8_t> bytes;
+  if (is_wide_gamut) {
+    texture_descriptor.format = PixelFormat::kR32G32B32A32Float;
+    bytes = ToR32G32B32A32FloatBytes(gradient_data.colors);
+  } else {
+    texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
+    bytes = ToR8G8B8A8Bytes(gradient_data.colors);
+  }
+
+  return CreateTexture(texture_descriptor, bytes, context, "Gradient");
 }
 
 std::vector<StopData> CreateGradientColors(const std::vector<Color>& colors,
