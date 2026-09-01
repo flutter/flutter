@@ -10,6 +10,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
@@ -212,6 +213,7 @@ abstract class FlutterCommand extends Command<void> {
       _explicitToolContext?.projectFactory ?? globals.projectFactory;
   Analytics get _analytics => runner?.analytics ?? globals.analytics;
   Cache get _cache => _explicitToolContext?.cache ?? globals.cache;
+  Config get _config => _explicitToolContext?.config ?? globals.config;
   FlutterVersion get _flutterVersion =>
       _explicitToolContext?.flutterVersion ?? globals.flutterVersion;
   FileSystemUtils get _fsUtils => _explicitToolContext?.fileSystemUtils ?? globals.fsUtils;
@@ -1151,6 +1153,7 @@ abstract class FlutterCommand extends Command<void> {
 
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
+    final String linuxGtkVersion = _resolveLinuxGtkVersion();
 
     final bool useCdn = getValue(WebOptions.webResourcesCdn);
     var useLocalWebSdk = false;
@@ -1176,6 +1179,7 @@ abstract class FlutterCommand extends Command<void> {
         dartDefines.add('$define=$value');
       }
     }
+    _addLinuxGtkToDartDefines(linuxGtkVersion, dartDefines);
     _addFlutterVersionToDartDefines(_flutterVersion, dartDefines);
     _addFeatureFlagsToDartDefines(dartDefines);
 
@@ -1209,7 +1213,72 @@ abstract class FlutterCommand extends Command<void> {
       assumeInitializeFromDillUpToDate: getValue(BuildInfoOptions.assumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
       webEnableHotReload: true,
+      linuxGtkVersion: linuxGtkVersion,
     );
+  }
+
+  String _resolveLinuxGtkVersion() {
+    if (_wasParsed('linux-gtk')) {
+      return stringArg('linux-gtk')!;
+    }
+
+    final String? projectLinuxGtkVersion = project.manifest.linuxGtkDefault;
+    if (projectLinuxGtkVersion != null) {
+      return projectLinuxGtkVersion;
+    }
+
+    final Object? globalLinuxGtkVersion = _config.getValue('linux-gtk-default');
+    if (globalLinuxGtkVersion == null) {
+      return 'gtk3';
+    }
+    if (globalLinuxGtkVersion is! String) {
+      throwToolExit(
+        'The "linux-gtk-default" property in "${_config.configPath}" '
+        'must be a string, but got $globalLinuxGtkVersion (${globalLinuxGtkVersion.runtimeType}).',
+      );
+    }
+    if (globalLinuxGtkVersion != 'gtk3' && globalLinuxGtkVersion != 'gtk4') {
+      throwToolExit(
+        'The "linux-gtk-default" property in "${_config.configPath}" '
+        'must be either "gtk3" or "gtk4", but got "$globalLinuxGtkVersion".',
+      );
+    }
+    return globalLinuxGtkVersion;
+  }
+
+  bool _wasParsed(String optionName) {
+    if (!argParser.options.containsKey(optionName)) {
+      return false;
+    }
+    return argResults?.options.contains(optionName) ?? false;
+  }
+
+  void _addLinuxGtkToDartDefines(String linuxGtkVersion, List<String> dartDefines) {
+    final String? explicitLinuxGtkDefine = _getDartDefineValue(dartDefines, kLinuxGtkDartDefine);
+    if (explicitLinuxGtkDefine == null) {
+      dartDefines.add('$kLinuxGtkDartDefine=$linuxGtkVersion');
+      return;
+    }
+    if (explicitLinuxGtkDefine != linuxGtkVersion) {
+      throwToolExit(
+        '$kLinuxGtkDartDefine=$explicitLinuxGtkDefine conflicts with '
+        '--linux-gtk=$linuxGtkVersion. Remove the --${FlutterOptions.kDartDefinesOption} '
+        'override or make it match --linux-gtk.',
+      );
+    }
+  }
+
+  String? _getDartDefineValue(List<String> dartDefines, String key) {
+    final keyPrefix = '$key=';
+    for (final String define in dartDefines.reversed) {
+      if (define == key) {
+        return '';
+      }
+      if (define.startsWith(keyPrefix)) {
+        return define.substring(keyPrefix.length);
+      }
+    }
+    return null;
   }
 
   /// Throws a [ToolExit] if [define], a dart-define key reserved by the
@@ -1300,10 +1369,15 @@ abstract class FlutterCommand extends Command<void> {
   @override
   Future<void> run() {
     final DateTime startTime = _clock.now();
+    final overrides = <Type, Generator>{FlutterCommand: () => this};
+    final String? linuxDirOverride = _linuxDirectoryOverride;
+    if (linuxDirOverride != null) {
+      overrides[LinuxProjectDirectory] = () => LinuxProjectDirectory(linuxDirOverride);
+    }
 
     return context.run<void>(
       name: 'command',
-      overrides: <Type, Generator>{FlutterCommand: () => this},
+      overrides: overrides,
       body: () async {
         if (_usesFatalWarnings) {
           _logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
@@ -1333,6 +1407,17 @@ abstract class FlutterCommand extends Command<void> {
         }
       },
     );
+  }
+
+  String? get _linuxDirectoryOverride {
+    if (!argParser.options.containsKey('linux-dir')) {
+      return null;
+    }
+    final String? value = stringArg('linux-dir');
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    return value.trim();
   }
 
   @override

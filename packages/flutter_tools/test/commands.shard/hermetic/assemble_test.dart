@@ -87,6 +87,29 @@ void main() {
     expect(logger.traceText, contains('build succeeded.'));
   });
 
+  testWithoutContext('flutter assemble includes FLUTTER_LINUX_GTK from dart defines', () async {
+    final CommandRunner<void> commandRunner = createTestCommandRunner(
+      AssembleCommand(
+        featureFlags: TestFeatureFlags(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          expect(environment.defines, containsPair('FLUTTER_LINUX_GTK', 'gtk4'));
+        }),
+        toolContext: toolContext,
+      ),
+    );
+    await commandRunner.run(<String>[
+      'assemble',
+      '-o Output',
+      '--dart-define=FLUTTER_LINUX_GTK=gtk4',
+      'debug_macos_bundle_flutter_assets',
+    ]);
+
+    expect(logger.traceText, contains('build succeeded.'));
+  });
+
   testWithoutContext('flutter assemble can parse empty defines', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
