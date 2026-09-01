@@ -429,7 +429,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   }
 
   void markAllViewsNeedRender() {
-    invoke(onMarkAllViewsNeedRender, _onMarkAllViewsNeedRenderZone);
+    invoke(_onMarkAllViewsNeedRender, _onMarkAllViewsNeedRenderZone);
   }
 
   @override
