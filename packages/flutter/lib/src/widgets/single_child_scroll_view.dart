@@ -22,7 +22,6 @@ import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
-import 'scroll_position.dart';
 import 'scroll_view.dart';
 import 'scrollable.dart';
 
@@ -345,6 +344,8 @@ class _SingleChildViewportElement extends SingleChildRenderObjectElement
   _SingleChildViewportElement(_SingleChildViewport super.widget);
 }
 
+typedef _ScrollRange = ({double viewport, double min, double max});
+
 class _RenderSingleChildViewport extends RenderBox
     with RenderObjectWithChildMixin<RenderBox>
     implements RenderAbstractViewport {
@@ -384,6 +385,8 @@ class _RenderSingleChildViewport extends RenderBox
     if (attached) {
       _offset.addListener(_hasScrolled);
     }
+    // The new offset has not been reconciled against the range yet.
+    _reconciledRange = null;
     markNeedsLayout();
   }
 
@@ -453,6 +456,9 @@ class _RenderSingleChildViewport extends RenderBox
     });
   }
 
+  // The scroll range the offset was last reconciled against.
+  _ScrollRange? _reconciledRange;
+
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     return switch (axis) {
       Axis.horizontal => constraints.heightConstraints(),
@@ -504,23 +510,26 @@ class _RenderSingleChildViewport extends RenderBox
       size = constraints.constrain(child!.size);
     }
 
-    // Reconcile an out-of-range offset only while nothing is driving it. During a
-    // drag or a ballistic simulation the offset is allowed past the edge if the
-    // physics says so, and correcting here would discard that overscroll: an
-    // unrelated relayout — a row reacting to hover, content growing — would cut
-    // the gesture short.
-    final ViewportOffset currentOffset = offset;
-    final bool driven = currentOffset is ScrollPosition && currentOffset.isScrollingNotifier.value;
-    if (offset.hasPixels && !driven) {
-      if (offset.pixels > _maxScrollExtent) {
-        offset.correctBy(_maxScrollExtent - offset.pixels);
-      } else if (offset.pixels < _minScrollExtent) {
-        offset.correctBy(_minScrollExtent - offset.pixels);
+    final _ScrollRange range = (
+      viewport: _viewportExtent,
+      min: _minScrollExtent,
+      max: _maxScrollExtent,
+    );
+
+    // Reconcile an out-of-range offset only when the range moved under it. A relayout that leaves
+    // the range alone must not touch an offset the physics is holding past the edge: a row
+    // reacting to hover or a label ticking would otherwise cut an overscroll short.
+    if (offset.hasPixels && range != _reconciledRange) {
+      if (offset.pixels > range.max) {
+        offset.correctBy(range.max - offset.pixels);
+      } else if (offset.pixels < range.min) {
+        offset.correctBy(range.min - offset.pixels);
       }
     }
+    _reconciledRange = range;
 
-    offset.applyViewportDimension(_viewportExtent);
-    offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
+    offset.applyViewportDimension(range.viewport);
+    offset.applyContentDimensions(range.min, range.max);
   }
 
   Offset get _paintOffset => _paintOffsetForPosition(offset.pixels);
