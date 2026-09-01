@@ -75,9 +75,12 @@ class ImagePrecacheDispatcher : public virtual flutter::DlOpReceiver,
 
  private:
   void Precache(const sk_sp<const flutter::DlImage>& image) {
-    if (image) {
-      image->asImpellerImage()->GetCachedTexture(context_);
+    if (!image) {
+      return;
     }
+    auto impeller_image = image->asImpellerImage();
+    FML_DCHECK(impeller_image);
+    impeller_image->GetCachedTexture(context_);
   }
 
   impeller::ContentContext& context_;
