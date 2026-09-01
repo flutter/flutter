@@ -224,3 +224,28 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] *Validation*: Golden tests verified to ensure zero pixel-level regressions on Android canvases. **Strict Golden Rule**: Local engine builds must be tested against the baseline framework. Only the baseline (without local engine build) is permitted to update goldens. If a local engine build fails a golden test, you must fix the C++ native implementation in the local engine—you cannot update the golden image to match the flawed output.
     - [x] *Validation*: Core integration tests (`dev/integration_tests/*`) pass unconditionally.
     - [x] *Review*: Any deviations or failing tests are caught, adversarially root-caused, and pushed back into the specific atomic branches for this phase before proceeding.
+
+## Phase 6: Complete Legacy Purge & Final JNI Cutover
+- [ ] **6.1 JNI Registration Cutover**:
+    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-6.1-jni-registration-cutover`
+    - [ ] Native JNI methods in `library_loader.cc` and `FlutterJNI` registration table rewired directly to `FlutterEmbedderNative` and `JniRouter`.
+    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [ ] *Validation*: `ninja -C out/host_debug_unopt flutter_embedder_native_unittests` compiles successfully AND all 201 host unit tests pass.
+- [ ] **6.2 Legacy Class Purge**:
+    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-6.2-legacy-class-purge`
+    - [ ] `android_shell_holder.{h,cc}`, `platform_view_android.{h,cc}`, `android_surface*`, `android_context*`, `image_external_texture*`, `surface_texture_external_texture*`, `vsync_waiter_android.{h,cc}`, `android_display.{h,cc}`, and legacy subdirectories purged.
+    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [ ] *Validation*: Repository file tree clean; no obsolete headers referenced.
+- [ ] **6.3 Final GN Integration & Dependency Severing**:
+    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-6.3-final-gn-integration`
+    - [ ] `flutter_shell_native_src` target removed; `flutter_shell_native` depends solely on `:flutter_embedder_native_src`; internal UI/Skia/Flow/Runtime deps severed.
+    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR (including Perfetto trace instrumentation verification) and feedback addressed.
+    - [ ] *Validation*: `gn gen` and `ninja -C out/host_debug_unopt` compile cleanly with zero target leaks.
+- [ ] **6.4 Parity Checkpoint & Verification**:
+    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-6-parity-checkpoint`
+    - [ ] *Validation*: Host unittests (`flutter_embedder_native_unittests`, `embedder_unittests`, `embedder_proctable_unittests`) - 100% passed.
+    - [ ] *Validation*: Framework unit tests (`flutter test`) - 100% passed.
+    - [ ] *Validation*: Golden tests verified to ensure zero pixel-level regressions on Android canvases. **Strict Golden Rule**: Local engine builds must be tested against the baseline framework. Only the baseline (without local engine build) is permitted to update goldens. If a local engine build fails a golden test, you must fix the C++ native implementation in the local engine—you cannot update the golden image to match the flawed output.
+    - [ ] *Validation*: Core integration tests (`dev/integration_tests/android_views`, `dev/integration_tests/channels`, `dev/integration_tests/platform_interaction`, `dev/integration_tests/android_engine_test`) pass unconditionally.
+    - [ ] *Validation*: DeviceLab tests (`android_lifecycles_test.dart`, `hybrid_android_views_integration_test.dart`, `android_semantics_integration_test.dart`) pass unconditionally.
+    - [ ] *Review*: Autonomous Adversarial Review Loop executed natively on PR with reidbaker-agent.
