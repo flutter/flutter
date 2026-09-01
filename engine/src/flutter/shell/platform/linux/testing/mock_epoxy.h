@@ -29,6 +29,18 @@ class MockEpoxy {
                EGLClientBuffer buffer,
                const EGLint* attrib_list));
   MOCK_METHOD(EGLBoolean, eglDestroyImageKHR, (EGLDisplay dpy, EGLImage image));
+  MOCK_METHOD(const char*, eglQueryString, (EGLDisplay dpy, EGLint name));
+  MOCK_METHOD(EGLSyncKHR,
+              eglCreateSyncKHR,
+              (EGLDisplay dpy, EGLenum type, const EGLint* attrib_list));
+  MOCK_METHOD(EGLBoolean, eglDestroySyncKHR, (EGLDisplay dpy, EGLSyncKHR sync));
+  MOCK_METHOD(
+      EGLint,
+      eglClientWaitSyncKHR,
+      (EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout));
+  MOCK_METHOD(EGLint,
+              eglWaitSyncKHR,
+              (EGLDisplay dpy, EGLSyncKHR sync, EGLint flags));
   MOCK_METHOD(void, glClearColor, (GLfloat r, GLfloat g, GLfloat b, GLfloat a));
   MOCK_METHOD(void,
               glBlitFramebuffer,

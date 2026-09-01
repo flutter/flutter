@@ -146,7 +146,7 @@ TEST_F(FlOpenGLFrameTest, ShareableFrameSynchronized) {
 
   g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new(/*shareable=*/TRUE);
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
+      fl_framebuffer_new(GL_RGBA, width, height, TRUE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
@@ -158,9 +158,61 @@ TEST_F(FlOpenGLFrameTest, ShareableFrameSynchronized) {
                         .size = {width, height}};
   const FlutterLayer* layers[1] = {&layer};
 
-  EXPECT_CALL(epoxy, glFinish());
+  // Rendering the frame takes a fence rather than waiting for the rendering to
+  // complete, so this thread can carry on rendering the next frame.
+  EXPECT_CALL(epoxy,
+              eglCreateSyncKHR(::testing::_, EGL_SYNC_FENCE_KHR, ::testing::_));
+  EXPECT_CALL(epoxy, glFinish()).Times(0);
 
   fl_opengl_frame_composite(frame, compositor, layers, 1);
+
+  // Drawing the frame waits for that fence. GTK draws using the window's paint
+  // context rather than the current one, so the wait can't be left to the GPU.
+  EXPECT_CALL(epoxy, eglClientWaitSyncKHR)
+      .WillOnce(::testing::Return(EGL_CONDITION_SATISFIED_KHR));
+  EXPECT_CALL(epoxy, eglWaitSyncKHR).Times(0);
+
+  int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, width);
+  g_autofree unsigned char* image_data =
+      static_cast<unsigned char*>(g_malloc(height * stride));
+  cairo_surface_t* surface = cairo_image_surface_create_for_data(
+      image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
+  cairo_t* cr = cairo_create(surface);
+  EXPECT_TRUE(fl_opengl_frame_draw(frame, cr, nullptr, 1, width, height));
+  cairo_destroy(cr);
+  cairo_surface_destroy(surface);
+}
+
+// Checks a shareable frame is still synchronized on drivers without fences, by
+// waiting for the rendering to complete instead.
+TEST_F(FlOpenGLFrameTest, ShareableFrameSynchronizedWithoutFences) {
+  constexpr size_t width = 100;
+  constexpr size_t height = 100;
+
+  g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new(/*shareable=*/TRUE);
+  g_autoptr(FlFramebuffer) framebuffer =
+      fl_framebuffer_new(GL_RGBA, width, height, TRUE);
+  FlutterBackingStore backing_store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {
+          .type = kFlutterOpenGLTargetTypeFramebuffer,
+          .framebuffer = {.target = GL_RGBA8, .user_data = framebuffer}}};
+  FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
+                        .backing_store = &backing_store,
+                        .offset = {0, 0},
+                        .size = {width, height}};
+  const FlutterLayer* layers[1] = {&layer};
+
+  // The compositor checks for fence support when it is created.
+  EXPECT_CALL(epoxy, eglQueryString(::testing::_, EGL_EXTENSIONS))
+      .WillRepeatedly(::testing::Return("EGL_KHR_image_base"));
+  g_autoptr(FlCompositorOpenGL) unfenced_compositor =
+      fl_compositor_opengl_new(opengl_manager);
+
+  EXPECT_CALL(epoxy, eglCreateSyncKHR).Times(0);
+  EXPECT_CALL(epoxy, glFinish());
+
+  fl_opengl_frame_composite(frame, unfenced_compositor, layers, 1);
 }
 
 // Checks a frame that is copied into CPU memory does not pay for a second
@@ -184,6 +236,7 @@ TEST_F(FlOpenGLFrameTest, UnshareableFrameNotSynchronizedTwice) {
   const FlutterLayer* layers[1] = {&layer};
 
   EXPECT_CALL(epoxy, glFinish()).Times(0);
+  EXPECT_CALL(epoxy, eglCreateSyncKHR).Times(0);
 
   fl_opengl_frame_composite(frame, compositor, layers, 1);
 }

@@ -9,6 +9,7 @@
 
 #include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
+#include "flutter/shell/platform/linux/fl_gl_fence.h"
 
 struct _FlOpenGLFrame {
   GObject parent_instance;
@@ -21,6 +22,11 @@ struct _FlOpenGLFrame {
 
   // Copy of the current frame in CPU memory (only set if shareable is FALSE).
   uint8_t* pixels;
+
+  // Reached when the current frame has finished rendering (only set if
+  // shareable is TRUE, as that is the only case the frame is used from another
+  // context).
+  FlGLFence* fence;
 };
 
 G_DEFINE_TYPE(FlOpenGLFrame, fl_opengl_frame, G_TYPE_OBJECT)
@@ -28,6 +34,7 @@ G_DEFINE_TYPE(FlOpenGLFrame, fl_opengl_frame, G_TYPE_OBJECT)
 static void fl_opengl_frame_dispose(GObject* object) {
   FlOpenGLFrame* self = FL_OPENGL_FRAME(object);
 
+  g_clear_object(&self->fence);
   g_clear_object(&self->framebuffer);
 
   G_OBJECT_CLASS(fl_opengl_frame_parent_class)->dispose(object);
@@ -122,9 +129,20 @@ void fl_opengl_frame_composite(FlOpenGLFrame* self,
     // partially rendered frame, and drivers can fail in ways that leave the
     // context unusable.
     //
+    // Take a fence and wait for it when the frame is drawn instead of waiting
+    // here, so this thread can carry on rendering the next frame. By the time
+    // GTK draws this one the rendering has normally already completed.
+    //
     // The frame is copied out of the GPU with glReadPixels() when it can't be
     // shared, which already waits for the rendering to complete.
-    glFinish();
+    g_clear_object(&self->fence);
+    if (fl_compositor_opengl_can_fence(compositor)) {
+      self->fence =
+          fl_gl_fence_new(fl_compositor_opengl_get_opengl_manager(compositor));
+    } else {
+      // No fences on this driver, wait for the rendering here instead.
+      glFinish();
+    }
   }
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
@@ -157,6 +175,15 @@ gboolean fl_opengl_frame_draw(FlOpenGLFrame* self,
   }
 
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
+    // Wait for the frame to have finished rendering before GTK reads it. GTK
+    // draws the frame using the window's paint context rather than the one
+    // that is current here, so the wait can't be left to the GPU - it would
+    // only order the context it was issued in.
+    if (self->fence != nullptr) {
+      fl_gl_fence_wait(self->fence);
+      g_clear_object(&self->fence);
+    }
+
     g_autoptr(FlFramebuffer) sibling =
         fl_framebuffer_create_sibling(self->framebuffer);
     gdk_cairo_draw_from_gl(cr, window, fl_framebuffer_get_texture_id(sibling),

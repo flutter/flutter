@@ -162,3 +162,35 @@ gboolean fl_opengl_manager_can_blit(FlOpenGLManager* self) {
          (epoxy_gl_version() >= 30 ||
           epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
 }
+
+gboolean fl_opengl_manager_has_extension(FlOpenGLManager* self,
+                                         const gchar* extension) {
+  g_return_val_if_fail(FL_IS_OPENGL_MANAGER(self), FALSE);
+
+  if (self->display == EGL_NO_DISPLAY) {
+    return FALSE;
+  }
+
+  const char* extensions = eglQueryString(self->display, EGL_EXTENSIONS);
+  if (extensions == nullptr) {
+    return FALSE;
+  }
+
+  // Match whole entries in the space separated list, so that an extension isn't
+  // reported because its name is a prefix of another one.
+  size_t length = strlen(extension);
+  const char* e = extensions;
+  while ((e = strstr(e, extension)) != nullptr) {
+    if ((e == extensions || e[-1] == ' ') &&
+        (e[length] == '\0' || e[length] == ' ')) {
+      return TRUE;
+    }
+    e += length;
+  }
+
+  return FALSE;
+}
+
+gboolean fl_opengl_manager_can_fence(FlOpenGLManager* self) {
+  return fl_opengl_manager_has_extension(self, "EGL_KHR_fence_sync");
+}

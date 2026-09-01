@@ -106,6 +106,32 @@ EGLContext fl_opengl_manager_get_context(FlOpenGLManager* manager);
  */
 gboolean fl_opengl_manager_can_blit(FlOpenGLManager* manager);
 
+/**
+ * fl_opengl_manager_has_extension:
+ * @manager: an #FlOpenGLManager.
+ * @extension: the name of an EGL extension, e.g. "EGL_KHR_fence_sync".
+ *
+ * Checks whether @extension is supported by the EGL display the contexts are
+ * created on.
+ *
+ * Returns: %TRUE if @extension is supported.
+ */
+gboolean fl_opengl_manager_has_extension(FlOpenGLManager* manager,
+                                         const gchar* extension);
+
+/**
+ * fl_opengl_manager_can_fence:
+ * @manager: an #FlOpenGLManager.
+ *
+ * Checks whether fences can be used to synchronize rendering between OpenGL
+ * contexts. Fences are an extension that may be missing on some drivers, so
+ * callers should fall back to waiting for the rendering to complete, e.g. with
+ * glFinish(), when this returns %FALSE.
+ *
+ * Returns: %TRUE if fences are available.
+ */
+gboolean fl_opengl_manager_can_fence(FlOpenGLManager* manager);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_OPENGL_MANAGER_H_

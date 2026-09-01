@@ -59,11 +59,26 @@ static MockConfig mock_config;
 static MockContext mock_context;
 static MockSurface mock_surface;
 static MockImage mock_image;
+typedef struct {
+  int dummy;
+} MockSync;
+static MockSync mock_sync;
 
 static EGLint mock_error = EGL_SUCCESS;
 
 MockEpoxy::MockEpoxy() {
   mock = this;
+
+  // Assume a driver that supports fences; tests that care override this.
+  ON_CALL(*this, eglQueryString(::testing::_, EGL_EXTENSIONS))
+      .WillByDefault(::testing::Return("EGL_KHR_fence_sync EGL_KHR_wait_sync"));
+  ON_CALL(*this, eglQueryString(::testing::_, ::testing::Ne(EGL_EXTENSIONS)))
+      .WillByDefault(::testing::Return(""));
+  ON_CALL(*this, eglCreateSyncKHR).WillByDefault(::testing::Return(&mock_sync));
+  ON_CALL(*this, eglDestroySyncKHR).WillByDefault(::testing::Return(EGL_TRUE));
+  ON_CALL(*this, eglClientWaitSyncKHR)
+      .WillByDefault(::testing::Return(EGL_CONDITION_SATISFIED_KHR));
+  ON_CALL(*this, eglWaitSyncKHR).WillByDefault(::testing::Return(EGL_TRUE));
 }
 
 MockEpoxy::~MockEpoxy() {
@@ -431,6 +446,31 @@ EGLBoolean _eglDestroyImageKHR(EGLDisplay dpy, EGLImage image) {
   return mock->eglDestroyImageKHR(dpy, image);
 }
 
+const char* _eglQueryString(EGLDisplay dpy, EGLint name) {
+  return mock->eglQueryString(dpy, name);
+}
+
+EGLSyncKHR _eglCreateSyncKHR(EGLDisplay dpy,
+                             EGLenum type,
+                             const EGLint* attrib_list) {
+  return mock->eglCreateSyncKHR(dpy, type, attrib_list);
+}
+
+EGLBoolean _eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync) {
+  return mock->eglDestroySyncKHR(dpy, sync);
+}
+
+EGLint _eglClientWaitSyncKHR(EGLDisplay dpy,
+                             EGLSyncKHR sync,
+                             EGLint flags,
+                             EGLTimeKHR timeout) {
+  return mock->eglClientWaitSyncKHR(dpy, sync, flags, timeout);
+}
+
+EGLint _eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags) {
+  return mock->eglWaitSyncKHR(dpy, sync, flags);
+}
+
 static GLuint bound_texture_2d;
 
 static std::map<GLenum, GLuint> framebuffer_renderbuffers;
@@ -792,6 +832,16 @@ EGLImageKHR (*epoxy_eglCreateImageKHR)(EGLDisplay dpy,
                                        EGLClientBuffer buffer,
                                        const EGLint* attrib_list);
 EGLBoolean (*epoxy_eglDestroyImageKHR)(EGLDisplay dpy, EGLImage image);
+const char* (*epoxy_eglQueryString)(EGLDisplay dpy, EGLint name);
+EGLSyncKHR (*epoxy_eglCreateSyncKHR)(EGLDisplay dpy,
+                                     EGLenum type,
+                                     const EGLint* attrib_list);
+EGLBoolean (*epoxy_eglDestroySyncKHR)(EGLDisplay dpy, EGLSyncKHR sync);
+EGLint (*epoxy_eglClientWaitSyncKHR)(EGLDisplay dpy,
+                                     EGLSyncKHR sync,
+                                     EGLint flags,
+                                     EGLTimeKHR timeout);
+EGLint (*epoxy_eglWaitSyncKHR)(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags);
 
 void (*epoxy_glAttachShader)(GLuint program, GLuint shader);
 void (*epoxy_glBindFramebuffer)(GLenum target, GLuint framebuffer);
@@ -891,6 +941,11 @@ static void library_init() {
   epoxy_eglSwapInterval = _eglSwapInterval;
   epoxy_eglCreateImageKHR = _eglCreateImageKHR;
   epoxy_eglDestroyImageKHR = _eglDestroyImageKHR;
+  epoxy_eglQueryString = _eglQueryString;
+  epoxy_eglCreateSyncKHR = _eglCreateSyncKHR;
+  epoxy_eglDestroySyncKHR = _eglDestroySyncKHR;
+  epoxy_eglClientWaitSyncKHR = _eglClientWaitSyncKHR;
+  epoxy_eglWaitSyncKHR = _eglWaitSyncKHR;
 
   epoxy_glAttachShader = _glAttachShader;
   epoxy_glBindFramebuffer = _glBindFramebuffer;
