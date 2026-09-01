@@ -8,6 +8,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+// NOLINTBEGIN(readability-identifier-naming)
+
 /* Primitive types that match up with Java equivalents. */
 typedef uint8_t jboolean; /* unsigned 8 bits */
 typedef int8_t jbyte;     /* signed 8 bits */
@@ -1720,5 +1722,7 @@ JNIEXPORT void JNI_OnUnload(JavaVM* vm, void* reserved);
 
 #define JNI_COMMIT 1 /* copy content, do not free buffer */
 #define JNI_ABORT 2  /* free buffer w/o copying back */
+
+// NOLINTEND(readability-identifier-naming)
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_JNI_INCLUDE_JNI_H_

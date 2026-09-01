@@ -1292,6 +1292,41 @@ typedef struct {
   /// If |has_constraints| is `true`, this must be greater than or equal to
   /// |min_height_constraint| and |height|.
   size_t max_height_constraint;
+  /// Top padding (e.g. status bar / notch).
+  double physical_padding_top;
+  /// Right padding.
+  double physical_padding_right;
+  /// Bottom padding (e.g. navigation bar / home indicator).
+  double physical_padding_bottom;
+  /// Left padding.
+  double physical_padding_left;
+  /// Top system gesture inset.
+  double physical_system_gesture_inset_top;
+  /// Right system gesture inset.
+  double physical_system_gesture_inset_right;
+  /// Bottom system gesture inset.
+  double physical_system_gesture_inset_bottom;
+  /// Left system gesture inset.
+  double physical_system_gesture_inset_left;
+  /// Touch slop.
+  double physical_touch_slop;
+  /// Top-left display corner radius.
+  double physical_display_corner_radius_top_left;
+  /// Top-right display corner radius.
+  double physical_display_corner_radius_top_right;
+  /// Bottom-right display corner radius.
+  double physical_display_corner_radius_bottom_right;
+  /// Bottom-left display corner radius.
+  double physical_display_corner_radius_bottom_left;
+  /// Number of display features.
+  size_t display_features_count;
+  /// Array of display features bounds [left, top, right, bottom] *
+  /// display_features_count.
+  const double* display_features_bounds;
+  /// Array of display feature types (int32_t) * display_features_count.
+  const int32_t* display_features_type;
+  /// Array of display feature states (int32_t) * display_features_count.
+  const int32_t* display_features_state;
 } FlutterWindowMetricsEvent;
 
 typedef struct {

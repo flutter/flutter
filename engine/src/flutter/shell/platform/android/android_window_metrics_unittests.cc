@@ -134,11 +134,22 @@ TEST(AndroidWindowMetricsMapperTest, BasicViewportMetricsTranslation) {
   metrics.physical_width = 1080.0;
   metrics.physical_height = 2400.0;
   metrics.physical_padding_top = 72.0;
+  metrics.physical_padding_right = 16.0;
   metrics.physical_padding_bottom = 48.0;
+  metrics.physical_padding_left = 16.0;
   metrics.physical_view_inset_top = 0.0;
   metrics.physical_view_inset_bottom = 200.0;
   metrics.physical_view_inset_left = 0.0;
   metrics.physical_view_inset_right = 0.0;
+  metrics.system_gesture_inset_top = 10.0;
+  metrics.system_gesture_inset_right = 20.0;
+  metrics.system_gesture_inset_bottom = 30.0;
+  metrics.system_gesture_inset_left = 40.0;
+  metrics.physical_touch_slop = 8.0;
+  metrics.physical_display_corner_radius_top_left = 12.0;
+  metrics.physical_display_corner_radius_top_right = 14.0;
+  metrics.physical_display_corner_radius_bottom_right = 16.0;
+  metrics.physical_display_corner_radius_bottom_left = 18.0;
 
   FlutterWindowMetricsEvent event =
       AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(metrics);
@@ -153,11 +164,53 @@ TEST(AndroidWindowMetricsMapperTest, BasicViewportMetricsTranslation) {
   EXPECT_DOUBLE_EQ(event.physical_view_inset_bottom, 200.0);
   EXPECT_DOUBLE_EQ(event.physical_view_inset_left, 0.0);
   EXPECT_DOUBLE_EQ(event.physical_view_inset_right, 0.0);
+  EXPECT_DOUBLE_EQ(event.physical_padding_top, 72.0);
+  EXPECT_DOUBLE_EQ(event.physical_padding_right, 16.0);
+  EXPECT_DOUBLE_EQ(event.physical_padding_bottom, 48.0);
+  EXPECT_DOUBLE_EQ(event.physical_padding_left, 16.0);
+  EXPECT_DOUBLE_EQ(event.physical_system_gesture_inset_top, 10.0);
+  EXPECT_DOUBLE_EQ(event.physical_system_gesture_inset_right, 20.0);
+  EXPECT_DOUBLE_EQ(event.physical_system_gesture_inset_bottom, 30.0);
+  EXPECT_DOUBLE_EQ(event.physical_system_gesture_inset_left, 40.0);
+  EXPECT_DOUBLE_EQ(event.physical_touch_slop, 8.0);
+  EXPECT_DOUBLE_EQ(event.physical_display_corner_radius_top_left, 12.0);
+  EXPECT_DOUBLE_EQ(event.physical_display_corner_radius_top_right, 14.0);
+  EXPECT_DOUBLE_EQ(event.physical_display_corner_radius_bottom_right, 16.0);
+  EXPECT_DOUBLE_EQ(event.physical_display_corner_radius_bottom_left, 18.0);
+  EXPECT_EQ(event.display_features_count, 0u);
+  EXPECT_EQ(event.display_features_bounds, nullptr);
+  EXPECT_EQ(event.display_features_type, nullptr);
+  EXPECT_EQ(event.display_features_state, nullptr);
   EXPECT_FALSE(event.has_constraints);
   EXPECT_EQ(event.min_width_constraint, 1080u);
   EXPECT_EQ(event.max_width_constraint, 1080u);
   EXPECT_EQ(event.min_height_constraint, 2400u);
   EXPECT_EQ(event.max_height_constraint, 2400u);
+}
+
+TEST(AndroidWindowMetricsMapperTest,
+     DisplayFeaturesMappingToFlutterWindowMetricsEvent) {
+  AndroidViewportMetrics metrics;
+  metrics.view_id = 0;
+  metrics.physical_width = 1080.0;
+  metrics.physical_height = 2400.0;
+  metrics.display_features_bounds = {0.0, 1000.0, 1080.0, 1050.0};
+  metrics.display_features_type = {1};
+  metrics.display_features_state = {2};
+
+  FlutterWindowMetricsEvent event =
+      AndroidWindowMetricsMapper::ToFlutterWindowMetricsEvent(metrics);
+
+  EXPECT_EQ(event.display_features_count, 1u);
+  ASSERT_NE(event.display_features_bounds, nullptr);
+  ASSERT_NE(event.display_features_type, nullptr);
+  ASSERT_NE(event.display_features_state, nullptr);
+  EXPECT_DOUBLE_EQ(event.display_features_bounds[0], 0.0);
+  EXPECT_DOUBLE_EQ(event.display_features_bounds[1], 1000.0);
+  EXPECT_DOUBLE_EQ(event.display_features_bounds[2], 1080.0);
+  EXPECT_DOUBLE_EQ(event.display_features_bounds[3], 1050.0);
+  EXPECT_EQ(event.display_features_type[0], 1);
+  EXPECT_EQ(event.display_features_state[0], 2);
 }
 
 TEST(AndroidWindowMetricsMapperTest, ConstrainedViewportMetricsTranslation) {

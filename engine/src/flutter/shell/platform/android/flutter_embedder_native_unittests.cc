@@ -2068,10 +2068,7 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.OnDisplayPlatformView(geom));
 
-  // 11. HidePlatformView
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("hidePlatformView", "(I)V",
-                                              std::vector<uint8_t>{}))
-      .WillOnce(Return(true));
+  // 11. HidePlatformView (no-op in non-HCPP mode)
   EXPECT_TRUE(provider.HidePlatformView(42));
 
   // 12. SynchronizeToNativeViewHierarchy
@@ -2118,14 +2115,8 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.OnDisplayOverlaySurface(overlay_req));
 
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("showOverlaySurface", "(I)V",
-                                              std::vector<uint8_t>{}))
-      .WillOnce(Return(true));
+  // ShowOverlaySurface / HideOverlaySurface (no-op in non-HCPP mode)
   EXPECT_TRUE(provider.ShowOverlaySurface(9));
-
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("hideOverlaySurface", "(I)V",
-                                              std::vector<uint8_t>{}))
-      .WillOnce(Return(true));
   EXPECT_TRUE(provider.HideOverlaySurface(9));
 
   // 15. Transactions
@@ -2150,6 +2141,78 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
   EXPECT_FALSE(provider.IsHcppEnabled());
   provider.SetHcppEnabled(true);
   EXPECT_TRUE(provider.IsHcppEnabled());
+}
+
+TEST(PlatformViewsTest, DefaultPlatformViewsProviderHcppRouting) {
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  DefaultPlatformViewsProvider provider(mock_invoker);
+  provider.SetHcppEnabled(true);
+  EXPECT_TRUE(provider.IsHcppEnabled());
+
+  // 1. CreateOverlaySurface in HCPP mode
+  EXPECT_CALL(
+      *mock_invoker,
+      InvokeIntMethod("createOverlaySurface2",
+                      "()Lio/flutter/embedding/engine/FlutterOverlaySurface;",
+                      std::vector<uint8_t>{}))
+      .WillOnce(Return(12));
+  auto overlay_id = provider.CreateOverlaySurface();
+  ASSERT_TRUE(overlay_id.has_value());
+  EXPECT_EQ(*overlay_id, 12);
+
+  // 2. ShowOverlaySurface in HCPP mode
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("showOverlaySurface2", "()V",
+                                              std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.ShowOverlaySurface(12));
+
+  // 3. HideOverlaySurface in HCPP mode
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("hideOverlaySurface2", "()V",
+                                              std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.HideOverlaySurface(12));
+
+  // 4. DestroyOverlaySurfaces in HCPP mode
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("destroyOverlaySurface2", "()V",
+                                              std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.DestroyOverlaySurfaces());
+
+  // 5. HidePlatformView in HCPP mode
+  int32_t view_id = 99;
+  std::vector<uint8_t> hide_payload(sizeof(int32_t));
+  std::memcpy(hide_payload.data(), &view_id, sizeof(view_id));
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("hidePlatformView2", "(I)V", hide_payload))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.HidePlatformView(99));
+
+  // 6. OnBeginFrame in HCPP mode (safe no-op)
+  EXPECT_TRUE(provider.OnBeginFrame());
+
+  // 7. OnEndFrame in HCPP mode
+  EXPECT_CALL(*mock_invoker,
+              InvokeVoidMethod("endFrame2", "()V", std::vector<uint8_t>{}))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.OnEndFrame());
+
+  // 8. OnDisplayPlatformView in HCPP mode
+  PlatformViewGeometry geometry = {
+      .view_id = 99,
+      .x = 0,
+      .y = 0,
+      .width = 100,
+      .height = 100,
+      .view_width = 100,
+      .view_height = 100,
+      .mutators_stack = {},
+  };
+  std::vector<uint8_t> display_payload = geometry.mutators_stack.Serialize();
+  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onDisplayPlatformView2",
+                                              "(IIIIIIILjava/nio/ByteBuffer;)V",
+                                              display_payload))
+      .WillOnce(Return(true));
+  EXPECT_TRUE(provider.OnDisplayPlatformView(geometry));
 }
 
 TEST(PlatformViewsTest, AndroidPlatformViewsControllerIntegration) {
