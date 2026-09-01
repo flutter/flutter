@@ -217,6 +217,60 @@ void main() {
       expect(data.boldText, isFalse);
       debugClearViewMetricsOverrides();
     });
+
+    testWidgets('view overrides selectively replace inherited platform data', (
+      WidgetTester tester,
+    ) async {
+      late MediaQueryData data;
+      final MediaQueryData inherited = MediaQueryData.fromView(tester.view).copyWith(
+        textScaler: const TextScaler.linear(4.0),
+        platformBrightness: ui.Brightness.light,
+        alwaysUse24HourFormat: false,
+        boldText: false,
+        highContrast: true,
+      );
+      await tester.pumpWidget(
+        MediaQuery(
+          data: inherited,
+          child: MediaQuery.fromView(
+            view: tester.view,
+            child: _capture((MediaQueryData value) => data = value),
+          ),
+        ),
+      );
+
+      expect(data.textScaler.scale(10), 40);
+      expect(data.platformBrightness, ui.Brightness.light);
+      expect(data.alwaysUse24HourFormat, isFalse);
+      expect(data.boldText, isFalse);
+      expect(data.highContrast, isTrue);
+
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(
+          textScaleFactor: 2.0,
+          platformBrightness: ui.Brightness.dark,
+          alwaysUse24HourFormat: true,
+          boldText: true,
+        ),
+      );
+      await tester.pump();
+
+      expect(data.textScaler.scale(10), 20);
+      expect(data.platformBrightness, ui.Brightness.dark);
+      expect(data.alwaysUse24HourFormat, isTrue);
+      expect(data.boldText, isTrue);
+      // The parent still supplies fields the view override does not name.
+      expect(data.highContrast, isTrue);
+
+      debugClearViewMetricsOverrides();
+      await tester.pump();
+      expect(data.textScaler.scale(10), 40);
+      expect(data.platformBrightness, ui.Brightness.light);
+      expect(data.alwaysUse24HourFormat, isFalse);
+      expect(data.boldText, isFalse);
+      expect(data.highContrast, isTrue);
+    });
   });
 
   group('layout', () {

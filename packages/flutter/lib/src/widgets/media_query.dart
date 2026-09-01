@@ -302,59 +302,99 @@ class MediaQueryData {
   ///    [FlutterView], makes it available to descendant widgets, and sets up
   ///    the appropriate notification listeners to keep the data updated.
   MediaQueryData.fromView(ui.FlutterView view, {MediaQueryData? platformData})
-    : size = view.physicalSize / view.devicePixelRatio,
-      devicePixelRatio = view.devicePixelRatio,
-      _textScaleFactor = 1.0, // _textScaler is the source of truth.
-      _textScaler = _textScalerFromView(view, platformData),
-      platformBrightness =
-          platformData?.platformBrightness ?? view.platformDispatcher.platformBrightness,
-      padding = EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio),
-      viewPadding = EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio),
-      viewInsets = EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio),
-      systemGestureInsets = EdgeInsets.fromViewPadding(
-        view.systemGestureInsets,
-        view.devicePixelRatio,
-      ),
-      accessibleNavigation =
-          platformData?.accessibleNavigation ??
-          view.platformDispatcher.accessibilityFeatures.accessibleNavigation,
-      invertColors =
-          platformData?.invertColors ?? view.platformDispatcher.accessibilityFeatures.invertColors,
-      disableAnimations =
-          platformData?.disableAnimations ??
-          view.platformDispatcher.accessibilityFeatures.disableAnimations,
-      reduceMotion =
-          platformData?.reduceMotion ?? view.platformDispatcher.accessibilityFeatures.reduceMotion,
-      boldText = platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
-      supportsAnnounce =
-          platformData?.supportsAnnounce ??
-          view.platformDispatcher.accessibilityFeatures.supportsAnnounce,
-      highContrast =
-          platformData?.highContrast ?? view.platformDispatcher.accessibilityFeatures.highContrast,
-      onOffSwitchLabels =
-          platformData?.onOffSwitchLabels ??
-          view.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
-      alwaysUse24HourFormat =
-          platformData?.alwaysUse24HourFormat ?? view.platformDispatcher.alwaysUse24HourFormat,
-      navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
-      gestureSettings = DeviceGestureSettings.fromView(view),
-      displayFeatures = view.displayFeatures,
-      supportsShowingSystemContextMenu =
-          platformData?.supportsShowingSystemContextMenu ??
-          view.platformDispatcher.supportsShowingSystemContextMenu,
-      lineHeightScaleFactorOverride =
-          platformData?.lineHeightScaleFactorOverride ??
-          view.platformDispatcher.lineHeightScaleFactorOverride,
-      letterSpacingOverride =
-          platformData?.letterSpacingOverride ?? view.platformDispatcher.letterSpacingOverride,
-      wordSpacingOverride =
-          platformData?.wordSpacingOverride ?? view.platformDispatcher.wordSpacingOverride,
-      paragraphSpacingOverride =
-          platformData?.paragraphSpacingOverride ??
-          view.platformDispatcher.paragraphSpacingOverride,
-      displayCornerRadii = _displayCornerRadiiFromView(view);
+    : this._fromView(
+        view,
+        platformData: platformData,
+        debugViewMetricsOverride: _debugViewMetricsOverrideFor(view),
+      );
 
-  static TextScaler _textScalerFromView(ui.FlutterView view, MediaQueryData? platformData) {
+  MediaQueryData._fromView(
+    ui.FlutterView view, {
+    required MediaQueryData? platformData,
+    required DebugViewMetricsOverride? debugViewMetricsOverride,
+  }) : size = view.physicalSize / view.devicePixelRatio,
+       devicePixelRatio = view.devicePixelRatio,
+       _textScaleFactor = 1.0, // _textScaler is the source of truth.
+       _textScaler = _textScalerFromView(view, platformData, debugViewMetricsOverride),
+       platformBrightness = debugViewMetricsOverride?.platformBrightness != null
+           ? view.platformDispatcher.platformBrightness
+           : platformData?.platformBrightness ?? view.platformDispatcher.platformBrightness,
+       padding = EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio),
+       viewPadding = EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio),
+       viewInsets = EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio),
+       systemGestureInsets = EdgeInsets.fromViewPadding(
+         view.systemGestureInsets,
+         view.devicePixelRatio,
+       ),
+       accessibleNavigation = debugViewMetricsOverride?.accessibleNavigation != null
+           ? view.platformDispatcher.accessibilityFeatures.accessibleNavigation
+           : platformData?.accessibleNavigation ??
+                 view.platformDispatcher.accessibilityFeatures.accessibleNavigation,
+       invertColors = debugViewMetricsOverride?.invertColors != null
+           ? view.platformDispatcher.accessibilityFeatures.invertColors
+           : platformData?.invertColors ??
+                 view.platformDispatcher.accessibilityFeatures.invertColors,
+       disableAnimations = debugViewMetricsOverride?.disableAnimations != null
+           ? view.platformDispatcher.accessibilityFeatures.disableAnimations
+           : platformData?.disableAnimations ??
+                 view.platformDispatcher.accessibilityFeatures.disableAnimations,
+       reduceMotion = debugViewMetricsOverride?.reduceMotion != null
+           ? view.platformDispatcher.accessibilityFeatures.reduceMotion
+           : platformData?.reduceMotion ??
+                 view.platformDispatcher.accessibilityFeatures.reduceMotion,
+       boldText = debugViewMetricsOverride?.boldText != null
+           ? view.platformDispatcher.accessibilityFeatures.boldText
+           : platformData?.boldText ?? view.platformDispatcher.accessibilityFeatures.boldText,
+       supportsAnnounce = debugViewMetricsOverride?.supportsAnnounce != null
+           ? view.platformDispatcher.accessibilityFeatures.supportsAnnounce
+           : platformData?.supportsAnnounce ??
+                 view.platformDispatcher.accessibilityFeatures.supportsAnnounce,
+       highContrast = debugViewMetricsOverride?.highContrast != null
+           ? view.platformDispatcher.accessibilityFeatures.highContrast
+           : platformData?.highContrast ??
+                 view.platformDispatcher.accessibilityFeatures.highContrast,
+       onOffSwitchLabels = debugViewMetricsOverride?.onOffSwitchLabels != null
+           ? view.platformDispatcher.accessibilityFeatures.onOffSwitchLabels
+           : platformData?.onOffSwitchLabels ??
+                 view.platformDispatcher.accessibilityFeatures.onOffSwitchLabels,
+       alwaysUse24HourFormat = debugViewMetricsOverride?.alwaysUse24HourFormat != null
+           ? view.platformDispatcher.alwaysUse24HourFormat
+           : platformData?.alwaysUse24HourFormat ?? view.platformDispatcher.alwaysUse24HourFormat,
+       navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
+       gestureSettings = DeviceGestureSettings.fromView(view),
+       displayFeatures = view.displayFeatures,
+       supportsShowingSystemContextMenu =
+           platformData?.supportsShowingSystemContextMenu ??
+           view.platformDispatcher.supportsShowingSystemContextMenu,
+       lineHeightScaleFactorOverride =
+           platformData?.lineHeightScaleFactorOverride ??
+           view.platformDispatcher.lineHeightScaleFactorOverride,
+       letterSpacingOverride =
+           platformData?.letterSpacingOverride ?? view.platformDispatcher.letterSpacingOverride,
+       wordSpacingOverride =
+           platformData?.wordSpacingOverride ?? view.platformDispatcher.wordSpacingOverride,
+       paragraphSpacingOverride =
+           platformData?.paragraphSpacingOverride ??
+           view.platformDispatcher.paragraphSpacingOverride,
+       displayCornerRadii = _displayCornerRadiiFromView(view);
+
+  static DebugViewMetricsOverride? _debugViewMetricsOverrideFor(ui.FlutterView view) {
+    DebugViewMetricsOverride? result;
+    assert(() {
+      result = debugViewMetricsOverrides[view.viewId];
+      return true;
+    }());
+    return result;
+  }
+
+  static TextScaler _textScalerFromView(
+    ui.FlutterView view,
+    MediaQueryData? platformData,
+    DebugViewMetricsOverride? debugViewMetricsOverride,
+  ) {
+    if (debugViewMetricsOverride?.textScaleFactor != null) {
+      return SystemTextScaler._(view.platformDispatcher);
+    }
     return platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher);
   }
 
@@ -2455,13 +2495,10 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
 
   @override
   void didChangeAccessibilityFeatures() {
-    // If we have a parent, it dictates our accessibility features. If we don't
-    // have a parent, we get our accessibility features straight from the
-    // PlatformDispatcher and need to update our data in response to the
-    // PlatformDispatcher changing its accessibility features setting.
-    if (_parentData == null) {
-      _updateData();
-    }
+    // A debug view-metrics override may selectively take precedence over
+    // inherited platform data, so even a MediaQuery with a parent must compare
+    // the newly resolved values.
+    _updateData();
   }
 
   @override
@@ -2471,24 +2508,18 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
 
   @override
   void didChangeTextScaleFactor() {
-    // If we have a parent, it dictates our text scale factor. If we don't have
-    // a parent, we get our text scale factor from the PlatformDispatcher and
-    // need to update our data in response to the PlatformDispatcher changing
-    // its text scale factor setting.
-    if (_parentData == null) {
-      _updateData();
-    }
+    // A debug view-metrics override may selectively take precedence over
+    // inherited platform data, so even a MediaQuery with a parent must compare
+    // the newly resolved values.
+    _updateData();
   }
 
   @override
   void didChangePlatformBrightness() {
-    // If we have a parent, it dictates our platform brightness. If we don't
-    // have a parent, we get our platform brightness from the PlatformDispatcher
-    // and need to update our data in response to the PlatformDispatcher
-    // changing its platform brightness setting.
-    if (_parentData == null) {
-      _updateData();
-    }
+    // A debug view-metrics override may selectively take precedence over
+    // inherited platform data, so even a MediaQuery with a parent must compare
+    // the newly resolved values.
+    _updateData();
   }
 
   @override
@@ -2500,10 +2531,12 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   @override
   Widget build(BuildContext context) {
     MediaQueryData effectiveData = _data!;
-    // If we get our platformBrightness from the PlatformDispatcher (i.e. we have no parentData) replace it
-    // with the debugBrightnessOverride in non-release mode.
+    // If we get our platformBrightness from the PlatformDispatcher, either
+    // because there is no parent data or because a per-view override supersedes
+    // it, replace it with debugBrightnessOverride in non-release mode.
     if (!kReleaseMode &&
-        _parentData == null &&
+        (_parentData == null ||
+            debugViewMetricsOverrides[widget.view.viewId]?.platformBrightness != null) &&
         effectiveData.platformBrightness != debugBrightnessOverride) {
       effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
     }

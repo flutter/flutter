@@ -55,6 +55,29 @@ ui.PlatformDispatcher debugApplyViewMetricsOverrides(ui.PlatformDispatcher dispa
   return result;
 }
 
+/// Returns a dispatcher that resolves platform metrics for [viewId].
+///
+/// This is the per-view counterpart to [debugApplyViewMetricsOverrides]. It is
+/// used by wrappers such as `TestPlatformDispatcher`, which vend their own view
+/// objects and therefore cannot use the dispatcher attached to the wrapped
+/// [ui.FlutterView] directly.
+///
+/// Returns [dispatcher] unchanged in release mode.
+ui.PlatformDispatcher debugApplyViewMetricsOverridesForView(
+  ui.PlatformDispatcher dispatcher,
+  int viewId,
+) {
+  var result = dispatcher;
+  assert(() {
+    final wrapped =
+        debugApplyViewMetricsOverrides(dispatcher) as _DebugViewMetricsPlatformDispatcher;
+    final _DebugViewMetricsPlatformDispatcher root = wrapped._root ?? wrapped;
+    result = _DebugViewMetricsPlatformDispatcher._forView(root, viewId);
+    return true;
+  }());
+  return result;
+}
+
 // Keyed by the wrapped dispatcher so that the wrapper cannot outlive it.
 final Expando<_DebugViewMetricsPlatformDispatcher> _wrappers =
     Expando<_DebugViewMetricsPlatformDispatcher>('debugViewMetricsOverrides');

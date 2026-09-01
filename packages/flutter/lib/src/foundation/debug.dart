@@ -26,7 +26,8 @@ import 'print.dart';
 
 export 'dart:ui' show Brightness;
 
-export '_view_metrics.dart' show debugApplyViewMetricsOverrides;
+export '_view_metrics.dart'
+    show debugApplyViewMetricsOverrides, debugApplyViewMetricsOverridesForView;
 export 'print.dart' show DebugPrintCallback;
 
 /// Returns true if none of the foundation library debug variables have been

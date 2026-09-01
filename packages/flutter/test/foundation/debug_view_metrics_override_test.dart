@@ -112,6 +112,24 @@ class _TwoViewPlatformDispatcher implements ui.PlatformDispatcher {
   ui.AccessibilityFeatures get accessibilityFeatures => const _NoAccessibilityFeatures();
 
   @override
+  Iterable<ui.Display> get displays => const <ui.Display>[];
+
+  @override
+  ui.VoidCallback? onAccessibilityFeaturesChanged;
+
+  @override
+  ui.VoidCallback? onMetricsChanged;
+
+  @override
+  ui.VoidCallback? onPlatformBrightnessChanged;
+
+  @override
+  ui.VoidCallback? onTextScaleFactorChanged;
+
+  @override
+  ui.ViewFocusChangeCallback? onViewFocusChange;
+
+  @override
   dynamic noSuchMethod(Invocation invocation) =>
       throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
 }
@@ -682,6 +700,46 @@ void main() {
       // Every dispatcher vends the same view wrappers.
       expect(first.platformDispatcher.view(id: 2), same(second));
       expect(second.platformDispatcher.implicitView, same(first));
+    });
+
+    test('TestPlatformDispatcher preserves per-view metrics and test-value precedence', () {
+      final dispatcher = _TwoViewPlatformDispatcher();
+      final testDispatcher = TestPlatformDispatcher(
+        platformDispatcher: debugApplyViewMetricsOverrides(dispatcher),
+      );
+      final ui.FlutterView first = testDispatcher.view(id: 1)!;
+      final ui.FlutterView second = testDispatcher.view(id: 2)!;
+
+      debugSetViewMetricsOverride(
+        2,
+        const DebugViewMetricsOverride(
+          textScaleFactor: 3.0,
+          platformBrightness: ui.Brightness.dark,
+          alwaysUse24HourFormat: true,
+          boldText: true,
+        ),
+      );
+
+      expect(first.platformDispatcher.textScaleFactor, 1.0);
+      expect(first.platformDispatcher.platformBrightness, ui.Brightness.light);
+      expect(first.platformDispatcher.alwaysUse24HourFormat, isFalse);
+      expect(first.platformDispatcher.accessibilityFeatures.boldText, isFalse);
+      expect(second.platformDispatcher.textScaleFactor, 3.0);
+      expect(second.platformDispatcher.scaleFontSize(10.0), 30.0);
+      expect(second.platformDispatcher.platformBrightness, ui.Brightness.dark);
+      expect(second.platformDispatcher.alwaysUse24HourFormat, isTrue);
+      expect(second.platformDispatcher.accessibilityFeatures.boldText, isTrue);
+
+      testDispatcher.textScaleFactorTestValue = 4.0;
+      testDispatcher.platformBrightnessTestValue = ui.Brightness.light;
+      testDispatcher.alwaysUse24HourFormatTestValue = false;
+      testDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures();
+
+      expect(second.platformDispatcher.textScaleFactor, 4.0);
+      expect(second.platformDispatcher.scaleFontSize(10.0), 40.0);
+      expect(second.platformDispatcher.platformBrightness, ui.Brightness.light);
+      expect(second.platformDispatcher.alwaysUse24HourFormat, isFalse);
+      expect(second.platformDispatcher.accessibilityFeatures.boldText, isFalse);
     });
 
     test('follows views as they are added and removed', () {
