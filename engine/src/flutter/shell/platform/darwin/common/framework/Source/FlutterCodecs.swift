@@ -160,9 +160,10 @@ import Foundation
       assertionFailure("Invalid JSON envelope")
       return nil
     }
-    let message = unwrapNil(array[1]) as? String
+    let message = unwrapNil(array[1])
+    assert(message == nil || message is String, "Invalid JSON envelope")
     let details = unwrapNil(array[2])
-    return FlutterError(code: code, message: message, details: details)
+    return FlutterError(code: code, message: message as? String, details: details)
   }
 
   private func wrapNil(_ value: Any?) -> Any {
