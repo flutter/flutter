@@ -258,6 +258,15 @@ void main() {
     expect(tester.hasRunningAnimations, isFalse);
   });
 
+  testWidgets(
+    'hasRunningAnimations is false when the transient callback does not schedule new frames',
+    (WidgetTester tester) async {
+      assert(!tester.hasRunningAnimations);
+      tester.binding.scheduleFrameCallback((_) {}, scheduleNewFrame: false);
+      expect(tester.hasRunningAnimations, false);
+    },
+  );
+
   testWidgets('pumpAndSettle control test', (WidgetTester tester) async {
     final controller = AnimationController(
       duration: const Duration(minutes: 525600),
@@ -569,34 +578,26 @@ void main() {
   group('testWidgets variants work', () {
     var numberOfVariationsRun = 0;
 
-    testWidgets(
-      'variant tests run all values provided',
-      (WidgetTester tester) async {
-        if (debugDefaultTargetPlatformOverride == null) {
-          expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
-        } else {
-          numberOfVariationsRun += 1;
-        }
-      },
-      variant: TargetPlatformVariant(TargetPlatform.values.toSet()),
-    );
+    testWidgets('variant tests run all values provided', (WidgetTester tester) async {
+      if (debugDefaultTargetPlatformOverride == null) {
+        expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
+      } else {
+        numberOfVariationsRun += 1;
+      }
+    }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
 
-    testWidgets(
-      'variant tests have descriptions with details',
-      (WidgetTester tester) async {
-        if (debugDefaultTargetPlatformOverride == null) {
-          expect(tester.testDescription, equals('variant tests have descriptions with details'));
-        } else {
-          expect(
-            tester.testDescription,
-            equals(
-              'variant tests have descriptions with details (variant: $debugDefaultTargetPlatformOverride)',
-            ),
-          );
-        }
-      },
-      variant: TargetPlatformVariant(TargetPlatform.values.toSet()),
-    );
+    testWidgets('variant tests have descriptions with details', (WidgetTester tester) async {
+      if (debugDefaultTargetPlatformOverride == null) {
+        expect(tester.testDescription, equals('variant tests have descriptions with details'));
+      } else {
+        expect(
+          tester.testDescription,
+          equals(
+            'variant tests have descriptions with details (variant: $debugDefaultTargetPlatformOverride)',
+          ),
+        );
+      }
+    }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
   });
 
   group('TargetPlatformVariant', () {
@@ -611,14 +612,10 @@ void main() {
       expect(debugDefaultTargetPlatformOverride, equals(origTargetPlatform));
     });
 
-    testWidgets(
-      'TargetPlatformVariant.only tests given value',
-      (WidgetTester tester) async {
-        expect(debugDefaultTargetPlatformOverride, equals(TargetPlatform.iOS));
-        expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-    );
+    testWidgets('TargetPlatformVariant.only tests given value', (WidgetTester tester) async {
+      expect(debugDefaultTargetPlatformOverride, equals(TargetPlatform.iOS));
+      expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     group('all', () {
       testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {

@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_utils.dart';
-import 'widgets_app_tester.dart';
 
 final FocusNode _focusNode = FocusNode(debugLabel: 'UndoHistory Node');
 

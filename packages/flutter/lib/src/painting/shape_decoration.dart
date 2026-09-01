@@ -294,7 +294,7 @@ class ShapeDecoration extends Decoration {
 
   @override
   bool hitTest(Size size, Offset position, {TextDirection? textDirection}) {
-    return shape.getOuterPath(Offset.zero & size, textDirection: textDirection).contains(position);
+    return shape.hitTest(Offset.zero & size, position, textDirection: textDirection);
   }
 
   @override

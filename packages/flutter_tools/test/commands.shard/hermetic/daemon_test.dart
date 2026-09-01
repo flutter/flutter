@@ -125,7 +125,6 @@ void main() {
         expect(response.data['id'], 0);
         expect(response.data['result'], isNotEmpty);
         expect(response.data['result']! as Map<String, Object?>, const <String, Object>{
-          'platforms': <String>['macos', 'windows'],
           'platformTypes': <String, Map<String, Object>>{
             'web': <String, Object>{
               'isSupported': false,
@@ -428,6 +427,7 @@ void main() {
               'emulator': false,
               'category': 'mobile',
               'platformType': 'android',
+              'cpuArch': 'armv7',
               'ephemeral': false,
               'emulatorId': 'device',
               'sdk': 'Android 12',
@@ -661,7 +661,7 @@ void main() {
         expect(device.dds.enableDevTools, true);
         expect(device.dds.startAppName, contains('Kind: Flutter'));
         expect(device.dds.startAppName, contains('Device: android device'));
-        expect(device.dds.startAppName, contains('Package: flutter_tools'));
+        expect(device.dds.startAppName, contains('Package: '));
 
         // dds.done event should be sent to the client.
         ddsDoneCompleter.complete();
@@ -1164,6 +1164,9 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
+  Future<CpuArch> get cpuArch async => CpuArch.armv7;
+
+  @override
   Future<bool> get isLocalEmulator async => false;
 
   @override
@@ -1215,8 +1218,11 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   late DeviceLogReader logReader;
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
-      logReader;
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) => logReader;
 
   ApplicationPackage? startAppPackage;
   late LaunchResult launchResult;

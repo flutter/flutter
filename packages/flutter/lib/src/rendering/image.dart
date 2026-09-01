@@ -42,6 +42,7 @@ class RenderImage extends RenderBox {
     bool invertColors = false,
     bool isAntiAlias = false,
     FilterQuality filterQuality = FilterQuality.medium,
+    BlendMode blendMode = BlendMode.srcOver,
   }) : _image = image,
        _width = width,
        _height = height,
@@ -57,7 +58,8 @@ class RenderImage extends RenderBox {
        _invertColors = invertColors,
        _textDirection = textDirection,
        _isAntiAlias = isAntiAlias,
-       _filterQuality = filterQuality {
+       _filterQuality = filterQuality,
+       _blendMode = blendMode {
     _updateColorFilter();
   }
 
@@ -213,6 +215,24 @@ class RenderImage extends RenderBox {
     }
     _colorBlendMode = value;
     _updateColorFilter();
+    markNeedsPaint();
+  }
+
+  /// Used to combine the image with the destination when painting onto the
+  /// canvas. This is forwarded to [paintImage].
+  ///
+  /// Defaults to [BlendMode.srcOver].
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  BlendMode get blendMode => _blendMode;
+  BlendMode _blendMode;
+  set blendMode(BlendMode value) {
+    if (value == _blendMode) {
+      return;
+    }
+    _blendMode = value;
     markNeedsPaint();
   }
 
@@ -440,6 +460,7 @@ class RenderImage extends RenderBox {
       invertColors: invertColors,
       filterQuality: _filterQuality,
       isAntiAlias: _isAntiAlias,
+      blendMode: _blendMode,
     );
   }
 
@@ -472,5 +493,6 @@ class RenderImage extends RenderBox {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode, defaultValue: BlendMode.srcOver));
   }
 }

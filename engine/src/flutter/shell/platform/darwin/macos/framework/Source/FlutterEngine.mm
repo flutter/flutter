@@ -393,6 +393,10 @@ constexpr char kTextPlainFormat[] = "text/plain";
   _publishedValue = value;
 }
 
+- (nullable NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
+  return [_flutterEngine valuePublishedByPlugin:pluginKey];
+}
+
 - (NSString*)lookupKeyForAsset:(NSString*)asset {
   return [FlutterDartProject lookupKeyForAsset:asset];
 }
@@ -1654,11 +1658,18 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
  */
 - (void)handleWillBecomeActive:(NSNotification*)notification {
   _active = YES;
-  if (!_visible) {
-    [self setApplicationState:flutter::AppLifecycleState::kHidden];
-  } else {
-    [self setApplicationState:flutter::AppLifecycleState::kResumed];
+  // occlusionState can latch stale on an occlusion->visible transition (same-screen
+  // Cmd-Tab / Mission Control), so `_visible` is unreliable here. Resume from
+  // NSWindow.isVisible instead — NO for a minimized window, so it won't resume hidden.
+  // https://github.com/flutter/flutter/issues/155977
+  for (NSWindow* window in [NSApplication sharedApplication].windows) {
+    if (window.isVisible) {
+      _visible = YES;
+      break;
+    }
   }
+  [self setApplicationState:_visible ? flutter::AppLifecycleState::kResumed
+                                     : flutter::AppLifecycleState::kHidden];
 }
 
 /**
@@ -1675,8 +1686,8 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 }
 
 /**
- * Called when the |FlutterAppDelegate| gets the applicationDidUnhide
- * notification.
+ * Called when the application's occlusion state changes
+ * (NSApplicationDidChangeOcclusionStateNotification).
  */
 - (void)handleDidChangeOcclusionState:(NSNotification*)notification {
   NSApplicationOcclusionState occlusionState = [[NSApplication sharedApplication] occlusionState];

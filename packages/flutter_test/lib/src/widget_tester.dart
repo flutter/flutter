@@ -848,10 +848,11 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///  * [SchedulerBinding.transientCallbackCount], which is the value on which
   ///    this is based.
   ///  * [SchedulerBinding.hasScheduledFrame], which is true whenever a frame is
-  ///    pending. [SchedulerBinding.hasScheduledFrame] is made true when a
-  ///    widget calls [State.setState], even if there are no transient callbacks
-  ///    scheduled. This is what [pumpAndSettle] uses.
-  bool get hasRunningAnimations => binding.transientCallbackCount > 0;
+  ///    pending. [SchedulerBinding.hasScheduledFrame] is a necessary (but not
+  ///    sufficient) condition to [hasRunningAnimations], as new frames can be
+  ///    scheduled when widget calls [State.setState], even if there are no
+  ///    transient callbacks scheduled. This is what [pumpAndSettle] uses.
+  bool get hasRunningAnimations => binding.hasScheduledFrame && binding.transientCallbackCount > 0;
 
   @override
   HitTestResult hitTestOnBinding(Offset location, {int? viewId}) {

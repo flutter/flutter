@@ -9,5 +9,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Headers/Flutter.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunners.h"
+#import "flutter/third_party/spring_animation/spring_animation.h"
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_INTERNALFLUTTERSWIFT_BRIDGING_HEADER_H_

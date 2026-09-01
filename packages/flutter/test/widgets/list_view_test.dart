@@ -1174,4 +1174,16 @@ void main() {
       throwsAssertionError,
     );
   });
+
+  testWidgets('ListView does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: ListView(children: const <Widget>[Placeholder()])),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ListView)), Size.zero);
+  });
 }

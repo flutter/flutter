@@ -854,9 +854,9 @@ public class PlatformPluginTest {
     // The intent action created by the plugin and passed to Intent.createChooser should be
     // 'Intent.ACTION_SEND'.
     Intent sendToIntent = intentCaptor.getValue();
-    assertEquals(sendToIntent.getAction(), Intent.ACTION_SEND);
-    assertEquals(sendToIntent.getType(), "text/plain");
-    assertEquals(sendToIntent.getStringExtra(Intent.EXTRA_TEXT), expectedContent);
+    assertEquals(Intent.ACTION_SEND, sendToIntent.getAction());
+    assertEquals("text/plain", sendToIntent.getType());
+    assertEquals(expectedContent, sendToIntent.getStringExtra(Intent.EXTRA_TEXT));
   }
 
   @Config(sdk = API_LEVELS.API_29)

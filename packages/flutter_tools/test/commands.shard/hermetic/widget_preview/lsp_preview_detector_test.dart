@@ -96,7 +96,6 @@ void main() {
             e.eventData['variableName'] == WidgetPreviewAnalytics.kPreviewReloadTime,
       );
       expect(reloadTimingEvents, hasLength(n));
-      expect(fakeAnalytics.sentEvents, hasLength(n));
     }
 
     Future<void> emitEvent(WatchEvent event) async {

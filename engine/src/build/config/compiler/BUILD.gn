@@ -143,6 +143,11 @@ config("compiler") {
     if (is_asan) {
       cflags += [ "-fsanitize=address" ]
       ldflags += [ "-fsanitize=address" ]
+
+      # ASan is deliberately not added to swiftflags.
+      # The Swift frontend emits an ASan version-mismatch guard
+      # (__asan_version_mismatch_check_apple_clang_*) that the engine's clang
+      # ASan runtime doesn't provide, so instrumenting Swift fails to link.
     }
     if (is_hwasan && is_android && current_cpu == "arm64") {
       cflags += [ "-fsanitize=hwaddress" ]
@@ -155,6 +160,7 @@ config("compiler") {
     if (is_tsan) {
       cflags += [ "-fsanitize=thread" ]
       ldflags += [ "-fsanitize=thread" ]
+      swiftflags += [ "-sanitize=thread" ]
     }
     if (is_msan) {
       cflags += [ "-fsanitize=memory" ]
@@ -163,6 +169,10 @@ config("compiler") {
     if (is_ubsan) {
       cflags += [ "-fsanitize=undefined" ]
       ldflags += [ "-fsanitize=undefined" ]
+
+      # UBSan is deliberately not added to swiftflags. The Swift compiler
+      # accepts -sanitize=undefined but emits no UBSan instrumentation for Swift
+      # code.
     }
 
     if (use_custom_libcxx) {
@@ -435,9 +445,9 @@ config("compiler") {
     # to say that it does. Define them here instead.
     defines += [ "HAVE_SYS_UIO_H" ]
 
-    # When Android requires new flags consider also editing the flags in
-    # the following locations.
-    # Framework plugin_ffi template: packages/flutter_tools/templates/plugin_ffi/src.tmpl/CMakeLists.txt.tmpl
+    # When Android requires new flags consider also editing the flags in the
+    # following locations. Framework plugin_ffi template:
+    # packages/flutter_tools/templates/plugin_ffi/src.tmpl/CMakeLists.txt.tmpl
     # Example PR: https://github.com/flutter/flutter/pull/155508
     # Dart Lang JNI package: pkgs/jni/src/CMakeLists.txt
     # Example PR: https://github.com/dart-lang/native/pull/1615
@@ -1006,6 +1016,7 @@ config("optimize") {
     cflags = [ "/O1" ] + common_optimize_on_cflags + [ "/Oi" ]
   } else if (is_ios) {
     cflags = [ "-Os" ] + common_optimize_on_cflags  # Favor size over speed.
+    swiftflags = [ "-Osize" ]
   } else if (is_android || is_fuchsia) {
     cflags = [ "-Oz" ] + common_optimize_on_cflags  # Favor size over speed.
   } else if (is_wasm) {
@@ -1017,13 +1028,16 @@ config("optimize") {
   } else {
     if (optimize_for_size) {
       cflags = [ "-Os" ] + common_optimize_on_cflags
+      swiftflags = [ "-Osize" ]
     } else {
       cflags = [ "-O2" ] + common_optimize_on_cflags
+      swiftflags = [ "-O" ]
     }
   }
 
   lto_flags = []
-  if (enable_lto && (is_linux || is_ios || is_mac || is_android || is_fuchsia || is_wasm)) {
+  if (enable_lto &&
+      (is_linux || is_ios || is_mac || is_android || is_fuchsia || is_wasm)) {
     lto_flags += [ "-flto" ]
   }
 
@@ -1059,6 +1073,7 @@ config("no_optimize") {
     ldflags = common_optimize_on_ldflags
   } else {
     cflags = [ "-O0" ]
+    swiftflags = [ "-Onone" ]
   }
 }
 

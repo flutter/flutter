@@ -19,7 +19,8 @@ namespace flutter {
 
 class IOSSurface {
  public:
-  static std::unique_ptr<IOSSurface> Create(std::shared_ptr<IOSContext> context, CALayer* layer);
+  static std::unique_ptr<IOSSurface> Create(const std::shared_ptr<IOSContext>& context,
+                                            CALayer* layer);
 
   std::shared_ptr<IOSContext> GetContext() const;
 

@@ -98,7 +98,9 @@ void mockGetIntegerv(GLenum name, int* value) {
       *value = g_extensions.size();
     } break;
     case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:
+      // Minimum default; a registered mock may overwrite it.
       *value = 8;
+      CallMockMethod(&IMockGLESImpl::GetIntegerv, name, value);
       break;
     case GL_MAX_LABEL_LENGTH_KHR:
       *value = 64;
@@ -302,6 +304,52 @@ void mockBindTexture(GLenum target, GLuint texture) {
 }
 static_assert(CheckSameSignature<decltype(mockBindTexture),  //
                                  decltype(glBindTexture)>::value);
+
+void mockBindBufferRange(GLenum target,
+                         GLuint index,
+                         GLuint buffer,
+                         GLintptr offset,
+                         GLsizeiptr size) {
+  CallMockMethod(&IMockGLESImpl::BindBufferRange, target, index, buffer, offset,
+                 size);
+}
+static_assert(CheckSameSignature<decltype(mockBindBufferRange),  //
+                                 decltype(glBindBufferRange)>::value);
+
+void mockGetProgramiv(GLuint program, GLenum pname, GLint* params) {
+  CallMockMethod(&IMockGLESImpl::GetProgramiv, program, pname, params);
+}
+static_assert(CheckSameSignature<decltype(mockGetProgramiv),  //
+                                 decltype(glGetProgramiv)>::value);
+
+void mockGetActiveUniformBlockiv(GLuint program,
+                                 GLuint uniformBlockIndex,
+                                 GLenum pname,
+                                 GLint* params) {
+  CallMockMethod(&IMockGLESImpl::GetActiveUniformBlockiv, program,
+                 uniformBlockIndex, pname, params);
+}
+static_assert(CheckSameSignature<decltype(mockGetActiveUniformBlockiv),  //
+                                 decltype(glGetActiveUniformBlockiv)>::value);
+
+void mockGetActiveUniformBlockName(GLuint program,
+                                   GLuint uniformBlockIndex,
+                                   GLsizei bufSize,
+                                   GLsizei* length,
+                                   GLchar* uniformBlockName) {
+  CallMockMethod(&IMockGLESImpl::GetActiveUniformBlockName, program,
+                 uniformBlockIndex, bufSize, length, uniformBlockName);
+}
+static_assert(CheckSameSignature<decltype(mockGetActiveUniformBlockName),  //
+                                 decltype(glGetActiveUniformBlockName)>::value);
+
+GLuint mockGetUniformBlockIndex(GLuint program,
+                                const GLchar* uniformBlockName) {
+  return CallMockMethod(&IMockGLESImpl::GetUniformBlockIndex, program,
+                        uniformBlockName);
+}
+static_assert(CheckSameSignature<decltype(mockGetUniformBlockIndex),  //
+                                 decltype(glGetUniformBlockIndex)>::value);
 
 GLboolean mockIsTexture(GLuint texture) {
   return CallMockMethod(&IMockGLESImpl::IsTexture, texture);
@@ -537,6 +585,16 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockDrawElementsInstanced);
   } else if (strcmp(name, "glVertexAttribDivisor") == 0) {
     return reinterpret_cast<void*>(mockVertexAttribDivisor);
+  } else if (strcmp(name, "glBindBufferRange") == 0) {
+    return reinterpret_cast<void*>(mockBindBufferRange);
+  } else if (strcmp(name, "glGetProgramiv") == 0) {
+    return reinterpret_cast<void*>(mockGetProgramiv);
+  } else if (strcmp(name, "glGetActiveUniformBlockiv") == 0) {
+    return reinterpret_cast<void*>(mockGetActiveUniformBlockiv);
+  } else if (strcmp(name, "glGetActiveUniformBlockName") == 0) {
+    return reinterpret_cast<void*>(mockGetActiveUniformBlockName);
+  } else if (strcmp(name, "glGetUniformBlockIndex") == 0) {
+    return reinterpret_cast<void*>(mockGetUniformBlockIndex);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }

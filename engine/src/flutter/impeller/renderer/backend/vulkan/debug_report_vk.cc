@@ -35,7 +35,8 @@ DebugReportVK::DebugReportVK(const CapabilitiesVK& caps,
     return;
   }
 
-  messenger_ = std::move(messenger.value);
+  messenger_ = std::make_unique<vk::UniqueDebugUtilsMessengerEXT>(
+      std::move(messenger.value));
   is_valid_ = true;
 }
 

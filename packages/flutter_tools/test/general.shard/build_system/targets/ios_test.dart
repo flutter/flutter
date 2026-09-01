@@ -842,6 +842,8 @@ void main() {
     late Directory outputDir;
     late File binary;
     late FakeCommand copyPhysicalFrameworkCommand;
+    late FakeCommand chmodPhysicalFrameworkCommand;
+    late FakeCommand chmodSimulatorFrameworkCommand;
     late FakeCommand copyPhysicalFrameworkDsymCommand;
     late FakeCommand copyPhysicalFrameworkDsymCommandFailure;
     late FakeCommand lipoCommandNonFatResult;
@@ -864,6 +866,19 @@ void main() {
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
           'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
           outputDir.path,
+        ],
+      );
+
+      chmodPhysicalFrameworkCommand = FakeCommand(
+        command: <String>[
+          'chmod',
+          '-R',
+          'u+w',
+          outputDir
+              .childDirectory(
+                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+              )
+              .path,
         ],
       );
 
@@ -910,6 +925,19 @@ void main() {
       adHocCodesignCommand = FakeCommand(
         command: <String>['codesign', '--force', '--sign', '-', '--timestamp=none', binary.path],
       );
+
+      chmodSimulatorFrameworkCommand = FakeCommand(
+        command: <String>[
+          'chmod',
+          '-R',
+          'u+w',
+          outputDir
+              .childDirectory(
+                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+              )
+              .path,
+        ],
+      );
     });
 
     testWithoutContext('iphonesimulator', () async {
@@ -937,6 +965,7 @@ void main() {
           ],
           onRun: (_) => binary.createSync(recursive: true),
         ),
+        chmodSimulatorFrameworkCommand,
         lipoCommandNonFatResult,
         FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'x86_64']),
         xattrCommand,
@@ -962,6 +991,7 @@ void main() {
         defines: <String, String>{kIosArchs: 'arm64', kSdkRoot: 'path/to/iPhoneOS.sdk'},
       );
       processManager.addCommand(copyPhysicalFrameworkCommand);
+      processManager.addCommand(chmodPhysicalFrameworkCommand);
       await expectLater(
         const DebugUnpackIOS().build(environment),
         throwsA(
@@ -997,6 +1027,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         copyPhysicalFrameworkDsymCommandFailure,
       ]);
       await expectLater(
@@ -1026,6 +1057,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
@@ -1063,6 +1095,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
@@ -1198,6 +1231,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1228,6 +1262,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
@@ -1269,6 +1304,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1298,6 +1334,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1360,6 +1397,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         copyPhysicalFrameworkDsymCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,

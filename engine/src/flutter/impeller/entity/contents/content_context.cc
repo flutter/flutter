@@ -265,7 +265,6 @@ struct ContentContext::Pipelines {
   Variants<FramebufferBlendSoftLightPipeline> framebuffer_blend_softlight;
   Variants<GaussianBlurPipeline> gaussian_blur;
   Variants<GlyphAtlasPipeline> glyph_atlas;
-  Variants<LinePipeline> line;
   Variants<LinearGradientFillPipeline> linear_gradient_fill;
   Variants<LinearGradientSSBOFillPipeline> linear_gradient_ssbo_fill;
   Variants<LinearGradientUniformFillPipeline> linear_gradient_uniform_fill;
@@ -637,7 +636,6 @@ ContentContext::ContentContext(
     pipelines_->solid_fill.CreateDefault(*context_, options);
     pipelines_->texture.CreateDefault(*context_, options);
     pipelines_->fast_gradient.CreateDefault(*context_, options);
-    pipelines_->line.CreateDefault(*context_, options);
     pipelines_->circle.CreateDefault(*context_, options);
     if (context_->GetFlags().use_sdfs) {
       pipelines_->uber_sdf.CreateDefault(*context_, options);
@@ -1539,10 +1537,6 @@ PipelineRef ContentContext::GetDrawVerticesUberPipeline(
 PipelineRef ContentContext::GetCirclePipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->circle, opts);
-}
-
-PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->line, opts);
 }
 
 #ifdef IMPELLER_ENABLE_OPENGLES

@@ -4,14 +4,14 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'package:dart_skills_lint/dart_skills_lint.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
+import 'package:skills_lint/skills_lint.dart';
 import 'package:test/test.dart';
 
 import 'check_backticks_relative_paths_rule.dart';
 
-const String _configFileName = 'dart_skills_lint.yaml';
+const String _configFileName = 'skills_lint.yaml';
 
 Directory _findSkillsDir() {
   Directory dir = Directory.current;
@@ -93,14 +93,14 @@ void main() {
     final bool isValid = await validateSkills(
       skillDirPaths: [skillsDirectory, reidbakerSkillsDirectory],
       customRules: [CheckBackticksRelativePathsRule(valid2SegmentPaths, repoRoot.path)],
-      resolvedRules: {
-        'check-absolute-paths': AnalysisSeverity.disabled,
-        'check-relative-paths': AnalysisSeverity.disabled,
-        'check-trailing-whitespace': AnalysisSeverity.disabled,
-        'description-too-long': AnalysisSeverity.disabled,
-        'disallowed-field': AnalysisSeverity.disabled,
-        'invalid-skill-name': AnalysisSeverity.disabled,
-        'valid-yaml-metadata': AnalysisSeverity.disabled,
+      resolvedRuleConfigs: {
+        'check-absolute-paths': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'check-relative-paths': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'check-trailing-whitespace': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'description-too-long': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'disallowed-field': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'invalid-skill-name': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
+        'valid-yaml-metadata': const RuleConfigPatch(severity: AnalysisSeverity.disabled),
       },
     );
     expect(isValid, isTrue, reason: 'Skills validation failed. See above for details.');

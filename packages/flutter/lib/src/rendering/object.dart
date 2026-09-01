@@ -2468,10 +2468,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   /// Whether the render tree this render object belongs to is attached to a [PipelineOwner].
   ///
-  /// This becomes true during the call to [attach].
-  ///
-  /// This becomes false during the call to [detach].
-  bool get attached => _owner != null;
+  /// This becomes true during the call to [attach], and becomes false during the call to [detach].
+  @nonVirtual
+  bool get attached => owner != null;
 
   /// Mark this render object as attached to the given owner.
   ///
@@ -6089,9 +6088,13 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     if (parentData == newParentData) {
       return;
     }
+    final bool wasParentDataDirty = parentDataDirty;
     // Parent data changes may result in node formation changes.
     markNeedsBuild();
     parentData = newParentData;
+    if (wasParentDataDirty) {
+      geometry = null;
+    }
     updateChildren();
   }
 

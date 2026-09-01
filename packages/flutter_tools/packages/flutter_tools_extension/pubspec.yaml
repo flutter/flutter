@@ -1,0 +1,15 @@
+name: flutter_tools_extension
+description: Protocol interfaces and base implementation for Flutter tools extensions.
+resolution: workspace
+
+environment:
+  sdk: ^3.11.0-0
+
+dependencies:
+  meta: 1.19.0
+  flutter_tools_core:
+    path: ../flutter_tools_core
+  json_rpc_2: 4.1.0
+  stream_channel: 2.1.4
+
+# PUBSPEC CHECKSUM: 608ed1
