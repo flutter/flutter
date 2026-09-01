@@ -5801,6 +5801,158 @@ TEST_F(Phase61JniRegistrationCutoverTest, ConcurrentMultithreadedJNIExecution) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Phase 6.3: Final GN Integration & Dependency Severing Tests
+// ---------------------------------------------------------------------------
+
+class Phase63FinalGNIntegrationTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    mock_invoker_ = std::make_shared<NiceMock<MockJvmInvoker>>();
+    font_provider_ = std::make_shared<InMemoryFontCollectionProvider>();
+    aot_provider_ = std::make_shared<InMemoryAndroidAOTProvider>();
+    vm_init_ = std::make_shared<AndroidVMInit>(mock_invoker_, font_provider_,
+                                               aot_provider_);
+  }
+
+  std::shared_ptr<NiceMock<MockJvmInvoker>> mock_invoker_;
+  std::shared_ptr<InMemoryFontCollectionProvider> font_provider_;
+  std::shared_ptr<InMemoryAndroidAOTProvider> aot_provider_;
+  std::shared_ptr<AndroidVMInit> vm_init_;
+  NiceMock<MockJNIEnv> mock_env_;
+};
+
+TEST_F(Phase63FinalGNIntegrationTest, VMInitAndProjectArgsIsolation) {
+  AndroidVMArgs args;
+  args.command_line_args = {"--enable-checked-mode", "--verify-entry-points"};
+  args.api_level = 34;
+  args.enable_impeller = true;
+  args.engine_caches_path = "/data/user/0/com.example/cache";
+  args.app_storage_path = "/data/user/0/com.example/files";
+  args.vm_service_uri = "http://127.0.0.1:8888/auth/";
+
+  EXPECT_CALL(*mock_invoker_, InvokeVoidMethod("setVmServiceUri", _, _))
+      .WillRepeatedly(Return(true));
+
+  ASSERT_TRUE(vm_init_->Init(args));
+  EXPECT_TRUE(vm_init_->IsInitialized());
+  EXPECT_EQ(vm_init_->GetVmServiceUri(), "http://127.0.0.1:8888/auth/");
+  EXPECT_EQ(vm_init_->GetSelectedRenderingAPI(),
+            AndroidRenderingAPI::kImpellerAutoselect);
+
+  const FlutterProjectArgs* project_args = vm_init_->GetProjectArgs();
+  ASSERT_NE(project_args, nullptr);
+  EXPECT_EQ(project_args->struct_size, sizeof(FlutterProjectArgs));
+  EXPECT_EQ(project_args->command_line_argc, 3);
+  EXPECT_STREQ(project_args->command_line_argv[0], "flutter");
+  EXPECT_STREQ(project_args->command_line_argv[1], "--enable-checked-mode");
+  EXPECT_STREQ(project_args->command_line_argv[2], "--verify-entry-points");
+  EXPECT_STREQ(project_args->persistent_cache_path,
+               "/data/user/0/com.example/cache");
+  EXPECT_EQ(project_args->vsync_callback,
+            &FlutterEmbedderNative::OnVsyncCallback);
+  EXPECT_EQ(project_args->update_semantics_callback2,
+            &FlutterEmbedderNative::OnUpdateSemantics2);
+}
+
+TEST_F(Phase63FinalGNIntegrationTest, RenderingAPISelectionMatrix) {
+  // Test Software fallback
+  {
+    AndroidVMArgs args;
+    args.enable_software_rendering = true;
+    EXPECT_EQ(SelectRenderingAPI(args), AndroidRenderingAPI::kSoftware);
+  }
+
+  // Test OpenGLES requested
+  {
+    AndroidVMArgs args;
+    args.requested_rendering_backend = "opengles";
+    args.enable_impeller = true;
+    EXPECT_EQ(SelectRenderingAPI(args), AndroidRenderingAPI::kImpellerOpenGLES);
+  }
+
+  // Test Vulkan requested
+  {
+    AndroidVMArgs args;
+    args.requested_rendering_backend = "vulkan";
+    args.enable_impeller = true;
+    EXPECT_EQ(SelectRenderingAPI(args), AndroidRenderingAPI::kImpellerVulkan);
+  }
+
+  // Test API level < 29 defaults to Skia OpenGLES
+  {
+    AndroidVMArgs args;
+    args.enable_impeller = true;
+    args.api_level = 28;
+    EXPECT_EQ(SelectRenderingAPI(args), AndroidRenderingAPI::kSkiaOpenGLES);
+  }
+
+  // Test API level >= 29 selects Impeller Autoselect
+  {
+    AndroidVMArgs args;
+    args.enable_impeller = true;
+    args.api_level = 29;
+    EXPECT_EQ(SelectRenderingAPI(args),
+              AndroidRenderingAPI::kImpellerAutoselect);
+  }
+
+  // Test Vivante GPU workaround
+  {
+    AndroidVMArgs args;
+    args.enable_impeller = true;
+    args.api_level = 30;
+    EXPECT_EQ(SelectRenderingAPI(args, /*is_vivante=*/true),
+              AndroidRenderingAPI::kSkiaOpenGLES);
+  }
+}
+
+TEST_F(Phase63FinalGNIntegrationTest, ConcurrentMultithreadedOperations) {
+  EXPECT_CALL(*mock_invoker_, InvokeVoidMethod("setVmServiceUri", _, _))
+      .WillRepeatedly(Return(true));
+
+  const size_t kThreadCount = 8;
+  const size_t kIterationsPerThread = 50;
+  std::vector<std::future<bool>> futures;
+  futures.reserve(kThreadCount);
+
+  for (size_t t = 0; t < kThreadCount; ++t) {
+    futures.push_back(std::async(std::launch::async, [&, t]() {
+      for (size_t i = 0; i < kIterationsPerThread; ++i) {
+        AndroidVMArgs args;
+        args.command_line_args = {"--thread=" + std::to_string(t),
+                                  "--iter=" + std::to_string(i)};
+        args.api_level = 30;
+        args.enable_impeller = true;
+        args.vm_service_uri = "http://127.0.0.1:" + std::to_string(8000 + t);
+
+        auto thread_vm = std::make_shared<AndroidVMInit>(
+            mock_invoker_, font_provider_, aot_provider_);
+        if (!thread_vm->Init(args)) {
+          return false;
+        }
+        if (!thread_vm->PrefetchDefaultFontManager()) {
+          return false;
+        }
+        if (!thread_vm->SetVmServiceUri("http://127.0.0.1:9000")) {
+          return false;
+        }
+        if (!thread_vm->IsInitialized()) {
+          return false;
+        }
+        if (thread_vm->GetSelectedRenderingAPI() !=
+            AndroidRenderingAPI::kImpellerAutoselect) {
+          return false;
+        }
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
+}
+
 class EmbedderTestListener : public ::testing::EmptyTestEventListener {
  public:
   void OnTestStart(const ::testing::TestInfo&) override {
