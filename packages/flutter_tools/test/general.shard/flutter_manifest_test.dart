@@ -527,6 +527,83 @@ flutter:
     expect(flutterManifest.usesAndroidX, true);
   });
 
+  testWithoutContext(
+    'FlutterManifest parses pluginRegistrantClassName from module declaration',
+    () {
+      const manifest = '''
+name: test
+flutter:
+  module:
+    androidPackage: com.example
+    pluginRegistrantClassName: CustomPluginRegistrant
+''';
+
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      )!;
+
+      expect(flutterManifest.isModule, true);
+      expect(flutterManifest.pluginRegistrantClassName, 'CustomPluginRegistrant');
+    },
+  );
+
+  testWithoutContext(
+    'FlutterManifest returns null pluginRegistrantClassName when omitted or not module',
+    () {
+      const moduleWithoutRegistrant = '''
+name: test
+flutter:
+  module:
+    androidPackage: com.example
+''';
+
+      final FlutterManifest manifest1 = FlutterManifest.createFromString(
+        moduleWithoutRegistrant,
+        logger: logger,
+      )!;
+      expect(manifest1.pluginRegistrantClassName, isNull);
+
+      const notModule = '''
+name: test
+flutter:
+  uses-material-design: true
+''';
+
+      final FlutterManifest manifest2 = FlutterManifest.createFromString(
+        notModule,
+        logger: logger,
+      )!;
+      expect(manifest2.pluginRegistrantClassName, isNull);
+    },
+  );
+
+  testWithoutContext('FlutterManifest validates pluginRegistrantClassName is valid identifier', () {
+    for (final invalidYamlValue in <String>['123', '"123Invalid"', '"my-registrant"', '""']) {
+      final manifest =
+          '''
+name: test
+flutter:
+  module:
+    androidPackage: com.example
+    pluginRegistrantClassName: $invalidYamlValue
+''';
+
+      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: logger,
+      );
+
+      expect(flutterManifest, isNull);
+      expect(
+        logger.errorText,
+        contains(
+          'The "pluginRegistrantClassName" value must be a valid class identifier if set (e.g. "MyPluginRegistrant").',
+        ),
+      );
+    }
+  });
+
   testWithoutContext('FlutterManifest allows a legacy plugin declaration', () {
     const manifest = '''
 name: test

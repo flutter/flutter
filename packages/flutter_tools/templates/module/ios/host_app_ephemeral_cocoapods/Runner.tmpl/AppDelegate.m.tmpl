@@ -1,5 +1,5 @@
 #import "AppDelegate.h"
-#import "FlutterPluginRegistrant/GeneratedPluginRegistrant.h"
+#import "{{iosPodName}}/{{pluginRegistrantClassName}}.h"
 
 @implementation AppDelegate
 
@@ -9,7 +9,7 @@
 }
 
 - (void)didInitializeImplicitFlutterEngine:(NSObject<FlutterImplicitEngineBridge>*)engineBridge {
-  [GeneratedPluginRegistrant registerWithRegistry:engineBridge.pluginRegistry];
+  [{{pluginRegistrantClassName}} registerWithRegistry:engineBridge.pluginRegistry];
 }
 
 @end

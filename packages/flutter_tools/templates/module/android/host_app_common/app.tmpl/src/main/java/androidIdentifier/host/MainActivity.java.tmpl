@@ -1,6 +1,18 @@
 package {{androidIdentifier}}.host;
 
+import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.FlutterEngine;
 
 public class MainActivity extends FlutterActivity {
+  @Override
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    super.configureFlutterEngine(flutterEngine);
+    try {
+      Class<?> clazz = Class.forName("io.flutter.plugins.{{pluginRegistrantClassName}}");
+      clazz.getDeclaredMethod("registerWith", FlutterEngine.class).invoke(null, flutterEngine);
+    } catch (Exception ignored) {
+      // Ignored if the registrant does not exist (e.g. module has no plugins).
+    }
+  }
 }

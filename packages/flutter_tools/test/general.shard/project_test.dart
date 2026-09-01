@@ -1719,6 +1719,38 @@ android {
           expect(project.android.gradleWrapperPropertiesFile.path, expected.path);
         },
       );
+      _testInMemory(
+        'Project.android.generatedPluginRegistrantFile respects pluginRegistrantClassName',
+        () async {
+          final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+            'flutter_project_test',
+          );
+          tempDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: my_module
+flutter:
+  module:
+    androidPackage: com.example.my_module
+    pluginRegistrantClassName: CustomPluginRegistrant
+''');
+          final FlutterProject project = FlutterProject.fromDirectory(tempDir);
+          expect(
+            project.android.generatedPluginRegistrantFile.path,
+            tempDir
+                .childDirectory('.android')
+                .childDirectory('Flutter')
+                .childDirectory('src')
+                .childDirectory('main')
+                .childDirectory('java')
+                .childDirectory('io')
+                .childDirectory('flutter')
+                .childDirectory('plugins')
+                .childFile('CustomPluginRegistrant.java')
+                .path,
+          );
+        },
+      );
       _testInMemory('Project.android.appGradleFile resolves to app/build.gradle', () async {
         final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
           'flutter_project_build_files',
