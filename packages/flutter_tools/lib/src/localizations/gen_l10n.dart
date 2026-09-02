@@ -127,6 +127,13 @@ List<String> generateMethodParameters(
         'the "type" attribute to "${placeholder.type}".',
       );
     }
+    if (!_isValidTypeName(placeholder.type!)) {
+      throw L10nException(
+        'The type "${placeholder.type}" of the "${placeholder.name}" placeholder in message "${message.resourceId}" '
+        'is not a valid Dart type name. Type names must be valid Dart identifiers, containing only '
+        'letters, numbers, underscores, dollar signs, question marks, and angle or square brackets for generics.',
+      );
+    }
     return '${useNamedParameters ? 'required ' : ''}${placeholder.type} ${placeholder.name}';
   }).toList();
 }
@@ -945,6 +952,54 @@ class LocalizationsGenerator {
     // Dart getter and method name cannot start with a number
     if (name[0].contains(RegExp(r'\d'))) {
       return false;
+    }
+    return true;
+  }
+
+  static bool _isValidTypeName(String type) {
+    if (type.isEmpty) {
+      return false;
+    }
+    // Dart type name must not start with an underscore
+    if (type[0] == '_') {
+      return false;
+    }
+    // Dart type names can only use letters, numbers, underscores, `$`, `?`, `[]`, and `<>`
+    // This regex allows: a-z, A-Z, 0-9, _, $, ?, [, ], <, >
+    if (type.contains(RegExp(r'[^a-zA-Z_$\d?\[\]<>]'))) {
+      return false;
+    }
+    // Check balanced angle brackets for generics (e.g., List<String>)
+    int angleBracketDepth = 0;
+    for (int i = 0; i < type.length; i++) {
+      final char = type[i];
+      if (char == '<') {
+        angleBracketDepth++;
+      } else if (char == '>') {
+        angleBracketDepth--;
+        if (angleBracketDepth < 0) {
+          return false; // Unbalanced angle brackets
+        }
+      }
+    }
+    if (angleBracketDepth != 0) {
+      return false; // Unbalanced angle brackets
+    }
+    // Check balanced square brackets for nullable types (e.g., String?)
+    int squareBracketDepth = 0;
+    for (int i = 0; i < type.length; i++) {
+      final char = type[i];
+      if (char == '[') {
+        squareBracketDepth++;
+      } else if (char == ']') {
+        squareBracketDepth--;
+        if (squareBracketDepth < 0) {
+          return false; // Unbalanced square brackets
+        }
+      }
+    }
+    if (squareBracketDepth != 0) {
+      return false; // Unbalanced square brackets
     }
     return true;
   }
