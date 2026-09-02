@@ -9,6 +9,7 @@ import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
+import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
@@ -165,7 +166,7 @@ class BuildApkCommand extends BuildSubCommand {
     validateBuild(androidBuildInfo);
     terminal.usesTerminalUi = true;
     final FlutterProject project = this.project;
-    await _androidBuilder?.buildApk(
+    await (_androidBuilder ?? context.get<AndroidBuilder>())?.buildApk(
       project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,

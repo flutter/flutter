@@ -11,6 +11,7 @@ import '../android/build_validation.dart';
 import '../android/deferred_components_prebuild_validator.dart';
 import '../android/deferred_components_validator.dart';
 import '../android/gradle_utils.dart';
+import '../base/context.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -207,7 +208,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     validateBuild(androidBuildInfo);
     terminal.usesTerminalUi = true;
-    await _androidBuilder?.buildAab(
+    await (_androidBuilder ?? context.get<AndroidBuilder>())?.buildAab(
       project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,

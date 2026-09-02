@@ -7,6 +7,7 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
+import 'src/android/gradle.dart';
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -267,6 +268,18 @@ List<FlutterCommand> generateCommands({
     fileSystem: toolDependencies.toolContext.fs,
   ),
   BuildCommand(
+    androidBuilder: AndroidGradleBuilder(
+      java: toolDependencies.androidContext.java,
+      logger: toolDependencies.toolContext.logger,
+      processManager: toolDependencies.toolContext.processManager,
+      fileSystem: toolDependencies.toolContext.fs,
+      artifacts: toolDependencies.toolContext.artifacts,
+      analytics: toolDependencies.analytics,
+      gradleUtils: toolDependencies.androidContext.gradleUtils,
+      platform: toolDependencies.toolContext.platform,
+      androidStudio: toolDependencies.androidContext.androidStudio,
+      androidSdk: toolDependencies.androidContext.androidSdk,
+    ),
     androidContext: toolDependencies.androidContext,
     androidSdk: toolDependencies.androidContext.androidSdk,
     artifacts: toolDependencies.toolContext.artifacts,

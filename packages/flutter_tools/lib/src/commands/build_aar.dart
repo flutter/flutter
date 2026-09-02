@@ -9,6 +9,7 @@ import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -178,7 +179,7 @@ class BuildAarCommand extends BuildSubCommand {
       throwToolExit('Please specify a build mode and try again.');
     }
 
-    await _androidBuilder?.buildAar(
+    await (_androidBuilder ?? context.get<AndroidBuilder>())?.buildAar(
       project: project,
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
