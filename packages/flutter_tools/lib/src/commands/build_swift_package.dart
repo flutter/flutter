@@ -33,7 +33,7 @@ import '../macos/swift_packages.dart';
 import '../macos/xcode.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../globals.dart' as globals;
+
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../runner/flutter_command_runner.dart';
@@ -311,7 +311,7 @@ class BuildSwiftPackage extends BuildSubCommand {
       throwToolExit('--build-mode is required.');
     }
 
-    final List<Plugin> plugins = await findPlugins(project, logger: globals.logger);
+    final List<Plugin> plugins = await findPlugins(project, logger: logger);
     plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
     await pluginSwiftDependencies.processPlugins(
       cacheDirectory: cacheDirectory,
