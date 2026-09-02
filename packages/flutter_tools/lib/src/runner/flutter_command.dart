@@ -1491,9 +1491,8 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    final FeatureFlags flags = _featureFlags;
-    final String enabledFeatureFlags = flags.allFeatures
-        .where((Feature feature) => flags.isEnabled(feature))
+    final String enabledFeatureFlags = _featureFlags.allFeatures
+        .where((Feature feature) => _featureFlags.isEnabled(feature))
         .where((Feature feature) => feature.runtimeId != null)
         .map((Feature feature) => feature.runtimeId!)
         .join(',');
