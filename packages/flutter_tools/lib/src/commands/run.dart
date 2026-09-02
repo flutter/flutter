@@ -236,8 +236,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       ..addFlag(
         'ios-profile-debugger',
         negatable: false,
-        help:
-            'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
+        help: 'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -504,8 +503,7 @@ class RunCommand extends RunCommandBase {
       ..addFlag(
         'hot',
         defaultsTo: kHotReloadDefault,
-        help:
-            'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',
+        help: 'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',
       )
       ..addFlag(
         'resident',

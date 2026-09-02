@@ -65,8 +65,7 @@ class DaemonCommand extends FlutterCommand {
        _java = java {
     argParser.addOption(
       'listen-on-tcp-port',
-      help:
-          'If specified, the daemon will be listening for commands on the specified port instead of stdio.',
+      help: 'If specified, the daemon will be listening for commands on the specified port instead of stdio.',
       valueHelp: 'port',
     );
   }
@@ -173,7 +172,7 @@ class DaemonServer {
     @visibleForTesting
     Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
     this.deviceManager,
-    this.featureFlags,
+    required this.featureFlags,
     this.fileSystem,
     this.java,
     this.notifyingLogger,
@@ -204,7 +203,7 @@ class DaemonServer {
   final DeviceManager? deviceManager;
   final Java? java;
   final AndroidSdk? androidSdk;
-  final FeatureFlags? featureFlags;
+  final FeatureFlags featureFlags;
   final AndroidWorkflow? androidWorkflow;
   final Stdio? stdio;
 
@@ -267,8 +266,10 @@ class DaemonServer {
 }
 
 typedef CommandHandler = Future<Object?>? Function(Map<String, Object?> args);
-typedef CommandHandlerWithBinary =
-    Future<Object?> Function(Map<String, Object?> args, Stream<List<int>>? binary);
+typedef CommandHandlerWithBinary = Future<Object?> Function(
+  Map<String, Object?> args,
+  Stream<List<int>>? binary,
+);
 
 class Daemon {
   Daemon(
@@ -277,7 +278,7 @@ class Daemon {
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
-    FeatureFlags? featureFlags,
+    required FeatureFlags featureFlags,
     FileSystem? fileSystem,
     FileTransfer fileTransfer = const FileTransfer(),
     Java? java,
@@ -296,20 +297,19 @@ class Daemon {
            fileSystem ??
            LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks()) {
     final Platform p = platform ?? const LocalPlatform();
-    final FeatureFlags flags = featureFlags ?? const _DefaultFeatureFlags();
     final ProcessManager pm = processManager ?? const LocalProcessManager();
     final AnsiTerminal term = terminal ?? AnsiTerminal(stdio: stdio ?? Stdio(), platform: p);
     final OutputPreferences prefs = outputPreferences ?? OutputPreferences.test();
     final Analytics an = analytics ?? const NoOpAnalytics();
     final SystemClock clock = systemClock ?? const SystemClock();
     final AndroidWorkflow workflow =
-        androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: flags);
+        androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: featureFlags);
 
     // Set up domains.
     registerDomain(
       daemonDomain = DaemonDomain(
         this,
-        featureFlags: flags,
+        featureFlags: featureFlags,
         fileSystem: _fs,
         logger: _logger,
         stdio: _stdio,
@@ -365,7 +365,7 @@ class Daemon {
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
-    FeatureFlags? featureFlags,
+    required FeatureFlags featureFlags,
     FileSystem? fileSystem,
     Java? java,
     OutputPreferences? outputPreferences,
@@ -846,37 +846,15 @@ class DaemonDomain extends Domain {
   }
 }
 
-class _DefaultFeatureFlags implements FeatureFlags {
-  const _DefaultFeatureFlags();
-
-  @override
-  bool get isLinuxEnabled => true;
-
-  @override
-  bool get isWindowsEnabled => true;
-
-  @override
-  bool get isMacOSEnabled => true;
-
-  @override
-  Object? noSuchMethod(Invocation invocation) {
-    if (invocation.isGetter) {
-      return false;
-    }
-    throw UnimplementedError('${invocation.memberName} not implemented in _DefaultFeatureFlags');
-  }
-}
-
 /// The reason a [PlatformType] is not currently supported.
 ///
 /// The [name] of this value will be sent as a response to daemon client.
 enum _ReasonCode { create, config }
 
-typedef RunOrAttach =
-    Future<void> Function({
-      Completer<DebugConnectionInfo>? connectionInfoCompleter,
-      Completer<void>? appStartedCompleter,
-    });
+typedef RunOrAttach = Future<void> Function({
+  Completer<DebugConnectionInfo>? connectionInfoCompleter,
+  Completer<void>? appStartedCompleter,
+});
 
 /// This domain responds to methods like [startApp] and [stop].
 ///
