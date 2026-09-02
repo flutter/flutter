@@ -34,7 +34,7 @@ void main() {
       expect(command.toolContext, same(toolContext));
     });
 
-    testUsingContext('rasterizer and skia screenshots do not require a device', () async {
+    testWithoutContext('rasterizer and skia screenshots do not require a device', () async {
       final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
       final command = ScreenshotCommand(
         toolContext: toolContext,

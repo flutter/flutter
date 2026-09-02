@@ -25,8 +25,9 @@ const _kSkiaType = 'skia';
 
 /// The `flutter screenshot` command, which captures a screenshot from a connected device.
 class ScreenshotCommand extends FlutterCommand {
-  ScreenshotCommand({this.fs, super.toolContext, VMServiceConnector? vmServiceConnector})
-    : _vmServiceConnector = vmServiceConnector ?? connectToVmService {
+  ScreenshotCommand({FileSystem? fs, super.toolContext, VMServiceConnector? vmServiceConnector})
+    : _fs = fs,
+      _vmServiceConnector = vmServiceConnector ?? connectToVmService {
     argParser.addOption(
       _kOut,
       abbr: 'o',
@@ -60,8 +61,10 @@ class ScreenshotCommand extends FlutterCommand {
     usesDeviceConnectionOption();
   }
 
-  final FileSystem? fs;
+  final FileSystem? _fs;
   final VMServiceConnector _vmServiceConnector;
+
+  FileSystem get fs => toolContext.fs;
 
   @override
   ToolContext get toolContext {
@@ -70,7 +73,7 @@ class ScreenshotCommand extends FlutterCommand {
       return explicit;
     }
     return _ScreenshotToolContext(
-      fs: fs ?? globals.fs,
+      fs: _fs ?? globals.fs,
       logger: globals.logger,
       platform: globals.platform,
       processManager: globals.processManager,
