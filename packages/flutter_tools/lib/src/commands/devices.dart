@@ -163,13 +163,12 @@ class DevicesCommandOutput {
   Future<void> findAndOutputAllTargetDevices({required bool machine}) async {
     var attachedDevices = <Device>[];
     var wirelessDevices = <Device>[];
-    final DeviceManager? deviceManager = _deviceManager;
-    if (deviceManager != null) {
+    if (_deviceManager != null) {
       // Refresh the cache and then get the attached and wireless devices from
       // the cache.
-      await deviceManager.refreshAllDevices(timeout: deviceDiscoveryTimeout);
-      attachedDevices = await _getAttachedDevices(deviceManager);
-      wirelessDevices = await _getWirelessDevices(deviceManager);
+      await _deviceManager.refreshAllDevices(timeout: deviceDiscoveryTimeout);
+      attachedDevices = await _getAttachedDevices(_deviceManager);
+      wirelessDevices = await _getWirelessDevices(_deviceManager);
     }
     final List<Device> allDevices = attachedDevices + wirelessDevices;
 
@@ -271,9 +270,8 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
         );
 
     var attachedDevices = <Device>[];
-    final DeviceManager? deviceManager = _deviceManager;
-    if (deviceManager != null) {
-      attachedDevices = await _getAttachedDevices(deviceManager);
+    if (_deviceManager != null) {
+      attachedDevices = await _getAttachedDevices(_deviceManager);
     }
 
     // Number of lines to clear starts at 1 because it's inclusive of the line
@@ -301,8 +299,8 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
     final Status waitingStatus = _logger.startSpinner();
     await extendedWirelessDiscovery;
     var wirelessDevices = <Device>[];
-    if (deviceManager != null) {
-      wirelessDevices = await _getWirelessDevices(deviceManager);
+    if (_deviceManager != null) {
+      wirelessDevices = await _getWirelessDevices(_deviceManager);
     }
     waitingStatus.stop();
 
