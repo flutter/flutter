@@ -64,22 +64,22 @@ import 'daemon.dart';
 class AttachCommand extends FlutterCommand {
   AttachCommand({
     bool verboseHelp = false,
-    HotRunnerFactory? runnerFactory,
-    required Stdio std,
-    required Logger log,
-    required Terminal term,
-    required Signals sigs,
-    required Platform plat,
-    required ProcessInfo pInfo,
-    required FileSystem fs,
-  }) : _hotRunnerFactory = runnerFactory ?? HotRunnerFactory(),
-       _stdio = std,
-       _logger = log,
-       _terminal = term,
-       _signals = sigs,
-       _platform = plat,
-       _processInfo = pInfo,
-       _fileSystem = fs {
+    HotRunnerFactory? hotRunnerFactory,
+    required Stdio stdio,
+    required Logger logger,
+    required Terminal terminal,
+    required Signals signals,
+    required Platform platform,
+    required ProcessInfo processInfo,
+    required FileSystem fileSystem,
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
+       _stdio = stdio,
+       _logger = logger,
+       _terminal = terminal,
+       _signals = signals,
+       _platform = platform,
+       _processInfo = processInfo,
+       _fileSystem = fileSystem {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);

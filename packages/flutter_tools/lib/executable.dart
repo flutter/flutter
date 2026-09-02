@@ -154,9 +154,9 @@ Future<void> main(List<String> args) async {
       BuildTargets: () => const BuildTargetsImpl(),
       Logger: () {
         final loggerFactory = LoggerFactory(
-          prefs: globals.outputPreferences,
-          term: globals.terminal,
-          std: globals.stdio,
+          outputPreferences: globals.outputPreferences,
+          terminal: globals.terminal,
+          stdio: globals.stdio,
         );
         return loggerFactory.createLogger(
           daemon: daemon,
@@ -208,7 +208,7 @@ String? findCommandName(List<String> args, {ToolContext? toolContext}) {
 }
 
 class _FallbackToolContext implements ToolContext {
-  _FallbackToolContext({OutputPreferences? prefs}) : _outputPreferences = prefs;
+  _FallbackToolContext({OutputPreferences? outputPreferences}) : _outputPreferences = outputPreferences;
 
   final OutputPreferences? _outputPreferences;
 
@@ -258,13 +258,13 @@ List<FlutterCommand> generateCommands({
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: toolDependencies.buildSystem),
   AttachCommand(
     verboseHelp: verboseHelp,
-    std: toolDependencies.toolContext.stdio,
-    log: toolDependencies.toolContext.logger,
-    term: toolDependencies.toolContext.terminal,
-    sigs: toolDependencies.toolContext.signals,
-    plat: toolDependencies.toolContext.platform,
-    pInfo: ProcessInfo(toolDependencies.toolContext.fs),
-    fs: toolDependencies.toolContext.fs,
+    stdio: toolDependencies.toolContext.stdio,
+    logger: toolDependencies.toolContext.logger,
+    terminal: toolDependencies.toolContext.terminal,
+    signals: toolDependencies.toolContext.signals,
+    platform: toolDependencies.toolContext.platform,
+    processInfo: ProcessInfo(toolDependencies.toolContext.fs),
+    fileSystem: toolDependencies.toolContext.fs,
   ),
   BuildCommand(
     fileSystem: toolDependencies.toolContext.fs,
@@ -390,14 +390,14 @@ List<FlutterCommand> generateCommands({
 /// Our logger class hierarchy and runtime requirements are overly complicated.
 class LoggerFactory {
   LoggerFactory({
-    required Terminal term,
-    required Stdio std,
-    required OutputPreferences prefs,
-    StopwatchFactory stopwatch = const StopwatchFactory(),
-  }) : _terminal = term,
-       _stdio = std,
-       _stopwatchFactory = stopwatch,
-       _outputPreferences = prefs;
+    required Terminal terminal,
+    required Stdio stdio,
+    required OutputPreferences outputPreferences,
+    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+  }) : _terminal = terminal,
+       _stdio = stdio,
+       _stopwatchFactory = stopwatchFactory,
+       _outputPreferences = outputPreferences;
 
   final Terminal _terminal;
   final Stdio _stdio;
