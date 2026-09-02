@@ -171,6 +171,30 @@ class DependencyVersionCheckerTest {
         verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
     }
 
+    @Test
+    fun `AGP built-in Kotlin skips KGP min version enforcement`() {
+        val mockProject =
+            MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(
+                kgpVersion = "2.2.10",
+                usesBuiltInKotlin = true
+            )
+
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
+        val mockLogger = mockProject.logger
+        every { mockLogger.debug(any()) } returns Unit
+
+        DependencyVersionChecker.checkDependencyVersions(mockProject)
+
+        verify {
+            mockLogger.debug(
+                "Skipping Kotlin min-version enforcement because the project uses " +
+                    "AGP built-in Kotlin or does not apply KGP."
+            )
+        }
+        verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
+    }
+
     // No test for Java version in warn range, as the lowest supported Java version is also the
     // lowest possible.
     @Test
@@ -422,6 +446,7 @@ private object MockProjectFactory {
         gradleVersion: String = SUPPORTED_GRADLE_VERSION,
         agpVersion: AndroidPluginVersion = SUPPORTED_AGP_VERSION,
         kgpVersion: String = SUPPORTED_KGP_VERSION,
+        usesBuiltInKotlin: Boolean = false,
         minSdkVersions: List<MinSdkVersion> = listOf(SUPPORTED_SDK_VERSION)
     ): Project {
         // Java
@@ -440,6 +465,7 @@ private object MockProjectFactory {
         // KGP
         every { mockProject.hasProperty(eq("kotlin_version")) } returns true
         every { mockProject.properties["kotlin_version"] } returns kgpVersion
+        every { mockProject.findProperty("android.builtInKotlin") } returns usesBuiltInKotlin.toString()
 
         // Logger
         val mockLogger = mockk<Logger>()
