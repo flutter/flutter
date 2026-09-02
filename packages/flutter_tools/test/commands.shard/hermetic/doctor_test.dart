@@ -833,6 +833,7 @@ void main() {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
       final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+      expect(command.toolContext, same(fakeToolContext));
 
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);

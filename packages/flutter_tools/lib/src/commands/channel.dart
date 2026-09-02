@@ -42,6 +42,9 @@ class ChannelCommand extends FlutterCommand {
   final ToolContext _toolContext;
 
   @override
+  ToolContext get toolContext => _toolContext;
+
+  @override
   String get name => 'channel';
 
   @override
@@ -102,7 +105,7 @@ class ChannelCommand extends FlutterCommand {
 
     logger.printStatus('Flutter channels:');
     final int result = await git.stream(
-      ['branch', '-r'],
+      <String>['branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
         rawOutput.add(line);
