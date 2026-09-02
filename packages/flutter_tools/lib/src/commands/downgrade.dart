@@ -110,8 +110,7 @@ class DowngradeCommand extends FlutterCommand {
         'Use "flutter channel" to switch to an official channel. ',
       );
     }
-    final PersistentToolState persistentToolState = _persistentToolState;
-    final String? lastFlutterVersion = persistentToolState.lastActiveVersion(channel);
+    final String? lastFlutterVersion = _persistentToolState.lastActiveVersion(channel);
     final String currentFlutterVersion = flutterVersion.frameworkRevision;
     if (lastFlutterVersion == null || currentFlutterVersion == lastFlutterVersion) {
       final String trailing = await _createErrorMessage(workingDirectory, channel, git: git);
