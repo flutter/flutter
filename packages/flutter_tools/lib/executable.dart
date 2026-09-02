@@ -314,8 +314,8 @@ List<FlutterCommand> generateCommands({
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
   DevicesCommand(
-    deviceManager: globals.deviceManager,
-    doctor: globals.doctor,
+    deviceManager: globals.deviceManager!,
+    doctor: globals.doctor!,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),

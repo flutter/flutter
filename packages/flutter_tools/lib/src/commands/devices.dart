@@ -16,9 +16,9 @@ import '../runner/flutter_command.dart';
 /// The `flutter devices` command, which lists all connected devices.
 class DevicesCommand extends FlutterCommand {
   DevicesCommand({
+    required DeviceManager deviceManager,
+    required Doctor doctor,
     required ToolContext toolContext,
-    DeviceManager? deviceManager,
-    Doctor? doctor,
     super.verboseHelp,
   }) : _deviceManager = deviceManager,
        _doctor = doctor,
@@ -34,8 +34,8 @@ class DevicesCommand extends FlutterCommand {
     usesDeviceConnectionOption();
   }
 
-  final DeviceManager? _deviceManager;
-  final Doctor? _doctor;
+  final DeviceManager _deviceManager;
+  final Doctor _doctor;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -75,7 +75,7 @@ class DevicesCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (_doctor?.canListAnything == false) {
+    if (!_doctor.canListAnything) {
       throwToolExit(
         "Unable to locate a development device; please run 'flutter doctor' for "
         'information about installing additional components.',

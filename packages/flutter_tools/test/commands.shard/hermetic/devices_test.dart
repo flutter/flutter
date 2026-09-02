@@ -63,12 +63,17 @@ void main() {
       });
 
       testWithoutContext('returns 0 when called', () async {
-        final command = DevicesCommand(toolContext: FakeToolContext(platform: platform));
+        final command = DevicesCommand(
+          deviceManager: _FakeDeviceManager(),
+          doctor: _FakeDoctor(),
+          toolContext: FakeToolContext(platform: platform),
+        );
         await createTestCommandRunner(command).run(<String>['devices']);
       });
 
       testWithoutContext('throws ToolExit when Doctor cannot list anything', () async {
         final command = DevicesCommand(
+          deviceManager: _FakeDeviceManager(),
           doctor: _FakeDoctor(canListAnything: false),
           toolContext: FakeToolContext(platform: platform),
         );
@@ -83,8 +88,9 @@ void main() {
       testWithoutContext('no error when no connected devices', () async {
         final logger = BufferLogger.test();
         final command = DevicesCommand(
-          toolContext: FakeToolContext(logger: logger, platform: platform),
           deviceManager: NoDevicesManager(),
+          doctor: _FakeDoctor(),
+          toolContext: FakeToolContext(logger: logger, platform: platform),
         );
         await createTestCommandRunner(command).run(<String>['devices']);
         expect(
@@ -117,8 +123,9 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           testWithoutContext('Outputs parsable JSON', () async {
             final logger = BufferLogger.test();
             final command = DevicesCommand(
-              toolContext: FakeToolContext(logger: logger, platform: platform),
               deviceManager: _FakeDeviceManager(devices: deviceList),
+              doctor: _FakeDoctor(),
+              toolContext: FakeToolContext(logger: logger, platform: platform),
             );
             await createTestCommandRunner(command).run(<String>['devices', '--machine']);
             expect(json.decode(logger.statusText), <Map<String, Object>>[
@@ -132,8 +139,9 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
             testWithoutContext('filtered to attached', () async {
               final logger = BufferLogger.test();
               final command = DevicesCommand(
-                toolContext: FakeToolContext(logger: logger, platform: platform),
                 deviceManager: _FakeDeviceManager(devices: deviceList),
+                doctor: _FakeDoctor(),
+                toolContext: FakeToolContext(logger: logger, platform: platform),
               );
               await createTestCommandRunner(
                 command,
@@ -147,8 +155,9 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
             testWithoutContext('filtered to wireless', () async {
               final logger = BufferLogger.test();
               final command = DevicesCommand(
-                toolContext: FakeToolContext(logger: logger, platform: platform),
                 deviceManager: _FakeDeviceManager(devices: deviceList),
+                doctor: _FakeDoctor(),
+                toolContext: FakeToolContext(logger: logger, platform: platform),
               );
               await createTestCommandRunner(
                 command,
@@ -161,8 +170,9 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
         testWithoutContext('available devices and diagnostics', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
-            toolContext: FakeToolContext(logger: logger, platform: platform),
             deviceManager: _FakeDeviceManager(devices: deviceList),
+            doctor: _FakeDoctor(),
+            toolContext: FakeToolContext(logger: logger, platform: platform),
           );
           await createTestCommandRunner(command).run(<String>['devices']);
           expect(logger.statusText, '''
@@ -185,8 +195,9 @@ If you expected another device to be detected, please run "flutter doctor" to di
           testWithoutContext('filtered to attached', () async {
             final logger = BufferLogger.test();
             final command = DevicesCommand(
-              toolContext: FakeToolContext(logger: logger, platform: platform),
               deviceManager: _FakeDeviceManager(devices: deviceList),
+              doctor: _FakeDoctor(),
+              toolContext: FakeToolContext(logger: logger, platform: platform),
             );
             await createTestCommandRunner(
               command,
@@ -207,8 +218,9 @@ If you expected another device to be detected, please run "flutter doctor" to di
           testWithoutContext('filtered to wireless', () async {
             final logger = BufferLogger.test();
             final command = DevicesCommand(
-              toolContext: FakeToolContext(logger: logger, platform: platform),
               deviceManager: _FakeDeviceManager(devices: deviceList),
+              doctor: _FakeDoctor(),
+              toolContext: FakeToolContext(logger: logger, platform: platform),
             );
             await createTestCommandRunner(
               command,
@@ -236,8 +248,9 @@ If you expected another device to be detected, please run "flutter doctor" to di
         testWithoutContext('available devices and diagnostics', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
-            toolContext: FakeToolContext(logger: logger, platform: platform),
             deviceManager: _FakeDeviceManager(devices: deviceList),
+            doctor: _FakeDoctor(),
+            toolContext: FakeToolContext(logger: logger, platform: platform),
           );
           await createTestCommandRunner(command).run(<String>['devices']);
           expect(logger.statusText, '''
@@ -263,8 +276,9 @@ If you expected another device to be detected, please run "flutter doctor" to di
         testWithoutContext('available devices and diagnostics', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
-            toolContext: FakeToolContext(logger: logger, platform: platform),
             deviceManager: _FakeDeviceManager(devices: deviceList),
+            doctor: _FakeDoctor(),
+            toolContext: FakeToolContext(logger: logger, platform: platform),
           );
           await createTestCommandRunner(command).run(<String>['devices']);
           expect(logger.statusText, '''
@@ -287,7 +301,11 @@ If you expected another device to be detected, please run "flutter doctor" to di
       });
 
       testWithoutContext('returns 0 when called', () async {
-        final command = DevicesCommand(toolContext: FakeToolContext(platform: platform));
+        final command = DevicesCommand(
+          deviceManager: _FakeDeviceManager(),
+          doctor: _FakeDoctor(),
+          toolContext: FakeToolContext(platform: platform),
+        );
         await createTestCommandRunner(command).run(<String>['devices']);
       });
 
@@ -295,8 +313,9 @@ If you expected another device to be detected, please run "flutter doctor" to di
         testWithoutContext('no error', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
-            toolContext: FakeToolContext(logger: logger, platform: platform),
             deviceManager: NoDevicesManager(),
+            doctor: _FakeDoctor(),
+            toolContext: FakeToolContext(logger: logger, platform: platform),
           );
           await createTestCommandRunner(command).run(<String>['devices']);
           expect(
@@ -317,8 +336,9 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           testWithoutContext('filtered to attached', () async {
             final logger = BufferLogger.test();
             final command = DevicesCommand(
-              toolContext: FakeToolContext(logger: logger, platform: platform),
               deviceManager: NoDevicesManager(),
+              doctor: _FakeDoctor(),
+              toolContext: FakeToolContext(logger: logger, platform: platform),
             );
             await createTestCommandRunner(
               command,
@@ -335,8 +355,9 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           testWithoutContext('filtered to wireless', () async {
             final logger = BufferLogger.test();
             final command = DevicesCommand(
-              toolContext: FakeToolContext(logger: logger, platform: platform),
               deviceManager: NoDevicesManager(),
+              doctor: _FakeDoctor(),
+              toolContext: FakeToolContext(logger: logger, platform: platform),
             );
             await createTestCommandRunner(
               command,
@@ -377,8 +398,9 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
           testWithoutContext('Outputs parsable JSON', () async {
             final logger = BufferLogger.test();
             final command = DevicesCommand(
-              toolContext: FakeToolContext(logger: logger, platform: platform),
               deviceManager: _FakeDeviceManager(devices: deviceList),
+              doctor: _FakeDoctor(),
+              toolContext: FakeToolContext(logger: logger, platform: platform),
             );
             await createTestCommandRunner(command).run(<String>['devices', '--machine']);
             expect(json.decode(logger.statusText), <Map<String, Object>>[
@@ -393,8 +415,9 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
             testWithoutContext('filtered to attached', () async {
               final logger = BufferLogger.test();
               final command = DevicesCommand(
-                toolContext: FakeToolContext(logger: logger, platform: platform),
                 deviceManager: _FakeDeviceManager(devices: deviceList),
+                doctor: _FakeDoctor(),
+                toolContext: FakeToolContext(logger: logger, platform: platform),
               );
               await createTestCommandRunner(
                 command,
@@ -408,8 +431,9 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
             testWithoutContext('filtered to wireless', () async {
               final logger = BufferLogger.test();
               final command = DevicesCommand(
-                toolContext: FakeToolContext(logger: logger, platform: platform),
                 deviceManager: _FakeDeviceManager(devices: deviceList),
+                doctor: _FakeDoctor(),
+                toolContext: FakeToolContext(logger: logger, platform: platform),
               );
               await createTestCommandRunner(
                 command,
@@ -425,8 +449,9 @@ If you expected a device to be detected, please run "flutter doctor" to diagnose
         testWithoutContext('available devices and diagnostics', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
-            toolContext: FakeToolContext(logger: logger, platform: platform),
             deviceManager: _FakeDeviceManager(devices: deviceList),
+            doctor: _FakeDoctor(),
+            toolContext: FakeToolContext(logger: logger, platform: platform),
           );
           await createTestCommandRunner(command).run(<String>['devices']);
           expect(logger.statusText, '''
@@ -466,12 +491,13 @@ Checking for wireless devices...
 
           testWithoutContext('available devices and diagnostics', () async {
             final command = DevicesCommand(
+              deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
+              doctor: _FakeDoctor(),
               toolContext: FakeToolContext(
                 logger: fakeLogger,
                 platform: platform,
                 terminal: terminal,
               ),
-              deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
             );
             await createTestCommandRunner(command).run(<String>['devices']);
 
@@ -502,8 +528,9 @@ If you expected another device to be detected, please run "flutter doctor" to di
 
           testWithoutContext('available devices and diagnostics', () async {
             final command = DevicesCommand(
-              toolContext: FakeToolContext(logger: fakeLogger, platform: platform),
               deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
+              doctor: _FakeDoctor(),
+              toolContext: FakeToolContext(logger: fakeLogger, platform: platform),
             );
             await createTestCommandRunner(command).run(<String>['devices']);
 
@@ -532,8 +559,9 @@ If you expected another device to be detected, please run "flutter doctor" to di
 
           testWithoutContext('when deviceConnectionInterface filtered to wireless', () async {
             final command = DevicesCommand(
-              toolContext: FakeToolContext(logger: fakeLogger, platform: platform),
               deviceManager: _FakeDeviceManager(devices: deviceList),
+              doctor: _FakeDoctor(),
+              toolContext: FakeToolContext(logger: fakeLogger, platform: platform),
             );
             await createTestCommandRunner(
               command,
@@ -564,8 +592,9 @@ If you expected another device to be detected, please run "flutter doctor" to di
         testWithoutContext('available devices and diagnostics', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
-            toolContext: FakeToolContext(logger: logger, platform: platform),
             deviceManager: _FakeDeviceManager(devices: deviceList),
+            doctor: _FakeDoctor(),
+            toolContext: FakeToolContext(logger: logger, platform: platform),
           );
           await createTestCommandRunner(command).run(<String>['devices']);
           expect(logger.statusText, '''
@@ -603,12 +632,13 @@ Checking for wireless devices...
 
           testWithoutContext('available devices and diagnostics', () async {
             final command = DevicesCommand(
+              deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
+              doctor: _FakeDoctor(),
               toolContext: FakeToolContext(
                 logger: fakeLogger,
                 platform: platform,
                 terminal: terminal,
               ),
-              deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
             );
             await createTestCommandRunner(command).run(<String>['devices']);
 
@@ -637,8 +667,9 @@ If you expected another device to be detected, please run "flutter doctor" to di
 
           testWithoutContext('available devices and diagnostics', () async {
             final command = DevicesCommand(
-              toolContext: FakeToolContext(logger: fakeLogger, platform: platform),
               deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
+              doctor: _FakeDoctor(),
+              toolContext: FakeToolContext(logger: fakeLogger, platform: platform),
             );
             await createTestCommandRunner(command).run(<String>['devices']);
 
@@ -674,8 +705,9 @@ If you expected another device to be detected, please run "flutter doctor" to di
         testWithoutContext('available devices and diagnostics', () async {
           final logger = BufferLogger.test();
           final command = DevicesCommand(
-            toolContext: FakeToolContext(logger: logger, platform: platform),
             deviceManager: _FakeDeviceManager(devices: deviceList),
+            doctor: _FakeDoctor(),
+            toolContext: FakeToolContext(logger: logger, platform: platform),
           );
           await createTestCommandRunner(command).run(<String>['devices']);
           expect(logger.statusText, '''
@@ -707,12 +739,13 @@ No devices found yet. Checking for wireless devices...
 
           testWithoutContext('available devices and diagnostics', () async {
             final command = DevicesCommand(
+              deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
+              doctor: _FakeDoctor(),
               toolContext: FakeToolContext(
                 logger: fakeLogger,
                 platform: platform,
                 terminal: terminal,
               ),
-              deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
             );
             await createTestCommandRunner(command).run(<String>['devices']);
 
@@ -739,8 +772,9 @@ If you expected another device to be detected, please run "flutter doctor" to di
 
           testWithoutContext('available devices and diagnostics', () async {
             final command = DevicesCommand(
-              toolContext: FakeToolContext(logger: fakeLogger, platform: platform),
               deviceManager: _FakeDeviceManager(devices: deviceList, logger: fakeLogger),
+              doctor: _FakeDoctor(),
+              toolContext: FakeToolContext(logger: fakeLogger, platform: platform),
             );
             await createTestCommandRunner(command).run(<String>['devices']);
 
@@ -862,7 +896,7 @@ class FakeBufferLogger extends BufferLogger {
 }
 
 class _FakeDoctor extends Fake implements Doctor {
-  _FakeDoctor({required this.canListAnything});
+  _FakeDoctor({this.canListAnything = true});
 
   @override
   final bool canListAnything;
