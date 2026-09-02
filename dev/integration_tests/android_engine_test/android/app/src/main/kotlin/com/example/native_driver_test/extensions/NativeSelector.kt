@@ -8,7 +8,6 @@ package com.example.android_engine_test.extensions
 
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.children
 
 // / Finds a native view using serialized data provided by a driver script.
 sealed class NativeSelector {
@@ -32,11 +31,13 @@ sealed class NativeSelector {
             parent: View,
             found: ArrayList<View>
         ) {
-            if (contentDescription == parent.contentDescription?.toString()) {
+            val desc = parent.contentDescription
+            if (desc != null && contentDescription.contentEquals(desc)) {
                 found.add(parent)
             }
             if (parent is ViewGroup) {
-                for (child in parent.children) {
+                for (i in 0 until parent.childCount) {
+                    val child = parent.getChildAt(i) ?: continue
                     findRecursive(child, found)
                 }
             }
