@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -26,7 +27,7 @@ import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart' show FakeAndroidContext, FakeFlutterVersion, FakeToolContext;
+import '../../src/fakes.dart' show FakeAndroidContext, FakeFlutterVersion, FakeToolContext, TestFeatureFlags;
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -136,11 +137,12 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
     testUsingContext(
-      'reports hcpp analytics default false when not in the manifest and no explicit flag is passed',
+      'reports hcpp analytics false when the manifest is silent and the feature flag is off',
       () async {
         final String projectPath = await createProject(
           tempDir,
@@ -165,6 +167,40 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics from the enable-hcpp feature flag when the manifest is silent',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        // The manifest does not set EnableHcpp, so the build injects the feature flag value
+        // and the packaged app has HCPP on.
+        await runBuildApkCommand(projectPath);
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'apk',
+              commandHasTerminal: false,
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildApkBuildMode: 'release',
+              buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: true,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
@@ -195,6 +231,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
@@ -228,6 +265,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
@@ -271,6 +309,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
@@ -374,6 +413,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -690,6 +730,7 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -744,6 +785,7 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -798,6 +840,7 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -848,6 +891,7 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -915,6 +959,7 @@ void main() {
         ProcessManager: () => processManager,
         Analytics: () => analytics,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -987,6 +1032,7 @@ void main() {
         ProcessManager: () => processManager,
         Analytics: () => analytics,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -1040,6 +1086,7 @@ void main() {
         ProcessManager: () => processManager,
         Analytics: () => analytics,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
   });

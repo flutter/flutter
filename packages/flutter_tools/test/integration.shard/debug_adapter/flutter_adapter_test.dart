@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:dap_adapters/dap_adapters.dart';
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
@@ -25,7 +24,6 @@ void main() {
   final relativeMainPath = 'lib${fileSystem.path.separator}main.dart';
 
   setUpAll(() {
-    Cache.flutterRoot = getFlutterRoot();
   });
 
   setUp(() async {

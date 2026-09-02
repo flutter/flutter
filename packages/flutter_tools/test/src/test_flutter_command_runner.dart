@@ -8,11 +8,11 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/features.dart';import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -25,12 +25,14 @@ CommandRunner<void> createTestCommandRunner([
   FlutterCommand? command,
   Analytics? analytics,
   ToolContext? toolContext,
+  FeatureFlags? featureFlags,
 ]) {
-  final ToolContext effectiveToolContext =
-      toolContext ??
-      (command != null ? (command as dynamic).toolContext as ToolContext? : null) ??
-      DelegatingToolContext();
-  final runner = TestFlutterCommandRunner(analytics: analytics, toolContext: effectiveToolContext);
+  final ToolContext? effectiveToolContext = toolContext ?? command?.toolContext;
+  final runner = TestFlutterCommandRunner(
+    analytics: analytics,
+    featureFlags: featureFlags,
+    toolContext: effectiveToolContext,
+  );
   if (command != null) {
     runner.addCommand(command);
   }
@@ -47,47 +49,48 @@ Future<String> createProject(
   ToolContext? toolContext,
 }) async {
   arguments ??= <String>['--no-pub'];
-  final FileSystem fs = toolContext?.fs ?? globals.fs;
-  final String projectPath = fs.path.join(temp.path, name);
-  final command = CreateCommand(
-    toolContext:
-        toolContext ??
-        FakeToolContext(
-          fs: fs,
-          logger: globals.logger,
-          platform: globals.platform,
-          processManager: globals.processManager,
-          cache: globals.cache,
-          flutterVersion: FakeFlutterVersion(),
-        ),
-  );
-  Analytics? analytics;
-  try {
-    analytics = context.get<Analytics>();
-  } on UnsupportedError {
-    // In testWithoutContext, context.get is not supported.
-  }
-  final CommandRunner<void> runner = createTestCommandRunner(command, analytics);
-  await runner.run(<String>['create', ...arguments, projectPath]);
+  final String projectPath = temp.fileSystem.path.join(temp.path, name);
+  final command = CreateCommand();
+  final CommandRunner<void> runner = createTestCommandRunner(command);  await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
 }
 
 class TestFlutterCommandRunner extends FlutterCommandRunner {
-  TestFlutterCommandRunner({Analytics? analytics, ToolContext? toolContext})
-    : super(
-        analytics: analytics ?? const NoOpAnalytics(),
-        toolContext: toolContext ?? FakeToolContext(),
-      );
+  TestFlutterCommandRunner({
+    Analytics? analytics,
+    FeatureFlags? featureFlags,
+    ToolContext? toolContext,
+  }) : super(
+         analytics: analytics ?? _defaultAnalytics(),
+         featureFlags: featureFlags ?? _defaultFeatureFlags(),
+         toolContext: toolContext ?? DelegatingToolContext(),
+       );
+
+  static Analytics _defaultAnalytics() {
+    try {
+      return context.get<Analytics>() ?? const NoOpAnalytics();
+    } on UnsupportedError {
+      return const NoOpAnalytics();
+    }
+  }
+
+  static FeatureFlags? _defaultFeatureFlags() {
+    try {
+      return context.get<FeatureFlags>();
+    } on UnsupportedError {
+      return null;
+    }
+  }
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Logger? topLevelLogger = toolContext?.logger ?? context.get<Logger>();
-    final contextOverrides = <Type, dynamic>{
-      if (topLevelLogger != null && (topLevelResults['verbose'] as bool))
-        Logger: VerboseLogger(topLevelLogger),
+    final Logger topLevelLogger = toolContext.logger;
+    final contextOverrides = <Type, Object?>{
+      if (topLevelResults['verbose'] as bool) Logger: VerboseLogger(topLevelLogger),
+      ProcessInfo: toolContext.processInfo,
     };
     return context.run<void>(
-      overrides: contextOverrides.map<Type, Generator>((Type type, dynamic value) {
+      overrides: contextOverrides.map<Type, Generator>((Type type, Object? value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
@@ -98,6 +101,6 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
 
   @override
   void printUsage() {
-    (toolContext?.logger ?? testLogger).printStatus(usage);
+    (toolContext.logger).printStatus(usage);
   }
 }

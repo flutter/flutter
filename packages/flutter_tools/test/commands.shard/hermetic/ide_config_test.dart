@@ -86,7 +86,6 @@ void main() {
       List<String> unexpectedPaths = const <String>[],
     }) async {
       dir ??= tempDir;
-      Cache.flutterRoot = tempDir.absolute.path;
       final command = IdeConfigCommand(toolContext: toolContext);
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['ide-config', ...args]);

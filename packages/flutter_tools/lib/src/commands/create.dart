@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -25,6 +27,8 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../darwin/darwin.dart';
+import '../experimental/extension_arg_parser.dart';
+import '../experimental/templates.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
@@ -34,6 +38,7 @@ import '../isolated/mustache_template.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../template.dart';
 import 'create_base.dart';
 
 const kPlatformHelp =
@@ -43,53 +48,67 @@ const kPlatformHelp =
     'When adding platforms to a plugin project, the pubspec.yaml will be updated with the requested platform. '
     'Adding desktop platforms requires the corresponding desktop config setting to be enabled.';
 
-class CreateCommand extends FlutterCommand with CreateBase {
+class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMixin {
   CreateCommand({
     required ToolContext toolContext,
-    TemplateRenderer? templateRenderer,
+    ExtensionTemplateManager? extensionTemplateManager,
     HttpClientFactory? httpClientFactory,
     Java? java,
     Net? net,
     PlistParser? plistParser,
     Pub? pub,
+    TemplateRenderer? templateRenderer,
     bool verboseHelp = false,
   }) : _toolContext = toolContext,
-       _templateRenderer = templateRenderer ?? const MustacheTemplateRenderer(),
+       _extensionTemplateManager = extensionTemplateManager,
        _httpClientFactory = httpClientFactory,
        _explicitJava = java,
        _explicitNet = net,
        _explicitPlistParser = plistParser,
        _explicitPub = pub,
-       super(toolContext: toolContext) {
-    addPubOptions();
-    argParser.addFlag(
+       _templateRenderer = templateRenderer ?? const MustacheTemplateRenderer(),
+       _verboseHelp = verboseHelp,
+       super(toolContext: toolContext);
+
+  final bool _verboseHelp;
+  final ExtensionTemplateManager? _extensionTemplateManager;
+
+  @override
+  ArgParser createBaseArgParser() {
+    final parser = ArgParser(
+      usageLineLength: _toolContext.outputPreferences.wrapText
+          ? _toolContext.outputPreferences.wrapColumn
+          : null,
+    );
+    addPubOptions(parser: parser);
+    parser.addFlag(
       'with-driver-test',
       help:
           '(deprecated) Historically, this added a flutter_driver dependency and generated a '
           'sample "flutter drive" test. Now it does nothing. Consider using the '
           '"integration_test" package: https://pub.dev/packages/integration_test',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
-    argParser.addFlag('overwrite', help: 'When performing operations, overwrite existing files.');
-    argParser.addOption(
+    parser.addFlag('overwrite', help: 'When performing operations, overwrite existing files.');
+    parser.addOption(
       'description',
       defaultsTo: 'A new Flutter project.',
       help:
           'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
     );
-    argParser.addOption(
+    parser.addOption(
       'org',
       defaultsTo: 'com.example',
       help:
           'The organization responsible for your new Flutter project, in reverse domain name notation. '
           'This string is used in Java package names and as prefix in the iOS bundle identifier.',
     );
-    argParser.addOption(
+    parser.addOption(
       'project-name',
       help:
           'The project name for this new Flutter project. This must be a valid dart package name.',
     );
-    argParser.addOption(
+    parser.addOption(
       'ios-language',
       abbr: 'i',
       defaultsTo: 'swift',
@@ -98,9 +117,9 @@ class CreateCommand extends FlutterCommand with CreateBase {
           '(deprecated) This option is deprecated and no longer has any effect. '
           'Swift is always used for iOS-specific code. '
           'This flag will be removed in a future version of Flutter.',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
-    argParser.addOption(
+    parser.addOption(
       'android-language',
       abbr: 'a',
       defaultsTo: 'kotlin',
@@ -108,26 +127,26 @@ class CreateCommand extends FlutterCommand with CreateBase {
       help:
           'The language to use for Android-specific code, either Kotlin (recommended) or Java (legacy).',
     );
-    argParser.addFlag(
+    parser.addFlag(
       'skip-name-checks',
       help:
           'Allow the creation of applications and plugins with invalid names. '
           'This is only intended to enable testing of the tool itself.',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
-    argParser.addFlag(
+    parser.addFlag(
       'implementation-tests',
       help:
           'Include implementation tests that verify the template functions correctly. '
           'This is only intended to enable testing of the tool itself.',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
-    argParser.addOption(
+    parser.addOption(
       'initial-create-revision',
       help:
           'The Flutter SDK git commit hash to store in .migrate_config. This parameter is used by the tool '
           'internally and should generally not be used manually.',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
 
     final Map<String, String> platformsAllowedHelp = {
@@ -135,19 +154,28 @@ class CreateCommand extends FlutterCommand with CreateBase {
     };
     platformsAllowedHelp['darwin'] =
         'A shared platform for iOS and macOS. (only supported for plugins)';
-    addPlatformsOptions(customHelp: kPlatformHelp, allowedHelp: platformsAllowedHelp);
+    addPlatformsOptions(
+      parser: parser,
+      customHelp: kPlatformHelp,
+      allowedHelp: platformsAllowedHelp,
+    );
 
     final List<ParsedFlutterTemplateType> enabledTemplates =
-        ParsedFlutterTemplateType.enabledValues(featureFlags);
-    argParser.addOption(
+        ParsedFlutterTemplateType.enabledValues(featureFlags, extensionTemplateManager: null);
+    final bool isToolExtensionEnabled = featureFlags.isToolExtensionsEnabled;
+    parser.addOption(
       'template',
       abbr: 't',
-      allowed: enabledTemplates.map((ParsedFlutterTemplateType t) => t.cliName),
+      allowed: isToolExtensionEnabled
+          ? null
+          : enabledTemplates.map((ParsedFlutterTemplateType t) => t.cliName),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
-      allowedHelp: CliEnum.allowedHelp(enabledTemplates),
+      allowedHelp: <String, String>{
+        for (final ParsedFlutterTemplateType t in enabledTemplates) t.cliName: t.helpText,
+      },
     );
-    argParser.addOption(
+    parser.addOption(
       'sample',
       abbr: 's',
       help:
@@ -156,22 +184,88 @@ class CreateCommand extends FlutterCommand with CreateBase {
           'documentation website (https://api.flutter.dev/). An example can be found at: '
           'https://api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       valueHelp: 'id',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
     );
-    argParser.addFlag(
+    parser.addFlag(
       'empty',
       abbr: 'e',
       help:
           'Specifies creating using an application template with a main.dart that is minimal, '
           'including no comments, as a starting point for a new application. Implies "--template=app".',
     );
-    argParser.addOption(
+    parser.addOption(
       'list-samples',
       help:
           'Specifies a JSON output file for a listing of Flutter code samples '
           'that can be created with "--sample".',
       valueHelp: 'path',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
+    );
+    return parser;
+  }
+
+  @override
+  Future<void> initializeDynamicOptions() async {
+    final ExtensionTemplateManager? manager = _extensionTemplateManager;
+    if (manager != null) {
+      try {
+        await manager.getProjectTemplates();
+        if (manager.cachedTemplates.isNotEmpty) {
+          rebuildDynamicArgParser();
+        }
+      } on Object catch (e) {
+        _toolContext.logger.printTrace('Failed to initialize dynamic templates: $e');
+      }
+    }
+  }
+
+  @override
+  ArgParser buildDynamicArgParser(ArgParser dynamicParser) {
+    final ExtensionTemplateManager? manager = _extensionTemplateManager;
+    final List<ProjectTemplate> projectTemplates =
+        manager?.cachedTemplates ?? const <ProjectTemplate>[];
+    if (projectTemplates.isEmpty) {
+      return dynamicParser;
+    }
+    return ExtensionArgParserMixin.cloneParser(
+      baseArgParser,
+      optionCloner: (ArgParser newParser, Option opt) {
+        if (opt.name != 'template') {
+          ExtensionArgParserMixin.copyOption(newParser, opt);
+          return;
+        }
+        final Map<String, String>? allowedHelp = opt.allowedHelp != null
+            ? Map<String, String>.of(opt.allowedHelp!)
+            : null;
+        final List<String>? allowed = opt.allowed != null ? List<String>.of(opt.allowed!) : null;
+        if (allowedHelp != null) {
+          for (final template in projectTemplates) {
+            if (!template.hidden) {
+              allowedHelp[template.name] =
+                  'Generate a project using the ${template.name} template.';
+            }
+          }
+        }
+        if (allowed != null) {
+          for (final template in projectTemplates) {
+            if (!allowed.contains(template.name)) {
+              allowed.add(template.name);
+            }
+          }
+        }
+        newParser.addOption(
+          opt.name,
+          abbr: opt.abbr,
+          aliases: opt.aliases,
+          allowed: allowed,
+          allowedHelp: allowedHelp,
+          defaultsTo: opt.defaultsTo as String?,
+          help: opt.help,
+          hide: opt.hide,
+          mandatory: opt.mandatory,
+          valueHelp: opt.valueHelp,
+        );
+      },
     );
   }
 
@@ -207,6 +301,9 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
   @override
   TemplateRenderer get templateRenderer => _templateRenderer;
+
+  @override
+  ToolContext get toolContext => _toolContext;
 
   // Lazy-initialize the net utilities with values from the context.
   late final Net _net =
@@ -290,15 +387,26 @@ class CreateCommand extends FlutterCommand with CreateBase {
     }
   }
 
-  FlutterTemplateType _getProjectType(Directory projectDir) {
-    FlutterTemplateType? template;
-    FlutterTemplateType? detectedProjectType;
+  ParsedFlutterTemplateType _getProjectType(Directory projectDir) {
+    ParsedFlutterTemplateType? template;
+    ParsedFlutterTemplateType? detectedProjectType;
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
     final String? templateArgument = stringArg('template');
     if (templateArgument != null) {
       final ParsedFlutterTemplateType? parsedTemplate = ParsedFlutterTemplateType.fromCliName(
         templateArgument,
+        extensionTemplateManager: _extensionTemplateManager,
       );
+      if (parsedTemplate == null) {
+        final Iterable<String> enabledTemplateNames = ParsedFlutterTemplateType.enabledValues(
+          featureFlags,
+          extensionTemplateManager: _extensionTemplateManager,
+        ).map((ParsedFlutterTemplateType t) => t.cliName);
+        throwToolExit(
+          'Expected one of ${enabledTemplateNames.join(', ')} '
+          'for option "--template", but got "$templateArgument"',
+        );
+      }
       switch (parsedTemplate) {
         case RemovedFlutterTemplateType():
           throwToolExit(
@@ -309,14 +417,16 @@ class CreateCommand extends FlutterCommand with CreateBase {
           );
         case FlutterTemplateType():
           template = parsedTemplate;
-        case null:
-          break;
+        case ExtensionProjectTemplateType():
+          template = parsedTemplate;
       }
     }
     // If the project directory exists and isn't empty, then try to determine the template
     // type from the project directory.
     if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
-      detectedProjectType = determineTemplateType();
+      detectedProjectType = determineTemplateType(
+        extensionTemplateManager: _extensionTemplateManager,
+      );
       if (detectedProjectType == null && metadataExists) {
         // We can only be definitive that this is the wrong type if the .metadata file
         // exists and contains a type that we don't understand, or doesn't contain a type.
@@ -366,7 +476,16 @@ class CreateCommand extends FlutterCommand with CreateBase {
     String? sampleCode;
     final String? sampleArgument = stringArg('sample');
     final bool emptyArgument = boolArg('empty');
-    final FlutterTemplateType template = _getProjectType(projectDir);
+
+    final ExtensionTemplateManager? manager = _extensionTemplateManager;
+    if (manager != null) {
+      try {
+        await manager.getProjectTemplates();
+      } on Object catch (e) {
+        _toolContext.logger.printTrace('Failed to retrieve project templates: $e');
+      }
+    }
+    final ParsedFlutterTemplateType template = _getProjectType(projectDir);
 
     if (template == FlutterTemplateType.pluginFfi) {
       logger.printWarning(
@@ -567,7 +686,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
-          projectType: template,
+          projectType: template as FlutterTemplateType?,
         );
         pubContext = PubContext.create;
       case FlutterTemplateType.module:
@@ -592,7 +711,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
-          projectType: template,
+          projectType: template as FlutterTemplateType,
         );
         pubContext = PubContext.createPlugin;
       case FlutterTemplateType.pluginFfi:
@@ -601,7 +720,7 @@ class CreateCommand extends FlutterCommand with CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
-          projectType: template,
+          projectType: template as FlutterTemplateType,
         );
         pubContext = PubContext.createPlugin;
       case FlutterTemplateType.packageFfi:
@@ -610,9 +729,97 @@ class CreateCommand extends FlutterCommand with CreateBase {
           templateContext,
           overwrite: overwrite,
           printStatusWhenWriting: !creatingNewProject,
-          projectType: template,
+          projectType: template as FlutterTemplateType,
         );
         pubContext = PubContext.createPackage;
+      // Handle custom templates provided by tool extensions.
+      case ExtensionProjectTemplateType():
+        final ExtensionTemplateManager? manager = _extensionTemplateManager;
+        if (manager == null) {
+          throwToolExit('ExtensionTemplateManager is not available.');
+        }
+        // Resolve the custom template by name from the cached templates.
+        ProjectTemplate? customTemplate;
+        for (final ProjectTemplate t in manager.cachedTemplates) {
+          if (t.name == template.cliName) {
+            customTemplate = t;
+            break;
+          }
+        }
+        if (customTemplate == null) {
+          throwToolExit('Custom template not found in manager: ${template.cliName}');
+        }
+        // Resolve the absolute path to the template directory.
+        final Directory templateDir = manager.resolveTemplateDirectory(customTemplate.templatePath);
+        if (!templateDir.existsSync()) {
+          throwToolExit('Custom template source directory does not exist: ${templateDir.path}');
+        }
+
+        // Request the extension to generate template parameters based on the host context.
+        final Map<String, Object?> renderedParameters = await manager.generateTemplateParameters(
+          customTemplate.name,
+          templateContext,
+        );
+
+        // Resolve all dependency templates.
+        final templateSources = <Directory>[];
+        final imageSources = <Directory>[];
+        for (final String depName in customTemplate.templateDependencies) {
+          final Directory internalDir = templatePathProvider.directoryInPackage(depName, fs);
+          if (internalDir.existsSync()) {
+            templateSources.add(internalDir);
+            final Directory imageDir = await templatePathProvider.imageDirectory(
+              depName,
+              fs,
+              logger,
+            );
+            if (imageDir.existsSync()) {
+              imageSources.add(imageDir);
+            }
+          } else {
+            ProjectTemplate? depTemplate;
+            for (final ProjectTemplate cached in manager.cachedTemplates) {
+              if (cached.name == depName) {
+                depTemplate = cached;
+                break;
+              }
+            }
+            if (depTemplate != null) {
+              final Directory depDir = manager.resolveTemplateDirectory(depTemplate.templatePath);
+              if (!depDir.existsSync()) {
+                throwToolExit(
+                  'Custom template dependency "$depName" source directory does not exist: ${depDir.path}',
+                );
+              }
+              templateSources.add(depDir);
+            } else {
+              throwToolExit(
+                'Template dependency "$depName" not found in internal templates or active extensions.',
+              );
+            }
+          }
+        }
+        templateSources.add(templateDir);
+
+        final Template t = await Template.fromDirectories(
+          templateSources,
+          imageSourceDirectories: imageSources,
+          fileSystem: fs,
+          logger: logger,
+          templateRenderer: templateRenderer,
+        );
+
+        // Render the template into the project directory.
+        generatedFileCount += t.render(
+          relativeDir,
+          renderedParameters,
+          overwriteExisting: overwrite,
+          printStatusWhenWriting: !creatingNewProject,
+        );
+
+        pubContext = PubContext.create;
+      case RemovedFlutterTemplateType():
+        throwToolExit('Unsupported template type: ${template.cliName}');
     }
 
     _generatePubspecLock(relativeDir, flutterRoot: flutterRoot);
@@ -725,16 +932,16 @@ Your $application code is in $relativeAppMain.
     // Show warning for Java/AGP or Java/Gradle incompatibility if building for
     // Android and Java version has been detected.
     final Java? java = _java;
-    if (includeAndroid && java?.version != null) {
+    if (includeAndroid && java != null && java.version != null && template is FlutterTemplateType) {
       _printIncompatibleJavaAgpGradleVersionsWarning(
-        javaVersion: versionToParsableString(java?.version)!,
-        templateGradleVersion: templateContext['gradleVersion']! as String,
+        fs: fs,
+        javaVersion: versionToParsableString(java.version)!,
+        logger: logger,
+        projectDirPath: projectDirPath,
+        projectType: template,
         templateAgpVersion: templateContext['agpVersion']! as String,
         templateAgpVersionForModule: templateContext['agpVersionForModule']! as String,
-        projectType: template,
-        projectDirPath: projectDirPath,
-        fs: fs,
-        logger: logger,
+        templateGradleVersion: templateContext['gradleVersion']! as String,
       );
     }
 
@@ -1244,14 +1451,14 @@ You must have a macOS host with Xcode installed to develop for iOS or macOS.
 // compatible, meaning that the Java version may only conflict with one of the
 // template Gradle or AGP versions.
 void _printIncompatibleJavaAgpGradleVersionsWarning({
+  required FileSystem fs,
   required String javaVersion,
-  required String templateGradleVersion,
+  required Logger logger,
+  required String projectDirPath,
+  required FlutterTemplateType projectType,
   required String templateAgpVersion,
   required String templateAgpVersionForModule,
-  required FlutterTemplateType projectType,
-  required String projectDirPath,
-  required FileSystem fs,
-  required Logger logger,
+  required String templateGradleVersion,
 }) {
   // Determine if the Java version specified conflicts with the template Gradle or AGP version.
   final bool javaGradleVersionsCompatible = gradle.validateJavaAndGradle(

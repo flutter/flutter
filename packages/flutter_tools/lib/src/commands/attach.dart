@@ -65,7 +65,6 @@ import 'daemon.dart';
 class AttachCommand extends FlutterCommand {
   AttachCommand({
     required super.toolContext,
-    super.analytics,
     bool verboseHelp = false,
     HotRunnerFactory? hotRunnerFactory,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
@@ -129,6 +128,7 @@ class AttachCommand extends FlutterCommand {
     addDevToolsOptions(verboseHelp: verboseHelp);
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
+    usesAdbLogFilteringOption(hide: !verboseHelp);
   }
 
   final HotRunnerFactory _hotRunnerFactory;
@@ -283,7 +283,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         terminalHandler =
             TerminalHandler(
                 runner,
-                logger: logger,
                 terminal: terminal,
                 signals: signals,
                 processInfo: processInfo,
@@ -309,7 +308,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
-        logger: logger,
       ),
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
@@ -350,7 +348,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final Platform platform = _toolContext.platform;
     final ProcessManager processManager = _toolContext.processManager;
 
-    final Stream<Uri> vmServiceUri = _discoverVmService(device: device);
+    final Future<Uri> vmServiceUri = _discoverVmService(device: device);
 
     final BuildInfo buildInfo = await getBuildInfo();
 
@@ -361,12 +359,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
       platform: platform,
-      artifacts: _toolContext.artifacts,
-      fileSystem: fs,
-      logger: logger,
-      processManager: processManager,
     );
-    flutterDevice.vmServiceUris = vmServiceUri;
+    flutterDevice.vmServiceUri = vmServiceUri;
     final flutterDevices = <FlutterDevice>[flutterDevice];
     final debuggingOptions = DebuggingOptions.enabled(
       buildInfo,
@@ -378,6 +372,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
       ipv6: ipv6!,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
+      adbLogFiltering:
+          argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering'),
     );
 
     return buildInfo.isDebug
@@ -391,7 +387,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             flutterProject: FlutterProject.current(),
             nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
             analytics: analytics,
-            logger: logger,
           )
         : ColdRunner(
             flutterDevices,
@@ -401,7 +396,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           );
   }
 
-  Stream<Uri> _discoverVmService({required Device device}) {
+  Future<Uri> _discoverVmService({required Device device}) async {
     final Logger logger = _toolContext.logger;
     final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
@@ -410,14 +405,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final bool isWirelessIOSDevice = (device is IOSDevice) && device.isWirelesslyConnected;
 
     if (!isWirelessIOSDevice && (debugPort != null || debugUri != null)) {
-      return Stream<Uri>.fromFuture(
-        buildVMServiceUri(
-          device,
-          debugUri?.host ?? hostname,
-          debugPort ?? debugUri!.port,
-          hostVmservicePort,
-          debugUri?.path,
-        ),
+      return buildVMServiceUri(
+        device,
+        debugUri?.host ?? hostname,
+        debugPort ?? debugUri!.port,
+        hostVmservicePort,
+        debugUri?.path,
       );
     }
 
@@ -430,7 +423,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       filterDevicePort: devicePort,
       expectedHostPort: hostVmservicePort,
       ipv6: usesIpv6,
-      logger: logger,
     );
 
     logger.printStatus('Waiting for a connection from Flutter on ${device.displayName}...');
@@ -462,8 +454,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       warningColor: TerminalColor.cyan,
     );
 
-    // Stop the timer once we receive the first uri.
-    return streamWithCallbackOnFirstItem(vmServiceDiscovery.uris, discoveryStatus.stop);
+    try {
+      return await vmServiceDiscovery.firstValidUri();
+    } finally {
+      discoveryStatus.stop();
+    }
   }
 
   bool _isIOSDevice(Device device) {
@@ -500,7 +495,6 @@ class HotRunnerFactory {
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     analytics: analytics,
     dartBuilder: hookRunner,
-    logger: logger,
   );
 }
 

@@ -70,7 +70,7 @@ Future<void> analyzeProject(
   List<String> expectedFailures = const <String>[],
 }) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'flutter_tools.snapshot'),
+    globals.fs.path.join(getFlutterRoot(), 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
   final args = <String>[flutterToolsSnapshotPath, 'analyze'];

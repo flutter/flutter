@@ -38,7 +38,6 @@ String getDefaultApplicationKernelPath({required bool trackWidgetCreation}) {
   }
   return getKernelPathForTransformerOptions(appDillPath, trackWidgetCreation: trackWidgetCreation);
 }
-
 String getDefaultCachedKernelPath({
   required bool trackWidgetCreation,
   required List<String> dartDefines,

@@ -33,13 +33,13 @@ import 'darwin_add_to_app.dart';
 
 abstract class BuildFrameworkCommand extends BuildSubCommand {
   BuildFrameworkCommand({
-    super.analytics,
     required AppleContext appleContext,
     required BuildSystem buildSystem,
     required this.codesign,
-    @visibleForTesting FlutterVersion? flutterVersion,
     required ToolContext toolContext,
     required bool verboseHelp,
+    super.analytics,
+    @visibleForTesting FlutterVersion? flutterVersion,
   }) : _appleContext = appleContext,
        _buildSystem = buildSystem,
        _flutterVersion = flutterVersion,
@@ -461,13 +461,13 @@ List<String> parseVendoredFrameworksFromPbxproj(
 /// managers.
 class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   BuildIOSFrameworkCommand({
-    super.analytics,
     required super.appleContext,
     required super.buildSystem,
     required super.codesign,
-    super.flutterVersion,
     required super.toolContext,
     required bool verboseHelp,
+    super.analytics,
+    super.flutterVersion,
   }) : super(verboseHelp: verboseHelp) {
     usesFlavorOption();
 
@@ -519,7 +519,13 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     final ProcessManager processManager = _toolContext.processManager;
 
     final String outputArgument =
-        stringArg('output') ?? fs.path.join(fs.currentDirectory.path, 'build', 'ios', 'framework');
+        stringArg('output') ??
+        fs.path.join(
+          fs.currentDirectory.path,
+          getBuildDirectory(_toolContext.config, fs),
+          'ios',
+          'framework',
+        );
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');

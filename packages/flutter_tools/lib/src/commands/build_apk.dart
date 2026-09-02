@@ -166,7 +166,7 @@ class BuildApkCommand extends BuildSubCommand {
       targetArchs: _targetArchs.map<CpuArch>(getCpuArchForName),
     );
     validateBuild(androidBuildInfo);
-    terminal.usesTerminalUi = true;
+terminal.usesTerminalUi = true;
     final FlutterProject project = this.project;
     await _androidBuilder?.buildApk(
       project: project,

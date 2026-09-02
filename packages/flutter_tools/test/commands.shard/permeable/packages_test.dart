@@ -34,7 +34,6 @@ void main() {
     mockStdio = FakeStdio()..stdout.terminalColumns = 80;
 
     // Some tests below override this with a blank root, always reset it.
-    Cache.flutterRoot = null;
   });
 
   setUpAll(() {
@@ -834,7 +833,6 @@ flutter:
     testUsingContext(
       'test without bot',
       () async {
-        Cache.flutterRoot = '';
         globals.fs.directory('/packages/flutter_tools').createSync(recursive: true);
         globals.fs.file('pubspec.yaml').createSync();
         processManager.addCommand(
@@ -872,7 +870,6 @@ flutter:
     testUsingContext(
       'test with bot',
       () async {
-        Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
         processManager.addCommand(
           const FakeCommand(
@@ -910,7 +907,6 @@ flutter:
     testUsingContext(
       'run pass arguments through to pub',
       () async {
-        Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
         final stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
@@ -951,7 +947,6 @@ flutter:
     testUsingContext(
       'token pass arguments through to pub',
       () async {
-        Cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
         final stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
@@ -991,7 +986,6 @@ flutter:
     testUsingContext(
       'upgrade does not check for pubspec.yaml if -h/--help is passed',
       () async {
-        Cache.flutterRoot = '';
         processManager.addCommand(
           FakeCommand(
             command: const <String>[

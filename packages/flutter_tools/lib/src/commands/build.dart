@@ -485,8 +485,7 @@ class BuildCommand extends FlutterCommand {
 abstract class BuildSubCommand extends FlutterCommand {
   BuildSubCommand({
     required this.logger,
-    required bool verboseHelp,
-    super.analytics,
+    required super.verboseHelp,
     super.outputPreferences,
     super.toolContext,
   }) {

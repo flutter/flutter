@@ -118,6 +118,7 @@ class ToolDependencies {
     Platform? platform,
     PlistParser? plistParser,
     PreRunValidator? preRunValidator,
+    ProcessInfo? processInfo,
     ProcessManager? processManager,
     FlutterProjectFactory? projectFactory,
     ShutdownHooks? shutdownHooks,
@@ -290,6 +291,8 @@ class ToolDependencies {
     final PreRunValidator finalPreRunValidator =
         preRunValidator ?? PreRunValidator(cache: finalCache, fileSystem: finalFS);
 
+    final ProcessInfo finalProcessInfo = processInfo ?? ProcessInfo(finalFS);
+
     final LocalEngineLocator finalLocalEngineLocator =
         localEngineLocator ??
         LocalEngineLocator(
@@ -357,7 +360,7 @@ class ToolDependencies {
           platform: finalPlatform,
           xcode: finalXcode,
           iproxy: IProxy(
-            iproxyPath: finalArtifacts.getHostArtifact(HostArtifact.iproxy).path,
+            artifacts: finalArtifacts,
             logger: finalLogger,
             processManager: finalProcessManager,
             dyLdLibEntry: finalCache.dyLdLibEntry,
@@ -461,8 +464,10 @@ class ToolDependencies {
         nativeAssetsBuilder: finalNativeAssetsBuilder,
         os: finalOS,
         outputPreferences: finalOutputPreferences,
+        persistentToolState: finalPersistentToolState,
         platform: finalPlatform,
         preRunValidator: finalPreRunValidator,
+        processInfo: finalProcessInfo,
         processManager: finalProcessManager,
         processUtils: finalProcessUtils,
         projectFactory: finalProjectFactory,

@@ -160,6 +160,22 @@ void main() {
       ];
       checkEncodeDecode<dynamic>(json, message);
     });
+    test('should preserve UTF-8 encoding and ByteData bounds across encoder chunks', () {
+      // Place a four-byte character across JsonUtf8Encoder's default 256-byte chunk boundary.
+      final message = '${'a' * 254}\u{1F602}';
+      final Uint8List expected = utf8.encode(jsonEncode(message));
+
+      final ByteData encoded = json.encodeMessage(message)!;
+      expect(Uint8List.sublistView(encoded), orderedEquals(expected));
+
+      final padded = Uint8List(expected.length + 2)
+        ..[0] = 0x5b
+        ..setRange(1, expected.length + 1, expected)
+        ..[expected.length + 1] = 0x5d;
+      final view = ByteData.sublistView(padded, 1, expected.length + 1);
+
+      expect(json.decodeMessage(view), message);
+    });
   });
   group('Standard message codec', () {
     const MessageCodec<dynamic> standard = StandardMessageCodec();

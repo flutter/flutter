@@ -5,14 +5,17 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/custom_devices.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
@@ -21,16 +24,12 @@ import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-<<<<<<< HEAD
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
-=======
->>>>>>> 2426710f9f0 ([tool] Migrate CustomDevicesCommand to modular dependency injection)
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 import '../../src/fakes.dart';
-import '../../src/test_flutter_command_runner.dart';
 
 const linuxFlutterRoot = '/flutter';
 const windowsFlutterRoot = r'C:\flutter';
@@ -256,6 +255,50 @@ class FakeTerminal implements Terminal {
   int get preferredStyle => terminal.preferredStyle;
 }
 
+class FakeCommandRunner extends FlutterCommandRunner {
+  FakeCommandRunner({
+    required Platform platform,
+    required FileSystem fileSystem,
+    required Logger logger,
+    UserMessages? userMessages,
+    ToolContext? toolContext,
+    Analytics? analytics,
+  }) : _platform = platform,
+       _fileSystem = fileSystem,
+       _logger = logger,
+       _userMessages = userMessages ?? UserMessages(),
+       super(
+         analytics: analytics ?? const NoOpAnalytics(),
+         toolContext:
+             toolContext ?? FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
+       );
+
+  final Platform _platform;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final UserMessages _userMessages;
+
+  @override
+  Future<void> runCommand(ArgResults topLevelResults) async {
+    final Logger logger = (topLevelResults['verbose'] as bool) ? VerboseLogger(_logger) : _logger;
+
+    return context.run<void>(
+      overrides: <Type, Generator>{Logger: () => logger},
+      body: () {
+        getFlutterRoot() ??= Cache.defaultFlutterRoot(
+          platform: _platform,
+          fileSystem: _fileSystem,
+          userMessages: _userMessages,
+        );
+        // For compatibility with tests that set this to a relative path.
+        getFlutterRoot() = _fileSystem.path.normalize(
+          _fileSystem.path.absolute(getFlutterRoot()),
+        );
+        return super.runCommand(topLevelResults);
+      },
+    );
+  }
+}
 
 /// May take platform, logger, processManager and fileSystem from context if
 /// not explicitly specified.
@@ -273,44 +316,30 @@ CustomDevicesCommand createCustomDevicesCommand({
   fileSystem ??= MemoryFileSystem.test();
   logger ??= BufferLogger.test();
 
-  final CustomDevicesConfig customDevicesConfig = config != null
-      ? config(fileSystem, logger)
-      : CustomDevicesConfig.test(
-          platform: platform,
-          fileSystem: fileSystem,
-          directory: fileSystem.directory('/'),
-          logger: logger,
-        );
-
-  final operatingSystemUtils = FakeOperatingSystemUtils(
-    hostPlatform: platform.isLinux
-        ? HostPlatform.linux_x64
-        : platform.isWindows
-        ? HostPlatform.windows_x64
-        : platform.isMacOS
-        ? HostPlatform.darwin_x64
-        : throw UnsupportedError('Unsupported operating system'),
-  );
-
-  final toolContext = FakeToolContext(
-    customDevicesConfig: customDevicesConfig,
-    fs: fileSystem,
-    logger: logger,
-    os: operatingSystemUtils,
+  return CustomDevicesCommand.test(
+    customDevicesConfig: config != null
+        ? config(fileSystem, logger)
+        : CustomDevicesConfig.test(
+            platform: platform,
+            fileSystem: fileSystem,
+            directory: fileSystem.directory('/'),
+            logger: logger,
+          ),
+    operatingSystemUtils: FakeOperatingSystemUtils(
+      hostPlatform: platform.isLinux
+          ? HostPlatform.linux_x64
+          : platform.isWindows
+          ? HostPlatform.windows_x64
+          : platform.isMacOS
+          ? HostPlatform.darwin_x64
+          : throw UnsupportedError('Unsupported operating system'),
+    ),
+    terminal: terminal != null ? terminal(platform) : FakeTerminal(platform: platform),
     platform: platform,
-    processManager: processManager,
-  );
-
-  return CustomDevicesCommand(
     featureFlags: TestFeatureFlags(areCustomDevicesEnabled: featureEnabled),
-    toolContext: toolContext,
-    customDevicesConfig: customDevicesConfig,
+    processManager: processManager,
     fileSystem: fileSystem,
     logger: logger,
-    operatingSystemUtils: operatingSystemUtils,
-    platform: platform,
-    processManager: processManager,
-    terminal: terminal != null ? terminal(platform) : FakeTerminal(platform: platform),
   );
 }
 
@@ -325,16 +354,21 @@ CommandRunner<void> createCustomDevicesCommandRunner({
   Logger? logger,
   bool featureEnabled = false,
 }) {
-  final CustomDevicesCommand command = createCustomDevicesCommand(
-    config: config,
-    terminal: terminal,
-    platform: platform,
-    fileSystem: fileSystem,
-    processManager: processManager,
-    logger: logger,
-    featureEnabled: featureEnabled,
+  platform ??= FakePlatform();
+  fileSystem ??= MemoryFileSystem.test();
+  logger ??= BufferLogger.test();
+
+  return FakeCommandRunner(platform: platform, fileSystem: fileSystem, logger: logger)..addCommand(
+    createCustomDevicesCommand(
+      config: config,
+      terminal: terminal,
+      platform: platform,
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: logger,
+      featureEnabled: featureEnabled,
+    ),
   );
-  return createTestCommandRunner(command);
 }
 
 FakeTerminal createFakeTerminalForAddingSshDevice({
@@ -373,10 +407,9 @@ void main() {
 
   group('linux', () {
     setUp(() {
-      Cache.flutterRoot = linuxFlutterRoot;
     });
 
-    testWithoutContext(
+    testUsingContext(
       'custom-devices command shows config file in help when feature is enabled',
       () async {
         final logger = BufferLogger.test();
@@ -393,7 +426,7 @@ void main() {
       },
     );
 
-    testWithoutContext('running custom-devices command without arguments prints usage', () async {
+    testUsingContext('running custom-devices command without arguments prints usage', () async {
       final logger = BufferLogger.test();
 
       final CommandRunner<void> runner = createCustomDevicesCommandRunner(
@@ -409,7 +442,7 @@ void main() {
     });
 
     // test behaviour with disabled feature
-    testWithoutContext('custom-devices add command fails when feature is not enabled', () async {
+    testUsingContext('custom-devices add command fails when feature is not enabled', () async {
       final CommandRunner<void> runner = createCustomDevicesCommandRunner();
       expect(
         runner.run(const <String>['custom-devices', 'add']),
@@ -417,7 +450,7 @@ void main() {
       );
     });
 
-    testWithoutContext('custom-devices delete command fails when feature is not enabled', () async {
+    testUsingContext('custom-devices delete command fails when feature is not enabled', () async {
       final CommandRunner<void> runner = createCustomDevicesCommandRunner();
       expect(
         runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
@@ -425,7 +458,7 @@ void main() {
       );
     });
 
-    testWithoutContext('custom-devices list command fails when feature is not enabled', () async {
+    testUsingContext('custom-devices list command fails when feature is not enabled', () async {
       final CommandRunner<void> runner = createCustomDevicesCommandRunner();
       expect(
         runner.run(const <String>['custom-devices', 'list']),
@@ -433,7 +466,7 @@ void main() {
       );
     });
 
-    testWithoutContext('custom-devices reset command fails when feature is not enabled', () async {
+    testUsingContext('custom-devices reset command fails when feature is not enabled', () async {
       final CommandRunner<void> runner = createCustomDevicesCommandRunner();
       expect(
         runner.run(const <String>['custom-devices', 'reset']),
@@ -442,7 +475,7 @@ void main() {
     });
 
     // test add command
-    testWithoutContext(
+    testUsingContext(
       'custom-devices add command correctly adds ssh device config on linux',
       () async {
         final fs = MemoryFileSystem.test();
@@ -534,195 +567,189 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'custom-devices add command correctly adds ipv4 ssh device config',
-      () async {
-        final fs = MemoryFileSystem.test();
+    testUsingContext('custom-devices add command correctly adds ipv4 ssh device config', () async {
+      final fs = MemoryFileSystem.test();
 
-        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
-            platform: platform,
+      final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+        terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+          platform: platform,
+          id: 'testid',
+          label: 'testlabel',
+          sdkNameAndVersion: 'testsdknameandversion',
+          enabled: 'y',
+          hostname: '192.168.178.1',
+          username: 'testuser',
+          runDebug: 'testrundebug',
+          usePortForwarding: 'y',
+          screenshot: 'testscreenshot',
+          apply: 'y',
+        ),
+        processManager: FakeProcessManager.any(),
+        fileSystem: fs,
+        featureEnabled: true,
+      );
+
+      await expectLater(
+        runner.run(const <String>['custom-devices', 'add', '--no-check']),
+        completes,
+      );
+
+      final config = CustomDevicesConfig.test(
+        fileSystem: fs,
+        directory: fs.directory('/'),
+        logger: BufferLogger.test(),
+      );
+
+      expect(
+        config.devices,
+        contains(
+          CustomDeviceConfig(
             id: 'testid',
             label: 'testlabel',
             sdkNameAndVersion: 'testsdknameandversion',
-            enabled: 'y',
-            hostname: '192.168.178.1',
-            username: 'testuser',
-            runDebug: 'testrundebug',
-            usePortForwarding: 'y',
-            screenshot: 'testscreenshot',
-            apply: 'y',
+            enabled: true,
+            pingCommand: const <String>['ping', '-c', '1', '-w', '1', '192.168.178.1'],
+            postBuildCommand: null,
+            installCommand: const <String>[
+              'scp',
+              '-r',
+              '-o',
+              'BatchMode=yes',
+              r'${localPath}',
+              r'testuser@192.168.178.1:/tmp/${appName}',
+            ],
+            uninstallCommand: const <String>[
+              'ssh',
+              '-o',
+              'BatchMode=yes',
+              'testuser@192.168.178.1',
+              r'rm -rf "/tmp/${appName}"',
+            ],
+            runDebugCommand: const <String>[
+              'ssh',
+              '-o',
+              'BatchMode=yes',
+              'testuser@192.168.178.1',
+              'testrundebug',
+            ],
+            forwardPortCommand: const <String>[
+              'ssh',
+              '-o',
+              'BatchMode=yes',
+              '-o',
+              'ExitOnForwardFailure=yes',
+              '-L',
+              r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
+              'testuser@192.168.178.1',
+              "echo 'Port forwarding success'; read",
+            ],
+            forwardPortSuccessRegex: RegExp('Port forwarding success'),
+            screenshotCommand: const <String>[
+              'ssh',
+              '-o',
+              'BatchMode=yes',
+              'testuser@192.168.178.1',
+              'testscreenshot',
+            ],
           ),
-          processManager: FakeProcessManager.any(),
-          fileSystem: fs,
-          featureEnabled: true,
-        );
+        ),
+      );
+    });
 
-        await expectLater(
-          runner.run(const <String>['custom-devices', 'add', '--no-check']),
-          completes,
-        );
+    testUsingContext('custom-devices add command correctly adds ipv6 ssh device config', () async {
+      final fs = MemoryFileSystem.test();
 
-        final config = CustomDevicesConfig.test(
-          fileSystem: fs,
-          directory: fs.directory('/'),
-          logger: BufferLogger.test(),
-        );
+      final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+        terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+          platform: platform,
+          id: 'testid',
+          label: 'testlabel',
+          sdkNameAndVersion: 'testsdknameandversion',
+          enabled: 'y',
+          hostname: '::1',
+          username: 'testuser',
+          runDebug: 'testrundebug',
+          usePortForwarding: 'y',
+          screenshot: 'testscreenshot',
+          apply: 'y',
+        ),
+        fileSystem: fs,
+        featureEnabled: true,
+      );
 
-        expect(
-          config.devices,
-          contains(
-            CustomDeviceConfig(
-              id: 'testid',
-              label: 'testlabel',
-              sdkNameAndVersion: 'testsdknameandversion',
-              enabled: true,
-              pingCommand: const <String>['ping', '-c', '1', '-w', '1', '192.168.178.1'],
-              postBuildCommand: null,
-              installCommand: const <String>[
-                'scp',
-                '-r',
-                '-o',
-                'BatchMode=yes',
-                r'${localPath}',
-                r'testuser@192.168.178.1:/tmp/${appName}',
-              ],
-              uninstallCommand: const <String>[
-                'ssh',
-                '-o',
-                'BatchMode=yes',
-                'testuser@192.168.178.1',
-                r'rm -rf "/tmp/${appName}"',
-              ],
-              runDebugCommand: const <String>[
-                'ssh',
-                '-o',
-                'BatchMode=yes',
-                'testuser@192.168.178.1',
-                'testrundebug',
-              ],
-              forwardPortCommand: const <String>[
-                'ssh',
-                '-o',
-                'BatchMode=yes',
-                '-o',
-                'ExitOnForwardFailure=yes',
-                '-L',
-                r'127.0.0.1:${hostPort}:127.0.0.1:${devicePort}',
-                'testuser@192.168.178.1',
-                "echo 'Port forwarding success'; read",
-              ],
-              forwardPortSuccessRegex: RegExp('Port forwarding success'),
-              screenshotCommand: const <String>[
-                'ssh',
-                '-o',
-                'BatchMode=yes',
-                'testuser@192.168.178.1',
-                'testscreenshot',
-              ],
-            ),
-          ),
-        );
-      },
-    );
+      await expectLater(
+        runner.run(const <String>['custom-devices', 'add', '--no-check']),
+        completes,
+      );
 
-    testWithoutContext(
-      'custom-devices add command correctly adds ipv6 ssh device config',
-      () async {
-        final fs = MemoryFileSystem.test();
+      final config = CustomDevicesConfig.test(
+        fileSystem: fs,
+        directory: fs.directory('/'),
+        logger: BufferLogger.test(),
+      );
 
-        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
-            platform: platform,
+      expect(
+        config.devices,
+        contains(
+          CustomDeviceConfig(
             id: 'testid',
             label: 'testlabel',
             sdkNameAndVersion: 'testsdknameandversion',
-            enabled: 'y',
-            hostname: '::1',
-            username: 'testuser',
-            runDebug: 'testrundebug',
-            usePortForwarding: 'y',
-            screenshot: 'testscreenshot',
-            apply: 'y',
+            enabled: true,
+            pingCommand: const <String>['ping', '-6', '-c', '1', '-w', '1', '::1'],
+            postBuildCommand: null,
+            installCommand: const <String>[
+              'scp',
+              '-r',
+              '-o',
+              'BatchMode=yes',
+              '-6',
+              r'${localPath}',
+              r'testuser@[::1]:/tmp/${appName}',
+            ],
+            uninstallCommand: const <String>[
+              'ssh',
+              '-o',
+              'BatchMode=yes',
+              '-6',
+              'testuser@[::1]',
+              r'rm -rf "/tmp/${appName}"',
+            ],
+            runDebugCommand: const <String>[
+              'ssh',
+              '-o',
+              'BatchMode=yes',
+              '-6',
+              'testuser@[::1]',
+              'testrundebug',
+            ],
+            forwardPortCommand: const <String>[
+              'ssh',
+              '-o',
+              'BatchMode=yes',
+              '-o',
+              'ExitOnForwardFailure=yes',
+              '-6',
+              '-L',
+              r'[::1]:${hostPort}:[::1]:${devicePort}',
+              'testuser@[::1]',
+              "echo 'Port forwarding success'; read",
+            ],
+            forwardPortSuccessRegex: RegExp('Port forwarding success'),
+            screenshotCommand: const <String>[
+              'ssh',
+              '-o',
+              'BatchMode=yes',
+              '-6',
+              'testuser@[::1]',
+              'testscreenshot',
+            ],
           ),
-          fileSystem: fs,
-          featureEnabled: true,
-        );
+        ),
+      );
+    });
 
-        await expectLater(
-          runner.run(const <String>['custom-devices', 'add', '--no-check']),
-          completes,
-        );
-
-        final config = CustomDevicesConfig.test(
-          fileSystem: fs,
-          directory: fs.directory('/'),
-          logger: BufferLogger.test(),
-        );
-
-        expect(
-          config.devices,
-          contains(
-            CustomDeviceConfig(
-              id: 'testid',
-              label: 'testlabel',
-              sdkNameAndVersion: 'testsdknameandversion',
-              enabled: true,
-              pingCommand: const <String>['ping', '-6', '-c', '1', '-w', '1', '::1'],
-              postBuildCommand: null,
-              installCommand: const <String>[
-                'scp',
-                '-r',
-                '-o',
-                'BatchMode=yes',
-                '-6',
-                r'${localPath}',
-                r'testuser@[::1]:/tmp/${appName}',
-              ],
-              uninstallCommand: const <String>[
-                'ssh',
-                '-o',
-                'BatchMode=yes',
-                '-6',
-                'testuser@[::1]',
-                r'rm -rf "/tmp/${appName}"',
-              ],
-              runDebugCommand: const <String>[
-                'ssh',
-                '-o',
-                'BatchMode=yes',
-                '-6',
-                'testuser@[::1]',
-                'testrundebug',
-              ],
-              forwardPortCommand: const <String>[
-                'ssh',
-                '-o',
-                'BatchMode=yes',
-                '-o',
-                'ExitOnForwardFailure=yes',
-                '-6',
-                '-L',
-                r'[::1]:${hostPort}:[::1]:${devicePort}',
-                'testuser@[::1]',
-                "echo 'Port forwarding success'; read",
-              ],
-              forwardPortSuccessRegex: RegExp('Port forwarding success'),
-              screenshotCommand: const <String>[
-                'ssh',
-                '-o',
-                'BatchMode=yes',
-                '-6',
-                'testuser@[::1]',
-                'testscreenshot',
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    testWithoutContext(
+    testUsingContext(
       'custom-devices add command correctly adds non-forwarding ssh device config',
       () async {
         final fs = MemoryFileSystem.test();
@@ -801,7 +828,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'custom-devices add command correctly adds non-screenshotting ssh device config',
       () async {
         final fs = MemoryFileSystem.test();
@@ -885,7 +912,7 @@ void main() {
       },
     );
 
-    testWithoutContext('custom-devices delete command deletes device and creates backup', () async {
+    testUsingContext('custom-devices delete command deletes device and creates backup', () async {
       final fs = MemoryFileSystem.test();
 
       final config = CustomDevicesConfig.test(
@@ -917,7 +944,7 @@ void main() {
       expect(contentsBefore, equals(backupContents));
     });
 
-    testWithoutContext(
+    testUsingContext(
       'custom-devices delete command without device argument throws tool exit',
       () async {
         final fs = MemoryFileSystem.test();
@@ -939,7 +966,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'custom-devices delete command throws tool exit with invalid device id',
       () async {
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(featureEnabled: true);
@@ -953,7 +980,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'custom-devices list command throws tool exit when config contains errors',
       () async {
         final fs = MemoryFileSystem.test();
@@ -980,25 +1007,22 @@ void main() {
       },
     );
 
-    testWithoutContext(
-      'custom-devices list command prints message when no devices found',
-      () async {
-        final logger = BufferLogger.test();
+    testUsingContext('custom-devices list command prints message when no devices found', () async {
+      final logger = BufferLogger.test();
 
-        final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          logger: logger,
-          featureEnabled: true,
-        );
+      final CommandRunner<void> runner = createCustomDevicesCommandRunner(
+        logger: logger,
+        featureEnabled: true,
+      );
 
-        await expectLater(runner.run(const <String>['custom-devices', 'list']), completes);
-        expect(
-          logger.statusText,
-          contains('No custom devices found in "/.flutter_custom_devices.json"'),
-        );
-      },
-    );
+      await expectLater(runner.run(const <String>['custom-devices', 'list']), completes);
+      expect(
+        logger.statusText,
+        contains('No custom devices found in "/.flutter_custom_devices.json"'),
+      );
+    });
 
-    testWithoutContext('custom-devices list command lists all devices', () async {
+    testUsingContext('custom-devices list command lists all devices', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
 
@@ -1029,7 +1053,7 @@ void main() {
       expect(logger.statusText, contains('id: testid2, label: testlabel2, enabled: false'));
     });
 
-    testWithoutContext('custom-devices reset correctly backs up the config file', () async {
+    testUsingContext('custom-devices reset correctly backs up the config file', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
 
@@ -1071,7 +1095,7 @@ void main() {
       );
     });
 
-    testWithoutContext(
+    testUsingContext(
       "custom-devices reset outputs correct msg when config file didn't exist",
       () async {
         final fs = MemoryFileSystem.test();
@@ -1093,7 +1117,7 @@ void main() {
       },
     );
 
-    testWithoutContext('custom-device log reader command', () async {
+    testUsingContext('custom-device log reader command', () async {
       const logLine = 'Hello, from custom device!';
       const logLineCommand = <String>['echo', logLine];
       const expectedLogLines = <String>[logLine];
@@ -1116,10 +1140,9 @@ void main() {
 
   group('windows', () {
     setUp(() {
-      Cache.flutterRoot = windowsFlutterRoot;
     });
 
-    testWithoutContext(
+    testUsingContext(
       'custom-devices add command correctly adds ssh device config on windows',
       () async {
         final fs = MemoryFileSystem.test(style: FileSystemStyle.windows);

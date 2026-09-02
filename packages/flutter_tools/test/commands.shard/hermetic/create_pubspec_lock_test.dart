@@ -15,7 +15,6 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    Cache.flutterRoot = '/flutter';
   });
 
   // Writes a minimal SDK package pubspec with a single hosted dependency.

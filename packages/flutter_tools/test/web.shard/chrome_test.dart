@@ -23,6 +23,11 @@ import '../src/fakes.dart' hide FakeProcess;
 const kChromeArgs = <String>[
   '--disable-background-timer-throttling',
   '--disable-renderer-backgrounding',
+  '--disable-background-networking',
+  '--disable-sync',
+  '--disable-client-side-phishing-detection',
+  '--disable-notifications',
+  ...kGcmDisabledFlags,
   '--disable-extensions',
   '--disable-popup-blocking',
   '--bwsi',
@@ -102,6 +107,46 @@ void main() {
         chromeLauncher,
       ),
     );
+  });
+
+  testWithoutContext('filters out Chromium D-Bus error lines from stderr logs', () async {
+    final logger = BufferLogger.test();
+    final chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: findChromeExecutable,
+      logger: logger,
+    );
+
+    const dbusStderr = '''
+[27076:27076:0805/172123.895258:ERROR:dbus/bus.cc(408)] Failed to connect to the bus: Could not parse server address e.g. ''
+[27076:27076:0805/172123.895258:ERROR:dbus/object_proxy.cc(588)] Failed to call method: org.freedesktop.DBus.Properties.Get: object_path= /org/freedesktop/UPower
+[27076:27076:0805/172123.895258:ERROR:some_other_file.cc(100)] Non-dbus error line
+DevTools listening on ws://127.0.0.1:12345/devtools/browser/
+''';
+
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: dbusStderr,
+      ),
+    );
+
+    await expectReturnsNormallyLater(chromiumLauncher.launch('example_url', skipCheck: true));
+
+    expect(logger.traceText, contains('Non-dbus error line'));
+    expect(logger.traceText, isNot(contains('ERROR:dbus/bus.cc')));
+    expect(logger.traceText, isNot(contains('ERROR:dbus/object_proxy.cc')));
+    expect(logger.traceText, isNot(contains('Failed to connect to the bus')));
+    expect(logger.traceText, isNot(contains('org.freedesktop.DBus')));
   });
 
   testWithoutContext('can launch chrome in verbose mode', () async {
@@ -440,11 +485,6 @@ void main() {
             '--no-sandbox',
             '--headless',
             '--window-size=1024,1024',
-            '--disable-background-networking',
-            '--disable-sync',
-            '--disable-client-side-phishing-detection',
-            '--disable-notifications',
-            '--disable-features=GCM',
             'example_url',
           ],
           stderr: kDevtoolsStderr,
@@ -579,11 +619,6 @@ void main() {
           '--no-sandbox',
           '--headless',
           '--window-size=1024,1024',
-          '--disable-background-networking',
-          '--disable-sync',
-          '--disable-client-side-phishing-detection',
-          '--disable-notifications',
-          '--disable-features=GCM',
           'example_url',
         ],
         stderr: kDevtoolsStderr,
@@ -680,11 +715,6 @@ void main() {
       '--no-sandbox',
       '--headless',
       '--window-size=1024,1024',
-      '--disable-background-networking',
-      '--disable-sync',
-      '--disable-client-side-phishing-detection',
-      '--disable-notifications',
-      '--disable-features=GCM',
       '--use-gl=angle',
       '--use-angle=swiftshader',
       '--enable-unsafe-swiftshader',
@@ -722,11 +752,6 @@ void main() {
       '--no-sandbox',
       '--headless',
       '--window-size=1024,1024',
-      '--disable-background-networking',
-      '--disable-sync',
-      '--disable-client-side-phishing-detection',
-      '--disable-notifications',
-      '--disable-features=GCM',
       'example_url',
     ];
 
@@ -764,11 +789,6 @@ void main() {
             '--no-sandbox',
             '--headless',
             '--window-size=1024,1024',
-            '--disable-background-networking',
-            '--disable-sync',
-            '--disable-client-side-phishing-detection',
-            '--disable-notifications',
-            '--disable-features=GCM',
             'example_url',
           ],
           stderr: 'nothing in the std error indicating glibc error',

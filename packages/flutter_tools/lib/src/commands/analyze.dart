@@ -88,6 +88,7 @@ class AnalyzeCommand extends FlutterCommand {
       hide: !verboseHelp,
       help: 'Also output the analysis time.',
     );
+    argParser.addFlag('plugins', defaultsTo: true, help: 'Whether to enable analyzer plugins.');
 
     usesPubOption();
 

@@ -88,7 +88,6 @@ environement:
   }
 
   setUp(() async {
-    Cache.flutterRoot = 'flutter';
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
@@ -106,7 +105,7 @@ environement:
     );
     fileSystem.file(
         fileSystem.path.join(
-          Cache.flutterRoot!,
+          getFlutterRoot(),
           'packages',
           'flutter_tools',
           'templates',
@@ -118,7 +117,7 @@ environement:
       ..writeAsStringSync('iOS podfile template');
     fileSystem.file(
         fileSystem.path.join(
-          Cache.flutterRoot!,
+          getFlutterRoot(),
           'packages',
           'flutter_tools',
           'templates',

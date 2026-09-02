@@ -127,15 +127,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addMultiOption(
         'tags',
         abbr: 't',
-        help:
-            'Run only tests associated with the specified tags. See: https://pub.dev/packages/test#tagging-tests',
+        help: 'Run only tests associated with the specified tags. See: https://pub.dev/packages/test#tagging-tests',
         splitCommas: false,
       )
       ..addMultiOption(
         'exclude-tags',
         abbr: 'x',
-        help:
-            'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
+        help: 'Run only tests that do not have the specified tags. See: https://pub.dev/packages/test#tagging-tests',
         splitCommas: false,
       )
       ..addMultiOption(
@@ -210,7 +208,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'update-goldens',
         negatable: false,
         help:
-            'Whether "matchesGoldenFile()" calls within your test methods should ' // flutter_ignore: golden_tag (see analyze.dart)
+            'Whether "matchesGoldenFile()" calls within your test methods should ' // ignore: golden_test_tags
             'update the golden files rather than test for an existing match.',
       )
       ..addOption(
@@ -282,16 +280,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption(
         'reporter',
         abbr: 'r',
-        help:
-            'Set how to print test results. If unset, value will default to either compact or expanded.',
+        help: 'Set how to print test results. If unset, value will default to either compact or expanded.',
         allowed: <String>['compact', 'expanded', 'failures-only', 'github', 'json', 'silent'],
         allowedHelp: <String, String>{
           'compact': 'A single line, updated continuously (the default).',
-          'expanded':
-              'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
+          'expanded': 'A separate line for each update. May be preferred when logging to a file or in continuous integration.',
           'failures-only': 'A separate line for failing tests, with no output for passing tests.',
-          'github':
-              'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
+          'github': 'A custom reporter for GitHub Actions (the default reporter when running on GitHub Actions).',
           'json': 'A machine-readable format. See: https://dart.dev/go/test-docs/json_reporter.md',
           'silent':
               'A reporter with no output. May be useful when only the exit code is meaningful.',
@@ -546,7 +541,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
           : null,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
       webUseWasm: useWasm,
-      enableHcpp: boolArg('enable-hcpp'),
+      enableHcpp: explicitEnableHcpp,
       uninstallApp: boolArg('uninstall'),
     );
 
@@ -871,7 +866,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
     if (_needsRebuild(assetBundle.entries, flavor, fs)) {
       await writeBundle(
-        fs.directory(fs.path.join('build', 'unit_test_assets')),
+        fs.directory(fs.path.join(getBuildDirectory(_toolContext.config, fs), 'unit_test_assets')),
         assetBundle.entries,
         targetPlatform: TargetPlatform.tester,
         impellerStatus: impellerStatus,
@@ -883,7 +878,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         buildMode: buildMode,
       );
 
-      final File cachedFlavorFile = fs.file(fs.path.join('build', 'test_cache', 'flavor.txt'));
+      final File cachedFlavorFile = fs.file(
+        fs.path.join(getBuildDirectory(_toolContext.config, fs), 'test_cache', 'flavor.txt'),
+      );
       if (cachedFlavorFile.existsSync()) {
         await cachedFlavorFile.delete();
       }
@@ -899,7 +896,13 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     //  schema of the contents of the asset manifest file and the user does not
     //  perform a `flutter clean` after upgrading.
     //  See https://github.com/flutter/flutter/issues/128563.
-    final File manifest = fs.file(fs.path.join('build', 'unit_test_assets', 'AssetManifest.bin'));
+    final File manifest = fs.file(
+      fs.path.join(
+        getBuildDirectory(_toolContext.config, fs),
+        'unit_test_assets',
+        'AssetManifest.bin',
+      ),
+    );
     if (!manifest.existsSync()) {
       return true;
     }
@@ -918,7 +921,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       }
     }
 
-    final File cachedFlavorFile = fs.file(fs.path.join('build', 'test_cache', 'flavor.txt'));
+    final File cachedFlavorFile = fs.file(
+      fs.path.join(getBuildDirectory(_toolContext.config, fs), 'test_cache', 'flavor.txt'),
+    );
     final String? cachedFlavor = cachedFlavorFile.existsSync()
         ? cachedFlavorFile.readAsStringSync()
         : null;

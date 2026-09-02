@@ -33,13 +33,13 @@ import 'darwin_add_to_app.dart';
 /// managers.
 class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   BuildMacOSFrameworkCommand({
-    super.analytics,
     required super.appleContext,
     required super.buildSystem,
     required super.codesign,
-    super.flutterVersion,
     required super.toolContext,
     required super.verboseHelp,
+    super.analytics,
+    super.flutterVersion,
   });
 
   @override
@@ -67,7 +67,12 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
     final String outputArgument =
         stringArg('output') ??
-        fs.path.join(fs.currentDirectory.path, 'build', 'macos', 'framework');
+        fs.path.join(
+          fs.currentDirectory.path,
+          getBuildDirectory(toolContext.config, fs),
+          'macos',
+          'framework',
+        );
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');

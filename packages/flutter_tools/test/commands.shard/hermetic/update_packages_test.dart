@@ -118,6 +118,23 @@ dev_dependencies:
 # PUBSPEC CHECKSUM: qlfuuh
 ''';
 
+const kFlutterAnalyzerPluginPubspecYaml = r'''
+name: flutter_analyzer_plugin
+description: Custom analysis rules for flutter/flutter
+version: 0.0.1
+publish_to: none
+
+resolution: workspace
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  typed_data: ^1.1.6
+
+# PUBSPEC CHECKSUM: 3si79p
+''';
+
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
 const kFlutterPubspecYaml = r'''
 name: flutter
@@ -264,6 +281,12 @@ void main() {
       flutterSdk.childFile('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(kFlutterWorkspacePubspecYaml);
+      final Directory flutterAnalyzerPlugin = flutterSdk
+          .childDirectory('dev')
+          .childDirectory('flutter_analyzer_plugin');
+      flutterAnalyzerPlugin.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(kFlutterAnalyzerPluginPubspecYaml);
       widgetPreviewScaffold = flutterSdk
           .childDirectory('dev')
           .childDirectory('integration_tests')
@@ -278,7 +301,6 @@ void main() {
       hookUserDefinesIntegrationTest.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync(kNonWorkspacePubspecYaml);
-      Cache.flutterRoot = flutterSdk.absolute.path;
       pub = _FakePub(flutterTools: flutterTools);
       processManager = FakeProcessManager.empty();
     });
@@ -315,6 +337,7 @@ void main() {
 
       final UpdatePackagesCommand command = createCommand();
       await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
+
       expect(
         pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
         (Pubspec.parse(kFlutterWorkspacePubspecYaml)
@@ -336,6 +359,16 @@ void main() {
                 version: VersionConstraint.parse('0.7.5'),
               ))
             .dependencies,
+      );
+
+      final File updatedPluginPubspec = flutterSdk
+          .childDirectory('dev')
+          .childDirectory('flutter_analyzer_plugin')
+          .childFile('pubspec.yaml');
+      final parsedPluginPubspec = Pubspec.parse(updatedPluginPubspec.readAsStringSync());
+      expect(
+        parsedPluginPubspec.dependencies['typed_data'],
+        HostedDependency(version: VersionConstraint.parse('^1.1.1')),
       );
     });
 
