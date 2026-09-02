@@ -1749,6 +1749,9 @@ MakeViewportMetricsFromWindowMetrics(
   size_t display_features_count =
       SAFE_ACCESS(flutter_metrics, display_features_count, 0);
   if (display_features_count > 0) {
+    if (display_features_count > 1000) {
+      return "Display features count is invalid or unreasonably large.";
+    }
     const double* bounds =
         SAFE_ACCESS(flutter_metrics, display_features_bounds, nullptr);
     const int32_t* types =
