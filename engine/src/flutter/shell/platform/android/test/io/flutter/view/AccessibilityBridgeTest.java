@@ -2754,7 +2754,7 @@ public class AccessibilityBridgeTest {
     assertEquals(1, cell11Info.getCollectionItemInfo().getRowSpan());
     assertEquals(0, cell11Info.getCollectionItemInfo().getColumnIndex());
     assertEquals(1, cell11Info.getCollectionItemInfo().getColumnSpan());
-    assertFalse(cell11Info.getCollectionItemInfo().isHeading());
+    assertFalse(cell11Info.isHeading());
 
     AccessibilityNodeInfo cell12Info = accessibilityBridge.createAccessibilityNodeInfo(4);
     assertNotNull(cell12Info.getCollectionItemInfo());
@@ -2762,7 +2762,7 @@ public class AccessibilityBridgeTest {
     assertEquals(1, cell12Info.getCollectionItemInfo().getRowSpan());
     assertEquals(1, cell12Info.getCollectionItemInfo().getColumnIndex());
     assertEquals(1, cell12Info.getCollectionItemInfo().getColumnSpan());
-    assertFalse(cell12Info.getCollectionItemInfo().isHeading());
+    assertFalse(cell12Info.isHeading());
 
     AccessibilityNodeInfo cell21Info = accessibilityBridge.createAccessibilityNodeInfo(5);
     assertNotNull(cell21Info.getCollectionItemInfo());
@@ -2770,7 +2770,7 @@ public class AccessibilityBridgeTest {
     assertEquals(1, cell21Info.getCollectionItemInfo().getRowSpan());
     assertEquals(0, cell21Info.getCollectionItemInfo().getColumnIndex());
     assertEquals(1, cell21Info.getCollectionItemInfo().getColumnSpan());
-    assertFalse(cell21Info.getCollectionItemInfo().isHeading());
+    assertFalse(cell21Info.isHeading());
 
     AccessibilityNodeInfo cell22Info = accessibilityBridge.createAccessibilityNodeInfo(6);
     assertNotNull(cell22Info.getCollectionItemInfo());
@@ -2778,7 +2778,7 @@ public class AccessibilityBridgeTest {
     assertEquals(1, cell22Info.getCollectionItemInfo().getRowSpan());
     assertEquals(1, cell22Info.getCollectionItemInfo().getColumnIndex());
     assertEquals(1, cell22Info.getCollectionItemInfo().getColumnSpan());
-    assertFalse(cell22Info.getCollectionItemInfo().isHeading());
+    assertFalse(cell22Info.isHeading());
   }
 
   @Config(sdk = API_LEVELS.API_32)
@@ -2927,25 +2927,25 @@ public class AccessibilityBridgeTest {
     assertNotNull(colHeader1Info.getCollectionItemInfo());
     assertEquals(0, colHeader1Info.getCollectionItemInfo().getRowIndex());
     assertEquals(0, colHeader1Info.getCollectionItemInfo().getColumnIndex());
-    assertTrue(colHeader1Info.getCollectionItemInfo().isHeading());
+    assertTrue(colHeader1Info.isHeading());
 
     AccessibilityNodeInfo colHeader2Info = accessibilityBridge.createAccessibilityNodeInfo(5);
     assertNotNull(colHeader2Info.getCollectionItemInfo());
     assertEquals(0, colHeader2Info.getCollectionItemInfo().getRowIndex());
     assertEquals(1, colHeader2Info.getCollectionItemInfo().getColumnIndex());
-    assertTrue(colHeader2Info.getCollectionItemInfo().isHeading());
+    assertTrue(colHeader2Info.isHeading());
 
     AccessibilityNodeInfo dataCell11Info = accessibilityBridge.createAccessibilityNodeInfo(6);
     assertNotNull(dataCell11Info.getCollectionItemInfo());
     assertEquals(1, dataCell11Info.getCollectionItemInfo().getRowIndex());
     assertEquals(0, dataCell11Info.getCollectionItemInfo().getColumnIndex());
-    assertFalse(dataCell11Info.getCollectionItemInfo().isHeading());
+    assertFalse(dataCell11Info.isHeading());
 
     AccessibilityNodeInfo dataCell22Info = accessibilityBridge.createAccessibilityNodeInfo(9);
     assertNotNull(dataCell22Info.getCollectionItemInfo());
     assertEquals(2, dataCell22Info.getCollectionItemInfo().getRowIndex());
     assertEquals(1, dataCell22Info.getCollectionItemInfo().getColumnIndex());
-    assertFalse(dataCell22Info.getCollectionItemInfo().isHeading());
+    assertFalse(dataCell22Info.isHeading());
   }
 
   @Test

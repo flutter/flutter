@@ -37,6 +37,10 @@ public class CellRoleConfigurator extends BaseRoleConfigurator {
         node.hasRole(AccessibilityBridge.Role.COLUMN_HEADER)
             || node.hasFlag(AccessibilityBridge.Flag.IS_HEADER);
 
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
+      result.setHeading(isHeading);
+    }
+
     if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
       result.setCollectionItemInfo(
           AccessibilityNodeInfo.CollectionItemInfo.obtain(
