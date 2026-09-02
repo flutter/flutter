@@ -215,7 +215,7 @@ Device 2 (mobile) • 456 • android • 1.2.3
   });
 
   group('Skia screenshot execution', () {
-    testUsingContext('successful Skia screenshot with custom out', () async {
+    testWithoutContext('successful Skia screenshot with custom out', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final toolContext = FakeToolContext(fs: fs, logger: logger);
@@ -259,7 +259,7 @@ Device 2 (mobile) • 456 • android • 1.2.3
       expect(logger.statusText, contains('Screenshot written to screenshot.skp (0kB).'));
     });
 
-    testUsingContext('failed Skia screenshot when disconnected', () async {
+    testWithoutContext('failed Skia screenshot when disconnected', () async {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
       final toolContext = FakeToolContext(fs: fs, logger: logger);

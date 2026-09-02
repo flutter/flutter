@@ -3,14 +3,17 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
@@ -22,10 +25,8 @@ const _kSkiaType = 'skia';
 
 /// The `flutter screenshot` command, which captures a screenshot from a connected device.
 class ScreenshotCommand extends FlutterCommand {
-  ScreenshotCommand({required ToolContext toolContext, VMServiceConnector? vmServiceConnector})
-    : _toolContext = toolContext,
-      _vmServiceConnector = vmServiceConnector ?? connectToVmService,
-      super(toolContext: toolContext) {
+  ScreenshotCommand({this.fs, super.toolContext, VMServiceConnector? vmServiceConnector})
+    : _vmServiceConnector = vmServiceConnector ?? connectToVmService {
     argParser.addOption(
       _kOut,
       abbr: 'o',
@@ -59,11 +60,22 @@ class ScreenshotCommand extends FlutterCommand {
     usesDeviceConnectionOption();
   }
 
-  final ToolContext _toolContext;
+  final FileSystem? fs;
   final VMServiceConnector _vmServiceConnector;
 
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext {
+    final ToolContext? explicit = super.toolContext;
+    if (explicit != null) {
+      return explicit;
+    }
+    return _ScreenshotToolContext(
+      fs: fs ?? globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+    );
+  }
 
   @override
   String get name => 'screenshot';
@@ -75,7 +87,7 @@ class ScreenshotCommand extends FlutterCommand {
   final String category = FlutterCommandCategory.tools;
 
   @override
-  bool get refreshWirelessDevices => true;
+  bool get refreshWirelessDevices => stringArg(_kType) == _kDeviceType;
 
   @override
   final aliases = <String>['pic'];
@@ -206,4 +218,31 @@ class ScreenshotCommand extends FlutterCommand {
     final int sizeKB = outputFile.lengthSync() ~/ 1024;
     logger.printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }
+}
+
+class _ScreenshotToolContext implements ToolContext {
+  _ScreenshotToolContext({
+    required this.fs,
+    required this.logger,
+    required this.platform,
+    required this.processManager,
+  });
+
+  @override
+  final FileSystem fs;
+
+  @override
+  final Logger logger;
+
+  @override
+  final Platform platform;
+
+  @override
+  final ProcessManager processManager;
+
+  @override
+  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
+
+  @override
+  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
