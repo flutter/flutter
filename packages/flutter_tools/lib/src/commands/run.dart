@@ -843,9 +843,20 @@ class RunCommand extends RunCommandBase {
   @visibleForTesting
   Daemon createMachineDaemon() {
     return Daemon.createMachineDaemon(
+      analytics: globals.analytics,
+      androidSdk: globals.androidSdk,
+      androidWorkflow: globals.androidWorkflow,
+      deviceManager: globals.deviceManager,
       featureFlags: featureFlags,
+      fileSystem: globals.fs,
+      java: globals.java,
       logger: globals.logger,
+      outputPreferences: globals.outputPreferences,
+      platform: globals.platform,
+      processManager: globals.processManager,
       stdio: globals.stdio,
+      systemClock: globals.systemClock,
+      terminal: globals.terminal,
     );
   }
 

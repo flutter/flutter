@@ -266,7 +266,13 @@ void main() {
 
     testUsingContext('printStatus should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = await capturedConsolePrint(() {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger, logToStdout: true, featureFlags: featureFlags, fileSystem: globals.fs);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          logToStdout: true,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
         globals.printStatus('daemon.logMessage test');
         return Future<void>.value();
       });
@@ -276,7 +282,13 @@ void main() {
 
     testUsingContext('printBox should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = await capturedConsolePrint(() {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger, logToStdout: true, featureFlags: featureFlags, fileSystem: globals.fs);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          logToStdout: true,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
         globals.printBox('This is the box message', title: 'Sample title');
         return Future<void>.value();
       });

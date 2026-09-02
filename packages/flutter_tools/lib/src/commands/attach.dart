@@ -321,6 +321,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           ? _logger
           : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
       logToStdout: true,
+      featureFlags: featureFlags,
     );
 
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
