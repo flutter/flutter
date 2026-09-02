@@ -52,6 +52,7 @@ import 'src/commands/widget_preview.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
 import 'src/devtools_launcher.dart';
+import 'src/doctor.dart';
 import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/experimental/templates.dart';
@@ -318,7 +319,11 @@ List<FlutterCommand> generateCommands({
   DoctorCommand(
     verbose: verbose,
     toolContext: toolDependencies.toolContext,
-    doctor: globals.doctor!,
+    doctor: Doctor(
+      logger: toolDependencies.toolContext.logger,
+      clock: toolDependencies.toolContext.systemClock,
+      analytics: toolDependencies.analytics,
+    ),
     androidLicenseValidator: androidLicenseValidator,
     extensionManager: extensionManager,
   ),
