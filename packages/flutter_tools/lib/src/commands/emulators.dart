@@ -17,9 +17,9 @@ import '../runner/flutter_command.dart';
 /// The `flutter emulators` command, which lists, launches, and creates emulators.
 class EmulatorsCommand extends FlutterCommand {
   EmulatorsCommand({
+    required Doctor doctor,
+    required EmulatorManager emulatorManager,
     required ToolContext toolContext,
-    Doctor? doctor,
-    EmulatorManager? emulatorManager,
     super.verboseHelp,
   }) : _doctor = doctor,
        _emulatorManager = emulatorManager,
@@ -41,8 +41,8 @@ class EmulatorsCommand extends FlutterCommand {
     );
   }
 
-  final Doctor? _doctor;
-  final EmulatorManager? _emulatorManager;
+  final Doctor _doctor;
+  final EmulatorManager _emulatorManager;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -63,7 +63,7 @@ class EmulatorsCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final Platform platform = toolContext.platform;
 
-    if (_doctor != null && _doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
+    if (_doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
       throwToolExit(
         'Unable to find any emulator sources. Please ensure you have some\n'
         'Android AVD images ${platform.isMacOS ? 'or an iOS Simulator ' : ''}available.',
@@ -86,8 +86,7 @@ class EmulatorsCommand extends FlutterCommand {
 
   Future<void> _launchEmulator(String id, {required bool coldBoot}) async {
     final Logger logger = toolContext.logger;
-    final List<Emulator> emulators =
-        await _emulatorManager?.getEmulatorsMatching(id) ?? <Emulator>[];
+    final List<Emulator> emulators = await _emulatorManager.getEmulatorsMatching(id);
 
     if (emulators.isEmpty) {
       logger.printStatus("No emulator found that matches '$id'.");
@@ -100,13 +99,7 @@ class EmulatorsCommand extends FlutterCommand {
 
   Future<void> _createEmulator({String? name}) async {
     final Logger logger = toolContext.logger;
-    final CreateEmulatorResult? createResult = await _emulatorManager?.createEmulator(name: name);
-
-    if (createResult == null) {
-      logger.printStatus('Failed to create emulator.\n');
-      _printAdditionalInfo();
-      return;
-    }
+    final CreateEmulatorResult createResult = await _emulatorManager.createEmulator(name: name);
 
     if (createResult.success) {
       logger.printStatus("Emulator '${createResult.emulatorName}' created successfully.");
@@ -122,12 +115,9 @@ class EmulatorsCommand extends FlutterCommand {
 
   Future<void> _listEmulators(String? searchText) async {
     final Logger logger = toolContext.logger;
-    final List<Emulator> emulators = switch (_emulatorManager) {
-      null => const <Emulator>[],
-      final EmulatorManager manager when searchText == null =>
-        await manager.getAllAvailableEmulators(),
-      final EmulatorManager manager => await manager.getEmulatorsMatching(searchText),
-    };
+    final List<Emulator> emulators = searchText == null
+        ? await _emulatorManager.getAllAvailableEmulators()
+        : await _emulatorManager.getEmulatorsMatching(searchText);
 
     if (emulators.isEmpty) {
       logger.printStatus('No emulators available.');

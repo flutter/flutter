@@ -38,7 +38,11 @@ void main() {
         () async {
           final toolContext = FakeToolContext(logger: logger, platform: platform);
           final doctor = _FakeDoctor(canListEmulators: false);
-          final command = EmulatorsCommand(toolContext: toolContext, doctor: doctor);
+          final command = EmulatorsCommand(
+            doctor: doctor,
+            emulatorManager: _FakeEmulatorManager(),
+            toolContext: toolContext,
+          );
 
           await expectLater(
             () => createTestCommandRunner(command).run(<String>['emulators']),
@@ -55,7 +59,11 @@ void main() {
         final macOSPlatform = FakePlatform(operatingSystem: 'macos');
         final toolContext = FakeToolContext(logger: logger, platform: macOSPlatform);
         final doctor = _FakeDoctor(canListEmulators: false);
-        final command = EmulatorsCommand(toolContext: toolContext, doctor: doctor);
+        final command = EmulatorsCommand(
+          doctor: doctor,
+          emulatorManager: _FakeEmulatorManager(),
+          toolContext: toolContext,
+        );
 
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['emulators']),
@@ -72,9 +80,9 @@ void main() {
         final doctor = _FakeDoctor();
         final emulatorManager = _FakeEmulatorManager();
         final command = EmulatorsCommand(
-          toolContext: toolContext,
           doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators']);
@@ -87,9 +95,9 @@ void main() {
         final toolContext = FakeToolContext(logger: logger, platform: platform);
         final emulatorManager = _FakeEmulatorManager();
         final command = EmulatorsCommand(
-          toolContext: toolContext,
           doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators']);
@@ -113,9 +121,9 @@ void main() {
         ];
         final emulatorManager = _FakeEmulatorManager(emulators: emulators);
         final command = EmulatorsCommand(
-          toolContext: toolContext,
           doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators']);
@@ -141,9 +149,9 @@ void main() {
         ];
         final emulatorManager = _FakeEmulatorManager(emulators: emulators);
         final command = EmulatorsCommand(
-          toolContext: toolContext,
           doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators', 'pixel']);
@@ -159,9 +167,9 @@ void main() {
         final toolContext = FakeToolContext(logger: logger, platform: platform);
         final emulatorManager = _FakeEmulatorManager();
         final command = EmulatorsCommand(
-          toolContext: toolContext,
           doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel']);
@@ -177,9 +185,9 @@ void main() {
         ];
         final emulatorManager = _FakeEmulatorManager(emulators: emulators);
         final command = EmulatorsCommand(
-          toolContext: toolContext,
           doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel']);
@@ -204,9 +212,9 @@ void main() {
         );
         final emulatorManager = _FakeEmulatorManager(emulators: <_FakeEmulator>[emulator]);
         final command = EmulatorsCommand(
-          toolContext: toolContext,
           doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel_6']);
@@ -230,9 +238,9 @@ void main() {
         );
         final emulatorManager = _FakeEmulatorManager(emulators: <_FakeEmulator>[emulator]);
         final command = EmulatorsCommand(
-          toolContext: toolContext,
           doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(
@@ -251,9 +259,9 @@ void main() {
           createResult: CreateEmulatorResult('flutter_emulator', success: true),
         );
         final command = EmulatorsCommand(
-          toolContext: toolContext,
           doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators', '--create']);
@@ -268,9 +276,9 @@ void main() {
           createResult: CreateEmulatorResult('my_custom_emulator', success: true),
         );
         final command = EmulatorsCommand(
-          toolContext: toolContext,
           doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(
@@ -291,9 +299,9 @@ void main() {
           ),
         );
         final command = EmulatorsCommand(
-          toolContext: toolContext,
           doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators', '--create']);

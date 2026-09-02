@@ -326,9 +326,10 @@ List<FlutterCommand> generateCommands({
     signals: toolDependencies.toolContext.signals,
   ),
   EmulatorsCommand(
-    doctor: globals.doctor,
-    emulatorManager: globals.emulatorManager,
+    doctor: globals.doctor!,
+    emulatorManager: globals.emulatorManager!,
     toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
   ),
   GenerateCommand(),
   GenerateLocalizationsCommand(
