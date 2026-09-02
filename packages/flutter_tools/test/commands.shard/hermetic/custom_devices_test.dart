@@ -860,16 +860,19 @@ void main() {
       },
     );
 
-    testUsingContext('custom-devices delete command throws tool exit with invalid device id', () async {
-      final CommandRunner<void> runner = createCustomDevicesCommandRunner(featureEnabled: true);
-      await expectLater(
-        runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
-        throwsToolExit(
-          message:
-              'Couldn\'t find device with id "testid" in config at "/.flutter_custom_devices.json"',
-        ),
-      );
-    });
+    testUsingContext(
+      'custom-devices delete command throws tool exit with invalid device id',
+      () async {
+        final CommandRunner<void> runner = createCustomDevicesCommandRunner(featureEnabled: true);
+        await expectLater(
+          runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
+          throwsToolExit(
+            message:
+                'Couldn\'t find device with id "testid" in config at "/.flutter_custom_devices.json"',
+          ),
+        );
+      },
+    );
 
     testWithoutContext(
       'custom-devices list command throws tool exit when config contains errors',
