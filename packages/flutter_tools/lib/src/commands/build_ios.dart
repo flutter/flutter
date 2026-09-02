@@ -1042,7 +1042,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     });
     final String? specifiedDeviceId =
         globalResults?[FlutterGlobalOptions.kDeviceIdOption] as String? ??
-        toolContext.platform.environment['FLUTTER_DEVICE_ID'];
+        _toolContext.platform.environment['FLUTTER_DEVICE_ID'];
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
