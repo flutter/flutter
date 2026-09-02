@@ -506,6 +506,12 @@ void _glDeleteTextures(GLsizei n, const GLuint* textures) {
   }
 }
 
+void _glFinish() {
+  if (mock) {
+    mock->glFinish();
+  }
+}
+
 static void _glDisable(GLenum cap) {
   _setEnable(cap, GL_FALSE);
 }
@@ -807,6 +813,7 @@ GLuint (*epoxy_glCreateShader)(GLenum shaderType);
 void (*epoxy_glDeleteFramebuffers)(GLsizei n, const GLuint* framebuffers);
 void (*expoxy_glDeleteShader)(GLuint shader);
 void (*epoxy_glDeleteTextures)(GLsizei n, const GLuint* textures);
+void (*epoxy_glFinish)();
 void (*epoxy_glFramebufferRenderbuffer)(GLenum target,
                                         GLenum attachment,
                                         GLenum renderbuffertarget,
@@ -898,6 +905,7 @@ static void library_init() {
   epoxy_glDeleteRenderbuffers = _glDeleteRenderbuffers;
   epoxy_glDeleteShader = _glDeleteShader;
   epoxy_glDeleteTextures = _glDeleteTextures;
+  epoxy_glFinish = _glFinish;
   epoxy_glDisable = _glDisable;
   epoxy_glEnable = _glEnable;
   epoxy_glFramebufferRenderbuffer = _glFramebufferRenderbuffer;
