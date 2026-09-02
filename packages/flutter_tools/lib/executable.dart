@@ -7,7 +7,6 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
-import 'src/android/android_workflow.dart';
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -415,12 +414,14 @@ class LoggerFactory {
     Logger logger;
     if (windows) {
       logger = WindowsStdoutLogger(
+        stdio: _stdio,
         terminal: _terminal,
         outputPreferences: _outputPreferences,
         stopwatchFactory: _stopwatchFactory,
       );
     } else {
       logger = StdoutLogger(
+        stdio: _stdio,
         terminal: _terminal,
         outputPreferences: _outputPreferences,
         stopwatchFactory: _stopwatchFactory,
