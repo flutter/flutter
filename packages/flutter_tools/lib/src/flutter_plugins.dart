@@ -109,7 +109,12 @@ Future<Plugin?> _pluginFromPackage(
   PubspecCache? pubspecCache,
   Logger? logger,
 }) async {
-  final FileSystem fs = fileSystem ?? globals.fs;
+  FileSystem fs;
+  try {
+    fs = fileSystem ?? globals.fs;
+  } on UnsupportedError {
+    fs = globals.localFileSystem;
+  }
   Logger effectiveLogger;
   try {
     effectiveLogger = logger ?? globals.logger;
