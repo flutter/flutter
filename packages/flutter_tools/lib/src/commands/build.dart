@@ -14,6 +14,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -85,10 +86,15 @@ class BuildCommand extends FlutterCommand {
         analytics ?? (context.get<Analytics>() ?? const NoOpAnalytics());
     final FeatureFlags effectiveFeatureFlags =
         featureFlags ?? (context.get<FeatureFlags>() ?? const _DefaultFeatureFlags());
-    final persistentToolState = PersistentToolState.test(
-      directory: fileSystem.directory('.tmp_state')..createSync(recursive: true),
-      logger: logger,
-    );
+    final effectivePlatform = platform;
+    final PersistentToolState persistentToolState =
+        context.get<PersistentToolState>() ??
+        PersistentToolState.test(
+          directory: fileSystem.directory(
+            fileSystem.path.join(fileSystem.systemTempDirectory.path, '.tmp_state'),
+          )..createSync(recursive: true),
+          logger: logger,
+        );
 
     final OutputPreferences effectiveOutputPreferences =
         outputPreferences ?? (context.get<OutputPreferences>() ?? OutputPreferences.test());
@@ -97,32 +103,32 @@ class BuildCommand extends FlutterCommand {
         (_fallbackToolContext = ToolContext(
           artifacts: artifacts,
           botDetector: BotDetector(
-            httpClientFactory: () => HttpClient(),
+            httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
             persistentToolState: persistentToolState,
-            platform: platform,
+            platform: effectivePlatform,
           ),
           cache: cache,
           config: config,
           customDevicesConfig: CustomDevicesConfig(
             fileSystem: fileSystem,
             logger: logger,
-            platform: platform,
+            platform: effectivePlatform,
           ),
           flutterVersion: flutterVersion,
           fs: fileSystem,
-          git: Git(currentPlatform: platform, runProcessWith: processUtils),
+          git: Git(currentPlatform: effectivePlatform, runProcessWith: processUtils),
           localEngineLocator: LocalEngineLocator(
             fileSystem: fileSystem,
             flutterRoot: Cache.flutterRoot ?? '',
             logger: logger,
-            platform: platform,
-            userMessages: UserMessages(),
+            platform: effectivePlatform,
+            userMessages: context.get<UserMessages>() ?? UserMessages(),
           ),
           logger: logger,
           os: osUtils,
           outputPreferences: effectiveOutputPreferences,
           persistentToolState: persistentToolState,
-          platform: platform,
+          platform: effectivePlatform,
           preRunValidator:
               preRunValidator ??
               (context.get<PreRunValidator>() ??
@@ -143,12 +149,12 @@ class BuildCommand extends FlutterCommand {
           projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
           shutdownHooks: ShutdownHooks(),
           signals: LocalSignals.instance,
-          stdio: Stdio(),
+          stdio: context.get<Stdio>() ?? Stdio(),
           systemClock: const SystemClock(),
           terminal: terminal is AnsiTerminal
               ? terminal
-              : AnsiTerminal(stdio: Stdio(), platform: platform),
-          userMessages: UserMessages(),
+              : AnsiTerminal(stdio: context.get<Stdio>() ?? Stdio(), platform: effectivePlatform),
+          userMessages: context.get<UserMessages>() ?? UserMessages(),
         ));
 
     _addSubcommand(
