@@ -852,7 +852,7 @@ bool Canvas::AttemptDrawLineSDF(const Point& p0,
                                 const Paint& paint,
                                 bool reuse_depth) {
   if (!renderer_.GetContext()->GetFlags().use_sdfs ||
-      !IsCompatibleWithSDFRendering(paint)) {
+      !IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     return false;
   }
   // Draw the line as a filled rectangle with width=line_length and
@@ -991,7 +991,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     Rect effective_rect = rect;
     Color effective_color = paint.color;
 
@@ -1064,7 +1064,7 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     UberSDFParameters params;
 
     if (paint.style == Paint::Style::kStroke) {
@@ -1152,7 +1152,8 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   const RoundingRadii& radii = round_rect.GetRadii();
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform()) &&
+      radii.AreAllCornersCircular()) {
     Color effective_color = paint.color;
     Rect bounds = round_rect.GetBounds();
 
@@ -1236,7 +1237,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     // Try to draw using UberSDF.
     auto params = UberSDFParameters::MakeRoundedSuperellipse(
         /*color=*/paint.color, /*round_superellipse=*/round_superellipse,
@@ -1300,7 +1301,7 @@ void Canvas::DrawCircle(const Point& center,
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFRendering(paint, GetCurrentTransform())) {
     auto params = UberSDFParameters::MakeCircle(
         /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
         /*stroke=*/paint.GetStroke());
@@ -2665,11 +2666,15 @@ void Canvas::EndReplay() {
   Initialize(initial_cull_rect_);
 }
 
-bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
+bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint,
+                                          const Matrix& transform) {
   if (!paint.anti_alias) {
     return false;
   }
   if (paint.mask_blur_descriptor.has_value()) {
+    return false;
+  }
+  if (transform.HasPerspective()) {
     return false;
   }
   switch (paint.blend_mode) {

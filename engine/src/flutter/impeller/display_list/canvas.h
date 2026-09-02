@@ -280,8 +280,8 @@ class Canvas {
 
   /// Returns true if the paint is compatible with SDF rendering.
   ///
-  /// Visible for testing.
-  static bool IsCompatibleWithSDFRendering(const Paint& paint);
+  static bool IsCompatibleWithSDFRendering(const Paint& paint,
+                                           const Matrix& transform = Matrix());
 
  private:
   class BlurShape {
