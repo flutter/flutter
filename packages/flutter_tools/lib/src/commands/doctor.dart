@@ -12,7 +12,7 @@ import '../runner/flutter_command.dart';
 class DoctorCommand extends FlutterCommand {
   DoctorCommand({
     required ToolContext toolContext,
-    Doctor? doctor,
+    required Doctor doctor,
     AndroidLicenseValidator? androidLicenseValidator,
     this.verbose = false,
     this.extensionManager,
@@ -36,7 +36,7 @@ class DoctorCommand extends FlutterCommand {
   }
 
   final ToolContext _toolContext;
-  final Doctor? _doctor;
+  final Doctor _doctor;
   final AndroidLicenseValidator? _androidLicenseValidator;
   final bool verbose;
   final ExtensionManager? extensionManager;
@@ -55,13 +55,12 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Doctor? doctor = _doctor;
     final AndroidLicenseValidator? androidLicenseValidator = _androidLicenseValidator;
 
     if (argResults?.wasParsed('check-for-remote-artifacts') ?? false) {
       final String engineRevision = stringArg('check-for-remote-artifacts')!;
       if (engineRevision.startsWith(RegExp(r'[a-f0-9]{1,40}'))) {
-        final bool success = await doctor?.checkRemoteArtifacts(engineRevision) ?? false;
+        final bool success = await _doctor.checkRemoteArtifacts(engineRevision);
         if (success) {
           throwToolExit(
             'Artifacts for engine $engineRevision are missing or are '
@@ -76,14 +75,12 @@ class DoctorCommand extends FlutterCommand {
         );
       }
     }
-    final bool success =
-        await doctor?.diagnose(
-          androidLicenses: boolArg('android-licenses'),
-          verbose: verbose,
-          androidLicenseValidator: androidLicenseValidator,
-          extensionManager: extensionManager,
-        ) ??
-        false;
+    final bool success = await _doctor.diagnose(
+      androidLicenses: boolArg('android-licenses'),
+      verbose: verbose,
+      androidLicenseValidator: androidLicenseValidator,
+      extensionManager: extensionManager,
+    );
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
 }
