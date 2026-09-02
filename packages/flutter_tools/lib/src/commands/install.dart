@@ -13,9 +13,7 @@ import '../device.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  InstallCommand({required ToolContext toolContext, required super.verboseHelp})
-    : _toolContext = toolContext,
-      super(toolContext: toolContext) {
+  InstallCommand({required super.toolContext, required super.verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp);
     requiresPubspecYaml();
     usesApplicationBinaryOption();
@@ -29,10 +27,8 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     );
   }
 
-  final ToolContext _toolContext;
-
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'install';
@@ -53,7 +49,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
 
   String? get _applicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
   File? get _applicationBinary =>
-      _applicationBinaryPath == null ? null : _toolContext.fs.file(_applicationBinaryPath);
+      _applicationBinaryPath == null ? null : toolContext.fs.file(_applicationBinaryPath);
 
   @override
   Future<void> validateCommand() async {
@@ -91,7 +87,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   }
 
   Future<void> _uninstallApp(ApplicationPackage package, Device device) async {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     if (await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
       logger.printStatus('Uninstalling $package from $device...');
       if (!await device.uninstallApp(package, userIdentifier: userIdentifier)) {
@@ -103,7 +99,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   }
 
   Future<void> _installApp(ApplicationPackage package, Device device) async {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     logger.printStatus('Installing $package to $device...');
 
     if (!await installApp(device, package, logger: logger, userIdentifier: userIdentifier)) {
