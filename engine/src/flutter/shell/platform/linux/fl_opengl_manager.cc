@@ -163,8 +163,9 @@ gboolean fl_opengl_manager_can_blit(FlOpenGLManager* self) {
           epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
 }
 
-gboolean fl_opengl_manager_has_extension(FlOpenGLManager* self,
-                                         const gchar* extension) {
+// Checks whether @extension is supported by the EGL display the contexts are
+// created on.
+static gboolean has_extension(FlOpenGLManager* self, const gchar* extension) {
   g_return_val_if_fail(FL_IS_OPENGL_MANAGER(self), FALSE);
 
   if (self->display == EGL_NO_DISPLAY) {
@@ -175,5 +176,9 @@ gboolean fl_opengl_manager_has_extension(FlOpenGLManager* self,
 }
 
 gboolean fl_opengl_manager_can_fence(FlOpenGLManager* self) {
-  return fl_opengl_manager_has_extension(self, "EGL_KHR_fence_sync");
+  return has_extension(self, "EGL_KHR_fence_sync");
+}
+
+gboolean fl_opengl_manager_can_wait_sync(FlOpenGLManager* self) {
+  return has_extension(self, "EGL_KHR_wait_sync");
 }

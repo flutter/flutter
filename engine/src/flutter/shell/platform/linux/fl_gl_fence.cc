@@ -64,8 +64,7 @@ FlGLFence* fl_gl_fence_new(FlOpenGLManager* opengl_manager) {
 
   self->display = display;
   self->sync = sync;
-  self->can_wait_gpu =
-      fl_opengl_manager_has_extension(opengl_manager, "EGL_KHR_wait_sync");
+  self->can_wait_gpu = fl_opengl_manager_can_wait_sync(opengl_manager);
 
   return self;
 }

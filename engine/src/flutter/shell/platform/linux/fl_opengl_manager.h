@@ -107,19 +107,6 @@ EGLContext fl_opengl_manager_get_context(FlOpenGLManager* manager);
 gboolean fl_opengl_manager_can_blit(FlOpenGLManager* manager);
 
 /**
- * fl_opengl_manager_has_extension:
- * @manager: an #FlOpenGLManager.
- * @extension: the name of an EGL extension, e.g. "EGL_KHR_fence_sync".
- *
- * Checks whether @extension is supported by the EGL display the contexts are
- * created on.
- *
- * Returns: %TRUE if @extension is supported.
- */
-gboolean fl_opengl_manager_has_extension(FlOpenGLManager* manager,
-                                         const gchar* extension);
-
-/**
  * fl_opengl_manager_can_fence:
  * @manager: an #FlOpenGLManager.
  *
@@ -131,6 +118,19 @@ gboolean fl_opengl_manager_has_extension(FlOpenGLManager* manager,
  * Returns: %TRUE if fences are available.
  */
 gboolean fl_opengl_manager_can_fence(FlOpenGLManager* manager);
+
+/**
+ * fl_opengl_manager_can_wait_sync:
+ * @manager: an #FlOpenGLManager.
+ *
+ * Checks whether a fence can be waited for by the GPU, i.e. without blocking
+ * the thread doing the waiting. This is an extension that may be missing on
+ * some drivers, so callers should fall back to blocking when this returns
+ * %FALSE.
+ *
+ * Returns: %TRUE if fences can be waited for without blocking.
+ */
+gboolean fl_opengl_manager_can_wait_sync(FlOpenGLManager* manager);
 
 G_END_DECLS
 
