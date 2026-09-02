@@ -1942,8 +1942,8 @@ BuildIOSFrameworkCommand createBuildIOSFrameworkCommand({
     appleContext: appleContext ?? FakeAppleContext(),
     buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
     codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
-    flutterVersion: flutterVersion,
     toolContext: FakeToolContext(
+      flutterVersion: flutterVersion,
       cache: effectiveCache,
       fs: effectiveFileSystem,
       logger: effectiveLogger,
@@ -1992,8 +1992,8 @@ BuildMacOSFrameworkCommand createBuildMacOSFrameworkCommand({
     appleContext: appleContext ?? FakeAppleContext(),
     buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
     codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
-    flutterVersion: flutterVersion,
     toolContext: FakeToolContext(
+      flutterVersion: flutterVersion,
       cache: effectiveCache,
       fs: effectiveFileSystem,
       logger: effectiveLogger,

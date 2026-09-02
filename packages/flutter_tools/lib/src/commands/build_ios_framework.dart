@@ -38,10 +38,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required this.codesign,
     required ToolContext toolContext,
     required bool verboseHelp,
-    @visibleForTesting FlutterVersion? flutterVersion,
   }) : _appleContext = appleContext,
        _buildSystem = buildSystem,
-       _flutterVersion = flutterVersion,
        _toolContext = toolContext,
        super(
          logger: toolContext.logger,
@@ -83,8 +81,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       )
       ..addFlag(
         'cocoapods',
-        help:
-            'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
+        help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
       )
       ..addFlag(
         'plugins',
@@ -95,8 +92,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       )
       ..addFlag(
         'static',
-        help:
-            'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
+        help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
       )
       ..addOption(
         'output',
@@ -107,8 +103,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       ..addFlag(
         'force',
         abbr: 'f',
-        help:
-            'Force Flutter.podspec creation on the master channel. This is only intended for testing the tool itself.',
+        help: 'Force Flutter.podspec creation on the master channel. This is only intended for testing the tool itself.',
         hide: !verboseHelp,
       );
   }
@@ -117,7 +112,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
-  final FlutterVersion? _flutterVersion;
   final ToolContext _toolContext;
 
   @protected
@@ -137,7 +131,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   Platform get platform => _toolContext.platform;
 
   @protected
-  FlutterVersion get flutterVersion => _flutterVersion ?? _toolContext.flutterVersion;
+  FlutterVersion get flutterVersion => _toolContext.flutterVersion;
 
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
@@ -465,7 +459,6 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     required super.codesign,
     required super.toolContext,
     required super.verboseHelp,
-    super.flutterVersion,
   }) {
     usesFlavorOption();
 

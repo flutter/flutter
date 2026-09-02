@@ -38,7 +38,6 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     required super.codesign,
     required super.toolContext,
     required super.verboseHelp,
-    super.flutterVersion,
   });
 
   @override
@@ -277,9 +276,9 @@ end
         defines: <String, String>{
           kTargetFile: targetFile,
           kTargetPlatform: TargetPlatform.darwin.getName(),
-          kDarwinArchs: defaultMacOSArchsForEnvironment(
-            artifacts,
-          ).map((CpuArch e) => e.darwinArchName).join(' '),
+          kDarwinArchs: defaultMacOSArchsForEnvironment(artifacts)
+              .map((CpuArch e) => e.darwinArchName)
+              .join(' '),
           ...buildInfo.toBuildSystemEnvironment(),
         },
         artifacts: artifacts,
