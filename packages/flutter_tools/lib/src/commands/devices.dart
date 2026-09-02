@@ -139,20 +139,20 @@ class DevicesCommandOutput {
       deviceConnectionInterface == null ||
       deviceConnectionInterface == DeviceConnectionInterface.wireless;
 
-  Future<List<Device>> _getAttachedDevices(DeviceManager deviceManager) async {
+  Future<List<Device>> _getAttachedDevices() async {
     if (!_includeAttachedDevices) {
       return <Device>[];
     }
-    return deviceManager.getAllDevices(
+    return _deviceManager.getAllDevices(
       filter: DeviceDiscoveryFilter(deviceConnectionInterface: DeviceConnectionInterface.attached),
     );
   }
 
-  Future<List<Device>> _getWirelessDevices(DeviceManager deviceManager) async {
+  Future<List<Device>> _getWirelessDevices() async {
     if (!_includeWirelessDevices) {
       return <Device>[];
     }
-    return deviceManager.getAllDevices(
+    return _deviceManager.getAllDevices(
       filter: DeviceDiscoveryFilter(deviceConnectionInterface: DeviceConnectionInterface.wireless),
     );
   }
@@ -161,8 +161,8 @@ class DevicesCommandOutput {
     // Refresh the cache and then get the attached and wireless devices from
     // the cache.
     await _deviceManager.refreshAllDevices(timeout: deviceDiscoveryTimeout);
-    final List<Device> attachedDevices = await _getAttachedDevices(_deviceManager);
-    final List<Device> wirelessDevices = await _getWirelessDevices(_deviceManager);
+    final List<Device> attachedDevices = await _getAttachedDevices();
+    final List<Device> wirelessDevices = await _getWirelessDevices();
     final List<Device> allDevices = attachedDevices + wirelessDevices;
 
     if (machine) {
@@ -218,9 +218,8 @@ class DevicesCommandOutput {
 
   Future<void> printDevicesAsJson(List<Device> devices) async {
     _logger.printStatus(
-      const JsonEncoder.withIndent(
-        '  ',
-      ).convert(await Future.wait(devices.map((Device d) => d.toJson()))),
+      const JsonEncoder.withIndent('  ')
+          .convert(await Future.wait(devices.map((Device d) => d.toJson()))),
     );
   }
 }
@@ -260,7 +259,7 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
           timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
         );
 
-    final List<Device> attachedDevices = await _getAttachedDevices(_deviceManager);
+    final List<Device> attachedDevices = await _getAttachedDevices();
 
     // Number of lines to clear starts at 1 because it's inclusive of the line
     // the cursor is on, which will be blank for this use case.
@@ -286,7 +285,7 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
 
     final Status waitingStatus = _logger.startSpinner();
     await extendedWirelessDiscovery;
-    final List<Device> wirelessDevices = await _getWirelessDevices(_deviceManager);
+    final List<Device> wirelessDevices = await _getWirelessDevices();
     waitingStatus.stop();
 
     final Terminal terminal = _logger.terminal;
