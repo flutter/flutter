@@ -289,7 +289,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
 
   virtual Canvas& GetCanvas() = 0;
 
-  virtual const ContentContext& GetContentContext() const = 0;
+  virtual ContentContext& GetContentContext() const = 0;
 
   std::shared_ptr<Texture> GetTexture(const sk_sp<flutter::DlImage>& image);
 
@@ -347,10 +347,10 @@ class CanvasDlDispatcher : public DlDispatcherBase {
 
  private:
   Canvas canvas_;
-  const ContentContext& renderer_;
+  ContentContext& renderer_;
 
   Canvas& GetCanvas() override;
-  const ContentContext& GetContentContext() const override;
+  ContentContext& GetContentContext() const override;
 };
 
 /// Performs a first pass over the display list to collect information
@@ -444,6 +444,15 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   size_t backdrop_count_ = 0;
   Paint paint_;
 };
+
+/// Render the provided display list to a texture with the given size.
+std::shared_ptr<Texture> DisplayListToTexture(
+    const sk_sp<flutter::DisplayList>& display_list,
+    ISize size,
+    ContentContext& context,
+    bool reset_host_buffer = true,
+    bool generate_mips = false,
+    std::optional<PixelFormat> target_pixel_format = std::nullopt);
 
 /// Render the provided display list to a texture with the given size.
 std::shared_ptr<Texture> DisplayListToTexture(
