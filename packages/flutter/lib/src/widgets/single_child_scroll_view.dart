@@ -344,7 +344,7 @@ class _SingleChildViewportElement extends SingleChildRenderObjectElement
   _SingleChildViewportElement(_SingleChildViewport super.widget);
 }
 
-typedef _ScrollRange = ({double viewport, double min, double max});
+typedef _ScrollExtents = ({double min, double max});
 
 class _RenderSingleChildViewport extends RenderBox
     with RenderObjectWithChildMixin<RenderBox>
@@ -385,8 +385,8 @@ class _RenderSingleChildViewport extends RenderBox
     if (attached) {
       _offset.addListener(_hasScrolled);
     }
-    // The new offset has not been reconciled against the range yet.
-    _reconciledRange = null;
+    // The new offset has not been reconciled against the extents yet.
+    _reconciledExtents = null;
     markNeedsLayout();
   }
 
@@ -456,8 +456,8 @@ class _RenderSingleChildViewport extends RenderBox
     });
   }
 
-  // The scroll range the offset was last reconciled against.
-  _ScrollRange? _reconciledRange;
+  // The scroll extents the offset was last reconciled against.
+  _ScrollExtents? _reconciledExtents;
 
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     return switch (axis) {
@@ -510,26 +510,29 @@ class _RenderSingleChildViewport extends RenderBox
       size = constraints.constrain(child!.size);
     }
 
-    final _ScrollRange range = (
-      viewport: _viewportExtent,
-      min: _minScrollExtent,
-      max: _maxScrollExtent,
-    );
+    final _ScrollExtents extents = (min: _minScrollExtent, max: _maxScrollExtent);
 
-    // Reconcile an out-of-range offset only when the range moved under it. A relayout that leaves
-    // the range alone must not touch an offset the physics is holding past the edge: a row
-    // reacting to hover or a label ticking would otherwise cut an overscroll short.
-    if (offset.hasPixels && range != _reconciledRange) {
-      if (offset.pixels > range.max) {
-        offset.correctBy(range.max - offset.pixels);
-      } else if (offset.pixels < range.min) {
-        offset.correctBy(range.min - offset.pixels);
+    if (offset.hasPixels) {
+      final double pixels = offset.pixels;
+      final _ScrollExtents? previous = _reconciledExtents;
+      // An offset already past an edge of the extents it was reconciled against got there through
+      // the physics, which also carries it across a change of extents in applyContentDimensions.
+      // The layout pulls the offset back only when the range moved out from under it: on the first
+      // layout of this offset, and when the new extents leave out an offset the previous ones held.
+      final bool overscrolled =
+          previous != null && (pixels < previous.min || pixels > previous.max);
+      if (!overscrolled) {
+        if (pixels > extents.max) {
+          offset.correctBy(extents.max - pixels);
+        } else if (pixels < extents.min) {
+          offset.correctBy(extents.min - pixels);
+        }
       }
+      _reconciledExtents = extents;
     }
-    _reconciledRange = range;
 
-    offset.applyViewportDimension(range.viewport);
-    offset.applyContentDimensions(range.min, range.max);
+    offset.applyViewportDimension(_viewportExtent);
+    offset.applyContentDimensions(extents.min, extents.max);
   }
 
   Offset get _paintOffset => _paintOffsetForPosition(offset.pixels);
