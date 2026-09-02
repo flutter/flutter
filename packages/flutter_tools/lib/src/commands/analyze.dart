@@ -26,13 +26,11 @@ class AnalyzeCommand extends FlutterCommand {
   AnalyzeCommand({
     required List<ProjectValidator> allProjectValidators,
     required bool suppressAnalytics,
-    required ToolContext toolContext,
+    required super.toolContext,
     bool verboseHelp = false,
     this.workingDirectory,
   }) : _allProjectValidators = allProjectValidators,
-       _suppressAnalytics = suppressAnalytics,
-       _toolContext = toolContext,
-       super(toolContext: toolContext) {
+       _suppressAnalytics = suppressAnalytics {
     argParser.addFlag(
       'flutter-repo',
       negatable: false,
@@ -197,9 +195,11 @@ class AnalyzeCommand extends FlutterCommand {
   /// The working directory for testing analysis using dartanalyzer.
   final Directory? workingDirectory;
 
-  final ToolContext _toolContext;
   final List<ProjectValidator> _allProjectValidators;
   final bool _suppressAnalytics;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => 'analyze';
@@ -221,7 +221,7 @@ class AnalyzeCommand extends FlutterCommand {
     }
 
     // Or we're not in a project directory.
-    if (!_toolContext.fs.file('pubspec.yaml').existsSync()) {
+    if (!toolContext.fs.file('pubspec.yaml').existsSync()) {
       return false;
     }
 
@@ -241,13 +241,13 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Artifacts artifacts = _toolContext.artifacts;
-    final FileSystem fileSystem = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final Platform platform = _toolContext.platform;
-    final ProcessManager processManager = _toolContext.processManager;
-    final FlutterProjectFactory projectFactory = _toolContext.projectFactory;
-    final Terminal terminal = _toolContext.terminal;
+    final Artifacts artifacts = toolContext.artifacts;
+    final FileSystem fileSystem = toolContext.fs;
+    final Logger logger = toolContext.logger;
+    final Platform platform = toolContext.platform;
+    final ProcessManager processManager = toolContext.processManager;
+    final FlutterProjectFactory projectFactory = toolContext.projectFactory;
+    final Terminal terminal = toolContext.terminal;
 
     if (boolArg('android')) {
       final AndroidAnalyzeOption option;
@@ -354,12 +354,12 @@ class AnalyzeCommand extends FlutterCommand {
         directoryPath = workingDirectory!.path;
       }
       return ValidateProject(
+        allProjectValidators: _allProjectValidators,
         fileSystem: fileSystem,
         logger: logger,
-        allProjectValidators: _allProjectValidators,
-        userPath: directoryPath,
         processManager: processManager,
         projectFactory: projectFactory,
+        userPath: directoryPath,
         machine: outputMachineFormat,
       ).run();
     } else if (boolArg('watch')) {
@@ -371,7 +371,7 @@ class AnalyzeCommand extends FlutterCommand {
         logger: logger,
         platform: platform,
         processManager: processManager,
-        shutdownHooks: _toolContext.shutdownHooks,
+        shutdownHooks: toolContext.shutdownHooks,
         suppressAnalytics: _suppressAnalytics,
         terminal: terminal,
       ).analyze();

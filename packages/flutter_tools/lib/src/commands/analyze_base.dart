@@ -25,14 +25,14 @@ import '../cache.dart';
 abstract class AnalyzeBase {
   AnalyzeBase(
     this.argResults, {
-    required this.repoPackages,
+    required this.artifacts,
     required this.fileSystem,
     required this.logger,
     required this.platform,
     required this.processManager,
-    required this.terminal,
-    required this.artifacts,
+    required this.repoPackages,
     required this.suppressAnalytics,
+    required this.terminal,
   });
 
   /// The parsed argument results for execution.

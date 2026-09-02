@@ -11,9 +11,7 @@ import '../context/tool_context.dart';
 import '../runner/flutter_command.dart';
 
 class ShellCompletionCommand extends FlutterCommand {
-  ShellCompletionCommand({required ToolContext toolContext})
-    : _toolContext = toolContext,
-      super(toolContext: toolContext) {
+  ShellCompletionCommand({required super.toolContext}) {
     argParser.addFlag(
       'overwrite',
       help:
@@ -21,7 +19,8 @@ class ShellCompletionCommand extends FlutterCommand {
     );
   }
 
-  final ToolContext _toolContext;
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'bash-completion';
@@ -49,8 +48,8 @@ class ShellCompletionCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final Stdio stdio = _toolContext.stdio;
+    final FileSystem fs = toolContext.fs;
+    final Stdio stdio = toolContext.stdio;
 
     final List<String> rest = argResults?.rest ?? <String>[];
     if (rest.length > 1) {

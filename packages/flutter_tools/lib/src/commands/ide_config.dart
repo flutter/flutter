@@ -16,11 +16,9 @@ import '../template.dart';
 
 class IdeConfigCommand extends FlutterCommand {
   IdeConfigCommand({
-    required ToolContext toolContext,
+    required super.toolContext,
     TemplateRenderer templateRenderer = const MustacheTemplateRenderer(),
-  }) : _toolContext = toolContext,
-       _templateRenderer = templateRenderer,
-       super(toolContext: toolContext) {
+  }) : _templateRenderer = templateRenderer {
     argParser.addFlag('overwrite', help: 'When performing operations, overwrite existing files.');
     argParser.addFlag(
       'update-templates',
@@ -43,8 +41,10 @@ class IdeConfigCommand extends FlutterCommand {
     );
   }
 
-  final ToolContext _toolContext;
   final TemplateRenderer _templateRenderer;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'ide-config';
@@ -72,25 +72,25 @@ class IdeConfigCommand extends FlutterCommand {
 
   static const _ideName = 'intellij';
   Directory get _templateDirectory {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     return fs.directory(
       fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'ide_templates', _ideName),
     );
   }
 
   Directory get _createTemplatesDirectory {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     return fs.directory(fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates'));
   }
 
   Directory get _flutterRoot {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     return fs.directory(fs.path.absolute(Cache.flutterRoot!));
   }
 
   // Returns true if any entire path element is equal to dir.
   bool _hasDirectoryInPath(FileSystemEntity entity, String dir) {
-    final path.Context pathContext = _toolContext.fs.path;
+    final path.Context pathContext = toolContext.fs.path;
     String pathStr = entity.absolute.path;
     while (pathStr.isNotEmpty && pathContext.dirname(pathStr) != pathStr) {
       if (pathContext.basename(pathStr) == dir) {
@@ -125,8 +125,8 @@ class IdeConfigCommand extends FlutterCommand {
 
   // Discovers and syncs with existing configuration files in the Flutter tree.
   void _handleTemplateUpdate() {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = toolContext.logger;
     final path.Context pathContext = fs.path;
     final Directory flutterRoot = _flutterRoot;
     final Directory templateDirectory = _templateDirectory;
@@ -239,8 +239,8 @@ class IdeConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = toolContext.logger;
 
     final List<String> rest = argResults?.rest ?? <String>[];
     if (rest.isNotEmpty) {
@@ -280,8 +280,8 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   int _renderTemplate(String templateName, String dirPath, Map<String, Object> context) {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = toolContext.logger;
     final template = Template(
       _templateDirectory,
       null,

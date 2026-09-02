@@ -46,11 +46,11 @@ import 'create_base.dart';
 
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
-    required ToolContext toolContext,
+    required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
     bool verboseHelp = false,
-  }) : super(toolContext: toolContext) {
+  }) {
     addSubcommand(
       WidgetPreviewStartCommand(
         toolContext: toolContext,
@@ -61,6 +61,9 @@ class WidgetPreviewCommand extends FlutterCommand {
     );
     addSubcommand(WidgetPreviewCleanCommand(toolContext: toolContext));
   }
+  @override
+  ToolContext get toolContext => super.toolContext!;
+
   @override
   String get description => 'Manage the widget preview environment.';
 
@@ -76,19 +79,19 @@ class WidgetPreviewCommand extends FlutterCommand {
 }
 
 abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
-  WidgetPreviewSubCommandBase({required ToolContext super.toolContext})
-    : _toolContext = toolContext;
+  WidgetPreviewSubCommandBase({required super.toolContext});
 
-  final ToolContext _toolContext;
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
-  FileSystem get fs => _toolContext.fs;
-  Logger get logger => _toolContext.logger;
-  FlutterProjectFactory get projectFactory => _toolContext.projectFactory;
+  FileSystem get fs => toolContext.fs;
+  Logger get logger => toolContext.logger;
+  FlutterProjectFactory get projectFactory => toolContext.projectFactory;
 
   FlutterProject getRootProject() {
     final ArgResults results = argResults!;
     final Directory projectDir;
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     if (results.rest case <String>[final String directory]) {
       projectDir = fs.directory(directory);
       if (!projectDir.existsSync()) {
@@ -204,21 +207,21 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   @override
   WidgetPreviewMachineAwareLogger get logger =>
-      _toolContext.logger as WidgetPreviewMachineAwareLogger;
+      toolContext.logger as WidgetPreviewMachineAwareLogger;
 
-  Cache get cache => _toolContext.cache;
+  Cache get cache => toolContext.cache;
 
-  Platform get platform => _toolContext.platform;
+  Platform get platform => toolContext.platform;
 
-  ShutdownHooks get shutdownHooks => _toolContext.shutdownHooks;
+  ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
 
-  OperatingSystemUtils get os => _toolContext.os;
+  OperatingSystemUtils get os => toolContext.os;
 
-  ProcessManager get processManager => _toolContext.processManager;
+  ProcessManager get processManager => toolContext.processManager;
 
-  Artifacts get artifacts => _toolContext.artifacts;
+  Artifacts get artifacts => toolContext.artifacts;
 
-  Terminal get terminal => _toolContext.terminal;
+  Terminal get terminal => toolContext.terminal;
 
   late final previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);
 
@@ -294,7 +297,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    assert(_toolContext.logger is WidgetPreviewMachineAwareLogger);
+    assert(toolContext.logger is WidgetPreviewMachineAwareLogger);
 
     // Start the timer tracking how long it takes to launch the preview environment.
     previewAnalytics.initializeLaunchStopwatch();
@@ -591,8 +594,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           logger: logger,
           terminal: terminal,
           platform: platform,
-          outputPreferences: _toolContext.outputPreferences,
-          systemClock: _toolContext.systemClock,
+          outputPreferences: toolContext.outputPreferences,
+          systemClock: toolContext.systemClock,
           // Explicitly provide the project root path rather than relying on the current directory
           // as the current directory exists within $TMP. At least on MacOS, when setting the
           // current directory to the widget_preview_scaffold project created under
