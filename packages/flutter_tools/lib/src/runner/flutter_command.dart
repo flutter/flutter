@@ -2091,7 +2091,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     final artifacts = <DevelopmentArtifact>{DevelopmentArtifact.universal};
     for (final device in devices) {
       final TargetPlatform targetPlatform = await device.targetPlatform;
-      final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(targetPlatform);
+      final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(targetPlatform, featureFlags);
       if (developmentArtifact != null) {
         artifacts.add(developmentArtifact);
       }
@@ -2104,40 +2104,38 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
 // if none is supported
 @protected
 DevelopmentArtifact? artifactFromTargetPlatform(
-  TargetPlatform targetPlatform, [
-  FeatureFlags? customFeatureFlags,
-]) {
-  late final FeatureFlags effectiveFeatureFlags = customFeatureFlags ?? globals.featureFlags;
+  TargetPlatform targetPlatform,
+  FeatureFlags featureFlags,
+) {
   switch (targetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-      return DevelopmentArtifact.androidGenSnapshot;
+        case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
     case TargetPlatform.web_javascript:
-      return DevelopmentArtifact.web;
+      return null;
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin:
-      if (effectiveFeatureFlags.isMacOSEnabled) {
+      if (featureFlags.isMacOSEnabled) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
-      if (effectiveFeatureFlags.isWindowsEnabled) {
+      if (featureFlags.isWindowsEnabled) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.linux_riscv64:
-      if (effectiveFeatureFlags.isLinuxEnabled) {
+      if (featureFlags.isLinuxEnabled) {
         return DevelopmentArtifact.linux;
       }
       return null;
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
     case TargetPlatform.unsupported:
       return null;

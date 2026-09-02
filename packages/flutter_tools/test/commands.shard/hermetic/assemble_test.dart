@@ -54,6 +54,7 @@ void main() {
   testWithoutContext('flutter assemble can run a build', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         toolContext: toolContext,
       ),
@@ -66,6 +67,7 @@ void main() {
   testWithoutContext('flutter assemble can parse defines whose values contain =', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -88,6 +90,7 @@ void main() {
   testWithoutContext('flutter assemble can parse empty defines', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
           Target target,
           Environment environment,
@@ -109,6 +112,7 @@ void main() {
 
   testWithoutContext('flutter assemble can parse inputs', () async {
     final command = AssembleCommand(
+      featureFlags: TestFeatureFlags(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
         Environment environment,
@@ -149,6 +153,7 @@ void main() {
 
   testWithoutContext('flutter assemble sends assemble-deferred-components', () async {
     final command = AssembleCommand(
+      featureFlags: TestFeatureFlags(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
     );
@@ -203,6 +208,7 @@ void main() {
   testWithoutContext('flutter assemble throws ToolExit if not provided with output', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         toolContext: toolContext,
       ),
@@ -219,6 +225,7 @@ void main() {
     () async {
       final CommandRunner<void> commandRunner = createTestCommandRunner(
         AssembleCommand(
+          featureFlags: TestFeatureFlags(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           toolContext: toolContext,
         ),
@@ -241,6 +248,7 @@ void main() {
     () async {
       final CommandRunner<void> commandRunner = createTestCommandRunner(
         AssembleCommand(
+          featureFlags: TestFeatureFlags(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           toolContext: toolContext,
         ),
@@ -298,6 +306,7 @@ void main() {
   testWithoutContext('flutter assemble throws ToolExit if called with non-existent rule', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         toolContext: toolContext,
       ),
@@ -309,6 +318,7 @@ void main() {
   testWithoutContext('flutter assemble does not log stack traces during build failure', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(
           BuildResult(
             success: false,
@@ -332,6 +342,7 @@ void main() {
   testWithoutContext('flutter assemble outputs JSON performance data to provided file', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.all(
           BuildResult(
             success: true,
@@ -380,6 +391,7 @@ void main() {
       );
       final CommandRunner<void> commandRunner = createTestCommandRunner(
         AssembleCommand(
+          featureFlags: TestFeatureFlags(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
             Environment environment,
@@ -422,7 +434,11 @@ void main() {
         ),
       ]);
       final CommandRunner<void> commandRunner = createTestCommandRunner(
-        AssembleCommand(buildSystem: buildSystem, toolContext: toolContext),
+        AssembleCommand(
+          featureFlags: TestFeatureFlags(),
+          buildSystem: buildSystem,
+          toolContext: toolContext,
+        ),
       );
       await commandRunner.run(<String>[
         'assemble',
@@ -497,7 +513,11 @@ void main() {
 
   testWithoutContext('hides itself from usage unless --verbose', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
-      AssembleCommand(buildSystem: TestBuildSystem.error(null), toolContext: toolContext),
+      AssembleCommand(
+        featureFlags: TestFeatureFlags(),
+        buildSystem: TestBuildSystem.error(null),
+        toolContext: toolContext,
+      ),
     );
 
     // If all commands are hidden, hidden is ignored. Add a non-hidden stub command.
@@ -510,6 +530,7 @@ void main() {
   testWithoutContext('describes itself from usage if --verbose', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(
       AssembleCommand(
+        featureFlags: TestFeatureFlags(),
         buildSystem: TestBuildSystem.error(null),
         toolContext: toolContext,
         verboseHelp: true,
@@ -533,7 +554,11 @@ void main() {
       processManager: FakeProcessManager.any(),
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(
-      AssembleCommand(buildSystem: TestBuildSystem.error(null), toolContext: emptyToolContext),
+      AssembleCommand(
+        featureFlags: TestFeatureFlags(),
+        buildSystem: TestBuildSystem.error(null),
+        toolContext: emptyToolContext,
+      ),
     );
 
     await expectLater(

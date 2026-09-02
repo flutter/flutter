@@ -98,8 +98,8 @@ var _kDefaultTargets = <Target>[
 class AssembleCommand extends FlutterCommand {
   AssembleCommand({
     required BuildSystem buildSystem,
+    required FeatureFlags featureFlags,
     required ToolContext toolContext,
-    FeatureFlags? featureFlags,
     bool verboseHelp = false,
   }) : _buildSystem = buildSystem,
        _featureFlags = featureFlags,
@@ -172,7 +172,7 @@ class AssembleCommand extends FlutterCommand {
 
   final bool _verboseHelp;
   final BuildSystem _buildSystem;
-  final FeatureFlags? _featureFlags;
+  final FeatureFlags _featureFlags;
   final ToolContext _toolContext;
 
   @override
