@@ -1,4 +1,4 @@
-# AI rules for Flutter
+# AI rules for developing with Flutter
 
 > [!IMPORTANT]
 > Looking for AI coding rules for building with Flutter?
