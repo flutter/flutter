@@ -2985,51 +2985,6 @@ String shortHash(Object? object) {
 String describeIdentity(Object? object) =>
     '${objectRuntimeType(object, '<optimized out>')}#${shortHash(object)}';
 
-/// Returns a short description of an enum value.
-///
-/// Strips off the enum class name from the `enumEntry.toString()`.
-///
-/// For real enums, this is redundant with calling the `name` getter on the enum
-/// value (see [EnumName.name]), a feature that was added to Dart 2.15.
-///
-/// This function can also be used with classes whose `toString` return a value
-/// in the same form as an enum (the class name, a dot, then the value name).
-/// For example, it's used with [SemanticsAction], which is written to appear to
-/// be an enum but is actually a bespoke class so that the index values can be
-/// set as powers of two instead of as sequential integers.
-///
-/// {@tool snippet}
-///
-/// ```dart
-/// enum Day {
-///   monday, tuesday, wednesday, thursday, friday, saturday, sunday
-/// }
-///
-/// void validateDescribeEnum() {
-///   assert(Day.monday.toString() == 'Day.monday');
-///   // ignore: deprecated_member_use
-///   assert(describeEnum(Day.monday) == 'monday');
-///   assert(Day.monday.name == 'monday'); // preferred for real enums
-/// }
-/// ```
-/// {@end-tool}
-@Deprecated(
-  'Use the `name` getter on enums instead. '
-  'This feature was deprecated after v3.14.0-2.0.pre.',
-)
-String describeEnum(Object enumEntry) {
-  if (enumEntry is Enum) {
-    return enumEntry.name;
-  }
-  final description = enumEntry.toString();
-  final int indexOfDot = description.indexOf('.');
-  assert(
-    indexOfDot != -1 && indexOfDot < description.length - 1,
-    'The provided object "$enumEntry" is not an enum.',
-  );
-  return description.substring(indexOfDot + 1);
-}
-
 /// Builder to accumulate properties and configuration used to assemble a
 /// [DiagnosticsNode] from a [Diagnosticable] object.
 class DiagnosticPropertiesBuilder {
