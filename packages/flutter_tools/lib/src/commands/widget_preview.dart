@@ -47,41 +47,46 @@ import 'create_base.dart';
 
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
-    required bool verboseHelp,
-    required Logger logger,
-    required FileSystem fs,
-    required FlutterProjectFactory projectFactory,
-    required Cache cache,
-    required Platform platform,
-    required ShutdownHooks shutdownHooks,
-    required OperatingSystemUtils os,
-    required ProcessManager processManager,
     required Artifacts artifacts,
+    required Cache cache,
+    required FileSystem fs,
+    required Logger logger,
+    required OperatingSystemUtils os,
+    required Platform platform,
+    required ProcessManager processManager,
+    required FlutterProjectFactory projectFactory,
+    required ShutdownHooks shutdownHooks,
     required Terminal terminal,
-    ToolContext? toolContext,
-    @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
+    required ToolContext toolContext,
+    required bool verboseHelp,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
+    @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
   }) : super(toolContext: toolContext) {
     addSubcommand(
       WidgetPreviewStartCommand(
-        verbose: verboseHelp,
-        logger: logger,
-        fs: fs,
-        projectFactory: projectFactory,
-        cache: cache,
-        platform: platform,
-        shutdownHooks: shutdownHooks,
-        os: os,
-        processManager: processManager,
         artifacts: artifacts,
-        dtdServicesOverride: dtdServicesOverride,
-        analysisServerFactoryOverride: analysisServerFactoryOverride,
+        cache: cache,
+        fs: fs,
+        logger: logger,
+        os: os,
+        platform: platform,
+        processManager: processManager,
+        projectFactory: projectFactory,
+        shutdownHooks: shutdownHooks,
         terminal: terminal,
         toolContext: toolContext,
+        verbose: verboseHelp,
+        analysisServerFactoryOverride: analysisServerFactoryOverride,
+        dtdServicesOverride: dtdServicesOverride,
       ),
     );
     addSubcommand(
-      WidgetPreviewCleanCommand(logger: logger, fs: fs, projectFactory: projectFactory),
+      WidgetPreviewCleanCommand(
+        fs: fs,
+        logger: logger,
+        projectFactory: projectFactory,
+        toolContext: toolContext,
+      ),
     );
   }
 
@@ -100,7 +105,7 @@ class WidgetPreviewCommand extends FlutterCommand {
 }
 
 abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
-  WidgetPreviewSubCommandBase({super.toolContext});
+  WidgetPreviewSubCommandBase({required super.toolContext});
 
   FileSystem get fs;
   Logger get logger;
@@ -140,20 +145,20 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
 
 final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with CreateBase {
   WidgetPreviewStartCommand({
-    this.verbose = false,
-    required Logger logger,
-    required this.fs,
-    required this.projectFactory,
-    required this.cache,
-    required this.platform,
-    required this.shutdownHooks,
-    required this.os,
-    required this.processManager,
     required this.artifacts,
+    required this.cache,
+    required this.fs,
+    required Logger logger,
+    required this.os,
+    required this.platform,
+    required this.processManager,
+    required this.projectFactory,
+    required this.shutdownHooks,
     required this.terminal,
-    super.toolContext,
-    @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
+    required super.toolContext,
+    this.verbose = false,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
+    @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
   }) : _logger = logger {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
@@ -673,7 +678,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 }
 
 final class WidgetPreviewCleanCommand extends WidgetPreviewSubCommandBase {
-  WidgetPreviewCleanCommand({required this.fs, required this.logger, required this.projectFactory});
+  WidgetPreviewCleanCommand({
+    required this.fs,
+    required this.logger,
+    required this.projectFactory,
+    required super.toolContext,
+  });
 
   @override
   String get description => 'Cleans up widget preview state.';
