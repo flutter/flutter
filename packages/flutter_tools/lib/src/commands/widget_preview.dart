@@ -200,7 +200,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   @override
   WidgetPreviewMachineAwareLogger get logger =>
-      toolContext!.logger as WidgetPreviewMachineAwareLogger;
+      _logger ??= (toolContext!.logger is WidgetPreviewMachineAwareLogger
+      ? toolContext!.logger as WidgetPreviewMachineAwareLogger
+      : WidgetPreviewMachineAwareLogger(
+          toolContext!.logger,
+          machine: argResults != null && argResults!.wasParsed('machine') && boolArg('machine'),
+          verbose: verbose,
+        ));
+  WidgetPreviewMachineAwareLogger? _logger;
 
   final ShutdownHooks shutdownHooks;
 
