@@ -34,7 +34,7 @@ void main() {
   testUsingContext('devices can display no connected devices with the --machine flag', () async {
     final command = DevicesCommand(
       deviceManager: deviceManager,
-      doctor: globals.doctor!,
+      doctor: globals.doctor,
       toolContext: FakeToolContext(logger: logger),
     );
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -49,7 +49,7 @@ void main() {
       deviceManager.devices = <Device>[WebServerDevice(logger: logger)];
       final command = DevicesCommand(
         deviceManager: deviceManager,
-        doctor: globals.doctor!,
+        doctor: globals.doctor,
         toolContext: FakeToolContext(logger: logger),
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);

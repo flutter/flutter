@@ -11,18 +11,18 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// The `flutter devices` command, which lists all connected devices.
 class DevicesCommand extends FlutterCommand {
   DevicesCommand({
-    required DeviceManager deviceManager,
-    required Doctor doctor,
-    required ToolContext toolContext,
+    DeviceManager? deviceManager,
+    Doctor? doctor,
+    super.toolContext,
     super.verboseHelp,
-  }) : _deviceManager = deviceManager,
-       _doctor = doctor,
-       super(toolContext: toolContext) {
+  }) : _deviceManager = deviceManager ?? globals.deviceManager!,
+       _doctor = doctor ?? globals.doctor! {
     addMachineOutputFlag(verboseHelp: verboseHelp);
     argParser.addOption(
       'timeout',
@@ -99,37 +99,38 @@ class DevicesCommand extends FlutterCommand {
 
 class DevicesCommandOutput {
   factory DevicesCommandOutput({
-    required Platform platform,
     required Logger logger,
-    DeviceManager? deviceManager,
-    Duration? deviceDiscoveryTimeout,
+    required Platform platform,
     DeviceConnectionInterface? deviceConnectionInterface,
+    Duration? deviceDiscoveryTimeout,
+    DeviceManager? deviceManager,
   }) {
+    final DeviceManager effectiveDeviceManager = deviceManager ?? globals.deviceManager!;
     if (platform.isMacOS) {
       return DevicesCommandOutputWithExtendedWirelessDeviceDiscovery(
-        logger: logger,
-        deviceManager: deviceManager,
-        deviceDiscoveryTimeout: deviceDiscoveryTimeout,
         deviceConnectionInterface: deviceConnectionInterface,
+        deviceDiscoveryTimeout: deviceDiscoveryTimeout,
+        deviceManager: effectiveDeviceManager,
+        logger: logger,
       );
     }
     return DevicesCommandOutput._private(
-      logger: logger,
-      deviceManager: deviceManager,
-      deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       deviceConnectionInterface: deviceConnectionInterface,
+      deviceDiscoveryTimeout: deviceDiscoveryTimeout,
+      deviceManager: effectiveDeviceManager,
+      logger: logger,
     );
   }
 
   DevicesCommandOutput._private({
-    required Logger logger,
-    required DeviceManager? deviceManager,
-    required this.deviceDiscoveryTimeout,
     required this.deviceConnectionInterface,
+    required this.deviceDiscoveryTimeout,
+    required DeviceManager deviceManager,
+    required Logger logger,
   }) : _deviceManager = deviceManager,
        _logger = logger;
 
-  final DeviceManager? _deviceManager;
+  final DeviceManager _deviceManager;
   final Logger _logger;
   final Duration? deviceDiscoveryTimeout;
   final DeviceConnectionInterface? deviceConnectionInterface;
@@ -161,15 +162,11 @@ class DevicesCommandOutput {
   }
 
   Future<void> findAndOutputAllTargetDevices({required bool machine}) async {
-    var attachedDevices = <Device>[];
-    var wirelessDevices = <Device>[];
-    if (_deviceManager != null) {
-      // Refresh the cache and then get the attached and wireless devices from
-      // the cache.
-      await _deviceManager.refreshAllDevices(timeout: deviceDiscoveryTimeout);
-      attachedDevices = await _getAttachedDevices(_deviceManager);
-      wirelessDevices = await _getWirelessDevices(_deviceManager);
-    }
+    // Refresh the cache and then get the attached and wireless devices from
+    // the cache.
+    await _deviceManager.refreshAllDevices(timeout: deviceDiscoveryTimeout);
+    final List<Device> attachedDevices = await _getAttachedDevices(_deviceManager);
+    final List<Device> wirelessDevices = await _getWirelessDevices(_deviceManager);
     final List<Device> allDevices = attachedDevices + wirelessDevices;
 
     if (machine) {
@@ -202,7 +199,7 @@ class DevicesCommandOutput {
   Future<void> _printDiagnostics({required bool foundAny}) async {
     final status = StringBuffer();
     status.writeln();
-    final List<String> diagnostics = await _deviceManager?.getDeviceDiagnostics() ?? <String>[];
+    final List<String> diagnostics = await _deviceManager.getDeviceDiagnostics();
     if (diagnostics.isNotEmpty) {
       for (final diagnostic in diagnostics) {
         status.writeln(diagnostic);
@@ -238,10 +235,10 @@ const _noWirelessDevicesFoundMessage = 'No wireless devices were found.';
 
 class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCommandOutput {
   DevicesCommandOutputWithExtendedWirelessDeviceDiscovery({
+    required super.deviceManager,
     required super.logger,
-    super.deviceManager,
-    super.deviceDiscoveryTimeout,
     super.deviceConnectionInterface,
+    super.deviceDiscoveryTimeout,
   }) : super._private();
 
   @override
@@ -254,25 +251,20 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
     }
 
     if (machine) {
-      final List<Device> devices =
-          await _deviceManager?.refreshAllDevices(
-            filter: DeviceDiscoveryFilter(deviceConnectionInterface: deviceConnectionInterface),
-            timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
-          ) ??
-          <Device>[];
+      final List<Device> devices = await _deviceManager.refreshAllDevices(
+        filter: DeviceDiscoveryFilter(deviceConnectionInterface: deviceConnectionInterface),
+        timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
+      );
       await printDevicesAsJson(devices);
       return;
     }
 
-    final Future<void>? extendedWirelessDiscovery = _deviceManager
-        ?.refreshExtendedWirelessDeviceDiscoverers(
+    final Future<void> extendedWirelessDiscovery = _deviceManager
+        .refreshExtendedWirelessDeviceDiscoverers(
           timeout: DeviceManager.minimumWirelessDeviceDiscoveryTimeout,
         );
 
-    var attachedDevices = <Device>[];
-    if (_deviceManager != null) {
-      attachedDevices = await _getAttachedDevices(_deviceManager);
-    }
+    final List<Device> attachedDevices = await _getAttachedDevices(_deviceManager);
 
     // Number of lines to clear starts at 1 because it's inclusive of the line
     // the cursor is on, which will be blank for this use case.
@@ -298,10 +290,7 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
 
     final Status waitingStatus = _logger.startSpinner();
     await extendedWirelessDiscovery;
-    var wirelessDevices = <Device>[];
-    if (_deviceManager != null) {
-      wirelessDevices = await _getWirelessDevices(_deviceManager);
-    }
+    final List<Device> wirelessDevices = await _getWirelessDevices(_deviceManager);
     waitingStatus.stop();
 
     final Terminal terminal = _logger.terminal;
