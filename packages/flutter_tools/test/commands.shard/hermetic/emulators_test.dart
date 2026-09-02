@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/emulator.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -24,10 +25,12 @@ void main() {
   group('EmulatorsCommand', () {
     late BufferLogger logger;
     late FakePlatform platform;
+    late _FakeDoctor doctor;
 
     setUp(() {
       logger = BufferLogger.test();
       platform = FakePlatform();
+      doctor = _FakeDoctor();
     });
 
     group('doctor validation', () {
@@ -36,7 +39,7 @@ void main() {
         () async {
           final toolContext = FakeToolContext(logger: logger, platform: platform);
           final doctor = _FakeDoctor(canListEmulators: false);
-          final command = EmulatorsCommand(toolContext: toolContext, doctor: doctor);
+          final command = EmulatorsCommand(doctor: doctor, toolContext: toolContext);
 
           await expectLater(
             () => createTestCommandRunner(command).run(<String>['emulators']),
@@ -53,7 +56,7 @@ void main() {
         final macOSPlatform = FakePlatform(operatingSystem: 'macos');
         final toolContext = FakeToolContext(logger: logger, platform: macOSPlatform);
         final doctor = _FakeDoctor(canListEmulators: false);
-        final command = EmulatorsCommand(toolContext: toolContext, doctor: doctor);
+        final command = EmulatorsCommand(doctor: doctor, toolContext: toolContext);
 
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['emulators']),
@@ -70,9 +73,9 @@ void main() {
         final doctor = _FakeDoctor();
         final emulatorManager = _FakeEmulatorManager();
         final command = EmulatorsCommand(
-          toolContext: toolContext,
           doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators']);
@@ -85,8 +88,9 @@ void main() {
         final toolContext = FakeToolContext(logger: logger, platform: platform);
         final emulatorManager = _FakeEmulatorManager();
         final command = EmulatorsCommand(
-          toolContext: toolContext,
+          doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators']);
@@ -110,8 +114,9 @@ void main() {
         ];
         final emulatorManager = _FakeEmulatorManager(emulators: emulators);
         final command = EmulatorsCommand(
-          toolContext: toolContext,
+          doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators']);
@@ -137,8 +142,9 @@ void main() {
         ];
         final emulatorManager = _FakeEmulatorManager(emulators: emulators);
         final command = EmulatorsCommand(
-          toolContext: toolContext,
+          doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators', 'pixel']);
@@ -154,8 +160,9 @@ void main() {
         final toolContext = FakeToolContext(logger: logger, platform: platform);
         final emulatorManager = _FakeEmulatorManager();
         final command = EmulatorsCommand(
-          toolContext: toolContext,
+          doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel']);
@@ -171,8 +178,9 @@ void main() {
         ];
         final emulatorManager = _FakeEmulatorManager(emulators: emulators);
         final command = EmulatorsCommand(
-          toolContext: toolContext,
+          doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel']);
@@ -197,8 +205,9 @@ void main() {
         );
         final emulatorManager = _FakeEmulatorManager(emulators: <_FakeEmulator>[emulator]);
         final command = EmulatorsCommand(
-          toolContext: toolContext,
+          doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel_6']);
@@ -222,8 +231,9 @@ void main() {
         );
         final emulatorManager = _FakeEmulatorManager(emulators: <_FakeEmulator>[emulator]);
         final command = EmulatorsCommand(
-          toolContext: toolContext,
+          doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(
@@ -242,8 +252,9 @@ void main() {
           createResult: CreateEmulatorResult('flutter_emulator', success: true),
         );
         final command = EmulatorsCommand(
-          toolContext: toolContext,
+          doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators', '--create']);
@@ -258,8 +269,9 @@ void main() {
           createResult: CreateEmulatorResult('my_custom_emulator', success: true),
         );
         final command = EmulatorsCommand(
-          toolContext: toolContext,
+          doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(
@@ -280,8 +292,9 @@ void main() {
           ),
         );
         final command = EmulatorsCommand(
-          toolContext: toolContext,
+          doctor: doctor,
           emulatorManager: emulatorManager,
+          toolContext: toolContext,
         );
 
         await createTestCommandRunner(command).run(<String>['emulators', '--create']);
@@ -294,6 +307,20 @@ void main() {
         );
       });
     });
+
+    testUsingContext(
+      'works when toolContext is omitted (fallback to ambient)',
+      () async {
+        final command = EmulatorsCommand();
+        await createTestCommandRunner(command).run(<String>['emulators']);
+
+        expect(testLogger.statusText, contains('No emulators available.'));
+      },
+      overrides: <Type, Generator>{
+        Doctor: () => _FakeDoctor(),
+        EmulatorManager: () => _FakeEmulatorManager(),
+      },
+    );
   });
 }
 
@@ -314,7 +341,7 @@ class _FakeWorkflow extends Fake implements Workflow {
 }
 
 class _FakeEmulatorManager extends Fake implements EmulatorManager {
-  _FakeEmulatorManager({this.emulators = const <Emulator>[], this.createResult});
+  _FakeEmulatorManager({this.createResult, this.emulators = const <Emulator>[]});
 
   final List<Emulator> emulators;
   final CreateEmulatorResult? createResult;
