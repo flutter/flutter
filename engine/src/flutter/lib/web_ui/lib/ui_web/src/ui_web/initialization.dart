@@ -2,8 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
+
+import 'asset_manager.dart';
 
 /// Bootstraps the Flutter Web engine and app.
 ///
@@ -50,4 +54,37 @@ Future<void> bootstrapEngine({ui.VoidCallback? registerPlugins, ui.VoidCallback?
     // Yield control of the bootstrap procedure to the user.
     loader.didCreateEngineInitializer(bootstrap.prepareEngineInitializer());
   }
+}
+
+/// Initializes the [AssetManager] used by the Flutter Engine.
+///
+/// This is useful when external plugins/tools need to access the [assetManager]
+/// without initializing the full Flutter engine.
+void initializeAssetManager([AssetManager? manager]) {
+  setAssetManager(manager ?? AssetManager());
+}
+
+/// Bootstraps the non-UI services of the Flutter Web engine.
+///
+/// Must only be used when taking full control over the engine initialization,
+/// and must be immediately followed by a call to [bootstrapEngineUi].
+///
+/// The [jsConfiguration] object must only contain valid configuration
+/// properties documented at https://docs.flutter.dev/platform-integration/web/initialization#customize-the-flutter-loader
+Future<void> bootstrapEngineServices({
+  AssetManager? assetManager,
+  JSObject? jsConfiguration,
+}) async {
+  await initializeEngineServices(
+    assetManager: assetManager,
+    jsConfiguration: jsConfiguration as JsFlutterConfiguration?,
+  );
+}
+
+/// Bootstraps the UI services of the Flutter Web engine.
+///
+/// Must only be used when taking full control over the engine initialization, and
+/// must be called immediately after [bootstrapEngineServices].
+Future<void> bootstrapEngineUi() async {
+  await initializeEngineUi();
 }
