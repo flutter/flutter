@@ -493,7 +493,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final OperatingSystemUtils os = _toolContext.os;
     final PlistParser plistParser = _appleContext.plistParser;
     final ProcessUtils processUtils = _toolContext.processUtils;
-    final AnsiTerminal terminal = _toolContext.terminal;
+    final Terminal terminal = _toolContext.terminal;
     final Xcode xcode = _appleContext.xcode;
 
     final BuildInfo buildInfo = await cachedBuildInfo;
@@ -1009,7 +1009,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     final Logger logger = _toolContext.logger;
     final OperatingSystemUtils os = _toolContext.os;
     final PlistParser plistParser = _appleContext.plistParser;
-    final AnsiTerminal terminal = _toolContext.terminal;
+    final Terminal terminal = _toolContext.terminal;
 
     defaultBuildMode = environmentType == EnvironmentType.simulator
         ? BuildMode.debug
@@ -1040,7 +1040,9 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       XcodeBuildAction.build => 'Building $app for $logTarget ($typeName)...',
       XcodeBuildAction.archive => 'Archiving $app...',
     });
-    final specifiedDeviceId = globalResults?[FlutterGlobalOptions.kDeviceIdOption] as String?;
+    final String? specifiedDeviceId =
+        globalResults?[FlutterGlobalOptions.kDeviceIdOption] as String? ??
+        toolContext.platform.environment['FLUTTER_DEVICE_ID'];
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,

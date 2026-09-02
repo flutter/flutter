@@ -86,10 +86,7 @@ class BuildCommand extends FlutterCommand {
     XcodeProjectInterpreter? xcodeProjectInterpreter,
   }) : super(outputPreferences: outputPreferences, toolContext: toolContext) {
     final Analytics effectiveAnalytics = context.get<Analytics>() ?? analytics;
-    final Platform effectivePlatform =
-        (platform.isMacOS || context.get<Platform>() == null || !context.get<Platform>()!.isMacOS)
-        ? platform
-        : context.get<Platform>()!;
+    final Platform effectivePlatform = context.get<Platform>() ?? platform;
     final persistentToolState = PersistentToolState.test(
       directory: fileSystem.directory('.tmp_state'),
       logger: logger,
@@ -160,7 +157,7 @@ class BuildCommand extends FlutterCommand {
         xcodeProjectInterpreter ??
         (context.get<XcodeProjectInterpreter>() ??
             XcodeProjectInterpreter(
-              platform: platform,
+              platform: effectivePlatform,
               processManager: processManager,
               logger: logger,
               fileSystem: fileSystem,
@@ -173,7 +170,7 @@ class BuildCommand extends FlutterCommand {
             fileSystem: fileSystem,
             processManager: processManager,
             logger: logger,
-            platform: platform,
+            platform: effectivePlatform,
             xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
             analytics: effectiveAnalytics,
           ),
@@ -182,7 +179,7 @@ class BuildCommand extends FlutterCommand {
               fileSystem: fileSystem,
               processManager: processManager,
               logger: logger,
-              platform: platform,
+              platform: effectivePlatform,
               xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
               analytics: effectiveAnalytics,
             ),
@@ -195,7 +192,7 @@ class BuildCommand extends FlutterCommand {
             xcode:
                 xcode ??
                 Xcode(
-                  platform: platform,
+                  platform: effectivePlatform,
                   processManager: processManager,
                   logger: logger,
                   fileSystem: fileSystem,
@@ -208,14 +205,14 @@ class BuildCommand extends FlutterCommand {
             xcode:
                 xcode ??
                 Xcode(
-                  platform: platform,
+                  platform: effectivePlatform,
                   processManager: processManager,
                   logger: logger,
                   fileSystem: fileSystem,
                   xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
                   userMessages: UserMessages(),
                 ),
-            platform: platform,
+            platform: effectivePlatform,
           ),
           plistParser: context.get<PlistParser>() ?? plistParser,
           xcdevice: XCDevice(
@@ -223,11 +220,11 @@ class BuildCommand extends FlutterCommand {
             logger: logger,
             artifacts: artifacts,
             cache: cache,
-            platform: platform,
+            platform: effectivePlatform,
             xcode:
                 xcode ??
                 Xcode(
-                  platform: platform,
+                  platform: effectivePlatform,
                   processManager: processManager,
                   logger: logger,
                   fileSystem: fileSystem,
@@ -247,7 +244,7 @@ class BuildCommand extends FlutterCommand {
           xcode:
               xcode ??
               Xcode(
-                platform: platform,
+                platform: effectivePlatform,
                 processManager: processManager,
                 logger: logger,
                 fileSystem: fileSystem,
@@ -285,7 +282,7 @@ class BuildCommand extends FlutterCommand {
             fileSystem: fileSystem,
             fileSystemUtils: fileSystemUtils,
             logger: logger,
-            platform: platform,
+            platform: effectivePlatform,
             plistParser: plistParser,
             processUtils: effectiveProcessUtils,
             terminal: terminal,
@@ -306,7 +303,7 @@ class BuildCommand extends FlutterCommand {
             fileSystem: fileSystem,
             fileSystemUtils: fileSystemUtils,
             logger: logger,
-            platform: platform,
+            platform: effectivePlatform,
             plistParser: plistParser,
             processUtils: effectiveProcessUtils,
             terminal: terminal,
@@ -329,7 +326,7 @@ class BuildCommand extends FlutterCommand {
             fileSystem: fileSystem,
             fileSystemUtils: fileSystemUtils,
             logger: logger,
-            platform: platform,
+            platform: effectivePlatform,
             plistParser: plistParser,
             processUtils: effectiveProcessUtils,
             terminal: terminal,
@@ -339,7 +336,7 @@ class BuildCommand extends FlutterCommand {
         fileSystem: fileSystem,
         flutterVersion: flutterVersion,
         logger: logger,
-        platform: platform,
+        platform: effectivePlatform,
         processManager: processManager,
         templateRenderer: templateRenderer,
         verboseHelp: verboseHelp,
