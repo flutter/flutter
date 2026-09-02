@@ -41,7 +41,6 @@ public class FlutterMutatorViewTest {
 
     {
       view.readyToDisplay(mutatorStack, /*left=*/ 1, /*top=*/ 2, /*width=*/ 0, /*height=*/ 0);
-      view.layout(1, 2, 1, 2);
       view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0));
       final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
       verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
@@ -55,13 +54,13 @@ public class FlutterMutatorViewTest {
 
     {
       view.readyToDisplay(mutatorStack, /*left=*/ 3, /*top=*/ 4, /*width=*/ 0, /*height=*/ 0);
-      view.layout(3, 4, 3, 4);
       view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0));
       final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
       verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
 
       final Matrix screenMatrix = new Matrix();
-      screenMatrix.postTranslate(3, 4);
+      // While dragging, uses the previous left/top (1, 2) when the move event fired.
+      screenMatrix.postTranslate(1, 2);
       assertEquals(matrixCaptor.getValue(), screenMatrix);
     }
 
@@ -69,13 +68,13 @@ public class FlutterMutatorViewTest {
 
     {
       view.readyToDisplay(mutatorStack, /*left=*/ 5, /*top=*/ 6, /*width=*/ 0, /*height=*/ 0);
-      view.layout(5, 6, 5, 6);
       view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0));
       final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
       verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
 
       final Matrix screenMatrix = new Matrix();
-      screenMatrix.postTranslate(5, 6);
+      // Uses the previous left/top (3, 4) from the previous move.
+      screenMatrix.postTranslate(3, 4);
       assertEquals(matrixCaptor.getValue(), screenMatrix);
     }
 
@@ -83,7 +82,6 @@ public class FlutterMutatorViewTest {
 
     {
       view.readyToDisplay(mutatorStack, /*left=*/ 7, /*top=*/ 8, /*width=*/ 0, /*height=*/ 0);
-      view.layout(7, 8, 7, 8);
       view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0));
       final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
       verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
@@ -92,6 +90,29 @@ public class FlutterMutatorViewTest {
       screenMatrix.postTranslate(7, 8);
       assertEquals(matrixCaptor.getValue(), screenMatrix);
     }
+  }
+
+  @Test
+  public void dynamicSetTouchProcessorForwardsTouches() {
+    final FlutterMutatorView view = new FlutterMutatorView(ctx);
+    final FlutterMutatorsStack mutatorStack = mock(FlutterMutatorsStack.class);
+    view.readyToDisplay(mutatorStack, /*left=*/ 10, /*top=*/ 20, /*width=*/ 100, /*height=*/ 100);
+
+    // With null touchProcessor, onTouchEvent delegates to super without throwing.
+    assertFalse(
+        view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0)));
+
+    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
+    when(touchProcessor.onTouchEvent(any(), any())).thenReturn(true);
+    view.setTouchProcessor(touchProcessor);
+
+    assertTrue(view.onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0)));
+    final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
+    verify(touchProcessor).onTouchEvent(any(), matrixCaptor.capture());
+
+    final Matrix expectedMatrix = new Matrix();
+    expectedMatrix.postTranslate(10, 20);
+    assertEquals(matrixCaptor.getValue(), expectedMatrix);
   }
 
   @Test
