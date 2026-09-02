@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../base/common.dart';
+import '../context/tool_context.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
@@ -10,18 +11,17 @@ import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../doctor.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// The `flutter devices` command, which lists all connected devices.
 class DevicesCommand extends FlutterCommand {
   DevicesCommand({
-    DeviceManager? deviceManager,
-    Doctor? doctor,
-    super.toolContext,
+    required DeviceManager deviceManager,
+    required Doctor doctor,
+    required super.toolContext,
     super.verboseHelp,
-  }) : _deviceManager = deviceManager ?? globals.deviceManager!,
-       _doctor = doctor ?? globals.doctor! {
+  }) : _deviceManager = deviceManager,
+       _doctor = doctor {
     addMachineOutputFlag(verboseHelp: verboseHelp);
     argParser.addOption(
       'timeout',
@@ -46,6 +46,9 @@ class DevicesCommand extends FlutterCommand {
   final String category = FlutterCommandCategory.tools;
 
   @override
+  ToolContext get toolContext => super.toolContext!;
+
+  @override
   Duration? get deviceDiscoveryTimeout {
     if (argResults?['timeout'] != null) {
       final int? timeoutSeconds = int.tryParse(stringArg('timeout')!);
@@ -60,8 +63,8 @@ class DevicesCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() {
     if (argResults?['timeout'] != null) {
-      final Logger logger = toolContext?.logger ?? globals.logger;
-      final Terminal terminal = toolContext?.terminal ?? globals.logger.terminal;
+      final Logger logger = toolContext.logger;
+      final Terminal terminal = toolContext.terminal;
       logger.printWarning(
         '${terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.',
       );
@@ -80,8 +83,8 @@ class DevicesCommand extends FlutterCommand {
     }
 
     final output = DevicesCommandOutput(
-      platform: toolContext?.platform ?? globals.platform,
-      logger: toolContext?.logger ?? globals.logger,
+      platform: toolContext.platform,
+      logger: toolContext.logger,
       deviceManager: _deviceManager,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       deviceConnectionInterface: deviceConnectionInterface,
@@ -218,8 +221,9 @@ class DevicesCommandOutput {
 
   Future<void> printDevicesAsJson(List<Device> devices) async {
     _logger.printStatus(
-      const JsonEncoder.withIndent('  ')
-          .convert(await Future.wait(devices.map((Device d) => d.toJson()))),
+      const JsonEncoder.withIndent(
+        '  ',
+      ).convert(await Future.wait(devices.map((Device d) => d.toJson()))),
     );
   }
 }
