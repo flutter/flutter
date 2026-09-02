@@ -34,7 +34,14 @@ void main() {
       exitCode = code;
     });
 
-    final command = BuildCommand(featureFlags: TestFeatureFlags(isWebEnabled: true, isLinuxEnabled: true, isMacOSEnabled: true, isWindowsEnabled: true, isFuchsiaEnabled: true), 
+    final command = BuildCommand(
+      featureFlags: TestFeatureFlags(
+        isWebEnabled: true,
+        isLinuxEnabled: true,
+        isMacOSEnabled: true,
+        isWindowsEnabled: true,
+        isFuchsiaEnabled: true,
+      ),
       toolContext: FakeToolContext(),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -92,7 +99,14 @@ void main() {
     });
 
     testUsingContext("doesn't fail if --fatal-warnings specified and no warnings occur", () async {
-      command = FakeBuildCommand(featureFlags: TestFeatureFlags(isWebEnabled: true, isLinuxEnabled: true, isMacOSEnabled: true, isWindowsEnabled: true, isFuchsiaEnabled: true), 
+      command = FakeBuildCommand(
+        featureFlags: TestFeatureFlags(
+          isWebEnabled: true,
+          isLinuxEnabled: true,
+          isMacOSEnabled: true,
+          isWindowsEnabled: true,
+          isFuchsiaEnabled: true,
+        ),
         toolContext: FakeToolContext(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -122,7 +136,14 @@ void main() {
     }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager});
 
     testUsingContext("doesn't fail if --fatal-warnings not specified", () async {
-      command = FakeBuildCommand(featureFlags: TestFeatureFlags(isWebEnabled: true, isLinuxEnabled: true, isMacOSEnabled: true, isWindowsEnabled: true, isFuchsiaEnabled: true), 
+      command = FakeBuildCommand(
+        featureFlags: TestFeatureFlags(
+          isWebEnabled: true,
+          isLinuxEnabled: true,
+          isMacOSEnabled: true,
+          isWindowsEnabled: true,
+          isFuchsiaEnabled: true,
+        ),
         toolContext: FakeToolContext(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -151,7 +172,14 @@ void main() {
     }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager});
 
     testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
-      command = FakeBuildCommand(featureFlags: TestFeatureFlags(isWebEnabled: true, isLinuxEnabled: true, isMacOSEnabled: true, isWindowsEnabled: true, isFuchsiaEnabled: true), 
+      command = FakeBuildCommand(
+        featureFlags: TestFeatureFlags(
+          isWebEnabled: true,
+          isLinuxEnabled: true,
+          isMacOSEnabled: true,
+          isWindowsEnabled: true,
+          isFuchsiaEnabled: true,
+        ),
         toolContext: FakeToolContext(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -184,7 +212,14 @@ void main() {
     }, overrides: <Type, Generator>{FileSystem: () => fs, ProcessManager: () => processManager});
 
     testUsingContext('fails if --fatal-warnings specified and errors emitted', () async {
-      command = FakeBuildCommand(featureFlags: TestFeatureFlags(isWebEnabled: true, isLinuxEnabled: true, isMacOSEnabled: true, isWindowsEnabled: true, isFuchsiaEnabled: true), 
+      command = FakeBuildCommand(
+        featureFlags: TestFeatureFlags(
+          isWebEnabled: true,
+          isLinuxEnabled: true,
+          isMacOSEnabled: true,
+          isWindowsEnabled: true,
+          isFuchsiaEnabled: true,
+        ),
         toolContext: FakeToolContext(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
