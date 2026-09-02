@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/commands/run.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -42,70 +41,6 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-ToolContext _createToolContext({
-  FileSystem? fileSystem,
-  Logger? logger,
-  ProcessManager? processManager,
-  Platform? platform,
-  Artifacts? artifacts,
-  AnsiTerminal? terminal,
-  Cache? cache,
-}) {
-  FileSystem? contextFs;
-  Logger? contextLogger;
-  Platform? contextPlatform;
-  ProcessManager? contextPm;
-  Artifacts? contextArtifacts;
-  AnsiTerminal? contextTerminal;
-  try {
-    contextFs = globals.fs;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextLogger = globals.logger;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextPlatform = globals.platform;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextPm = globals.processManager;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextArtifacts = globals.artifacts;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextTerminal = globals.terminal;
-  } on Object {
-    // ignore
-  }
-  final FileSystem effectiveFs = fileSystem ?? (contextFs ?? MemoryFileSystem.test());
-  final Logger effectiveLogger = logger ?? (contextLogger ?? BufferLogger.test());
-  final Platform effectivePlatform = platform ?? (contextPlatform ?? const LocalPlatform());
-  final ProcessManager effectiveProcessManager =
-      processManager ?? (contextPm ?? FakeProcessManager.any());
-  final Artifacts? effectiveArtifacts = artifacts ?? contextArtifacts;
-  final AnsiTerminal effectiveTerminal = terminal ?? (contextTerminal ?? FakeAnsiTerminal());
-  return FakeToolContext(
-    fs: effectiveFs,
-    logger: effectiveLogger,
-    platform: effectivePlatform,
-    processManager: effectiveProcessManager,
-    artifacts: effectiveArtifacts,
-    terminal: effectiveTerminal,
-    cache: cache,
-    projectFactory: FlutterProjectFactory(fileSystem: effectiveFs, logger: effectiveLogger),
-  );
-}
-
 void main() {
   setUpAll(() {
     Cache.disableLocking();
@@ -125,7 +60,7 @@ void main() {
     testUsingContext(
       'fails when target not found',
       () async {
-        final command = RunCommand(toolContext: _createToolContext());
+        final command = RunCommand();
         expect(
           () => createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']),
           throwsA(
@@ -159,7 +94,7 @@ void main() {
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.currentDirectory = fileSystem.directory('a/b/c')..createSync(recursive: true);
 
-        final command = RunCommand(toolContext: _createToolContext());
+        final command = RunCommand();
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
           throwsToolExit(),
@@ -183,7 +118,7 @@ void main() {
         fileSystem.currentDirectory = fileSystem.directory('a/b/c')..createSync(recursive: true);
         fileSystem.file('lib/main.dart').createSync(recursive: true);
 
-        final command = RunCommand(toolContext: _createToolContext());
+        final command = RunCommand();
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
           throwsToolExit(message: 'No pubspec.yaml file found'),
@@ -243,7 +178,7 @@ void main() {
       testUsingContext(
         'exits with a user message when no supported devices attached',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           testDeviceManager.devices = <Device>[];
 
           await expectLater(
@@ -267,7 +202,7 @@ void main() {
       testUsingContext(
         'exits and lists available devices when specified device not found',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           final device = FakeDevice(isLocalEmulator: true);
           testDeviceManager
             ..devices = <Device>[device]
@@ -349,7 +284,7 @@ void main() {
       testUsingContext(
         'shows unsupported devices when no supported devices are found',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           final mockDevice = FakeDevice(
             targetPlatform: TargetPlatform.android_arm,
             isLocalEmulator: true,
@@ -430,7 +365,7 @@ void main() {
       testUsingContext(
         'forwards --uninstall-only to DebuggingOptions',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
@@ -463,7 +398,7 @@ void main() {
       testUsingContext(
         'passes device target platform to analytics',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
@@ -493,7 +428,6 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
-                runEnableHcpp: false,
               ),
             ),
           );
@@ -503,6 +437,7 @@ void main() {
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Stdio: () => FakeStdio(),
@@ -521,7 +456,7 @@ void main() {
               .childDirectory('ios')
               .childFile('AppDelegate.swift')
               .createSync(recursive: true);
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
@@ -547,7 +482,6 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: true,
-                runEnableHcpp: false,
               ),
             ),
           );
@@ -557,6 +491,7 @@ void main() {
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Stdio: () => FakeStdio(),
@@ -568,7 +503,7 @@ void main() {
         testUsingContext(
           'can pass --device-user',
           () async {
-            final command = DaemonCapturingRunCommand(toolContext: _createToolContext());
+            final command = DaemonCapturingRunCommand();
             final device = FakeDevice(platformType: PlatformType.android);
             testDeviceManager.devices = <Device>[device];
 
@@ -607,7 +542,7 @@ void main() {
           testUsingContext(
             'can pass --web-define',
             () async {
-              final command = RunCommand(toolContext: _createToolContext());
+              final command = RunCommand();
               final device = FakeDevice(
                 platformType: PlatformType.web,
                 targetPlatform: TargetPlatform.web_javascript,
@@ -644,7 +579,7 @@ void main() {
         testUsingContext(
           'can disable devtools with --no-devtools',
           () async {
-            final command = DaemonCapturingRunCommand(toolContext: _createToolContext());
+            final command = DaemonCapturingRunCommand();
             final device = FakeDevice();
             testDeviceManager.devices = <Device>[device];
 
@@ -681,8 +616,6 @@ void main() {
       testUsingContext(
         "doesn't fail if --fatal-warnings specified and no warnings occur",
         () async {
-          command = TestRunCommandWithFakeResidentRunner()
-            ..fakeResidentRunner = FakeResidentRunner();
           try {
             await createTestCommandRunner(
               command,
@@ -700,8 +633,6 @@ void main() {
       testUsingContext(
         "doesn't fail if --fatal-warnings not specified",
         () async {
-          command = TestRunCommandWithFakeResidentRunner()
-            ..fakeResidentRunner = FakeResidentRunner();
           testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
           try {
             await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
@@ -718,8 +649,6 @@ void main() {
       testUsingContext(
         'fails if --fatal-warnings specified and warnings emitted',
         () async {
-          command = TestRunCommandWithFakeResidentRunner()
-            ..fakeResidentRunner = FakeResidentRunner();
           testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
           await expectLater(
             createTestCommandRunner(
@@ -740,8 +669,6 @@ void main() {
       testUsingContext(
         'fails if --fatal-warnings specified and errors emitted',
         () async {
-          command = TestRunCommandWithFakeResidentRunner()
-            ..fakeResidentRunner = FakeResidentRunner();
           testLogger.printError('Error: Danger Will Robinson!');
           await expectLater(
             createTestCommandRunner(
@@ -768,7 +695,7 @@ void main() {
         ];
 
         expect(
-          await RunCommand(toolContext: _createToolContext()).requiredArtifacts,
+          await RunCommand().requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.androidGenSnapshot,
@@ -778,7 +705,7 @@ void main() {
         testDeviceManager.devices = <Device>[FakeDevice()];
 
         expect(
-          await RunCommand(toolContext: _createToolContext()).requiredArtifacts,
+          await RunCommand().requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.iOS,
@@ -791,7 +718,7 @@ void main() {
         ];
 
         expect(
-          await RunCommand(toolContext: _createToolContext()).requiredArtifacts,
+          await RunCommand().requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.iOS,
@@ -804,7 +731,7 @@ void main() {
         ];
 
         expect(
-          await RunCommand(toolContext: _createToolContext()).requiredArtifacts,
+          await RunCommand().requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.web,
@@ -862,7 +789,6 @@ void main() {
                 runProjectModule: false,
                 runProjectHostLanguage: '',
                 runIsTest: false,
-                runEnableHcpp: false,
               ),
             ),
           );
@@ -870,6 +796,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -913,7 +840,6 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
-                runEnableHcpp: false,
               ),
             ),
           );
@@ -921,6 +847,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -969,7 +896,6 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
-                runEnableHcpp: false,
               ),
             ),
           );
@@ -977,6 +903,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -1026,6 +953,109 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
+          FileSystem: () => MemoryFileSystem.test(),
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        'with Android device and android project reports runEnableHcpp',
+        () async {
+          fileSystem.file('pubspec.yaml').createSync();
+          fileSystem.file('android/build.gradle').createSync(recursive: true);
+          fileSystem.file('android/app/src/main/AndroidManifest.xml').createSync(recursive: true);
+          fileSystem
+              .file('android/app/src/main/AndroidManifest.xml')
+              .writeAsStringSync(
+                '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application><meta-data android:name="flutterEmbedding" android:value="2"/></application></manifest>',
+              );
+          final devices = <Device>[
+            FakeDevice(targetPlatform: TargetPlatform.android, platformType: PlatformType.android),
+          ];
+          final command = TestRunCommandForUsageValues(devices: devices);
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          try {
+            await runner.run(<String>['run', '--no-pub']);
+          } on ToolExit {
+            // Ignore tool exit during test run.
+          }
+
+          final analytics.Event usageValues = await command.unifiedAnalyticsUsageValues('run');
+
+          expect(
+            usageValues,
+            equals(
+              analytics.Event.commandUsageValues(
+                workflow: 'run',
+                commandHasTerminal: false,
+                runIsEmulator: false,
+                runTargetName: 'android',
+                runTargetOsVersion: '',
+                runModeName: 'debug',
+                runProjectModule: false,
+                runProjectHostLanguage: 'java',
+                runAndroidEmbeddingVersion: 'v2',
+                runIsTest: false,
+                runEnableHcpp: true,
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        'with Android device and android project reports runEnableHcpp false when --no-enable-hcpp is passed',
+        () async {
+          fileSystem.file('pubspec.yaml').createSync();
+          fileSystem.file('android/build.gradle').createSync(recursive: true);
+          fileSystem.file('android/app/src/main/AndroidManifest.xml').createSync(recursive: true);
+          fileSystem
+              .file('android/app/src/main/AndroidManifest.xml')
+              .writeAsStringSync(
+                '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application><meta-data android:name="flutterEmbedding" android:value="2"/></application></manifest>',
+              );
+          final devices = <Device>[
+            FakeDevice(targetPlatform: TargetPlatform.android, platformType: PlatformType.android),
+          ];
+          final command = TestRunCommandForUsageValues(devices: devices);
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          try {
+            await runner.run(<String>['run', '--no-pub', '--no-enable-hcpp']);
+          } on ToolExit {
+            // Ignore tool exit during test run.
+          }
+
+          final analytics.Event usageValues = await command.unifiedAnalyticsUsageValues('run');
+
+          expect(
+            usageValues,
+            equals(
+              analytics.Event.commandUsageValues(
+                workflow: 'run',
+                commandHasTerminal: false,
+                runIsEmulator: false,
+                runTargetName: 'android',
+                runTargetOsVersion: '',
+                runModeName: 'debug',
+                runProjectModule: false,
+                runProjectHostLanguage: 'java',
+                runAndroidEmbeddingVersion: 'v2',
+                runIsTest: false,
                 runEnableHcpp: false,
               ),
             ),
@@ -1034,7 +1064,8 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          FileSystem: () => MemoryFileSystem.test(),
+          FeatureFlags: () => FakeFeatureFlags(),
+          FileSystem: () => fileSystem,
           ProcessManager: () => FakeProcessManager.any(),
         },
       );
@@ -1067,7 +1098,7 @@ void main() {
       testUsingContext(
         'can accept simple, valid values',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await createTestCommandRunner(
             command,
           ).run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
@@ -1091,7 +1122,7 @@ void main() {
       testUsingContext(
         'throws a ToolExit when no value is provided',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await expectLater(
             () => createTestCommandRunner(
               command,
@@ -1116,7 +1147,7 @@ void main() {
           fileSystem.file('pubspec.yaml').createSync();
           fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
 
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
               'run',
@@ -1143,7 +1174,7 @@ void main() {
         'throws a ToolExit when using --wasm on a non-web platform',
         () async {
           testDeviceManager.devices = <Device>[FakeDevice(platformType: PlatformType.android)];
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await expectLater(
             () => createTestCommandRunner(
               command,
@@ -1164,7 +1195,7 @@ void main() {
       testUsingContext(
         'throws a ToolExit when using the skwasm renderer without --wasm',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
               'run',
@@ -1188,7 +1219,7 @@ void main() {
       testUsingContext(
         'accepts headers with commas in them',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
@@ -1246,7 +1277,7 @@ server:
   host: confighost
   port: 9000
 ''');
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await createTestCommandRunner(
             command,
           ).run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
@@ -1273,7 +1304,7 @@ server:
   host: confighost
   port: 9000
 ''');
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await createTestCommandRunner(
             command,
           ).run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
@@ -1305,7 +1336,7 @@ server:
     - name: X-Shared-Header
       value: from-config
 ''');
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
@@ -1343,7 +1374,7 @@ server:
   host: confighost
   port: 9000
 ''');
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
@@ -1372,7 +1403,7 @@ server:
     cert-path: /config/cert.pem
     cert-key-path: /config/key.pem
 ''');
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
@@ -1414,7 +1445,7 @@ server:
     cert-path: /config/cert.pem
     cert-key-path: /config/key.pem
 ''');
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await createTestCommandRunner(
             command,
           ).run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
@@ -1447,7 +1478,7 @@ server:
         'CLI TLS args work without web_dev_config.yaml file',
         () async {
           // No web_dev_config.yaml file exists
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
@@ -1506,7 +1537,7 @@ server:
       testUsingContext(
         'passes base-href to WebDevServerConfig',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await createTestCommandRunner(
             command,
           ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
@@ -1528,7 +1559,7 @@ server:
       testUsingContext(
         'throws ToolExit when base-href does not start with /',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await expectLater(
             () => createTestCommandRunner(
               command,
@@ -1549,7 +1580,7 @@ server:
       testUsingContext(
         'throws ToolExit when base-href does not end with /',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await expectLater(
             () => createTestCommandRunner(
               command,
@@ -1570,7 +1601,7 @@ server:
       testUsingContext(
         'base-href defaults to null when not provided',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand();
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
@@ -1739,7 +1770,7 @@ server:
   testUsingContext(
     'Configures web connection options to use web sockets by default',
     () async {
-      final command = RunCommand(toolContext: _createToolContext());
+      final command = RunCommand();
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
         throwsToolExit(),
@@ -1761,7 +1792,7 @@ server:
   testUsingContext(
     'flags propagate to debugging options',
     () async {
-      final command = RunCommand(toolContext: _createToolContext());
+      final command = RunCommand();
       await expectLater(
         () => createTestCommandRunner(command).run(<String>[
           'run',
@@ -1821,7 +1852,7 @@ server:
   testUsingContext(
     'usingCISystem can also be set by environment LUCI_CI',
     () async {
-      final command = RunCommand(toolContext: _createToolContext());
+      final command = RunCommand();
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run']),
         throwsToolExit(),
@@ -1842,7 +1873,7 @@ server:
   testUsingContext(
     'wasm mode selects skwasm renderer by default',
     () async {
-      final command = RunCommand(toolContext: _createToolContext());
+      final command = RunCommand();
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run', '-d chrome', '--wasm']),
         throwsToolExit(),
@@ -1863,7 +1894,7 @@ server:
   testUsingContext(
     'fails when "--web-launch-url" is not supported',
     () async {
-      final command = RunCommand(toolContext: _createToolContext());
+      final command = RunCommand();
       await expectLater(
         () => createTestCommandRunner(
           command,
@@ -1985,6 +2016,75 @@ server:
       initializeFlutterRoot: false,
       // https://github.com/flutter/flutter/issues/142060
       skip: true,
+    );
+
+    testUsingContext(
+      'warning triggered when --build flag is passed',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run', '--build']);
+
+        expect(
+          testLogger.warningText,
+          contains(
+            'The "--build" flag is deprecated and will be removed in a future release. '
+            'Building is the default behavior, so this flag can be safely removed.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+
+    testUsingContext(
+      'warning triggered when --no-build flag is passed',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run', '--no-build']);
+
+        expect(
+          testLogger.warningText,
+          contains(
+            'The "--no-build" flag is deprecated and will be removed in a future release. '
+            'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+
+    testUsingContext(
+      'no warning triggered when --build or --no-build flag is not passed',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run']);
+
+        expect(testLogger.warningText, isNot(contains('is deprecated')));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
     );
   });
 }
@@ -2163,8 +2263,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 }
 
 class TestRunCommandForUsageValues extends RunCommand {
-  TestRunCommandForUsageValues({List<Device>? devices, ToolContext? toolContext})
-    : super(toolContext: toolContext ?? _createToolContext()) {
+  TestRunCommandForUsageValues({List<Device>? devices}) {
     this.devices = devices;
   }
 
@@ -2186,9 +2285,6 @@ class TestRunCommandForUsageValues extends RunCommand {
 }
 
 class TestRunCommandWithFakeResidentRunner extends RunCommand {
-  TestRunCommandWithFakeResidentRunner({ToolContext? toolContext})
-    : super(toolContext: toolContext ?? _createToolContext());
-
   late FakeResidentRunner fakeResidentRunner;
 
   @override
@@ -2209,9 +2305,6 @@ class TestRunCommandWithFakeResidentRunner extends RunCommand {
 }
 
 class TestRunCommandThatOnlyValidates extends RunCommand {
-  TestRunCommandThatOnlyValidates({ToolContext? toolContext})
-    : super(toolContext: toolContext ?? _createToolContext());
-
   @override
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();
@@ -2245,9 +2338,6 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 }
 
 class DaemonCapturingRunCommand extends RunCommand {
-  DaemonCapturingRunCommand({ToolContext? toolContext})
-    : super(toolContext: toolContext ?? _createToolContext());
-
   late Daemon daemon;
   late CapturingAppDomain appDomain;
 
@@ -2321,7 +2411,14 @@ class FakeFeatureFlags extends Fake implements FeatureFlags {
   bool get isWebEnabled => true;
 
   @override
+  bool get isToolExtensionsEnabled => false;
+
+  @override
   bool isEnabled(Feature feature) => feature.master.enabledByDefault;
+
+  // Queried by getBuildInfo.
+  @override
+  bool get isHcppEnabled => isEnabled(hcpp);
 
   @override
   List<Feature> get allFeatures => const <Feature>[];

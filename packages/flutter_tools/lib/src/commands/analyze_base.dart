@@ -20,6 +20,7 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../globals.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
@@ -55,7 +56,7 @@ abstract class AnalyzeBase {
   final bool suppressAnalytics;
 
   @protected
-  String get flutterRoot => fileSystem.path.absolute(Cache.flutterRoot!);
+  String get flutterRoot => globals.fs.path.absolute(Cache.flutterRoot!);
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
@@ -96,6 +97,14 @@ abstract class AnalyzeBase {
 
   bool get isBenchmarking => argResults['benchmark'] as bool;
   String? get protocolTrafficLog => argResults['protocol-traffic-log'] as String?;
+
+  @protected
+  bool get usePlugins {
+    if (argResults.options.contains('plugins') && argResults.wasParsed('plugins')) {
+      return argResults['plugins'] as bool;
+    }
+    return !isBenchmarking;
+  }
 
   /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
   static String generateErrorsMessage({
@@ -142,13 +151,13 @@ class PackageDependency {
   }
 
   bool get hasConflict => values.length > 1;
-  bool hasConflictAffectingFlutterRepo(FileSystem fileSystem) {
+  bool get hasConflictAffectingFlutterRepo {
     final String? flutterRoot = Cache.flutterRoot;
-    assert(flutterRoot != null && fileSystem.path.isAbsolute(flutterRoot));
+    assert(flutterRoot != null && globals.fs.path.isAbsolute(flutterRoot));
     for (final List<String> targetSources in values.values) {
       for (final source in targetSources) {
-        assert(fileSystem.path.isAbsolute(source));
-        if (fileSystem.path.isWithin(flutterRoot!, source)) {
+        assert(globals.fs.path.isAbsolute(source));
+        if (globals.fs.path.isWithin(flutterRoot!, source)) {
           return true;
         }
       }
@@ -201,22 +210,23 @@ class PackageDependencyTracker {
 
   void checkForConflictingDependencies(
     Iterable<Directory> pubSpecDirectories,
-    PackageDependencyTracker dependencies, {
-    required FileSystem fileSystem,
-  }) {
+    PackageDependencyTracker dependencies,
+  ) {
     for (final directory in pubSpecDirectories) {
-      final String pubSpecYamlPath = fileSystem.path.join(directory.path, 'pubspec.yaml');
-      final File pubSpecYamlFile = fileSystem.file(pubSpecYamlPath);
+      final String pubSpecYamlPath = globals.fs.path.join(directory.path, 'pubspec.yaml');
+      final File pubSpecYamlFile = globals.fs.file(pubSpecYamlPath);
       if (pubSpecYamlFile.existsSync()) {
         // we are analyzing the actual canonical source for this package;
         // make sure we remember that, in case all the packages are actually
         // pointing elsewhere somehow.
-        final dynamic pubSpecYaml = yaml.loadYaml(pubSpecYamlFile.readAsStringSync());
+        final dynamic pubSpecYaml = yaml.loadYaml(
+          globals.fs.file(pubSpecYamlPath).readAsStringSync(),
+        );
         if (pubSpecYaml is yaml.YamlMap) {
           final dynamic packageName = pubSpecYaml['name'];
           if (packageName is String) {
-            final String packagePath = fileSystem.path.normalize(
-              fileSystem.path.absolute(fileSystem.path.join(directory.path, 'lib')),
+            final String packagePath = globals.fs.path.normalize(
+              globals.fs.path.absolute(globals.fs.path.join(directory.path, 'lib')),
             );
             dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
           } else {
@@ -234,7 +244,7 @@ class PackageDependencyTracker {
       message.writeln(
         'Make sure you have run "pub upgrade" in all the directories mentioned above.',
       );
-      if (dependencies.hasConflictsAffectingFlutterRepo(fileSystem)) {
+      if (dependencies.hasConflictsAffectingFlutterRepo) {
         message.writeln(
           'For packages in the flutter repository, try using "flutter update-packages" to do all of them at once.\n'
           'If you need to actually upgrade them, consider "flutter update-packages --force-upgrade". '
@@ -253,9 +263,9 @@ class PackageDependencyTracker {
     return packages.values.any((PackageDependency dependency) => dependency.hasConflict);
   }
 
-  bool hasConflictsAffectingFlutterRepo(FileSystem fileSystem) {
+  bool get hasConflictsAffectingFlutterRepo {
     return packages.values.any(
-      (PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo(fileSystem),
+      (PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo,
     );
   }
 

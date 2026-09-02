@@ -210,26 +210,10 @@ void main() {
       );
     });
 
-    CreateCommand createCreateCommand({Pub? pub, Java? java}) {
-      return CreateCommand(
-        toolContext: FakeToolContext(
-          fs: globals.fs,
-          logger: globals.logger,
-          platform: globals.platform,
-          processManager: globals.processManager,
-          cache: globals.cache,
-          flutterVersion: FakeFlutterVersion(),
-          projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
-        ),
-        pub: pub,
-        java: java,
-      );
-    }
-
     testUsingContext(
       'set template type as usage value',
       () => testbed.run(() async {
-        final CreateCommand command = createCreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=module', 'testy']);
@@ -269,7 +253,7 @@ void main() {
     testUsingContext(
       'set Android host language type as usage value',
       () => testbed.run(() async {
-        final CreateCommand command = createCreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
@@ -296,7 +280,7 @@ void main() {
     testUsingContext(
       'create --offline',
       () => testbed.run(() async {
-        final CreateCommand command = createCreateCommand(pub: fakePub);
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['create', 'testy', '--offline']);
         expect(fakePub.calledOnline, 0);
@@ -309,7 +293,7 @@ void main() {
     testUsingContext(
       'package_ffi template not enabled',
       () async {
-        final CreateCommand command = createCreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         expect(
@@ -328,7 +312,7 @@ void main() {
     );
 
     testUsingContext('plugin_ffi template is marked as deprecated in help', () {
-      final CreateCommand command = createCreateCommand();
+      final command = CreateCommand();
       final String? templateHelp =
           command.argParser.options['template']?.allowedHelp?['plugin_ffi'];
       expect(templateHelp, contains('(deprecated)'));

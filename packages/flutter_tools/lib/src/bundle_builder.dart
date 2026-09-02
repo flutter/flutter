@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
@@ -37,7 +38,7 @@ class BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
-    BuildSystem? buildSystem,
+    @visibleForTesting BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath;

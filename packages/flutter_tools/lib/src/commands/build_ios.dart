@@ -5,46 +5,36 @@
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../artifacts.dart';
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
-import '../context/apple_context.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../doctor_validator.dart';
+import '../globals.dart' as globals;
 import '../ios/application_package.dart';
 import '../ios/code_signing.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
-import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import 'build.dart';
 
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({
-    super.analytics,
-    required super.appleContext,
-    required super.buildSystem,
-    required super.toolContext,
-    required bool verboseHelp,
-  }) : super(verboseHelp: verboseHelp) {
+  BuildIOSCommand({required super.logger, required bool verboseHelp})
+    : super(verboseHelp: verboseHelp) {
     addPublishPort(verboseHelp: verboseHelp);
     argParser
       ..addFlag(
@@ -80,7 +70,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) =>
-      _toolContext.fs.directory(xcodeResultOutput).parent;
+      globals.fs.directory(xcodeResultOutput).parent;
 }
 
 /// The key that uniquely identifies an image file in an image asset.
@@ -119,13 +109,7 @@ class _ImageAssetFileKey {
 ///
 /// Can only be run on a macOS host.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
-  BuildIOSArchiveCommand({
-    super.analytics,
-    required super.appleContext,
-    required super.buildSystem,
-    required super.toolContext,
-    required super.verboseHelp,
-  }) {
+  BuildIOSArchiveCommand({required super.logger, required super.verboseHelp}) {
     argParser.addOption(
       'export-method',
       defaultsTo: 'app-store',
@@ -170,14 +154,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   String? get exportOptionsPlist => stringArg('export-options-plist');
 
   @override
-  Directory _outputAppDirectory(String xcodeResultOutput) => _toolContext.fs
+  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
       .directory(xcodeResultOutput)
       .childDirectory('Products')
       .childDirectory('Applications');
 
   @override
   Future<void> validateCommand() async {
-    final FileSystem fs = _toolContext.fs;
     final String? exportOptions = exportOptionsPlist;
     if (exportOptions != null) {
       if (argResults?.wasParsed('export-method') ?? false) {
@@ -187,7 +170,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           'See "xcodebuild -h" for available exportOptionsPlist keys.',
         );
       }
-      final FileSystemEntityType type = fs.typeSync(exportOptions);
+      final FileSystemEntityType type = globals.fs.typeSync(exportOptions);
       if (type == FileSystemEntityType.notFound) {
         throwToolExit('"$exportOptions" property list does not exist.');
       } else if (type != FileSystemEntityType.file) {
@@ -204,7 +187,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     String contentsJsonDirName, {
     required bool requiresSize,
   }) {
-    final Directory contentsJsonDirectory = _toolContext.fs.directory(contentsJsonDirName);
+    final Directory contentsJsonDirectory = globals.fs.directory(contentsJsonDirName);
     if (!contentsJsonDirectory.existsSync()) {
       return <_ImageAssetFileKey, String>{};
     }
@@ -269,15 +252,18 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     required String templateImageDirName,
     required String projectImageDirName,
   }) {
-    final FileSystem fs = _toolContext.fs;
     return projectImageInfoMap.entries.any((MapEntry<_ImageAssetFileKey, String> entry) {
       final String projectFileName = entry.value;
       final String? templateFileName = templateImageInfoMap[entry.key];
       if (templateFileName == null) {
         return false;
       }
-      final File projectFile = fs.file(fs.path.join(projectImageDirName, projectFileName));
-      final File templateFile = fs.file(fs.path.join(templateImageDirName, templateFileName));
+      final File projectFile = globals.fs.file(
+        globals.fs.path.join(projectImageDirName, projectFileName),
+      );
+      final File templateFile = globals.fs.file(
+        globals.fs.path.join(templateImageDirName, templateFileName),
+      );
 
       return projectFile.existsSync() &&
           templateFile.existsSync() &&
@@ -291,11 +277,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     required Map<_ImageAssetFileKey, String> imageInfoMap,
     required String imageDirName,
   }) {
-    final FileSystem fs = _toolContext.fs;
     return imageInfoMap.entries
         .where((MapEntry<_ImageAssetFileKey, String> entry) {
           final String fileName = entry.value;
-          final File imageFile = fs.file(fs.path.join(imageDirName, fileName));
+          final File imageFile = globals.fs.file(globals.fs.path.join(imageDirName, fileName));
           if (!imageFile.existsSync()) {
             return false;
           }
@@ -416,36 +401,36 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   }
 
   Future<List<ValidationMessage>> _validateXcodeBuildSettingsAfterArchive() async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final PlistParser plistParser = _appleContext.plistParser;
     final BuildableIOSApp app = await buildableIOSApp;
 
     final String plistPath = app.builtInfoPlistPathAfterArchive;
 
-    if (!fs.file(plistPath).existsSync()) {
-      logger.printError('Invalid iOS archive. Does not contain Info.plist.');
+    if (!globals.fs.file(plistPath).existsSync()) {
+      globals.printError('Invalid iOS archive. Does not contain Info.plist.');
       return <ValidationMessage>[];
     }
 
     final xcodeProjectSettingsMap = <String, String?>{};
 
-    xcodeProjectSettingsMap['Version Number'] = plistParser.getValueFromFile<String>(
+    xcodeProjectSettingsMap['Version Number'] = globals.plistParser.getValueFromFile<String>(
       plistPath,
       PlistParser.kCFBundleShortVersionStringKey,
     );
-    xcodeProjectSettingsMap['Build Number'] = plistParser.getValueFromFile<String>(
+    xcodeProjectSettingsMap['Build Number'] = globals.plistParser.getValueFromFile<String>(
       plistPath,
       PlistParser.kCFBundleVersionKey,
     );
     xcodeProjectSettingsMap['Display Name'] =
-        plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleDisplayNameKey) ??
-        plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleNameKey);
-    xcodeProjectSettingsMap['Deployment Target'] = plistParser.getValueFromFile<String>(
+        globals.plistParser.getValueFromFile<String>(
+          plistPath,
+          PlistParser.kCFBundleDisplayNameKey,
+        ) ??
+        globals.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleNameKey);
+    xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getValueFromFile<String>(
       plistPath,
       PlistParser.kMinimumOSVersionKey,
     );
-    xcodeProjectSettingsMap['Bundle Identifier'] = plistParser.getValueFromFile<String>(
+    xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getValueFromFile<String>(
       plistPath,
       PlistParser.kCFBundleIdentifierKey,
     );
@@ -489,14 +474,6 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final OperatingSystemUtils os = _toolContext.os;
-    final PlistParser plistParser = _appleContext.plistParser;
-    final ProcessUtils processUtils = _toolContext.processUtils;
-    final AnsiTerminal terminal = _toolContext.terminal;
-    final Xcode xcode = _appleContext.xcode;
-
     final BuildInfo buildInfo = await cachedBuildInfo;
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
 
@@ -515,26 +492,26 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     );
 
     for (final ValidationResult result in validationResults.whereType<ValidationResult>()) {
-      logger.printStatus('\n${result.coloredLeadingBox} ${result.statusInfo}');
+      globals.printStatus('\n${result.coloredLeadingBox} ${result.statusInfo}');
       for (final ValidationMessage message in result.messages) {
-        logger.printStatus(
+        globals.printStatus(
           '${message.coloredIndicator} ${message.message}',
           indent: result.leadingBox.length + 1,
         );
       }
     }
-    logger.printStatus(
+    globals.printStatus(
       '\nTo update the settings, please refer to https://flutter.dev/to/ios-deploy\n',
     );
 
     // xcarchive failed or not at expected location.
     if (xcarchiveResult.exitStatus != ExitStatus.success) {
-      logger.printStatus('Skipping IPA.');
+      globals.printStatus('Skipping IPA.');
       return xcarchiveResult;
     }
 
     if (!shouldCodesign) {
-      logger.printStatus('Codesigning disabled with --no-codesign, skipping IPA.');
+      globals.printStatus('Codesigning disabled with --no-codesign, skipping IPA.');
       return xcarchiveResult;
     }
 
@@ -543,11 +520,11 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     Status? status;
     RunResult? result;
     final String relativeOutputPath = app.ipaOutputPath;
-    final String absoluteOutputPath = fs.path.absolute(relativeOutputPath);
-    final String absoluteArchivePath = fs.path.absolute(app.archiveBundleOutputPath);
+    final String absoluteOutputPath = globals.fs.path.absolute(relativeOutputPath);
+    final String absoluteArchivePath = globals.fs.path.absolute(app.archiveBundleOutputPath);
     String? exportOptions = exportOptionsPlist;
     String? exportMethod = exportOptions != null
-        ? plistParser.getValueFromFile<String?>(exportOptions, 'method')
+        ? globals.plistParser.getValueFromFile<String?>(exportOptions, 'method')
         : null;
     exportMethod ??= _getVersionAppropriateExportMethod(stringArg('export-method')!);
     final bool isAppStoreUpload =
@@ -555,35 +532,35 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     File? generatedExportPlist;
     try {
       final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
-      status = logger.startProgress('Building $exportMethodDisplayName IPA...');
+      status = globals.logger.startProgress('Building $exportMethodDisplayName IPA...');
       if (exportOptions == null) {
         final Map<String, String>? buildSettings = await app.project.buildSettingsForBuildInfo(
           buildInfo,
         );
         // Create XcodeCodeSigningSettings for dependency injection into createExportPlist
         final codeSigningSettings = XcodeCodeSigningSettings(
-          config: _toolContext.config,
+          config: globals.config,
           logger: logger,
-          platform: _toolContext.platform,
-          processUtils: processUtils,
-          fileSystem: fs,
-          fileSystemUtils: _toolContext.fileSystemUtils,
-          terminal: terminal,
-          plistParser: plistParser,
+          platform: globals.platform,
+          processUtils: globals.processUtils,
+          fileSystem: globals.fs,
+          fileSystemUtils: globals.fsUtils,
+          terminal: globals.terminal,
+          plistParser: globals.plistParser,
         );
         generatedExportPlist = await createExportPlist(
           exportMethod: exportMethod,
           app: app,
           buildInfo: buildInfo,
           buildSettings: buildSettings,
-          fileSystem: fs,
+          fileSystem: globals.fs,
           codeSigningSettings: codeSigningSettings,
         );
         exportOptions = generatedExportPlist.path;
       }
 
-      result = await processUtils.run(<String>[
-        ...xcode.xcrunCommand(),
+      result = await globals.processUtils.run(<String>[
+        ...globals.xcode!.xcrunCommand(),
         'xcodebuild',
         '-exportArchive',
         if (shouldCodesign) ...<String>[
@@ -595,7 +572,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         '-exportPath',
         absoluteOutputPath,
         '-exportOptionsPlist',
-        fs.path.absolute(exportOptions),
+        globals.fs.path.absolute(exportOptions),
       ]);
     } finally {
       if (generatedExportPlist != null) {
@@ -616,15 +593,15 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         result.stderr,
       ).where((String line) => line.contains('error: ')).forEach(errorMessage.writeln);
 
-      logger.printError('Encountered error while creating the IPA:');
-      logger.printError(errorMessage.toString());
+      globals.printError('Encountered error while creating the IPA:');
+      globals.printError(errorMessage.toString());
 
-      final FileSystemEntityType type = fs.typeSync(absoluteArchivePath);
-      logger.printError('Try distributing the app in Xcode:');
+      final FileSystemEntityType type = globals.fs.typeSync(absoluteArchivePath);
+      globals.printError('Try distributing the app in Xcode:');
       if (type == FileSystemEntityType.notFound) {
-        logger.printError('open ios/Runner.xcworkspace', indent: 2);
+        globals.printError('open ios/Runner.xcworkspace', indent: 2);
       } else {
-        logger.printError('open $absoluteArchivePath', indent: 2);
+        globals.printError('open $absoluteArchivePath', indent: 2);
       }
 
       // Even though the IPA step didn't succeed, the xcarchive did.
@@ -633,29 +610,29 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       return FlutterCommandResult.success();
     }
 
-    final Directory outputDirectory = fs.directory(absoluteOutputPath);
-    final int? directorySize = os.getDirectorySize(outputDirectory);
+    final Directory outputDirectory = globals.fs.directory(absoluteOutputPath);
+    final int? directorySize = globals.os.getDirectorySize(outputDirectory);
     final appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
         ? '' // Don't display the size when building a debug variant.
         : ' (${getSizeAsPlatformMB(directorySize)})';
 
-    logger.printStatus(
-      '${terminal.successMark} '
-      'Built IPA to ${fs.path.relative(outputDirectory.path)}$appSize',
+    globals.printStatus(
+      '${globals.terminal.successMark} '
+      'Built IPA to ${globals.fs.path.relative(outputDirectory.path)}$appSize',
       color: TerminalColor.green,
     );
 
     if (isAppStoreUpload) {
-      logger.printStatus('To upload to the App Store either:');
-      logger.printStatus(
+      globals.printStatus('To upload to the App Store either:');
+      globals.printStatus(
         '1. Drag and drop the "$relativeOutputPath/*.ipa" bundle into the Apple Transporter macOS app https://apps.apple.com/us/app/transporter/id1450874784',
         indent: 4,
       );
-      logger.printStatus(
+      globals.printStatus(
         '2. Run "xcrun altool --upload-app --type ios -f $relativeOutputPath/*.ipa --apiKey your_api_key --apiIssuer your_issuer_id".',
         indent: 4,
       );
-      logger.printStatus(
+      globals.printStatus(
         'See "man altool" for details about how to authenticate with the App Store Connect API key.',
         indent: 7,
       );
@@ -713,7 +690,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           profileSpecifier,
           codeSigningSettings: codeSigningSettings,
           fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils ?? _toolContext.fileSystemUtils,
+          fileSystemUtils: fileSystemUtils ?? globals.fsUtils,
         );
 
         if (profileUuid != null) {
@@ -860,14 +837,14 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final XcodeCodeSigningSettings settings =
         codeSigningSettings ??
         XcodeCodeSigningSettings(
-          config: _toolContext.config,
+          config: globals.config,
           logger: logger,
-          platform: _toolContext.platform,
-          processUtils: _toolContext.processUtils,
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          terminal: _toolContext.terminal,
-          plistParser: _appleContext.plistParser,
+          platform: globals.platform,
+          processUtils: globals.processUtils,
+          fileSystem: globals.fs,
+          fileSystemUtils: globals.fsUtils,
+          terminal: globals.terminal,
+          plistParser: globals.plistParser,
         );
 
     // Search for profiles matching the specifier (could be name or UUID)
@@ -897,7 +874,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   // are now deprecated. The new equivalents are 'app-store-connect', 'release-testing',
   // and 'debugging'.
   String _getVersionAppropriateExportMethod(String method) {
-    final Version? currVersion = _appleContext.xcode.currentVersion;
+    final Version? currVersion = globals.xcode!.currentVersion;
     if (currVersion != null) {
       if (currVersion >= Version(15, 4, 0)) {
         switch (method) {
@@ -916,21 +893,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 }
 
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
-  _BuildIOSSubCommand({
-    super.analytics,
-    required AppleContext appleContext,
-    required BuildSystem buildSystem,
-    required ToolContext toolContext,
-    required bool verboseHelp,
-  }) : _appleContext = appleContext,
-       _buildSystem = buildSystem,
-       _toolContext = toolContext,
-       super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
-         verboseHelp: verboseHelp,
-       ) {
+  _BuildIOSSubCommand({required super.logger, required bool verboseHelp})
+    : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -951,20 +915,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       help: 'Codesign the application bundle (only available on device builds).',
     );
   }
-
-  final AppleContext _appleContext;
-  final BuildSystem _buildSystem;
-  final ToolContext _toolContext;
-
-  @visibleForTesting
-  AppleContext get appleContext => _appleContext;
-
-  @visibleForTesting
-  BuildSystem get buildSystem => _buildSystem;
-
-  @visibleForTesting
-  @override
-  ToolContext get toolContext => _toolContext;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -1001,18 +951,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   Directory _outputAppDirectory(String xcodeResultOutput);
 
   @override
-  bool get supported => _toolContext.platform.isMacOS;
+  bool get supported => globals.platform.isMacOS;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Artifacts artifacts = _toolContext.artifacts;
-    final FileSystem fs = _toolContext.fs;
-    final FileSystemUtils fsUtils = _toolContext.fileSystemUtils;
-    final Logger logger = _toolContext.logger;
-    final OperatingSystemUtils os = _toolContext.os;
-    final PlistParser plistParser = _appleContext.plistParser;
-    final AnsiTerminal terminal = _toolContext.terminal;
-
     defaultBuildMode = environmentType == EnvironmentType.simulator
         ? BuildMode.debug
         : BuildMode.release;
@@ -1028,7 +970,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       throwToolExit('Cannot analyze code size without performing a full build.');
     }
     if (environmentType == EnvironmentType.physical && !shouldCodesign) {
-      logger.printStatus(
+      globals.printStatus(
         'Warning: Building for device with codesigning disabled. You will '
         'have to manually codesign before deploying to device.',
       );
@@ -1037,12 +979,11 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final logTarget = environmentType == EnvironmentType.simulator ? 'simulator' : 'device';
-    final String typeName = artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
-    logger.printStatus(switch (xcodeBuildAction) {
+    final String typeName = globals.artifacts!.getEngineType(TargetPlatform.ios, buildInfo.mode);
+    globals.printStatus(switch (xcodeBuildAction) {
       XcodeBuildAction.build => 'Building $app for $logTarget ($typeName)...',
       XcodeBuildAction.archive => 'Archiving $app...',
     });
-    final specifiedDeviceId = globalResults?[FlutterGlobalOptions.kDeviceIdOption] as String?;
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
@@ -1051,7 +992,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       codesign: shouldCodesign,
       configOnly: configOnly,
       buildAction: xcodeBuildAction,
-      deviceID: specifiedDeviceId,
+      deviceID: globals.deviceManager?.specifiedDeviceId,
       disablePortPublication:
           usingCISystem &&
           xcodeBuildAction == XcodeBuildAction.build &&
@@ -1062,9 +1003,9 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     if (!result.success) {
       await diagnoseXcodeBuildFailure(
         result,
-        analytics: analytics,
-        fileSystem: fs,
-        logger: logger,
+        analytics: globals.analytics,
+        fileSystem: globals.fs,
+        logger: globals.logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
       );
@@ -1076,17 +1017,17 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
     if (buildInfo.codeSizeDirectory != null) {
       final sizeAnalyzer = SizeAnalyzer(
-        fileSystem: fs,
-        logger: logger,
+        fileSystem: globals.fs,
+        logger: globals.logger,
         analytics: analytics,
         appFilenamePattern: 'App',
       );
       // Only support 64bit iOS code size analysis.
       final String arch = CpuArch.arm64.darwinArchName;
-      final File aotSnapshot = fs
+      final File aotSnapshot = globals.fs
           .directory(buildInfo.codeSizeDirectory)
           .childFile('snapshot.$arch.json');
-      final File precompilerTrace = fs
+      final File precompilerTrace = globals.fs
           .directory(buildInfo.codeSizeDirectory)
           .childFile('trace.$arch.json');
 
@@ -1101,8 +1042,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         appDirectory = outputAppDirectoryCandidate.listSync().whereType<Directory>().where((
           Directory directory,
         ) {
-          return fs.path.extension(directory.path) == '.app';
-        }).firstOrNull;
+          return globals.fs.path.extension(directory.path) == '.app';
+        }).first;
       }
       if (appDirectory == null) {
         throwToolExit(
@@ -1115,32 +1056,32 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         outputDirectory: appDirectory,
         type: 'ios',
       );
-      final File outputFile = fsUtils.getUniqueFile(
-        fs.directory(fsUtils.homeDirPath).childDirectory('.flutter-devtools'),
+      final File outputFile = globals.fsUtils.getUniqueFile(
+        globals.fs.directory(globals.fsUtils.homeDirPath).childDirectory('.flutter-devtools'),
         'ios-code-size-analysis',
         'json',
       )..writeAsStringSync(jsonEncode(output));
       // This message is used as a sentinel in analyze_apk_size_test.dart
-      logger.printStatus(
+      globals.printStatus(
         'A summary of your iOS bundle analysis can be found at: ${outputFile.path}',
       );
 
-      logger.printStatus(
+      globals.printStatus(
         '\nTo analyze your app size in Dart DevTools, run the following command:\n'
         'dart devtools --appSizeBase=${outputFile.path}',
       );
     }
 
     if (result.output != null) {
-      final Directory outputDirectory = fs.directory(result.output);
-      final int? directorySize = os.getDirectorySize(outputDirectory);
+      final Directory outputDirectory = globals.fs.directory(result.output);
+      final int? directorySize = globals.os.getDirectorySize(outputDirectory);
       final appSize = (buildInfo.mode == BuildMode.debug || directorySize == null)
           ? '' // Don't display the size when building a debug variant.
           : ' (${getSizeAsPlatformMB(directorySize)})';
 
-      logger.printStatus(
-        '${terminal.successMark} '
-        'Built ${fs.path.relative(outputDirectory.path)}$appSize',
+      globals.printStatus(
+        '${globals.terminal.successMark} '
+        'Built ${globals.fs.path.relative(outputDirectory.path)}$appSize',
         color: TerminalColor.green,
       );
 
@@ -1149,7 +1090,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       // flag set as "enabled" because the default is to enable Impeller on iOS.
       final BuildableIOSApp app = await buildableIOSApp;
       final String plistPath = app.project.infoPlist.path;
-      final bool? impellerEnabled = plistParser.getValueFromFile<bool>(
+      final bool? impellerEnabled = globals.plistParser.getValueFromFile<bool>(
         plistPath,
         PlistParser.kFLTEnableImpellerKey,
       );
@@ -1157,7 +1098,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       final buildLabel = impellerEnabled == false
           ? 'plist-impeller-disabled'
           : 'plist-impeller-enabled';
-      analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'ios'));
+      globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'ios'));
 
       return FlutterCommandResult.success();
     }

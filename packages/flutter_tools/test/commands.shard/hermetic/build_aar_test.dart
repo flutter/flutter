@@ -8,12 +8,11 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/build_aar.dart';
-import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/commands/build.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../../src/android_common.dart';
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
@@ -26,8 +25,6 @@ void main() {
   late Platform platform;
   late Cache cache;
   late FakeAnalytics fakeAnalytics;
-  late FakeToolContext toolContext;
-  late FakeAndroidContext androidContext;
 
   setUpAll(() {
     Cache.disableLocking();
@@ -45,19 +42,12 @@ void main() {
       fs: fs,
       fakeFlutterVersion: FakeFlutterVersion(),
     );
-    toolContext = FakeToolContext(
-      cache: cache,
-      fs: fs,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
-    );
-    androidContext = FakeAndroidContext(androidSdk: FakeAndroidSdk());
   });
 
-  testWithoutContext('will not build an AAR for a plugin', () async {
-    fs.file('pubspec.yaml').writeAsStringSync('''
+  testUsingContext(
+    'will not build an AAR for a plugin',
+    () async {
+      fs.file('pubspec.yaml').writeAsStringSync('''
 name: foo_bar
 
 flutter:
@@ -67,74 +57,112 @@ flutter:
         null
 ''');
 
-    final command = BuildAarCommand(
-      androidBuilder: FakeAndroidBuilder(),
-      androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fs,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
 
-    expect(
-      createTestCommandRunner(command).run(const <String>['aar', '--no-pub']),
-      throwsToolExit(message: 'AARs can only be built from modules'),
-    );
-    expect(processManager, hasNoRemainingExpectations);
-  });
+      expect(
+        createTestCommandRunner(command).run(const <String>['build', 'aar', '--no-pub']),
+        throwsToolExit(message: 'AARs can only be built from modules'),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Cache: () => cache,
+      FileSystem: () => fs,
+      Platform: () => platform,
+      ProcessManager: () => processManager,
+    },
+  );
 
-  testWithoutContext('will build an AAR for a module', () async {
-    fs.file('pubspec.yaml').writeAsStringSync('''
+  testUsingContext(
+    'will build an AAR for a module',
+    () async {
+      fs.file('pubspec.yaml').writeAsStringSync('''
 name: foo_bar
 
 flutter:
   module:
     foo: bar
 ''');
-    final Directory dotAndroidDir = fs.directory('.android')..createSync(recursive: true);
-    dotAndroidDir.childFile('gradlew').createSync();
+      final Directory dotAndroidDir = fs.directory('.android')..createSync(recursive: true);
+      dotAndroidDir.childFile('gradlew').createSync();
 
-    final command = BuildAarCommand(
-      androidBuilder: FakeAndroidBuilder(),
-      androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
-
-    await createTestCommandRunner(command, fakeAnalytics).run(const <String>['aar', '--no-pub']);
-    expect(
-      fakeAnalytics.sentEvents,
-      contains(
-        Event.commandUsageValues(
-          workflow: 'aar',
-          commandHasTerminal: false,
-          buildAarProjectType: 'module',
-          buildAarTargetPlatform: 'android-arm,android-arm64,android-x64',
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(command: <String>['chmod', '755', 'flutter/bin/cache/artifacts']),
+        const FakeCommand(command: <String>['which', 'java']),
+        ...<String>['Debug', 'Profile', 'Release'].map(
+          (String buildMode) => FakeCommand(
+            command: <Pattern>[
+              '/.android/gradlew',
+              '-I=/flutter/packages/flutter_tools/gradle/aar_init_script.gradle',
+              ...List<RegExp>.filled(4, RegExp(r'-P[a-zA-Z-]+=.*')),
+              '-q',
+              ...List<RegExp>.filled(7, RegExp(r'-P[a-zA-Z-]+=.*')),
+              'assembleAar$buildMode',
+            ],
+            onRun: (_) => fs.directory('/build/host/outputs/repo').createSync(recursive: true),
+          ),
         ),
-      ),
-    );
-  });
+      ]);
 
-  testWithoutContext('throws ToolExit if androidSdk is null', () async {
-    fs.file('pubspec.yaml').writeAsStringSync('''
-name: foo_bar
+      cache.getArtifactDirectory('gradle_wrapper').createSync(recursive: true);
 
-flutter:
-  module:
-    foo: bar
-''');
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fs,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
 
-    final command = BuildAarCommand(
-      androidBuilder: FakeAndroidBuilder(),
-      androidContext: FakeAndroidContext(),
-      androidSdk: null,
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
-
-    expect(
-      createTestCommandRunner(command).run(const <String>['aar', '--no-pub']),
-      throwsToolExit(message: 'No Android SDK found'),
-    );
-  });
+      await createTestCommandRunner(command).run(const <String>['build', 'aar', '--no-pub']);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.commandUsageValues(
+            workflow: 'build/aar',
+            commandHasTerminal: false,
+            buildAarProjectType: 'module',
+            buildAarTargetPlatform: 'android-arm,android-arm64,android-x64',
+          ),
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      Platform: () => platform,
+      ProcessManager: () => processManager,
+      Analytics: () => fakeAnalytics,
+    },
+  );
 }

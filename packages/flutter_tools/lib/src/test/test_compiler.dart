@@ -6,20 +6,15 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
-import 'package:process/process.dart';
 
-import '../artifacts.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../compile.dart';
 import '../dart/language_version.dart';
 import '../flutter_plugins.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import 'test_time_recorder.dart';
 
@@ -112,32 +107,17 @@ class TestCompiler {
   TestCompiler(
     BuildInfo buildInfo,
     this.flutterProject, {
-    required Artifacts artifacts,
-    required Config config,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-    required ShutdownHooks shutdownHooks,
     String? precompiledDillPath,
-    this.residentCompilerFactory = const ResidentCompilerFactory(),
     this.testTimeRecorder,
-  }) : _artifacts = artifacts,
-       _config = config,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _platform = platform,
-       _processManager = processManager,
-       _shutdownHooks = shutdownHooks,
-       testFilePath =
+  }) : testFilePath =
            precompiledDillPath ??
-           fileSystem.path.join(
+           globals.fs.path.join(
              flutterProject!.directory.path,
              getBuildDirectory(),
              'test_cache',
              getDefaultCachedKernelPath(
-               config: config,
-               fileSystem: fileSystem,
+               config: globals.config,
+               fileSystem: globals.fs,
                trackWidgetCreation: buildInfo.trackWidgetCreation,
                dartDefines: buildInfo.dartDefines,
                targetModel: TargetModel.flutter,
@@ -149,18 +129,18 @@ class TestCompiler {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
-    final Directory outputDillDirectory = fileSystem.systemTempDirectory.createTempSync(
+    final Directory outputDillDirectory = globals.fs.systemTempDirectory.createTempSync(
       'flutter_test_compiler.',
     );
     outputDill = outputDillDirectory.childFile('output.dill');
-    _logger.printTrace(
+    globals.printTrace(
       'Compiler will use the following file as its incremental dill file: ${outputDill.path}',
     );
-    _logger.printTrace('Listening to compiler controller...');
+    globals.printTrace('Listening to compiler controller...');
     compilerController.stream.listen(
       _onCompilationRequest,
       onDone: () {
-        _logger.printTrace('Deleting ${outputDillDirectory.path}...');
+        globals.printTrace('Deleting ${outputDillDirectory.path}...');
         outputDillDirectory.deleteSync(recursive: true);
       },
     );
@@ -173,15 +153,6 @@ class TestCompiler {
   final String testFilePath;
   final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
-  final ResidentCompilerFactory residentCompilerFactory;
-
-  final Artifacts _artifacts;
-  final Config _config;
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final Platform _platform;
-  final ProcessManager _processManager;
-  final ShutdownHooks _shutdownHooks;
 
   ResidentCompiler? compiler;
   late File outputDill;
@@ -221,16 +192,16 @@ class TestCompiler {
   @visibleForTesting
   Future<ResidentCompiler?> createCompiler() async {
     final ResidentCompiler residentCompiler = residentCompilerFactory.create(
-      artifacts: _artifacts,
-      logger: _logger,
-      processManager: _processManager,
+      artifacts: globals.artifacts!,
+      logger: globals.logger,
+      processManager: globals.processManager,
       buildInfo: buildInfo,
-      platform: _platform,
+      platform: globals.platform,
       testCompilation: true,
-      fileSystem: _fileSystem,
-      shutdownHooks: _shutdownHooks,
-      config: _config,
-      targetPlatform: TargetPlatform.tester,
+      fileSystem: globals.fs,
+      shutdownHooks: globals.shutdownHooks,
+      config: globals.config,
+      targetPlatform: .tester,
     );
     return residentCompiler;
   }
@@ -247,10 +218,7 @@ class TestCompiler {
     }
     while (compilationQueue.isNotEmpty) {
       final _CompilationRequest request = compilationQueue.first;
-      final Logger logger = _logger;
-      final FileSystem fileSystem = _fileSystem;
-      final Platform platform = _platform;
-      logger.printTrace('Compiling ${request.mainUri}');
+      globals.printTrace('Compiling ${request.mainUri}');
       final compilerTime = Stopwatch()..start();
       final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
       var firstCompile = false;
@@ -261,7 +229,7 @@ class TestCompiler {
 
       final invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
-        final File mainFile = fileSystem.file(request.mainUri);
+        final File mainFile = globals.fs.file(request.mainUri);
         final LanguageVersion languageVersion = determineLanguageVersion(
           mainFile,
           buildInfo.packageConfig.packageOf(request.mainUri),
@@ -289,7 +257,7 @@ class TestCompiler {
         packageConfig: buildInfo.packageConfig,
         projectRootPath: flutterProject?.directory.absolute.path,
         checkDartPluginRegistry: true,
-        fs: fileSystem,
+        fs: globals.fs,
       );
       final String? outputPath = compilerOutput?.outputFilename;
 
@@ -307,10 +275,10 @@ class TestCompiler {
         await _shutdown();
       } else {
         if (shouldCopyDillFile) {
-          final String path = request.mainUri.toFilePath(windows: platform.isWindows);
-          final File outputFile = fileSystem.file(outputPath);
+          final String path = request.mainUri.toFilePath(windows: globals.platform.isWindows);
+          final File outputFile = globals.fs.file(outputPath);
           final File kernelReadyToRun = await outputFile.copy('$path.dill');
-          final File testCache = fileSystem.file(testFilePath);
+          final File testCache = globals.fs.file(testFilePath);
           if (firstCompile ||
               !testCache.existsSync() ||
               (testCache.lengthSync() < outputFile.lengthSync())) {
@@ -333,7 +301,7 @@ class TestCompiler {
         compiler!.accept();
         compiler!.reset();
       }
-      logger.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
+      globals.printTrace('Compiling ${request.mainUri} took ${compilerTime.elapsedMilliseconds}ms');
       testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);

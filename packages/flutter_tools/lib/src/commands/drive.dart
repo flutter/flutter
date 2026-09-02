@@ -26,6 +26,7 @@ import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
+import '../drive/import_validator.dart';
 import '../drive/web_driver_service.dart' show Browser;
 import '../ios/devices.dart';
 import '../resident_runner.dart';
@@ -58,7 +59,6 @@ import 'run.dart';
 class DriveCommand extends RunCommandBase {
   DriveCommand({
     required super.toolContext,
-    super.analytics,
     @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
@@ -263,6 +263,40 @@ class DriveCommand extends RunCommandBase {
         throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
       }
     }
+
+    // Ensure host-side flutter_driver test scripts do not import device-side
+    // libraries (e.g. dart:ui, package:flutter, package:flutter_test).
+    final String? testFile = _getTestFile();
+    if (testFile != null && _toolContext.fs.isFileSync(testFile)) {
+      final File packageConfigFile = findPackageConfigFileOrDefault(_toolContext.fs.currentDirectory);
+      if (packageConfigFile.existsSync()) {
+        final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: _toolContext.logger,
+          throwOnError: false,
+        );
+        final validator = DriverTestImportValidator(
+          fileSystem: _toolContext.fs,
+          logger: _toolContext.logger,
+          packageConfig: packageConfig,
+          projectRootPath: _toolContext.fs.currentDirectory.path,
+        );
+        final List<String> errors = validator.validate(_toolContext.fs.file(testFile));
+        if (errors.isNotEmpty) {
+          final buffer = StringBuffer();
+          buffer.writeln('flutter_driver test "$testFile" has invalid imports:');
+          for (final error in errors) {
+            buffer.writeln('  $error');
+          }
+          buffer.writeln(
+            'flutter_driver tests run on the host VM and cannot import libraries that '
+            'depend on dart:ui (like package:flutter or package:flutter_test).',
+          );
+          throwToolExit(buffer.toString());
+        }
+      }
+    }
+
     return super.validateCommand();
   }
 

@@ -162,7 +162,7 @@ void main() {
         logger: BufferLogger.test(),
         httpClient: FakeHttpClient.any(),
         processManager: FakeProcessManager.empty(),
-        artifacts: Artifacts.test(),
+        config: Config.test(), artifacts: Artifacts.test(),
         buildMode: BuildMode.debug,
       );
       expect(() async => devFS.create(), throwsA(isA<DevFSException>()));
@@ -186,7 +186,7 @@ void main() {
       logger: BufferLogger.test(),
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
+      config: Config.test(), artifacts: Artifacts.test(),
       buildMode: BuildMode.debug,
     );
 
@@ -261,7 +261,7 @@ void main() {
       ]),
       uploadRetryThrottle: Duration.zero,
       processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
+      config: Config.test(), artifacts: Artifacts.test(),
       buildMode: BuildMode.debug,
     );
     await devFS.create();
@@ -297,7 +297,7 @@ void main() {
       osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
+      config: Config.test(), artifacts: Artifacts.test(),
       buildMode: BuildMode.debug,
     );
 
@@ -342,7 +342,7 @@ void main() {
         osUtils: FakeOperatingSystemUtils(),
         httpClient: FakeHttpClient.any(),
         processManager: FakeProcessManager.empty(),
-        artifacts: Artifacts.test(),
+        config: Config.test(), artifacts: Artifacts.test(),
         buildMode: BuildMode.debug,
       );
 
@@ -388,7 +388,7 @@ void main() {
       osUtils: FakeOperatingSystemUtils(),
       httpClient: HttpClient(),
       processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
+      config: Config.test(), artifacts: Artifacts.test(),
       buildMode: BuildMode.debug,
     );
 
@@ -440,7 +440,7 @@ void main() {
       osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
+      config: Config.test(), artifacts: Artifacts.test(),
       buildMode: BuildMode.debug,
     );
 
@@ -524,7 +524,7 @@ void main() {
         },
       ),
       processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
+      config: Config.test(), artifacts: Artifacts.test(),
       buildMode: BuildMode.debug,
     );
 
@@ -570,7 +570,7 @@ void main() {
       osUtils: FakeOperatingSystemUtils(),
       httpClient: FakeHttpClient.any(),
       processManager: FakeProcessManager.empty(),
-      artifacts: Artifacts.test(),
+      config: Config.test(), artifacts: Artifacts.test(),
       buildMode: BuildMode.debug,
     );
 
@@ -619,7 +619,7 @@ void main() {
       'sdkroot',
       logger: logger,
       processManager: fakeProcessManager,
-      artifacts: Artifacts.test(),
+      config: Config.test(), artifacts: Artifacts.test(),
       platform: FakePlatform(),
       fileSystem: fileSystem,
       stdoutHandler: generatorStdoutHandler,
@@ -686,7 +686,7 @@ void main() {
         httpClient: FakeHttpClient.any(),
         config: Config.test(),
         processManager: FakeProcessManager.empty(),
-        artifacts: Artifacts.test(),
+        config: Config.test(), artifacts: Artifacts.test(),
         buildMode: BuildMode.debug,
       );
 
@@ -745,7 +745,7 @@ void main() {
         httpClient: FakeHttpClient.any(),
         config: Config.test(),
         processManager: FakeProcessManager.empty(),
-        artifacts: Artifacts.test(),
+        config: Config.test(), artifacts: Artifacts.test(),
         buildMode: BuildMode.debug,
       );
 
@@ -835,7 +835,7 @@ void main() {
         httpClient: FakeHttpClient.any(),
         config: Config.test(),
         processManager: processManager,
-        artifacts: artifacts,
+        config: Config.test(), artifacts: artifacts,
         buildMode: BuildMode.debug,
       );
 
@@ -914,7 +914,7 @@ void main() {
         httpClient: FakeHttpClient.any(),
         config: Config.test(),
         processManager: processManager,
-        artifacts: artifacts,
+        config: Config.test(), artifacts: artifacts,
         buildMode: BuildMode.debug,
       );
 

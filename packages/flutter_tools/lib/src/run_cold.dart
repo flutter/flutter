@@ -6,7 +6,9 @@ import 'dart:async';
 
 import 'base/dds.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'build_info.dart';
+import 'globals.dart' as globals;
 import 'resident_runner.dart';
 import 'tracing.dart';
 import 'vmservice.dart';
@@ -16,32 +18,14 @@ const kFlutterTestOutputsDirEnvName = 'FLUTTER_TEST_OUTPUTS_DIR';
 class ColdRunner extends ResidentRunner {
   ColdRunner(
     super.flutterDevices, {
-    required super.debuggingOptions,
     required super.target,
-    super.analytics,
-    this.applicationBinary,
-    super.artifacts,
-    this.awaitFirstFrameWhenTracing = true,
-    super.buildSystem,
-    super.buildTargets,
-    super.cache,
-    super.commandHelp,
-    super.config,
-    super.dartBuilder,
-    super.dillOutputPath,
-    super.fileSystem,
-    super.flutterVersion,
-    super.logger,
-    super.machine,
-    super.osUtils,
-    super.outputPreferences,
-    super.platform,
-    super.processManager,
-    super.projectRootPath,
-    super.stayResident,
-    super.terminal,
+    required super.debuggingOptions,
     this.traceStartup = false,
-    super.xcode,
+    this.awaitFirstFrameWhenTracing = true,
+    this.applicationBinary,
+    super.stayResident,
+    super.machine,
+    super.dartBuilder,
   }) : super(hotMode: false);
 
   final bool traceStartup;
@@ -54,6 +38,12 @@ class ColdRunner extends ResidentRunner {
 
   @override
   bool get reloadIsRestart => false;
+
+  @override
+  Logger get logger => globals.logger;
+
+  @override
+  FileSystem get fileSystem => globals.fs;
 
   @override
   bool get supportsDetach => _didAttach;
@@ -73,7 +63,7 @@ class ColdRunner extends ResidentRunner {
         }
       }
     } on Exception catch (err, stack) {
-      logger.printError('$err\n$stack');
+      globals.printError('$err\n$stack');
       appFailedToStart();
       return 1;
     }
@@ -83,14 +73,14 @@ class ColdRunner extends ResidentRunner {
       try {
         await connectToServiceProtocol();
       } on Exception catch (exception) {
-        logger.printError(exception.toString());
+        globals.printError(exception.toString());
         appFailedToStart();
         return 2;
       }
     }
 
     final FlutterDevice flutterDevice = flutterDevices.first;
-    if (flutterDevice.vmServiceUris != null) {
+    if (flutterDevice.vmServiceUri != null) {
       final FlutterVmService? vmService = flutterDevice.vmService;
       final DartDevelopmentService dds = flutterDevice.device!.dds;
       // For now, only support one debugger connection.
@@ -104,27 +94,27 @@ class ColdRunner extends ResidentRunner {
       );
     }
 
-    logger.printTrace('Application running.');
+    globals.printTrace('Application running.');
 
     for (final FlutterDevice? device in flutterDevices) {
       if (device!.vmService == null) {
         continue;
       }
-      logger.printTrace('Connected to ${device.device!.displayName}');
+      globals.printTrace('Connected to ${device.device!.displayName}');
     }
 
     if (traceStartup) {
       // Only trace startup for the first device.
       final FlutterDevice device = flutterDevices.first;
       if (device.vmService != null) {
-        logger.printStatus('Tracing startup on ${device.device!.displayName}.');
+        globals.printStatus('Tracing startup on ${device.device!.displayName}.');
         final String outputPath =
-            platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
+            globals.platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
         await downloadStartupTrace(
           device.vmService!,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
-          logger: logger,
-          output: fileSystem.directory(outputPath),
+          logger: globals.logger,
+          output: globals.fs.directory(outputPath),
         );
       }
       appFinished();
@@ -151,14 +141,14 @@ class ColdRunner extends ResidentRunner {
     try {
       await connectToServiceProtocol();
     } on Exception catch (error) {
-      logger.printError('Error connecting to the service protocol: $error');
+      globals.printError('Error connecting to the service protocol: $error');
       return 2;
     }
 
     for (final FlutterDevice? device in flutterDevices) {
       final List<FlutterView> views = await device!.vmService!.getFlutterViews();
       for (final view in views) {
-        logger.printTrace('Connected to $view.');
+        globals.printTrace('Connected to $view.');
       }
     }
 
