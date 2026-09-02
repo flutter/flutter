@@ -121,19 +121,19 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
 Future<bool> installApp(
   Device device,
   ApplicationPackage package, {
-  Logger? logger,
+  required Logger logger,
   bool uninstall = true,
   String? userIdentifier,
 }) async {
   try {
     if (uninstall && await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
-      logger?.printStatus('Uninstalling old version...');
+      logger.printStatus('Uninstalling old version...');
       if (!await device.uninstallApp(package, userIdentifier: userIdentifier)) {
-        logger?.printWarning('Warning: uninstalling old version failed');
+        logger.printWarning('Warning: uninstalling old version failed');
       }
     }
   } on ProcessException catch (e) {
-    logger?.printError('Error accessing device ${device.id}:\n${e.message}');
+    logger.printError('Error accessing device ${device.id}:\n${e.message}');
   }
 
   return device.installApp(package, userIdentifier: userIdentifier);
