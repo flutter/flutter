@@ -6,10 +6,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
@@ -28,10 +26,8 @@ void main() {
   late BufferLogger logger;
   late FakeFlutterVersion flutterVersion;
   late FlutterProject flutterProject;
-  late BuildTargets buildTargets;
 
   setUp(() {
-    buildTargets = const BuildTargetsImpl();
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
     flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', engineRevision: '9.8.7');
@@ -77,7 +73,6 @@ environement:
         logger: logger,
         processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
-        buildTargets: buildTargets,
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
@@ -146,7 +141,6 @@ environement:
         logger: logger,
         processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
-        buildTargets: buildTargets,
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
@@ -156,7 +150,7 @@ environement:
         'target',
         BuildInfo.debug,
         ServiceWorkerStrategy.offlineFirst,
-        compilerConfigs: <WebCompilerConfig>[],
+        compilerConfigs: const <WebCompilerConfig>[],
       );
 
       expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -192,7 +186,6 @@ environement:
         logger: logger,
         processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
-        buildTargets: buildTargets,
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
@@ -201,8 +194,8 @@ environement:
         flutterProject,
         'target',
         BuildInfo.debug,
-        null, // serviceWorkerStrategy is omitted
-        compilerConfigs: <WebCompilerConfig>[],
+        null,
+        compilerConfigs: const <WebCompilerConfig>[],
       );
 
       expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -235,7 +228,6 @@ environement:
         logger: logger,
         processManager: FakeProcessManager.any(),
         buildSystem: buildSystem,
-        buildTargets: buildTargets,
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,

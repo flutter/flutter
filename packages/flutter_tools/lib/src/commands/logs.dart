@@ -4,25 +4,16 @@
 
 import 'dart:async';
 
+import '../android/android_device.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
-import '../context/tool_context.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
-  LogsCommand({
-    required ToolContext toolContext,
-    ApplicationPackageFactory? applicationPackageFactory,
-    ProcessSignal? sigint,
-    ProcessSignal? sigterm,
-  }) : _toolContext = toolContext,
-       _sigint = sigint ?? ProcessSignal.sigint,
-       _sigterm = sigterm ?? ProcessSignal.sigterm,
-       super(toolContext: toolContext) {
-    applicationPackages = applicationPackageFactory;
+  LogsCommand({required this.sigint, required this.sigterm}) {
     argParser.addFlag(
       'clear',
       negatable: false,
@@ -31,11 +22,8 @@ class LogsCommand extends FlutterCommand {
     );
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
+    usesAdbLogFilteringOption(hide: false);
   }
-
-  final ToolContext _toolContext;
-  final ProcessSignal _sigint;
-  final ProcessSignal _sigterm;
 
   @override
   final name = 'logs';
@@ -53,6 +41,8 @@ class LogsCommand extends FlutterCommand {
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   Device? device;
+  final ProcessSignal sigint;
+  final ProcessSignal sigterm;
 
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
@@ -65,7 +55,6 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = _toolContext.logger;
     final Device cachedDevice = device!;
     if (boolArg('clear')) {
       cachedDevice.clearLogs();
@@ -75,9 +64,16 @@ class LogsCommand extends FlutterCommand {
       await cachedDevice.targetPlatform,
     );
 
-    final DeviceLogReader logReader = await cachedDevice.getLogReader(app: app);
+    final bool filtering =
+        argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering');
+    final DeviceLogReader logReader;
+    if (cachedDevice is AndroidDevice) {
+      logReader = await cachedDevice.getLogReader(app: app, adbLogFiltering: filtering);
+    } else {
+      logReader = await cachedDevice.getLogReader(app: app);
+    }
 
-    logger.printStatus('Showing $logReader logs:');
+    globals.printStatus('Showing $logReader logs:');
 
     final exitCompleter = Completer<int>();
 
@@ -92,18 +88,18 @@ class LogsCommand extends FlutterCommand {
 
     // Start reading.
     final StreamSubscription<String> subscription = logReader.logLines.listen(
-      (String message) => logger.printStatus(message, wrap: false),
+      (String message) => globals.printStatus(message, wrap: false),
       onDone: () => maybeComplete(),
-      onError: (Object error) => maybeComplete(error is int ? error : 1),
+      onError: (dynamic error) => maybeComplete(error is int ? error : 1),
     );
 
     // When terminating, close down the log reader.
-    _sigint.watch().listen((ProcessSignal signal) {
+    sigint.watch().listen((ProcessSignal signal) {
       subscription.cancel();
       maybeComplete();
-      logger.printStatus('');
+      globals.printStatus('');
     });
-    _sigterm.watch().listen((ProcessSignal signal) {
+    sigterm.watch().listen((ProcessSignal signal) {
       subscription.cancel();
       maybeComplete();
     });

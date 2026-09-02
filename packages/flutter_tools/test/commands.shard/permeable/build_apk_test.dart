@@ -9,13 +9,13 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart'
     show templateAndroidGradlePluginVersion;
-import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -26,7 +26,7 @@ import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart' show FakeAndroidContext, FakeFlutterVersion, FakeToolContext;
+import '../../src/fakes.dart' show FakeFlutterVersion, TestFeatureFlags;
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -136,11 +136,12 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
     testUsingContext(
-      'reports hcpp analytics default false when not in the manifest and no explicit flag is passed',
+      'reports hcpp analytics false when the manifest is silent and the feature flag is off',
       () async {
         final String projectPath = await createProject(
           tempDir,
@@ -165,6 +166,40 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+      },
+    );
+
+    testUsingContext(
+      'reports hcpp analytics from the enable-hcpp feature flag when the manifest is silent',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=app'],
+        );
+
+        // The manifest does not set EnableHcpp, so the build injects the feature flag value
+        // and the packaged app has HCPP on.
+        await runBuildApkCommand(projectPath);
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.commandUsageValues(
+              workflow: 'apk',
+              commandHasTerminal: false,
+              buildApkTargetPlatform: 'android-arm,android-arm64,android-x64',
+              buildApkBuildMode: 'release',
+              buildApkSplitPerAbi: false,
+              buildApkEnableHcpp: true,
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => FakeAndroidBuilder(),
+        Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
@@ -195,6 +230,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
@@ -228,6 +264,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
@@ -271,6 +308,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       },
     );
@@ -374,6 +412,7 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => FakeAndroidBuilder(),
         Analytics: () => fakeAnalytics,
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -690,6 +729,7 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -744,6 +784,7 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -798,6 +839,7 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -848,6 +890,7 @@ void main() {
         FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => processManager,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -915,6 +958,7 @@ void main() {
         ProcessManager: () => processManager,
         Analytics: () => analytics,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -987,6 +1031,7 @@ void main() {
         ProcessManager: () => processManager,
         Analytics: () => analytics,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
 
@@ -1040,34 +1085,15 @@ void main() {
         ProcessManager: () => processManager,
         Analytics: () => analytics,
         AndroidStudio: () => FakeAndroidStudio(),
+        FeatureFlags: () => TestFeatureFlags(),
       },
     );
   });
 }
 
-Future<BuildApkCommand> runBuildApkCommand(
-  String target, {
-  AndroidSdk? androidSdk,
-  List<String>? arguments,
-}) async {
-  final AndroidSdk effectiveAndroidSdk =
-      androidSdk ??
-      context.get<AndroidSdk>() ??
-      FakeAndroidSdk(globals.fs.directory('android-sdk'));
-  final command = BuildApkCommand(
-    androidBuilder: context.get<AndroidBuilder>() ?? FakeAndroidBuilder(),
-    androidContext: FakeAndroidContext(androidSdk: effectiveAndroidSdk),
-    androidSdk: effectiveAndroidSdk,
-    buildSystem: globals.buildSystem,
-    toolContext: FakeToolContext(
-      fs: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      projectFactory: globals.projectFactory,
-    ),
-  );
-  final CommandRunner<void> runner = createTestCommandRunner(command, context.get<Analytics>());
+Future<BuildApkCommand> runBuildApkCommand(String target, {List<String>? arguments}) async {
+  final command = BuildApkCommand(logger: BufferLogger.test());
+  final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'apk',
     ...?arguments,

@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:unified_analytics/unified_analytics.dart';
@@ -76,7 +75,7 @@ void main() {
       List<String>? args,
       List<String>? globalArgs,
     }) async {
-      final PackagesCommand command = createPackagesCommand();
+      final command = PackagesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         ...?globalArgs,
@@ -848,7 +847,7 @@ flutter:
             ],
           ),
         );
-        await createTestCommandRunner(createPackagesCommand()).run(<String>['packages', 'test']);
+        await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
@@ -886,7 +885,7 @@ flutter:
             ],
           ),
         );
-        await createTestCommandRunner(createPackagesCommand()).run(<String>['packages', 'test']);
+        await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
@@ -927,7 +926,7 @@ flutter:
           ),
         );
         await createTestCommandRunner(
-          createPackagesCommand(),
+          PackagesCommand(),
         ).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
 
         expect(processManager, hasNoRemainingExpectations);
@@ -967,7 +966,7 @@ flutter:
           ),
         );
         await createTestCommandRunner(
-          createPackagesCommand(),
+          PackagesCommand(),
         ).run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
 
         expect(processManager, hasNoRemainingExpectations);
@@ -1004,9 +1003,7 @@ flutter:
             stdin: IOSink(StreamController<List<int>>().sink),
           ),
         );
-        await createTestCommandRunner(
-          createPackagesCommand(),
-        ).run(<String>['pub', 'upgrade', '-h']);
+        await createTestCommandRunner(PackagesCommand()).run(<String>['pub', 'upgrade', '-h']);
 
         expect(processManager, hasNoRemainingExpectations);
       },
@@ -1026,8 +1023,4 @@ flutter:
       },
     );
   });
-}
-
-PackagesCommand createPackagesCommand({ToolContext? toolContext}) {
-  return PackagesCommand(toolContext: toolContext ?? DelegatingToolContext());
 }

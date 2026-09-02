@@ -13,7 +13,6 @@ import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
-import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/template.dart';
@@ -107,15 +106,8 @@ Future<Plugin?> _pluginFromPackage(
   required bool isDevDependency,
   FileSystem? fileSystem,
   PubspecCache? pubspecCache,
-  Logger? logger,
 }) async {
   final FileSystem fs = fileSystem ?? globals.fs;
-  Logger effectiveLogger;
-  try {
-    effectiveLogger = logger ?? globals.logger;
-  } on UnsupportedError {
-    effectiveLogger = BufferLogger.test();
-  }
   YamlMap? pubspec;
   // Use containsKey rather than a null check so that a cached null (meaning
   // "pubspec.yaml is missing or unparseable") is distinguished from a cache
@@ -131,10 +123,10 @@ Future<Plugin?> _pluginFromPackage(
       final Object? parsed = loadYaml(await pubspecFile.readAsString());
       pubspec = parsed is YamlMap ? parsed : null;
     } on YamlException catch (err) {
-      effectiveLogger.printTrace('Failed to parse plugin manifest for $name: $err');
+      globals.printTrace('Failed to parse plugin manifest for $name: $err');
       // Do nothing, potentially not a plugin.
     } on FileSystemException catch (err) {
-      effectiveLogger.printTrace('Failed to read plugin manifest for $name: $err');
+      globals.printTrace('Failed to read plugin manifest for $name: $err');
       // Do nothing, potentially not a plugin.
     }
   }
@@ -151,7 +143,7 @@ Future<Plugin?> _pluginFromPackage(
       : semver.VersionConstraint.parse(flutterConstraintText);
   final String packageRootPath = fs.path.fromUri(packageRoot);
   final dependencies = pubspec['dependencies'] as YamlMap?;
-  effectiveLogger.printTrace('Found plugin $name at $packageRootPath');
+  globals.printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(
     name,
     packageRootPath,
@@ -173,16 +165,9 @@ Future<List<Plugin>> findPlugins(
   PubspecCache? pubspecCache,
   PackageGraph? packageGraph,
   PackageConfig? packageConfig,
-  Logger? logger,
 }) async {
   final plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
-  Logger effectiveLogger;
-  try {
-    effectiveLogger = logger ?? globals.logger;
-  } on UnsupportedError {
-    effectiveLogger = BufferLogger.test();
-  }
 
   // Shared workspace resources (packageGraph, packageConfig) are only valid
   // when the project is actually a member of the workspace — i.e. its name
@@ -198,7 +183,7 @@ Future<List<Plugin>> findPlugins(
     final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
     resolvedPackageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
-      logger: effectiveLogger,
+      logger: globals.logger,
       throwOnError: throwOnError,
     );
   }
@@ -214,7 +199,7 @@ Future<List<Plugin>> findPlugins(
       if (throwOnError) {
         throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`');
       } else {
-        effectiveLogger.printTrace('Could not locate package:$packageName');
+        globals.logger.printTrace('Could not locate package:$packageName');
         continue;
       }
     }
@@ -225,7 +210,6 @@ Future<List<Plugin>> findPlugins(
       isDevDependency: dependency.isExclusiveDevDependency,
       fileSystem: fs,
       pubspecCache: pubspecCache,
-      logger: effectiveLogger,
     );
     if (plugin != null) {
       plugins.add(plugin);
@@ -415,27 +399,6 @@ bool _writeFlutterPluginsList(
   } on FormatException catch (_) {
     return (pluginsChanged: true, contentsChanged: true);
   }
-}
-
-/// Checks if the .flutter-plugins-dependencies file has any plugin
-/// dev dependencies with platform-specific implementations.
-bool flutterPluginsListHasDevDependencies(File pluginsFile) {
-  final String pluginsString = pluginsFile.readAsStringSync();
-  final pluginsJson = json.decode(pluginsString) as Map<String, dynamic>;
-  final plugins = pluginsJson[_kFlutterPluginsPluginListKey] as Map<String, dynamic>;
-
-  for (final MapEntry<String, dynamic> pluginEntries in plugins.entries) {
-    final platformPlugins = pluginEntries.value as List<dynamic>;
-    final bool hasDevDependencies = platformPlugins.cast<Map<String, dynamic>>().any(
-      (Map<String, dynamic> plugin) => plugin[_kFlutterPluginsDevDependencyKey] == true,
-    );
-
-    if (hasDevDependencies) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 /// Creates a map representation of the [plugins] for those supported by [platformKey].
@@ -1285,8 +1248,26 @@ void _createPlatformPluginSymlinks(
     final name = pluginInfo[_kFlutterPluginsNameKey]! as String;
     final path = pluginInfo[_kFlutterPluginsPathKey]! as String;
     final Link link = symlinkDirectory.childLink(name);
-    if (link.existsSync()) {
-      continue;
+    // Inspect the entity on disk without following links. Link.existsSync()
+    // only returns true if the entity is specifically a link; if a conflicting
+    // non-link file or directory occupies link.path, or if an existing link
+    // points to an outdated target, it must be cleaned up before creating the
+    // new link to avoid FileSystemException collisions (such as
+    // ERROR_ALREADY_EXISTS on Windows or EEXIST on POSIX).
+    final FileSystemEntityType entityType = link.fileSystem.typeSync(link.path, followLinks: false);
+    if (entityType == FileSystemEntityType.link) {
+      try {
+        final String target = link.targetSync();
+        if (link.fileSystem.path.canonicalize(target) == link.fileSystem.path.canonicalize(path) &&
+            link.existsSync()) {
+          continue;
+        }
+      } on FileSystemException {
+        // Fall through to delete and recreate if resolving target throws.
+      }
+      ErrorHandlingFileSystem.deleteIfExists(link);
+    } else if (entityType != FileSystemEntityType.notFound) {
+      ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
     }
     try {
       link.createSync(path);
@@ -1315,6 +1296,7 @@ Future<void> refreshPluginsList(
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
+  bool forceSwiftPM = false,
   PubspecCache? pubspecCache,
   PackageGraph? packageGraph,
   PackageConfig? packageConfig,
@@ -1330,7 +1312,10 @@ Future<void> refreshPluginsList(
 
   var swiftPackageManagerEnabledIos = false;
   var swiftPackageManagerEnabledMacos = false;
-  if (!forceCocoaPodsOnly) {
+  if (forceSwiftPM) {
+    swiftPackageManagerEnabledIos = true;
+    swiftPackageManagerEnabledMacos = true;
+  } else if (!forceCocoaPodsOnly) {
     if (iosPlatform) {
       swiftPackageManagerEnabledIos = project.ios.usesSwiftPackageManager;
     }
@@ -1473,6 +1458,7 @@ Future<void> injectPlugins(
             templateRenderer: globals.templateRenderer,
             processUtils: globals.processUtils,
             config: globals.config,
+            logger: globals.logger,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,

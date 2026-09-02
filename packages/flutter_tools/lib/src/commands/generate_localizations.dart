@@ -8,7 +8,6 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../context/tool_context.dart';
 import '../localizations/gen_l10n.dart';
 import '../localizations/localizations_utils.dart';
 import '../runner/flutter_command.dart';
@@ -20,10 +19,15 @@ import '../runner/flutter_command.dart';
 /// For a more comprehensive tutorial on the tool, please see the
 /// [internationalization guide](https://flutter.dev/to/internationalization).
 class GenerateLocalizationsCommand extends FlutterCommand {
-  GenerateLocalizationsCommand({required ToolContext toolContext, Artifacts? artifacts})
-    : _toolContext = toolContext,
-      _artifacts = artifacts,
-      super(toolContext: toolContext) {
+  GenerateLocalizationsCommand({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Artifacts artifacts,
+    required ProcessManager processManager,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _artifacts = artifacts,
+       _processManager = processManager {
     argParser.addOption(
       'arb-dir',
       help: 'The directory where the template and translated arb files are located.',
@@ -210,10 +214,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     );
   }
 
-  final ToolContext _toolContext;
-  final Artifacts? _artifacts;
-
-  Artifacts get _effectiveArtifacts => _artifacts ?? _toolContext.artifacts;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final Artifacts _artifacts;
+  final ProcessManager _processManager;
 
   @override
   String get description => 'Generate localizations for the current project.';
@@ -230,48 +234,39 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     if (argResults!.rest.isNotEmpty) {
       throwToolExit('Unexpected positional argument "${argResults!.rest.first}".');
     }
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final ProcessManager processManager = _toolContext.processManager;
-    final Artifacts artifacts = _effectiveArtifacts;
-
     // Keep in mind that this is also defined in the following locations:
     // 1. flutter_tools/lib/src/build_system/targets/localizations.dart
     // 2. flutter_tools/test/general.shard/build_system/targets/localizations_test.dart
     // Keep the value consistent in all three locations to ensure behavior is the
     // same across "flutter gen-l10n" and "flutter run".
-    final String defaultArbDir = fs.path.join('lib', 'l10n');
+    final String defaultArbDir = _fileSystem.path.join('lib', 'l10n');
     // Get all options associated with gen-l10n.
     final LocalizationOptions options;
-    if (fs.file('l10n.yaml').existsSync()) {
+    if (_fileSystem.file('l10n.yaml').existsSync()) {
       options = parseLocalizationsOptionsFromYAML(
-        file: fs.file('l10n.yaml'),
-        logger: logger,
-        fileSystem: fs,
+        file: _fileSystem.file('l10n.yaml'),
+        logger: _logger,
+        fileSystem: _fileSystem,
         defaultArbDir: defaultArbDir,
       );
-      logger.printStatus(
+      _logger.printStatus(
         'Because l10n.yaml exists, the options defined there will be used '
         'instead.\n'
         'To use the command line arguments, delete the l10n.yaml file in the '
         'Flutter project.\n\n',
       );
     } else {
-      options = parseLocalizationsOptionsFromCommand(
-        command: this,
-        defaultArbDir: defaultArbDir,
-        logger: logger,
-      );
+      options = parseLocalizationsOptionsFromCommand(command: this, defaultArbDir: defaultArbDir);
     }
 
     // Run the localizations generator.
     await generateLocalizations(
-      logger: logger,
+      logger: _logger,
       options: options,
-      projectDir: fs.currentDirectory,
-      fileSystem: fs,
-      artifacts: artifacts,
-      processManager: processManager,
+      projectDir: _fileSystem.currentDirectory,
+      fileSystem: _fileSystem,
+      artifacts: _artifacts,
+      processManager: _processManager,
     );
 
     return FlutterCommandResult.success();

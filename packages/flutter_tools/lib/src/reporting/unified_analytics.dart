@@ -7,6 +7,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../base/config.dart';
 import '../base/io.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../version.dart';
 
 /// This function is called from within the context runner to perform
@@ -77,7 +78,10 @@ String? getEnabledFeatures(Config config) {
 int? getMaxRss(ProcessInfo processInfo) {
   try {
     return processInfo.maxRss;
-  } on Exception {
-    return null;
+  } on Exception catch (error) {
+    globals.printTrace('Querying maxRss failed with error: $error');
+  } on UnsupportedError {
+    // maxRss is unsupported on this platform.
   }
+  return null;
 }

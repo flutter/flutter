@@ -96,7 +96,6 @@ workspace:
   - tools/clang_tidy
   - tools/clangd_check
   - tools/compare_goldens
-  - tools/const_finder
   - tools/engine_tool
   - tools/header_guard_check
   - tools/gen_web_locale_keymap
@@ -222,8 +221,6 @@ dependency_overrides:
     path: ./third_party/dart/pkg/js
   json_rpc_2:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/json_rpc_2
-  kernel:
-    path: ./third_party/dart/pkg/kernel
   logging:
     path: ./third_party/dart/third_party/pkg/core/pkgs/logging
   matcher:

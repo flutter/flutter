@@ -62,6 +62,9 @@ class SymbolizeCommand extends FlutterCommand {
   final DwarfSymbolizationService _dwarfSymbolizationService;
 
   @override
+  ToolContext get toolContext => _toolContext;
+
+  @override
   String get description => 'Symbolize a stack trace from an AOT-compiled Flutter app.';
 
   @override
@@ -319,12 +322,13 @@ class DwarfSymbolizationService {
           },
           onDone: onDone.complete,
           onError: onDone.completeError,
+          cancelOnError: true,
         );
 
     try {
       await onDone.future;
       await output.close();
-    } on Exception catch (err) {
+    } on Object catch (err) {
       throwToolExit('Failed to symbolize stack trace:\n $err');
     }
   }
