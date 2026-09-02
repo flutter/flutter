@@ -553,6 +553,14 @@ class _ForceImplicitScrollPhysics extends ScrollPhysics {
 
   @override
   final bool allowImplicitScrolling;
+
+  @override
+  bool shouldUpdate(covariant _ForceImplicitScrollPhysics old) {
+    if (allowImplicitScrolling != old.allowImplicitScrolling) {
+      return true;
+    }
+    return super.shouldUpdate(old);
+  }
 }
 
 /// Scroll physics used by a [PageView].

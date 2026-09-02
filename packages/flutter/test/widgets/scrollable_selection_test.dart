@@ -1562,8 +1562,6 @@ void main() {
   testWidgets(
     'paged scrollable does not flip pages during selection, but text still gets selected',
     (WidgetTester tester) async {
-      // Dragging a selection past a PageView's edge must not flip to the next
-      // page and snap back. The selection itself must still work.
       final controller = PageController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
