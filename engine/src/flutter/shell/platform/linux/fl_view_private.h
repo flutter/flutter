@@ -79,6 +79,10 @@ GtkWidget* fl_view_gtk4_get_toplevel_window(FlView* view);
 void fl_view_gtk4_set_cursor(FlView* view, const gchar* cursor_name);
 gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event);
 void fl_view_gtk4_setup(FlView* view);
+void fl_view_gtk4_update_accessible_name(FlView* view);
+void fl_view_gtk4_update_accessible_tree(FlView* view);
+void fl_view_gtk4_setup_subsurface(FlView* view);
+void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height);
 #endif
 
 G_END_DECLS
