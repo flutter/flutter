@@ -56,7 +56,7 @@ void main() {
         expect(registrant.existsSync(), isFalse);
 
         await createTestCommandRunner(
-          BuildCommand(
+          BuildCommand(toolContext: FakeToolContext(), 
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
@@ -97,7 +97,7 @@ void main() {
         expect(contentsBeforeBuild, isNot(contains('lib/generated_plugin_registrant.dart')));
 
         await createTestCommandRunner(
-          BuildCommand(
+          BuildCommand(toolContext: FakeToolContext(), 
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
@@ -137,7 +137,7 @@ void main() {
         expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
 
         await createTestCommandRunner(
-          BuildCommand(
+          BuildCommand(toolContext: FakeToolContext(), 
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
@@ -179,7 +179,7 @@ void main() {
         expect(registrant.existsSync(), isTrue);
 
         await createTestCommandRunner(
-          BuildCommand(
+          BuildCommand(toolContext: FakeToolContext(), 
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
@@ -220,7 +220,7 @@ void main() {
         expect(gitignore.readAsStringSync(), contains('lib/generated_plugin_registrant.dart'));
 
         await createTestCommandRunner(
-          BuildCommand(
+          BuildCommand(toolContext: FakeToolContext(), 
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,

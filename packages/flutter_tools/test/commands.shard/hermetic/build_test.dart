@@ -35,7 +35,7 @@ void main() {
     });
 
     final command = BuildCommand(
-        toolContext: FakeToolContext(),
+        toolContext: FakeToolContext(logger: testLogger),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -91,7 +91,7 @@ void main() {
 
     testUsingContext("doesn't fail if --fatal-warnings specified and no warnings occur", () async {
       command = FakeBuildCommand(
-        toolContext: FakeToolContext(),
+        toolContext: FakeToolContext(logger: testLogger),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
@@ -121,7 +121,7 @@ void main() {
 
     testUsingContext("doesn't fail if --fatal-warnings not specified", () async {
       command = FakeBuildCommand(
-        toolContext: FakeToolContext(),
+        toolContext: FakeToolContext(logger: testLogger),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
@@ -151,7 +151,7 @@ void main() {
 
     testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
       command = FakeBuildCommand(
-        toolContext: FakeToolContext(),
+        toolContext: FakeToolContext(logger: testLogger),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
@@ -184,7 +184,7 @@ void main() {
 
     testUsingContext('fails if --fatal-warnings specified and errors emitted', () async {
       command = FakeBuildCommand(
-        toolContext: FakeToolContext(),
+        toolContext: FakeToolContext(logger: testLogger),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,

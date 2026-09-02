@@ -57,7 +57,7 @@ flutter:
         null
 ''');
 
-      final command = BuildCommand(
+      final command = BuildCommand(toolContext: FakeToolContext(), 
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
@@ -124,7 +124,7 @@ flutter:
 
       cache.getArtifactDirectory('gradle_wrapper').createSync(recursive: true);
 
-      final command = BuildCommand(
+      final command = BuildCommand(toolContext: FakeToolContext(), 
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,

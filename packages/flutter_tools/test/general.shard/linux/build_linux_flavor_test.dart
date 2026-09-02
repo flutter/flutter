@@ -75,7 +75,7 @@ void main() {
   }
 
   BuildCommand makeBuildCommand() {
-    return BuildCommand(
+    return BuildCommand(toolContext: FakeToolContext(), 
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,

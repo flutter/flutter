@@ -138,7 +138,7 @@ void main() {
       projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
     );
     return BuildCommand(
-        toolContext: FakeToolContext(),
+        toolContext: toolContext,
       analytics: fakeAnalytics,
       androidSdk: FakeAndroidSdk(),
       artifacts: FakeArtifacts(),
@@ -157,7 +157,6 @@ void main() {
       processUtils: FakeProcessUtils(),
       templateRenderer: FakeTemplateRenderer(),
       terminal: FakeTerminal(),
-      toolContext: toolContext,
       verboseHelp: verboseHelp,
       xcode: FakeXcode(),
     );
