@@ -35,7 +35,7 @@ void main() {
     });
 
     final command = BuildCommand(
-        toolContext: FakeToolContext(logger: testLogger),
+      toolContext: FakeToolContext(logger: testLogger),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -111,9 +111,8 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
       );
       try {
-        await createTestCommandRunner(
-          command,
-        ).run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']);
+        await createTestCommandRunner(command)
+            .run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']);
       } on Exception {
         fail('Unexpected exception thrown');
       }
@@ -172,9 +171,8 @@ void main() {
       );
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
       await expectLater(
-        createTestCommandRunner(
-          command,
-        ).run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
+        createTestCommandRunner(command)
+            .run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
         throwsToolExit(
           message:
               'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
@@ -205,9 +203,8 @@ void main() {
       );
       testLogger.printError('Error: Danger Will Robinson!');
       await expectLater(
-        createTestCommandRunner(
-          command,
-        ).run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
+        createTestCommandRunner(command)
+            .run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
         throwsToolExit(
           message:
               'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',

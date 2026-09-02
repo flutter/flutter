@@ -53,7 +53,8 @@ void main() {
     () async {
       fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(toolContext: FakeToolContext(), 
+        BuildCommand(
+          toolContext: FakeToolContext(),
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -95,7 +96,8 @@ void main() {
     'Refuses to build for web when feature is disabled',
     () async {
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(toolContext: FakeToolContext(), 
+        BuildCommand(
+          toolContext: FakeToolContext(),
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: MemoryFileSystem.test(),
@@ -119,8 +121,7 @@ void main() {
       expect(
         () => runner.run(<String>['build', 'web', '--no-pub']),
         throwsToolExit(
-          message:
-              '"build web" is not currently supported. To enable, run "flutter config --enable-web".',
+          message: '"build web" is not currently supported. To enable, run "flutter config --enable-web".',
         ),
       );
     },
@@ -135,7 +136,8 @@ void main() {
   testUsingContext(
     'Setup for a web build with default output directory',
     () async {
-      final buildCommand = BuildCommand(toolContext: FakeToolContext(), 
+      final buildCommand = BuildCommand(
+        toolContext: FakeToolContext(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -175,30 +177,28 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          'TargetFile': 'lib/main.dart',
-          'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
-          'BuildMode': 'release',
-          'DartDefines':
-              'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          'DartObfuscation': 'false',
-          'TrackWidgetCreation': 'false',
-          'TreeShakeIcons': 'true',
-          'UseLocalCanvasKit': 'true',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              'TargetFile': 'lib/main.dart',
+              'HasWebPlugins': 'true',
+              'ServiceWorkerStrategy': 'offline-first',
+              'BuildMode': 'release',
+              'DartDefines': 'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              'DartObfuscation': 'false',
+              'TrackWidgetCreation': 'false',
+              'TreeShakeIcons': 'true',
+              'UseLocalCanvasKit': 'true',
+            });
+          }),
     },
   );
 
   testUsingContext(
     'Passes --web-define values to environment defines with prefix',
     () async {
-      final buildCommand = BuildCommand(toolContext: FakeToolContext(), 
+      final buildCommand = BuildCommand(
+        toolContext: FakeToolContext(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -249,7 +249,8 @@ void main() {
   testUsingContext(
     'Builds successfully without --web-define',
     () async {
-      final buildCommand = BuildCommand(toolContext: FakeToolContext(), 
+      final buildCommand = BuildCommand(
+        toolContext: FakeToolContext(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -296,7 +297,8 @@ void main() {
     'Infers target entrypoint correctly from --target',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/136830.
-      final buildCommand = BuildCommand(toolContext: FakeToolContext(), 
+      final buildCommand = BuildCommand(
+        toolContext: FakeToolContext(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -335,23 +337,20 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          'TargetFile': 'lib/a.dart',
-          'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
-          'BuildMode': 'release',
-          'DartDefines':
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          'DartObfuscation': 'false',
-          'TrackWidgetCreation': 'false',
-          'TreeShakeIcons': 'true',
-          'UseLocalCanvasKit': 'true',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              'TargetFile': 'lib/a.dart',
+              'HasWebPlugins': 'true',
+              'ServiceWorkerStrategy': 'offline-first',
+              'BuildMode': 'release',
+              'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              'DartObfuscation': 'false',
+              'TrackWidgetCreation': 'false',
+              'TreeShakeIcons': 'true',
+              'UseLocalCanvasKit': 'true',
+            });
+          }),
     },
   );
 
@@ -359,7 +358,8 @@ void main() {
     'Infers target entrypoint correctly from positional argument list',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/136830.
-      final buildCommand = BuildCommand(toolContext: FakeToolContext(), 
+      final buildCommand = BuildCommand(
+        toolContext: FakeToolContext(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -398,30 +398,28 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          'TargetFile': 'lib/a.dart',
-          'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
-          'BuildMode': 'release',
-          'DartDefines':
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          'DartObfuscation': 'false',
-          'TrackWidgetCreation': 'false',
-          'TreeShakeIcons': 'true',
-          'UseLocalCanvasKit': 'true',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              'TargetFile': 'lib/a.dart',
+              'HasWebPlugins': 'true',
+              'ServiceWorkerStrategy': 'offline-first',
+              'BuildMode': 'release',
+              'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              'DartObfuscation': 'false',
+              'TrackWidgetCreation': 'false',
+              'TreeShakeIcons': 'true',
+              'UseLocalCanvasKit': 'true',
+            });
+          }),
     },
   );
 
   testUsingContext(
     'Does not allow -O0 optimization level',
     () async {
-      final buildCommand = BuildCommand(toolContext: FakeToolContext(), 
+      final buildCommand = BuildCommand(
+        toolContext: FakeToolContext(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -472,7 +470,8 @@ void main() {
   testUsingContext(
     'Setup for a web build with a user specified output directory',
     () async {
-      final buildCommand = BuildCommand(toolContext: FakeToolContext(), 
+      final buildCommand = BuildCommand(
+        toolContext: FakeToolContext(),
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -516,23 +515,20 @@ void main() {
       FileSystem: () => fileSystem,
       FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
       ProcessManager: () => processManager,
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (
-        Target target,
-        Environment environment,
-      ) {
-        expect(environment.defines, <String, String>{
-          'TargetFile': 'lib/main.dart',
-          'HasWebPlugins': 'true',
-          'ServiceWorkerStrategy': 'offline-first',
-          'BuildMode': 'release',
-          'DartDefines':
-              'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
-          'DartObfuscation': 'false',
-          'TrackWidgetCreation': 'false',
-          'TreeShakeIcons': 'true',
-          'UseLocalCanvasKit': 'true',
-        });
-      }),
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            expect(environment.defines, <String, String>{
+              'TargetFile': 'lib/main.dart',
+              'HasWebPlugins': 'true',
+              'ServiceWorkerStrategy': 'offline-first',
+              'BuildMode': 'release',
+              'DartDefines': 'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              'DartObfuscation': 'false',
+              'TrackWidgetCreation': 'false',
+              'TreeShakeIcons': 'true',
+              'UseLocalCanvasKit': 'true',
+            });
+          }),
     },
   );
 
@@ -1038,7 +1034,8 @@ void main() {
     () async {
       fileSystem.file(fileSystem.path.join('web')).deleteSync(recursive: true);
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(toolContext: FakeToolContext(), 
+        BuildCommand(
+          toolContext: FakeToolContext(),
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
