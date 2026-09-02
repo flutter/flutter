@@ -8,6 +8,8 @@ package com.example.android_engine_test.extensions
 
 import android.app.Activity
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.view.MotionEvent
 import io.flutter.Log
@@ -68,14 +70,13 @@ class NativeDriverSupportPlugin :
             "tap_view" -> {
                 // Decode the selector.
                 val kind = call.argument<String>("kind")
-                lateinit var selector: NativeSelector
-                when (kind) {
+                val selector: NativeSelector = when (kind) {
                     "byNativeAccessibilityLabel" -> {
-                        selector = NativeSelector.ByContentDescription(call.argument("label")!!)
+                        NativeSelector.ByContentDescription(call.argument("label")!!)
                     }
                     "byNativeIntegerId" -> {
                         val stringId = call.argument<String>("id")!!
-                        selector = NativeSelector.ByViewId(stringId.toInt())
+                        NativeSelector.ByViewId(stringId.toInt())
                     }
                     else -> {
                         result.error("INVALID_SELECTOR", "Not supported", kind)
@@ -83,26 +84,40 @@ class NativeDriverSupportPlugin :
                     }
                 }
 
-                // Fail if not found.
-                val found = selector.find(activity.window.decorView.rootView)
-                if (found == null) {
-                    result.error("VIEW_NOT_FOUND", "No view was found", call.arguments())
-                    return
+                val handler = Handler(Looper.getMainLooper())
+                val startTime = SystemClock.uptimeMillis()
+                val timeoutMs = 5000L
+
+                fun tryFindAndTap() {
+                    val currentActivity = this.activity
+                    if (currentActivity == null) {
+                        result.error("NO_ACTIVITY", "Activity is null", null)
+                        return
+                    }
+                    val root = currentActivity.window.decorView.rootView
+                    val found = selector.find(root)
+                    if (found != null) {
+                        // Send tap event.
+                        val x = found.x + found.width / 2
+                        val y = found.y + found.height / 2
+                        val downTime = SystemClock.uptimeMillis()
+
+                        val pressDown = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, x, y, 0)
+                        found.dispatchTouchEvent(pressDown)
+                        pressDown.recycle()
+
+                        val pressUp = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_UP, x, y, 0)
+                        found.dispatchTouchEvent(pressUp)
+                        pressUp.recycle()
+                        result.success(null)
+                    } else if (SystemClock.uptimeMillis() - startTime < timeoutMs) {
+                        handler.postDelayed(::tryFindAndTap, 50)
+                    } else {
+                        result.error("VIEW_NOT_FOUND", "No view was found", call.arguments())
+                    }
                 }
 
-                // Send tap event.
-                val x = found.x + found.width / 2
-                val y = found.y + found.height / 2
-                val downTime = SystemClock.uptimeMillis()
-
-                val pressDown = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN, x, y, 0)
-                found.dispatchTouchEvent(pressDown)
-                pressDown.recycle()
-
-                val pressUp = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_UP, x, y, 0)
-                found.dispatchTouchEvent(pressUp)
-                pressUp.recycle()
-                result.success(null)
+                tryFindAndTap()
             }
             else -> {
                 result.notImplemented()
