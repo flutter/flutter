@@ -128,13 +128,13 @@ class BuildCommand extends FlutterCommand {
           platform: effectivePlatform,
           preRunValidator:
               preRunValidator ??
-              ((!fileSystem
+              (!fileSystem
                       .directory(
                         fileSystem.path.join(Cache.flutterRoot ?? '', 'packages', 'flutter_tools'),
                       )
                       .existsSync()
                   ? _NoopPreRunValidator()
-                  : PreRunValidator(fileSystem: fileSystem))),
+                  : PreRunValidator(fileSystem: fileSystem)),
           processInfo: ProcessInfo(fileSystem),
           processManager: processManager,
           processUtils: effectiveProcessUtils,
