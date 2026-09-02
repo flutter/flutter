@@ -126,7 +126,6 @@ Future<void> main(List<String> args) async {
       );
       return generateCommands(
         toolDependencies: toolDependencies,
-        toolContext: toolDependencies.toolContext,
         verboseHelp: verboseHelp,
         verbose: verbose,
         extensionManager: manager,
@@ -135,7 +134,6 @@ Future<void> main(List<String> args) async {
     },
     verbose: verbose,
     muteCommandLogging: muteCommandLogging,
-    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     overrides: <Type, Generator>{
       FlutterHookRunner: () => FlutterHookRunnerNative(),
@@ -237,7 +235,6 @@ List<FlutterCommand> generateCommands({
   ExtensionTemplateManager? extensionTemplateManager,
 }) => <FlutterCommand>[
   AnalyzeCommand(
-    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     fileSystem: toolDependencies.toolContext.fs,
     platform: toolDependencies.toolContext.platform,
@@ -259,7 +256,6 @@ List<FlutterCommand> generateCommands({
   ),
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: toolDependencies.buildSystem),
   AttachCommand(
-    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     stdio: toolDependencies.toolContext.stdio,
     logger: toolDependencies.toolContext.logger,
@@ -273,7 +269,6 @@ List<FlutterCommand> generateCommands({
     fileSystem: toolDependencies.toolContext.fs,
     buildSystem: toolDependencies.buildSystem,
     osUtils: toolDependencies.toolContext.os,
-    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     androidSdk: toolDependencies.androidContext.androidSdk,
     logger: toolDependencies.toolContext.logger,
@@ -298,7 +293,6 @@ List<FlutterCommand> generateCommands({
     xcodeProjectInterpreter: toolDependencies.appleContext.xcodeProjectInterpreter,
   ),
   ConfigCommand(
-    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     androidContext: toolDependencies.androidContext,
     toolContext: toolDependencies.toolContext,
@@ -329,7 +323,6 @@ List<FlutterCommand> generateCommands({
   ),
   DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
   DriveCommand(
-    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     fileSystem: toolDependencies.toolContext.fs,
     logger: toolDependencies.toolContext.logger,
@@ -350,7 +343,6 @@ List<FlutterCommand> generateCommands({
   LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
   PackagesCommand(),
   PrecacheCommand(
-    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     cache: toolDependencies.toolContext.cache,
     logger: toolDependencies.toolContext.logger,
@@ -367,7 +359,6 @@ List<FlutterCommand> generateCommands({
     nativeAssetsBuilder: toolDependencies.toolContext.nativeAssetsBuilder,
   ),
   WidgetPreviewCommand(
-    toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     logger: toolDependencies.toolContext.logger,
     fs: toolDependencies.toolContext.fs,
