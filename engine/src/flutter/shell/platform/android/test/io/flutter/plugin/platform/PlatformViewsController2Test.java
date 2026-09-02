@@ -591,6 +591,76 @@ public class PlatformViewsController2Test {
     verify(mockFlutterView, never()).invalidate();
   }
 
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createFlutterPlatformViewEagerlyAttachesToFlutterView() {
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(registryImpl);
+    FlutterJNI jni = new FlutterJNI();
+    FlutterView flutterView = attach(jni, controller);
+
+    PlatformViewRegistry registry = controller.getRegistry();
+    registry.registerViewFactory(
+        CountingPlatformView.VIEW_TYPE_ID,
+        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+          @Override
+          public PlatformView create(Context context, int viewId, Object args) {
+            return new CountingPlatformView(context);
+          }
+        });
+
+    int viewId = 0;
+    final PlatformViewCreationRequest request =
+        PlatformViewCreationRequest.createHCPPRequest(
+            viewId, CountingPlatformView.VIEW_TYPE_ID, View.LAYOUT_DIRECTION_LTR, null);
+    PlatformView pView = controller.createFlutterPlatformView(request);
+    assertNotNull(pView);
+    assertNotNull(pView.getView().getParent());
+    assertTrue(pView.getView().getParent() instanceof FlutterMutatorView);
+    FlutterMutatorView mutatorView = (FlutterMutatorView) pView.getView().getParent();
+    assertEquals(flutterView, mutatorView.getParent());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void attachToViewEagerlyAttachesPreExistingPlatformViews() {
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(registryImpl);
+    final Context context = ApplicationProvider.getApplicationContext();
+    FlutterJNI jni = new FlutterJNI();
+    final DartExecutor executor = new DartExecutor(jni, mock(AssetManager.class));
+    executor.onAttachedToJNI();
+    controller.attach(context, executor);
+
+    PlatformViewRegistry registry = controller.getRegistry();
+    registry.registerViewFactory(
+        CountingPlatformView.VIEW_TYPE_ID,
+        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+          @Override
+          public PlatformView create(Context context, int viewId, Object args) {
+            return new CountingPlatformView(context);
+          }
+        });
+
+    int viewId = 0;
+    final PlatformViewCreationRequest request =
+        PlatformViewCreationRequest.createHCPPRequest(
+            viewId, CountingPlatformView.VIEW_TYPE_ID, View.LAYOUT_DIRECTION_LTR, null);
+    PlatformView pView = controller.createFlutterPlatformView(request);
+    assertNotNull(pView);
+    assertNull(pView.getView().getParent());
+
+    FlutterView flutterView = new FlutterView(context, new FlutterSurfaceView(context));
+    controller.attachToView(flutterView);
+
+    assertNotNull(pView.getView().getParent());
+    assertTrue(pView.getView().getParent() instanceof FlutterMutatorView);
+    FlutterMutatorView mutatorView = (FlutterMutatorView) pView.getView().getParent();
+    assertEquals(flutterView, mutatorView.getParent());
+  }
+
   private static ByteBuffer encodeMethodCall(MethodCall call) {
     final ByteBuffer buffer = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
     buffer.rewind();
