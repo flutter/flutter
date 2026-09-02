@@ -69,7 +69,7 @@ class HotRunner extends ResidentRunner {
     super.flutterDevices, {
     required super.debuggingOptions,
     required super.target,
-    super.analytics,
+
     this.applicationBinary,
     super.artifacts,
     this.benchmarkMode = false,

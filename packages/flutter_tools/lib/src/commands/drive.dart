@@ -59,7 +59,7 @@ import 'run.dart';
 class DriveCommand extends RunCommandBase {
   DriveCommand({
     required super.toolContext,
-    super.analytics,
+
     @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},

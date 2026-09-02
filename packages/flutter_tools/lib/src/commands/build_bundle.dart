@@ -22,7 +22,7 @@ class BuildBundleCommand extends BuildSubCommand {
     required BuildSystem buildSystem,
     required ToolContext toolContext,
     required bool verboseHelp,
-    super.analytics,
+
     BundleBuilder? bundleBuilder,
     FeatureFlags? featureFlags,
   }) : _buildSystem = buildSystem,

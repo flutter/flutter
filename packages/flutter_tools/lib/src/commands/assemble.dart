@@ -97,7 +97,7 @@ class AssembleCommand extends FlutterCommand {
   AssembleCommand({
     required BuildSystem buildSystem,
     required ToolContext toolContext,
-    super.analytics,
+
     bool verboseHelp = false,
   }) : _buildSystem = buildSystem,
        _toolContext = toolContext,
