@@ -45,7 +45,6 @@ import 'daemon.dart';
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   RunCommandBase({
     required bool verboseHelp,
-    super.analytics,
     super.outputPreferences,
     super.toolContext,
   }) {
@@ -813,12 +812,12 @@ class RunCommand extends RunCommandBase {
 
     if (argResults!.wasParsed('build')) {
       if (boolArg('build')) {
-        globals.printWarning(
+        _toolContext.logger.printWarning(
           'The "--build" flag is deprecated and will be removed in a future release. '
           'Building is the default behavior, so this flag can be safely removed.',
         );
       } else {
-        globals.printWarning(
+        _toolContext.logger.printWarning(
           'The "--no-build" flag is deprecated and will be removed in a future release. '
           'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
         );

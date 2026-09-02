@@ -230,13 +230,13 @@ class FlutterDevice {
           }
           // Exponential backoff.
           final int backoffPeriod = (1 << (attempts - 1)) * 100;
-          globals.printTrace(
+          logger.printTrace(
             'Failed to make initial connection to VM Service (attempt $attempts of $kMaxAttempts). '
             'Retrying in ${backoffPeriod}ms...',
           );
           await Future<void>.delayed(Duration(milliseconds: backoffPeriod));
         } on Exception catch (e) {
-          globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
+          logger.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
           rethrow;
         }
       }
@@ -284,7 +284,7 @@ class FlutterDevice {
         } on ToolExit {
           rethrow;
         } on Exception catch (e) {
-          globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
+          logger.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
           throw Exception('failed to connect to $vmServiceUri $e');
         }
       }
@@ -304,17 +304,17 @@ class FlutterDevice {
                   flutterProject: FlutterProject.current(),
                   printStructuredErrorLogMethod: printStructuredErrorLogMethod,
                   device: device,
-                  logger: globals.logger,
+                  logger: logger,
                 ),
                 if (!existingDds)
                   device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
               ])
               as FlutterVmService?;
     } on Exception catch (exception) {
-      globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
+      logger.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
       rethrow;
     }
-    globals.printTrace('Successfully connected to service protocol: $vmServiceUri');
+    logger.printTrace('Successfully connected to service protocol: $vmServiceUri');
 
     vmService = service;
     if (debuggingOptions.enableDds && !existingDds) {
@@ -1274,13 +1274,13 @@ abstract class ResidentRunner extends ResidentHandlers {
     _lastBuild = await buildSystem.buildIncremental(compositeTarget, _environment, _lastBuild);
     if (!_lastBuild!.success) {
       for (final ExceptionMeasurement exceptionMeasurement in _lastBuild!.exceptions.values) {
-        _logger.printError(
+        logger.printError(
           exceptionMeasurement.exception.toString(),
           stackTrace: _logger.isVerbose ? exceptionMeasurement.stackTrace : null,
         );
       }
     }
-    _logger.printTrace('complete');
+    logger.printTrace('complete');
   }
 
   @protected
@@ -1292,7 +1292,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         vmserviceOutFile.createSync(recursive: true);
         vmserviceOutFile.writeAsStringSync(address);
       } on FileSystemException {
-        _logger.printError(
+        logger.printError(
           'Failed to write vmservice-out-file at ${debuggingOptions.vmserviceOutFile}',
         );
       }
@@ -1333,13 +1333,13 @@ abstract class ResidentRunner extends ResidentHandlers {
             try {
               await dds.shutdown();
             } on Object catch (error) {
-              _logger.printTrace('Warning: Failed to shut down DDS for device: $error');
+              logger.printTrace('Warning: Failed to shut down DDS for device: $error');
             }
           }
         }),
       ).timeout(const Duration(seconds: 10));
     } on TimeoutException {
-      _logger.printTrace('Warning: shutdownDartDevelopmentService timed out.');
+      logger.printTrace('Warning: shutdownDartDevelopmentService timed out.');
     }
   }
 
@@ -1350,7 +1350,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     if (_dillOutputPath != null) {
       return;
     }
-    _logger.printTrace('Caching compiled dill');
+    logger.printTrace('Caching compiled dill');
     final File outputDill = _fileSystem.file(dillOutputPath);
     if (outputDill.existsSync()) {
       final TargetPlatform? targetPlatform = flutterDevices.firstOrNull?.targetPlatform;
@@ -1383,14 +1383,14 @@ abstract class ResidentRunner extends ResidentHandlers {
         if (errorsSinceReload == 0) {
           // We print a blank line around the first error, to more clearly emphasize it
           // in the output. (Other errors don't get this.)
-          _logger.printStatus('');
+          logger.printStatus('');
         }
-        _logger.printStatus('${json['renderedErrorText']}');
+        logger.printStatus('${json['renderedErrorText']}');
         if (errorsSinceReload == 0) {
-          _logger.printStatus('');
+          logger.printStatus('');
         }
       } else {
-        _logger.printError(
+        logger.printError(
           'Received an invalid ${_logger.terminal.bolden("Flutter.Error")} message from app: $json',
         );
       }
@@ -1449,11 +1449,11 @@ abstract class ResidentRunner extends ResidentHandlers {
   }
 
   Future<void> _serviceProtocolDone(dynamic object) async {
-    _logger.printTrace('Service protocol connection closed.');
+    logger.printTrace('Service protocol connection closed.');
   }
 
   Future<void> _serviceProtocolError(Object error, StackTrace stack) {
-    _logger.printTrace('Service protocol connection closed with an error: $error\n$stack');
+    logger.printTrace('Service protocol connection closed with an error: $error\n$stack');
     return Future<void>.error(error, stack);
   }
 
@@ -1465,7 +1465,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     if (_finished.isCompleted) {
       return;
     }
-    _logger.printStatus('Lost connection to device.');
+    logger.printStatus('Lost connection to device.');
 
     final Version? xcodeVersion = _xcode?.currentVersion;
     for (final FlutterDevice device in flutterDevices) {
@@ -1474,7 +1474,7 @@ abstract class ResidentRunner extends ResidentHandlers {
           debuggingOptions.buildInfo.isProfile &&
           !(debuggingOptions.iosProfileDebugger ??
               (xcodeVersion == null || xcodeVersion.major < 26))) {
-        _logger.printStatus(
+        logger.printStatus(
           'If the application crashed, you can attach a debugger to get a more complete '
           'stack trace by running again with the "--ios-profile-debugger" flag.',
         );
@@ -1489,7 +1489,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     if (_finished.isCompleted) {
       return;
     }
-    _logger.printStatus('Application finished.');
+    logger.printStatus('Application finished.');
     _finished.complete(0);
   }
 
@@ -1535,7 +1535,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         continue;
       }
       // Caution: This log line is parsed by device lab tests.
-      _logger.printStatus(
+      logger.printStatus(
         'A Dart VM Service on ${device.device!.name} is available at: '
         '${device.vmService!.httpAddress}',
       );
@@ -1544,7 +1544,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       // See https://github.com/flutter/flutter/issues/182052
       final Uri? dtdUri = connectionInfo?.dtdUri ?? device.device!.dds.dtdUri;
       if (debuggingOptions.printDtd && dtdUri != null) {
-        _logger.printStatus('The Dart Tooling Daemon is available at: $dtdUri');
+        logger.printStatus('The Dart Tooling Daemon is available at: $dtdUri');
       }
       final Uri? devToolsUri = device.device!.devToolsUri;
       if (devToolsUri != null) {
@@ -1560,7 +1560,7 @@ abstract class ResidentRunner extends ResidentHandlers {
           return base.toString();
         }
 
-        _logger.printStatus(
+        logger.printStatus(
           'The Flutter DevTools debugger and profiler '
           'on ${device.device!.name} is available at: ${urlToDisplayString(devToolsUri)}',
         );
@@ -1899,7 +1899,7 @@ class TerminalHandler {
 
   void setupTerminal() {
     if (!_logger.quiet) {
-      _logger.printStatus('');
+      logger.printStatus('');
       residentRunner.printHelp(details: false);
     }
     _terminal.singleCharMode = true;
@@ -1920,7 +1920,7 @@ class TerminalHandler {
       _addSignalHandler(io.ProcessSignal.sigusr1, _handleSignal);
       _addSignalHandler(io.ProcessSignal.sigusr2, _handleSignal);
       if (_pidFile != null) {
-        _logger.printTrace('Writing pid to: $_pidFile');
+        logger.printTrace('Writing pid to: $_pidFile');
         _actualPidFile = _processInfo.writePidFile(_pidFile);
       }
     }
@@ -1931,7 +1931,7 @@ class TerminalHandler {
     assert(residentRunner.stayResident);
     if (_actualPidFile != null) {
       try {
-        _logger.printTrace('Deleting pid file (${_actualPidFile!.path}).');
+        logger.printTrace('Deleting pid file (${_actualPidFile!.path}).');
         _actualPidFile!.deleteSync();
       } on FileSystemException catch (error) {
         _logger.printWarning(
@@ -1957,7 +1957,7 @@ class TerminalHandler {
   /// This can be extended to support other layouts (AZERTY, QWERTZ, etc.) by
   /// adding entries to [keyboardLayoutMappings].
   Future<bool> _commonTerminalInputHandler(String character) async {
-    _logger.printStatus(''); // the key the user tapped might be on this line
+    logger.printStatus(''); // the key the user tapped might be on this line
     // Map non-Latin characters to Latin equivalents based on physical key position
     character = _mapKeyToLatin(character);
     switch (character) {
@@ -2013,7 +2013,7 @@ class TerminalHandler {
           throwToolExit(result.message);
         }
         if (!result.isOk) {
-          _logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
+          logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
         }
         return true;
       case 'R':
@@ -2026,7 +2026,7 @@ class TerminalHandler {
           throwToolExit(result.message);
         }
         if (!result.isOk) {
-          _logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
+          logger.printStatus('Try again after fixing the above error(s).', emphasis: true);
         }
         return true;
       case 's':
@@ -2072,7 +2072,7 @@ class TerminalHandler {
     // When terminal doesn't support line mode, '\n' can sneak into the input.
     command = command.trim();
     if (_processingUserRequest) {
-      _logger.printTrace('Ignoring terminal input: "$command" because we are busy.');
+      logger.printTrace('Ignoring terminal input: "$command" because we are busy.');
       return;
     }
     _processingUserRequest = true;
@@ -2083,21 +2083,21 @@ class TerminalHandler {
     } catch (error, st) {
       // Don't print stack traces for known error types.
       if (error is! ToolExit) {
-        _logger.printError('$error\n$st');
+        logger.printError('$error\n$st');
       }
       await _cleanUp(null);
       rethrow;
     } finally {
       _processingUserRequest = false;
       if (_reportReady) {
-        _logger.printStatus('ready');
+        logger.printStatus('ready');
       }
     }
   }
 
   Future<void> _handleSignal(io.ProcessSignal signal) async {
     if (_processingUserRequest) {
-      _logger.printTrace('Ignoring signal: "$signal" because we are busy.');
+      logger.printTrace('Ignoring signal: "$signal" because we are busy.');
       return;
     }
     _processingUserRequest = true;
