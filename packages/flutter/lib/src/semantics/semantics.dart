@@ -112,9 +112,8 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 ///
 /// Use [ChildSemanticsConfigurationsResultBuilder] to generate the return
 /// value.
-typedef ChildSemanticsConfigurationsDelegate = ChildSemanticsConfigurationsResult Function(
-  List<SemanticsConfiguration>,
-);
+typedef ChildSemanticsConfigurationsDelegate =
+    ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
 /// Controls how accessibility focus is blocked.
 ///
@@ -6461,6 +6460,9 @@ class SemanticsConfiguration {
   /// is blocked in the a11y focus (different from input focus).
   AccessibilityFocusBlockType get accessibilityFocusBlockType => _accessibilityFocusBlockType;
   set accessibilityFocusBlockType(AccessibilityFocusBlockType value) {
+    if (_accessibilityFocusBlockType == value) {
+      return;
+    }
     _accessibilityFocusBlockType = value;
     _flags = _flags.copyWith(
       isAccessibilityFocusBlocked: value != AccessibilityFocusBlockType.none,
