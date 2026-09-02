@@ -9,7 +9,7 @@ import '../cmake_project.dart';
 /// Adds the snippet to the CMake file that copies the native assets.
 ///
 /// ```cmake
-/// # Copy the native assets provided by the build.dart from all packages.
+/// # Copy the native assets provided by the hook/build.dart from all packages.
 /// set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
 /// install(DIRECTORY "${NATIVE_ASSETS_DIR}"
 ///    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
@@ -39,7 +39,7 @@ class CmakeNativeAssetsMigration extends ProjectMigrator {
     final copyNativeAssetsCommand =
         '''
 
-# Copy the native assets provided by the build.dart from all packages.
+# Copy the native assets provided by the hook/build.dart from all packages.
 set(NATIVE_ASSETS_DIR "\${PROJECT_BUILD_DIR}native_assets/$os/")
 install(DIRECTORY "\${NATIVE_ASSETS_DIR}"
   DESTINATION "\${INSTALL_BUNDLE_LIB_DIR}"
