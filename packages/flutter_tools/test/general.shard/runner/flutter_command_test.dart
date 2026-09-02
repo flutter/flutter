@@ -2213,6 +2213,7 @@ class FakeClock extends Fake implements SystemClock {
 class _TestRunCommandThatOnlyValidates extends RunCommand {
   _TestRunCommandThatOnlyValidates({ToolContext? toolContext})
     : super(
+        appleContext: FakeAppleContext(),
         toolContext:
             toolContext ??
             FakeToolContext(

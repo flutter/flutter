@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/commands/run.dart';
+import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -29,7 +30,6 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
@@ -290,9 +290,9 @@ void main() {
             ..specifiedDeviceId = 'invalid-device-id';
 
           await expectLater(
-            () => createTestCommandRunner(
-              command,
-            ).run(<String>['run', '-d', 'invalid-device-id', '--no-pub', '--no-hot']),
+            () =>
+                createTestCommandRunner(command)
+                    .run(<String>['run', '-d', 'invalid-device-id', '--no-pub', '--no-hot']),
             throwsToolExit(),
           );
           expect(
@@ -322,12 +322,10 @@ void main() {
 
           final command = TestRunCommandThatOnlyValidates();
           await expectLater(
-            createTestCommandRunner(
-              command,
-            ).run(<String>['run', '--no-pub', '--device-user', '10']),
+            createTestCommandRunner(command)
+                .run(<String>['run', '--no-pub', '--device-user', '10']),
             throwsToolExit(
-              message:
-                  '--device-user is only supported for Android. At least one Android device is required.',
+              message: '--device-user is only supported for Android. At least one Android device is required.',
             ),
           );
         },
@@ -348,9 +346,8 @@ void main() {
           testDeviceManager.devices = <Device>[device];
 
           final command = TestRunCommandThatOnlyValidates();
-          await createTestCommandRunner(
-            command,
-          ).run(<String>['run', '--no-pub', '--device-user', '10']);
+          await createTestCommandRunner(command)
+              .run(<String>['run', '--no-pub', '--device-user', '10']);
           // Finishes normally without error.
         },
         overrides: <Type, Generator>{
@@ -464,9 +461,8 @@ void main() {
               .createSync(recursive: true);
 
           await expectToolExitLater(
-            createTestCommandRunner(
-              command,
-            ).run(<String>['run', '--no-pub', '--no-hot', '--uninstall-first']),
+            createTestCommandRunner(command)
+                .run(<String>['run', '--no-pub', '--no-hot', '--uninstall-first']),
             isNull,
           );
 
@@ -555,9 +551,8 @@ void main() {
           testDeviceManager.devices = <Device>[mockDevice];
 
           await expectToolExitLater(
-            createTestCommandRunner(
-              command,
-            ).run(<String>['run', '--no-pub', '--no-hot', 'test/widget_test.dart']),
+            createTestCommandRunner(command)
+                .run(<String>['run', '--no-pub', '--no-hot', 'test/widget_test.dart']),
             isNull,
           );
 
@@ -686,9 +681,8 @@ void main() {
             testDeviceManager.devices = <Device>[device];
 
             await expectLater(
-              () => createTestCommandRunner(
-                command,
-              ).run(<String>['run', '--no-pub', '--no-devtools', '--machine', '-d', device.id]),
+              () => createTestCommandRunner(command)
+                  .run(<String>['run', '--no-pub', '--no-devtools', '--machine', '-d', device.id]),
               throwsToolExit(),
             );
             expect(command.appDomain.enableDevTools, isFalse);
@@ -721,9 +715,8 @@ void main() {
           command = TestRunCommandWithFakeResidentRunner()
             ..fakeResidentRunner = FakeResidentRunner();
           try {
-            await createTestCommandRunner(
-              command,
-            ).run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']);
+            await createTestCommandRunner(command)
+                .run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']);
           } on Exception {
             fail('Unexpected exception thrown');
           }
@@ -759,9 +752,8 @@ void main() {
             ..fakeResidentRunner = FakeResidentRunner();
           testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
           await expectLater(
-            createTestCommandRunner(
-              command,
-            ).run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']),
+            createTestCommandRunner(command)
+                .run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']),
             throwsToolExit(
               message:
                   'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
@@ -781,9 +773,8 @@ void main() {
             ..fakeResidentRunner = FakeResidentRunner();
           testLogger.printError('Error: Danger Will Robinson!');
           await expectLater(
-            createTestCommandRunner(
-              command,
-            ).run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']),
+            createTestCommandRunner(command)
+                .run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']),
             throwsToolExit(
               message:
                   'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
@@ -1224,9 +1215,8 @@ void main() {
             toolContext: _createToolContext(),
             appleContext: FakeAppleContext(),
           );
-          await createTestCommandRunner(
-            command,
-          ).run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
+          await createTestCommandRunner(command)
+              .run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1310,9 +1300,9 @@ void main() {
             appleContext: FakeAppleContext(),
           );
           await expectLater(
-            () => createTestCommandRunner(
-              command,
-            ).run(<String>['run', '--no-pub', '--no-resident', '--wasm']),
+            () =>
+                createTestCommandRunner(command)
+                    .run(<String>['run', '--no-pub', '--no-resident', '--wasm']),
             throwsToolExit(message: '--wasm is only supported on the web platform'),
           );
         },
@@ -1421,9 +1411,8 @@ server:
             toolContext: _createToolContext(),
             appleContext: FakeAppleContext(),
           );
-          await createTestCommandRunner(
-            command,
-          ).run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
+          await createTestCommandRunner(command)
+              .run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1451,9 +1440,8 @@ server:
             toolContext: _createToolContext(),
             appleContext: FakeAppleContext(),
           );
-          await createTestCommandRunner(
-            command,
-          ).run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
+          await createTestCommandRunner(command)
+              .run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1604,9 +1592,8 @@ server:
             toolContext: _createToolContext(),
             appleContext: FakeAppleContext(),
           );
-          await createTestCommandRunner(
-            command,
-          ).run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
+          await createTestCommandRunner(command)
+              .run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1702,9 +1689,8 @@ server:
             toolContext: _createToolContext(),
             appleContext: FakeAppleContext(),
           );
-          await createTestCommandRunner(
-            command,
-          ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
+          await createTestCommandRunner(command)
+              .run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1728,9 +1714,9 @@ server:
             appleContext: FakeAppleContext(),
           );
           await expectLater(
-            () => createTestCommandRunner(
-              command,
-            ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=preview/']),
+            () =>
+                createTestCommandRunner(command)
+                    .run(<String>['run', '--no-pub', '--no-hot', '--base-href=preview/']),
             throwsToolExit(message: '--base-href should start and end with /'),
           );
         },
@@ -1752,9 +1738,9 @@ server:
             appleContext: FakeAppleContext(),
           );
           await expectLater(
-            () => createTestCommandRunner(
-              command,
-            ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview']),
+            () =>
+                createTestCommandRunner(command)
+                    .run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview']),
             throwsToolExit(message: '--base-href should start and end with /'),
           );
         },
@@ -2084,9 +2070,9 @@ server:
         appleContext: FakeAppleContext(),
       );
       await expectLater(
-        () => createTestCommandRunner(
-          command,
-        ).run(<String>['run', '--web-launch-url=http://flutter.dev']),
+        () =>
+            createTestCommandRunner(command)
+                .run(<String>['run', '--web-launch-url=http://flutter.dev']),
         throwsA(
           isException.having(
             (Exception exception) => exception.toString(),
@@ -2451,8 +2437,14 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 }
 
 class TestRunCommandForUsageValues extends RunCommand {
-  TestRunCommandForUsageValues({List<Device>? devices, ToolContext? toolContext, AppleContext? appleContext})
-    : super(toolContext: toolContext ?? _createToolContext(), appleContext: appleContext ?? FakeAppleContext()) {
+  TestRunCommandForUsageValues({
+    List<Device>? devices,
+    ToolContext? toolContext,
+    AppleContext? appleContext,
+  }) : super(
+         toolContext: toolContext ?? _createToolContext(),
+         appleContext: appleContext ?? FakeAppleContext(),
+       ) {
     this.devices = devices;
   }
 
