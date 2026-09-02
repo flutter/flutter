@@ -925,7 +925,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
        _toolContext = toolContext,
        super(
          logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,
          verboseHelp: verboseHelp,
        ) {
