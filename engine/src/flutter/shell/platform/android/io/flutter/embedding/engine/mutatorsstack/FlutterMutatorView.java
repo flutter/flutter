@@ -29,7 +29,7 @@ import io.flutter.util.ViewUtils;
  * its children.
  */
 public class FlutterMutatorView extends FrameLayout {
-  private FlutterMutatorsStack mutatorsStack;
+  @Nullable private FlutterMutatorsStack mutatorsStack;
   private float screenDensity;
   private int left;
   private int top;
@@ -112,6 +112,10 @@ public class FlutterMutatorView extends FrameLayout {
 
   @Override
   public void draw(Canvas canvas) {
+    if (mutatorsStack == null) {
+      super.draw(canvas);
+      return;
+    }
     // Apply all clippings on the parent canvas.
     canvas.save();
     for (Path path : mutatorsStack.getFinalClippingPaths()) {
@@ -139,6 +143,10 @@ public class FlutterMutatorView extends FrameLayout {
 
   @Override
   public void dispatchDraw(Canvas canvas) {
+    if (mutatorsStack == null) {
+      super.dispatchDraw(canvas);
+      return;
+    }
     // Apply all the transforms on the child canvas.
     canvas.save();
 
@@ -148,6 +156,9 @@ public class FlutterMutatorView extends FrameLayout {
   }
 
   private Matrix getPlatformViewMatrix() {
+    if (mutatorsStack == null) {
+      return new Matrix();
+    }
     Matrix finalMatrix = new Matrix(mutatorsStack.getFinalMatrix());
 
     // Reverse scale based on screen scale.
