@@ -32,7 +32,7 @@ sealed class NativeSelector {
             parent: View,
             found: ArrayList<View>
         ) {
-            if (contentDescription == parent.contentDescription) {
+            if (contentDescription == parent.contentDescription?.toString()) {
                 found.add(parent)
             }
             if (parent is ViewGroup) {
