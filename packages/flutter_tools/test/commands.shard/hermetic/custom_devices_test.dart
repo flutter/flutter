@@ -207,13 +207,12 @@ CustomDevicesCommand createCustomDevicesCommand({
         );
 
   final operatingSystemUtils = FakeOperatingSystemUtils(
-    hostPlatform: platform.isLinux
-        ? HostPlatform.linux_x64
-        : platform.isWindows
-        ? HostPlatform.windows_x64
-        : platform.isMacOS
-        ? HostPlatform.darwin_x64
-        : throw UnsupportedError('Unsupported operating system'),
+    hostPlatform: switch (platform) {
+      _ when platform.isLinux => HostPlatform.linux_x64,
+      _ when platform.isWindows => HostPlatform.windows_x64,
+      _ when platform.isMacOS => HostPlatform.darwin_x64,
+      _ => throw UnsupportedError('Unsupported operating system'),
+    },
   );
 
   final ToolContext effectiveToolContext =
@@ -861,19 +860,16 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'custom-devices delete command throws tool exit with invalid device id',
-      () async {
-        final CommandRunner<void> runner = createCustomDevicesCommandRunner(featureEnabled: true);
-        await expectLater(
-          runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
-          throwsToolExit(
-            message:
-                'Couldn\'t find device with id "testid" in config at "/.flutter_custom_devices.json"',
-          ),
-        );
-      },
-    );
+    testUsingContext('custom-devices delete command throws tool exit with invalid device id', () async {
+      final CommandRunner<void> runner = createCustomDevicesCommandRunner(featureEnabled: true);
+      await expectLater(
+        runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
+        throwsToolExit(
+          message:
+              'Couldn\'t find device with id "testid" in config at "/.flutter_custom_devices.json"',
+        ),
+      );
+    });
 
     testWithoutContext(
       'custom-devices list command throws tool exit when config contains errors',
