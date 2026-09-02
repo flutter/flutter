@@ -1160,12 +1160,16 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
     return widget.route.requestFocus;
   }
 
-  // This should be called to wrap any changes to route.isCurrent, route.canPop,
-  // and route.offstage.
-  void _routeSetState(VoidCallback fn) {
+  void _maybeRequestRouteFocus() {
     if (widget.route.isCurrent && !_shouldIgnoreFocusRequest && _shouldRequestFocus) {
       widget.route.navigator!.focusNode.enclosingScope?.setFirstFocus(focusScopeNode);
     }
+  }
+
+  // This should be called to wrap any changes to route.isCurrent, route.canPop,
+  // and route.offstage.
+  void _routeSetState(VoidCallback fn) {
+    _maybeRequestRouteFocus();
     setState(fn);
   }
 
@@ -2226,6 +2230,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         /* internal state already changed */
       });
       _modalBarrier.markNeedsBuild();
+    } else {
+      // During the build phase, setState is skipped (the tree is already
+      // rebuilding), but the route focus update must not be. For example,
+      // removing the top-most page of a page-based navigator updates the
+      // routes during build, and the route below must still return focus to
+      // its previously focused node before the removed route's focus scope is
+      // disposed.
+      _scopeKey.currentState?._maybeRequestRouteFocus();
     }
     _modalScope.maintainState = maintainState;
   }
