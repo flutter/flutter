@@ -1457,18 +1457,23 @@ abstract class FlutterCommand extends Command<void> {
     ]);
   }
 
+  FeatureFlags? _cachedFeatureFlags;
+
   FeatureFlags get _featureFlags {
+    if (_cachedFeatureFlags != null) {
+      return _cachedFeatureFlags!;
+    }
     try {
       final FeatureFlags? contextFeatureFlags = context.get<FeatureFlags>();
       if (contextFeatureFlags != null) {
-        return contextFeatureFlags;
+        return _cachedFeatureFlags = contextFeatureFlags;
       }
     } on UnsupportedError {
       // In testWithoutContext, context.get is not supported.
     }
     final ToolContext? toolContext = this.toolContext;
     if (toolContext != null) {
-      return FlutterFeatureFlags(
+      return _cachedFeatureFlags = FlutterFeatureFlags(
         flutterVersion: toolContext.flutterVersion,
         featuresConfig: FlutterFeaturesConfig(
           globalConfig: toolContext.config,
@@ -1478,7 +1483,7 @@ abstract class FlutterCommand extends Command<void> {
         platform: toolContext.platform,
       );
     }
-    return featureFlags;
+    return _cachedFeatureFlags = featureFlags;
   }
 
   void _addFeatureFlagsToDartDefines(List<String> dartDefines) {
