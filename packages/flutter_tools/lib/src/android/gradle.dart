@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 
@@ -20,9 +19,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/platform.dart';
-import '../context/android_context.dart';
-import '../context/tool_context.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
@@ -30,6 +26,8 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
@@ -38,8 +36,8 @@ import 'android_builder.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
-import 'gradle_utils.dart';
 import 'gradle_utils.dart' as gradle;
+import 'gradle_utils.dart';
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/cmake_android_16k_pages_migration.dart';
@@ -165,53 +163,28 @@ const kMaxRetryTime = Duration(seconds: 10);
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder({
-    ToolContext? toolContext,
-    AndroidContext? androidContext,
-    Analytics? analytics,
-    Java? java,
-    Logger? logger,
-    ProcessManager? processManager,
-    FileSystem? fileSystem,
-    Artifacts? artifacts,
-    GradleUtils? gradleUtils,
-    Platform? platform,
-    AndroidStudio? androidStudio,
-    AndroidSdk? androidSdk,
-  }) : _androidContext = androidContext,
-       _toolContext = toolContext,
-       _java = java ?? androidContext?.java,
-       _logger = logger ?? toolContext!.logger,
-       _fileSystem = fileSystem ?? toolContext!.fs,
-       _artifacts = artifacts ?? toolContext!.artifacts,
-       _analytics = analytics!,
-       _gradleUtils = gradleUtils ?? androidContext!.gradleUtils,
-       _androidStudio = androidStudio ?? androidContext?.androidStudio,
-       _androidSdk = androidSdk ?? androidContext?.androidSdk,
-       _fileSystemUtils =
-           toolContext?.fileSystemUtils ??
-           FileSystemUtils(
-             fileSystem: fileSystem ?? toolContext!.fs,
-             platform: platform ?? toolContext.platform,
-           ),
-       _processUtils =
-           toolContext?.processUtils ??
-           ProcessUtils(
-             logger: logger ?? toolContext!.logger,
-             processManager: processManager ?? toolContext.processManager,
-           );
+    required ToolContext toolContext,
+    required AndroidContext androidContext,
+    required Analytics analytics,
+  }) : _toolContext = toolContext,
+       _androidContext = androidContext,
+       _analytics = analytics,
+       _fileSystemUtils = toolContext.fileSystemUtils,
+       _processUtils = toolContext.processUtils;
 
-  final ToolContext? _toolContext;
-  final AndroidContext? _androidContext;
-  final Java? _java;
-  final Logger _logger;
-  final ProcessUtils _processUtils;
-  final FileSystem _fileSystem;
-  final Artifacts _artifacts;
+  final ToolContext _toolContext;
+  final AndroidContext _androidContext;
   final Analytics _analytics;
-  final GradleUtils _gradleUtils;
   final FileSystemUtils _fileSystemUtils;
-  final AndroidStudio? _androidStudio;
-  final AndroidSdk? _androidSdk;
+  final ProcessUtils _processUtils;
+
+  Java? get _java => _androidContext.java;
+  Logger get _logger => _toolContext.logger;
+  FileSystem get _fileSystem => _toolContext.fs;
+  Artifacts get _artifacts => _toolContext.artifacts;
+  GradleUtils get _gradleUtils => _androidContext.gradleUtils;
+  AndroidStudio? get _androidStudio => _androidContext.androidStudio;
+  AndroidSdk? get _androidSdk => _androidContext.androidSdk;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
