@@ -115,11 +115,18 @@ import Foundation
 
   @objc(encodeMethodCall:)
   func encode(_ methodCall: FlutterMethodCall) -> Data {
+    // Swift Dictionary hashes differently from a NSDictionary thus the ordering
+    // can be different and that makes the resulting Data different.
+    // Historically this method was implemented in Objective-C, and a few tests expect
+    // this method to output the exact same Data as the Objective-C implementation,
+    // so keep using NSDictionary for backward compatibility.
+    let dictionary =
+      [
+        "method": methodCall.method,
+        "args": wrapNil(methodCall.arguments),
+      ] as NSDictionary
     // TODO(LongCatIsLooong): https://github.com/flutter/flutter/issues/192122
-    FlutterJSONMessageCodec.sharedInstance().encode([
-      "method": methodCall.method,
-      "args": wrapNil(methodCall.arguments),
-    ]) ?? Data()
+    return FlutterJSONMessageCodec.sharedInstance().encode(dictionary) ?? Data()
   }
 
   func encodeSuccessEnvelope(_ result: Any?) -> Data {
