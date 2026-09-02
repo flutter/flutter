@@ -67,14 +67,16 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     events.append("applicationWillTerminate")
   }
 
-  public func application(
+    public func application(
     _ application: UIApplication,
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
     events.append("applicationOpenURL")
+    events.append("url:\(url.absoluteString)")
     return true
   }
+
 
   public func application(
     _ application: UIApplication,
@@ -85,25 +87,38 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     return true
   }
 
-  public func application(
+    public func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
     restorationHandler: @escaping ([Any]) -> Void
   ) -> Bool {
     events.append("applicationContinueUserActivity")
+    if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+       let url = userActivity.webpageURL {
+      events.append("url:\(url.absoluteString)")
+    }
     return true
   }
 
+
   // MARK: - Scene Events
 
-  public func scene(
+    public func scene(
     _ scene: UIScene,
     willConnectTo session: UISceneSession,
     options connectionOptions: UIScene.ConnectionOptions?
   ) -> Bool {
     events.append("sceneWillConnect")
+    if let userActivity = connectionOptions?.userActivities.first(where: { $0.activityType == NSUserActivityTypeBrowsingWeb }),
+       let url = userActivity.webpageURL {
+      events.append("url:\(url.absoluteString)")
+    }
+    if let urlContext = connectionOptions?.urlContexts.first {
+      events.append("url:\(urlContext.url.absoluteString)")
+    }
     return true
   }
+
 
   public func sceneDidDisconnect(_ scene: UIScene) {
     events.append("sceneDidDisconnect")
@@ -125,20 +140,27 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     events.append("sceneDidEnterBackground")
   }
 
-  public func scene(
+    public func scene(
     _ scene: UIScene,
     openURLContexts URLContexts: Set<UIOpenURLContext>
   ) -> Bool {
     events.append("sceneOpenURLContexts")
+    if let url = URLContexts.first?.url {
+      events.append("url:\(url.absoluteString)")
+    }
     return true
   }
 
-  public func scene(_ scene: UIScene, continue userActivity: NSUserActivity)
-    -> Bool
-  {
+
+    public func scene(_ scene: UIScene, continue userActivity: NSUserActivity) -> Bool {
     events.append("sceneContinueUserActivity")
+    if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+       let url = userActivity.webpageURL {
+      events.append("url:\(url.absoluteString)")
+    }
     return true
   }
+
 
   public func windowScene(
     _ windowScene: UIWindowScene,

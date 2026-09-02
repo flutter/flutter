@@ -35,6 +35,9 @@ public class MyPlugin: NSObject, FlutterPlugin {
     didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any] = [:]
   ) -> Bool {
     events.append("applicationDidFinishLaunchingWithOptions")
+    if let url = launchOptions[UIApplication.LaunchOptionsKey.url] as? URL {
+      events.append("url:\(url.absoluteString)")
+    }
     return true
   }
 
@@ -66,12 +69,14 @@ public class MyPlugin: NSObject, FlutterPlugin {
     events.append("applicationWillTerminate")
   }
 
+  @objc(application:openURL:options:)
   public func application(
     _ application: UIApplication,
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
     events.append("applicationOpenURL")
+    events.append("url:\(url.absoluteString)")
     return true
   }
 
@@ -84,12 +89,17 @@ public class MyPlugin: NSObject, FlutterPlugin {
     return true
   }
 
+  @objc(application:continueUserActivity:restorationHandler:)
   public func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
-    restorationHandler: @escaping ([Any]) -> Void
+    restorationHandler: (([Any]?) -> Void)?
   ) -> Bool {
     events.append("applicationContinueUserActivity")
+    if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+       let url = userActivity.webpageURL {
+      events.append("url:\(url.absoluteString)")
+    }
     return true
   }
 }
