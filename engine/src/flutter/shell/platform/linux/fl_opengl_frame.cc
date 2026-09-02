@@ -7,6 +7,7 @@
 #include <epoxy/egl.h>
 #include <epoxy/gl.h>
 
+#include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 
 struct _FlOpenGLFrame {
@@ -82,13 +83,8 @@ void fl_opengl_frame_composite(FlOpenGLFrame* self,
   if (self->framebuffer == nullptr ||
       fl_framebuffer_get_width(self->framebuffer) != width ||
       fl_framebuffer_get_height(self->framebuffer) != height) {
-    GLint general_format = GL_RGBA;
-    if (layers[0]->type == kFlutterLayerContentTypeBackingStore &&
-        layers[0]->backing_store != nullptr &&
-        layers[0]->backing_store->type == kFlutterBackingStoreTypeOpenGL &&
-        layers[0]->backing_store->open_gl.framebuffer.target == GL_BGRA8_EXT) {
-      general_format = GL_BGRA_EXT;
-    }
+    GLint general_format =
+        fl_compositor_opengl_get_frame_format(layers, layers_count);
     g_clear_object(&self->framebuffer);
     self->framebuffer =
         fl_framebuffer_new(general_format, width, height, self->shareable);
@@ -117,6 +113,18 @@ void fl_opengl_frame_composite(FlOpenGLFrame* self,
                       fl_framebuffer_get_id(self->framebuffer));
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, self->pixels);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, saved_read_framebuffer_binding);
+  } else {
+    // This frame is drawn by GTK on the main thread using a different OpenGL
+    // context to the one it was rendered with. Sharing a texture between
+    // contexts requires the rendering to have completed before the other
+    // context uses it - glFlush() only guarantees the commands have been
+    // submitted, not that they have finished. Without this GTK can sample a
+    // partially rendered frame, and drivers can fail in ways that leave the
+    // context unusable.
+    //
+    // The frame is copied out of the GPU with glReadPixels() when it can't be
+    // shared, which already waits for the rendering to complete.
+    glFinish();
   }
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
