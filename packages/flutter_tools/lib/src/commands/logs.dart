@@ -9,20 +9,22 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../context/tool_context.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
+/// Show log output for running Flutter apps.
 class LogsCommand extends FlutterCommand {
+  /// Creates a new [LogsCommand].
+  ///
+  /// If [toolContext] is omitted, ambient fallbacks from [globals] will be used.
   LogsCommand({
-    required ToolContext toolContext,
     ApplicationPackageFactory? applicationPackageFactory,
     ProcessSignal? sigint,
     ProcessSignal? sigterm,
-  }) : _toolContext = toolContext,
-       _sigint = sigint ?? ProcessSignal.sigint,
-       _sigterm = sigterm ?? ProcessSignal.sigterm,
-       super(toolContext: toolContext) {
+    super.toolContext,
+  }) : _sigint = sigint ?? ProcessSignal.sigint,
+       _sigterm = sigterm ?? ProcessSignal.sigterm {
     applicationPackages = applicationPackageFactory;
     argParser.addFlag(
       'clear',
@@ -35,7 +37,6 @@ class LogsCommand extends FlutterCommand {
     usesAdbLogFilteringOption(hide: false);
   }
 
-  final ToolContext _toolContext;
   final ProcessSignal _sigint;
   final ProcessSignal _sigterm;
 
@@ -67,7 +68,7 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext?.logger ?? globals.logger;
     final Device cachedDevice = device!;
     if (boolArg('clear')) {
       cachedDevice.clearLogs();

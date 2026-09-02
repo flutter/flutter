@@ -199,6 +199,28 @@ void main() {
         ),
       );
     }, overrides: <Type, Generator>{DeviceManager: () => deviceManager, Platform: () => platform});
+
+    testUsingContext('works when toolContext is omitted (fallback to ambient)', () async {
+      final logReader = FakeDeviceLogReader();
+      final fakeDevice = _LoggingFakeDevice('phone', deviceId, deviceLogReader: logReader);
+      deviceManager.attachedDevices.add(fakeDevice);
+      final termSignal = FakeProcessSignal();
+      final intSignal = FakeProcessSignal();
+      final command = LogsCommand(sigterm: termSignal, sigint: intSignal);
+      final Future<void> commandFuture = createTestCommandRunner(
+        command,
+      ).run(<String>['-d', deviceId, 'logs']);
+      await pumpEventQueue(times: 5);
+
+      logReader.addLine('Ambient logger line');
+      await pumpEventQueue(times: 5);
+
+      expect(testLogger.statusText, contains('Ambient logger line'));
+
+      intSignal.send(1);
+      await pumpEventQueue(times: 5);
+      await commandFuture;
+    }, overrides: <Type, Generator>{DeviceManager: () => deviceManager, Platform: () => platform});
   });
 }
 
