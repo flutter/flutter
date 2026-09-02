@@ -88,6 +88,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
           exitCode: SIGABRT,
@@ -117,6 +118,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
           exitCode: 255,
@@ -149,12 +151,12 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
           process: process,
         ),
       ]);
-
       await runner.run(<String>['analyze', '--flutter-repo']);
 
       final Map<String, Object?> request = await process.initializeRequest;
@@ -180,6 +182,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--no-with-fine-dependencies',
             '--no-plugins',
             '--suppress-analytics',
           ],
@@ -200,6 +203,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--no-with-fine-dependencies',
             '--no-plugins',
             '--suppress-analytics',
           ],
@@ -220,6 +224,7 @@ void main() {
             'Artifact.engineDartSdkPath',
             '--disable-server-feature-completion',
             '--disable-server-feature-search',
+            '--no-with-fine-dependencies',
             '--suppress-analytics',
           ],
           exitCode: 255,
