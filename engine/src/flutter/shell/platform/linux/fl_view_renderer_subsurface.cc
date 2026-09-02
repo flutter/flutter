@@ -306,6 +306,13 @@ static void fl_view_renderer_subsurface_present_layers(
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
 
+  // The frame is presented below using the subsurface's own OpenGL context.
+  // Sharing a texture between contexts requires the rendering to have completed
+  // before the other context uses it - making a context current only flushes
+  // the previous one, which guarantees the commands have been submitted, not
+  // that they have finished.
+  glFinish();
+
   // Present the composited frame directly to the subsurface using its own EGL
   // context. This reads the engine's frame texture directly, as the subsurface
   // context shares resources with the engine.
