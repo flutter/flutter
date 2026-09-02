@@ -61,10 +61,9 @@ class EmulatorsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Doctor? doctor = _doctor;
     final Platform platform = toolContext.platform;
 
-    if (doctor != null && doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
+    if (_doctor != null && _doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
       throwToolExit(
         'Unable to find any emulator sources. Please ensure you have some\n'
         'Android AVD images ${platform.isMacOS ? 'or an iOS Simulator ' : ''}available.',
@@ -123,11 +122,11 @@ class EmulatorsCommand extends FlutterCommand {
 
   Future<void> _listEmulators(String? searchText) async {
     final Logger logger = toolContext.logger;
-    final EmulatorManager? emulatorManager = _emulatorManager;
-    final List<Emulator> emulators = switch (emulatorManager) {
+    final List<Emulator> emulators = switch (_emulatorManager) {
       null => const <Emulator>[],
-      _ when searchText == null => await emulatorManager.getAllAvailableEmulators(),
-      _ => await emulatorManager.getEmulatorsMatching(searchText),
+      final EmulatorManager manager when searchText == null =>
+        await manager.getAllAvailableEmulators(),
+      final EmulatorManager manager => await manager.getEmulatorsMatching(searchText),
     };
 
     if (emulators.isEmpty) {
