@@ -94,7 +94,6 @@ class BuildCommand extends FlutterCommand {
       logger: logger,
     );
 
-    final effectiveProcessUtils = processUtils;
     final OutputPreferences effectiveOutputPreferences =
         outputPreferences ?? (context.get<OutputPreferences>() ?? OutputPreferences.test());
     final ToolContext effectiveToolContext =
@@ -115,7 +114,7 @@ class BuildCommand extends FlutterCommand {
           ),
           flutterVersion: flutterVersion,
           fs: fileSystem,
-          git: Git(currentPlatform: effectivePlatform, runProcessWith: effectiveProcessUtils),
+          git: Git(currentPlatform: effectivePlatform, runProcessWith: processUtils),
           localEngineLocator: LocalEngineLocator(
             fileSystem: fileSystem,
             flutterRoot: Cache.flutterRoot ?? '',
@@ -144,7 +143,7 @@ class BuildCommand extends FlutterCommand {
                       : PreRunValidator(fileSystem: fileSystem))),
           processInfo: ProcessInfo(fileSystem),
           processManager: processManager,
-          processUtils: effectiveProcessUtils,
+          processUtils: processUtils,
           projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
           shutdownHooks: ShutdownHooks(),
           signals: LocalSignals.instance,
