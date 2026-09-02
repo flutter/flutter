@@ -286,7 +286,7 @@ List<FlutterCommand> generateCommands({
     cache: toolDependencies.toolContext.cache,
     flutterVersion: toolDependencies.toolContext.flutterVersion,
   ),
-  ChannelCommand(verboseHelp: verboseHelp),
+  ChannelCommand(verboseHelp: verboseHelp, toolContext: toolDependencies.toolContext),
   CleanCommand(
     verbose: verbose,
     toolContext: toolDependencies.toolContext,
@@ -314,7 +314,14 @@ List<FlutterCommand> generateCommands({
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp, extensionManager: extensionManager),
-  DoctorCommand(verbose: verbose, extensionManager: extensionManager),
+  DoctorCommand(
+    verbose: verbose,
+    toolContext: toolDependencies.toolContext,
+    // Provide the shared singleton from globals until dependent commands
+    // (e.g. DevicesCommand, EmulatorsCommand) are migrated to DI.
+    doctor: globals.doctor,
+    extensionManager: extensionManager,
+  ),
   DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
   DriveCommand(
     verboseHelp: verboseHelp,

@@ -189,6 +189,92 @@ void main() {
         ProcessManager: () => processManager,
       },
     );
+
+    testUsingContext(
+      '--no-plugins passes --no-plugins to language-server',
+      () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--no-plugins',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: 'error',
+          ),
+        ]);
+        await expectLater(
+          runner.run(<String>['analyze', '--no-plugins']),
+          throwsA(isA<ToolExit>()),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      '--benchmark passes --no-plugins to language-server by default',
+      () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--no-plugins',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: 'error',
+          ),
+        ]);
+        await expectLater(runner.run(<String>['analyze', '--benchmark']), throwsA(isA<ToolExit>()));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      '--benchmark with --plugins enables plugins',
+      () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: 'error',
+          ),
+        ]);
+        await expectLater(
+          runner.run(<String>['analyze', '--benchmark', '--plugins']),
+          throwsA(isA<ToolExit>()),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
   });
 
   testWithoutContext('analyze inRepo', () {

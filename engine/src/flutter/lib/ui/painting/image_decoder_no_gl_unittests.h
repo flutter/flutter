@@ -69,6 +69,18 @@ class TestImpellerAllocator : public impeller::Allocator {
 
   ~TestImpellerAllocator() = default;
 
+  const std::vector<std::shared_ptr<TestImpellerTexture>>& created_textures()
+      const {
+    return created_textures_;
+  }
+
+  std::shared_ptr<TestImpellerTexture> last_created_texture() const {
+    if (created_textures_.empty()) {
+      return nullptr;
+    }
+    return created_textures_.back();
+  }
+
  private:
   uint16_t MinimumBytesPerRow(PixelFormat format) const override { return 0; }
 
@@ -83,8 +95,12 @@ class TestImpellerAllocator : public impeller::Allocator {
 
   std::shared_ptr<Texture> OnCreateTexture(const TextureDescriptor& desc,
                                            bool threadsafe) override {
-    return std::make_shared<TestImpellerTexture>(desc);
+    auto texture = std::make_shared<TestImpellerTexture>(desc);
+    created_textures_.push_back(texture);
+    return texture;
   }
+
+  std::vector<std::shared_ptr<TestImpellerTexture>> created_textures_;
 };
 
 }  // namespace impeller
