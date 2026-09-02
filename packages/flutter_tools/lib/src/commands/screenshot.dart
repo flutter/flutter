@@ -3,17 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
@@ -25,9 +22,8 @@ const _kSkiaType = 'skia';
 
 /// The `flutter screenshot` command, which captures a screenshot from a connected device.
 class ScreenshotCommand extends FlutterCommand {
-  ScreenshotCommand({FileSystem? fs, super.toolContext, VMServiceConnector? vmServiceConnector})
-    : _fs = fs,
-      _vmServiceConnector = vmServiceConnector ?? connectToVmService {
+  ScreenshotCommand({required super.toolContext, VMServiceConnector? vmServiceConnector})
+    : _vmServiceConnector = vmServiceConnector ?? connectToVmService {
     argParser.addOption(
       _kOut,
       abbr: 'o',
@@ -61,26 +57,12 @@ class ScreenshotCommand extends FlutterCommand {
     usesDeviceConnectionOption();
   }
 
-  final FileSystem? _fs;
   final VMServiceConnector _vmServiceConnector;
 
   FileSystem get fs => toolContext.fs;
 
-  ToolContext? _fallbackToolContext;
-
   @override
-  ToolContext get toolContext {
-    final ToolContext? explicit = super.toolContext;
-    if (explicit != null) {
-      return explicit;
-    }
-    return _fallbackToolContext ??= _ScreenshotToolContext(
-      fs: _fs ?? globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
-    );
-  }
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => 'screenshot';
@@ -223,31 +205,4 @@ class ScreenshotCommand extends FlutterCommand {
     final int sizeKB = outputFile.lengthSync() ~/ 1024;
     logger.printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }
-}
-
-class _ScreenshotToolContext implements ToolContext {
-  _ScreenshotToolContext({
-    required this.fs,
-    required this.logger,
-    required this.platform,
-    required this.processManager,
-  });
-
-  @override
-  final FileSystem fs;
-
-  @override
-  final Logger logger;
-
-  @override
-  final Platform platform;
-
-  @override
-  final ProcessManager processManager;
-
-  @override
-  late final FileSystemUtils fileSystemUtils = FileSystemUtils(fileSystem: fs, platform: platform);
-
-  @override
-  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
