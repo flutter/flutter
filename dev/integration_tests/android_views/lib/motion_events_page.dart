@@ -65,8 +65,10 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        SizedBox(
-          height: 300.0,
+        // Expanded ensures that the platform view expands dynamically to fit all
+        // recorded touch coordinates regardless of device pixel ratio or screen dimensions.
+        Expanded(
+          flex: 3,
           child: AndroidView(
             key: const ValueKey<String>('PlatformView'),
             viewType: 'simple_view',
@@ -144,6 +146,17 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       print('replaying ${recordedEvents.length} motion events');
       for (final Map<String, dynamic> event in recordedEvents.reversed) {
         await channel.invokeMethod<void>('synthesizeEvent', event);
+      }
+
+      // Allow in-flight asynchronous touch events to drain before stopping event pipes.
+      // 5 seconds timeout provides ample time for asynchronous platform channel dispatch.
+      const drainTimeout = Duration(seconds: 5);
+      // Poll interval between checking the count of received events.
+      const pollInterval = Duration(milliseconds: 50);
+      final stopwatch = Stopwatch()..start();
+      while (embeddedViewEvents.length < flutterViewEvents.length &&
+          stopwatch.elapsed < drainTimeout) {
+        await Future<void>.delayed(pollInterval);
       }
 
       await channel.invokeMethod<void>('stopFlutterViewEvents');
