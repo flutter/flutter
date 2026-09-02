@@ -66,13 +66,15 @@ class ScreenshotCommand extends FlutterCommand {
 
   FileSystem get fs => toolContext.fs;
 
+  ToolContext? _fallbackToolContext;
+
   @override
   ToolContext get toolContext {
     final ToolContext? explicit = super.toolContext;
     if (explicit != null) {
       return explicit;
     }
-    return _ScreenshotToolContext(
+    return _fallbackToolContext ??= _ScreenshotToolContext(
       fs: _fs ?? globals.fs,
       logger: globals.logger,
       platform: globals.platform,
@@ -244,7 +246,7 @@ class _ScreenshotToolContext implements ToolContext {
   final ProcessManager processManager;
 
   @override
-  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
+  late final FileSystemUtils fileSystemUtils = FileSystemUtils(fileSystem: fs, platform: platform);
 
   @override
   Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
