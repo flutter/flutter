@@ -89,6 +89,7 @@ void main() {
               'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
+              '--no-with-fine-dependencies',
               '--suppress-analytics',
             ],
             exitCode: SIGABRT,
@@ -125,6 +126,7 @@ void main() {
               'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
+              '--no-with-fine-dependencies',
               '--suppress-analytics',
             ],
             exitCode: 255,
@@ -164,6 +166,7 @@ void main() {
               'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
+              '--no-with-fine-dependencies',
               '--suppress-analytics',
             ],
             process: process,
@@ -182,6 +185,95 @@ void main() {
               'uri': 'file:///home/user/flutter/',
             }),
           ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      '--no-plugins passes --no-plugins to language-server',
+      () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--no-with-fine-dependencies',
+              '--no-plugins',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: 'error',
+          ),
+        ]);
+        await expectLater(
+          runner.run(<String>['analyze', '--no-plugins']),
+          throwsA(isA<ToolExit>()),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      '--benchmark passes --no-plugins to language-server by default',
+      () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--no-with-fine-dependencies',
+              '--no-plugins',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: 'error',
+          ),
+        ]);
+        await expectLater(runner.run(<String>['analyze', '--benchmark']), throwsA(isA<ToolExit>()));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      '--benchmark with --plugins enables plugins',
+      () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--no-with-fine-dependencies',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: 'error',
+          ),
+        ]);
+        await expectLater(
+          runner.run(<String>['analyze', '--benchmark', '--plugins']),
+          throwsA(isA<ToolExit>()),
         );
       },
       overrides: <Type, Generator>{

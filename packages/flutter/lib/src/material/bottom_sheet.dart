@@ -652,7 +652,6 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
 
 class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({
-    super.key,
     required this.route,
     this.backgroundColor,
     this.elevation,
