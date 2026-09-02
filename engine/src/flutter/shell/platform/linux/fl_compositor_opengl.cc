@@ -321,9 +321,10 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
     fl_compositor_opengl_gtk4_reset_frame_failure(self);
 #endif
 #if FLUTTER_LINUX_GTK4
-    self->framebuffer = self->shareable
-                        ? fl_framebuffer_new_shareable(general_format, width, height)
-                        : fl_framebuffer_new(general_format, width, height);
+    self->framebuffer =
+        self->shareable
+            ? fl_framebuffer_new_shareable(general_format, width, height)
+            : fl_framebuffer_new(general_format, width, height);
 #else
     self->framebuffer = fl_framebuffer_new(general_format, width, height);
 #endif

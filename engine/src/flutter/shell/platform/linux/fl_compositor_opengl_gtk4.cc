@@ -62,9 +62,8 @@ static void log_dmabuf_format(guint32 fourcc,
                               gpointer user_data) {
   (void)user_data;
   flutter_linux_gtk4_dbg("gtk4_dmabuf_capabilities",
-                         "gdk_format fourcc=0x%x modifier=0x%" G_GINT64_MODIFIER
-                         "x",
-                         fourcc, modifier);
+                    "gdk_format fourcc=0x%x modifier=0x%" G_GINT64_MODIFIER "x",
+                    fourcc, modifier);
 }
 
 static void log_dmabuf_capabilities(FlCompositorOpenGL* self,
@@ -96,14 +95,14 @@ static void log_dmabuf_capabilities(FlCompositorOpenGL* self,
   }
 
   flutter_linux_gtk4_dbg("gtk4_dmabuf_capabilities",
-                         "gtk_runtime=%u.%u.%u gtk_dmabuf=%d egl_current=%d "
-                         "egl_import=%d egl_modifiers=%d egl_mesa_export=%d "
-                         "native_fence=%d export_prototype_enabled=%d",
-                         gtk_get_major_version(), gtk_get_minor_version(),
-                         gtk_get_micro_version(), has_gtk_dmabuf,
-                         egl_display != EGL_NO_DISPLAY, has_egl_import,
-                         has_egl_modifiers, has_egl_export, has_native_fence,
-                         gtk4_dmabuf_enabled());
+                    "gtk_runtime=%u.%u.%u gtk_dmabuf=%d egl_current=%d "
+                    "egl_import=%d egl_modifiers=%d egl_mesa_export=%d "
+                    "native_fence=%d export_prototype_enabled=%d",
+                    gtk_get_major_version(), gtk_get_minor_version(),
+                    gtk_get_micro_version(), has_gtk_dmabuf,
+                    egl_display != EGL_NO_DISPLAY, has_egl_import,
+                    has_egl_modifiers, has_egl_export, has_native_fence,
+                    gtk4_dmabuf_enabled());
 }
 
 // Used only by the GTK4 readback/memory-texture fallback. The native
@@ -181,8 +180,8 @@ static void import_dmabuf_sync(FlCompositorOpenGL* self,
     if (ioctl(data->fds[i], DMA_BUF_IOCTL_IMPORT_SYNC_FILE, &sync) != 0) {
       if (!self->dmabuf_sync_warning_logged) {
         flutter_linux_gtk4_dbg("gtk4_dmabuf",
-                               "failed to import frame fence for plane %d: %s",
-                               i, g_strerror(errno));
+                          "failed to import frame fence for plane %d: %s", i,
+                          g_strerror(errno));
         self->dmabuf_sync_warning_logged = TRUE;
       }
       break;
@@ -297,9 +296,9 @@ static GdkTexture* acquire_dmabuf_texture(FlCompositorOpenGL* self,
   if (!fl_gtk_runtime_dmabuf_format_supported(display, fourcc, modifier)) {
     if (!self->dmabuf_fallback_logged) {
       flutter_linux_gtk4_dbg("gtk4_dmabuf",
-                             "fallback=GDK rejected format fourcc=0x%x "
-                             "modifier=0x%" G_GINT64_MODIFIER "x planes=%d",
-                             fourcc, modifier, n_planes);
+                        "fallback=GDK rejected format fourcc=0x%x "
+                        "modifier=0x%" G_GINT64_MODIFIER "x planes=%d",
+                        fourcc, modifier, n_planes);
       self->dmabuf_fallback_logged = TRUE;
       self->dmabuf_disabled = TRUE;
     }
@@ -343,8 +342,8 @@ static GdkTexture* acquire_dmabuf_texture(FlCompositorOpenGL* self,
       display, &descriptor, release_dmabuf_texture_data, data, &error);
   if (texture == nullptr) {
     flutter_linux_gtk4_dbg("gtk4_dmabuf",
-                           "failed to build texture: %s; using GL texture",
-                           error != nullptr ? error->message : "unknown error");
+                      "failed to build texture: %s; using GL texture",
+                      error != nullptr ? error->message : "unknown error");
     self->dmabuf_fallback_logged = TRUE;
     self->dmabuf_frame_failed = TRUE;
     release_dmabuf_texture_data(data);
@@ -411,7 +410,8 @@ static gboolean publish_dmabuf_snapshot(FlCompositorOpenGL* self,
         fl_framebuffer_get_width(snapshot.framebuffer) != width ||
         fl_framebuffer_get_height(snapshot.framebuffer) != height) {
       g_clear_object(&snapshot.framebuffer);
-      snapshot.framebuffer = fl_framebuffer_new(format, width, height, TRUE);
+      snapshot.framebuffer =
+          fl_framebuffer_new_shareable(format, width, height);
     }
     if (!fl_framebuffer_get_shareable(snapshot.framebuffer)) {
       log_dmabuf_fallback(self, "snapshot is not exportable", TRUE);
