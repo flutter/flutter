@@ -36,7 +36,7 @@ import '../../src/throwing_pub.dart';
 
 class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
   @override
-  Future<XcodeProjectInfo?> getInfo(
+  Future<XcodeProjectInfo> getInfo(
     XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
@@ -53,7 +53,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   final Map<String, String> overrides;
 
   @override
-  Future<XcodeProjectInfo?> getInfo(
+  Future<XcodeProjectInfo> getInfo(
     XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
@@ -66,7 +66,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   @override
   Future<Map<String, String>> getBuildSettings(
     XcodeBasedProject xcodeProject, {
-    required XcodeProjectBuildContext buildContext,
+    XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{...overrides, 'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
@@ -82,7 +82,7 @@ class FakeXcodeProjectInterpreterWithVersion extends FakeXcodeProjectInterpreter
   @override
   Future<Map<String, String>> getBuildSettings(
     XcodeBasedProject xcodeProject, {
-    required XcodeProjectBuildContext buildContext,
+    XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
@@ -255,6 +255,46 @@ STDERR STUFF
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    },
+  );
+
+  testUsingContext(
+    'macOS build fails when Xcode is not installed',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      createMinimalMockProjectFiles();
+
+      expect(
+        createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']),
+        throwsToolExit(
+          message: 'Xcode not installed; this is necessary for iOS and macOS development.',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(isInstalled: false),
     },
   );
 
@@ -500,8 +540,8 @@ STDERR STUFF
       final command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
         platform: FakePlatform(),
@@ -609,7 +649,6 @@ STDERR STUFF
       ]),
       Platform: () => macosPlatform,
       Pub: ThrowingPub.new,
-      Logger: () => logger,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
@@ -927,8 +966,7 @@ STDERR STUFF
     );
 
     final bool supported = BuildMacosCommand(
-      buildSystem: FakeBuildSystem(),
-      toolContext: FakeToolContext(logger: BufferLogger.test(), platform: FakePlatform()),
+      logger: BufferLogger.test(),
       verboseHelp: false,
     ).supported;
     expect(
@@ -940,14 +978,7 @@ STDERR STUFF
   testUsingContext(
     'hidden when not enabled on macOS host',
     () {
-      expect(
-        BuildMacosCommand(
-          buildSystem: FakeBuildSystem(),
-          toolContext: FakeToolContext(logger: BufferLogger.test(), platform: macosPlatform),
-          verboseHelp: false,
-        ).hidden,
-        true,
-      );
+      expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, true);
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(),
@@ -958,14 +989,7 @@ STDERR STUFF
   testUsingContext(
     'Not hidden when enabled and on macOS host',
     () {
-      expect(
-        BuildMacosCommand(
-          buildSystem: FakeBuildSystem(),
-          toolContext: FakeToolContext(logger: BufferLogger.test(), platform: macosPlatform),
-          verboseHelp: false,
-        ).hidden,
-        false,
-      );
+      expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, false);
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),

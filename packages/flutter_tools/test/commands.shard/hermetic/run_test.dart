@@ -493,7 +493,6 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
-                runEnableHcpp: false,
               ),
             ),
           );
@@ -503,6 +502,7 @@ void main() {
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Stdio: () => FakeStdio(),
@@ -547,7 +547,6 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: true,
-                runEnableHcpp: false,
               ),
             ),
           );
@@ -557,6 +556,7 @@ void main() {
           Artifacts: () => artifacts,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
           DeviceManager: () => testDeviceManager,
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
           Stdio: () => FakeStdio(),
@@ -862,7 +862,6 @@ void main() {
                 runProjectModule: false,
                 runProjectHostLanguage: '',
                 runIsTest: false,
-                runEnableHcpp: false,
               ),
             ),
           );
@@ -870,6 +869,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -913,7 +913,6 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
-                runEnableHcpp: false,
               ),
             ),
           );
@@ -921,6 +920,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -969,7 +969,6 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
-                runEnableHcpp: false,
               ),
             ),
           );
@@ -977,6 +976,7 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
         },
@@ -1026,6 +1026,109 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
+          FileSystem: () => MemoryFileSystem.test(),
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        'with Android device and android project reports runEnableHcpp',
+        () async {
+          fileSystem.file('pubspec.yaml').createSync();
+          fileSystem.file('android/build.gradle').createSync(recursive: true);
+          fileSystem.file('android/app/src/main/AndroidManifest.xml').createSync(recursive: true);
+          fileSystem
+              .file('android/app/src/main/AndroidManifest.xml')
+              .writeAsStringSync(
+                '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application><meta-data android:name="flutterEmbedding" android:value="2"/></application></manifest>',
+              );
+          final devices = <Device>[
+            FakeDevice(targetPlatform: TargetPlatform.android, platformType: PlatformType.android),
+          ];
+          final command = TestRunCommandForUsageValues(devices: devices);
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          try {
+            await runner.run(<String>['run', '--no-pub']);
+          } on ToolExit {
+            // Ignore tool exit during test run.
+          }
+
+          final analytics.Event usageValues = await command.unifiedAnalyticsUsageValues('run');
+
+          expect(
+            usageValues,
+            equals(
+              analytics.Event.commandUsageValues(
+                workflow: 'run',
+                commandHasTerminal: false,
+                runIsEmulator: false,
+                runTargetName: 'android',
+                runTargetOsVersion: '',
+                runModeName: 'debug',
+                runProjectModule: false,
+                runProjectHostLanguage: 'java',
+                runAndroidEmbeddingVersion: 'v2',
+                runIsTest: false,
+                runEnableHcpp: true,
+              ),
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () => testDeviceManager,
+          Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+          FeatureFlags: () => FakeFeatureFlags(),
+          FileSystem: () => fileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+
+      testUsingContext(
+        'with Android device and android project reports runEnableHcpp false when --no-enable-hcpp is passed',
+        () async {
+          fileSystem.file('pubspec.yaml').createSync();
+          fileSystem.file('android/build.gradle').createSync(recursive: true);
+          fileSystem.file('android/app/src/main/AndroidManifest.xml').createSync(recursive: true);
+          fileSystem
+              .file('android/app/src/main/AndroidManifest.xml')
+              .writeAsStringSync(
+                '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><application><meta-data android:name="flutterEmbedding" android:value="2"/></application></manifest>',
+              );
+          final devices = <Device>[
+            FakeDevice(targetPlatform: TargetPlatform.android, platformType: PlatformType.android),
+          ];
+          final command = TestRunCommandForUsageValues(devices: devices);
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+          try {
+            await runner.run(<String>['run', '--no-pub', '--no-enable-hcpp']);
+          } on ToolExit {
+            // Ignore tool exit during test run.
+          }
+
+          final analytics.Event usageValues = await command.unifiedAnalyticsUsageValues('run');
+
+          expect(
+            usageValues,
+            equals(
+              analytics.Event.commandUsageValues(
+                workflow: 'run',
+                commandHasTerminal: false,
+                runIsEmulator: false,
+                runTargetName: 'android',
+                runTargetOsVersion: '',
+                runModeName: 'debug',
+                runProjectModule: false,
+                runProjectHostLanguage: 'java',
+                runAndroidEmbeddingVersion: 'v2',
+                runIsTest: false,
                 runEnableHcpp: false,
               ),
             ),
@@ -1034,7 +1137,8 @@ void main() {
         overrides: <Type, Generator>{
           DeviceManager: () => testDeviceManager,
           Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-          FileSystem: () => MemoryFileSystem.test(),
+          FeatureFlags: () => FakeFeatureFlags(),
+          FileSystem: () => fileSystem,
           ProcessManager: () => FakeProcessManager.any(),
         },
       );
@@ -1986,6 +2090,75 @@ server:
       // https://github.com/flutter/flutter/issues/142060
       skip: true,
     );
+
+    testUsingContext(
+      'warning triggered when --build flag is passed',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run', '--build']);
+
+        expect(
+          testLogger.warningText,
+          contains(
+            'The "--build" flag is deprecated and will be removed in a future release. '
+            'Building is the default behavior, so this flag can be safely removed.',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+
+    testUsingContext(
+      'warning triggered when --no-build flag is passed',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run', '--no-build']);
+
+        expect(
+          testLogger.warningText,
+          contains(
+            'The "--no-build" flag is deprecated and will be removed in a future release. '
+            'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
+
+    testUsingContext(
+      'no warning triggered when --build or --no-build flag is not passed',
+      () async {
+        final CommandRunner<void> runner = createTestCommandRunner(
+          TestRunCommandThatOnlyValidates(),
+        );
+        await runner.run(<String>['run']);
+
+        expect(testLogger.warningText, isNot(contains('is deprecated')));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+      initializeFlutterRoot: false,
+    );
   });
 }
 
@@ -2321,7 +2494,14 @@ class FakeFeatureFlags extends Fake implements FeatureFlags {
   bool get isWebEnabled => true;
 
   @override
+  bool get isToolExtensionsEnabled => false;
+
+  @override
   bool isEnabled(Feature feature) => feature.master.enabledByDefault;
+
+  // Queried by getBuildInfo.
+  @override
+  bool get isHcppEnabled => isEnabled(hcpp);
 
   @override
   List<Feature> get allFeatures => const <Feature>[];

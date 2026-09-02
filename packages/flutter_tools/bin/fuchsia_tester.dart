@@ -131,11 +131,6 @@ Future<void> run(List<String> args) async {
         packagesPath: packagesPath,
         libraryNames: libraryNames,
         resolver: await CoverageCollector.getResolver(packagesPath),
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform,
-        processUtils: globals.processUtils,
-        os: globals.os,
       );
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
@@ -163,19 +158,7 @@ Future<void> run(List<String> args) async {
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       ),
     );
-    final testRunner = FlutterTestRunner(
-      artifacts: globals.artifacts!,
-      config: globals.config,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      os: globals.os,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      shutdownHooks: globals.shutdownHooks,
-      stdio: globals.stdio,
-      terminal: globals.terminal,
-    );
-    exitCode = await testRunner.runTests(
+    exitCode = await const FlutterTestRunner().runTests(
       const TestWrapper(),
       tests.keys.map(Uri.file).toList(),
       debuggingOptions: DebuggingOptions.enabled(buildInfo),

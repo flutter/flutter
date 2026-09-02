@@ -79,7 +79,7 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   }
 }
 
-class FakeTerminal extends Fake implements AnsiTerminal {}
+class FakeTerminal extends Fake implements Terminal {}
 
 class FakeAnalysisServer extends Fake implements AnalysisServer {
   @override
@@ -218,23 +218,22 @@ void main() {
   }) async {
     final CommandRunner<void> runner = createTestCommandRunner(
       WidgetPreviewCommand(
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
-          cache: Cache.test(processManager: loggingProcessManager, platform: platform),
-          fs: fs,
-          logger: logger,
-          os: OperatingSystemUtils(
-            fileSystem: fs,
-            processManager: loggingProcessManager,
-            logger: logger,
-            platform: platform,
-          ),
-          platform: platform,
+        verboseHelp: false,
+        logger: logger,
+        fs: fs,
+        projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
+        cache: Cache.test(processManager: loggingProcessManager, platform: platform),
+        platform: platform,
+        shutdownHooks: shutdownHooks,
+        os: OperatingSystemUtils(
+          fileSystem: fs,
           processManager: loggingProcessManager,
-          projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
-          shutdownHooks: shutdownHooks,
-          terminal: FakeTerminal(),
+          logger: logger,
+          platform: platform,
         ),
+        artifacts: Artifacts.test(),
+        processManager: loggingProcessManager,
+        terminal: FakeTerminal(),
         dtdServicesOverride: fakeDtdServices,
         analysisServerFactoryOverride:
             analysisServerFactoryOverride ?? () async => FakeAnalysisServer(),
@@ -285,13 +284,7 @@ void main() {
 
   Future<void> cleanWidgetPreview({required Directory rootProject}) async {
     await runWidgetPreviewCommand(<String>['clean', rootProject.path]);
-    expect(
-      fs
-          .directory(rootProject)
-          .childDirectory('.dart_tool')
-          .childDirectory('widget_preview_scaffold'),
-      isNot(exists),
-    );
+    expect(fs.directory(rootProject).childDirectory('.widget_preview'), isNot(exists));
   }
 
   group('flutter widget-preview', () {
@@ -378,6 +371,62 @@ void main() {
             // ignore: avoid_redundant_argument_values, readability
             isWebEnabled: false,
           ),
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
+    });
+
+    group('workspaces', () {
+      testUsingContext(
+        'starts from workspace root when run from member package',
+        () async {
+          final File workspacePubspec = tempDir.childFile('pubspec.yaml');
+          workspacePubspec.writeAsStringSync('''
+name: my_workspace
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+workspace:
+  - my_app
+''');
+
+          final String memberProjectPath = await createProject(
+            tempDir,
+            name: 'my_app',
+            arguments: <String>['--pub'],
+          );
+          final Directory memberProjectDir = fs.directory(memberProjectPath);
+
+          final File memberPubspec = memberProjectDir.childFile('pubspec.yaml');
+          final String memberPubspecContent = memberPubspec.readAsStringSync();
+          memberPubspec.writeAsStringSync('''
+$memberPubspecContent
+resolution: workspace
+''');
+
+          fs.currentDirectory = memberProjectDir;
+
+          await startWidgetPreview(rootProject: null);
+          final Directory workspaceScaffoldDir = tempDir.childDirectory('.widget_preview');
+          final Directory memberScaffoldDir = memberProjectDir.childDirectory('.widget_preview');
+
+          expect(workspaceScaffoldDir, exists);
+          expect(memberScaffoldDir, isNot(exists));
+
+          await cleanWidgetPreview(rootProject: tempDir);
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          DeviceManager: () => fakeDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => loggingProcessManager,
+          FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
           Pub: () => Pub.test(
             fileSystem: fs,
             logger: logger,

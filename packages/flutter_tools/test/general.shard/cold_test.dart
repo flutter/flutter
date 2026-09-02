@@ -151,6 +151,7 @@ void main() {
           'Connection closed before full header was received, '
           'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws',
         ),
+        vmServiceUri: Future<Uri>.value(Uri.parse('http://127.0.0.1:63394/5ZmLv8A59xY=/ws')),
       ),
     ];
 
@@ -278,7 +279,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
   @override
-  Stream<Uri> get vmServiceUris => const Stream<Uri>.empty();
+  Future<Uri>? get vmServiceUri => null;
 
   @override
   final Device device;
@@ -370,26 +371,28 @@ class TestFlutterDevice extends FlutterDevice {
     required Device device,
     required this.exception,
     required ResidentCompiler generator,
+    Future<Uri>? vmServiceUri,
   }) : super(
          targetPlatform: .unsupported,
          device,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),
-       );
+       ) {
+    this.vmServiceUri = vmServiceUri;
+  }
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
   }) async {
     throw exception;
   }
