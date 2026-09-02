@@ -2091,7 +2091,10 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     final artifacts = <DevelopmentArtifact>{DevelopmentArtifact.universal};
     for (final device in devices) {
       final TargetPlatform targetPlatform = await device.targetPlatform;
-      final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(targetPlatform, featureFlags);
+      final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(
+        targetPlatform,
+        featureFlags,
+      );
       if (developmentArtifact != null) {
         artifacts.add(developmentArtifact);
       }
@@ -2112,9 +2115,11 @@ DevelopmentArtifact? artifactFromTargetPlatform(
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
-        case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
+      return DevelopmentArtifact.androidGenSnapshot;
     case TargetPlatform.web_javascript:
+      return DevelopmentArtifact.web;
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
       return null;
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
