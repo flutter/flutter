@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import '../base/common.dart';
-import '../context/tool_context.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../doctor.dart';
@@ -221,9 +221,8 @@ class DevicesCommandOutput {
 
   Future<void> printDevicesAsJson(List<Device> devices) async {
     _logger.printStatus(
-      const JsonEncoder.withIndent(
-        '  ',
-      ).convert(await Future.wait(devices.map((Device d) => d.toJson()))),
+      const JsonEncoder.withIndent('  ')
+          .convert(await Future.wait(devices.map((Device d) => d.toJson()))),
     );
   }
 }
