@@ -198,18 +198,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final bool verbose;
 
-
   @override
-  WidgetPreviewMachineAwareLogger get logger => toolContext!.logger as WidgetPreviewMachineAwareLogger;
-
-
-
+  WidgetPreviewMachineAwareLogger get logger =>
+      toolContext!.logger as WidgetPreviewMachineAwareLogger;
 
   final ShutdownHooks shutdownHooks;
-
-
-
-
 
   late final previewAnalytics = WidgetPreviewAnalytics(analytics: analytics);
 
@@ -267,7 +260,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     logger: logger,
     shutdownHooks: shutdownHooks,
     onHotRestartPreviewerRequest: onHotRestartRequest,
-    dtdLauncher: DtdLauncher(logger: logger, artifacts: toolContext!.artifacts, processManager: toolContext!.processManager),
+    dtdLauncher: DtdLauncher(
+      logger: logger,
+      artifacts: toolContext!.artifacts,
+      processManager: toolContext!.processManager,
+    ),
     project: rootProject.widgetPreviewScaffoldProject,
     addUuidToServiceName: !boolArg(kDisableDtdServiceUuid),
   );
@@ -285,7 +282,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    
     // Start the timer tracking how long it takes to launch the preview environment.
     previewAnalytics.initializeLaunchStopwatch();
     logger.sendInitializingEvent();
