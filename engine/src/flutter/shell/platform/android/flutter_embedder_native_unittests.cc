@@ -2192,7 +2192,9 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderHcppRouting) {
   EXPECT_CALL(*mock_invoker, CreateOverlaySurface(true)).WillOnce(Return(12));
   auto overlay_id = provider.CreateOverlaySurface();
   ASSERT_TRUE(overlay_id.has_value());
-  EXPECT_EQ(*overlay_id, 12);
+  if (overlay_id.has_value()) {
+    EXPECT_EQ(overlay_id.value(), 12);
+  }
 
   // 2. ShowOverlaySurface in HCPP mode
   EXPECT_CALL(*mock_invoker, InvokeVoidMethod("showOverlaySurface2", "()V",
