@@ -242,9 +242,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     final String defaultArbDir = fs.path.join('lib', 'l10n');
     // Get all options associated with gen-l10n.
     final LocalizationOptions options;
-    if (fs.file('l10n.yaml').existsSync()) {
+    final File l10nYaml = fs.file('l10n.yaml');
+    if (l10nYaml.existsSync()) {
       options = parseLocalizationsOptionsFromYAML(
-        file: fs.file('l10n.yaml'),
+        file: l10nYaml,
         logger: logger,
         fileSystem: fs,
         defaultArbDir: defaultArbDir,

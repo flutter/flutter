@@ -25,6 +25,7 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../features.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 
 /// All currently implemented targets.
@@ -255,6 +256,7 @@ class AssembleCommand extends FlutterCommand {
   /// The environmental configuration for a build invocation.
   Environment _createEnvironment() {
     final FileSystem fs = _toolContext.fs;
+    final FlutterProject project = this.project;
     String? output = stringArg('output');
     if (output == null) {
       throwToolExit('--output directory is required for assemble.');
