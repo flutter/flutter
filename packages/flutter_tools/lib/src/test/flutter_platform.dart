@@ -611,8 +611,7 @@ class FlutterPlatform extends PlatformPlugin {
     final Logger log = logger;
     log.printTrace('test $ourTestCount: starting test $testPath');
 
-    _AsyncError?
-    outOfBandError; // error that we couldn't send to the harness that we need to send via our future
+    _AsyncError? outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
     // Will be run in reverse order.
     final finalizers = <Finalizer>[];
@@ -903,19 +902,18 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
 
   @override
   Future<dynamic> close() {
-    Future.wait<dynamic>(<Future<dynamic>>[_parent.close(), _shellProcessClosed]).then<void>((
-      List<dynamic> futureResults,
-    ) {
-      assert(futureResults.length == 2);
-      assert(futureResults.first == null);
-      final dynamic lastResult = futureResults.last;
-      if (lastResult is _AsyncError) {
-        _done.completeError(lastResult.error as Object, lastResult.stack);
-      } else {
-        assert(lastResult == null);
-        _done.complete();
-      }
-    }, onError: _done.completeError);
+    Future.wait<dynamic>(<Future<dynamic>>[_parent.close(), _shellProcessClosed])
+        .then<void>((List<dynamic> futureResults) {
+          assert(futureResults.length == 2);
+          assert(futureResults.first == null);
+          final dynamic lastResult = futureResults.last;
+          if (lastResult is _AsyncError) {
+            _done.completeError(lastResult.error as Object, lastResult.stack);
+          } else {
+            assert(lastResult == null);
+            _done.complete();
+          }
+        }, onError: _done.completeError);
     return done;
   }
 
