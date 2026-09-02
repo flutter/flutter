@@ -297,7 +297,12 @@ class _DefaultPub implements Pub {
       switch (decoded) {
         case {'workspaceRoot': final String workspaceRoot}:
           packageConfigFile = _fileSystem.file(
-            _fileSystem.path.join(workspaceRefFile.parent.path, workspaceRoot),
+            _fileSystem.path.join(
+              workspaceRefFile.parent.path,
+              workspaceRoot,
+              '.dart_tool',
+              'package_config.json',
+            ),
           );
         default:
           // The workspace_ref.json file was malformed. Attempt to load the
