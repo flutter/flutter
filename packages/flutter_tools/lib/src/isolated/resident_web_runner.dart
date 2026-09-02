@@ -195,6 +195,7 @@ class ResidentWebRunner extends ResidentRunner {
   StreamSubscription<vmservice.Event>? _serviceSub;
   StreamSubscription<vmservice.Event>? _extensionEventSub;
   var _exited = false;
+  var _isRestarting = false;
   WipConnection? _wipConnection;
   ChromiumLauncher? _chromiumLauncher;
 
@@ -455,6 +456,13 @@ class ResidentWebRunner extends ResidentRunner {
     String? reason,
     bool benchmarkMode = false,
   }) async {
+    if (_exited) {
+      return OperationResult(1, 'Application has exited.');
+    }
+    if (_isRestarting) {
+      return OperationResult(1, 'A restart is already in progress.');
+    }
+    _isRestarting = true;
     final DateTime start = _systemClock.now();
     final Status status;
     if (debuggingOptions.buildInfo.ddcModuleFormat != DdcModuleFormat.ddc ||
@@ -625,9 +633,10 @@ class ResidentWebRunner extends ResidentRunner {
           'ignoreCache': !debuggingOptions.buildInfo.isDebug,
         });
       }
-    } on Exception catch (err) {
+    } on Object catch (err) {
       return OperationResult(1, err.toString(), fatal: true);
     } finally {
+      _isRestarting = false;
       status.stop();
     }
 
