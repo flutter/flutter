@@ -345,9 +345,9 @@ class Container extends StatelessWidget {
   /// [foregroundDecoration] avoids the mismatch.
   ///
   /// {@tool dartpad}
-  /// This example shows the resulting gaps, and the related [clipBehavior]
-  /// case of an opaque child covering the border, each rendered side by
-  /// side with a way to avoid it.
+  /// This example shows the resulting gaps next to an otherwise identical
+  /// child clipped to the corner radius minus the border width, which
+  /// aligns the curves.
   ///
   /// ** See code in examples/api/lib/widgets/container/container.decoration.0.dart **
   /// {@end-tool}
@@ -399,11 +399,11 @@ class Container extends StatelessWidget {
   /// path.
   ///
   /// {@tool dartpad}
-  /// This example shows a border covered by an opaque child, and the related
-  /// [decoration] case of corner gaps around a self-clipping child, each
-  /// rendered side by side with a way to avoid it.
+  /// This example shows a border covered by an opaque child next to the same
+  /// border painted by [foregroundDecoration], which stays visible on top of
+  /// the child.
   ///
-  /// ** See code in examples/api/lib/widgets/container/container.decoration.0.dart **
+  /// ** See code in examples/api/lib/widgets/container/container.clip_behavior.0.dart **
   /// {@end-tool}
   final Clip clipBehavior;
 

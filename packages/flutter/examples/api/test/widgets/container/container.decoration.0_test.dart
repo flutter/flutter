@@ -14,19 +14,14 @@ void main() {
   testWidgets(
     'Each tile renders the corner geometry that its label describes',
     (WidgetTester tester) async {
-      // Make the surface tall enough to show both sections at once, so that
-      // every probed pixel is within the captured image.
-      tester.view.physicalSize = const Size(2400, 3300);
+      // Make the surface large enough to show both tiles side by side, so
+      // that every probed pixel is within the captured image.
+      tester.view.physicalSize = const Size(2400, 1800);
       addTearDown(tester.view.resetPhysicalSize);
 
       await tester.pumpWidget(const example.ContainerDecorationExampleApp());
 
-      for (final String key in <String>[
-        'gap-pitfall',
-        'gap-recommended',
-        'covered-pitfall',
-        'covered-recommended',
-      ]) {
+      for (final String key in <String>['gap-pitfall', 'gap-recommended']) {
         expect(find.byKey(Key(key)), findsOneWidget);
       }
 
@@ -64,21 +59,22 @@ void main() {
         );
       }
 
-      // Section 1: both tiles are 160x160 with a 20-pixel border and a
-      // 56-pixel corner radius. Along the top-left diagonal, the inside of
-      // the border reaches 56 - 36 / sqrt(2), about (30.5, 30.5). In the
-      // pitfall tile, the child's corner, clipped with the outer 56-pixel
-      // radius, only reaches 76 - 56 / sqrt(2), about (36.4, 36.4), so the
-      // band between the two curves shows the background: a visible gap.
+      // Both tiles are 160x160 with a 20-pixel border and a 56-pixel corner
+      // radius, so the child is 120x120 and the outer radius still fits its
+      // sides (2 * 56 <= 120): no radius gets scaled down. Along the top-left
+      // diagonal, the inside of the border reaches 56 - 36 / sqrt(2), about
+      // (30.5, 30.5). In the first tile, the child's corner, clipped with the
+      // outer 56-pixel radius around (76, 76), only reaches 76 - 56 / sqrt(2),
+      // about (36.4, 36.4), so the band between the two curves shows the
+      // background: a visible gap.
       expect(cornerDiagonal('gap-pitfall'), contains(example.backgroundColor));
       expect(
         pixelAt('gap-pitfall', const Offset(33.5, 33.5)),
         example.backgroundColor,
       );
-      // In the recommended tile, the child's 36-pixel corner radius matches
-      // the inside of the border exactly: no background shows through
-      // anywhere along the diagonal, and the gap midpoint is filled by the
-      // child.
+      // In the second tile, the child's 36-pixel corner radius matches the
+      // inside of the border exactly: no background shows through anywhere
+      // along the diagonal, and the gap midpoint is filled by the child.
       expect(
         cornerDiagonal('gap-recommended'),
         isNot(contains(example.backgroundColor)),
@@ -90,25 +86,6 @@ void main() {
       // The straight edges and the center are unaffected in both tiles.
       for (final String key in <String>['gap-pitfall', 'gap-recommended']) {
         expect(pixelAt(key, const Offset(10.0, 80.0)), example.borderColor);
-        expect(pixelAt(key, const Offset(80.0, 80.0)), example.fillColor);
-      }
-
-      // Section 2: both tiles are 160x160 with an 8-pixel border and a
-      // 56-pixel corner radius. Along the top-left diagonal, the border ring
-      // spans from 56 - 56 / sqrt(2), about (16.4, 16.4), to
-      // 56 - 48 / sqrt(2), about (22.1, 22.1). Probe its midpoint: in the
-      // pitfall tile the opaque child covers the border there, while in the
-      // recommended tile the foreground-painted border stays visible.
-      const Offset ringProbe = Offset(19.2, 19.2);
-      expect(pixelAt('covered-pitfall', ringProbe), example.fillColor);
-      expect(pixelAt('covered-recommended', ringProbe), example.borderColor);
-      // On the straight edges the border is visible in both tiles: the
-      // pitfall only destroys the border near the corners.
-      for (final String key in <String>[
-        'covered-pitfall',
-        'covered-recommended',
-      ]) {
-        expect(pixelAt(key, const Offset(4.0, 80.0)), example.borderColor);
         expect(pixelAt(key, const Offset(80.0, 80.0)), example.fillColor);
       }
     },
