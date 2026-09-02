@@ -197,9 +197,8 @@ Future<void> main(List<String> args) async {
 String? findCommandName(List<String> args, {ToolContext? toolContext}) {
   final ArgResults results;
   try {
-    results = FlutterCommandRunner(
-      toolContext: toolContext ?? _FallbackToolContext(),
-    ).argParser.parse(args);
+    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
+        .parse(args);
   } on ArgParserException {
     // The real parser will complain about these later.
     return null;
@@ -208,7 +207,8 @@ String? findCommandName(List<String> args, {ToolContext? toolContext}) {
 }
 
 class _FallbackToolContext implements ToolContext {
-  _FallbackToolContext({OutputPreferences? outputPreferences}) : _outputPreferences = outputPreferences;
+  _FallbackToolContext({OutputPreferences? outputPreferences})
+    : _outputPreferences = outputPreferences;
 
   final OutputPreferences? _outputPreferences;
 
@@ -312,11 +312,10 @@ List<FlutterCommand> generateCommands({
   ),
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
   DaemonCommand(
-    androidSdk: globals.androidSdk,
+    androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,
     deviceManager: globals.deviceManager,
     hidden: !verboseHelp,
-    java: globals.java,
     toolContext: toolDependencies.toolContext,
   ),
   DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),

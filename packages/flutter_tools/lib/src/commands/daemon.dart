@@ -25,6 +25,7 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../daemon.dart';
@@ -54,15 +55,13 @@ const protocolVersion = '0.6.1';
 class DaemonCommand extends FlutterCommand {
   DaemonCommand({
     required super.toolContext,
-    AndroidSdk? androidSdk,
+    required AndroidContext androidContext,
     AndroidWorkflow? androidWorkflow,
     DeviceManager? deviceManager,
     this.hidden = false,
-    Java? java,
-  }) : _androidSdk = androidSdk,
+  }) : _androidContext = androidContext,
        _androidWorkflow = androidWorkflow,
-       _deviceManager = deviceManager,
-       _java = java {
+       _deviceManager = deviceManager {
     argParser.addOption(
       'listen-on-tcp-port',
       help: 'If specified, the daemon will be listening for commands on the specified port instead of stdio.',
@@ -70,10 +69,12 @@ class DaemonCommand extends FlutterCommand {
     );
   }
 
-  final AndroidSdk? _androidSdk;
+  final AndroidContext _androidContext;
   final AndroidWorkflow? _androidWorkflow;
   final DeviceManager? _deviceManager;
-  final Java? _java;
+
+  AndroidSdk? get _androidSdk => _androidContext.androidSdk;
+  Java? get _java => _androidContext.java;
 
   @override
   ToolContext get toolContext => super.toolContext!;

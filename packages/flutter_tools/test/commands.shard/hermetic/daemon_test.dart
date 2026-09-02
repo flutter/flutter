@@ -1288,13 +1288,20 @@ void main() {
 
   group('DaemonCommand', () {
     testWithoutContext('has correct properties', () {
-      final command = DaemonCommand(toolContext: FakeToolContext());
+      final command = DaemonCommand(
+        androidContext: FakeAndroidContext(),
+        toolContext: FakeToolContext(),
+      );
 
       expect(command.name, 'daemon');
       expect(command.category, FlutterCommandCategory.tools);
       expect(command.hidden, false);
 
-      final hiddenCommand = DaemonCommand(toolContext: FakeToolContext(), hidden: true);
+      final hiddenCommand = DaemonCommand(
+        androidContext: FakeAndroidContext(),
+        toolContext: FakeToolContext(),
+        hidden: true,
+      );
       expect(hiddenCommand.hidden, true);
     });
   });
