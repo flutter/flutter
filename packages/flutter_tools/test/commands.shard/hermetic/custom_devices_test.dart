@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
@@ -15,11 +14,11 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/custom_devices.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 import 'package:flutter_tools/src/custom_devices/custom_devices_config.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/features.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -167,98 +166,30 @@ final Platform windowsPlatform = FakePlatform(
   environment: <String, String>{'FLUTTER_ROOT': windowsFlutterRoot},
 );
 
-class FakeTerminal implements Terminal {
+class FakeTerminal extends AnsiTerminal {
   factory FakeTerminal({required Platform platform}) {
     return FakeTerminal._private(stdio: FakeStdio(), platform: platform);
   }
 
-  FakeTerminal._private({required this.stdio, required Platform platform})
-    : terminal = AnsiTerminal(stdio: stdio, platform: platform);
+  FakeTerminal._private({required this.stdio, required super.platform}) : super(stdio: stdio);
 
   final FakeStdio stdio;
-  final AnsiTerminal terminal;
 
   void simulateStdin(String line) {
     stdio.simulateStdin(line);
   }
-
-  @override
-  set usesTerminalUi(bool value) => terminal.usesTerminalUi = value;
-
-  @override
-  bool get usesTerminalUi => terminal.usesTerminalUi;
-
-  @override
-  String bolden(String message) => terminal.bolden(message);
-
-  @override
-  String clearScreen() => terminal.clearScreen();
-
-  @override
-  String color(String message, TerminalColor color) => terminal.color(message, color);
-
-  @override
-  Stream<String> get keystrokes => terminal.keystrokes;
-
-  @override
-  Future<String> readLine() => terminal.readLine();
-
-  @override
-  Future<String> promptForCharInput(
-    List<String> acceptedCharacters, {
-    required Logger logger,
-    String? prompt,
-    int? defaultChoiceIndex,
-    bool displayAcceptedCharacters = true,
-  }) => terminal.promptForCharInput(
-    acceptedCharacters,
-    logger: logger,
-    prompt: prompt,
-    defaultChoiceIndex: defaultChoiceIndex,
-    displayAcceptedCharacters: displayAcceptedCharacters,
-  );
-
-  @override
-  bool get singleCharMode => terminal.singleCharMode;
-  @override
-  set singleCharMode(bool value) => terminal.singleCharMode = value;
-
-  @override
-  bool get stdinHasTerminal => terminal.stdinHasTerminal;
-
-  @override
-  String get successMark => terminal.successMark;
-
-  @override
-  bool get supportsColor => terminal.supportsColor;
-
-  @override
-  bool get isCliAnimationEnabled => terminal.isCliAnimationEnabled;
-
-  @override
-  void applyFeatureFlags(FeatureFlags flags) {
-    // ignored
-  }
-
-  @override
-  bool get supportsEmoji => terminal.supportsEmoji;
-
-  @override
-  String get warningMark => terminal.warningMark;
-
-  @override
-  int get preferredStyle => terminal.preferredStyle;
 }
 
 /// May take platform, logger, processManager and fileSystem from context if
 /// not explicitly specified.
 CustomDevicesCommand createCustomDevicesCommand({
   CustomDevicesConfig Function(FileSystem, Logger)? config,
-  Terminal Function(Platform)? terminal,
+  AnsiTerminal Function(Platform)? terminal,
   Platform? platform,
   FileSystem? fileSystem,
   ProcessManager? processManager,
   Logger? logger,
+  ToolContext? toolContext,
   bool featureEnabled = false,
 }) {
   platform ??= FakePlatform();
@@ -285,25 +216,22 @@ CustomDevicesCommand createCustomDevicesCommand({
         : throw UnsupportedError('Unsupported operating system'),
   );
 
-  final toolContext = FakeToolContext(
-    customDevicesConfig: customDevicesConfig,
-    fs: fileSystem,
-    logger: logger,
-    os: operatingSystemUtils,
-    platform: platform,
-    processManager: processManager,
-  );
+  final ToolContext effectiveToolContext =
+      toolContext ??
+      FakeToolContext(
+        customDevicesConfig: customDevicesConfig,
+        fs: fileSystem,
+        logger: logger,
+        os: operatingSystemUtils,
+        platform: platform,
+        processManager: processManager,
+        terminal: terminal != null ? terminal(platform) : FakeTerminal(platform: platform),
+      );
 
   return CustomDevicesCommand(
     featureFlags: TestFeatureFlags(areCustomDevicesEnabled: featureEnabled),
-    toolContext: toolContext,
+    toolContext: effectiveToolContext,
     customDevicesConfig: customDevicesConfig,
-    fileSystem: fileSystem,
-    logger: logger,
-    operatingSystemUtils: operatingSystemUtils,
-    platform: platform,
-    processManager: processManager,
-    terminal: terminal != null ? terminal(platform) : FakeTerminal(platform: platform),
   );
 }
 
@@ -311,11 +239,12 @@ CustomDevicesCommand createCustomDevicesCommand({
 /// not explicitly specified.
 CommandRunner<void> createCustomDevicesCommandRunner({
   CustomDevicesConfig Function(FileSystem, Logger)? config,
-  Terminal Function(Platform)? terminal,
+  AnsiTerminal Function(Platform)? terminal,
   Platform? platform,
   FileSystem? fileSystem,
   ProcessManager? processManager,
   Logger? logger,
+  ToolContext? toolContext,
   bool featureEnabled = false,
 }) {
   final CustomDevicesCommand command = createCustomDevicesCommand(
@@ -325,6 +254,7 @@ CommandRunner<void> createCustomDevicesCommandRunner({
     fileSystem: fileSystem,
     processManager: processManager,
     logger: logger,
+    toolContext: toolContext,
     featureEnabled: featureEnabled,
   );
   return createTestCommandRunner(command);

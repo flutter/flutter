@@ -13,7 +13,6 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../context/tool_context.dart';
@@ -31,29 +30,15 @@ class CustomDevicesCommand extends FlutterCommand {
     required FeatureFlags featureFlags,
     required ToolContext toolContext,
     CustomDevicesConfig? customDevicesConfig,
-    FileSystem? fileSystem,
-    Logger? logger,
-    OperatingSystemUtils? operatingSystemUtils,
-    Platform? platform,
-    ProcessManager? processManager,
-    Terminal? terminal,
   }) : _customDevicesConfig = customDevicesConfig ?? toolContext.customDevicesConfig,
        _featureFlags = featureFlags,
        super(toolContext: toolContext) {
     final CustomDevicesConfig config = _customDevicesConfig;
-    final FileSystem fs = fileSystem ?? toolContext.fs;
-    final Logger log = logger ?? toolContext.logger;
-    final OperatingSystemUtils os = operatingSystemUtils ?? toolContext.os;
-    final Platform plat = platform ?? toolContext.platform;
-    final ProcessManager pm = processManager ?? toolContext.processManager;
-    final Terminal term = terminal ?? toolContext.terminal;
 
     addSubcommand(
       CustomDevicesListCommand(
         customDevicesConfig: config,
         featureFlags: featureFlags,
-        fileSystem: fs,
-        logger: log,
         toolContext: toolContext,
       ),
     );
@@ -61,8 +46,6 @@ class CustomDevicesCommand extends FlutterCommand {
       CustomDevicesResetCommand(
         customDevicesConfig: config,
         featureFlags: featureFlags,
-        fileSystem: fs,
-        logger: log,
         toolContext: toolContext,
       ),
     );
@@ -70,12 +53,6 @@ class CustomDevicesCommand extends FlutterCommand {
       CustomDevicesAddCommand(
         customDevicesConfig: config,
         featureFlags: featureFlags,
-        fileSystem: fs,
-        logger: log,
-        operatingSystemUtils: os,
-        platform: plat,
-        processManager: pm,
-        terminal: term,
         toolContext: toolContext,
       ),
     );
@@ -83,8 +60,6 @@ class CustomDevicesCommand extends FlutterCommand {
       CustomDevicesDeleteCommand(
         customDevicesConfig: config,
         featureFlags: featureFlags,
-        fileSystem: fs,
-        logger: log,
         toolContext: toolContext,
       ),
     );
@@ -92,6 +67,9 @@ class CustomDevicesCommand extends FlutterCommand {
 
   final CustomDevicesConfig _customDevicesConfig;
   final FeatureFlags _featureFlags;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get description {
@@ -132,24 +110,23 @@ Requires the custom devices feature to be enabled. You can enable it using "flut
 /// feature is enabled.
 abstract class CustomDevicesCommandBase extends FlutterCommand {
   CustomDevicesCommandBase({
+    required this.customDevicesConfig,
     required this.featureFlags,
     required ToolContext toolContext,
-    CustomDevicesConfig? customDevicesConfig,
-    FileSystem? fileSystem,
-    Logger? logger,
-  }) : customDevicesConfig = customDevicesConfig ?? toolContext.customDevicesConfig,
-       fileSystem = fileSystem ?? toolContext.fs,
-       logger = logger ?? toolContext.logger,
-       super(toolContext: toolContext);
+  }) : super(toolContext: toolContext);
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @protected
   final CustomDevicesConfig customDevicesConfig;
   @protected
   final FeatureFlags featureFlags;
+
   @protected
-  final FileSystem fileSystem;
+  FileSystem get fileSystem => toolContext.fs;
   @protected
-  final Logger logger;
+  Logger get logger => toolContext.logger;
 
   /// The path to the (potentially non-existing) backup of the config file.
   @protected
@@ -184,11 +161,9 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
 
 class CustomDevicesListCommand extends CustomDevicesCommandBase {
   CustomDevicesListCommand({
+    required super.customDevicesConfig,
     required super.featureFlags,
     required super.toolContext,
-    super.customDevicesConfig,
-    super.fileSystem,
-    super.logger,
   });
 
   @override
@@ -231,11 +206,9 @@ List the currently configured custom devices, both enabled and disabled, reachab
 
 class CustomDevicesResetCommand extends CustomDevicesCommandBase {
   CustomDevicesResetCommand({
+    required super.customDevicesConfig,
     required super.featureFlags,
     required super.toolContext,
-    super.customDevicesConfig,
-    super.fileSystem,
-    super.logger,
   });
 
   @override
@@ -270,19 +243,10 @@ If a file already exists at the backup location, it will be overwritten.
 
 class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   CustomDevicesAddCommand({
+    required super.customDevicesConfig,
     required super.featureFlags,
     required super.toolContext,
-    super.customDevicesConfig,
-    super.fileSystem,
-    super.logger,
-    OperatingSystemUtils? operatingSystemUtils,
-    Platform? platform,
-    ProcessManager? processManager,
-    Terminal? terminal,
-  }) : _operatingSystemUtils = operatingSystemUtils ?? toolContext.os,
-       _terminal = terminal ?? toolContext.terminal,
-       _platform = platform ?? toolContext.platform,
-       _processManager = processManager ?? toolContext.processManager {
+  }) {
     argParser.addFlag(
       _kCheck,
       help:
@@ -335,10 +299,6 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     r'^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$',
   );
 
-  final OperatingSystemUtils _operatingSystemUtils;
-  final Terminal _terminal;
-  final Platform _platform;
-  final ProcessManager _processManager;
   late StreamQueue<String> inputs;
 
   @override
@@ -355,7 +315,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// fine.
   Future<bool> _checkConfigWithLogging(CustomDeviceConfig config) async {
     final Logger log = logger;
-    final ProcessManager pm = _processManager;
+    final ProcessManager pm = toolContext.processManager;
     final device = CustomDevice(config: config, logger: log, processManager: pm);
 
     var result = true;
@@ -408,7 +368,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
       try {
         // find a random port we can forward
-        final int port = await _operatingSystemUtils.findFreePort();
+        final int port = await toolContext.os.findFreePort();
 
         final ForwardedPort? forwardedPort = await portForwarder.tryForward(port, port);
         if (forwardedPort == null) {
@@ -558,7 +518,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     // So instead, we add the keystrokes stream events to a new single-subscription
     // stream and listen to that instead.
     final nonClosingKeystrokes = StreamController<String>();
-    final StreamSubscription<String> keystrokesSubscription = _terminal.keystrokes.listen(
+    final Terminal terminal = toolContext.terminal;
+    final StreamSubscription<String> keystrokesSubscription = terminal.keystrokes.listen(
       (String s) => nonClosingKeystrokes.add(s.trim()),
       cancelOnError: true,
     );
@@ -703,13 +664,14 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
           : null,
     );
 
-    if (_platform.isWindows) {
+    final Platform platform = toolContext.platform;
+    if (platform.isWindows) {
       config = config.copyWith(
         pingCommand: <String>['ping', if (ipv6) '-6', '-n', '1', '-w', '500', targetStr],
         explicitPingSuccessRegex: true,
         pingSuccessRegex: RegExp(r'[<=]\d+ms'),
       );
-    } else if (_platform.isLinux || _platform.isMacOS) {
+    } else if (platform.isLinux || platform.isMacOS) {
       config = config.copyWith(
         pingCommand: <String>['ping', if (ipv6) '-6', '-c', '1', '-w', '1', targetStr],
         explicitPingSuccessRegex: true,
@@ -749,11 +711,9 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
 class CustomDevicesDeleteCommand extends CustomDevicesCommandBase {
   CustomDevicesDeleteCommand({
+    required super.customDevicesConfig,
     required super.featureFlags,
     required super.toolContext,
-    super.customDevicesConfig,
-    super.fileSystem,
-    super.logger,
   });
 
   @override
