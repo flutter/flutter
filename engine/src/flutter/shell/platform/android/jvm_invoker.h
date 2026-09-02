@@ -9,11 +9,13 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/shell/platform/android/android_mutators_mapper.h"
 
 namespace flutter {
 namespace android {
@@ -147,6 +149,53 @@ class JvmInvoker {
                                    int configuration_id) {
     return unscaled_font_size;
   }
+
+  /// @brief Positions and displays a platform view with its mutators stack.
+  virtual bool OnDisplayPlatformView(int64_t view_id,
+                                     int32_t x,
+                                     int32_t y,
+                                     int32_t width,
+                                     int32_t height,
+                                     int32_t view_width,
+                                     int32_t view_height,
+                                     const AndroidMutatorsStack& mutators_stack,
+                                     bool hcpp_enabled) {
+    return true;
+  }
+
+  /// @brief Creates an overlay surface in the embedding.
+  virtual std::optional<int32_t> CreateOverlaySurface(bool hcpp_enabled) {
+    return std::nullopt;
+  }
+
+  /// @brief Displays an overlay surface with specified geometry.
+  virtual bool OnDisplayOverlaySurface(int32_t surface_id,
+                                       int32_t x,
+                                       int32_t y,
+                                       int32_t width,
+                                       int32_t height) {
+    return true;
+  }
+
+  /// @brief Creates a SurfaceControl transaction.
+  virtual bool CreateTransaction() { return true; }
+
+  /// @brief Resizes a platform view.
+  virtual bool ResizePlatformView(int64_t view_id,
+                                  double width,
+                                  double height) {
+    return true;
+  }
+
+  /// @brief Offsets a platform view.
+  virtual bool OffsetPlatformView(int64_t view_id, double top, double left) {
+    return true;
+  }
+
+  /// @brief Sets layout direction of a platform view.
+  virtual bool SetPlatformViewDirection(int64_t view_id, int32_t direction) {
+    return true;
+  }
 };
 
 /// @brief Default in-memory / host-safe implementation of JvmInvoker.
@@ -213,6 +262,34 @@ class DefaultJvmInvoker : public JvmInvoker {
   bool SetSemanticsTreeEnabled(bool enabled) override;
 
   bool SetApplicationLocale(const std::string& locale) override;
+
+  bool OnDisplayPlatformView(int64_t view_id,
+                             int32_t x,
+                             int32_t y,
+                             int32_t width,
+                             int32_t height,
+                             int32_t view_width,
+                             int32_t view_height,
+                             const AndroidMutatorsStack& mutators_stack,
+                             bool hcpp_enabled) override;
+
+  std::optional<int32_t> CreateOverlaySurface(bool hcpp_enabled) override;
+
+  bool OnDisplayOverlaySurface(int32_t surface_id,
+                               int32_t x,
+                               int32_t y,
+                               int32_t width,
+                               int32_t height) override;
+
+  bool CreateTransaction() override;
+
+  bool ResizePlatformView(int64_t view_id,
+                          double width,
+                          double height) override;
+
+  bool OffsetPlatformView(int64_t view_id, double top, double left) override;
+
+  bool SetPlatformViewDirection(int64_t view_id, int32_t direction) override;
 
  private:
   bool attached_ = false;
