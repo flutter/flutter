@@ -920,14 +920,6 @@ HostPlatform getCurrentHostPlatform() {
 }
 
 /// Returns the top-level build output directory.
-FileSystem _resolveFileSystem(FileSystem? fileSystem) {
-  try {
-    return fileSystem ?? globals.fs;
-  } on UnsupportedError {
-    return globals.localFileSystem;
-  }
-}
-
 String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
   // TODO(andrewkolos): Prefer required parameters instead of falling back to globals.
   // TODO(johnmccutchan): Stop calling this function as part of setting
@@ -938,7 +930,7 @@ String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
   } on UnsupportedError {
     localConfig = null;
   }
-  final FileSystem localFilesystem = _resolveFileSystem(fileSystem);
+  final FileSystem localFilesystem = fileSystem ?? globals.fs;
 
   final String buildDir = localConfig?.getValue('build-dir') as String? ?? 'build';
   if (localConfig != null && localFilesystem.path.isAbsolute(buildDir)) {
@@ -983,7 +975,7 @@ String getMacOSBuildDirectory({Config? config, FileSystem? fileSystem}) {
 
 /// Returns the web build output directory.
 String getWebBuildDirectory([Config? config, FileSystem? fileSystem]) {
-  final FileSystem localFilesystem = _resolveFileSystem(fileSystem);
+  final FileSystem localFilesystem = fileSystem ?? globals.fs;
   return localFilesystem.path.join(getBuildDirectory(config, fileSystem), 'web');
 }
 

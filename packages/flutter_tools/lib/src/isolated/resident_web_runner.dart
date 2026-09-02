@@ -351,6 +351,10 @@ class ResidentWebRunner extends ResidentRunner {
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
             analytics: globals.analytics,
+            artifacts: globals.artifacts!,
+            cache: globals.cache,
+            platform: globals.platform,
+            terminal: globals.terminal,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -513,6 +517,10 @@ class ResidentWebRunner extends ResidentRunner {
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
           analytics: globals.analytics,
+          artifacts: globals.artifacts!,
+          cache: globals.cache,
+          platform: globals.platform,
+          terminal: globals.terminal,
         );
         await webBuilder.buildWeb(
           flutterProject,

@@ -4,10 +4,13 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -81,6 +84,10 @@ environement:
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
+        artifacts: FakeArtifacts(),
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        platform: FakePlatform(),
+        terminal: Terminal.test(),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -150,6 +157,10 @@ environement:
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
+        artifacts: FakeArtifacts(),
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        platform: FakePlatform(),
+        terminal: Terminal.test(),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -196,6 +207,10 @@ environement:
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
+        artifacts: FakeArtifacts(),
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        platform: FakePlatform(),
+        terminal: Terminal.test(),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -239,6 +254,10 @@ environement:
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
+        artifacts: FakeArtifacts(),
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        platform: FakePlatform(),
+        terminal: Terminal.test(),
       );
       await expectLater(
         () async => webBuilder.buildWeb(

@@ -17,7 +17,6 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -52,33 +51,33 @@ class WebBuilder {
     required FlutterVersion flutterVersion,
     required Logger logger,
     required ProcessManager processManager,
-    Artifacts? artifacts,
-    Cache? cache,
-    Platform? platform,
-    Terminal? terminal,
+    required this.artifacts,
+    required this.cache,
+    required this.platform,
+    required this.terminal,
   }) : _analytics = analytics,
-       _artifacts = artifacts,
        _buildSystem = buildSystem,
        _buildTargets = buildTargets,
-       _cache = cache,
        _fileSystem = fileSystem,
        _flutterVersion = flutterVersion,
        _logger = logger,
-       _platform = platform,
-       _processManager = processManager,
-       _terminal = terminal;
+       _processManager = processManager;
 
   final Analytics _analytics;
-  final Artifacts? _artifacts;
+
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
-  final Cache? _cache;
+
   final FileSystem _fileSystem;
   final FlutterVersion _flutterVersion;
   final Logger _logger;
-  final Platform? _platform;
+
   final ProcessManager _processManager;
-  final Terminal? _terminal;
+
+  final Artifacts artifacts;
+  final Cache cache;
+  final Platform platform;
+  final Terminal terminal;
 
   /// Builds the web application using the specified compiler configurations
   /// and generates the necessary web assets in the output directory.
@@ -121,11 +120,6 @@ class WebBuilder {
 
     final migration = ProjectMigration(migrators);
     await migration.run();
-
-    final Artifacts artifacts = _artifacts ?? globals.artifacts!;
-    final Platform platform = _platform ?? globals.platform;
-    final Cache cache = _cache ?? globals.cache;
-    final Terminal terminal = _terminal ?? globals.terminal;
 
     final Status status = _logger.startProgress('Compiling $target for the Web...');
     final sw = Stopwatch()..start();
