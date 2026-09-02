@@ -172,7 +172,7 @@ final Platform windowsPlatform = FakePlatform(
   environment: <String, String>{'FLUTTER_ROOT': windowsFlutterRoot},
 );
 
-class FakeTerminal implements AnsiTerminal {
+class FakeTerminal implements Terminal {
   factory FakeTerminal({required Platform platform}) {
     return FakeTerminal._private(stdio: FakeStdio(), platform: platform);
   }
@@ -967,19 +967,16 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'custom-devices delete command throws tool exit with invalid device id',
-      () async {
-        final CommandRunner<void> runner = createCustomDevicesCommandRunner(featureEnabled: true);
-        await expectLater(
-          runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
-          throwsToolExit(
-            message:
-                'Couldn\'t find device with id "testid" in config at "/.flutter_custom_devices.json"',
-          ),
-        );
-      },
-    );
+    testUsingContext('custom-devices delete command throws tool exit with invalid device id', () async {
+      final CommandRunner<void> runner = createCustomDevicesCommandRunner(featureEnabled: true);
+      await expectLater(
+        runner.run(const <String>['custom-devices', 'delete', '-d', 'testid']),
+        throwsToolExit(
+          message:
+              'Couldn\'t find device with id "testid" in config at "/.flutter_custom_devices.json"',
+        ),
+      );
+    });
 
     testUsingContext(
       'custom-devices list command throws tool exit when config contains errors',

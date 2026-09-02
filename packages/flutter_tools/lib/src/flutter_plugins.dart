@@ -100,6 +100,14 @@ Future<void> _renderTemplateToFile(
   await file.writeAsString(renderedTemplate);
 }
 
+Logger _resolveLogger(Logger? logger) {
+  try {
+    return logger ?? globals.logger;
+  } on UnsupportedError {
+    return BufferLogger.test();
+  }
+}
+
 Future<Plugin?> _pluginFromPackage(
   String name,
   Uri packageRoot,
@@ -115,12 +123,7 @@ Future<Plugin?> _pluginFromPackage(
   } on UnsupportedError {
     fs = globals.localFileSystem;
   }
-  Logger effectiveLogger;
-  try {
-    effectiveLogger = logger ?? globals.logger;
-  } on UnsupportedError {
-    effectiveLogger = BufferLogger.test();
-  }
+  final Logger effectiveLogger = _resolveLogger(logger);
   YamlMap? pubspec;
   // Use containsKey rather than a null check so that a cached null (meaning
   // "pubspec.yaml is missing or unparseable") is distinguished from a cache
@@ -182,12 +185,7 @@ Future<List<Plugin>> findPlugins(
 }) async {
   final plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
-  Logger effectiveLogger;
-  try {
-    effectiveLogger = logger ?? globals.logger;
-  } on UnsupportedError {
-    effectiveLogger = BufferLogger.test();
-  }
+  final Logger effectiveLogger = _resolveLogger(logger);
 
   // Shared workspace resources (packageGraph, packageConfig) are only valid
   // when the project is actually a member of the workspace — i.e. its name
