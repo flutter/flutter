@@ -125,6 +125,7 @@ abstract class FlutterVersion {
       flutterRoot: flutterRoot,
       fetchTags: fetchTags,
       git: git,
+      platform: globals.platform,
     );
   }
 
@@ -137,16 +138,16 @@ abstract class FlutterVersion {
        _git = git;
 
   factory FlutterVersion.fromRevision({
+    required Platform platform,
     required String flutterRoot,
     required String frameworkRevision,
     required FileSystem fs,
     required Git git,
     SystemClock clock = const SystemClock(),
     bool fetchTags = false,
-    Platform? platform,
   }) {
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
-      platform ?? globals.platform,
+      platform,
       git: git,
       gitRef: frameworkRevision,
       workingDirectory: flutterRoot,

@@ -85,6 +85,7 @@ class WebBuilder {
 
     final bool hasWebPlugins = (await findPlugins(
       flutterProject,
+      logger: globals.logger,
     )).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
         ? _fileSystem.directory(
