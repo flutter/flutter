@@ -100,7 +100,7 @@ class RenderCanvas extends DisplayCanvas {
 
   /// Render the given [bitmap] with this [RenderCanvas].
   ///
-  /// The canvas will be resized to accomodate the bitmap immediately before
+  /// The canvas will be resized to accommodate the bitmap immediately before
   /// rendering it.
   void render(DomImageBitmap bitmap) {
     _ensureSize(BitmapSize(bitmap.width, bitmap.height));

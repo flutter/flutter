@@ -4594,7 +4594,7 @@ void _testRoute() {
   // Test the scenario of a route coming up and containing non-focusable
   // descendants that can have a11y focus. The expectation is that the first
   // descendant will be auto-focused, even if it's not input-focusable.
-  test('focuses on the first non-focusable descedant', () async {
+  test('focuses on the first non-focusable descendant', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5276,7 +5276,7 @@ void _testMenus() {
     expect(object.element.getAttribute('role'), 'menu');
   });
 
-  test('menu can have non-immidiate menu item nodes', () {
+  test('menu can have non-immediate menu item nodes', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5359,7 +5359,7 @@ void _testMenus() {
     expect(object1.element.getAttribute('aria-owns'), 'flt-semantic-node-7 flt-semantic-node-8');
   });
 
-  test('menu bar can have non-immidiate menu item nodes', () {
+  test('menu bar can have non-immediate menu item nodes', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;

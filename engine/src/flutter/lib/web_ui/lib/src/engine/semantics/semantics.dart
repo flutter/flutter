@@ -3375,7 +3375,7 @@ AFTER: $description
   /// resources.
   ///
   /// The object remains usable after this operation, but because the previous
-  /// semantics tree is completely removed, partial udpates will not succeed as
+  /// semantics tree is completely removed, partial updates will not succeed as
   /// they rely on the prior state of the tree. There is no distinction between
   /// a full update and partial update, so the failure may be cryptic.
   void reset() {
