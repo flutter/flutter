@@ -154,6 +154,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final FlutterProject project = this.project;
     final Logger logger = toolContext.logger;
     final Platform platform = toolContext.platform;
     final AnsiTerminal terminal = toolContext.terminal;

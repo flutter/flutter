@@ -143,6 +143,7 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final FlutterProject project = this.project;
     final Logger logger = toolContext.logger;
     final FileSystem fs = toolContext.fs;
     if (_androidSdk == null) {

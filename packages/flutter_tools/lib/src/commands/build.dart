@@ -109,7 +109,7 @@ class BuildCommand extends FlutterCommand {
           ),
           logger: logger,
           os: osUtils,
-          outputPreferences: OutputPreferences.test(),
+          outputPreferences: OutputPreferences(),
           persistentToolState: persistentToolState,
           platform: platform,
           preRunValidator: PreRunValidator(fileSystem: fileSystem),
