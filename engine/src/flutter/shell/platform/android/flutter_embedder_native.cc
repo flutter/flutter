@@ -3193,10 +3193,11 @@ FlutterEngineResult FlutterEmbedderNative::RunEngineWithBundle(
   std::string assets_path = bundle_path;
   if (assets_path.empty() ||
       !fml::IsFile(fml::paths::JoinPaths({assets_path, "kernel_blob.bin"}))) {
-    if (vm_init_ && vm_init_->GetVMArgs().has_value() &&
-        !vm_init_->GetVMArgs()->kernel_path.empty()) {
-      assets_path =
-          fml::paths::GetDirectoryName(vm_init_->GetVMArgs()->kernel_path);
+    if (vm_init_) {
+      const auto vm_args = vm_init_->GetVMArgs();
+      if (vm_args.has_value() && !vm_args->kernel_path.empty()) {
+        assets_path = fml::paths::GetDirectoryName(vm_args->kernel_path);
+      }
     }
   }
   if (!assets_path.empty()) {

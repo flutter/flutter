@@ -127,6 +127,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     embeddedView.setLayoutDirection(request.direction);
     platformViews.put(request.viewId, platformView);
     maybeInvokeOnFlutterViewAttached(platformView);
+    if (flutterView != null) {
+      initializePlatformViewIfNeeded(request.viewId);
+    }
     return platformView;
   }
 
@@ -240,10 +243,16 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
    */
   public void attachToView(@NonNull FlutterView newFlutterView) {
     flutterView = newFlutterView;
+    for (int index = 0; index < platformViews.size(); index++) {
+      final int viewId = platformViews.keyAt(index);
+      initializePlatformViewIfNeeded(viewId);
+    }
     // Add wrapper for platform views that are composed at the view hierarchy level.
     for (int index = 0; index < platformViewParent.size(); index++) {
       final FlutterMutatorView view = platformViewParent.valueAt(index);
-      flutterView.addView(view);
+      if (view.getParent() == null) {
+        flutterView.addView(view);
+      }
     }
     // Notify platform views that they are now attached to a FlutterView.
     for (int index = 0; index < platformViews.size(); index++) {
@@ -452,6 +461,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
     if (platformViewParent.get(viewId) != null) {
       return true;
+    }
+    if (flutterView == null) {
+      return false;
     }
     final View embeddedView = platformView.getView();
     if (embeddedView == null) {
