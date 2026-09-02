@@ -220,24 +220,24 @@ STDERR STUFF
     'macOS build fails when there is no macos project',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createCoreMockProjectFiles();
 
       expect(
@@ -262,24 +262,24 @@ STDERR STUFF
     'macOS build fails when Xcode is not installed',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
 
       expect(
@@ -302,24 +302,24 @@ STDERR STUFF
     'macOS build successfully with renamed .xcodeproj/.xcworkspace files',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
 
       fileSystem
           .directory(fileSystem.path.join('macos', 'RenamedProj.xcodeproj'))
@@ -355,24 +355,24 @@ STDERR STUFF
     'macOS build invokes xcodebuild with -project when there is no .xcworkspace',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
 
       createMinimalMockProjectFiles(createWorkspace: false);
 
@@ -400,24 +400,24 @@ STDERR STUFF
     'macOS build fails on non-macOS platform',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
 
@@ -439,24 +439,24 @@ STDERR STUFF
     'macOS build fails when feature is disabled',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
 
@@ -481,24 +481,24 @@ STDERR STUFF
     'macOS build forwards error stdout to status logger error',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
 
       await createTestCommandRunner(
@@ -538,24 +538,24 @@ STDERR STUFF
     'macOS build outputs path and size when successful',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: MemoryFileSystem.test(),
+    flutterVersion: FakeFlutterVersion(),
+    logger: BufferLogger.test(),
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
 
       await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);
@@ -579,24 +579,24 @@ STDERR STUFF
     'macOS build invokes xcode build (debug)',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
 
       await createTestCommandRunner(
@@ -618,24 +618,24 @@ STDERR STUFF
     'macOS build invokes xcode build (debug) with verbosity',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
 
       await createTestCommandRunner(
@@ -658,24 +658,24 @@ STDERR STUFF
     'macOS build invokes xcode build (profile)',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
 
       await createTestCommandRunner(
@@ -698,24 +698,24 @@ STDERR STUFF
     'macOS build invokes xcode build (release)',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
 
       await createTestCommandRunner(
@@ -737,24 +737,24 @@ STDERR STUFF
     'macOS build supports standard desktop build options',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
       fileSystem.file('lib/other.dart').createSync(recursive: true);
 
@@ -856,24 +856,24 @@ STDERR STUFF
       ]);
 
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
 
       await createTestCommandRunner(
         command,
@@ -896,24 +896,24 @@ STDERR STUFF
     'macOS build supports build-name and build-number',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
 
       await createTestCommandRunner(command).run(const <String>[
@@ -945,24 +945,24 @@ STDERR STUFF
   testUsingContext('Refuses to build for macOS when feature is disabled', () {
     final CommandRunner<void> runner = createTestCommandRunner(
       BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      ),
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+),
     );
 
     final bool supported = BuildMacosCommand(
@@ -1001,24 +1001,24 @@ STDERR STUFF
     'code size analysis throws StateError if no code size snapshot generated by gen_snapshot',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
 
       fileSystem.file('build/macos/Build/Products/Release/Runner.app/App')
@@ -1058,24 +1058,24 @@ STDERR STUFF
     'Performs code size analysis and sends analytics from arm64 host',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
 
       fileSystem.file('build/macos/Build/Products/Release/example.app/App')
@@ -1131,24 +1131,24 @@ STDERR STUFF
     'macOS build overrides CODE_SIGN_ENTITLEMENTS when in CI if entitlement file exists (debug)',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
 
       final File entitlementFile = fileSystem.file(
@@ -1211,24 +1211,24 @@ STDERR STUFF
     'macOS build overrides CODE_SIGN_ENTITLEMENTS when in CI if entitlement file exists (release)',
     () async {
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
       createMinimalMockProjectFiles();
 
       final File entitlementFile = fileSystem.file(
@@ -1293,24 +1293,24 @@ STDERR STUFF
       createMinimalMockProjectFiles();
 
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
 
       await createTestCommandRunner(
         command,
@@ -1334,24 +1334,24 @@ STDERR STUFF
       createMinimalMockProjectFiles();
 
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
 
       await createTestCommandRunner(
         command,
@@ -1376,24 +1376,24 @@ STDERR STUFF
       createMinimalMockProjectFiles();
 
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
 
       await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);
     },
@@ -1415,24 +1415,24 @@ STDERR STUFF
       createMinimalMockProjectFiles();
 
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
 
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(const <String>['build', 'macos', '--debug', '--no-pub']);
@@ -1473,24 +1473,24 @@ STDERR STUFF
       ]);
 
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
 
       await createTestCommandRunner(
         command,
@@ -1517,24 +1517,24 @@ STDERR STUFF
       createMinimalMockProjectFiles();
 
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
 
       await expectLater(
         createTestCommandRunner(command).run(<String>['build', 'macos', '--release', '--no-pub']),
@@ -1578,24 +1578,24 @@ STDERR STUFF
       ]);
 
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
 
       await createTestCommandRunner(
         command,
@@ -1622,24 +1622,24 @@ STDERR STUFF
       createMinimalMockProjectFiles();
 
       final command = BuildCommand(
-        androidSdk: FakeAndroidSdk(),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: testLogger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
-        templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
-      );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: testLogger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
 
       await createTestCommandRunner(
         command,
@@ -1684,24 +1684,24 @@ STDERR STUFF
       'Sends an analytics event when Impeller is enabled',
       () async {
         final command = BuildCommand(
-          androidSdk: FakeAndroidSdk(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          osUtils: FakeOperatingSystemUtils(),
-          config: FakeConfig(),
-          platform: FakePlatform(),
-          fileSystemUtils: FakeFileSystemUtils(),
-          terminal: FakeTerminal(),
-          plistParser: FakePlistParser(),
-          processUtils: FakeProcessUtils(),
-          processManager: FakeProcessManager.any(),
-          templateRenderer: FakeTemplateRenderer(),
-          xcode: FakeXcode(),
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          flutterVersion: FakeFlutterVersion(),
-        );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: BufferLogger.test(),
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
         createMinimalMockProjectFiles();
 
         await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);
@@ -1728,24 +1728,24 @@ STDERR STUFF
       'Sends an analytics event when Impeller is disabled',
       () async {
         final command = BuildCommand(
-          androidSdk: FakeAndroidSdk(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          osUtils: FakeOperatingSystemUtils(),
-          config: FakeConfig(),
-          platform: FakePlatform(),
-          fileSystemUtils: FakeFileSystemUtils(),
-          terminal: FakeTerminal(),
-          plistParser: FakePlistParser(),
-          processUtils: FakeProcessUtils(),
-          processManager: FakeProcessManager.any(),
-          templateRenderer: FakeTemplateRenderer(),
-          xcode: FakeXcode(),
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          flutterVersion: FakeFlutterVersion(),
-        );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: BufferLogger.test(),
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
         createMinimalMockProjectFiles();
 
         fileSystem.file(fileSystem.path.join('usr', 'bin', 'plutil')).createSync(recursive: true);
@@ -1781,24 +1781,24 @@ STDERR STUFF
       'Reads built app bundle Contents/Info.plist when present',
       () async {
         final command = BuildCommand(
-          androidSdk: FakeAndroidSdk(),
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          osUtils: FakeOperatingSystemUtils(),
-          config: FakeConfig(),
-          platform: FakePlatform(),
-          fileSystemUtils: FakeFileSystemUtils(),
-          terminal: FakeTerminal(),
-          plistParser: FakePlistParser(),
-          processUtils: FakeProcessUtils(),
-          processManager: FakeProcessManager.any(),
-          templateRenderer: FakeTemplateRenderer(),
-          xcode: FakeXcode(),
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          flutterVersion: FakeFlutterVersion(),
-        );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: BufferLogger.test(),
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
         createMinimalMockProjectFiles();
 
         await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);

@@ -76,24 +76,24 @@ void main() {
 
   BuildCommand makeBuildCommand() {
     return BuildCommand(
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: fileSystem,
-      logger: logger,
-      osUtils: FakeOperatingSystemUtils(),
-      config: FakeConfig(),
-      platform: FakePlatform(),
-      fileSystemUtils: FakeFileSystemUtils(),
-      terminal: FakeTerminal(),
-      plistParser: FakePlistParser(),
-      processUtils: FakeProcessUtils(),
-      processManager: FakeProcessManager.any(),
-      templateRenderer: FakeTemplateRenderer(),
-      xcode: FakeXcode(),
-      artifacts: FakeArtifacts(),
-      cache: FakeCache(),
-      flutterVersion: FakeFlutterVersion(),
-    );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fileSystem,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
   }
 
   testUsingContext(

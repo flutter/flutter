@@ -21,6 +21,8 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
+import '../context/android_context.dart';
+import '../context/tool_context.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
@@ -163,27 +165,43 @@ const kMaxRetryTime = Duration(seconds: 10);
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder({
-    required Java? java,
-    required Logger logger,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required Analytics analytics,
-    required GradleUtils gradleUtils,
-    required Platform platform,
-    required AndroidStudio? androidStudio,
+    ToolContext? toolContext,
+    AndroidContext? androidContext,
+    Analytics? analytics,
+    Java? java,
+    Logger? logger,
+    ProcessManager? processManager,
+    FileSystem? fileSystem,
+    Artifacts? artifacts,
+    GradleUtils? gradleUtils,
+    Platform? platform,
+    AndroidStudio? androidStudio,
     AndroidSdk? androidSdk,
-  }) : _java = java,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _analytics = analytics,
-       _gradleUtils = gradleUtils,
-       _androidStudio = androidStudio,
-       _androidSdk = androidSdk,
-       _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  }) : _androidContext = androidContext,
+       _toolContext = toolContext,
+       _java = java ?? androidContext?.java,
+       _logger = logger ?? toolContext!.logger,
+       _fileSystem = fileSystem ?? toolContext!.fs,
+       _artifacts = artifacts ?? toolContext!.artifacts,
+       _analytics = analytics!,
+       _gradleUtils = gradleUtils ?? androidContext!.gradleUtils,
+       _androidStudio = androidStudio ?? androidContext?.androidStudio,
+       _androidSdk = androidSdk ?? androidContext?.androidSdk,
+       _fileSystemUtils =
+           toolContext?.fileSystemUtils ??
+           FileSystemUtils(
+             fileSystem: fileSystem ?? toolContext!.fs,
+             platform: platform ?? toolContext.platform,
+           ),
+       _processUtils =
+           toolContext?.processUtils ??
+           ProcessUtils(
+             logger: logger ?? toolContext!.logger,
+             processManager: processManager ?? toolContext.processManager,
+           );
 
+  final ToolContext? _toolContext;
+  final AndroidContext? _androidContext;
   final Java? _java;
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -745,13 +763,13 @@ To fix this, you can either:
       );
       return false;
     }
-    if (!_androidSdk.cmdlineToolsAvailable) {
+    if (!(_androidSdk?.cmdlineToolsAvailable ?? false)) {
       _logger.printTrace(
         'Failed to find cmdline-tools when checking final appbundle for debug symbols.',
       );
       return false;
     }
-    final String? apkAnalyzerPath = _androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName);
+    final String? apkAnalyzerPath = _androidSdk?.getCmdlineToolsPath(apkAnalyzerBinaryName);
     if (apkAnalyzerPath == null) {
       _logger.printTrace(
         'Failed to find apkanalyzer when checking final appbundle for debug symbols.',

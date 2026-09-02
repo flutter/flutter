@@ -53,223 +53,155 @@ import 'build_swift_package.dart';
 import 'build_web.dart';
 import 'build_windows.dart';
 import 'darwin_add_to_app.dart';
+import '../context/apple_context.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({
-    required Artifacts artifacts,
-    required Cache cache,
-    required FileSystem fileSystem,
-    required FlutterVersion flutterVersion,
+    required AndroidContext androidContext,
+    required AppleContext appleContext,
     required BuildSystem buildSystem,
-    required OperatingSystemUtils osUtils,
-    required Logger logger,
-    required AndroidSdk? androidSdk,
-    required Config config,
-    required Platform platform,
-    required ProcessUtils processUtils,
-    required ProcessManager processManager,
-    required FileSystemUtils fileSystemUtils,
     required TemplateRenderer templateRenderer,
-    required Terminal terminal,
-    required PlistParser plistParser,
-    required Xcode? xcode,
+    required ToolContext toolContext,
     AndroidBuilder? androidBuilder,
-    AndroidContext? androidContext,
-    ToolContext? toolContext,
     bool verboseHelp = false,
-  }) {
-    final persistentToolState = PersistentToolState(
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-    );
-    final ToolContext effectiveToolContext =
-        toolContext ??
-        ToolContext(
-          artifacts: artifacts,
-          botDetector: BotDetector(
-            httpClientFactory: () => HttpClient(),
-            persistentToolState: persistentToolState,
-            platform: platform,
-          ),
-          cache: cache,
-          config: config,
-          customDevicesConfig: CustomDevicesConfig(
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: platform,
-          ),
-          flutterVersion: flutterVersion,
-          fs: fileSystem,
-          git: Git(currentPlatform: platform, runProcessWith: processUtils),
-          localEngineLocator: LocalEngineLocator(
-            fileSystem: fileSystem,
-            flutterRoot: Cache.flutterRoot ?? '',
-            logger: logger,
-            platform: platform,
-            userMessages: UserMessages(),
-          ),
-          logger: logger,
-          os: osUtils,
-          outputPreferences: OutputPreferences(),
-          persistentToolState: persistentToolState,
-          platform: platform,
-          preRunValidator: PreRunValidator(fileSystem: fileSystem),
-          processInfo: ProcessInfo(fileSystem),
-          processManager: processManager,
-          processUtils: processUtils,
-          projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
-          shutdownHooks: ShutdownHooks(),
-          signals: LocalSignals.instance,
-          stdio: Stdio(),
-          systemClock: const SystemClock(),
-          terminal: terminal is AnsiTerminal
-              ? terminal
-              : AnsiTerminal(stdio: Stdio(), platform: platform),
-          userMessages: UserMessages(),
-        );
-    final AndroidContext effectiveAndroidContext =
-        androidContext ??
-        AndroidContext(
-          androidSdk: androidSdk,
-          androidStudio: null,
-          gradleUtils: GradleUtils(
-            cache: cache,
-            logger: logger,
-            operatingSystemUtils: osUtils,
-            platform: platform,
-          ),
-          java: null,
-        );
-    final AndroidBuilder? effectiveAndroidBuilder =
-        androidBuilder ??
-        (context.get<AndroidBuilder>() ??
-            (effectiveAndroidContext.androidSdk != null
-                ? AndroidGradleBuilder(
-                    java: effectiveAndroidContext.java,
-                    logger: logger,
-                    processManager: processManager,
-                    fileSystem: fileSystem,
-                    artifacts: artifacts,
-                    analytics: analytics,
-                    gradleUtils: effectiveAndroidContext.gradleUtils,
-                    platform: platform,
-                    androidStudio: effectiveAndroidContext.androidStudio,
-                    androidSdk: effectiveAndroidContext.androidSdk,
-                  )
-                : null));
+  }) : _androidContext = androidContext,
+       _appleContext = appleContext,
+       _buildSystem = buildSystem,
+       _templateRenderer = templateRenderer,
+       _toolContext = toolContext,
+       _androidBuilder = androidBuilder,
+       super(verboseHelp: verboseHelp) {
     _addSubcommand(
       BuildAarCommand(
-        androidBuilder: effectiveAndroidBuilder,
-        androidContext: effectiveAndroidContext,
-        buildSystem: buildSystem,
-        toolContext: effectiveToolContext,
+        androidBuilder: _androidBuilder,
+        androidContext: _androidContext,
+        buildSystem: _buildSystem,
+        toolContext: _toolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
       BuildApkCommand(
-        androidBuilder: effectiveAndroidBuilder,
-        androidContext: effectiveAndroidContext,
-        buildSystem: buildSystem,
-        toolContext: effectiveToolContext,
+        androidBuilder: _androidBuilder,
+        androidContext: _androidContext,
+        buildSystem: _buildSystem,
+        toolContext: _toolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
       BuildAppBundleCommand(
-        androidBuilder: effectiveAndroidBuilder,
-        androidContext: effectiveAndroidContext,
-        buildSystem: buildSystem,
-        toolContext: effectiveToolContext,
+        androidBuilder: _androidBuilder,
+        androidContext: _androidContext,
+        buildSystem: _buildSystem,
+        toolContext: _toolContext,
         verboseHelp: verboseHelp,
       ),
     );
-    _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildIOSCommand(logger: _toolContext.logger, verboseHelp: verboseHelp));
     _addSubcommand(
       BuildIOSFrameworkCommand(
-        logger: logger,
-        buildSystem: buildSystem,
+        logger: _toolContext.logger,
+        buildSystem: _buildSystem,
         verboseHelp: verboseHelp,
         codesign: DarwinAddToAppCodesigning(
-          logger: logger,
+          logger: _toolContext.logger,
           xcodeCodeSigningSettings: XcodeCodeSigningSettings(
-            config: config,
-            logger: logger,
-            platform: platform,
-            processUtils: processUtils,
-            fileSystem: fileSystem,
-            fileSystemUtils: fileSystemUtils,
-            terminal: terminal,
-            plistParser: plistParser,
+            config: _toolContext.config,
+            logger: _toolContext.logger,
+            platform: _toolContext.platform,
+            processUtils: _toolContext.processUtils,
+            fileSystem: _toolContext.fs,
+            fileSystemUtils: _toolContext.fileSystemUtils,
+            terminal: _toolContext.terminal,
+            plistParser: _appleContext.plistParser,
           ),
         ),
       ),
     );
     _addSubcommand(
       BuildMacOSFrameworkCommand(
-        logger: logger,
-        buildSystem: buildSystem,
+        logger: _toolContext.logger,
+        buildSystem: _buildSystem,
         verboseHelp: verboseHelp,
         codesign: DarwinAddToAppCodesigning(
-          logger: logger,
+          logger: _toolContext.logger,
           xcodeCodeSigningSettings: XcodeCodeSigningSettings(
-            config: config,
-            logger: logger,
-            platform: platform,
-            processUtils: processUtils,
-            fileSystem: fileSystem,
-            fileSystemUtils: fileSystemUtils,
-            terminal: terminal,
-            plistParser: plistParser,
+            config: _toolContext.config,
+            logger: _toolContext.logger,
+            platform: _toolContext.platform,
+            processUtils: _toolContext.processUtils,
+            fileSystem: _toolContext.fs,
+            fileSystemUtils: _toolContext.fileSystemUtils,
+            terminal: _toolContext.terminal,
+            plistParser: _appleContext.plistParser,
           ),
         ),
       ),
     );
     _addSubcommand(
       BuildSwiftPackage(
-        logger: logger,
+        logger: _toolContext.logger,
         analytics: analytics,
-        artifacts: artifacts,
-        buildSystem: buildSystem,
-        cache: cache,
+        artifacts: _toolContext.artifacts,
+        buildSystem: _buildSystem,
+        cache: _toolContext.cache,
         featureFlags: featureFlags,
-        fileSystem: fileSystem,
-        flutterVersion: flutterVersion,
-        platform: platform,
-        processManager: processManager,
-        templateRenderer: templateRenderer,
-        xcode: xcode,
+        fileSystem: _toolContext.fs,
+        flutterVersion: _toolContext.flutterVersion,
+        platform: _toolContext.platform,
+        processManager: _toolContext.processManager,
+        templateRenderer: _templateRenderer,
+        xcode: _appleContext.xcode,
         codesign: DarwinAddToAppCodesigning(
-          logger: logger,
+          logger: _toolContext.logger,
           xcodeCodeSigningSettings: XcodeCodeSigningSettings(
-            config: config,
-            logger: logger,
-            platform: platform,
-            processUtils: processUtils,
-            fileSystem: fileSystem,
-            fileSystemUtils: fileSystemUtils,
-            terminal: terminal,
-            plistParser: plistParser,
+            config: _toolContext.config,
+            logger: _toolContext.logger,
+            platform: _toolContext.platform,
+            processUtils: _toolContext.processUtils,
+            fileSystem: _toolContext.fs,
+            fileSystemUtils: _toolContext.fileSystemUtils,
+            terminal: _toolContext.terminal,
+            plistParser: _appleContext.plistParser,
           ),
         ),
         verboseHelp: verboseHelp,
       ),
     );
 
-    _addSubcommand(BuildIOSArchiveCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildIOSArchiveCommand(logger: _toolContext.logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildBundleCommand(logger: _toolContext.logger, verboseHelp: verboseHelp));
     _addSubcommand(
-      BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
+      BuildWebCommand(
+        fileSystem: _toolContext.fs,
+        logger: _toolContext.logger,
+        verboseHelp: verboseHelp,
+      ),
     );
-    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildMacosCommand(logger: _toolContext.logger, verboseHelp: verboseHelp));
     _addSubcommand(
-      BuildLinuxCommand(logger: logger, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
+      BuildLinuxCommand(
+        logger: _toolContext.logger,
+        operatingSystemUtils: _toolContext.os,
+        verboseHelp: verboseHelp,
+      ),
     );
     _addSubcommand(
-      BuildWindowsCommand(logger: logger, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
+      BuildWindowsCommand(
+        logger: _toolContext.logger,
+        operatingSystemUtils: _toolContext.os,
+        verboseHelp: verboseHelp,
+      ),
     );
   }
+
+  final AndroidContext _androidContext;
+  final AppleContext _appleContext;
+  final BuildSystem _buildSystem;
+  final TemplateRenderer _templateRenderer;
+  final ToolContext _toolContext;
+  final AndroidBuilder? _androidBuilder;
 
   void _addSubcommand(BuildSubCommand command) {
     if (command.supported) {
@@ -292,17 +224,25 @@ class BuildCommand extends FlutterCommand {
 
 abstract class BuildSubCommand extends FlutterCommand {
   BuildSubCommand({
-    required this.logger,
+    Logger? logger,
     required super.verboseHelp,
     super.outputPreferences,
-    super.toolContext,
-  }) {
+    ToolContext? toolContext,
+  }) : _toolContext = toolContext,
+       _logger = logger,
+       super(
+         outputPreferences: outputPreferences ?? toolContext?.outputPreferences,
+         toolContext: toolContext,
+       ) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
+  final ToolContext? _toolContext;
+  final Logger? _logger;
+
   @protected
-  final Logger logger;
+  Logger get logger => _logger ?? _toolContext!.logger;
 
   /// Whether this command is supported and should be shown.
   bool get supported => true;

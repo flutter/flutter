@@ -19,24 +19,24 @@ void main() {
     final logger = BufferLogger.test();
     final fs = MemoryFileSystem.test();
     final command = BuildCommand(
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      fileSystem: fs,
-      logger: logger,
-      osUtils: FakeOperatingSystemUtils(),
-      config: FakeConfig(),
-      platform: FakePlatform(),
-      fileSystemUtils: FakeFileSystemUtils(),
-      terminal: FakeTerminal(),
-      plistParser: FakePlistParser(),
-      processUtils: FakeProcessUtils(),
-      processManager: FakeProcessManager.any(),
-      templateRenderer: FakeTemplateRenderer(),
-      xcode: FakeXcode(),
-      artifacts: FakeArtifacts(),
-      cache: FakeCache(),
-      flutterVersion: FakeFlutterVersion(),
-    );
+  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+  buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+  templateRenderer: FakeTemplateRenderer(),
+  toolContext: FakeToolContext(
+    artifacts: FakeArtifacts(),
+    cache: FakeCache(),
+    config: FakeConfig(),
+    fs: fs,
+    flutterVersion: FakeFlutterVersion(),
+    logger: logger,
+    os: FakeOperatingSystemUtils(),
+    platform: FakePlatform(),
+    processManager: FakeProcessManager.any(),
+    processUtils: FakeProcessUtils(),
+    terminal: FakeTerminal(),
+  ),
+);
     for (final Command<void> x in command.subcommands.values) {
       expect((x as BuildSubCommand).supported, isTrue);
     }
