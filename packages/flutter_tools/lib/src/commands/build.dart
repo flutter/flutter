@@ -10,7 +10,6 @@ import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/config.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -85,15 +84,17 @@ class BuildCommand extends FlutterCommand {
     bool verboseHelp = false,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
   }) : super(outputPreferences: outputPreferences, toolContext: toolContext) {
-    final Analytics effectiveAnalytics = context.get<Analytics>() ?? analytics;
+    final Analytics effectiveAnalytics = analytics;
     final effectivePlatform = platform;
-    final PersistentToolState persistentToolState =
-        context.get<PersistentToolState>() ??
-        PersistentToolState(fileSystem: fileSystem, logger: logger, platform: effectivePlatform);
+    final persistentToolState = PersistentToolState(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: effectivePlatform,
+    );
     final ProcessUtils effectiveProcessUtils =
         processUtils ?? ProcessUtils(processManager: processManager, logger: logger);
     final OutputPreferences effectiveOutputPreferences =
-        outputPreferences ?? (context.get<OutputPreferences>() ?? OutputPreferences.test());
+        outputPreferences ?? (OutputPreferences.test());
     final ToolContext effectiveToolContext =
         toolContext ??
         ToolContext(
@@ -127,18 +128,13 @@ class BuildCommand extends FlutterCommand {
           platform: effectivePlatform,
           preRunValidator:
               preRunValidator ??
-              (context.get<PreRunValidator>() ??
-                  (!fileSystem
-                          .directory(
-                            fileSystem.path.join(
-                              Cache.flutterRoot ?? '',
-                              'packages',
-                              'flutter_tools',
-                            ),
-                          )
-                          .existsSync()
-                      ? _NoopPreRunValidator()
-                      : PreRunValidator(fileSystem: fileSystem))),
+              ((!fileSystem
+                      .directory(
+                        fileSystem.path.join(Cache.flutterRoot ?? '', 'packages', 'flutter_tools'),
+                      )
+                      .existsSync()
+                  ? _NoopPreRunValidator()
+                  : PreRunValidator(fileSystem: fileSystem))),
           processInfo: ProcessInfo(fileSystem),
           processManager: processManager,
           processUtils: effectiveProcessUtils,
@@ -193,7 +189,7 @@ class BuildCommand extends FlutterCommand {
             platform: effectivePlatform,
             xcode: effectiveXcode,
           ),
-          plistParser: context.get<PlistParser>() ?? plistParser,
+          plistParser: plistParser,
           xcdevice: XCDevice(
             analytics: effectiveAnalytics,
             artifacts: artifacts,
