@@ -30,11 +30,9 @@ CommandRunner<void> createTestCommandRunner([
   FeatureFlags? featureFlags,
 ]) {
   final ToolContext? effectiveToolContext = toolContext ?? command?.toolContext;
-  final FeatureFlags? effectiveFeatureFlags =
-      featureFlags ?? (command != null ? _commandFeatureFlags(command) : null);
   final runner = TestFlutterCommandRunner(
     analytics: analytics,
-    featureFlags: effectiveFeatureFlags,
+    featureFlags: featureFlags,
     toolContext: effectiveToolContext,
   );
   if (command != null) {
@@ -57,14 +55,6 @@ Future<String> createProject(
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
-}
-
-FeatureFlags? _commandFeatureFlags(FlutterCommand command) {
-  try {
-    return command.featureFlags;
-  } on Object {
-    return null;
-  }
 }
 
 class TestFlutterCommandRunner extends FlutterCommandRunner {

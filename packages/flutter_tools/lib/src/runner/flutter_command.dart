@@ -197,17 +197,6 @@ abstract class FlutterCommand extends Command<void> {
   /// The [ToolContext] providing explicit dependency injection for this command.
   ToolContext? get toolContext => _explicitToolContext ?? runner?.toolContext;
 
-  /// The [FeatureFlags] instance used by this command.
-  FeatureFlags get featureFlags =>
-      runner?.featureFlags ??
-      (() {
-        try {
-          return context.get<FeatureFlags>() ?? const _DefaultFeatureFlags();
-        } on UnsupportedError {
-          return const _DefaultFeatureFlags();
-        }
-      })();
-
   SystemClock get _clock => _explicitToolContext?.systemClock ?? globals.systemClock;
   Logger get _logger => _explicitToolContext?.logger ?? globals.logger;
   Signals get _signals => _explicitToolContext?.signals ?? globals.signals;
@@ -1245,7 +1234,19 @@ abstract class FlutterCommand extends Command<void> {
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp => explicitEnableHcpp ?? featureFlags.isHcppEnabled;
+  bool get enableHcpp {
+    if (explicitEnableHcpp case final bool explicit) {
+      return explicit;
+    }
+    if (runner?.featureFlags case final FeatureFlags flags) {
+      return flags.isHcppEnabled;
+    }
+    try {
+      return featureFlags.isHcppEnabled;
+    } on UnsupportedError {
+      return false;
+    }
+  }
 
   void addTestFlag({required bool verboseHelp}) {
     argParser.addFlag(
@@ -1480,8 +1481,17 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    final String enabledFeatureFlags = featureFlags.allFeatures
-        .where((Feature feature) => featureFlags.isEnabled(feature))
+    FeatureFlags? effectiveFeatureFlags = runner?.featureFlags;
+    if (effectiveFeatureFlags == null) {
+      try {
+        effectiveFeatureFlags = featureFlags;
+      } on UnsupportedError {
+        return;
+      }
+    }
+
+    final String enabledFeatureFlags = effectiveFeatureFlags.allFeatures
+        .where((Feature feature) => effectiveFeatureFlags!.isEnabled(feature))
         .where((Feature feature) => feature.runtimeId != null)
         .map((Feature feature) => feature.runtimeId!)
         .join(',');
@@ -2155,54 +2165,3 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
 bool _isBlank(String s) => s.trim().isEmpty;
-
-class _DefaultFeatureFlags extends FeatureFlags {
-  const _DefaultFeatureFlags();
-
-  @override
-  bool isEnabled(Feature feature) => false;
-  @override
-  bool get isLinuxEnabled => false;
-  @override
-  bool get isMacOSEnabled => false;
-  @override
-  bool get isWindowsEnabled => false;
-  @override
-  bool get isWebEnabled => false;
-  @override
-  bool get isAndroidEnabled => false;
-  @override
-  bool get isIOSEnabled => false;
-  @override
-  bool get isFuchsiaEnabled => false;
-  @override
-  bool get areCustomDevicesEnabled => false;
-  @override
-  bool get isCliAnimationEnabled => false;
-  @override
-  bool get isNativeAssetsEnabled => false;
-  @override
-  bool get isDartDataAssetsEnabled => false;
-  @override
-  bool get isRecordUseEnabled => false;
-  @override
-  bool get isSwiftPackageManagerEnabled => false;
-  @override
-  bool get isOmitLegacyVersionFileEnabled => false;
-  @override
-  bool get isWindowingEnabled => false;
-  @override
-  bool get isAccessibilityEvaluationsEnabled => false;
-  @override
-  bool get isLLDBDebuggingEnabled => false;
-  @override
-  bool get isUISceneMigrationEnabled => false;
-  @override
-  bool get isRiscv64SupportEnabled => false;
-  @override
-  bool get isMacOSArm64OnlyEnabled => false;
-  @override
-  bool get isHcppEnabled => false;
-  @override
-  bool get isToolExtensionsEnabled => false;
-}

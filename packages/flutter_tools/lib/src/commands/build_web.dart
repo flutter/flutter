@@ -61,9 +61,6 @@ class BuildWebCommand extends BuildSubCommand {
   BuildSystem get buildSystem => _buildSystem;
 
   @override
-  FeatureFlags get featureFlags => _featureFlags;
-
-  @override
   ToolContext get toolContext => super.toolContext!;
 
   @override
