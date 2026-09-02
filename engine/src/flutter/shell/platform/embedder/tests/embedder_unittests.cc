@@ -3983,6 +3983,11 @@ TEST_F(EmbedderTest, InvalidFlutterWindowMetricsEvent) {
   event.display_features_state = nullptr;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kInvalidArguments);
+
+  // Unreasonably large display features count must fail.
+  event.display_features_count = 1001;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
 }
 
 TEST_F(EmbedderTest, WindowMetricsEventWithPaddingAndDisplayFeatures) {
