@@ -55,7 +55,7 @@ class WebBuilder {
     Artifacts? artifacts,
     Cache? cache,
     Platform? platform,
-    AnsiTerminal? terminal,
+    Terminal? terminal,
   }) : _analytics = analytics,
        _artifacts = artifacts,
        _buildSystem = buildSystem,
@@ -78,7 +78,7 @@ class WebBuilder {
   final Logger _logger;
   final Platform? _platform;
   final ProcessManager _processManager;
-  final AnsiTerminal? _terminal;
+  final Terminal? _terminal;
 
   /// Builds the web application using the specified compiler configurations
   /// and generates the necessary web assets in the output directory.
@@ -125,7 +125,7 @@ class WebBuilder {
     final Artifacts artifacts = _artifacts ?? globals.artifacts!;
     final Platform platform = _platform ?? globals.platform;
     final Cache cache = _cache ?? globals.cache;
-    final AnsiTerminal terminal = _terminal ?? globals.terminal;
+    final Terminal terminal = _terminal ?? globals.terminal;
 
     final Status status = _logger.startProgress('Compiling $target for the Web...');
     final sw = Stopwatch()..start();
