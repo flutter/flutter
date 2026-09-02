@@ -1053,7 +1053,10 @@ public class FlutterActivity extends Activity
   @Override
   @Nullable
   public String getCachedEngineId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_ID)) {
+      return IntentUtils.safeGetStringExtra(this, EXTRA_CACHED_ENGINE_ID);
+    }
+    return null;
   }
 
   /**
@@ -1064,7 +1067,10 @@ public class FlutterActivity extends Activity
   @Override
   @Nullable
   public String getCachedEngineGroupId() {
-    return getIntent().getStringExtra(EXTRA_CACHED_ENGINE_GROUP_ID);
+    if (getIntent().hasExtra(EXTRA_CACHED_ENGINE_GROUP_ID)) {
+      return IntentUtils.safeGetStringExtra(this, EXTRA_CACHED_ENGINE_GROUP_ID);
+    }
+    return null;
   }
 
   /**
@@ -1079,6 +1085,7 @@ public class FlutterActivity extends Activity
   @Override
   public boolean shouldDestroyEngineWithHost() {
     boolean explicitDestructionRequested =
+        // TODO(camsim99): Migrate to IntentUtils.safeGetBooleanExtra()
         getIntent().getBooleanExtra(EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, false);
     if (getCachedEngineId() != null || delegate.isFlutterEngineFromHost()) {
       // Only destroy a cached engine if explicitly requested by app developer.
@@ -1086,6 +1093,7 @@ public class FlutterActivity extends Activity
     } else {
       // If this Activity created the FlutterEngine, destroy it by default unless
       // explicitly requested not to.
+      // TODO(camsim99): Migrate to IntentUtils.safeGetBooleanExtra()
       return getIntent().getBooleanExtra(EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, true);
     }
   }
@@ -1110,7 +1118,7 @@ public class FlutterActivity extends Activity
   @NonNull
   public String getDartEntrypointFunctionName() {
     if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT)) {
-      return getIntent().getStringExtra(EXTRA_DART_ENTRYPOINT);
+      return IntentUtils.safeGetStringExtra(this, EXTRA_DART_ENTRYPOINT);
     }
 
     try {
@@ -1132,7 +1140,10 @@ public class FlutterActivity extends Activity
    */
   @Nullable
   public List<String> getDartEntrypointArgs() {
-    return (List<String>) getIntent().getSerializableExtra(EXTRA_DART_ENTRYPOINT_ARGS);
+    if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT_ARGS)) {
+      return (List<String>) IntentUtils.safeGetSerializableExtra(this, EXTRA_DART_ENTRYPOINT_ARGS);
+    }
+    return null;
   }
 
   /**
@@ -1190,6 +1201,10 @@ public class FlutterActivity extends Activity
    * route is derived from the {@code Intent} through the Intent.getData() instead.
    */
   public String getInitialRoute() {
+    if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
+      return IntentUtils.safeGetStringExtra(this, EXTRA_INITIAL_ROUTE);
+    }
+
     try {
       return FlutterActivityLaunchConfigs.getInitialRoute(getIntent(), this, getMetaData());
     } catch (PackageManager.NameNotFoundException e) {
@@ -1267,6 +1282,7 @@ public class FlutterActivity extends Activity
   @NonNull
   protected BackgroundMode getBackgroundMode() {
     if (getIntent().hasExtra(EXTRA_BACKGROUND_MODE)) {
+      // TODO(camsim99): Migrate to IntentUtils.safeGetStringExtra()
       return BackgroundMode.valueOf(getIntent().getStringExtra(EXTRA_BACKGROUND_MODE));
     } else {
       return BackgroundMode.opaque;
@@ -1457,6 +1473,7 @@ public class FlutterActivity extends Activity
   @Override
   public boolean shouldRestoreAndSaveState() {
     if (getIntent().hasExtra(EXTRA_ENABLE_STATE_RESTORATION)) {
+      // TODO(camsim99): Migrate to IntentUtils.safeGetBooleanExtra()
       return getIntent().getBooleanExtra(EXTRA_ENABLE_STATE_RESTORATION, false);
     }
     if (getCachedEngineId() != null) {
