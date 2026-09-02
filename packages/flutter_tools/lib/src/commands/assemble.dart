@@ -24,6 +24,7 @@ import '../build_system/targets/windows.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
@@ -98,8 +99,10 @@ class AssembleCommand extends FlutterCommand {
   AssembleCommand({
     required BuildSystem buildSystem,
     required ToolContext toolContext,
+    FeatureFlags? featureFlags,
     bool verboseHelp = false,
   }) : _buildSystem = buildSystem,
+       _featureFlags = featureFlags,
        _toolContext = toolContext,
        _verboseHelp = verboseHelp,
        super(toolContext: toolContext) {
@@ -169,6 +172,7 @@ class AssembleCommand extends FlutterCommand {
 
   final bool _verboseHelp;
   final BuildSystem _buildSystem;
+  final FeatureFlags? _featureFlags;
   final ToolContext _toolContext;
 
   @override
@@ -208,7 +212,7 @@ class AssembleCommand extends FlutterCommand {
     }
 
     final targetPlatform = TargetPlatform.fromName(platform);
-    final DevelopmentArtifact? artifact = artifactFromTargetPlatform(targetPlatform);
+    final DevelopmentArtifact? artifact = artifactFromTargetPlatform(targetPlatform, _featureFlags);
     if (artifact != null) {
       return <DevelopmentArtifact>{artifact};
     }

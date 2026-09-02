@@ -2118,20 +2118,20 @@ DevelopmentArtifact? artifactFromTargetPlatform(
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin:
-      if (featureFlags?.isMacOSEnabled ?? true) {
+      if ((featureFlags ?? globals.featureFlags).isMacOSEnabled) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
-      if (featureFlags?.isWindowsEnabled ?? true) {
+      if ((featureFlags ?? globals.featureFlags).isWindowsEnabled) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.linux_riscv64:
-      if (featureFlags?.isLinuxEnabled ?? true) {
+      if ((featureFlags ?? globals.featureFlags).isLinuxEnabled) {
         return DevelopmentArtifact.linux;
       }
       return null;

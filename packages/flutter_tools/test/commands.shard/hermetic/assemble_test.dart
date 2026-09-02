@@ -133,6 +133,7 @@ void main() {
     final command = AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
+      featureFlags: TestFeatureFlags(isMacOSEnabled: true),
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     await commandRunner.run(<String>[
@@ -175,6 +176,7 @@ void main() {
     final command = AssembleCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
+      featureFlags: TestFeatureFlags(isMacOSEnabled: true),
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command, fakeAnalytics);
     await commandRunner.run(<String>[
