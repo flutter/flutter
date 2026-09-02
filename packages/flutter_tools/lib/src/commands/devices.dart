@@ -97,23 +97,22 @@ class DevicesCommandOutput {
   factory DevicesCommandOutput({
     required Logger logger,
     required Platform platform,
+    required DeviceManager deviceManager,
     DeviceConnectionInterface? deviceConnectionInterface,
     Duration? deviceDiscoveryTimeout,
-    DeviceManager? deviceManager,
   }) {
-    final DeviceManager effectiveDeviceManager = deviceManager ?? globals.deviceManager!;
     if (platform.isMacOS) {
       return DevicesCommandOutputWithExtendedWirelessDeviceDiscovery(
         deviceConnectionInterface: deviceConnectionInterface,
         deviceDiscoveryTimeout: deviceDiscoveryTimeout,
-        deviceManager: effectiveDeviceManager,
+        deviceManager: deviceManager,
         logger: logger,
       );
     }
     return DevicesCommandOutput._private(
       deviceConnectionInterface: deviceConnectionInterface,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
-      deviceManager: effectiveDeviceManager,
+      deviceManager: deviceManager,
       logger: logger,
     );
   }
