@@ -9,6 +9,7 @@ import static junit.framework.TestCase.*;
 import static org.mockito.Mockito.*;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.view.MotionEvent;
 import android.view.View;
@@ -218,6 +219,24 @@ public class FlutterMutatorViewTest {
 
     view.unsetOnDescendantFocusChangeListener();
     verify(viewTreeObserver, times(1)).removeOnGlobalFocusChangeListener(activeFocusListener);
+  }
+
+  @Test
+  public void drawDoesNotThrowWhenMutatorsStackIsNull() {
+    final FlutterMutatorView view = new FlutterMutatorView(ctx);
+    final Canvas canvas = mock(Canvas.class);
+    // When mutatorsStack is null (prior to readyToDisplay), draw must not throw
+    // NullPointerException.
+    view.draw(canvas);
+  }
+
+  @Test
+  public void dispatchDrawDoesNotThrowWhenMutatorsStackIsNull() {
+    final FlutterMutatorView view = new FlutterMutatorView(ctx);
+    final Canvas canvas = mock(Canvas.class);
+    // When mutatorsStack is null (prior to readyToDisplay), dispatchDraw must not throw
+    // NullPointerException.
+    view.dispatchDraw(canvas);
   }
 
   @Test
