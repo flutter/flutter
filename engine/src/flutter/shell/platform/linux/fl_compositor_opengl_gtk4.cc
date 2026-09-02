@@ -535,7 +535,17 @@ void fl_compositor_opengl_gtk4_finish_present(FlCompositorOpenGL* self,
     close(self->dmabuf_sync_fd);
     self->dmabuf_sync_fd = -1;
   }
-  glFlush();
+
+  if (self->shareable) {
+    // The GdkGLTexture fallback is sampled by GTK using a different OpenGL
+    // context. glFlush() only submits the raster context's work, so wait for
+    // it to finish before the texture can be exposed to GTK. A successful
+    // DMA-BUF export returns above and uses its native fence instead.
+    glFinish();
+  } else {
+    // Readback below uses glReadPixels(), which synchronizes the frame.
+    glFlush();
+  }
 }
 
 void fl_compositor_opengl_gtk4_reset_frame_failure(FlCompositorOpenGL* self) {

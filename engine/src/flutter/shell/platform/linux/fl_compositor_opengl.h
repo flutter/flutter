@@ -86,9 +86,10 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
  * OpenGL context and read by fl_compositor_opengl_render using another. When
  * the compositor is created as shareable the two contexts must belong to the
  * same share group so the frame texture can be accessed from both, and the
- * writing context issues a glFlush() so the frame is visible to the reading
- * context. When not shareable the frame is copied to CPU memory by the writing
- * context and uploaded into a new texture by the reading context.
+ * writing context flushes its commands. The presentation path synchronizes
+ * before another context samples a shared texture. When not shareable the
+ * frame is copied to CPU memory by the writing context and uploaded into a new
+ * texture by the reading context.
  */
 
 /**

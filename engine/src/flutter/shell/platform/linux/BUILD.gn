@@ -523,6 +523,7 @@ executable("flutter_linux_gtk4_unittests") {
     "fl_binary_messenger_test.cc",
 
     # fl_compositor_opengl_test.cc is GTK3-only (uses GTK3 OpenGL APIs)
+    "fl_compositor_opengl_gtk4_test.cc",
     "fl_dart_project_test.cc",
     "fl_display_monitor_test.cc",
     "fl_egl_image_test.cc",
