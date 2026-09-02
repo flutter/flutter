@@ -7,7 +7,6 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
-import 'src/android/android_workflow.dart';
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -320,8 +319,7 @@ List<FlutterCommand> generateCommands({
     toolContext: toolDependencies.toolContext,
     // Provide the shared singleton from globals until dependent commands
     // (e.g. DevicesCommand, EmulatorsCommand) are migrated to DI.
-    doctor: globals.doctor!,
-    androidLicenseValidator: androidLicenseValidator,
+    doctor: globals.doctor,
     extensionManager: extensionManager,
   ),
   DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
