@@ -195,7 +195,7 @@ class PackagesTestCommand extends FlutterCommand {
 
   final Pub? _injectedPub;
 
-  Pub get _pub =>
+  late final Pub _pub =
       _injectedPub ??
       Pub(
         fileSystem: toolContext.fs,
@@ -250,7 +250,7 @@ class PackagesForwardCommand extends FlutterCommand {
 
   final Pub? _injectedPub;
 
-  Pub get _pub =>
+  late final Pub _pub =
       _injectedPub ??
       Pub(
         fileSystem: toolContext.fs,
@@ -305,7 +305,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
   ToolContext get toolContext => super.toolContext!;
   final Pub? _injectedPub;
 
-  Pub get _pub =>
+  late final Pub _pub =
       _injectedPub ??
       Pub(
         fileSystem: toolContext.fs,
@@ -360,7 +360,7 @@ class PackagesGetCommand extends FlutterCommand {
   final Pub? _injectedPub;
   final BuildSystem? _injectedBuildSystem;
 
-  Pub get _pub =>
+  late final Pub _pub =
       _injectedPub ??
       Pub(
         fileSystem: toolContext.fs,
@@ -371,7 +371,7 @@ class PackagesGetCommand extends FlutterCommand {
         stdio: toolContext.stdio,
       );
 
-  BuildSystem get _buildSystem =>
+  late final BuildSystem _buildSystem =
       _injectedBuildSystem ??
       FlutterBuildSystem(
         fileSystem: toolContext.fs,

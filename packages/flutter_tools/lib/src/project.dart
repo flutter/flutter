@@ -236,9 +236,8 @@ class FlutterProject {
         if (globResult.childFile('pubspec.yaml').existsSync()) {
           try {
             _workspaceProjects.add(
-              _projectFactory != null
-                  ? _projectFactory.fromDirectory(globResult)
-                  : FlutterProject.fromDirectory(globResult),
+              _projectFactory?.fromDirectory(globResult) ??
+                  FlutterProject.fromDirectory(globResult),
             );
           } on Exception catch (_) {
             // Ignore child projects with invalid manifests.

@@ -159,7 +159,7 @@ class UpgradeCommandRunner {
   final PersistentToolState? _injectedPersistentToolState;
   final Pub? _injectedPub;
 
-  PersistentToolState get _persistentToolState =>
+  late final PersistentToolState _persistentToolState =
       _injectedPersistentToolState ??
       PersistentToolState(
         fileSystem: _toolContext.fs,
@@ -167,7 +167,7 @@ class UpgradeCommandRunner {
         platform: _toolContext.platform,
       );
 
-  Pub get _pub =>
+  late final Pub _pub =
       _injectedPub ??
       Pub(
         fileSystem: _toolContext.fs,

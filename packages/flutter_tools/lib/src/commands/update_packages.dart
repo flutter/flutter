@@ -90,7 +90,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   final Net? _injectedNet;
   final Pub? _injectedPub;
 
-  Net get _net =>
+  late final Net _net =
       _injectedNet ??
       Net(
         httpClientFactory: _httpClientFactory,
@@ -98,7 +98,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         platform: toolContext.platform,
       );
 
-  Pub get _pub =>
+  late final Pub _pub =
       _injectedPub ??
       Pub(
         fileSystem: toolContext.fs,
