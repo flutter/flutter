@@ -7,9 +7,10 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
@@ -19,8 +20,12 @@ const _kVmServiceUrl = 'vm-service-url';
 const _kDeviceType = 'device';
 const _kSkiaType = 'skia';
 
+/// The `flutter screenshot` command, which captures a screenshot from a connected device.
 class ScreenshotCommand extends FlutterCommand {
-  ScreenshotCommand({required this.fs}) {
+  ScreenshotCommand({required ToolContext toolContext, VMServiceConnector? vmServiceConnector})
+    : _toolContext = toolContext,
+      _vmServiceConnector = vmServiceConnector ?? connectToVmService,
+      super(toolContext: toolContext) {
     argParser.addOption(
       _kOut,
       abbr: 'o',
@@ -54,7 +59,11 @@ class ScreenshotCommand extends FlutterCommand {
     usesDeviceConnectionOption();
   }
 
-  final FileSystem fs;
+  final ToolContext _toolContext;
+  final VMServiceConnector _vmServiceConnector;
+
+  @override
+  ToolContext get toolContext => _toolContext;
 
   @override
   String get name => 'screenshot';
@@ -104,6 +113,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final FileSystem fs = toolContext.fs;
     File? outputFile;
     if (argResults?.wasParsed(_kOut) ?? false) {
       outputFile = fs.file(stringArg(_kOut));
@@ -121,7 +131,9 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<void> runScreenshot(File? outputFile) async {
-    outputFile ??= globals.fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'png');
+    final FileSystem fs = toolContext.fs;
+    final FileSystemUtils fileSystemUtils = toolContext.fileSystemUtils;
+    outputFile ??= fileSystemUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'png');
 
     try {
       await device!.takeScreenshot(outputFile);
@@ -144,20 +156,20 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<bool> runSkia(File? outputFile) async {
+    final FileSystem fs = toolContext.fs;
+    final FileSystemUtils fileSystemUtils = toolContext.fileSystemUtils;
+    final Logger logger = toolContext.logger;
     final Uri vmServiceUrl = Uri.parse(stringArg(_kVmServiceUrl)!);
-    final FlutterVmService vmService = await connectToVmService(
-      vmServiceUrl,
-      logger: globals.logger,
-    );
+    final FlutterVmService vmService = await _vmServiceConnector(vmServiceUrl, logger: logger);
     final vm_service.Response? skp = await vmService.screenshotSkp();
     if (skp == null) {
-      globals.printError(
+      logger.printError(
         'The Skia picture request failed, probably because the device was '
         'disconnected',
       );
       return false;
     }
-    outputFile ??= globals.fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
+    outputFile ??= fileSystemUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
     final IOSink sink = outputFile.openWrite();
     sink.add(base64.decode(skp.json?['skp'] as String));
     await sink.close();
@@ -189,9 +201,9 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   void _showOutputFileInfo(File outputFile) {
-    final int sizeKB = (outputFile.lengthSync()) ~/ 1024;
-    globals.printStatus(
-      'Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).',
-    );
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = toolContext.logger;
+    final int sizeKB = outputFile.lengthSync() ~/ 1024;
+    logger.printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }
 }
