@@ -59,8 +59,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     Pub? pub,
     TemplateRenderer? templateRenderer,
     bool verboseHelp = false,
-  }) : _toolContext = toolContext,
-       _extensionTemplateManager = extensionTemplateManager,
+  }) : _extensionTemplateManager = extensionTemplateManager,
        _httpClientFactory = httpClientFactory,
        _explicitJava = java,
        _explicitNet = net,
@@ -76,8 +75,8 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   @override
   ArgParser createBaseArgParser() {
     final parser = ArgParser(
-      usageLineLength: _toolContext.outputPreferences.wrapText
-          ? _toolContext.outputPreferences.wrapColumn
+      usageLineLength: toolContext.outputPreferences.wrapText
+          ? toolContext.outputPreferences.wrapColumn
           : null,
     );
     addPubOptions(parser: parser);
@@ -214,7 +213,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
           rebuildDynamicArgParser();
         }
       } on Object catch (e) {
-        _toolContext.logger.printTrace('Failed to initialize dynamic templates: $e');
+        toolContext.logger.printTrace('Failed to initialize dynamic templates: $e');
       }
     }
   }
@@ -291,7 +290,6 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     createAndroidLanguage: stringArg('android-language'),
   );
 
-  final ToolContext _toolContext;
   final TemplateRenderer _templateRenderer;
   final HttpClientFactory? _httpClientFactory;
   final Java? _explicitJava;
@@ -303,40 +301,40 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   TemplateRenderer get templateRenderer => _templateRenderer;
 
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   // Lazy-initialize the net utilities with values from the context.
   late final Net _net =
       _explicitNet ??
       Net(
         httpClientFactory: _httpClientFactory,
-        logger: _toolContext.logger,
-        platform: _toolContext.platform,
+        logger: toolContext.logger,
+        platform: toolContext.platform,
       );
 
   late final Pub _pub =
       _explicitPub ??
       Pub(
-        fileSystem: _toolContext.fs,
-        logger: _toolContext.logger,
-        processManager: _toolContext.processManager,
-        platform: _toolContext.platform,
-        botDetector: _toolContext.botDetector,
+        fileSystem: toolContext.fs,
+        logger: toolContext.logger,
+        processManager: toolContext.processManager,
+        platform: toolContext.platform,
+        botDetector: toolContext.botDetector,
       );
 
   late final PlistParser _plistParser =
       _explicitPlistParser ??
       PlistParser(
-        fileSystem: _toolContext.fs,
-        processManager: _toolContext.processManager,
-        logger: _toolContext.logger,
+        fileSystem: toolContext.fs,
+        processManager: toolContext.processManager,
+        logger: toolContext.logger,
       );
 
   Java? get _java => _explicitJava;
 
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost =>
-      _toolContext.flutterVersion.channel == 'stable' ? 'api.flutter.dev' : 'main-api.flutter.dev';
+      toolContext.flutterVersion.channel == 'stable' ? 'api.flutter.dev' : 'main-api.flutter.dev';
 
   Future<String?> _fetchSampleFromServer(String sampleId) async {
     // Sanity check the sampleId
@@ -368,8 +366,8 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   /// Fetches the samples index file from the server and writes it to
   /// [outputFilePath].
   Future<void> _writeSamplesJson(String outputFilePath) async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = toolContext.logger;
     try {
       final File outputFile = fs.file(outputFilePath);
       if (outputFile.existsSync()) {
@@ -451,15 +449,15 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final Platform platform = _toolContext.platform;
-    final ProcessManager processManager = _toolContext.processManager;
-    final FileSystemUtils fsUtils = _toolContext.fileSystemUtils;
-    final Config config = _toolContext.config;
-    final AnsiTerminal terminal = _toolContext.terminal;
-    final Cache cache = _toolContext.cache;
-    final FlutterProjectFactory projectFactory = _toolContext.projectFactory;
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = toolContext.logger;
+    final Platform platform = toolContext.platform;
+    final ProcessManager processManager = toolContext.processManager;
+    final FileSystemUtils fsUtils = toolContext.fileSystemUtils;
+    final Config config = toolContext.config;
+    final AnsiTerminal terminal = toolContext.terminal;
+    final Cache cache = toolContext.cache;
+    final FlutterProjectFactory projectFactory = toolContext.projectFactory;
 
     final String? listSamples = stringArg('list-samples');
     if (listSamples != null) {
@@ -482,7 +480,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       try {
         await manager.getProjectTemplates();
       } on Object catch (e) {
-        _toolContext.logger.printTrace('Failed to retrieve project templates: $e');
+        toolContext.logger.printTrace('Failed to retrieve project templates: $e');
       }
     }
     final ParsedFlutterTemplateType template = _getProjectType(projectDir);
@@ -960,7 +958,7 @@ Your $application code is in $relativeAppMain.
         : 'A new Flutter module project.';
     templateContext['description'] = description;
     generatedCount += await renderTemplate(
-      _toolContext.fs.path.join('module', 'common'),
+      toolContext.fs.path.join('module', 'common'),
       directory,
       templateContext,
       overwrite: overwrite,
@@ -1007,8 +1005,8 @@ Your $application code is in $relativeAppMain.
 
     final List<String> existingPlatforms = _getSupportedPlatformsInPlugin(
       directory,
-      fs: _toolContext.fs,
-      logger: _toolContext.logger,
+      fs: toolContext.fs,
+      logger: toolContext.logger,
     );
     for (final existingPlatform in existingPlatforms) {
       // re-generate files for existing platforms
@@ -1052,7 +1050,7 @@ Your $application code is in $relativeAppMain.
       templateContext.remove('withSwiftPackageManager');
     }
 
-    final FlutterProject project = _toolContext.projectFactory.fromDirectory(directory);
+    final FlutterProject project = toolContext.projectFactory.fromDirectory(directory);
     final generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
@@ -1112,8 +1110,8 @@ Your $application code is in $relativeAppMain.
 
     final List<String> existingPlatforms = _getSupportedPlatformsInPlugin(
       directory,
-      fs: _toolContext.fs,
-      logger: _toolContext.logger,
+      fs: toolContext.fs,
+      logger: toolContext.logger,
     );
     for (final existingPlatform in existingPlatforms) {
       // re-generate files for existing platforms
@@ -1135,7 +1133,7 @@ Your $application code is in $relativeAppMain.
       printStatusWhenWriting: printStatusWhenWriting,
     );
 
-    final FlutterProject project = _toolContext.projectFactory.fromDirectory(directory);
+    final FlutterProject project = toolContext.projectFactory.fromDirectory(directory);
     final generateAndroid = templateContext['android'] == true;
     if (generateAndroid) {
       gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
@@ -1199,7 +1197,7 @@ Your $application code is in $relativeAppMain.
       printStatusWhenWriting: printStatusWhenWriting,
     );
 
-    final FlutterProject project = _toolContext.projectFactory.fromDirectory(directory);
+    final FlutterProject project = toolContext.projectFactory.fromDirectory(directory);
 
     final projectName = templateContext['projectName'] as String?;
     final exampleProjectName = '${projectName}_example';
