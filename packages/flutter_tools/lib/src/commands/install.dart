@@ -30,6 +30,8 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   @override
   ToolContext get toolContext => super.toolContext!;
 
+  Logger get _logger => toolContext.logger;
+
   @override
   final name = 'install';
 
@@ -87,22 +89,20 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   }
 
   Future<void> _uninstallApp(ApplicationPackage package, Device device) async {
-    final Logger logger = toolContext.logger;
     if (await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
-      logger.printStatus('Uninstalling $package from $device...');
+      _logger.printStatus('Uninstalling $package from $device...');
       if (!await device.uninstallApp(package, userIdentifier: userIdentifier)) {
-        logger.printError('Uninstalling old version failed');
+        _logger.printError('Uninstalling old version failed');
       }
     } else {
-      logger.printStatus('$package not found on $device, skipping uninstall');
+      _logger.printStatus('$package not found on $device, skipping uninstall');
     }
   }
 
   Future<void> _installApp(ApplicationPackage package, Device device) async {
-    final Logger logger = toolContext.logger;
-    logger.printStatus('Installing $package to $device...');
+    _logger.printStatus('Installing $package to $device...');
 
-    if (!await installApp(device, package, logger: logger, userIdentifier: userIdentifier)) {
+    if (!await installApp(device, package, logger: _logger, userIdentifier: userIdentifier)) {
       throwToolExit('Install failed');
     }
   }
