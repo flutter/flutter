@@ -535,6 +535,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
 LocalizationOptions parseLocalizationsOptionsFromCommand({
   required FlutterCommand command,
   required String defaultArbDir,
+  Logger? logger,
 }) {
   const kSyntheticPackage = 'synthetic-package';
   const kFlutterGenNotice = 'http://flutter.dev/to/flutter-gen-deprecation';
@@ -545,7 +546,7 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
         'See $kFlutterGenNotice.',
       );
     } else {
-      globals.logger.printWarning(
+      (logger ?? command.toolContext?.logger ?? globals.logger).printWarning(
         'The argument "$kSyntheticPackage" no longer has any effect and should '
         'be removed. See $kFlutterGenNotice',
       );

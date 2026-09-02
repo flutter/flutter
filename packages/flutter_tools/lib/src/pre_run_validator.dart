@@ -8,18 +8,21 @@ import 'cache.dart';
 
 /// A validator that runs before the tool runs any command.
 abstract class PreRunValidator {
-  factory PreRunValidator({required FileSystem fileSystem}) = _DefaultPreRunValidator;
+  factory PreRunValidator({required FileSystem fileSystem, Cache? cache, String? flutterRoot}) =
+      _DefaultPreRunValidator;
 
   void validate();
 }
 
 class _DefaultPreRunValidator implements PreRunValidator {
-  _DefaultPreRunValidator({required this.fileSystem});
+  _DefaultPreRunValidator({required this.fileSystem, Cache? cache, String? flutterRoot})
+    : _flutterRoot = flutterRoot ?? cache?.flutterRoot;
 
   final FileSystem fileSystem;
+  final String? _flutterRoot;
 
   late final Directory _toolsDir = fileSystem.directory(
-    fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
+    fileSystem.path.join(_flutterRoot ?? '', 'packages', 'flutter_tools'),
   );
 
   @override

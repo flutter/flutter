@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:test/fake.dart';
@@ -131,6 +132,20 @@ void main() {
       );
 
       expect(dependencies.buildTargets, same(mockBuildTargets));
+    });
+
+    testUsingContext('respects explicit overrides for TemplateRenderer', () async {
+      const customRenderer = NoOpTemplateRenderer();
+
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        templateRenderer: customRenderer,
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+
+      expect(dependencies.toolContext.templateRenderer, same(customRenderer));
     });
   });
 }

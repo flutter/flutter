@@ -79,7 +79,7 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   }
 }
 
-class FakeTerminal extends Fake implements Terminal {}
+class FakeTerminal extends Fake implements AnsiTerminal {}
 
 class FakeAnalysisServer extends Fake implements AnalysisServer {
   @override
@@ -198,7 +198,6 @@ void main() {
     // which in turn will check for the presence of the Flutter SDK root. Without
     // this field set consistently, the order of the tests becomes important *or*
     // you need to remember to set it everywhere.
-    Cache.flutterRoot = fs.path.absolute('..', '..');
   });
 
   tearDown(() async {
@@ -218,22 +217,23 @@ void main() {
   }) async {
     final CommandRunner<void> runner = createTestCommandRunner(
       WidgetPreviewCommand(
-        verboseHelp: false,
-        logger: logger,
-        fs: fs,
-        projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
-        cache: Cache.test(processManager: loggingProcessManager, platform: platform),
-        platform: platform,
-        shutdownHooks: shutdownHooks,
-        os: OperatingSystemUtils(
-          fileSystem: fs,
-          processManager: loggingProcessManager,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: loggingProcessManager, platform: platform),
+          fs: fs,
           logger: logger,
+          os: OperatingSystemUtils(
+            fileSystem: fs,
+            processManager: loggingProcessManager,
+            logger: logger,
+            platform: platform,
+          ),
           platform: platform,
+          processManager: loggingProcessManager,
+          projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
+          shutdownHooks: shutdownHooks,
+          terminal: FakeTerminal(),
         ),
-        artifacts: Artifacts.test(),
-        processManager: loggingProcessManager,
-        terminal: FakeTerminal(),
         dtdServicesOverride: fakeDtdServices,
         analysisServerFactoryOverride:
             analysisServerFactoryOverride ?? () async => FakeAnalysisServer(),

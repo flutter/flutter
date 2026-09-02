@@ -4455,7 +4455,7 @@ class FakeShutdownHooks extends Fake implements ShutdownHooks {
   }
 
   @override
-  Future<void> runShutdownHooks(Logger logger) async {
+  Future<void> runShutdownHooks([Logger? logger]) async {
     _isShuttingDown = true;
   }
 }

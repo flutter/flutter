@@ -15,7 +15,6 @@ import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -43,6 +42,11 @@ const kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
 
 /// The error response code from an unrecoverable compilation failure.
 const kIsolateReloadBarred = 1005;
+
+/// Used to build RegExp instances which can detect the VM service message.
+final kVMServiceMessageRegExp = RegExp(
+  r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
+);
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [io.WebSocket]s (used by tests).
@@ -222,7 +226,7 @@ Future<vm_service.VmService> setUpVmService({
   ) async {
     final FlutterVersion version =
         context.get<FlutterVersion>() ??
-        FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: globals.git);
+        FlutterVersion(fs: globals.fs, flutterRoot: globals.cache.flutterRoot, git: globals.git);
     final Map<String, Object> versionJson = version.toJson();
     versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
     versionJson['engineRevisionShort'] = version.engineRevisionShort;

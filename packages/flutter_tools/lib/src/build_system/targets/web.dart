@@ -81,7 +81,7 @@ class WebEntrypointTarget extends Target {
     final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
-      Cache.flutterRoot!,
+      environment.flutterRootDir.path,
     );
 
     // Use the PackageConfig to find the correct package-scheme import path
@@ -931,7 +931,7 @@ class WebReleaseBundle extends Target {
 
     final File sourceRobotoFont = environment.fileSystem.file(
       environment.fileSystem.path.join(
-        Cache.flutterRoot!,
+        environment.flutterRootDir.path,
         'engine',
         'src',
         'flutter',

@@ -154,12 +154,14 @@ class Cache {
   Cache({
     @protected Directory? rootOverride,
     @protected List<ArtifactSet>? artifacts,
+    String? flutterRoot,
     required Logger logger,
     required FileSystem fileSystem,
     required Platform platform,
     required OperatingSystemUtils osUtils,
     Stdio? stdio,
   }) : _rootOverride = rootOverride,
+       _flutterRoot = flutterRoot,
        _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
@@ -177,12 +179,14 @@ class Cache {
   factory Cache.test({
     Directory? rootOverride,
     List<ArtifactSet>? artifacts,
+    String? flutterRoot,
     Logger? logger,
     FileSystem? fileSystem,
     Platform? platform,
     Stdio? stdio,
-    required ProcessManager processManager,
+    ProcessManager? processManager,
     Abi? currentAbi,
+    OperatingSystemUtils? osUtils,
   }) {
     if (rootOverride?.fileSystem != null &&
         fileSystem != null &&
@@ -196,26 +200,31 @@ class Cache {
     fileSystem ??= rootOverride?.fileSystem ?? MemoryFileSystem.test();
     platform ??= FakePlatform(environment: <String, String>{});
     logger ??= BufferLogger.test();
+    processManager ??= const LocalProcessManager();
     return Cache(
-      rootOverride: rootOverride ?? fileSystem.currentDirectory,
+      rootOverride: rootOverride,
       artifacts: artifacts ?? <ArtifactSet>[],
+      flutterRoot: flutterRoot,
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
       stdio: stdio,
-      osUtils: OperatingSystemUtils(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        currentAbi: currentAbi,
-      ),
+      osUtils:
+          osUtils ??
+          OperatingSystemUtils(
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: processManager,
+            currentAbi: currentAbi,
+          ),
     );
   }
 
   final Logger _logger;
   final Platform _platform;
   final FileSystem _fileSystem;
+  FileSystem get fileSystem => _fileSystem;
   final OperatingSystemUtils _osUtils;
   OperatingSystemUtils get osUtils => _osUtils;
   final Directory? _rootOverride;
@@ -251,9 +260,22 @@ class Cache {
     'chrome-infra-packages.appspot.com',
   ];
 
-  // Initialized by FlutterCommandRunner on startup.
-  // Explore making this field lazy to catch non-initialized access.
-  static String? flutterRoot;
+  /// The root directory of the Flutter SDK checkout.
+  String get flutterRoot {
+    if (_flutterRoot != null) {
+      return _flutterRoot!;
+    }
+    if (_rootOverride != null) {
+      return _rootOverride.path;
+    }
+    return _flutterRoot = defaultFlutterRoot(
+      platform: _platform,
+      fileSystem: _fileSystem,
+      userMessages: UserMessages(),
+    );
+  }
+
+  String? _flutterRoot;
 
   /// Determine the absolute and normalized path for the root of the current
   /// Flutter checkout.
@@ -372,7 +394,7 @@ class Cache {
     }
     assert(_lock == null);
     final File lockFile = _fileSystem.file(
-      _fileSystem.path.join(flutterRoot!, 'bin', 'cache', 'lockfile'),
+      _fileSystem.path.join(flutterRoot, 'bin', 'cache', 'lockfile'),
     );
     try {
       _lock = lockFile.openSync(mode: FileMode.write);
@@ -490,11 +512,18 @@ class Cache {
     if (_dartSdkBuild == null) {
       // Make the version string more customer-friendly.
       // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
-      final String justVersion = _platform.version.split(' ')[0];
+      final String version = _platform.version.trim();
+      if (version.isEmpty) {
+        return '3.7.0';
+      }
+      final String justVersion = version.split(' ')[0];
       _dartSdkBuild = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
         final String noFlutter = match[2]!.replaceAll('.flutter-', ' ');
         return '${match[1]}$noFlutter';
       });
+      if (_dartSdkBuild!.isEmpty) {
+        _dartSdkBuild = '3.7.0';
+      }
     }
     return _dartSdkBuild!;
   }
@@ -617,7 +646,7 @@ class Cache {
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() {
     return _fileSystem.directory(
-      _fileSystem.path.join(_rootOverride?.path ?? flutterRoot!, 'bin', 'cache'),
+      _fileSystem.path.join(_rootOverride?.path ?? flutterRoot, 'bin', 'cache'),
     );
   }
 
@@ -645,7 +674,7 @@ class Cache {
   Directory getCacheArtifacts() => getCacheDir('artifacts');
 
   /// Location of LICENSE file.
-  File getLicenseFile() => _fileSystem.file(_fileSystem.path.join(flutterRoot!, 'LICENSE'));
+  File getLicenseFile() => _fileSystem.file(_fileSystem.path.join(flutterRoot, 'LICENSE'));
 
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
@@ -684,7 +713,7 @@ class Cache {
   String? getVersionFor(String artifactName) {
     final File versionFile = _fileSystem.file(
       _fileSystem.path.join(
-        _rootOverride?.path ?? flutterRoot!,
+        _rootOverride?.path ?? flutterRoot,
         'bin',
         'internal',
         '$artifactName.version',
@@ -698,7 +727,7 @@ class Cache {
   String? getRealmFor(String artifactName) {
     final File realmFile = _fileSystem.file(
       _fileSystem.path.join(
-        _rootOverride?.path ?? flutterRoot!,
+        _rootOverride?.path ?? flutterRoot,
         'bin',
         'cache',
         '$artifactName.realm',
@@ -764,7 +793,12 @@ class Cache {
     Set<DevelopmentArtifact> requiredArtifacts,
   ) async {
     final artifactsToUpdate = <ArtifactSet>[];
-    final isLocalEngine = context.get<Artifacts>()?.localEngineInfo != null;
+    var isLocalEngine = false;
+    try {
+      isLocalEngine = context.get<Artifacts>()?.localEngineInfo != null;
+    } on UnsupportedError {
+      isLocalEngine = false;
+    }
 
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
@@ -787,10 +821,6 @@ class Cache {
 
   /// Update the cache to contain all `requiredArtifacts`.
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
-    if (!_lockEnabled) {
-      return;
-    }
-
     final List<ArtifactSet> artifactsToUpdate = await _collectArtifactsToUpdate(requiredArtifacts);
 
     if (artifactsToUpdate.isEmpty) {

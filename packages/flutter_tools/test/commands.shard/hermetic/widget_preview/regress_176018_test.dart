@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/widget_preview/preview_manifest.dart';
 import 'package:flutter_tools/src/widget_preview/preview_pubspec_builder.dart';
 import 'package:process/process.dart';
 import 'package:test/fake.dart';
-import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../../src/common.dart';
@@ -128,6 +127,7 @@ $yaml
           botDetector: const FakeBotDetector(true),
           platform: const LocalPlatform(),
           stdio: Stdio.test(stdout: stdout, stderr: stderr),
+          flutterRoot: getFlutterRoot(),
         ),
       },
     );

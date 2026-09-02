@@ -14,6 +14,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/signals.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
@@ -54,6 +55,7 @@ class ToolContext {
     required this.signals,
     required this.stdio,
     required this.systemClock,
+    this.templateRenderer = const NoOpTemplateRenderer(),
     required this.terminal,
     required this.userMessages,
   });
@@ -129,6 +131,9 @@ class ToolContext {
 
   /// Provides mockable system time interfaces for timed operations.
   final SystemClock systemClock;
+
+  /// Renders string templates.
+  final TemplateRenderer templateRenderer;
 
   /// Formats terminal text output, colorization, and ANSI terminal capabilities.
   final AnsiTerminal terminal;

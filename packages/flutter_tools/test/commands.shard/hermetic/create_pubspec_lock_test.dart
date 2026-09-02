@@ -5,7 +5,6 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 
 import '../../src/common.dart';
@@ -15,7 +14,6 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    Cache.flutterRoot = '/flutter';
   });
 
   // Writes a minimal SDK package pubspec with a single hosted dependency.
@@ -46,8 +44,14 @@ void main() {
       '    sdk: flutter\n',
     );
 
-    expect(() => gatherSdkPackageDependencies(projectDir), returnsNormally);
-    expect(gatherSdkPackageDependencies(projectDir), contains('vector_math'));
+    expect(
+      () => gatherSdkPackageDependencies(projectDir, flutterRoot: '/flutter'),
+      returnsNormally,
+    );
+    expect(
+      gatherSdkPackageDependencies(projectDir, flutterRoot: '/flutter'),
+      contains('vector_math'),
+    );
   });
 
   testWithoutContext('skips an SDK package whose pubspec cannot be found', () {
@@ -62,8 +66,14 @@ void main() {
       '    sdk: flutter\n',
     );
 
-    expect(() => gatherSdkPackageDependencies(projectDir), returnsNormally);
-    expect(gatherSdkPackageDependencies(projectDir), contains('vector_math'));
+    expect(
+      () => gatherSdkPackageDependencies(projectDir, flutterRoot: '/flutter'),
+      returnsNormally,
+    );
+    expect(
+      gatherSdkPackageDependencies(projectDir, flutterRoot: '/flutter'),
+      contains('vector_math'),
+    );
   });
 
   testWithoutContext('skips an SDK package whose directory exists but has no pubspec', () {
@@ -80,8 +90,14 @@ void main() {
       '    sdk: flutter\n',
     );
 
-    expect(() => gatherSdkPackageDependencies(projectDir), returnsNormally);
-    expect(gatherSdkPackageDependencies(projectDir), contains('vector_math'));
+    expect(
+      () => gatherSdkPackageDependencies(projectDir, flutterRoot: '/flutter'),
+      returnsNormally,
+    );
+    expect(
+      gatherSdkPackageDependencies(projectDir, flutterRoot: '/flutter'),
+      contains('vector_math'),
+    );
   });
 
   testWithoutContext('throws ToolExit if project pubspec.yaml is empty', () {

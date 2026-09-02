@@ -1044,7 +1044,7 @@ flutter:
         writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'my_app');
 
         final String materialIconsPath = fileSystem.path.join(
-          getFlutterRoot(),
+          globals.cache.flutterRoot,
           'bin',
           'cache',
           'artifacts',
@@ -1053,7 +1053,7 @@ flutter:
         );
         fileSystem.file(materialIconsPath).createSync(recursive: true);
 
-        final String flutterRoot = getFlutterRoot();
+        final String flutterRoot = globals.cache.flutterRoot;
         fileSystem
             .file(
               fileSystem.path.join(

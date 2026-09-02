@@ -141,7 +141,7 @@ mixin CreateBase on FlutterCommand {
 
   /// Gets the flutter root directory.
   @protected
-  String get flutterRoot => Cache.flutterRoot!;
+  String get flutterRoot => globals.cache.flutterRoot!;
 
   /// Determines the project type in an existing flutter project.
   ///
@@ -633,7 +633,7 @@ mixin CreateBase on FlutterCommand {
   late final Set<Uri> _templateManifest = _computeTemplateManifest();
   Set<Uri> _computeTemplateManifest() {
     final String flutterToolsAbsolutePath = globals.fs.path.join(
-      Cache.flutterRoot!,
+      globals.cache.flutterRoot!,
       'packages',
       'flutter_tools',
     );
