@@ -668,12 +668,12 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     super.delegate, {
     required this.machine,
     required this.verbose,
-    Stdio? stdio,
+    required Stdio stdio,
   }) : _stdio = stdio;
 
   final bool machine;
   final bool verbose;
-  final Stdio? _stdio;
+  final Stdio _stdio;
 
   @override
   void printError(
@@ -792,8 +792,7 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
     }
     // Don't call super.printStatus as it will result in a prefix being printed when --verbose is
     // provided.
-    final Stdio stdio = _stdio ?? Stdio();
-    stdio.stdout.writeln(
+    _stdio.stdout.writeln(
       json.encode([
         {'event': 'widget_preview.$name', 'params': ?args},
       ]),

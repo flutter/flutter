@@ -171,11 +171,16 @@ void main() {
     await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
     shutdownHooks = ShutdownHooks();
-    logger = WidgetPreviewMachineAwareLogger(BufferLogger.test(), machine: false, verbose: false);
+    mockStdio = FakeStdio();
+    logger = WidgetPreviewMachineAwareLogger(
+      BufferLogger.test(),
+      machine: false,
+      stdio: mockStdio,
+      verbose: false,
+    );
     fs = LocalFileSystem.test(signals: Signals.test());
     botDetector = const FakeBotDetector(false);
     tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
-    mockStdio = FakeStdio();
     platform = FakePlatform.fromPlatform(const LocalPlatform());
 
     fakeGoogleChromeDevice = FakeGoogleChromeDevice();
