@@ -5,6 +5,7 @@
 import 'package:dart_style/dart_style.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -263,7 +264,12 @@ void main() {
         ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary)
         ..childFile('lib/src/custom_previews.dart').writeAsStringSync(kCustomPreviews);
       project = FlutterProject.fromDirectoryTest(projectDir);
+      final String? sdkPath = Cache.flutterRoot != null
+          ? fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'dart-sdk')
+          : null;
+      final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
       previewDetector = PreviewDetector(
+        artifacts: artifacts,
         platform: FakePlatform(),
         previewAnalytics: WidgetPreviewAnalytics(
           analytics: getInitializedFakeAnalyticsInstance(
@@ -373,8 +379,8 @@ List<_i1.WidgetPreview> previews() => [
           size: _i7.Size(123.0, 456.0),
           textScaleFactor: 50.0,
           wrapper: _i8.wrapper,
-          brightness: _i7.Brightness.dark,
           theme: _i9.myThemeData,
+          brightness: _i7.Brightness.dark,
           localizations: _i10.myLocalizations,
         ).transform(),
   ),

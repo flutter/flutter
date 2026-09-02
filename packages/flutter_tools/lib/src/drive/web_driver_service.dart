@@ -24,6 +24,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../project.dart';
 import '../resident_runner.dart';
+import '../web/chrome_constants.dart';
 import '../web/web_runner.dart';
 import 'drive_service.dart';
 
@@ -350,6 +351,11 @@ Map<String, dynamic> getDesiredCapabilities(
         '--bwsi',
         '--disable-background-timer-throttling',
         '--disable-renderer-backgrounding',
+        '--disable-background-networking',
+        '--disable-sync',
+        '--disable-client-side-phishing-detection',
+        '--disable-notifications',
+        ...kGcmDisabledFlags,
         '--disable-default-apps',
         '--disable-extensions',
         '--disable-popup-blocking',

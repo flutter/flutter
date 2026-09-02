@@ -1210,10 +1210,42 @@ class ManifestAssetBundle implements AssetBundle {
   }) {
     final String directoryPath;
     _ensureAssetPathIsValid(assetsBaseDir: assetBase, assetUri: assetUri, packageName: packageName);
-    directoryPath = _fileSystem.path.join(
+
+    final String localDirectoryPath = _fileSystem.path.join(
       assetBase,
       assetUri.toFilePath(windows: _platform.isWindows),
     );
+
+    final bool isPackageAsset =
+        assetUri.pathSegments.length >= 2 &&
+        assetUri.pathSegments[1].isNotEmpty &&
+        assetUri.pathSegments.first == 'packages' &&
+        !_fileSystem.directory(localDirectoryPath).existsSync();
+
+    String? packageLibPath;
+    String? resolvedPackageName;
+
+    if (isPackageAsset) {
+      final _Asset? packageAsset = _resolvePackageAsset(
+        assetUri,
+        packageConfig,
+        attributedPackage,
+        flavors: flavors,
+        platforms: platforms,
+        transformers: transformers,
+      );
+      if (packageAsset == null) {
+        return;
+      }
+      directoryPath = _fileSystem.path.join(
+        packageAsset.baseDir,
+        packageAsset.relativeUri.toFilePath(windows: _platform.isWindows),
+      );
+      packageLibPath = packageAsset.baseDir;
+      resolvedPackageName = assetUri.pathSegments[1];
+    } else {
+      directoryPath = localDirectoryPath;
+    }
 
     if (!_fileSystem.directory(directoryPath).existsSync()) {
       _logger.printError('Error: unable to find directory entry in pubspec.yaml: $directoryPath');
@@ -1224,8 +1256,15 @@ class ManifestAssetBundle implements AssetBundle {
 
     final Iterable<File> files = entities.whereType<File>();
     for (final file in files) {
-      final String relativePath = _fileSystem.path.relative(file.path, from: assetBase);
-      final uri = Uri.file(relativePath, windows: _platform.isWindows);
+      final Uri uri;
+      if (isPackageAsset) {
+        final String relativePathToLib = _fileSystem.path.relative(file.path, from: packageLibPath);
+        final List<String> parts = _fileSystem.path.split(relativePathToLib);
+        uri = Uri(pathSegments: <String>['packages', resolvedPackageName!, ...parts]);
+      } else {
+        final String relativePath = _fileSystem.path.relative(file.path, from: assetBase);
+        uri = Uri.file(relativePath, windows: _platform.isWindows);
+      }
 
       _parseAssetFromFile(
         packageConfig,

@@ -609,6 +609,47 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       },
     );
 
+    testWithoutContext('parses missing module map error', () async {
+      const buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final buildResult = XcodeBuildResult(
+        success: false,
+        stdout: '',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: '/blah/blah',
+          environmentType: EnvironmentType.physical,
+          buildSettings: buildSettings,
+        ),
+        xcResult: XCResult.test(
+          issues: <XCResultIssue>[
+            XCResultIssue.test(
+              message:
+                  "module map file '.../test_app/build/ios/Release-iphoneos/url_launcher_ios/url_launcher_ios.framework/Modules/module.modulemap' not found",
+              subType: 'Error',
+            ),
+          ],
+        ),
+      );
+      final fs = MemoryFileSystem.test();
+      final project = FakeFlutterProject(fileSystem: fs, usesSwiftPackageManager: true);
+      project.ios.podfile.createSync(recursive: true);
+      await diagnoseXcodeBuildFailure(
+        buildResult,
+        logger: logger,
+        analytics: fakeAnalytics,
+        fileSystem: fs,
+        platform: FlutterDarwinPlatform.ios,
+        project: project,
+      );
+      expect(
+        logger.errorText,
+        contains(
+          'A precompiled file has been changed since last built. Please run "flutter clean --include-xcode-workspace" to '
+          'clear the cache.',
+        ),
+      );
+    });
+
     testWithoutContext('parses file has been modified error', () async {
       const buildCommands = <String>['xcrun', 'cc', 'blah'];
       final buildResult = XcodeBuildResult(
@@ -653,7 +694,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       expect(
         logger.errorText,
         contains(
-          'A precompiled file has been changed since last built. Please run "flutter clean" to '
+          'A precompiled file has been changed since last built. Please run "flutter clean --include-xcode-workspace" to '
           'clear the cache.',
         ),
       );

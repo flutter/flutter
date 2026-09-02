@@ -31,9 +31,18 @@ class ChannelCommand extends FlutterCommand {
           'This is the equivalent of running "flutter precache" with the "--all-platforms" flag.',
       defaultsTo: true,
     );
+    argParser.addFlag(
+      'force',
+      abbr: 'f',
+      help: 'Force switch channels, potentially discarding local changes.',
+      negatable: false,
+    );
   }
 
   final ToolContext _toolContext;
+
+  @override
+  ToolContext get toolContext => _toolContext;
 
   @override
   String get name => 'channel';
@@ -96,8 +105,8 @@ class ChannelCommand extends FlutterCommand {
 
     logger.printStatus('Flutter channels:');
     final int result = await git.stream(
-      ['branch', '-r'],
-      workingDirectory: _toolContext.cache.flutterRoot,
+      <String>['branch', '-r'],
+      workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
         rawOutput.add(line);
         return null;
@@ -178,10 +187,10 @@ class ChannelCommand extends FlutterCommand {
         'This is not an official channel. For a list of available channels, try "flutter channel".',
       );
     }
-    await _checkout(branchName, git: git, cache: cache);
+    await _checkout(branchName, git: git, cache: cache, force: boolArg('force'));
     if (boolArg('cache-artifacts')) {
       await precacheArtifacts(
-        workingDirectory: cache.flutterRoot,
+        workingDirectory: Cache.flutterRoot,
         logger: logger,
         processUtils: _toolContext.processUtils,
         fileSystem: _toolContext.fs,
@@ -208,10 +217,14 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  static Future<void> _checkout(String branchName, {required Git git, Cache? cache}) async {
-    final String? flutterRoot = cache?.flutterRoot;
+  static Future<void> _checkout(
+    String branchName, {
+    required Git git,
+    Cache? cache,
+    bool force = false,
+  }) async {
     // Get latest refs from upstream.
-    RunResult runResult = await git.run(<String>['fetch'], workingDirectory: flutterRoot);
+    RunResult runResult = await git.run(<String>['fetch'], workingDirectory: Cache.flutterRoot);
 
     if (runResult.processResult.exitCode == 0) {
       runResult = await git.run(<String>[
@@ -219,23 +232,25 @@ class ChannelCommand extends FlutterCommand {
         '--verify',
         '--quiet',
         'refs/heads/$branchName',
-      ], workingDirectory: flutterRoot);
+      ], workingDirectory: Cache.flutterRoot);
       if (runResult.processResult.exitCode == 0) {
         // branch already exists, try just switching to it
         runResult = await git.run(<String>[
           'checkout',
+          if (force) '-f',
           branchName,
           '--',
-        ], workingDirectory: flutterRoot);
+        ], workingDirectory: Cache.flutterRoot);
       } else {
         // branch does not exist, we have to create it
         runResult = await git.run(<String>[
           'checkout',
+          if (force) '-f',
           '--track',
           '-b',
           branchName,
           'origin/$branchName',
-        ], workingDirectory: flutterRoot);
+        ], workingDirectory: Cache.flutterRoot);
       }
     }
     if (runResult.processResult.exitCode != 0) {

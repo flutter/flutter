@@ -3,137 +3,24 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/command_help.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/hook_runner.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/tracing.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
-import 'package:unified_analytics/unified_analytics.dart' hide Event;
 import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-
-ColdRunner createColdRunner(
-  List<FlutterDevice> flutterDevices, {
-  required DebuggingOptions debuggingOptions,
-  required String target,
-  Analytics? analytics,
-  File? applicationBinary,
-  Artifacts? artifacts,
-  bool awaitFirstFrameWhenTracing = true,
-  BuildSystem? buildSystem,
-  BuildTargets? buildTargets,
-  Cache? cache,
-  CommandHelp? commandHelp,
-  Config? config,
-  FlutterHookRunner? dartBuilder,
-  String? dillOutputPath,
-  FileSystem? fileSystem,
-  FlutterVersion? flutterVersion,
-  Logger? logger,
-  bool machine = false,
-  OperatingSystemUtils? osUtils,
-  OutputPreferences? outputPreferences,
-  Platform? platform,
-  ProcessManager? processManager,
-  String? projectRootPath,
-  bool stayResident = true,
-  Terminal? terminal,
-  bool traceStartup = false,
-  Xcode? xcode,
-}) {
-  FileSystem? contextFs;
-  Platform? contextPlatform;
-  ProcessManager? contextPm;
-  Artifacts? contextArtifacts;
-  Logger? contextLogger;
-  try {
-    contextFs = globals.fs;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextPlatform = globals.platform;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextPm = globals.processManager;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextArtifacts = globals.artifacts;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextLogger = globals.logger;
-  } on Object {
-    // ignore
-  }
-
-  final FileSystem effectiveFs = fileSystem ?? (contextFs ?? MemoryFileSystem.test());
-  final Platform effectivePlatform = platform ?? (contextPlatform ?? const LocalPlatform());
-  final ProcessManager effectiveProcessManager =
-      processManager ?? (contextPm ?? FakeProcessManager.any());
-  final Artifacts effectiveArtifacts = artifacts ?? (contextArtifacts ?? Artifacts.test());
-  final Logger effectiveLogger = logger ?? (contextLogger ?? BufferLogger.test());
-
-  return ColdRunner(
-    flutterDevices,
-    debuggingOptions: debuggingOptions,
-    target: target,
-    analytics: analytics,
-    applicationBinary: applicationBinary,
-    artifacts: effectiveArtifacts,
-    awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
-    buildSystem: buildSystem,
-    buildTargets: buildTargets,
-    cache: cache ?? globals.cache,
-    commandHelp: commandHelp,
-    config: config ?? globals.config,
-    dartBuilder: dartBuilder,
-    dillOutputPath: dillOutputPath,
-    fileSystem: effectiveFs,
-    flutterVersion: flutterVersion,
-    logger: effectiveLogger,
-    machine: machine,
-    osUtils: osUtils ?? globals.os,
-    outputPreferences: outputPreferences ?? globals.outputPreferences,
-    platform: effectivePlatform,
-    processManager: effectiveProcessManager,
-    projectRootPath: projectRootPath,
-    stayResident: stayResident,
-    terminal: terminal ?? globals.terminal,
-    traceStartup: traceStartup,
-    xcode: xcode,
-  );
-}
 
 void main() {
   testUsingContext('Exits with code 2 when HttpException is thrown '
@@ -151,10 +38,11 @@ void main() {
           'Connection closed before full header was received, '
           'uri = http://127.0.0.1:63394/5ZmLv8A59xY=/ws',
         ),
+        vmServiceUri: Future<Uri>.value(Uri.parse('http://127.0.0.1:63394/5ZmLv8A59xY=/ws')),
       ),
     ];
 
-    final int exitCode = await createColdRunner(
+    final int exitCode = await ColdRunner(
       devices,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       target: 'main.dart',
@@ -171,7 +59,7 @@ void main() {
 
       final devices = <FlutterDevice>[flutterDevice1, flutterDevice2];
 
-      await createColdRunner(
+      await ColdRunner(
         devices,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
         target: 'main.dart',
@@ -198,7 +86,7 @@ void main() {
       final flutterDevice = FakeFlutterDevice(device)..runColdCode = 1;
       final devices = <FlutterDevice>[flutterDevice];
       final File applicationBinary = MemoryFileSystem.test().file('binary');
-      final int result = await createColdRunner(
+      final int result = await ColdRunner(
         devices,
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -215,7 +103,7 @@ void main() {
         final flutterDevice = FakeFlutterDevice(device);
         final devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
-        final int result = await createColdRunner(
+        final int result = await ColdRunner(
           devices,
           applicationBinary: applicationBinary,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -248,7 +136,7 @@ void main() {
         final flutterDevice = FakeFlutterDevice(device);
         final devices = <FlutterDevice>[flutterDevice];
         final File applicationBinary = MemoryFileSystem.test().file('binary');
-        final int result = await createColdRunner(
+        final int result = await ColdRunner(
           devices,
           applicationBinary: applicationBinary,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
@@ -278,7 +166,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
 
   @override
-  Stream<Uri> get vmServiceUris => const Stream<Uri>.empty();
+  Future<Uri>? get vmServiceUri => null;
 
   @override
   final Device device;
@@ -370,26 +258,28 @@ class TestFlutterDevice extends FlutterDevice {
     required Device device,
     required this.exception,
     required ResidentCompiler generator,
+    Future<Uri>? vmServiceUri,
   }) : super(
          targetPlatform: .unsupported,
          device,
          buildInfo: BuildInfo.debug,
          generator: generator,
          developmentShaderCompiler: const FakeShaderCompiler(),
-       );
+       ) {
+    this.vmServiceUri = vmServiceUri;
+  }
 
   /// The exception to throw when the connect method is called.
   final Exception exception;
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
   }) async {
     throw exception;
   }

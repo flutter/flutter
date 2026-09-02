@@ -156,7 +156,7 @@ environement:
         'target',
         BuildInfo.debug,
         ServiceWorkerStrategy.offlineFirst,
-        compilerConfigs: <WebCompilerConfig>[],
+        compilerConfigs: const <WebCompilerConfig>[],
       );
 
       expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -201,8 +201,8 @@ environement:
         flutterProject,
         'target',
         BuildInfo.debug,
-        null, // serviceWorkerStrategy is omitted
-        compilerConfigs: <WebCompilerConfig>[],
+        null,
+        compilerConfigs: const <WebCompilerConfig>[],
       );
 
       expect(logger.statusText, contains('Compiling target for the Web...'));

@@ -9,14 +9,14 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
 import 'package:flutter_tools/src/project_validator.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart' hide FakeProcess;
+import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'analysis_server_mock.dart';
 
@@ -41,7 +41,7 @@ void main() {
     late Platform platform;
     late BufferLogger logger;
     late FakeProcessManager processManager;
-    late FakeToolContext toolContext;
+    late Terminal terminal;
     late AnalyzeCommand command;
     late CommandRunner<void> runner;
 
@@ -54,156 +54,233 @@ void main() {
       platform = FakePlatform();
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
-      const homePath = '/home/user/flutter';
-      toolContext = FakeToolContext(
+      terminal = Terminal.test();
+      command = AnalyzeCommand(
         artifacts: Artifacts.test(),
-        cache: Cache.test(fileSystem: fileSystem, flutterRoot: homePath),
-        fs: fileSystem,
+        fileSystem: fileSystem,
         logger: logger,
         platform: platform,
         processManager: processManager,
-      );
-      command = AnalyzeCommand(
+        terminal: terminal,
         allProjectValidators: <ProjectValidator>[],
         suppressAnalytics: true,
-        toolContext: toolContext,
       );
       runner = createTestCommandRunner(command);
 
       // Setup repo roots
+      const homePath = '/home/user/flutter';
+      Cache.flutterRoot = homePath;
       for (final dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
     });
 
-    testWithoutContext('SIGABRT throws Exception', () async {
-      const stderr = 'Something bad happened!';
-      processManager.addCommands(<FakeCommand>[
-        const FakeCommand(
-          // artifact paths are from Artifacts.test() and stable
-          command: <String>[
-            'Artifact.engineDartSdkPath/bin/dart',
-            'language-server',
-            '--dart-sdk',
-            'Artifact.engineDartSdkPath',
-            '--disable-server-feature-completion',
-            '--disable-server-feature-search',
-            '--suppress-analytics',
-          ],
-          exitCode: SIGABRT,
-          stderr: stderr,
-        ),
-      ]);
-      await expectLater(
-        runner.run(<String>['analyze']),
-        throwsA(
-          isA<Exception>().having(
-            (Exception e) => e.toString(),
-            'description',
-            contains('analysis server exited with code $SIGABRT and output:\n[stderr] $stderr'),
+    testUsingContext(
+      'SIGABRT throws Exception',
+      () async {
+        const stderr = 'Something bad happened!';
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            // artifact paths are from Artifacts.test() and stable
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--no-with-fine-dependencies',
+              '--suppress-analytics',
+            ],
+            exitCode: SIGABRT,
+            stderr: stderr,
           ),
-        ),
-      );
-    });
+        ]);
+        await expectLater(
+          runner.run(<String>['analyze']),
+          throwsA(
+            isA<Exception>().having(
+              (Exception e) => e.toString(),
+              'description',
+              contains('analysis server exited with code $SIGABRT and output:\n[stderr] $stderr'),
+            ),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
 
-    testWithoutContext('Analysis server premature exit with 255 throws ToolExit', () async {
-      const stderr = 'Fatal error in analyzer';
-      processManager.addCommands(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'Artifact.engineDartSdkPath/bin/dart',
-            'language-server',
-            '--dart-sdk',
-            'Artifact.engineDartSdkPath',
-            '--disable-server-feature-completion',
-            '--disable-server-feature-search',
-            '--suppress-analytics',
-          ],
-          exitCode: 255,
-          stderr: stderr,
-        ),
-      ]);
-      await expectLater(
-        runner.run(<String>['analyze']),
-        throwsA(
-          isA<ToolExit>()
-              .having(
-                (ToolExit e) => e.message,
-                'message',
-                contains('analysis server exited with code 255 and output:\n[stderr] $stderr'),
-              )
-              .having((ToolExit e) => e.exitCode, 'exitCode', equals(255)),
-        ),
-      );
-    });
+    testUsingContext(
+      'Analysis server premature exit with 255 throws ToolExit',
+      () async {
+        const stderr = 'Fatal error in analyzer';
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--no-with-fine-dependencies',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: stderr,
+          ),
+        ]);
+        await expectLater(
+          runner.run(<String>['analyze']),
+          throwsA(
+            isA<ToolExit>()
+                .having(
+                  (ToolExit e) => e.message,
+                  'message',
+                  contains('analysis server exited with code 255 and output:\n[stderr] $stderr'),
+                )
+                .having((ToolExit e) => e.exitCode, 'exitCode', equals(255)),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
 
-    testWithoutContext('--flutter-repo analyzes everything in the flutterRoot', () async {
-      final streamController = StreamController<List<int>>();
-      final sink = IOSink(streamController.sink);
-      final exitCompleter = Completer<void>();
-      final process = _CustomLspProcess(stdin: sink, exitCompleter: exitCompleter);
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(
-          // artifact paths are from Artifacts.test() and stable
-          command: const <String>[
-            'Artifact.engineDartSdkPath/bin/dart',
-            'language-server',
-            '--dart-sdk',
-            'Artifact.engineDartSdkPath',
-            '--disable-server-feature-completion',
-            '--disable-server-feature-search',
-            '--suppress-analytics',
-          ],
-          process: process,
-        ),
-      ]);
+    testUsingContext(
+      '--flutter-repo analyzes everything in the flutterRoot',
+      () async {
+        final process = MockLspServerProcess();
+        processManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            // artifact paths are from Artifacts.test() and stable
+            command: const <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--no-with-fine-dependencies',
+              '--suppress-analytics',
+            ],
+            process: process,
+          ),
+        ]);
 
-      final buffer = StringBuffer();
-      final messageReceived = Completer<void>();
-      String? firstMessage;
+        await runner.run(<String>['analyze', '--flutter-repo']);
 
-      streamController.stream.transform(utf8.decoder).listen((String chunk) {
-        buffer.write(chunk);
-        final current = buffer.toString();
-        if (current.contains('{') && firstMessage == null) {
-          final int startIndex = current.indexOf('{');
-          firstMessage = current.substring(startIndex);
-          final request = jsonDecode(firstMessage!) as Map<String, Object?>;
-          if (request['method'] == 'initialize') {
-            process.addResponse(
-              '{"jsonrpc":"2.0","id":1,"result":'
-              '{"capabilities":{"window":{"workDoneProgress":true}}}}',
-            );
-            process.addResponse(
-              r'{"jsonrpc":"2.0","method":"$/progress","params":'
-              r'{"token":"analyze","value":{"kind":"begin"}}}',
-            );
-            process.addResponse(
-              r'{"jsonrpc":"2.0","method":"$/progress","params":'
-              r'{"token":"analyze","value":{"kind":"end"}}}',
-            );
-            exitCompleter.complete();
-            messageReceived.complete();
-          }
-        }
-      });
+        final Map<String, Object?> request = await process.initializeRequest;
+        final params = request['params']! as Map<String, Object?>;
+        expect(
+          params['workspaceFolders'] as List?,
+          contains(
+            equals(<String, dynamic>{
+              'name': '/home/user/flutter',
+              'uri': 'file:///home/user/flutter/',
+            }),
+          ),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
 
-      await runner.run(<String>['analyze', '--flutter-repo']);
+    testUsingContext(
+      '--no-plugins passes --no-plugins to language-server',
+      () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--no-with-fine-dependencies',
+              '--no-plugins',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: 'error',
+          ),
+        ]);
+        await expectLater(
+          runner.run(<String>['analyze', '--no-plugins']),
+          throwsA(isA<ToolExit>()),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
 
-      expect(firstMessage, isNotNull);
-      final request = jsonDecode(firstMessage!) as Map<String, Object?>;
-      expect(request['method'], 'initialize');
-      final params = request['params']! as Map<String, Object?>;
-      expect(
-        params['workspaceFolders'] as List?,
-        contains(
-          equals(<String, dynamic>{
-            'name': '/home/user/flutter',
-            'uri': 'file:///home/user/flutter/',
-          }),
-        ),
-      );
-    });
+    testUsingContext(
+      '--benchmark passes --no-plugins to language-server by default',
+      () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--no-with-fine-dependencies',
+              '--no-plugins',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: 'error',
+          ),
+        ]);
+        await expectLater(runner.run(<String>['analyze', '--benchmark']), throwsA(isA<ToolExit>()));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      '--benchmark with --plugins enables plugins',
+      () async {
+        processManager.addCommands(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartSdkPath/bin/dart',
+              'language-server',
+              '--dart-sdk',
+              'Artifact.engineDartSdkPath',
+              '--disable-server-feature-completion',
+              '--disable-server-feature-search',
+              '--no-with-fine-dependencies',
+              '--suppress-analytics',
+            ],
+            exitCode: 255,
+            stderr: 'error',
+          ),
+        ]);
+        await expectLater(
+          runner.run(<String>['analyze', '--benchmark', '--plugins']),
+          throwsA(isA<ToolExit>()),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
   });
 
   testWithoutContext('analyze inRepo', () {
@@ -212,15 +289,16 @@ void main() {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
+    Cache.flutterRoot = _kFlutterRoot;
 
     // Absolute paths
     expect(inRepo(<String>[tempDir.path], fileSystem), isFalse);
     expect(inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem), isFalse);
-    expect(inRepo(<String>[_kFlutterRoot], fileSystem), isTrue);
-    expect(inRepo(<String>[fileSystem.path.join(_kFlutterRoot, 'foo')], fileSystem), isTrue);
+    expect(inRepo(<String>[Cache.flutterRoot!], fileSystem), isTrue);
+    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot!, 'foo')], fileSystem), isTrue);
 
     // Relative paths
-    fileSystem.currentDirectory = _kFlutterRoot;
+    fileSystem.currentDirectory = Cache.flutterRoot;
     expect(inRepo(<String>['.'], fileSystem), isTrue);
     expect(inRepo(<String>['foo'], fileSystem), isTrue);
     fileSystem.currentDirectory = tempDir.path;
@@ -237,7 +315,7 @@ bool inRepo(List<String>? fileList, FileSystem fileSystem) {
   if (fileList == null || fileList.isEmpty) {
     fileList = <String>[fileSystem.path.current];
   }
-  final String root = fileSystem.path.normalize(fileSystem.path.absolute(_kFlutterRoot));
+  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot!));
   final String prefix = root + fileSystem.path.separator;
   for (String file in fileList) {
     file = fileSystem.path.normalize(fileSystem.path.absolute(file));
@@ -246,17 +324,4 @@ bool inRepo(List<String>? fileList, FileSystem fileSystem) {
     }
   }
   return false;
-}
-class _CustomLspProcess extends FakeProcess {
-  _CustomLspProcess({super.stdin, Completer<void>? exitCompleter})
-    : super(completer: exitCompleter);
-
-  final StreamController<List<int>> _stdoutController = StreamController<List<int>>();
-
-  @override
-  Stream<List<int>> get stdout => _stdoutController.stream;
-
-  void addResponse(String message) {
-    _stdoutController.add(utf8.encode('Content-Length: ${message.length}\r\n\r\n$message'));
-  }
 }

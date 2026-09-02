@@ -2132,12 +2132,15 @@ flutter:
                 ddsUri: Uri.parse('http://localhost/existingDdsInField'),
               );
             };
-        final flutterDevice = TestFlutterDevice(device, vmServiceUris: Stream<Uri>.value(testUri));
+        final flutterDevice = TestFlutterDevice(device, vmServiceUri: Future<Uri>.value(testUri));
         final done = Completer<void>();
         unawaited(
           runZonedGuarded(
             () => flutterDevice
-                .connect(debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug))
+                .connect(
+                  vmServiceUri: testUri,
+                  debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+                )
                 .then((_) => done.complete()),
             (_, _) => done.complete(),
           ),
@@ -2206,8 +2209,9 @@ flutter:
               done.complete();
               return FakeDartDevelopmentServiceLauncher(uri: remoteVmServiceUri);
             };
-        final flutterDevice = TestFlutterDevice(device, vmServiceUris: Stream<Uri>.value(testUri));
+        final flutterDevice = TestFlutterDevice(device, vmServiceUri: Future<Uri>.value(testUri));
         await flutterDevice.connect(
+          vmServiceUri: testUri,
           debuggingOptions: DebuggingOptions.enabled(
             BuildInfo.debug,
             disableServiceAuthCodes: true,

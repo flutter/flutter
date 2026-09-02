@@ -18,6 +18,7 @@ Future<void> processPodsIfNeeded(
   String buildDirectory,
   BuildMode buildMode, {
   bool forceCocoaPodsOnly = false,
+  bool forceSwiftPM = false,
 }) async {
   final FlutterProject project = xcodeProject.parent;
 
@@ -34,6 +35,7 @@ Future<void> processPodsIfNeeded(
     iosPlatform: project.ios.existsSync(),
     macOSPlatform: project.macos.existsSync(),
     forceCocoaPodsOnly: forceCocoaPodsOnly,
+    forceSwiftPM: forceSwiftPM,
   );
 
   // If there are no plugins and if the project is a not module with an existing
