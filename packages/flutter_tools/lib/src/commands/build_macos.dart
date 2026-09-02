@@ -5,7 +5,9 @@
 import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../macos/build_macos.dart';
@@ -14,8 +16,16 @@ import 'build.dart';
 
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
-  BuildMacosCommand({required super.logger, required bool verboseHelp})
-    : super(verboseHelp: verboseHelp) {
+  BuildMacosCommand({
+    required ToolContext toolContext,
+    required this.buildSystem,
+    required bool verboseHelp,
+  }) : super(
+         logger: toolContext.logger,
+         outputPreferences: toolContext.outputPreferences,
+         toolContext: toolContext,
+         verboseHelp: verboseHelp,
+       ) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesFlavorOption();
     argParser.addFlag(
@@ -26,6 +36,11 @@ class BuildMacosCommand extends BuildSubCommand {
           'performing duplicate work.',
     );
   }
+
+  final BuildSystem buildSystem;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'macos';

@@ -26,10 +26,10 @@ class BuildWindowsCommand extends BuildSubCommand {
     required this.buildSystem,
     required ToolContext toolContext,
     required bool verboseHelp,
-    super.analytics,
-    FeatureFlags? featureFlags,
-    this.visualStudioOverride,
-  }) : _featureFlags = featureFlags ?? const _DefaultFeatureFlags(),
+    required FeatureFlags featureFlags,
+    required VisualStudio visualStudio,
+  }) : _featureFlags = featureFlags,
+       _visualStudio = visualStudio,
        super(
          logger: toolContext.logger,
          outputPreferences: toolContext.outputPreferences,
@@ -67,8 +67,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   @override
   String get description => 'Build a Windows desktop application.';
 
-  @visibleForTesting
-  VisualStudio? visualStudioOverride;
+  final VisualStudio _visualStudio;
 
   bool get configOnly => boolArg('config-only');
 
@@ -99,7 +98,7 @@ class BuildWindowsCommand extends BuildSubCommand {
       buildInfo,
       targetPlatform,
       target: targetFile,
-      visualStudioOverride: visualStudioOverride,
+      visualStudioOverride: _visualStudio,
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: fs,
         logger: logger,
@@ -110,55 +109,4 @@ class BuildWindowsCommand extends BuildSubCommand {
     );
     return FlutterCommandResult.success();
   }
-}
-
-class _DefaultFeatureFlags extends FeatureFlags {
-  const _DefaultFeatureFlags();
-
-  @override
-  bool isEnabled(Feature feature) => false;
-  @override
-  bool get isLinuxEnabled => false;
-  @override
-  bool get isMacOSEnabled => false;
-  @override
-  bool get isWindowsEnabled => false;
-  @override
-  bool get isWebEnabled => false;
-  @override
-  bool get isAndroidEnabled => false;
-  @override
-  bool get isIOSEnabled => false;
-  @override
-  bool get isFuchsiaEnabled => false;
-  @override
-  bool get areCustomDevicesEnabled => false;
-  @override
-  bool get isCliAnimationEnabled => false;
-  @override
-  bool get isNativeAssetsEnabled => false;
-  @override
-  bool get isDartDataAssetsEnabled => false;
-  @override
-  bool get isRecordUseEnabled => false;
-  @override
-  bool get isSwiftPackageManagerEnabled => false;
-  @override
-  bool get isOmitLegacyVersionFileEnabled => false;
-  @override
-  bool get isWindowingEnabled => false;
-  @override
-  bool get isAccessibilityEvaluationsEnabled => false;
-  @override
-  bool get isLLDBDebuggingEnabled => false;
-  @override
-  bool get isUISceneMigrationEnabled => false;
-  @override
-  bool get isRiscv64SupportEnabled => false;
-  @override
-  bool get isMacOSArm64OnlyEnabled => false;
-  @override
-  bool get isHcppEnabled => false;
-  @override
-  bool get isToolExtensionsEnabled => false;
 }

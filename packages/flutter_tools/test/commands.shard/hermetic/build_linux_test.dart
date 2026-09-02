@@ -139,8 +139,7 @@ void main() {
     );
     return BuildCommand(
       toolContext: toolContext,
-      analytics: fakeAnalytics,
-      androidSdk: FakeAndroidSdk(),
+            androidSdk: FakeAndroidSdk(),
       artifacts: FakeArtifacts(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       cache: FakeCache(),
@@ -190,8 +189,7 @@ void main() {
       projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
     );
     return BuildLinuxCommand(
-      analytics: fakeAnalytics,
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       featureFlags: effectiveFeatureFlags,
       toolContext: toolContext,
       verboseHelp: verboseHelp,

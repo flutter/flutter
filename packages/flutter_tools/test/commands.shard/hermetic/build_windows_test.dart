@@ -109,12 +109,11 @@ void main() {
       projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
     );
     return BuildWindowsCommand(
-      analytics: fakeAnalytics,
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       featureFlags: effectiveFeatureFlags,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
-      visualStudioOverride: visualStudio,
+      visualStudio: visualStudio ?? FakeVisualStudio(),
     );
   }
 

@@ -37,6 +37,7 @@ import 'build_macos_framework.dart';
 import 'build_swift_package.dart';
 import 'build_web.dart';
 import 'build_windows.dart';
+import '../windows/visual_studio.dart';
 import 'darwin_add_to_app.dart';
 
 class BuildCommand extends FlutterCommand {
@@ -155,10 +156,13 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
     );
-    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildMacosCommand(
+      toolContext: toolContext,
+      buildSystem: buildSystem,
+      verboseHelp: verboseHelp,
+    ));
     _addSubcommand(
       BuildLinuxCommand(
-        analytics: effectiveAnalytics,
         buildSystem: buildSystem,
         featureFlags: effectiveFeatureFlags,
         toolContext: toolContext,
@@ -167,11 +171,17 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildWindowsCommand(
-        analytics: effectiveAnalytics,
         buildSystem: buildSystem,
         featureFlags: effectiveFeatureFlags,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
+        visualStudio: VisualStudio(
+          fileSystem: fileSystem,
+          platform: platform,
+          logger: logger,
+          processManager: processManager,
+          osUtils: osUtils,
+        ),
       ),
     );
   }
