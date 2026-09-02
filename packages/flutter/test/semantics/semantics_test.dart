@@ -1064,6 +1064,23 @@ void main() {
     expect(config.customSemanticsActions[customAction], same(onCustomAction));
   });
 
+  test(
+    'SemanticsConfiguration accessibilityFocusBlockType does not mark hasBeenAnnotated when unchanged',
+    () {
+      final config = SemanticsConfiguration();
+      expect(config.accessibilityFocusBlockType, AccessibilityFocusBlockType.none);
+      expect(config.hasBeenAnnotated, isFalse);
+
+      config.accessibilityFocusBlockType = AccessibilityFocusBlockType.none;
+      expect(config.accessibilityFocusBlockType, AccessibilityFocusBlockType.none);
+      expect(config.hasBeenAnnotated, isFalse);
+
+      config.accessibilityFocusBlockType = AccessibilityFocusBlockType.blockSubtree;
+      expect(config.accessibilityFocusBlockType, AccessibilityFocusBlockType.blockSubtree);
+      expect(config.hasBeenAnnotated, isTrue);
+    },
+  );
+
   test('SemanticsConfiguration.copy() preserves hitTestBehavior', () {
     final config = SemanticsConfiguration()
       ..isSemanticBoundary = true

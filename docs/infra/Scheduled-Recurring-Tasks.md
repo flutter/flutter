@@ -14,6 +14,7 @@ You can find active or closed automated task issues using the following GitHub i
 
 - [All open automated tasks](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3A%22automated+task%22) (`is:issue is:open label:"automated task"`)
 - [Localization tasks](https://github.com/flutter/flutter/issues?q=is%3Aissue+label%3A%22automated+task%22+label%3A%22a%3A+internationalization%22) (`is:issue label:"automated task" label:"a: internationalization"`)
+- [goldctl tasks](https://github.com/flutter/flutter/issues?q=is%3Aissue+label%3A%22automated+task%22+label%3A%22infra%3A+flutter+gold%22) (`is:issue label:"automated task" label:"infra: flutter gold"`)
 
 ---
 
@@ -47,17 +48,17 @@ jobs:
     steps:
       - name: Create scheduled task issue
         run: |
-          new_issue_url=$(gh issue create \
+          gh issue create \
             --title "$TITLE" \
             --assignee "$ASSIGNEES" \
             --label "$LABELS" \
-            --body "$BODY")
+            --body "$BODY"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           TITLE: '[Automated Task] Issue Title'
           ASSIGNEES: assignee_username
-          LABELS: automated task,team-label
+          LABELS: 'automated task,team-label'
           BODY: |
             ### Task Description
 
@@ -91,6 +92,7 @@ For more details on GitHub Action issue creation, see [GitHub's Schedule Issue C
 
 ## Current Active Workflows
 
-| Task Name | Workflow File | Schedule | Description | Labels Applied |
-| :--- | :--- | :--- | :--- | :--- |
-| **Quarterly Localization Update** | [scheduled-localization-update.yml](../../.github/workflows/scheduled-localization-update.yml) | Quarterly (`40 09 2 2,5,8,11 *`) | Prompts team to check for new upstream strings, pull translations from internal console, update `flutter_localizations`, Material, and Cupertino localizations, run tests, submit PR, and file follow-up issues if stable roll is required. | `automated task`, `a: internationalization`, `team-framework` |
+| Task Name | GitHub Workflow | Description | Labels Applied |
+| :--- | :--- | :--- | :--- |
+| **Localization Update** | [quarterly-scheduled-tasks.yml](../../.github/workflows/quarterly-scheduled-tasks.yml) | Prompts team to check for new upstream strings, pull translations from internal console, update `flutter_localizations`, Material, and Cupertino localizations, run tests, submit PR, and file follow-up issues if stable roll is required. | `automated task`, `a: internationalization`, `team-framework` |
+| **Goldctl Version Update** | [quarterly-scheduled-tasks.yml](../../.github/workflows/quarterly-scheduled-tasks.yml) | Prompts team to find the latest `goldctl` git revision, update `goldctl` dependencies in `.ci.yaml` across `flutter/flutter` and `flutter/packages`, verify golden file tests, and open PRs. | `automated task`, `team-ecosystem`, `infra: flutter gold` |
