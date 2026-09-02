@@ -310,12 +310,27 @@ class MediaQueryData {
   ///    [FlutterView], makes it available to descendant widgets, and sets up
   ///    the appropriate notification listeners to keep the data updated.
   MediaQueryData.fromView(ui.FlutterView view, {MediaQueryData? platformData})
-    : this._fromView(
-        view,
+    : this._fromOverrideAwareView(
+        // A view of a PlatformDispatcher the framework wrapped applies no
+        // override of its own; the one this returns for it does. Everything
+        // below then reads a single view that agrees with
+        // debugViewMetricsOverrides about what is overridden.
+        debugViewWithMetricsOverrides(view),
         platformData: platformData,
-        accessibilityFeatures: view.platformDispatcher.accessibilityFeatures,
-        debugViewMetricsOverride: _debugViewMetricsOverrideFor(view),
       );
+
+  // A hop, rather than more arguments to [fromView], because a redirecting
+  // constructor cannot bind the override-aware view to a name and the two
+  // arguments below have to be read from that same view.
+  MediaQueryData._fromOverrideAwareView(
+    ui.FlutterView view, {
+    required MediaQueryData? platformData,
+  }) : this._fromView(
+         view,
+         platformData: platformData,
+         accessibilityFeatures: view.platformDispatcher.accessibilityFeatures,
+         debugViewMetricsOverride: _debugViewMetricsOverrideFor(view),
+       );
 
   // Every platform-wide metric resolves the same way, through [_resolve]: an
   // override registered for this view makes the value come from this view's
@@ -424,6 +439,24 @@ class MediaQueryData {
   static T _resolve<T>(T? overridden, T? inherited, T reported) =>
       overridden != null ? reported : inherited ?? reported;
 
+  /// The [debugViewMetricsOverrides] entry `view` applies, or null.
+  ///
+  /// `view` is override-aware by the time this runs:
+  /// [debugViewWithMetricsOverrides] has replaced a view that merely reports
+  /// the metrics of a wrapped [ui.PlatformDispatcher] with the wrapper's own
+  /// view, so an entry found here is one that the values read from this view
+  /// and its dispatcher already have applied. A view this library has never
+  /// seen is taken at its word: a view that wraps one of ours, which resolves
+  /// the entry through the dispatcher it was given, cannot be told apart from
+  /// one that resolves nothing. `TestFlutterView` is the first kind; a
+  /// hand-written [ui.FlutterView], and the view a `flutter_test` window
+  /// controller vends, are the second, and an entry registered for the id one
+  /// of those reports supersedes `platformData` without reaching the values
+  /// read below. A view of the second kind that reports a dispatcher belonging
+  /// to no view of its own resolves the implicit view's entry for the metrics
+  /// that are not per-view, which is the dispatcher's documented behavior for a
+  /// consumer that has no view to resolve against, and is why such a view is
+  /// worth giving a dispatcher bound to its own id.
   static DebugViewMetricsOverride? _debugViewMetricsOverrideFor(ui.FlutterView view) {
     DebugViewMetricsOverride? result;
     assert(() {
@@ -441,10 +474,12 @@ class MediaQueryData {
     // The same rule as [_resolve], written out because the override carries a
     // factor while the metric is a [TextScaler]: what the override sets is the
     // factor the view's dispatcher already scales font sizes by.
-    final TextScaler reported = SystemTextScaler._(view.platformDispatcher);
-    return debugViewMetricsOverride?.textScaleFactor != null
-        ? reported
-        : platformData?.textScaler ?? reported;
+    final overridden = debugViewMetricsOverride?.textScaleFactor != null;
+    final TextScaler reported = SystemTextScaler._(
+      view.platformDispatcher,
+      debugScalesLinearly: overridden,
+    );
+    return overridden ? reported : platformData?.textScaler ?? reported;
   }
 
   static BorderRadius? _displayCornerRadiiFromView(ui.FlutterView view) {
@@ -1277,7 +1312,7 @@ class MediaQueryData {
     return other is MediaQueryData &&
         other.size == size &&
         other.devicePixelRatio == devicePixelRatio &&
-        other.textScaleFactor == textScaleFactor &&
+        _sameTextScaling(other.textScaler, textScaler) &&
         other.platformBrightness == platformBrightness &&
         other.padding == padding &&
         other.viewPadding == viewPadding &&
@@ -1301,6 +1336,41 @@ class MediaQueryData {
         other.wordSpacingOverride == wordSpacingOverride &&
         other.paragraphSpacingOverride == paragraphSpacingOverride &&
         other.displayCornerRadii == displayCornerRadii;
+  }
+
+  // Text scaling compares by [TextScaler.textScaleFactor], as everything did
+  // before, except that in debug mode two scalers of the same type are compared
+  // as scalers. A [debugViewMetricsOverrides] entry that supplies the factor
+  // replaces the platform's curve with a multiplication by it, so two scalers
+  // report the same factor and scale differently, and a MediaQuery that
+  // compared equal through that would not rebuild the text it scales. A scaler
+  // that wraps another, as [MediaQuery.withClampedTextScaling] produces,
+  // forwards the comparison to what it wraps, so the distinction survives.
+  //
+  // Release builds keep the plain comparison. Two scalers can report the same
+  // factor and scale differently there too — two clamps of the same scaler with
+  // different bounds do — but that is how [MediaQueryData] has always compared
+  // them, and the stricter rule costs rebuilds where a [TextScaler] subclass
+  // does not define [operator ==]: it then compares by identity, and a new
+  // instance of one is built on every rebuild that reaches it.
+  //
+  // Scalers of different types are compared by factor even in debug, because a
+  // [TextScaler] can be equal to one of another type that reports the same
+  // factor without that being mutual — [TextScaler.noScaling] and a
+  // [SystemTextScaler] of 1.0 are — and comparing those as scalers would make
+  // [operator ==] itself asymmetric.
+  //
+  // The two debug rules are not transitive while an override that reports the
+  // platform's own factor is installed: a scaler of some other type reporting
+  // that factor equals both of two [SystemTextScaler]s that do not equal each
+  // other. [hashCode] stays consistent with all of it — everything equal here
+  // reports an equal factor — so the cost falls on a [MediaQueryData] used as a
+  // set element or a map key, which is not something the framework does.
+  static bool _sameTextScaling(TextScaler a, TextScaler b) {
+    if (kDebugMode && a.runtimeType == b.runtimeType) {
+      return a == b;
+    }
+    return a.textScaleFactor == b.textScaleFactor;
   }
 
   @override
@@ -2622,12 +2692,20 @@ class _UnspecifiedTextScaler implements TextScaler {
 /// A [TextScaler] that reflects the user's font scale preferences from the
 /// platform's accessibility settings.
 final class SystemTextScaler extends TextScaler {
-  SystemTextScaler._(this._platformDispatcher)
-    : textScaleFactor = _platformDispatcher.textScaleFactor;
+  SystemTextScaler._(this._platformDispatcher, {required bool debugScalesLinearly})
+    : textScaleFactor = _platformDispatcher.textScaleFactor,
+      _debugScalesLinearly = debugScalesLinearly;
 
   final ui.PlatformDispatcher _platformDispatcher;
   @override
   double scale(double fontSize) => _platformDispatcher.scaleFontSize(fontSize);
+
+  /// Whether [scale] multiplies by [textScaleFactor] instead of applying the
+  /// platform's own curve, because a [debugViewMetricsOverrides] entry supplies
+  /// that factor.
+  ///
+  /// Always false in release mode, where there are no overrides.
+  final bool _debugScalesLinearly;
 
   /// A value that represents the current user preference for the scaling factor
   /// for fonts.
@@ -2635,8 +2713,12 @@ final class SystemTextScaler extends TextScaler {
   /// This numeric value is typically used to compare [SystemTextScaler]s. Two
   /// [SystemTextScaler] instances with the same [textScaleFactor] are considered
   /// equal as their [scale] methods produce the same output when given the same
-  /// input font size. However, [textScaleFactor] should not be used in arithmetic
-  /// operations.
+  /// input font size. In debug builds there is one exception: a
+  /// [debugViewMetricsOverrides] entry that supplies the factor also replaces
+  /// the platform's own scaling curve with a multiplication by it, so a scaler
+  /// that reports an overridden factor is not equal to one that reports the same
+  /// factor from the platform. However, [textScaleFactor] should not be used in
+  /// arithmetic operations.
   // TODO(LongCatIsLooong): consider changing the type to Comparable<OpaqueWrapper>
   // once  `MediaQueryData.textScaleFactor` is removed:
   // https://github.com/flutter/flutter/issues/128825.
@@ -2651,7 +2733,21 @@ final class SystemTextScaler extends TextScaler {
     return switch (other) {
       // The system's text scale factor is used for the equality check because the
       // `scale` function's output monotonically increases with the text scale factor.
-      SystemTextScaler(:final double textScaleFactor) => this.textScaleFactor == textScaleFactor,
+      // Which function it is matters too: installing a debug override whose factor
+      // happens to match the platform's leaves the factor alone but replaces the
+      // platform's curve with a straight multiplication, and a MediaQuery that
+      // compared equal through that would not rebuild the text it scales.
+      final SystemTextScaler scaler =>
+        textScaleFactor == scaler.textScaleFactor &&
+            // Only debug builds have overrides, so the rest of this folds away
+            // in release, where the flag is always false.
+            (!kDebugMode ||
+                // At a factor of 1.0 both are the identity — dart:ui returns the
+                // font size unchanged there rather than applying its curve — so
+                // they remain extensionally equal, and have to be, or equality
+                // with TextScaler.noScaling below would not be transitive.
+                textScaleFactor == 1.0 ||
+                _debugScalesLinearly == scaler._debugScalesLinearly),
       // When textScaleFactor is 1.0, the two TextScalers are extensionally
       // equivalent.
       TextScaler.noScaling => textScaleFactor == 1.0,
@@ -2659,6 +2755,10 @@ final class SystemTextScaler extends TextScaler {
     };
   }
 
+  // Two scalers that differ only in how they scale share this hash code, which
+  // == separates. Including the scaling function here instead would give a
+  // scaler that does not scale a different hash code than TextScaler.noScaling,
+  // which it can be equal to.
   @override
   int get hashCode => textScaleFactor.hashCode;
 

@@ -506,6 +506,221 @@ void main() {
       expect(reported.boldText, isTrue);
       expect(reported.devicePixelRatio, 5.0);
     });
+
+    testWidgets('a view read straight from the platform applies its override', (
+      WidgetTester tester,
+    ) async {
+      // MediaQueryData.fromView documents that its view may come from
+      // PlatformDispatcher.views. Such a view applies no override itself, so
+      // resolving one against it reported neither the override nor the
+      // inherited value.
+      final ui.FlutterView rawView = ui.PlatformDispatcher.instance.implicitView!;
+      final MediaQueryData inherited = MediaQueryData.fromView(
+        rawView,
+      ).copyWith(boldText: false, highContrast: true);
+      debugSetViewMetricsOverride(
+        rawView.viewId,
+        const DebugViewMetricsOverride(
+          devicePixelRatio: 4.0,
+          physicalSize: ui.Size(400, 800),
+          boldText: true,
+        ),
+      );
+
+      final data = MediaQueryData.fromView(rawView, platformData: inherited);
+      expect(data.boldText, isTrue);
+      // The view geometry the override sets reaches it too.
+      expect(data.devicePixelRatio, 4.0);
+      expect(data.size, const Size(100, 200));
+      // What the override does not name still comes from the parent.
+      expect(data.highContrast, isTrue);
+
+      debugClearViewMetricsOverrides();
+    });
+
+    testWidgets('the deprecated window builds data that honors an override', (
+      WidgetTester tester,
+    ) async {
+      // The window itself reports the platform's own metrics, as its
+      // documentation says, but it stands for a view of the wrapped dispatcher,
+      // so the data built from it resolves that view's override like any other.
+      final ui.SingletonFlutterWindow window = ui.window;
+      debugSetViewMetricsOverride(
+        window.viewId,
+        const DebugViewMetricsOverride(devicePixelRatio: 4.0, physicalSize: ui.Size(400, 800)),
+      );
+
+      expect(window.devicePixelRatio, isNot(4.0));
+      final data = MediaQueryData.fromWindow(window);
+      expect(data.devicePixelRatio, 4.0);
+      expect(data.size, const Size(100, 200));
+
+      debugClearViewMetricsOverrides();
+    });
+
+    testWidgets('an overridden factor of 1.0 still equals no scaling at all', (
+      WidgetTester tester,
+    ) async {
+      // Both a reported and an overridden factor of 1.0 equal
+      // TextScaler.noScaling, so they have to equal each other, or MediaQuery's
+      // idea of text scaling is not even transitive. dart:ui returns the font
+      // size unchanged at 1.0 rather than applying its curve, so they really do
+      // scale alike.
+      final TextScaler reported = MediaQueryData.fromView(tester.view).textScaler;
+      expect(reported.textScaleFactor, 1.0);
+
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(textScaleFactor: 1.0),
+      );
+      final TextScaler overridden = MediaQueryData.fromView(tester.view).textScaler;
+
+      expect(overridden.textScaleFactor, 1.0);
+      expect(overridden == reported, isTrue);
+      expect(reported == overridden, isTrue);
+      expect(overridden == TextScaler.noScaling, isTrue);
+
+      // TextScaler equality is not mutual across types — TextScaler.noScaling
+      // does not accept a SystemTextScaler — so MediaQueryData compares those
+      // by factor, which has to hold whichever way round they are asked.
+      final fromView = MediaQueryData.fromView(tester.view);
+      final MediaQueryData withNoScaling = fromView.copyWith(textScaler: TextScaler.noScaling);
+      expect(fromView == withNoScaling, isTrue);
+      expect(withNoScaling == fromView, isTrue);
+
+      debugClearViewMetricsOverrides();
+    });
+
+    testWidgets('a view read straight from the platform keeps one identity', (
+      WidgetTester tester,
+    ) async {
+      // The view a raw one is read through is built whether or not an override
+      // is registered, so that it does not change identity under a RenderView
+      // or a View as tooling installs and removes overrides.
+      final ui.FlutterView rawView = ui.PlatformDispatcher.instance.implicitView!;
+      final ui.FlutterView applied = debugViewWithMetricsOverrides(rawView);
+      expect(applied.viewId, rawView.viewId);
+      // A view that already applies its own override is its own answer.
+      expect(debugViewWithMetricsOverrides(applied), same(applied));
+
+      debugSetViewMetricsOverride(
+        rawView.viewId,
+        const DebugViewMetricsOverride(devicePixelRatio: 4.0),
+      );
+      expect(debugViewWithMetricsOverrides(rawView), same(applied));
+
+      debugClearViewMetricsOverrides();
+      expect(debugViewWithMetricsOverrides(rawView), same(applied));
+    });
+
+    testWidgets('rebuilds when an override changes how text scales, not by how much', (
+      WidgetTester tester,
+    ) async {
+      // A platform whose own curve is not a multiplication by the factor it
+      // reports: installing an override of that same factor leaves the factor
+      // alone and replaces the curve, which widgets that scale text have to be
+      // told about.
+      final dispatcher = _CurvedTextScalingPlatformDispatcher();
+      final ui.FlutterView view = debugApplyViewMetricsOverrides(dispatcher).implicitView!;
+      var builds = 0;
+      late MediaQueryData data;
+      await tester.pumpWidget(
+        MediaQuery(
+          // The platform data an ancestor would supply, taken from the same
+          // platform, so that the only thing the override changes below is how
+          // the factor both of them report is applied.
+          data: MediaQueryData.fromView(view),
+          child: MediaQuery.fromView(
+            view: view,
+            child: Builder(
+              builder: (BuildContext context) {
+                builds += 1;
+                data = MediaQuery.of(context);
+                return const SizedBox.expand();
+              },
+            ),
+          ),
+        ),
+      );
+      expect(data.textScaler.textScaleFactor, 2.0);
+      expect(data.textScaler.scale(10), 25.0);
+      final buildsBeforeOverride = builds;
+
+      debugSetViewMetricsOverride(
+        view.viewId,
+        const DebugViewMetricsOverride(textScaleFactor: 2.0),
+      );
+      await tester.pump();
+
+      expect(builds, buildsBeforeOverride + 1);
+      expect(data.textScaler.textScaleFactor, 2.0);
+      expect(data.textScaler.scale(10), 20.0);
+
+      // A change to another view is not a change to this one. The comparison
+      // has to be able to say "the same" as well, or every notification the
+      // framework replays rebuilds everything that reads a MediaQuery.
+      final buildsBeforeOtherView = builds;
+      debugSetViewMetricsOverride(
+        view.viewId + 1,
+        const DebugViewMetricsOverride(textScaleFactor: 4.0),
+      );
+      await tester.pump();
+
+      expect(builds, buildsBeforeOtherView);
+
+      debugClearViewMetricsOverrides();
+      await tester.pump();
+
+      expect(builds, buildsBeforeOverride + 2);
+      expect(data.textScaler.scale(10), 25.0);
+    });
+
+    testWidgets('rebuilds through a scaler that wraps the one that changed', (
+      WidgetTester tester,
+    ) async {
+      // MediaQuery.withClampedTextScaling hands its subtree a TextScaler that
+      // wraps this one, and the material and cupertino libraries put it above a
+      // great deal of text. What it wraps has to keep deciding whether the
+      // subtree rebuilds.
+      final dispatcher = _CurvedTextScalingPlatformDispatcher();
+      final ui.FlutterView view = debugApplyViewMetricsOverrides(dispatcher).implicitView!;
+      var builds = 0;
+      late TextScaler scaler;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData.fromView(view),
+          child: MediaQuery.fromView(
+            view: view,
+            child: MediaQuery.withClampedTextScaling(
+              maxScaleFactor: 3.0,
+              child: Builder(
+                builder: (BuildContext context) {
+                  builds += 1;
+                  scaler = MediaQuery.textScalerOf(context);
+                  return const SizedBox.expand();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(scaler.scale(10), 25.0);
+      final buildsBeforeOverride = builds;
+
+      debugSetViewMetricsOverride(
+        view.viewId,
+        const DebugViewMetricsOverride(textScaleFactor: 2.0),
+      );
+      await tester.pump();
+
+      expect(builds, buildsBeforeOverride + 1);
+      expect(scaler.scale(10), 20.0);
+
+      debugClearViewMetricsOverrides();
+      await tester.pump();
+
+      expect(scaler.scale(10), 25.0);
+    });
   });
 
   group('every overridable metric MediaQuery surfaces', () {
@@ -980,4 +1195,121 @@ void main() {
       expect(tester.getSize(find.byType(SizedBox)), const Size(800, 600));
     });
   });
+}
+
+/// A [ui.PlatformDispatcher] that scales font sizes the way a platform does:
+/// along a curve of its own rather than by the factor it reports.
+///
+/// The curve below is affine rather than piecewise, which is enough: what
+/// matters is that it is not a multiplication by [textScaleFactor], so that
+/// overriding the factor with the one already reported still changes how text
+/// is scaled.
+class _CurvedTextScalingPlatformDispatcher implements ui.PlatformDispatcher {
+  late final _FakeView _view = _FakeView(this);
+
+  @override
+  Iterable<ui.FlutterView> get views => <ui.FlutterView>[_view];
+
+  @override
+  ui.FlutterView? view({required int id}) => id == _view.viewId ? _view : null;
+
+  @override
+  ui.FlutterView? get implicitView => _view;
+
+  @override
+  double get textScaleFactor => 2.0;
+
+  @override
+  double scaleFontSize(double unscaledFontSize) => unscaledFontSize * 2.0 + 5.0;
+
+  @override
+  ui.AccessibilityFeatures get accessibilityFeatures =>
+      ui.PlatformDispatcher.instance.accessibilityFeatures;
+
+  @override
+  ui.Brightness get platformBrightness => ui.Brightness.light;
+
+  @override
+  bool get alwaysUse24HourFormat => false;
+
+  @override
+  bool get supportsShowingSystemContextMenu => false;
+
+  @override
+  double? get letterSpacingOverride => null;
+
+  @override
+  double? get lineHeightScaleFactorOverride => null;
+
+  @override
+  double? get paragraphSpacingOverride => null;
+
+  @override
+  double? get wordSpacingOverride => null;
+
+  @override
+  ui.VoidCallback? onAccessibilityFeaturesChanged;
+
+  @override
+  ui.VoidCallback? onMetricsChanged;
+
+  @override
+  ui.VoidCallback? onPlatformBrightnessChanged;
+
+  @override
+  ui.VoidCallback? onPlatformConfigurationChanged;
+
+  @override
+  ui.VoidCallback? onTextScaleFactorChanged;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
+}
+
+/// A [ui.FlutterView] with an id no other view in these tests reports — not the
+/// test view's 0, and not the 100 that `FakeView` reports — so that an override
+/// registered for it cannot reach anything else.
+class _FakeView implements ui.FlutterView {
+  _FakeView(this.platformDispatcher);
+
+  @override
+  final ui.PlatformDispatcher platformDispatcher;
+
+  @override
+  int get viewId => 200;
+
+  @override
+  double get devicePixelRatio => 2.0;
+
+  @override
+  ui.Size get physicalSize => const ui.Size(800, 600);
+
+  @override
+  ui.ViewConstraints get physicalConstraints => ui.ViewConstraints.tight(physicalSize);
+
+  @override
+  ui.ViewPadding get padding => ui.ViewPadding.zero;
+
+  @override
+  ui.ViewPadding get viewInsets => ui.ViewPadding.zero;
+
+  @override
+  ui.ViewPadding get viewPadding => ui.ViewPadding.zero;
+
+  @override
+  ui.ViewPadding get systemGestureInsets => ui.ViewPadding.zero;
+
+  @override
+  ui.GestureSettings get gestureSettings => const ui.GestureSettings();
+
+  @override
+  List<ui.DisplayFeature> get displayFeatures => const <ui.DisplayFeature>[];
+
+  @override
+  ui.DisplayCornerRadii? get displayCornerRadii => null;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
 }

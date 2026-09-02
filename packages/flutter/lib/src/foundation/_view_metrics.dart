@@ -15,8 +15,8 @@ library;
 // signatures; an explicit `show` list would name most of `dart:ui` and would
 // have to be updated on every engine roll for members this library only
 // forwards. The dependency is debug-only: everything below is unreachable in
-// release builds, because the only thing that constructs it,
-// [debugApplyViewMetricsOverrides], does so inside an `assert`.
+// release builds, because every function that constructs it does so inside an
+// `assert`.
 import 'dart:typed_data' show ByteData;
 import 'dart:ui' as ui;
 
@@ -47,9 +47,7 @@ import 'debug.dart';
 ui.PlatformDispatcher debugApplyViewMetricsOverrides(ui.PlatformDispatcher dispatcher) {
   var result = dispatcher;
   assert(() {
-    if (dispatcher is! _DebugViewMetricsPlatformDispatcher) {
-      result = _wrappers[dispatcher] ??= _DebugViewMetricsPlatformDispatcher(dispatcher);
-    }
+    result = _wrapperFor(dispatcher, notify: true);
     return true;
   }());
   return result;
@@ -67,6 +65,13 @@ ui.PlatformDispatcher debugApplyViewMetricsOverrides(ui.PlatformDispatcher dispa
 /// this library produced, which is bound correctly by construction; this is for
 /// views it did not produce.
 ///
+/// Unlike [debugApplyViewMetricsOverrides], this does not make `dispatcher` one
+/// of the dispatchers an override change is reported to: resolving a view id
+/// says nothing about where the framework registered its `dart:ui` callbacks.
+/// A binding that supplies its own dispatcher has to apply
+/// [debugApplyViewMetricsOverrides] to it, which is what its documentation asks
+/// for anyway.
+///
 /// While `dispatcher` reports a view with this id, this returns that view's own
 /// dispatcher, so repeated calls and the view itself all report the same
 /// object. For an id it reports no view for there is nothing to tie the result
@@ -80,8 +85,10 @@ ui.PlatformDispatcher debugApplyViewMetricsOverridesForView(
 ) {
   var result = dispatcher;
   assert(() {
-    final wrapped =
-        debugApplyViewMetricsOverrides(dispatcher) as _DebugViewMetricsPlatformDispatcher;
+    // notify: false — resolving a view id says nothing about where the
+    // framework registered its callbacks. The dispatcher this is given is
+    // reached through a wrapper of its own, which is where that was decided.
+    final _DebugViewMetricsPlatformDispatcher wrapped = _wrapperFor(dispatcher, notify: false);
     final _DebugViewMetricsPlatformDispatcher root = wrapped._root ?? wrapped;
     result = root._dispatcherForView(viewId);
     return true;
@@ -89,9 +96,149 @@ ui.PlatformDispatcher debugApplyViewMetricsOverridesForView(
   return result;
 }
 
+/// Returns the [ui.FlutterView] that applies the [debugViewMetricsOverrides]
+/// entry registered for `view`'s id, when `view` itself does not apply it.
+///
+/// A view read straight from a [ui.PlatformDispatcher] that has been wrapped —
+/// from [ui.PlatformDispatcher.views], rather than from the dispatcher
+/// [BindingBase.platformDispatcher] returns — reports the metrics the platform
+/// reports, while [debugViewMetricsOverrides] has an entry for its id. Reading
+/// it through the wrapper instead keeps what a view reports and what the
+/// registry says in agreement, which is what [MediaQueryData.fromView] relies
+/// on when it lets an override supersede the platform data an ancestor
+/// [MediaQuery] supplies.
+///
+/// A view this library produced already applies its own override and is
+/// returned unchanged, as is one whose dispatcher this library has not wrapped:
+/// that is either a view that wraps one of ours, such as a `TestFlutterView`,
+/// which resolves its own override through the dispatcher
+/// [debugApplyViewMetricsOverridesForView] gave it, or a view this library can
+/// do nothing for.
+///
+/// Like the wrapper itself, the result does not depend on whether an override
+/// is registered: a view that is wrapped while one exists would otherwise
+/// change identity as tooling installs and removes overrides.
+///
+/// Returns `view` unchanged in release mode.
+ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
+  var result = view;
+  assert(() {
+    if (view is! _DebugViewMetricsFlutterView) {
+      // Whether that dispatcher is one an override change is reported to does
+      // not come into it: a view that is credited with an override — see
+      // [MediaQueryData.fromView] — has to be one that applies it, or it
+      // reports neither the override nor what an ancestor supplied. Announcing
+      // the change is the caller's part, and [BindingBase.platformDispatcher]
+      // says how.
+      result = _wrappers[view.platformDispatcher]?._wrapView(view) ?? view;
+    }
+    return true;
+  }());
+  return result;
+}
+
+/// Calls `callback` with every [ui.PlatformDispatcher] that has been wrapped by
+/// [debugApplyViewMetricsOverrides], so that an override change can be reported
+/// the way the platform reports a real one.
+///
+/// A dispatcher wrapped only by [debugApplyViewMetricsOverridesForView] is not
+/// among them: resolving a view id against a dispatcher says nothing about
+/// where the framework registered its callbacks, and reading callbacks off a
+/// dispatcher that has none is how an incomplete test double starts throwing
+/// from somewhere else.
+///
+/// These are the wrapped dispatchers rather than their wrappers, because a
+/// wrapper forwards callback registration to what it wraps: these are the
+/// objects the framework's `dart:ui` callbacks were stored on. Which
+/// dispatchers those are is not assumed: it is usually
+/// [ui.PlatformDispatcher.instance], but a binding that supplies its own, as
+/// [BindingBase.platformDispatcher] documents, registers the framework's
+/// callbacks on that one instead, and would never hear about an override if
+/// only the singleton were told.
+///
+/// A dispatcher is visited whichever view an override was registered for, and
+/// whether or not it reports that view: what an override changes for a given
+/// dispatcher is for that dispatcher's own metrics to say, and re-reading
+/// metrics that did not change is what the platform's own notifications ask
+/// for too.
+///
+/// `callback` is expected not to throw: one dispatcher that cannot be told
+/// about an override would otherwise be what keeps the rest — the framework's
+/// own among them — from being told.
+///
+/// Does nothing in release mode, where nothing is ever wrapped.
+void debugForEachOverriddenPlatformDispatcher(
+  void Function(ui.PlatformDispatcher dispatcher) callback,
+) {
+  assert(() {
+    // Pruned here rather than as dispatchers are wrapped, because this already
+    // reads every target; wrapping n dispatchers would otherwise cost O(n²).
+    _wrapped.removeWhere(
+      (WeakReference<ui.PlatformDispatcher> reference) => reference.target == null,
+    );
+    // Iterated over a copy: a callback is free to wrap another dispatcher.
+    for (final WeakReference<ui.PlatformDispatcher> reference in _wrapped.toList()) {
+      final ui.PlatformDispatcher? dispatcher = reference.target;
+      if (dispatcher != null) {
+        callback(dispatcher);
+      }
+    }
+    return true;
+  }());
+}
+
 // Keyed by the wrapped dispatcher so that the wrapper cannot outlive it.
 final Expando<_DebugViewMetricsPlatformDispatcher> _wrappers =
     Expando<_DebugViewMetricsPlatformDispatcher>('debugViewMetricsOverrides');
+
+// The dispatchers that are notified when an override changes, in the order they
+// were first wrapped as one.
+//
+// An Expando cannot be enumerated, so the keys of [_wrappers] are also kept
+// here, weakly and pruned as they die, so that remembering a dispatcher for the
+// sake of notifying it does not keep it — or the isolate's worth of fake
+// dispatchers a test suite makes — alive.
+final _wrapped = <WeakReference<ui.PlatformDispatcher>>[];
+
+// The wrapper for `dispatcher`, built and cached if there is not one already,
+// and `dispatcher` itself if it is already a wrapper.
+//
+// This is the only place a root wrapper is created — the per-view ones are
+// built when a view is wrapped and when a view id is resolved, and share their
+// root's dispatcher — so a dispatcher cannot be wrapped for the framework to
+// read without the decision about notifying it being made at the same time.
+// `notify` adds it to [_wrapped]; see
+// [debugForEachOverriddenPlatformDispatcher].
+_DebugViewMetricsPlatformDispatcher _wrapperFor(
+  ui.PlatformDispatcher dispatcher, {
+  required bool notify,
+}) {
+  if (dispatcher is _DebugViewMetricsPlatformDispatcher) {
+    // Already a wrapper, so there is nothing to build; it still has to become a
+    // notification target if that is what it was asked for. What forwards the
+    // callbacks is the dispatcher the root wraps.
+    final _DebugViewMetricsPlatformDispatcher root = dispatcher._root ?? dispatcher;
+    _remember(root, notify: notify);
+    return dispatcher;
+  }
+  final _DebugViewMetricsPlatformDispatcher wrapper = _wrappers[dispatcher] ??=
+      _DebugViewMetricsPlatformDispatcher(dispatcher);
+  _remember(wrapper, notify: notify);
+  return wrapper;
+}
+
+// Adds what [wrapper] wraps to [_wrapped], if it is not there already.
+//
+// Asking for a wrapper again, this time as a dispatcher to notify, is what
+// makes it one: a wrapper built for the per-view path first does not keep the
+// dispatcher from ever hearing about an override. The flag on the wrapper is
+// what keeps it from being added, and notified, twice.
+void _remember(_DebugViewMetricsPlatformDispatcher wrapper, {required bool notify}) {
+  if (notify && !wrapper._notified) {
+    wrapper._notified = true;
+    _wrapped.add(WeakReference<ui.PlatformDispatcher>(wrapper._dispatcher));
+  }
+}
 
 /// A [ui.PlatformDispatcher] that reports the metrics of
 /// [debugViewMetricsOverrides] in place of the ones the platform reports.
@@ -124,6 +271,13 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
 
   /// The dispatcher whose metrics are being overridden.
   final ui.PlatformDispatcher _dispatcher;
+
+  /// Whether this wrapper has put [_dispatcher] in the list
+  /// `debugForEachOverriddenPlatformDispatcher` walks.
+  ///
+  /// Only the root wrapper does that, so this stays false on a per-view one
+  /// even though the dispatcher it shares with its root is in the list.
+  bool _notified = false;
 
   /// The dispatcher that owns the view wrappers, or null if this is that
   /// dispatcher.

@@ -70,6 +70,21 @@ final Map<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> _
       'deterministicCursor': (DebugViewMetricsOverride o) => o.copyWith(deterministicCursor: false),
     };
 
+/// Every metric [DebugViewMetricsOverride] supports, according to
+/// [DebugViewMetricsOverride.fromJson], which names them when it rejects one it
+/// does not know — the only place the full set is available at runtime.
+Set<String> _allOverridableMetrics() {
+  try {
+    DebugViewMetricsOverride.fromJson(const <String, Object?>{'not-a-metric': true});
+  } on FormatException catch (error) {
+    const marker = 'Supported metrics are: ';
+    final int start = error.message.indexOf(marker);
+    expect(start, isNonNegative, reason: 'fromJson no longer lists the metrics it supports');
+    return error.message.substring(start + marker.length).replaceAll('.', '').split(', ').toSet();
+  }
+  fail('fromJson accepted an unknown metric');
+}
+
 /// A [ui.PlatformDispatcher] with two views, so that per-view resolution can be
 /// tested: the engine the framework's own tests run against only ever has one.
 class _TwoViewPlatformDispatcher implements ui.PlatformDispatcher {
@@ -123,6 +138,9 @@ class _TwoViewPlatformDispatcher implements ui.PlatformDispatcher {
 
   @override
   ui.VoidCallback? onPlatformBrightnessChanged;
+
+  @override
+  ui.VoidCallback? onPlatformConfigurationChanged;
 
   @override
   ui.VoidCallback? onTextScaleFactorChanged;
@@ -1059,6 +1077,234 @@ void main() {
       expect(wrappedView.physicalConstraints.isTight, isTrue);
       expect(wrappedView.physicalConstraints.isSatisfiedBy(const ui.Size(400, 800)), isTrue);
       expect(wrappedView.physicalConstraints.isSatisfiedBy(const ui.Size(10, 10)), isFalse);
+    });
+  });
+
+  group('an override change is reported', () {
+    tearDown(debugClearViewMetricsOverrides);
+
+    test('to the dispatcher the framework registered its callbacks on', () {
+      // A binding that supplies its own PlatformDispatcher registers the
+      // framework's callbacks on that one, so reporting an override to
+      // ui.PlatformDispatcher.instance would leave such an application stale:
+      // its overridden metrics would change with nothing told to re-read them.
+      final fake = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(fake);
+      var metricsChanged = 0;
+      var textScaleFactorChanged = 0;
+      wrapped.onMetricsChanged = () => metricsChanged += 1;
+      wrapped.onTextScaleFactorChanged = () => textScaleFactorChanged += 1;
+
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(devicePixelRatio: 3.0));
+      expect(metricsChanged, 1);
+      expect(textScaleFactorChanged, 0);
+
+      // The ratio goes away as the factor arrives, so both groups changed.
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(textScaleFactor: 2.0));
+      expect(metricsChanged, 2);
+      expect(textScaleFactorChanged, 1);
+
+      debugClearViewMetricsOverrides();
+      expect(metricsChanged, 2);
+      expect(textScaleFactorChanged, 2);
+    });
+
+    test('through onPlatformConfigurationChanged as well, once', () {
+      // dart:ui reports everything in its platform configuration through the
+      // umbrella notification first, and then through the callback for the
+      // field that changed, when that field has one.
+      final fake = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(fake);
+      final notifications = <String>[];
+      wrapped.onPlatformConfigurationChanged = () => notifications.add('configuration');
+      wrapped.onTextScaleFactorChanged = () => notifications.add('textScaleFactor');
+      wrapped.onPlatformBrightnessChanged = () => notifications.add('platformBrightness');
+      wrapped.onAccessibilityFeaturesChanged = () => notifications.add('accessibilityFeatures');
+      wrapped.onMetricsChanged = () => notifications.add('metrics');
+
+      // View metrics are not part of the platform configuration.
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(devicePixelRatio: 3.0));
+      expect(notifications, <String>['metrics']);
+
+      notifications.clear();
+      debugSetViewMetricsOverride(
+        1,
+        const DebugViewMetricsOverride(
+          devicePixelRatio: 3.0,
+          textScaleFactor: 2.0,
+          platformBrightness: ui.Brightness.dark,
+          boldText: true,
+        ),
+      );
+      expect(notifications, <String>[
+        'configuration',
+        'textScaleFactor',
+        'platformBrightness',
+        'accessibilityFeatures',
+      ]);
+
+      // The 24 hour format has no callback of its own: the configuration
+      // notification is the only one that names it, and onMetricsChanged is
+      // what tells the framework to re-read it.
+      notifications.clear();
+      debugSetViewMetricsOverride(
+        1,
+        const DebugViewMetricsOverride(
+          devicePixelRatio: 3.0,
+          textScaleFactor: 2.0,
+          platformBrightness: ui.Brightness.dark,
+          boldText: true,
+          alwaysUse24HourFormat: true,
+        ),
+      );
+      expect(notifications, <String>['configuration', 'metrics']);
+    });
+
+    test('for every metric there is, through exactly the callbacks dart:ui would', () {
+      // The completeness guard for the notification groupings: a metric added
+      // to DebugViewMetricsOverride has to reach the notification that reports
+      // it, and no other, rather than compare and store correctly while never
+      // being announced or announcing something that did not change.
+      const viewMetrics = <String>{
+        'devicePixelRatio',
+        'physicalSize',
+        'padding',
+        'viewPadding',
+        'viewInsets',
+      };
+      expect(
+        _perMetricChange.keys.toSet(),
+        _allOverridableMetrics(),
+        reason: 'this table is the enumeration the guards below run over',
+      );
+
+      final fake = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(fake);
+      final notifications = <String>[];
+      wrapped.onPlatformConfigurationChanged = () => notifications.add('configuration');
+      wrapped.onMetricsChanged = () => notifications.add('metrics');
+      wrapped.onTextScaleFactorChanged = () => notifications.add('textScaleFactor');
+      wrapped.onPlatformBrightnessChanged = () => notifications.add('platformBrightness');
+      wrapped.onAccessibilityFeaturesChanged = () => notifications.add('accessibilityFeatures');
+
+      for (final MapEntry<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> entry
+          in _perMetricChange.entries) {
+        debugSetViewMetricsOverride(1, _fullyPopulated);
+        notifications.clear();
+        debugSetViewMetricsOverride(1, entry.value(_fullyPopulated));
+        expect(notifications.toSet(), switch (entry.key) {
+          // dart:ui has no callback of its own for the 24 hour format: it
+          // reports it through the configuration notification, and the
+          // framework re-reads it when the view metrics change.
+          'alwaysUse24HourFormat' => <String>{'configuration', 'metrics'},
+          'textScaleFactor' => <String>{'configuration', 'textScaleFactor'},
+          'platformBrightness' => <String>{'configuration', 'platformBrightness'},
+          final String metric when viewMetrics.contains(metric) => <String>{'metrics'},
+          _ => <String>{'configuration', 'accessibilityFeatures'},
+        }, reason: 'changing ${entry.key} announced $notifications');
+      }
+    });
+
+    test('and its views apply it whether or not it is a target', () {
+      // Being told about a change is not what makes a view apply an override:
+      // a view that MediaQueryData.fromView credits with one has to be a view
+      // that applies it, or it reports neither the override nor the platform
+      // data an ancestor supplied.
+      final fake = _TwoViewPlatformDispatcher();
+      final ui.FlutterView raw = fake.view(id: 1)!;
+      debugApplyViewMetricsOverridesForView(fake, 1);
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(devicePixelRatio: 7.0));
+
+      expect(debugViewWithMetricsOverrides(raw).devicePixelRatio, 7.0);
+    });
+
+    test('but not to a dispatcher that was only asked to resolve a view id', () {
+      // A dispatcher becomes a notification target by being wrapped, which is
+      // what a binding does with the dispatcher it registers the framework's
+      // callbacks on. Resolving a view id against one says nothing about that,
+      // and reading callbacks off a dispatcher nobody registered any on is how
+      // an incomplete test double starts throwing from an unrelated test.
+      final fake = _TwoViewPlatformDispatcher();
+      debugApplyViewMetricsOverridesForView(fake, 1);
+      var metricsChanged = 0;
+      fake.onMetricsChanged = () => metricsChanged += 1;
+
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(devicePixelRatio: 3.0));
+      expect(metricsChanged, 0);
+    });
+
+    test('to one wrapped for a view first and as a binding dispatcher after', () {
+      // Resolving a view id first must not keep a dispatcher from becoming a
+      // notification target when a binding wraps it afterwards, and wrapping it
+      // again must not make it one twice over.
+      final fake = _TwoViewPlatformDispatcher();
+      debugApplyViewMetricsOverridesForView(fake, 1);
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(fake);
+      debugApplyViewMetricsOverrides(fake);
+      var metricsChanged = 0;
+      wrapped.onMetricsChanged = () => metricsChanged += 1;
+
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(devicePixelRatio: 3.0));
+      expect(metricsChanged, 1);
+    });
+
+    test('to one reached through a wrapper of its own', () {
+      // What BindingBase.platformDispatcher tells a subclass to wrap can
+      // already be a wrapper. Notifying it means notifying the dispatcher its
+      // callbacks were forwarded to.
+      final fake = _TwoViewPlatformDispatcher();
+      debugApplyViewMetricsOverrides(debugApplyViewMetricsOverridesForView(fake, 1));
+      var metricsChanged = 0;
+      fake.onMetricsChanged = () => metricsChanged += 1;
+
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(devicePixelRatio: 3.0));
+      expect(metricsChanged, 1);
+
+      // And the dispatcher underneath it is the same one, so wrapping that
+      // does not make it a second target.
+      debugApplyViewMetricsOverrides(fake);
+      debugClearViewMetricsOverrides();
+
+      expect(metricsChanged, 2);
+    });
+
+    test('through every callback and to every dispatcher, even when one fails', () {
+      // A metric that changed and was not reported leaves the framework reading
+      // a value nothing told it to re-read. Neither the notifications after a
+      // failing one, nor the dispatchers after it — the framework's own is one
+      // of them — may be skipped because of it.
+      final failing = _TwoViewPlatformDispatcher();
+      final reached = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(failing);
+      wrapped.onPlatformConfigurationChanged = () =>
+          throw StateError('this dispatcher cannot be notified');
+      // Unregistered here rather than at the end of the body: the tear down
+      // replays this override once more, and an expectation that fails below
+      // would otherwise leave something to throw from every later test.
+      addTearDown(() => wrapped.onPlatformConfigurationChanged = null);
+      var stillTold = 0;
+      wrapped.onTextScaleFactorChanged = () => stillTold += 1;
+      wrapped.onMetricsChanged = () => stillTold += 1;
+      var notified = 0;
+      debugApplyViewMetricsOverrides(reached).onMetricsChanged = () => notified += 1;
+
+      final errors = <Object>[];
+      final FlutterExceptionHandler? previousOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => errors.add(details.exception);
+      addTearDown(() => FlutterError.onError = previousOnError);
+
+      debugSetViewMetricsOverride(
+        1,
+        const DebugViewMetricsOverride(devicePixelRatio: 3.0, textScaleFactor: 2.0),
+      );
+
+      // Reported rather than thrown, so that a caller is not left with an
+      // override installed and half the application told about it.
+      expect(errors, hasLength(1));
+      expect(errors.single, isStateError);
+      // The failing dispatcher still heard about the factor and the metrics.
+      expect(stillTold, 2);
+      expect(notified, 1);
     });
   });
 }

@@ -21,10 +21,12 @@ import 'dart:ui'
         PlatformDispatcher,
         Size,
         ViewConstraints,
-        ViewPadding;
+        ViewPadding,
+        VoidCallback;
 
 import 'package:meta/meta.dart';
 
+import '_view_metrics.dart' show debugForEachOverriddenPlatformDispatcher;
 import 'assertions.dart';
 import 'diagnostics.dart';
 import 'memory_allocations.dart';
@@ -34,7 +36,10 @@ import 'print.dart';
 export 'dart:ui' show Brightness;
 
 export '_view_metrics.dart'
-    show debugApplyViewMetricsOverrides, debugApplyViewMetricsOverridesForView;
+    show
+        debugApplyViewMetricsOverrides,
+        debugApplyViewMetricsOverridesForView,
+        debugViewWithMetricsOverrides;
 export 'print.dart' show DebugPrintCallback;
 
 /// Returns true if none of the foundation library debug variables have been
@@ -283,9 +288,11 @@ class DebugViewPadding implements ui.ViewPadding {
 /// physical pixels rather than the logical pixels [MediaQueryData] reports.
 ///
 /// The one framework accessor these do not reach is the deprecated
-/// [BindingBase.window], which reports the platform's own metrics. Its
-/// remaining callers in the framework, [MediaQuery.fromWindow] and the
-/// deprecated `ScrollPhysics.tolerance`, are themselves deprecated.
+/// [BindingBase.window], which reports the platform's own metrics, and with it
+/// the deprecated `ScrollPhysics.tolerance` that reads it. The deprecated
+/// [MediaQuery.fromWindow] does apply them: it builds its data with
+/// [MediaQueryData.fromView], which resolves the override registered for the
+/// view the window stands for.
 ///
 /// In a widget test, a value set on [TestFlutterView] or
 /// [TestPlatformDispatcher] — including the size
@@ -593,14 +600,27 @@ class DebugViewMetricsOverride with Diagnosticable {
 
   // The metrics dart:ui delivers through PlatformDispatcher.onMetricsChanged.
   //
-  // These groupings define == and hashCode as well as which platform
-  // notification an override change replays, so a metric that is not in exactly
-  // one of them is neither compared nor propagated. A record is used so that
-  // adding a field without adding it here shows up as a completeness guard
-  // failure rather than as a metric that only sometimes takes effect.
+  // This grouping, `_accessibilityFeatures`, and the standalone `textScaleFactor`
+  // and `platformBrightness` are what == and hashCode compare, and what decides
+  // which platform notification an override change replays, so a metric that
+  // reaches none of them is neither compared nor propagated. A record is used
+  // so that adding a field without adding it here shows up as a completeness
+  // guard failure rather than as a metric that only sometimes takes effect.
   (double?, ui.Size?, DebugViewPadding?, DebugViewPadding?, DebugViewPadding?, bool?)
   get _viewMetrics =>
       (devicePixelRatio, physicalSize, padding, viewPadding, viewInsets, alwaysUse24HourFormat);
+
+  // Everything dart:ui keeps in its platform configuration — the metrics that
+  // belong to the application rather than to one view, which it reports through
+  // PlatformDispatcher.onPlatformConfigurationChanged as well as through the
+  // callback for the field that changed, when that field has one.
+  //
+  // This grouping overlaps the others rather than partitioning with them: every
+  // metric it names is also compared elsewhere. A metric added to
+  // DebugViewMetricsOverride has to be classified here too, or the umbrella
+  // notification silently never fires for it.
+  (double?, ui.Brightness?, bool?, Object?) get _platformConfiguration =>
+      (textScaleFactor, platformBrightness, alwaysUse24HourFormat, _accessibilityFeatures);
 
   // The flags dart:ui delivers through
   // PlatformDispatcher.onAccessibilityFeaturesChanged.
@@ -934,9 +954,10 @@ bool debugClearViewMetricsOverrides() {
 // WidgetsBindingObserver is notified — with no code in those paths that knows
 // about overrides at all.
 //
-// The callbacks are read off ui.PlatformDispatcher.instance rather than off the
-// wrapper, because the wrapper forwards callback registration to it, so these
-// are the framework's own handlers whether or not a wrapper is installed.
+// The callbacks are invoked on every dispatcher an override applies to rather
+// than on ui.PlatformDispatcher.instance, because a binding that supplies its
+// own dispatcher registers the framework's callbacks on that one; see
+// [debugForEachOverriddenPlatformDispatcher].
 //
 // Only the notifications whose metrics actually changed are replayed, so that
 // toggling an accessibility flag does not tell the application its window
@@ -950,6 +971,7 @@ void _debugReplayPlatformNotifications(
   var textScaleFactor = false;
   var platformBrightness = false;
   var accessibilityFeatures = false;
+  var platformConfiguration = false;
   for (final (DebugViewMetricsOverride? previous, DebugViewMetricsOverride? next) in changes) {
     // No override at all and an override that leaves a group alone report the
     // same metrics, so a missing override is compared as the empty one.
@@ -963,18 +985,54 @@ void _debugReplayPlatformNotifications(
         platformBrightness || before.platformBrightness != after.platformBrightness;
     accessibilityFeatures =
         accessibilityFeatures || before._accessibilityFeatures != after._accessibilityFeatures;
+    // Reported once, and before the callback for the field that changed, the
+    // way dart:ui reports it. A consumer that listens to the umbrella
+    // notification rather than to the narrower ones — and alwaysUse24HourFormat
+    // has no narrower one at all — has to hear about an override too.
+    platformConfiguration =
+        platformConfiguration || before._platformConfiguration != after._platformConfiguration;
   }
-  final ui.PlatformDispatcher dispatcher = ui.PlatformDispatcher.instance;
-  if (textScaleFactor) {
-    dispatcher.onTextScaleFactorChanged?.call();
-  }
-  if (platformBrightness) {
-    dispatcher.onPlatformBrightnessChanged?.call();
-  }
-  if (accessibilityFeatures) {
-    dispatcher.onAccessibilityFeaturesChanged?.call();
-  }
-  if (viewMetrics) {
-    dispatcher.onMetricsChanged?.call();
+  debugForEachOverriddenPlatformDispatcher((ui.PlatformDispatcher dispatcher) {
+    if (platformConfiguration) {
+      _debugNotify(() => dispatcher.onPlatformConfigurationChanged?.call());
+    }
+    if (textScaleFactor) {
+      _debugNotify(() => dispatcher.onTextScaleFactorChanged?.call());
+    }
+    if (platformBrightness) {
+      _debugNotify(() => dispatcher.onPlatformBrightnessChanged?.call());
+    }
+    if (accessibilityFeatures) {
+      _debugNotify(() => dispatcher.onAccessibilityFeaturesChanged?.call());
+    }
+    if (viewMetrics) {
+      _debugNotify(() => dispatcher.onMetricsChanged?.call());
+    }
+  });
+}
+
+// Delivers one notification, reporting a failure rather than letting it cancel
+// the notifications after it.
+//
+// A metric that changed and was not reported leaves the framework reading a
+// value nothing told it to re-read, which is the state this whole replay
+// exists to prevent — a handler that throws must not put another metric, or
+// another dispatcher, into it. Reading the callback is inside the guard too:
+// on a dispatcher that implements `dart:ui` through noSuchMethod, that read is
+// itself what throws.
+void _debugNotify(ui.VoidCallback notification) {
+  try {
+    notification();
+  } catch (exception, stack) {
+    FlutterError.reportError(
+      FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'foundation library',
+        context: ErrorDescription(
+          'while telling a PlatformDispatcher that a debug view metrics override changed',
+        ),
+      ),
+    );
   }
 }

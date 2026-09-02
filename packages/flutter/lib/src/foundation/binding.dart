@@ -698,6 +698,12 @@ abstract class BindingBase {
   /// the `overrides` key, plus every overridden view id under
   /// `overriddenViewIds`, so that tooling can resynchronize after any call.
   ///
+  /// A call that changes an override also posts a
+  /// `Flutter.ServiceExtensionStateChanged` event whose value is the JSON text
+  /// of every override now installed, keyed by view id, so that a client which
+  /// is not the one that made the request learns about it too. A read, and a
+  /// write that changes nothing, post no event.
+  ///
   /// A malformed payload is rejected before any override is installed, so a
   /// failed call leaves no partial state behind.
   ///
@@ -708,7 +714,9 @@ abstract class BindingBase {
     Map<String, String> parameters,
   ) async {
     if (parameters['clearAll'] == 'true') {
-      debugClearViewMetricsOverrides();
+      if (debugClearViewMetricsOverrides()) {
+        _postViewMetricsOverrideStateChangedEvent();
+      }
       return <String, Object?>{'overrides': <String, Object?>{}, 'overriddenViewIds': <int>[]};
     }
 
@@ -730,13 +738,33 @@ abstract class BindingBase {
       // DebugViewMetricsOverride.fromJson throws a FormatException on a
       // malformed payload, which the service extension machinery reports back
       // to the caller as an error rather than silently applying part of it.
-      debugSetViewMetricsOverride(viewId, DebugViewMetricsOverride.fromJson(decoded));
+      if (debugSetViewMetricsOverride(viewId, DebugViewMetricsOverride.fromJson(decoded))) {
+        _postViewMetricsOverrideStateChangedEvent();
+      }
     }
 
     return <String, Object?>{
       'overrides': debugViewMetricsOverrides[viewId]?.toJson() ?? <String, Object?>{},
       'overriddenViewIds': debugViewMetricsOverrides.keys.toList(),
     };
+  }
+
+  // The whole of [debugViewMetricsOverrides], rather than the entry that
+  // changed, because one event then describes the state of the extension for a
+  // client that missed the ones before it — including the clearAll that leaves
+  // no entry to report.
+  //
+  // Encoded as text rather than sent as a map, because every other extension
+  // state change carries a [String] and a client is entitled to read one.
+  void _postViewMetricsOverrideStateChangedEvent() {
+    final overrides = <String, Object?>{
+      for (final MapEntry<int, DebugViewMetricsOverride> entry in debugViewMetricsOverrides.entries)
+        '${entry.key}': entry.value.toJson(),
+    };
+    _postExtensionStateChangedEvent(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      json.encode(overrides),
+    );
   }
 
   /// Whether [lockEvents] is currently locking events.
