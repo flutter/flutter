@@ -1406,6 +1406,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     } else if (_semanticsOwner != null) {
       _semanticsOwner?.dispose();
       _semanticsOwner = null;
+      // Deferred updates would otherwise retain their render objects until
+      // this owner is disposed; re-enabling semantics rebuilds from scratch.
+      _deferredNodesNeedingSemanticsGeometryUpdate.clear();
       onSemanticsOwnerDisposed?.call();
     }
   }
@@ -1519,8 +1522,10 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       // Deferred geometry updates are retried as well; if their branch
       // rejoined the tree in the updateChildren phase above, they can now be
       // applied.
-      _nodesNeedingSemanticsGeometryUpdate.addAll(_deferredNodesNeedingSemanticsGeometryUpdate);
-      _deferredNodesNeedingSemanticsGeometryUpdate.clear();
+      if (_deferredNodesNeedingSemanticsGeometryUpdate.isNotEmpty) {
+        _nodesNeedingSemanticsGeometryUpdate.addAll(_deferredNodesNeedingSemanticsGeometryUpdate);
+        _deferredNodesNeedingSemanticsGeometryUpdate.clear();
+      }
       final nodesToProcessGeometry = <RenderObject>[];
       for (final RenderObject object in _nodesNeedingSemanticsGeometryUpdate) {
         if (object._needsLayout || object.owner != this) {

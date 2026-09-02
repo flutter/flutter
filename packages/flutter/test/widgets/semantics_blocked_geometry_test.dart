@@ -96,6 +96,75 @@ void main() {
     expect(globalSemanticsRect(tester, target), tester.getRect(find.byKey(targetKey)));
   });
 
+  testWidgets('Regression test: semantics geometry is updated after the keyboard is dismissed '
+      'while a modal route is up', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/186178.
+    final navigatorKey = GlobalKey<NavigatorState>();
+
+    // The keyboard is up.
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300.0);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF000000),
+        navigatorKey: navigatorKey,
+        onGenerateRoute: (RouteSettings settings) => PageRouteBuilder<void>(
+          settings: settings,
+          pageBuilder:
+              (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) {
+                return Column(
+                  children: <Widget>[
+                    const Expanded(child: SizedBox.expand()),
+                    Semantics(
+                      container: true,
+                      label: 'target',
+                      child: const SizedBox(key: targetKey, width: 100.0, height: 20.0),
+                    ),
+                    // Stands in for the space taken by the keyboard.
+                    SizedBox(height: MediaQuery.viewInsetsOf(context).bottom),
+                  ],
+                );
+              },
+        ),
+      ),
+    );
+
+    // A modal route with a barrier opens, e.g. a dialog.
+    navigatorKey.currentState!.push(
+      PageRouteBuilder<void>(
+        opaque: false,
+        barrierColor: const Color(0x80000000),
+        pageBuilder:
+            (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => Semantics(
+              container: true,
+              label: 'dialog',
+              child: const SizedBox(width: 100.0, height: 100.0),
+            ),
+      ),
+    );
+    await tester.pump();
+
+    // The keyboard is dismissed while the modal route is up.
+    tester.view.viewInsets = FakeViewPadding.zero;
+    await tester.pumpAndSettle();
+
+    // The modal route is closed.
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+
+    final SemanticsNode target = tester.getSemantics(find.byKey(targetKey));
+    expect(globalSemanticsRect(tester, target), tester.getRect(find.byKey(targetKey)));
+  });
+
   testWidgets('blocked branch with pending geometry update can be removed', (
     WidgetTester tester,
   ) async {
