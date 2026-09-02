@@ -41,7 +41,6 @@ class BuildCommand extends FlutterCommand {
        _templateRenderer = templateRenderer,
        _toolContext = toolContext,
        super(verboseHelp: verboseHelp) {
-    
     _addSubcommand(
       BuildAarCommand(
         fileSystem: _toolContext.fs,
@@ -143,7 +142,11 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(BuildBundleCommand(logger: _toolContext.logger, verboseHelp: verboseHelp));
     _addSubcommand(
-      BuildWebCommand(fileSystem: _toolContext.fs, logger: _toolContext.logger, verboseHelp: verboseHelp),
+      BuildWebCommand(
+        fileSystem: _toolContext.fs,
+        logger: _toolContext.logger,
+        verboseHelp: verboseHelp,
+      ),
     );
     _addSubcommand(
       BuildMacosCommand(
@@ -153,13 +156,20 @@ class BuildCommand extends FlutterCommand {
       ),
     );
     _addSubcommand(
-      BuildLinuxCommand(logger: _toolContext.logger, operatingSystemUtils: _toolContext.os, verboseHelp: verboseHelp),
+      BuildLinuxCommand(
+        logger: _toolContext.logger,
+        operatingSystemUtils: _toolContext.os,
+        verboseHelp: verboseHelp,
+      ),
     );
     _addSubcommand(
-      BuildWindowsCommand(logger: _toolContext.logger, operatingSystemUtils: _toolContext.os, verboseHelp: verboseHelp),
+      BuildWindowsCommand(
+        logger: _toolContext.logger,
+        operatingSystemUtils: _toolContext.os,
+        verboseHelp: verboseHelp,
+      ),
     );
   }
-
 
   final AndroidContext _androidContext;
   final AppleContext _appleContext;
