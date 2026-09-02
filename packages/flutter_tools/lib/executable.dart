@@ -313,7 +313,12 @@ List<FlutterCommand> generateCommands({
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
-  DevicesCommand(verboseHelp: verboseHelp),
+  DevicesCommand(
+    deviceManager: globals.deviceManager,
+    doctor: globals.doctor,
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
+  ),
   DoctorCommand(
     verbose: verbose,
     toolContext: toolDependencies.toolContext,
