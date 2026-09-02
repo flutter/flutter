@@ -61,6 +61,8 @@ uniform FragInfo {
   ///   3: RoundRect
   ///   4: Rounded Superellipse (must have uniform circular corner radii)
   float type;
+  /// The perceived luminance (Rec. 709 luma) of the shape's foreground color.
+  float luma;
   /// The width in device pixels over which to apply antialiasing.
   float aa_pixels;
 
@@ -288,7 +290,7 @@ vec2 strokedSDF(vec2 p) {
 }
 
 // Converts linear coverage alpha to perceptual alpha.
-float gammaCorrectedAlpha(float alpha, vec3 foreground_rgb) {
+float gammaCorrectedAlpha(float alpha, float luma) {
   // Gamma corrected alpha used for dark colors.
   // Fast approximation for `1.0 - pow(1.0 - alpha, 1.0 / 2.2)`.
   float alpha_dark = 1.0 - sqrt(1.0 - alpha);
@@ -299,7 +301,6 @@ float gammaCorrectedAlpha(float alpha, vec3 foreground_rgb) {
 
   // Interpolate between the dark and light gamma corrected alphas based on the
   // foreground luma.
-  float luma = dot(foreground_rgb, vec3(0.2126, 0.7152, 0.0722));
   return mix(alpha_dark, alpha_light, luma);
 }
 
@@ -315,7 +316,7 @@ void main() {
   // Clamp alpha in case floating point precision errors cause it to be outside
   // [0.0, 1.0].
   alpha = clamp(alpha, 0.0, 1.0);
-  alpha = gammaCorrectedAlpha(alpha, frag_info.color.rgb);
+  alpha = gammaCorrectedAlpha(alpha, frag_info.luma);
 
   frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
   frag_color = IPPremultiply(frag_color);
