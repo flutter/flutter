@@ -42,6 +42,7 @@ void SemanticsUpdateBuilder::updateNode(
     int scrollChildren,
     int scrollIndex,
     int traversalParent,
+    int indexInParent,
     double scrollPosition,
     double scrollExtentMax,
     double scrollExtentMin,
@@ -95,6 +96,7 @@ void SemanticsUpdateBuilder::updateNode(
   node.scrollChildren = scrollChildren;
   node.scrollIndex = scrollIndex;
   node.traversalParent = traversalParent;
+  node.indexInParent = indexInParent;
   node.scrollPosition = scrollPosition;
   node.scrollExtentMax = scrollExtentMax;
   node.scrollExtentMin = scrollExtentMin;

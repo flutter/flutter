@@ -27,26 +27,9 @@ public class CellRoleConfigurator extends BaseRoleConfigurator {
       return;
     }
 
-    // Only rows are counted, so that a non-row child of the table does not offset the rows that
-    // follow it. TableRoleConfigurator counts the row total the same way.
-    int rowIndex = 0;
-    for (AccessibilityBridge.SemanticsNode sibling : table.childrenInTraversalOrder) {
-      if (sibling == row) {
-        break;
-      }
-      if (sibling.hasRole(AccessibilityBridge.Role.ROW)) {
-        rowIndex++;
-      }
-    }
-
-    // TODO(gmackall): Report the cell's real column rather than its position among its siblings.
-    // RenderTable drops cells whose contents produce no semantics node at all (an empty SizedBox,
-    // for example) and cells with zero width, so a table with such a gap in it shifts every cell
-    // to the right of the gap one column to the left. RenderTable knows the real column and
-    // records it in SemanticsNode.indexInParent, but that field stays in the framework and is
-    // never sent over the semantics wire, so it is not available here.
-    final int columnIndex = row.childrenInTraversalOrder.indexOf(node);
-    if (columnIndex < 0) {
+    final int rowIndex = row.indexInParent;
+    final int columnIndex = node.indexInParent;
+    if (rowIndex < 0 || columnIndex < 0) {
       return;
     }
 

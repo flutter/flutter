@@ -5034,6 +5034,9 @@ mixin SemanticsAnnotationsMixin on RenderObject {
     if (_properties.traversalChildIdentifier != null) {
       config.traversalChildIdentifier = _properties.traversalChildIdentifier;
     }
+    if (_properties.indexInParent != null) {
+      config.indexInParent = _properties.indexInParent;
+    }
     if (_attributedLabel != null) {
       config.attributedLabel = _attributedLabel!;
     }

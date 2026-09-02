@@ -24,8 +24,14 @@ public class TableRoleConfigurator extends BaseRoleConfigurator {
       if (!row.hasRole(AccessibilityBridge.Role.ROW)) {
         continue;
       }
-      rowCount++;
-      columnCount = Math.max(columnCount, row.childrenInTraversalOrder.size());
+      if (row.indexInParent >= 0) {
+        rowCount = Math.max(rowCount, row.indexInParent + 1);
+      }
+      for (AccessibilityBridge.SemanticsNode cell : row.childrenInTraversalOrder) {
+        if (cell.indexInParent >= 0) {
+          columnCount = Math.max(columnCount, cell.indexInParent + 1);
+        }
+      }
     }
 
     if (rowCount == 0 || columnCount == 0) {

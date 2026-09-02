@@ -2706,24 +2706,30 @@ public class AccessibilityBridgeTest {
     TestSemanticsNode row1 = new TestSemanticsNode();
     row1.id = 1;
     row1.role = AccessibilityBridge.Role.ROW.value;
+    row1.indexInParent = 0;
     TestSemanticsNode cell1_1 = new TestSemanticsNode();
     cell1_1.id = 3;
     cell1_1.role = AccessibilityBridge.Role.CELL.value;
+    cell1_1.indexInParent = 0;
     TestSemanticsNode cell1_2 = new TestSemanticsNode();
     cell1_2.id = 4;
     cell1_2.role = AccessibilityBridge.Role.CELL.value;
+    cell1_2.indexInParent = 1;
     row1.children.add(cell1_1);
     row1.children.add(cell1_2);
 
     TestSemanticsNode row2 = new TestSemanticsNode();
     row2.id = 2;
     row2.role = AccessibilityBridge.Role.ROW.value;
+    row2.indexInParent = 1;
     TestSemanticsNode cell2_1 = new TestSemanticsNode();
     cell2_1.id = 5;
     cell2_1.role = AccessibilityBridge.Role.CELL.value;
+    cell2_1.indexInParent = 0;
     TestSemanticsNode cell2_2 = new TestSemanticsNode();
     cell2_2.id = 6;
     cell2_2.role = AccessibilityBridge.Role.CELL.value;
+    cell2_2.indexInParent = 1;
     row2.children.add(cell2_1);
     row2.children.add(cell2_2);
 
@@ -2800,23 +2806,29 @@ public class AccessibilityBridgeTest {
     TestSemanticsNode row1 = new TestSemanticsNode();
     row1.id = 1;
     row1.role = AccessibilityBridge.Role.ROW.value;
+    row1.indexInParent = 0;
     TestSemanticsNode cell1_1 = new TestSemanticsNode();
     cell1_1.id = 3;
     cell1_1.role = AccessibilityBridge.Role.CELL.value;
+    cell1_1.indexInParent = 0;
     row1.children.add(cell1_1);
 
     TestSemanticsNode row2 = new TestSemanticsNode();
     row2.id = 2;
     row2.role = AccessibilityBridge.Role.ROW.value;
+    row2.indexInParent = 1;
     TestSemanticsNode cell2_1 = new TestSemanticsNode();
     cell2_1.id = 4;
     cell2_1.role = AccessibilityBridge.Role.CELL.value;
+    cell2_1.indexInParent = 0;
     TestSemanticsNode cell2_2 = new TestSemanticsNode();
     cell2_2.id = 5;
     cell2_2.role = AccessibilityBridge.Role.CELL.value;
+    cell2_2.indexInParent = 1;
     TestSemanticsNode cell2_3 = new TestSemanticsNode();
     cell2_3.id = 6;
     cell2_3.role = AccessibilityBridge.Role.CELL.value;
+    cell2_3.indexInParent = 2;
     row2.children.add(cell2_1);
     row2.children.add(cell2_2);
     row2.children.add(cell2_3);
@@ -2853,36 +2865,45 @@ public class AccessibilityBridgeTest {
     TestSemanticsNode headerRow = new TestSemanticsNode();
     headerRow.id = 1;
     headerRow.role = AccessibilityBridge.Role.ROW.value;
+    headerRow.indexInParent = 0;
     TestSemanticsNode colHeader1 = new TestSemanticsNode();
     colHeader1.id = 4;
     colHeader1.role = AccessibilityBridge.Role.COLUMN_HEADER.value;
+    colHeader1.indexInParent = 0;
     TestSemanticsNode colHeader2 = new TestSemanticsNode();
     colHeader2.id = 5;
     colHeader2.role = AccessibilityBridge.Role.COLUMN_HEADER.value;
+    colHeader2.indexInParent = 1;
     headerRow.children.add(colHeader1);
     headerRow.children.add(colHeader2);
 
     TestSemanticsNode dataRow1 = new TestSemanticsNode();
     dataRow1.id = 2;
     dataRow1.role = AccessibilityBridge.Role.ROW.value;
+    dataRow1.indexInParent = 1;
     TestSemanticsNode cell1_1 = new TestSemanticsNode();
     cell1_1.id = 6;
     cell1_1.role = AccessibilityBridge.Role.CELL.value;
+    cell1_1.indexInParent = 0;
     TestSemanticsNode cell1_2 = new TestSemanticsNode();
     cell1_2.id = 7;
     cell1_2.role = AccessibilityBridge.Role.CELL.value;
+    cell1_2.indexInParent = 1;
     dataRow1.children.add(cell1_1);
     dataRow1.children.add(cell1_2);
 
     TestSemanticsNode dataRow2 = new TestSemanticsNode();
     dataRow2.id = 3;
     dataRow2.role = AccessibilityBridge.Role.ROW.value;
+    dataRow2.indexInParent = 2;
     TestSemanticsNode cell2_1 = new TestSemanticsNode();
     cell2_1.id = 8;
     cell2_1.role = AccessibilityBridge.Role.CELL.value;
+    cell2_1.indexInParent = 0;
     TestSemanticsNode cell2_2 = new TestSemanticsNode();
     cell2_2.id = 9;
     cell2_2.role = AccessibilityBridge.Role.CELL.value;
+    cell2_2.indexInParent = 1;
     dataRow2.children.add(cell2_1);
     dataRow2.children.add(cell2_2);
 
@@ -2942,9 +2963,11 @@ public class AccessibilityBridgeTest {
     TestSemanticsNode row = new TestSemanticsNode();
     row.id = 2;
     row.role = AccessibilityBridge.Role.ROW.value;
+    row.indexInParent = 0;
     TestSemanticsNode cell = new TestSemanticsNode();
     cell.id = 3;
     cell.role = AccessibilityBridge.Role.CELL.value;
+    cell.indexInParent = 0;
     row.children.add(cell);
 
     table.children.add(nonRowChild);
@@ -2997,13 +3020,101 @@ public class AccessibilityBridgeTest {
     TestSemanticsNode row = new TestSemanticsNode();
     row.id = 1;
     row.role = AccessibilityBridge.Role.ROW.value;
+    row.indexInParent = 0;
     TestSemanticsNode cell = new TestSemanticsNode();
     cell.id = 2;
     cell.role = AccessibilityBridge.Role.CELL.value;
+    cell.indexInParent = 0;
     row.children.add(cell);
     root.children.add(row);
 
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo cellInfo = accessibilityBridge.createAccessibilityNodeInfo(2);
+    assertNotNull(cellInfo);
+    assertNull(cellInfo.getCollectionItemInfo());
+  }
+
+  @Test
+  public void itAddsTableLayoutAndCollectionInfo_sparseTable() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode table = new TestSemanticsNode();
+    table.id = 0;
+    table.role = AccessibilityBridge.Role.TABLE.value;
+
+    // Row 0 has cells at column 0 and column 2 (column 1 empty).
+    TestSemanticsNode row1 = new TestSemanticsNode();
+    row1.id = 1;
+    row1.role = AccessibilityBridge.Role.ROW.value;
+    row1.indexInParent = 0;
+    TestSemanticsNode cell1_1 = new TestSemanticsNode();
+    cell1_1.id = 3;
+    cell1_1.role = AccessibilityBridge.Role.CELL.value;
+    cell1_1.indexInParent = 0;
+    TestSemanticsNode cell1_3 = new TestSemanticsNode();
+    cell1_3.id = 4;
+    cell1_3.role = AccessibilityBridge.Role.CELL.value;
+    cell1_3.indexInParent = 2;
+    row1.children.add(cell1_1);
+    row1.children.add(cell1_3);
+
+    // Row 1 has a cell only at column 1 (columns 0 and 2 empty).
+    TestSemanticsNode row2 = new TestSemanticsNode();
+    row2.id = 2;
+    row2.role = AccessibilityBridge.Role.ROW.value;
+    row2.indexInParent = 1;
+    TestSemanticsNode cell2_2 = new TestSemanticsNode();
+    cell2_2.id = 5;
+    cell2_2.role = AccessibilityBridge.Role.CELL.value;
+    cell2_2.indexInParent = 1;
+    row2.children.add(cell2_2);
+
+    table.children.add(row1);
+    table.children.add(row2);
+
+    TestSemanticsUpdate testSemanticsUpdate = table.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    AccessibilityNodeInfo nodeInfo = accessibilityBridge.createAccessibilityNodeInfo(0);
+    assertNotNull(nodeInfo);
+    AccessibilityNodeInfo.CollectionInfo collectionInfo = nodeInfo.getCollectionInfo();
+    assertNotNull(collectionInfo);
+    assertEquals(2, collectionInfo.getRowCount());
+    assertEquals(3, collectionInfo.getColumnCount());
+
+    AccessibilityNodeInfo cell13Info = accessibilityBridge.createAccessibilityNodeInfo(4);
+    assertNotNull(cell13Info.getCollectionItemInfo());
+    assertEquals(0, cell13Info.getCollectionItemInfo().getRowIndex());
+    assertEquals(2, cell13Info.getCollectionItemInfo().getColumnIndex());
+
+    AccessibilityNodeInfo cell22Info = accessibilityBridge.createAccessibilityNodeInfo(5);
+    assertNotNull(cell22Info.getCollectionItemInfo());
+    assertEquals(1, cell22Info.getCollectionItemInfo().getRowIndex());
+    assertEquals(1, cell22Info.getCollectionItemInfo().getColumnIndex());
+  }
+
+  @Test
+  public void itDoesNotAddCollectionItemInfoWhenIndexInParentIsNegative() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
+
+    TestSemanticsNode table = new TestSemanticsNode();
+    table.id = 0;
+    table.role = AccessibilityBridge.Role.TABLE.value;
+
+    TestSemanticsNode row = new TestSemanticsNode();
+    row.id = 1;
+    row.role = AccessibilityBridge.Role.ROW.value;
+    row.indexInParent = 0;
+    TestSemanticsNode cell = new TestSemanticsNode();
+    cell.id = 2;
+    cell.role = AccessibilityBridge.Role.CELL.value;
+    // indexInParent defaults to -1.
+    row.children.add(cell);
+    table.children.add(row);
+
+    TestSemanticsUpdate testSemanticsUpdate = table.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
 
     AccessibilityNodeInfo cellInfo = accessibilityBridge.createAccessibilityNodeInfo(2);
@@ -3745,6 +3856,7 @@ public class AccessibilityBridgeTest {
     int scrollChildren = 0;
     int scrollIndex = 0;
     int traversalParent = -1;
+    int indexInParent = -1;
     float scrollPosition = 0.0f;
     float scrollExtentMax = 0.0f;
     float scrollExtentMin = 0.0f;
@@ -3819,6 +3931,7 @@ public class AccessibilityBridgeTest {
       bytes.putInt(scrollChildren);
       bytes.putInt(scrollIndex);
       bytes.putInt(traversalParent);
+      bytes.putInt(indexInParent);
       bytes.putFloat(scrollPosition);
       bytes.putFloat(scrollExtentMax);
       bytes.putFloat(scrollExtentMin);

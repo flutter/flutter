@@ -1107,6 +1107,25 @@ void main() {
     expect(node.toString(), contains('indexInParent: 10'));
   });
 
+  test('SemanticsNode.getSemanticsData populates indexInParent', () {
+    final node = SemanticsNode()..indexInParent = 5;
+    expect(node.getSemanticsData().indexInParent, 5);
+  });
+
+  test('SemanticsData includes indexInParent in equality and hashCode', () {
+    final node1 = SemanticsNode()..indexInParent = 3;
+    final node2 = SemanticsNode()..indexInParent = 3;
+    final node3 = SemanticsNode()..indexInParent = 4;
+
+    final SemanticsData data1 = node1.getSemanticsData();
+    final SemanticsData data2 = node2.getSemanticsData();
+    final SemanticsData data3 = node3.getSemanticsData();
+
+    expect(data1, equals(data2));
+    expect(data1.hashCode, equals(data2.hashCode));
+    expect(data1, isNot(equals(data3)));
+  });
+
   group('SemanticsLabelBuilder', () {
     test('basic functionality with default separator', () {
       final builder = SemanticsLabelBuilder();

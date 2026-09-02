@@ -112,9 +112,8 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 ///
 /// Use [ChildSemanticsConfigurationsResultBuilder] to generate the return
 /// value.
-typedef ChildSemanticsConfigurationsDelegate = ChildSemanticsConfigurationsResult Function(
-  List<SemanticsConfiguration>,
-);
+typedef ChildSemanticsConfigurationsDelegate =
+    ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
 /// Controls how accessibility focus is blocked.
 ///
@@ -1083,6 +1082,7 @@ class SemanticsData with Diagnosticable {
     required this.locale,
     required this.minValue,
     required this.maxValue,
+    this.indexInParent,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -1242,6 +1242,9 @@ class SemanticsData with Diagnosticable {
 
   /// The index of the first visible semantic child of a scroll node.
   final int? scrollIndex;
+
+  /// The index of this node within the parent's list of semantic children.
+  final int? indexInParent;
 
   /// Indicates the current scrolling position in logical pixels if the node is
   /// scrollable.
@@ -1463,6 +1466,7 @@ class SemanticsData with Diagnosticable {
     properties.add(IntProperty('currentValueLength', currentValueLength, defaultValue: null));
     properties.add(IntProperty('scrollChildren', scrollChildCount, defaultValue: null));
     properties.add(IntProperty('scrollIndex', scrollIndex, defaultValue: null));
+    properties.add(IntProperty('indexInParent', indexInParent, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
@@ -1506,6 +1510,7 @@ class SemanticsData with Diagnosticable {
         setEquals(other.tags, tags) &&
         other.scrollChildCount == scrollChildCount &&
         other.scrollIndex == scrollIndex &&
+        other.indexInParent == indexInParent &&
         other.textSelection == textSelection &&
         other.scrollPosition == scrollPosition &&
         other.scrollExtentMax == scrollExtentMax &&
@@ -1550,6 +1555,7 @@ class SemanticsData with Diagnosticable {
     scrollExtentMin,
     platformViewId,
     Object.hash(
+      indexInParent,
       maxValueLength,
       currentValueLength,
       transform,
@@ -1750,6 +1756,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.customSemanticsActions,
     this.minValue,
     this.maxValue,
+    this.indexInParent,
   }) : assert(
          label == null || attributedLabel == null,
          'Only one of label or attributedLabel should be provided',
@@ -2718,6 +2725,14 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@endtemplate}
   final String? minValue;
 
+  /// {@template flutter.semantics.SemanticsProperties.indexInParent}
+  /// The index of this node within the parent's list of semantic children.
+  ///
+  /// For example, in a table, a row's [indexInParent] represents its row index,
+  /// and a cell's [indexInParent] represents its column index.
+  /// {@endtemplate}
+  final int? indexInParent;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -2785,6 +2800,7 @@ class SemanticsProperties extends DiagnosticableTree {
         defaultValue: null,
       ),
     );
+    properties.add(IntProperty('indexInParent', indexInParent, defaultValue: null));
   }
 
   @override
@@ -3852,6 +3868,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     TextSelection? textSelection = _textSelection;
     int? scrollChildCount = _scrollChildCount;
     int? scrollIndex = _scrollIndex;
+    int? indexInParent = this.indexInParent;
     double? scrollPosition = _scrollPosition;
     double? scrollExtentMax = _scrollExtentMax;
     double? scrollExtentMin = _scrollExtentMin;
@@ -3898,6 +3915,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         textSelection ??= node._textSelection;
         scrollChildCount ??= node._scrollChildCount;
         scrollIndex ??= node._scrollIndex;
+        indexInParent ??= node.indexInParent;
         scrollPosition ??= node._scrollPosition;
         scrollExtentMax ??= node._scrollExtentMax;
         scrollExtentMin ??= node._scrollExtentMin;
@@ -4015,6 +4033,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       textSelection: textSelection,
       scrollChildCount: scrollChildCount,
       scrollIndex: scrollIndex,
+      indexInParent: indexInParent,
       scrollPosition: scrollPosition,
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
@@ -4214,6 +4233,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
       transform: (_traversalTransform ?? _kIdentityTransform).storage,
       traversalParent: traversalParentId,
+      indexInParent: data.indexInParent ?? -1,
       hitTestTransform: (data.transform ?? _kIdentityTransform).storage,
       childrenInTraversalOrder: childrenInTraversalOrder,
       childrenInHitTestOrder: childrenInHitTestOrder,
