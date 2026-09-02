@@ -10,7 +10,6 @@ import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/config.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -82,28 +81,24 @@ class BuildCommand extends FlutterCommand {
          toolContext: toolContext,
          verboseHelp: verboseHelp,
        ) {
-    final Analytics effectiveAnalytics =
-        analytics ?? (context.get<Analytics>() ?? const NoOpAnalytics());
-    final FeatureFlags effectiveFeatureFlags =
-        featureFlags ?? (context.get<FeatureFlags>() ?? const _DefaultFeatureFlags());
+    final Analytics effectiveAnalytics = analytics ?? const NoOpAnalytics();
+    final FeatureFlags effectiveFeatureFlags = featureFlags ?? const _DefaultFeatureFlags();
     final effectivePlatform = platform;
-    final PersistentToolState persistentToolState =
-        context.get<PersistentToolState>() ??
-        PersistentToolState.test(
-          directory: fileSystem.directory(
-            fileSystem.path.join(fileSystem.systemTempDirectory.path, '.tmp_state'),
-          )..createSync(recursive: true),
-          logger: logger,
-        );
+    final PersistentToolState persistentToolState = PersistentToolState.test(
+      directory: fileSystem.directory(
+        fileSystem.path.join(fileSystem.systemTempDirectory.path, '.tmp_state'),
+      )..createSync(recursive: true),
+      logger: logger,
+    );
 
     final OutputPreferences effectiveOutputPreferences =
-        outputPreferences ?? (context.get<OutputPreferences>() ?? OutputPreferences.test());
+        outputPreferences ?? OutputPreferences.test();
     final ToolContext effectiveToolContext =
         toolContext ??
         (_fallbackToolContext = ToolContext(
           artifacts: artifacts,
           botDetector: BotDetector(
-            httpClientFactory: context.get<HttpClientFactory>() ?? () => HttpClient(),
+            httpClientFactory: () => HttpClient(),
             persistentToolState: persistentToolState,
             platform: effectivePlatform,
           ),
@@ -122,7 +117,7 @@ class BuildCommand extends FlutterCommand {
             flutterRoot: Cache.flutterRoot ?? '',
             logger: logger,
             platform: effectivePlatform,
-            userMessages: context.get<UserMessages>() ?? UserMessages(),
+            userMessages: UserMessages(),
           ),
           logger: logger,
           os: osUtils,
@@ -131,30 +126,25 @@ class BuildCommand extends FlutterCommand {
           platform: effectivePlatform,
           preRunValidator:
               preRunValidator ??
-              (context.get<PreRunValidator>() ??
-                  (!fileSystem
-                          .directory(
-                            fileSystem.path.join(
-                              Cache.flutterRoot ?? '',
-                              'packages',
-                              'flutter_tools',
-                            ),
-                          )
-                          .existsSync()
-                      ? _NoopPreRunValidator()
-                      : PreRunValidator(fileSystem: fileSystem))),
+              (!fileSystem
+                      .directory(
+                        fileSystem.path.join(Cache.flutterRoot ?? '', 'packages', 'flutter_tools'),
+                      )
+                      .existsSync()
+                  ? _NoopPreRunValidator()
+                  : PreRunValidator(fileSystem: fileSystem)),
           processInfo: ProcessInfo(fileSystem),
           processManager: processManager,
           processUtils: processUtils,
           projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
           shutdownHooks: ShutdownHooks(),
           signals: LocalSignals.instance,
-          stdio: context.get<Stdio>() ?? Stdio(),
+          stdio: Stdio(),
           systemClock: const SystemClock(),
           terminal: terminal is AnsiTerminal
               ? terminal
-              : AnsiTerminal(stdio: context.get<Stdio>() ?? Stdio(), platform: effectivePlatform),
-          userMessages: context.get<UserMessages>() ?? UserMessages(),
+              : AnsiTerminal(stdio: Stdio(), platform: effectivePlatform),
+          userMessages: UserMessages(),
         ));
 
     _addSubcommand(
