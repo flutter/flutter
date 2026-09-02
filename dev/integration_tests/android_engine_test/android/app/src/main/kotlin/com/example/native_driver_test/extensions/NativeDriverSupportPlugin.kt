@@ -70,13 +70,14 @@ class NativeDriverSupportPlugin :
             "tap_view" -> {
                 // Decode the selector.
                 val kind = call.argument<String>("kind")
-                val selector: NativeSelector = when (kind) {
+                val selector: NativeSelector
+                when (kind) {
                     "byNativeAccessibilityLabel" -> {
-                        NativeSelector.ByContentDescription(call.argument("label")!!)
+                        selector = NativeSelector.ByContentDescription(call.argument("label")!!)
                     }
                     "byNativeIntegerId" -> {
                         val stringId = call.argument<String>("id")!!
-                        NativeSelector.ByViewId(stringId.toInt())
+                        selector = NativeSelector.ByViewId(stringId.toInt())
                     }
                     else -> {
                         result.error("INVALID_SELECTOR", "Not supported", kind)
@@ -113,6 +114,7 @@ class NativeDriverSupportPlugin :
                     } else if (SystemClock.uptimeMillis() - startTime < timeoutMs) {
                         handler.postDelayed(::tryFindAndTap, 50)
                     } else {
+                        Log.w(tag, "View not found for selector $selector in root $root")
                         result.error("VIEW_NOT_FOUND", "No view was found", call.arguments())
                     }
                 }
