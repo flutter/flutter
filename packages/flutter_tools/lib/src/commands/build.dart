@@ -155,102 +155,66 @@ class BuildCommand extends FlutterCommand {
         );
     final XcodeProjectInterpreter effectiveXcodeProjectInterpreter =
         xcodeProjectInterpreter ??
-        (context.get<XcodeProjectInterpreter>() ??
-            XcodeProjectInterpreter(
-              platform: effectivePlatform,
-              processManager: processManager,
-              logger: logger,
-              fileSystem: fileSystem,
-              analytics: effectiveAnalytics,
-            ));
+        XcodeProjectInterpreter(
+          analytics: effectiveAnalytics,
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: effectivePlatform,
+          processManager: processManager,
+        );
+    final effectiveCocoaPods = CocoaPods(
+      analytics: effectiveAnalytics,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: effectivePlatform,
+      processManager: processManager,
+      xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
+    );
+    final Xcode effectiveXcode =
+        xcode ??
+        Xcode(
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: effectivePlatform,
+          processManager: processManager,
+          userMessages: UserMessages(),
+          xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
+        );
     final AppleContext effectiveAppleContext =
         appleContext ??
         AppleContext(
-          cocoaPods: CocoaPods(
-            fileSystem: fileSystem,
-            processManager: processManager,
-            logger: logger,
-            platform: effectivePlatform,
-            xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
-            analytics: effectiveAnalytics,
-          ),
-          cocoapodsValidator: CocoaPodsValidator(
-            CocoaPods(
-              fileSystem: fileSystem,
-              processManager: processManager,
-              logger: logger,
-              platform: effectivePlatform,
-              xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
-              analytics: effectiveAnalytics,
-            ),
-            UserMessages(),
-          ),
+          cocoaPods: effectiveCocoaPods,
+          cocoapodsValidator: CocoaPodsValidator(effectiveCocoaPods, UserMessages()),
           iosSimulatorUtils: IOSSimulatorUtils(
             logger: logger,
             operatingSystemUtils: osUtils,
             processManager: processManager,
-            xcode:
-                xcode ??
-                Xcode(
-                  platform: effectivePlatform,
-                  processManager: processManager,
-                  logger: logger,
-                  fileSystem: fileSystem,
-                  xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
-                  userMessages: UserMessages(),
-                ),
+            xcode: effectiveXcode,
           ),
           iosWorkflow: IOSWorkflow(
             featureFlags: featureFlags,
-            xcode:
-                xcode ??
-                Xcode(
-                  platform: effectivePlatform,
-                  processManager: processManager,
-                  logger: logger,
-                  fileSystem: fileSystem,
-                  xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
-                  userMessages: UserMessages(),
-                ),
             platform: effectivePlatform,
+            xcode: effectiveXcode,
           ),
           plistParser: context.get<PlistParser>() ?? plistParser,
           xcdevice: XCDevice(
-            processManager: processManager,
-            logger: logger,
+            analytics: effectiveAnalytics,
             artifacts: artifacts,
             cache: cache,
-            platform: effectivePlatform,
-            xcode:
-                xcode ??
-                Xcode(
-                  platform: effectivePlatform,
-                  processManager: processManager,
-                  logger: logger,
-                  fileSystem: fileSystem,
-                  xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
-                  userMessages: UserMessages(),
-                ),
+            fileSystem: fileSystem,
             iproxy: IProxy(
               artifacts: artifacts,
               dyLdLibEntry: cache.dyLdLibEntry,
               logger: logger,
               processManager: processManager,
             ),
-            fileSystem: fileSystem,
-            analytics: effectiveAnalytics,
+            logger: logger,
+            platform: effectivePlatform,
+            processManager: processManager,
             shutdownHooks: ShutdownHooks(),
+            xcode: effectiveXcode,
           ),
-          xcode:
-              xcode ??
-              Xcode(
-                platform: effectivePlatform,
-                processManager: processManager,
-                logger: logger,
-                fileSystem: fileSystem,
-                xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
-                userMessages: UserMessages(),
-              ),
+          xcode: effectiveXcode,
           xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
         );
     _addSubcommand(
@@ -340,7 +304,7 @@ class BuildCommand extends FlutterCommand {
         processManager: processManager,
         templateRenderer: templateRenderer,
         verboseHelp: verboseHelp,
-        xcode: xcode,
+        xcode: effectiveXcode,
       ),
     );
 
