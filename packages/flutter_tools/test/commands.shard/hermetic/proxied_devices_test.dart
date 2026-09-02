@@ -16,8 +16,6 @@ import 'package:flutter_tools/src/daemon.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/proxied_devices/devices.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/features.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';

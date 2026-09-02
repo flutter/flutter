@@ -9,6 +9,7 @@ import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
+import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -236,7 +237,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       ..addFlag(
         'ios-profile-debugger',
         negatable: false,
-        help: 'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
+        help:
+            'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -503,7 +505,8 @@ class RunCommand extends RunCommandBase {
       ..addFlag(
         'hot',
         defaultsTo: kHotReloadDefault,
-        help: 'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',
+        help:
+            'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',
       )
       ..addFlag(
         'resident',
@@ -845,7 +848,7 @@ class RunCommand extends RunCommandBase {
     return Daemon.createMachineDaemon(
       analytics: globals.analytics,
       androidSdk: globals.androidSdk,
-      androidWorkflow: globals.androidWorkflow,
+      androidWorkflow: android_workflow.androidWorkflow,
       deviceManager: globals.deviceManager,
       featureFlags: featureFlags,
       fileSystem: globals.fs,

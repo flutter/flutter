@@ -34,6 +34,7 @@ import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../vmservice.dart';
 import 'daemon.dart';
+import '../features.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.

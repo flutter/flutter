@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
 import 'src/globals.dart' as globals;
+import 'src/android/android_workflow.dart' as android_workflow;
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -56,7 +57,6 @@ import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/experimental/templates.dart';
 import 'src/features.dart';
-import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/hook_runner.dart' show FlutterHookRunner;
 import 'src/isolated/build_targets.dart';
@@ -197,8 +197,9 @@ Future<void> main(List<String> args) async {
 String? findCommandName(List<String> args, {ToolContext? toolContext}) {
   final ArgResults results;
   try {
-    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
-        .parse(args);
+    results = FlutterCommandRunner(
+      toolContext: toolContext ?? _FallbackToolContext(),
+    ).argParser.parse(args);
   } on ArgParserException {
     // The real parser will complain about these later.
     return null;
@@ -313,7 +314,7 @@ List<FlutterCommand> generateCommands({
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
   DaemonCommand(
     androidSdk: globals.androidSdk,
-    androidWorkflow: globals.androidWorkflow,
+    androidWorkflow: android_workflow.androidWorkflow,
     deviceManager: globals.deviceManager,
     hidden: !verboseHelp,
     java: globals.java,
