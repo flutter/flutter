@@ -5,9 +5,11 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -262,7 +264,10 @@ void main() {
       Logger: () => logger,
     },
   );
-  BrowserManager createBrowserManager(StreamChannelController<dynamic> controller) {
+  BrowserManager createBrowserManager(
+    StreamChannelController<dynamic> controller,
+    Process process,
+  ) {
     final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
       platform: platform,
@@ -275,22 +280,41 @@ void main() {
       0,
       ChromeConnection('localhost', 1234),
       chromiumLauncher: chromiumLauncher,
-      process: FakeProcess(),
+      process: process,
       logger: logger,
     );
     return BrowserManager.test(chromium, Runtime.chrome, FakeWebSocketChannel(controller), logger);
   }
 
-  testWithoutContext('BrowserManager reports an unexpected browser disconnect', () async {
-    // The browser hanging up mid-run is the one teardown path with no
-    // exit code to report, so this message is all the run has to explain
-    // the "did not complete" results that follow.
-    final controller = StreamChannelController<dynamic>();
-    createBrowserManager(controller);
+  testWithoutContext('BrowserManager reports a browser that closed its connection', () {
+    // Regression test for https://github.com/flutter/flutter/issues/191920.
+    FakeAsync().run((FakeAsync time) {
+      final controller = StreamChannelController<dynamic>();
+      createBrowserManager(controller, FakeProcess(exitCode: Completer<int>().future));
 
-    await controller.local.sink.close();
-    await pumpEventQueue();
+      controller.local.sink.close();
+      time.elapse(const Duration(seconds: 2));
 
-    expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+      expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+    });
+  });
+
+  testWithoutContext('BrowserManager reports the exit code of a browser process that died', () {
+    // Regression test for https://github.com/flutter/flutter/issues/191920.
+    FakeAsync().run((FakeAsync time) {
+      final exitCode = Completer<int>();
+      final controller = StreamChannelController<dynamic>();
+      createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
+
+      // A dying process takes its connection with it, and the connection is
+      // seen to close before the exit code arrives.
+      controller.local.sink.close();
+      time.flushMicrotasks();
+      exitCode.complete(-9);
+      time.elapse(const Duration(seconds: 2));
+
+      expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+      expect(logger.errorText, contains('exited unexpectedly with code -9'));
+    });
   });
 }
