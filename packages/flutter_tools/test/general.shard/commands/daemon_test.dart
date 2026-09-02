@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:test/fake.dart';
-import '../../src/fakes.dart' show TestFeatureFlags;
 
 import '../../src/common.dart';
+import '../../src/fakes.dart' show TestFeatureFlags;
 
 void main() {
   testWithoutContext('binds on ipv4 normally', () async {

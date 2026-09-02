@@ -7,7 +7,6 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
-import 'src/globals.dart' as globals;
 import 'src/android/android_workflow.dart' as android_workflow;
 import 'src/base/context.dart';
 import 'src/base/io.dart';
@@ -57,6 +56,7 @@ import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
 import 'src/experimental/templates.dart';
 import 'src/features.dart';
+import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/hook_runner.dart' show FlutterHookRunner;
 import 'src/isolated/build_targets.dart';
@@ -154,9 +154,9 @@ Future<void> main(List<String> args) async {
       BuildTargets: () => const BuildTargetsImpl(),
       Logger: () {
         final loggerFactory = LoggerFactory(
-          outputPreferences: globals.outputPreferences,
-          terminal: globals.terminal,
-          stdio: globals.stdio,
+          prefs: globals.outputPreferences,
+          term: globals.terminal,
+          std: globals.stdio,
         );
         return loggerFactory.createLogger(
           daemon: daemon,
@@ -186,7 +186,7 @@ Future<void> main(List<String> args) async {
   );
 }
 
-/// The name of the command in [args], or null if there isn't one.
+/// The name of the command in `args`, or null if there isn't one.
 ///
 /// Global options can come before the command, so it can't be found by
 /// position. A throwaway parser walks past them instead: trailing options are
@@ -208,8 +208,7 @@ String? findCommandName(List<String> args, {ToolContext? toolContext}) {
 }
 
 class _FallbackToolContext implements ToolContext {
-  _FallbackToolContext({OutputPreferences? outputPreferences})
-    : _outputPreferences = outputPreferences;
+  _FallbackToolContext({OutputPreferences? prefs}) : _outputPreferences = prefs;
 
   final OutputPreferences? _outputPreferences;
 
@@ -259,13 +258,13 @@ List<FlutterCommand> generateCommands({
   AssembleCommand(verboseHelp: verboseHelp, buildSystem: toolDependencies.buildSystem),
   AttachCommand(
     verboseHelp: verboseHelp,
-    stdio: toolDependencies.toolContext.stdio,
-    logger: toolDependencies.toolContext.logger,
-    terminal: toolDependencies.toolContext.terminal,
-    signals: toolDependencies.toolContext.signals,
-    platform: toolDependencies.toolContext.platform,
-    processInfo: ProcessInfo(toolDependencies.toolContext.fs),
-    fileSystem: toolDependencies.toolContext.fs,
+    std: toolDependencies.toolContext.stdio,
+    log: toolDependencies.toolContext.logger,
+    term: toolDependencies.toolContext.terminal,
+    sigs: toolDependencies.toolContext.signals,
+    plat: toolDependencies.toolContext.platform,
+    pInfo: ProcessInfo(toolDependencies.toolContext.fs),
+    fs: toolDependencies.toolContext.fs,
   ),
   BuildCommand(
     fileSystem: toolDependencies.toolContext.fs,
@@ -391,14 +390,14 @@ List<FlutterCommand> generateCommands({
 /// Our logger class hierarchy and runtime requirements are overly complicated.
 class LoggerFactory {
   LoggerFactory({
-    required Terminal terminal,
-    required Stdio stdio,
-    required OutputPreferences outputPreferences,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  }) : _terminal = terminal,
-       _stdio = stdio,
-       _stopwatchFactory = stopwatchFactory,
-       _outputPreferences = outputPreferences;
+    required Terminal term,
+    required Stdio std,
+    required OutputPreferences prefs,
+    StopwatchFactory stopwatch = const StopwatchFactory(),
+  }) : _terminal = term,
+       _stdio = std,
+       _stopwatchFactory = stopwatch,
+       _outputPreferences = prefs;
 
   final Terminal _terminal;
   final Stdio _stdio;

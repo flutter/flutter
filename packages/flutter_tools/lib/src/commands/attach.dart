@@ -21,6 +21,7 @@ import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../features.dart';
 import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -34,7 +35,6 @@ import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 import '../vmservice.dart';
 import 'daemon.dart';
-import '../features.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -64,22 +64,22 @@ import '../features.dart';
 class AttachCommand extends FlutterCommand {
   AttachCommand({
     bool verboseHelp = false,
-    HotRunnerFactory? hotRunnerFactory,
-    required Stdio stdio,
-    required Logger logger,
-    required Terminal terminal,
-    required Signals signals,
-    required Platform platform,
-    required ProcessInfo processInfo,
-    required FileSystem fileSystem,
-  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
-       _stdio = stdio,
-       _logger = logger,
-       _terminal = terminal,
-       _signals = signals,
-       _platform = platform,
-       _processInfo = processInfo,
-       _fileSystem = fileSystem {
+    HotRunnerFactory? runnerFactory,
+    required Stdio std,
+    required Logger log,
+    required Terminal term,
+    required Signals sigs,
+    required Platform plat,
+    required ProcessInfo pInfo,
+    required FileSystem fs,
+  }) : _hotRunnerFactory = runnerFactory ?? HotRunnerFactory(),
+       _stdio = std,
+       _logger = log,
+       _terminal = term,
+       _signals = sigs,
+       _platform = plat,
+       _processInfo = pInfo,
+       _fileSystem = fs {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
