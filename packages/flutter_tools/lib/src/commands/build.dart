@@ -71,15 +71,27 @@ class BuildCommand extends FlutterCommand {
     required AnsiTerminal terminal,
     required Xcode? xcode,
     FeatureFlags? featureFlags,
-    OutputPreferences? outputPreferences,
+    super.outputPreferences,
     ToolContext? toolContext,
     super.verboseHelp,
-  }) : super(outputPreferences: outputPreferences, toolContext: toolContext) {
+  }) : _fallbackToolContext = _createFallbackToolContext(
+         artifacts: artifacts,
+         cache: cache,
+         config: config,
+         fileSystem: fileSystem,
+         flutterVersion: flutterVersion,
+         logger: logger,
+         osUtils: osUtils,
+         outputPreferences: outputPreferences,
+         platform: platform,
+         processManager: processManager,
+         processUtils: processUtils,
+         terminal: terminal,
+       ),
+       super(toolContext: toolContext) {
     FeatureFlags? contextFeatureFlags;
-    OutputPreferences? contextOutputPreferences;
     try {
       contextFeatureFlags = context.get<FeatureFlags>();
-      contextOutputPreferences = context.get<OutputPreferences>();
     } on UnsupportedError {
       // In testWithoutContext, context.get is not supported.
     }
@@ -91,56 +103,7 @@ class BuildCommand extends FlutterCommand {
     }
     final FeatureFlags effectiveFeatureFlags =
         featureFlags ?? (contextFeatureFlags ?? const _DefaultFeatureFlags());
-    final OutputPreferences effectiveOutputPreferences =
-        outputPreferences ?? (contextOutputPreferences ?? OutputPreferences.test());
-    final persistentToolState = PersistentToolState(
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-    );
-    final ToolContext effectiveToolContext =
-        toolContext ??
-        (_fallbackToolContext = ToolContext(
-          artifacts: artifacts,
-          botDetector: BotDetector(
-            httpClientFactory: () => HttpClient(),
-            persistentToolState: persistentToolState,
-            platform: platform,
-          ),
-          cache: cache,
-          config: config,
-          customDevicesConfig: CustomDevicesConfig(
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: platform,
-          ),
-          flutterVersion: flutterVersion,
-          fs: fileSystem,
-          git: Git(currentPlatform: platform, runProcessWith: processUtils),
-          localEngineLocator: LocalEngineLocator(
-            fileSystem: fileSystem,
-            flutterRoot: Cache.flutterRoot ?? '',
-            logger: logger,
-            platform: platform,
-            userMessages: UserMessages(),
-          ),
-          logger: logger,
-          os: osUtils,
-          outputPreferences: effectiveOutputPreferences,
-          persistentToolState: persistentToolState,
-          platform: platform,
-          preRunValidator: PreRunValidator(fileSystem: fileSystem),
-          processInfo: ProcessInfo(fileSystem),
-          processManager: processManager,
-          processUtils: processUtils,
-          projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
-          shutdownHooks: ShutdownHooks(),
-          signals: LocalSignals.instance,
-          stdio: Stdio(),
-          systemClock: const SystemClock(),
-          terminal: terminal,
-          userMessages: UserMessages(),
-        ));
+    final ToolContext effectiveToolContext = toolContext ?? _fallbackToolContext;
 
     _addSubcommand(
       BuildAarCommand(
@@ -250,7 +213,80 @@ class BuildCommand extends FlutterCommand {
     );
   }
 
-  late final ToolContext _fallbackToolContext;
+  final ToolContext _fallbackToolContext;
+
+  static ToolContext _createFallbackToolContext({
+    required Artifacts artifacts,
+    required Cache cache,
+    required Config config,
+    required FileSystem fileSystem,
+    required FlutterVersion flutterVersion,
+    required Logger logger,
+    required OperatingSystemUtils osUtils,
+    required OutputPreferences? outputPreferences,
+    required Platform platform,
+    required ProcessManager processManager,
+    required ProcessUtils processUtils,
+    required AnsiTerminal terminal,
+  }) {
+    OutputPreferences? contextOutputPreferences;
+    try {
+      contextOutputPreferences = context.get<OutputPreferences>();
+    } on UnsupportedError {
+      // In testWithoutContext, context.get is not supported.
+    }
+    final OutputPreferences effectiveOutputPreferences =
+        outputPreferences ?? (contextOutputPreferences ?? OutputPreferences.test());
+
+    final persistentToolState = PersistentToolState(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+    );
+
+    return ToolContext(
+      artifacts: artifacts,
+      botDetector: BotDetector(
+        httpClientFactory: () => HttpClient(),
+        persistentToolState: persistentToolState,
+        platform: platform,
+      ),
+      cache: cache,
+      config: config,
+      customDevicesConfig: CustomDevicesConfig(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+      ),
+      flutterVersion: flutterVersion,
+      fs: fileSystem,
+      git: Git(currentPlatform: platform, runProcessWith: processUtils),
+      localEngineLocator: LocalEngineLocator(
+        fileSystem: fileSystem,
+        flutterRoot: Cache.flutterRoot ?? '',
+        logger: logger,
+        platform: platform,
+        userMessages: UserMessages(),
+      ),
+      logger: logger,
+      os: osUtils,
+      outputPreferences: effectiveOutputPreferences,
+      persistentToolState: persistentToolState,
+      platform: platform,
+      preRunValidator: PreRunValidator(fileSystem: fileSystem),
+      processInfo: ProcessInfo(fileSystem),
+      processManager: processManager,
+      processUtils: processUtils,
+      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
+      shutdownHooks: ShutdownHooks(),
+      signals: LocalSignals.instance,
+      stdio: Stdio(),
+      systemClock: const SystemClock(),
+      terminal: terminal,
+      userMessages: UserMessages(),
+    );
+  }
+
   @override
   ToolContext get toolContext => super.toolContext ?? _fallbackToolContext;
 

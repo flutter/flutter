@@ -25,8 +25,12 @@ String get defaultMainPath => _fs.path.join('lib', 'main.dart');
 const defaultManifestPath = 'pubspec.yaml';
 String get defaultDepfilePath => _fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
-String getDefaultApplicationKernelPath({required bool trackWidgetCreation}) {
-  final String appDillPath = _fs.path.join(getBuildDirectory(), 'app.dill');
+String getDefaultApplicationKernelPath({
+  required bool trackWidgetCreation,
+  FileSystem? fileSystem,
+}) {
+  final FileSystem fs = fileSystem ?? _fs;
+  final String appDillPath = fs.path.join(getBuildDirectory(), 'app.dill');
   return getKernelPathForTransformerOptions(appDillPath, trackWidgetCreation: trackWidgetCreation);
 }
 
