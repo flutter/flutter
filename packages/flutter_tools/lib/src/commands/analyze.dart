@@ -327,7 +327,7 @@ class AnalyzeCommand extends FlutterCommand {
         directoryPath = items.first;
       }
       await IOSAnalyze(
-        project: FlutterProject.fromDirectory(fileSystem.directory(directoryPath)),
+        project: projectFactory.fromDirectory(fileSystem.directory(directoryPath)),
         option: option,
         configuration: configuration,
         target: target,
