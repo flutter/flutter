@@ -61,7 +61,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     bool verboseHelp = false,
   }) : _extensionTemplateManager = extensionTemplateManager,
        _httpClientFactory = httpClientFactory,
-       _explicitJava = java,
+       _java = java,
        _explicitNet = net,
        _explicitPlistParser = plistParser,
        _explicitPub = pub,
@@ -292,7 +292,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
 
   final TemplateRenderer _templateRenderer;
   final HttpClientFactory? _httpClientFactory;
-  final Java? _explicitJava;
+  final Java? _java;
   final Net? _explicitNet;
   final PlistParser? _explicitPlistParser;
   final Pub? _explicitPub;
@@ -329,8 +329,6 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         processManager: toolContext.processManager,
         logger: toolContext.logger,
       );
-
-  Java? get _java => _explicitJava;
 
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost =>

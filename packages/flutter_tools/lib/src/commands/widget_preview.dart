@@ -82,9 +82,9 @@ class WidgetPreviewCommand extends FlutterCommand {
 abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
   WidgetPreviewSubCommandBase({required super.toolContext});
 
-  FileSystem get fs;
-  Logger get logger;
-  FlutterProjectFactory get projectFactory;
+  FileSystem get fs => toolContext!.fs;
+  Logger get logger => toolContext!.logger;
+  FlutterProjectFactory get projectFactory => toolContext!.projectFactory;
 
   FlutterProject getRootProject() {
     final ArgResults results = argResults!;
@@ -653,26 +653,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 }
 
 final class WidgetPreviewCleanCommand extends WidgetPreviewSubCommandBase {
-  WidgetPreviewCleanCommand({required ToolContext toolContext})
-    : fs = toolContext.fs,
-      logger = toolContext.logger,
-      projectFactory = toolContext.projectFactory,
-      super(toolContext: toolContext);
+  WidgetPreviewCleanCommand({required super.toolContext});
 
   @override
   String get description => 'Cleans up widget preview state.';
 
   @override
   String get name => 'clean';
-
-  @override
-  final FileSystem fs;
-
-  @override
-  final Logger logger;
-
-  @override
-  final FlutterProjectFactory projectFactory;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
