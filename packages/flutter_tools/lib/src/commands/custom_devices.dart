@@ -33,32 +33,30 @@ class CustomDevicesCommand extends FlutterCommand {
   }) : _customDevicesConfig = customDevicesConfig ?? toolContext.customDevicesConfig,
        _featureFlags = featureFlags,
        super(toolContext: toolContext) {
-    final CustomDevicesConfig config = _customDevicesConfig;
-
     addSubcommand(
       CustomDevicesListCommand(
-        customDevicesConfig: config,
+        customDevicesConfig: _customDevicesConfig,
         featureFlags: featureFlags,
         toolContext: toolContext,
       ),
     );
     addSubcommand(
       CustomDevicesResetCommand(
-        customDevicesConfig: config,
+        customDevicesConfig: _customDevicesConfig,
         featureFlags: featureFlags,
         toolContext: toolContext,
       ),
     );
     addSubcommand(
       CustomDevicesAddCommand(
-        customDevicesConfig: config,
+        customDevicesConfig: _customDevicesConfig,
         featureFlags: featureFlags,
         toolContext: toolContext,
       ),
     );
     addSubcommand(
       CustomDevicesDeleteCommand(
-        customDevicesConfig: config,
+        customDevicesConfig: _customDevicesConfig,
         featureFlags: featureFlags,
         toolContext: toolContext,
       ),
@@ -185,14 +183,13 @@ List the currently configured custom devices, both enabled and disabled, reachab
       throwToolExit('Could not list custom devices.');
     }
 
-    final Logger log = logger;
     final String configPath = customDevicesConfig.configPath;
     if (devices.isEmpty) {
-      log.printStatus('No custom devices found in "$configPath"');
+      logger.printStatus('No custom devices found in "$configPath"');
     } else {
-      log.printStatus('List of custom devices in "$configPath":');
+      logger.printStatus('List of custom devices in "$configPath":');
       for (final device in devices) {
-        log.printStatus(
+        logger.printStatus(
           'id: ${device.id}, label: ${device.label}, enabled: ${device.enabled}',
           indent: 2,
           hangingIndent: 2,
@@ -314,9 +311,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Check this config by executing some of the commands, see if they run
   /// fine.
   Future<bool> _checkConfigWithLogging(CustomDeviceConfig config) async {
-    final Logger log = logger;
     final ProcessManager pm = toolContext.processManager;
-    final device = CustomDevice(config: config, logger: log, processManager: pm);
+    final device = CustomDevice(config: config, logger: logger, processManager: pm);
 
     var result = true;
 
@@ -363,7 +359,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         forwardPortCommand: config.forwardPortCommand!,
         forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
         processManager: pm,
-        logger: log,
+        logger: logger,
       );
 
       try {
@@ -384,7 +380,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     }
 
     if (result) {
-      log.printStatus('Passed all checks successfully.');
+      logger.printStatus('Passed all checks successfully.');
     }
 
     return result;
@@ -451,8 +447,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       msg += ' ($exampleOrDefault)';
     }
 
-    final Logger log = logger;
-    log.printStatus(msg);
+    logger.printStatus(msg);
     while (true) {
       if (!await inputs.hasNext) {
         return null;
@@ -461,7 +456,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       final String input = await inputs.next;
 
       if (validator != null && !await validator(input)) {
-        log.printStatus('Invalid input. Please enter $name:');
+        logger.printStatus('Invalid input. Please enter $name:');
       } else {
         return input;
       }
@@ -471,8 +466,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Ask the user for a y(es) / n(o) or empty input.
   Future<bool> askForBool(String name, {String? description, bool defaultsTo = true}) async {
     final defaultsToStr = defaultsTo ? '[Y/n]' : '[y/N]';
-    final Logger log = logger;
-    log.printStatus('$description $defaultsToStr (empty for default)');
+    logger.printStatus('$description $defaultsToStr (empty for default)');
     while (true) {
       final String input = await inputs.next;
 
@@ -483,7 +477,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       } else if (input.toLowerCase() == 'n') {
         return false;
       } else {
-        log.printStatus(
+        logger.printStatus(
           'Invalid input. Expected is either y, n or empty for default. $name? $defaultsToStr',
         );
       }
