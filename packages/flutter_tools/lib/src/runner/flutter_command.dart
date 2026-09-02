@@ -2107,6 +2107,7 @@ DevelopmentArtifact? artifactFromTargetPlatform(
   TargetPlatform targetPlatform, [
   FeatureFlags? customFeatureFlags,
 ]) {
+  late final FeatureFlags effectiveFeatureFlags = customFeatureFlags ?? globals.featureFlags;
   switch (targetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
@@ -2118,20 +2119,20 @@ DevelopmentArtifact? artifactFromTargetPlatform(
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin:
-      if ((customFeatureFlags ?? globals.featureFlags).isMacOSEnabled) {
+      if (effectiveFeatureFlags.isMacOSEnabled) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
     case TargetPlatform.windows_arm64:
-      if ((customFeatureFlags ?? globals.featureFlags).isWindowsEnabled) {
+      if (effectiveFeatureFlags.isWindowsEnabled) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.linux_riscv64:
-      if ((customFeatureFlags ?? globals.featureFlags).isLinuxEnabled) {
+      if (effectiveFeatureFlags.isLinuxEnabled) {
         return DevelopmentArtifact.linux;
       }
       return null;
