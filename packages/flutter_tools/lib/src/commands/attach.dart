@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -65,7 +64,6 @@ import 'daemon.dart';
 class AttachCommand extends FlutterCommand {
   AttachCommand({
     required super.toolContext,
-    super.analytics,
     bool verboseHelp = false,
     HotRunnerFactory? hotRunnerFactory,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
@@ -270,6 +268,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attach({required Device device}) async {
+    final Logger logger = _toolContext.logger;
     final processInfo = ProcessInfo(_toolContext.fs);
     final Signals signals = _toolContext.signals;
     final AnsiTerminal terminal = _toolContext.terminal;
@@ -302,6 +301,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attachDaemon({required Device device}) async {
+    final FileSystem fs = _toolContext.fs;
+    final Logger logger = _toolContext.logger;
     final Stdio stdio = _toolContext.stdio;
 
     final daemon = Daemon(
@@ -344,8 +345,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
     final Platform platform = _toolContext.platform;
+    final Logger logger = _toolContext.logger;
 
     final Future<Uri> vmServiceUri = _discoverVmService(device: device);
+    vmServiceUri.ignore();
 
     final BuildInfo buildInfo = await getBuildInfo();
 
@@ -356,9 +359,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
       platform: platform,
-      fileSystem: fs,
-      logger: logger,
-      processManager: processManager,
     );
     flutterDevice.vmServiceUri = vmServiceUri;
     final flutterDevices = <FlutterDevice>[flutterDevice];
@@ -398,6 +398,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<Uri> _discoverVmService({required Device device}) async {
+    final Logger logger = _toolContext.logger;
     final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
