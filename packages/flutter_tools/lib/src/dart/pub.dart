@@ -288,7 +288,13 @@ class _DefaultPub implements Pub {
         .childFile('workspace_ref.json');
     final File packageConfigFile;
     if (workspaceRefFile.existsSync()) {
-      switch (jsonDecode(workspaceRefFile.readAsStringSync())) {
+      Object? decoded;
+      try {
+        decoded = jsonDecode(workspaceRefFile.readAsStringSync());
+      } on FormatException {
+        // Fall through to default.
+      }
+      switch (decoded) {
         case {'workspaceRoot': final String workspaceRoot}:
           packageConfigFile = _fileSystem.file(
             _fileSystem.path.join(workspaceRefFile.parent.path, workspaceRoot),

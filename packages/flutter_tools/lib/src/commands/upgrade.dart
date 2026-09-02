@@ -18,7 +18,6 @@ import '../context/tool_context.dart';
 import '../dart/pub.dart';
 import '../git.dart';
 import '../persistent_tool_state.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'channel.dart';
@@ -509,7 +508,7 @@ class UpgradeCommandRunner {
       logger.printStatus('');
       await _pub.get(
         context: PubContext.pubUpgrade,
-        project: FlutterProject.fromDirectory(fs.directory(projectRoot)),
+        project: _toolContext.projectFactory.fromDirectory(fs.directory(projectRoot)),
         upgrade: true,
       );
     }
