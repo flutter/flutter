@@ -5349,7 +5349,6 @@ targets:
 
   - name: Mac channels_integration_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5423,7 +5422,6 @@ targets:
 
   - name: Mac route_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5795,7 +5793,6 @@ targets:
 
   - name: Mac platform_interaction_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
