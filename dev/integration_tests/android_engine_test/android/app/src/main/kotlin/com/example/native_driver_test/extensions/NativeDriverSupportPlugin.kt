@@ -12,6 +12,8 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -114,7 +116,10 @@ class NativeDriverSupportPlugin :
                     } else if (SystemClock.uptimeMillis() - startTime < timeoutMs) {
                         handler.postDelayed(::tryFindAndTap, 50)
                     } else {
-                        Log.w(tag, "View not found for selector $selector in root $root")
+                        Log.w(
+                            tag,
+                            "View not found for selector $selector in root $root.\nHierarchy:\n${dumpViewHierarchy(root)}"
+                        )
                         result.error("VIEW_NOT_FOUND", "No view was found", call.arguments())
                     }
                 }
@@ -125,6 +130,24 @@ class NativeDriverSupportPlugin :
                 result.notImplemented()
             }
         }
+    }
+
+    private fun dumpViewHierarchy(
+        view: View,
+        depth: Int = 0,
+        sb: StringBuilder = StringBuilder()
+    ): String {
+        val indent = "  ".repeat(depth)
+        val desc = view.contentDescription ?: "null"
+        val count = if (view is ViewGroup) view.childCount else 0
+        sb.append("$indent${view.javaClass.name} (id=${view.id}, desc='$desc', vis=${view.visibility}, childCount=$count)\n")
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                val child = view.getChildAt(i) ?: continue
+                dumpViewHierarchy(child, depth + 1, sb)
+            }
+        }
+        return sb.toString()
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
