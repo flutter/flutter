@@ -3,43 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
-import '../android/android_sdk.dart';
-import '../android/gradle.dart';
-import '../android/gradle_utils.dart';
-import '../artifacts.dart';
-import '../base/bot_detector.dart';
-import '../base/config.dart';
-import '../base/context.dart';
-import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
-import '../base/signals.dart';
 import '../base/template.dart';
 import '../base/terminal.dart';
-import '../base/time.dart';
-import '../base/user_messages.dart';
 import '../build_system/build_system.dart';
-import '../cache.dart';
 import '../context/android_context.dart';
+import '../context/apple_context.dart';
 import '../context/tool_context.dart';
-import '../custom_devices/custom_devices_config.dart';
 import '../features.dart';
-import '../git.dart';
 import '../ios/code_signing.dart';
-import '../ios/plist_parser.dart';
-import '../macos/xcode.dart';
-import '../persistent_tool_state.dart';
-import '../pre_run_validator.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../runner/local_engine.dart';
-import '../version.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
 import 'build_appbundle.dart';
@@ -53,7 +28,6 @@ import 'build_swift_package.dart';
 import 'build_web.dart';
 import 'build_windows.dart';
 import 'darwin_add_to_app.dart';
-import '../context/apple_context.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({
@@ -226,13 +200,12 @@ abstract class BuildSubCommand extends FlutterCommand {
   BuildSubCommand({
     Logger? logger,
     required super.verboseHelp,
-    super.outputPreferences,
-    ToolContext? toolContext,
+    OutputPreferences? outputPreferences,
+    super.toolContext,
   }) : _toolContext = toolContext,
        _logger = logger,
        super(
          outputPreferences: outputPreferences ?? toolContext?.outputPreferences,
-         toolContext: toolContext,
        ) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
