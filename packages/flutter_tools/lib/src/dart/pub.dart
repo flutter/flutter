@@ -9,6 +9,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+
 import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -326,8 +327,6 @@ class _DefaultPub implements Pub {
         fs: _fileSystem,
         git: _git,
       );
-      final File pubspecYaml = project.pubspecFile;
-      final File pubLockFile = workspaceRoot.childFile('pubspec.lock');
 
       if (shouldSkipThirdPartyGenerator) {
         Map<String, Object?> packageConfigMap;
@@ -347,18 +346,14 @@ class _DefaultPub implements Pub {
         }
       }
 
-      // If the pubspec.yaml is older than the package config file and the last
-      // flutter version used is the same as the current version skip pub get.
-      // This will incorrectly skip pub on the master branch if dependencies
-      // are being added/removed from the flutter framework packages, but this
-      // can be worked around by manually running pub.
-      if (checkUpToDate &&
-          pubLockFile.existsSync() &&
-          pubspecYaml.lastModifiedSync().isBefore(pubLockFile.lastModifiedSync()) &&
-          pubspecYaml.lastModifiedSync().isBefore(packageConfigFile.lastModifiedSync()) &&
+      final bool versionMatch =
           lastVersion.existsSync() &&
-          lastVersion.readAsStringSync() == versionFromFile.frameworkVersion) {
-        _logger.printTrace('Skipping pub get: version match.');
+          lastVersion.readAsStringSync() == versionFromFile.frameworkVersion;
+
+      if (checkUpToDate &&
+          versionMatch &&
+          await _checkResolutionUpToDate(directory, context, flutterRootOverride)) {
+        _logger.printTrace('Skipping pub get: resolution up-to-date.');
         return;
       }
     }
@@ -383,6 +378,33 @@ class _DefaultPub implements Pub {
       outputMode: outputMode,
     );
     await _updateVersionAndPackageConfig(project);
+  }
+
+  Future<bool> _checkResolutionUpToDate(
+    String directory,
+    PubContext context,
+    String? flutterRootOverride,
+  ) async {
+    final pubCommand = <String>[
+      ..._pubCommand,
+      '--directory',
+      _fileSystem.path.relative(directory),
+      'check-resolution-up-to-date',
+    ];
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(
+      context: context,
+      flutterRootOverride: flutterRootOverride,
+    );
+    try {
+      final RunResult result = await _processUtils.run(
+        pubCommand,
+        workingDirectory: _fileSystem.path.current,
+        environment: pubEnvironment,
+      );
+      return result.exitCode == 0;
+    } on io.ProcessException {
+      return false;
+    }
   }
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
