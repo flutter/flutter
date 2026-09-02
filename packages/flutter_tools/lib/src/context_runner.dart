@@ -8,8 +8,6 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_builder.dart';
-import 'context/android_context.dart';
-import 'context/tool_context.dart';
 import 'android/android_sdk.dart';
 import 'android/android_studio.dart';
 import 'android/android_workflow.dart';
@@ -31,6 +29,8 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'context/android_context.dart';
+import 'context/tool_context.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
