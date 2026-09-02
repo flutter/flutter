@@ -231,7 +231,6 @@ CustomDevicesCommand createCustomDevicesCommand({
   return CustomDevicesCommand(
     featureFlags: TestFeatureFlags(areCustomDevicesEnabled: featureEnabled),
     toolContext: effectiveToolContext,
-    customDevicesConfig: customDevicesConfig,
   );
 }
 
