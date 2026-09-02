@@ -559,6 +559,35 @@ void main() {
       expect(wrapped.implicitView, same(implicitView));
     });
 
+    test('binds a dispatcher to a view id', () {
+      final ui.PlatformDispatcher real = ui.PlatformDispatcher.instance;
+      final ui.FlutterView implicitView = debugApplyViewMetricsOverrides(real).implicitView!;
+
+      // A view this library vends already owns a correctly bound dispatcher, so
+      // asking by that view's id hands back the very same object rather than
+      // retaining a second one.
+      expect(
+        debugApplyViewMetricsOverridesForView(real, implicitView.viewId),
+        same(implicitView.platformDispatcher),
+      );
+
+      // For an id the platform does not report there is no view to hang the
+      // dispatcher off, so one is cached; repeated calls are still stable.
+      final ui.PlatformDispatcher viewless = debugApplyViewMetricsOverridesForView(real, 123456);
+      expect(viewless, isNot(same(implicitView.platformDispatcher)));
+      expect(debugApplyViewMetricsOverridesForView(real, 123456), same(viewless));
+
+      // It resolves the override registered for the id it was bound to, and
+      // only that one.
+      debugSetViewMetricsOverride(123456, const DebugViewMetricsOverride(textScaleFactor: 3.0));
+      final double bound = viewless.textScaleFactor;
+      final double unbound = implicitView.platformDispatcher.textScaleFactor;
+      debugClearViewMetricsOverrides();
+
+      expect(bound, 3.0);
+      expect(unbound, real.textScaleFactor);
+    });
+
     test('returns null for a view that does not exist', () {
       final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(
         ui.PlatformDispatcher.instance,
@@ -740,6 +769,25 @@ void main() {
       expect(second.platformDispatcher.platformBrightness, ui.Brightness.light);
       expect(second.platformDispatcher.alwaysUse24HourFormat, isFalse);
       expect(second.platformDispatcher.accessibilityFeatures.boldText, isFalse);
+    });
+
+    test('a view adopts a dispatcher already handed out for its id', () {
+      final dispatcher = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
+
+      // Asked about before the platform reports a view with this id.
+      final ui.PlatformDispatcher early = debugApplyViewMetricsOverridesForView(dispatcher, 3);
+      expect(debugApplyViewMetricsOverridesForView(dispatcher, 3), same(early));
+
+      // Once the view turns up it takes over the dispatcher that was already
+      // handed out, so the early caller and the view agree.
+      dispatcher.addView(3, 6.0);
+      expect(wrapped.view(id: 3)!.platformDispatcher, same(early));
+      expect(debugApplyViewMetricsOverridesForView(dispatcher, 3), same(early));
+
+      debugSetViewMetricsOverride(3, const DebugViewMetricsOverride(textScaleFactor: 2.0));
+      expect(early.textScaleFactor, 2.0);
+      expect(wrapped.view(id: 3)!.platformDispatcher.textScaleFactor, 2.0);
     });
 
     test('follows views as they are added and removed', () {

@@ -58,6 +58,127 @@ class _UnboundView implements ui.FlutterView {
       throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
 }
 
+/// Every metric [DebugViewMetricsOverride] can set that [MediaQueryData]
+/// surfaces: an override that sets it, how to read it back, and the value
+/// [MediaQueryData] must then report.
+///
+/// The test view reports 2400x1800 physical pixels at a device pixel ratio of
+/// 3, which is what the logical expectations below are derived from.
+///
+/// A metric that is in neither this table nor [_notSurfacedByMediaQuery] is one
+/// [MediaQueryData] could silently stop honoring, which is the failure the
+/// per-view resolution in `MediaQueryData.fromView` exists to prevent.
+final Map<String, (DebugViewMetricsOverride, Object? Function(MediaQueryData), Object?)>
+_surfacedMetrics = <String, (DebugViewMetricsOverride, Object? Function(MediaQueryData), Object?)>{
+  'devicePixelRatio': (
+    const DebugViewMetricsOverride(devicePixelRatio: 6.0),
+    (MediaQueryData data) => data.devicePixelRatio,
+    6.0,
+  ),
+  'physicalSize': (
+    const DebugViewMetricsOverride(physicalSize: ui.Size(600, 900)),
+    (MediaQueryData data) => data.size,
+    const Size(200, 300),
+  ),
+  'padding': (
+    const DebugViewMetricsOverride(padding: DebugViewPadding(top: 30)),
+    (MediaQueryData data) => data.padding,
+    const EdgeInsets.only(top: 10),
+  ),
+  'viewPadding': (
+    const DebugViewMetricsOverride(viewPadding: DebugViewPadding(top: 30)),
+    (MediaQueryData data) => data.viewPadding,
+    const EdgeInsets.only(top: 10),
+  ),
+  'viewInsets': (
+    const DebugViewMetricsOverride(viewInsets: DebugViewPadding(bottom: 30)),
+    (MediaQueryData data) => data.viewInsets,
+    const EdgeInsets.only(bottom: 10),
+  ),
+  'textScaleFactor': (
+    const DebugViewMetricsOverride(textScaleFactor: 3.0),
+    (MediaQueryData data) => data.textScaler.scale(10),
+    30.0,
+  ),
+  'platformBrightness': (
+    const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
+    (MediaQueryData data) => data.platformBrightness,
+    ui.Brightness.dark,
+  ),
+  'alwaysUse24HourFormat': (
+    const DebugViewMetricsOverride(alwaysUse24HourFormat: true),
+    (MediaQueryData data) => data.alwaysUse24HourFormat,
+    true,
+  ),
+  'accessibleNavigation': (
+    const DebugViewMetricsOverride(accessibleNavigation: true),
+    (MediaQueryData data) => data.accessibleNavigation,
+    true,
+  ),
+  'invertColors': (
+    const DebugViewMetricsOverride(invertColors: true),
+    (MediaQueryData data) => data.invertColors,
+    true,
+  ),
+  'disableAnimations': (
+    const DebugViewMetricsOverride(disableAnimations: true),
+    (MediaQueryData data) => data.disableAnimations,
+    true,
+  ),
+  'boldText': (
+    const DebugViewMetricsOverride(boldText: true),
+    (MediaQueryData data) => data.boldText,
+    true,
+  ),
+  'reduceMotion': (
+    const DebugViewMetricsOverride(reduceMotion: true),
+    (MediaQueryData data) => data.reduceMotion,
+    true,
+  ),
+  'highContrast': (
+    const DebugViewMetricsOverride(highContrast: true),
+    (MediaQueryData data) => data.highContrast,
+    true,
+  ),
+  'onOffSwitchLabels': (
+    const DebugViewMetricsOverride(onOffSwitchLabels: true),
+    (MediaQueryData data) => data.onOffSwitchLabels,
+    true,
+  ),
+  'supportsAnnounce': (
+    const DebugViewMetricsOverride(supportsAnnounce: false),
+    (MediaQueryData data) => data.supportsAnnounce,
+    false,
+  ),
+};
+
+/// Accessibility flags [DebugViewMetricsOverride] can set that [MediaQueryData]
+/// does not expose, so there is nothing for it to honor.
+const Set<String> _notSurfacedByMediaQuery = <String>{
+  'autoPlayAnimatedImages',
+  'autoPlayVideos',
+  'deterministicCursor',
+};
+
+/// Every metric [DebugViewMetricsOverride] accepts, taken from the class rather
+/// than restated here, so that adding one to it fails this file until the new
+/// metric is classified above.
+///
+/// [DebugViewMetricsOverride.fromJson] rejects keys it does not recognize and
+/// names the ones it does, which is the only place the full set is available at
+/// runtime.
+Set<String> _allOverridableMetrics() {
+  try {
+    DebugViewMetricsOverride.fromJson(const <String, Object?>{'not-a-metric': true});
+  } on FormatException catch (error) {
+    const marker = 'Supported metrics are: ';
+    final int start = error.message.indexOf(marker);
+    expect(start, isNonNegative, reason: 'fromJson no longer lists the metrics it supports');
+    return error.message.substring(start + marker.length).replaceAll('.', '').split(', ').toSet();
+  }
+  fail('fromJson accepted an unknown metric');
+}
+
 /// Records which [WidgetsBindingObserver] notifications the framework sends.
 class _NotificationRecorder with WidgetsBindingObserver {
   int metrics = 0;
@@ -398,6 +519,76 @@ void main() {
       expect(data.textScaler.scale(10), 50, reason: 'the override supplies the value');
       expect(data.boldText, isTrue, reason: 'the override supplies the value');
       expect(data.highContrast, isTrue, reason: 'the parent supplies unnamed metrics');
+    });
+  });
+
+  group('every overridable metric MediaQuery surfaces', () {
+    testWidgets('is honored over inherited platform data', (WidgetTester tester) async {
+      // The table is the enumeration, checked against the class itself, so a
+      // metric added to DebugViewMetricsOverride has to be classified rather
+      // than silently never applying under a parent MediaQuery.
+      expect(<String>{
+        ..._surfacedMetrics.keys,
+        ..._notSurfacedByMediaQuery,
+      }, unorderedEquals(_allOverridableMetrics()));
+      expect(tester.view.physicalSize, const Size(2400, 1800));
+      expect(tester.view.devicePixelRatio, 3.0);
+
+      late MediaQueryData data;
+      // A parent that disagrees with every override in the table, so inheriting
+      // from it instead of honoring the override is visible.
+      final MediaQueryData parent = MediaQueryData.fromView(tester.view).copyWith(
+        textScaler: const TextScaler.linear(9.0),
+        platformBrightness: ui.Brightness.light,
+        alwaysUse24HourFormat: false,
+        accessibleNavigation: false,
+        invertColors: false,
+        disableAnimations: false,
+        boldText: false,
+        reduceMotion: false,
+        highContrast: false,
+        onOffSwitchLabels: false,
+        supportsAnnounce: true,
+      );
+      await tester.pumpWidget(
+        MediaQuery(
+          data: parent,
+          child: MediaQuery.fromView(
+            view: tester.view,
+            child: _capture((MediaQueryData value) => data = value),
+          ),
+        ),
+      );
+
+      for (final MapEntry<
+            String,
+            (DebugViewMetricsOverride, Object? Function(MediaQueryData), Object?)
+          >
+          entry
+          in _surfacedMetrics.entries) {
+        final (
+          DebugViewMetricsOverride override,
+          Object? Function(MediaQueryData) read,
+          Object? expected,
+        ) = entry.value;
+        final Object? inherited = read(data);
+        debugSetViewMetricsOverride(tester.view.viewId, override);
+        await tester.pump();
+        final Object? overridden = read(data);
+        debugSetViewMetricsOverride(tester.view.viewId, null);
+        await tester.pump();
+
+        expect(overridden, expected, reason: '${entry.key} was not honored');
+        expect(
+          inherited,
+          isNot(expected),
+          reason:
+              '${entry.key} would read the same without the override, so the '
+              'test cannot tell whether it was honored',
+        );
+      }
+      debugClearViewMetricsOverrides();
+      await tester.pump();
     });
   });
 

@@ -135,17 +135,26 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   // through [_root], so `late` keeps them from allocating an Expando each.
   late final Expando<_DebugViewMetricsFlutterView> _views = Expando<_DebugViewMetricsFlutterView>();
 
-  // The dispatcher each view resolves its platform-wide metrics through, keyed
-  // by view id. Both the views this library vends and
-  // debugApplyViewMetricsOverridesForView read it, so a view and a caller
-  // asking about that view's id get the same object. Only the root populates
-  // it, and it holds one small object per id anything asks about.
-  late final Map<int, _DebugViewMetricsPlatformDispatcher> _dispatchersForView =
+  // Dispatchers for view ids the platform does not report a view for, which is
+  // the only case debugApplyViewMetricsOverridesForView has to cache: a view
+  // this library vends owns its own dispatcher, so that one dies with the view.
+  // Keyed by id because there is no object to key on. An entry is handed over
+  // to the view and removed from here if a view with that id turns up later, so
+  // what is left is only ids that never had one, which in practice means test
+  // fakes.
+  late final Map<int, _DebugViewMetricsPlatformDispatcher> _dispatchersForViewlessId =
       <int, _DebugViewMetricsPlatformDispatcher>{};
 
   _DebugViewMetricsPlatformDispatcher _dispatcherForView(int viewId) {
     assert(_root == null, 'Per-view dispatchers are owned by the root dispatcher.');
-    return _dispatchersForView[viewId] ??= _DebugViewMetricsPlatformDispatcher._forView(
+    // Prefer the dispatcher the view already owns, so that a caller asking by
+    // id and the view itself report the same object, and so that nothing is
+    // retained past the life of the view.
+    final ui.FlutterView? view = _dispatcher.view(id: viewId);
+    if (view != null) {
+      return _wrapView(view)._platformDispatcher;
+    }
+    return _dispatchersForViewlessId[viewId] ??= _DebugViewMetricsPlatformDispatcher._forView(
       this,
       viewId,
     );
@@ -158,7 +167,14 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
 
   _DebugViewMetricsFlutterView _wrapView(ui.FlutterView view) {
     final _DebugViewMetricsPlatformDispatcher root = _root ?? this;
-    return root._views[view] ??= _DebugViewMetricsFlutterView(view, root);
+    return root._views[view] ??= _DebugViewMetricsFlutterView(
+      view,
+      // Adopt a dispatcher already handed out for this id, so that a caller
+      // that asked before the platform reported the view keeps the object it
+      // was given, and so that nothing is left behind in the fallback cache.
+      root._dispatchersForViewlessId.remove(view.viewId) ??
+          _DebugViewMetricsPlatformDispatcher._forView(root, view.viewId),
+    );
   }
 
   // Overridden metrics.
@@ -480,8 +496,12 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
 /// implement `noSuchMethod`, so that a new `dart:ui` member has to be
 /// classified rather than silently reporting null.
 class _DebugViewMetricsFlutterView implements ui.FlutterView {
-  _DebugViewMetricsFlutterView(this._view, _DebugViewMetricsPlatformDispatcher root)
-    : platformDispatcher = root._dispatcherForView(_view.viewId);
+  _DebugViewMetricsFlutterView(this._view, this._platformDispatcher)
+    : assert(
+        _platformDispatcher._viewId == _view.viewId,
+        'A view must report a dispatcher bound to its own id, or the override '
+        'it resolves would not be the one registered for it.',
+      );
 
   /// The view whose metrics are being overridden.
   final ui.FlutterView _view;
@@ -489,9 +509,11 @@ class _DebugViewMetricsFlutterView implements ui.FlutterView {
   /// The dispatcher that resolves this view's platform-wide metric overrides.
   ///
   /// This is not the dispatcher [debugApplyViewMetricsOverrides] returned; see
-  /// [_DebugViewMetricsPlatformDispatcher] for why they differ.
+  /// [_DebugViewMetricsPlatformDispatcher] for why they differ. It is owned by
+  /// this view so that it is collected along with it.
   @override
-  final ui.PlatformDispatcher platformDispatcher;
+  ui.PlatformDispatcher get platformDispatcher => _platformDispatcher;
+  final _DebugViewMetricsPlatformDispatcher _platformDispatcher;
 
   DebugViewMetricsOverride? get _override => debugViewMetricsOverrides[_view.viewId];
 
