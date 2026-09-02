@@ -212,7 +212,7 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
   const auto& gl = reactor.GetProcTable();
   // Force a rebind after deleted shared texture names can be reused on Mali.
   // See https://github.com/flutter/flutter/issues/190640.
-  gl.BindTexture(texture_type, GL_NONE);
+  gl.BindTexture(texture_type, 0u);
   gl.BindTexture(texture_type, gl_handle.value());
   const GLvoid* tex_data =
       source.GetBuffer()->OnGetContents() + source.GetRange().offset;
