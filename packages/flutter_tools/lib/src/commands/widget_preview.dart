@@ -600,7 +600,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         webRunHeadless: boolArg(kHeadless),
         devToolsServerAddress: devToolsServerAddress,
       );
-      final String target = bundle.defaultMainPath;
+      final String target = bundle.defaultMainPath();
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
         target: target,

@@ -20,10 +20,14 @@ FileSystem get _fs {
   }
 }
 
-String get defaultMainPath => _fs.path.join('lib', 'main.dart');
+String defaultMainPath([FileSystem? fileSystem]) =>
+    (fileSystem ?? _fs).path.join('lib', 'main.dart');
 
 const defaultManifestPath = 'pubspec.yaml';
-String get defaultDepfilePath => _fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
+String defaultDepfilePath([FileSystem? fileSystem]) {
+  final FileSystem fs = fileSystem ?? _fs;
+  return fs.path.join(getBuildDirectory(null, fs), 'snapshot_blob.bin.d');
+}
 
 String getDefaultApplicationKernelPath({
   required bool trackWidgetCreation,

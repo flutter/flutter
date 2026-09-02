@@ -41,7 +41,7 @@ class BuildBundleCommand extends BuildSubCommand {
     argParser
       ..addOption(
         'depfile',
-        defaultsTo: defaultDepfilePath,
+        defaultsTo: defaultDepfilePath(toolContext.fs),
         help:
             'A file path where a depfile will be written. '
             'This contains all build inputs and outputs in a Make-style syntax.',

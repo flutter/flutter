@@ -739,7 +739,7 @@ class CustomDevice extends Device {
         platform: platform,
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
-        depfilePath: defaultDepfilePath,
+        depfilePath: defaultDepfilePath(),
         assetDirPath: assetBundleDir,
       );
 
