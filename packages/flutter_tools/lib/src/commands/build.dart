@@ -10,7 +10,6 @@ import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/config.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -89,20 +88,13 @@ class BuildCommand extends FlutterCommand {
          terminal: terminal,
        ),
        super(toolContext: toolContext) {
-    FeatureFlags? contextFeatureFlags;
-    try {
-      contextFeatureFlags = context.get<FeatureFlags>();
-    } on UnsupportedError {
-      // In testWithoutContext, context.get is not supported.
-    }
     Analytics effectiveAnalytics;
     try {
       effectiveAnalytics = analytics;
     } on UnsupportedError {
       effectiveAnalytics = const NoOpAnalytics();
     }
-    final FeatureFlags effectiveFeatureFlags =
-        featureFlags ?? (contextFeatureFlags ?? const _DefaultFeatureFlags());
+    final FeatureFlags effectiveFeatureFlags = featureFlags ?? const _DefaultFeatureFlags();
     final ToolContext effectiveToolContext = toolContext ?? _fallbackToolContext;
 
     _addSubcommand(
@@ -229,14 +221,8 @@ class BuildCommand extends FlutterCommand {
     required ProcessUtils processUtils,
     required AnsiTerminal terminal,
   }) {
-    OutputPreferences? contextOutputPreferences;
-    try {
-      contextOutputPreferences = context.get<OutputPreferences>();
-    } on UnsupportedError {
-      // In testWithoutContext, context.get is not supported.
-    }
     final OutputPreferences effectiveOutputPreferences =
-        outputPreferences ?? (contextOutputPreferences ?? OutputPreferences.test());
+        outputPreferences ?? OutputPreferences.test();
 
     final persistentToolState = PersistentToolState(
       fileSystem: fileSystem,
