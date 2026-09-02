@@ -213,7 +213,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final packages = <Directory>[...runner!.getRepoPackages(), rootDirectory];
 
     if (!updateHashes) {
-      _verifyPubspecs(packages, logger: logger);
+      _verifyPubspecs(packages);
     }
     if (forceUpgrade || cherryPicks.isNotEmpty) {
       final (project: _, :ResolvedDependencies deps) = (await _upgrade(
@@ -261,9 +261,9 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
     logger.printStatus('Running pub get only...');
     if (updateHashes || forceUpgrade || cherryPicks.isNotEmpty) {
-      _writeHashesToPubspecs(packages, logger: logger);
+      _writeHashesToPubspecs(packages);
     }
-    _verifyPubspecs(packages, logger: logger);
+    _verifyPubspecs(packages);
     _checkWithFlutterTools(rootDirectory);
     _checkPins(rootDirectory);
 
@@ -473,10 +473,10 @@ class UpdatePackagesCommand extends FlutterCommand {
     pubspecFile.writeAsStringSync(yamlEditor.toString());
   }
 
-  void _verifyPubspecs(List<Directory> packages, {required Logger logger}) {
-    logger.printStatus('Verifying pubspecs...');
+  void _verifyPubspecs(List<Directory> packages) {
+    toolContext.logger.printStatus('Verifying pubspecs...');
     for (final directory in packages) {
-      logger.printTrace('Reading pubspec.yaml from ${directory.path}');
+      toolContext.logger.printTrace('Reading pubspec.yaml from ${directory.path}');
       final String pubspecString = directory.childFile(_pubspecName).readAsStringSync();
       _checkHash(pubspecString, directory);
     }
@@ -543,10 +543,10 @@ class UpdatePackagesCommand extends FlutterCommand {
     }
   }
 
-  void _writeHashesToPubspecs(List<Directory> packages, {required Logger logger}) {
-    logger.printStatus('Writing hashes to pubspecs...');
+  void _writeHashesToPubspecs(List<Directory> packages) {
+    toolContext.logger.printStatus('Writing hashes to pubspecs...');
     for (final directory in packages) {
-      logger.printTrace('Reading pubspec.yaml from ${directory.path}');
+      toolContext.logger.printTrace('Reading pubspec.yaml from ${directory.path}');
       final File pubspecFile = directory.childFile(_pubspecName);
       String pubspec = pubspecFile.readAsStringSync();
       final String actualChecksum = _computeChecksum(pubspec);
@@ -562,7 +562,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
       pubspecFile.writeAsStringSync(pubspec);
     }
-    logger.printStatus('All pubspecs are now up to date.');
+    toolContext.logger.printStatus('All pubspecs are now up to date.');
   }
 
   String _computeChecksum(String pubspecString) {
