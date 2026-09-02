@@ -302,7 +302,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   // See https://github.com/flutter/engine/pull/4602 and
   // https://github.com/flutter/engine/pull/27786.
   for (SemanticsObject* child in _children) {
-    child.parent = nil;
+    if (child.parent == self) {
+      child.parent = nil;
+    }
   }
   [_children removeAllObjects];
 
@@ -318,7 +320,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (void)setChildren:(NSArray<SemanticsObject*>*)children {
   for (SemanticsObject* child in _children) {
-    child.parent = nil;
+    if (child.parent == self) {
+      child.parent = nil;
+    }
   }
   _children = [children mutableCopy];
   for (SemanticsObject* child in _children) {
@@ -328,7 +332,9 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 
 - (void)setChildrenInHitTestOrder:(NSArray<SemanticsObject*>*)childrenInHitTestOrder {
   for (SemanticsObject* child in _childrenInHitTestOrder) {
-    child.parent = nil;
+    if (child.parent == self) {
+      child.parent = nil;
+    }
   }
   _childrenInHitTestOrder = [childrenInHitTestOrder copy];
   for (SemanticsObject* child in _childrenInHitTestOrder) {
