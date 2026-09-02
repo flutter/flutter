@@ -41,7 +41,6 @@ class AnalyzeContinuously extends AnalyzeBase {
       final dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(
         repoPackages,
-        dependencies,
         fileSystem: fileSystem,
       );
 

@@ -208,8 +208,7 @@ class PackageDependencyTracker {
   }
 
   void checkForConflictingDependencies(
-    Iterable<Directory> pubSpecDirectories,
-    PackageDependencyTracker dependencies, {
+    Iterable<Directory> pubSpecDirectories, {
     required FileSystem fileSystem,
   }) {
     for (final directory in pubSpecDirectories) {
@@ -226,7 +225,7 @@ class PackageDependencyTracker {
             final String packagePath = fileSystem.path.normalize(
               fileSystem.path.absolute(fileSystem.path.join(directory.path, 'lib')),
             );
-            dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
+            addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
           } else {
             throwToolExit('pubspec.yaml is malformed. The name should be a String.');
           }
@@ -236,13 +235,13 @@ class PackageDependencyTracker {
       }
     }
 
-    if (dependencies.hasConflicts) {
+    if (hasConflicts) {
       final message = StringBuffer();
-      message.writeln(dependencies.generateConflictReport());
+      message.writeln(generateConflictReport());
       message.writeln(
         'Make sure you have run "pub upgrade" in all the directories mentioned above.',
       );
-      if (dependencies.hasConflictsAffectingFlutterRepo(fileSystem)) {
+      if (hasConflictsAffectingFlutterRepo(fileSystem)) {
         message.writeln(
           'For packages in the flutter repository, try using "flutter update-packages" to do all of them at once.\n'
           'If you need to actually upgrade them, consider "flutter update-packages --force-upgrade". '

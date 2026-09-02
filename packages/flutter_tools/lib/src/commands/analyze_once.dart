@@ -37,7 +37,6 @@ class AnalyzeOnce extends AnalyzeBase {
       final dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(
         repoPackages,
-        dependencies,
         fileSystem: fileSystem,
       );
       items.add(flutterRoot);

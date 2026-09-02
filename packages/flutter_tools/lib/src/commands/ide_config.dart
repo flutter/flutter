@@ -75,7 +75,8 @@ class IdeConfigCommand extends FlutterCommand {
     final FileSystem fs = toolContext.fs;
     return fs.directory(
       fs.path.join(
-        toolContext.cache.flutterRoot!,
+        // TODO(bkonyi): Use instance getter once Cache is refactored (PR #190795).
+        Cache.flutterRoot!,
         'packages',
         'flutter_tools',
         'ide_templates',
@@ -86,14 +87,14 @@ class IdeConfigCommand extends FlutterCommand {
 
   Directory get _createTemplatesDirectory {
     final FileSystem fs = toolContext.fs;
-    return fs.directory(
-      fs.path.join(toolContext.cache.flutterRoot!, 'packages', 'flutter_tools', 'templates'),
-    );
+    // TODO(bkonyi): Use instance getter once Cache is refactored (PR #190795).
+    return fs.directory(fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates'));
   }
 
   Directory get _flutterRoot {
     final FileSystem fs = toolContext.fs;
-    return fs.directory(fs.path.absolute(toolContext.cache.flutterRoot!));
+    // TODO(bkonyi): Use instance getter once Cache is refactored (PR #190795).
+    return fs.directory(fs.path.absolute(Cache.flutterRoot!));
   }
 
   // Returns true if any entire path element is equal to dir.
@@ -257,10 +258,9 @@ class IdeConfigCommand extends FlutterCommand {
       return FlutterCommandResult.success();
     }
 
-    final String flutterRoot = fs.path.absolute(toolContext.cache.flutterRoot!);
-    final String dirPath = fs.path.normalize(
-      fs.directory(fs.path.absolute(toolContext.cache.flutterRoot!)).absolute.path,
-    );
+    // TODO(bkonyi): Use instance getter once Cache is refactored (PR #190795).
+    final String flutterRoot = fs.path.absolute(Cache.flutterRoot!);
+    final String dirPath = fs.path.normalize(fs.directory(flutterRoot).absolute.path);
 
     final String? error = _validateFlutterDir(dirPath, fileSystem: fs, flutterRoot: flutterRoot);
     if (error != null) {
@@ -269,7 +269,7 @@ class IdeConfigCommand extends FlutterCommand {
 
     logger.printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     var generatedCount = 0;
-    generatedCount += _renderTemplate(_ideName, dirPath, <String, Object>{
+    generatedCount += _renderTemplate(dirPath, <String, Object>{
       'withRootModule': boolArg('with-root-module'),
       'android': true,
     });
@@ -284,7 +284,7 @@ class IdeConfigCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  int _renderTemplate(String templateName, String dirPath, Map<String, Object> context) {
+  int _renderTemplate(String dirPath, Map<String, Object> context) {
     final FileSystem fs = toolContext.fs;
     final Logger logger = toolContext.logger;
     final template = Template(
@@ -315,8 +315,4 @@ String? _validateFlutterDir(String dirPath, {required FileSystem fileSystem, Str
   }
   // In the case of any other [FileSystemEntityType]s, like the deprecated ones, return null.
   return null;
-}
-
-extension on Cache {
-  String? get flutterRoot => Cache.flutterRoot;
 }
