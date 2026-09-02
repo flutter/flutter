@@ -8,34 +8,21 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
-import '../base/bot_detector.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/net.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/signals.dart';
 import '../base/template.dart';
 import '../base/terminal.dart';
-import '../base/time.dart';
-import '../base/user_messages.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
-import '../custom_devices/custom_devices_config.dart';
 import '../features.dart';
-import '../git.dart';
 import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
-import '../persistent_tool_state.dart';
-import '../pre_run_validator.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../runner/local_engine.dart';
 import '../version.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
@@ -62,7 +49,6 @@ class BuildCommand extends FlutterCommand {
     required FileSystemUtils fileSystemUtils,
     required FlutterVersion flutterVersion,
     required Logger logger,
-    required OperatingSystemUtils osUtils,
     required Platform platform,
     required PlistParser plistParser,
     required ProcessManager processManager,
@@ -73,13 +59,11 @@ class BuildCommand extends FlutterCommand {
     required Xcode? xcode,
     Analytics? analytics,
     FeatureFlags? featureFlags,
-    OutputPreferences? outputPreferences,
-    PreRunValidator? preRunValidator,
+    super.outputPreferences,
     super.verboseHelp,
-  }) : super(
-         outputPreferences: outputPreferences,
-       ) {
-
+  }) : super() {
+    final Analytics effectiveAnalytics = analytics ?? const NoOpAnalytics();
+    final FeatureFlags effectiveFeatureFlags = featureFlags ?? toolContext.featureFlags;
 
     _addSubcommand(
       BuildAarCommand(
@@ -135,11 +119,11 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildSwiftPackage(
         logger: logger,
-        analytics: analytics,
+        analytics: effectiveAnalytics,
         artifacts: artifacts,
         buildSystem: buildSystem,
         cache: cache,
-        featureFlags: featureFlags,
+        featureFlags: effectiveFeatureFlags,
         fileSystem: fileSystem,
         flutterVersion: flutterVersion,
         platform: platform,
@@ -171,19 +155,19 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
       BuildLinuxCommand(
-        analytics: analytics,
+        analytics: effectiveAnalytics,
         buildSystem: buildSystem,
-        featureFlags: featureFlags,
-        toolContext: toolContext!,
+        featureFlags: effectiveFeatureFlags,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
       BuildWindowsCommand(
-        analytics: analytics,
+        analytics: effectiveAnalytics,
         buildSystem: buildSystem,
-        featureFlags: featureFlags,
-        toolContext: toolContext!,
+        featureFlags: effectiveFeatureFlags,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
     );

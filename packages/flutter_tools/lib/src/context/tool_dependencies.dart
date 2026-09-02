@@ -242,6 +242,7 @@ class ToolDependencies {
         getAnalytics(
           runningOnBot: isBot,
           flutterVersion: finalFlutterVersion,
+        featureFlags: featureFlags,
           environment: finalPlatform.environment,
           clientIde: finalPlatform.environment['FLUTTER_HOST'],
           config: finalConfig,
@@ -378,6 +379,7 @@ class ToolDependencies {
 
     final featureFlags = FlutterFeatureFlags(
       flutterVersion: finalFlutterVersion,
+        featureFlags: featureFlags,
       featuresConfig: FlutterFeaturesConfig(
         globalConfig: finalConfig,
         platform: finalPlatform,
@@ -456,6 +458,7 @@ class ToolDependencies {
         config: finalConfig,
         customDevicesConfig: finalCustomDevicesConfig,
         flutterVersion: finalFlutterVersion,
+        featureFlags: featureFlags,
         fs: finalFS,
         git: finalGit,
         localEngineLocator: finalLocalEngineLocator,

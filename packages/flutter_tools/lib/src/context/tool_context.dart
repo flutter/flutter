@@ -5,6 +5,7 @@
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
+import '../features.dart';
 import '../base/bot_detector.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
@@ -36,6 +37,7 @@ class ToolContext {
     required this.config,
     required this.customDevicesConfig,
     required this.flutterVersion,
+    required this.featureFlags,
     required this.fs,
     required this.git,
     required this.localEngineLocator,
@@ -75,6 +77,9 @@ class ToolContext {
 
   /// Provides version and git channel info for the current Flutter SDK.
   final FlutterVersion flutterVersion;
+
+  /// Feature flags!
+  final FeatureFlags featureFlags;
 
   /// Provides mockable file system operations across host and virtual environments.
   final FileSystem fs;
