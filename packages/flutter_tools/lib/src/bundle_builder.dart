@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
@@ -30,15 +29,15 @@ class BundleBuilder {
   /// The default `mainPath` is `lib/main.dart`.
   /// The default `manifestPath` is `pubspec.yaml`.
   Future<void> build({
-    required TargetPlatform platform,
     required BuildInfo buildInfo,
-    FlutterProject? project,
+    required TargetPlatform platform,
+    String? applicationKernelFilePath,
+    String? assetDirPath,
+    BuildSystem? buildSystem,
+    String? depfilePath,
     String? mainPath,
     String manifestPath = defaultManifestPath,
-    String? applicationKernelFilePath,
-    String? depfilePath,
-    String? assetDirPath,
-    @visibleForTesting BuildSystem? buildSystem,
+    FlutterProject? project,
   }) async {
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath;

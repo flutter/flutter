@@ -2,12 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+import 'package:process/process.dart';
+
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
+import '../cache.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../isolated/build_targets.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 import '../web/compile.dart';
 import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/web_constants.dart';
@@ -17,10 +29,21 @@ import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
-    required super.logger,
-    required FileSystem fileSystem,
+    required BuildSystem buildSystem,
+    required FeatureFlags featureFlags,
+    required ToolContext toolContext,
     required super.verboseHelp,
-  }) : _fileSystem = fileSystem {
+    BuildTargets buildTargets = const BuildTargetsImpl(),
+    WebBuilder? webBuilder,
+  }) : _buildSystem = buildSystem,
+       _buildTargets = buildTargets,
+       _featureFlags = featureFlags,
+       _webBuilder = webBuilder,
+       super(
+         logger: toolContext.logger,
+         outputPreferences: toolContext.outputPreferences,
+         toolContext: toolContext,
+       ) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),
@@ -29,7 +52,19 @@ class BuildWebCommand extends BuildSubCommand {
     ]);
   }
 
-  final FileSystem _fileSystem;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
+  final FeatureFlags _featureFlags;
+  final WebBuilder? _webBuilder;
+
+  @visibleForTesting
+  BuildSystem get buildSystem => _buildSystem;
+
+  @override
+  FeatureFlags get featureFlags => _featureFlags;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -40,14 +75,19 @@ class BuildWebCommand extends BuildSubCommand {
   final name = 'web';
 
   @override
-  bool get hidden => !featureFlags.isWebEnabled;
+  bool get hidden => !_featureFlags.isWebEnabled;
 
   @override
   final description = 'Build a web application bundle.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (!featureFlags.isWebEnabled) {
+    final FileSystem fs = toolContext.fs;
+    final FlutterVersion flutterVersion = toolContext.flutterVersion;
+    final Logger logger = this.logger;
+    final ProcessManager processManager = toolContext.processManager;
+
+    if (!_featureFlags.isWebEnabled) {
       throwToolExit(
         '"build web" is not currently supported. To enable, run "flutter config --enable-web".',
       );
@@ -82,7 +122,7 @@ class BuildWebCommand extends BuildSubCommand {
           'Do not attempt to set a web renderer when using "--${FlutterOptions.kWebWasmFlag}"',
         );
       }
-      globals.logger.printBox(title: 'New feature', '''
+      logger.printBox(title: 'New feature', '''
   WebAssembly compilation is new. Understand the details before deploying to production.
   $kWasmMoreInfo''');
 
@@ -150,7 +190,7 @@ class BuildWebCommand extends BuildSubCommand {
         'To configure this project for the web, run flutter create . --platforms web',
       );
     }
-    if (!_fileSystem.currentDirectory
+    if (!fs.currentDirectory
             .childDirectory('web')
             .childFile('index.html')
             .readAsStringSync()
@@ -164,16 +204,28 @@ class BuildWebCommand extends BuildSubCommand {
 
     final String? outputDirectoryPath = getValue(CommonOptions.outputDir);
 
+    final Artifacts artifacts = toolContext.artifacts;
+    final Cache cache = toolContext.cache;
+    final Platform platform = toolContext.platform;
+    final AnsiTerminal terminal = toolContext.terminal;
+
     final Map<String, String> webDefines = extractWebDefines();
 
-    final webBuilder = WebBuilder(
-      logger: globals.logger,
-      processManager: globals.processManager,
-      buildSystem: globals.buildSystem,
-      fileSystem: globals.fs,
-      flutterVersion: globals.flutterVersion,
-      analytics: globals.analytics,
-    );
+    final WebBuilder webBuilder =
+        _webBuilder ??
+        WebBuilder(
+          analytics: analytics,
+          artifacts: artifacts,
+          buildSystem: _buildSystem,
+          buildTargets: _buildTargets,
+          cache: cache,
+          fileSystem: fs,
+          flutterVersion: flutterVersion,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+          terminal: terminal,
+        );
     await webBuilder.buildWeb(
       project,
       targetFile,

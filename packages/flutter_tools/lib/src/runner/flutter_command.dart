@@ -197,6 +197,17 @@ abstract class FlutterCommand extends Command<void> {
   /// The [ToolContext] providing explicit dependency injection for this command.
   ToolContext? get toolContext => _explicitToolContext ?? runner?.toolContext;
 
+  /// The [FeatureFlags] instance used by this command.
+  FeatureFlags get featureFlags =>
+      runner?.featureFlags ??
+      (() {
+        try {
+          return context.get<FeatureFlags>() ?? const _DefaultFeatureFlags();
+        } on UnsupportedError {
+          return const _DefaultFeatureFlags();
+        }
+      })();
+
   SystemClock get _clock => _explicitToolContext?.systemClock ?? globals.systemClock;
   Logger get _logger => _explicitToolContext?.logger ?? globals.logger;
   Signals get _signals => _explicitToolContext?.signals ?? globals.signals;
@@ -1246,7 +1257,9 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  FlutterProject get project => FlutterProject.current();
+  FlutterProject get project => toolContext != null
+      ? toolContext!.projectFactory.fromDirectory(toolContext!.fs.currentDirectory)
+      : FlutterProject.current();
 
   /// The path to the package config for the current project.
   ///
@@ -2142,3 +2155,54 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
 bool _isBlank(String s) => s.trim().isEmpty;
+
+class _DefaultFeatureFlags extends FeatureFlags {
+  const _DefaultFeatureFlags();
+
+  @override
+  bool isEnabled(Feature feature) => false;
+  @override
+  bool get isLinuxEnabled => false;
+  @override
+  bool get isMacOSEnabled => false;
+  @override
+  bool get isWindowsEnabled => false;
+  @override
+  bool get isWebEnabled => false;
+  @override
+  bool get isAndroidEnabled => false;
+  @override
+  bool get isIOSEnabled => false;
+  @override
+  bool get isFuchsiaEnabled => false;
+  @override
+  bool get areCustomDevicesEnabled => false;
+  @override
+  bool get isCliAnimationEnabled => false;
+  @override
+  bool get isNativeAssetsEnabled => false;
+  @override
+  bool get isDartDataAssetsEnabled => false;
+  @override
+  bool get isRecordUseEnabled => false;
+  @override
+  bool get isSwiftPackageManagerEnabled => false;
+  @override
+  bool get isOmitLegacyVersionFileEnabled => false;
+  @override
+  bool get isWindowingEnabled => false;
+  @override
+  bool get isAccessibilityEvaluationsEnabled => false;
+  @override
+  bool get isLLDBDebuggingEnabled => false;
+  @override
+  bool get isUISceneMigrationEnabled => false;
+  @override
+  bool get isRiscv64SupportEnabled => false;
+  @override
+  bool get isMacOSArm64OnlyEnabled => false;
+  @override
+  bool get isHcppEnabled => false;
+  @override
+  bool get isToolExtensionsEnabled => false;
+}

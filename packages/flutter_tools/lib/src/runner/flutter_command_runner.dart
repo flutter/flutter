@@ -331,6 +331,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// The [ToolContext] instance.
   ToolContext get toolContext => _toolContext;
 
+  /// The [FeatureFlags] instance.
+  FeatureFlags? get featureFlags => _featureFlags;
+
   // See https://github.com/flutter/flutter/issues/145158.
   late bool _machineFlagPresentInAnyCliArg;
 
