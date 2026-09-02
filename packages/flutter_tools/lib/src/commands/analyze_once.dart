@@ -62,6 +62,7 @@ class AnalyzeOnce extends AnalyzeBase {
       terminal: terminal,
       protocolTrafficLog: protocolTrafficLog,
       suppressAnalytics: suppressAnalytics,
+      usePlugins: usePlugins,
     );
 
     Stopwatch? timer;
