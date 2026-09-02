@@ -640,7 +640,6 @@ class _AndroidMotionEventConverter {
 
     // Mask for extracting the flag value from the event's platformData
     const kPointerDataFlagMask = 0xff;
-    const kPointerDataMultiplePointerCountShift = 8;
 
     // Android MotionEvent objects can batch information on multiple pointers.
     // Flutter breaks these such batched events into multiple PointerEvent objects.
@@ -652,8 +651,7 @@ class _AndroidMotionEventConverter {
       return null;
     }
     if (platformDataFlag == kPointerDataFlagMultiple) {
-      final int originalPointerCount = event.platformData >> kPointerDataMultiplePointerCountShift;
-      if (pointerIdx != originalPointerCount - 1) {
+      if (pointerIdx < numPointers - 1) {
         return null;
       }
     }
