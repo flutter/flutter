@@ -238,7 +238,7 @@ class CleanCommand extends FlutterCommand {
   ///
   /// Retries file deletion after stopping Gradle daemons and returns `true` if deletion succeeds.
   Future<bool> _tryStopGradleAndRetryDelete(FileSystemEntity file, FlutterProject? project) async {
-    final AnsiTerminal terminal = _toolContext.terminal;
+    final Terminal terminal = _toolContext.terminal;
     final Logger logger = _toolContext.logger;
     final bool stopGradleFlag =
         (argResults?.wasParsed('stop-gradle') ?? false) && boolArg('stop-gradle');

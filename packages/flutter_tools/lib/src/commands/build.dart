@@ -147,9 +147,7 @@ class BuildCommand extends FlutterCommand {
           signals: LocalSignals.instance,
           stdio: Stdio(),
           systemClock: const SystemClock(),
-          terminal: terminal is AnsiTerminal
-              ? terminal
-              : AnsiTerminal(stdio: Stdio(), platform: effectivePlatform),
+          terminal: terminal,
           userMessages: UserMessages(),
         );
     final XcodeProjectInterpreter effectiveXcodeProjectInterpreter =
