@@ -16,7 +16,8 @@ class DoctorCommand extends FlutterCommand {
     AndroidLicenseValidator? androidLicenseValidator,
     this.verbose = false,
     this.extensionManager,
-  }) : _doctor = doctor,
+  }) : _toolContext = toolContext,
+       _doctor = doctor,
        _androidLicenseValidator = androidLicenseValidator,
        super(toolContext: toolContext) {
     argParser.addFlag(
@@ -34,10 +35,14 @@ class DoctorCommand extends FlutterCommand {
     );
   }
 
+  final ToolContext _toolContext;
   final Doctor? _doctor;
   final AndroidLicenseValidator? _androidLicenseValidator;
   final bool verbose;
   final ExtensionManager? extensionManager;
+
+  @override
+  ToolContext get toolContext => _toolContext;
 
   @override
   final name = 'doctor';
