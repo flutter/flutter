@@ -267,6 +267,7 @@ List<FlutterCommand> generateCommands({
     fileSystem: toolDependencies.toolContext.fs,
   ),
   BuildCommand(
+    toolContext: toolDependencies.toolContext,
     fileSystem: toolDependencies.toolContext.fs,
     buildSystem: toolDependencies.buildSystem,
     osUtils: toolDependencies.toolContext.os,

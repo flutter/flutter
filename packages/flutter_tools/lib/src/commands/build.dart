@@ -69,83 +69,17 @@ class BuildCommand extends FlutterCommand {
     required ProcessUtils processUtils,
     required TemplateRenderer templateRenderer,
     required Terminal terminal,
+    required super.toolContext,
     required Xcode? xcode,
     Analytics? analytics,
     FeatureFlags? featureFlags,
     OutputPreferences? outputPreferences,
     PreRunValidator? preRunValidator,
-    ToolContext? toolContext,
-    bool verboseHelp = false,
+    super.verboseHelp,
   }) : super(
          outputPreferences: outputPreferences,
-         toolContext: toolContext,
-         verboseHelp: verboseHelp,
        ) {
-    final Analytics effectiveAnalytics = analytics ?? const NoOpAnalytics();
-    final FeatureFlags effectiveFeatureFlags = featureFlags ?? const _DefaultFeatureFlags();
-    final effectivePlatform = platform;
-    final PersistentToolState persistentToolState = PersistentToolState.test(
-      directory: fileSystem.directory(
-        fileSystem.path.join(fileSystem.systemTempDirectory.path, '.tmp_state'),
-      )..createSync(recursive: true),
-      logger: logger,
-    );
 
-    final OutputPreferences effectiveOutputPreferences =
-        outputPreferences ?? OutputPreferences.test();
-    final ToolContext effectiveToolContext =
-        toolContext ??
-        (_fallbackToolContext = ToolContext(
-          artifacts: artifacts,
-          botDetector: BotDetector(
-            httpClientFactory: () => HttpClient(),
-            persistentToolState: persistentToolState,
-            platform: effectivePlatform,
-          ),
-          cache: cache,
-          config: config,
-          customDevicesConfig: CustomDevicesConfig(
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: effectivePlatform,
-          ),
-          flutterVersion: flutterVersion,
-          fs: fileSystem,
-          git: Git(currentPlatform: effectivePlatform, runProcessWith: processUtils),
-          localEngineLocator: LocalEngineLocator(
-            fileSystem: fileSystem,
-            flutterRoot: Cache.flutterRoot ?? '',
-            logger: logger,
-            platform: effectivePlatform,
-            userMessages: UserMessages(),
-          ),
-          logger: logger,
-          os: osUtils,
-          outputPreferences: effectiveOutputPreferences,
-          persistentToolState: persistentToolState,
-          platform: effectivePlatform,
-          preRunValidator:
-              preRunValidator ??
-              (!fileSystem
-                      .directory(
-                        fileSystem.path.join(Cache.flutterRoot ?? '', 'packages', 'flutter_tools'),
-                      )
-                      .existsSync()
-                  ? _NoopPreRunValidator()
-                  : PreRunValidator(fileSystem: fileSystem)),
-          processInfo: ProcessInfo(fileSystem),
-          processManager: processManager,
-          processUtils: processUtils,
-          projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: logger),
-          shutdownHooks: ShutdownHooks(),
-          signals: LocalSignals.instance,
-          stdio: Stdio(),
-          systemClock: const SystemClock(),
-          terminal: terminal is AnsiTerminal
-              ? terminal
-              : AnsiTerminal(stdio: Stdio(), platform: effectivePlatform),
-          userMessages: UserMessages(),
-        ));
 
     _addSubcommand(
       BuildAarCommand(
@@ -201,11 +135,11 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildSwiftPackage(
         logger: logger,
-        analytics: effectiveAnalytics,
+        analytics: analytics,
         artifacts: artifacts,
         buildSystem: buildSystem,
         cache: cache,
-        featureFlags: effectiveFeatureFlags,
+        featureFlags: featureFlags,
         fileSystem: fileSystem,
         flutterVersion: flutterVersion,
         platform: platform,
@@ -237,19 +171,19 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
       BuildLinuxCommand(
-        analytics: effectiveAnalytics,
+        analytics: analytics,
         buildSystem: buildSystem,
-        featureFlags: effectiveFeatureFlags,
-        toolContext: effectiveToolContext,
+        featureFlags: featureFlags,
+        toolContext: toolContext!,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
       BuildWindowsCommand(
-        analytics: effectiveAnalytics,
+        analytics: analytics,
         buildSystem: buildSystem,
-        featureFlags: effectiveFeatureFlags,
-        toolContext: effectiveToolContext,
+        featureFlags: featureFlags,
+        toolContext: toolContext!,
         verboseHelp: verboseHelp,
       ),
     );
@@ -261,10 +195,8 @@ class BuildCommand extends FlutterCommand {
     }
   }
 
-  ToolContext? _fallbackToolContext;
-
   @override
-  ToolContext? get toolContext => super.toolContext ?? _fallbackToolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'build';
@@ -302,28 +234,4 @@ abstract class BuildSubCommand extends FlutterCommand {
 
   /// Whether this command is supported and should be shown.
   bool get supported => true;
-}
-
-class _NoopPreRunValidator implements PreRunValidator {
-  @override
-  void validate() {}
-}
-
-class _DefaultFeatureFlags implements FeatureFlags {
-  const _DefaultFeatureFlags();
-
-  @override
-  bool get isLinuxEnabled => true;
-
-  @override
-  bool get isWindowsEnabled => true;
-
-  @override
-  bool get isHcppEnabled => false;
-
-  @override
-  bool get isToolExtensionsEnabled => false;
-
-  @override
-  Object? noSuchMethod(Invocation invocation) => false;
 }
