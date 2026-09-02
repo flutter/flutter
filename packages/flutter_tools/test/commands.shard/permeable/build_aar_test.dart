@@ -48,7 +48,6 @@ void main() {
     final command = BuildAarCommand(
       androidBuilder: context.get<AndroidBuilder>() ?? FakeAndroidBuilder(),
       androidContext: FakeAndroidContext(androidSdk: androidSdk),
-      androidSdk: androidSdk,
       buildSystem: globals.buildSystem,
       toolContext: FakeToolContext(
         fs: globals.fs,

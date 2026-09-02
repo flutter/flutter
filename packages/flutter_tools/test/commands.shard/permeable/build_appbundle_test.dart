@@ -210,7 +210,6 @@ void main() {
       final command = BuildAppBundleCommand(
         androidBuilder: FakeAndroidBuilder(),
         androidContext: FakeAndroidContext(),
-        androidSdk: FakeAndroidSdk(globals.fs.directory('irrelevant')),
         buildSystem: globals.buildSystem,
         toolContext: FakeToolContext(logger: BufferLogger.test()),
       );
@@ -656,7 +655,6 @@ Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   final command = BuildAppBundleCommand(
     androidBuilder: context.get<AndroidBuilder>() ?? FakeAndroidBuilder(),
     androidContext: FakeAndroidContext(androidSdk: effectiveAndroidSdk),
-    androidSdk: effectiveAndroidSdk,
     buildSystem: globals.buildSystem,
     toolContext: FakeToolContext(
       fs: globals.fs,

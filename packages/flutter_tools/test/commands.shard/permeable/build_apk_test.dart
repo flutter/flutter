@@ -1105,7 +1105,6 @@ Future<BuildApkCommand> runBuildApkCommand(
   final command = BuildApkCommand(
     androidBuilder: context.get<AndroidBuilder>() ?? FakeAndroidBuilder(),
     androidContext: FakeAndroidContext(androidSdk: effectiveAndroidSdk),
-    androidSdk: effectiveAndroidSdk,
     buildSystem: globals.buildSystem,
     toolContext: FakeToolContext(
       fs: globals.fs,

@@ -90,7 +90,6 @@ flutter:
     final command = BuildApkCommand(
       androidBuilder: FakeAndroidBuilder(),
       androidContext: FakeAndroidContext(),
-      androidSdk: null,
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
     );
@@ -120,7 +119,6 @@ flutter:
     final command = BuildApkCommand(
       androidBuilder: fakeBuilder,
       androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
     );
@@ -139,7 +137,6 @@ flutter:
     final command = BuildApkCommand(
       androidBuilder: FakeAndroidBuilder(),
       androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
     );
@@ -179,7 +176,6 @@ flutter:
     final command = BuildApkCommand(
       androidBuilder: fakeBuilder,
       androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
     );

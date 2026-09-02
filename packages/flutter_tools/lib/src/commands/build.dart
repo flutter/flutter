@@ -145,7 +145,6 @@ class BuildCommand extends FlutterCommand {
       BuildAarCommand(
         androidBuilder: effectiveAndroidBuilder,
         androidContext: effectiveAndroidContext,
-        androidSdk: androidSdk,
         buildSystem: buildSystem,
         toolContext: effectiveToolContext,
         verboseHelp: verboseHelp,
@@ -155,7 +154,6 @@ class BuildCommand extends FlutterCommand {
       BuildApkCommand(
         androidBuilder: effectiveAndroidBuilder,
         androidContext: effectiveAndroidContext,
-        androidSdk: androidSdk,
         buildSystem: buildSystem,
         toolContext: effectiveToolContext,
         verboseHelp: verboseHelp,
@@ -165,7 +163,6 @@ class BuildCommand extends FlutterCommand {
       BuildAppBundleCommand(
         androidBuilder: effectiveAndroidBuilder,
         androidContext: effectiveAndroidContext,
-        androidSdk: androidSdk,
         buildSystem: buildSystem,
         toolContext: effectiveToolContext,
         verboseHelp: verboseHelp,

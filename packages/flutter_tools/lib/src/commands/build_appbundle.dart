@@ -29,13 +29,11 @@ class BuildAppBundleCommand extends BuildSubCommand {
   BuildAppBundleCommand({
     required AndroidBuilder? androidBuilder,
     required AndroidContext androidContext,
-    required AndroidSdk? androidSdk,
     required BuildSystem buildSystem,
     required ToolContext toolContext,
     bool verboseHelp = false,
   }) : _androidBuilder = androidBuilder,
        _androidContext = androidContext,
-       _androidSdk = androidSdk,
        _buildSystem = buildSystem,
        super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
@@ -88,7 +86,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   final AndroidBuilder? _androidBuilder;
   final AndroidContext _androidContext;
-  final AndroidSdk? _androidSdk;
   final BuildSystem _buildSystem;
   @visibleForTesting
   AndroidBuilder? get androidBuilder => _androidBuilder;
@@ -97,7 +94,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
   AndroidContext get androidContext => _androidContext;
 
   @visibleForTesting
-  AndroidSdk? get androidSdk => _androidSdk;
+  AndroidSdk? get androidSdk => _androidContext.androidSdk;
 
   @visibleForTesting
   BuildSystem get buildSystem => _buildSystem;
@@ -157,8 +154,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
     final FlutterProject project = this.project;
     final Logger logger = toolContext.logger;
     final Platform platform = toolContext.platform;
-    final AnsiTerminal terminal = toolContext.terminal;
-    if (_androidSdk == null) {
+    final Terminal terminal = toolContext.terminal;
+    if (androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final androidBuildInfo = AndroidBuildInfo(

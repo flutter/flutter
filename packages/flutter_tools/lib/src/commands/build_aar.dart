@@ -25,13 +25,11 @@ class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({
     required AndroidBuilder? androidBuilder,
     required AndroidContext androidContext,
-    required AndroidSdk? androidSdk,
     required BuildSystem buildSystem,
     required ToolContext toolContext,
     bool verboseHelp = false,
   }) : _androidBuilder = androidBuilder,
        _androidContext = androidContext,
-       _androidSdk = androidSdk,
        _buildSystem = buildSystem,
        super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
     argParser
@@ -73,7 +71,6 @@ class BuildAarCommand extends BuildSubCommand {
 
   final AndroidBuilder? _androidBuilder;
   final AndroidContext _androidContext;
-  final AndroidSdk? _androidSdk;
   final BuildSystem _buildSystem;
   @visibleForTesting
   AndroidBuilder? get androidBuilder => _androidBuilder;
@@ -82,7 +79,7 @@ class BuildAarCommand extends BuildSubCommand {
   AndroidContext get androidContext => _androidContext;
 
   @visibleForTesting
-  AndroidSdk? get androidSdk => _androidSdk;
+  AndroidSdk? get androidSdk => _androidContext.androidSdk;
 
   @visibleForTesting
   BuildSystem get buildSystem => _buildSystem;
@@ -146,7 +143,7 @@ class BuildAarCommand extends BuildSubCommand {
     final FlutterProject project = this.project;
     final Logger logger = toolContext.logger;
     final FileSystem fs = toolContext.fs;
-    if (_androidSdk == null) {
+    if (androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final androidBuildInfo = <AndroidBuildInfo>{};

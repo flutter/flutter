@@ -70,7 +70,6 @@ flutter:
     final command = BuildAarCommand(
       androidBuilder: FakeAndroidBuilder(),
       androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
     );
@@ -96,7 +95,6 @@ flutter:
     final command = BuildAarCommand(
       androidBuilder: FakeAndroidBuilder(),
       androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
     );
@@ -127,7 +125,6 @@ flutter:
     final command = BuildAarCommand(
       androidBuilder: FakeAndroidBuilder(),
       androidContext: FakeAndroidContext(),
-      androidSdk: null,
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       toolContext: toolContext,
     );
