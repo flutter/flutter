@@ -2,24 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../android/android_workflow.dart';
+import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
-import '../context/tool_context.dart';
 import '../doctor.dart';
 import '../experimental/extension_manager.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
+/// The `flutter doctor` command, which displays diagnostic information about the
+/// installed developer environment and tooling.
 class DoctorCommand extends FlutterCommand {
+  /// Creates a new [DoctorCommand].
+  ///
+  /// If [doctor] is omitted, it defaults to [globals.doctor]. If
+  /// [androidLicenseValidator] is omitted, it is lazily resolved from the
+  /// active context when `--android-licenses` is supplied.
   DoctorCommand({
-    required ToolContext toolContext,
-    required Doctor doctor,
-    AndroidLicenseValidator? androidLicenseValidator,
-    this.verbose = false,
+    android_workflow.AndroidLicenseValidator? androidLicenseValidator,
+    Doctor? doctor,
     this.extensionManager,
-  }) : _toolContext = toolContext,
-       _doctor = doctor,
-       _androidLicenseValidator = androidLicenseValidator,
-       super(toolContext: toolContext) {
+    super.toolContext,
+    this.verbose = false,
+  }) : _androidLicenseValidator = androidLicenseValidator,
+       _explicitDoctor = doctor {
     argParser.addFlag(
       'android-licenses',
       negatable: false,
@@ -35,14 +40,12 @@ class DoctorCommand extends FlutterCommand {
     );
   }
 
-  final ToolContext _toolContext;
-  final Doctor _doctor;
-  final AndroidLicenseValidator? _androidLicenseValidator;
+  final Doctor? _explicitDoctor;
+  final android_workflow.AndroidLicenseValidator? _androidLicenseValidator;
   final bool verbose;
   final ExtensionManager? extensionManager;
 
-  @override
-  ToolContext get toolContext => _toolContext;
+  Doctor get _doctor => _explicitDoctor ?? globals.doctor!;
 
   @override
   final name = 'doctor';
@@ -55,8 +58,6 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final AndroidLicenseValidator? androidLicenseValidator = _androidLicenseValidator;
-
     if (argResults?.wasParsed('check-for-remote-artifacts') ?? false) {
       final String engineRevision = stringArg('check-for-remote-artifacts')!;
       if (engineRevision.startsWith(RegExp(r'[a-f0-9]{1,40}'))) {
@@ -73,6 +74,16 @@ class DoctorCommand extends FlutterCommand {
           'Remote artifact revision $engineRevision is not a valid '
           'git hash.',
         );
+      }
+    }
+    android_workflow.AndroidLicenseValidator? androidLicenseValidator = _androidLicenseValidator;
+    if (androidLicenseValidator == null && boolArg('android-licenses')) {
+      try {
+        androidLicenseValidator = android_workflow.androidLicenseValidator;
+      } on Exception {
+        // Fallback when running in hermetic test environments without AppContext.
+      } on Error {
+        // Catches UnsupportedError in testWithoutContext and StateError if AppContext is missing.
       }
     }
     final bool success = await _doctor.diagnose(

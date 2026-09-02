@@ -870,6 +870,37 @@ void main() {
       expect(fakeDoctor.androidLicensesPassed, isTrue);
     });
 
+    testWithoutContext('passes explicit androidLicenseValidator to doctor.diagnose', () async {
+      final fakeDoctor = FakeDiagnoseDoctor();
+      final fakeToolContext = FakeToolContext();
+      final fakeLicenseValidator = FakeAndroidLicenseValidator();
+      final command = DoctorCommand(
+        toolContext: fakeToolContext,
+        doctor: fakeDoctor,
+        androidLicenseValidator: fakeLicenseValidator,
+      );
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor', '--android-licenses']);
+
+      expect(fakeDoctor.diagnoseCalled, isTrue);
+      expect(fakeDoctor.androidLicensesPassed, isTrue);
+      expect(fakeDoctor.androidLicenseValidatorPassed, same(fakeLicenseValidator));
+    });
+
+    testWithoutContext('lazily falls back when androidLicenseValidator is not provided', () async {
+      final fakeDoctor = FakeDiagnoseDoctor();
+      final fakeToolContext = FakeToolContext();
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor', '--android-licenses']);
+
+      expect(fakeDoctor.diagnoseCalled, isTrue);
+      expect(fakeDoctor.androidLicensesPassed, isTrue);
+      expect(fakeDoctor.androidLicenseValidatorPassed, isNull);
+    });
+
     testWithoutContext('checks remote artifacts when flag provided', () async {
       final fakeDoctor = FakeDiagnoseDoctor();
       final fakeToolContext = FakeToolContext();
@@ -1340,6 +1371,7 @@ class FakeDiagnoseDoctor extends Fake implements Doctor {
   bool diagnoseCalled = false;
   bool? verbosePassed;
   bool? androidLicensesPassed;
+  AndroidLicenseValidator? androidLicenseValidatorPassed;
   String? checkRemoteArtifactsRevision;
 
   @override
@@ -1355,6 +1387,7 @@ class FakeDiagnoseDoctor extends Fake implements Doctor {
     diagnoseCalled = true;
     verbosePassed = verbose;
     androidLicensesPassed = androidLicenses;
+    androidLicenseValidatorPassed = androidLicenseValidator;
     return diagnoseResult;
   }
 
@@ -1364,3 +1397,5 @@ class FakeDiagnoseDoctor extends Fake implements Doctor {
     return checkRemoteArtifactsResult;
   }
 }
+
+class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidator {}
