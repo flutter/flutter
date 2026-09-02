@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:js_interop';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -34,89 +33,128 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.Gradient createConicalGradient(
-    ui.Offset focal,
-    double focalRadius,
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix,
-  ]) => SkwasmGradient.conical(
-    focal: focal,
-    focalRadius: focalRadius,
-    center: center,
-    centerRadius: radius,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    matrix4: matrix,
-  );
+  BackendImageFilter createBlurImageFilter({
+    required double sigmaX,
+    required double sigmaY,
+    required ui.TileMode tileMode,
+  }) {
+    return SkwasmBlurImageFilter(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  }
 
   @override
-  ui.ImageFilter createBlurImageFilter({
-    double sigmaX = 0.0,
-    double sigmaY = 0.0,
-    ui.TileMode? tileMode,
-    ui.Rect? bounds,
-  }) =>
-      // TODO(dkwingsmt): `bounds` is currently not implemented in Skwasm.
-      // Fall back to unbounded blur.
-      // https://github.com/flutter/flutter/issues/175899
-      SkwasmImageFilter.blur(sigmaX: sigmaX, sigmaY: sigmaY, tileMode: tileMode);
+  BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY}) {
+    return SkwasmDilateImageFilter(radiusX: radiusX, radiusY: radiusY);
+  }
 
   @override
-  ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
-      SkwasmImageFilter.dilate(radiusX: radiusX, radiusY: radiusY);
+  BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY}) {
+    return SkwasmErodeImageFilter(radiusX: radiusX, radiusY: radiusY);
+  }
 
   @override
-  ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0}) =>
-      SkwasmImageFilter.erode(radiusX: radiusX, radiusY: radiusY);
+  BackendImageFilter createMatrixImageFilter({
+    required Float64List matrix,
+    required ui.FilterQuality filterQuality,
+  }) {
+    return SkwasmMatrixImageFilter(matrix: matrix, filterQuality: filterQuality);
+  }
 
   @override
-  ui.ImageFilter composeImageFilters({
-    required ui.ImageFilter outer,
-    required ui.ImageFilter inner,
-  }) => SkwasmImageFilter.compose(
-    SkwasmImageFilter.fromUiFilter(outer),
-    SkwasmImageFilter.fromUiFilter(inner),
-  );
+  BackendImageFilter createComposeImageFilter({
+    required BackendImageFilter outer,
+    required BackendImageFilter inner,
+  }) {
+    return SkwasmComposeImageFilter(outer: outer, inner: inner);
+  }
 
   @override
-  ui.ImageFilter createMatrixImageFilter(
-    Float64List matrix4, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.low,
-  }) => SkwasmImageFilter.matrix(matrix4, filterQuality: filterQuality);
+  BackendImageFilter createColorFilterImageFilter({required BackendColorFilter filter}) {
+    return SkwasmColorFilterImageFilter(filter as SkwasmColorFilter);
+  }
 
   @override
-  ui.ImageShader createImageShader(
-    ui.Image image,
+  BackendImageShader createImageShader(
+    EngineImage image,
     ui.TileMode tmx,
     ui.TileMode tmy,
-    Float64List matrix4,
-    ui.FilterQuality? filterQuality,
-  ) => SkwasmImageShader.imageShader(image, tmx, tmy, matrix4, filterQuality);
+    Float64List? matrix4,
+    ui.FilterQuality filterQuality,
+  ) => SkwasmImageShader(image.backendImage as SkwasmImage, tmx, tmy, matrix4, filterQuality);
 
   @override
-  ui.Gradient createLinearGradient(
-    ui.Offset from,
-    ui.Offset to,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+  BackendGradient createGradientLinear(
+    Float32List endPoints,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]) => SkwasmGradient.linear(
-    from: from,
-    to: to,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    matrix4: matrix4,
+  ) => SkwasmGradient.linear(endPoints, colors, colorStops, tileMode, matrix4);
+
+  @override
+  BackendGradient createGradientRadial(
+    double centerX,
+    double centerY,
+    double radius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) => SkwasmGradient.radial(centerX, centerY, radius, colors, colorStops, tileMode, matrix4);
+
+  @override
+  BackendGradient createGradientConical(
+    double startX,
+    double startY,
+    double startRadius,
+    double endX,
+    double endY,
+    double endRadius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) => SkwasmGradient.conical(
+    startX,
+    startY,
+    startRadius,
+    endX,
+    endY,
+    endRadius,
+    colors,
+    colorStops,
+    tileMode,
+    matrix4,
+  );
+
+  @override
+  BackendGradient createGradientSweep(
+    double centerX,
+    double centerY,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    double startAngle,
+    double endAngle,
+    Float32List? matrix4,
+  ) => SkwasmGradient.sweep(
+    centerX,
+    centerY,
+    colors,
+    colorStops,
+    tileMode,
+    startAngle,
+    endAngle,
+    matrix4,
   );
 
   @override
   ui.Paint createPaint() => SkwasmPaint();
+
+  @override
+  BackendColorFilter createColorFilter(EngineColorFilter filter) => SkwasmColorFilter(filter);
+
+  @override
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter) => SkwasmMaskFilter(filter);
 
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
@@ -160,23 +198,6 @@ class SkwasmRenderer extends Renderer {
   ui.PictureRecorder createPictureRecorder() => SkwasmPictureRecorder();
 
   @override
-  ui.Gradient createRadialGradient(
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix4,
-  ]) => SkwasmGradient.radial(
-    center: center,
-    radius: radius,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    matrix4: matrix4,
-  );
-
-  @override
   ui.SceneBuilder createSceneBuilder() => LayerSceneBuilder();
 
   @override
@@ -200,25 +221,6 @@ class SkwasmRenderer extends Renderer {
     fontWeight: fontWeight,
     fontStyle: fontStyle,
     forceStrutHeight: forceStrutHeight,
-  );
-
-  @override
-  ui.Gradient createSweepGradient(
-    ui.Offset center,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    double startAngle = 0.0,
-    double endAngle = math.pi * 2,
-    Float32List? matrix4,
-  ]) => SkwasmGradient.sweep(
-    center: center,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    startAngle: startAngle,
-    endAngle: endAngle,
-    matrix4: matrix4,
   );
 
   @override
@@ -269,28 +271,13 @@ class SkwasmRenderer extends Renderer {
   );
 
   @override
-  ui.Vertices createVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  }) => SkwasmVertices(
-    mode,
-    positions,
-    textureCoordinates: textureCoordinates,
-    colors: colors,
-    indices: indices,
-  );
-
-  @override
-  ui.Vertices createVerticesRaw(
+  BackendVertices createVertices(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
     Int32List? colors,
     Uint16List? indices,
-  }) => SkwasmVertices.raw(
+  }) => SkwasmVertices(
     mode,
     positions,
     textureCoordinates: textureCoordinates,
