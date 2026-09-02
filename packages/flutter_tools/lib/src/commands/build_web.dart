@@ -207,7 +207,7 @@ class BuildWebCommand extends BuildSubCommand {
     final Artifacts artifacts = toolContext.artifacts;
     final Cache cache = toolContext.cache;
     final Platform platform = toolContext.platform;
-    final AnsiTerminal terminal = toolContext.terminal;
+    final Terminal terminal = toolContext.terminal;
 
     final Map<String, String> webDefines = extractWebDefines();
 
