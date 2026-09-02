@@ -116,6 +116,7 @@ class ToolDependencies {
     Platform? platform,
     PlistParser? plistParser,
     PreRunValidator? preRunValidator,
+    ProcessInfo? processInfo,
     ProcessManager? processManager,
     FlutterVersion? flutterVersion,
     FlutterProjectFactory? projectFactory,
@@ -291,6 +292,8 @@ class ToolDependencies {
     final PreRunValidator finalPreRunValidator =
         preRunValidator ?? PreRunValidator(fileSystem: finalFS);
 
+    final ProcessInfo finalProcessInfo = processInfo ?? ProcessInfo(finalFS);
+
     final LocalEngineLocator finalLocalEngineLocator =
         localEngineLocator ??
         LocalEngineLocator(
@@ -460,8 +463,10 @@ class ToolDependencies {
         nativeAssetsBuilder: finalNativeAssetsBuilder,
         os: finalOS,
         outputPreferences: finalOutputPreferences,
+        persistentToolState: finalPersistentToolState,
         platform: finalPlatform,
         preRunValidator: finalPreRunValidator,
+        processInfo: finalProcessInfo,
         processManager: finalProcessManager,
         processUtils: finalProcessUtils,
         projectFactory: finalProjectFactory,
