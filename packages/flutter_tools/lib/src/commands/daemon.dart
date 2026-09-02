@@ -856,8 +856,15 @@ class _DefaultFeatureFlags implements FeatureFlags {
   bool get isWindowsEnabled => true;
 
   @override
-  Object? noSuchMethod(Invocation invocation) =>
-      throw UnimplementedError('${invocation.memberName} not implemented in _DefaultFeatureFlags');
+  bool get isMacOSEnabled => true;
+
+  @override
+  Object? noSuchMethod(Invocation invocation) {
+    if (invocation.isGetter) {
+      return false;
+    }
+    throw UnimplementedError('${invocation.memberName} not implemented in _DefaultFeatureFlags');
+  }
 }
 
 /// The reason a [PlatformType] is not currently supported.
