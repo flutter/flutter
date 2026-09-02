@@ -122,10 +122,11 @@ FlFramebuffer* fl_framebuffer_new(GLint format,
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                          self->texture_id, 0);
 
-  glGenRenderbuffers(1, &self->depth_stencil);
-  glBindRenderbuffer(GL_RENDERBUFFER, self->depth_stencil);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-  attach_depth_stencil(self->depth_stencil);
+  // No depth or stencil attachment is made - this framebuffer is only used to
+  // present already rendered frames, which is done by copying color data with
+  // glBlitFramebuffer() or drawing a textured quad. Neither uses the depth or
+  // stencil tests, and a depth/stencil renderbuffer would use as much memory
+  // again as the texture itself.
 
   return self;
 }

@@ -13,32 +13,50 @@ class FlFramebufferTest : public flutter::testing::LinuxTest {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
 };
 
-TEST_F(FlFramebufferTest, HasDepthStencil) {
+TEST_F(FlFramebufferTest, NoDepthStencil) {
+  // Presentation framebuffers are only ever copied into, so they don't need
+  // a depth/stencil buffer and shouldn't allocate the memory for one.
+  EXPECT_CALL(epoxy, glGenRenderbuffers).Times(0);
+  EXPECT_CALL(epoxy, glRenderbufferStorage).Times(0);
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                        ::testing::_, ::testing::_))
+      .Times(0);
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                        ::testing::_, ::testing::_))
+      .Times(0);
+
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, 100, 100, FALSE);
+}
 
-  GLint depth_type = GL_NONE;
-  glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                        GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE,
-                                        &depth_type);
-  EXPECT_NE(depth_type, GL_NONE);
+TEST_F(FlFramebufferTest, MultisampleHasDepthStencil) {
+  // Framebuffers rendered into by the engine still require a depth/stencil
+  // buffer.
+  ON_CALL(epoxy, epoxy_has_gl_extension(::testing::_))
+      .WillByDefault(::testing::Return(false));
 
-  GLint stencil_type = GL_NONE;
-  glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                                        GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE,
-                                        &stencil_type);
-  EXPECT_NE(stencil_type, GL_NONE);
+  EXPECT_CALL(epoxy, glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8,
+                                           100, 100));
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                        GL_RENDERBUFFER, ::testing::_));
+  EXPECT_CALL(epoxy,
+              glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                        GL_RENDERBUFFER, ::testing::_));
+
+  g_autoptr(FlFramebuffer) framebuffer =
+      fl_framebuffer_new_multisample(GL_RGBA, 100, 100, /*use_msaa=*/FALSE);
 }
 
 TEST_F(FlFramebufferTest, ResourcesRemoved) {
   EXPECT_CALL(epoxy, glGenFramebuffers);
   EXPECT_CALL(epoxy, glGenTextures);
-  EXPECT_CALL(epoxy, glGenRenderbuffers);
   FlFramebuffer* framebuffer = fl_framebuffer_new(GL_RGB, 100, 100, FALSE);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);
-  EXPECT_CALL(epoxy, glDeleteRenderbuffers);
   g_object_unref(framebuffer);
 }
 
@@ -94,7 +112,6 @@ TEST_F(FlFramebufferTest, ImpellerImplicitMSAA) {
 
   FlFramebuffer* framebuffer =
       fl_framebuffer_new_multisample(GL_RGBA, 100, 100, /*use_msaa=*/TRUE);
-  EXPECT_NE(fl_framebuffer_get_texture_id(framebuffer), 0u);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);
@@ -116,7 +133,6 @@ TEST_F(FlFramebufferTest, ImpellerNoMSAA) {
 
   FlFramebuffer* framebuffer =
       fl_framebuffer_new_multisample(GL_RGBA, 100, 100, /*use_msaa=*/TRUE);
-  EXPECT_NE(fl_framebuffer_get_texture_id(framebuffer), 0u);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);
@@ -138,7 +154,6 @@ TEST_F(FlFramebufferTest, SkiaNoMSAA) {
 
   FlFramebuffer* framebuffer =
       fl_framebuffer_new_multisample(GL_RGBA, 100, 100, /*use_msaa=*/FALSE);
-  EXPECT_NE(fl_framebuffer_get_texture_id(framebuffer), 0u);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);
@@ -194,7 +209,6 @@ TEST_F(FlFramebufferTest, ImpellerImplicitMSAABgra) {
 
   FlFramebuffer* framebuffer =
       fl_framebuffer_new_multisample(GL_BGRA_EXT, 100, 100, /*use_msaa=*/TRUE);
-  EXPECT_NE(fl_framebuffer_get_texture_id(framebuffer), 0u);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);

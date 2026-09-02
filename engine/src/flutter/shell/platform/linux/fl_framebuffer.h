@@ -27,7 +27,12 @@ G_DECLARE_FINAL_TYPE(FlFramebuffer, fl_framebuffer, FL, FRAMEBUFFER, GObject)
  * @shareable: %TRUE if this framebuffer can be shared between contexts
  * (requires EGL).
  *
- * Creates a new frame buffer. Requires a valid OpenGL context to create.
+ * Creates a new frame buffer for presenting rendered frames. Requires a valid
+ * OpenGL context to create.
+ *
+ * The framebuffer has a color attachment only; it has no depth or stencil
+ * attachment. Use fl_framebuffer_new_multisample() for a framebuffer to render
+ * into.
  *
  * Returns: a new #FlFramebuffer.
  */
