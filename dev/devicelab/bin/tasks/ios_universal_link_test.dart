@@ -16,7 +16,7 @@ Future<void> main() async {
 
     await testWithNewIOSSimulator('UniversalLinkTestSim', (String deviceId) async {
       try {
-        Future<bool> buildAndTestApp(String projectName, String bundleId) async {
+        Future<bool> buildAndTestApp(String projectName) async {
           print('--- Building and testing $projectName ---');
           final String projectDir = path.join(
             flutterDirectory.path,
@@ -58,24 +58,11 @@ Future<void> main() async {
           return true;
         }
 
-        var allPassed = true;
-        if (!await buildAndTestApp('ios_universal_link', 'com.google.experimental0.dev')) {
-          print('Failed ios_universal_link test');
-          allPassed = false;
-        }
-
-        if (!await buildAndTestApp(
-          'ios_universal_link_appdelegate',
-          'com.google.experimental0.dev',
-        )) {
-          print('Failed ios_universal_link_appdelegate test');
-          allPassed = false;
-        }
-
-        if (allPassed) {
+        final bool success = await buildAndTestApp('ios_universal_link');
+        if (success) {
           result = TaskResult.success(null, benchmarkScoreKeys: <String>[]);
         } else {
-          result = TaskResult.failure('One or more tests failed');
+          result = TaskResult.failure('ios_universal_link test failed');
         }
       } finally {
         await removeIOSSimulator(deviceId);

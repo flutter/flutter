@@ -10,16 +10,14 @@ String _initialRoute = 'Home Page';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChannels.navigation.setMethodCallHandler((MethodCall call) async {
-    if (call.method == 'pushRouteInformation' || call.method == 'pushRoute') {
+    // Both cold and warm deep links are dispatched by FlutterEngine via pushRouteInformation.
+    if (call.method == 'pushRouteInformation') {
       final dynamic args = call.arguments;
-      var location = '';
+      final String location;
       if (args is Map) {
         // pushRouteInformation provides a map with 'location'
         location = (args['location'] as String?) ?? args.toString();
-      } else if (args is String) {
-        // pushRoute provides a string
-        location = args;
-      } else if (args != null) {
+      } else {
         location = args.toString();
       }
       _initialRoute = location;
