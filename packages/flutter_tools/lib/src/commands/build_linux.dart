@@ -27,7 +27,6 @@ class BuildLinuxCommand extends BuildSubCommand {
     required bool verboseHelp,
     super.analytics,
     FeatureFlags? featureFlags,
-    this.operatingSystemUtils,
   }) : _featureFlags = featureFlags ?? const _DefaultFeatureFlags(),
        super(
          logger: toolContext.logger,
@@ -37,7 +36,7 @@ class BuildLinuxCommand extends BuildSubCommand {
        ) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesFlavorOption();
-    final OperatingSystemUtils os = operatingSystemUtils ?? toolContext.os;
+    final OperatingSystemUtils os = toolContext.os;
     final String defaultTargetPlatform = switch (os.hostPlatform) {
       HostPlatform.linux_arm64 => 'linux-arm64',
       HostPlatform.linux_riscv64 => 'linux-riscv64',
@@ -65,7 +64,6 @@ class BuildLinuxCommand extends BuildSubCommand {
 
   final BuildSystem buildSystem;
   final FeatureFlags _featureFlags;
-  final OperatingSystemUtils? operatingSystemUtils;
 
   @visibleForTesting
   FeatureFlags get featureFlags => _featureFlags;
@@ -93,7 +91,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final FileSystem fs = toolContext.fs;
     final Logger logger = this.logger;
-    final OperatingSystemUtils os = operatingSystemUtils ?? toolContext.os;
+    final OperatingSystemUtils os = toolContext.os;
     final Platform platform = toolContext.platform;
 
     final BuildInfo buildInfo = await getBuildInfo();

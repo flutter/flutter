@@ -28,7 +28,6 @@ class BuildWindowsCommand extends BuildSubCommand {
     required bool verboseHelp,
     super.analytics,
     FeatureFlags? featureFlags,
-    this.operatingSystemUtils,
     this.visualStudioOverride,
   }) : _featureFlags = featureFlags ?? const _DefaultFeatureFlags(),
        super(
@@ -47,7 +46,6 @@ class BuildWindowsCommand extends BuildSubCommand {
 
   final BuildSystem buildSystem;
   final FeatureFlags _featureFlags;
-  final OperatingSystemUtils? operatingSystemUtils;
 
   @visibleForTesting
   FeatureFlags get featureFlags => _featureFlags;
@@ -78,7 +76,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final FileSystem fs = toolContext.fs;
     final Logger logger = this.logger;
-    final OperatingSystemUtils os = operatingSystemUtils ?? toolContext.os;
+    final OperatingSystemUtils os = toolContext.os;
     final Platform platform = toolContext.platform;
 
     final BuildInfo buildInfo = await getBuildInfo();

@@ -85,10 +85,6 @@ class BuildCommand extends FlutterCommand {
         analytics ?? (context.get<Analytics>() ?? const NoOpAnalytics());
     final FeatureFlags effectiveFeatureFlags =
         featureFlags ?? (context.get<FeatureFlags>() ?? const _DefaultFeatureFlags());
-    final Platform effectivePlatform =
-        (platform.isMacOS || context.get<Platform>() == null || !context.get<Platform>()!.isMacOS)
-        ? platform
-        : context.get<Platform>()!;
     final persistentToolState = PersistentToolState.test(
       directory: fileSystem.directory('.tmp_state')..createSync(recursive: true),
       logger: logger,
@@ -103,30 +99,30 @@ class BuildCommand extends FlutterCommand {
           botDetector: BotDetector(
             httpClientFactory: () => HttpClient(),
             persistentToolState: persistentToolState,
-            platform: effectivePlatform,
+            platform: platform,
           ),
           cache: cache,
           config: config,
           customDevicesConfig: CustomDevicesConfig(
             fileSystem: fileSystem,
             logger: logger,
-            platform: effectivePlatform,
+            platform: platform,
           ),
           flutterVersion: flutterVersion,
           fs: fileSystem,
-          git: Git(currentPlatform: effectivePlatform, runProcessWith: processUtils),
+          git: Git(currentPlatform: platform, runProcessWith: processUtils),
           localEngineLocator: LocalEngineLocator(
             fileSystem: fileSystem,
             flutterRoot: Cache.flutterRoot ?? '',
             logger: logger,
-            platform: effectivePlatform,
+            platform: platform,
             userMessages: UserMessages(),
           ),
           logger: logger,
           os: osUtils,
           outputPreferences: effectiveOutputPreferences,
           persistentToolState: persistentToolState,
-          platform: effectivePlatform,
+          platform: platform,
           preRunValidator:
               preRunValidator ??
               (context.get<PreRunValidator>() ??

@@ -193,7 +193,6 @@ void main() {
       analytics: fakeAnalytics,
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       featureFlags: effectiveFeatureFlags,
-      operatingSystemUtils: effectiveOsUtils,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
     );
