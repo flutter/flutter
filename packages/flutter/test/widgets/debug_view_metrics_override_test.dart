@@ -13,51 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'multi_view_testing.dart';
 
-/// A [ui.FlutterView] that reports an id its [platformDispatcher] does not
-/// resolve, standing in for a view the framework did not produce.
-class _UnboundView implements ui.FlutterView {
-  _UnboundView(this._view, this.viewId);
-
-  final ui.FlutterView _view;
-
-  @override
-  final int viewId;
-
-  @override
-  ui.PlatformDispatcher get platformDispatcher => _view.platformDispatcher;
-
-  @override
-  double get devicePixelRatio => _view.devicePixelRatio;
-
-  @override
-  ui.Size get physicalSize => _view.physicalSize;
-
-  @override
-  ui.ViewPadding get padding => _view.padding;
-
-  @override
-  ui.ViewPadding get viewPadding => _view.viewPadding;
-
-  @override
-  ui.ViewPadding get viewInsets => _view.viewInsets;
-
-  @override
-  ui.ViewPadding get systemGestureInsets => _view.systemGestureInsets;
-
-  @override
-  List<ui.DisplayFeature> get displayFeatures => _view.displayFeatures;
-
-  @override
-  ui.DisplayCornerRadii? get displayCornerRadii => _view.displayCornerRadii;
-
-  @override
-  ui.GestureSettings get gestureSettings => _view.gestureSettings;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
-}
-
 /// Every metric [DebugViewMetricsOverride] can set that [MediaQueryData]
 /// surfaces: an override that sets it, how to read it back, and the value
 /// [MediaQueryData] must then report.
@@ -497,28 +452,59 @@ void main() {
       await tester.pump();
     });
 
-    testWidgets('an overridden metric takes its value from the override itself', (
-      WidgetTester tester,
-    ) async {
-      // A FlutterView whose dispatcher resolves a different id than the view
-      // reports. The overridden value has to come from the override registered
-      // for the reported id, not from a dispatcher read, or the result would be
-      // neither the override's value nor the inherited one.
-      final unbound = _UnboundView(tester.view, tester.view.viewId + 999);
-      final MediaQueryData inherited = MediaQueryData.fromView(
-        tester.view,
-      ).copyWith(textScaler: const TextScaler.linear(4.0), boldText: false, highContrast: true);
+    testWidgets('explicit test values outrank a debug override', (WidgetTester tester) async {
+      // DebugViewMetricsOverride documents that a value set on a
+      // TestPlatformDispatcher or TestFlutterView wins over an override, and
+      // the dispatcher implements that by resolving the test value first.
+      // MediaQuery has to agree with it, or the two report different platforms.
+      tester.platformDispatcher.textScaleFactorTestValue = 4.0;
+      tester.platformDispatcher.platformBrightnessTestValue = ui.Brightness.dark;
+      tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(
+        boldText: true,
+      );
+      tester.view.devicePixelRatio = 5.0;
+
+      late MediaQueryData data;
+      await tester.pumpWidget(_capture((MediaQueryData value) => data = value));
 
       debugSetViewMetricsOverride(
-        unbound.viewId,
-        const DebugViewMetricsOverride(textScaleFactor: 5.0, boldText: true),
+        tester.view.viewId,
+        const DebugViewMetricsOverride(
+          textScaleFactor: 3.0,
+          platformBrightness: ui.Brightness.light,
+          boldText: false,
+          devicePixelRatio: 7.0,
+        ),
       );
-      final data = MediaQueryData.fromView(unbound, platformData: inherited);
-      debugClearViewMetricsOverrides();
+      await tester.pump();
 
-      expect(data.textScaler.scale(10), 50, reason: 'the override supplies the value');
-      expect(data.boldText, isTrue, reason: 'the override supplies the value');
-      expect(data.highContrast, isTrue, reason: 'the parent supplies unnamed metrics');
+      final ui.PlatformDispatcher dispatcher = tester.view.platformDispatcher;
+      final double dispatcherTextScale = dispatcher.textScaleFactor;
+      final ui.Brightness dispatcherBrightness = dispatcher.platformBrightness;
+      final bool dispatcherBoldText = dispatcher.accessibilityFeatures.boldText;
+      final double viewRatio = tester.view.devicePixelRatio;
+      final reported = data;
+      // SystemTextScaler asks the dispatcher at scale() time, so this has to be
+      // evaluated before the test values are cleared.
+      final double reportedTextScale = reported.textScaler.scale(10);
+
+      debugClearViewMetricsOverrides();
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
+      tester.platformDispatcher.clearPlatformBrightnessTestValue();
+      tester.platformDispatcher.clearAccessibilityFeaturesTestValue();
+      tester.view.resetDevicePixelRatio();
+      await tester.pump();
+
+      // The dispatcher and the view report the test values, not the override.
+      expect(dispatcherTextScale, 4.0);
+      expect(dispatcherBrightness, ui.Brightness.dark);
+      expect(dispatcherBoldText, isTrue);
+      expect(viewRatio, 5.0);
+      // MediaQuery agrees with them.
+      expect(reportedTextScale, 40.0);
+      expect(reported.platformBrightness, ui.Brightness.dark);
+      expect(reported.boldText, isTrue);
+      expect(reported.devicePixelRatio, 5.0);
     });
   });
 
@@ -589,6 +575,80 @@ void main() {
       }
       debugClearViewMetricsOverrides();
       await tester.pump();
+    });
+  });
+
+  group('disableAnimations', () {
+    testWidgets('reaches MediaQuery per view but AnimationController process-wide', (
+      WidgetTester tester,
+    ) async {
+      // AnimationBehavior.normal shortens a controller's duration according to
+      // SemanticsBinding.disableAnimations, which the binding caches from its
+      // own dispatcher and which therefore resolves the implicit view's
+      // override however many views there are. This pins that boundary: it is
+      // the documented limit of the per-view contract, not an accident.
+      final secondary = FakeView(tester.view);
+      expect(secondary.viewId, isNot(tester.view.viewId));
+
+      final controller = AnimationController(vsync: tester, duration: const Duration(seconds: 1));
+      addTearDown(controller.dispose);
+
+      // A one second animation is scaled to 50ms when animations are disabled,
+      // so whether it has finished after 100ms says which value was used.
+      Future<bool> finishesShortened() async {
+        controller.value = 0.0;
+        controller.forward();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 100));
+        final bool finished = controller.isCompleted;
+        controller.stop();
+        return finished;
+      }
+
+      expect(SemanticsBinding.instance.disableAnimations, isFalse);
+      expect(await finishesShortened(), isFalse);
+
+      // The implicit view's override reaches the binding, so it shortens
+      // controllers belonging to every view.
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(disableAnimations: true),
+      );
+      final bool bindingFromImplicit = SemanticsBinding.instance.disableAnimations;
+      final bool shortenedByImplicit = await finishesShortened();
+      debugClearViewMetricsOverrides();
+
+      // A secondary view's override does not, even though that view and its
+      // MediaQuery both report animations as disabled.
+      debugSetViewMetricsOverride(
+        secondary.viewId,
+        const DebugViewMetricsOverride(disableAnimations: true),
+      );
+      final bool bindingFromSecondary = SemanticsBinding.instance.disableAnimations;
+      final bool shortenedBySecondary = await finishesShortened();
+      final bool secondaryReports =
+          secondary.platformDispatcher.accessibilityFeatures.disableAnimations;
+      late MediaQueryData secondaryData;
+      await tester.pumpWidget(
+        MediaQuery.fromView(
+          view: secondary,
+          child: _capture((MediaQueryData value) => secondaryData = value),
+        ),
+      );
+      final bool secondaryMediaQuery = secondaryData.disableAnimations;
+      debugClearViewMetricsOverrides();
+      await tester.pump();
+
+      expect(bindingFromImplicit, isTrue);
+      expect(shortenedByImplicit, isTrue, reason: 'the implicit view shortens every controller');
+      expect(bindingFromSecondary, isFalse);
+      expect(
+        shortenedBySecondary,
+        isFalse,
+        reason: 'a secondary view does not shorten any controller',
+      );
+      expect(secondaryReports, isTrue, reason: 'the view itself does report it');
+      expect(secondaryMediaQuery, isTrue, reason: 'and so does its MediaQuery');
     });
   });
 

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -379,6 +380,68 @@ void main() {
       );
     });
 
+    test('rejects unknown members of nested objects', () {
+      // A misspelled nested member is the same tooling mistake as a misspelled
+      // metric: the value it was meant to carry is silently not applied.
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'viewInsets': <String, Object?>{'left': 0, 'top': 0, 'right': 0, 'botom': 4},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'viewInsets': <String, Object?>{'left': 0, 'top': 0, 'right': 0, 'bottom': 4, 'botom': 4},
+        }),
+        throwsA(
+          isA<FormatException>().having(
+            (FormatException e) => e.message,
+            'message',
+            allOf(contains('botom'), contains('viewInsets')),
+          ),
+        ),
+      );
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'physicalSize': <String, Object?>{'width': 1, 'height': 2, 'depth': 3},
+        }),
+        throwsFormatException,
+      );
+      // The service extension hands fromJson what json.decode produces, which is
+      // Map<String, dynamic> rather than the literals above, so the nested
+      // check has to match that type too.
+      expect(
+        () => DebugViewMetricsOverride.fromJson(
+          json.decode('{"viewInsets": {"left": 0, "top": 0, "right": 0, "bottom": 4, "botom": 9}}')
+              as Map<String, Object?>,
+        ),
+        throwsA(
+          isA<FormatException>().having(
+            (FormatException e) => e.message,
+            'message',
+            contains('botom'),
+          ),
+        ),
+      );
+      expect(
+        DebugViewMetricsOverride.fromJson(
+          json.decode('{"viewInsets": {"left": 0, "top": 0, "right": 0, "bottom": 4}}')
+              as Map<String, Object?>,
+        ).viewInsets,
+        const DebugViewPadding(bottom: 4),
+      );
+
+      for (final key in <String>['padding', 'viewPadding', 'viewInsets']) {
+        expect(
+          () => DebugViewMetricsOverride.fromJson(<String, Object?>{
+            key: const <String, Object?>{'left': 0, 'top': 0, 'right': 0, 'bottom': 0, 'extra': 0},
+          }),
+          throwsFormatException,
+          reason: '$key accepted an unknown member',
+        );
+      }
+    });
+
     test('rejects out of range values', () {
       for (final value in <Object>[0, -1, double.infinity, double.nan]) {
         expect(
@@ -520,6 +583,47 @@ void main() {
       expect(debugClearViewMetricsOverrides(), isFalse);
     });
 
+    test('rejects geometry that cannot be laid out, built directly', () {
+      // The const constructor cannot check these, and tooling payloads go
+      // through fromJson, so debugSetViewMetricsOverride is the only gate a
+      // directly built override passes through.
+      const invalid = <DebugViewMetricsOverride>[
+        DebugViewMetricsOverride(physicalSize: ui.Size(double.nan, 100)),
+        DebugViewMetricsOverride(physicalSize: ui.Size(100, double.infinity)),
+        DebugViewMetricsOverride(physicalSize: ui.Size(-1, 100)),
+        DebugViewMetricsOverride(physicalSize: ui.Size(100, -1)),
+        DebugViewMetricsOverride(padding: DebugViewPadding(left: -1)),
+        DebugViewMetricsOverride(padding: DebugViewPadding(top: double.nan)),
+        DebugViewMetricsOverride(viewPadding: DebugViewPadding(right: double.infinity)),
+        DebugViewMetricsOverride(viewInsets: DebugViewPadding(bottom: -1)),
+      ];
+      for (final override in invalid) {
+        expect(
+          () => debugSetViewMetricsOverride(1, override),
+          throwsFlutterError,
+          reason: '$override was stored',
+        );
+        expect(debugViewMetricsOverrides, isEmpty, reason: '$override left state behind');
+      }
+
+      // Zero extents are legal, and a rejected override does not disturb one
+      // that is already installed.
+      const valid = DebugViewMetricsOverride(
+        physicalSize: ui.Size.zero,
+        padding: DebugViewPadding.zero,
+      );
+      expect(debugSetViewMetricsOverride(1, valid), isTrue);
+      expect(
+        () => debugSetViewMetricsOverride(
+          1,
+          const DebugViewMetricsOverride(viewInsets: DebugViewPadding(bottom: -1)),
+        ),
+        throwsFlutterError,
+      );
+      expect(debugViewMetricsOverrides[1], valid);
+      debugClearViewMetricsOverrides();
+    });
+
     test('debugAssertAllFoundationVarsUnset treats a leftover override as a leak', () {
       expect(debugAssertAllFoundationVarsUnset('leak'), isTrue);
       debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(boldText: true));
@@ -571,11 +675,11 @@ void main() {
         same(implicitView.platformDispatcher),
       );
 
-      // For an id the platform does not report there is no view to hang the
-      // dispatcher off, so one is cached; repeated calls are still stable.
+      // For an id the platform reports no view for, there is nothing to tie the
+      // result to, so a fresh one is built per call and the caller holds it.
       final ui.PlatformDispatcher viewless = debugApplyViewMetricsOverridesForView(real, 123456);
       expect(viewless, isNot(same(implicitView.platformDispatcher)));
-      expect(debugApplyViewMetricsOverridesForView(real, 123456), same(viewless));
+      expect(debugApplyViewMetricsOverridesForView(real, 123456), isNot(same(viewless)));
 
       // It resolves the override registered for the id it was bound to, and
       // only that one.
@@ -769,25 +873,6 @@ void main() {
       expect(second.platformDispatcher.platformBrightness, ui.Brightness.light);
       expect(second.platformDispatcher.alwaysUse24HourFormat, isFalse);
       expect(second.platformDispatcher.accessibilityFeatures.boldText, isFalse);
-    });
-
-    test('a view adopts a dispatcher already handed out for its id', () {
-      final dispatcher = _TwoViewPlatformDispatcher();
-      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
-
-      // Asked about before the platform reports a view with this id.
-      final ui.PlatformDispatcher early = debugApplyViewMetricsOverridesForView(dispatcher, 3);
-      expect(debugApplyViewMetricsOverridesForView(dispatcher, 3), same(early));
-
-      // Once the view turns up it takes over the dispatcher that was already
-      // handed out, so the early caller and the view agree.
-      dispatcher.addView(3, 6.0);
-      expect(wrapped.view(id: 3)!.platformDispatcher, same(early));
-      expect(debugApplyViewMetricsOverridesForView(dispatcher, 3), same(early));
-
-      debugSetViewMetricsOverride(3, const DebugViewMetricsOverride(textScaleFactor: 2.0));
-      expect(early.textScaleFactor, 2.0);
-      expect(wrapped.view(id: 3)!.platformDispatcher.textScaleFactor, 2.0);
     });
 
     test('follows views as they are added and removed', () {

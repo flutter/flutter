@@ -67,9 +67,13 @@ ui.PlatformDispatcher debugApplyViewMetricsOverrides(ui.PlatformDispatcher dispa
 /// this library produced, which is bound correctly by construction; this is for
 /// views it did not produce.
 ///
-/// Like [debugApplyViewMetricsOverrides], this returns the same wrapper every
-/// time it is called with the same dispatcher and view id, and returns
-/// [dispatcher] unchanged in release mode.
+/// While `dispatcher` reports a view with this id, this returns that view's own
+/// dispatcher, so repeated calls and the view itself all report the same
+/// object. For an id it reports no view for there is nothing to tie the result
+/// to, so a new one is built per call and the caller is expected to hold it
+/// rather than to look it up again.
+///
+/// Returns [dispatcher] unchanged in release mode.
 ui.PlatformDispatcher debugApplyViewMetricsOverridesForView(
   ui.PlatformDispatcher dispatcher,
   int viewId,
@@ -103,7 +107,9 @@ final Expando<_DebugViewMetricsPlatformDispatcher> _wrappers =
 /// them from the override of [ui.PlatformDispatcher.implicitView], because
 /// consumers that read those metrics off the binding rather than off a view —
 /// [SemanticsBinding.accessibilityFeatures], for one — have no view to resolve
-/// against.
+/// against. Such a consumer is therefore process-wide however many views there
+/// are; [DebugViewMetricsOverride.disableAnimations] describes what that means
+/// for the one whose behavior an application is most likely to notice.
 ///
 /// This class deliberately does not implement `noSuchMethod`: when `dart:ui`
 /// grows a member, this library must fail to compile so that whoever adds the
@@ -135,29 +141,22 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   // through [_root], so `late` keeps them from allocating an Expando each.
   late final Expando<_DebugViewMetricsFlutterView> _views = Expando<_DebugViewMetricsFlutterView>();
 
-  // Dispatchers for view ids the platform does not report a view for, which is
-  // the only case debugApplyViewMetricsOverridesForView has to cache: a view
-  // this library vends owns its own dispatcher, so that one dies with the view.
-  // Keyed by id because there is no object to key on. An entry is handed over
-  // to the view and removed from here if a view with that id turns up later, so
-  // what is left is only ids that never had one, which in practice means test
-  // fakes.
-  late final Map<int, _DebugViewMetricsPlatformDispatcher> _dispatchersForViewlessId =
-      <int, _DebugViewMetricsPlatformDispatcher>{};
-
   _DebugViewMetricsPlatformDispatcher _dispatcherForView(int viewId) {
     assert(_root == null, 'Per-view dispatchers are owned by the root dispatcher.');
-    // Prefer the dispatcher the view already owns, so that a caller asking by
-    // id and the view itself report the same object, and so that nothing is
-    // retained past the life of the view.
+    // The dispatcher a view owns, when there is one: that keeps a caller asking
+    // by id and the view itself reporting the same object, and it is collected
+    // along with the view.
+    //
+    // For an id the platform reports no view for there is nothing to key a
+    // cache on and nothing to bound its life, so a new one is built each time
+    // and the caller is expected to hold it, which is what TestFlutterView
+    // does. Caching those here would retain one per id for the life of the
+    // isolate, which a test suite that makes many fake views would grow without
+    // limit.
     final ui.FlutterView? view = _dispatcher.view(id: viewId);
-    if (view != null) {
-      return _wrapView(view)._platformDispatcher;
-    }
-    return _dispatchersForViewlessId[viewId] ??= _DebugViewMetricsPlatformDispatcher._forView(
-      this,
-      viewId,
-    );
+    return view != null
+        ? _wrapView(view)._platformDispatcher
+        : _DebugViewMetricsPlatformDispatcher._forView(this, viewId);
   }
 
   DebugViewMetricsOverride? get _override {
@@ -169,11 +168,7 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
     final _DebugViewMetricsPlatformDispatcher root = _root ?? this;
     return root._views[view] ??= _DebugViewMetricsFlutterView(
       view,
-      // Adopt a dispatcher already handed out for this id, so that a caller
-      // that asked before the platform reported the view keeps the object it
-      // was given, and so that nothing is left behind in the fallback cache.
-      root._dispatchersForViewlessId.remove(view.viewId) ??
-          _DebugViewMetricsPlatformDispatcher._forView(root, view.viewId),
+      _DebugViewMetricsPlatformDispatcher._forView(root, view.viewId),
     );
   }
 

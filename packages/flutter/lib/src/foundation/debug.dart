@@ -14,7 +14,14 @@ library;
 import 'dart:collection';
 import 'dart:ui'
     as ui
-    show AccessibilityFeatures, Brightness, FlutterView, PlatformDispatcher, Size, ViewPadding;
+    show
+        AccessibilityFeatures,
+        Brightness,
+        FlutterView,
+        PlatformDispatcher,
+        Size,
+        ViewConstraints,
+        ViewPadding;
 
 import 'package:meta/meta.dart';
 
@@ -455,6 +462,21 @@ class DebugViewMetricsOverride with Diagnosticable {
   final bool? invertColors;
 
   /// Overrides [ui.AccessibilityFeatures.disableAnimations].
+  ///
+  /// This reaches [MediaQueryData.disableAnimations], and so
+  /// [MediaQuery.disableAnimationsOf], for the view it is registered for, along
+  /// with the [ui.AccessibilityFeatures] that view's [ui.PlatformDispatcher]
+  /// reports.
+  ///
+  /// It does not reach [AnimationController]s built with
+  /// [AnimationBehavior.normal], which shorten their duration according to
+  /// [SemanticsBinding.disableAnimations]. That is process-wide: the binding
+  /// caches it from its own [ui.PlatformDispatcher], which has no view to
+  /// resolve against and so uses the override of
+  /// [ui.PlatformDispatcher.implicitView]. An override on the implicit view
+  /// therefore shortens those animations in every view, and an override on any
+  /// other view shortens them in none. Only widgets that read the value out of
+  /// [MediaQuery] honor it per view.
   final bool? disableAnimations;
 
   /// Overrides [ui.AccessibilityFeatures.boldText].
@@ -699,20 +721,21 @@ class DebugViewMetricsOverride with Diagnosticable {
   }
 
   static ui.Size? _sizeFromJson(Map<String, Object?> json, String key) {
-    return switch (json[key]) {
+    final Object? value = _checkedMembers(json[key], key, const <String>{'width', 'height'});
+    return switch (value) {
       null => null,
       {'width': final num width, 'height': final num height} => ui.Size(
         _checkedExtent(width, key, 'width'),
         _checkedExtent(height, key, 'height'),
       ),
-      final Object value => throw FormatException(
-        'Expected {"width": num, "height": num} for $key, got $value.',
-      ),
+      _ => throw FormatException('Expected {"width": num, "height": num} for $key, got $value.'),
     };
   }
 
   static DebugViewPadding? _viewPaddingFromJson(Map<String, Object?> json, String key) {
-    return switch (json[key]) {
+    const members = <String>{'left', 'top', 'right', 'bottom'};
+    final Object? value = _checkedMembers(json[key], key, members);
+    return switch (value) {
       null => null,
       {
         'left': final num left,
@@ -726,22 +749,85 @@ class DebugViewMetricsOverride with Diagnosticable {
           right: _checkedExtent(right, key, 'right'),
           bottom: _checkedExtent(bottom, key, 'bottom'),
         ),
-      final Object value => throw FormatException(
+      _ => throw FormatException(
         'Expected {"left": num, "top": num, "right": num, "bottom": num} for $key, got $value.',
       ),
     };
   }
 
-  // Sizes and insets are platform-reported distances that feed straight into
-  // layout, so a negative or non-finite component from tooling would produce
-  // negative or NaN geometry rather than an obviously wrong looking screen.
+  /// Throws a [FlutterError] describing the first geometry this override sets
+  /// that cannot be used as layout input.
+  ///
+  /// The constructor checks [devicePixelRatio] and [textScaleFactor], but
+  /// cannot check the rest: reading a field off a [ui.Size] or a
+  /// [DebugViewPadding] is not a constant expression, and asserting on one
+  /// would make the constructor unusable in a `const` expression.
+  /// [DebugViewMetricsOverride.fromJson] rejects them for values arriving from
+  /// tooling, and [debugSetViewMetricsOverride] calls this for values built
+  /// directly, so that a negative or non-finite size cannot reach layout as a
+  /// tight [ui.ViewConstraints] or as NaN [MediaQueryData] geometry.
+  ///
+  /// Returns true so it can be used inside an `assert`.
+  bool _debugAssertGeometryIsValid() {
+    void checkExtent(double extent, String description) {
+      if (!_isUsableExtent(extent)) {
+        throw FlutterError(
+          'DebugViewMetricsOverride.$description must be finite and non-negative, '
+          'but was $extent.',
+        );
+      }
+    }
+
+    void checkPadding(DebugViewPadding? padding, String name) {
+      if (padding == null) {
+        return;
+      }
+      checkExtent(padding.left, '$name.left');
+      checkExtent(padding.top, '$name.top');
+      checkExtent(padding.right, '$name.right');
+      checkExtent(padding.bottom, '$name.bottom');
+    }
+
+    if (physicalSize case final ui.Size size) {
+      checkExtent(size.width, 'physicalSize.width');
+      checkExtent(size.height, 'physicalSize.height');
+    }
+    checkPadding(padding, 'padding');
+    checkPadding(viewPadding, 'viewPadding');
+    checkPadding(viewInsets, 'viewInsets');
+    return true;
+  }
+
+  // A nested object with an unrecognized member is a tooling mistake for the
+  // same reason an unrecognized metric is: the value it was meant to carry is
+  // silently not applied, and the call still reports success. Returns [value]
+  // so that it can wrap the read.
+  static Object? _checkedMembers(Object? value, String key, Set<String> members) {
+    if (value is Map<String, Object?>) {
+      final Iterable<String> unknown = value.keys.where((String k) => !members.contains(k));
+      if (unknown.isNotEmpty) {
+        throw FormatException(
+          'Unknown member(s) of $key: ${unknown.join(', ')}. '
+          'Supported members are: ${members.join(', ')}.',
+        );
+      }
+    }
+    return value;
+  }
+
   static double _checkedExtent(num value, String key, String component) {
     final double extent = value.toDouble();
-    if (!extent.isFinite || extent < 0) {
+    if (!_isUsableExtent(extent)) {
       throw FormatException('$key.$component must be finite and non-negative, got $extent.');
     }
     return extent;
   }
+
+  // What a size or inset component has to be for layout to be able to use it,
+  // stated once so that the JSON boundary and the direct one accept the same
+  // values. A negative or non-finite component would produce negative or NaN
+  // geometry rather than an obviously wrong looking screen.
+  static bool _isUsableExtent(double extent) => extent.isFinite && extent >= 0;
 }
 
 /// Debug-only view metric overrides, keyed by [ui.FlutterView.viewId].
@@ -794,6 +880,7 @@ final Map<int, DebugViewMetricsOverride> _unmodifiableViewMetricsOverrides =
 bool debugSetViewMetricsOverride(int viewId, DebugViewMetricsOverride? override) {
   var changed = false;
   assert(() {
+    assert(override?._debugAssertGeometryIsValid() ?? true);
     final DebugViewMetricsOverride? previous = _viewMetricsOverrides[viewId];
     final DebugViewMetricsOverride? next = override == null || override.isEmpty ? null : override;
     if (previous == next) {

@@ -291,6 +291,14 @@ class MediaQueryData {
   /// this method again when it changes to keep the constructed [MediaQueryData]
   /// updated.
   ///
+  /// In debug mode there is one exception: a [debugViewMetricsOverrides] entry
+  /// for `view` supersedes the platform-wide values `platformData` supplies, so
+  /// while one is installed — and on the notification that reports it being
+  /// removed — the last three matter even when `platformData` is provided.
+  /// [MediaQuery.fromView] handles this; a caller that reproduces the
+  /// `platformData` early out itself would miss overrides being installed and
+  /// removed.
+  ///
   /// In general, [MediaQuery.of], and its associated "...Of" methods, are the
   /// appropriate way to obtain [MediaQueryData] from a widget. This `fromView`
   /// constructor is primarily for use in the implementation of the framework
@@ -309,16 +317,13 @@ class MediaQueryData {
         debugViewMetricsOverride: _debugViewMetricsOverrideFor(view),
       );
 
-  // Every platform-wide metric resolves the same way: a debug view metrics
-  // override for this view wins, then the platform data inherited from an
-  // ancestor MediaQuery, then what this view's PlatformDispatcher reports.
-  //
-  // The overridden value is taken from the override itself rather than read
-  // back out of the dispatcher, so that the decision to honor an override and
-  // the value it contributes cannot come from different views. A FlutterView
-  // whose platformDispatcher is not bound to its own viewId — TestFlutterView
-  // subclasses that override viewId, for instance — would otherwise report a
-  // value that is neither the override's nor the ancestor's.
+  // Every platform-wide metric resolves the same way, through [_resolve]: an
+  // override registered for this view makes the value come from this view's
+  // PlatformDispatcher — which is where that override is applied, and where a
+  // value set explicitly on a TestPlatformDispatcher or TestFlutterView
+  // supersedes it — rather than from the platform data an ancestor MediaQuery
+  // supplied. That relies on the view reporting a dispatcher bound to its own
+  // id, which is asserted where the two are paired.
   MediaQueryData._fromView(
     ui.FlutterView view, {
     required MediaQueryData? platformData,
@@ -328,10 +333,11 @@ class MediaQueryData {
        devicePixelRatio = view.devicePixelRatio,
        _textScaleFactor = 1.0, // _textScaler is the source of truth.
        _textScaler = _textScalerFromView(view, platformData, debugViewMetricsOverride),
-       platformBrightness =
-           debugViewMetricsOverride?.platformBrightness ??
-           platformData?.platformBrightness ??
-           view.platformDispatcher.platformBrightness,
+       platformBrightness = _resolve(
+         debugViewMetricsOverride?.platformBrightness,
+         platformData?.platformBrightness,
+         view.platformDispatcher.platformBrightness,
+       ),
        padding = EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio),
        viewPadding = EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio),
        viewInsets = EdgeInsets.fromViewPadding(view.viewInsets, view.devicePixelRatio),
@@ -339,42 +345,51 @@ class MediaQueryData {
          view.systemGestureInsets,
          view.devicePixelRatio,
        ),
-       accessibleNavigation =
-           debugViewMetricsOverride?.accessibleNavigation ??
-           platformData?.accessibleNavigation ??
-           accessibilityFeatures.accessibleNavigation,
-       invertColors =
-           debugViewMetricsOverride?.invertColors ??
-           platformData?.invertColors ??
-           accessibilityFeatures.invertColors,
-       disableAnimations =
-           debugViewMetricsOverride?.disableAnimations ??
-           platformData?.disableAnimations ??
-           accessibilityFeatures.disableAnimations,
-       reduceMotion =
-           debugViewMetricsOverride?.reduceMotion ??
-           platformData?.reduceMotion ??
-           accessibilityFeatures.reduceMotion,
-       boldText =
-           debugViewMetricsOverride?.boldText ??
-           platformData?.boldText ??
-           accessibilityFeatures.boldText,
-       supportsAnnounce =
-           debugViewMetricsOverride?.supportsAnnounce ??
-           platformData?.supportsAnnounce ??
-           accessibilityFeatures.supportsAnnounce,
-       highContrast =
-           debugViewMetricsOverride?.highContrast ??
-           platformData?.highContrast ??
-           accessibilityFeatures.highContrast,
-       onOffSwitchLabels =
-           debugViewMetricsOverride?.onOffSwitchLabels ??
-           platformData?.onOffSwitchLabels ??
-           accessibilityFeatures.onOffSwitchLabels,
-       alwaysUse24HourFormat =
-           debugViewMetricsOverride?.alwaysUse24HourFormat ??
-           platformData?.alwaysUse24HourFormat ??
-           view.platformDispatcher.alwaysUse24HourFormat,
+       accessibleNavigation = _resolve(
+         debugViewMetricsOverride?.accessibleNavigation,
+         platformData?.accessibleNavigation,
+         accessibilityFeatures.accessibleNavigation,
+       ),
+       invertColors = _resolve(
+         debugViewMetricsOverride?.invertColors,
+         platformData?.invertColors,
+         accessibilityFeatures.invertColors,
+       ),
+       disableAnimations = _resolve(
+         debugViewMetricsOverride?.disableAnimations,
+         platformData?.disableAnimations,
+         accessibilityFeatures.disableAnimations,
+       ),
+       reduceMotion = _resolve(
+         debugViewMetricsOverride?.reduceMotion,
+         platformData?.reduceMotion,
+         accessibilityFeatures.reduceMotion,
+       ),
+       boldText = _resolve(
+         debugViewMetricsOverride?.boldText,
+         platformData?.boldText,
+         accessibilityFeatures.boldText,
+       ),
+       supportsAnnounce = _resolve(
+         debugViewMetricsOverride?.supportsAnnounce,
+         platformData?.supportsAnnounce,
+         accessibilityFeatures.supportsAnnounce,
+       ),
+       highContrast = _resolve(
+         debugViewMetricsOverride?.highContrast,
+         platformData?.highContrast,
+         accessibilityFeatures.highContrast,
+       ),
+       onOffSwitchLabels = _resolve(
+         debugViewMetricsOverride?.onOffSwitchLabels,
+         platformData?.onOffSwitchLabels,
+         accessibilityFeatures.onOffSwitchLabels,
+       ),
+       alwaysUse24HourFormat = _resolve(
+         debugViewMetricsOverride?.alwaysUse24HourFormat,
+         platformData?.alwaysUse24HourFormat,
+         view.platformDispatcher.alwaysUse24HourFormat,
+       ),
        navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
        gestureSettings = DeviceGestureSettings.fromView(view),
        displayFeatures = view.displayFeatures,
@@ -393,8 +408,22 @@ class MediaQueryData {
            view.platformDispatcher.paragraphSpacingOverride,
        displayCornerRadii = _displayCornerRadiiFromView(view);
 
-  /// The debug view metrics override registered for [view], or null in release
-  /// mode and when the view has none.
+  /// Resolves one platform-wide metric.
+  ///
+  /// [overridden] is what a [debugViewMetricsOverrides] entry for this view
+  /// sets for the metric, or null when it sets nothing; only whether it is null
+  /// matters here, never its value. [reported] is what this view's
+  /// [ui.PlatformDispatcher] says, which already has that override applied —
+  /// and in which a value set explicitly for a test supersedes it, as
+  /// [DebugViewMetricsOverride] documents. Taking the value from there rather
+  /// than from the override keeps [MediaQueryData] and the dispatcher in
+  /// agreement about what the platform currently reports.
+  ///
+  /// [inherited] is what an ancestor [MediaQuery] supplies, which an override
+  /// supersedes so that a per-view override reaches a nested [MediaQuery].
+  static T _resolve<T>(T? overridden, T? inherited, T reported) =>
+      overridden != null ? reported : inherited ?? reported;
+
   static DebugViewMetricsOverride? _debugViewMetricsOverrideFor(ui.FlutterView view) {
     DebugViewMetricsOverride? result;
     assert(() {
@@ -409,15 +438,13 @@ class MediaQueryData {
     MediaQueryData? platformData,
     DebugViewMetricsOverride? debugViewMetricsOverride,
   ) {
-    // Linear rather than the view's SystemTextScaler for the same reason the
-    // other overridden metrics come from the override: the factor has to be the
-    // one that was registered for this view. An overridden PlatformDispatcher
-    // scales font sizes linearly by that same factor, so the two agree wherever
-    // the dispatcher really is this view's.
-    return switch (debugViewMetricsOverride?.textScaleFactor) {
-      final double textScaleFactor => TextScaler.linear(textScaleFactor),
-      null => platformData?.textScaler ?? SystemTextScaler._(view.platformDispatcher),
-    };
+    // The same rule as [_resolve], written out because the override carries a
+    // factor while the metric is a [TextScaler]: what the override sets is the
+    // factor the view's dispatcher already scales font sizes by.
+    final TextScaler reported = SystemTextScaler._(view.platformDispatcher);
+    return debugViewMetricsOverride?.textScaleFactor != null
+        ? reported
+        : platformData?.textScaler ?? reported;
   }
 
   static BorderRadius? _displayCornerRadiiFromView(ui.FlutterView view) {
