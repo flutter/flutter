@@ -1238,14 +1238,15 @@ abstract class FlutterCommand extends Command<void> {
     if (explicitEnableHcpp case final bool explicit) {
       return explicit;
     }
-    if (runner?.featureFlags case final FeatureFlags flags) {
-      return flags.isHcppEnabled;
+    FeatureFlags? flags = runner?.featureFlags;
+    if (flags == null) {
+      try {
+        flags = context.get<FeatureFlags>();
+      } on UnsupportedError {
+        flags = null;
+      }
     }
-    try {
-      return featureFlags.isHcppEnabled;
-    } on UnsupportedError {
-      return false;
-    }
+    return flags?.isHcppEnabled ?? false;
   }
 
   void addTestFlag({required bool verboseHelp}) {
@@ -1481,17 +1482,21 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    FeatureFlags? effectiveFeatureFlags = runner?.featureFlags;
-    if (effectiveFeatureFlags == null) {
+    FeatureFlags? flags = runner?.featureFlags;
+    if (flags == null) {
       try {
-        effectiveFeatureFlags = featureFlags;
+        flags = context.get<FeatureFlags>();
       } on UnsupportedError {
         return;
       }
     }
+    if (flags == null) {
+      return;
+    }
+    final FeatureFlags effectiveFeatureFlags = flags;
 
     final String enabledFeatureFlags = effectiveFeatureFlags.allFeatures
-        .where((Feature feature) => effectiveFeatureFlags!.isEnabled(feature))
+        .where((Feature feature) => effectiveFeatureFlags.isEnabled(feature))
         .where((Feature feature) => feature.runtimeId != null)
         .map((Feature feature) => feature.runtimeId!)
         .join(',');
