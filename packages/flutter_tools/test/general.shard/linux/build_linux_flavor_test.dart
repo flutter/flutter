@@ -76,7 +76,7 @@ void main() {
 
   BuildCommand makeBuildCommand() {
     return BuildCommand(
-      toolContext: FakeToolContext(),
+      toolContext: FakeToolContext(logger: logger, fs: fileSystem),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
@@ -94,6 +94,7 @@ void main() {
       artifacts: FakeArtifacts(),
       cache: FakeCache(),
       flutterVersion: FakeFlutterVersion(),
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
     );
   }
 
@@ -107,8 +108,9 @@ void main() {
       ]);
       setUpMockProjectFilesForBuild();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'linux', '--no-pub', '--flavor', 'apple']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'linux', '--no-pub', '--flavor', 'apple']);
 
       expect(processManager.hasRemainingExpectations, isFalse);
       expect(testLogger.statusText, contains('✓ Built build/linux/x64/apple/release/bundle'));
