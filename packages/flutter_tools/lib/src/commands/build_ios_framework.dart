@@ -339,7 +339,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         continue;
       }
 
-      final String binaryName = fs.path.basenameWithoutExtension(frameworkName);
+      final String binaryName = _toolContext.fs.path.basenameWithoutExtension(frameworkName);
 
       // Skip if we've already processed this framework name
       if (processedFrameworks.contains(binaryName)) {
@@ -512,15 +512,13 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
     final ProcessManager processManager = _toolContext.processManager;
 
     final String outputArgument =
         stringArg('output') ??
-        fs.path.join(
-          fs.currentDirectory.path,
-          getBuildDirectory(_toolContext.config, fs),
+        _toolContext.fs.path.join(
+          _toolContext.fs.currentDirectory.path,
+          getBuildDirectory(_toolContext.config, _toolContext.fs),
           'ios',
           'framework',
         );
@@ -533,8 +531,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       throwToolExit('Project does not support iOS');
     }
 
-    final Directory outputDirectory = fs.directory(
-      fs.path.absolute(fs.path.normalize(outputArgument)),
+    final Directory outputDirectory = _toolContext.fs.directory(
+      _toolContext.fs.path.absolute(_toolContext.fs.path.normalize(outputArgument)),
     );
     final List<BuildInfo> buildInfos = await getBuildInfos();
 
@@ -560,7 +558,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       );
 
       final String? productBundleIdentifier = await project.ios.productBundleIdentifier(buildInfo);
-      logger.printStatus(
+      _toolContext.logger.printStatus(
         'Building frameworks for $productBundleIdentifier in ${buildInfo.mode.cliName} mode...',
       );
 
@@ -611,8 +609,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         );
       }
 
-      final Status status = logger.startProgress(
-        ' └─Moving to ${fs.path.relative(modeDirectory.path)}',
+      final Status status = _toolContext.logger.startProgress(
+        ' └─Moving to ${_toolContext.fs.path.relative(modeDirectory.path)}',
       );
 
       // Package native assets.
@@ -657,7 +655,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       }
     }
 
-    logger.printStatus('Frameworks written to ${outputDirectory.path}.');
+    _toolContext.logger.printStatus('Frameworks written to ${outputDirectory.path}.');
 
     if (!project.isModule && hasPlugins(project)) {
       // Apps do not generate a FlutterPluginRegistrant.framework. Users will need
@@ -670,8 +668,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       pluginRegistrantImplementation.copySync(
         outputDirectory.childFile(pluginRegistrantImplementation.basename).path,
       );
-      logger.printStatus(
-        '\nCopy the ${fs.path.basenameWithoutExtension(pluginRegistrantHeader.path)} class into your project.\n'
+      _toolContext.logger.printStatus(
+        '\nCopy the ${_toolContext.fs.path.basenameWithoutExtension(pluginRegistrantHeader.path)} class into your project.\n'
         'See https://flutter.dev/to/ios-create-flutter-engine for more information.',
       );
     }
@@ -961,7 +959,7 @@ end
           if (fs.path.extension(podFrameworkName) != '.framework') {
             continue;
           }
-          final String binaryName = fs.path.basenameWithoutExtension(podFrameworkName);
+          final String binaryName = _toolContext.fs.path.basenameWithoutExtension(podFrameworkName);
 
           final frameworks = <Directory>[
             podProduct as Directory,

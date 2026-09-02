@@ -991,7 +991,7 @@ class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
 
 class FakeTerminal extends Fake implements Terminal {
   @override
-  String get successMark => "✓";
+  String get successMark => '✓';
 }
 
 class FakeProcessUtils extends Fake implements ProcessUtils {}

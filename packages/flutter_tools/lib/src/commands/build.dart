@@ -86,7 +86,7 @@ class BuildCommand extends FlutterCommand {
     XcodeProjectInterpreter? xcodeProjectInterpreter,
   }) : super(outputPreferences: outputPreferences, toolContext: toolContext) {
     final Analytics effectiveAnalytics = context.get<Analytics>() ?? analytics;
-    final Platform effectivePlatform = context.get<Platform>() ?? platform;
+    final effectivePlatform = platform;
     final PersistentToolState persistentToolState =
         context.get<PersistentToolState>() ??
         PersistentToolState(fileSystem: fileSystem, logger: logger, platform: effectivePlatform);
