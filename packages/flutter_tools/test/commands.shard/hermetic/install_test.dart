@@ -105,7 +105,7 @@ void main() {
       expect(logger.statusText, contains('Installing FakeAndroidApk to Android...'));
     });
 
-    testUsingContext('Passes flavor to application package.', () async {
+    testUsingContext('passes flavor to application package', () async {
       const flavor = 'free';
       final command = InstallCommand(toolContext: toolContext, verboseHelp: false);
       final fakeAppFactory = FakeApplicationPackageFactory(FakeIOSApp());
