@@ -81,7 +81,8 @@ bool DefaultPlatformViewsProvider::ResizePlatformView(
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("resizePlatformView", "(IDD)V");
+  return jvm_invoker_->ResizePlatformView(request.view_id, request.width,
+                                          request.height);
 }
 
 bool DefaultPlatformViewsProvider::OffsetPlatformView(int64_t view_id,
@@ -92,7 +93,7 @@ bool DefaultPlatformViewsProvider::OffsetPlatformView(int64_t view_id,
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("offsetPlatformView", "(IDD)V");
+  return jvm_invoker_->OffsetPlatformView(view_id, top, left);
 }
 
 bool DefaultPlatformViewsProvider::SetDirection(int64_t view_id,
@@ -102,7 +103,7 @@ bool DefaultPlatformViewsProvider::SetDirection(int64_t view_id,
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("setPlatformViewDirection", "(II)V");
+  return jvm_invoker_->SetPlatformViewDirection(view_id, direction);
 }
 
 bool DefaultPlatformViewsProvider::ClearFocus(int64_t view_id) {
@@ -111,7 +112,11 @@ bool DefaultPlatformViewsProvider::ClearFocus(int64_t view_id) {
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("clearPlatformViewFocus", "(I)V");
+  std::vector<uint8_t> payload(sizeof(int32_t));
+  int32_t id = static_cast<int32_t>(view_id);
+  std::memcpy(payload.data(), &id, sizeof(id));
+  return jvm_invoker_->InvokeVoidMethod("clearPlatformViewFocus", "(I)V",
+                                        payload);
 }
 
 bool DefaultPlatformViewsProvider::DispatchTouchEvent(
@@ -133,11 +138,10 @@ bool DefaultPlatformViewsProvider::OnDisplayPlatformView(
   if (!jvm_invoker_) {
     return false;
   }
-  std::vector<uint8_t> payload = geometry.mutators_stack.Serialize();
-  const char* method_name =
-      hcpp_enabled_ ? "onDisplayPlatformView2" : "onDisplayPlatformView";
-  return jvm_invoker_->InvokeVoidMethod(
-      method_name, "(IIIIIIILjava/nio/ByteBuffer;)V", payload);
+  return jvm_invoker_->OnDisplayPlatformView(
+      geometry.view_id, geometry.x, geometry.y, geometry.width, geometry.height,
+      geometry.view_width, geometry.view_height, geometry.mutators_stack,
+      hcpp_enabled_);
 }
 
 bool DefaultPlatformViewsProvider::HidePlatformView(int64_t view_id) {
@@ -195,20 +199,7 @@ std::optional<int32_t> DefaultPlatformViewsProvider::CreateOverlaySurface() {
   if (!jvm_invoker_) {
     return std::nullopt;
   }
-  int64_t id = -1;
-  if (hcpp_enabled_) {
-    id = jvm_invoker_->InvokeIntMethod(
-        "createOverlaySurface2",
-        "()Lio/flutter/embedding/engine/FlutterOverlaySurface;");
-  } else {
-    id = jvm_invoker_->InvokeIntMethod(
-        "createOverlaySurface",
-        "()Lio/flutter/embedding/engine/FlutterOverlaySurface;");
-  }
-  if (id < 0) {
-    return std::nullopt;
-  }
-  return static_cast<int32_t>(id);
+  return jvm_invoker_->CreateOverlaySurface(hcpp_enabled_);
 }
 
 bool DefaultPlatformViewsProvider::DestroyOverlaySurfaces() {
@@ -231,7 +222,8 @@ bool DefaultPlatformViewsProvider::OnDisplayOverlaySurface(
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod("onDisplayOverlaySurface", "(IIIII)V");
+  return jvm_invoker_->OnDisplayOverlaySurface(
+      overlay.surface_id, overlay.x, overlay.y, overlay.width, overlay.height);
 }
 
 bool DefaultPlatformViewsProvider::ShowOverlaySurface(int32_t surface_id) {
@@ -263,8 +255,7 @@ bool DefaultPlatformViewsProvider::CreateTransaction() {
   if (!jvm_invoker_) {
     return false;
   }
-  return jvm_invoker_->InvokeVoidMethod(
-      "createTransaction", "()Landroid/view/SurfaceControl$Transaction;");
+  return jvm_invoker_->CreateTransaction();
 }
 
 bool DefaultPlatformViewsProvider::SwapTransactions() {

@@ -61,6 +61,24 @@ class MockJvmInvoker : public JvmInvoker {
         .WillByDefault(::testing::Return(true));
     ON_CALL(*this, PostJvmTask(::testing::_))
         .WillByDefault(::testing::Return(true));
+    ON_CALL(*this,
+            OnDisplayPlatformView(::testing::_, ::testing::_, ::testing::_,
+                                  ::testing::_, ::testing::_, ::testing::_,
+                                  ::testing::_, ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this, CreateOverlaySurface(::testing::_))
+        .WillByDefault(::testing::Return(std::nullopt));
+    ON_CALL(*this,
+            OnDisplayOverlaySurface(::testing::_, ::testing::_, ::testing::_,
+                                    ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this, CreateTransaction()).WillByDefault(::testing::Return(true));
+    ON_CALL(*this, ResizePlatformView(::testing::_, ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this, OffsetPlatformView(::testing::_, ::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
+    ON_CALL(*this, SetPlatformViewDirection(::testing::_, ::testing::_))
+        .WillByDefault(::testing::Return(true));
   }
 
   MOCK_METHOD(bool, EnsureAttachedToThread, (), (override));
@@ -145,6 +163,47 @@ class MockJvmInvoker : public JvmInvoker {
   MOCK_METHOD(bool,
               SetApplicationLocale,
               (const std::string& locale),
+              (override));
+
+  MOCK_METHOD(bool,
+              OnDisplayPlatformView,
+              (int64_t view_id,
+               int32_t x,
+               int32_t y,
+               int32_t width,
+               int32_t height,
+               int32_t view_width,
+               int32_t view_height,
+               const AndroidMutatorsStack& mutators_stack,
+               bool hcpp_enabled),
+              (override));
+
+  MOCK_METHOD(std::optional<int32_t>,
+              CreateOverlaySurface,
+              (bool hcpp_enabled),
+              (override));
+
+  MOCK_METHOD(
+      bool,
+      OnDisplayOverlaySurface,
+      (int32_t surface_id, int32_t x, int32_t y, int32_t width, int32_t height),
+      (override));
+
+  MOCK_METHOD(bool, CreateTransaction, (), (override));
+
+  MOCK_METHOD(bool,
+              ResizePlatformView,
+              (int64_t view_id, double width, double height),
+              (override));
+
+  MOCK_METHOD(bool,
+              OffsetPlatformView,
+              (int64_t view_id, double top, double left),
+              (override));
+
+  MOCK_METHOD(bool,
+              SetPlatformViewDirection,
+              (int64_t view_id, int32_t direction),
               (override));
 };
 
@@ -1440,11 +1499,8 @@ TEST(MutatorTranslationTest, JniDelegatePlatformViewMutatorsPush) {
   stack.PushTransform(ft);
   stack.PushOpacity(0.9f);
 
-  std::vector<uint8_t> expected_payload = stack.Serialize();
-
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onDisplayPlatformView",
-                                              "(IIIIIIILjava/nio/ByteBuffer;)V",
-                                              expected_payload))
+  EXPECT_CALL(*mock_invoker, OnDisplayPlatformView(101L, 10, 20, 300, 400, 300,
+                                                   400, stack, false))
       .WillOnce(Return(true));
 
   EXPECT_TRUE(
@@ -1460,16 +1516,13 @@ TEST(MutatorTranslationTest, JniRouterPlatformViewMutatorsDirectRouting) {
   AndroidMutatorsStack stack;
   stack.PushOpacity(0.8f);
 
-  std::vector<uint8_t> payload = stack.Serialize();
-
   // In Phase 5.5+, Mutators routing is unconditionally direct
   for (bool flag_attempt : {false, true}) {
     JniRouter::SetEmbedderEnabled(flag_attempt);
     EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
 
-    EXPECT_CALL(*mock_invoker,
-                InvokeVoidMethod("onDisplayPlatformView",
-                                 "(IIIIIIILjava/nio/ByteBuffer;)V", payload))
+    EXPECT_CALL(*mock_invoker, OnDisplayPlatformView(1001L, 0, 0, 100, 200, 100,
+                                                     200, stack, false))
         .WillOnce(Return(true));
     EXPECT_TRUE(
         router->RoutePlatformViewMutators(1001L, 0, 0, 100, 200, stack));
@@ -1513,10 +1566,8 @@ TEST(MutatorTranslationTest,
   AndroidMutatorsStack stack = native.MapPlatformView(pv);
   EXPECT_EQ(stack.GetMutatorsCount(), 1u);
 
-  std::vector<uint8_t> payload = stack.Serialize();
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("onDisplayPlatformView",
-                               "(IIIIIIILjava/nio/ByteBuffer;)V", payload))
+  EXPECT_CALL(*mock_invoker, OnDisplayPlatformView(555L, 0, 0, 500, 500, 500,
+                                                   500, stack, false))
       .WillOnce(Return(true));
 
   EXPECT_TRUE(native.PushPlatformViewMutators(pv, 0, 0, 500, 500));
@@ -2026,26 +2077,27 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
       .width = 200.0,
       .height = 300.0,
   };
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("resizePlatformView", "(IDD)V",
-                                              std::vector<uint8_t>{}))
+  EXPECT_CALL(*mock_invoker, ResizePlatformView(42, 200.0, 300.0))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.ResizePlatformView(resize_req));
 
   // 6. OffsetPlatformView
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("offsetPlatformView", "(IDD)V",
-                                              std::vector<uint8_t>{}))
+  EXPECT_CALL(*mock_invoker, OffsetPlatformView(42, 10.0, 20.0))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.OffsetPlatformView(42, 10.0, 20.0));
 
   // 7. SetDirection
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("setPlatformViewDirection",
-                                              "(II)V", std::vector<uint8_t>{}))
+  EXPECT_CALL(*mock_invoker, SetPlatformViewDirection(42, 1))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.SetDirection(42, 1));
 
   // 8. ClearFocus
+  int32_t clear_focus_id = 42;
+  std::vector<uint8_t> clear_focus_payload(sizeof(int32_t));
+  std::memcpy(clear_focus_payload.data(), &clear_focus_id,
+              sizeof(clear_focus_id));
   EXPECT_CALL(*mock_invoker, InvokeVoidMethod("clearPlatformViewFocus", "(I)V",
-                                              std::vector<uint8_t>{}))
+                                              clear_focus_payload))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.ClearFocus(42));
 
@@ -2061,10 +2113,8 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
 
   // 10. OnDisplayPlatformView
   PlatformViewGeometry geom = {.view_id = 42};
-  std::vector<uint8_t> geom_payload = geom.mutators_stack.Serialize();
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("onDisplayPlatformView",
-                               "(IIIIIIILjava/nio/ByteBuffer;)V", geom_payload))
+  EXPECT_CALL(*mock_invoker, OnDisplayPlatformView(42, 0, 0, 0, 0, 0, 0,
+                                                   geom.mutators_stack, false))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.OnDisplayPlatformView(geom));
 
@@ -2091,12 +2141,7 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
   EXPECT_TRUE(provider.OnEndFrame());
 
   // 14. Overlay surfaces
-  EXPECT_CALL(
-      *mock_invoker,
-      InvokeIntMethod("createOverlaySurface",
-                      "()Lio/flutter/embedding/engine/FlutterOverlaySurface;",
-                      std::vector<uint8_t>{}))
-      .WillOnce(Return(9));
+  EXPECT_CALL(*mock_invoker, CreateOverlaySurface(false)).WillOnce(Return(9));
   auto overlay_id = provider.CreateOverlaySurface();
   ASSERT_TRUE(overlay_id.has_value());
   if (overlay_id.has_value()) {
@@ -2109,9 +2154,7 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
   EXPECT_TRUE(provider.DestroyOverlaySurfaces());
 
   PlatformViewOverlay overlay_req = {.surface_id = 9};
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("onDisplayOverlaySurface", "(IIIII)V",
-                               std::vector<uint8_t>{}))
+  EXPECT_CALL(*mock_invoker, OnDisplayOverlaySurface(9, 0, 0, 0, 0))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.OnDisplayOverlaySurface(overlay_req));
 
@@ -2120,11 +2163,7 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderWithMockInvoker) {
   EXPECT_TRUE(provider.HideOverlaySurface(9));
 
   // 15. Transactions
-  EXPECT_CALL(*mock_invoker,
-              InvokeVoidMethod("createTransaction",
-                               "()Landroid/view/SurfaceControl$Transaction;",
-                               std::vector<uint8_t>{}))
-      .WillOnce(Return(true));
+  EXPECT_CALL(*mock_invoker, CreateTransaction()).WillOnce(Return(true));
   EXPECT_TRUE(provider.CreateTransaction());
 
   EXPECT_CALL(*mock_invoker, InvokeVoidMethod("swapTransactions", "()V",
@@ -2150,12 +2189,7 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderHcppRouting) {
   EXPECT_TRUE(provider.IsHcppEnabled());
 
   // 1. CreateOverlaySurface in HCPP mode
-  EXPECT_CALL(
-      *mock_invoker,
-      InvokeIntMethod("createOverlaySurface2",
-                      "()Lio/flutter/embedding/engine/FlutterOverlaySurface;",
-                      std::vector<uint8_t>{}))
-      .WillOnce(Return(12));
+  EXPECT_CALL(*mock_invoker, CreateOverlaySurface(true)).WillOnce(Return(12));
   auto overlay_id = provider.CreateOverlaySurface();
   ASSERT_TRUE(overlay_id.has_value());
   EXPECT_EQ(*overlay_id, 12);
@@ -2207,10 +2241,9 @@ TEST(PlatformViewsTest, DefaultPlatformViewsProviderHcppRouting) {
       .view_height = 100,
       .mutators_stack = {},
   };
-  std::vector<uint8_t> display_payload = geometry.mutators_stack.Serialize();
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onDisplayPlatformView2",
-                                              "(IIIIIIILjava/nio/ByteBuffer;)V",
-                                              display_payload))
+  EXPECT_CALL(*mock_invoker,
+              OnDisplayPlatformView(99, 0, 0, 100, 100, 100, 100,
+                                    geometry.mutators_stack, true))
       .WillOnce(Return(true));
   EXPECT_TRUE(provider.OnDisplayPlatformView(geometry));
 }
@@ -4104,10 +4137,8 @@ TEST(Phase52LegacyDeletionSubsystemsTest,
     stack.PushOpacity(0.5f);
     std::vector<uint8_t> stack_bytes = stack.Serialize();
 
-    EXPECT_CALL(
-        *mock_invoker,
-        InvokeVoidMethod("onDisplayPlatformView",
-                         "(IIIIIIILjava/nio/ByteBuffer;)V", stack_bytes))
+    EXPECT_CALL(*mock_invoker, OnDisplayPlatformView(777L, 10, 20, 300, 400,
+                                                     300, 400, _, false))
         .WillOnce(Return(true));
     EXPECT_TRUE(
         router->RoutePlatformViewMutators(777L, 10, 20, 300, 400, stack));
@@ -4123,10 +4154,8 @@ TEST(Phase52LegacyDeletionSubsystemsTest,
         .mutations_count = 1,
         .mutations = mutations,
     };
-    EXPECT_CALL(
-        *mock_invoker,
-        InvokeVoidMethod("onDisplayPlatformView",
-                         "(IIIIIIILjava/nio/ByteBuffer;)V", stack_bytes))
+    EXPECT_CALL(*mock_invoker, OnDisplayPlatformView(777L, 10, 20, 300, 400,
+                                                     300, 400, _, false))
         .WillOnce(Return(true));
     EXPECT_TRUE(router->RoutePlatformViewMutators(pv, 10, 20, 300, 400));
   }
