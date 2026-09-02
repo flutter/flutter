@@ -11,6 +11,7 @@ import '../android/gradle_utils.dart';
 import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/config.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -139,9 +140,10 @@ class BuildCommand extends FlutterCommand {
           ),
           java: null,
         );
+    final AndroidBuilder? effectiveAndroidBuilder = androidBuilder ?? context.get<AndroidBuilder>();
     _addSubcommand(
       BuildAarCommand(
-        androidBuilder: androidBuilder,
+        androidBuilder: effectiveAndroidBuilder,
         androidContext: effectiveAndroidContext,
         androidSdk: androidSdk,
         buildSystem: buildSystem,
@@ -151,7 +153,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildApkCommand(
-        androidBuilder: androidBuilder,
+        androidBuilder: effectiveAndroidBuilder,
         androidContext: effectiveAndroidContext,
         androidSdk: androidSdk,
         buildSystem: buildSystem,
@@ -161,7 +163,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildAppBundleCommand(
-        androidBuilder: androidBuilder,
+        androidBuilder: effectiveAndroidBuilder,
         androidContext: effectiveAndroidContext,
         androidSdk: androidSdk,
         buildSystem: buildSystem,
