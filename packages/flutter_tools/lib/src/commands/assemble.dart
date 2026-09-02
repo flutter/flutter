@@ -25,7 +25,6 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../features.dart';
-import '../project.dart';
 import '../runner/flutter_command.dart';
 
 /// All currently implemented targets.
@@ -183,10 +182,6 @@ class AssembleCommand extends FlutterCommand {
   @override
   bool get hidden => !_verboseHelp;
 
-  late final FlutterProject _flutterProject = _toolContext.projectFactory.fromDirectory(
-    _toolContext.fs.currentDirectory,
-  );
-
   @override
   String get description => 'Assemble and build Flutter resources.';
 
@@ -201,7 +196,7 @@ class AssembleCommand extends FlutterCommand {
     workflow: commandPath,
     commandHasTerminal: hasTerminal,
     buildBundleTargetPlatform: _environment.defines[kTargetPlatform],
-    buildBundleIsModule: _flutterProject.isModule,
+    buildBundleIsModule: project.isModule,
   );
 
   @override
@@ -268,7 +263,7 @@ class AssembleCommand extends FlutterCommand {
     }
     // If path is relative, make it absolute from flutter project.
     if (fs.path.isRelative(output)) {
-      output = fs.path.join(_flutterProject.directory.path, output);
+      output = fs.path.join(project.directory.path, output);
     }
     final Artifacts artifacts = _toolContext.artifacts;
 
@@ -286,10 +281,8 @@ class AssembleCommand extends FlutterCommand {
 
     return Environment(
       outputDir: fs.directory(output),
-      buildDir: _flutterProject.directory
-          .childDirectory('.dart_tool')
-          .childDirectory('flutter_build'),
-      projectDir: _flutterProject.directory,
+      buildDir: project.directory.childDirectory('.dart_tool').childDirectory('flutter_build'),
+      projectDir: project.directory,
       packageConfigPath: packageConfigPath(),
       defines: _parseDefines([...stringsArg('define'), ...decodedDefines]),
       inputs: _parseDefines(stringsArg('input')),
@@ -335,7 +328,7 @@ class AssembleCommand extends FlutterCommand {
     }
 
     results[kDeferredComponents] = 'false';
-    if (_flutterProject.manifest.deferredComponents != null &&
+    if (project.manifest.deferredComponents != null &&
         isDeferredComponentsTargets() &&
         !isDebug()) {
       results[kDeferredComponents] = 'true';
@@ -372,7 +365,7 @@ class AssembleCommand extends FlutterCommand {
         ),
       );
     }
-    if (_flutterProject.manifest.deferredComponents != null &&
+    if (project.manifest.deferredComponents != null &&
         _environment.defines['validate-deferred-components'] == 'true' &&
         deferredTargets.isNotEmpty &&
         !isDebug()) {
