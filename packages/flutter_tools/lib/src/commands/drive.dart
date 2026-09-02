@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
+import '../globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -58,8 +59,8 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
-    required super.toolContext,
-    super.analytics,
+    
+    
     @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
@@ -268,21 +269,21 @@ class DriveCommand extends RunCommandBase {
     // Ensure host-side flutter_driver test scripts do not import device-side
     // libraries (e.g. dart:ui, package:flutter, package:flutter_test).
     final String? testFile = _getTestFile();
-    if (testFile != null && _fileSystem.isFileSync(testFile)) {
-      final File packageConfigFile = findPackageConfigFileOrDefault(_fileSystem.currentDirectory);
+    if (testFile != null && globals.fs.isFileSync(testFile)) {
+      final File packageConfigFile = findPackageConfigFileOrDefault(globals.fs.currentDirectory);
       if (packageConfigFile.existsSync()) {
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           packageConfigFile,
-          logger: _logger,
+          logger: globals.logger,
           throwOnError: false,
         );
         final validator = DriverTestImportValidator(
-          fileSystem: _fileSystem,
-          logger: _logger,
+          fileSystem: globals.fs,
+          logger: globals.logger,
           packageConfig: packageConfig,
-          projectRootPath: _fileSystem.currentDirectory.path,
+          projectRootPath: globals.fs.currentDirectory.path,
         );
-        final List<String> errors = validator.validate(_fileSystem.file(testFile));
+        final List<String> errors = validator.validate(globals.fs.file(testFile));
         if (errors.isNotEmpty) {
           final buffer = StringBuffer();
           buffer.writeln('flutter_driver test "$testFile" has invalid imports:');

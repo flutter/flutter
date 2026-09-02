@@ -40,7 +40,7 @@ import 'build.dart';
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
   BuildIOSCommand({
-    super.analytics,
+    
     required super.appleContext,
     required super.buildSystem,
     required super.toolContext,
@@ -121,7 +121,7 @@ class _ImageAssetFileKey {
 /// Can only be run on a macOS host.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   BuildIOSArchiveCommand({
-    super.analytics,
+    
     required super.appleContext,
     required super.buildSystem,
     required super.toolContext,
@@ -918,7 +918,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({
-    super.analytics,
+    
     required AppleContext appleContext,
     required BuildSystem buildSystem,
     required ToolContext toolContext,

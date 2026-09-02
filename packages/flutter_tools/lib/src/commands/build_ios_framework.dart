@@ -38,7 +38,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required this.codesign,
     required ToolContext toolContext,
     required bool verboseHelp,
-    super.analytics,
+    
     @visibleForTesting FlutterVersion? flutterVersion,
   }) : _appleContext = appleContext,
        _buildSystem = buildSystem,
@@ -466,7 +466,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     required super.codesign,
     required super.toolContext,
     required bool verboseHelp,
-    super.analytics,
+    
     super.flutterVersion,
   }) : super(verboseHelp: verboseHelp) {
     usesFlavorOption();

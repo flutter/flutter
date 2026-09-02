@@ -21,7 +21,7 @@ import 'build.dart';
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({
-    super.analytics,
+    
     required BuildSystem buildSystem,
     required ToolContext toolContext,
     required bool verboseHelp,

@@ -23,6 +23,7 @@ import '../context/tool_context.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../features.dart';
 import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -249,7 +250,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     final AnsiTerminal terminal = _toolContext.terminal;
 
     try {
-      await (machineMode ? _attachDaemon(device: device) : _attach(device: device));
+      await (machineMode ? _attachDaemon(featureFlags: globals.featureFlags, device: device) : _attach(device: device));
     } on RPCError catch (err) {
       if (err.isConnectionDisposedException) {
         throwToolExit('Lost connection to device.');
@@ -300,12 +301,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     terminalHandler?.stop();
   }
 
-  Future<void> _attachDaemon({required Device device}) async {
+  Future<void> _attachDaemon(featureFlags: globals.featureFlags, {required Device device}) async {
     final FileSystem fs = _toolContext.fs;
     final Logger logger = _toolContext.logger;
     final Stdio stdio = _toolContext.stdio;
 
-    final daemon = Daemon(
+    final daemon = Daemon(featureFlags: globals.featureFlags, 
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
       ),
@@ -313,6 +314,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           ? logger
           : NotifyingLogger(verbose: logger.isVerbose, parent: logger),
       logToStdout: true,
+      featureFlags: featureFlags,
     );
 
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
@@ -417,7 +419,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     // The device port we expect to have the debug port be listening
     final int? devicePort = debugPort ?? debugUri?.port ?? deviceVmservicePort;
 
-    final VMServiceDiscoveryForAttach vmServiceDiscovery = device.getVMServiceDiscoveryForAttach(
+    final VMServiceDiscoveryForAttach vmServiceDiscovery = device.getVMServiceDiscoveryForAttach(logger: logger, 
       appId: appId,
       fuchsiaModule: stringArg('module'),
       filterDevicePort: devicePort,

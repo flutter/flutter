@@ -38,7 +38,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     required super.codesign,
     required super.toolContext,
     required super.verboseHelp,
-    super.analytics,
+    
     super.flutterVersion,
   });
 

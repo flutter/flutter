@@ -22,7 +22,7 @@ class BuildBundleCommand extends BuildSubCommand {
     required BuildSystem buildSystem,
     required ToolContext toolContext,
     required bool verboseHelp,
-    super.analytics,
+    
     BundleBuilder? bundleBuilder,
     FeatureFlags? featureFlags,
   }) : _buildSystem = buildSystem,
@@ -186,6 +186,10 @@ class BuildBundleCommand extends BuildSubCommand {
 }
 
 class _DefaultFeatureFlags extends FeatureFlags {
+  @override
+  bool get isHcppEnabled => false;
+  @override
+  bool get isToolExtensionsEnabled => false;
   const _DefaultFeatureFlags();
 
   @override

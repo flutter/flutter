@@ -25,6 +25,7 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../daemon.dart';
@@ -52,19 +53,31 @@ const protocolVersion = '0.6.1';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({required super.toolContext, this.hidden = false, DeviceManager? deviceManager})
-    : _deviceManager = deviceManager {
+  DaemonCommand({
+    required super.toolContext,
+    required AndroidContext androidContext,
+    AndroidWorkflow? androidWorkflow,
+    DeviceManager? deviceManager,
+    this.hidden = false,
+  }) : _androidContext = androidContext,
+       _androidWorkflow = androidWorkflow,
+       _deviceManager = deviceManager {
     argParser.addOption(
       'listen-on-tcp-port',
-      help:
-          'If specified, the daemon will be listening for commands on the specified port instead of stdio.',
+      help: 'If specified, the daemon will be listening for commands on the specified port instead of stdio.',
       valueHelp: 'port',
     );
   }
 
+  final AndroidContext _androidContext;
+  final AndroidWorkflow? _androidWorkflow;
   final DeviceManager? _deviceManager;
 
-  ToolContext get _toolContext => toolContext!;
+  AndroidSdk? get _androidSdk => _androidContext.androidSdk;
+  Java? get _java => _androidContext.java;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'daemon';
@@ -80,14 +93,14 @@ class DaemonCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = _toolContext.logger;
-    final Stdio stdio = _toolContext.stdio;
-    final AnsiTerminal terminal = _toolContext.terminal;
-    final OutputPreferences outputPreferences = _toolContext.outputPreferences;
-    final FileSystem fs = _toolContext.fs;
-    final Platform platform = _toolContext.platform;
-    final ProcessManager processManager = _toolContext.processManager;
-    final SystemClock systemClock = _toolContext.systemClock;
+    final Logger logger = toolContext.logger;
+    final Stdio stdio = toolContext.stdio;
+    final AnsiTerminal terminal = toolContext.terminal;
+    final OutputPreferences outputPreferences = toolContext.outputPreferences;
+    final FileSystem fs = toolContext.fs;
+    final Platform platform = toolContext.platform;
+    final ProcessManager processManager = toolContext.processManager;
+    final SystemClock systemClock = toolContext.systemClock;
 
     if (argResults!['listen-on-tcp-port'] != null) {
       int? port;
@@ -98,22 +111,25 @@ class DaemonCommand extends FlutterCommand {
       }
 
       await DaemonServer(
-        port: port,
         logger: StdoutLogger(
           terminal: terminal,
           stdio: stdio,
           outputPreferences: outputPreferences,
         ),
-        notifyingLogger: asLogger<NotifyingLogger>(logger),
-        fileSystem: fs,
-        platform: platform,
-        processManager: processManager,
         analytics: analytics,
-        systemClock: systemClock,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
+        androidSdk: _androidSdk,
+        androidWorkflow: _androidWorkflow,
         deviceManager: _deviceManager,
         featureFlags: featureFlags,
+        fileSystem: fs,
+        java: _java,
+        notifyingLogger: asLogger<NotifyingLogger>(logger),
+        outputPreferences: outputPreferences,
+        platform: platform,
+        port: port,
+        processManager: processManager,
+        systemClock: systemClock,
+        terminal: terminal,
       ).run();
       return FlutterCommandResult.success();
     }
@@ -122,18 +138,21 @@ class DaemonCommand extends FlutterCommand {
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
         logger: logger,
       ),
-      notifyingLogger: asLogger<NotifyingLogger>(logger),
-      fileSystem: fs,
-      platform: platform,
-      processManager: processManager,
-      logger: logger,
       analytics: analytics,
-      systemClock: systemClock,
-      terminal: terminal,
-      outputPreferences: outputPreferences,
+      androidSdk: _androidSdk,
+      androidWorkflow: _androidWorkflow,
       deviceManager: _deviceManager,
       featureFlags: featureFlags,
+      fileSystem: fs,
+      java: _java,
+      logger: logger,
+      notifyingLogger: asLogger<NotifyingLogger>(logger),
+      outputPreferences: outputPreferences,
+      platform: platform,
+      processManager: processManager,
       stdio: stdio,
+      systemClock: systemClock,
+      terminal: terminal,
     );
     logger.printStatus('Device daemon started.');
     final int code = await daemon.onExit;
@@ -147,24 +166,24 @@ class DaemonCommand extends FlutterCommand {
 @visibleForTesting
 class DaemonServer {
   DaemonServer({
-    this.port,
     required this.logger,
-    this.notifyingLogger,
-    this.fileSystem,
-    this.platform,
-    this.processManager,
     this.analytics,
-    this.systemClock,
-    this.terminal,
-    this.outputPreferences,
-    this.deviceManager,
-    this.java,
     this.androidSdk,
-    this.featureFlags,
     this.androidWorkflow,
-    this.stdio,
     @visibleForTesting
     Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
+    this.deviceManager,
+    required this.featureFlags,
+    this.fileSystem,
+    this.java,
+    this.notifyingLogger,
+    this.outputPreferences,
+    this.platform,
+    this.port,
+    this.processManager,
+    this.stdio,
+    this.systemClock,
+    this.terminal,
   }) : _bind = bind;
 
   final int? port;
@@ -185,7 +204,7 @@ class DaemonServer {
   final DeviceManager? deviceManager;
   final Java? java;
   final AndroidSdk? androidSdk;
-  final FeatureFlags? featureFlags;
+  final FeatureFlags featureFlags;
   final AndroidWorkflow? androidWorkflow;
   final Stdio? stdio;
 
@@ -248,83 +267,84 @@ class DaemonServer {
 }
 
 typedef CommandHandler = Future<Object?>? Function(Map<String, Object?> args);
-typedef CommandHandlerWithBinary =
-    Future<Object?> Function(Map<String, Object?> args, Stream<List<int>>? binary);
+typedef CommandHandlerWithBinary = Future<Object?> Function(
+  Map<String, Object?> args,
+  Stream<List<int>>? binary,
+);
 
 class Daemon {
   Daemon(
     this.connection, {
-    this.notifyingLogger,
-    this.logToStdout = false,
-    FileTransfer fileTransfer = const FileTransfer(),
+    Analytics? analytics,
+    AndroidSdk? androidSdk,
+    AndroidWorkflow? androidWorkflow,
+    DeviceManager? deviceManager,
+    required FeatureFlags featureFlags,
     FileSystem? fileSystem,
+    FileTransfer fileTransfer = const FileTransfer(),
+    Java? java,
+    this.logToStdout = false,
+    Logger? logger,
+    this.notifyingLogger,
+    OutputPreferences? outputPreferences,
     Platform? platform,
     ProcessManager? processManager,
-    Logger? logger,
-    Analytics? analytics,
+    Stdio? stdio,
     SystemClock? systemClock,
     AnsiTerminal? terminal,
-    OutputPreferences? outputPreferences,
-    DeviceManager? deviceManager,
-    Java? java,
-    AndroidSdk? androidSdk,
-    FeatureFlags? featureFlags,
-    AndroidWorkflow? androidWorkflow,
-    Stdio? stdio,
   }) : _stdio = stdio,
        _logger = logger ?? BufferLogger.test(),
        _fs =
            fileSystem ??
            LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks()) {
-    final FileSystem fs = _fs;
     final Platform p = platform ?? const LocalPlatform();
-    final Logger l = _logger;
-    final FeatureFlags flags = featureFlags ?? const _DefaultFeatureFlags();
     final ProcessManager pm = processManager ?? const LocalProcessManager();
     final AnsiTerminal term = terminal ?? AnsiTerminal(stdio: stdio ?? Stdio(), platform: p);
     final OutputPreferences prefs = outputPreferences ?? OutputPreferences.test();
     final Analytics an = analytics ?? const NoOpAnalytics();
     final SystemClock clock = systemClock ?? const SystemClock();
     final AndroidWorkflow workflow =
-        androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: flags);
+        androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: featureFlags);
 
     // Set up domains.
     registerDomain(
       daemonDomain = DaemonDomain(
         this,
-        fileSystem: fs,
-        featureFlags: flags,
-        logger: l,
+        featureFlags: featureFlags,
+        fileSystem: _fs,
+        logger: _logger,
         stdio: _stdio,
       ),
     );
     registerDomain(
       appDomain = AppDomain(
         this,
-        fileSystem: fs,
-        platform: p,
         analytics: an,
-        systemClock: clock,
-        logger: l,
-        terminal: term,
+        fileSystem: _fs,
+        logger: _logger,
         outputPreferences: prefs,
+        platform: p,
+        systemClock: clock,
+        terminal: term,
       ),
     );
-    registerDomain(deviceDomain = DeviceDomain(this, deviceManager: deviceManager, logger: l));
+    registerDomain(
+      deviceDomain = DeviceDomain(this, logger: _logger, deviceManager: deviceManager),
+    );
     registerDomain(
       emulatorDomain = EmulatorDomain(
         this,
-        fileSystem: fs,
-        logger: l,
-        java: java,
-        androidSdk: androidSdk,
-        processManager: pm,
         androidWorkflow: workflow,
+        fileSystem: _fs,
+        logger: _logger,
+        processManager: pm,
+        androidSdk: androidSdk,
+        java: java,
       ),
     );
     registerDomain(devToolsDomain = DevToolsDomain(this));
     registerDomain(
-      proxyDomain = ProxyDomain(this, fileTransfer: fileTransfer, fileSystem: fs, logger: l),
+      proxyDomain = ProxyDomain(this, fileSystem: _fs, fileTransfer: fileTransfer, logger: _logger),
     );
 
     // Start listening.
@@ -340,20 +360,20 @@ class Daemon {
   }
 
   factory Daemon.createMachineDaemon({
-    required Stdio stdio,
     required Logger logger,
+    required Stdio stdio,
+    Analytics? analytics,
+    AndroidSdk? androidSdk,
+    AndroidWorkflow? androidWorkflow,
+    DeviceManager? deviceManager,
+    required FeatureFlags featureFlags,
     FileSystem? fileSystem,
+    Java? java,
+    OutputPreferences? outputPreferences,
     Platform? platform,
     ProcessManager? processManager,
-    Analytics? analytics,
     SystemClock? systemClock,
     AnsiTerminal? terminal,
-    OutputPreferences? outputPreferences,
-    DeviceManager? deviceManager,
-    Java? java,
-    AndroidSdk? androidSdk,
-    FeatureFlags? featureFlags,
-    AndroidWorkflow? androidWorkflow,
   }) {
     final daemon = Daemon(
       DaemonConnection(
@@ -557,8 +577,8 @@ abstract class Domain {
 class DaemonDomain extends Domain {
   DaemonDomain(
     Daemon daemon, {
-    required FileSystem fileSystem,
     required FeatureFlags featureFlags,
+    required FileSystem fileSystem,
     required Logger logger,
     Stdio? stdio,
   }) : _fs = fileSystem,
@@ -799,7 +819,7 @@ class DaemonDomain extends Domain {
       PlatformType.values.forEach(handlePlatformType);
 
       return <String, Object>{
-        // TODO(fujino): delete this key https://github.com/flutter/flutter/issues/140473
+        // TODO(bkonyi): remove 'platformTypes' once clients have migrated to 'platforms'. See https://github.com/flutter/flutter/issues/140473
         'platforms': platformTypes,
         'platformTypes': platformTypesMap,
       };
@@ -827,29 +847,15 @@ class DaemonDomain extends Domain {
   }
 }
 
-class _DefaultFeatureFlags implements FeatureFlags {
-  const _DefaultFeatureFlags();
-
-  @override
-  bool get isLinuxEnabled => true;
-
-  @override
-  bool get isWindowsEnabled => true;
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => false;
-}
-
 /// The reason a [PlatformType] is not currently supported.
 ///
 /// The [name] of this value will be sent as a response to daemon client.
 enum _ReasonCode { create, config }
 
-typedef RunOrAttach =
-    Future<void> Function({
-      Completer<DebugConnectionInfo>? connectionInfoCompleter,
-      Completer<void>? appStartedCompleter,
-    });
+typedef RunOrAttach = Future<void> Function({
+  Completer<DebugConnectionInfo>? connectionInfoCompleter,
+  Completer<void>? appStartedCompleter,
+});
 
 /// This domain responds to methods like [startApp] and [stop].
 ///
@@ -857,20 +863,25 @@ typedef RunOrAttach =
 class AppDomain extends Domain {
   AppDomain(
     Daemon daemon, {
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Analytics analytics,
-    required SystemClock systemClock,
-    required Logger logger,
-    required AnsiTerminal terminal,
-    required OutputPreferences outputPreferences,
-  }) : _fs = fileSystem,
-       _platform = platform,
-       _analytics = analytics,
-       _systemClock = systemClock,
-       _logger = logger,
-       _terminal = terminal,
-       _outputPreferences = outputPreferences,
+    Analytics? analytics,
+    FileSystem? fileSystem,
+    Logger? logger,
+    OutputPreferences? outputPreferences,
+    Platform? platform,
+    SystemClock? systemClock,
+    AnsiTerminal? terminal,
+  }) : _fs = fileSystem ?? daemon._fs,
+       _platform = platform ?? const LocalPlatform(),
+       _analytics = analytics ?? const NoOpAnalytics(),
+       _systemClock = systemClock ?? const SystemClock(),
+       _logger = logger ?? daemon._logger,
+       _terminal =
+           terminal ??
+           AnsiTerminal(
+             stdio: daemon._stdio ?? Stdio(),
+             platform: platform ?? const LocalPlatform(),
+           ),
+       _outputPreferences = outputPreferences ?? OutputPreferences.test(),
        super(daemon, 'app') {
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
@@ -911,10 +922,6 @@ class AppDomain extends Domain {
     bool machine = true,
     String? userIdentifier,
   }) async {
-    final FileSystem fs = _fs;
-    final Platform platform = _platform;
-    final Logger logger = _logger;
-
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
         '${options.buildInfo.mode.uppercaseFriendlyName} '
@@ -923,15 +930,15 @@ class AppDomain extends Domain {
     }
 
     // We change the current working directory for the duration of the `start` command.
-    final Directory cwd = fs.currentDirectory;
-    fs.currentDirectory = fs.directory(projectDirectory);
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
+    final Directory cwd = _fs.currentDirectory;
+    _fs.currentDirectory = _fs.directory(projectDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(_fs.currentDirectory);
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       target: target,
       buildInfo: options.buildInfo,
-      platform: platform,
+      platform: _platform,
       userIdentifier: userIdentifier,
     );
 
@@ -948,11 +955,11 @@ class AppDomain extends Domain {
         machine: machine,
         analytics: _analytics,
         systemClock: _systemClock,
-        logger: logger,
+        logger: _logger,
         terminal: _terminal,
-        platform: platform,
+        platform: _platform,
         outputPreferences: _outputPreferences,
-        fileSystem: fs,
+        fileSystem: _fs,
         webDefines: webDefines,
       );
     } else if (enableHotReload) {
@@ -966,7 +973,7 @@ class AppDomain extends Domain {
         hostIsIde: true,
         machine: machine,
         analytics: _analytics,
-        logger: logger,
+        logger: _logger,
       );
     } else {
       runner = ColdRunner(
@@ -995,7 +1002,7 @@ class AppDomain extends Domain {
       enableHotReload,
       cwd,
       LaunchMode.run,
-      asLogger<MachineOutputLogger>(logger),
+      asLogger<MachineOutputLogger>(_logger),
     );
   }
 
@@ -1247,7 +1254,7 @@ typedef _DeviceEventHandler = void Function(Device device);
 /// It exports a `getDevices()` call, as well as firing `device.added` and
 /// `device.removed` events.
 class DeviceDomain extends Domain {
-  DeviceDomain(Daemon daemon, {DeviceManager? deviceManager, required Logger logger})
+  DeviceDomain(Daemon daemon, {required Logger logger, DeviceManager? deviceManager})
     : _deviceManager = deviceManager,
       _logger = logger,
       super(daemon, 'device') {
@@ -1853,13 +1860,13 @@ class AppInstance {
 class EmulatorDomain extends Domain {
   EmulatorDomain(
     Daemon daemon, {
+    required AndroidWorkflow androidWorkflow,
     required FileSystem fileSystem,
     required Logger logger,
-    Java? java,
-    AndroidSdk? androidSdk,
     required ProcessManager processManager,
-    required AndroidWorkflow androidWorkflow,
+    AndroidSdk? androidSdk,
     EmulatorManager? emulatorManager,
+    Java? java,
   }) : emulators =
            emulatorManager ??
            EmulatorManager(
@@ -1910,8 +1917,8 @@ class EmulatorDomain extends Domain {
 class ProxyDomain extends Domain {
   ProxyDomain(
     Daemon daemon, {
-    required FileTransfer fileTransfer,
     required FileSystem fileSystem,
+    required FileTransfer fileTransfer,
     required Logger logger,
   }) : _fileTransfer = fileTransfer,
        _fs = fileSystem,

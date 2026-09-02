@@ -31,8 +31,7 @@ base class ExtensionTemplateManager extends TemplateService {
   }) : _extensionManager = extensionManager,
        _featureFlags = featureFlags,
        _fileSystem = fileSystem,
-       _logger = logger,
-       flutterRoot = flutterRoot;
+       _logger = logger;
 
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;

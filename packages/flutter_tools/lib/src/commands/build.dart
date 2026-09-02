@@ -91,7 +91,7 @@ class BuildCommand extends FlutterCommand {
     PreRunValidator? preRunValidator,
     ToolContext? toolContext,
     bool verboseHelp = false,
-  }) : super(analytics: analytics, outputPreferences: outputPreferences, toolContext: toolContext) {
+  }) : super( outputPreferences: outputPreferences, toolContext: toolContext) {
     Analytics? contextAnalytics;
     FeatureFlags? contextFeatureFlags;
     Platform? contextPlatform;
@@ -129,6 +129,7 @@ class BuildCommand extends FlutterCommand {
     final ToolContext effectiveToolContext =
         toolContext ??
         (_fallbackToolContext = ToolContext(
+                persistentToolState: globals.persistentToolState,
           artifacts: artifacts,
           botDetector: BotDetector(
             httpClientFactory: () => HttpClient(),
@@ -195,9 +196,7 @@ class BuildCommand extends FlutterCommand {
               platform: platform,
               processManager: processManager,
               logger: logger,
-              fileSystem: fileSystem,
-              analytics: effectiveAnalytics,
-            ));
+              fileSystem: fileSystem,            ));
     final AppleContext effectiveAppleContext =
         appleContext ??
         AppleContext(
@@ -206,18 +205,14 @@ class BuildCommand extends FlutterCommand {
             processManager: processManager,
             logger: logger,
             platform: platform,
-            xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
-            analytics: effectiveAnalytics,
-          ),
+            xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,          ),
           cocoapodsValidator: CocoaPodsValidator(
             CocoaPods(
               fileSystem: fileSystem,
               processManager: processManager,
               logger: logger,
               platform: platform,
-              xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
-              analytics: effectiveAnalytics,
-            ),
+              xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,            ),
             UserMessages(),
           ),
           iosSimulatorUtils: IOSSimulatorUtils(
@@ -266,15 +261,11 @@ class BuildCommand extends FlutterCommand {
                   xcodeProjectInterpreter: effectiveXcodeProjectInterpreter,
                   userMessages: UserMessages(),
                 ),
-            iproxy: IProxy(
-              iproxyPath: artifacts.getHostArtifact(HostArtifact.iproxy).path,
-              logger: logger,
+            iproxy: IProxy(              logger: logger,
               processManager: processManager,
               dyLdLibEntry: cache.dyLdLibEntry,
             ),
-            fileSystem: fileSystem,
-            analytics: effectiveAnalytics,
-            shutdownHooks: ShutdownHooks(),
+            fileSystem: fileSystem,            shutdownHooks: ShutdownHooks(),
           ),
           xcode:
               xcode ??
@@ -292,9 +283,7 @@ class BuildCommand extends FlutterCommand {
       BuildAarCommand(
         androidBuilder: androidBuilder,
         androidContext: effectiveAndroidContext,
-        androidSdk: androidSdk,
-        buildSystem: buildSystem,
-        toolContext: effectiveToolContext,
+        androidSdk: androidSdk,        toolContext: effectiveToolContext,
         verboseHelp: verboseHelp,
       ),
     );
@@ -302,9 +291,7 @@ class BuildCommand extends FlutterCommand {
       BuildApkCommand(
         androidBuilder: androidBuilder,
         androidContext: effectiveAndroidContext,
-        androidSdk: androidSdk,
-        buildSystem: buildSystem,
-        toolContext: effectiveToolContext,
+        androidSdk: androidSdk,        toolContext: effectiveToolContext,
         verboseHelp: verboseHelp,
       ),
     );
@@ -312,27 +299,17 @@ class BuildCommand extends FlutterCommand {
       BuildAppBundleCommand(
         androidBuilder: androidBuilder,
         androidContext: effectiveAndroidContext,
-        androidSdk: androidSdk,
-        buildSystem: buildSystem,
-        toolContext: effectiveToolContext,
+        androidSdk: androidSdk,        toolContext: effectiveToolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
-      BuildIOSCommand(
-        analytics: effectiveAnalytics,
-        appleContext: effectiveAppleContext,
-        buildSystem: buildSystem,
-        toolContext: effectiveToolContext,
+      BuildIOSCommand(        appleContext: effectiveAppleContext,        toolContext: effectiveToolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
-      BuildIOSFrameworkCommand(
-        analytics: effectiveAnalytics,
-        appleContext: effectiveAppleContext,
-        buildSystem: buildSystem,
-        codesign: DarwinAddToAppCodesigning(
+      BuildIOSFrameworkCommand(        appleContext: effectiveAppleContext,        codesign: DarwinAddToAppCodesigning(
           logger: logger,
           xcodeCodeSigningSettings: XcodeCodeSigningSettings(
             config: config,
@@ -350,11 +327,7 @@ class BuildCommand extends FlutterCommand {
       ),
     );
     _addSubcommand(
-      BuildMacOSFrameworkCommand(
-        analytics: effectiveAnalytics,
-        appleContext: effectiveAppleContext,
-        buildSystem: buildSystem,
-        codesign: DarwinAddToAppCodesigning(
+      BuildMacOSFrameworkCommand(        appleContext: effectiveAppleContext,        codesign: DarwinAddToAppCodesigning(
           logger: logger,
           xcodeCodeSigningSettings: XcodeCodeSigningSettings(
             config: config,
@@ -373,11 +346,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildSwiftPackage(
-        logger: logger,
-        analytics: effectiveAnalytics,
-        artifacts: artifacts,
-        buildSystem: buildSystem,
-        cache: cache,
+        logger: logger,        artifacts: artifacts,        cache: cache,
         featureFlags: effectiveFeatureFlags,
         fileSystem: fileSystem,
 
@@ -404,54 +373,35 @@ class BuildCommand extends FlutterCommand {
     );
 
     _addSubcommand(
-      BuildIOSArchiveCommand(
-        analytics: effectiveAnalytics,
-        appleContext: effectiveAppleContext,
-        buildSystem: buildSystem,
+      BuildIOSArchiveCommand(        appleContext: effectiveAppleContext,        toolContext: effectiveToolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
+    _addSubcommand(
+      BuildBundleCommand(        featureFlags: effectiveFeatureFlags,
         toolContext: effectiveToolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
-      BuildBundleCommand(
-        analytics: effectiveAnalytics,
-        buildSystem: buildSystem,
-        featureFlags: effectiveFeatureFlags,
+      BuildWebCommand(        featureFlags: effectiveFeatureFlags,
         toolContext: effectiveToolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
-      BuildWebCommand(
-        analytics: effectiveAnalytics,
-        buildSystem: buildSystem,
-        featureFlags: effectiveFeatureFlags,
+      BuildMacosCommand(        toolContext: effectiveToolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
+    _addSubcommand(
+      BuildLinuxCommand(        featureFlags: effectiveFeatureFlags,
         toolContext: effectiveToolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
-      BuildMacosCommand(
-        analytics: effectiveAnalytics,
-        buildSystem: buildSystem,
-        toolContext: effectiveToolContext,
-        verboseHelp: verboseHelp,
-      ),
-    );
-    _addSubcommand(
-      BuildLinuxCommand(
-        analytics: effectiveAnalytics,
-        buildSystem: buildSystem,
-        featureFlags: effectiveFeatureFlags,
-        toolContext: effectiveToolContext,
-        verboseHelp: verboseHelp,
-      ),
-    );
-    _addSubcommand(
-      BuildWindowsCommand(
-        analytics: effectiveAnalytics,
-        buildSystem: buildSystem,
-        featureFlags: effectiveFeatureFlags,
+      BuildWindowsCommand(        featureFlags: effectiveFeatureFlags,
         toolContext: effectiveToolContext,
         verboseHelp: verboseHelp,
       ),
