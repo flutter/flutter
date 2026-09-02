@@ -318,7 +318,7 @@ List<FlutterCommand> generateCommands({
   DoctorCommand(
     verbose: verbose,
     toolContext: toolDependencies.toolContext,
-    doctor: globals.doctor,
+    doctor: globals.doctor!,
     androidLicenseValidator: androidLicenseValidator,
     extensionManager: extensionManager,
   ),
