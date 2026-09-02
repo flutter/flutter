@@ -277,9 +277,7 @@ class Daemon {
        _fs =
            fileSystem ??
            LocalFileSystem(LocalSignals.instance, Signals.defaultExitSignals, ShutdownHooks()) {
-    final FileSystem fs = _fs;
     final Platform p = platform ?? const LocalPlatform();
-    final Logger l = _logger;
     final FeatureFlags flags = featureFlags ?? const _DefaultFeatureFlags();
     final ProcessManager pm = processManager ?? const LocalProcessManager();
     final AnsiTerminal term = terminal ?? AnsiTerminal(stdio: stdio ?? Stdio(), platform: p);
@@ -294,8 +292,8 @@ class Daemon {
       daemonDomain = DaemonDomain(
         this,
         featureFlags: flags,
-        fileSystem: fs,
-        logger: l,
+        fileSystem: _fs,
+        logger: _logger,
         stdio: _stdio,
       ),
     );
@@ -303,21 +301,23 @@ class Daemon {
       appDomain = AppDomain(
         this,
         analytics: an,
-        fileSystem: fs,
-        logger: l,
+        fileSystem: _fs,
+        logger: _logger,
         outputPreferences: prefs,
         platform: p,
         systemClock: clock,
         terminal: term,
       ),
     );
-    registerDomain(deviceDomain = DeviceDomain(this, logger: l, deviceManager: deviceManager));
+    registerDomain(
+      deviceDomain = DeviceDomain(this, logger: _logger, deviceManager: deviceManager),
+    );
     registerDomain(
       emulatorDomain = EmulatorDomain(
         this,
         androidWorkflow: workflow,
-        fileSystem: fs,
-        logger: l,
+        fileSystem: _fs,
+        logger: _logger,
         processManager: pm,
         androidSdk: androidSdk,
         java: java,
@@ -325,7 +325,7 @@ class Daemon {
     );
     registerDomain(devToolsDomain = DevToolsDomain(this));
     registerDomain(
-      proxyDomain = ProxyDomain(this, fileSystem: fs, fileTransfer: fileTransfer, logger: l),
+      proxyDomain = ProxyDomain(this, fileSystem: _fs, fileTransfer: fileTransfer, logger: _logger),
     );
 
     // Start listening.
@@ -917,10 +917,6 @@ class AppDomain extends Domain {
     bool machine = true,
     String? userIdentifier,
   }) async {
-    final FileSystem fs = _fs;
-    final Platform platform = _platform;
-    final Logger logger = _logger;
-
     if (!await device.supportsRuntimeMode(options.buildInfo.mode)) {
       throw Exception(
         '${options.buildInfo.mode.uppercaseFriendlyName} '
@@ -929,15 +925,15 @@ class AppDomain extends Domain {
     }
 
     // We change the current working directory for the duration of the `start` command.
-    final Directory cwd = fs.currentDirectory;
-    fs.currentDirectory = fs.directory(projectDirectory);
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
+    final Directory cwd = _fs.currentDirectory;
+    _fs.currentDirectory = _fs.directory(projectDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(_fs.currentDirectory);
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       target: target,
       buildInfo: options.buildInfo,
-      platform: platform,
+      platform: _platform,
       userIdentifier: userIdentifier,
     );
 
@@ -954,11 +950,11 @@ class AppDomain extends Domain {
         machine: machine,
         analytics: _analytics,
         systemClock: _systemClock,
-        logger: logger,
+        logger: _logger,
         terminal: _terminal,
-        platform: platform,
+        platform: _platform,
         outputPreferences: _outputPreferences,
-        fileSystem: fs,
+        fileSystem: _fs,
         webDefines: webDefines,
       );
     } else if (enableHotReload) {
@@ -972,7 +968,7 @@ class AppDomain extends Domain {
         hostIsIde: true,
         machine: machine,
         analytics: _analytics,
-        logger: logger,
+        logger: _logger,
       );
     } else {
       runner = ColdRunner(
@@ -1001,7 +997,7 @@ class AppDomain extends Domain {
       enableHotReload,
       cwd,
       LaunchMode.run,
-      asLogger<MachineOutputLogger>(logger),
+      asLogger<MachineOutputLogger>(_logger),
     );
   }
 
