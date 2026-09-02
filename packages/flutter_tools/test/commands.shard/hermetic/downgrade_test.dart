@@ -278,7 +278,7 @@ Channel "master" was previously on: v1.2.3.''',
   }, overrides: {ProcessManager: () => processManager});
 }
 
-class FakeTerminal extends Fake implements Terminal {
+class FakeTerminal extends Fake implements AnsiTerminal {
   @override
   bool usesTerminalUi = false;
 

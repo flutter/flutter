@@ -172,7 +172,7 @@ final Platform windowsPlatform = FakePlatform(
   environment: <String, String>{'FLUTTER_ROOT': windowsFlutterRoot},
 );
 
-class FakeTerminal implements Terminal {
+class FakeTerminal implements AnsiTerminal {
   factory FakeTerminal({required Platform platform}) {
     return FakeTerminal._private(stdio: FakeStdio(), platform: platform);
   }

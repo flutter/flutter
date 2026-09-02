@@ -68,7 +68,7 @@ class BuildCommand extends FlutterCommand {
     required ProcessManager processManager,
     required ProcessUtils processUtils,
     required TemplateRenderer templateRenderer,
-    required Terminal terminal,
+    required AnsiTerminal terminal,
     required Xcode? xcode,
     FeatureFlags? featureFlags,
     OutputPreferences? outputPreferences,
@@ -138,9 +138,7 @@ class BuildCommand extends FlutterCommand {
           signals: LocalSignals.instance,
           stdio: Stdio(),
           systemClock: const SystemClock(),
-          terminal: terminal is AnsiTerminal
-              ? terminal
-              : AnsiTerminal(stdio: Stdio(), platform: platform),
+          terminal: terminal,
           userMessages: UserMessages(),
         ));
 

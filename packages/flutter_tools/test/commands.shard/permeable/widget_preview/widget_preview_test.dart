@@ -79,7 +79,7 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   }
 }
 
-class FakeTerminal extends Fake implements Terminal {}
+class FakeTerminal extends Fake implements AnsiTerminal {}
 
 class FakeAnalysisServer extends Fake implements AnalysisServer {
   @override
