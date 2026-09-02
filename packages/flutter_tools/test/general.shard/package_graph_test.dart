@@ -30,7 +30,6 @@ void main() {
   late FileSystem fileSystem;
 
   setUp(() {
-    Cache.flutterRoot = '';
     fileSystem = MemoryFileSystem.test();
   });
 

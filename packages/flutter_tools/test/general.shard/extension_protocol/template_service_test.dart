@@ -6,7 +6,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/experimental/templates.dart';
@@ -18,7 +17,6 @@ import '../../src/fakes.dart';
 
 void main() {
   setUpAll(() {
-    Cache.flutterRoot = '/flutter';
   });
 
   group('ExtensionTemplateManager', () {

@@ -1265,11 +1265,11 @@ class FakeToolContext extends Fake implements ToolContext {
   late final LocalEngineLocator localEngineLocator =
       _localEngineLocator ??
       LocalEngineLocator(
+        flutterRoot: '',
         userMessages: userMessages,
         logger: logger,
         platform: platform,
         fileSystem: fs,
-        flutterRoot: Cache.flutterRoot ?? '',
       );
 
   @override
@@ -1444,11 +1444,11 @@ class DelegatingToolContext extends Fake implements ToolContext {
       _localEngineLocator ??
       globals.localEngineLocator ??
       LocalEngineLocator(
+        flutterRoot: '',
         userMessages: userMessages,
         logger: logger,
         platform: platform,
         fileSystem: fs,
-        flutterRoot: Cache.flutterRoot ?? '',
       );
 
   @override

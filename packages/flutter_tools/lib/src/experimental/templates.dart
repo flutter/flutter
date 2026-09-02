@@ -9,7 +9,6 @@ import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../cache.dart';
 import '../features.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
@@ -26,6 +25,7 @@ base class ExtensionTemplateManager extends TemplateService {
   ExtensionTemplateManager({
     required ExtensionManager extensionManager,
     required FeatureFlags featureFlags,
+    required this.flutterRoot,
     required FileSystem fileSystem,
     required Logger logger,
   }) : _extensionManager = extensionManager,
@@ -35,6 +35,7 @@ base class ExtensionTemplateManager extends TemplateService {
 
   final ExtensionManager _extensionManager;
   final FeatureFlags _featureFlags;
+  final String flutterRoot;
   final FileSystem _fileSystem;
   final Logger _logger;
 
@@ -97,7 +98,7 @@ base class ExtensionTemplateManager extends TemplateService {
     if (templatePath.startsWith('package:flutter_tools/')) {
       final String relativePath = templatePath.substring('package:flutter_tools/'.length);
       final String absolutePath = _fileSystem.path.join(
-        Cache.flutterRoot!,
+        flutterRoot,
         'packages',
         'flutter_tools',
         'lib',
@@ -111,7 +112,7 @@ base class ExtensionTemplateManager extends TemplateService {
         'package:flutter_tools_extension_linux_prototype/'.length,
       );
       final String absolutePath = _fileSystem.path.join(
-        Cache.flutterRoot!,
+        flutterRoot,
         'packages',
         'flutter_tools',
         'packages',

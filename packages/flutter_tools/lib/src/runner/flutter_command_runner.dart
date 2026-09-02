@@ -610,7 +610,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           final String status;
           if (topLevelMachineFlag) {
             final Map<String, Object> jsonOut = version.toJson();
-            jsonOut['flutterRoot'] = Cache.flutterRoot!;
+            jsonOut['flutterRoot'] = _toolContext.cache.flutterRoot;
             status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
             status = version.toString();
@@ -640,7 +640,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// Get the root directories of the repo - the directories containing Dart packages.
   List<String> getRepoRoots() {
     final FileSystem fs = _toolContext.fs;
-    final String root = fs.path.absolute(Cache.flutterRoot!);
+    final String root = fs.path.absolute(_toolContext.cache.flutterRoot);
     // not bin, and not the root
     return <String>['dev', 'examples', 'packages'].map<String>((String item) {
       return fs.path.join(root, item);

@@ -9,6 +9,7 @@ import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
+import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -759,7 +760,7 @@ class RunCommand extends RunCommandBase {
       (Device device) => device.supportsFlavors,
     );
     if (flavor != null && !flavorsSupportedOnEveryDevice) {
-      globals.printWarning(
+      logger.printWarning(
         '--flavor is only supported for Android, Linux, macOS, iOS, and Windows devices. '
         'Flavor-related features may not function properly and could '
         'behave differently in a future release.',
@@ -768,12 +769,12 @@ class RunCommand extends RunCommandBase {
 
     if (argResults!.wasParsed('build')) {
       if (boolArg('build')) {
-        globals.printWarning(
+        logger.printWarning(
           'The "--build" flag is deprecated and will be removed in a future release. '
           'Building is the default behavior, so this flag can be safely removed.',
         );
       } else {
-        globals.printWarning(
+        logger.printWarning(
           'The "--no-build" flag is deprecated and will be removed in a future release. '
           'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
         );
@@ -844,7 +845,22 @@ class RunCommand extends RunCommandBase {
 
   @visibleForTesting
   Daemon createMachineDaemon() {
-    return Daemon.createMachineDaemon();
+    return Daemon.createMachineDaemon(
+      analytics: globals.analytics,
+      androidSdk: globals.androidSdk,
+      androidWorkflow: android_workflow.androidWorkflow,
+      deviceManager: globals.deviceManager,
+      featureFlags: featureFlags,
+      fileSystem: globals.fs,
+      java: globals.java,
+      logger: globals.logger,
+      outputPreferences: globals.outputPreferences,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      stdio: globals.stdio,
+      systemClock: globals.systemClock,
+      terminal: globals.terminal,
+    );
   }
 
   @override

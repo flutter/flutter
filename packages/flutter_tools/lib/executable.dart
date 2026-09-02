@@ -7,16 +7,14 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
+import 'src/android/android_workflow.dart' as android_workflow;
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
-import 'src/base/platform.dart';
 import 'src/base/template.dart';
 import 'src/base/terminal.dart';
-import 'src/base/user_messages.dart';
 import 'src/build_system/build_targets.dart';
 import 'src/build_system/targets/hook_runner_native.dart' show FlutterHookRunnerNative;
-import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
@@ -100,15 +98,6 @@ Future<void> main(List<String> args) async {
   final widgetPreviews = commandName == WidgetPreviewCommand.kWidgetPreview;
   final bool runMachine = args.contains('--machine');
 
-  // Cache.flutterRoot must be set early because other features use it (e.g.
-  // enginePath's initializer uses it). This can only work with the real
-  // instances of the platform or filesystem, so just use those.
-  Cache.flutterRoot = Cache.defaultFlutterRoot(
-    platform: const LocalPlatform(),
-    fileSystem: globals.localFileSystem,
-    userMessages: UserMessages(),
-  );
-
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
@@ -117,12 +106,14 @@ Future<void> main(List<String> args) async {
         logger: globals.logger,
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
+        flutterRoot: toolDependencies.toolContext.cache.flutterRoot,
       );
       final templateManager = ExtensionTemplateManager(
         extensionManager: manager,
         fileSystem: toolDependencies.toolContext.fs,
         logger: toolDependencies.toolContext.logger,
         featureFlags: featureFlags,
+        flutterRoot: toolDependencies.toolContext.cache.flutterRoot,
       );
       return generateCommands(
         toolDependencies: toolDependencies,
@@ -185,7 +176,7 @@ Future<void> main(List<String> args) async {
   );
 }
 
-/// The name of the command in [args], or null if there isn't one.
+/// The name of the command in `args`, or null if there isn't one.
 ///
 /// Global options can come before the command, so it can't be found by
 /// position. A throwaway parser walks past them instead: trailing options are
@@ -196,9 +187,8 @@ Future<void> main(List<String> args) async {
 String? findCommandName(List<String> args, {ToolContext? toolContext}) {
   final ArgResults results;
   try {
-    results = FlutterCommandRunner(
-      toolContext: toolContext ?? _FallbackToolContext(),
-    ).argParser.parse(args);
+    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
+        .parse(args);
   } on ArgParserException {
     // The real parser will complain about these later.
     return null;
@@ -255,7 +245,7 @@ List<FlutterCommand> generateCommands({
     ],
     suppressAnalytics: !toolDependencies.analytics.okToSend,
   ),
-  AssembleCommand(verboseHelp: verboseHelp, buildSystem: toolDependencies.buildSystem),
+  AssembleCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp, buildSystem: toolDependencies.buildSystem),
   AttachCommand(
     verboseHelp: verboseHelp,
     stdio: toolDependencies.toolContext.stdio,
@@ -298,6 +288,7 @@ List<FlutterCommand> generateCommands({
     androidContext: toolDependencies.androidContext,
     toolContext: toolDependencies.toolContext,
     featureFlags: featureFlags,
+        flutterRoot: toolDependencies.toolContext.cache.flutterRoot,
     extensionManager: extensionManager,
   ),
   CustomDevicesCommand(
@@ -306,13 +297,20 @@ List<FlutterCommand> generateCommands({
     terminal: toolDependencies.toolContext.terminal,
     platform: toolDependencies.toolContext.platform,
     featureFlags: featureFlags,
+        flutterRoot: toolDependencies.toolContext.cache.flutterRoot,
     processManager: toolDependencies.toolContext.processManager,
     fileSystem: toolDependencies.toolContext.fs,
     logger: toolDependencies.toolContext.logger,
   ),
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
-  DaemonCommand(hidden: !verboseHelp),
-  DebugAdapterCommand(verboseHelp: verboseHelp),
+  DaemonCommand(
+    androidContext: toolDependencies.androidContext,
+    androidWorkflow: android_workflow.androidWorkflow,
+    deviceManager: globals.deviceManager,
+    hidden: !verboseHelp,
+    toolContext: toolDependencies.toolContext,
+  ),
+  DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),
   DoctorCommand(
     verbose: verbose,
@@ -322,7 +320,7 @@ List<FlutterCommand> generateCommands({
     doctor: globals.doctor,
     extensionManager: extensionManager,
   ),
-  DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
+  DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
   DriveCommand(
     verboseHelp: verboseHelp,
     fileSystem: toolDependencies.toolContext.fs,
@@ -332,29 +330,30 @@ List<FlutterCommand> generateCommands({
     outputPreferences: toolDependencies.toolContext.outputPreferences,
     signals: toolDependencies.toolContext.signals,
   ),
-  EmulatorsCommand(),
-  GenerateCommand(),
+  EmulatorsCommand(toolContext: toolDependencies.toolContext),
+  GenerateCommand(toolContext: toolDependencies.toolContext),
   GenerateLocalizationsCommand(
     fileSystem: toolDependencies.toolContext.fs,
     logger: toolDependencies.toolContext.logger,
     artifacts: toolDependencies.toolContext.artifacts,
     processManager: toolDependencies.toolContext.processManager,
   ),
-  InstallCommand(verboseHelp: verboseHelp),
-  LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
-  PackagesCommand(),
+  InstallCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
+  LogsCommand(toolContext: toolDependencies.toolContext, sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
+  PackagesCommand(toolContext: toolDependencies.toolContext),
   PrecacheCommand(
     verboseHelp: verboseHelp,
     cache: toolDependencies.toolContext.cache,
     logger: toolDependencies.toolContext.logger,
     platform: toolDependencies.toolContext.platform,
     featureFlags: featureFlags,
+        flutterRoot: toolDependencies.toolContext.cache.flutterRoot,
   ),
   RunCommand(verboseHelp: verboseHelp),
-  ScreenshotCommand(fs: toolDependencies.toolContext.fs),
-  ShellCompletionCommand(),
+  ScreenshotCommand(toolContext: toolDependencies.toolContext, fs: toolDependencies.toolContext.fs),
+  ShellCompletionCommand(toolContext: toolDependencies.toolContext),
   TestCommand(
-    verboseHelp: verboseHelp,
+    toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp,
     verbose: verbose,
     nativeAssetsBuilder: toolDependencies.toolContext.nativeAssetsBuilder,
   ),
@@ -374,8 +373,8 @@ List<FlutterCommand> generateCommands({
   UpgradeCommand(verboseHelp: verboseHelp),
   SymbolizeCommand(toolContext: toolDependencies.toolContext),
   // Development-only commands. These are always hidden,
-  IdeConfigCommand(),
-  UpdatePackagesCommand(verboseHelp: verboseHelp),
+  IdeConfigCommand(toolContext: toolDependencies.toolContext),
+  UpdatePackagesCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
 ];
 
 /// An abstraction for instantiation of the correct logger type.

@@ -2583,14 +2583,13 @@ void _testInMemory(
   ProcessManager? processManager,
   AndroidSdk? androidSdk,
 }) {
-  Cache.flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = fileSystem ?? getFileSystemForPlatform();
 
-  final Directory fakeFlutterRoot = testFileSystem.directory(Cache.flutterRoot);
+  final Directory fakeFlutterRoot = testFileSystem.directory(getFlutterRoot());
   _insertFakeGradleArtifactDir(flutterRoot: fakeFlutterRoot);
   transfer(
     globals.fs
-        .directory(Cache.flutterRoot)
+        .directory(getFlutterRoot())
         .childDirectory('packages')
         .childDirectory('flutter_tools')
         .childDirectory('templates'),
@@ -2601,7 +2600,7 @@ void _testInMemory(
   dummyTemplateImagesDirectory.createSync(recursive: true);
   writePackageConfigFiles(
     directory: testFileSystem
-        .directory(Cache.flutterRoot)
+        .directory(getFlutterRoot())
         .childDirectory('packages')
         .childDirectory('flutter_tools'),
     mainLibName: 'app_name',

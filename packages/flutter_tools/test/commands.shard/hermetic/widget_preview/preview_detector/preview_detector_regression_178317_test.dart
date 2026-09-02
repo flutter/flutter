@@ -33,15 +33,14 @@ void main() {
     }
 
     setUp(() {
-      Cache.flutterRoot = getFlutterRoot();
       fs = MemoryFileSystem.test(
         style: const LocalPlatform().isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
       );
       watcher = FakeWatcher();
       logger = BufferLogger.test();
       project = FlutterProject.fromDirectoryTest(fs.systemTempDirectory.createTempSync('root'));
-      final String? sdkPath = Cache.flutterRoot != null
-          ? fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'dart-sdk')
+      final String? sdkPath = getFlutterRoot() != null
+          ? fs.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk')
           : null;
       final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
       previewDetector = PreviewDetector(

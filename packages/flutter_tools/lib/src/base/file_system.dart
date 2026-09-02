@@ -209,6 +209,13 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
     List<ProcessSignal> fatalSignals = Signals.defaultExitSignals,
   }) : this(signals, fatalSignals, ShutdownHooks());
 
+  static LocalFileSystem? _instance;
+  static LocalFileSystem get instance => _instance ??= LocalFileSystem(
+    LocalSignals.instance,
+    Signals.defaultExitSignals,
+    ShutdownHooks(),
+  );
+
   Directory? _systemTemp;
   final _signalTokens = <ProcessSignal, Object>{};
 

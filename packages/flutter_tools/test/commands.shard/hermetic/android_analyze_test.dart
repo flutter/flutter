@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -19,6 +18,7 @@ import 'package:flutter_tools/src/project_validator.dart';
 import 'package:test/fake.dart';
 
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -27,16 +27,16 @@ void main() {
     final Platform platform = FakePlatform();
     final logger = BufferLogger.test();
     final processManager = FakeProcessManager.empty();
-    final terminal = Terminal.test();
     final AnalyzeCommand command = FakeAndroidAnalyzeCommand(
-      artifacts: Artifacts.test(),
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-      terminal: terminal,
       allProjectValidators: <ProjectValidator>[],
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: Artifacts.test(),
+        fs: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
     );
     fileSystem.currentDirectory.childFile('pubspec.yaml').createSync();
     expect(command.shouldRunPub, isTrue);
@@ -47,7 +47,6 @@ void main() {
     late Platform platform;
     late BufferLogger logger;
     late FakeProcessManager processManager;
-    late Terminal terminal;
     late AnalyzeCommand command;
     late CommandRunner<void> runner;
     late Directory tempDir;
@@ -62,16 +61,16 @@ void main() {
       platform = FakePlatform();
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
-      terminal = Terminal.test();
       command = AnalyzeCommand(
-        artifacts: Artifacts.test(),
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        terminal: terminal,
         allProjectValidators: <ProjectValidator>[],
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
       );
       runner = createTestCommandRunner(command);
       tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
@@ -79,7 +78,6 @@ void main() {
 
       // Setup repo roots
       const homePath = '/home/user/flutter';
-      Cache.flutterRoot = homePath;
       for (final dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
@@ -162,14 +160,9 @@ class FakeAndroidBuilder extends Fake implements AndroidBuilder {
 
 class FakeAndroidAnalyzeCommand extends AnalyzeCommand {
   FakeAndroidAnalyzeCommand({
-    required super.fileSystem,
-    required super.platform,
-    required super.terminal,
-    required super.logger,
-    required super.processManager,
-    required super.artifacts,
     required super.allProjectValidators,
     required super.suppressAnalytics,
+    required super.toolContext,
   });
 
   @override

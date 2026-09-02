@@ -10,15 +10,13 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
-import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/features.dart';import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'context.dart';
 import 'fakes.dart';
 
 export 'package:test/test.dart' hide isInstanceOf, test;
@@ -48,12 +46,12 @@ Future<String> createProject(
   Directory temp, {
   String name = 'flutter_project',
   List<String>? arguments,
+  ToolContext? toolContext,
 }) async {
   arguments ??= <String>['--no-pub'];
   final String projectPath = temp.fileSystem.path.join(temp.path, name);
   final command = CreateCommand();
-  final CommandRunner<void> runner = createTestCommandRunner(command);
-  await runner.run(<String>['create', ...arguments, projectPath]);
+  final CommandRunner<void> runner = createTestCommandRunner(command);  await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
 }
 
@@ -96,14 +94,6 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
-        Cache.flutterRoot ??= Cache.defaultFlutterRoot(
-          platform: toolContext.platform,
-          fileSystem: toolContext.fs,
-          userMessages: UserMessages(),
-        );
-        // For compatibility with tests that set this to a relative path.
-        final FileSystem fs = toolContext.fs;
-        Cache.flutterRoot = fs.path.normalize(fs.path.absolute(Cache.flutterRoot!));
         return super.runCommand(topLevelResults);
       },
     );
@@ -111,6 +101,6 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
 
   @override
   void printUsage() {
-    toolContext.logger.printStatus(usage);
+    (toolContext.logger).printStatus(usage);
   }
 }

@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -21,10 +20,6 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
 void main() {
-  setUpAll(() {
-    Cache.flutterRoot = '';
-  });
-
   testWithoutContext('Throws a tool exit if pub cannot be run', () async {
     final processManager = FakeProcessManager.empty();
     final logger = BufferLogger.test();
@@ -64,17 +59,6 @@ void main() {
             '--suppress-analytics',
             '--directory',
             '.',
-            'check-resolution-up-to-date',
-          ],
-          exitCode: 1,
-        ),
-        const FakeCommand(
-          command: <String>[
-            'bin/cache/dart-sdk/bin/dart',
-            'pub',
-            '--suppress-analytics',
-            '--directory',
-            '.',
             'get',
             '--example',
           ],
@@ -88,9 +72,6 @@ void main() {
       fileSystem.file('bin/cache/flutter.version.json')
         ..createSync(recursive: true)
         ..writeAsStringSync(_generateFlutterVersionJson('b'));
-      fileSystem.file('.dart_tool/version')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('b');
       fileSystem.file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -134,17 +115,6 @@ void main() {
               '--suppress-analytics',
               '--directory',
               '.',
-              'check-resolution-up-to-date',
-            ],
-            exitCode: 1,
-          ),
-          const FakeCommand(
-            command: <String>[
-              'bin/cache/dart-sdk/bin/dart',
-              'pub',
-              '--suppress-analytics',
-              '--directory',
-              '.',
               'get',
               '--example',
             ],
@@ -166,7 +136,7 @@ void main() {
     "generatorVersion": "2.14.0-276.0.dev"
   }
   ''');
-        fileSystem.file('.dart_tool/version').writeAsStringSync('b');
+        fileSystem.file('.dart_tool/version').writeAsStringSync('a');
         fileSystem.file('bin/cache/flutter.version.json')
           ..createSync(recursive: true)
           ..writeAsStringSync(_generateFlutterVersionJson('b'));
@@ -202,17 +172,6 @@ void main() {
               '--suppress-analytics',
               '--directory',
               '.',
-              'check-resolution-up-to-date',
-            ],
-            exitCode: 1,
-          ),
-          const FakeCommand(
-            command: <String>[
-              'bin/cache/dart-sdk/bin/dart',
-              'pub',
-              '--suppress-analytics',
-              '--directory',
-              '.',
               'get',
               '--example',
             ],
@@ -234,7 +193,7 @@ void main() {
     "generatorVersion": "2.14.0-276.0.dev"
   }
   ''');
-        fileSystem.file('.dart_tool/version').writeAsStringSync('b');
+        fileSystem.file('.dart_tool/version').writeAsStringSync('a');
         fileSystem.file('bin/cache/flutter.version.json')
           ..createSync(recursive: true)
           ..writeAsStringSync(_generateFlutterVersionJson('b'));
@@ -293,53 +252,41 @@ void main() {
     });
   });
 
-  testUsingContext(
-    'checkUpToDate skips pub get if the resolution is up-to-date and the current framework version is the same as the last version',
-    () async {
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'bin/cache/dart-sdk/bin/dart',
-            'pub',
-            '--suppress-analytics',
-            '--directory',
-            '.',
-            'check-resolution-up-to-date',
-          ],
-        ),
-      ]);
-      final logger = BufferLogger.test();
-      final fileSystem = MemoryFileSystem.test();
+  testUsingContext('checkUpToDate skips pub get if the package config is newer than the pubspec '
+      'and the current framework version is the same as the last version', () async {
+    final processManager = FakeProcessManager.empty();
+    final logger = BufferLogger.test();
+    final fileSystem = MemoryFileSystem.test();
 
-      fileSystem.file('pubspec.yaml').createSync();
-      fileSystem.file('pubspec.lock').createSync();
-      fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-      fileSystem.file('.dart_tool/version').writeAsStringSync('a');
-      fileSystem.file('bin/cache/flutter.version.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(_generateFlutterVersionJson('a'));
+    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('pubspec.lock').createSync();
+    fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
+    fileSystem.file('.dart_tool/version').writeAsStringSync('a');
+    fileSystem.file('bin/cache/flutter.version.json')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(_generateFlutterVersionJson('a'));
 
-      final pub = Pub.test(
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        platform: FakePlatform(),
-        botDetector: const FakeBotDetector(false),
-        stdio: FakeStdio(),
-      );
+    final pub = Pub.test(
+      fileSystem: fileSystem,
+      logger: logger,
+      processManager: processManager,
+      platform: FakePlatform(),
+      botDetector: const FakeBotDetector(false),
+      stdio: FakeStdio(),
+    );
 
-      await pub.get(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        context: PubContext.pubGet,
-        checkUpToDate: true,
-      );
+    await pub.get(
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      context: PubContext.pubGet,
+      checkUpToDate: true,
+    );
 
-      expect(logger.traceText, contains('Skipping pub get: resolution up-to-date.'));
-    },
-  );
+    expect(logger.traceText, contains('Skipping pub get: version match.'));
+  });
 
   testUsingContext(
-    'checkUpToDate does not skip pub get if the current framework version is not the same as the last version',
+    'checkUpToDate does not skip pub get if the package config is newer than the pubspec '
+    'but the current framework version is not the same as the last version',
     () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -386,7 +333,8 @@ void main() {
   );
 
   testUsingContext(
-    'checkUpToDate does not skip pub get if the last framework version file does not exist',
+    'checkUpToDate does not skip pub get if the package config is newer than the pubspec '
+    'but the current framework version does not exist yet',
     () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -428,64 +376,6 @@ void main() {
 
       expect(processManager, hasNoRemainingExpectations);
       expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'b');
-    },
-  );
-
-  testUsingContext(
-    'checkUpToDate does not skip pub get if the current framework version matches but resolution needs updating (exit code 1)',
-    () async {
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'bin/cache/dart-sdk/bin/dart',
-            'pub',
-            '--suppress-analytics',
-            '--directory',
-            '.',
-            'check-resolution-up-to-date',
-          ],
-          exitCode: 1,
-        ),
-        const FakeCommand(
-          command: <String>[
-            'bin/cache/dart-sdk/bin/dart',
-            'pub',
-            '--suppress-analytics',
-            '--directory',
-            '.',
-            'get',
-            '--example',
-          ],
-        ),
-      ]);
-      final logger = BufferLogger.test();
-      final fileSystem = MemoryFileSystem.test();
-
-      fileSystem.file('pubspec.yaml').createSync();
-      fileSystem.file('pubspec.lock').createSync();
-      fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-      fileSystem.file('.dart_tool/version').writeAsStringSync('a');
-      fileSystem.file('bin/cache/flutter.version.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(_generateFlutterVersionJson('a'));
-
-      final pub = Pub.test(
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        platform: FakePlatform(),
-        botDetector: const FakeBotDetector(false),
-        stdio: FakeStdio(),
-      );
-
-      await pub.get(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        context: PubContext.pubGet,
-        checkUpToDate: true,
-      );
-
-      expect(processManager, hasNoRemainingExpectations);
-      expect(fileSystem.file('.dart_tool/version').readAsStringSync(), 'a');
     },
   );
 
@@ -549,17 +439,6 @@ void main() {
             '--suppress-analytics',
             '--directory',
             '.',
-            'check-resolution-up-to-date',
-          ],
-          exitCode: 1,
-        ),
-        const FakeCommand(
-          command: <String>[
-            'bin/cache/dart-sdk/bin/dart',
-            'pub',
-            '--suppress-analytics',
-            '--directory',
-            '.',
             'get',
             '--example',
           ],
@@ -605,17 +484,6 @@ void main() {
             '--suppress-analytics',
             '--directory',
             '.',
-            'check-resolution-up-to-date',
-          ],
-          exitCode: 1,
-        ),
-        const FakeCommand(
-          command: <String>[
-            'bin/cache/dart-sdk/bin/dart',
-            'pub',
-            '--suppress-analytics',
-            '--directory',
-            '.',
             'get',
             '--example',
           ],
@@ -629,7 +497,6 @@ void main() {
       fileSystem.file('.dart_tool/package_config.json')
         ..createSync(recursive: true)
         ..setLastModifiedSync(DateTime(1991));
-      fileSystem.file('.dart_tool/version').writeAsStringSync('b');
       fileSystem.file('bin/cache/flutter.version.json')
         ..createSync(recursive: true)
         ..writeAsStringSync(_generateFlutterVersionJson('b'));
@@ -658,17 +525,6 @@ void main() {
     'checkUpToDate does not skip pub get if the pubspec.lock is older that the pubspec',
     () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'bin/cache/dart-sdk/bin/dart',
-            'pub',
-            '--suppress-analytics',
-            '--directory',
-            '.',
-            'check-resolution-up-to-date',
-          ],
-          exitCode: 1,
-        ),
         const FakeCommand(
           command: <String>[
             'bin/cache/dart-sdk/bin/dart',
@@ -1288,58 +1144,6 @@ exit code: 66
     ); // because nothing should touch it
     logger.clear();
   });
-
-  testUsingContext(
-    'checkUpToDate works and calls check-resolution-up-to-date in a workspace context',
-    () async {
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final Directory pkg = fileSystem.directory('workspace_pkg')..createSync(recursive: true);
-
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            'bin/cache/dart-sdk/bin/dart',
-            'pub',
-            '--suppress-analytics',
-            '--directory',
-            'workspace_pkg',
-            'check-resolution-up-to-date',
-          ],
-        ),
-      ]);
-      final logger = BufferLogger.test();
-
-      // Workspace package setup
-      pkg.childFile('pubspec.yaml').createSync();
-      fileSystem.file('pubspec.lock').createSync();
-      fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-      pkg.childDirectory('.dart_tool').childDirectory('pub').childFile('workspace_ref.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('{"workspaceRoot": "../../../"}');
-      fileSystem.file('bin/cache/flutter.version.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(_generateFlutterVersionJson('a'));
-      fileSystem.file('.dart_tool/version').writeAsStringSync('a');
-
-      final pub = Pub.test(
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        platform: FakePlatform(),
-        botDetector: const FakeBotDetector(false),
-        stdio: FakeStdio(),
-      );
-
-      await pub.get(
-        project: FlutterProject.fromDirectoryTest(pkg),
-        context: PubContext.pubGet,
-        checkUpToDate: true,
-      );
-
-      expect(logger.traceText, contains('Skipping pub get: resolution up-to-date.'));
-      expect(processManager, hasNoRemainingExpectations);
-    },
-  );
 }
 
 String _generateFlutterVersionJson(String version) {

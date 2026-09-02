@@ -24,9 +24,8 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
+import '../build_system/build_targets.dart';
 import '../dart/language_version.dart';
-import '../dart/package_map.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
@@ -43,6 +42,7 @@ import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
+import 'build_targets.dart';
 import 'devfs_web.dart';
 import 'web_expression_compiler.dart';
 
@@ -114,6 +114,7 @@ class ResidentWebRunner extends ResidentRunner {
     required Analytics analytics,
     UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
+    BuildTargets? buildTargets,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
@@ -131,6 +132,7 @@ class ResidentWebRunner extends ResidentRunner {
            outputPreferences: outputPreferences,
          ),
          dartBuilder: hookRunner,
+         buildTargets: buildTargets ?? const BuildTargetsImpl(),
        );
 
   final FileSystem _fileSystem;
@@ -340,12 +342,13 @@ class ResidentWebRunner extends ResidentRunner {
             return 1;
           }
           flutterDevice!.generator!.accept();
-          cacheInitialDillCompilation();
+          unawaited(cacheInitialDillCompilation());
         } else {
           final webBuilder = WebBuilder(
             logger: _logger,
             processManager: globals.processManager,
             buildSystem: globals.buildSystem,
+            buildTargets: const BuildTargetsImpl(),
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
             analytics: globals.analytics,
@@ -356,7 +359,6 @@ class ResidentWebRunner extends ResidentRunner {
             debuggingOptions.buildInfo,
             ServiceWorkerStrategy.none,
             compilerConfigs: <WebCompilerConfig>[_compilerConfig],
-            webDefines: _webDefines,
           );
         }
         final webDevFS = flutterDevice!.devFS! as WebDevFS;
@@ -507,6 +509,7 @@ class ResidentWebRunner extends ResidentRunner {
           logger: _logger,
           processManager: globals.processManager,
           buildSystem: globals.buildSystem,
+          buildTargets: const BuildTargetsImpl(),
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
           analytics: globals.analytics,
@@ -517,7 +520,6 @@ class ResidentWebRunner extends ResidentRunner {
           debuggingOptions.buildInfo,
           ServiceWorkerStrategy.none,
           compilerConfigs: <WebCompilerConfig>[_compilerConfig],
-          webDefines: _webDefines,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
@@ -720,7 +722,7 @@ class ResidentWebRunner extends ResidentRunner {
       // the web_plugin_registrant.dart file alongside the generated main.dart
       const generatedImport = 'web_plugin_registrant.dart';
 
-      Uri? importedEntrypoint = packageConfig!.toPackageUriForWorkspace(mainUri);
+      Uri? importedEntrypoint = packageConfig!.toPackageUri(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
         final String parent = _fileSystem.file(mainUri).parent.path;
@@ -736,7 +738,7 @@ class ResidentWebRunner extends ResidentRunner {
       final LanguageVersion languageVersion = determineLanguageVersion(
         _fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
-        Cache.flutterRoot!,
+        cache?.flutterRoot ?? '',
       );
 
       final String entrypoint = main_dart.generateMainDartFile(
@@ -771,6 +773,11 @@ class ResidentWebRunner extends ResidentRunner {
         return UpdateFSReport();
       }
     }
+    final projectFileInvalidator = ProjectFileInvalidator(
+      fileSystem: _fileSystem,
+      platform: _platform,
+      logger: _logger,
+    );
     final InvalidationResult invalidationResult = await projectFileInvalidator.findInvalidated(
       lastCompiled: flutterDevice!.devFS!.lastCompiled,
       urisToMonitor: flutterDevice!.devFS!.sources,

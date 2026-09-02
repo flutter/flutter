@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -77,8 +76,6 @@ Future<void> run(List<String> args) async {
     'flutter_fuchsia_tester.',
   );
   try {
-    Cache.flutterRoot = tempDir.path;
-
     final String flutterTesterBinPath = globals.fs
         .file(argResults[_kOptionShell])
         .resolveSymbolicLinksSync();
@@ -131,6 +128,11 @@ Future<void> run(List<String> args) async {
         packagesPath: packagesPath,
         libraryNames: libraryNames,
         resolver: await CoverageCollector.getResolver(packagesPath),
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processUtils: globals.processUtils,
+        os: globals.os,
       );
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
@@ -158,7 +160,19 @@ Future<void> run(List<String> args) async {
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       ),
     );
-    exitCode = await const FlutterTestRunner().runTests(
+    final testRunner = FlutterTestRunner(
+      artifacts: globals.artifacts!,
+      config: globals.config,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      os: globals.os,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      shutdownHooks: globals.shutdownHooks,
+      stdio: globals.stdio,
+      terminal: globals.terminal,
+    );
+    exitCode = await testRunner.runTests(
       const TestWrapper(),
       tests.keys.map(Uri.file).toList(),
       debuggingOptions: DebuggingOptions.enabled(buildInfo),

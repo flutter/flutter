@@ -32,7 +32,7 @@ void main() {
       return;
     }
     testWithoutContext('should log a message to stderr when lock is not acquired', () async {
-      final String? oldRoot = Cache.flutterRoot;
+      final String? oldRoot = getFlutterRoot();
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
       final logger = BufferLogger(
         terminal: Terminal.test(),
@@ -41,17 +41,16 @@ void main() {
       logger.fatalWarnings = true;
       Process? process;
       try {
-        Cache.flutterRoot = tempDir.absolute.path;
         final cache = Cache.test(
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
           logger: logger,
         );
         final File cacheFile = fileSystem.file(
-          fileSystem.path.join(Cache.flutterRoot!, 'bin', 'cache', 'lockfile'),
+          fileSystem.path.join(getFlutterRoot(), 'bin', 'cache', 'lockfile'),
         )..createSync(recursive: true);
         final File script = fileSystem.file(
-          fileSystem.path.join(Cache.flutterRoot!, 'bin', 'cache', 'test_lock.dart'),
+          fileSystem.path.join(getFlutterRoot(), 'bin', 'cache', 'test_lock.dart'),
         );
         script.writeAsStringSync(r'''
 import 'dart:async';
@@ -103,7 +102,6 @@ Future<void> main(List<String> args) async {
         // Just to keep from leaving the process hanging around.
         process?.kill(io.ProcessSignal.sighup);
         tryToDelete(tempDir);
-        Cache.flutterRoot = oldRoot;
       }
       expect(logger.statusText, isEmpty);
       expect(logger.errorText, isEmpty);
@@ -117,7 +115,7 @@ Future<void> main(List<String> args) async {
       expect(logger.hadWarningOutput, isFalse);
     });
     testWithoutContext('should log a warning message for unknown version ', () async {
-      final String? oldRoot = Cache.flutterRoot;
+      final String? oldRoot = getFlutterRoot();
       final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('cache_test.');
       final logger = BufferLogger(
         terminal: Terminal.test(),
@@ -125,7 +123,6 @@ Future<void> main(List<String> args) async {
       );
       logger.fatalWarnings = true;
       try {
-        Cache.flutterRoot = tempDir.absolute.path;
         final cache = Cache.test(
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
@@ -141,7 +138,6 @@ Future<void> main(List<String> args) async {
         );
       } finally {
         tryToDelete(tempDir);
-        Cache.flutterRoot = oldRoot;
       }
       expect(logger.statusText, isEmpty);
       expect(

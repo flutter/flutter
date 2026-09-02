@@ -10,9 +10,7 @@ import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/io.dart';
 import '../base/process.dart';
-import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart' as globals show fs;
 import 'error_formatter.dart';
 import 'flutter_adapter_args.dart';
 import 'flutter_base_adapter.dart';
@@ -143,7 +141,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     if (vmServiceUri == null && vmServiceInfoFile != null) {
       final Uri uriFromFile = await waitForVmServiceInfoFile(
         logger,
-        globals.fs.file(vmServiceInfoFile),
+        fileSystem.file(vmServiceInfoFile),
       );
       vmServiceUri = uriFromFile.toString();
     }
@@ -288,11 +286,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     // Handle customTool and deletion of any arguments for it.
     final String executable =
         customTool ??
-        fileSystem.path.join(
-          Cache.flutterRoot!,
-          'bin',
-          platform.isWindows ? 'flutter.bat' : 'flutter',
-        );
+        fileSystem.path.join(flutterSdkRoot, 'bin', platform.isWindows ? 'flutter.bat' : 'flutter');
     final removeArgs = customToolReplacesArgs;
     if (customTool != null && removeArgs != null) {
       toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));

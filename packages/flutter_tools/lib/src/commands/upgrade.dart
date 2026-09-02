@@ -96,7 +96,7 @@ class UpgradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    _commandRunner.workingDirectory = stringArg('working-directory') ?? Cache.flutterRoot!;
+    _commandRunner.workingDirectory = stringArg('working-directory') ?? globals.cache.flutterRoot;
     return _commandRunner.runCommand(
       _parsePhaseFromContinueArg(),
       force: boolArg('force'),
@@ -268,7 +268,7 @@ class UpgradeCommandRunner {
   Future<void> flutterUpgradeContinue({required DateTime startedAt}) async {
     final int code = await globals.processUtils.stream(
       [
-        globals.fs.path.join(workingDirectory ?? Cache.flutterRoot!, 'bin', 'flutter'),
+        globals.fs.path.join(workingDirectory ?? globals.cache.flutterRoot, 'bin', 'flutter'),
         'upgrade',
         '--continue',
         '--continue-started-at',

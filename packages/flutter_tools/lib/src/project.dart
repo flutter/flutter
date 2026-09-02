@@ -76,7 +76,7 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest);
+      return FlutterProject(directory, manifest, exampleManifest, projectFactory: this);
     });
   }
 }
@@ -97,9 +97,13 @@ class FlutterProject {
     FlutterManifest manifest,
     this._exampleManifest, {
     Directory? buildDirectory,
-  }) : _buildDirectory = buildDirectory {
+    FlutterProjectFactory? projectFactory,
+  }) : _buildDirectory = buildDirectory,
+       _projectFactory = projectFactory {
     _setManifest(manifest);
   }
+
+  final FlutterProjectFactory? _projectFactory;
 
   FlutterProject? _workspaceRoot;
   bool _searchedForWorkspaceRoot = false;
@@ -147,7 +151,9 @@ class FlutterProject {
             return glob.matches(relativePath);
           });
           if (isMember) {
-            return FlutterProject.fromDirectory(candidate);
+            return _projectFactory != null
+                ? _projectFactory.fromDirectory(candidate)
+                : FlutterProject.fromDirectory(candidate);
           }
         }
       } on Exception catch (_) {
@@ -229,7 +235,11 @@ class FlutterProject {
               .whereType<Directory>()) {
         if (globResult.childFile('pubspec.yaml').existsSync()) {
           try {
-            _workspaceProjects.add(FlutterProject.fromDirectory(globResult));
+            _workspaceProjects.add(
+              _projectFactory != null
+                  ? _projectFactory.fromDirectory(globResult)
+                  : FlutterProject.fromDirectory(globResult),
+            );
           } on Exception catch (_) {
             // Ignore child projects with invalid manifests.
           }
