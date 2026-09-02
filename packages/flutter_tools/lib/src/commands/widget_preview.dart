@@ -667,8 +667,8 @@ final class WidgetPreviewMachineAwareLogger extends DelegatingLogger {
   WidgetPreviewMachineAwareLogger(
     super.delegate, {
     required this.machine,
-    required this.verbose,
     required Stdio stdio,
+    required this.verbose,
   }) : _stdio = stdio;
 
   final bool machine;
