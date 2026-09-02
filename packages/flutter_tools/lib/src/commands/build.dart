@@ -25,6 +25,7 @@ import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+import '../windows/visual_studio.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
 import 'build_appbundle.dart';
@@ -37,7 +38,6 @@ import 'build_macos_framework.dart';
 import 'build_swift_package.dart';
 import 'build_web.dart';
 import 'build_windows.dart';
-import '../windows/visual_studio.dart';
 import 'darwin_add_to_app.dart';
 
 class BuildCommand extends FlutterCommand {
@@ -156,11 +156,13 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
     );
-    _addSubcommand(BuildMacosCommand(
-      toolContext: toolContext,
-      buildSystem: buildSystem,
-      verboseHelp: verboseHelp,
-    ));
+    _addSubcommand(
+      BuildMacosCommand(
+        toolContext: toolContext,
+        buildSystem: buildSystem,
+        verboseHelp: verboseHelp,
+      ),
+    );
     _addSubcommand(
       BuildLinuxCommand(
         buildSystem: buildSystem,
