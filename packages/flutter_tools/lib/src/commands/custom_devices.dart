@@ -26,44 +26,15 @@ import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 
 class CustomDevicesCommand extends FlutterCommand {
-  CustomDevicesCommand({
-    required FeatureFlags featureFlags,
-    required ToolContext toolContext,
-    CustomDevicesConfig? customDevicesConfig,
-  }) : _customDevicesConfig = customDevicesConfig ?? toolContext.customDevicesConfig,
-       _featureFlags = featureFlags,
-       super(toolContext: toolContext) {
-    addSubcommand(
-      CustomDevicesListCommand(
-        customDevicesConfig: _customDevicesConfig,
-        featureFlags: featureFlags,
-        toolContext: toolContext,
-      ),
-    );
-    addSubcommand(
-      CustomDevicesResetCommand(
-        customDevicesConfig: _customDevicesConfig,
-        featureFlags: featureFlags,
-        toolContext: toolContext,
-      ),
-    );
-    addSubcommand(
-      CustomDevicesAddCommand(
-        customDevicesConfig: _customDevicesConfig,
-        featureFlags: featureFlags,
-        toolContext: toolContext,
-      ),
-    );
-    addSubcommand(
-      CustomDevicesDeleteCommand(
-        customDevicesConfig: _customDevicesConfig,
-        featureFlags: featureFlags,
-        toolContext: toolContext,
-      ),
-    );
+  CustomDevicesCommand({required FeatureFlags featureFlags, required ToolContext toolContext})
+    : _featureFlags = featureFlags,
+      super(toolContext: toolContext) {
+    addSubcommand(CustomDevicesListCommand(featureFlags: featureFlags, toolContext: toolContext));
+    addSubcommand(CustomDevicesResetCommand(featureFlags: featureFlags, toolContext: toolContext));
+    addSubcommand(CustomDevicesAddCommand(featureFlags: featureFlags, toolContext: toolContext));
+    addSubcommand(CustomDevicesDeleteCommand(featureFlags: featureFlags, toolContext: toolContext));
   }
 
-  final CustomDevicesConfig _customDevicesConfig;
   final FeatureFlags _featureFlags;
 
   @override
@@ -74,7 +45,7 @@ class CustomDevicesCommand extends FlutterCommand {
     String configFileLine;
     if (_featureFlags.areCustomDevicesEnabled) {
       configFileLine =
-          '\nMakes changes to the config file at "${_customDevicesConfig.configPath}".\n';
+          '\nMakes changes to the config file at "${toolContext.customDevicesConfig.configPath}".\n';
     } else {
       configFileLine = '';
     }
@@ -107,17 +78,14 @@ Requires the custom devices feature to be enabled. You can enable it using "flut
 /// to the subcommands, like backing up the config file & checking if the
 /// feature is enabled.
 abstract class CustomDevicesCommandBase extends FlutterCommand {
-  CustomDevicesCommandBase({
-    required this.customDevicesConfig,
-    required this.featureFlags,
-    required ToolContext toolContext,
-  }) : super(toolContext: toolContext);
+  CustomDevicesCommandBase({required this.featureFlags, required ToolContext toolContext})
+    : super(toolContext: toolContext);
 
   @override
   ToolContext get toolContext => super.toolContext!;
 
   @protected
-  final CustomDevicesConfig customDevicesConfig;
+  CustomDevicesConfig get customDevicesConfig => toolContext.customDevicesConfig;
   @protected
   final FeatureFlags featureFlags;
 
@@ -158,11 +126,7 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
 }
 
 class CustomDevicesListCommand extends CustomDevicesCommandBase {
-  CustomDevicesListCommand({
-    required super.customDevicesConfig,
-    required super.featureFlags,
-    required super.toolContext,
-  });
+  CustomDevicesListCommand({required super.featureFlags, required super.toolContext});
 
   @override
   String get description => '''
@@ -202,11 +166,7 @@ List the currently configured custom devices, both enabled and disabled, reachab
 }
 
 class CustomDevicesResetCommand extends CustomDevicesCommandBase {
-  CustomDevicesResetCommand({
-    required super.customDevicesConfig,
-    required super.featureFlags,
-    required super.toolContext,
-  });
+  CustomDevicesResetCommand({required super.featureFlags, required super.toolContext});
 
   @override
   String get description => '''
@@ -239,11 +199,7 @@ If a file already exists at the backup location, it will be overwritten.
 }
 
 class CustomDevicesAddCommand extends CustomDevicesCommandBase {
-  CustomDevicesAddCommand({
-    required super.customDevicesConfig,
-    required super.featureFlags,
-    required super.toolContext,
-  }) {
+  CustomDevicesAddCommand({required super.featureFlags, required super.toolContext}) {
     argParser.addFlag(
       _kCheck,
       help:
@@ -704,11 +660,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 }
 
 class CustomDevicesDeleteCommand extends CustomDevicesCommandBase {
-  CustomDevicesDeleteCommand({
-    required super.customDevicesConfig,
-    required super.featureFlags,
-    required super.toolContext,
-  });
+  CustomDevicesDeleteCommand({required super.featureFlags, required super.toolContext});
 
   @override
   String get description => '''
