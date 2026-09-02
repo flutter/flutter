@@ -128,26 +128,23 @@ class IdeConfigCommand extends FlutterCommand {
     final FileSystem fs = toolContext.fs;
     final Logger logger = toolContext.logger;
     final path.Context pathContext = fs.path;
-    final Directory flutterRoot = _flutterRoot;
-    final Directory templateDirectory = _templateDirectory;
-    final Directory createTemplatesDirectory = _createTemplatesDirectory;
 
-    if (!flutterRoot.existsSync()) {
+    if (!_flutterRoot.existsSync()) {
       return;
     }
 
     final manifest = <String>{};
-    final Iterable<File> flutterFiles = flutterRoot.listSync(recursive: true).whereType<File>();
+    final Iterable<File> flutterFiles = _flutterRoot.listSync(recursive: true).whereType<File>();
     for (final srcFile in flutterFiles) {
       final String relativePath = pathContext.relative(
         srcFile.path,
-        from: flutterRoot.absolute.path,
+        from: _flutterRoot.absolute.path,
       );
 
       // Skip template files in both the ide_templates and templates
       // directories to avoid copying onto themselves.
-      if (_isChildDirectoryOf(templateDirectory, srcFile) ||
-          _isChildDirectoryOf(createTemplatesDirectory, srcFile)) {
+      if (_isChildDirectoryOf(_templateDirectory, srcFile) ||
+          _isChildDirectoryOf(_createTemplatesDirectory, srcFile)) {
         continue;
       }
 
@@ -164,13 +161,13 @@ class IdeConfigCommand extends FlutterCommand {
 
       final File finalDestinationFile = fs.file(
         pathContext.absolute(
-          templateDirectory.absolute.path,
+          _templateDirectory.absolute.path,
           '$relativePath${Template.copyTemplateExtension}',
         ),
       );
       final String relativeDestination = pathContext.relative(
         finalDestinationFile.path,
-        from: flutterRoot.absolute.path,
+        from: _flutterRoot.absolute.path,
       );
       if (finalDestinationFile.existsSync()) {
         if (_fileIsIdentical(srcFile, finalDestinationFile)) {
@@ -205,19 +202,19 @@ class IdeConfigCommand extends FlutterCommand {
 
     // Look for any files under the template dir that don't exist in the manifest and remove
     // them.
-    final Iterable<File> templateFiles = templateDirectory
+    final Iterable<File> templateFiles = _templateDirectory
         .listSync(recursive: true)
         .whereType<File>();
     for (final templateFile in templateFiles) {
       final String relativePath = pathContext.relative(
         templateFile.absolute.path,
-        from: templateDirectory.absolute.path,
+        from: _templateDirectory.absolute.path,
       );
       if (!manifest.contains(relativePath)) {
         templateFile.deleteSync();
         final String relativeDestination = pathContext.relative(
           templateFile.path,
-          from: flutterRoot.absolute.path,
+          from: _flutterRoot.absolute.path,
         );
         logger.printStatus('  $relativeDestination (removed)');
       }
@@ -230,7 +227,7 @@ class IdeConfigCommand extends FlutterCommand {
           '  ${pathContext.relative(parentDir.absolute.path)} (empty directory - removed)',
         );
         parentDir = fs.directory(parentDir.dirname);
-        if (pathContext.isWithin(templateDirectory.absolute.path, parentDir.absolute.path)) {
+        if (pathContext.isWithin(_templateDirectory.absolute.path, parentDir.absolute.path)) {
           break;
         }
       }
