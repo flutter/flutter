@@ -416,14 +416,12 @@ class LoggerFactory {
     if (windows) {
       logger = WindowsStdoutLogger(
         terminal: _terminal,
-        stdio: _stdio,
         outputPreferences: _outputPreferences,
         stopwatchFactory: _stopwatchFactory,
       );
     } else {
       logger = StdoutLogger(
         terminal: _terminal,
-        stdio: _stdio,
         outputPreferences: _outputPreferences,
         stopwatchFactory: _stopwatchFactory,
       );
@@ -439,7 +437,6 @@ class LoggerFactory {
         logger,
         machine: machine,
         verbose: verbose,
-        stdio: _stdio,
       );
     }
     if (daemon) {
