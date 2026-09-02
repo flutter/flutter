@@ -227,10 +227,10 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
 
   // Make this context wait for the frame to have finished rendering in the
   // engine's context before it reads the texture below. This context is the one
-  // that reads the frame, so the wait can be left to the GPU and this thread
+  // that reads the frame, so the waiting can be left to OpenGL and this thread
   // doesn't have to block.
   if (fence != nullptr) {
-    fl_gl_fence_wait_gpu(fence);
+    fl_gl_fence_wait(fence);
   }
 
   EGLint surface_width = 0, surface_height = 0;

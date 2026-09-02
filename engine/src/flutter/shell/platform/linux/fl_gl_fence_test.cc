@@ -41,12 +41,12 @@ TEST_F(FlGLFenceTest, NewFails) {
 
   EXPECT_CALL(epoxy, eglClientWaitSyncKHR).Times(0);
   EXPECT_CALL(epoxy, eglWaitSyncKHR).Times(0);
+  fl_gl_fence_client_wait(fence);
   fl_gl_fence_wait(fence);
-  fl_gl_fence_wait_gpu(fence);
 }
 
 // Waiting blocks the calling thread until the fence is reached.
-TEST_F(FlGLFenceTest, Wait) {
+TEST_F(FlGLFenceTest, ClientWait) {
   g_autoptr(FlGLFence) fence = fl_gl_fence_new(opengl_manager);
   ASSERT_NE(fence, nullptr);
 
@@ -54,11 +54,11 @@ TEST_F(FlGLFenceTest, Wait) {
                                           ::testing::_, ::testing::_))
       .WillOnce(::testing::Return(EGL_CONDITION_SATISFIED_KHR));
 
-  fl_gl_fence_wait(fence);
+  fl_gl_fence_client_wait(fence);
 }
 
-// Waiting on the GPU doesn't block the calling thread.
-TEST_F(FlGLFenceTest, WaitGpu) {
+// OpenGL can do the waiting, which doesn't block the calling thread.
+TEST_F(FlGLFenceTest, Wait) {
   g_autoptr(FlGLFence) fence = fl_gl_fence_new(opengl_manager);
   ASSERT_NE(fence, nullptr);
 
@@ -66,12 +66,12 @@ TEST_F(FlGLFenceTest, WaitGpu) {
       .WillOnce(::testing::Return(EGL_TRUE));
   EXPECT_CALL(epoxy, eglClientWaitSyncKHR).Times(0);
 
-  fl_gl_fence_wait_gpu(fence);
+  fl_gl_fence_wait(fence);
 }
 
 // Drivers that can create fences but can't wait on them without blocking fall
 // back to blocking, which is slower but still correct.
-TEST_F(FlGLFenceTest, WaitGpuUnsupported) {
+TEST_F(FlGLFenceTest, WaitUnsupported) {
   EXPECT_CALL(epoxy, epoxy_has_egl_extension(
                          ::testing::_, ::testing::StrEq("EGL_KHR_wait_sync")))
       .WillRepeatedly(::testing::Return(false));
@@ -83,7 +83,7 @@ TEST_F(FlGLFenceTest, WaitGpuUnsupported) {
   EXPECT_CALL(epoxy, eglClientWaitSyncKHR)
       .WillOnce(::testing::Return(EGL_CONDITION_SATISFIED_KHR));
 
-  fl_gl_fence_wait_gpu(fence);
+  fl_gl_fence_wait(fence);
 }
 
 // The fence is destroyed with the display it was created on, so it doesn't

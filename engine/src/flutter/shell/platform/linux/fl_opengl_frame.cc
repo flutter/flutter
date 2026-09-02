@@ -177,10 +177,10 @@ gboolean fl_opengl_frame_draw(FlOpenGLFrame* self,
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
     // Wait for the frame to have finished rendering before GTK reads it. GTK
     // draws the frame using the window's paint context rather than the one
-    // that is current here, so the wait can't be left to the GPU - it would
+    // that is current here, so the waiting can't be left to OpenGL - it would
     // only order the context it was issued in.
     if (self->fence != nullptr) {
-      fl_gl_fence_wait(self->fence);
+      fl_gl_fence_client_wait(self->fence);
       g_clear_object(&self->fence);
     }
 

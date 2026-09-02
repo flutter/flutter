@@ -21,8 +21,8 @@ struct _FlGLFence {
 
   EGLSyncKHR sync;
 
-  // TRUE if the current context can be made to wait without blocking.
-  gboolean can_wait_gpu;
+  // TRUE if OpenGL can wait for the fence, i.e. without blocking this thread.
+  gboolean can_wait_sync;
 };
 
 G_DEFINE_TYPE(FlGLFence, fl_gl_fence, G_TYPE_OBJECT)
@@ -64,12 +64,12 @@ FlGLFence* fl_gl_fence_new(FlOpenGLManager* opengl_manager) {
 
   self->display = display;
   self->sync = sync;
-  self->can_wait_gpu = fl_opengl_manager_can_wait_sync(opengl_manager);
+  self->can_wait_sync = fl_opengl_manager_can_wait_sync(opengl_manager);
 
   return self;
 }
 
-void fl_gl_fence_wait(FlGLFence* self) {
+void fl_gl_fence_client_wait(FlGLFence* self) {
   g_return_if_fail(FL_IS_GL_FENCE(self));
 
   // Nothing to wait for if the fence couldn't be created.
@@ -87,7 +87,7 @@ void fl_gl_fence_wait(FlGLFence* self) {
   }
 }
 
-void fl_gl_fence_wait_gpu(FlGLFence* self) {
+void fl_gl_fence_wait(FlGLFence* self) {
   g_return_if_fail(FL_IS_GL_FENCE(self));
 
   // Nothing to wait for if the fence couldn't be created.
@@ -95,8 +95,8 @@ void fl_gl_fence_wait_gpu(FlGLFence* self) {
     return;
   }
 
-  if (!self->can_wait_gpu) {
-    fl_gl_fence_wait(self);
+  if (!self->can_wait_sync) {
+    fl_gl_fence_client_wait(self);
     return;
   }
 
