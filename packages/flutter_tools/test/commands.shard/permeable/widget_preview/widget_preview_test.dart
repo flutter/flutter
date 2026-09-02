@@ -216,39 +216,26 @@ void main() {
     List<String> arguments, {
     Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) async {
-    final CommandRunner<void> runner = createTestCommandRunner(
-      WidgetPreviewCommand(
-        artifacts: Artifacts.test(),
-        cache: Cache.test(processManager: loggingProcessManager, platform: platform),
-        fs: fs,
+    final fakeToolContext = FakeToolContext(
+      artifacts: Artifacts.test(),
+      cache: Cache.test(processManager: loggingProcessManager, platform: platform),
+      fs: fs,
+      logger: logger,
+      os: OperatingSystemUtils(
+        fileSystem: fs,
         logger: logger,
-        os: OperatingSystemUtils(
-          fileSystem: fs,
-          logger: logger,
-          platform: platform,
-          processManager: loggingProcessManager,
-        ),
         platform: platform,
         processManager: loggingProcessManager,
-        projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+      ),
+      platform: platform,
+      processManager: loggingProcessManager,
+      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+      terminal: FakeTerminal(),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(
+      WidgetPreviewCommand(
         shutdownHooks: shutdownHooks,
-        terminal: FakeTerminal(),
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
-          cache: Cache.test(processManager: loggingProcessManager, platform: platform),
-          fs: fs,
-          logger: logger,
-          os: OperatingSystemUtils(
-            fileSystem: fs,
-            logger: logger,
-            platform: platform,
-            processManager: loggingProcessManager,
-          ),
-          platform: platform,
-          processManager: loggingProcessManager,
-          projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
-          terminal: FakeTerminal(),
-        ),
+        toolContext: fakeToolContext,
         verboseHelp: false,
         analysisServerFactoryOverride:
             analysisServerFactoryOverride ?? () async => FakeAnalysisServer(),

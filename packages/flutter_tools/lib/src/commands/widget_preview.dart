@@ -47,16 +47,7 @@ import 'create_base.dart';
 
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
-    required Artifacts artifacts,
-    required Cache cache,
-    required FileSystem fs,
-    required Logger logger,
-    required OperatingSystemUtils os,
-    required Platform platform,
-    required ProcessManager processManager,
-    required FlutterProjectFactory projectFactory,
     required ShutdownHooks shutdownHooks,
-    required Terminal terminal,
     required ToolContext toolContext,
     required bool verboseHelp,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
@@ -64,16 +55,16 @@ class WidgetPreviewCommand extends FlutterCommand {
   }) : super(toolContext: toolContext) {
     addSubcommand(
       WidgetPreviewStartCommand(
-        artifacts: artifacts,
-        cache: cache,
-        fs: fs,
-        logger: logger,
-        os: os,
-        platform: platform,
-        processManager: processManager,
-        projectFactory: projectFactory,
+        artifacts: toolContext.artifacts,
+        cache: toolContext.cache,
+        fs: toolContext.fs,
+        logger: toolContext.logger,
+        os: toolContext.os,
+        platform: toolContext.platform,
+        processManager: toolContext.processManager,
+        projectFactory: toolContext.projectFactory,
         shutdownHooks: shutdownHooks,
-        terminal: terminal,
+        terminal: toolContext.terminal,
         toolContext: toolContext,
         verbose: verboseHelp,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
@@ -82,9 +73,9 @@ class WidgetPreviewCommand extends FlutterCommand {
     );
     addSubcommand(
       WidgetPreviewCleanCommand(
-        fs: fs,
-        logger: logger,
-        projectFactory: projectFactory,
+        fs: toolContext.fs,
+        logger: toolContext.logger,
+        projectFactory: toolContext.projectFactory,
         toolContext: toolContext,
       ),
     );
