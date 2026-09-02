@@ -29,6 +29,7 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
@@ -125,7 +126,10 @@ void main() {
     testUsingContext(
       'fails when target not found',
       () async {
-        final command = RunCommand(toolContext: _createToolContext());
+        final command = RunCommand(
+          toolContext: _createToolContext(),
+          appleContext: FakeAppleContext(),
+        );
         expect(
           () => createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']),
           throwsA(
@@ -159,7 +163,10 @@ void main() {
         fileSystem.file('lib/main.dart').createSync(recursive: true);
         fileSystem.currentDirectory = fileSystem.directory('a/b/c')..createSync(recursive: true);
 
-        final command = RunCommand(toolContext: _createToolContext());
+        final command = RunCommand(
+          toolContext: _createToolContext(),
+          appleContext: FakeAppleContext(),
+        );
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
           throwsToolExit(),
@@ -183,7 +190,10 @@ void main() {
         fileSystem.currentDirectory = fileSystem.directory('a/b/c')..createSync(recursive: true);
         fileSystem.file('lib/main.dart').createSync(recursive: true);
 
-        final command = RunCommand(toolContext: _createToolContext());
+        final command = RunCommand(
+          toolContext: _createToolContext(),
+          appleContext: FakeAppleContext(),
+        );
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
           throwsToolExit(message: 'No pubspec.yaml file found'),
@@ -243,7 +253,10 @@ void main() {
       testUsingContext(
         'exits with a user message when no supported devices attached',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           testDeviceManager.devices = <Device>[];
 
           await expectLater(
@@ -267,16 +280,19 @@ void main() {
       testUsingContext(
         'exits and lists available devices when specified device not found',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           final device = FakeDevice(isLocalEmulator: true);
           testDeviceManager
             ..devices = <Device>[device]
             ..specifiedDeviceId = 'invalid-device-id';
 
           await expectLater(
-            () =>
-                createTestCommandRunner(command)
-                    .run(<String>['run', '-d', 'invalid-device-id', '--no-pub', '--no-hot']),
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '-d', 'invalid-device-id', '--no-pub', '--no-hot']),
             throwsToolExit(),
           );
           expect(
@@ -306,10 +322,12 @@ void main() {
 
           final command = TestRunCommandThatOnlyValidates();
           await expectLater(
-            createTestCommandRunner(command)
-                .run(<String>['run', '--no-pub', '--device-user', '10']),
+            createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--device-user', '10']),
             throwsToolExit(
-              message: '--device-user is only supported for Android. At least one Android device is required.',
+              message:
+                  '--device-user is only supported for Android. At least one Android device is required.',
             ),
           );
         },
@@ -330,8 +348,9 @@ void main() {
           testDeviceManager.devices = <Device>[device];
 
           final command = TestRunCommandThatOnlyValidates();
-          await createTestCommandRunner(command)
-              .run(<String>['run', '--no-pub', '--device-user', '10']);
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--device-user', '10']);
           // Finishes normally without error.
         },
         overrides: <Type, Generator>{
@@ -346,7 +365,10 @@ void main() {
       testUsingContext(
         'shows unsupported devices when no supported devices are found',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           final mockDevice = FakeDevice(
             targetPlatform: TargetPlatform.android_arm,
             isLocalEmulator: true,
@@ -427,7 +449,10 @@ void main() {
       testUsingContext(
         'forwards --uninstall-only to DebuggingOptions',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
@@ -439,8 +464,9 @@ void main() {
               .createSync(recursive: true);
 
           await expectToolExitLater(
-            createTestCommandRunner(command)
-                .run(<String>['run', '--no-pub', '--no-hot', '--uninstall-first']),
+            createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--uninstall-first']),
             isNull,
           );
 
@@ -459,7 +485,10 @@ void main() {
       testUsingContext(
         'passes device target platform to analytics',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
@@ -517,14 +546,18 @@ void main() {
               .childDirectory('ios')
               .childFile('AppDelegate.swift')
               .createSync(recursive: true);
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
           testDeviceManager.devices = <Device>[mockDevice];
 
           await expectToolExitLater(
-            createTestCommandRunner(command)
-                .run(<String>['run', '--no-pub', '--no-hot', 'test/widget_test.dart']),
+            createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', 'test/widget_test.dart']),
             isNull,
           );
 
@@ -563,7 +596,10 @@ void main() {
         testUsingContext(
           'can pass --device-user',
           () async {
-            final command = DaemonCapturingRunCommand(toolContext: _createToolContext());
+            final command = DaemonCapturingRunCommand(
+              toolContext: _createToolContext(),
+              appleContext: FakeAppleContext(),
+            );
             final device = FakeDevice(platformType: PlatformType.android);
             testDeviceManager.devices = <Device>[device];
 
@@ -602,7 +638,10 @@ void main() {
           testUsingContext(
             'can pass --web-define',
             () async {
-              final command = RunCommand(toolContext: _createToolContext());
+              final command = RunCommand(
+                toolContext: _createToolContext(),
+                appleContext: FakeAppleContext(),
+              );
               final device = FakeDevice(
                 platformType: PlatformType.web,
                 targetPlatform: TargetPlatform.web_javascript,
@@ -639,13 +678,17 @@ void main() {
         testUsingContext(
           'can disable devtools with --no-devtools',
           () async {
-            final command = DaemonCapturingRunCommand(toolContext: _createToolContext());
+            final command = DaemonCapturingRunCommand(
+              toolContext: _createToolContext(),
+              appleContext: FakeAppleContext(),
+            );
             final device = FakeDevice();
             testDeviceManager.devices = <Device>[device];
 
             await expectLater(
-              () => createTestCommandRunner(command)
-                  .run(<String>['run', '--no-pub', '--no-devtools', '--machine', '-d', device.id]),
+              () => createTestCommandRunner(
+                command,
+              ).run(<String>['run', '--no-pub', '--no-devtools', '--machine', '-d', device.id]),
               throwsToolExit(),
             );
             expect(command.appDomain.enableDevTools, isFalse);
@@ -678,8 +721,9 @@ void main() {
           command = TestRunCommandWithFakeResidentRunner()
             ..fakeResidentRunner = FakeResidentRunner();
           try {
-            await createTestCommandRunner(command)
-                .run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']);
+            await createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']);
           } on Exception {
             fail('Unexpected exception thrown');
           }
@@ -715,8 +759,9 @@ void main() {
             ..fakeResidentRunner = FakeResidentRunner();
           testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
           await expectLater(
-            createTestCommandRunner(command)
-                .run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']),
+            createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']),
             throwsToolExit(
               message:
                   'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
@@ -736,8 +781,9 @@ void main() {
             ..fakeResidentRunner = FakeResidentRunner();
           testLogger.printError('Error: Danger Will Robinson!');
           await expectLater(
-            createTestCommandRunner(command)
-                .run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']),
+            createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--${FlutterOptions.kFatalWarnings}']),
             throwsToolExit(
               message:
                   'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
@@ -759,7 +805,10 @@ void main() {
         ];
 
         expect(
-          await RunCommand(toolContext: _createToolContext()).requiredArtifacts,
+          await RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.androidGenSnapshot,
@@ -769,7 +818,10 @@ void main() {
         testDeviceManager.devices = <Device>[FakeDevice()];
 
         expect(
-          await RunCommand(toolContext: _createToolContext()).requiredArtifacts,
+          await RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.iOS,
@@ -782,7 +834,10 @@ void main() {
         ];
 
         expect(
-          await RunCommand(toolContext: _createToolContext()).requiredArtifacts,
+          await RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.iOS,
@@ -795,7 +850,10 @@ void main() {
         ];
 
         expect(
-          await RunCommand(toolContext: _createToolContext()).requiredArtifacts,
+          await RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
             DevelopmentArtifact.web,
@@ -1162,9 +1220,13 @@ void main() {
       testUsingContext(
         'can accept simple, valid values',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
-          await createTestCommandRunner(command)
-              .run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1185,7 +1247,10 @@ void main() {
       testUsingContext(
         'throws a ToolExit when no value is provided',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           await expectLater(
             () => createTestCommandRunner(
               command,
@@ -1210,7 +1275,10 @@ void main() {
           fileSystem.file('pubspec.yaml').createSync();
           fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
 
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
               'run',
@@ -1237,11 +1305,14 @@ void main() {
         'throws a ToolExit when using --wasm on a non-web platform',
         () async {
           testDeviceManager.devices = <Device>[FakeDevice(platformType: PlatformType.android)];
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           await expectLater(
-            () =>
-                createTestCommandRunner(command)
-                    .run(<String>['run', '--no-pub', '--no-resident', '--wasm']),
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-resident', '--wasm']),
             throwsToolExit(message: '--wasm is only supported on the web platform'),
           );
         },
@@ -1258,7 +1329,10 @@ void main() {
       testUsingContext(
         'throws a ToolExit when using the skwasm renderer without --wasm',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
               'run',
@@ -1282,7 +1356,10 @@ void main() {
       testUsingContext(
         'accepts headers with commas in them',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
@@ -1340,9 +1417,13 @@ server:
   host: confighost
   port: 9000
 ''');
-          final command = RunCommand(toolContext: _createToolContext());
-          await createTestCommandRunner(command)
-              .run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1366,9 +1447,13 @@ server:
   host: confighost
   port: 9000
 ''');
-          final command = RunCommand(toolContext: _createToolContext());
-          await createTestCommandRunner(command)
-              .run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1397,7 +1482,10 @@ server:
     - name: X-Shared-Header
       value: from-config
 ''');
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
@@ -1435,7 +1523,10 @@ server:
   host: confighost
   port: 9000
 ''');
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
@@ -1464,7 +1555,10 @@ server:
     cert-path: /config/cert.pem
     cert-key-path: /config/key.pem
 ''');
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
@@ -1506,9 +1600,13 @@ server:
     cert-path: /config/cert.pem
     cert-key-path: /config/key.pem
 ''');
-          final command = RunCommand(toolContext: _createToolContext());
-          await createTestCommandRunner(command)
-              .run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1538,7 +1636,10 @@ server:
         'CLI TLS args work without web_dev_config.yaml file',
         () async {
           // No web_dev_config.yaml file exists
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           await createTestCommandRunner(command).run(<String>[
             'run',
             '--no-pub',
@@ -1597,9 +1698,13 @@ server:
       testUsingContext(
         'passes base-href to WebDevServerConfig',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
-          await createTestCommandRunner(command)
-              .run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
+          await createTestCommandRunner(
+            command,
+          ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
           expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
@@ -1618,11 +1723,14 @@ server:
       testUsingContext(
         'throws ToolExit when base-href does not start with /',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           await expectLater(
-            () =>
-                createTestCommandRunner(command)
-                    .run(<String>['run', '--no-pub', '--no-hot', '--base-href=preview/']),
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=preview/']),
             throwsToolExit(message: '--base-href should start and end with /'),
           );
         },
@@ -1639,11 +1747,14 @@ server:
       testUsingContext(
         'throws ToolExit when base-href does not end with /',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           await expectLater(
-            () =>
-                createTestCommandRunner(command)
-                    .run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview']),
+            () => createTestCommandRunner(
+              command,
+            ).run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview']),
             throwsToolExit(message: '--base-href should start and end with /'),
           );
         },
@@ -1660,7 +1771,10 @@ server:
       testUsingContext(
         'base-href defaults to null when not provided',
         () async {
-          final command = RunCommand(toolContext: _createToolContext());
+          final command = RunCommand(
+            toolContext: _createToolContext(),
+            appleContext: FakeAppleContext(),
+          );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
@@ -1829,7 +1943,10 @@ server:
   testUsingContext(
     'Configures web connection options to use web sockets by default',
     () async {
-      final command = RunCommand(toolContext: _createToolContext());
+      final command = RunCommand(
+        toolContext: _createToolContext(),
+        appleContext: FakeAppleContext(),
+      );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
         throwsToolExit(),
@@ -1851,7 +1968,10 @@ server:
   testUsingContext(
     'flags propagate to debugging options',
     () async {
-      final command = RunCommand(toolContext: _createToolContext());
+      final command = RunCommand(
+        toolContext: _createToolContext(),
+        appleContext: FakeAppleContext(),
+      );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>[
           'run',
@@ -1911,7 +2031,10 @@ server:
   testUsingContext(
     'usingCISystem can also be set by environment LUCI_CI',
     () async {
-      final command = RunCommand(toolContext: _createToolContext());
+      final command = RunCommand(
+        toolContext: _createToolContext(),
+        appleContext: FakeAppleContext(),
+      );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run']),
         throwsToolExit(),
@@ -1932,7 +2055,10 @@ server:
   testUsingContext(
     'wasm mode selects skwasm renderer by default',
     () async {
-      final command = RunCommand(toolContext: _createToolContext());
+      final command = RunCommand(
+        toolContext: _createToolContext(),
+        appleContext: FakeAppleContext(),
+      );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run', '-d chrome', '--wasm']),
         throwsToolExit(),
@@ -1953,11 +2079,14 @@ server:
   testUsingContext(
     'fails when "--web-launch-url" is not supported',
     () async {
-      final command = RunCommand(toolContext: _createToolContext());
+      final command = RunCommand(
+        toolContext: _createToolContext(),
+        appleContext: FakeAppleContext(),
+      );
       await expectLater(
-        () =>
-            createTestCommandRunner(command)
-                .run(<String>['run', '--web-launch-url=http://flutter.dev']),
+        () => createTestCommandRunner(
+          command,
+        ).run(<String>['run', '--web-launch-url=http://flutter.dev']),
         throwsA(
           isException.having(
             (Exception exception) => exception.toString(),
@@ -2322,8 +2451,8 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 }
 
 class TestRunCommandForUsageValues extends RunCommand {
-  TestRunCommandForUsageValues({List<Device>? devices, ToolContext? toolContext})
-    : super(toolContext: toolContext ?? _createToolContext()) {
+  TestRunCommandForUsageValues({List<Device>? devices, ToolContext? toolContext, AppleContext? appleContext})
+    : super(toolContext: toolContext ?? _createToolContext(), appleContext: appleContext ?? FakeAppleContext()) {
     this.devices = devices;
   }
 
@@ -2345,8 +2474,11 @@ class TestRunCommandForUsageValues extends RunCommand {
 }
 
 class TestRunCommandWithFakeResidentRunner extends RunCommand {
-  TestRunCommandWithFakeResidentRunner({ToolContext? toolContext})
-    : super(toolContext: toolContext ?? _createToolContext());
+  TestRunCommandWithFakeResidentRunner({ToolContext? toolContext, AppleContext? appleContext})
+    : super(
+        toolContext: toolContext ?? _createToolContext(),
+        appleContext: appleContext ?? FakeAppleContext(),
+      );
 
   late FakeResidentRunner fakeResidentRunner;
 
@@ -2368,8 +2500,11 @@ class TestRunCommandWithFakeResidentRunner extends RunCommand {
 }
 
 class TestRunCommandThatOnlyValidates extends RunCommand {
-  TestRunCommandThatOnlyValidates({ToolContext? toolContext})
-    : super(toolContext: toolContext ?? _createToolContext());
+  TestRunCommandThatOnlyValidates({ToolContext? toolContext, AppleContext? appleContext})
+    : super(
+        toolContext: toolContext ?? _createToolContext(),
+        appleContext: appleContext ?? FakeAppleContext(),
+      );
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -2404,8 +2539,11 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 }
 
 class DaemonCapturingRunCommand extends RunCommand {
-  DaemonCapturingRunCommand({ToolContext? toolContext})
-    : super(toolContext: toolContext ?? _createToolContext());
+  DaemonCapturingRunCommand({ToolContext? toolContext, AppleContext? appleContext})
+    : super(
+        toolContext: toolContext ?? _createToolContext(),
+        appleContext: appleContext ?? FakeAppleContext(),
+      );
 
   late Daemon daemon;
   late CapturingAppDomain appDomain;

@@ -43,11 +43,7 @@ import 'daemon.dart';
 
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  RunCommandBase({
-    required bool verboseHelp,
-    super.outputPreferences,
-    super.toolContext,
-  }) {
+  RunCommandBase({required bool verboseHelp, super.outputPreferences, super.toolContext}) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
     usesWebDefineOption();
@@ -480,7 +476,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 class RunCommand extends RunCommandBase {
   RunCommand({
     required super.toolContext,
-    AppleContext? appleContext,
+    required AppleContext appleContext,
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
     DeviceManager? deviceManager,
@@ -575,7 +571,7 @@ class RunCommand extends RunCommandBase {
       );
   }
 
-  final AppleContext? _appleContext;
+  final AppleContext _appleContext;
   final BuildSystem? _buildSystem;
   final BuildTargets? _buildTargets;
   final DeviceManager? _deviceManager;
@@ -872,7 +868,7 @@ class RunCommand extends RunCommandBase {
         buildSystem: _buildSystem,
         cache: _toolContext.cache,
         flutterVersion: _toolContext.flutterVersion,
-        xcode: _appleContext?.xcode,
+        xcode: _appleContext.xcode,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -913,7 +909,7 @@ class RunCommand extends RunCommandBase {
       buildSystem: _buildSystem,
       cache: _toolContext.cache,
       flutterVersion: _toolContext.flutterVersion,
-      xcode: _appleContext?.xcode,
+      xcode: _appleContext.xcode,
     );
   }
 
