@@ -55,30 +55,14 @@ class WidgetPreviewCommand extends FlutterCommand {
   }) : super(toolContext: toolContext) {
     addSubcommand(
       WidgetPreviewStartCommand(
-        artifacts: toolContext.artifacts,
-        cache: toolContext.cache,
-        fs: toolContext.fs,
-        logger: toolContext.logger,
-        os: toolContext.os,
-        platform: toolContext.platform,
-        processManager: toolContext.processManager,
-        projectFactory: toolContext.projectFactory,
         shutdownHooks: shutdownHooks,
-        terminal: toolContext.terminal,
         toolContext: toolContext,
-        verbose: verboseHelp,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
         dtdServicesOverride: dtdServicesOverride,
+        verbose: verboseHelp,
       ),
     );
-    addSubcommand(
-      WidgetPreviewCleanCommand(
-        fs: toolContext.fs,
-        logger: toolContext.logger,
-        projectFactory: toolContext.projectFactory,
-        toolContext: toolContext,
-      ),
-    );
+    addSubcommand(WidgetPreviewCleanCommand(toolContext: toolContext));
   }
 
   @override
@@ -136,21 +120,21 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
 
 final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with CreateBase {
   WidgetPreviewStartCommand({
-    required this.artifacts,
-    required this.cache,
-    required this.fs,
-    required Logger logger,
-    required this.os,
-    required this.platform,
-    required this.processManager,
-    required this.projectFactory,
     required this.shutdownHooks,
-    required this.terminal,
-    required super.toolContext,
-    this.verbose = false,
+    required ToolContext toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
-  }) : _logger = logger {
+    this.verbose = false,
+  }) : artifacts = toolContext.artifacts,
+       cache = toolContext.cache,
+       fs = toolContext.fs,
+       _logger = toolContext.logger,
+       os = toolContext.os,
+       platform = toolContext.platform,
+       processManager = toolContext.processManager,
+       projectFactory = toolContext.projectFactory,
+       terminal = toolContext.terminal,
+       super(toolContext: toolContext) {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
     }
@@ -669,12 +653,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 }
 
 final class WidgetPreviewCleanCommand extends WidgetPreviewSubCommandBase {
-  WidgetPreviewCleanCommand({
-    required this.fs,
-    required this.logger,
-    required this.projectFactory,
-    required super.toolContext,
-  });
+  WidgetPreviewCleanCommand({required ToolContext toolContext})
+    : fs = toolContext.fs,
+      logger = toolContext.logger,
+      projectFactory = toolContext.projectFactory,
+      super(toolContext: toolContext);
 
   @override
   String get description => 'Cleans up widget preview state.';
