@@ -496,6 +496,259 @@ void main() {
       final moveArgs = moveCalls.single.arguments as List<dynamic>;
       expect(moveArgs[kAndroidMotionEventListIndexPointerCount], equals(pointerCount));
     });
+
+    testWidgets(
+      'motion event converter dispatches move events when tracking subset of total pointers',
+      (WidgetTester tester) async {
+        final log = <MethodCall>[];
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform_views,
+          (MethodCall methodCall) async {
+            log.add(methodCall);
+            return null;
+          },
+        );
+
+        final AndroidViewController viewController = PlatformViewsService.initSurfaceAndroidView(
+          id: 8,
+          viewType: 'web',
+          layoutDirection: TextDirection.ltr,
+        );
+        viewController.pointTransformer = (Offset offset) => offset;
+
+        // Platform view only tracks pointer 0 (e.g. pointer 1 was outside the platform view).
+        await viewController.dispatchPointerEvent(
+          const PointerDownEvent(timeStamp: Duration(milliseconds: 1)),
+        );
+
+        // Pointer event platform data bitmask constants from _AndroidMotionEventConverter.
+        const kPointerDataFlagMultiple = 2;
+        // Shift for encoding total pointer count into PointerEvent.platformData.
+        const kPointerDataMultiplePointerCountShift = 8;
+        // Number of pointers present in the underlying Android MotionEvent.
+        const totalAndroidPointers = 2;
+
+        // Dispatch a move event for pointer 0 where totalAndroidPointers is 2.
+        await viewController.dispatchPointerEvent(
+          const PointerMoveEvent(
+            timeStamp: Duration(milliseconds: 2),
+            platformData:
+                kPointerDataFlagMultiple |
+                (totalAndroidPointers << kPointerDataMultiplePointerCountShift),
+          ),
+        );
+
+        // Indexes in the list returned by AndroidMotionEvent._asList
+        const kAndroidMotionEventListIndexAction = 3;
+        const kAndroidMotionEventListIndexPointerCount = 4;
+
+        final List<MethodCall> moveCalls = log.where((MethodCall call) {
+          final args = call.arguments as List<dynamic>;
+          return call.method == 'touch' &&
+              args[kAndroidMotionEventListIndexAction] == AndroidViewController.kActionMove;
+        }).toList();
+
+        // The _AndroidMotionEventConverter should dispatch the move event for the tracked pointer.
+        expect(moveCalls.length, equals(1));
+        final moveArgs = moveCalls.single.arguments as List<dynamic>;
+        expect(moveArgs[kAndroidMotionEventListIndexPointerCount], equals(1));
+      },
+    );
+
+    testWidgets('motion event converter multi-pointer lifecycle sequence', (
+      WidgetTester tester,
+    ) async {
+      final log = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform_views,
+        (MethodCall methodCall) async {
+          log.add(methodCall);
+          return null;
+        },
+      );
+
+      final AndroidViewController viewController = PlatformViewsService.initSurfaceAndroidView(
+        id: 9,
+        viewType: 'web',
+        layoutDirection: TextDirection.ltr,
+      );
+      viewController.pointTransformer = (Offset offset) => offset;
+
+      // Pointer event platform data bitmask constants from _AndroidMotionEventConverter.
+      const kPointerDataFlagBatched = 1;
+      const kPointerDataFlagMultiple = 2;
+      // Shift for encoding total pointer count into PointerEvent.platformData.
+      const kPointerDataMultiplePointerCountShift = 8;
+      // Total pointers present in the underlying Android MotionEvent.
+      const totalAndroidPointersTwo = 2;
+      const totalAndroidPointersOne = 1;
+
+      // 1. Pointer 0 Down
+      await viewController.dispatchPointerEvent(
+        const PointerDownEvent(timeStamp: Duration(milliseconds: 1)),
+      );
+
+      // 2. Pointer 1 Down (secondary pointer down)
+      await viewController.dispatchPointerEvent(
+        const PointerDownEvent(timeStamp: Duration(milliseconds: 2), pointer: 1),
+      );
+
+      // 3. Batched move for pointers 0 and 1
+      await viewController.dispatchPointerEvent(
+        const PointerMoveEvent(
+          timeStamp: Duration(milliseconds: 3),
+          platformData:
+              kPointerDataFlagMultiple |
+              (totalAndroidPointersTwo << kPointerDataMultiplePointerCountShift),
+        ),
+      );
+      await viewController.dispatchPointerEvent(
+        const PointerMoveEvent(
+          timeStamp: Duration(milliseconds: 3),
+          pointer: 1,
+          platformData:
+              kPointerDataFlagMultiple |
+              (totalAndroidPointersTwo << kPointerDataMultiplePointerCountShift),
+        ),
+      );
+
+      // 4. Pointer 0 Up (batched move for continuing pointer 1, then up for pointer 0)
+      await viewController.dispatchPointerEvent(
+        const PointerMoveEvent(
+          timeStamp: Duration(milliseconds: 4),
+          pointer: 1,
+          platformData: kPointerDataFlagBatched,
+        ),
+      );
+      await viewController.dispatchPointerEvent(
+        const PointerUpEvent(timeStamp: Duration(milliseconds: 4)),
+      );
+
+      // 5. Pointer 1 Move (now single pointer tracked)
+      await viewController.dispatchPointerEvent(
+        const PointerMoveEvent(
+          timeStamp: Duration(milliseconds: 5),
+          pointer: 1,
+          platformData:
+              kPointerDataFlagMultiple |
+              (totalAndroidPointersOne << kPointerDataMultiplePointerCountShift),
+        ),
+      );
+
+      // 6. Pointer 1 Up
+      await viewController.dispatchPointerEvent(
+        const PointerUpEvent(timeStamp: Duration(milliseconds: 6), pointer: 1),
+      );
+
+      // Indexes in the list returned by AndroidMotionEvent._asList
+      const kAndroidMotionEventListIndexAction = 3;
+      const kAndroidMotionEventListIndexPointerCount = 4;
+
+      final List<int> actions = log.map((MethodCall call) {
+        final args = call.arguments as List<dynamic>;
+        return args[kAndroidMotionEventListIndexAction] as int;
+      }).toList();
+
+      final List<int> pointerCounts = log.map((MethodCall call) {
+        final args = call.arguments as List<dynamic>;
+        return args[kAndroidMotionEventListIndexPointerCount] as int;
+      }).toList();
+
+      // Expected actions:
+      // - ACTION_DOWN (0) with pointerCount 1
+      // - ACTION_POINTER_DOWN (0x0105 = 261, pointerIdx 1) with pointerCount 2
+      // - ACTION_MOVE (2) with pointerCount 2
+      // - ACTION_POINTER_UP (0x0006 = 6, pointerIdx 0) with pointerCount 2
+      // - ACTION_MOVE (2) with pointerCount 1
+      // - ACTION_UP (1) with pointerCount 1
+      expect(
+        actions,
+        equals(<int>[
+          AndroidViewController.kActionDown,
+          AndroidViewController.pointerAction(1, AndroidViewController.kActionPointerDown),
+          AndroidViewController.kActionMove,
+          AndroidViewController.pointerAction(0, AndroidViewController.kActionPointerUp),
+          AndroidViewController.kActionMove,
+          AndroidViewController.kActionUp,
+        ]),
+      );
+      expect(pointerCounts, equals(<int>[1, 2, 2, 2, 1, 1]));
+    });
+
+    testWidgets('motion event converter handles pointer cancel', (WidgetTester tester) async {
+      final log = <MethodCall>[];
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform_views,
+        (MethodCall methodCall) async {
+          log.add(methodCall);
+          return null;
+        },
+      );
+
+      final AndroidViewController viewController = PlatformViewsService.initSurfaceAndroidView(
+        id: 10,
+        viewType: 'web',
+        layoutDirection: TextDirection.ltr,
+      );
+      viewController.pointTransformer = (Offset offset) => offset;
+
+      // Pointer event platform data bitmask constant from _AndroidMotionEventConverter.
+      const kPointerDataFlagMultiple = 2;
+      // Shift for encoding total pointer count into PointerEvent.platformData.
+      const kPointerDataMultiplePointerCountShift = 8;
+      // Total pointers present in the underlying Android MotionEvent.
+      const totalAndroidPointersOne = 1;
+
+      // Down on pointer 0
+      await viewController.dispatchPointerEvent(
+        const PointerDownEvent(timeStamp: Duration(milliseconds: 1)),
+      );
+
+      // Down on pointer 1
+      await viewController.dispatchPointerEvent(
+        const PointerDownEvent(timeStamp: Duration(milliseconds: 2), pointer: 1),
+      );
+
+      // Cancel pointer 0
+      await viewController.dispatchPointerEvent(
+        const PointerCancelEvent(timeStamp: Duration(milliseconds: 3)),
+      );
+
+      // Move on pointer 1 (now 1 tracked pointer)
+      await viewController.dispatchPointerEvent(
+        const PointerMoveEvent(
+          timeStamp: Duration(milliseconds: 4),
+          pointer: 1,
+          platformData:
+              kPointerDataFlagMultiple |
+              (totalAndroidPointersOne << kPointerDataMultiplePointerCountShift),
+        ),
+      );
+
+      const kAndroidMotionEventListIndexAction = 3;
+      const kAndroidMotionEventListIndexPointerCount = 4;
+
+      final List<int> actions = log.map((MethodCall call) {
+        final args = call.arguments as List<dynamic>;
+        return args[kAndroidMotionEventListIndexAction] as int;
+      }).toList();
+
+      final List<int> pointerCounts = log.map((MethodCall call) {
+        final args = call.arguments as List<dynamic>;
+        return args[kAndroidMotionEventListIndexPointerCount] as int;
+      }).toList();
+
+      expect(
+        actions,
+        equals(<int>[
+          AndroidViewController.kActionDown,
+          AndroidViewController.pointerAction(1, AndroidViewController.kActionPointerDown),
+          AndroidViewController.kActionCancel,
+          AndroidViewController.kActionMove,
+        ]),
+      );
+      expect(pointerCounts, equals(<int>[1, 2, 2, 1]));
+    });
   });
 
   group('iOS', () {
