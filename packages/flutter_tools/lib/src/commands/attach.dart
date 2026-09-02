@@ -63,11 +63,16 @@ import 'daemon.dart';
 /// To attach to a flutter mod running on a fuchsia device, `--module` must
 /// also be provided.
 class AttachCommand extends FlutterCommand {
+  final ToolContext _injectedToolContext;
+  @override
+  ToolContext get toolContext => _injectedToolContext;
+
   AttachCommand({
-    required super.toolContext,
+    required ToolContext toolContext,
     bool verboseHelp = false,
     HotRunnerFactory? hotRunnerFactory,
-  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
+  ) : _injectedToolContext = toolContext,
+       _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -133,7 +138,7 @@ class AttachCommand extends FlutterCommand {
 
   final HotRunnerFactory _hotRunnerFactory;
 
-  ToolContext get _toolContext => toolContext!;
+  ToolContext get _injectedToolContext => toolContext!;
 
   @override
   final name = 'attach';
@@ -246,7 +251,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
 
     final bool machineMode = boolArg(FlutterGlobalOptions.kMachineFlag);
-    final AnsiTerminal terminal = _toolContext.terminal;
+    final AnsiTerminal terminal = _injectedToolContext.terminal;
 
     try {
       await (machineMode ? _attachDaemon(device: device) : _attach(device: device));
@@ -269,10 +274,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attach({required Device device}) async {
-    final Logger logger = _toolContext.logger;
-    final processInfo = ProcessInfo(_toolContext.fs);
-    final Signals signals = _toolContext.signals;
-    final AnsiTerminal terminal = _toolContext.terminal;
+    final processInfo = ProcessInfo(_injectedToolContext.fs);
+    final Signals signals = _injectedToolContext.signals;
+    final AnsiTerminal terminal = _injectedToolContext.terminal;
 
     terminal.usesTerminalUi = true;
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
@@ -292,6 +296,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
               ..registerSignalHandlers()
               ..setupTerminal();
       }),
+      logger: _injectedToolContext.logger,
     );
     final int result = await runner.attach(appStartedCompleter: onAppStart);
     if (result != 0) {
@@ -301,9 +306,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attachDaemon({required Device device}) async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final Stdio stdio = _toolContext.stdio;
+    final Stdio stdio = _injectedToolContext.stdio;
 
     final daemon = Daemon(
       DaemonConnection(
@@ -343,10 +346,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final Platform platform = _toolContext.platform;
-    final ProcessManager processManager = _toolContext.processManager;
+    final Platform platform = _injectedToolContext.platform;
 
     final Future<Uri> vmServiceUri = _discoverVmService(device: device);
 
@@ -397,7 +397,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<Uri> _discoverVmService({required Device device}) async {
-    final Logger logger = _toolContext.logger;
     final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;

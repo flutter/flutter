@@ -58,12 +58,13 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
-    required super.toolContext,
+    required ToolContext toolContext,
     @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
     bool verboseHelp = false,
-  }) : _flutterDriverFactory = flutterDriverFactory,
+  }) : _injectedToolContext = toolContext,
+       _flutterDriverFactory = flutterDriverFactory,
        super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
@@ -179,7 +180,9 @@ class DriveCommand extends RunCommandBase {
       );
   }
 
-  ToolContext get _toolContext => toolContext!;
+  @override
+  ToolContext get toolContext => _injectedToolContext;
+  ToolContext get _toolContext => _injectedToolContext;
 
   static const _kKeepAppRunning = 'keep-app-running';
   static const _kUseExistingApp = 'use-existing-app';
