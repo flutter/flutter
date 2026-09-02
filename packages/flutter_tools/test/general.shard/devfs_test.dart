@@ -835,7 +835,7 @@ void main() {
         httpClient: FakeHttpClient.any(),
         config: Config.test(),
         processManager: processManager,
-        config: Config.test(), artifacts: artifacts,
+        artifacts: artifacts,
         buildMode: BuildMode.debug,
       );
 
@@ -914,7 +914,7 @@ void main() {
         httpClient: FakeHttpClient.any(),
         config: Config.test(),
         processManager: processManager,
-        config: Config.test(), artifacts: artifacts,
+        artifacts: artifacts,
         buildMode: BuildMode.debug,
       );
 

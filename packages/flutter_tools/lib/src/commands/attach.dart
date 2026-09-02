@@ -63,16 +63,12 @@ import 'daemon.dart';
 /// To attach to a flutter mod running on a fuchsia device, `--module` must
 /// also be provided.
 class AttachCommand extends FlutterCommand {
-  final ToolContext _injectedToolContext;
-  @override
-  ToolContext get toolContext => _injectedToolContext;
-
   AttachCommand({
-    required ToolContext toolContext,
+    required super.toolContext,
+    super.analytics,
     bool verboseHelp = false,
     HotRunnerFactory? hotRunnerFactory,
-  ) : _injectedToolContext = toolContext,
-       _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory() {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -138,7 +134,7 @@ class AttachCommand extends FlutterCommand {
 
   final HotRunnerFactory _hotRunnerFactory;
 
-  ToolContext get _injectedToolContext => toolContext!;
+  ToolContext get _toolContext => toolContext!;
 
   @override
   final name = 'attach';
@@ -251,7 +247,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
 
     final bool machineMode = boolArg(FlutterGlobalOptions.kMachineFlag);
-    final AnsiTerminal terminal = _injectedToolContext.terminal;
+    final AnsiTerminal terminal = _toolContext.terminal;
 
     try {
       await (machineMode ? _attachDaemon(device: device) : _attach(device: device));
@@ -274,9 +270,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attach({required Device device}) async {
-    final processInfo = ProcessInfo(_injectedToolContext.fs);
-    final Signals signals = _injectedToolContext.signals;
-    final AnsiTerminal terminal = _injectedToolContext.terminal;
+    final processInfo = ProcessInfo(_toolContext.fs);
+    final Signals signals = _toolContext.signals;
+    final AnsiTerminal terminal = _toolContext.terminal;
 
     terminal.usesTerminalUi = true;
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
@@ -287,6 +283,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         terminalHandler =
             TerminalHandler(
                 runner,
+                logger: logger,
                 terminal: terminal,
                 signals: signals,
                 processInfo: processInfo,
@@ -296,7 +293,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
               ..registerSignalHandlers()
               ..setupTerminal();
       }),
-      logger: _injectedToolContext.logger,
     );
     final int result = await runner.attach(appStartedCompleter: onAppStart);
     if (result != 0) {
@@ -306,11 +302,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<void> _attachDaemon({required Device device}) async {
-    final Stdio stdio = _injectedToolContext.stdio;
+    final Stdio stdio = _toolContext.stdio;
 
     final daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(stdio, logger: logger),
+        logger: logger,
       ),
       notifyingLogger: (logger is NotifyingLogger)
           ? logger
@@ -346,7 +343,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<ResidentRunner> _discoverVmServiceAndCreateResidentRunner({required Device device}) async {
-    final Platform platform = _injectedToolContext.platform;
+    final Platform platform = _toolContext.platform;
 
     final Future<Uri> vmServiceUri = _discoverVmService(device: device);
 
@@ -359,6 +356,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       buildInfo: buildInfo,
       userIdentifier: userIdentifier,
       platform: platform,
+      fileSystem: fs,
+      logger: logger,
+      processManager: processManager,
     );
     flutterDevice.vmServiceUri = vmServiceUri;
     final flutterDevices = <FlutterDevice>[flutterDevice];
@@ -387,6 +387,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             flutterProject: FlutterProject.current(),
             nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
             analytics: analytics,
+            logger: logger,
           )
         : ColdRunner(
             flutterDevices,
@@ -422,6 +423,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       filterDevicePort: devicePort,
       expectedHostPort: hostVmservicePort,
       ipv6: usesIpv6,
+      logger: logger,
     );
 
     logger.printStatus('Waiting for a connection from Flutter on ${device.displayName}...');
@@ -494,6 +496,7 @@ class HotRunnerFactory {
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     analytics: analytics,
     dartBuilder: hookRunner,
+    logger: logger,
   );
 }
 
