@@ -14,6 +14,7 @@
 #include <utility>
 
 #include "flutter/fml/paths.h"
+#include "flutter/third_party/re2/re2/re2.h"
 #include "impeller/base/allocation.h"
 #include "impeller/compiler/compiler_backend.h"
 #include "impeller/compiler/constants.h"
@@ -397,102 +398,53 @@ void CanonicalizeUniformBlockInstanceNamesForGL(
   }
 }
 
-static std::string StripComments(const std::string& source) {
-  std::string result;
-  result.reserve(source.size());
-  size_t pos = 0;
-  while (pos < source.size()) {
-    if (pos + 1 < source.size() && source[pos] == '/' &&
-        source[pos + 1] == '/') {
-      pos = source.find('\n', pos + 2);
-      if (pos == std::string::npos) {
-        break;
-      }
-      result += '\n';
-      pos++;
-      continue;
-    }
-    if (pos + 1 < source.size() && source[pos] == '/' &&
-        source[pos + 1] == '*') {
-      pos = source.find("*/", pos + 2);
-      if (pos == std::string::npos) {
-        break;
-      }
-      pos += 2;
-      result += ' ';
-      continue;
-    }
-    result += source[pos];
-    pos++;
-  }
+/// Strips C-style single-line (//...) and multi-line (/*...*/) comments from
+/// the GLSL shader source.
+static std::string StripComments(std::string_view source) {
+  std::string result(source);
+  re2::RE2::GlobalReplace(&result, "//[^\n]*", "");
+  re2::RE2::GlobalReplace(&result, "/\\*[\\s\\S]*?\\*/", "");
   return result;
 }
 
-static bool CheckHasEarlyReturnsInMain(const std::string& source) {
+/// Checks if the fragment shader source contains multiple return statements or
+/// an early return within the `main()` function.
+static bool CheckHasMultipleReturnsInMain(std::string_view source) {
   std::string clean_source = StripComments(source);
-  auto is_id_char = [](char c) {
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
-           (c >= '0' && c <= '9') || c == '_';
-  };
-  auto is_space = [](char c) {
-    return c == ' ' || c == '\t' || c == '\r' || c == '\n';
-  };
 
-  // Find "main" as a whole word followed by '('
-  size_t pos = 0;
-  size_t main_decl = std::string::npos;
-  while ((pos = clean_source.find("main", pos)) != std::string::npos) {
-    bool prev_is_id = pos > 0 && is_id_char(clean_source[pos - 1]);
-    size_t next_pos = pos + 4;
-    bool next_is_id =
-        next_pos < clean_source.size() && is_id_char(clean_source[next_pos]);
-    if (!prev_is_id && !next_is_id) {
-      size_t paren_pos = next_pos;
-      while (paren_pos < clean_source.size() &&
-             is_space(clean_source[paren_pos])) {
-        paren_pos++;
-      }
-      if (paren_pos < clean_source.size() && clean_source[paren_pos] == '(') {
-        main_decl = pos;
-        break;
-      }
-    }
-    pos += 4;
-  }
-
-  if (main_decl == std::string::npos) {
+  // Match the declaration of main(...) {
+  static const re2::LazyRE2 kMainPattern = {R"((\bmain\s*\([^)]*\)\s*\{))"};
+  re2::StringPiece match;
+  if (!re2::RE2::PartialMatch(clean_source, *kMainPattern, &match)) {
     return false;
   }
 
-  size_t open_brace = clean_source.find('{', main_decl);
+  size_t main_offset = match.data() - clean_source.data();
+  size_t open_brace = clean_source.find('{', main_offset);
   if (open_brace == std::string::npos) {
     return false;
   }
 
+  // Find the matching closing brace for main().
   int brace_depth = 1;
-  pos = open_brace + 1;
+  size_t pos = open_brace + 1;
   while (pos < clean_source.size() && brace_depth > 0) {
     char c = clean_source[pos];
     if (c == '{') {
       brace_depth++;
     } else if (c == '}') {
       brace_depth--;
-    } else {
-      // Check for "return" as a whole word.
-      if (clean_source.compare(pos, 6, "return") == 0) {
-        bool prev_is_id = pos > 0 && is_id_char(clean_source[pos - 1]);
-        size_t next_pos = pos + 6;
-        bool next_is_id = next_pos < clean_source.size() &&
-                          is_id_char(clean_source[next_pos]);
-        if (!prev_is_id && !next_is_id) {
-          return true;
-        }
-      }
     }
     pos++;
   }
 
-  return false;
+  size_t main_body_len =
+      (pos > open_brace + 1) ? (pos - 1) - (open_brace + 1) : 0;
+  re2::StringPiece main_body(clean_source.data() + open_brace + 1,
+                             main_body_len);
+
+  static const re2::LazyRE2 kReturnPattern = {R"(\breturn\b)"};
+  return re2::RE2::PartialMatch(main_body, *kReturnPattern);
 }
 
 static bool CheckHasSamplers(const CompilerBackend& sl_compiler) {
@@ -734,13 +686,14 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
       reinterpret_cast<const char*>(source_mapping->GetMapping()),
       source_mapping->GetSize());
   if (source_options.type == SourceType::kFragmentShader &&
-      CheckHasSamplers(sl_compiler) && CheckHasEarlyReturnsInMain(source_str)) {
+      CheckHasSamplers(sl_compiler) &&
+      CheckHasMultipleReturnsInMain(source_str)) {
     COMPILER_WARNING(warning_stream_)
-        << "Fragment shader uses texture samplers alongside early 'return' "
+        << "Fragment shader uses texture samplers alongside multiple 'return' "
            "statements. "
         << "This has the potential to cause compilation errors during shader "
            "compilation on Windows. \n"
-        << "To avoid crashes on Windows, consider removing early 'return;' "
+        << "To avoid crashes on Windows, consider removing multiple 'return;' "
            "statements."
         << "See https://github.com/flutter/flutter/issues/190809 for details.";
   }
