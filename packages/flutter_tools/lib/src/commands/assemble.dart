@@ -177,8 +177,6 @@ class AssembleCommand extends FlutterCommand {
   @override
   ToolContext get toolContext => _toolContext;
 
-  Analytics get _effectiveAnalytics => analytics;
-
   @override
   bool get hidden => !_verboseHelp;
 
@@ -292,7 +290,7 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: fs,
       logger: _toolContext.logger,
       processManager: _toolContext.processManager,
-      analytics: _effectiveAnalytics,
+      analytics: analytics,
       platform: _toolContext.platform,
       engineVersion: artifacts.usesLocalArtifacts
           ? null
@@ -357,7 +355,7 @@ class AssembleCommand extends FlutterCommand {
     Target? target;
     if (deferredTargets.isNotEmpty) {
       // Record to analytics that DeferredComponents is being used.
-      _effectiveAnalytics.send(
+      analytics.send(
         Event.flutterBuildInfo(
           label: 'assemble-deferred-components',
           buildType: 'android',
