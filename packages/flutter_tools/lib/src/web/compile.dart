@@ -106,10 +106,7 @@ class WebBuilder {
     )).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
         ? _fileSystem.directory(
-            _fileSystem.path.join(
-              flutterProject.directory.path,
-              getWebBuildDirectory(null, _fileSystem),
-            ),
+            _fileSystem.path.join(flutterProject.directory.path, getWebBuildDirectory()),
           )
         : _fileSystem.directory(outputDirectoryPath);
     outputDirectory.createSync(recursive: true);

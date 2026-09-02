@@ -26,7 +26,6 @@ class BuildWindowsCommand extends BuildSubCommand {
     required BuildSystem buildSystem,
     required ToolContext toolContext,
     required bool verboseHelp,
-    super.analytics,
     FeatureFlags? featureFlags,
     OperatingSystemUtils? operatingSystemUtils,
     this.visualStudioOverride,
