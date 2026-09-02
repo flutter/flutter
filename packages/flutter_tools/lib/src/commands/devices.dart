@@ -7,7 +7,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../doctor.dart';
@@ -38,9 +37,6 @@ class DevicesCommand extends FlutterCommand {
   final Doctor _doctor;
 
   @override
-  ToolContext get toolContext => super.toolContext!;
-
-  @override
   final name = 'devices';
 
   @override
@@ -64,8 +60,8 @@ class DevicesCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() {
     if (argResults?['timeout'] != null) {
-      final Logger logger = toolContext.logger;
-      final AnsiTerminal terminal = toolContext.terminal;
+      final Logger logger = super.toolContext?.logger ?? globals.logger;
+      final Terminal terminal = super.toolContext?.terminal ?? globals.logger.terminal;
       logger.printWarning(
         '${terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.',
       );
@@ -84,8 +80,8 @@ class DevicesCommand extends FlutterCommand {
     }
 
     final output = DevicesCommandOutput(
-      platform: toolContext.platform,
-      logger: toolContext.logger,
+      platform: super.toolContext?.platform ?? globals.platform,
+      logger: super.toolContext?.logger ?? globals.logger,
       deviceManager: _deviceManager,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       deviceConnectionInterface: deviceConnectionInterface,
@@ -123,8 +119,8 @@ class DevicesCommandOutput {
   }
 
   DevicesCommandOutput._private({
-    required this.deviceConnectionInterface,
-    required this.deviceDiscoveryTimeout,
+    this.deviceConnectionInterface,
+    this.deviceDiscoveryTimeout,
     required DeviceManager deviceManager,
     required Logger logger,
   }) : _deviceManager = deviceManager,
