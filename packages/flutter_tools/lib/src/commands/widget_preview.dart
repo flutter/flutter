@@ -22,6 +22,7 @@ import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle.dart' as bundle;
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/analysis.dart';
 import '../device.dart';
@@ -75,15 +76,15 @@ class WidgetPreviewCommand extends FlutterCommand {
 }
 
 abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
-  WidgetPreviewSubCommandBase({required ToolContext toolContext})
-    : _toolContext = toolContext,
-      super(toolContext: toolContext);
+  WidgetPreviewSubCommandBase({required ToolContext super.toolContext})
+    : _toolContext = toolContext;
 
   final ToolContext _toolContext;
 
   FileSystem get fs => _toolContext.fs;
   Logger get logger => _toolContext.logger;
   FlutterProjectFactory get projectFactory => _toolContext.projectFactory;
+
   FlutterProject getRootProject() {
     final ArgResults results = argResults!;
     final Directory projectDir;
@@ -122,7 +123,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
-    this.verbose = false,  }) {
+    this.verbose = false,
+  }) {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
     }

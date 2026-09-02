@@ -27,6 +27,7 @@ import 'analysis_server_mock.dart';
 
 void main() {
   setUpAll(() {
+    Cache.disableLocking();
     Cache.flutterRoot = getFlutterRoot();
   });
 
@@ -503,14 +504,15 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: fileSystem,
-      processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     final commandRunner = TestFlutterCommandRunner();
