@@ -87,10 +87,9 @@ class BuildCommand extends FlutterCommand {
   }) : super(outputPreferences: outputPreferences, toolContext: toolContext) {
     final Analytics effectiveAnalytics = context.get<Analytics>() ?? analytics;
     final Platform effectivePlatform = context.get<Platform>() ?? platform;
-    final persistentToolState = PersistentToolState.test(
-      directory: fileSystem.directory('.tmp_state'),
-      logger: logger,
-    );
+    final PersistentToolState persistentToolState =
+        context.get<PersistentToolState>() ??
+        PersistentToolState(fileSystem: fileSystem, logger: logger, platform: effectivePlatform);
     final ProcessUtils effectiveProcessUtils =
         processUtils ?? ProcessUtils(processManager: processManager, logger: logger);
     final OutputPreferences effectiveOutputPreferences =
