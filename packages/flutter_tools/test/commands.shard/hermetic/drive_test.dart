@@ -842,7 +842,7 @@ void main() {
   testUsingContext(
     'flutter drive fails if driver test imports package:flutter_test',
     () async {
-      final command = createDriveCommand();
+      final DriveCommand command = createDriveCommand();
 
       fileSystem.file('lib/main.dart').createSync(recursive: true);
       final File driverTest = fileSystem.file('test_driver/main_test.dart')

@@ -58,8 +58,7 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
-    required super.toolContext,
-    super.analytics,
+    super.toolContext,
     @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
     @visibleForTesting
     this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
@@ -265,24 +264,27 @@ class DriveCommand extends RunCommandBase {
       }
     }
 
+    final FileSystem fs = _toolContext.fs;
+    final Logger logger = _toolContext.logger;
+
     // Ensure host-side flutter_driver test scripts do not import device-side
     // libraries (e.g. dart:ui, package:flutter, package:flutter_test).
     final String? testFile = _getTestFile();
-    if (testFile != null && _fileSystem.isFileSync(testFile)) {
-      final File packageConfigFile = findPackageConfigFileOrDefault(_fileSystem.currentDirectory);
+    if (testFile != null && fs.isFileSync(testFile)) {
+      final File packageConfigFile = findPackageConfigFileOrDefault(fs.currentDirectory);
       if (packageConfigFile.existsSync()) {
         final PackageConfig packageConfig = await loadPackageConfigWithLogging(
           packageConfigFile,
-          logger: _logger,
+          logger: logger,
           throwOnError: false,
         );
         final validator = DriverTestImportValidator(
-          fileSystem: _fileSystem,
-          logger: _logger,
+          fileSystem: fs,
+          logger: logger,
           packageConfig: packageConfig,
-          projectRootPath: _fileSystem.currentDirectory.path,
+          projectRootPath: fs.currentDirectory.path,
         );
-        final List<String> errors = validator.validate(_fileSystem.file(testFile));
+        final List<String> errors = validator.validate(fs.file(testFile));
         if (errors.isNotEmpty) {
           final buffer = StringBuffer();
           buffer.writeln('flutter_driver test "$testFile" has invalid imports:');
