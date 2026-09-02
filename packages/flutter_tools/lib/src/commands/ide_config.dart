@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as path;
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -99,13 +97,12 @@ class IdeConfigCommand extends FlutterCommand {
 
   // Returns true if any entire path element is equal to dir.
   bool _hasDirectoryInPath(FileSystemEntity entity, String dir) {
-    final path.Context pathContext = toolContext.fs.path;
     String pathStr = entity.absolute.path;
-    while (pathStr.isNotEmpty && pathContext.dirname(pathStr) != pathStr) {
-      if (pathContext.basename(pathStr) == dir) {
+    while (pathStr.isNotEmpty && toolContext.fs.path.dirname(pathStr) != pathStr) {
+      if (toolContext.fs.path.basename(pathStr) == dir) {
         return true;
       }
-      pathStr = pathContext.dirname(pathStr);
+      pathStr = toolContext.fs.path.dirname(pathStr);
     }
     return false;
   }
@@ -136,7 +133,6 @@ class IdeConfigCommand extends FlutterCommand {
   void _handleTemplateUpdate() {
     final FileSystem fs = toolContext.fs;
     final Logger logger = toolContext.logger;
-    final path.Context pathContext = fs.path;
 
     if (!_flutterRoot.existsSync()) {
       return;
@@ -145,10 +141,7 @@ class IdeConfigCommand extends FlutterCommand {
     final manifest = <String>{};
     final Iterable<File> flutterFiles = _flutterRoot.listSync(recursive: true).whereType<File>();
     for (final srcFile in flutterFiles) {
-      final String relativePath = pathContext.relative(
-        srcFile.path,
-        from: _flutterRoot.absolute.path,
-      );
+      final String relativePath = fs.path.relative(srcFile.path, from: _flutterRoot.absolute.path);
 
       // Skip template files in both the ide_templates and templates
       // directories to avoid copying onto themselves.
@@ -169,12 +162,12 @@ class IdeConfigCommand extends FlutterCommand {
       }
 
       final File finalDestinationFile = fs.file(
-        pathContext.join(
+        fs.path.join(
           _templateDirectory.absolute.path,
           '$relativePath${Template.copyTemplateExtension}',
         ),
       );
-      final String relativeDestination = pathContext.relative(
+      final String relativeDestination = fs.path.relative(
         finalDestinationFile.path,
         from: _flutterRoot.absolute.path,
       );
@@ -215,13 +208,13 @@ class IdeConfigCommand extends FlutterCommand {
         .listSync(recursive: true)
         .whereType<File>();
     for (final templateFile in templateFiles) {
-      final String relativePath = pathContext.relative(
+      final String relativePath = fs.path.relative(
         templateFile.absolute.path,
         from: _templateDirectory.absolute.path,
       );
       if (!manifest.contains(relativePath)) {
         templateFile.deleteSync();
-        final String relativeDestination = pathContext.relative(
+        final String relativeDestination = fs.path.relative(
           templateFile.path,
           from: _flutterRoot.absolute.path,
         );
@@ -233,10 +226,10 @@ class IdeConfigCommand extends FlutterCommand {
       while (parentDir.listSync().isEmpty) {
         parentDir.deleteSync();
         logger.printTrace(
-          '  ${pathContext.relative(parentDir.absolute.path)} (empty directory - removed)',
+          '  ${fs.path.relative(parentDir.absolute.path)} (empty directory - removed)',
         );
         parentDir = fs.directory(parentDir.dirname);
-        if (!pathContext.isWithin(_templateDirectory.absolute.path, parentDir.absolute.path)) {
+        if (!fs.path.isWithin(_templateDirectory.absolute.path, parentDir.absolute.path)) {
           break;
         }
       }
