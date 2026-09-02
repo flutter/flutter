@@ -844,7 +844,11 @@ class RunCommand extends RunCommandBase {
 
   @visibleForTesting
   Daemon createMachineDaemon() {
-    return Daemon.createMachineDaemon(logger: globals.logger, stdio: globals.stdio);
+    return Daemon.createMachineDaemon(
+      featureFlags: featureFlags,
+      logger: globals.logger,
+      stdio: globals.stdio,
+    );
   }
 
   @override

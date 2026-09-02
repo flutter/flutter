@@ -52,8 +52,17 @@ const protocolVersion = '0.6.1';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({required super.toolContext, DeviceManager? deviceManager, this.hidden = false})
-    : _deviceManager = deviceManager {
+  DaemonCommand({
+    required super.toolContext,
+    AndroidSdk? androidSdk,
+    AndroidWorkflow? androidWorkflow,
+    DeviceManager? deviceManager,
+    this.hidden = false,
+    Java? java,
+  }) : _androidSdk = androidSdk,
+       _androidWorkflow = androidWorkflow,
+       _deviceManager = deviceManager,
+       _java = java {
     argParser.addOption(
       'listen-on-tcp-port',
       help:
@@ -62,7 +71,10 @@ class DaemonCommand extends FlutterCommand {
     );
   }
 
+  final AndroidSdk? _androidSdk;
+  final AndroidWorkflow? _androidWorkflow;
   final DeviceManager? _deviceManager;
+  final Java? _java;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -105,9 +117,12 @@ class DaemonCommand extends FlutterCommand {
           outputPreferences: outputPreferences,
         ),
         analytics: analytics,
+        androidSdk: _androidSdk,
+        androidWorkflow: _androidWorkflow,
         deviceManager: _deviceManager,
         featureFlags: featureFlags,
         fileSystem: fs,
+        java: _java,
         notifyingLogger: asLogger<NotifyingLogger>(logger),
         outputPreferences: outputPreferences,
         platform: platform,
@@ -124,9 +139,12 @@ class DaemonCommand extends FlutterCommand {
         logger: logger,
       ),
       analytics: analytics,
+      androidSdk: _androidSdk,
+      androidWorkflow: _androidWorkflow,
       deviceManager: _deviceManager,
       featureFlags: featureFlags,
       fileSystem: fs,
+      java: _java,
       logger: logger,
       notifyingLogger: asLogger<NotifyingLogger>(logger),
       outputPreferences: outputPreferences,

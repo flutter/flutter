@@ -7,6 +7,7 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
+import 'src/android/android_workflow.dart' as globals;
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -312,8 +313,11 @@ List<FlutterCommand> generateCommands({
   ),
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
   DaemonCommand(
+    androidSdk: globals.androidSdk,
+    androidWorkflow: globals.androidWorkflow,
     deviceManager: globals.deviceManager,
     hidden: !verboseHelp,
+    java: globals.java,
     toolContext: toolDependencies.toolContext,
   ),
   DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
