@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -77,13 +78,14 @@ void main() {
       HotRunnerFactory? hotRunnerFactory,
       bool verboseHelp = false,
       ToolContext? toolContext,
+      Logger? commandLogger,
     }) {
       return AttachCommand(
         toolContext:
             toolContext ??
             FakeToolContext(
               fs: testFileSystem,
-              logger: logger,
+              logger: commandLogger ?? context.get<Logger>() ?? logger,
               platform: platform,
               signals: signals,
               stdio: stdio,
