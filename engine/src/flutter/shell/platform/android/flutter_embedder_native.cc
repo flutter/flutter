@@ -2803,13 +2803,23 @@ void FlutterEmbedderNative::DispatchPointerDataPacket(const uint8_t* buffer,
     event.pressure = dfields[14];
     event.pressure_min = dfields[15];
     event.pressure_max = dfields[16];
-    event.scroll_delta_x = dfields[26];
-    event.scroll_delta_y = dfields[27];
-    event.pan_x = dfields[28];
-    event.pan_y = dfields[29];
-    event.scale = dfields[32];
-    event.rotation = dfields[33];
-    event.view_id = static_cast<FlutterViewId>(fields[34]);
+    event.distance = dfields[17];
+    event.distance_max = dfields[18];
+    event.size = dfields[19];
+    event.radius_major = dfields[20];
+    event.radius_minor = dfields[21];
+    event.radius_min = dfields[22];
+    event.radius_max = dfields[23];
+    event.orientation = dfields[24];
+    event.tilt = dfields[25];
+    event.platform_data = fields[26];
+    event.scroll_delta_x = dfields[27];
+    event.scroll_delta_y = dfields[28];
+    event.pan_x = dfields[29];
+    event.pan_y = dfields[30];
+    event.scale = dfields[33];
+    event.rotation = dfields[34];
+    event.view_id = static_cast<FlutterViewId>(fields[35]);
 
     events.push_back(event);
   }

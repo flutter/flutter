@@ -1626,6 +1626,26 @@ typedef struct {
   /// The maximum bound of the pressure of the current pointer, where 0.0 is the
   /// default maximum bound.
   double pressure_max;
+  /// An arbitrary int64 payload provided by the platform / embedder.
+  int64_t platform_data;
+  /// The distance of the detected object from the input surface.
+  double distance;
+  /// The maximum value of a distance for the current pointer.
+  double distance_max;
+  /// The size of the contact area for the current pointer.
+  double size;
+  /// The radius of the contact area along the major axis of the ellipse.
+  double radius_major;
+  /// The radius of the contact area along the minor axis of the ellipse.
+  double radius_minor;
+  /// The minimum radius of the contact area for the current pointer.
+  double radius_min;
+  /// The maximum radius of the contact area for the current pointer.
+  double radius_max;
+  /// The orientation of the current pointer in radians.
+  double orientation;
+  /// The tilt of the current pointer in radians.
+  double tilt;
 } FlutterPointerEvent;
 
 typedef enum {
