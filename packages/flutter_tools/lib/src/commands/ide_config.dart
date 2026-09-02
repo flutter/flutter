@@ -160,7 +160,7 @@ class IdeConfigCommand extends FlutterCommand {
       }
 
       final File finalDestinationFile = fs.file(
-        pathContext.absolute(
+        pathContext.join(
           _templateDirectory.absolute.path,
           '$relativePath${Template.copyTemplateExtension}',
         ),
@@ -227,7 +227,7 @@ class IdeConfigCommand extends FlutterCommand {
           '  ${pathContext.relative(parentDir.absolute.path)} (empty directory - removed)',
         );
         parentDir = fs.directory(parentDir.dirname);
-        if (pathContext.isWithin(_templateDirectory.absolute.path, parentDir.absolute.path)) {
+        if (!pathContext.isWithin(_templateDirectory.absolute.path, parentDir.absolute.path)) {
           break;
         }
       }
