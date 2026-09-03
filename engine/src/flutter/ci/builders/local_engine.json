@@ -1084,7 +1084,7 @@
       },
       "properties": {
         "$flutter/osx_sdk": {
-          "skip_xcode_install": true
+          "sdk_version": "17c52"
         }
       },
       "cas_archive": false
@@ -1115,7 +1115,7 @@
       },
       "properties": {
         "$flutter/osx_sdk": {
-          "skip_xcode_install": true
+          "sdk_version": "17c52"
         }
       },
       "cas_archive": false
