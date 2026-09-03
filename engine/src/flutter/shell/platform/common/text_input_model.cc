@@ -24,6 +24,43 @@ bool IsTrailingSurrogate(char32_t code_point) {
   return (code_point & 0xFFFFFC00) == 0xDC00;
 }
 
+// Returns the position one character after |pos|, or |limit| if a whole
+// character does not fit between the two.
+//
+// A surrogate pair that straddles |limit| is not stepped over. We can't end
+// halfway through, and deleting half a character would produce invalid UTF-8.
+//
+// A leading surrogate spans two code units only if |text| pairs it with a
+// trailing one. An unpaired surrogate is a character of its own, so it is
+// stepped over alone rather than swallowing whatever follows it.
+size_t NextCharacterBoundary(const std::u16string& text,
+                             size_t pos,
+                             size_t limit) {
+  if (pos == limit) {
+    return pos;
+  }
+  size_t step = IsLeadingSurrogate(text.at(pos)) && pos + 1 < text.length() &&
+                        IsTrailingSurrogate(text.at(pos + 1))
+                    ? 2
+                    : 1;
+  return limit - pos < step ? pos : pos + step;
+}
+
+// Returns the position one character before |pos|, or |limit| if a whole
+// character does not fit between the two.
+size_t PreviousCharacterBoundary(const std::u16string& text,
+                                 size_t pos,
+                                 size_t limit) {
+  if (pos == limit) {
+    return pos;
+  }
+  size_t step = IsTrailingSurrogate(text.at(pos - 1)) && pos >= 2 &&
+                        IsLeadingSurrogate(text.at(pos - 2))
+                    ? 2
+                    : 1;
+  return pos - limit < step ? pos : pos - step;
+}
+
 }  // namespace
 
 TextInputModel::TextInputModel() = default;
@@ -168,59 +205,74 @@ bool TextInputModel::Backspace() {
   if (DeleteSelected()) {
     return true;
   }
-  // There is no selection. Delete the preceding codepoint.
-  size_t position = selection_.position();
-  if (position != editable_range().start()) {
-    int count = IsTrailingSurrogate(text_.at(position - 1)) ? 2 : 1;
-    text_.erase(position - count, count);
-    selection_ = TextRange(position - count);
-    if (composing_) {
-      composing_range_.set_end(composing_range_.end() - count);
-    }
-    return true;
+  // There is no selection. Delete the preceding character.
+  size_t position = std::clamp(selection_.position(), editable_range().start(),
+                               editable_range().end());
+  size_t start =
+      PreviousCharacterBoundary(text_, position, editable_range().start());
+  if (start == position) {
+    return false;
   }
-  return false;
+  size_t count = position - start;
+  text_.erase(start, count);
+  selection_ = TextRange(start);
+  if (composing_) {
+    composing_range_.set_end(composing_range_.end() - count);
+  }
+  return true;
 }
 
 bool TextInputModel::Delete() {
   if (DeleteSelected()) {
     return true;
   }
-  // There is no selection. Delete the preceding codepoint.
-  size_t position = selection_.position();
-  if (position < editable_range().end()) {
-    int count = IsLeadingSurrogate(text_.at(position)) ? 2 : 1;
-    text_.erase(position, count);
-    if (composing_) {
-      composing_range_.set_end(composing_range_.end() - count);
-    }
-    return true;
+  // There is no selection. Delete the following character.
+  size_t position = std::clamp(selection_.position(), editable_range().start(),
+                               editable_range().end());
+  size_t end = NextCharacterBoundary(text_, position, editable_range().end());
+  if (end == position) {
+    return false;
   }
-  return false;
+  size_t count = end - position;
+  text_.erase(position, count);
+  if (composing_) {
+    composing_range_.set_end(composing_range_.end() - count);
+  }
+  return true;
 }
 
 bool TextInputModel::DeleteSurrounding(int offset_from_cursor, int count) {
+  size_t min_pos = editable_range().start();
   size_t max_pos = editable_range().end();
-  size_t start = selection_.extent();
+  size_t start = std::clamp(selection_.extent(), min_pos, max_pos);
   if (offset_from_cursor < 0) {
     for (int i = 0; i < -offset_from_cursor; i++) {
-      // If requested start is before the available text then reduce the
-      // number of characters to delete.
-      if (start == editable_range().start()) {
+      size_t previous = PreviousCharacterBoundary(text_, start, min_pos);
+      // We hit the start of the editable range. Delete only the characters it
+      // covered.
+      if (previous == start) {
         count = i;
         break;
       }
-      start -= IsTrailingSurrogate(text_.at(start - 1)) ? 2 : 1;
+      start = previous;
     }
   } else {
-    for (int i = 0; i < offset_from_cursor && start != max_pos; i++) {
-      start += IsLeadingSurrogate(text_.at(start)) ? 2 : 1;
+    for (int i = 0; i < offset_from_cursor; i++) {
+      size_t next = NextCharacterBoundary(text_, start, max_pos);
+      if (next == start) {
+        break;
+      }
+      start = next;
     }
   }
 
   auto end = start;
-  for (int i = 0; i < count && end != max_pos; i++) {
-    end += IsLeadingSurrogate(text_.at(start)) ? 2 : 1;
+  for (int i = 0; i < count; i++) {
+    size_t next = NextCharacterBoundary(text_, end, max_pos);
+    if (next == end) {
+      break;
+    }
+    end = next;
   }
 
   if (start == end) {

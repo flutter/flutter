@@ -616,6 +616,66 @@ TEST(TextInputModel, DeleteWideCharacters) {
   EXPECT_STREQ(model->GetText().c_str(), "😄🙃🧐");
 }
 
+TEST(TextInputModel, DeleteSplitPairAtComposingEnd) {
+  auto model = std::make_unique<TextInputModel>();
+  // The composing range ends between the two halves of U+1F600, and the cursor
+  // sits on the leading one.
+  EXPECT_TRUE(model->SetText("a\U0001F600bcd", TextRange(1), TextRange(1, 2)));
+  // Only half the character is editable. Verify we don't delete the whole
+  // pair, which reaches outside the composing range and leaves its end before
+  // its start.
+  EXPECT_FALSE(model->Delete());
+  EXPECT_STREQ(model->GetText().c_str(), "a\U0001F600bcd");
+  EXPECT_EQ(model->composing_range(), TextRange(1, 2));
+}
+
+TEST(TextInputModel, DeleteUnpairedLeadingSurrogate) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ab");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  // Composing text arrives from the input method as UTF-16 and is not required
+  // to be well formed, so a leading surrogate can stand alone.
+  model->AddText(std::u16string(1, 0xD83D));
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  // The surrogate is unpaired, so it is one character on its own. Verify we
+  // don't treat it as half of a pair and take the 'a' after it as well.
+  EXPECT_TRUE(model->Delete());
+  EXPECT_STREQ(model->GetText().c_str(), "ab");
+  EXPECT_EQ(model->selection(), TextRange(0));
+}
+
+TEST(TextInputModel, DeleteUnpairedSurrogateAtEndComposing) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ab");
+  EXPECT_TRUE(model->SetSelection(TextRange(2)));
+  model->AddText(std::u16string(1, 0xD83D));
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(0, 3), 3));
+  EXPECT_TRUE(model->SetSelection(TextRange(2)));
+  // Verify the composing range shrinks by the one code unit deleted. Measuring
+  // the unpaired surrogate as half of a pair shrinks it by two, leaving it
+  // shorter than the text it describes.
+  EXPECT_TRUE(model->Delete());
+  EXPECT_STREQ(model->GetText().c_str(), "ab");
+  EXPECT_EQ(model->composing_range(), TextRange(0, 2));
+}
+
+TEST(TextInputModel, DeleteWithSelectionPastComposingRange) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetText("ABCDE"));
+  model->BeginComposing();
+  // The composing range does not have to contain the selection: this offset
+  // places the caret three characters beyond the end of the range.
+  EXPECT_TRUE(model->SetComposingRange(TextRange(1, 2), 4));
+  EXPECT_EQ(model->selection(), TextRange(5));
+  // Verify deletion is confined to the composing range. The caret is already
+  // past it, so there is nothing after it to delete, and deleting at the caret
+  // would index past the end of the text.
+  EXPECT_FALSE(model->Delete());
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+  EXPECT_EQ(model->composing_range(), TextRange(1, 2));
+}
+
 TEST(TextInputModel, DeleteSelection) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
@@ -915,6 +975,147 @@ TEST(TextInputModel, DeleteSurroundingReverseSelection) {
   EXPECT_STREQ(model->GetText().c_str(), "ABCE");
 }
 
+TEST(TextInputModel, DeleteSurroundingAtCursorSurrogatePairFirst) {
+  auto model = std::make_unique<TextInputModel>();
+  // U+1F600 occupies two UTF-16 code units but counts as one character.
+  model->SetText("\U0001F600ab");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  // Verify deleting two characters deletes the whole pair and the 'a' that
+  // follows it.
+  EXPECT_TRUE(model->DeleteSurrounding(0, 2));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "b");
+}
+
+TEST(TextInputModel, DeleteSurroundingAtCursorSurrogatePairNotFirst) {
+  auto model = std::make_unique<TextInputModel>();
+  // U+1F600 occupies two UTF-16 code units but counts as one character.
+  model->SetText("a\U0001F600b");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  // Verify deleting two characters deletes the 'a' and the whole pair that
+  // follows it.
+  EXPECT_TRUE(model->DeleteSurrounding(0, 2));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_STREQ(model->GetText().c_str(), "b");
+}
+
+TEST(TextInputModel, DeleteSurroundingAfterCursorSplitPairAtComposingEnd) {
+  auto model = std::make_unique<TextInputModel>();
+  // The composing range ends between the two halves of U+1F600.
+  EXPECT_TRUE(model->SetText("a\U0001F600bcd", TextRange(1), TextRange(1, 2)));
+  EXPECT_FALSE(model->DeleteSurrounding(1, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "a\U0001F600bcd");
+  EXPECT_EQ(model->composing_range(), TextRange(1, 2));
+}
+
+TEST(TextInputModel, DeleteSurroundingAtCursorSplitPairAtComposingEnd) {
+  auto model = std::make_unique<TextInputModel>();
+  // The cursor sits on the leading surrogate, and the composing range ends
+  // between the two halves.
+  EXPECT_TRUE(model->SetText("a\U0001F600bcd", TextRange(1), TextRange(1, 2)));
+  // Only the leading half is inside the range. Verify we don't delete it and
+  // leave an unpaired trailing surrogate that GetText cannot convert.
+  EXPECT_FALSE(model->DeleteSurrounding(0, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "a\U0001F600bcd");
+  EXPECT_EQ(model->composing_range(), TextRange(1, 2));
+}
+
+TEST(TextInputModel, DeleteSurroundingAtCursorStopsAtSplitPair) {
+  auto model = std::make_unique<TextInputModel>();
+  // "ab<U+1F600>cd" with a composing range ending between the two halves.
+  EXPECT_TRUE(model->SetText("ab\U0001F600cd", TextRange(1), TextRange(0, 3)));
+  // The first character requested is whole and the second is not. Verify the
+  // whole one is deleted and the walk stops.
+  EXPECT_TRUE(model->DeleteSurrounding(0, 2));
+  EXPECT_STREQ(model->GetText().c_str(), "a\U0001F600cd");
+  EXPECT_EQ(model->composing_range(), TextRange(0, 2));
+}
+
+TEST(TextInputModel, DeleteSurroundingBeforeCursorSplitPairAtComposingStart) {
+  auto model = std::make_unique<TextInputModel>();
+  // The composing range starts between the two halves.
+  EXPECT_TRUE(model->SetText("\U0001F600bcd", TextRange(2), TextRange(1, 5)));
+  EXPECT_FALSE(model->DeleteSurrounding(-1, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "\U0001F600bcd");
+  EXPECT_EQ(model->composing_range(), TextRange(1, 5));
+}
+
+TEST(TextInputModel, DeleteSurroundingWithSelectionPastComposingRange) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetText("ABCDE"));
+  model->BeginComposing();
+  // The offset places the caret two characters beyond the end of the range.
+  EXPECT_TRUE(model->SetComposingRange(TextRange(1, 2), 4));
+  EXPECT_EQ(model->selection(), TextRange(5));
+  // Verify deletion is confined to the editable range. The caret is already
+  // past it, so there is nothing after it to delete.
+  EXPECT_FALSE(model->DeleteSurrounding(0, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+  EXPECT_EQ(model->composing_range(), TextRange(1, 2));
+  // Verify the walk backwards starts from the end of the range rather than from
+  // the caret, deleting the character inside it.
+  EXPECT_TRUE(model->DeleteSurrounding(-1, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "ACDE");
+  EXPECT_EQ(model->composing_range(), TextRange(1, 1));
+}
+
+TEST(TextInputModel, DeleteSurroundingAfterCursorUnpairedSurrogateAtEnd) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ab");
+  EXPECT_TRUE(model->SetSelection(TextRange(2)));
+  // Composing text arrives from the input method as UTF-16 and is not
+  // well-formed, so the text can end in half a surrogate pair.
+  model->AddText(std::u16string(1, 0xD83D));
+  EXPECT_TRUE(model->SetSelection(TextRange(2)));
+  // Stepping over that half runs the offset past the end of the text. Ensure
+  // the walk stops there rather than keep reading, and index out of bounds.
+  EXPECT_FALSE(model->DeleteSurrounding(2, 1));
+  EXPECT_EQ(model->selection(), TextRange(2));
+}
+
+TEST(TextInputModel, DeleteSurroundingAtCursorUnpairedLeadingSurrogate) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ab");
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  // An unpaired leading surrogate followed by an ordinary character.
+  model->AddText(std::u16string(1, 0xD83D));
+  EXPECT_TRUE(model->SetSelection(TextRange(0)));
+  // The surrogate is unpaired, so it is one character on its own. Verify we
+  // don't treat it as half of a pair and take the 'a' after it as well.
+  EXPECT_TRUE(model->DeleteSurrounding(0, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "ab");
+  EXPECT_EQ(model->selection(), TextRange(0));
+}
+
+TEST(TextInputModel, DeleteSurroundingAtCursorUnpairedSurrogateAtEnd) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ab");
+  EXPECT_TRUE(model->SetSelection(TextRange(2)));
+  model->AddText(std::u16string(1, 0xD83D));
+  EXPECT_TRUE(model->SetSelection(TextRange(2)));
+  // Verify the unpaired surrogate ending the text can be deleted. Measuring it
+  // as half of a pair leaves it permanently stuck, since two code units never
+  // fit before the end of the text.
+  EXPECT_TRUE(model->DeleteSurrounding(0, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "ab");
+  EXPECT_EQ(model->selection(), TextRange(2));
+}
+
+TEST(TextInputModel, DeleteSurroundingBeforeCursorUnpairedTrailingSurrogate) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ab");
+  EXPECT_TRUE(model->SetSelection(TextRange(2)));
+  // The mirror case: an unpaired trailing surrogate preceded by an ordinary
+  // character.
+  model->AddText(std::u16string(1, 0xDE00));
+  EXPECT_TRUE(model->SetSelection(TextRange(3)));
+  // Verify we don't treat it as half of a pair and take the 'b' before it as
+  // well.
+  EXPECT_TRUE(model->DeleteSurrounding(-1, 1));
+  EXPECT_STREQ(model->GetText().c_str(), "ab");
+  EXPECT_EQ(model->selection(), TextRange(2));
+}
+
 TEST(TextInputModel, BackspaceStart) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
@@ -953,6 +1154,47 @@ TEST(TextInputModel, BackspaceWideCharacters) {
   EXPECT_EQ(model->selection(), TextRange(2));
   EXPECT_EQ(model->composing_range(), TextRange(0));
   EXPECT_STREQ(model->GetText().c_str(), "😄🤪🧐");
+}
+
+TEST(TextInputModel, BackspaceSplitPairAtComposingStart) {
+  auto model = std::make_unique<TextInputModel>();
+  // The composing range starts between the two halves of U+1F600, and the
+  // cursor sits just after the trailing one.
+  EXPECT_TRUE(model->SetText("\U0001F600bcd", TextRange(2), TextRange(1, 5)));
+  // Only half the character is editable. Verify we don't delete the whole
+  // pair, which reaches outside the composing range.
+  EXPECT_FALSE(model->Backspace());
+  EXPECT_STREQ(model->GetText().c_str(), "\U0001F600bcd");
+  EXPECT_EQ(model->composing_range(), TextRange(1, 5));
+}
+
+TEST(TextInputModel, BackspaceUnpairedTrailingSurrogate) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ab");
+  EXPECT_TRUE(model->SetSelection(TextRange(2)));
+  // The mirror case: a trailing surrogate that stands alone.
+  model->AddText(std::u16string(1, 0xDE00));
+  EXPECT_TRUE(model->SetSelection(TextRange(3)));
+  // Verify we don't treat it as half of a pair and take the 'b' before it as
+  // well.
+  EXPECT_TRUE(model->Backspace());
+  EXPECT_STREQ(model->GetText().c_str(), "ab");
+  EXPECT_EQ(model->selection(), TextRange(2));
+}
+
+TEST(TextInputModel, BackspaceWithSelectionPastComposingRange) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetText("ABCDE"));
+  model->BeginComposing();
+  EXPECT_TRUE(model->SetComposingRange(TextRange(1, 2), 4));
+  EXPECT_EQ(model->selection(), TextRange(5));
+  // Verify the walk backwards starts from the end of the composing range
+  // rather than from the caret, deleting the character inside it. Starting
+  // from the caret would delete a character outside the range entirely.
+  EXPECT_TRUE(model->Backspace());
+  EXPECT_STREQ(model->GetText().c_str(), "ACDE");
+  EXPECT_EQ(model->selection(), TextRange(1));
+  EXPECT_EQ(model->composing_range(), TextRange(1, 1));
 }
 
 TEST(TextInputModel, BackspaceSelection) {
