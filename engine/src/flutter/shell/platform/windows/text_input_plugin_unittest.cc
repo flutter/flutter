@@ -508,9 +508,8 @@ TEST_F(TextInputPluginTest, SetClientRequiresViewIdToBeInteger) {
 TEST_F(TextInputPluginTest, SetEditingStatePreservesComposingRange) {
   UseEngineWithView();
 
-  TestBinaryMessenger messenger([](const std::string&,
-                                   const uint8_t*, size_t,
-                                   BinaryReply) {});
+  TestBinaryMessenger messenger(
+      [](const std::string&, const uint8_t*, size_t, BinaryReply) {});
   BinaryReply reply_handler = [](const uint8_t*, size_t) {};
 
   TextInputPlugin handler(&messenger, engine());
