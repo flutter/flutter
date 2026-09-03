@@ -43,4 +43,15 @@ TEST_F(SkiaParagraphBuilderTests, RenderSoftHyphensEnabled) {
   style.render_soft_hyphens = false;
   ASSERT_FALSE(builder.TxtToSkia(style).getRenderSoftHyphens());
 }
+
+TEST_F(SkiaParagraphBuilderTests, FakeMissingFontStyles) {
+  ParagraphStyle style;
+  auto collection = std::make_shared<FontCollection>();
+  ParagraphBuilderSkia builder(style, collection, false);
+
+  EXPECT_TRUE(builder.TxtToSkia(style).fakeMissingFontStyles());
+
+  style.fake_missing_font_styles = false;
+  EXPECT_FALSE(builder.TxtToSkia(style).fakeMissingFontStyles());
+}
 }  // namespace txt
