@@ -97,14 +97,14 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
-        globals.cache.flutterRoot ??= Cache.defaultFlutterRoot(
+        // globals.cache.flutterRoot ??= Cache.defaultFlutterRoot(
           platform: toolContext.platform,
           fileSystem: toolContext.fs,
           userMessages: UserMessages(),
         );
         // For compatibility with tests that set this to a relative path.
         final FileSystem fs = toolContext.fs;
-        globals.cache.flutterRoot = fs.path.normalize(fs.path.absolute(globals.cache.flutterRoot));
+        // globals.cache.flutterRoot = fs.path.normalize(fs.path.absolute(globals.cache.flutterRoot!));
         return super.runCommand(topLevelResults);
       },
     );

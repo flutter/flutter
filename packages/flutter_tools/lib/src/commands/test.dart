@@ -610,7 +610,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         flutterProject,
         buildInfo.packageConfig,
       );
-      collector = CoverageCollector(fileSystem: globals.fs, 
+      collector = CoverageCollector(fileSystem: globals.fs,  
         verbose: !outputMachineFormat,
         libraryNames: packagesToInclude,
         packagesPath: buildInfo.packageConfigPath,

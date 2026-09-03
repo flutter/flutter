@@ -21,6 +21,7 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'project.dart';
+import 'globals.dart' as globals;
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
@@ -69,36 +70,22 @@ class HotRunner extends ResidentRunner {
     super.flutterDevices, {
     required super.debuggingOptions,
     required super.target,
+    required this.analytics,
 
     this.applicationBinary,
     
     this.benchmarkMode = false,
-    super.buildSystem,
-    super.buildTargets,
-    super.cache,
-    super.commandHelp,
-    super.config,
-    super.dartBuilder,
     super.dillOutputPath,
-    super.fileSystem,
-    super.flutterVersion,
     this.hostIsIde = false,
     HotRunnerConfig? hotRunnerConfig,
-    super.logger,
     super.machine,
     String? nativeAssetsYamlFile,
-    super.osUtils,
-    super.outputPreferences,
-    super.platform,
-    super.processManager,
     ProjectFileInvalidator? projectFileInvalidator,
     super.projectRootPath,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     super.stayResident,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-    super.terminal,
-    super.xcode,
   }) : _hotRunnerConfig = hotRunnerConfig,
        _nativeAssetsYamlFile = nativeAssetsYamlFile,
        _projectFileInvalidator = projectFileInvalidator,
@@ -110,6 +97,7 @@ class HotRunner extends ResidentRunner {
   final StopwatchFactory _stopwatchFactory;
   final ReloadSourcesHelper _reloadSourcesHelper;
   final ReassembleHelper _reassembleHelper;
+  final Analytics analytics;
   final String? _nativeAssetsYamlFile;
   final ProjectFileInvalidator? _projectFileInvalidator;
   final HotRunnerConfig? _hotRunnerConfig;
@@ -117,7 +105,7 @@ class HotRunner extends ResidentRunner {
   @override
   ProjectFileInvalidator get projectFileInvalidator =>
       _projectFileInvalidator ??
-      ProjectFileInvalidator(fileSystem: fileSystem, platform: platform, logger: logger);
+      ProjectFileInvalidator(fileSystem: globals.fs, platform: globals.platform, logger: globals.logger);
 
   HotRunnerConfig get hotRunnerConfig => _hotRunnerConfig ?? HotRunnerConfig();
 
@@ -446,7 +434,7 @@ class HotRunner extends ResidentRunner {
 
     unawaited(
       appStartedCompleter?.future.then((_) {
-        globals.analytics.send(
+        analytics.send(
           Event.hotRunnerInfo(
             label: 'reload-ready',
             targetPlatform: _targetPlatformName!,
@@ -737,7 +725,7 @@ class HotRunner extends ResidentRunner {
 
     // Send timing analytics.
     final Duration elapsedDuration = restartTimer.elapsed;
-    globals.analytics.send(
+    analytics.send(
       Event.timing(
         workflow: 'hot',
         variableName: 'restart',
@@ -864,7 +852,7 @@ class HotRunner extends ResidentRunner {
       if (!result.isOk) {
         restartEvent = 'restart-failed';
       } else {
-        globals.analytics.send(
+        analytics.send(
           Event.hotRunnerInfo(
             label: 'restart',
             targetPlatform: targetPlatform!,
@@ -892,7 +880,7 @@ class HotRunner extends ResidentRunner {
       // The `restartEvent` variable will be null if restart succeeded. We will
       // only handle the case when it failed here.
       if (restartEvent != null) {
-        globals.analytics.send(
+        analytics.send(
           Event.hotRunnerInfo(
             label: restartEvent,
             targetPlatform: targetPlatform!,
@@ -939,7 +927,7 @@ class HotRunner extends ResidentRunner {
             'the source code. Please address the error and then use "R" to '
             'restart the app.\n'
             '${error.message} (error code: ${error.code})';
-        globals.analytics.send(
+        analytics.send(
           Event.hotRunnerInfo(
             label: 'reload-barred',
             targetPlatform: targetPlatform!,
@@ -950,7 +938,7 @@ class HotRunner extends ResidentRunner {
           ),
         );
       } else {
-        globals.analytics.send(
+        analytics.send(
           Event.hotRunnerInfo(
             label: 'exception',
             targetPlatform: targetPlatform!,
@@ -1024,7 +1012,7 @@ class HotRunner extends ResidentRunner {
         sdkName,
         emulator,
         reason,
-        globals.analytics,
+        analytics,
       );
       if (result.code != 0) {
         return result;
@@ -1046,6 +1034,7 @@ class HotRunner extends ResidentRunner {
       viewCache,
       onSlow,
       reloadMessage,
+      logger,
     );
     shouldReportReloadTime = reassembleResult.shouldReportReloadTime;
     if (reassembleResult.reassembleViews.isEmpty) {
@@ -1068,7 +1057,7 @@ class HotRunner extends ResidentRunner {
     // many libraries were affected by the hot reload request.
     // Relation of [invalidatedSourcesCount] to [syncedLibraryCount] should help
     // understand sync/transfer "overhead" of updating this number of source files.
-    globals.analytics.send(
+    analytics.send(
       Event.hotRunnerInfo(
         label: 'reload',
         targetPlatform: targetPlatform!,
@@ -1101,7 +1090,7 @@ class HotRunner extends ResidentRunner {
     if ((reassembleResult.reassembleViews.length == 1) &&
         !reassembleResult.failedReassemble &&
         shouldReportReloadTime) {
-      globals.analytics.send(
+      analytics.send(
         Event.timing(
           workflow: 'hot',
           variableName: 'reload',
@@ -1183,7 +1172,7 @@ typedef ReloadSourcesHelper =
       String? sdkName,
       bool? emulator,
       String? reason,
-      Analytics globals.analytics,
+      Analytics analytics,
     );
 
 @visibleForTesting
@@ -1196,7 +1185,7 @@ Future<OperationResult> defaultReloadSourcesHelper(
   String? sdkName,
   bool? emulator,
   String? reason,
-  Analytics globals.analytics,
+  Analytics analytics,
 ) async {
   final vmReloadTimer = Stopwatch()..start();
   const entryPath = 'main.dart.incremental.dill';
@@ -1233,7 +1222,7 @@ Future<OperationResult> defaultReloadSourcesHelper(
   final vm_service.ReloadReport? reloadReport = reports.isEmpty ? null : reports.first.reports[0];
   if (reloadReport == null ||
       !HotRunner.validateReloadReport(reloadReport, logger: hotRunner.logger)) {
-    globals.analytics.send(
+    analytics.send(
       Event.hotRunnerInfo(
         label: 'reload-reject',
         targetPlatform: targetPlatform!,
@@ -1305,16 +1294,15 @@ typedef ReassembleHelper =
       List<FlutterDevice?> flutterDevices,
       Map<FlutterDevice?, List<FlutterView>> viewCache,
       void Function(String message)? onSlow,
-      String reloadMessage,
+      String reloadMessage, Logger logger,
     );
 
 Future<ReassembleResult> _defaultReassembleHelper(
   List<FlutterDevice?> flutterDevices,
   Map<FlutterDevice?, List<FlutterView>> viewCache,
   void Function(String message)? onSlow,
-  String reloadMessage,
+  String reloadMessage, Logger logger,
 ) async {
-  final Logger logger = flutterDevices.firstOrNull?.device?.logger ?? BufferLogger.test();
   // Check if any isolates are paused and reassemble those that aren't.
   final reassembleViews = <FlutterView, FlutterVmService?>{};
   final reassembleFutures = <Future<void>>[];
@@ -1496,7 +1484,7 @@ class ProjectFileInvalidator {
     final invalidatedFiles = <Uri>[];
 
     final bool Function(DateTime) isInvalidated;
-    if (_globals.platform.isWindows) {
+    if (_platform.isWindows) {
       // On Windows, FileStat.modified truncates to second precision (via GetFileAttributesExW).
       // However, lastCompiled is recorded with millisecond precision.
       final lastCompiledTruncated = DateTime.fromMillisecondsSinceEpoch(
@@ -1521,7 +1509,7 @@ class ProjectFileInvalidator {
                         // TODO(srawlins): Switch from using `stat` to using `statSync`.
                         // ignore: avoid_slow_async_io
                         ? _fileSystem.file(uri).stat()
-                        : _fileSystem.stat(uri.toFilePath(windows: _globals.platform.isWindows)))
+                        : _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
                     .then((FileStat stat) {
                       final DateTime updatedAt = stat.modified;
                       if (isInvalidated(updatedAt)) {
@@ -1538,7 +1526,7 @@ class ProjectFileInvalidator {
         // uri.toFilePath() does not work with MultiRootFileSystem.
         final DateTime updatedAt = uri.hasScheme && uri.scheme != 'file'
             ? _fileSystem.file(uri).statSync().modified
-            : _fileSystem.statSync(uri.toFilePath(windows: _globals.platform.isWindows)).modified;
+            : _fileSystem.statSync(uri.toFilePath(windows: _platform.isWindows)).modified;
         if (isInvalidated(updatedAt)) {
           invalidatedFiles.add(uri);
         }
@@ -1562,7 +1550,7 @@ class ProjectFileInvalidator {
   }
 
   bool _isNotInPubCache(Uri uri) {
-    return !(_globals.platform.isWindows && uri.path.contains(_pubCachePathWindows)) &&
+    return !(_platform.isWindows && uri.path.contains(_pubCachePathWindows)) &&
         !uri.path.contains(_pubCachePathLinuxAndMac);
   }
 }

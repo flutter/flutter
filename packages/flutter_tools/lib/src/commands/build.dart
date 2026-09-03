@@ -1,3 +1,4 @@
+import '../context/tool_context.dart';
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -140,17 +141,17 @@ class BuildCommand extends FlutterCommand {
       ),
     );
 
-    _addSubcommand(BuildIOSArchiveCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildIOSArchiveCommand(toolContext: toolContext, verboseHelp: verboseHelp));
+    _addSubcommand(BuildBundleCommand(buildSystem: _buildSystem, toolContext: toolContext, verboseHelp: verboseHelp));
     _addSubcommand(
-      BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
+      BuildWebCommand(toolContext: toolContext, verboseHelp: verboseHelp),
     );
-    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildMacosCommand(toolContext: toolContext, verboseHelp: verboseHelp));
     _addSubcommand(
-      BuildLinuxCommand(logger: logger, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
+      BuildLinuxCommand(toolContext: toolContext, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
     );
     _addSubcommand(
-      BuildWindowsCommand(logger: logger, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
+      BuildWindowsCommand(buildSystem: _buildSystem, toolContext: toolContext, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
     );
   }
 
@@ -174,7 +175,7 @@ class BuildCommand extends FlutterCommand {
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand({required this.logger, required super.verboseHelp}) {
+  BuildSubCommand({required ToolContext toolContext, required this.logger, required super.verboseHelp}) : super(toolContext: toolContext) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }

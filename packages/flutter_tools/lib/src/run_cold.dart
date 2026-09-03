@@ -22,9 +22,6 @@ class ColdRunner extends ResidentRunner {
     this.applicationBinary,
     
     this.awaitFirstFrameWhenTracing = true,
-    super.buildSystem,
-    super.buildTargets,
-    super.cache,
     super.commandHelp,
     super.config,
     super.dartBuilder,

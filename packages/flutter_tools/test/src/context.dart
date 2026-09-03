@@ -88,7 +88,7 @@ void testUsingContext(
     }
   });
   Config buildConfig(FileSystem fs) {
-    configDir ??= LocalFileSystem.instance.systemTempDirectory.createTempSync(
+    configDir ??= globals.localFileSystem.systemTempDirectory.createTempSync(
       'flutter_config_dir_test.',
     );
     return Config.test(
@@ -99,7 +99,7 @@ void testUsingContext(
   }
 
   PersistentToolState buildPersistentToolState(FileSystem fs) {
-    configDir ??= LocalFileSystem.instance.systemTempDirectory.createTempSync(
+    configDir ??= globals.localFileSystem.systemTempDirectory.createTempSync(
       'flutter_config_dir_test.',
     );
     return PersistentToolState.test(directory: configDir!, logger: BufferLogger.test());
@@ -115,7 +115,7 @@ void testUsingContext(
             name: 'mocks',
             overrides: <Type, Generator>{
               AnsiTerminal: () => AnsiTerminal(platform: FakePlatform(), stdio: FakeStdio()),
-              Config: () => buildConfig(LocalFileSystem.instance),
+              Config: () => buildConfig(globals.localFileSystem),
               DeviceManager: () => FakeDeviceManager(),
               Doctor: () => FakeDoctor(BufferLogger.test()),
               FlutterVersion: () => FakeFlutterVersion(),
@@ -124,7 +124,7 @@ void testUsingContext(
               OutputPreferences: () => OutputPreferences.test(),
               Logger: () => BufferLogger.test(outputPreferences: context.get<OutputPreferences>()),
               OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-              PersistentToolState: () => buildPersistentToolState(LocalFileSystem.instance),
+              PersistentToolState: () => buildPersistentToolState(globals.localFileSystem),
               XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
               FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
               PlistParser: () => FakePlistParser(),

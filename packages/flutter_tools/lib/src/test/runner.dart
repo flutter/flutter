@@ -156,11 +156,7 @@ interface class FlutterTestRunner {
           await WebTestCompiler(
             logger: logger,
             fileSystem: fileSystem,
-            platform: platform,
-            artifacts: artifacts,
             processManager: processManager,
-            config: config,
-            shutdownHooks: shutdownHooks,
           ).initialize(
             projectDirectory: flutterProject!.directory,
             testOutputDir: tempBuildDir,
@@ -185,11 +181,9 @@ interface class FlutterTestRunner {
           logger: logger,
           fileSystem: fileSystem,
           buildDirectory: fileSystem.directory(tempBuildDir),
-          artifacts: artifacts,
           processManager: processManager,
           chromiumLauncher: ChromiumLauncher(
             fileSystem: fileSystem,
-            platform: platform,
             processManager: processManager,
             operatingSystemUtils: os,
             browserFinder: findChromeExecutable,
@@ -236,10 +230,6 @@ interface class FlutterTestRunner {
       fileSystem: fileSystem,
       logger: logger,
       processManager: processManager,
-      platform: platform,
-      artifacts: artifacts,
-      config: config,
-      shutdownHooks: shutdownHooks,
     );
 
     try {
@@ -605,7 +595,7 @@ class SpawnPlugin extends PlatformPlugin {
     rootTestIsolateSpawnerSourceFile.writeAsStringSync(buffer.toString());
   }
 
-  static Future<void> _compileFile({
+  static Future<void> _compileFile(Artifacts artifacts, {
     required Artifacts artifacts,
     required BuildInfo buildInfo,
     required Config config,
@@ -625,15 +615,11 @@ class SpawnPlugin extends PlatformPlugin {
 
     final ResidentCompiler residentCompiler = residentCompilerFactory.create(
       targetPlatform: TargetPlatform.tester,
-      artifacts: artifacts,
       logger: logger,
       processManager: processManager,
       buildInfo: buildInfo,
-      platform: platform,
       testCompilation: true,
       fileSystem: fileSystem,
-      shutdownHooks: shutdownHooks,
-      config: config,
     );
 
     await residentCompiler.recompile(
@@ -755,7 +741,6 @@ class SpawnPlugin extends PlatformPlugin {
       autoUpdateGoldenFiles: updateGoldens,
       childTestIsolateSpawnerSourceFile: childTestIsolateSpawnerSourceFile,
       fileSystem: fileSystem,
-      platform: platform,
       logger: logger,
     );
 
@@ -763,7 +748,6 @@ class SpawnPlugin extends PlatformPlugin {
       childTestIsolateSpawnerSourceFile: childTestIsolateSpawnerSourceFile,
       childTestIsolateSpawnerDillFile: childTestIsolateSpawnerDillFile,
       rootTestIsolateSpawnerSourceFile: rootTestIsolateSpawnerSourceFile,
-      platform: platform,
     );
 
     final BuildInfo buildInfo = debuggingOptions.buildInfo.copyWith(
@@ -771,29 +755,21 @@ class SpawnPlugin extends PlatformPlugin {
       packageConfigPath: isolateSpawningTesterPackageConfigFile.path,
     );
     await _compileFile(
-      artifacts: artifacts,
       buildInfo: buildInfo,
-      config: config,
       fileSystem: fileSystem,
       logger: logger,
       outputDillFile: childTestIsolateSpawnerDillFile,
-      platform: platform,
       processManager: processManager,
-      shutdownHooks: shutdownHooks,
       sourceFile: childTestIsolateSpawnerSourceFile,
       testTimeRecorder: testTimeRecorder,
     );
 
     await _compileFile(
-      artifacts: artifacts,
       buildInfo: buildInfo,
-      config: config,
       fileSystem: fileSystem,
       logger: logger,
       outputDillFile: rootTestIsolateSpawnerDillFile,
-      platform: platform,
       processManager: processManager,
-      shutdownHooks: shutdownHooks,
       sourceFile: rootTestIsolateSpawnerSourceFile,
       testTimeRecorder: testTimeRecorder,
     );

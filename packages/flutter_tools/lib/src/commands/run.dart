@@ -849,6 +849,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         debuggingOptions: debuggingOptions,
         benchmarkMode: boolArg('benchmark'),
+        analytics: analytics,
         applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
         projectRootPath: stringArg('project-root'),
         dillOutputPath: stringArg('output-dill'),

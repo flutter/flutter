@@ -55,7 +55,7 @@ class FlutterDevice {
   final Duration logFlushDelay;
 
   /// Create a [FlutterDevice] with optional code generation enabled.
-  static Future<FlutterDevice> create({
+  static Future<FlutterDevice> create(
     Device device, {
     required String? target,
     required BuildInfo buildInfo,
@@ -982,7 +982,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     cacheDir: globals.cache.getRoot(),
     engineVersion: globals.flutterVersion.engineRevision,
     fileSystem: globals.fs,
-    flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+    flutterRootDir: globals.fs.directory(globals.cache.flutterRoot!),
     outputDir: globals.fs.directory(getBuildDirectory()),
     processManager: globals.processManager,
     platform: globals.platform,
@@ -1762,7 +1762,7 @@ class TerminalHandler {
         _logger.printTrace('Deleting pid file (${_actualPidFile!.path}).');
         _actualPidFile!.deleteSync();
       } on FileSystemException catch (error) {
-        _globals.logger.printWarning(
+        globals.logger.printWarning(
           'Failed to delete pid file (${_actualPidFile!.path}): ${error.message}',
         );
       }

@@ -1573,7 +1573,7 @@ List<String>? _getBuildGradleConfigurationFilePaths(
 /// command.
 void _generatePubspecLock(Directory directory) {
   final FileSystem fs = directory.fileSystem;
-  final String flutterRoot = Cache.flutterRoot!;
+  final String flutterRoot = globals.cache.flutterRoot!;
   final flutterPubspecLock =
       loadYaml(fs.file(fs.path.join(flutterRoot, 'pubspec.lock')).readAsStringSync()) as YamlMap;
 
@@ -1630,7 +1630,7 @@ List<String> gatherSdkPackageDependencies(Directory directory) {
   final result = <String>{};
   // Initialized by FlutterCommandRunner on startup.
   // So it is safe to access it here.
-  final String flutterRoot = Cache.flutterRoot!;
+  final String flutterRoot = globals.cache.flutterRoot!;
   for (final sdkPackage in sdkPackages) {
     final Directory? packageDir = _resolveSdkPackageDir(fs, flutterRoot, sdkPackage);
     if (packageDir == null) {
