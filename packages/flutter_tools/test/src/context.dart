@@ -351,17 +351,32 @@ class NoopIOSSimulatorUtils implements IOSSimulatorUtils {
 }
 
 class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
-  @override
-  bool get isInstalled => true;
+  FakeXcodeProjectInterpreter({
+    bool isInstalled = true,
+    String? versionText = 'Xcode 15',
+    Version? version = const Version.withText(15, 0, 0, '15.0.0'),
+    String? build = '15A240D',
+  }) : _isInstalled = isInstalled,
+       _versionText = versionText,
+       _version = version,
+       _build = build;
+
+  final bool _isInstalled;
+  final String? _versionText;
+  final Version? _version;
+  final String? _build;
 
   @override
-  String get versionText => 'Xcode 15';
+  bool get isInstalled => _isInstalled;
 
   @override
-  Version get version => Version(15, 0, 0);
+  String? get versionText => _versionText;
 
   @override
-  String get build => '15A240D';
+  Version? get version => _version;
+
+  @override
+  String? get build => _build;
 
   @override
   Future<Map<String, String>> getBuildSettings(
