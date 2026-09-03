@@ -136,6 +136,8 @@ final Map<String, _ParagraphStylePropertyPopulator> _populatorsA =
       },
       'hyphens': (_TestParagraphStyleBuilder builder) {
         builder.hyphens = ui.Hyphens.manual;
+      'fakeMissingFontStyles': (_TestParagraphStyleBuilder builder) {
+        builder.fakeMissingFontStyles = true;
       },
     };
 
@@ -179,6 +181,8 @@ final Map<String, _ParagraphStylePropertyPopulator> _populatorsB =
       },
       'hyphens': (_TestParagraphStyleBuilder builder) {
         builder.hyphens = ui.Hyphens.hidden;
+      'fakeMissingFontStyles': (_TestParagraphStyleBuilder builder) {
+        builder.fakeMissingFontStyles = false;
       },
     };
 
@@ -196,6 +200,7 @@ class _TestParagraphStyleBuilder {
   String? ellipsis;
   ui.Locale? locale;
   ui.Hyphens? hyphens;
+  bool? fakeMissingFontStyles;
 
   ui.ParagraphStyle build() {
     return ui.ParagraphStyle(
@@ -212,6 +217,7 @@ class _TestParagraphStyleBuilder {
       ellipsis: ellipsis,
       locale: locale,
       hyphens: hyphens,
+      fakeMissingFontStyles: fakeMissingFontStyles,
     );
   }
 }
