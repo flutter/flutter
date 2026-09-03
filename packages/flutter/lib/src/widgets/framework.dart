@@ -1598,16 +1598,7 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   @override
   ParentDataElement<T> createElement() => ParentDataElement<T>(this);
 
-  /// Checks if this widget can apply its parent data to the provided
-  /// `renderObject`.
-  ///
-  /// The [RenderObject.parentData] of the provided `renderObject` is
-  /// typically set up by an ancestor [RenderObjectWidget] of the type returned
-  /// by [debugTypicalAncestorWidgetClass].
-  ///
-  /// This is called just before [applyParentData] is invoked with the same
-  /// [RenderObject] provided to that method.
-  bool debugIsValidRenderObject(RenderObject renderObject) {
+  bool _isValidRenderObject(RenderObject renderObject) {
     assert(T != dynamic);
     assert(T != ParentData);
     return renderObject.parentData is T;
@@ -6766,7 +6757,7 @@ abstract class RenderObjectElement extends Element {
     //    KeepAlive, and another ParentDataWidget with ParentData type
     //    TwoDimensionalViewportParentData or a subclass thereof.
     // The first and second cases are verified here. The third is verified in
-    // debugIsValidRenderObject.
+    // _isValidRenderObject.
 
     while (ancestor != null && ancestor is! RenderObjectElement) {
       if (ancestor is ParentDataElement<ParentData>) {
@@ -6891,11 +6882,11 @@ abstract class RenderObjectElement extends Element {
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
-    var applyParentData = true;
-    assert(() {
-      try {
-        if (!parentDataWidget.debugIsValidRenderObject(renderObject)) {
-          applyParentData = false;
+    if (parentDataWidget._isValidRenderObject(renderObject)) {
+      parentDataWidget.applyParentData(renderObject);
+    } else {
+      assert(() {
+        try {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('Incorrect use of ParentDataWidget.'),
             ...parentDataWidget._debugDescribeIncorrectParentDataType(
@@ -6904,18 +6895,15 @@ abstract class RenderObjectElement extends Element {
               ownershipChain: ErrorDescription(debugGetCreatorChain(10)),
             ),
           ]);
+        } on FlutterError catch (e) {
+          // We catch the exception directly to avoid activating the ErrorWidget,
+          // while still allowing debuggers to break on exception. Since the tree
+          // is in a broken state, adding the ErrorWidget would likely cause more
+          // exceptions, which is not good for the debugging experience.
+          _reportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
         }
-      } on FlutterError catch (e) {
-        // We catch the exception directly to avoid activating the ErrorWidget,
-        // while still allowing debuggers to break on exception. Since the tree
-        // is in a broken state, adding the ErrorWidget would likely cause more
-        // exceptions, which is not good for the debugging experience.
-        _reportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
-      }
-      return true;
-    }());
-    if (applyParentData) {
-      parentDataWidget.applyParentData(renderObject);
+        return true;
+      }());
     }
   }
 
