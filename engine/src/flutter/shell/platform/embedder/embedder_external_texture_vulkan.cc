@@ -219,6 +219,9 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureImpeller(
   // Transition the layout to shader read.
   {
     auto buffer = impeller_context.CreateCommandBuffer();
+    if (!buffer) {
+      return nullptr;
+    }
     impeller::CommandBufferVK& buffer_vk =
         impeller::CommandBufferVK::Cast(*buffer);
 
