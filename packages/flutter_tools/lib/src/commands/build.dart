@@ -68,9 +68,10 @@ class BuildCommand extends FlutterCommand {
 
     _addSubcommand(
       BuildAarCommand(
-        fileSystem: fileSystem,
-        androidSdk: androidContext.androidSdk,
-        logger: logger,
+        androidBuilder: androidBuilder,
+        androidContext: androidContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
     );
