@@ -680,6 +680,12 @@ void main() {
       expect(calls, hasLength(1));
       expect(calls.first.method, 'rejectGesture');
       expect(calls.first.arguments, <String, dynamic>{'id': 42});
+
+      calls.clear();
+      await controller.rejectGesture(gestureId: 999);
+      expect(calls, hasLength(1));
+      expect(calls.first.method, 'rejectGesture');
+      expect(calls.first.arguments, <String, dynamic>{'id': 42, 'gestureId': 999});
     },
   );
 

@@ -2007,9 +2007,37 @@ public class PlatformViewsControllerTest {
     assertNotNull(parent);
     assertFalse(parent.getFlutterWonGesture());
 
-    // Send rejectGesture via channel.
+    // Without active gesture, rejectGesture has no effect.
+    final Map<String, Object> idleArgs = new HashMap<>();
+    idleArgs.put("id", platformViewId);
+    idleArgs.put("gestureId", 100L);
+    jni.handlePlatformMessage(
+        "flutter/platform_views",
+        encodeMethodCall(new MethodCall("rejectGesture", idleArgs)),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+    assertFalse(parent.getFlutterWonGesture());
+
+    // Start active gesture with downTime 100.
+    final MotionEvent downEvent =
+        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    parent.onTouchEvent(downEvent);
+
+    // Mismatched gestureId does not set flutterWonGesture.
+    final Map<String, Object> mismatchArgs = new HashMap<>();
+    mismatchArgs.put("id", platformViewId);
+    mismatchArgs.put("gestureId", 50L);
+    jni.handlePlatformMessage(
+        "flutter/platform_views",
+        encodeMethodCall(new MethodCall("rejectGesture", mismatchArgs)),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+    assertFalse(parent.getFlutterWonGesture());
+
+    // Send rejectGesture via channel with matching gestureId.
     final Map<String, Object> args = new HashMap<>();
     args.put("id", platformViewId);
+    args.put("gestureId", 100L);
     final MethodCall rejectCall = new MethodCall("rejectGesture", args);
     jni.handlePlatformMessage(
         "flutter/platform_views", encodeMethodCall(rejectCall), /*replyId=*/ 0, /*messageData=*/ 0);
@@ -2042,9 +2070,37 @@ public class PlatformViewsControllerTest {
     assertNotNull(wrapper);
     assertFalse(wrapper.getFlutterWonGesture());
 
-    // Send rejectGesture via channel.
+    // Without active gesture, rejectGesture has no effect.
+    final Map<String, Object> idleArgs = new HashMap<>();
+    idleArgs.put("id", platformViewId);
+    idleArgs.put("gestureId", 100L);
+    jni.handlePlatformMessage(
+        "flutter/platform_views",
+        encodeMethodCall(new MethodCall("rejectGesture", idleArgs)),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+    assertFalse(wrapper.getFlutterWonGesture());
+
+    // Start active gesture with downTime 100.
+    final MotionEvent downEvent =
+        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    wrapper.onTouchEvent(downEvent);
+
+    // Mismatched gestureId does not set flutterWonGesture.
+    final Map<String, Object> mismatchArgs = new HashMap<>();
+    mismatchArgs.put("id", platformViewId);
+    mismatchArgs.put("gestureId", 50L);
+    jni.handlePlatformMessage(
+        "flutter/platform_views",
+        encodeMethodCall(new MethodCall("rejectGesture", mismatchArgs)),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+    assertFalse(wrapper.getFlutterWonGesture());
+
+    // Send rejectGesture via channel with matching gestureId.
     final Map<String, Object> args = new HashMap<>();
     args.put("id", platformViewId);
+    args.put("gestureId", 100L);
     final MethodCall rejectCall = new MethodCall("rejectGesture", args);
     jni.handlePlatformMessage(
         "flutter/platform_views", encodeMethodCall(rejectCall), /*replyId=*/ 0, /*messageData=*/ 0);

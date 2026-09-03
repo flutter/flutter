@@ -387,7 +387,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
       // This means that the pointer event was absorbed by a different render object.
       // Since on the platform side the FlutterTouchIntercepting view is seeing all events that are
       // within its bounds we need to tell it to reject the current touch sequence.
-      _viewController.rejectGesture();
+      _viewController.rejectGesture(gestureId: event.timeStamp.inMilliseconds);
     }
     _lastPointerDownEvent = null;
   }
@@ -607,9 +607,12 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
     _handlePointerEvent = handlePointerEvent;
   }
 
-  final VoidCallback? onRejectGesture;
+  final void Function(int? gestureId)? onRejectGesture;
 
   late _HandlePointerEvent _handlePointerEvent;
+
+  final Map<int, int> _downTimes = <int, int>{};
+  int? _currentDownTime;
 
   // Maps a pointer to a list of its cached pointer events.
   // Before the arena for a pointer is resolved all events are cached here, if we win the arena
@@ -629,6 +632,10 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
+    if (_downTimes.isEmpty) {
+      _currentDownTime = event.timeStamp.inMilliseconds;
+    }
+    _downTimes[event.pointer] = _currentDownTime!;
     super.addAllowedPointer(event);
     for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
@@ -653,15 +660,23 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void acceptGesture(int pointer) {
+    _downTimes.remove(pointer);
+    if (_downTimes.isEmpty) {
+      _currentDownTime = null;
+    }
     _flushPointerCache(pointer);
     forwardedPointers.add(pointer);
   }
 
   @override
   void rejectGesture(int pointer) {
+    final int? gestureId = _downTimes.remove(pointer);
+    if (_downTimes.isEmpty) {
+      _currentDownTime = null;
+    }
     stopTrackingPointer(pointer);
     cachedEvents.remove(pointer);
-    onRejectGesture?.call();
+    onRejectGesture?.call(gestureId);
   }
 
   void _cacheEvent(PointerEvent event) {
@@ -677,11 +692,17 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void stopTrackingPointer(int pointer) {
+    _downTimes.remove(pointer);
+    if (_downTimes.isEmpty) {
+      _currentDownTime = null;
+    }
     super.stopTrackingPointer(pointer);
     forwardedPointers.remove(pointer);
   }
 
   void reset() {
+    _downTimes.clear();
+    _currentDownTime = null;
     forwardedPointers.forEach(super.stopTrackingPointer);
     forwardedPointers.clear();
     cachedEvents.keys.forEach(super.stopTrackingPointer);
@@ -745,8 +766,8 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     _updateGestureRecognizersWithCallBack(
       gestureRecognizers,
       _controller.dispatchPointerEvent,
-      onRejectGesture: () {
-        unawaited(_controller.rejectGesture());
+      onRejectGesture: (int? gestureId) {
+        unawaited(_controller.rejectGesture(gestureId: gestureId));
       },
     );
   }
@@ -806,7 +827,7 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   void _updateGestureRecognizersWithCallBack(
     Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
     _HandlePointerEvent handlePointerEvent, {
-    VoidCallback? onRejectGesture,
+    void Function(int? gestureId)? onRejectGesture,
   }) {
     assert(
       _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,

@@ -188,6 +188,24 @@ public class PlatformViewWrapper extends FrameLayout {
   }
 
   private boolean flutterWonGesture = false;
+  private boolean isGestureActive = false;
+  private long currentDownTime = 0;
+
+  /**
+   * Informs this view that Flutter has won the gesture arena for the active touch sequence.
+   *
+   * <p>Subsequent {@link MotionEvent#ACTION_MOVE} events will request unbuffered dispatch to
+   * minimize latency and prevent stutter for Flutter-driven gestures (e.g., scrolling).
+   *
+   * @param gestureId The identifier (downTime) of the gesture that Flutter won. If non-zero,
+   *     unbuffered dispatch is only enabled if this matches the currently active gesture's
+   *     downTime.
+   */
+  public void onFlutterWonGesture(long gestureId) {
+    if (isGestureActive && (gestureId == 0 || currentDownTime == gestureId)) {
+      flutterWonGesture = true;
+    }
+  }
 
   /**
    * Informs this view that Flutter has won the gesture arena for the active touch sequence.
@@ -196,12 +214,27 @@ public class PlatformViewWrapper extends FrameLayout {
    * minimize latency and prevent stutter for Flutter-driven gestures (e.g., scrolling).
    */
   public void onFlutterWonGesture() {
-    flutterWonGesture = true;
+    onFlutterWonGesture(0);
   }
 
   @VisibleForTesting
-  boolean getFlutterWonGesture() {
+  public boolean getFlutterWonGesture() {
     return flutterWonGesture;
+  }
+
+  @VisibleForTesting
+  public boolean isGestureActive() {
+    return isGestureActive;
+  }
+
+  @VisibleForTesting
+  public long getCurrentDownTime() {
+    return currentDownTime;
+  }
+
+  @VisibleForTesting
+  void requestUnbuffered(MotionEvent event) {
+    requestUnbufferedDispatch(event);
   }
 
   @Override
@@ -210,16 +243,23 @@ public class PlatformViewWrapper extends FrameLayout {
     if (touchProcessor == null) {
       return super.onTouchEvent(event);
     }
-    if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-      flutterWonGesture = false;
-    }
-    if (flutterWonGesture && event.getActionMasked() == MotionEvent.ACTION_MOVE) {
-      requestUnbufferedDispatch(event);
-      flutterWonGesture = false;
-    }
-    if (event.getActionMasked() == MotionEvent.ACTION_UP
-        || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-      flutterWonGesture = false;
+    switch (event.getActionMasked()) {
+      case MotionEvent.ACTION_DOWN:
+        isGestureActive = true;
+        currentDownTime = event.getDownTime();
+        flutterWonGesture = false;
+        break;
+      case MotionEvent.ACTION_MOVE:
+        if (flutterWonGesture) {
+          requestUnbuffered(event);
+          flutterWonGesture = false;
+        }
+        break;
+      case MotionEvent.ACTION_UP:
+      case MotionEvent.ACTION_CANCEL:
+        isGestureActive = false;
+        flutterWonGesture = false;
+        break;
     }
     final Matrix screenMatrix = new Matrix();
     switch (event.getAction()) {

@@ -265,8 +265,10 @@ public class PlatformViewsChannel {
         private void rejectGesture(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
           final Map<String, Object> args = call.arguments();
           final int viewId = (int) args.get("id");
+          final Number gestureIdNumber = (Number) args.get("gestureId");
+          final long gestureId = gestureIdNumber != null ? gestureIdNumber.longValue() : 0;
           try {
-            handler.onRejectGesture(viewId);
+            handler.onRejectGesture(viewId, gestureId);
             result.success(null);
           } catch (IllegalStateException exception) {
             result.error("error", detailedExceptionString(exception), null);
@@ -389,8 +391,20 @@ public class PlatformViewsChannel {
      * Flutter has won the gesture arena and rejected the platform view.
      *
      * @param viewId The ID of the platform view that lost the gesture.
+     * @param gestureId The identifier (e.g. downTime) of the specific gesture that was rejected.
      */
-    void onRejectGesture(int viewId);
+    default void onRejectGesture(int viewId, long gestureId) {
+      onRejectGesture(viewId);
+    }
+
+    /**
+     * Flutter has won the gesture arena and rejected the platform view.
+     *
+     * @param viewId The ID of the platform view that lost the gesture.
+     */
+    default void onRejectGesture(int viewId) {
+      onRejectGesture(viewId, 0);
+    }
   }
 
   /** Request sent from Flutter to resize a platform view. */

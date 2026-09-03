@@ -647,7 +647,11 @@ void main() {
 
     // Compete in the arena: add a pointer down, then resolve the arena with rejection.
     renderBox.handleEvent(
-      const PointerDownEvent(pointer: 1, position: Offset(10, 10)),
+      const PointerDownEvent(
+        pointer: 1,
+        position: Offset(10, 10),
+        timeStamp: Duration(milliseconds: 12345),
+      ),
       BoxHitTestEntry(renderBox, const Offset(10, 10)),
     );
 
@@ -660,6 +664,7 @@ void main() {
     entry.resolve(GestureDisposition.accepted);
 
     expect(viewController.rejectGestureCount, 1);
+    expect(viewController.lastRejectGestureId, 12345);
   });
 }
 

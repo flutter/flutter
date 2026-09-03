@@ -607,6 +607,7 @@ public class PlatformViewsController2Test {
     platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
 
     FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
     attach(jni, platformViewsController);
 
     createPlatformView(jni, platformViewsController, platformViewId, "testType");
@@ -617,8 +618,21 @@ public class PlatformViewsController2Test {
     assertNotNull(parentView);
     assertFalse(parentView.getFlutterWonGesture());
 
-    rejectGesturePlatformView(jni, platformViewsController, platformViewId);
+    // Without active gesture, rejectGesture has no effect.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 100L);
+    assertFalse(parentView.getFlutterWonGesture());
 
+    // Start active gesture with downTime 100.
+    final MotionEvent downEvent =
+        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    parentView.onTouchEvent(downEvent);
+
+    // Mismatched gestureId does not set flutterWonGesture.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 50L);
+    assertFalse(parentView.getFlutterWonGesture());
+
+    // Matching gestureId sets flutterWonGesture.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 100L);
     assertTrue(parentView.getFlutterWonGesture());
   }
 
@@ -684,8 +698,19 @@ public class PlatformViewsController2Test {
 
   private static void rejectGesturePlatformView(
       FlutterJNI jni, PlatformViewsController2 platformViewsController, int platformViewId) {
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 0L);
+  }
+
+  private static void rejectGesturePlatformView(
+      FlutterJNI jni,
+      PlatformViewsController2 platformViewsController,
+      int platformViewId,
+      long gestureId) {
     final Map<String, Object> args = new HashMap<>();
     args.put("id", platformViewId);
+    if (gestureId != 0L) {
+      args.put("gestureId", gestureId);
+    }
 
     final MethodCall platformRejectGestureMethodCall = new MethodCall("rejectGesture", args);
 

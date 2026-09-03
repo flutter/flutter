@@ -777,7 +777,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   //// Message Handler ///////
 
-  final PlatformViewsChannel2.PlatformViewsHandler channelHandler =
+  @VisibleForTesting
+  PlatformViewsChannel2.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel2.PlatformViewsHandler() {
 
         @Override
@@ -874,10 +875,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
         }
 
         @Override
-        public void onRejectGesture(int viewId) {
+        public void onRejectGesture(int viewId, long gestureId) {
           final FlutterMutatorView parentView = platformViewParent.get(viewId);
           if (parentView != null) {
-            parentView.onFlutterWonGesture();
+            parentView.onFlutterWonGesture(gestureId);
           }
         }
 

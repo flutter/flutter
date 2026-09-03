@@ -1047,7 +1047,7 @@ abstract class AndroidViewController extends PlatformViewController {
   }
 
   @override
-  Future<void> rejectGesture() async {}
+  Future<void> rejectGesture({int? gestureId}) async {}
 }
 
 /// Controls an Android view that is composed using a GL texture.
@@ -1121,8 +1121,8 @@ class SurfaceAndroidViewController extends AndroidViewController {
   }
 
   @override
-  Future<void> rejectGesture() {
-    return _internals.rejectGesture(viewId: viewId);
+  Future<void> rejectGesture({int? gestureId}) {
+    return _internals.rejectGesture(viewId: viewId, gestureId: gestureId);
   }
 }
 
@@ -1181,8 +1181,8 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   }
 
   @override
-  Future<void> rejectGesture() {
-    return _internals.rejectGesture(viewId: viewId);
+  Future<void> rejectGesture({int? gestureId}) {
+    return _internals.rejectGesture(viewId: viewId, gestureId: gestureId);
   }
 }
 
@@ -1252,8 +1252,8 @@ class HybridAndroidViewController extends AndroidViewController {
   }
 
   @override
-  Future<void> rejectGesture() {
-    return _internals.rejectGesture(viewId: viewId);
+  Future<void> rejectGesture({int? gestureId}) {
+    return _internals.rejectGesture(viewId: viewId, gestureId: gestureId);
   }
 }
 
@@ -1336,8 +1336,8 @@ class TextureAndroidViewController extends AndroidViewController {
   }
 
   @override
-  Future<void> rejectGesture() {
-    return _internals.rejectGesture(viewId: viewId);
+  Future<void> rejectGesture({int? gestureId}) {
+    return _internals.rejectGesture(viewId: viewId, gestureId: gestureId);
   }
 }
 
@@ -1398,9 +1398,10 @@ abstract class _AndroidViewControllerInternals {
 
   Future<void> sendDisposeMessage({required int viewId});
 
-  Future<void> rejectGesture({required int viewId}) {
+  Future<void> rejectGesture({required int viewId, int? gestureId}) {
     return SystemChannels.platform_views.invokeMethod<void>('rejectGesture', <String, dynamic>{
       'id': viewId,
+      if (gestureId != null) 'gestureId': gestureId,
     });
   }
 }
@@ -1559,9 +1560,10 @@ class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInter
   }
 
   @override
-  Future<void> rejectGesture({required int viewId}) {
+  Future<void> rejectGesture({required int viewId, int? gestureId}) {
     return SystemChannels.platform_views_2.invokeMethod<void>('rejectGesture', <String, dynamic>{
       'id': viewId,
+      if (gestureId != null) 'gestureId': gestureId,
     });
   }
 }
@@ -1616,8 +1618,8 @@ abstract class DarwinPlatformViewController {
   /// When a touch sequence is happening on the embedded UIView all touch events are delayed.
   /// Calling this method drops the buffered touch events and prevents any future touch events for
   /// the pointers that are part of the active touch sequence from arriving to the embedded view.
-  Future<void> rejectGesture() {
-    final args = <String, dynamic>{'id': id};
+  Future<void> rejectGesture({int? gestureId}) {
+    final args = <String, dynamic>{'id': id, if (gestureId != null) 'gestureId': gestureId};
     return SystemChannels.platform_views.invokeMethod('rejectGesture', args);
   }
 
@@ -1757,5 +1759,8 @@ abstract class PlatformViewController {
   ///
   /// This is called when Flutter wins the gesture arena for a touch sequence that
   /// started on this platform view.
-  Future<void> rejectGesture() async {}
+  ///
+  /// The optional [gestureId] identifies the specific gesture (e.g. its downTime timestamp in
+  /// milliseconds) that was rejected.
+  Future<void> rejectGesture({int? gestureId}) async {}
 }

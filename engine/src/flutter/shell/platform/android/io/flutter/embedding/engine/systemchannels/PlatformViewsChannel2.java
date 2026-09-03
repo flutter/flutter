@@ -178,8 +178,10 @@ public class PlatformViewsChannel2 {
         private void rejectGesture(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
           final Map<String, Object> args = call.arguments();
           final int viewId = (int) args.get("id");
+          final Number gestureIdNumber = (Number) args.get("gestureId");
+          final long gestureId = gestureIdNumber != null ? gestureIdNumber.longValue() : 0;
           try {
-            handler.onRejectGesture(viewId);
+            handler.onRejectGesture(viewId, gestureId);
             result.success(null);
           } catch (IllegalStateException exception) {
             result.error("error", detailedExceptionString(exception), null);
@@ -237,8 +239,20 @@ public class PlatformViewsChannel2 {
      * Informs the handler that Flutter has won the gesture arena and rejected the platform view.
      *
      * @param viewId The ID of the platform view that was rejected.
+     * @param gestureId The identifier (e.g. downTime) of the specific gesture that was rejected.
      */
-    void onRejectGesture(int viewId);
+    default void onRejectGesture(int viewId, long gestureId) {
+      onRejectGesture(viewId);
+    }
+
+    /**
+     * Informs the handler that Flutter has won the gesture arena and rejected the platform view.
+     *
+     * @param viewId The ID of the platform view that was rejected.
+     */
+    default void onRejectGesture(int viewId) {
+      onRejectGesture(viewId, 0);
+    }
 
     /** Whether the SurfaceControl swapchain is enabled. */
     boolean isSurfaceControlEnabled();

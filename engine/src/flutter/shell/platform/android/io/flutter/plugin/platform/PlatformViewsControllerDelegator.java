@@ -117,12 +117,17 @@ public class PlatformViewsControllerDelegator
   }
 
   @Override
-  public void onRejectGesture(int viewId) {
+  public void onRejectGesture(int viewId, long gestureId) {
     if (platformViewsController2.getPlatformViewById(viewId) != null) {
-      platformViewsController2.channelHandler.onRejectGesture(viewId);
+      platformViewsController2.channelHandler.onRejectGesture(viewId, gestureId);
     } else {
-      platformViewsController.channelHandler.onRejectGesture(viewId);
+      platformViewsController.channelHandler.onRejectGesture(viewId, gestureId);
     }
+  }
+
+  @Override
+  public void onRejectGesture(int viewId) {
+    onRejectGesture(viewId, 0);
   }
 
   /** Returns true if creation of HC++ platform views is currently supported. */

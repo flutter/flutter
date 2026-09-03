@@ -158,7 +158,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   private static boolean enableSurfaceProducerRenderTarget = true;
 
-  final PlatformViewsChannel.PlatformViewsHandler channelHandler =
+  @VisibleForTesting
+  PlatformViewsChannel.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel.PlatformViewsHandler() {
 
         @Override
@@ -497,15 +498,15 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         }
 
         @Override
-        public void onRejectGesture(int viewId) {
+        public void onRejectGesture(int viewId, long gestureId) {
           final FlutterMutatorView parentView = platformViewParent.get(viewId);
           if (parentView != null) {
-            parentView.onFlutterWonGesture();
+            parentView.onFlutterWonGesture(gestureId);
             return;
           }
           final PlatformViewWrapper viewWrapper = viewWrappers.get(viewId);
           if (viewWrapper != null) {
-            viewWrapper.onFlutterWonGesture();
+            viewWrapper.onFlutterWonGesture(gestureId);
           }
         }
       };
@@ -528,7 +529,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   @VisibleForTesting
   public void onRejectGesture(int viewId) {
-    channelHandler.onRejectGesture(viewId);
+    onRejectGesture(viewId, 0);
+  }
+
+  @VisibleForTesting
+  public void onRejectGesture(int viewId, long gestureId) {
+    channelHandler.onRejectGesture(viewId, gestureId);
   }
 
   @VisibleForTesting
