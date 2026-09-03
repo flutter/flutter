@@ -15,6 +15,7 @@ import android.graphics.Path;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
@@ -29,12 +30,14 @@ import io.flutter.util.ViewUtils;
  * its children.
  */
 public class FlutterMutatorView extends FrameLayout {
-  private FlutterMutatorsStack mutatorsStack;
+  @Nullable private FlutterMutatorsStack mutatorsStack;
   private float screenDensity;
+  private int prevLeft;
+  private int prevTop;
   private int left;
   private int top;
 
-  private final AndroidTouchProcessor androidTouchProcessor;
+  @Nullable private AndroidTouchProcessor androidTouchProcessor;
   private Paint paint;
 
   /**
@@ -54,6 +57,15 @@ public class FlutterMutatorView extends FrameLayout {
   /** Initialize the FlutterMutatorView. */
   public FlutterMutatorView(@NonNull Context context) {
     this(context, 1, /* androidTouchProcessor=*/ null);
+  }
+
+  /**
+   * Sets the touch processor that allows intercepting gestures.
+   *
+   * @param newTouchProcessor The touch processor.
+   */
+  public void setTouchProcessor(@Nullable AndroidTouchProcessor newTouchProcessor) {
+    this.androidTouchProcessor = newTouchProcessor;
   }
 
   @Nullable @VisibleForTesting ViewTreeObserver.OnGlobalFocusChangeListener activeFocusListener;
@@ -95,6 +107,21 @@ public class FlutterMutatorView extends FrameLayout {
   }
 
   /**
+   * Sets the layout parameters for this view.
+   *
+   * @param params The new parameters.
+   */
+  @Override
+  public void setLayoutParams(@NonNull ViewGroup.LayoutParams params) {
+    super.setLayoutParams(params);
+    if (params instanceof ViewGroup.MarginLayoutParams) {
+      final ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams) params;
+      this.left = marginParams.leftMargin;
+      this.top = marginParams.topMargin;
+    }
+  }
+
+  /**
    * Pass the necessary parameters to the view so it can apply correct mutations to its children.
    */
   public void readyToDisplay(
@@ -112,6 +139,10 @@ public class FlutterMutatorView extends FrameLayout {
 
   @Override
   public void draw(Canvas canvas) {
+    if (mutatorsStack == null) {
+      super.draw(canvas);
+      return;
+    }
     // Apply all clippings on the parent canvas.
     canvas.save();
     for (Path path : mutatorsStack.getFinalClippingPaths()) {
@@ -139,6 +170,10 @@ public class FlutterMutatorView extends FrameLayout {
 
   @Override
   public void dispatchDraw(Canvas canvas) {
+    if (mutatorsStack == null) {
+      super.dispatchDraw(canvas);
+      return;
+    }
     // Apply all the transforms on the child canvas.
     canvas.save();
 
@@ -148,6 +183,9 @@ public class FlutterMutatorView extends FrameLayout {
   }
 
   private Matrix getPlatformViewMatrix() {
+    if (mutatorsStack == null) {
+      return new Matrix();
+    }
     Matrix finalMatrix = new Matrix(mutatorsStack.getFinalMatrix());
 
     // Reverse scale based on screen scale.
@@ -198,7 +236,25 @@ public class FlutterMutatorView extends FrameLayout {
       return super.onTouchEvent(event);
     }
     final Matrix screenMatrix = new Matrix();
-    screenMatrix.postTranslate(getLeft(), getTop());
+    switch (event.getActionMasked()) {
+      case MotionEvent.ACTION_DOWN:
+        prevLeft = left;
+        prevTop = top;
+        screenMatrix.postTranslate(left, top);
+        break;
+      case MotionEvent.ACTION_MOVE:
+        // While the view is dragged, use the left and top positions as
+        // they were at the moment the touch event fired.
+        screenMatrix.postTranslate(prevLeft, prevTop);
+        prevLeft = left;
+        prevTop = top;
+        break;
+      case MotionEvent.ACTION_UP:
+      case MotionEvent.ACTION_CANCEL:
+      default:
+        screenMatrix.postTranslate(left, top);
+        break;
+    }
     return androidTouchProcessor.onTouchEvent(event, screenMatrix);
   }
 }

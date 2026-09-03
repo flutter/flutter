@@ -63,6 +63,12 @@ source_set("fml") {
     "native_library.h",
     "paths.cc",
     "paths.h",
+    "platform/android/jni_util.cc",
+    "platform/android/jni_util.h",
+    "platform/android/jni_weak_ref.cc",
+    "platform/android/jni_weak_ref.h",
+    "platform/android/scoped_java_ref.cc",
+    "platform/android/scoped_java_ref.h",
     "posix_wrappers.h",
     "process.h",
     "raster_thread_merger.cc",
@@ -136,6 +142,7 @@ source_set("fml") {
   public_configs = [
     "//flutter:config",
     "//flutter/common:flutter_config",
+    "//flutter/shell/platform/android:jni_headers_config",
   ]
 
   libs = []
@@ -168,16 +175,10 @@ source_set("fml") {
     sources += [
       "platform/android/cpu_affinity.cc",
       "platform/android/cpu_affinity.h",
-      "platform/android/jni_util.cc",
-      "platform/android/jni_util.h",
-      "platform/android/jni_weak_ref.cc",
-      "platform/android/jni_weak_ref.h",
       "platform/android/message_loop_android.cc",
       "platform/android/message_loop_android.h",
       "platform/android/paths_android.cc",
       "platform/android/paths_android.h",
-      "platform/android/scoped_java_ref.cc",
-      "platform/android/scoped_java_ref.h",
     ]
 
     libs += [ "android" ]

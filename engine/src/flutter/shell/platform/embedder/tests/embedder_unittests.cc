@@ -23,7 +23,10 @@
 #include "flutter/fml/thread.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
+#include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_hb.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
@@ -514,6 +517,210 @@ TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
 
   ASSERT_TRUE(destruction_callback_called.load());
   destruction_callback_called = false;
+}
+
+TEST_F(EmbedderTest, CanSpecifyCustomTaskRunnerThreadPriorities) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  std::mutex ui_task_runner_mutex;
+  bool ui_task_runner_destroyed = false;
+  auto ui_thread = std::make_unique<fml::Thread>("test_ui_thread");
+  auto ui_task_runner = ui_thread->GetTaskRunner();
+  auto platform_thread = std::make_unique<fml::Thread>("test_platform_thread");
+  auto platform_task_runner = platform_thread->GetTaskRunner();
+  UniqueEngine engine;
+
+  static std::atomic<FlutterThreadPriority> s_ui_priority_applied;
+  static std::atomic<FlutterThreadPriority> s_platform_priority_applied;
+  s_ui_priority_applied.store(FlutterThreadPriority::kNormal);
+  s_platform_priority_applied.store(FlutterThreadPriority::kBackground);
+
+  EmbedderTestTaskRunner test_ui_task_runner =
+      EmbedderTestTaskRunnerBuilder()
+          .SetRealTaskRunner(ui_task_runner)
+          .SetPriority(FlutterThreadPriority::kDisplay)
+          .SetThreadPrioritySetter([](FlutterThreadPriority priority) {
+            s_ui_priority_applied.store(priority);
+          })
+          .SetTaskExpiryCallback([&](FlutterTask task) {
+            std::scoped_lock lock(ui_task_runner_mutex);
+            if (ui_task_runner_destroyed) {
+              return;
+            }
+            FlutterEngineRunTask(engine.get(), &task);
+          })
+          .SetDestructionCallback([&]() {
+            std::scoped_lock lock(ui_task_runner_mutex);
+            ui_task_runner_destroyed = true;
+          })
+          .Build();
+
+  EmbedderTestTaskRunner test_platform_task_runner =
+      EmbedderTestTaskRunnerBuilder()
+          .SetRealTaskRunner(platform_task_runner)
+          .SetPriority(FlutterThreadPriority::kNormal)
+          .SetThreadPrioritySetter([](FlutterThreadPriority priority) {
+            s_platform_priority_applied.store(priority);
+          })
+          .SetTaskExpiryCallback([&](FlutterTask task) {
+            if (!engine.is_valid()) {
+              return;
+            }
+            FlutterEngineRunTask(engine.get(), &task);
+          })
+          .Build();
+
+  EXPECT_EQ(test_ui_task_runner.GetPriority(), FlutterThreadPriority::kDisplay);
+  EXPECT_EQ(test_platform_task_runner.GetPriority(),
+            FlutterThreadPriority::kNormal);
+
+  fml::AutoResetWaitableEvent signal_latch_ui;
+  fml::AutoResetWaitableEvent signal_latch_platform;
+
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+        ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
+        signal_latch_ui.Signal();
+      }));
+
+  platform_task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    const auto ui_task_runner_description =
+        test_ui_task_runner.GetFlutterTaskRunnerDescription();
+    const auto platform_task_runner_description =
+        test_platform_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetSurface(DlISize(1, 1));
+    builder.SetUITaskRunner(&ui_task_runner_description);
+    builder.SetPlatformTaskRunner(&platform_task_runner_description);
+    builder.SetDartEntrypoint("canSpecifyCustomUITaskRunner");
+    builder.SetPlatformMessageCallback(
+        [&](const FlutterPlatformMessage* message) {
+          ASSERT_TRUE(platform_task_runner->RunsTasksOnCurrentThread());
+          signal_latch_platform.Signal();
+        });
+    engine = builder.InitializeEngine();
+    ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+    ASSERT_TRUE(engine.is_valid());
+  });
+  signal_latch_ui.Wait();
+  signal_latch_platform.Wait();
+
+  EXPECT_EQ(s_ui_priority_applied.load(), FlutterThreadPriority::kDisplay);
+  EXPECT_EQ(s_platform_priority_applied.load(), FlutterThreadPriority::kNormal);
+
+  fml::AutoResetWaitableEvent kill_latch;
+  platform_task_runner->PostTask([&] {
+    engine.reset();
+    platform_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  });
+  kill_latch.Wait();
+
+  // Shut down the threads before exiting the test.  There may still be
+  // pending tasks queued to the task runners, and they must not run
+  // after the engine goes out of scope.
+  ui_thread.reset();
+  platform_thread.reset();
+}
+
+TEST_F(EmbedderTest, CanSetEngineThreadPrioritiesWithGlobalSetter) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  struct PriorityCounter {
+    std::atomic<int> background_count{0};
+    std::atomic<int> display_count{0};
+    std::atomic<int> raster_count{0};
+    std::atomic<int> normal_count{0};
+
+    void Reset() {
+      background_count.store(0);
+      display_count.store(0);
+      raster_count.store(0);
+      normal_count.store(0);
+    }
+  };
+  static PriorityCounter s_counter;
+  s_counter.Reset();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetThreadPrioritySetter([](FlutterThreadPriority priority) {
+    switch (priority) {
+      case FlutterThreadPriority::kBackground:
+        s_counter.background_count++;
+        break;
+      case FlutterThreadPriority::kDisplay:
+        s_counter.display_count++;
+        break;
+      case FlutterThreadPriority::kRaster:
+        s_counter.raster_count++;
+        break;
+      case FlutterThreadPriority::kNormal:
+        s_counter.normal_count++;
+        break;
+    }
+  });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  EXPECT_GT(s_counter.background_count.load(), 0);
+  EXPECT_GT(s_counter.display_count.load(), 0);
+  EXPECT_GT(s_counter.raster_count.load(), 0);
+
+  engine.reset();
+}
+
+TEST_F(EmbedderTest, CanSetEngineThreadPrioritiesWithUserDataSetter) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  struct UserDataContext {
+    std::atomic<int> callback_count{0};
+    std::atomic<int> background_count{0};
+    std::atomic<int> display_count{0};
+    std::atomic<int> raster_count{0};
+    void* expected_this = nullptr;
+  };
+  UserDataContext user_data_context;
+  user_data_context.expected_this = &user_data_context;
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetThreadPrioritySetterWithUserData(
+      [](FlutterThreadPriority priority, void* user_data) {
+        auto* ctx = reinterpret_cast<UserDataContext*>(user_data);
+        if (ctx && ctx->expected_this == ctx) {
+          ctx->callback_count++;
+          switch (priority) {
+            case FlutterThreadPriority::kBackground:
+              ctx->background_count++;
+              break;
+            case FlutterThreadPriority::kDisplay:
+              ctx->display_count++;
+              break;
+            case FlutterThreadPriority::kRaster:
+              ctx->raster_count++;
+              break;
+            default:
+              break;
+          }
+        }
+      },
+      &user_data_context);
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  EXPECT_GT(user_data_context.callback_count.load(), 0);
+  EXPECT_GT(user_data_context.background_count.load(), 0);
+  EXPECT_GT(user_data_context.display_count.load(), 0);
+  EXPECT_GT(user_data_context.raster_count.load(), 0);
+
+  engine.reset();
 }
 
 TEST(EmbedderTestNoFixture, CanGetCurrentTimeInNanoseconds) {
@@ -1496,6 +1703,634 @@ TEST_F(EmbedderTest, CanDeinitializeAnEngine) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kInvalidArguments);
   engine.reset();
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineSpawn validates arguments correctly.
+///
+TEST_F(EmbedderTest, SpawnEngineInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterEngine spawned_engine = nullptr;
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+
+  // Null parent engine.
+  EXPECT_EQ(FlutterEngineSpawn(nullptr, &spawn_config, &spawned_engine),
+            kInvalidArguments);
+
+  // Null spawned engine output pointer.
+  EXPECT_EQ(FlutterEngineSpawn(engine.get(), &spawn_config, nullptr),
+            kInvalidArguments);
+
+  // Null spawn config.
+  EXPECT_EQ(FlutterEngineSpawn(engine.get(), nullptr, &spawned_engine),
+            kInvalidArguments);
+
+  // Invalid struct size (0).
+  FlutterEngineSpawnConfig invalid_config_zero = {};
+  invalid_config_zero.struct_size = 0;
+  EXPECT_EQ(
+      FlutterEngineSpawn(engine.get(), &invalid_config_zero, &spawned_engine),
+      kInvalidArguments);
+
+  // Invalid struct size (too large).
+  FlutterEngineSpawnConfig invalid_config_large = {};
+  invalid_config_large.struct_size = sizeof(FlutterEngineSpawnConfig) + 128;
+  EXPECT_EQ(
+      FlutterEngineSpawn(engine.get(), &invalid_config_large, &spawned_engine),
+      kInvalidArguments);
+
+  // Uninitialized engine cannot be spawned.
+  auto uninitialized_engine = builder.InitializeEngine();
+  ASSERT_TRUE(uninitialized_engine.is_valid());
+  EXPECT_EQ(FlutterEngineSpawn(uninitialized_engine.get(), &spawn_config,
+                               &spawned_engine),
+            kInvalidArguments);
+  uninitialized_engine.reset();
+}
+
+//------------------------------------------------------------------------------
+/// Test that an engine can spawn a child engine instance sharing the isolate
+/// group and resources.
+///
+TEST_F(EmbedderTest, CanSpawnEngine) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent parent_latch;
+  context.AddIsolateCreateCallback(
+      [&parent_latch]() { parent_latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+  parent_latch.Wait();
+
+  FlutterEngine spawned_engine = nullptr;
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.user_data = &context;
+
+  ASSERT_EQ(
+      FlutterEngineSpawn(parent_engine.get(), &spawn_config, &spawned_engine),
+      kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+  ASSERT_NE(spawned_engine, parent_engine.get());
+
+  // Verify spawned engine can be shut down cleanly.
+  ASSERT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that a spawned engine can invoke a custom entrypoint with arguments.
+///
+TEST_F(EmbedderTest, SpawnEngineWithCustomEntrypointAndArgs) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent parent_latch;
+  context.AddIsolateCreateCallback(
+      [&parent_latch]() { parent_latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+  parent_latch.Wait();
+
+  fml::AutoResetWaitableEvent callback_latch;
+  std::vector<std::string> callback_args;
+  auto nativeArgumentsCallback = [&callback_args,
+                                  &callback_latch](Dart_Handle args) {
+    callback_args =
+        tonic::DartConverter<std::vector<std::string>>::FromDart(args);
+    callback_latch.Signal();
+  };
+  context.AddFfiNativeCallback("NativeArgumentsCallback",
+                               CREATE_FFI_LAMBDA(nativeArgumentsCallback));
+
+  const char* argv[] = {"spawned_arg1", "spawned_arg2"};
+  FlutterProjectArgs custom_args = {};
+  custom_args.struct_size = sizeof(FlutterProjectArgs);
+  custom_args.custom_dart_entrypoint = "dart_entrypoint_args";
+  custom_args.dart_entrypoint_argc = 2;
+  custom_args.dart_entrypoint_argv = argv;
+
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.custom_args = &custom_args;
+  spawn_config.user_data = &context;
+
+  FlutterEngine spawned_engine = nullptr;
+  ASSERT_EQ(
+      FlutterEngineSpawn(parent_engine.get(), &spawn_config, &spawned_engine),
+      kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+
+  callback_latch.Wait();
+  ASSERT_EQ(callback_args.size(), 2u);
+  ASSERT_EQ(callback_args[0], "spawned_arg1");
+  ASSERT_EQ(callback_args[1], "spawned_arg2");
+
+  ASSERT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that a spawned engine can send and receive platform messages.
+///
+TEST_F(EmbedderTest, SpawnEnginePlatformMessages) {
+  struct Captures {
+    fml::AutoResetWaitableEvent latch;
+    std::thread::id thread_id;
+  };
+  Captures captures;
+
+  CreateNewThread()->PostTask([&]() {
+    captures.thread_id = std::this_thread::get_id();
+    auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+    EmbedderConfigBuilder builder(context);
+    builder.SetSurface(DlISize(1, 1));
+
+    fml::AutoResetWaitableEvent ready;
+    context.AddFfiNativeCallback(
+        "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
+
+    auto parent_engine = builder.LaunchEngine();
+    ASSERT_TRUE(parent_engine.is_valid());
+
+    FlutterProjectArgs custom_args = {};
+    custom_args.struct_size = sizeof(FlutterProjectArgs);
+    custom_args.custom_dart_entrypoint = "platform_messages_response";
+
+    FlutterEngineSpawnConfig spawn_config = {};
+    spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+    spawn_config.custom_args = &custom_args;
+    spawn_config.user_data = &context;
+
+    FlutterEngine spawned_engine = nullptr;
+    ASSERT_EQ(
+        FlutterEngineSpawn(parent_engine.get(), &spawn_config, &spawned_engine),
+        kSuccess);
+    ASSERT_NE(spawned_engine, nullptr);
+
+    static std::string kMessageData = "Hello from spawned embedder.";
+
+    FlutterPlatformMessageResponseHandle* response_handle = nullptr;
+    auto callback = [](const uint8_t* data, size_t size,
+                       void* user_data) -> void {
+      ASSERT_EQ(size, kMessageData.size());
+      ASSERT_EQ(strncmp(reinterpret_cast<const char*>(kMessageData.data()),
+                        reinterpret_cast<const char*>(data), size),
+                0);
+      auto captures = reinterpret_cast<Captures*>(user_data);
+      ASSERT_EQ(captures->thread_id, std::this_thread::get_id());
+      captures->latch.Signal();
+    };
+    auto result = FlutterPlatformMessageCreateResponseHandle(
+        spawned_engine, callback, &captures, &response_handle);
+    ASSERT_EQ(result, kSuccess);
+
+    FlutterPlatformMessage message = {};
+    message.struct_size = sizeof(FlutterPlatformMessage);
+    message.channel = "test_channel";
+    message.message = reinterpret_cast<const uint8_t*>(kMessageData.data());
+    message.message_size = kMessageData.size();
+    message.response_handle = response_handle;
+
+    ready.Wait();
+    result = FlutterEngineSendPlatformMessage(spawned_engine, &message);
+    ASSERT_EQ(result, kSuccess);
+
+    result = FlutterPlatformMessageReleaseResponseHandle(spawned_engine,
+                                                         response_handle);
+    ASSERT_EQ(result, kSuccess);
+
+    ASSERT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+  });
+
+  captures.latch.Wait();
+}
+
+//------------------------------------------------------------------------------
+/// Test that parent and spawned engines can be shut down out-of-order safely.
+///
+TEST_F(EmbedderTest, SpawnEngineOutOfOrderShutdownParentFirst) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent parent_latch;
+  context.AddIsolateCreateCallback(
+      [&parent_latch]() { parent_latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+  parent_latch.Wait();
+
+  fml::AutoResetWaitableEvent child_latch;
+  auto entrypoint = [&child_latch]() { child_latch.Signal(); };
+  context.AddFfiNativeCallback("SayHiFromCustomEntrypoint",
+                               CREATE_FFI_LAMBDA(entrypoint));
+
+  FlutterProjectArgs custom_args = {};
+  custom_args.struct_size = sizeof(FlutterProjectArgs);
+  custom_args.custom_dart_entrypoint = "customEntrypoint";
+
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.custom_args = &custom_args;
+  spawn_config.user_data = &context;
+
+  FlutterEngine spawned_engine = nullptr;
+  ASSERT_EQ(
+      FlutterEngineSpawn(parent_engine.get(), &spawn_config, &spawned_engine),
+      kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+  child_latch.Wait();
+
+  // Shut down parent engine first while spawned child is still alive.
+  parent_engine.reset();
+
+  // Child engine should shut down cleanly without issues.
+  ASSERT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that multiple child engines can be spawned and shut down in any order.
+///
+TEST_F(EmbedderTest, SpawnMultipleEngines) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent parent_latch;
+  context.AddIsolateCreateCallback(
+      [&parent_latch]() { parent_latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+  parent_latch.Wait();
+
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.user_data = &context;
+
+  FlutterEngine child1 = nullptr;
+  FlutterEngine child2 = nullptr;
+
+  ASSERT_EQ(FlutterEngineSpawn(parent_engine.get(), &spawn_config, &child1),
+            kSuccess);
+  ASSERT_NE(child1, nullptr);
+
+  ASSERT_EQ(FlutterEngineSpawn(parent_engine.get(), &spawn_config, &child2),
+            kSuccess);
+  ASSERT_NE(child2, nullptr);
+
+  // Shut down child2 first, then parent, then child1.
+  ASSERT_EQ(FlutterEngineShutdown(child2), kSuccess);
+  parent_engine.reset();
+  ASSERT_EQ(FlutterEngineShutdown(child1), kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test argument validation for FlutterEngineLoadDartDeferredLibrary and
+/// related error notification functions.
+///
+TEST_F(EmbedderTest, DartDeferredLibraryInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  const uint8_t dummy_data[] = {0x01, 0x02};
+  const uint8_t dummy_instructions[] = {0x03, 0x04};
+
+  // Null engine for load.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(
+                nullptr, 1, dummy_data, sizeof(dummy_data), dummy_instructions,
+                sizeof(dummy_instructions)),
+            kInvalidArguments);
+
+  // Null snapshot_data for load.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(
+                engine.get(), 1, nullptr, sizeof(dummy_data),
+                dummy_instructions, sizeof(dummy_instructions)),
+            kInvalidArguments);
+
+  // Null snapshot_instructions for load.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(engine.get(), 1, dummy_data,
+                                                 sizeof(dummy_data), nullptr,
+                                                 sizeof(dummy_instructions)),
+            kInvalidArguments);
+
+  // Null engine for notify error.
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(nullptr, 1,
+                                                            "test error", true),
+            kInvalidArguments);
+
+  // Null error message for notify error.
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(engine.get(), 1,
+                                                            nullptr, true),
+            kInvalidArguments);
+
+  // Null engine for failure alias.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibraryFailure(nullptr, 1,
+                                                        "test error", true),
+            kInvalidArguments);
+
+  // Null error message for failure alias.
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibraryFailure(engine.get(), 1,
+                                                        nullptr, true),
+            kInvalidArguments);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineLoadDartDeferredLibrary can be called successfully on
+/// a running engine instance.
+///
+TEST_F(EmbedderTest, CanLoadDartDeferredLibrary) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  const uint8_t dummy_data[] = {0x00};
+  const uint8_t dummy_instructions[] = {0x00};
+
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(
+                engine.get(), 42, dummy_data, sizeof(dummy_data),
+                dummy_instructions, sizeof(dummy_instructions)),
+            kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineNotifyDartDeferredLibraryLoadError and
+/// FlutterEngineLoadDartDeferredLibraryFailure notify load failures.
+///
+TEST_F(EmbedderTest, CanNotifyDartDeferredLibraryLoadError) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(
+                engine.get(), 42, "Failed to load component", true),
+            kSuccess);
+
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(
+                engine.get(), 43, "Permanent load failure", false),
+            kSuccess);
+
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibraryFailure(
+                engine.get(), 44, "Failed via alias", true),
+            kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that dart_deferred_library_loading_unit_callback is invoked on the
+/// platform thread when a loading unit is requested.
+///
+TEST_F(EmbedderTest, DartDeferredLibraryLoadingUnitCallbackInvoked) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  static fml::AutoResetWaitableEvent callback_latch;
+  static int64_t requested_loading_unit_id = -1;
+  static size_t received_struct_size = 0;
+  static void* received_user_data = nullptr;
+
+  builder.GetProjectArgs().dart_deferred_library_loading_unit_callback =
+      [](const FlutterDartDeferredLibraryLoadingUnit* unit, void* user_data) {
+        received_user_data = user_data;
+        if (unit != nullptr) {
+          received_struct_size = unit->struct_size;
+          requested_loading_unit_id = unit->loading_unit_id;
+        }
+        callback_latch.Signal();
+      };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  auto platform_view = reinterpret_cast<EmbedderEngine*>(engine.get())
+                           ->GetShell()
+                           .GetPlatformView();
+  ASSERT_TRUE(platform_view);
+  platform_view->RequestDartDeferredLibrary(123);
+  callback_latch.Wait();
+
+  EXPECT_EQ(received_user_data, &context);
+  EXPECT_EQ(received_struct_size,
+            sizeof(FlutterDartDeferredLibraryLoadingUnit));
+  EXPECT_EQ(requested_loading_unit_id, 123);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineScreenshot and FlutterEngineFreeScreenshot reject
+/// invalid arguments.
+///
+TEST_F(EmbedderTest, ScreenshotInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  FlutterEngineScreenshotInfo screenshot = {};
+  screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+
+  // Null engine.
+  EXPECT_EQ(FlutterEngineScreenshot(nullptr, &screenshot), kInvalidArguments);
+
+  // Null screenshot_out.
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), nullptr), kInvalidArguments);
+
+  // Struct size mismatch on screenshot.
+  FlutterEngineScreenshotInfo bad_screenshot = {};
+  bad_screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo) - 1;
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), &bad_screenshot),
+            kInvalidArguments);
+
+  // Free with null screenshot.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(nullptr), kInvalidArguments);
+
+  // Free with struct size mismatch.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&bad_screenshot), kInvalidArguments);
+
+  // Free with valid struct_size and null pixels should succeed.
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineGetCallbackInformation retrieves callback
+/// representations from DartCallbackCache and validates arguments.
+///
+TEST_F(EmbedderTest, CallbackInformationLookup) {
+  FlutterCallbackInformation info = {};
+  info.struct_size = sizeof(FlutterCallbackInformation);
+
+  // Null output struct pointer.
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(0, nullptr), kInvalidArguments);
+
+  // Struct size mismatch.
+  FlutterCallbackInformation bad_info = {};
+  bad_info.struct_size = sizeof(FlutterCallbackInformation) - 1;
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(0, &bad_info),
+            kInvalidArguments);
+
+  // Non-existent callback handle returns kInternalInconsistency.
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(99999999, &info),
+            kInternalInconsistency);
+
+  // Register a top-level callback into DartCallbackCache.
+  int64_t top_level_handle = DartCallbackCache::GetCallbackHandle(
+      "topLevelMethod", "", "package:test_app/main.dart");
+  EXPECT_NE(top_level_handle, 0);
+
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(top_level_handle, &info),
+            kSuccess);
+  EXPECT_STREQ(info.name, "topLevelMethod");
+  EXPECT_EQ(info.class_name, nullptr);
+  EXPECT_STREQ(info.library_path, "package:test_app/main.dart");
+
+  // Register a class-scoped callback into DartCallbackCache.
+  int64_t class_method_handle = DartCallbackCache::GetCallbackHandle(
+      "classMethod", "TargetClass", "package:test_app/service.dart");
+  EXPECT_NE(class_method_handle, 0);
+
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(class_method_handle, &info),
+            kSuccess);
+  EXPECT_STREQ(info.name, "classMethod");
+  EXPECT_STREQ(info.class_name, "TargetClass");
+  EXPECT_STREQ(info.library_path, "package:test_app/service.dart");
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineRegisterImageDecoder validates its arguments and
+/// registers custom decoder callbacks on a running engine.
+///
+TEST_F(EmbedderTest, RegisterImageDecoderValidation) {
+  // Null engine handle.
+  EXPECT_EQ(FlutterEngineRegisterImageDecoder(
+                nullptr,
+                [](const uint8_t* data, size_t size, void* user_data) {
+                  return true;
+                },
+                nullptr, 0),
+            kInvalidArguments);
+
+  // Null callback pointer.
+  EXPECT_EQ(FlutterEngineRegisterImageDecoder(
+                reinterpret_cast<FlutterEngine>(0x1234), nullptr, nullptr, 0),
+            kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  bool callback_called = false;
+  auto decoder_cb = [](const uint8_t* data, size_t size,
+                       void* user_data) -> bool {
+    auto* called_ptr = reinterpret_cast<bool*>(user_data);
+    if (called_ptr) {
+      *called_ptr = true;
+    }
+    return false;
+  };
+
+  EXPECT_EQ(FlutterEngineRegisterImageDecoder(
+                reinterpret_cast<FlutterEngine>(engine.get()), decoder_cb,
+                &callback_called, 1),
+            kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineScreenshot returns kInternalInconsistency when no
+/// frame has been rasterized yet.
+///
+TEST_F(EmbedderTest, ScreenshotWithoutFrameReturnsInternalInconsistency) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  FlutterEngineScreenshotInfo screenshot = {};
+  screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), &screenshot),
+            kInternalInconsistency);
+}
+
+//------------------------------------------------------------------------------
+/// Test that FlutterEngineScreenshot successfully captures a raster screenshot
+/// and FlutterEngineFreeScreenshot frees the buffer.
+///
+TEST_F(EmbedderTest, CanCaptureScreenshot) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetDartEntrypoint("draw_solid_red");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  fml::AutoResetWaitableEvent frame_latch;
+  VoidCallback frame_callback = [](void* user_data) {
+    auto* latch = static_cast<fml::AutoResetWaitableEvent*>(user_data);
+    latch->Signal();
+  };
+
+  ASSERT_EQ(FlutterEngineSetNextFrameCallback(engine.get(), frame_callback,
+                                              &frame_latch),
+            kSuccess);
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  frame_latch.Wait();
+
+  FlutterEngineScreenshotInfo screenshot = {};
+  screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+
+  ASSERT_EQ(FlutterEngineScreenshot(engine.get(), &screenshot), kSuccess);
+  EXPECT_EQ(screenshot.struct_size, sizeof(FlutterEngineScreenshotInfo));
+  EXPECT_EQ(screenshot.width, 800u);
+  EXPECT_EQ(screenshot.height, 600u);
+  EXPECT_GE(screenshot.row_bytes, 800u * 4);
+  EXPECT_NE(screenshot.pixels, nullptr);
+  EXPECT_GE(screenshot.pixels_size, 800u * 600u * 4);
+
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
 }
 
 //------------------------------------------------------------------------------
@@ -3123,6 +3958,75 @@ TEST_F(EmbedderTest, InvalidFlutterWindowMetricsEvent) {
   // Left/right insets cannot be greater than width.
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kInvalidArguments);
+
+  event.physical_view_inset_top = 0.0;
+  event.physical_view_inset_right = 0.0;
+  event.physical_view_inset_bottom = 0.0;
+  event.physical_view_inset_left = 0.0;
+
+  // Physical padding must be non-negative.
+  event.physical_padding_top = -1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
+  event.physical_padding_top = 0.0;
+
+  // Physical system gesture insets must be non-negative.
+  event.physical_system_gesture_inset_top = -1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
+  event.physical_system_gesture_inset_top = 0.0;
+
+  // Display features count > 0 with null arrays must fail.
+  event.display_features_count = 1;
+  event.display_features_bounds = nullptr;
+  event.display_features_type = nullptr;
+  event.display_features_state = nullptr;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
+
+  // Unreasonably large display features count must fail.
+  event.display_features_count = 1001;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, WindowMetricsEventWithPaddingAndDisplayFeatures) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+
+  double bounds[] = {0.0, 100.0, 800.0, 150.0};
+  int32_t types[] = {1};
+  int32_t states[] = {2};
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  event.physical_padding_top = 24.0;
+  event.physical_padding_bottom = 48.0;
+  event.physical_padding_left = 12.0;
+  event.physical_padding_right = 12.0;
+  event.physical_system_gesture_inset_top = 10.0;
+  event.physical_system_gesture_inset_bottom = 20.0;
+  event.physical_system_gesture_inset_left = 30.0;
+  event.physical_system_gesture_inset_right = 40.0;
+  event.physical_touch_slop = 8.0;
+  event.physical_display_corner_radius_top_left = 16.0;
+  event.physical_display_corner_radius_top_right = 16.0;
+  event.physical_display_corner_radius_bottom_right = 16.0;
+  event.physical_display_corner_radius_bottom_left = 16.0;
+  event.display_features_count = 1;
+  event.display_features_bounds = bounds;
+  event.display_features_type = types;
+  event.display_features_state = states;
+
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
 }
 
 TEST_F(EmbedderTest, WindowMetricsEventWithConstraints) {
@@ -4315,6 +5219,920 @@ TEST_F(EmbedderTest, PlatformThreadIsolatesWithCustomPlatformTaskRunner) {
   // Check that the FFI call was executed on the platform thread.
   ASSERT_EQ(platform_thread_id, ffi_call_thread_id);
 }
+
+//------------------------------------------------------------------------------
+/// Vulkan External Texture unit tests validating struct sizes, ABI
+/// compatibility, YCbCr conversion parameters, lifecycle registration, and
+/// destruction callbacks.
+
+TEST_F(EmbedderTest, VulkanExternalTextureStructSizesAndABI) {
+  FlutterVulkanComponentMapping mapping = {};
+  mapping.struct_size = sizeof(FlutterVulkanComponentMapping);
+  mapping.r = kFlutterVulkanComponentSwizzleIdentity;
+  mapping.g = kFlutterVulkanComponentSwizzleZero;
+  mapping.b = kFlutterVulkanComponentSwizzleOne;
+  mapping.a = kFlutterVulkanComponentSwizzleR;
+  EXPECT_EQ(mapping.struct_size, sizeof(FlutterVulkanComponentMapping));
+  EXPECT_EQ(mapping.r, kFlutterVulkanComponentSwizzleIdentity);
+  EXPECT_EQ(mapping.g, kFlutterVulkanComponentSwizzleZero);
+  EXPECT_EQ(mapping.b, kFlutterVulkanComponentSwizzleOne);
+  EXPECT_EQ(mapping.a, kFlutterVulkanComponentSwizzleR);
+
+  FlutterVulkanYcbcrConversionInfo ycbcr = {};
+  ycbcr.struct_size = sizeof(FlutterVulkanYcbcrConversionInfo);
+  ycbcr.format = 0;
+  ycbcr.ycbcr_model = 1;
+  ycbcr.ycbcr_range = 0;
+  ycbcr.components = mapping;
+  ycbcr.x_chroma_offset = 0;
+  ycbcr.y_chroma_offset = 0;
+  ycbcr.chroma_filter = 1;
+  ycbcr.force_explicit_reconstruction = 0;
+  ycbcr.external_format = 0x12345678ULL;
+  EXPECT_EQ(ycbcr.struct_size, sizeof(FlutterVulkanYcbcrConversionInfo));
+  EXPECT_EQ(ycbcr.external_format, 0x12345678ULL);
+  EXPECT_EQ(ycbcr.components.struct_size,
+            sizeof(FlutterVulkanComponentMapping));
+
+  FlutterVulkanExternalTexture texture = {};
+  texture.struct_size = sizeof(FlutterVulkanExternalTexture);
+  texture.width = 1920;
+  texture.height = 1080;
+  texture.image = 0xDEADBEEF;
+  texture.format = 44;       // VK_FORMAT_R8G8B8A8_UNORM
+  texture.image_layout = 5;  // VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+  texture.ycbcr_conversion_info = &ycbcr;
+  texture.user_data = reinterpret_cast<void*>(0xBAADF00D);
+  texture.destruction_callback = [](void* user_data) {
+    EXPECT_EQ(user_data, reinterpret_cast<void*>(0xBAADF00D));
+  };
+  EXPECT_EQ(texture.struct_size, sizeof(FlutterVulkanExternalTexture));
+  EXPECT_EQ(texture.width, 1920u);
+  EXPECT_EQ(texture.height, 1080u);
+  EXPECT_EQ(texture.image, 0xDEADBEEFULL);
+  EXPECT_EQ(texture.format, 44u);
+  EXPECT_EQ(texture.image_layout, 5u);
+  EXPECT_EQ(texture.ycbcr_conversion_info, &ycbcr);
+  EXPECT_EQ(texture.user_data, reinterpret_cast<void*>(0xBAADF00D));
+  EXPECT_NE(texture.destruction_callback, nullptr);
+  texture.destruction_callback(texture.user_data);
+
+  FlutterVulkanRendererConfig config = {};
+  config.struct_size = sizeof(FlutterVulkanRendererConfig);
+  config.external_texture_frame_callback =
+      [](void* user_data, int64_t id, size_t width, size_t height,
+         FlutterVulkanExternalTexture* out) -> bool {
+    out->struct_size = sizeof(FlutterVulkanExternalTexture);
+    return true;
+  };
+  EXPECT_EQ(config.struct_size, sizeof(FlutterVulkanRendererConfig));
+  EXPECT_NE(config.external_texture_frame_callback, nullptr);
+}
+
+TEST_F(EmbedderTest, VulkanExternalTextureYCbCrSamplerDescriptor) {
+  FlutterVulkanComponentMapping components = {
+      .struct_size = sizeof(FlutterVulkanComponentMapping),
+      .r = kFlutterVulkanComponentSwizzleR,
+      .g = kFlutterVulkanComponentSwizzleG,
+      .b = kFlutterVulkanComponentSwizzleB,
+      .a = kFlutterVulkanComponentSwizzleA,
+  };
+
+  FlutterVulkanYcbcrConversionInfo ycbcr_info = {
+      .struct_size = sizeof(FlutterVulkanYcbcrConversionInfo),
+      .format = 0,       // VK_FORMAT_UNDEFINED
+      .ycbcr_model = 1,  // VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_601
+      .ycbcr_range = 0,  // VK_SAMPLER_YCBCR_RANGE_ITU_FULL
+      .components = components,
+      .x_chroma_offset = 0,  // VK_CHROMA_LOCATION_COSITED_EVEN
+      .y_chroma_offset = 0,  // VK_CHROMA_LOCATION_COSITED_EVEN
+      .chroma_filter = 1,    // VK_FILTER_LINEAR
+      .force_explicit_reconstruction = 0,
+      .external_format = 0xFEEDBEEFULL,
+  };
+
+  EXPECT_EQ(ycbcr_info.struct_size, sizeof(FlutterVulkanYcbcrConversionInfo));
+  EXPECT_EQ(ycbcr_info.format, 0u);
+  EXPECT_EQ(ycbcr_info.ycbcr_model, 1u);
+  EXPECT_EQ(ycbcr_info.ycbcr_range, 0u);
+  EXPECT_EQ(ycbcr_info.components.r, kFlutterVulkanComponentSwizzleR);
+  EXPECT_EQ(ycbcr_info.components.g, kFlutterVulkanComponentSwizzleG);
+  EXPECT_EQ(ycbcr_info.components.b, kFlutterVulkanComponentSwizzleB);
+  EXPECT_EQ(ycbcr_info.components.a, kFlutterVulkanComponentSwizzleA);
+  EXPECT_EQ(ycbcr_info.x_chroma_offset, 0u);
+  EXPECT_EQ(ycbcr_info.y_chroma_offset, 0u);
+  EXPECT_EQ(ycbcr_info.chroma_filter, 1u);
+  EXPECT_EQ(ycbcr_info.force_explicit_reconstruction, 0u);
+  EXPECT_EQ(ycbcr_info.external_format, 0xFEEDBEEFULL);
+}
+
+TEST_F(EmbedderTest, VulkanExternalTextureDestructionCallbackInvocation) {
+  bool destruction_called = false;
+
+  auto destruction_callback = [](void* user_data) {
+    *static_cast<bool*>(user_data) = true;
+  };
+
+  FlutterVulkanExternalTexture texture = {};
+  texture.struct_size = sizeof(FlutterVulkanExternalTexture);
+  texture.width = 100;
+  texture.height = 100;
+  texture.image = 1;
+  texture.user_data = &destruction_called;
+  texture.destruction_callback = destruction_callback;
+
+  ASSERT_FALSE(destruction_called);
+  texture.destruction_callback(texture.user_data);
+  ASSERT_TRUE(destruction_called);
+}
+
+//------------------------------------------------------------------------------
+/// HardwareBuffer External Texture unit tests validating struct sizes, ABI
+/// compatibility, opaque buffer handover, lifecycle registration, and
+/// destruction callbacks.
+
+TEST_F(EmbedderTest, HardwareBufferExternalTextureStructSizesAndABI) {
+  FlutterHardwareBufferExternalTexture texture = {};
+  texture.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+  texture.width = 1920;
+  texture.height = 1080;
+  texture.format = 1;  // AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM
+  texture.buffer = reinterpret_cast<FlutterHardwareBufferHandle>(0xDEADBEEF);
+  texture.user_data = reinterpret_cast<void*>(0xBAADF00D);
+  texture.destruction_callback = [](void* user_data) {
+    EXPECT_EQ(user_data, reinterpret_cast<void*>(0xBAADF00D));
+  };
+
+  EXPECT_EQ(texture.struct_size, sizeof(FlutterHardwareBufferExternalTexture));
+  EXPECT_EQ(texture.width, 1920u);
+  EXPECT_EQ(texture.height, 1080u);
+  EXPECT_EQ(texture.format, 1u);
+  EXPECT_EQ(texture.buffer,
+            reinterpret_cast<FlutterHardwareBufferHandle>(0xDEADBEEF));
+  EXPECT_EQ(texture.user_data, reinterpret_cast<void*>(0xBAADF00D));
+  EXPECT_NE(texture.destruction_callback, nullptr);
+  texture.destruction_callback(texture.user_data);
+
+  // Validate FlutterHardwareBufferTexture alias equivalence.
+  FlutterHardwareBufferTexture texture_alias = {};
+  texture_alias.struct_size = sizeof(FlutterHardwareBufferTexture);
+  EXPECT_EQ(texture_alias.struct_size,
+            sizeof(FlutterHardwareBufferExternalTexture));
+
+  // Validate FlutterOpenGLRendererConfig hardware buffer callback field.
+  FlutterOpenGLRendererConfig gl_config = {};
+  gl_config.struct_size = sizeof(FlutterOpenGLRendererConfig);
+  gl_config.hardware_buffer_external_texture_frame_callback =
+      [](void* user_data, int64_t id, size_t width, size_t height,
+         FlutterHardwareBufferExternalTexture* out) -> bool {
+    out->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    return true;
+  };
+  EXPECT_EQ(gl_config.struct_size, sizeof(FlutterOpenGLRendererConfig));
+  EXPECT_NE(gl_config.hardware_buffer_external_texture_frame_callback, nullptr);
+
+  // Validate FlutterVulkanRendererConfig hardware buffer callback field.
+  FlutterVulkanRendererConfig vk_config = {};
+  vk_config.struct_size = sizeof(FlutterVulkanRendererConfig);
+  vk_config.hardware_buffer_external_texture_frame_callback =
+      [](void* user_data, int64_t id, size_t width, size_t height,
+         FlutterHardwareBufferExternalTexture* out) -> bool {
+    out->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    return true;
+  };
+  EXPECT_EQ(vk_config.struct_size, sizeof(FlutterVulkanRendererConfig));
+  EXPECT_NE(vk_config.hardware_buffer_external_texture_frame_callback, nullptr);
+
+  // Validate FlutterHardwareBufferTextureFrameCallback typedef.
+  FlutterHardwareBufferTextureFrameCallback alias_callback =
+      [](void* user_data, int64_t id, size_t width, size_t height,
+         FlutterHardwareBufferTexture* out) -> bool {
+    out->struct_size = sizeof(FlutterHardwareBufferTexture);
+    return true;
+  };
+  EXPECT_NE(alias_callback, nullptr);
+}
+
+TEST_F(EmbedderTest,
+       HardwareBufferExternalTextureDestructionCallbackInvocation) {
+  bool destruction_called = false;
+
+  auto destruction_callback = [](void* user_data) {
+    *static_cast<bool*>(user_data) = true;
+  };
+
+  FlutterHardwareBufferExternalTexture texture = {};
+  texture.struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+  texture.width = 100;
+  texture.height = 100;
+  texture.format = 1;
+  texture.buffer = reinterpret_cast<FlutterHardwareBufferHandle>(0x1234);
+  texture.user_data = &destruction_called;
+  texture.destruction_callback = destruction_callback;
+
+  ASSERT_FALSE(destruction_called);
+  texture.destruction_callback(texture.user_data);
+  ASSERT_TRUE(destruction_called);
+}
+
+TEST_F(EmbedderTest, HardwareBufferExternalTextureLifecycleAndFrameRelease) {
+  int destruction_call_count = 0;
+
+  auto destruction_callback = [](void* user_data) {
+    auto* counter = static_cast<int*>(user_data);
+    (*counter)++;
+  };
+
+  int callback_invocation_count = 0;
+  auto frame_callback = [&](int64_t texture_id, size_t width, size_t height)
+      -> std::unique_ptr<FlutterHardwareBufferExternalTexture> {
+    callback_invocation_count++;
+    auto texture = std::make_unique<FlutterHardwareBufferExternalTexture>();
+    texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    texture->width = width != 0 ? width : 100;
+    texture->height = height != 0 ? height : 100;
+    texture->format = 1;
+    texture->buffer = reinterpret_cast<FlutterHardwareBufferHandle>(
+        static_cast<uintptr_t>(0xABC + callback_invocation_count));
+    texture->user_data = &destruction_call_count;
+    texture->destruction_callback = destruction_callback;
+    return texture;
+  };
+
+  {
+    auto hb_texture =
+        std::make_unique<EmbedderExternalTextureHB>(42, frame_callback);
+    ASSERT_EQ(hb_texture->Id(), 42);
+
+    // Initial state: no frame cached
+    EXPECT_EQ(hb_texture->GetCurrentFrame(), nullptr);
+    EXPECT_EQ(destruction_call_count, 0);
+    EXPECT_EQ(callback_invocation_count, 0);
+
+    // Paint to resolve frame 1
+    Texture::PaintContext ctx{};
+    hb_texture->Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false,
+                      DlImageSampling::kLinear);
+
+    EXPECT_EQ(callback_invocation_count, 1);
+    EXPECT_NE(hb_texture->GetCurrentFrame(), nullptr);
+    EXPECT_EQ(destruction_call_count, 0);
+
+    // Repaint without new frame available should NOT call frame_callback again
+    hb_texture->Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false,
+                      DlImageSampling::kLinear);
+    EXPECT_EQ(callback_invocation_count, 1);
+    EXPECT_EQ(destruction_call_count, 0);
+
+    // Signal new frame available
+    hb_texture->MarkNewFrameAvailable();
+    // Old buffer is not destroyed yet until new frame is resolved or
+    // unregistered
+    EXPECT_EQ(destruction_call_count, 0);
+
+    // Paint to resolve frame 2; this should destroy frame 1
+    hb_texture->Paint(ctx, DlRect::MakeXYWH(0, 0, 100, 100), false,
+                      DlImageSampling::kLinear);
+    EXPECT_EQ(callback_invocation_count, 2);
+    EXPECT_EQ(destruction_call_count, 1);
+
+    // Unregister texture should release frame 2
+    hb_texture->OnTextureUnregistered();
+    EXPECT_EQ(destruction_call_count, 2);
+    EXPECT_EQ(hb_texture->GetCurrentFrame(), nullptr);
+  }
+
+  // Final count remains 2 (all frames released)
+  EXPECT_EQ(destruction_call_count, 2);
+}
+
+TEST_F(EmbedderTest, HardwareBufferExternalTextureResolverIntegration) {
+  bool resolver_callback_called = false;
+  auto frame_callback = [&](int64_t texture_id, size_t width, size_t height)
+      -> std::unique_ptr<FlutterHardwareBufferExternalTexture> {
+    resolver_callback_called = true;
+    auto texture = std::make_unique<FlutterHardwareBufferExternalTexture>();
+    texture->struct_size = sizeof(FlutterHardwareBufferExternalTexture);
+    texture->width = width;
+    texture->height = height;
+    texture->format = 1;
+    texture->buffer = reinterpret_cast<FlutterHardwareBufferHandle>(0x5678);
+    texture->user_data = nullptr;
+    texture->destruction_callback = nullptr;
+    return texture;
+  };
+
+  EmbedderExternalTextureResolver resolver(frame_callback);
+  EXPECT_TRUE(resolver.SupportsExternalTextures());
+
+  auto texture = resolver.ResolveExternalTexture(100);
+  ASSERT_NE(texture, nullptr);
+  EXPECT_EQ(texture->Id(), 100);
+}
+
+TEST_F(EmbedderTest, RasterThreadContextStructABI) {
+  FlutterProjectArgs args = {};
+  args.struct_size = sizeof(FlutterProjectArgs);
+  EXPECT_EQ(args.struct_size, sizeof(FlutterProjectArgs));
+  EXPECT_GE(args.struct_size,
+            offsetof(FlutterProjectArgs, raster_thread_context_clear_current) +
+                sizeof(args.raster_thread_context_clear_current));
+}
+
+TEST_F(EmbedderTest, RasterThreadContextHooksInvoked) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  struct HookData {
+    std::atomic<int> make_current_count{0};
+    std::atomic<int> clear_current_count{0};
+    std::thread::id make_current_thread_id;
+    std::thread::id clear_current_thread_id;
+    void* make_current_user_data = nullptr;
+    void* clear_current_user_data = nullptr;
+
+    void Reset() {
+      make_current_count = 0;
+      clear_current_count = 0;
+      make_current_thread_id = std::thread::id();
+      clear_current_thread_id = std::thread::id();
+      make_current_user_data = nullptr;
+      clear_current_user_data = nullptr;
+    }
+  };
+
+  static HookData s_hook_data;
+  s_hook_data.Reset();
+
+  builder.GetProjectArgs().raster_thread_context_make_current =
+      [](void* user_data) -> bool {
+    s_hook_data.make_current_count++;
+    s_hook_data.make_current_thread_id = std::this_thread::get_id();
+    s_hook_data.make_current_user_data = user_data;
+    return true;
+  };
+
+  builder.GetProjectArgs().raster_thread_context_clear_current =
+      [](void* user_data) -> bool {
+    s_hook_data.clear_current_count++;
+    s_hook_data.clear_current_thread_id = std::this_thread::get_id();
+    s_hook_data.clear_current_user_data = user_data;
+    return true;
+  };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  EXPECT_EQ(s_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_hook_data.clear_current_count.load(), 0);
+  EXPECT_NE(s_hook_data.make_current_thread_id, std::this_thread::get_id());
+  EXPECT_EQ(s_hook_data.make_current_user_data, &context);
+
+  engine.reset();
+
+  EXPECT_EQ(s_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_hook_data.clear_current_count.load(), 1);
+  EXPECT_EQ(s_hook_data.clear_current_thread_id,
+            s_hook_data.make_current_thread_id);
+  EXPECT_EQ(s_hook_data.clear_current_user_data, &context);
+}
+
+TEST_F(EmbedderTest, RasterThreadContextMakeCurrentFailure) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  builder.GetProjectArgs().raster_thread_context_make_current =
+      [](void* user_data) -> bool { return false; };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_FALSE(engine.is_valid());
+}
+
+TEST_F(EmbedderTest, RasterThreadContextHooksCustomTaskRunners) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  UniqueEngine engine;
+  auto render_thread = CreateNewThread("custom_render_thread");
+  EmbedderTestTaskRunner render_task_runner(
+      render_thread, [&](FlutterTask task) {
+        if (engine.is_valid()) {
+          FlutterEngineRunTask(engine.get(), &task);
+        }
+      });
+
+  struct HookData {
+    std::atomic<int> make_current_count{0};
+    std::atomic<int> clear_current_count{0};
+    bool make_current_on_runner = false;
+    bool clear_current_on_runner = false;
+
+    void Reset() {
+      make_current_count = 0;
+      clear_current_count = 0;
+      make_current_on_runner = false;
+      clear_current_on_runner = false;
+    }
+  };
+
+  static HookData s_hook_data;
+  s_hook_data.Reset();
+  static fml::RefPtr<fml::TaskRunner> s_render_runner;
+  s_render_runner = render_thread;
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  const auto task_runner_description =
+      render_task_runner.GetFlutterTaskRunnerDescription();
+  builder.SetRenderTaskRunner(&task_runner_description);
+
+  builder.GetProjectArgs().raster_thread_context_make_current =
+      [](void* user_data) -> bool {
+    s_hook_data.make_current_count++;
+    s_hook_data.make_current_on_runner =
+        s_render_runner->RunsTasksOnCurrentThread();
+    return true;
+  };
+
+  builder.GetProjectArgs().raster_thread_context_clear_current =
+      [](void* user_data) -> bool {
+    s_hook_data.clear_current_count++;
+    s_hook_data.clear_current_on_runner =
+        s_render_runner->RunsTasksOnCurrentThread();
+    return true;
+  };
+
+  engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+  ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+  latch.Wait();
+
+  EXPECT_EQ(s_hook_data.make_current_count.load(), 1);
+  EXPECT_TRUE(s_hook_data.make_current_on_runner);
+  EXPECT_EQ(s_hook_data.clear_current_count.load(), 0);
+
+  engine.reset();
+
+  EXPECT_EQ(s_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_hook_data.clear_current_count.load(), 1);
+  EXPECT_TRUE(s_hook_data.clear_current_on_runner);
+}
+
+TEST_F(EmbedderTest, RasterThreadContextHooksSpawnEngine) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+  latch.Wait();
+
+  struct SpawnHookData {
+    std::atomic<int> make_current_count{0};
+    std::atomic<int> clear_current_count{0};
+    void* make_current_user_data = nullptr;
+    void* clear_current_user_data = nullptr;
+
+    void Reset() {
+      make_current_count = 0;
+      clear_current_count = 0;
+      make_current_user_data = nullptr;
+      clear_current_user_data = nullptr;
+    }
+  };
+  static SpawnHookData s_spawn_hook_data;
+  s_spawn_hook_data.Reset();
+
+  FlutterProjectArgs custom_args = {};
+  custom_args.struct_size = sizeof(FlutterProjectArgs);
+  custom_args.raster_thread_context_make_current = [](void* user_data) -> bool {
+    s_spawn_hook_data.make_current_count++;
+    s_spawn_hook_data.make_current_user_data = user_data;
+    return true;
+  };
+  custom_args.raster_thread_context_clear_current =
+      [](void* user_data) -> bool {
+    s_spawn_hook_data.clear_current_count++;
+    s_spawn_hook_data.clear_current_user_data = user_data;
+    return true;
+  };
+
+  FlutterEngine spawned_engine = nullptr;
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.custom_args = &custom_args;
+  void* const kSpawnUserData = reinterpret_cast<void*>(0x12345678);
+  spawn_config.user_data = kSpawnUserData;
+
+  ASSERT_EQ(
+      FlutterEngineSpawn(parent_engine.get(), &spawn_config, &spawned_engine),
+      kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+  EXPECT_EQ(s_spawn_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_spawn_hook_data.clear_current_count.load(), 0);
+  EXPECT_EQ(s_spawn_hook_data.make_current_user_data, kSpawnUserData);
+
+  ASSERT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+  EXPECT_EQ(s_spawn_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_spawn_hook_data.clear_current_count.load(), 1);
+  EXPECT_EQ(s_spawn_hook_data.clear_current_user_data, kSpawnUserData);
+}
+
+//------------------------------------------------------------------------------
+/// Multi-backend matrix initialization tests verifying consistent behavior
+/// across all available rendering backends and engine configurations.
+
+TEST_P(EmbedderAllBackendsTest, CanLaunchAndShutdown) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+  engine.reset();
+}
+
+TEST_P(EmbedderAllBackendsTest, CanInvokeCustomEntrypoint) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  auto entrypoint = [&latch]() { latch.Signal(); };
+  context.AddFfiNativeCallback("SayHiFromCustomEntrypoint",
+                               CREATE_FFI_LAMBDA(entrypoint));
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("customEntrypoint");
+  auto engine = builder.LaunchEngine();
+  latch.Wait();
+  ASSERT_TRUE(engine.is_valid());
+}
+
+TEST_P(EmbedderAllBackendsTest, CanSendPointerAndWindowMetrics) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(800, 600));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  FlutterPointerEvent pointer_event = {};
+  pointer_event.struct_size = sizeof(pointer_event);
+  pointer_event.phase = FlutterPointerPhase::kDown;
+  pointer_event.timestamp = 0;
+  pointer_event.x = 50.0;
+  pointer_event.y = 50.0;
+  ASSERT_EQ(FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1),
+            kSuccess);
+
+  FlutterWindowMetricsEvent metrics_event = {};
+  metrics_event.struct_size = sizeof(metrics_event);
+  metrics_event.width = 800;
+  metrics_event.height = 600;
+  metrics_event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &metrics_event),
+            kSuccess);
+}
+
+TEST_P(EmbedderAllBackendsTest, CanRegisterAndUnregisterExternalTexture) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(800, 600));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  constexpr int64_t texture_id = 42;
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+  ASSERT_TRUE(embedder_engine->MarkTextureFrameAvailable(texture_id));
+  ASSERT_TRUE(embedder_engine->UnregisterTexture(texture_id));
+
+  engine.reset();
+}
+
+TEST_P(EmbedderAllBackendsTest, CanSpawnEngine) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+  latch.Wait();
+
+  FlutterEngine spawned_engine = nullptr;
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.user_data = &context;
+
+  ASSERT_EQ(
+      FlutterEngineSpawn(parent_engine.get(), &spawn_config, &spawned_engine),
+      kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+
+  ASSERT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+}
+
+TEST_P(EmbedderTestMatrix, CanLaunchAndExecuteMatrix) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  ConfigureBuilder(builder);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+  engine.reset();
+}
+
+TEST_P(EmbedderTestMatrix, CanInvokeCustomEntrypointInMatrix) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  auto entrypoint = [&latch]() { latch.Signal(); };
+  context.AddFfiNativeCallback("SayHiFromCustomEntrypoint",
+                               CREATE_FFI_LAMBDA(entrypoint));
+  EmbedderConfigBuilder builder(context);
+  ConfigureBuilder(builder);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("customEntrypoint");
+  auto engine = builder.LaunchEngine();
+  latch.Wait();
+  ASSERT_TRUE(engine.is_valid());
+}
+
+TEST_P(EmbedderTestMatrix, CanSpawnEngineInMatrix) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  ConfigureBuilder(builder);
+  builder.SetSurface(DlISize(1, 1));
+  auto parent_engine = builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+  latch.Wait();
+
+  FlutterEngine spawned_engine = nullptr;
+  FlutterEngineSpawnConfig spawn_config = {};
+  spawn_config.struct_size = sizeof(FlutterEngineSpawnConfig);
+  spawn_config.user_data = &context;
+
+  ASSERT_EQ(
+      FlutterEngineSpawn(parent_engine.get(), &spawn_config, &spawned_engine),
+      kSuccess);
+  ASSERT_NE(spawned_engine, nullptr);
+
+  ASSERT_EQ(FlutterEngineShutdown(spawned_engine), kSuccess);
+}
+
+TEST_P(EmbedderTestMatrix, CanLoadDartDeferredLibraryInMatrix) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  ConfigureBuilder(builder);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  const uint8_t dummy_data[] = {0x00};
+  const uint8_t dummy_instructions[] = {0x00};
+
+  EXPECT_EQ(FlutterEngineLoadDartDeferredLibrary(
+                engine.get(), 10, dummy_data, sizeof(dummy_data),
+                dummy_instructions, sizeof(dummy_instructions)),
+            kSuccess);
+
+  EXPECT_EQ(FlutterEngineNotifyDartDeferredLibraryLoadError(
+                engine.get(), 10, "Test error in matrix", true),
+            kSuccess);
+}
+
+TEST_P(EmbedderTestMatrix, CanCaptureScreenshotInMatrix) {
+  auto& context = GetEmbedderContext();
+  EmbedderConfigBuilder builder(context);
+  ConfigureBuilder(builder);
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetDartEntrypoint("draw_solid_red");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  fml::AutoResetWaitableEvent frame_latch;
+  VoidCallback frame_callback = [](void* user_data) {
+    auto* latch = static_cast<fml::AutoResetWaitableEvent*>(user_data);
+    latch->Signal();
+  };
+
+  ASSERT_EQ(FlutterEngineSetNextFrameCallback(engine.get(), frame_callback,
+                                              &frame_latch),
+            kSuccess);
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  frame_latch.Wait();
+
+  FlutterEngineScreenshotInfo screenshot = {};
+  screenshot.struct_size = sizeof(FlutterEngineScreenshotInfo);
+
+  ASSERT_EQ(FlutterEngineScreenshot(engine.get(), &screenshot), kSuccess);
+  EXPECT_EQ(screenshot.struct_size, sizeof(FlutterEngineScreenshotInfo));
+  EXPECT_EQ(screenshot.width, 800u);
+  EXPECT_EQ(screenshot.height, 600u);
+  EXPECT_GE(screenshot.row_bytes, 800u * 4);
+  EXPECT_NE(screenshot.pixels, nullptr);
+  EXPECT_GE(screenshot.pixels_size, 800u * 600u * 4);
+
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+}
+
+TEST_P(EmbedderTestMatrix, CanInvokeRasterThreadContextHooksInMatrix) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+  context.AddIsolateCreateCallback([&latch]() { latch.Signal(); });
+  EmbedderConfigBuilder builder(context);
+  ConfigureBuilder(builder);
+  builder.SetSurface(DlISize(1, 1));
+
+  struct MatrixHookData {
+    std::atomic<int> make_current_count{0};
+    std::atomic<int> clear_current_count{0};
+    std::thread::id make_current_thread_id;
+    std::thread::id clear_current_thread_id;
+
+    void Reset() {
+      make_current_count = 0;
+      clear_current_count = 0;
+      make_current_thread_id = std::thread::id();
+      clear_current_thread_id = std::thread::id();
+    }
+  };
+  static MatrixHookData s_matrix_hook_data;
+  s_matrix_hook_data.Reset();
+
+  builder.GetProjectArgs().raster_thread_context_make_current =
+      [](void* user_data) -> bool {
+    s_matrix_hook_data.make_current_count++;
+    s_matrix_hook_data.make_current_thread_id = std::this_thread::get_id();
+    return true;
+  };
+
+  builder.GetProjectArgs().raster_thread_context_clear_current =
+      [](void* user_data) -> bool {
+    s_matrix_hook_data.clear_current_count++;
+    s_matrix_hook_data.clear_current_thread_id = std::this_thread::get_id();
+    return true;
+  };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  latch.Wait();
+
+  EXPECT_EQ(s_matrix_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_matrix_hook_data.clear_current_count.load(), 0);
+
+  engine.reset();
+
+  EXPECT_EQ(s_matrix_hook_data.make_current_count.load(), 1);
+  EXPECT_EQ(s_matrix_hook_data.clear_current_count.load(), 1);
+  EXPECT_EQ(s_matrix_hook_data.clear_current_thread_id,
+            s_matrix_hook_data.make_current_thread_id);
+}
+
+TEST_P(EmbedderTestMatrix,
+       CanConfigureCustomTaskRunnersAndThreadPrioritiesInMatrix) {
+  auto& context = GetEmbedderContext();
+  std::mutex ui_task_runner_mutex;
+  bool ui_task_runner_destroyed = false;
+  auto ui_thread = std::make_unique<fml::Thread>("matrix_ui_thread");
+  auto ui_task_runner = ui_thread->GetTaskRunner();
+  auto platform_thread =
+      std::make_unique<fml::Thread>("matrix_platform_thread");
+  auto platform_task_runner = platform_thread->GetTaskRunner();
+  UniqueEngine engine;
+
+  static std::atomic<FlutterThreadPriority> s_matrix_ui_priority_applied;
+  static std::atomic<FlutterThreadPriority> s_matrix_platform_priority_applied;
+  s_matrix_ui_priority_applied.store(FlutterThreadPriority::kNormal);
+  s_matrix_platform_priority_applied.store(FlutterThreadPriority::kBackground);
+
+  EmbedderTestTaskRunner test_ui_task_runner =
+      EmbedderTestTaskRunnerBuilder()
+          .SetRealTaskRunner(ui_task_runner)
+          .SetPriority(FlutterThreadPriority::kDisplay)
+          .SetThreadPrioritySetter([](FlutterThreadPriority priority) {
+            s_matrix_ui_priority_applied.store(priority);
+          })
+          .SetTaskExpiryCallback([&](FlutterTask task) {
+            std::scoped_lock lock(ui_task_runner_mutex);
+            if (ui_task_runner_destroyed) {
+              return;
+            }
+            FlutterEngineRunTask(engine.get(), &task);
+          })
+          .SetDestructionCallback([&]() {
+            std::scoped_lock lock(ui_task_runner_mutex);
+            ui_task_runner_destroyed = true;
+          })
+          .Build();
+
+  EmbedderTestTaskRunner test_platform_task_runner =
+      EmbedderTestTaskRunnerBuilder()
+          .SetRealTaskRunner(platform_task_runner)
+          .SetPriority(FlutterThreadPriority::kNormal)
+          .SetThreadPrioritySetter([](FlutterThreadPriority priority) {
+            s_matrix_platform_priority_applied.store(priority);
+          })
+          .SetTaskExpiryCallback([&](FlutterTask task) {
+            if (!engine.is_valid()) {
+              return;
+            }
+            FlutterEngineRunTask(engine.get(), &task);
+          })
+          .Build();
+
+  fml::AutoResetWaitableEvent signal_latch_ui;
+  fml::AutoResetWaitableEvent signal_latch_platform;
+
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+        ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
+        signal_latch_ui.Signal();
+      }));
+
+  platform_task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    ConfigureBuilder(builder);
+    const auto ui_task_runner_description =
+        test_ui_task_runner.GetFlutterTaskRunnerDescription();
+    const auto platform_task_runner_description =
+        test_platform_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetSurface(DlISize(1, 1));
+    builder.SetUITaskRunner(&ui_task_runner_description);
+    builder.SetPlatformTaskRunner(&platform_task_runner_description);
+    builder.SetDartEntrypoint("canSpecifyCustomUITaskRunner");
+    builder.SetPlatformMessageCallback(
+        [&](const FlutterPlatformMessage* message) {
+          ASSERT_TRUE(platform_task_runner->RunsTasksOnCurrentThread());
+          signal_latch_platform.Signal();
+        });
+    engine = builder.InitializeEngine();
+    ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+    ASSERT_TRUE(engine.is_valid());
+  });
+  signal_latch_ui.Wait();
+  signal_latch_platform.Wait();
+
+  EXPECT_EQ(s_matrix_ui_priority_applied.load(),
+            FlutterThreadPriority::kDisplay);
+  EXPECT_EQ(s_matrix_platform_priority_applied.load(),
+            FlutterThreadPriority::kNormal);
+
+  fml::AutoResetWaitableEvent kill_latch;
+  platform_task_runner->PostTask([&] {
+    engine.reset();
+    platform_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  });
+  kill_latch.Wait();
+
+  // Shut down the threads before exiting the test.  There may still be
+  // pending tasks queued to the task runners, and they must not run
+  // after the engine goes out of scope.
+  ui_thread.reset();
+  platform_thread.reset();
+}
+
+INSTANTIATE_TEST_SUITE_P(AllBackends,
+                         EmbedderAllBackendsTest,
+                         ::testing::ValuesIn(GetSupportedBackends()),
+                         EmbedderTestParamName());
+
+INSTANTIATE_TEST_SUITE_P(Matrix,
+                         EmbedderTestMatrix,
+                         ::testing::ValuesIn(GetSupportedMatrixConfigs()),
+                         EmbedderTestParamName());
 
 }  // namespace testing
 }  // namespace flutter

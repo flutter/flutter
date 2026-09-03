@@ -9,8 +9,8 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
-#include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
+#include "flutter/shell/platform/android/android_vm_init.h"
 
 namespace flutter {
 
@@ -29,13 +29,8 @@ class FlutterMain {
       const flutter::Settings& settings,
       int api_level);
 
- private:
-  const flutter::Settings settings_;
-  const flutter::AndroidRenderingAPI android_rendering_api_;
-  DartServiceIsolate::CallbackHandle vm_service_uri_callback_ = 0;
-
-  explicit FlutterMain(const flutter::Settings& settings,
-                       flutter::AndroidRenderingAPI android_rendering_api);
+  static bool IsInitialized();
+  const flutter::android::AndroidVMArgs& GetVMArgs() const;
 
   static void Init(JNIEnv* env,
                    jclass clazz,
@@ -46,6 +41,17 @@ class FlutterMain {
                    jstring engineCachesPath,
                    jlong initTimeMillis,
                    jint api_level);
+
+  static void ResetForTesting();
+
+ private:
+  const flutter::Settings settings_;
+  const flutter::AndroidRenderingAPI android_rendering_api_;
+  const flutter::android::AndroidVMArgs vm_args_;
+
+  explicit FlutterMain(const flutter::Settings& settings,
+                       flutter::AndroidRenderingAPI android_rendering_api,
+                       const flutter::android::AndroidVMArgs& vm_args);
 
   void SetupDartVMServiceUriCallback(JNIEnv* env);
 

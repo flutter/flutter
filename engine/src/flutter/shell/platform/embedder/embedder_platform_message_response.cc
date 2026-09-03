@@ -27,13 +27,19 @@ void EmbedderPlatformMessageResponse::Complete(
       // The static leak checker gets confused by the use of fml::MakeCopyable.
       // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
       fml::MakeCopyable([data = std::move(data), callback = callback_]() {
-        callback(data->GetMapping(), data->GetSize());
+        static const uint8_t dummy = 0;
+        const uint8_t* mapping = data->GetMapping();
+        if (mapping == nullptr && data->GetSize() == 0) {
+          mapping = &dummy;
+        }
+        callback(mapping, data->GetSize());
       }));
 }
 
 // |PlatformMessageResponse|
 void EmbedderPlatformMessageResponse::CompleteEmpty() {
-  Complete(std::make_unique<fml::NonOwnedMapping>(nullptr, 0u));
+  runner_->PostTask(
+      fml::MakeCopyable([callback = callback_]() { callback(nullptr, 0); }));
 }
 
 }  // namespace flutter

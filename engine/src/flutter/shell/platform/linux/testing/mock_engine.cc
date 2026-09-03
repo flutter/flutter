@@ -194,6 +194,50 @@ FlutterEngineResult FlutterEngineRemoveView(FLUTTER_API_SYMBOL(FlutterEngine)
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                       const FlutterEngineSpawnConfig* config,
+                                       FLUTTER_API_SYMBOL(FlutterEngine) *
+                                           engine_out) {
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineLoadDartDeferredLibrary(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t loading_unit_id,
+    const uint8_t* snapshot_data,
+    size_t snapshot_data_size,
+    const uint8_t* snapshot_instructions,
+    size_t snapshot_instructions_size) {
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineNotifyDartDeferredLibraryLoadError(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t loading_unit_id,
+    const char* error_message,
+    bool transient) {
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineLoadDartDeferredLibraryFailure(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    int64_t loading_unit_id,
+    const char* error_message,
+    bool transient) {
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineScreenshot(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineScreenshotInfo* screenshot_out) {
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineFreeScreenshot(
+    const FlutterEngineScreenshotInfo* screenshot) {
+  return kSuccess;
+}
+
 }  // namespace
 
 FlutterEngineResult FlutterEngineGetProcAddresses(
@@ -236,5 +280,13 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   table->NotifyDisplayUpdate = &FlutterEngineNotifyDisplayUpdate;
   table->AddView = &FlutterEngineAddView;
   table->RemoveView = &FlutterEngineRemoveView;
+  table->Spawn = &FlutterEngineSpawn;
+  table->LoadDartDeferredLibrary = &FlutterEngineLoadDartDeferredLibrary;
+  table->NotifyDartDeferredLibraryLoadError =
+      &FlutterEngineNotifyDartDeferredLibraryLoadError;
+  table->LoadDartDeferredLibraryFailure =
+      &FlutterEngineLoadDartDeferredLibraryFailure;
+  table->Screenshot = &FlutterEngineScreenshot;
+  table->FreeScreenshot = &FlutterEngineFreeScreenshot;
   return kSuccess;
 }

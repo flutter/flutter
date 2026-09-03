@@ -6,18 +6,22 @@
 
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/message_loop_task_queues.h"
+#include "flutter/fml/trace_event.h"
 
 namespace flutter {
 
 std::atomic_intptr_t EmbedderTaskRunner::next_unique_id_ = 0;
 
 EmbedderTaskRunner::EmbedderTaskRunner(DispatchTable table,
-                                       size_t embedder_identifier)
+                                       size_t embedder_identifier,
+                                       FlutterThreadPriority priority)
     : TaskRunner(nullptr /* loop implemenation*/),
       embedder_identifier_(embedder_identifier),
       dispatch_table_(std::move(table)),
       placeholder_id_(fml::TaskQueueId(fml::TaskQueueId::kInvalid)),
-      unique_id_(next_unique_id_++) {
+      unique_id_(next_unique_id_++),
+      priority_(priority) {
+  TRACE_EVENT0("flutter", "EmbedderTaskRunner::EmbedderTaskRunner");
   FML_DCHECK(dispatch_table_.post_task_callback);
   FML_DCHECK(dispatch_table_.runs_task_on_current_thread_callback);
   FML_DCHECK(dispatch_table_.destruction_callback);
@@ -31,12 +35,21 @@ size_t EmbedderTaskRunner::GetEmbedderIdentifier() const {
   return embedder_identifier_;
 }
 
+void EmbedderTaskRunner::SetThreadPriority(FlutterThreadPriority priority) {
+  TRACE_EVENT0("flutter", "EmbedderTaskRunner::SetThreadPriority");
+  priority_ = priority;
+  if (dispatch_table_.thread_priority_setter) {
+    dispatch_table_.thread_priority_setter(priority);
+  }
+}
+
 void EmbedderTaskRunner::PostTask(const fml::closure& task) {
   PostTaskForTime(task, fml::TimePoint::Now());
 }
 
 void EmbedderTaskRunner::PostTaskForTime(const fml::closure& task,
                                          fml::TimePoint target_time) {
+  TRACE_EVENT0("flutter", "EmbedderTaskRunner::PostTaskForTime");
   if (!task) {
     return;
   }
@@ -59,10 +72,12 @@ void EmbedderTaskRunner::PostDelayedTask(const fml::closure& task,
 }
 
 bool EmbedderTaskRunner::RunsTasksOnCurrentThread() {
+  TRACE_EVENT0("flutter", "EmbedderTaskRunner::RunsTasksOnCurrentThread");
   return dispatch_table_.runs_task_on_current_thread_callback();
 }
 
 bool EmbedderTaskRunner::PostTask(uint64_t baton) {
+  TRACE_EVENT0("flutter", "EmbedderTaskRunner::PostTask");
   fml::closure task;
 
   {
@@ -75,7 +90,7 @@ bool EmbedderTaskRunner::PostTask(uint64_t baton) {
     task = found->second;
     pending_tasks_.erase(found);
 
-    // Let go of the tasks mutex befor executing the task.
+    // Let go of the tasks mutex before executing the task.
   }
 
   FML_DCHECK(task);
