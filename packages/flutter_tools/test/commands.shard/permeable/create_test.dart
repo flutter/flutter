@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/android/gradle_utils.dart'
         templateDefaultGradleVersion;
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -28,6 +29,8 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/create_base.dart';
+import 'package:flutter_tools/src/context/android_context.dart';
+import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/experimental/templates.dart';
@@ -5187,12 +5190,19 @@ bool _getBooleanValueFromPlist({required File plistFile, String? key}) {
 }
 
 CreateCommand createCreateCommand({
-  ToolContext? toolContext,
-  TemplateRenderer? templateRenderer,
+  AndroidContext? androidContext,
+  AppleContext? appleContext,
   ExtensionTemplateManager? extensionTemplateManager,
+  Net? net,
+  Pub? pub,
+  TemplateRenderer? templateRenderer,
+  ToolContext? toolContext,
   bool verboseHelp = false,
 }) {
   return CreateCommand(
+    androidContext: androidContext ?? FakeAndroidContext(javaBuilder: () => globals.java),
+    appleContext: appleContext ?? FakeAppleContext(),
+    templateRenderer: templateRenderer ?? const MustacheTemplateRenderer(),
     toolContext:
         toolContext ??
         FakeToolContext(
@@ -5201,13 +5211,18 @@ CreateCommand createCreateCommand({
           platform: globals.platform,
           processManager: globals.processManager,
           cache: globals.cache,
-          flutterVersion: FakeFlutterVersion(),
+          flutterVersion: globals.flutterVersion,
           projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
         ),
-    androidContext: FakeAndroidContext(),
-    appleContext: FakeAppleContext(),
     extensionTemplateManager: extensionTemplateManager,
-    templateRenderer: templateRenderer ?? const MustacheTemplateRenderer(),
+    net:
+        net ??
+        Net(
+          httpClientFactory: context.get<HttpClientFactory>(),
+          logger: globals.logger,
+          platform: globals.platform,
+        ),
+    pub: pub,
     verboseHelp: verboseHelp,
   );
 }

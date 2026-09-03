@@ -11,7 +11,6 @@ import 'package:yaml/yaml.dart';
 
 import '../android/gradle_utils.dart' as gradle;
 import '../android/java.dart';
-import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
@@ -36,8 +35,6 @@ import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
 import '../ios/code_signing.dart';
-import '../ios/plist_parser.dart';
-import '../isolated/mustache_template.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -53,21 +50,27 @@ const kPlatformHelp =
 
 class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMixin {
   CreateCommand({
-    required ToolContext toolContext,
     required this.androidContext,
     required this.appleContext,
-    ExtensionTemplateManager? extensionTemplateManager,
     required TemplateRenderer templateRenderer,
+    required ToolContext toolContext,
+    ExtensionTemplateManager? extensionTemplateManager,
+    Net? net,
+    Pub? pub,
     bool verboseHelp = false,
   }) : _extensionTemplateManager = extensionTemplateManager,
+       _net = net,
+       _pub = pub,
        _templateRenderer = templateRenderer,
        _verboseHelp = verboseHelp,
        super(toolContext: toolContext);
 
   final AndroidContext androidContext;
   final AppleContext appleContext;
-  final bool _verboseHelp;
   final ExtensionTemplateManager? _extensionTemplateManager;
+  final Net? _net;
+  final Pub? _pub;
+  final bool _verboseHelp;
 
   @override
   ArgParser createBaseArgParser() {
@@ -298,9 +301,19 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost =>
       toolContext.flutterVersion.channel == 'stable' ? 'api.flutter.dev' : 'main-api.flutter.dev';
+  Net get _netInstance => _net ?? Net(logger: toolContext.logger, platform: toolContext.platform);
+  Pub get _pubInstance =>
+      _pub ??
+      Pub(
+        fileSystem: toolContext.fs,
+        logger: toolContext.logger,
+        processManager: toolContext.processManager,
+        platform: toolContext.platform,
+        botDetector: toolContext.botDetector,
+      );
 
+  /// Fetches the code for a sample from the Flutter docs website.
   Future<String?> _fetchSampleFromServer(String sampleId) async {
-    // Sanity check the sampleId
     if (sampleId.contains(RegExp(r'[^-\w\.]'))) {
       throwToolExit(
         'Sample ID "$sampleId" contains invalid characters. Check the ID in the '
@@ -308,11 +321,8 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       );
     }
 
-    final ToolContext(:Logger logger, :Platform platform) = toolContext;
-    final net = Net(logger: logger, platform: platform);
-
     final snippetsUri = Uri.https(_snippetsHost, 'snippets/$sampleId.dart');
-    final data = await net.fetchUrl(snippetsUri);
+    final List<int>? data = await _netInstance.fetchUrl(snippetsUri);
     if (data == null || data.isEmpty) {
       return null;
     }
@@ -321,11 +331,8 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
 
   /// Fetches the samples index file from the Flutter docs website.
   Future<String?> _fetchSamplesIndexFromServer() async {
-    final ToolContext(:Logger logger, :Platform platform) = toolContext;
-    final net = Net(logger: logger, platform: platform);
-
     final snippetsUri = Uri.https(_snippetsHost, 'snippets/index.json');
-    final data = await net.fetchUrl(snippetsUri, maxAttempts: 2);
+    final List<int>? data = await _netInstance.fetchUrl(snippetsUri, maxAttempts: 2);
     if (data == null || data.isEmpty) {
       return null;
     }
@@ -792,22 +799,9 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     _generatePubspecLock(relativeDir);
 
     if (shouldCallPubGet) {
+      projectFactory.invalidate(relativeDir);
       final FlutterProject project = projectFactory.fromDirectory(relativeDir);
-      final ToolContext(
-        :FileSystem fs,
-        :Logger logger,
-        :ProcessManager processManager,
-        :Platform platform,
-        :BotDetector botDetector,
-      ) = toolContext;
-      final pub = Pub(
-        fileSystem: fs,
-        logger: logger,
-        processManager: processManager,
-        platform: platform,
-        botDetector: botDetector,
-      );
-      await pub.get(
+      await _pubInstance.get(
         context: pubContext,
         project: project,
         offline: offline,

@@ -53,10 +53,10 @@ Future<String> createProject(
   arguments ??= <String>['--no-pub'];
   final String projectPath = temp.fileSystem.path.join(temp.path, name);
   final command = CreateCommand(
-    toolContext: FakeToolContext(fs: temp.fileSystem),
     androidContext: FakeAndroidContext(),
     appleContext: FakeAppleContext(),
     templateRenderer: const MustacheTemplateRenderer(),
+    toolContext: FakeToolContext(fs: temp.fileSystem),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...arguments, projectPath]);

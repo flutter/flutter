@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import '../commands.shard/permeable/utils/project_testing_utils.dart';
@@ -276,6 +277,9 @@ void main() {
 Future<void> _createProject(Directory dir, List<String> createArgs) async {
   Cache.flutterRoot = '../..';
   final command = CreateCommand(
+    androidContext: FakeAndroidContext(),
+    appleContext: FakeAppleContext(),
+    templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       fs: globals.fs,
       logger: globals.logger,

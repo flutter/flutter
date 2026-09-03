@@ -65,9 +65,23 @@ class FlutterProjectFactory {
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
+    final File pubspec = directory.childFile(bundle.defaultManifestPath);
+    if (!pubspec.existsSync()) {
+      final FlutterManifest manifest = FlutterProject._readManifest(
+        pubspec.path,
+        logger: _logger,
+        fileSystem: _fileSystem,
+      );
+      final FlutterManifest exampleManifest = FlutterProject._readManifest(
+        FlutterProject._exampleDirectory(directory).childFile(bundle.defaultManifestPath).path,
+        logger: _logger,
+        fileSystem: _fileSystem,
+      );
+      return FlutterProject(directory, manifest, exampleManifest);
+    }
     return projects.putIfAbsent(directory.path, () {
       final FlutterManifest manifest = FlutterProject._readManifest(
-        directory.childFile(bundle.defaultManifestPath).path,
+        pubspec.path,
         logger: _logger,
         fileSystem: _fileSystem,
       );
@@ -78,6 +92,11 @@ class FlutterProjectFactory {
       );
       return FlutterProject(directory, manifest, exampleManifest);
     });
+  }
+
+  /// Invalidate any cached [FlutterProject] for the given [directory].
+  void invalidate(Directory directory) {
+    projects.remove(directory.path);
   }
 }
 

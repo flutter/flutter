@@ -40,7 +40,10 @@ class FakePub extends Fake implements Pub {
     bool enforceLockfile = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
-    writePackageConfigFiles(directory: project.directory, mainLibName: 'my_app');
+    writePackageConfigFiles(
+      directory: project.directory,
+      mainLibName: project.manifest.appName.isNotEmpty ? project.manifest.appName : 'my_app',
+    );
     if (offline) {
       calledGetOffline += 1;
     } else {
@@ -211,8 +214,11 @@ void main() {
       );
     });
 
-    CreateCommand createCreateCommand() {
+    CreateCommand createCreateCommand({Pub? pub}) {
       return CreateCommand(
+        androidContext: FakeAndroidContext(),
+        appleContext: FakeAppleContext(),
+        templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: globals.fs,
           logger: globals.logger,
@@ -222,9 +228,7 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
         ),
-        androidContext: FakeAndroidContext(),
-        appleContext: FakeAppleContext(),
-        templateRenderer: const MustacheTemplateRenderer(),
+        pub: pub,
       );
     }
 
@@ -298,11 +302,9 @@ void main() {
     testUsingContext(
       'create --offline',
       () => testbed.run(() async {
-        final CreateCommand command = createCreateCommand();
+        final CreateCommand command = createCreateCommand(pub: fakePub);
         final CommandRunner<void> runner = createTestCommandRunner(command);
-        globals.fs.directory('testy/.dart_tool').childFile('package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+        writePackageConfigFiles(directory: globals.fs.directory('testy'), mainLibName: 'my_app');
         await runner.run(<String>['create', 'testy', '--offline']);
 
         expect(command.argParser.options.containsKey('offline'), true);

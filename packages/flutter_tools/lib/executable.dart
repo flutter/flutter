@@ -302,10 +302,10 @@ List<FlutterCommand> generateCommands({
   ),
   CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
   CreateCommand(
-    toolContext: toolDependencies.toolContext,
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
     templateRenderer: const MustacheTemplateRenderer(),
+    toolContext: toolDependencies.toolContext,
     extensionTemplateManager: extensionTemplateManager,
     verboseHelp: verboseHelp,
   ),
