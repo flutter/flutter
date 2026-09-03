@@ -168,7 +168,7 @@ class AndroidView extends StatefulWidget {
   /// recognizer that immediately claims the gesture after a pointer down event.
   ///
   /// The [gestureRecognizers] property must not contain more than one factory
-  /// with the same [Factory.type].
+  /// with the same `Factory type`.
   ///
   /// Changing [gestureRecognizers] results in rejection of any active gesture
   /// arenas (if the platform view is actively participating in an arena).
