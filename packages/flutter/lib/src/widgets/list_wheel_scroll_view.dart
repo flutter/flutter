@@ -513,16 +513,23 @@ class FixedExtentScrollPhysics extends ScrollPhysics {
     // If it was going to end up past the scroll extent, defer back to the
     // parent physics' ballistics again which should put us on the scrollable's
     // boundary.
-    if (testFrictionSimulation != null &&
-        (testFrictionSimulation.x(double.infinity) == metrics.minScrollExtent ||
-            testFrictionSimulation.x(double.infinity) == metrics.maxScrollExtent)) {
+    //
+    // A non-finite natural end position means the parent simulation springs
+    // back to one of the boundaries but never mathematically settles on it (for
+    // instance a critically damped or an underdamped spring), so it belongs to
+    // this scenario as well.
+    final double? naturalEndPosition = testFrictionSimulation?.x(double.infinity);
+    if (naturalEndPosition != null &&
+        (!naturalEndPosition.isFinite ||
+            naturalEndPosition == metrics.minScrollExtent ||
+            naturalEndPosition == metrics.maxScrollExtent)) {
       return super.createBallisticSimulation(metrics, velocity);
     }
 
     // From the natural final position, find the nearest item it should have
     // settled to.
     final int settlingItemIndex = _getItemFromOffset(
-      offset: testFrictionSimulation?.x(double.infinity) ?? metrics.pixels,
+      offset: naturalEndPosition ?? metrics.pixels,
       itemExtent: metrics.itemExtent,
       minScrollExtent: metrics.minScrollExtent,
       maxScrollExtent: metrics.maxScrollExtent,

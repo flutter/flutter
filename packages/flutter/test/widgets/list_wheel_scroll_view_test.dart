@@ -1639,6 +1639,40 @@ void main() {
       expect(scrolledPositions.last, moreOrLessEquals(40 * 1000.0, epsilon: 0.2));
     });
 
+    testWidgets('does not throw when the parent physics uses a critically damped spring', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/149657.
+      final controller = FixedExtentScrollController(initialItem: 95);
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListWheelScrollView(
+            controller: controller,
+            physics: const FixedExtentScrollPhysics(
+              parent: _CriticallyDampedBouncingScrollPhysics(),
+            ),
+            itemExtent: 100.0,
+            children: List<Widget>.generate(100, (int index) {
+              return const Placeholder();
+            }),
+          ),
+        ),
+      );
+
+      // Fling hard enough towards the end of the list that the parent
+      // ballistic simulation overshoots maxScrollExtent and has to spring
+      // back to it.
+      await tester.fling(find.byType(ListWheelScrollView), const Offset(0.0, -300.0), 5000.0);
+      expect(tester.takeException(), isNull);
+
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(controller.selectedItem, 99);
+    });
+
     testWidgets(
       'high fling velocities lands exactly on items',
       (WidgetTester tester) async {
@@ -2061,4 +2095,20 @@ void main() {
       expect(tester.getSize(find.byType(ListWheelViewport)), Size.zero);
     },
   );
+}
+
+/// A [BouncingScrollPhysics] whose spring is exactly critically damped, so that
+/// its [SpringSimulation] never mathematically settles in finite time.
+class _CriticallyDampedBouncingScrollPhysics extends BouncingScrollPhysics {
+  const _CriticallyDampedBouncingScrollPhysics({super.parent});
+
+  @override
+  _CriticallyDampedBouncingScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _CriticallyDampedBouncingScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  SpringDescription get spring =>
+      // `withDampingRatio` defaults to a ratio of 1.0, i.e. critical damping.
+      SpringDescription.withDampingRatio(mass: 0.4, stiffness: 75.0);
 }
