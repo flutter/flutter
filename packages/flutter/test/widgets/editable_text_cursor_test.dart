@@ -129,9 +129,6 @@ void main() {
       if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
       }
-      if (methodCall.method == 'Clipboard.hasStrings') {
-        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
-      }
       return null;
     });
 
@@ -187,9 +184,6 @@ void main() {
     ) async {
       if (methodCall.method == 'Clipboard.getData') {
         return const <String, dynamic>{'text': clipboardContent};
-      }
-      if (methodCall.method == 'Clipboard.hasStrings') {
-        return <String, dynamic>{'value': clipboardContent.isNotEmpty};
       }
       return null;
     });
@@ -1031,9 +1025,6 @@ void main() {
         if (methodCall.method == 'Clipboard.getData') {
           return const <String, dynamic>{'text': clipboardContent};
         }
-        if (methodCall.method == 'Clipboard.hasStrings') {
-          return <String, dynamic>{'value': clipboardContent.isNotEmpty};
-        }
         return null;
       });
 
@@ -1102,9 +1093,6 @@ void main() {
       ) async {
         if (methodCall.method == 'Clipboard.getData') {
           return const <String, dynamic>{'text': clipboardContent};
-        }
-        if (methodCall.method == 'Clipboard.hasStrings') {
-          return <String, dynamic>{'value': clipboardContent.isNotEmpty};
         }
         return null;
       });
