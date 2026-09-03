@@ -1182,7 +1182,7 @@ class FakeToolContext extends Fake implements ToolContext {
     Signals? signals,
     Stdio? stdio,
     SystemClock? systemClock,
-    AnsiTerminal? terminal,
+    Terminal? terminal,
     UserMessages? userMessages,
   }) : _artifacts = artifacts,
        _botDetector = botDetector,
@@ -1235,7 +1235,7 @@ class FakeToolContext extends Fake implements ToolContext {
   final Signals? _signals;
   final Stdio? _stdio;
   final SystemClock? _systemClock;
-  final AnsiTerminal? _terminal;
+  final Terminal? _terminal;
   final UserMessages? _userMessages;
 
   @override
@@ -1328,7 +1328,7 @@ class FakeToolContext extends Fake implements ToolContext {
   late final SystemClock systemClock = _systemClock ?? const SystemClock();
 
   @override
-  late final AnsiTerminal terminal = _terminal ?? AnsiTerminal(stdio: stdio, platform: platform);
+  late final Terminal terminal = _terminal ?? AnsiTerminal(stdio: stdio, platform: platform);
 
   @override
   late final UserMessages userMessages = _userMessages ?? UserMessages();
