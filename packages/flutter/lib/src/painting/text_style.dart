@@ -848,7 +848,10 @@ class TextStyle with Diagnosticable {
   /// How visual text overflow should be handled.
   final TextOverflow? overflow;
 
-  /// Whether to fake missing font styles.
+  /// Whether to fake missing font styles (such as synthetic bolding or
+  /// italicizing) when the font does not natively support them.
+  ///
+  /// Defaults to true.
   final bool? fakeMissingFontStyles;
 
   // Return the original value of fontFamily, without the additional
