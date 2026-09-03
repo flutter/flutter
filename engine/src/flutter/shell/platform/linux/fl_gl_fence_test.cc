@@ -41,20 +41,7 @@ TEST_F(FlGLFenceTest, NewFails) {
 
   EXPECT_CALL(epoxy, eglClientWaitSyncKHR).Times(0);
   EXPECT_CALL(epoxy, eglWaitSyncKHR).Times(0);
-  fl_gl_fence_client_wait(fence);
   fl_gl_fence_wait(fence);
-}
-
-// Waiting blocks the calling thread until the fence is reached.
-TEST_F(FlGLFenceTest, ClientWait) {
-  g_autoptr(FlGLFence) fence = fl_gl_fence_new(opengl_manager);
-  ASSERT_NE(fence, nullptr);
-
-  EXPECT_CALL(epoxy, eglClientWaitSyncKHR(::testing::_, ::testing::_,
-                                          ::testing::_, ::testing::_))
-      .WillOnce(::testing::Return(EGL_CONDITION_SATISFIED_KHR));
-
-  fl_gl_fence_client_wait(fence);
 }
 
 // OpenGL can do the waiting, which doesn't block the calling thread.

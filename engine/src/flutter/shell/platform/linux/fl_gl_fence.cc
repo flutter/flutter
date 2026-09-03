@@ -69,14 +69,8 @@ FlGLFence* fl_gl_fence_new(FlOpenGLManager* opengl_manager) {
   return self;
 }
 
-void fl_gl_fence_client_wait(FlGLFence* self) {
-  g_return_if_fail(FL_IS_GL_FENCE(self));
-
-  // Nothing to wait for if the fence couldn't be created.
-  if (self->sync == EGL_NO_SYNC_KHR) {
-    return;
-  }
-
+// Blocks the calling thread until the fence is reached.
+static void client_wait(FlGLFence* self) {
   // The commands were flushed when the fence was created, so they don't need to
   // be flushed again here. Flushing wouldn't work anyway, as that only applies
   // to a fence created in the context current on this thread.
@@ -96,7 +90,7 @@ void fl_gl_fence_wait(FlGLFence* self) {
   }
 
   if (!self->can_wait_sync) {
-    fl_gl_fence_client_wait(self);
+    client_wait(self);
     return;
   }
 

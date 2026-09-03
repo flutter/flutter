@@ -44,18 +44,6 @@ G_DECLARE_FINAL_TYPE(FlGLFence, fl_gl_fence, FL, GL_FENCE, GObject)
 FlGLFence* fl_gl_fence_new(FlOpenGLManager* opengl_manager);
 
 /**
- * fl_gl_fence_client_wait:
- * @fence: an #FlGLFence.
- *
- * Blocks the calling thread until @fence is reached.
- *
- * Use this when the context that is going to use the rendered texture isn't the
- * current one, e.g. when handing a frame to a toolkit that makes its own
- * context current before reading it.
- */
-void fl_gl_fence_client_wait(FlGLFence* fence);
-
-/**
  * fl_gl_fence_wait:
  * @fence: an #FlGLFence.
  *
@@ -64,7 +52,7 @@ void fl_gl_fence_client_wait(FlGLFence* fence);
  * use the rendered texture to be current.
  *
  * This doesn't block the calling thread, the waiting is done by OpenGL. Falls
- * back to fl_gl_fence_client_wait() if the driver can't wait this way.
+ * back to blocking the calling thread if the driver can't wait this way.
  */
 void fl_gl_fence_wait(FlGLFence* fence);
 
