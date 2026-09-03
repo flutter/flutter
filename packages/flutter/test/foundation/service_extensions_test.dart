@@ -1528,6 +1528,13 @@ void main() {
     );
     expect(extensionChangedEvents.length, 4);
 
+    // Changing the override replays the corresponding platform notifications.
+    // In particular, the accessibility-features change above schedules a frame.
+    // Consume it so that randomized tests do not inherit this test's work.
+    expect(binding.frameScheduled, isTrue);
+    await binding.doFrame();
+    expect(binding.frameScheduled, isFalse);
+
     testedExtensions.add(FoundationServiceExtensions.viewMetricsOverride.name);
   });
 
