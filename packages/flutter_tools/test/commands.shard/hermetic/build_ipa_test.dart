@@ -27,6 +27,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../general.shard/ios/xcresult_test_data.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
@@ -162,7 +163,7 @@ void main() {
         (context.get<XcodeProjectInterpreter>() ?? FakeXcodeProjectInterpreterWithBuildSettings());
     final PlistParser effectivePlistParser =
         plistParser ?? (context.get<PlistParser>() ?? plistUtils);
-    return BuildCommand(
+    return createFakeBuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: effectiveFileSystem,
