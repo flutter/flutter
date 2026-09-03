@@ -75,6 +75,7 @@ void main() {
     TextAlign textAlign = TextAlign.left,
     bool readOnly = false,
     bool obscured = false,
+    int? maxLines,
     TextStyle style = const TextStyle(fontSize: 10.0),
     bool enableInteractiveSelection = true,
   }) {
@@ -98,7 +99,7 @@ void main() {
             backgroundCursorColor: const Color(0xFF9E9E9E),
             selectionControls: emptyTextSelectionControls,
             keyboardType: TextInputType.text,
-            maxLines: obscured ? 1 : null,
+            maxLines: obscured ? 1 : maxLines,
             readOnly: readOnly,
             textAlign: textAlign,
             obscureText: obscured,
@@ -1433,6 +1434,40 @@ void main() {
               controller.selection,
               const TextSelection.collapsed(offset: 4, affinity: TextAffinity.upstream),
             );
+          }, variant: TargetPlatformVariant.all());
+
+          // Regression test for https://github.com/flutter/flutter/issues/139201.
+          // A single line field lays the text out with an unbounded width, so the
+          // paint offset of a paragraph that is not left aligned is not zero. That
+          // used to invalidate the vertical caret run as soon as it was created,
+          // which asserted in debug mode and left the caret in place otherwise.
+          testWidgets('run in a single line field that is not left aligned', (
+            WidgetTester tester,
+          ) async {
+            for (final textAlign in <TextAlign>[TextAlign.center, TextAlign.right, TextAlign.end]) {
+              controller.text = 'aaaa';
+              controller.selection = const TextSelection.collapsed(offset: 2);
+              await tester.pumpWidget(buildEditableText(textAlign: textAlign, maxLines: 1));
+              await tester.pump(); // Wait for autofocus to take effect.
+
+              // There is only one line, so moving down goes to the end of the
+              // text and moving back up goes to the beginning of the text.
+              await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowDown));
+              await tester.pump();
+              expect(
+                controller.selection,
+                const TextSelection.collapsed(offset: 4),
+                reason: '$textAlign',
+              );
+
+              await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.arrowUp));
+              await tester.pump();
+              expect(
+                controller.selection,
+                const TextSelection.collapsed(offset: 0),
+                reason: '$textAlign',
+              );
+            }
           }, variant: TargetPlatformVariant.all());
 
           testWidgets(
