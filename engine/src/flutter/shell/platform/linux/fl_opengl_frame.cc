@@ -113,6 +113,18 @@ void fl_opengl_frame_composite(FlOpenGLFrame* self,
                       fl_framebuffer_get_id(self->framebuffer));
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, self->pixels);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, saved_read_framebuffer_binding);
+  } else {
+    // This frame is drawn by GTK on the main thread using a different OpenGL
+    // context to the one it was rendered with. Sharing a texture between
+    // contexts requires the rendering to have completed before the other
+    // context uses it - glFlush() only guarantees the commands have been
+    // submitted, not that they have finished. Without this GTK can sample a
+    // partially rendered frame, and drivers can fail in ways that leave the
+    // context unusable.
+    //
+    // The frame is copied out of the GPU with glReadPixels() when it can't be
+    // shared, which already waits for the rendering to complete.
+    glFinish();
   }
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);

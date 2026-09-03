@@ -368,7 +368,9 @@ void main() {
   // Clamp alpha in case floating point precision errors cause it to be outside
   // [0.0, 1.0].
   alpha = clamp(alpha, 0.0, 1.0);
-  alpha = gammaCorrectedAlpha(alpha, color.rgb);
+  if (alpha < 1.0) {
+    alpha = gammaCorrectedAlpha(alpha, color.rgb);
+  }
 
   frag_color = vec4(color.rgb, color.a * alpha);
   frag_color = IPPremultiply(frag_color);
