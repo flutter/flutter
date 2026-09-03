@@ -187,11 +187,39 @@ public class PlatformViewWrapper extends FrameLayout {
     }
   }
 
+  private boolean flutterWonGesture = false;
+
+  /**
+   * Informs this view that Flutter has won the gesture arena for the active touch sequence.
+   *
+   * <p>Subsequent {@link MotionEvent#ACTION_MOVE} events will request unbuffered dispatch to
+   * minimize latency and prevent stutter for Flutter-driven gestures (e.g., scrolling).
+   */
+  public void onFlutterWonGesture() {
+    flutterWonGesture = true;
+  }
+
+  @VisibleForTesting
+  boolean getFlutterWonGesture() {
+    return flutterWonGesture;
+  }
+
   @Override
   @SuppressLint("ClickableViewAccessibility")
   public boolean onTouchEvent(@NonNull MotionEvent event) {
     if (touchProcessor == null) {
       return super.onTouchEvent(event);
+    }
+    if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+      flutterWonGesture = false;
+    }
+    if (flutterWonGesture && event.getActionMasked() == MotionEvent.ACTION_MOVE) {
+      requestUnbufferedDispatch(event);
+      flutterWonGesture = false;
+    }
+    if (event.getActionMasked() == MotionEvent.ACTION_UP
+        || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+      flutterWonGesture = false;
     }
     final Matrix screenMatrix = new Matrix();
     switch (event.getAction()) {

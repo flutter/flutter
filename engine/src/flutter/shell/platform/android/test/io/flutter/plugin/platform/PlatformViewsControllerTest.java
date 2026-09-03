@@ -1982,6 +1982,76 @@ public class PlatformViewsControllerTest {
     assertEquals(-1, flutterView.indexOfChild(overlayView));
   }
 
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onRejectGesture_informsMutatorViewFlutterWonGesture_forHybridComposition() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    final int platformViewId = 0;
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    createPlatformView(jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ true);
+    assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
+
+    final FlutterMutatorView parent = platformViewsController.getPlatformViewParent(platformViewId);
+    assertNotNull(parent);
+    assertFalse(parent.getFlutterWonGesture());
+
+    // Send rejectGesture via channel.
+    final Map<String, Object> args = new HashMap<>();
+    args.put("id", platformViewId);
+    final MethodCall rejectCall = new MethodCall("rejectGesture", args);
+    jni.handlePlatformMessage(
+        "flutter/platform_views", encodeMethodCall(rejectCall), /*replyId=*/ 0, /*messageData=*/ 0);
+
+    assertTrue(parent.getFlutterWonGesture());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onRejectGesture_informsViewWrapperFlutterWonGesture_forTextureLayer() {
+    final PlatformViewsController platformViewsController = new PlatformViewsController();
+    final int platformViewId = 0;
+
+    final PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    final PlatformView platformView = mock(PlatformView.class);
+    final View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    final FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    platformViewsController.setFlutterJNI(jni);
+    attach(jni, platformViewsController);
+
+    createPlatformView(
+        jni, platformViewsController, platformViewId, "testType", /* hybrid=*/ false);
+
+    final PlatformViewWrapper wrapper = platformViewsController.getViewWrapper(platformViewId);
+    assertNotNull(wrapper);
+    assertFalse(wrapper.getFlutterWonGesture());
+
+    // Send rejectGesture via channel.
+    final Map<String, Object> args = new HashMap<>();
+    args.put("id", platformViewId);
+    final MethodCall rejectCall = new MethodCall("rejectGesture", args);
+    jni.handlePlatformMessage(
+        "flutter/platform_views", encodeMethodCall(rejectCall), /*replyId=*/ 0, /*messageData=*/ 0);
+
+    assertTrue(wrapper.getFlutterWonGesture());
+  }
+
   private static ByteBuffer encodeMethodCall(MethodCall call) {
     final ByteBuffer buffer = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
     buffer.rewind();

@@ -1119,6 +1119,11 @@ class SurfaceAndroidViewController extends AndroidViewController {
   Future<void> setOffset(Offset off) {
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
+
+  @override
+  Future<void> rejectGesture() {
+    return _internals.rejectGesture(viewId: viewId);
+  }
 }
 
 /// Controls an Android view that is composed using the Android view hierarchy.
@@ -1173,6 +1178,11 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   @override
   Future<void> setOffset(Offset off) {
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
+  }
+
+  @override
+  Future<void> rejectGesture() {
+    return _internals.rejectGesture(viewId: viewId);
   }
 }
 
@@ -1388,7 +1398,11 @@ abstract class _AndroidViewControllerInternals {
 
   Future<void> sendDisposeMessage({required int viewId});
 
-  Future<void> rejectGesture({required int viewId}) => Future<void>.value();
+  Future<void> rejectGesture({required int viewId}) {
+    return SystemChannels.platform_views.invokeMethod<void>('rejectGesture', <String, dynamic>{
+      'id': viewId,
+    });
+  }
 }
 
 // An AndroidViewController implementation for views whose contents are

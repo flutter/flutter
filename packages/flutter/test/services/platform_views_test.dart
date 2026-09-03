@@ -682,4 +682,83 @@ void main() {
       expect(calls.first.arguments, <String, dynamic>{'id': 42});
     },
   );
+
+  test(
+    'ExpensiveAndroidViewController.rejectGesture invokes rejectGesture on platform_views',
+    () async {
+      final calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform_views,
+        (MethodCall call) async {
+          calls.add(call);
+          return null;
+        },
+      );
+
+      final ExpensiveAndroidViewController controller =
+          PlatformViewsService.initExpensiveAndroidView(
+            id: 43,
+            viewType: 'test_view',
+            layoutDirection: TextDirection.ltr,
+          );
+
+      await controller.rejectGesture();
+
+      expect(calls, hasLength(1));
+      expect(calls.first.method, 'rejectGesture');
+      expect(calls.first.arguments, <String, dynamic>{'id': 43});
+    },
+  );
+
+  test(
+    'TextureAndroidViewController.rejectGesture invokes rejectGesture on platform_views',
+    () async {
+      final calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform_views,
+        (MethodCall call) async {
+          calls.add(call);
+          return null;
+        },
+      );
+
+      final AndroidViewController controller = PlatformViewsService.initAndroidView(
+        id: 44,
+        viewType: 'test_view',
+        layoutDirection: TextDirection.ltr,
+      );
+
+      await controller.rejectGesture();
+
+      expect(calls, hasLength(1));
+      expect(calls.first.method, 'rejectGesture');
+      expect(calls.first.arguments, <String, dynamic>{'id': 44});
+    },
+  );
+
+  test(
+    'SurfaceAndroidViewController.rejectGesture invokes rejectGesture on platform_views',
+    () async {
+      final calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform_views,
+        (MethodCall call) async {
+          calls.add(call);
+          return null;
+        },
+      );
+
+      final SurfaceAndroidViewController controller = PlatformViewsService.initSurfaceAndroidView(
+        id: 45,
+        viewType: 'test_view',
+        layoutDirection: TextDirection.ltr,
+      );
+
+      await controller.rejectGesture();
+
+      expect(calls, hasLength(1));
+      expect(calls.first.method, 'rejectGesture');
+      expect(calls.first.arguments, <String, dynamic>{'id': 45});
+    },
+  );
 }

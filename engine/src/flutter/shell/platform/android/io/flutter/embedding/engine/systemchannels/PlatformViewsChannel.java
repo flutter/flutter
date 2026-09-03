@@ -75,6 +75,9 @@ public class PlatformViewsChannel {
             case "synchronizeToNativeViewHierarchy":
               synchronizeToNativeViewHierarchy(call, result);
               break;
+            case "rejectGesture":
+              rejectGesture(call, result);
+              break;
             default:
               result.notImplemented();
           }
@@ -258,6 +261,17 @@ public class PlatformViewsChannel {
             result.error("error", detailedExceptionString(exception), null);
           }
         }
+
+        private void rejectGesture(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+          final Map<String, Object> args = call.arguments();
+          final int viewId = (int) args.get("id");
+          try {
+            handler.onRejectGesture(viewId);
+            result.success(null);
+          } catch (IllegalStateException exception) {
+            result.error("error", detailedExceptionString(exception), null);
+          }
+        }
       };
 
   /**
@@ -370,6 +384,13 @@ public class PlatformViewsChannel {
      * to true.
      */
     void synchronizeToNativeViewHierarchy(boolean yes);
+
+    /**
+     * Flutter has won the gesture arena and rejected the platform view.
+     *
+     * @param viewId The ID of the platform view that lost the gesture.
+     */
+    void onRejectGesture(int viewId);
   }
 
   /** Request sent from Flutter to resize a platform view. */
