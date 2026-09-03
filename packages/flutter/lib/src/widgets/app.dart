@@ -452,7 +452,8 @@ class WidgetsApp extends StatefulWidget {
   ///    [PlatformRouteInformationProvider] is created, starting at
   ///    [dart:ui.PlatformDispatcher.defaultRouteName].
   ///  * Without a [backButtonDispatcher], a [RootBackButtonDispatcher] is
-  ///    created, so that the Android system back button pops the app's routes.
+  ///    created, so that platform back navigation (such as the Android system
+  ///    back button) pops the app's routes.
   ///
   /// Every other argument behaves as it does on the default constructor. The
   /// [Navigator] specific arguments ([navigatorKey], [home], [routes],
