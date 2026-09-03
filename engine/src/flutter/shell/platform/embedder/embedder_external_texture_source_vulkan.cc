@@ -156,8 +156,7 @@ bool EmbedderExternalTextureSourceVulkan::CreateTextureImageView(
   view_info.subresourceRange.levelCount = 1;
   view_info.subresourceRange.layerCount = 1;
 
-  if (RequiresYCBCRConversion(
-          static_cast<impeller::vk::Format>(embedder_desc->format))) {
+  if (yuv_conversion_wrapper) {
     view_chain.get<impeller::vk::SamplerYcbcrConversionInfo>().conversion =
         yuv_conversion_wrapper->GetConversion();
   } else {
