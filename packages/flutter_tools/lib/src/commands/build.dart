@@ -7,22 +7,17 @@ import 'package:process/process.dart';
 
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/template.dart';
-import '../base/terminal.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
-import '../ios/code_signing.dart';
-import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -48,27 +43,24 @@ class BuildCommand extends FlutterCommand {
     required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
     bool verboseHelp = false,
-  }) : _appleContext = appleContext,
-       _buildSystem = buildSystem,
-       _templateRenderer = templateRenderer,
-       _toolContext = toolContext,
-       super(toolContext: toolContext, verboseHelp: verboseHelp) {
+  }) : super(toolContext: toolContext, verboseHelp: verboseHelp) {
     final ToolContext(
       :Artifacts artifacts,
       :Cache cache,
-      :Config config,
-      :FileSystemUtils fileSystemUtils,
       :FlutterVersion flutterVersion,
       fs: FileSystem fileSystem,
       :Logger logger,
       os: OperatingSystemUtils osUtils,
       :Platform platform,
       :ProcessManager processManager,
-      :ProcessUtils processUtils,
-      :Terminal terminal,
     ) = toolContext;
-    final AppleContext(:PlistParser plistParser, :Xcode? xcode) = appleContext;
+    final AppleContext(:Xcode? xcode) = appleContext;
     final AndroidContext(:AndroidSdk? androidSdk) = androidContext;
+
+    final codesign = DarwinAddToAppCodesigning.fromContexts(
+      appleContext: appleContext,
+      toolContext: toolContext,
+    );
 
     _addSubcommand(
       BuildAarCommand(
@@ -80,106 +72,48 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(BuildApkCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(
-      BuildIOSCommand(
-        appleContext: _appleContext,
-        buildSystem: _buildSystem,
-        toolContext: _toolContext,
-        verboseHelp: verboseHelp,
-      ),
-    );
+    _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
       BuildIOSFrameworkCommand(
-        appleContext: _appleContext,
-        buildSystem: _buildSystem,
-        toolContext: _toolContext,
+        buildSystem: buildSystem,
+        codesign: codesign,
+        logger: logger,
         verboseHelp: verboseHelp,
-        codesign: DarwinAddToAppCodesigning(
-          logger: logger,
-          xcodeCodeSigningSettings: XcodeCodeSigningSettings(
-            config: config,
-            logger: logger,
-            platform: platform,
-            processUtils: processUtils,
-            fileSystem: fileSystem,
-            fileSystemUtils: fileSystemUtils,
-            terminal: terminal,
-            plistParser: plistParser,
-          ),
-        ),
       ),
     );
     _addSubcommand(
       BuildMacOSFrameworkCommand(
-        appleContext: _appleContext,
-        buildSystem: _buildSystem,
-        toolContext: _toolContext,
+        buildSystem: buildSystem,
+        codesign: codesign,
+        logger: logger,
         verboseHelp: verboseHelp,
-        codesign: DarwinAddToAppCodesigning(
-          logger: logger,
-          xcodeCodeSigningSettings: XcodeCodeSigningSettings(
-            config: config,
-            logger: logger,
-            platform: platform,
-            processUtils: processUtils,
-            fileSystem: fileSystem,
-            fileSystemUtils: fileSystemUtils,
-            terminal: terminal,
-            plistParser: plistParser,
-          ),
-        ),
       ),
     );
     _addSubcommand(
       BuildSwiftPackage(
-        logger: logger,
         analytics: analytics,
         artifacts: artifacts,
-        buildSystem: _buildSystem,
+        buildSystem: buildSystem,
         cache: cache,
+        codesign: codesign,
         featureFlags: featureFlags,
         fileSystem: fileSystem,
         flutterVersion: flutterVersion,
+        logger: logger,
         platform: platform,
         processManager: processManager,
-        templateRenderer: _templateRenderer,
-        xcode: xcode,
-        codesign: DarwinAddToAppCodesigning(
-          logger: logger,
-          xcodeCodeSigningSettings: XcodeCodeSigningSettings(
-            config: config,
-            logger: logger,
-            platform: platform,
-            processUtils: processUtils,
-            fileSystem: fileSystem,
-            fileSystemUtils: fileSystemUtils,
-            terminal: terminal,
-            plistParser: plistParser,
-          ),
-        ),
+        templateRenderer: templateRenderer,
         verboseHelp: verboseHelp,
+        xcode: xcode,
       ),
     );
 
-    _addSubcommand(
-      BuildIOSArchiveCommand(
-        appleContext: _appleContext,
-        buildSystem: _buildSystem,
-        toolContext: _toolContext,
-        verboseHelp: verboseHelp,
-      ),
-    );
+    _addSubcommand(BuildIOSArchiveCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
       BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
     );
-    _addSubcommand(
-      BuildMacosCommand(
-        buildSystem: _buildSystem,
-        toolContext: _toolContext,
-        verboseHelp: verboseHelp,
-      ),
-    );
+    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
       BuildLinuxCommand(logger: logger, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
     );
@@ -188,11 +122,6 @@ class BuildCommand extends FlutterCommand {
     );
   }
 
-  final AppleContext _appleContext;
-  final BuildSystem _buildSystem;
-  final TemplateRenderer _templateRenderer;
-  final ToolContext _toolContext;
-
   void _addSubcommand(BuildSubCommand command) {
     if (command.supported) {
       addSubcommand(command);
@@ -200,10 +129,10 @@ class BuildCommand extends FlutterCommand {
   }
 
   @override
-  final name = 'build';
+  final String name = 'build';
 
   @override
-  final description = 'Build an executable app or install bundle.';
+  final String description = 'Build an executable app or install bundle.';
 
   @override
   String get category => FlutterCommandCategory.project;
@@ -213,12 +142,7 @@ class BuildCommand extends FlutterCommand {
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand({
-    required this.logger,
-    required bool verboseHelp,
-    super.outputPreferences,
-    super.toolContext,
-  }) : super(verboseHelp: verboseHelp) {
+  BuildSubCommand({required this.logger, required super.verboseHelp}) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }

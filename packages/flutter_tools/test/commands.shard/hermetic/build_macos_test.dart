@@ -37,7 +37,7 @@ import '../../src/throwing_pub.dart';
 
 class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
   @override
-  Future<XcodeProjectInfo?> getInfo(
+  Future<XcodeProjectInfo> getInfo(
     XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
@@ -54,7 +54,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   final Map<String, String> overrides;
 
   @override
-  Future<XcodeProjectInfo?> getInfo(
+  Future<XcodeProjectInfo> getInfo(
     XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
@@ -67,7 +67,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   @override
   Future<Map<String, String>> getBuildSettings(
     XcodeBasedProject xcodeProject, {
-    required XcodeProjectBuildContext buildContext,
+    XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{...overrides, 'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
@@ -83,7 +83,7 @@ class FakeXcodeProjectInterpreterWithVersion extends FakeXcodeProjectInterpreter
   @override
   Future<Map<String, String>> getBuildSettings(
     XcodeBasedProject xcodeProject, {
-    required XcodeProjectBuildContext buildContext,
+    XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{'PRODUCT_BUNDLE_IDENTIFIER': 'com.example.test'};
@@ -227,7 +227,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -269,7 +269,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -309,7 +309,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -362,7 +362,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -446,7 +446,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -488,7 +488,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -541,11 +541,11 @@ STDERR STUFF
       final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fileSystem,
-        logger: logger,
+        fileSystem: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -586,7 +586,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -625,7 +625,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -650,7 +650,6 @@ STDERR STUFF
       ]),
       Platform: () => macosPlatform,
       Pub: ThrowingPub.new,
-      Logger: () => logger,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
@@ -666,7 +665,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -706,7 +705,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -745,7 +744,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -864,7 +863,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -904,7 +903,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -953,7 +952,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -968,8 +967,7 @@ STDERR STUFF
     );
 
     final bool supported = BuildMacosCommand(
-      buildSystem: FakeBuildSystem(),
-      toolContext: FakeToolContext(logger: BufferLogger.test(), platform: macosPlatform),
+      logger: BufferLogger.test(),
       verboseHelp: false,
     ).supported;
     expect(
@@ -981,14 +979,7 @@ STDERR STUFF
   testUsingContext(
     'hidden when not enabled on macOS host',
     () {
-      expect(
-        BuildMacosCommand(
-          buildSystem: FakeBuildSystem(),
-          toolContext: FakeToolContext(logger: BufferLogger.test(), platform: macosPlatform),
-          verboseHelp: false,
-        ).hidden,
-        true,
-      );
+      expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, true);
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(),
@@ -999,14 +990,7 @@ STDERR STUFF
   testUsingContext(
     'Not hidden when enabled and on macOS host',
     () {
-      expect(
-        BuildMacosCommand(
-          buildSystem: FakeBuildSystem(),
-          toolContext: FakeToolContext(logger: BufferLogger.test(), platform: macosPlatform),
-          verboseHelp: false,
-        ).hidden,
-        false,
-      );
+      expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, false);
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -1024,7 +1008,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1081,7 +1065,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1154,10 +1138,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(
-          operatingSystem: 'macos',
-          environment: <String, String>{'FLUTTER_ROOT': '/', 'HOME': '/', 'LUCI_CI': 'True'},
-        ),
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1237,10 +1218,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(
-          operatingSystem: 'macos',
-          environment: <String, String>{'FLUTTER_ROOT': '/', 'HOME': '/', 'LUCI_CI': 'True'},
-        ),
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1322,7 +1300,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1363,7 +1341,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1405,7 +1383,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1444,7 +1422,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1502,7 +1480,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1546,7 +1524,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1607,7 +1585,7 @@ STDERR STUFF
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1651,7 +1629,7 @@ STDERR STUFF
         logger: testLogger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: macosPlatform,
+        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1713,7 +1691,7 @@ STDERR STUFF
           logger: BufferLogger.test(),
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
-          platform: macosPlatform,
+          platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
@@ -1757,7 +1735,7 @@ STDERR STUFF
           logger: BufferLogger.test(),
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
-          platform: macosPlatform,
+          platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
@@ -1810,7 +1788,7 @@ STDERR STUFF
           logger: BufferLogger.test(),
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
-          platform: macosPlatform,
+          platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),

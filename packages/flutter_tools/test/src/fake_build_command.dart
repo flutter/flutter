@@ -33,7 +33,7 @@ BuildCommand createFakeBuildCommand({
   Config? config,
   Platform? platform,
   FileSystemUtils? fileSystemUtils,
-  Terminal? terminal,
+  AnsiTerminal? terminal,
   PlistParser? plistParser,
   ProcessUtils? processUtils,
   ProcessManager? processManager,

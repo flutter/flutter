@@ -131,7 +131,7 @@ class ToolContext {
   final SystemClock systemClock;
 
   /// Formats terminal text output, colorization, and ANSI terminal capabilities.
-  final Terminal terminal;
+  final AnsiTerminal terminal;
 
   /// Centralized templates for user-facing status strings and error messages.
   final UserMessages userMessages;
