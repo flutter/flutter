@@ -402,8 +402,8 @@ void CanonicalizeUniformBlockInstanceNamesForGL(
 /// the GLSL shader source.
 static std::string StripComments(std::string_view source) {
   std::string result(source);
-  re2::RE2::GlobalReplace(&result, "//[^\n]*", "");
-  re2::RE2::GlobalReplace(&result, "/\\*[\\s\\S]*?\\*/", "");
+  static const re2::LazyRE2 kCommentPattern = {R"(//[^\n]*|/\*[\s\S]*?\*/)"};
+  re2::RE2::GlobalReplace(&result, *kCommentPattern, "");
   return result;
 }
 
@@ -690,11 +690,11 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
       CheckHasMultipleReturnsInMain(source_str)) {
     COMPILER_WARNING(warning_stream_)
         << "Fragment shader uses texture samplers alongside multiple 'return' "
-           "statements. "
+           "statements in `main()`. "
         << "This has the potential to cause compilation errors during shader "
            "compilation on Windows. \n"
         << "To avoid crashes on Windows, consider removing multiple 'return;' "
-           "statements."
+           "statements in `main()`."
         << "See https://github.com/flutter/flutter/issues/190809 for details.";
   }
 
