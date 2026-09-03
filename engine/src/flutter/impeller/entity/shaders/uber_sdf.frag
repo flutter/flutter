@@ -140,9 +140,10 @@ float distanceFromRoundedSuperellipse(vec2 p,
                                       vec2 radii,
                                       vec2 angle_span,
                                       vec2 circle_center_top,
-                                      vec2 circle_center_right) {
-  // Do work in the first quadrant to simply things.
-  p = abs(p);
+                                      vec2 circle_center_right,
+                                      out vec2 normal) {
+  // Do work in the first quadrant to simplify things.
+  vec2 p_abs = abs(p);
 
   // Transition line offset dividing top and right octants.
   float c = size.x - size.y;
@@ -153,12 +154,13 @@ float distanceFromRoundedSuperellipse(vec2 p,
 
   // 'p' in the coordinate system of the octant.
   vec2 p_oct;
+  bool is_top = (p_abs.y + c > p_abs.x);
 
   // We split the quadrant along the diagonal of the transition (p.y + c ==
   // p.x). This allows us to grab the correct set of parameters for the
   // "top" and "right" halves of the corner.
-  if (p.y + c > p.x) {
-    p_oct = p + vec2(0.0, c);
+  if (is_top) {
+    p_oct = p_abs + vec2(0.0, c);
     se_degree = degree.x;
     span = angle_span.x;
     radius = radii.x;
@@ -167,7 +169,7 @@ float distanceFromRoundedSuperellipse(vec2 p,
   } else {
     // For the 'right' octant, we flip the point and shift it according to
     // the CPU's OctantContains/Flip logic.
-    p_oct = p.yx - vec2(0.0, c);
+    p_oct = p_abs.yx - vec2(0.0, c);
     se_degree = degree.y;
     span = angle_span.y;
     radius = radii.y;
@@ -175,8 +177,17 @@ float distanceFromRoundedSuperellipse(vec2 p,
     axis_length = size.y;
   }
 
-  return distanceFromRSEOctant(p_oct, circle_center, radius, span, axis_length,
-                               se_degree);
+  vec3 dist_with_grad = distanceFromRSEOctantWithGrad(
+      p_oct, circle_center, radius, span, axis_length, se_degree);
+
+  float dist = dist_with_grad.x;
+  vec2 grad_oct = dist_with_grad.yz;
+
+  vec2 grad = is_top ? grad_oct : grad_oct.yx;
+  vec2 s = vec2(p.x >= 0.0 ? 1.0 : -1.0, p.y >= 0.0 ? 1.0 : -1.0);
+  normal = s * grad;
+
+  return dist;
 }
 
 // Calculates pixel size for rectangles using frag_info.pixel_size.
@@ -225,14 +236,6 @@ float directionalPixelSize(vec2 normal) {
   return length(normal * frag_info.pixel_size);
 }
 
-// Calculates pixel size from the SDF gradient using screen-space derivatives.
-// Used for shapes like Oval and Rounded Superellipse where the surface normal
-// varies along complex curves and cannot be cheaply derived analytically.
-float pixelSize(float sdf) {
-  vec2 gradient = vec2(dFdx(sdf), dFdy(sdf));
-  return length(gradient);
-}
-
 // Evaluates the SDF for the shape selected by frag_info.type.
 // Returns vec2(sdf, pixel_size).
 vec2 filledSDF(vec2 p) {
@@ -255,11 +258,12 @@ vec2 filledSDF(vec2 p) {
     // RoundRect has its own separate logic for calculating pixel size.
     pixel_size = roundRectPixelSize(p);
   } else {  // Symmetric Rounded Superellipse
+    vec2 normal;
     sdf = distanceFromRoundedSuperellipse(
         p, frag_info.superellipse_degree, frag_info.size, frag_info.radii.xy,
         frag_info.angle_span, frag_info.circle_center_top,
-        frag_info.circle_center_right);
-    pixel_size = pixelSize(sdf);
+        frag_info.circle_center_right, normal);
+    pixel_size = directionalPixelSize(normal);
   }
   return vec2(sdf, pixel_size);
 }
