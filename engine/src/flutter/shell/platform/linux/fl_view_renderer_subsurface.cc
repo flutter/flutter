@@ -292,8 +292,7 @@ static void fl_view_renderer_subsurface_present_layers(
     GLint general_format =
         fl_compositor_opengl_get_frame_format(layers, layers_count);
     g_clear_object(&self->framebuffer);
-    self->framebuffer =
-        fl_framebuffer_new(general_format, width, height, FALSE);
+    self->framebuffer = fl_framebuffer_new(general_format, width, height);
   }
 
   // Bind the target framebuffer so the compositor draws into it.
@@ -305,6 +304,13 @@ static void fl_view_renderer_subsurface_present_layers(
   fl_compositor_opengl_composite_layers(self->compositor, layers, layers_count);
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
+
+  // The frame is presented below using the subsurface's own OpenGL context.
+  // Sharing a texture between contexts requires the rendering to have completed
+  // before the other context uses it - making a context current only flushes
+  // the previous one, which guarantees the commands have been submitted, not
+  // that they have finished.
+  glFinish();
 
   // Present the composited frame directly to the subsurface using its own EGL
   // context. This reads the engine's frame texture directly, as the subsurface

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' hide exit;
@@ -14,6 +15,8 @@ import 'package:path/path.dart' as path;
 import 'allowlist.dart';
 import 'run_command.dart';
 import 'utils.dart';
+
+const _kHeartbeatInterval = Duration(seconds: 30);
 
 /// The path to the `dart` executable; set at the top of `main`
 late final String dart;
@@ -1794,12 +1797,20 @@ Future<CommandResult> _runFlutterAnalyze(
   List<String> options = const <String>[],
   String? failureMessage,
 }) async {
-  return runCommand(
-    flutter,
-    <String>['analyze', ...options],
-    workingDirectory: workingDirectory,
-    failureMessage: failureMessage,
-  );
+  final stopwatch = Stopwatch()..start();
+  final heartbeatTimer = Timer.periodic(_kHeartbeatInterval, (Timer _) {
+    print('Analysis in progress (${stopwatch.elapsed.inSeconds}s)...');
+  });
+  try {
+    return await runCommand(
+      flutter,
+      <String>['analyze', ...options],
+      workingDirectory: workingDirectory,
+      failureMessage: failureMessage,
+    );
+  } finally {
+    heartbeatTimer.cancel();
+  }
 }
 
 // These files legitimately require executable permissions
