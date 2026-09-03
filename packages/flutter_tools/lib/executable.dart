@@ -196,8 +196,9 @@ Future<void> main(List<String> args) async {
 String? findCommandName(List<String> args, {ToolContext? toolContext}) {
   final ArgResults results;
   try {
-    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
-        .parse(args);
+    results = FlutterCommandRunner(
+      toolContext: toolContext ?? _FallbackToolContext(),
+    ).argParser.parse(args);
   } on ArgParserException {
     // The real parser will complain about these later.
     return null;
@@ -256,7 +257,7 @@ List<FlutterCommand> generateCommands({
   ),
   AssembleCommand(
     buildSystem: toolDependencies.buildSystem,
-    featureFlags: featureFlags,
+    featureFlags: toolDependencies.featureFlags,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),
