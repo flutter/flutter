@@ -66,7 +66,7 @@ EmbedderExternalTextureSourceVulkan::~EmbedderExternalTextureSourceVulkan() {
   }
 }
 
-impeller::PixelFormat ToPixelFormat(int32_t vk_format) {
+impeller::PixelFormat ToPixelFormat(uint32_t vk_format) {
   switch (vk_format) {
     case VK_FORMAT_UNDEFINED:
       return impeller::PixelFormat::kUnknown;
