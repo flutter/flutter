@@ -404,7 +404,7 @@ class IOSSimulator extends Device {
   Future<bool> get supportsHardwareRendering async => false;
 
   @override
-  bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
+  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
   @override
   Future<CpuArch> get cpuArch async => _cpuArch;
@@ -566,9 +566,6 @@ class IOSSimulator extends Device {
     String? mainPath,
   ) async {
     // Step 1: Build the Xcode project.
-    // The build mode for the simulator is always debug.
-    assert(buildInfo.isDebug);
-
     final XcodeBuildResult buildResult = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,

@@ -823,8 +823,7 @@ end
           generateDartPluginRegistry: true,
         );
         Target target;
-        // Always build debug for simulator.
-        if (buildInfo.isDebug || sdkType == EnvironmentType.simulator) {
+        if (buildInfo.isDebug) {
           target = const DebugIosApplicationBundle();
         } else if (buildInfo.isProfile) {
           target = const ProfileIosApplicationBundle();

@@ -131,7 +131,7 @@ void main() {
         await snapshotter.build(
           platform: TargetPlatform.ios,
           cpuArch: CpuArch.arm64,
-          sdkRoot: 'path/to/sdk',
+          sdkRoot: 'path/to/iPhoneOS.sdk',
           buildMode: BuildMode.debug,
           mainPath: 'main.dill',
           outputPath: outputPath,
@@ -225,7 +225,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         cpuArch: CpuArch.arm64,
-        sdkRoot: 'path/to/sdk',
+        sdkRoot: 'path/to/iPhoneOS.sdk',
         splitDebugInfo: 'foo',
         dartObfuscation: false,
       );
@@ -285,7 +285,7 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         cpuArch: CpuArch.arm64,
-        sdkRoot: 'path/to/sdk',
+        sdkRoot: 'path/to/iPhoneOS.sdk',
         dartObfuscation: true,
       );
 
@@ -343,13 +343,74 @@ void main() {
         mainPath: 'main.dill',
         outputPath: outputPath,
         cpuArch: CpuArch.arm64,
-        sdkRoot: 'path/to/sdk',
+        sdkRoot: 'path/to/iPhoneOS.sdk',
         dartObfuscation: false,
       );
 
       expect(genSnapshotExitCode, 0);
       expect(processManager, hasNoRemainingExpectations);
     });
+
+    for (final buildMode in <BuildMode>[BuildMode.profile, BuildMode.release]) {
+      testWithoutContext('builds iOS simulator snapshot in ${buildMode.cliName} mode', () async {
+        final String outputPath = fileSystem.path.join('build', buildMode.cliName);
+        final String genSnapshotPath = artifacts.getArtifactPath(
+          Artifact.genSnapshotX64,
+          platform: TargetPlatform.ios,
+          mode: buildMode,
+        );
+        processManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              genSnapshotPath,
+              '--deterministic',
+              '--snapshot_kind=app-aot-macho-dylib',
+              '--macho=$outputPath/App.framework/App',
+              '--macho-object=$outputPath/app.o',
+              '--macho-min-os-version=15.0',
+              '--macho-platform-simulated',
+              '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+              '--macho-install-name=@rpath/App.framework/App',
+              'main.dill',
+            ],
+          ),
+          kWhichSysctlCommand,
+          kx64CheckCommand,
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'dsymutil',
+              '-o',
+              '$outputPath/App.framework.dSYM',
+              '$outputPath/App.framework/App',
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'strip',
+              '-x',
+              '$outputPath/App.framework/App',
+              '-o',
+              '$outputPath/App.framework/App',
+            ],
+          ),
+        ]);
+
+        final int genSnapshotExitCode = await snapshotter.build(
+          platform: TargetPlatform.ios,
+          buildMode: buildMode,
+          mainPath: 'main.dill',
+          outputPath: outputPath,
+          cpuArch: CpuArch.x64,
+          sdkRoot: 'path/to/iPhoneSimulator.sdk',
+          dartObfuscation: false,
+        );
+
+        expect(genSnapshotExitCode, 0);
+        expect(processManager, hasNoRemainingExpectations);
+      });
+    }
 
     testWithoutContext('builds shared library for android-arm (32bit)', () async {
       final String outputPath = fileSystem.path.join('build', 'foo');

@@ -97,7 +97,7 @@ void main() {
   });
 
   testUsingContext(
-    'simulators only support debug mode',
+    'simulators support debug, profile, and release modes',
     () async {
       final simulator = IOSSimulator(
         '123',
@@ -109,8 +109,8 @@ void main() {
       );
 
       expect(simulator.supportsRuntimeMode(BuildMode.debug), true);
-      expect(simulator.supportsRuntimeMode(BuildMode.profile), false);
-      expect(simulator.supportsRuntimeMode(BuildMode.release), false);
+      expect(simulator.supportsRuntimeMode(BuildMode.profile), true);
+      expect(simulator.supportsRuntimeMode(BuildMode.release), true);
       expect(simulator.supportsRuntimeMode(BuildMode.jitRelease), false);
     },
     overrides: <Type, Generator>{
