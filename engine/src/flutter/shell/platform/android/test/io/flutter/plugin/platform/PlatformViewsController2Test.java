@@ -462,6 +462,7 @@ public class PlatformViewsController2Test {
 
     assertNotNull(androidView.getParent());
     assertTrue(androidView.getParent() instanceof FlutterMutatorView);
+    assertTrue(((FlutterMutatorView) androidView.getParent()).getUnbufferOnMove());
 
     // Simulate dispose call from the framework.
     disposePlatformView(jni, PlatformViewsController2, platformViewId);

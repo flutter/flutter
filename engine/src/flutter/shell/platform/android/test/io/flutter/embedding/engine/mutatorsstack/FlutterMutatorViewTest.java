@@ -238,6 +238,64 @@ public class FlutterMutatorViewTest {
     assertFalse(eventSent);
   }
 
+  @Test
+  @Config(
+      shadows = {
+        ShadowViewWithUnbufferedDispatch.class,
+      })
+  public void requestsUnbufferedDispatchOnMoveOnly_whenUnbufferOnMoveEnabled() {
+    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
+    final FlutterMutatorView view =
+        new FlutterMutatorView(ctx, 1.0f, touchProcessor, /*unbufferOnMove=*/ true);
+
+    ShadowViewWithUnbufferedDispatch.lastRequestedEvent = null;
+
+    final MotionEvent downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    view.onTouchEvent(downEvent);
+    assertNull(ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
+
+    final MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0);
+    view.onTouchEvent(moveEvent);
+    assertEquals(moveEvent, ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
+
+    ShadowViewWithUnbufferedDispatch.lastRequestedEvent = null;
+
+    final MotionEvent upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 0.0f, 0.0f, 0);
+    view.onTouchEvent(upEvent);
+    assertNull(ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
+  }
+
+  @Test
+  @Config(
+      shadows = {
+        ShadowViewWithUnbufferedDispatch.class,
+      })
+  public void doesNotRequestUnbufferedDispatchOnMove_whenUnbufferOnMoveDisabled() {
+    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
+    final FlutterMutatorView defaultView = new FlutterMutatorView(ctx, 1.0f, touchProcessor);
+
+    ShadowViewWithUnbufferedDispatch.lastRequestedEvent = null;
+
+    final MotionEvent moveEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0);
+    defaultView.onTouchEvent(moveEvent);
+    assertNull(ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
+
+    final FlutterMutatorView explicitDisabledView =
+        new FlutterMutatorView(ctx, 1.0f, touchProcessor, /*unbufferOnMove=*/ false);
+    explicitDisabledView.onTouchEvent(moveEvent);
+    assertNull(ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
+  }
+
+  @Implements(View.class)
+  public static class ShadowViewWithUnbufferedDispatch extends org.robolectric.shadows.ShadowView {
+    public static MotionEvent lastRequestedEvent;
+
+    @Implementation
+    protected void requestUnbufferedDispatch(MotionEvent event) {
+      lastRequestedEvent = event;
+    }
+  }
+
   @Implements(ViewGroup.class)
   public static class ShadowViewGroup extends org.robolectric.shadows.ShadowViewGroup {
     @Implementation

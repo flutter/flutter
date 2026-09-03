@@ -465,7 +465,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
     final FlutterMutatorView parentView =
         new FlutterMutatorView(
-            context, context.getResources().getDisplayMetrics().density, androidTouchProcessor);
+            context,
+            context.getResources().getDisplayMetrics().density,
+            androidTouchProcessor,
+            /*unbufferOnMove=*/ true);
 
     parentView.setOnDescendantFocusChangeListener(
         (view, hasFocus) -> {

@@ -35,6 +35,7 @@ public class FlutterMutatorView extends FrameLayout {
   private int top;
 
   private final AndroidTouchProcessor androidTouchProcessor;
+  private final boolean unbufferOnMove;
   private Paint paint;
 
   /**
@@ -45,15 +46,33 @@ public class FlutterMutatorView extends FrameLayout {
       @NonNull Context context,
       float screenDensity,
       @Nullable AndroidTouchProcessor androidTouchProcessor) {
+    this(context, screenDensity, androidTouchProcessor, /*unbufferOnMove=*/ false);
+  }
+
+  /**
+   * Initialize the FlutterMutatorView. Use this to set the screenDensity, which will be used to
+   * correct the final transform matrix, and whether to request unbuffered dispatch on move events.
+   */
+  public FlutterMutatorView(
+      @NonNull Context context,
+      float screenDensity,
+      @Nullable AndroidTouchProcessor androidTouchProcessor,
+      boolean unbufferOnMove) {
     super(context, null);
     this.screenDensity = screenDensity;
     this.androidTouchProcessor = androidTouchProcessor;
+    this.unbufferOnMove = unbufferOnMove;
     this.paint = new Paint();
   }
 
   /** Initialize the FlutterMutatorView. */
   public FlutterMutatorView(@NonNull Context context) {
-    this(context, 1, /* androidTouchProcessor=*/ null);
+    this(context, 1, /* androidTouchProcessor=*/ null, /*unbufferOnMove=*/ false);
+  }
+
+  @VisibleForTesting
+  boolean getUnbufferOnMove() {
+    return unbufferOnMove;
   }
 
   @Nullable @VisibleForTesting ViewTreeObserver.OnGlobalFocusChangeListener activeFocusListener;
@@ -196,6 +215,9 @@ public class FlutterMutatorView extends FrameLayout {
   public boolean onTouchEvent(MotionEvent event) {
     if (androidTouchProcessor == null) {
       return super.onTouchEvent(event);
+    }
+    if (unbufferOnMove && event.getActionMasked() == MotionEvent.ACTION_MOVE) {
+      requestUnbufferedDispatch(event);
     }
     final Matrix screenMatrix = new Matrix();
     screenMatrix.postTranslate(getLeft(), getTop());
