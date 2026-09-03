@@ -116,6 +116,15 @@ public class PlatformViewsControllerDelegator
     platformViewsController.channelHandler.synchronizeToNativeViewHierarchy(yes);
   }
 
+  @Override
+  public void onRejectGesture(int viewId) {
+    if (platformViewsController2.getPlatformViewById(viewId) != null) {
+      platformViewsController2.channelHandler.onRejectGesture(viewId);
+    } else {
+      platformViewsController.channelHandler.onRejectGesture(viewId);
+    }
+  }
+
   /** Returns true if creation of HC++ platform views is currently supported. */
   @Override
   public boolean isHcppEnabled() {

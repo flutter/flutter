@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.view.View;
+import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
+import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.view.AccessibilityBridge;
 import org.junit.Assert;
 import org.junit.Test;
@@ -99,5 +101,35 @@ public class PlatformViewsControllerDelegatorTest {
 
     verify(platformViewsController).detachAccessibilityBridge();
     verify(platformViewsController2).detachAccessibilityBridge();
+  }
+
+  @Test
+  public void onRejectGesture_delegatesToPVC2ifPresent() {
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
+    platformViewsController2.channelHandler =
+        mock(PlatformViewsChannel2.PlatformViewsHandler.class);
+    platformViewsController.channelHandler = mock(PlatformViewsChannel.PlatformViewsHandler.class);
+    View pv2 = mock(View.class);
+    when(platformViewsController2.getPlatformViewById(0)).thenReturn(pv2);
+
+    PlatformViewsControllerDelegator delegator =
+        new PlatformViewsControllerDelegator(platformViewsController, platformViewsController2);
+    delegator.onRejectGesture(0);
+
+    verify(platformViewsController2.channelHandler).onRejectGesture(0);
+  }
+
+  @Test
+  public void onRejectGesture_delegatesToPVC1ifNotPresentInPVC2() {
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
+    platformViewsController.channelHandler = mock(PlatformViewsChannel.PlatformViewsHandler.class);
+
+    PlatformViewsControllerDelegator delegator =
+        new PlatformViewsControllerDelegator(platformViewsController, platformViewsController2);
+    delegator.onRejectGesture(0);
+
+    verify(platformViewsController.channelHandler).onRejectGesture(0);
   }
 }
