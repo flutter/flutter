@@ -44,7 +44,7 @@ void main() {
         );
         toolsDir.createSync(recursive: true);
 
-        final PreRunValidator validator = PreRunValidator(
+        final validator = PreRunValidator(
           fileSystem: fs,
           flutterRoot: flutterRoot,
           platform: platform,
@@ -62,7 +62,7 @@ void main() {
       );
       toolsDir.createSync(recursive: true);
 
-      final PreRunValidator validator = PreRunValidator(
+      final validator = PreRunValidator(
         fileSystem: fs,
         cache: cache,
         platform: platform,
@@ -83,7 +83,7 @@ void main() {
       );
       toolsDir.createSync(recursive: true);
 
-      final PreRunValidator validator = PreRunValidator(
+      final validator = PreRunValidator(
         fileSystem: fs,
         platform: platform,
         userMessages: userMessages,
@@ -99,7 +99,7 @@ void main() {
       );
       expect(toolsDir.existsSync(), isFalse);
 
-      final PreRunValidator validator = PreRunValidator(
+      final validator = PreRunValidator(
         fileSystem: fs,
         cache: cache,
         platform: platform,
