@@ -826,6 +826,13 @@ class DevFS {
     for (final entry in syncedEntries) {
       entry.content.markClean();
     }
+    if (!bundleFirstUpload) {
+      // Assets that were removed or renamed since the previous build are no
+      // longer visited by bundle.entries.forEach above, so without this they
+      // would never be evicted from a running application's asset cache.
+      assetPathsToEvict.addAll(bundle.removedEntries);
+      shaderPathsToEvict.addAll(bundle.removedShaderEntries);
+    }
     return syncedBytes;
   }
 }
