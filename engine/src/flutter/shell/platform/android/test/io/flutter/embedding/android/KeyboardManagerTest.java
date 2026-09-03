@@ -2122,4 +2122,36 @@ public class KeyboardManagerTest {
         });
     calls.clear();
   }
+
+  @Test
+  public void androidIrRemoteDpadCenterMapsToPhysicalSelect() {
+    final KeyboardTester tester = new KeyboardTester();
+    final ArrayList<CallRecord> calls = new ArrayList<>();
+    tester.recordEmbedderCallsTo(calls);
+    tester.respondToTextInputWith(true); // Suppress redispatching
+
+    // Scan code 97 with KEYCODE_DPAD_CENTER (23) on Android IR Remotes.
+    final KeyEvent irRemoteDownEvent =
+        new FakeKeyEvent(
+            ACTION_DOWN, 97, KEYCODE_DPAD_CENTER, 0, '\0', 0, InputDevice.SOURCE_KEYBOARD);
+    assertTrue(tester.keyboardManager.handleEvent(irRemoteDownEvent));
+    verifyEmbedderEvents(
+        calls,
+        new KeyData[] {
+          buildKeyData(
+              Type.kDown, PHYSICAL_SELECT, LOGICAL_SELECT, null, false, DeviceType.kKeyboard),
+        });
+    calls.clear();
+
+    final KeyEvent irRemoteUpEvent =
+        new FakeKeyEvent(
+            ACTION_UP, 97, KEYCODE_DPAD_CENTER, 0, '\0', 0, InputDevice.SOURCE_KEYBOARD);
+    assertTrue(tester.keyboardManager.handleEvent(irRemoteUpEvent));
+    verifyEmbedderEvents(
+        calls,
+        new KeyData[] {
+          buildKeyData(
+              Type.kUp, PHYSICAL_SELECT, LOGICAL_SELECT, null, false, DeviceType.kKeyboard),
+        });
+  }
 }
