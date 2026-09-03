@@ -254,6 +254,23 @@ void main() {
       expect(e.toString(), contains('Expected to find project root in missing_dir'));
     }
   });
+
+  testWithoutContext(
+    'packages forward command forwards command name and arguments to pub',
+    () async {
+      final fakePub = FakePub();
+      fakePub.expectedArguments = <String>['outdated', '--json'];
+      final toolContext = FakeToolContext(fs: fileSystem, logger: logger);
+      fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
+      final command = PackagesCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        pub: fakePub,
+        toolContext: toolContext,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['pub', 'outdated', '--json']);
+    },
+  );
 }
 
 class FakePub extends Fake implements Pub {
