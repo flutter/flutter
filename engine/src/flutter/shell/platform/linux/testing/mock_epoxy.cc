@@ -49,16 +49,12 @@ typedef struct {
 typedef struct {
 } MockSurface;
 
-typedef struct {
-} MockImage;
-
 static MockEpoxy* mock = nullptr;
 static bool display_initialized = false;
 static MockDisplay mock_display;
 static MockConfig mock_config;
 static MockContext mock_context;
 static MockSurface mock_surface;
-static MockImage mock_image;
 
 static EGLint mock_error = EGL_SUCCESS;
 
@@ -418,19 +414,6 @@ EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
   return bool_success();
 }
 
-EGLImageKHR _eglCreateImageKHR(EGLDisplay dpy,
-                               EGLContext ctx,
-                               EGLenum target,
-                               EGLClientBuffer buffer,
-                               const EGLint* attrib_list) {
-  mock->eglCreateImageKHR(dpy, ctx, target, buffer, attrib_list);
-  return &mock_image;
-}
-
-EGLBoolean _eglDestroyImageKHR(EGLDisplay dpy, EGLImage image) {
-  return mock->eglDestroyImageKHR(dpy, image);
-}
-
 static GLuint bound_texture_2d;
 
 static std::map<GLenum, GLuint> framebuffer_renderbuffers;
@@ -503,6 +486,12 @@ void _glDeleteShader(GLuint shader) {}
 void _glDeleteTextures(GLsizei n, const GLuint* textures) {
   if (mock) {
     mock->glDeleteTextures(n, textures);
+  }
+}
+
+void _glFinish() {
+  if (mock) {
+    mock->glFinish();
   }
 }
 
@@ -672,6 +661,18 @@ static GLenum _glGetError() {
 
 void _glLinkProgram(GLuint program) {}
 
+static void _glReadPixels(GLint x,
+                          GLint y,
+                          GLsizei width,
+                          GLsizei height,
+                          GLenum format,
+                          GLenum type,
+                          void* pixels) {
+  if (mock) {
+    mock->glReadPixels(x, y, width, height, format, type, pixels);
+  }
+}
+
 void _glRenderbufferStorage(GLenum target,
                             GLenum internalformat,
                             GLsizei width,
@@ -780,12 +781,6 @@ EGLBoolean (*epoxy_eglQuerySurface)(EGLDisplay dpy,
 EGLBoolean (*epoxy_eglDestroySurface)(EGLDisplay dpy, EGLSurface surface);
 EGLBoolean (*epoxy_eglDestroyContext)(EGLDisplay dpy, EGLContext ctx);
 EGLBoolean (*epoxy_eglSwapInterval)(EGLDisplay dpy, EGLint interval);
-EGLImageKHR (*epoxy_eglCreateImageKHR)(EGLDisplay dpy,
-                                       EGLContext ctx,
-                                       EGLenum target,
-                                       EGLClientBuffer buffer,
-                                       const EGLint* attrib_list);
-EGLBoolean (*epoxy_eglDestroyImageKHR)(EGLDisplay dpy, EGLImage image);
 
 void (*epoxy_glAttachShader)(GLuint program, GLuint shader);
 void (*epoxy_glBindFramebuffer)(GLenum target, GLuint framebuffer);
@@ -807,6 +802,7 @@ GLuint (*epoxy_glCreateShader)(GLenum shaderType);
 void (*epoxy_glDeleteFramebuffers)(GLsizei n, const GLuint* framebuffers);
 void (*expoxy_glDeleteShader)(GLuint shader);
 void (*epoxy_glDeleteTextures)(GLsizei n, const GLuint* textures);
+void (*epoxy_glFinish)();
 void (*epoxy_glFramebufferRenderbuffer)(GLenum target,
                                         GLenum attachment,
                                         GLenum renderbuffertarget,
@@ -830,6 +826,13 @@ void (*epoxy_glGenFramebuffers)(GLsizei n, GLuint* framebuffers);
 void (*epoxy_glGenRenderbuffers)(GLsizei n, GLuint* renderbuffers);
 void (*epoxy_glGenTextures)(GLsizei n, GLuint* textures);
 void (*epoxy_glLinkProgram)(GLuint program);
+void (*epoxy_glReadPixels)(GLint x,
+                           GLint y,
+                           GLsizei width,
+                           GLsizei height,
+                           GLenum format,
+                           GLenum type,
+                           void* pixels);
 void (*epoxy_glRenderbufferStorage)(GLenum target,
                                     GLenum internalformat,
                                     GLsizei width,
@@ -882,8 +885,6 @@ static void library_init() {
   epoxy_eglDestroySurface = _eglDestroySurface;
   epoxy_eglDestroyContext = _eglDestroyContext;
   epoxy_eglSwapInterval = _eglSwapInterval;
-  epoxy_eglCreateImageKHR = _eglCreateImageKHR;
-  epoxy_eglDestroyImageKHR = _eglDestroyImageKHR;
 
   epoxy_glAttachShader = _glAttachShader;
   epoxy_glBindFramebuffer = _glBindFramebuffer;
@@ -898,6 +899,7 @@ static void library_init() {
   epoxy_glDeleteRenderbuffers = _glDeleteRenderbuffers;
   epoxy_glDeleteShader = _glDeleteShader;
   epoxy_glDeleteTextures = _glDeleteTextures;
+  epoxy_glFinish = _glFinish;
   epoxy_glDisable = _glDisable;
   epoxy_glEnable = _glEnable;
   epoxy_glFramebufferRenderbuffer = _glFramebufferRenderbuffer;
@@ -917,6 +919,7 @@ static void library_init() {
   epoxy_glGetString = _glGetString;
   epoxy_glIsEnabled = _glIsEnabled;
   epoxy_glLinkProgram = _glLinkProgram;
+  epoxy_glReadPixels = _glReadPixels;
   epoxy_glRenderbufferStorage = _glRenderbufferStorage;
   epoxy_glRenderbufferStorageMultisample = _glRenderbufferStorageMultisample;
   epoxy_glRenderbufferStorageMultisampleEXT =
