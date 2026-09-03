@@ -72,7 +72,14 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(BuildApkCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(
+      BuildIOSCommand(
+        appleContext: appleContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
     _addSubcommand(
       BuildIOSFrameworkCommand(
         buildSystem: buildSystem,
@@ -108,7 +115,14 @@ class BuildCommand extends FlutterCommand {
       ),
     );
 
-    _addSubcommand(BuildIOSArchiveCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(
+      BuildIOSArchiveCommand(
+        appleContext: appleContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
     _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
       BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
