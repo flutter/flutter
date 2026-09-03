@@ -27,7 +27,6 @@ class AnalysisServer {
     required Platform platform,
     required Terminal terminal,
     required this.suppressAnalytics,
-    this.withFineDependencies = true,
     this.usePlugins = true,
     String? protocolTrafficLog,
   }) : _fileSystem = fileSystem,
@@ -37,7 +36,6 @@ class AnalysisServer {
        _terminal = terminal,
        _protocolTrafficLog = protocolTrafficLog;
 
-  final bool withFineDependencies;
   final bool usePlugins;
   final String sdkPath;
   final List<String> directories;
@@ -79,7 +77,6 @@ class AnalysisServer {
       sdkPath,
       '--disable-server-feature-completion',
       '--disable-server-feature-search',
-      if (!withFineDependencies) '--no-with-fine-dependencies',
       if (!usePlugins) '--no-plugins',
       if (suppressAnalytics) '--suppress-analytics',
       if (_protocolTrafficLog != null) '--protocol-traffic-log=$_protocolTrafficLog',

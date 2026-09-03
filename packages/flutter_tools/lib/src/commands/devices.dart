@@ -7,22 +7,13 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../doctor.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {
-  DevicesCommand({
-    required ToolContext toolContext,
-    DeviceManager? deviceManager,
-    Doctor? doctor,
-    bool verboseHelp = false,
-  }) : _toolContext = toolContext,
-       _deviceManager = deviceManager,
-       _doctor = doctor,
-       super(toolContext: toolContext) {
+  DevicesCommand({bool verboseHelp = false}) {
     addMachineOutputFlag(verboseHelp: verboseHelp);
     argParser.addOption(
       'timeout',
@@ -33,10 +24,6 @@ class DevicesCommand extends FlutterCommand {
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
   }
-
-  final ToolContext _toolContext;
-  final DeviceManager? _deviceManager;
-  final Doctor? _doctor;
 
   @override
   final name = 'devices';
@@ -62,10 +49,8 @@ class DevicesCommand extends FlutterCommand {
   @override
   Future<void> validateCommand() {
     if (argResults?['timeout'] != null) {
-      final Logger logger = _toolContext.logger;
-      final AnsiTerminal terminal = _toolContext.terminal;
-      logger.printWarning(
-        '${terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.',
+      globals.printWarning(
+        '${globals.logger.terminal.warningMark} The "--timeout" argument is deprecated; use "--${FlutterOptions.kDeviceTimeout}" instead.',
       );
     }
     return super.validateCommand();
@@ -73,8 +58,7 @@ class DevicesCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Doctor? doctor = _doctor;
-    if (doctor != null && !doctor.canListAnything) {
+    if (globals.doctor?.canListAnything != true) {
       throwToolExit(
         "Unable to locate a development device; please run 'flutter doctor' for "
         'information about installing additional components.',
@@ -82,13 +66,10 @@ class DevicesCommand extends FlutterCommand {
       );
     }
 
-    final Logger logger = _toolContext.logger;
-    final Platform platform = _toolContext.platform;
-
     final output = DevicesCommandOutput(
-      platform: platform,
-      logger: logger,
-      deviceManager: _deviceManager,
+      platform: globals.platform,
+      logger: globals.logger,
+      deviceManager: globals.deviceManager,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       deviceConnectionInterface: deviceConnectionInterface,
     );
@@ -321,7 +302,7 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
       _logger.printStatus(terminal.clearLines(numLinesToClear), newline: false);
     }
 
-    if (attachedDevices.isNotEmpty || !terminal.supportsColor) {
+    if (attachedDevices.isNotEmpty || !_logger.terminal.supportsColor) {
       _logger.printStatus('');
     }
 

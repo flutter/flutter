@@ -92,7 +92,12 @@ void main() {
     });
 
     testUsingContext('daemon.version command should succeed', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'daemon.version'}),
       );
@@ -109,6 +114,7 @@ void main() {
           daemonConnection,
           notifyingLogger: notifyingLogger,
           featureFlags: featureFlags,
+          fileSystem: globals.fs,
         );
         // Use the flutter_gallery project which has a known set of supported platforms.
         final String projectPath = globals.fs.path.join(
@@ -215,7 +221,12 @@ void main() {
     );
 
     testUsingContext('printError should send daemon.logMessage event', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       globals.printError('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
         DaemonMessage message,
@@ -225,15 +236,19 @@ void main() {
       });
       expect(response.data['id'], isNull);
       expect(response.data['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = castStringKeyedMap(
-        response.data['params'],
-      )!.cast<String, String>();
+      final Map<String, String> logMessage = castStringKeyedMap(response.data['params'])!
+          .cast<String, String>();
       expect(logMessage['level'], 'error');
       expect(logMessage['message'], 'daemon.logMessage test');
     }, overrides: <Type, Generator>{Logger: () => notifyingLogger});
 
     testUsingContext('printWarning should send daemon.logMessage event', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       globals.printWarning('daemon.logMessage test');
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere((
         DaemonMessage message,
@@ -243,16 +258,21 @@ void main() {
       });
       expect(response.data['id'], isNull);
       expect(response.data['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = castStringKeyedMap(
-        response.data['params'],
-      )!.cast<String, String>();
+      final Map<String, String> logMessage = castStringKeyedMap(response.data['params'])!
+          .cast<String, String>();
       expect(logMessage['level'], 'warning');
       expect(logMessage['message'], 'daemon.logMessage test');
     }, overrides: <Type, Generator>{Logger: () => notifyingLogger});
 
     testUsingContext('printStatus should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = await capturedConsolePrint(() {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger, logToStdout: true);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          logToStdout: true,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
         globals.printStatus('daemon.logMessage test');
         return Future<void>.value();
       });
@@ -262,7 +282,13 @@ void main() {
 
     testUsingContext('printBox should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = await capturedConsolePrint(() {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger, logToStdout: true);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          logToStdout: true,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
         globals.printBox('This is the box message', title: 'Sample title');
         return Future<void>.value();
       });
@@ -273,7 +299,12 @@ void main() {
     testUsingContext(
       'printTrace should send daemon.logMessage event when notifyVerbose is enabled',
       () async {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
         notifyingLogger.notifyVerbose = false;
         globals.printTrace('daemon.logMessage test 1');
         notifyingLogger.notifyVerbose = true;
@@ -286,9 +317,8 @@ void main() {
         });
         expect(response.data['id'], isNull);
         expect(response.data['event'], 'daemon.logMessage');
-        final Map<String, String> logMessage = castStringKeyedMap(
-          response.data['params'],
-        )!.cast<String, String>();
+        final Map<String, String> logMessage = castStringKeyedMap(response.data['params'])!
+            .cast<String, String>();
         expect(logMessage['level'], 'trace');
         expect(logMessage['message'], 'daemon.logMessage test 2');
       },
@@ -298,7 +328,12 @@ void main() {
     testUsingContext(
       'daemon.setNotifyVerbose command should update the notify verbose status to true',
       () async {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
         expect(notifyingLogger.notifyVerbose, false);
 
         daemonStreams.inputs.add(
@@ -316,7 +351,12 @@ void main() {
     testUsingContext(
       'daemon.setNotifyVerbose command should update the notify verbose status to false',
       () async {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
         notifyingLogger.notifyVerbose = false;
 
         daemonStreams.inputs.add(
@@ -332,7 +372,12 @@ void main() {
     );
 
     testUsingContext('daemon.shutdown command should stop daemon', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'daemon.shutdown'}),
       );
@@ -343,7 +388,12 @@ void main() {
     });
 
     testUsingContext('app.restart without an appId should report an error', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
 
       daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'app.restart'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
@@ -354,7 +404,12 @@ void main() {
     testUsingContext(
       'ext.flutter.debugPaint via service extension without an appId should report an error',
       () async {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
 
         daemonStreams.inputs.add(
           DaemonMessage(<String, Object?>{
@@ -370,7 +425,12 @@ void main() {
     );
 
     testUsingContext('app.stop without appId should report an error', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
 
       daemonStreams.inputs.add(DaemonMessage(<String, Object?>{'id': 0, 'method': 'app.stop'}));
       final DaemonMessage response = await daemonStreams.outputs.stream.firstWhere(_notEvent);
@@ -379,7 +439,12 @@ void main() {
     });
 
     testUsingContext('device.getDevices should respond with list', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.getDevices'}),
       );
@@ -389,7 +454,12 @@ void main() {
     });
 
     testUsingContext('device.getDevices reports available devices', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(FakeAndroidDevice());
@@ -406,7 +476,12 @@ void main() {
     testUsingContext(
       'should send device.added event when device is discovered',
       () async {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
 
         final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -460,7 +535,12 @@ void main() {
     );
 
     testUsingContext('device.discoverDevices should respond with list', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'device.discoverDevices'}),
       );
@@ -470,7 +550,12 @@ void main() {
     });
 
     testUsingContext('device.discoverDevices reports available devices', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       discoverer.addDevice(FakeAndroidDevice());
@@ -486,7 +571,12 @@ void main() {
     });
 
     testUsingContext('device.supportsRuntimeMode returns correct value', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       final device = FakeAndroidDevice();
@@ -506,7 +596,12 @@ void main() {
     });
 
     testUsingContext('device.logReader.start and .stop starts and stops log reader', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       final discoverer = FakePollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
       final device = FakeAndroidDevice();
@@ -556,7 +651,12 @@ void main() {
       });
 
       testUsingContext('device.startApp and .stopApp starts and stops an app', () async {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
         final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
         final device = FakeAndroidDevice();
@@ -628,7 +728,12 @@ void main() {
     testUsingContext(
       'device.startDartDevelopmentService and .shutdownDartDevelopmentService starts and stops DDS',
       () async {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
         final discoverer = FakePollingDeviceDiscovery();
         daemon.deviceDomain.addDeviceDiscoverer(discoverer);
         final device = FakeAndroidDevice();
@@ -694,7 +799,12 @@ void main() {
     );
 
     testUsingContext('device.getDiagnostics returns correct value', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       final discoverer1 = FakePollingDeviceDiscovery();
       discoverer1.diagnostics = <String>['fake diagnostic 1', 'fake diagnostic 2'];
       final discoverer2 = FakePollingDeviceDiscovery();
@@ -715,7 +825,12 @@ void main() {
     });
 
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
 
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.launch'}),
@@ -726,7 +841,12 @@ void main() {
     });
 
     testUsingContext('emulator.launch coldboot parameter must be boolean', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       final params = <String, Object?>{'emulatorId': 'device', 'coldBoot': 1};
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.launch', 'params': params}),
@@ -737,7 +857,12 @@ void main() {
     });
 
     testUsingContext('emulator.getEmulators should respond with list', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'emulator.getEmulators'}),
       );
@@ -750,7 +875,12 @@ void main() {
       const originalUrl = 'http://localhost:1234/';
       const mappedUrl = 'https://publichost:4321/';
 
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
 
       // Respond to any requests from the daemon to expose a URL.
       unawaited(
@@ -774,7 +904,12 @@ void main() {
     testUsingContext(
       'devtools.serve command should return host and port on success',
       () async {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
 
         daemonStreams.inputs.add(
           DaemonMessage(<String, Object?>{'id': 0, 'method': 'devtools.serve'}),
@@ -794,7 +929,12 @@ void main() {
     );
 
     testUsingContext('devtools.serve command should return null fields if null returned', () async {
-      daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        daemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: featureFlags,
+        fileSystem: globals.fs,
+      );
 
       daemonStreams.inputs.add(
         DaemonMessage(<String, Object?>{'id': 0, 'method': 'devtools.serve'}),
@@ -825,7 +965,12 @@ void main() {
             throw const io.SocketException('fail');
           };
 
-          daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+          daemon = Daemon(
+            daemonConnection,
+            notifyingLogger: notifyingLogger,
+            featureFlags: featureFlags,
+            fileSystem: globals.fs,
+          );
           daemonStreams.inputs.add(
             DaemonMessage(<String, Object?>{
               'id': 0,
@@ -904,7 +1049,12 @@ void main() {
           throw const io.SocketException('fail');
         };
 
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
         daemonStreams.inputs.add(
           DaemonMessage(<String, Object?>{
             'id': 0,
@@ -929,7 +1079,12 @@ void main() {
         ioOverrides.connectCallback = (Object? host, int port) =>
             throw const io.SocketException('fail');
 
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
         daemonStreams.inputs.add(
           DaemonMessage(<String, Object?>{
             'id': 0,
@@ -950,7 +1105,12 @@ void main() {
     testUsingContext(
       'app.start throws DaemonException if app fails to start early',
       () async {
-        daemon = Daemon(daemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          daemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: featureFlags,
+          fileSystem: globals.fs,
+        );
         final ResidentRunner runner = FakeResidentRunner();
         final Device device = FakeAndroidDevice();
 
@@ -1073,9 +1233,8 @@ void main() {
       await _runFakeAsync((FakeAsync time) async {
         final operations = <Future<int>>[
           queue.queueAndDebounce('OP1', debounceDuration, () async => 1),
-          Future<void>.delayed(
-            debounceDuration * 2,
-          ).then((_) => queue.queueAndDebounce('OP1', debounceDuration, () async => 2)),
+          Future<void>.delayed(debounceDuration * 2)
+              .then((_) => queue.queueAndDebounce('OP1', debounceDuration, () async => 2)),
         ];
 
         time.elapse(debounceDuration * 5);
@@ -1129,13 +1288,20 @@ void main() {
 
   group('DaemonCommand', () {
     testWithoutContext('has correct properties', () {
-      final command = DaemonCommand(toolContext: FakeToolContext());
+      final command = DaemonCommand(
+        androidContext: FakeAndroidContext(),
+        toolContext: FakeToolContext(),
+      );
 
       expect(command.name, 'daemon');
       expect(command.category, FlutterCommandCategory.tools);
       expect(command.hidden, false);
 
-      final hiddenCommand = DaemonCommand(toolContext: FakeToolContext(), hidden: true);
+      final hiddenCommand = DaemonCommand(
+        androidContext: FakeAndroidContext(),
+        toolContext: FakeToolContext(),
+        hidden: true,
+      );
       expect(hiddenCommand.hidden, true);
     });
   });

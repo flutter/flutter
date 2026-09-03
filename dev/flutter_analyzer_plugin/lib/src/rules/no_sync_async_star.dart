@@ -10,10 +10,8 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
-import '../flutter_analysis_rule.dart';
-
 /// A rule that enforces explanation comments for `sync*` and `async*` methods.
-class NoSyncAsyncStar extends FlutterAnalysisRule {
+class NoSyncAsyncStar extends AnalysisRule {
   /// Creates a new [NoSyncAsyncStar] rule.
   NoSyncAsyncStar()
     : super(
@@ -25,8 +23,7 @@ class NoSyncAsyncStar extends FlutterAnalysisRule {
   static const LintCode code = LintCode(
     'no_sync_async_star',
     'Do not use sync*/async* methods without an explanation comment.',
-    correctionMessage:
-        'See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-syncasync for details.',
+    correctionMessage: 'See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-syncasync for details.',
     severity: DiagnosticSeverity.ERROR,
   );
 
@@ -34,18 +31,7 @@ class NoSyncAsyncStar extends FlutterAnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
-    if (!filePath.contains('/home/test') &&
-        (!filePath.contains('/packages/') && !filePath.contains('/examples/'))) {
-      return;
-    }
-    if (!filePath.contains('/home/test') &&
-        (filePath.contains('/test/') ||
-            filePath.endsWith('_test.dart') ||
-            filePath.contains('flutter_test'))) {
-      return;
-    }
+  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
     registry.addFunctionDeclaration(this, visitor);
     registry.addMethodDeclaration(this, visitor);
@@ -78,12 +64,12 @@ class _Visitor extends SimpleAstVisitor<void> {
   }
 
   void _checkFunctionBody(FunctionBody body, AstNode node) {
-    if (body.isGenerator && !_hasExplanationComment(node, body)) {
+    if (body.isGenerator && !_hasExplanationComment(node)) {
       rule.reportAtNode(node);
     }
   }
 
-  bool _hasExplanationComment(AstNode node, FunctionBody body) {
+  bool _hasExplanationComment(AstNode node) {
     bool hasMatch(Token? startToken) {
       for (
         Token? comment = startToken?.precedingComments;
@@ -95,19 +81,6 @@ class _Visitor extends SimpleAstVisitor<void> {
         }
       }
       return false;
-    }
-
-    final Token firstToken =
-        node is AnnotatedNode ? node.firstTokenAfterCommentAndMetadata : node.beginToken;
-
-    for (
-      Token? token = firstToken;
-      token != null && token.offset <= body.beginToken.offset;
-      token = token.next
-    ) {
-      if (hasMatch(token)) {
-        return true;
-      }
     }
 
     return hasMatch(node.beginToken) || hasMatch(node.parent?.beginToken);

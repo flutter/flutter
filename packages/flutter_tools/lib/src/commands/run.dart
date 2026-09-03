@@ -853,7 +853,7 @@ class RunCommand extends RunCommandBase {
         projectRootPath: stringArg('project-root'),
         dillOutputPath: stringArg('output-dill'),
         stayResident: stayResident,
-        analytics: analytics,
+        
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
         dartBuilder: hookRunner,
         logger: logger,
@@ -878,7 +878,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: debuggingOptions,
         stayResident: stayResident,
         fileSystem: fs,
-        analytics: analytics,
+        
         logger: logger,
         terminal: terminal,
         platform: platform,
@@ -903,7 +903,7 @@ class RunCommand extends RunCommandBase {
       artifacts: _toolContext.artifacts,
       terminal: terminal,
       outputPreferences: outputPreferences,
-      analytics: analytics,
+      
       config: _toolContext.config,
       buildTargets: _buildTargets,
       buildSystem: _buildSystem,

@@ -9,8 +9,6 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
-import '../flutter_analysis_rule.dart';
-
 const _testSuffix = '_test.dart';
 
 const Set<String> _exemptTestImports = <String>{
@@ -21,7 +19,7 @@ const Set<String> _exemptTestImports = <String>{
 };
 
 /// Verifies that files do not import a test directly.
-class NoTestImports extends FlutterAnalysisRule {
+class NoTestImports extends AnalysisRule {
   NoTestImports()
     : super(name: code.name, description: 'Verify that files do not import a test directly.');
 
@@ -37,11 +35,7 @@ class NoTestImports extends FlutterAnalysisRule {
   LintCode get diagnosticCode => code;
 
   @override
-  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
-    if (!filePath.contains('/home/test') && !filePath.contains('/packages/')) {
-      return;
-    }
+  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
     registry.addImportDirective(this, visitor);
   }

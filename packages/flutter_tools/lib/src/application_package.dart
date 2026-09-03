@@ -10,13 +10,7 @@ import 'base/file_system.dart';
 import 'build_info.dart';
 
 abstract class ApplicationPackageFactory {
-  static ApplicationPackageFactory? get instance {
-    try {
-      return context.get<ApplicationPackageFactory>();
-    } on UnsupportedError {
-      return null;
-    }
-  }
+  static ApplicationPackageFactory? get instance => context.get<ApplicationPackageFactory>();
 
   /// Create an [ApplicationPackage] for the given platform.
   Future<ApplicationPackage?> getPackageForPlatform(

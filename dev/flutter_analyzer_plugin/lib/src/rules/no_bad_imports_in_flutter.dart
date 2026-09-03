@@ -10,22 +10,19 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:path/path.dart' as path;
 
-import '../flutter_analysis_rule.dart';
-
 /// Checks for bad imports in `package:flutter`.
 ///
 /// Restricts `package:meta/meta.dart` imports within `lib/src/` (excluding
 /// `src/foundation/`), and prevents recursive self-imports (e.g. files under
 /// `lib/src/widgets/` importing `package:flutter/widgets.dart`).
-class NoBadImportsInFlutter extends FlutterAnalysisRule {
+class NoBadImportsInFlutter extends AnalysisRule {
   NoBadImportsInFlutter()
     : super(name: code.name, description: 'Checks for bad imports in flutter package.');
 
   static const code = LintCode(
     'no_bad_imports_in_flutter',
     'Bad import in flutter package.',
-    correctionMessage:
-        'Use relative imports or valid exported packages. Do not recursive import or import meta/meta.dart.',
+    correctionMessage: 'Use relative imports or valid exported packages. Do not recursive import or import meta/meta.dart.',
     severity: DiagnosticSeverity.ERROR,
   );
 
@@ -33,9 +30,10 @@ class NoBadImportsInFlutter extends FlutterAnalysisRule {
   LintCode get diagnosticCode => code;
 
   @override
-  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
-    if (!filePath.contains('packages/flutter/lib/src/') && !filePath.contains('/home/test')) {
+  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path;
+    if (!filePath.contains('packages/flutter/lib/src/') &&
+        !filePath.contains(r'packages\flutter\lib\src\')) {
       return;
     }
     final visitor = _Visitor(this, filePath);

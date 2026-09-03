@@ -78,6 +78,7 @@ void main() {
   group('Fatal Logs', () {
     late FakeBuildCommand command;
     late MemoryFileSystem fs;
+    late BufferLogger logger;
     late ProcessManager processManager;
 
     setUp(() {
@@ -85,6 +86,7 @@ void main() {
       fs.file('/package/pubspec.yaml').createSync(recursive: true);
       fs.currentDirectory = '/package';
       Cache.disableLocking();
+      logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
     });
 
@@ -93,7 +95,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
-        logger: testLogger,
+        logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
         platform: FakePlatform(),
@@ -122,7 +124,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
-        logger: testLogger,
+        logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
         platform: FakePlatform(),
@@ -138,7 +140,6 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
       );
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
-      testLogger.printError('Error: Danger Will Robinson!');
       try {
         await createTestCommandRunner(command).run(<String>['build', 'test']);
       } on Exception {
@@ -151,7 +152,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
-        logger: testLogger,
+        logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
         platform: FakePlatform(),
@@ -183,7 +184,7 @@ void main() {
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
-        logger: testLogger,
+        logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
         platform: FakePlatform(),

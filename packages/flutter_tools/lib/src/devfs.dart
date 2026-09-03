@@ -11,9 +11,11 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import 'artifacts.dart';
 import 'asset.dart';
 import 'base/config.dart';
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/net.dart';
 import 'base/os.dart';
 import 'build_info.dart';
 import 'build_system/tools/asset_transformer.dart';
@@ -29,6 +31,8 @@ class DevFSConfig {
   /// Should DevFS assume that there are no symlinks to directories?
   bool noDirectorySymlinks = false;
 }
+
+DevFSConfig? get devFSConfig => context.get<DevFSConfig>();
 
 /// Common superclass for content copied to the device.
 abstract class DevFSContent {
@@ -54,10 +58,9 @@ abstract class DevFSContent {
 
 // File content to be copied to the device.
 class DevFSFileContent extends DevFSContent {
-  DevFSFileContent(this.file, {DevFSConfig? devFSConfig}) : _devFSConfig = devFSConfig;
+  DevFSFileContent(this.file);
 
   final FileSystemEntity file;
-  final DevFSConfig? _devFSConfig;
   File? _linkTarget;
   FileStat? _fileStat;
 
@@ -119,7 +122,7 @@ class DevFSFileContent extends DevFSContent {
   void markClean() {
     final (FileStat? fileStat, File? linkTarget) = _statFile();
     _fileStat = fileStat;
-    if (linkTarget != null && (_devFSConfig?.cacheSymlinks ?? false)) {
+    if (linkTarget != null && (devFSConfig?.cacheSymlinks ?? false)) {
       _linkTarget = linkTarget;
     } else {
       _linkTarget = null;
@@ -458,7 +461,11 @@ class DevFS {
          osUtils: osUtils,
          logger: logger,
          uploadRetryThrottle: uploadRetryThrottle,
-         httpClient: httpClient ?? HttpClient(),
+         httpClient:
+             httpClient ??
+             ((context.get<HttpClientFactory>() == null)
+                 ? HttpClient()
+                 : context.get<HttpClientFactory>()!()),
        ),
        _stopwatchFactory = stopwatchFactory,
        _config = config,

@@ -84,7 +84,7 @@ PreviewDetector createTestPreviewDetector() {
   _projectRoot = _fs.systemTempDirectory.createTempSync('root');
   final FlutterProject project = FlutterProject.fromDirectory(_projectRoot!);
 
-  final String sdkPath = _fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'dart-sdk');
+  final String sdkPath = _fs.path.join(globals.cache.flutterRoot, 'bin', 'cache', 'dart-sdk');
   final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
 
   return PreviewDetector(

@@ -10,9 +10,7 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/error/error.dart';
 
-import '../flutter_analysis_rule.dart';
-
-class AvoidFutureCatchError extends FlutterAnalysisRule {
+class AvoidFutureCatchError extends AnalysisRule {
   AvoidFutureCatchError()
     : super(
         name: code.name,
@@ -30,7 +28,7 @@ class AvoidFutureCatchError extends FlutterAnalysisRule {
   LintCode get diagnosticCode => code;
 
   @override
-  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
     registry.addMethodInvocation(this, visitor);
   }

@@ -55,7 +55,7 @@ class FlutterDevice {
   final Duration logFlushDelay;
 
   /// Create a [FlutterDevice] with optional code generation enabled.
-  static Future<FlutterDevice> create(
+  static Future<FlutterDevice> create({
     Device device, {
     required String? target,
     required BuildInfo buildInfo,
@@ -1762,7 +1762,7 @@ class TerminalHandler {
         _logger.printTrace('Deleting pid file (${_actualPidFile!.path}).');
         _actualPidFile!.deleteSync();
       } on FileSystemException catch (error) {
-        _logger.printWarning(
+        _globals.logger.printWarning(
           'Failed to delete pid file (${_actualPidFile!.path}): ${error.message}',
         );
       }

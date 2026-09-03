@@ -71,7 +71,7 @@ class HotRunner extends ResidentRunner {
     required super.target,
 
     this.applicationBinary,
-    super.artifacts,
+    
     this.benchmarkMode = false,
     super.buildSystem,
     super.buildTargets,
@@ -446,7 +446,7 @@ class HotRunner extends ResidentRunner {
 
     unawaited(
       appStartedCompleter?.future.then((_) {
-        analytics.send(
+        globals.analytics.send(
           Event.hotRunnerInfo(
             label: 'reload-ready',
             targetPlatform: _targetPlatformName!,
@@ -467,7 +467,7 @@ class HotRunner extends ResidentRunner {
         appFailedToStart();
         return 1;
       }
-      await cacheInitialDillCompilation();
+      
     } on Exception catch (err) {
       logger.printError(err.toString());
       appFailedToStart();
@@ -737,7 +737,7 @@ class HotRunner extends ResidentRunner {
 
     // Send timing analytics.
     final Duration elapsedDuration = restartTimer.elapsed;
-    analytics.send(
+    globals.analytics.send(
       Event.timing(
         workflow: 'hot',
         variableName: 'restart',
@@ -864,7 +864,7 @@ class HotRunner extends ResidentRunner {
       if (!result.isOk) {
         restartEvent = 'restart-failed';
       } else {
-        analytics.send(
+        globals.analytics.send(
           Event.hotRunnerInfo(
             label: 'restart',
             targetPlatform: targetPlatform!,
@@ -892,7 +892,7 @@ class HotRunner extends ResidentRunner {
       // The `restartEvent` variable will be null if restart succeeded. We will
       // only handle the case when it failed here.
       if (restartEvent != null) {
-        analytics.send(
+        globals.analytics.send(
           Event.hotRunnerInfo(
             label: restartEvent,
             targetPlatform: targetPlatform!,
@@ -939,7 +939,7 @@ class HotRunner extends ResidentRunner {
             'the source code. Please address the error and then use "R" to '
             'restart the app.\n'
             '${error.message} (error code: ${error.code})';
-        analytics.send(
+        globals.analytics.send(
           Event.hotRunnerInfo(
             label: 'reload-barred',
             targetPlatform: targetPlatform!,
@@ -950,7 +950,7 @@ class HotRunner extends ResidentRunner {
           ),
         );
       } else {
-        analytics.send(
+        globals.analytics.send(
           Event.hotRunnerInfo(
             label: 'exception',
             targetPlatform: targetPlatform!,
@@ -1024,7 +1024,7 @@ class HotRunner extends ResidentRunner {
         sdkName,
         emulator,
         reason,
-        analytics,
+        globals.analytics,
       );
       if (result.code != 0) {
         return result;
@@ -1068,7 +1068,7 @@ class HotRunner extends ResidentRunner {
     // many libraries were affected by the hot reload request.
     // Relation of [invalidatedSourcesCount] to [syncedLibraryCount] should help
     // understand sync/transfer "overhead" of updating this number of source files.
-    analytics.send(
+    globals.analytics.send(
       Event.hotRunnerInfo(
         label: 'reload',
         targetPlatform: targetPlatform!,
@@ -1101,7 +1101,7 @@ class HotRunner extends ResidentRunner {
     if ((reassembleResult.reassembleViews.length == 1) &&
         !reassembleResult.failedReassemble &&
         shouldReportReloadTime) {
-      analytics.send(
+      globals.analytics.send(
         Event.timing(
           workflow: 'hot',
           variableName: 'reload',
@@ -1132,7 +1132,7 @@ class HotRunner extends ResidentRunner {
             uiIsolateId: view.uiIsolate!.id,
             viewId: view.id,
             windows:
-                (device.targetPlatform == TargetPlatform.tester && platform.isWindows) ||
+                (device.targetPlatform == TargetPlatform.tester && globals.platform.isWindows) ||
                 device.targetPlatform == TargetPlatform.windows_x64 ||
                 device.targetPlatform == TargetPlatform.windows_arm64,
           ),
@@ -1183,7 +1183,7 @@ typedef ReloadSourcesHelper =
       String? sdkName,
       bool? emulator,
       String? reason,
-      Analytics analytics,
+      Analytics globals.analytics,
     );
 
 @visibleForTesting
@@ -1196,7 +1196,7 @@ Future<OperationResult> defaultReloadSourcesHelper(
   String? sdkName,
   bool? emulator,
   String? reason,
-  Analytics analytics,
+  Analytics globals.analytics,
 ) async {
   final vmReloadTimer = Stopwatch()..start();
   const entryPath = 'main.dart.incremental.dill';
@@ -1233,7 +1233,7 @@ Future<OperationResult> defaultReloadSourcesHelper(
   final vm_service.ReloadReport? reloadReport = reports.isEmpty ? null : reports.first.reports[0];
   if (reloadReport == null ||
       !HotRunner.validateReloadReport(reloadReport, logger: hotRunner.logger)) {
-    analytics.send(
+    globals.analytics.send(
       Event.hotRunnerInfo(
         label: 'reload-reject',
         targetPlatform: targetPlatform!,
@@ -1314,7 +1314,7 @@ Future<ReassembleResult> _defaultReassembleHelper(
   void Function(String message)? onSlow,
   String reloadMessage,
 ) async {
-  final Logger logger = flutterDevices.firstOrNull?.logger ?? BufferLogger.test();
+  final Logger logger = flutterDevices.firstOrNull?.device?.logger ?? BufferLogger.test();
   // Check if any isolates are paused and reassemble those that aren't.
   final reassembleViews = <FlutterView, FlutterVmService?>{};
   final reassembleFutures = <Future<void>>[];
@@ -1496,7 +1496,7 @@ class ProjectFileInvalidator {
     final invalidatedFiles = <Uri>[];
 
     final bool Function(DateTime) isInvalidated;
-    if (_platform.isWindows) {
+    if (_globals.platform.isWindows) {
       // On Windows, FileStat.modified truncates to second precision (via GetFileAttributesExW).
       // However, lastCompiled is recorded with millisecond precision.
       final lastCompiledTruncated = DateTime.fromMillisecondsSinceEpoch(
@@ -1521,7 +1521,7 @@ class ProjectFileInvalidator {
                         // TODO(srawlins): Switch from using `stat` to using `statSync`.
                         // ignore: avoid_slow_async_io
                         ? _fileSystem.file(uri).stat()
-                        : _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
+                        : _fileSystem.stat(uri.toFilePath(windows: _globals.platform.isWindows)))
                     .then((FileStat stat) {
                       final DateTime updatedAt = stat.modified;
                       if (isInvalidated(updatedAt)) {
@@ -1538,7 +1538,7 @@ class ProjectFileInvalidator {
         // uri.toFilePath() does not work with MultiRootFileSystem.
         final DateTime updatedAt = uri.hasScheme && uri.scheme != 'file'
             ? _fileSystem.file(uri).statSync().modified
-            : _fileSystem.statSync(uri.toFilePath(windows: _platform.isWindows)).modified;
+            : _fileSystem.statSync(uri.toFilePath(windows: _globals.platform.isWindows)).modified;
         if (isInvalidated(updatedAt)) {
           invalidatedFiles.add(uri);
         }
@@ -1562,7 +1562,7 @@ class ProjectFileInvalidator {
   }
 
   bool _isNotInPubCache(Uri uri) {
-    return !(_platform.isWindows && uri.path.contains(_pubCachePathWindows)) &&
+    return !(_globals.platform.isWindows && uri.path.contains(_pubCachePathWindows)) &&
         !uri.path.contains(_pubCachePathLinuxAndMac);
   }
 }

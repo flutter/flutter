@@ -10,10 +10,8 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:analyzer/source/line_info.dart';
 
-import '../flutter_analysis_rule.dart';
-
 /// A rule that enforces standard Flutter deprecation notice syntax.
-class DeprecationSyntax extends FlutterAnalysisRule {
+class DeprecationSyntax extends AnalysisRule {
   /// Creates a new [DeprecationSyntax] rule.
   DeprecationSyntax() : super(name: code.name, description: 'Verify deprecation syntax');
 
@@ -21,8 +19,7 @@ class DeprecationSyntax extends FlutterAnalysisRule {
   static const LintCode code = LintCode(
     'deprecation_syntax',
     'Deprecation syntax must conform to flutter standards.',
-    correctionMessage:
-        'See https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes',
+    correctionMessage: 'See https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes',
     severity: DiagnosticSeverity.ERROR,
   );
 
@@ -30,11 +27,7 @@ class DeprecationSyntax extends FlutterAnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
-    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
-    if (filePath.contains('analyze-test-input')) {
-      return;
-    }
+  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     registry.addAnnotation(this, _Visitor(this, context));
   }
 }
@@ -72,10 +65,9 @@ class _Visitor extends SimpleAstVisitor<void> {
     }
 
     // Check the remainder of the current line.
-    final int currentLineEnd =
-        lineIndex + 1 < lineInfo.lineCount
-            ? lineInfo.getOffsetOfLine(lineIndex + 1)
-            : content.length;
+    final int currentLineEnd = lineIndex + 1 < lineInfo.lineCount
+        ? lineInfo.getOffsetOfLine(lineIndex + 1)
+        : content.length;
     final String textAfterNode = content.substring(node.offset, currentLineEnd);
     return textAfterNode.contains(ignorePattern);
   }
@@ -89,9 +81,8 @@ class _Visitor extends SimpleAstVisitor<void> {
       return;
     }
 
-    if (node.arguments?.arguments case [
-      AdjacentStrings(:final List<StringLiteral> strings),
-    ] when strings.isNotEmpty) {
+    if (node.arguments?.arguments case [AdjacentStrings(:final List<StringLiteral> strings)]
+        when strings.isNotEmpty) {
       final List<StringLiteral> messageLiterals = strings.sublist(0, strings.length - 1);
       final StringLiteral versionLiteral = strings.last;
 
@@ -129,11 +120,10 @@ class _Visitor extends SimpleAstVisitor<void> {
         return;
       }
 
-      final String fullExplanation =
-          messageLiterals
-              .map((StringLiteral message) => message.stringValue ?? '')
-              .join()
-              .trimRight();
+      final String fullExplanation = messageLiterals
+          .map((StringLiteral message) => message.stringValue ?? '')
+          .join()
+          .trimRight();
       if (fullExplanation.isEmpty) {
         rule.reportAtNode(messageLiterals.last);
         return;

@@ -2867,7 +2867,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         for (final FileSystemEntity fileEntity
             in fileSystem
                 .directory(
-                  '${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
+                  '${globals.cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
                 )
                 .listSync(recursive: true)) {
           if (fileEntity is File) {
@@ -2878,7 +2878,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
 
         // Set up package_config.json for template imageDirectory
         final File packagesFile = fs.file(
-          '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+          '${globals.cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
         )..createSync(recursive: true);
         packagesFile.writeAsStringSync(
           json.encode(<String, Object>{
@@ -3109,7 +3109,7 @@ let package = Package(
         for (final FileSystemEntity fileEntity
             in fileSystem
                 .directory(
-                  '${Cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
+                  '${globals.cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
                 )
                 .listSync(recursive: true)) {
           if (fileEntity is File) {
@@ -3120,7 +3120,7 @@ let package = Package(
 
         // Set up package_config.json for template imageDirectory
         final File packagesFile = fs.file(
-          '${Cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+          '${globals.cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
         )..createSync(recursive: true);
         packagesFile.writeAsStringSync(
           json.encode(<String, Object>{

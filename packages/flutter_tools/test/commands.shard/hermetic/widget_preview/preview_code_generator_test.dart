@@ -1,3 +1,4 @@
+import 'package:flutter_tools/src/globals.dart' as globals;
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -264,8 +265,8 @@ void main() {
         ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary)
         ..childFile('lib/src/custom_previews.dart').writeAsStringSync(kCustomPreviews);
       project = FlutterProject.fromDirectoryTest(projectDir);
-      final String? sdkPath = Cache.flutterRoot != null
-          ? fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'dart-sdk')
+      final String? sdkPath = globals.cache.flutterRoot != null
+          ? fs.path.join(globals.cache.flutterRoot, 'bin', 'cache', 'dart-sdk')
           : null;
       final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
       previewDetector = PreviewDetector(

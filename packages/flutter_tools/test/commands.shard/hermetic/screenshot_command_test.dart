@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -9,17 +11,14 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/screenshot.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
-import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
-import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -28,30 +27,18 @@ void main() {
   });
 
   group('Validate screenshot options', () {
-    testWithoutContext('rasterizer and skia screenshots do not require a device', () async {
-      final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
-      final command = ScreenshotCommand(
-        toolContext: toolContext,
-        vmServiceConnector:
-            (
-              Uri uri, {
-              ReloadSources? reloadSources,
-              Restart? restart,
-              CompileExpression? compileExpression,
-              FlutterProject? flutterProject,
-              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-              CompressionOptions compression = CompressionOptions.compressionDefault,
-              Device? device,
-              required Logger logger,
-            }) async {
-              expect(uri.toString(), 'http://localhost:8181');
-              throw Exception('dummy');
-            },
-      );
+    testUsingContext('rasterizer and skia screenshots do not require a device', () async {
+      // Throw a specific exception when attempting to make a VM Service connection to
+      // verify that we've made it past the initial validation.
+      openChannelForTesting =
+          (String url, {CompressionOptions? compression, Logger? logger}) async {
+            expect(url, 'ws://localhost:8181/ws');
+            throw Exception('dummy');
+          };
 
       await expectLater(
         () => createTestCommandRunner(
-          command,
+          ScreenshotCommand(fs: MemoryFileSystem.test()),
         ).run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']),
         throwsA(
           isException.having(
@@ -63,31 +50,28 @@ void main() {
       );
     });
 
-    testWithoutContext('rasterizer and skia screenshots require VM Service uri', () async {
-      final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
+    testUsingContext('rasterizer and skia screenshots require VM Service uri', () async {
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(toolContext: toolContext),
+          ScreenshotCommand(fs: MemoryFileSystem.test()),
         ).run(<String>['screenshot', '--type=skia']),
         throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia'),
       );
     });
 
     testUsingContext('device screenshots require device', () async {
-      final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(toolContext: toolContext),
+          ScreenshotCommand(fs: MemoryFileSystem.test()),
         ).run(<String>['screenshot']),
         throwsToolExit(message: 'Must have a connected device for screenshot type device'),
       );
     });
 
-    testWithoutContext('device screenshots cannot provide VM Service', () async {
-      final toolContext = FakeToolContext(fs: MemoryFileSystem.test());
+    testUsingContext('device screenshots cannot provided VM Service', () async {
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(toolContext: toolContext),
+          ScreenshotCommand(fs: MemoryFileSystem.test()),
         ).run(<String>['screenshot', '--vm-service-url=http://localhost:8181']),
         throwsToolExit(message: 'VM Service URI cannot be provided for screenshot type device'),
       );
@@ -158,17 +142,13 @@ void main() {
 
   group('Screenshot for devices unsupported for project', () {
     late _TestDeviceManager testDeviceManager;
-    late BufferLogger logger;
-    late FakeToolContext toolContext;
 
     setUp(() {
-      logger = BufferLogger.test();
-      testDeviceManager = _TestDeviceManager(logger: logger);
-      toolContext = FakeToolContext(fs: MemoryFileSystem.test(), logger: logger);
+      testDeviceManager = _TestDeviceManager(logger: BufferLogger.test());
     });
 
     testUsingContext('should not throw for a single device', () async {
-      final command = ScreenshotCommand(toolContext: toolContext);
+      final command = ScreenshotCommand(fs: MemoryFileSystem.test());
 
       final deviceUnsupportedForProject = _ScreenshotDevice(
         id: '123',
@@ -182,7 +162,7 @@ void main() {
     }, overrides: <Type, Generator>{DeviceManager: () => testDeviceManager});
 
     testUsingContext('should tool exit for multiple devices', () async {
-      final command = ScreenshotCommand(toolContext: toolContext);
+      final command = ScreenshotCommand(fs: MemoryFileSystem.test());
 
       final devicesUnsupportedForProject = <_ScreenshotDevice>[
         _ScreenshotDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
@@ -206,87 +186,6 @@ Device 2 (mobile) • 456 • android • 1.2.3
 '''),
       );
     }, overrides: <Type, Generator>{DeviceManager: () => testDeviceManager});
-  });
-
-  group('Skia screenshot execution', () {
-    testWithoutContext('successful Skia screenshot with custom out', () async {
-      final fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final toolContext = FakeToolContext(fs: fs, logger: logger);
-
-      final fakeVmService = _FakeFlutterVmService(
-        response: vm_service.Response.parse(<String, Object?>{
-          'type': 'Response',
-          'skp': base64.encode(utf8.encode('valid skp data')),
-        }),
-      );
-
-      final command = ScreenshotCommand(
-        toolContext: toolContext,
-        vmServiceConnector:
-            (
-              Uri uri, {
-              ReloadSources? reloadSources,
-              Restart? restart,
-              CompileExpression? compileExpression,
-              FlutterProject? flutterProject,
-              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-              CompressionOptions compression = CompressionOptions.compressionDefault,
-              Device? device,
-              required Logger logger,
-            }) async {
-              expect(uri.toString(), 'http://localhost:8181');
-              return fakeVmService;
-            },
-      );
-
-      await createTestCommandRunner(command).run(<String>[
-        'screenshot',
-        '--type=skia',
-        '--vm-service-url=http://localhost:8181',
-        '--out=screenshot.skp',
-      ]);
-
-      final File outputFile = fs.file('screenshot.skp');
-      expect(outputFile.existsSync(), isTrue);
-      expect(outputFile.readAsStringSync(), 'valid skp data');
-      expect(logger.statusText, contains('Screenshot written to screenshot.skp (0kB).'));
-    });
-
-    testWithoutContext('failed Skia screenshot when disconnected', () async {
-      final fs = MemoryFileSystem.test();
-      final logger = BufferLogger.test();
-      final toolContext = FakeToolContext(fs: fs, logger: logger);
-
-      final fakeVmService = _FakeFlutterVmService();
-
-      final command = ScreenshotCommand(
-        toolContext: toolContext,
-        vmServiceConnector:
-            (
-              Uri uri, {
-              ReloadSources? reloadSources,
-              Restart? restart,
-              CompileExpression? compileExpression,
-              FlutterProject? flutterProject,
-              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-              CompressionOptions compression = CompressionOptions.compressionDefault,
-              Device? device,
-              required Logger logger,
-            }) async {
-              return fakeVmService;
-            },
-      );
-
-      await createTestCommandRunner(
-        command,
-      ).run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']);
-
-      expect(
-        logger.errorText,
-        contains('The Skia picture request failed, probably because the device was disconnected'),
-      );
-    });
   });
 }
 
@@ -354,13 +253,4 @@ class _TestDeviceManager extends DeviceManager {
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }
-}
-
-class _FakeFlutterVmService extends Fake implements FlutterVmService {
-  _FakeFlutterVmService({this.response});
-
-  final vm_service.Response? response;
-
-  @override
-  Future<vm_service.Response?> screenshotSkp() async => response;
 }

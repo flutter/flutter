@@ -14,19 +14,19 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/error/error.dart';
 
-import '../flutter_analysis_rule.dart';
-
-class ProtectPublicStateSubtypes extends FlutterAnalysisRule {
+class ProtectPublicStateSubtypes extends AnalysisRule {
   ProtectPublicStateSubtypes()
     : super(
         name: code.name,
-        description: 'Enforces that public subclasses of State are marked @protected.',
+        description:
+            'Public State subtypes should add @protected when overriding methods '
+            'to avoid exposing internal logic to developers.',
       );
 
   static const LintCode code = LintCode(
     'protect_public_state_subtypes',
-    'Public State subtypes must be marked @protected.',
-    correctionMessage: 'Add @protected annotation to the State subclass.',
+    'Public State subtypes should add @protected when overriding methods '
+        'to avoid exposing internal logic to developers.',
     severity: DiagnosticSeverity.ERROR,
   );
 
@@ -34,7 +34,7 @@ class ProtectPublicStateSubtypes extends FlutterAnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
     registry.addClassDeclaration(this, visitor);
   }

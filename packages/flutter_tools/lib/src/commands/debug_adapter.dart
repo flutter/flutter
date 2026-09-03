@@ -37,7 +37,8 @@ class DebugAdapterCommand extends FlutterCommand {
     );
   }
 
-  ToolContext get _toolContext => toolContext!;
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'debug-adapter';
@@ -57,13 +58,13 @@ class DebugAdapterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = _toolContext.logger;
-    final Stdio stdio = _toolContext.stdio;
+    final Logger logger = toolContext.logger;
+    final Stdio stdio = toolContext.stdio;
     final server = DapServer(
       stdio.stdin,
       stdio.stdout.nonBlocking,
-      fileSystem: _toolContext.fs,
-      platform: _toolContext.platform,
+      fileSystem: toolContext.fs,
+      platform: toolContext.platform,
       ipv6: ipv6 ?? false,
       enableDds: enableDds,
       test: boolArg('test'),

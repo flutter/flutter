@@ -18,7 +18,7 @@ import '../../src/fakes.dart';
 
 void main() {
   setUpAll(() {
-    Cache.flutterRoot = '/flutter';
+    globals.cache.flutterRoot = '/flutter';
   });
 
   group('ExtensionTemplateManager', () {

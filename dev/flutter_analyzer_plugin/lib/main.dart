@@ -29,25 +29,23 @@ class FlutterAnalyzerPlugin extends Plugin {
   @override
   void register(PluginRegistry registry) {
     registry
-      // Repo-wide warning rules (migrated from dev/bots/analyze.dart validations).
+      ..registerWarningRule(AvoidFutureCatchError())
       ..registerWarningRule(DeprecationSyntax())
       ..registerWarningRule(GoldenTestTags())
       ..registerWarningRule(IntegrationTestTimeouts())
       ..registerWarningRule(IssueLinkSyntax())
       ..registerWarningRule(NoBadImportsInFlutter())
+      ..registerWarningRule(NoDoubleClamp())
+      ..registerWarningRule(NoRuntimeTypeInToString())
+      ..registerWarningRule(NoStopwatches())
       ..registerWarningRule(NoSyncAsyncStar())
       ..registerWarningRule(NoTestImports())
+      ..registerWarningRule(NullInitializedDebugExpensiveFields())
+      ..registerWarningRule(ProtectPublicStateSubtypes())
+      ..registerWarningRule(RenderBoxIntrinsicCalculationRule())
       ..registerWarningRule(RepositoryLinkSyntax())
       ..registerWarningRule(SkipTestComments())
-      ..registerWarningRule(TabooDocumentation())
-      // Package-specific lint rules (opt-in via diagnostics: in analysis_options.yaml).
-      ..registerLintRule(AvoidFutureCatchError())
-      ..registerLintRule(NoDoubleClamp())
-      ..registerLintRule(NoRuntimeTypeInToString())
-      ..registerLintRule(NoStopwatches())
-      ..registerLintRule(NullInitializedDebugExpensiveFields())
-      ..registerLintRule(ProtectPublicStateSubtypes())
-      ..registerLintRule(RenderBoxIntrinsicCalculationRule());
+      ..registerWarningRule(TabooDocumentation());
   }
 
   @override

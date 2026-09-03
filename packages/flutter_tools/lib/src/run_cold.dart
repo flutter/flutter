@@ -20,7 +20,7 @@ class ColdRunner extends ResidentRunner {
     required super.target,
 
     this.applicationBinary,
-    super.artifacts,
+    
     this.awaitFirstFrameWhenTracing = true,
     super.buildSystem,
     super.buildTargets,
@@ -119,7 +119,7 @@ class ColdRunner extends ResidentRunner {
       if (device.vmService != null) {
         logger.printStatus('Tracing startup on ${device.device!.displayName}.');
         final String outputPath =
-            platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
+            globals.platform.environment[kFlutterTestOutputsDirEnvName] ?? getBuildDirectory();
         await downloadStartupTrace(
           device.vmService!,
           awaitFirstFrame: awaitFirstFrameWhenTracing,

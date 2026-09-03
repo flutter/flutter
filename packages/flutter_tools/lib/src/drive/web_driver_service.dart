@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../base/common.dart';
@@ -17,11 +16,11 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
-import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
@@ -31,34 +30,25 @@ import 'drive_service.dart';
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
   WebDriverService({
-    required String dartSdkPath,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required OutputPreferences outputPreferences,
-    required Platform platform,
     required ProcessUtils processUtils,
+    required String dartSdkPath,
+    required Platform platform,
+    required Logger logger,
     required Terminal terminal,
-    Analytics? analytics,
-    SystemClock? systemClock,
-  }) : _dartSdkPath = dartSdkPath,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _outputPreferences = outputPreferences,
+    required OutputPreferences outputPreferences,
+  }) : _processUtils = processUtils,
+       _dartSdkPath = dartSdkPath,
        _platform = platform,
-       _processUtils = processUtils,
+       _logger = logger,
        _terminal = terminal,
-       _analytics = analytics ?? const NoOpAnalytics(),
-       _systemClock = systemClock ?? const SystemClock();
+       _outputPreferences = outputPreferences;
 
-  final String _dartSdkPath;
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final OutputPreferences _outputPreferences;
-  final Platform _platform;
   final ProcessUtils _processUtils;
+  final String _dartSdkPath;
+  final Platform _platform;
+  final Logger _logger;
   final Terminal _terminal;
-  final Analytics _analytics;
-  final SystemClock _systemClock;
+  final OutputPreferences _outputPreferences;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -83,6 +73,7 @@ class WebDriverService extends DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
+    Map<String, String> webDefines = const <String, String>{},
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
@@ -109,14 +100,15 @@ class WebDriverService extends DriverService {
             ),
       platformArgs: platformArgs,
       stayResident: true,
+      webDefines: webDefines,
       flutterProject: FlutterProject.current(),
-      fileSystem: _fileSystem,
-      analytics: _analytics,
+      fileSystem: globals.fs,
+      analytics: globals.analytics,
       logger: _logger,
       terminal: _terminal,
       platform: _platform,
       outputPreferences: _outputPreferences,
-      systemClock: _systemClock,
+      systemClock: globals.systemClock,
     );
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(

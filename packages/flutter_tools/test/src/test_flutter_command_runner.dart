@@ -1,3 +1,4 @@
+import 'package:flutter_tools/src/globals.dart' as globals;
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -96,14 +97,14 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () {
-        Cache.flutterRoot ??= Cache.defaultFlutterRoot(
+        globals.cache.flutterRoot ??= Cache.defaultFlutterRoot(
           platform: toolContext.platform,
           fileSystem: toolContext.fs,
           userMessages: UserMessages(),
         );
         // For compatibility with tests that set this to a relative path.
         final FileSystem fs = toolContext.fs;
-        Cache.flutterRoot = fs.path.normalize(fs.path.absolute(Cache.flutterRoot!));
+        globals.cache.flutterRoot = fs.path.normalize(fs.path.absolute(globals.cache.flutterRoot));
         return super.runCommand(topLevelResults);
       },
     );

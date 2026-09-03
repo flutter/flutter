@@ -1,3 +1,4 @@
+import '../globals.dart' as globals;
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -97,7 +98,7 @@ base class ExtensionTemplateManager extends TemplateService {
     if (templatePath.startsWith('package:flutter_tools/')) {
       final String relativePath = templatePath.substring('package:flutter_tools/'.length);
       final String absolutePath = _fileSystem.path.join(
-        Cache.flutterRoot!,
+        globals.cache.flutterRoot,
         'packages',
         'flutter_tools',
         'lib',
@@ -111,7 +112,7 @@ base class ExtensionTemplateManager extends TemplateService {
         'package:flutter_tools_extension_linux_prototype/'.length,
       );
       final String absolutePath = _fileSystem.path.join(
-        Cache.flutterRoot!,
+        globals.cache.flutterRoot,
         'packages',
         'flutter_tools',
         'packages',

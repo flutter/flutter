@@ -69,7 +69,7 @@ void main() {
 
       // Setup repo roots
       const homePath = '/home/user/flutter';
-      Cache.flutterRoot = homePath;
+      globals.cache.flutterRoot = homePath;
       for (final dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
@@ -89,7 +89,6 @@ void main() {
               'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
-              '--no-with-fine-dependencies',
               '--suppress-analytics',
             ],
             exitCode: SIGABRT,
@@ -126,7 +125,6 @@ void main() {
               'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
-              '--no-with-fine-dependencies',
               '--suppress-analytics',
             ],
             exitCode: 255,
@@ -166,7 +164,6 @@ void main() {
               'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
-              '--no-with-fine-dependencies',
               '--suppress-analytics',
             ],
             process: process,
@@ -205,7 +202,6 @@ void main() {
               'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
-              '--no-with-fine-dependencies',
               '--no-plugins',
               '--suppress-analytics',
             ],
@@ -236,7 +232,6 @@ void main() {
               'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
-              '--no-with-fine-dependencies',
               '--no-plugins',
               '--suppress-analytics',
             ],
@@ -264,7 +259,6 @@ void main() {
               'Artifact.engineDartSdkPath',
               '--disable-server-feature-completion',
               '--disable-server-feature-search',
-              '--no-with-fine-dependencies',
               '--suppress-analytics',
             ],
             exitCode: 255,
@@ -289,16 +283,16 @@ void main() {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
-    Cache.flutterRoot = _kFlutterRoot;
+    globals.cache.flutterRoot = _kFlutterRoot;
 
     // Absolute paths
     expect(inRepo(<String>[tempDir.path], fileSystem), isFalse);
     expect(inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem), isFalse);
-    expect(inRepo(<String>[Cache.flutterRoot!], fileSystem), isTrue);
-    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot!, 'foo')], fileSystem), isTrue);
+    expect(inRepo(<String>[globals.cache.flutterRoot], fileSystem), isTrue);
+    expect(inRepo(<String>[fileSystem.path.join(globals.cache.flutterRoot, 'foo')], fileSystem), isTrue);
 
     // Relative paths
-    fileSystem.currentDirectory = Cache.flutterRoot;
+    fileSystem.currentDirectory = globals.cache.flutterRoot;
     expect(inRepo(<String>['.'], fileSystem), isTrue);
     expect(inRepo(<String>['foo'], fileSystem), isTrue);
     fileSystem.currentDirectory = tempDir.path;
@@ -315,7 +309,7 @@ bool inRepo(List<String>? fileList, FileSystem fileSystem) {
   if (fileList == null || fileList.isEmpty) {
     fileList = <String>[fileSystem.path.current];
   }
-  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot!));
+  final String root = fileSystem.path.normalize(fileSystem.path.absolute(globals.cache.flutterRoot));
   final String prefix = root + fileSystem.path.separator;
   for (String file in fileList) {
     file = fileSystem.path.normalize(fileSystem.path.absolute(file));

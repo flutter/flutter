@@ -65,7 +65,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
     bool verboseHelp = false,
     this.testWrapper = const TestWrapper(),
-    this.testRunner = const FlutterTestRunner(),
+    this.testRunner,
     this.verbose = false,
     this.nativeAssetsBuilder,
   }) {
@@ -329,7 +329,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   final TestWrapper testWrapper;
 
   /// Interface for running the tester process.
-  final FlutterTestRunner testRunner;
+  final FlutterTestRunner? testRunner;
 
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
@@ -610,7 +610,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         flutterProject,
         buildInfo.packageConfig,
       );
-      collector = CoverageCollector(
+      collector = CoverageCollector(fileSystem: globals.fs, 
         verbose: !outputMachineFormat,
         libraryNames: packagesToInclude,
         packagesPath: buildInfo.packageConfigPath,
@@ -676,7 +676,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final int result;
     if (experimentalFasterTesting) {
       assert(!isWeb && !_isIntegrationTest && _testFileUris.length > 1);
-      result = await testRunner.runTestsBySpawningLightweightEngines(
+      result = await testRunner!.runTestsBySpawningLightweightEngines(
         _testFileUris.toList(),
         debuggingOptions: debuggingOptions,
         names: names,
@@ -702,7 +702,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         nativeAssetsBuilder: nativeAssetsBuilder,
       );
     } else {
-      result = await testRunner.runTests(
+      result = await testRunner!.runTests(
         testWrapper,
         _testFileUris.toList(),
         debuggingOptions: debuggingOptions,

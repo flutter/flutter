@@ -30,13 +30,13 @@ void main() {
     late BufferLogger logger;
 
     setUp(() {
-      Cache.flutterRoot = getFlutterRoot();
+      globals.cache.flutterRoot = getFlutterRoot();
       fs = LocalFileSystem.test(signals: FakeSignals());
       watcher = FakeWatcher();
       logger = BufferLogger.test();
       project = FlutterProject.fromDirectoryTest(fs.systemTempDirectory.createTempSync('root'));
-      final String? sdkPath = Cache.flutterRoot != null
-          ? fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'dart-sdk')
+      final String? sdkPath = globals.cache.flutterRoot != null
+          ? fs.path.join(globals.cache.flutterRoot, 'bin', 'cache', 'dart-sdk')
           : null;
       final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
       previewDetector = PreviewDetector(

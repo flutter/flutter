@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -20,8 +16,6 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
-
-import '../src/fake_process_manager.dart';
 
 class FakeDevFs extends Fake implements DevFS {
   @override
@@ -103,18 +97,6 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
 class FakeFlutterDevice extends Fake implements FlutterDevice {
   FakeFlutterDevice(this.device);
-
-  @override
-  Logger logger = BufferLogger.test();
-
-  @override
-  FileSystem fileSystem = MemoryFileSystem.test();
-
-  @override
-  Platform platform = const LocalPlatform();
-
-  @override
-  ProcessManager processManager = FakeProcessManager.any();
 
   bool stoppedEchoingDeviceLog = false;
   late Future<UpdateFSReport> Function() updateDevFSReportCallback;

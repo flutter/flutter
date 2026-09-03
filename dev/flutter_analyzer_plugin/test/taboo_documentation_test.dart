@@ -72,13 +72,21 @@ void badFunction() {}
   }
 
   // ignore: non_constant_identifier_names
-  Future<void> test_note_allowed() async {
+  Future<void> test_taboo_note_colon() async {
     const source = '''
-/// Note: foo is allowed.
-/// Note that this is allowed.
-void validFunction() {}
+/// Note: foo is taboo.
+void badFunction() {}
 ''';
-    await assertNoDiagnostics(source);
+    await assertDiagnostics(source, [lint(0, 23)]);
+  }
+
+  // ignore: non_constant_identifier_names
+  Future<void> test_taboo_note_that() async {
+    const source = '''
+/// Note that this is taboo.
+void badFunction() {}
+''';
+    await assertDiagnostics(source, [lint(0, 28)]);
   }
 
   // ignore: non_constant_identifier_names

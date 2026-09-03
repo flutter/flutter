@@ -106,7 +106,7 @@ class ChannelCommand extends FlutterCommand {
     logger.printStatus('Flutter channels:');
     final int result = await git.stream(
       <String>['branch', '-r'],
-      workingDirectory: Cache.flutterRoot,
+      workingDirectory: flutterRoot,
       mapFunction: (String line) {
         rawOutput.add(line);
         return null;
@@ -190,7 +190,7 @@ class ChannelCommand extends FlutterCommand {
     await _checkout(branchName, git: git, cache: cache, force: boolArg('force'));
     if (boolArg('cache-artifacts')) {
       await precacheArtifacts(
-        workingDirectory: Cache.flutterRoot,
+        workingDirectory: flutterRoot,
         logger: logger,
         processUtils: _toolContext.processUtils,
         fileSystem: _toolContext.fs,
@@ -224,7 +224,7 @@ class ChannelCommand extends FlutterCommand {
     bool force = false,
   }) async {
     // Get latest refs from upstream.
-    RunResult runResult = await git.run(<String>['fetch'], workingDirectory: Cache.flutterRoot);
+    RunResult runResult = await git.run(<String>['fetch'], workingDirectory: flutterRoot);
 
     if (runResult.processResult.exitCode == 0) {
       runResult = await git.run(<String>[
@@ -232,7 +232,7 @@ class ChannelCommand extends FlutterCommand {
         '--verify',
         '--quiet',
         'refs/heads/$branchName',
-      ], workingDirectory: Cache.flutterRoot);
+      ], workingDirectory: flutterRoot);
       if (runResult.processResult.exitCode == 0) {
         // branch already exists, try just switching to it
         runResult = await git.run(<String>[
@@ -240,7 +240,7 @@ class ChannelCommand extends FlutterCommand {
           if (force) '-f',
           branchName,
           '--',
-        ], workingDirectory: Cache.flutterRoot);
+        ], workingDirectory: flutterRoot);
       } else {
         // branch does not exist, we have to create it
         runResult = await git.run(<String>[
@@ -250,7 +250,7 @@ class ChannelCommand extends FlutterCommand {
           '-b',
           branchName,
           'origin/$branchName',
-        ], workingDirectory: Cache.flutterRoot);
+        ], workingDirectory: flutterRoot);
       }
     }
     if (runResult.processResult.exitCode != 0) {
