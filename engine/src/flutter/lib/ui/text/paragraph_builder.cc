@@ -293,7 +293,8 @@ ParagraphBuilder::ParagraphBuilder(
   }
 
   if (mask & kPSFakeMissingFontStylesMask) {
-    style.fake_missing_font_styles = mask & kPSFakeMissingFontStylesValueMask;
+    style.fake_missing_font_styles =
+        (mask & kPSFakeMissingFontStylesValueMask) != 0;
   }
 
   FontCollection& font_collection = UIDartState::Current()
