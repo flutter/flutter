@@ -142,36 +142,32 @@ abstract class InheritedModel<T> extends InheritedWidget {
   @protected
   bool isSupportedAspect(Object aspect) => true;
 
-  // The [result] will be a list of all of context's type T ancestors concluding
-  // with the one that supports the specified model [aspect].
-  static void _findModels<T extends InheritedModel<Object>>(
-    BuildContext context,
+  // Adds the type T ancestors of [model] to [results], nearest first, up to
+  // and including the one that supports the specified model [aspect].
+  static void _findAncestorModels<T extends InheritedModel<Object>>(
+    InheritedElement model,
     Object aspect,
     List<InheritedElement> results,
   ) {
-    final InheritedElement? model = context.getElementForInheritedWidgetOfExactType<T>();
-    if (model == null) {
-      return;
-    }
-
-    results.add(model);
-
-    assert(model.widget is T);
-    final modelWidget = model.widget as T;
-    if (modelWidget.isSupportedAspect(aspect)) {
-      return;
-    }
-
     Element? modelParent;
     model.visitAncestorElements((Element ancestor) {
       modelParent = ancestor;
       return false;
     });
-    if (modelParent == null) {
+    final InheritedElement? ancestorModel = modelParent
+        ?.getElementForInheritedWidgetOfExactType<T>();
+    if (ancestorModel == null) {
       return;
     }
 
-    _findModels<T>(modelParent!, aspect, results);
+    results.add(ancestorModel);
+
+    assert(ancestorModel.widget is T);
+    if ((ancestorModel.widget as T).isSupportedAspect(aspect)) {
+      return;
+    }
+
+    _findAncestorModels<T>(ancestorModel, aspect, results);
   }
 
   /// Makes [context] dependent on the specified [aspect] of an [InheritedModel]
@@ -207,11 +203,8 @@ abstract class InheritedModel<T> extends InheritedWidget {
 
     // Create a dependency on all of the type T ancestor models up until
     // a model is found for which isSupportedAspect(aspect) is true.
-    final models = <InheritedElement>[];
-    _findModels<T>(context, aspect, models);
-    if (models.isEmpty) {
-      return null;
-    }
+    final models = <InheritedElement>[nearestModel];
+    _findAncestorModels<T>(nearestModel, aspect, models);
 
     final InheritedElement lastModel = models.last;
     for (final model in models) {
