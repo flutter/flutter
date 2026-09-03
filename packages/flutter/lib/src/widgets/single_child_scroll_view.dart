@@ -344,6 +344,8 @@ class _SingleChildViewportElement extends SingleChildRenderObjectElement
   _SingleChildViewportElement(_SingleChildViewport super.widget);
 }
 
+typedef _ScrollExtents = ({double min, double max});
+
 class _RenderSingleChildViewport extends RenderBox
     with RenderObjectWithChildMixin<RenderBox>
     implements RenderAbstractViewport {
@@ -383,6 +385,8 @@ class _RenderSingleChildViewport extends RenderBox
     if (attached) {
       _offset.addListener(_hasScrolled);
     }
+    // The new offset has not been reconciled against the extents yet.
+    _reconciledExtents = null;
     markNeedsLayout();
   }
 
@@ -452,6 +456,9 @@ class _RenderSingleChildViewport extends RenderBox
     });
   }
 
+  // The scroll extents the offset was last reconciled against.
+  _ScrollExtents? _reconciledExtents;
+
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     return switch (axis) {
       Axis.horizontal => constraints.heightConstraints(),
@@ -503,16 +510,29 @@ class _RenderSingleChildViewport extends RenderBox
       size = constraints.constrain(child!.size);
     }
 
+    final _ScrollExtents extents = (min: _minScrollExtent, max: _maxScrollExtent);
+
     if (offset.hasPixels) {
-      if (offset.pixels > _maxScrollExtent) {
-        offset.correctBy(_maxScrollExtent - offset.pixels);
-      } else if (offset.pixels < _minScrollExtent) {
-        offset.correctBy(_minScrollExtent - offset.pixels);
+      final double pixels = offset.pixels;
+      final _ScrollExtents? previous = _reconciledExtents;
+      // An offset already past an edge of the extents it was reconciled against got there through
+      // the physics, which also carries it across a change of extents in applyContentDimensions.
+      // The layout pulls the offset back only when the range moved out from under it: on the first
+      // layout of this offset, and when the new extents leave out an offset the previous ones held.
+      final bool overscrolled =
+          previous != null && (pixels < previous.min || pixels > previous.max);
+      if (!overscrolled) {
+        if (pixels > extents.max) {
+          offset.correctBy(extents.max - pixels);
+        } else if (pixels < extents.min) {
+          offset.correctBy(extents.min - pixels);
+        }
       }
+      _reconciledExtents = extents;
     }
 
     offset.applyViewportDimension(_viewportExtent);
-    offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
+    offset.applyContentDimensions(extents.min, extents.max);
   }
 
   Offset get _paintOffset => _paintOffsetForPosition(offset.pixels);
