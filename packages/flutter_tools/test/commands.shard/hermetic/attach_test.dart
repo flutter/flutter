@@ -873,6 +873,54 @@ void main() {
       );
 
       testUsingContext(
+        'passes --flavor into the build info so hot restart keeps $kAppFlavor',
+        () async {
+          device.onGetLogReader = () {
+            fakeLogReader.addLine('Foo');
+            fakeLogReader.addLine(
+              'The Dart VM service is listening on http://127.0.0.1:$devicePort',
+            );
+            return fakeLogReader;
+          };
+          testDeviceManager.devices = <Device>[device];
+
+          final hotRunner = FakeHotRunner();
+          hotRunner.onAttach =
+              (
+                Completer<DebugConnectionInfo>? connectionInfoCompleter,
+                Completer<void>? appStartedCompleter,
+                bool enableDevTools,
+              ) async => 0;
+          hotRunner.exited = false;
+          hotRunner.isWaitingForVmService = false;
+
+          final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+
+          final command = AttachCommand(
+            hotRunnerFactory: hotRunnerFactory,
+            stdio: stdio,
+            logger: logger,
+            terminal: terminal,
+            signals: signals,
+            platform: platform,
+            processInfo: processInfo,
+            fileSystem: testFileSystem,
+          );
+          await createTestCommandRunner(command).run(<String>['attach', '--flavor', 'strawberry']);
+
+          expect(hotRunnerFactory.devices, hasLength(1));
+          final BuildInfo buildInfo = hotRunnerFactory.devices.first.buildInfo;
+          expect(buildInfo.flavor, 'strawberry');
+          expect(buildInfo.dartDefines, contains('$kAppFlavor=strawberry'));
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
         'exits when ipv6 is specified and debug-port is not on non-iOS device',
         () async {
           testDeviceManager.devices = <Device>[device];
