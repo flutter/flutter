@@ -13,8 +13,6 @@
 
 namespace flutter {
 
-class ContextVK;
-
 class EmbedderExternalTextureSourceVulkan final
     : public impeller::TextureSourceVK {
  public:
