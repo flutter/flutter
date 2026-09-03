@@ -2073,7 +2073,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       fallbackFocus = traversalDescendants.first;
     }
 
-    // Return fallback focus or restore to [rootScope] as a safe and last option
+    // Return fallback focus or restore to [rootScope] as a safe and last option.
     return fallbackFocus ?? rootScope;
   }
 
