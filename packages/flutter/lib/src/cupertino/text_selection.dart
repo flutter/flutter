@@ -117,38 +117,26 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     VoidCallback? onTap,
   ]) {
     // iOS selection handles do not respond to taps.
-    final Size desiredSize;
-    final Widget handle;
-
+    final Size handleSize = getHandleSize(textLineHeight);
     final Widget customPaint = CustomPaint(
       painter: _CupertinoTextSelectionHandlePainter(
         CupertinoTheme.of(context).selectionHandleColor,
       ),
     );
 
-    // [buildHandle]'s widget is positioned at the selection cursor's bottom
-    // baseline. We transform the handle such that the SizedBox is superimposed
-    // on top of the text selection endpoints.
-    switch (type) {
-      case TextSelectionHandleType.left:
-        desiredSize = getHandleSize(textLineHeight);
-        handle = SizedBox.fromSize(size: desiredSize, child: customPaint);
-        return handle;
-      case TextSelectionHandleType.right:
-        desiredSize = getHandleSize(textLineHeight);
-        handle = SizedBox.fromSize(size: desiredSize, child: customPaint);
-        return Transform(
-          transform: Matrix4.identity()
-            ..translateByDouble(desiredSize.width / 2, desiredSize.height / 2, 0, 1)
-            ..rotateZ(math.pi)
-            ..translateByDouble(-desiredSize.width / 2, -desiredSize.height / 2, 0, 1),
-          child: handle,
-        );
+    return switch (type) {
+      TextSelectionHandleType.left => SizedBox.fromSize(size: handleSize, child: customPaint),
+      TextSelectionHandleType.right => Transform(
+        transform: Matrix4.identity()
+          ..translateByDouble(handleSize.width / 2, handleSize.height / 2, 0, 1)
+          ..rotateZ(math.pi)
+          ..translateByDouble(-handleSize.width / 2, -handleSize.height / 2, 0, 1),
+        child: SizedBox.fromSize(size: handleSize, child: customPaint),
+      ),
       // iOS should draw an invisible box so the handle can still receive gestures
       // on collapsed selections.
-      case TextSelectionHandleType.collapsed:
-        return SizedBox.fromSize(size: getHandleSize(textLineHeight));
-    }
+      TextSelectionHandleType.collapsed => SizedBox.fromSize(size: handleSize),
+    };
   }
 
   /// Gets anchor for cupertino-style text selection handles.
@@ -158,25 +146,22 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     final Size handleSize = getHandleSize(textLineHeight);
 
-    switch (type) {
+    return switch (type) {
       // The circle is at the top for the left handle, and the anchor point is
       // all the way at the bottom of the line.
-      case TextSelectionHandleType.left:
-        return Offset(handleSize.width / 2, handleSize.height);
+      TextSelectionHandleType.left => Offset(handleSize.width / 2, handleSize.height),
       // The right handle is vertically flipped, and the anchor point is near
       // the top of the circle to give slight overlap.
-      case TextSelectionHandleType.right:
-        return Offset(
-          handleSize.width / 2,
-          handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
-        );
+      TextSelectionHandleType.right => Offset(
+        handleSize.width / 2,
+        handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
+      ),
       // A collapsed handle anchors itself so that it's centered.
-      case TextSelectionHandleType.collapsed:
-        return Offset(
-          handleSize.width / 2,
-          textLineHeight + (handleSize.height - textLineHeight) / 2,
-        );
-    }
+      TextSelectionHandleType.collapsed => Offset(
+        handleSize.width / 2,
+        textLineHeight + (handleSize.height - textLineHeight) / 2,
+      ),
+    };
   }
 }
 
