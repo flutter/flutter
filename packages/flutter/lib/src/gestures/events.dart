@@ -2339,7 +2339,11 @@ class _TransformedPointerPanZoomUpdateEvent extends _TransformedPointerEvent
   Offset get pan => original.pan;
 
   @override
-  late final Offset localPan = PointerEvent.transformPosition(transform, pan);
+  late final Offset localPan = PointerEvent.transformDeltaViaPositions(
+    transform: transform,
+    untransformedDelta: pan,
+    untransformedEndPosition: pan,
+  );
 
   @override
   Offset get panDelta => original.panDelta;
@@ -2349,7 +2353,6 @@ class _TransformedPointerPanZoomUpdateEvent extends _TransformedPointerEvent
     transform: transform,
     untransformedDelta: panDelta,
     untransformedEndPosition: pan,
-    transformedEndPosition: localPan,
   );
 
   @override
