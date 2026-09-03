@@ -196,9 +196,8 @@ Future<void> main(List<String> args) async {
 String? findCommandName(List<String> args, {ToolContext? toolContext}) {
   final ArgResults results;
   try {
-    results = FlutterCommandRunner(
-      toolContext: toolContext ?? _FallbackToolContext(),
-    ).argParser.parse(args);
+    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
+        .parse(args);
   } on ArgParserException {
     // The real parser will complain about these later.
     return null;
@@ -305,16 +304,7 @@ List<FlutterCommand> generateCommands({
     featureFlags: featureFlags,
     extensionManager: extensionManager,
   ),
-  CustomDevicesCommand(
-    customDevicesConfig: toolDependencies.toolContext.customDevicesConfig,
-    operatingSystemUtils: toolDependencies.toolContext.os,
-    terminal: toolDependencies.toolContext.terminal,
-    platform: toolDependencies.toolContext.platform,
-    featureFlags: featureFlags,
-    processManager: toolDependencies.toolContext.processManager,
-    fileSystem: toolDependencies.toolContext.fs,
-    logger: toolDependencies.toolContext.logger,
-  ),
+  CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
@@ -340,7 +330,7 @@ List<FlutterCommand> generateCommands({
   EmulatorsCommand(),
   GenerateCommand(toolContext: toolDependencies.toolContext),
   GenerateLocalizationsCommand(toolContext: toolDependencies.toolContext),
-  InstallCommand(verboseHelp: verboseHelp),
+  InstallCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
   PackagesCommand(),
   PrecacheCommand(

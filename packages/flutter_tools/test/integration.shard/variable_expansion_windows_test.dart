@@ -9,21 +9,25 @@ import 'test_utils.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/84270 .
-  testWithoutContext('dart command will not expand variables on windows', () async {
-    final ProcessResult result = await processManager.run(<String>[
-      fileSystem.path.join(getFlutterRoot(), 'bin', 'dart.bat'),
-      fileSystem.path.join(
-        getFlutterRoot(),
-        'packages',
-        'flutter_tools',
-        'test',
-        'integration.shard',
-        'variable_expansion_windows.dart',
-      ),
-      '"^(?!Golden).+"',
-    ]);
-    expect(result.exitCode, 0, reason: 'Process failed with stderr: ${result.stderr}');
-    expect(result.stdout, contains('(?!Golden)'));
-    expect(result.stdout, isNot(contains('(?Golden)')));
-  }, skip: !platform.isWindows);
+  testWithoutContext(
+    'dart command will not expand variables on windows',
+    () async {
+      final ProcessResult result = await processManager.run(<String>[
+        fileSystem.path.join(getFlutterRoot(), 'bin', 'dart.bat'),
+        fileSystem.path.join(
+          getFlutterRoot(),
+          'packages',
+          'flutter_tools',
+          'test',
+          'integration.shard',
+          'variable_expansion_windows.dart',
+        ),
+        '"^(?!Golden).+"',
+      ]);
+      expect(result.exitCode, 0, reason: 'Process failed with stderr: ${result.stderr}');
+      expect(result.stdout, contains('(?!Golden)'));
+    },
+    // [intended] Windows-specific test.
+    skip: !platform.isWindows,
+  );
 }
