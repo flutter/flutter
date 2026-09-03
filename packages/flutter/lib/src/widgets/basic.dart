@@ -4870,20 +4870,22 @@ class Stack extends MultiChildRenderObjectWidget {
   }
 }
 
-/// A widget that controls where a child of a [Stack] or an [Overlay] is
-/// positioned.
+/// A widget that positions its child within a [Stack] or an [Overlay].
 ///
-/// A [Positioned] widget must be a descendant of a widget that lays its
-/// children out using the stack layout algorithm, and the path from the
-/// [Positioned] widget to that widget must contain only [StatelessWidget]s or
+/// A [Positioned] widget only takes effect inside a subtree that is laid out
+/// with the stack layout algorithm, and the path from the root of that subtree
+/// down to the [Positioned] widget must contain only [StatelessWidget]s or
 /// [StatefulWidget]s (not other kinds of widgets, like [RenderObjectWidget]s).
-/// A [Stack] is such a widget.
 ///
-/// An [Overlay] lays its entries out using the same stack layout algorithm, in
-/// an internal widget that sits directly above the subtree built by each
-/// [OverlayEntry] and by [OverlayPortal.overlayChildBuilder]. Those subtrees
-/// can therefore contain a [Positioned] too, with the same restriction applying
-/// to the path between the [Positioned] widget and the root of the subtree.
+/// In a [Stack], each of its children is such a subtree, so the restriction
+/// covers the path from the [Stack] itself down to the [Positioned] widget.
+///
+/// An [Overlay] lays its entries out with the same stack layout algorithm. The
+/// subtree there is the one an [OverlayEntry] builds, or the one
+/// [OverlayPortal.overlayChildBuilder] builds, and the widgets between it and
+/// the [Overlay] are internal to the overlay and do include
+/// [RenderObjectWidget]s. The restriction is therefore measured from the root
+/// of that subtree, not from the [Overlay].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EgtPleVwxBQ}
 ///
@@ -4925,8 +4927,8 @@ class Stack extends MultiChildRenderObjectWidget {
 ///    [CompositedTransformTarget] elsewhere in the tree, an alternative way to
 ///    position a widget that is shown on an [Overlay].
 class Positioned extends ParentDataWidget<StackParentData> {
-  /// Creates a widget that controls where a child of a [Stack] or an [Overlay]
-  /// is positioned.
+  /// Creates a widget that positions its child within a [Stack] or an
+  /// [Overlay].
   ///
   /// Only two out of the three horizontal values ([left], [right],
   /// [width]), and only two out of the three vertical values ([top],
@@ -4988,8 +4990,8 @@ class Positioned extends ParentDataWidget<StackParentData> {
   }) : width = null,
        height = null;
 
-  /// Creates a widget that controls where a child of a [Stack] or an [Overlay]
-  /// is positioned.
+  /// Creates a widget that positions its child within a [Stack] or an
+  /// [Overlay].
   ///
   /// Only two out of the three horizontal values (`start`, `end`,
   /// [width]), and only two out of the three vertical values ([top],
@@ -5142,24 +5144,28 @@ class Positioned extends ParentDataWidget<StackParentData> {
   }
 }
 
-/// A widget that controls where a child of a [Stack] or an [Overlay] is
-/// positioned without committing to a specific [TextDirection].
+/// A widget that positions its child within a [Stack] or an [Overlay] without
+/// committing to a specific [TextDirection].
 ///
 /// The ambient [Directionality] is used to determine whether [start] is to the
 /// left or to the right.
 ///
-/// A [PositionedDirectional] widget must be a descendant of a widget that lays
-/// its children out using the stack layout algorithm, and the path from the
-/// [PositionedDirectional] widget to that widget must contain only
+/// A [PositionedDirectional] widget only takes effect inside a subtree that is
+/// laid out with the stack layout algorithm, and the path from the root of that
+/// subtree down to the [PositionedDirectional] widget must contain only
 /// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
-/// [RenderObjectWidget]s). A [Stack] is such a widget.
+/// [RenderObjectWidget]s).
 ///
-/// An [Overlay] lays its entries out using the same stack layout algorithm, in
-/// an internal widget that sits directly above the subtree built by each
-/// [OverlayEntry] and by [OverlayPortal.overlayChildBuilder]. Those subtrees
-/// can therefore contain a [PositionedDirectional] too, with the same
-/// restriction applying to the path between the [PositionedDirectional] widget
-/// and the root of the subtree.
+/// In a [Stack], each of its children is such a subtree, so the restriction
+/// covers the path from the [Stack] itself down to the [PositionedDirectional]
+/// widget.
+///
+/// An [Overlay] lays its entries out with the same stack layout algorithm. The
+/// subtree there is the one an [OverlayEntry] builds, or the one
+/// [OverlayPortal.overlayChildBuilder] builds, and the widgets between it and
+/// the [Overlay] are internal to the overlay and do include
+/// [RenderObjectWidget]s. The restriction is therefore measured from the root
+/// of that subtree, not from the [Overlay].
 ///
 /// If a widget is wrapped in a [PositionedDirectional], then it is a
 /// _positioned_ widget in its [Stack] or [Overlay]. If the [top] property is
@@ -5192,8 +5198,8 @@ class Positioned extends ParentDataWidget<StackParentData> {
 ///    [CompositedTransformTarget] elsewhere in the tree, an alternative way to
 ///    position a widget that is shown on an [Overlay].
 class PositionedDirectional extends StatelessWidget {
-  /// Creates a widget that controls where a child of a [Stack] or an [Overlay]
-  /// is positioned.
+  /// Creates a widget that positions its child within a [Stack] or an
+  /// [Overlay].
   ///
   /// Only two out of the three horizontal values (`start`, `end`,
   /// [width]), and only two out of the three vertical values ([top],
