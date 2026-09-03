@@ -143,23 +143,28 @@ sk_sp<GrDirectContext> EmbedderSurfaceVulkan::CreateGrContext(
 
   skgpu::VulkanExtensions extensions;
 
-  // Pass VkPhysicalDeviceFeatures2 with the samplerYcbcrConversion feature
-  // in the pNext chain. Skia's GrVkCaps::init looks for
-  // VkPhysicalDeviceSamplerYcbcrConversionFeatures (or Vulkan11Features) in
-  // the VkPhysicalDeviceFeatures2 pNext chain to determine
-  // fSupportsYcbcrConversion. Without fDeviceFeatures2, Skia only sees the
-  // old VkPhysicalDeviceFeatures struct (which has no YCbCr field) and
-  // fSupportsYcbcrConversion stays false, causing onWrapBackendTexture to
-  // reject YUV textures.
+  // Try to use vkGetPhysicalDeviceFeatures2 to query device features including
+  // samplerYcbcrConversion. If vkGetPhysicalDeviceFeatures2 is not available
+  // (Vulkan 1.0 without VK_KHR_get_physical_device_properties2 extension),
+  // fall back to vkGetPhysicalDeviceFeatures and pass fDeviceFeatures instead.
+  VkPhysicalDeviceFeatures2 features2 = {};
+  features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
   VkPhysicalDeviceSamplerYcbcrConversionFeatures ycbcr_features = {};
   ycbcr_features.sType =
       VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_YCBCR_CONVERSION_FEATURES;
-  ycbcr_features.samplerYcbcrConversion = VK_TRUE;
-
-  VkPhysicalDeviceFeatures2 features2 = {};
-  features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-  features2.features = features;
   features2.pNext = &ycbcr_features;
+
+  // Try to obtain vkGetPhysicalDeviceFeatures2 function pointer.
+  // In Vulkan 1.1+ this is a core function; in Vulkan 1.0 it requires
+  // the VK_KHR_get_physical_device_properties2 extension.
+  auto vkGetPhysicalDeviceFeatures2Func =
+      reinterpret_cast<PFN_vkGetPhysicalDeviceFeatures2>(
+          vk_->AcquireProc("vkGetPhysicalDeviceFeatures2",
+                           vulkan::VulkanHandle<VkInstance>{instance}));
+  if (vkGetPhysicalDeviceFeatures2Func) {
+    vkGetPhysicalDeviceFeatures2Func(device_.GetPhysicalDeviceHandle(),
+                                     &features2);
+  }
 
   skgpu::VulkanBackendContext backend_context = {};
   backend_context.fInstance = instance;
@@ -168,7 +173,11 @@ sk_sp<GrDirectContext> EmbedderSurfaceVulkan::CreateGrContext(
   backend_context.fQueue = device_.GetQueueHandle();
   backend_context.fGraphicsQueueIndex = device_.GetGraphicsQueueIndex();
   backend_context.fMaxAPIVersion = version;
-  backend_context.fDeviceFeatures2 = &features2;
+  if (vkGetPhysicalDeviceFeatures2Func) {
+    backend_context.fDeviceFeatures2 = &features2;
+  } else {
+    backend_context.fDeviceFeatures = &features;
+  }
   backend_context.fVkExtensions = &extensions;
   backend_context.fGetProc = get_proc;
 
