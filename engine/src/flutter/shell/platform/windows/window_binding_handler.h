@@ -75,6 +75,9 @@ class WindowBindingHandler {
   // client is cleared.
   virtual void OnResetImeComposing() = 0;
 
+  // Invoked when the view gains or loses an active text input client.
+  virtual void OnTextInputClientChanged(bool active) = 0;
+
   // Returns the last known position of the primary pointer in window
   // coordinates.
   virtual PointerLocation GetPrimaryPointerLocation() = 0;

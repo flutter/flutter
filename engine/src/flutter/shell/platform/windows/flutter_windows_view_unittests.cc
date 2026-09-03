@@ -418,6 +418,20 @@ TEST(FlutterWindowsViewTest, EnableSemantics) {
   EXPECT_TRUE(semantics_enabled);
 }
 
+TEST(FlutterWindowsViewTest, ForwardsTextInputClientState) {
+  std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
+  auto window_binding_handler =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  MockWindowBindingHandler* window_binding_handler_ptr =
+      window_binding_handler.get();
+  std::unique_ptr<FlutterWindowsView> view =
+      engine->CreateView(std::move(window_binding_handler),
+                         /*is_sized_to_content=*/false, BoxConstraints());
+
+  EXPECT_CALL(*window_binding_handler_ptr, OnTextInputClientChanged(true));
+  view->OnTextInputClientChanged(true);
+}
+
 TEST(FlutterWindowsViewTest, AddSemanticsNodeUpdate) {
   std::unique_ptr<FlutterWindowsEngine> engine = GetTestEngine();
   EngineModifier modifier(engine.get());

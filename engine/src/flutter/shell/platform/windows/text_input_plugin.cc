@@ -231,6 +231,7 @@ void TextInputPlugin::HandleMethodCall(
       SendStateUpdate(*active_model_);
     }
     view->OnResetImeComposing();
+    view->OnTextInputClientChanged(false);
     active_model_ = nullptr;
   } else if (method.compare(kSetClientMethod) == 0) {
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {
@@ -241,6 +242,8 @@ void TextInputPlugin::HandleMethodCall(
 
     const rapidjson::Value& client_id_json = args[0];
     const rapidjson::Value& client_config = args[1];
+    const FlutterViewId previous_view_id = view_id_;
+    const bool had_active_model = active_model_ != nullptr;
     if (client_id_json.IsNull()) {
       result->Error(kBadArgumentError, "Could not set client, ID is null.");
       return;
@@ -283,6 +286,16 @@ void TextInputPlugin::HandleMethodCall(
       }
     }
     active_model_ = std::make_unique<TextInputModel>();
+    if (had_active_model && previous_view_id != view_id_) {
+      FlutterWindowsView* previous_view = engine_->view(previous_view_id);
+      if (previous_view != nullptr) {
+        previous_view->OnTextInputClientChanged(false);
+      }
+    }
+    FlutterWindowsView* view = engine_->view(view_id_);
+    if (view != nullptr) {
+      view->OnTextInputClientChanged(true);
+    }
   } else if (method.compare(kSetEditingStateMethod) == 0) {
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {
       result->Error(kBadArgumentError, "Method invoked without args");
@@ -508,10 +521,15 @@ void TextInputPlugin::OnViewRemoved(FlutterViewId view_id) {
   }
 
   // If composing, commit and end composing. Skip sending state updates and
-  // IME reset since the view is being removed.
+  // composing reset since the view is being removed.
   if (active_model_ != nullptr && active_model_->composing()) {
     active_model_->CommitComposing();
     active_model_->EndComposing();
+  }
+
+  FlutterWindowsView* view = engine_->view(view_id_);
+  if (view != nullptr) {
+    view->OnTextInputClientChanged(false);
   }
 
   active_model_ = nullptr;
