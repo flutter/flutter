@@ -43,7 +43,8 @@ class BuildCommand extends FlutterCommand {
     required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
     bool verboseHelp = false,
-  }) : super(toolContext: toolContext, verboseHelp: verboseHelp) {
+  }) : _appleContext = appleContext,
+       super(toolContext: toolContext, verboseHelp: verboseHelp) {
     final ToolContext(
       :Artifacts artifacts,
       :Cache cache,
@@ -159,6 +160,12 @@ class BuildCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
+
+  final AppleContext _appleContext;
+
+  /// The Apple-specific context dependencies, exposed for hermetic testing.
+  @visibleForTesting
+  AppleContext get appleContext => _appleContext;
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
