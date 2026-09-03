@@ -292,8 +292,7 @@ static void fl_view_renderer_subsurface_present_layers(
     GLint general_format =
         fl_compositor_opengl_get_frame_format(layers, layers_count);
     g_clear_object(&self->framebuffer);
-    self->framebuffer =
-        fl_framebuffer_new(general_format, width, height, FALSE);
+    self->framebuffer = fl_framebuffer_new(general_format, width, height);
   }
 
   // Bind the target framebuffer so the compositor draws into it.
