@@ -206,6 +206,10 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureImpeller(
   auto texture_source = std::make_shared<EmbedderExternalTextureSourceVulkan>(
       aiks_context->GetContext(), texture_desc.get());
 
+  if (!texture_source->IsValid()) {
+    return nullptr;
+  }
+
   auto texture = std::make_shared<impeller::TextureVK>(
       aiks_context->GetContext(), texture_source);
   // Transition the layout to shader read.
