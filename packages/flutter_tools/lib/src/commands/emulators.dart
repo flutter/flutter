@@ -1,7 +1,3 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'package:args/args.dart';
 
 import '../base/common.dart';
@@ -12,18 +8,13 @@ import '../context/tool_context.dart';
 import '../doctor.dart';
 import '../doctor_validator.dart';
 import '../emulator.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// The `flutter emulators` command, which lists, launches, and creates emulators.
 class EmulatorsCommand extends FlutterCommand {
-  EmulatorsCommand({
-    required Doctor doctor,
-    required EmulatorManager emulatorManager,
-    required ToolContext toolContext,
-    super.verboseHelp,
-  }) : _doctor = doctor,
-       _emulatorManager = emulatorManager,
-       super(toolContext: toolContext) {
+  EmulatorsCommand({required ToolContext toolContext, super.verboseHelp})
+    : super(toolContext: toolContext) {
     argParser.addOption('launch', help: 'The full or partial ID of the emulator to launch.');
     argParser.addFlag(
       'cold',
@@ -41,11 +32,8 @@ class EmulatorsCommand extends FlutterCommand {
     );
   }
 
-  final Doctor _doctor;
-  final EmulatorManager _emulatorManager;
-
   @override
-  ToolContext get toolContext => super.toolContext!;
+  ToolContext get toolContext => super.toolContext;
 
   @override
   final name = 'emulators';
@@ -63,7 +51,7 @@ class EmulatorsCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final Platform platform = toolContext.platform;
 
-    if (_doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
+    if (globals.doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
       throwToolExit(
         'Unable to find any emulator sources. Please ensure you have some\n'
         'Android AVD images ${platform.isMacOS ? 'or an iOS Simulator ' : ''}available.',
@@ -86,7 +74,7 @@ class EmulatorsCommand extends FlutterCommand {
 
   Future<void> _launchEmulator(String id, {required bool coldBoot}) async {
     final Logger logger = toolContext.logger;
-    final List<Emulator> emulators = await _emulatorManager.getEmulatorsMatching(id);
+    final List<Emulator> emulators = await emulatorManager.getEmulatorsMatching(id);
 
     if (emulators.isEmpty) {
       logger.printStatus("No emulator found that matches '$id'.");
@@ -99,7 +87,7 @@ class EmulatorsCommand extends FlutterCommand {
 
   Future<void> _createEmulator({String? name}) async {
     final Logger logger = toolContext.logger;
-    final CreateEmulatorResult createResult = await _emulatorManager.createEmulator(name: name);
+    final CreateEmulatorResult createResult = await emulatorManager.createEmulator(name: name);
 
     if (createResult.success) {
       logger.printStatus("Emulator '${createResult.emulatorName}' created successfully.");
@@ -116,8 +104,8 @@ class EmulatorsCommand extends FlutterCommand {
   Future<void> _listEmulators(String? searchText) async {
     final Logger logger = toolContext.logger;
     final List<Emulator> emulators = searchText == null
-        ? await _emulatorManager.getAllAvailableEmulators()
-        : await _emulatorManager.getEmulatorsMatching(searchText);
+        ? await emulatorManager.getAllAvailableEmulators()
+        : await emulatorManager.getEmulatorsMatching(searchText);
 
     if (emulators.isEmpty) {
       logger.printStatus('No emulators available.');

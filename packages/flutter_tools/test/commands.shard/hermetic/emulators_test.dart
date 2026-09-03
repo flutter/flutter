@@ -33,7 +33,7 @@ void main() {
     });
 
     group('doctor validation', () {
-      testWithoutContext(
+      testUsingContext(
         'throws ToolExit if no emulator sources are available on non-macOS',
         () async {
           final toolContext = FakeToolContext(logger: logger, platform: platform);
@@ -55,264 +55,269 @@ void main() {
         },
       );
 
-      testWithoutContext('throws ToolExit if no emulator sources are available on macOS', () async {
-        final macOSPlatform = FakePlatform(operatingSystem: 'macos');
-        final toolContext = FakeToolContext(logger: logger, platform: macOSPlatform);
-        final doctor = _FakeDoctor(canListEmulators: false);
-        final command = EmulatorsCommand(
-          doctor: doctor,
-          emulatorManager: _FakeEmulatorManager(),
-          toolContext: toolContext,
-        );
+      testUsingContext(
+        'throws ToolExit if no emulator sources are available on macOS',
+        () async {
+          final macOSPlatform = FakePlatform(operatingSystem: 'macos');
+          final toolContext = FakeToolContext(logger: logger, platform: macOSPlatform);
+          final doctor = _FakeDoctor(canListEmulators: false);
+          final command = EmulatorsCommand(
+            doctor: doctor,
+            emulatorManager: _FakeEmulatorManager(),
+            toolContext: toolContext,
+          );
 
-        await expectLater(
-          () => createTestCommandRunner(command).run(<String>['emulators']),
-          throwsToolExit(
-            message:
-                'Unable to find any emulator sources. Please ensure you have some\n'
-                'Android AVD images or an iOS Simulator available.',
-          ),
-        );
-      });
+          await expectLater(
+            () => createTestCommandRunner(command).run(<String>['emulators']),
+            throwsToolExit(
+              message:
+                  'Unable to find any emulator sources. Please ensure you have some\n'
+                  'Android AVD images or an iOS Simulator available.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{Doctor: () => doctor, EmulatorManager: () => emulatorManager},
+      );
 
-      testWithoutContext('proceeds when doctor reports canListEmulators is true', () async {
-        final toolContext = FakeToolContext(logger: logger, platform: platform);
-        final doctor = _FakeDoctor();
-        final emulatorManager = _FakeEmulatorManager();
-        final command = EmulatorsCommand(
-          doctor: doctor,
-          emulatorManager: emulatorManager,
-          toolContext: toolContext,
-        );
+      testUsingContext(
+        'proceeds when doctor reports canListEmulators is true',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          final doctor = _FakeDoctor();
+          final emulatorManager = _FakeEmulatorManager();
+          final command = EmulatorsCommand(toolContext: toolContext);
 
-        await createTestCommandRunner(command).run(<String>['emulators']);
-        expect(logger.statusText, contains('No emulators available.'));
-      });
+          await createTestCommandRunner(command).run(<String>['emulators']);
+          expect(logger.statusText, contains('No emulators available.'));
+        },
+        overrides: <Type, Generator>{Doctor: () => doctor, EmulatorManager: () => emulatorManager},
+      );
     });
 
     group('list emulators', () {
-      testWithoutContext('shows message when no emulators available', () async {
-        final toolContext = FakeToolContext(logger: logger, platform: platform);
-        final emulatorManager = _FakeEmulatorManager();
-        final command = EmulatorsCommand(
-          doctor: doctor,
-          emulatorManager: emulatorManager,
-          toolContext: toolContext,
-        );
+      testUsingContext(
+        'shows message when no emulators available',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          final emulatorManager = _FakeEmulatorManager();
+          final command = EmulatorsCommand(toolContext: toolContext);
 
-        await createTestCommandRunner(command).run(<String>['emulators']);
+          await createTestCommandRunner(command).run(<String>['emulators']);
 
-        expect(logger.statusText, contains('No emulators available.'));
-        expect(
-          logger.statusText,
-          contains("To create a new emulator, run 'flutter emulators --create [--name xyz]'."),
-        );
-        expect(
-          logger.statusText,
-          contains('https://developer.android.com/studio/run/managing-avds'),
-        );
-      });
+          expect(logger.statusText, contains('No emulators available.'));
+          expect(
+            logger.statusText,
+            contains("To create a new emulator, run 'flutter emulators --create [--name xyz]'."),
+          );
+          expect(
+            logger.statusText,
+            contains('https://developer.android.com/studio/run/managing-avds'),
+          );
+        },
+        overrides: <Type, Generator>{Doctor: () => doctor, EmulatorManager: () => emulatorManager},
+      );
 
-      testWithoutContext('lists available emulators with header', () async {
-        final toolContext = FakeToolContext(logger: logger, platform: platform);
-        const emulators = <_FakeEmulator>[
-          _FakeEmulator('nexus_5', 'Nexus 5', 'Google'),
-          _FakeEmulator('pixel_6', 'Pixel 6', 'Google'),
-        ];
-        final emulatorManager = _FakeEmulatorManager(emulators: emulators);
-        final command = EmulatorsCommand(
-          doctor: doctor,
-          emulatorManager: emulatorManager,
-          toolContext: toolContext,
-        );
+      testUsingContext(
+        'lists available emulators with header',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          const emulators = <_FakeEmulator>[
+            _FakeEmulator('nexus_5', 'Nexus 5', 'Google'),
+            _FakeEmulator('pixel_6', 'Pixel 6', 'Google'),
+          ];
+          final emulatorManager = _FakeEmulatorManager(emulators: emulators);
+          final command = EmulatorsCommand(toolContext: toolContext);
 
-        await createTestCommandRunner(command).run(<String>['emulators']);
+          await createTestCommandRunner(command).run(<String>['emulators']);
 
-        expect(logger.statusText, contains('2 available emulators:'));
-        expect(logger.statusText, contains('Nexus 5'));
-        expect(logger.statusText, contains('Pixel 6'));
-        expect(
-          logger.statusText,
-          contains("To run an emulator, run 'flutter emulators --launch <emulator id>'."),
-        );
-        expect(
-          logger.statusText,
-          contains("To create a new emulator, run 'flutter emulators --create [--name xyz]'."),
-        );
-      });
+          expect(logger.statusText, contains('2 available emulators:'));
+          expect(logger.statusText, contains('Nexus 5'));
+          expect(logger.statusText, contains('Pixel 6'));
+          expect(
+            logger.statusText,
+            contains("To run an emulator, run 'flutter emulators --launch <emulator id>'."),
+          );
+          expect(
+            logger.statusText,
+            contains("To create a new emulator, run 'flutter emulators --create [--name xyz]'."),
+          );
+        },
+        overrides: <Type, Generator>{Doctor: () => doctor, EmulatorManager: () => emulatorManager},
+      );
 
-      testWithoutContext('filters emulators by search query', () async {
-        final toolContext = FakeToolContext(logger: logger, platform: platform);
-        const emulators = <_FakeEmulator>[
-          _FakeEmulator('nexus_5', 'Nexus 5', 'Google'),
-          _FakeEmulator('pixel_6', 'Pixel 6', 'Google'),
-        ];
-        final emulatorManager = _FakeEmulatorManager(emulators: emulators);
-        final command = EmulatorsCommand(
-          doctor: doctor,
-          emulatorManager: emulatorManager,
-          toolContext: toolContext,
-        );
+      testUsingContext(
+        'filters emulators by search query',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          const emulators = <_FakeEmulator>[
+            _FakeEmulator('nexus_5', 'Nexus 5', 'Google'),
+            _FakeEmulator('pixel_6', 'Pixel 6', 'Google'),
+          ];
+          final emulatorManager = _FakeEmulatorManager(emulators: emulators);
+          final command = EmulatorsCommand(toolContext: toolContext);
 
-        await createTestCommandRunner(command).run(<String>['emulators', 'pixel']);
+          await createTestCommandRunner(command).run(<String>['emulators', 'pixel']);
 
-        expect(logger.statusText, contains('1 available emulator:'));
-        expect(logger.statusText, contains('Pixel 6'));
-        expect(logger.statusText, isNot(contains('Nexus 5')));
-      });
+          expect(logger.statusText, contains('1 available emulator:'));
+          expect(logger.statusText, contains('Pixel 6'));
+          expect(logger.statusText, isNot(contains('Nexus 5')));
+        },
+        overrides: <Type, Generator>{Doctor: () => doctor, EmulatorManager: () => emulatorManager},
+      );
     });
 
     group('launch emulator', () {
-      testWithoutContext('prints error when no matching emulator is found', () async {
-        final toolContext = FakeToolContext(logger: logger, platform: platform);
-        final emulatorManager = _FakeEmulatorManager();
-        final command = EmulatorsCommand(
-          doctor: doctor,
-          emulatorManager: emulatorManager,
-          toolContext: toolContext,
-        );
+      testUsingContext(
+        'prints error when no matching emulator is found',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          final emulatorManager = _FakeEmulatorManager();
+          final command = EmulatorsCommand(toolContext: toolContext);
 
-        await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel']);
+          await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel']);
 
-        expect(logger.statusText, contains("No emulator found that matches 'pixel'."));
-      });
+          expect(logger.statusText, contains("No emulator found that matches 'pixel'."));
+        },
+        overrides: <Type, Generator>{Doctor: () => doctor, EmulatorManager: () => emulatorManager},
+      );
 
-      testWithoutContext('prints list when multiple emulators match', () async {
-        final toolContext = FakeToolContext(logger: logger, platform: platform);
-        const emulators = <_FakeEmulator>[
-          _FakeEmulator('pixel_6', 'Pixel 6', 'Google'),
-          _FakeEmulator('pixel_7', 'Pixel 7', 'Google'),
-        ];
-        final emulatorManager = _FakeEmulatorManager(emulators: emulators);
-        final command = EmulatorsCommand(
-          doctor: doctor,
-          emulatorManager: emulatorManager,
-          toolContext: toolContext,
-        );
+      testUsingContext(
+        'prints list when multiple emulators match',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          const emulators = <_FakeEmulator>[
+            _FakeEmulator('pixel_6', 'Pixel 6', 'Google'),
+            _FakeEmulator('pixel_7', 'Pixel 7', 'Google'),
+          ];
+          final emulatorManager = _FakeEmulatorManager(emulators: emulators);
+          final command = EmulatorsCommand(toolContext: toolContext);
 
-        await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel']);
+          await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel']);
 
-        expect(logger.statusText, contains("More than one emulator matches 'pixel':"));
-        expect(logger.statusText, contains('Pixel 6'));
-        expect(logger.statusText, contains('Pixel 7'));
-      });
+          expect(logger.statusText, contains("More than one emulator matches 'pixel':"));
+          expect(logger.statusText, contains('Pixel 6'));
+          expect(logger.statusText, contains('Pixel 7'));
+        },
+        overrides: <Type, Generator>{Doctor: () => doctor, EmulatorManager: () => emulatorManager},
+      );
 
-      testWithoutContext('launches emulator when exactly one match found (warm boot)', () async {
-        final toolContext = FakeToolContext(logger: logger, platform: platform);
-        var launchCount = 0;
-        bool? lastColdBoot;
-        final emulator = _FakeEmulator(
-          'pixel_6',
-          'Pixel 6',
-          'Google',
-          onLaunch: (bool coldBoot) {
-            launchCount++;
-            lastColdBoot = coldBoot;
-          },
-        );
-        final emulatorManager = _FakeEmulatorManager(emulators: <_FakeEmulator>[emulator]);
-        final command = EmulatorsCommand(
-          doctor: doctor,
-          emulatorManager: emulatorManager,
-          toolContext: toolContext,
-        );
+      testUsingContext(
+        'launches emulator when exactly one match found (warm boot)',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          var launchCount = 0;
+          bool? lastColdBoot;
+          final emulator = _FakeEmulator(
+            'pixel_6',
+            'Pixel 6',
+            'Google',
+            onLaunch: (bool coldBoot) {
+              launchCount++;
+              lastColdBoot = coldBoot;
+            },
+          );
+          final emulatorManager = _FakeEmulatorManager(emulators: <_FakeEmulator>[emulator]);
+          final command = EmulatorsCommand(toolContext: toolContext);
 
-        await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel_6']);
+          await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel_6']);
 
-        expect(launchCount, 1);
-        expect(lastColdBoot, isFalse);
-      });
+          expect(launchCount, 1);
+          expect(lastColdBoot, isFalse);
+        },
+        overrides: <Type, Generator>{Doctor: () => doctor, EmulatorManager: () => emulatorManager},
+      );
 
-      testWithoutContext('launches emulator with cold boot when --cold is specified', () async {
-        final toolContext = FakeToolContext(logger: logger, platform: platform);
-        var launchCount = 0;
-        bool? lastColdBoot;
-        final emulator = _FakeEmulator(
-          'pixel_6',
-          'Pixel 6',
-          'Google',
-          onLaunch: (bool coldBoot) {
-            launchCount++;
-            lastColdBoot = coldBoot;
-          },
-        );
-        final emulatorManager = _FakeEmulatorManager(emulators: <_FakeEmulator>[emulator]);
-        final command = EmulatorsCommand(
-          doctor: doctor,
-          emulatorManager: emulatorManager,
-          toolContext: toolContext,
-        );
+      testUsingContext(
+        'launches emulator with cold boot when --cold is specified',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          var launchCount = 0;
+          bool? lastColdBoot;
+          final emulator = _FakeEmulator(
+            'pixel_6',
+            'Pixel 6',
+            'Google',
+            onLaunch: (bool coldBoot) {
+              launchCount++;
+              lastColdBoot = coldBoot;
+            },
+          );
+          final emulatorManager = _FakeEmulatorManager(emulators: <_FakeEmulator>[emulator]);
+          final command = EmulatorsCommand(toolContext: toolContext);
 
-        await createTestCommandRunner(
-          command,
-        ).run(<String>['emulators', '--launch', 'pixel_6', '--cold']);
+          await createTestCommandRunner(command)
+              .run(<String>['emulators', '--launch', 'pixel_6', '--cold']);
 
-        expect(launchCount, 1);
-        expect(lastColdBoot, isTrue);
-      });
+          expect(launchCount, 1);
+          expect(lastColdBoot, isTrue);
+        },
+        overrides: <Type, Generator>{Doctor: () => doctor, EmulatorManager: () => emulatorManager},
+      );
     });
 
     group('create emulator', () {
-      testWithoutContext('creates emulator successfully without name', () async {
-        final toolContext = FakeToolContext(logger: logger, platform: platform);
-        final emulatorManager = _FakeEmulatorManager(
-          createResult: CreateEmulatorResult('flutter_emulator', success: true),
-        );
-        final command = EmulatorsCommand(
-          doctor: doctor,
-          emulatorManager: emulatorManager,
-          toolContext: toolContext,
-        );
+      testUsingContext(
+        'creates emulator successfully without name',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          final emulatorManager = _FakeEmulatorManager(
+            createResult: CreateEmulatorResult('flutter_emulator', success: true),
+          );
+          final command = EmulatorsCommand(toolContext: toolContext);
 
-        await createTestCommandRunner(command).run(<String>['emulators', '--create']);
+          await createTestCommandRunner(command).run(<String>['emulators', '--create']);
 
-        expect(logger.statusText, contains("Emulator 'flutter_emulator' created successfully."));
-        expect(emulatorManager.lastCreatedName, isNull);
-      });
+          expect(logger.statusText, contains("Emulator 'flutter_emulator' created successfully."));
+          expect(emulatorManager.lastCreatedName, isNull);
+        },
+        overrides: <Type, Generator>{Doctor: () => doctor, EmulatorManager: () => emulatorManager},
+      );
 
-      testWithoutContext('creates emulator successfully with custom name', () async {
-        final toolContext = FakeToolContext(logger: logger, platform: platform);
-        final emulatorManager = _FakeEmulatorManager(
-          createResult: CreateEmulatorResult('my_custom_emulator', success: true),
-        );
-        final command = EmulatorsCommand(
-          doctor: doctor,
-          emulatorManager: emulatorManager,
-          toolContext: toolContext,
-        );
+      testUsingContext(
+        'creates emulator successfully with custom name',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          final emulatorManager = _FakeEmulatorManager(
+            createResult: CreateEmulatorResult('my_custom_emulator', success: true),
+          );
+          final command = EmulatorsCommand(toolContext: toolContext);
 
-        await createTestCommandRunner(
-          command,
-        ).run(<String>['emulators', '--create', '--name', 'my_custom_emulator']);
+          await createTestCommandRunner(command)
+              .run(<String>['emulators', '--create', '--name', 'my_custom_emulator']);
 
-        expect(logger.statusText, contains("Emulator 'my_custom_emulator' created successfully."));
-        expect(emulatorManager.lastCreatedName, 'my_custom_emulator');
-      });
+          expect(
+            logger.statusText,
+            contains("Emulator 'my_custom_emulator' created successfully."),
+          );
+          expect(emulatorManager.lastCreatedName, 'my_custom_emulator');
+        },
+        overrides: <Type, Generator>{Doctor: () => doctor, EmulatorManager: () => emulatorManager},
+      );
 
-      testWithoutContext('prints error and additional info when creation fails', () async {
-        final toolContext = FakeToolContext(logger: logger, platform: platform);
-        final emulatorManager = _FakeEmulatorManager(
-          createResult: CreateEmulatorResult(
-            'existing_emulator',
-            success: false,
-            error: 'AVD already exists',
-          ),
-        );
-        final command = EmulatorsCommand(
-          doctor: doctor,
-          emulatorManager: emulatorManager,
-          toolContext: toolContext,
-        );
+      testUsingContext(
+        'prints error and additional info when creation fails',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          final emulatorManager = _FakeEmulatorManager(
+            createResult: CreateEmulatorResult(
+              'existing_emulator',
+              success: false,
+              error: 'AVD already exists',
+            ),
+          );
+          final command = EmulatorsCommand(toolContext: toolContext);
 
-        await createTestCommandRunner(command).run(<String>['emulators', '--create']);
+          await createTestCommandRunner(command).run(<String>['emulators', '--create']);
 
-        expect(logger.statusText, contains("Failed to create emulator 'existing_emulator'."));
-        expect(logger.statusText, contains('AVD already exists'));
-        expect(
-          logger.statusText,
-          contains('https://developer.android.com/studio/run/managing-avds'),
-        );
-      });
+          expect(logger.statusText, contains("Failed to create emulator 'existing_emulator'."));
+          expect(logger.statusText, contains('AVD already exists'));
+          expect(
+            logger.statusText,
+            contains('https://developer.android.com/studio/run/managing-avds'),
+          );
+        },
+        overrides: <Type, Generator>{Doctor: () => doctor, EmulatorManager: () => emulatorManager},
+      );
     });
   });
 }
