@@ -88,6 +88,8 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   ToolContext get toolContext => super.toolContext!;
 
+  FileSystem get _fileSystem => toolContext.fs;
+
   @override
   final name = 'aar';
 
@@ -141,8 +143,7 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject project = this.project;
-    final ToolContext(:Logger logger, :FileSystem fs) = toolContext;
+    final ToolContext(:Logger logger) = toolContext;
     if (androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
@@ -160,7 +161,7 @@ class BuildAarCommand extends BuildSubCommand {
         ? buildNumberArg
         : '1.0';
 
-    final File targetFile = fs.file(fs.path.join('lib', 'main.dart'));
+    final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
     for (final buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
         androidBuildInfo.add(
@@ -203,11 +204,10 @@ class BuildAarCommand extends BuildSubCommand {
     if (remainingArguments.isEmpty) {
       return super.project;
     }
-    final ToolContext(:FileSystem fs) = toolContext;
-    final File mainFile = fs.file(remainingArguments.first);
+    final File mainFile = _fileSystem.file(remainingArguments.first);
     final String path;
     if (!mainFile.existsSync()) {
-      final Directory pathProject = fs.directory(remainingArguments.first);
+      final Directory pathProject = _fileSystem.directory(remainingArguments.first);
       if (!pathProject.existsSync()) {
         throwToolExit('${remainingArguments.first} does not exist');
       }
@@ -215,11 +215,10 @@ class BuildAarCommand extends BuildSubCommand {
     } else {
       path = mainFile.parent.path;
     }
-    final String? projectRoot = findProjectRoot(fs, path);
+    final String? projectRoot = findProjectRoot(_fileSystem, path);
     if (projectRoot == null) {
       throwToolExit('${mainFile.parent.path} is not a valid flutter project');
     }
-    final FlutterProjectFactory projectFactory = toolContext.projectFactory;
-    return projectFactory.fromDirectory(fs.directory(projectRoot));
+    return FlutterProject.fromDirectory(_fileSystem.directory(projectRoot));
   }
 }

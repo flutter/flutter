@@ -164,7 +164,6 @@ class BuildApkCommand extends BuildSubCommand {
     );
     validateBuild(androidBuildInfo);
     terminal.usesTerminalUi = true;
-    final FlutterProject project = this.project;
     await (_androidBuilder ?? context.get<AndroidBuilder>())?.buildApk(
       project: project,
       target: targetFile,
