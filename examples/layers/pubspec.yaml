@@ -8,7 +8,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  material_ui: ^0.0.2
+  material_ui: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -19,4 +19,4 @@ flutter:
     - services/data.json
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: oescuq
+# PUBSPEC CHECKSUM: dvvsfu
