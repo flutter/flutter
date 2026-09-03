@@ -241,18 +241,7 @@ public class PlatformViewsChannel2 {
      * @param viewId The ID of the platform view that was rejected.
      * @param gestureId The identifier (e.g. downTime) of the specific gesture that was rejected.
      */
-    default void onRejectGesture(int viewId, long gestureId) {
-      onRejectGesture(viewId);
-    }
-
-    /**
-     * Informs the handler that Flutter has won the gesture arena and rejected the platform view.
-     *
-     * @param viewId The ID of the platform view that was rejected.
-     */
-    default void onRejectGesture(int viewId) {
-      onRejectGesture(viewId, 0);
-    }
+    default void onRejectGesture(int viewId, long gestureId) {}
 
     /** Whether the SurfaceControl swapchain is enabled. */
     boolean isSurfaceControlEnabled();

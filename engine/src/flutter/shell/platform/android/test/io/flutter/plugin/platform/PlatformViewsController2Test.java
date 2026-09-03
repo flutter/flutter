@@ -697,20 +697,13 @@ public class PlatformViewsController2Test {
   }
 
   private static void rejectGesturePlatformView(
-      FlutterJNI jni, PlatformViewsController2 platformViewsController, int platformViewId) {
-    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 0L);
-  }
-
-  private static void rejectGesturePlatformView(
       FlutterJNI jni,
       PlatformViewsController2 platformViewsController,
       int platformViewId,
       long gestureId) {
     final Map<String, Object> args = new HashMap<>();
     args.put("id", platformViewId);
-    if (gestureId != 0L) {
-      args.put("gestureId", gestureId);
-    }
+    args.put("gestureId", gestureId);
 
     final MethodCall platformRejectGestureMethodCall = new MethodCall("rejectGesture", args);
 

@@ -528,16 +528,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   @VisibleForTesting
-  public void onRejectGesture(int viewId) {
-    onRejectGesture(viewId, 0);
-  }
-
-  @VisibleForTesting
-  public void onRejectGesture(int viewId, long gestureId) {
-    channelHandler.onRejectGesture(viewId, gestureId);
-  }
-
-  @VisibleForTesting
   public FlutterMutatorView getPlatformViewParent(int viewId) {
     return platformViewParent.get(viewId);
   }

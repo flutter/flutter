@@ -387,7 +387,7 @@ abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> 
       // This means that the pointer event was absorbed by a different render object.
       // Since on the platform side the FlutterTouchIntercepting view is seeing all events that are
       // within its bounds we need to tell it to reject the current touch sequence.
-      _viewController.rejectGesture(gestureId: event.timeStamp.inMilliseconds);
+      _viewController.rejectGesture();
     }
     _lastPointerDownEvent = null;
   }
@@ -670,10 +670,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void rejectGesture(int pointer) {
-    final int? gestureId = _downTimes.remove(pointer);
-    if (_downTimes.isEmpty) {
-      _currentDownTime = null;
-    }
+    final int? gestureId = _downTimes[pointer];
     stopTrackingPointer(pointer);
     cachedEvents.remove(pointer);
     onRejectGesture?.call(gestureId);

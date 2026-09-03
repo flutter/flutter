@@ -393,18 +393,7 @@ public class PlatformViewsChannel {
      * @param viewId The ID of the platform view that lost the gesture.
      * @param gestureId The identifier (e.g. downTime) of the specific gesture that was rejected.
      */
-    default void onRejectGesture(int viewId, long gestureId) {
-      onRejectGesture(viewId);
-    }
-
-    /**
-     * Flutter has won the gesture arena and rejected the platform view.
-     *
-     * @param viewId The ID of the platform view that lost the gesture.
-     */
-    default void onRejectGesture(int viewId) {
-      onRejectGesture(viewId, 0);
-    }
+    default void onRejectGesture(int viewId, long gestureId) {}
   }
 
   /** Request sent from Flutter to resize a platform view. */

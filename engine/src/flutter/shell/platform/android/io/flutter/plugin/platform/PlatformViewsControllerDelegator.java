@@ -125,11 +125,6 @@ public class PlatformViewsControllerDelegator
     }
   }
 
-  @Override
-  public void onRejectGesture(int viewId) {
-    onRejectGesture(viewId, 0);
-  }
-
   /** Returns true if creation of HC++ platform views is currently supported. */
   @Override
   public boolean isHcppEnabled() {

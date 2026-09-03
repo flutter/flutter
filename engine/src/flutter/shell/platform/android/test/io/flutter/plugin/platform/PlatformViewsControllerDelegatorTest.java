@@ -115,11 +115,8 @@ public class PlatformViewsControllerDelegatorTest {
 
     PlatformViewsControllerDelegator delegator =
         new PlatformViewsControllerDelegator(platformViewsController, platformViewsController2);
-    delegator.onRejectGesture(0);
-
-    verify(platformViewsController2.channelHandler).onRejectGesture(0, 0L);
-
     delegator.onRejectGesture(0, 12345L);
+
     verify(platformViewsController2.channelHandler).onRejectGesture(0, 12345L);
   }
 
@@ -131,11 +128,8 @@ public class PlatformViewsControllerDelegatorTest {
 
     PlatformViewsControllerDelegator delegator =
         new PlatformViewsControllerDelegator(platformViewsController, platformViewsController2);
-    delegator.onRejectGesture(0);
-
-    verify(platformViewsController.channelHandler).onRejectGesture(0, 0L);
-
     delegator.onRejectGesture(0, 12345L);
+
     verify(platformViewsController.channelHandler).onRejectGesture(0, 12345L);
   }
 }

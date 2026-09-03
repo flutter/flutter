@@ -201,24 +201,13 @@ public class FlutterMutatorView extends FrameLayout {
    * <p>Subsequent {@link MotionEvent#ACTION_MOVE} events will request unbuffered dispatch to
    * minimize latency and prevent stutter for Flutter-driven gestures (e.g., scrolling).
    *
-   * @param gestureId The identifier (downTime) of the gesture that Flutter won. If non-zero,
-   *     unbuffered dispatch is only enabled if this matches the currently active gesture's
-   *     downTime.
+   * @param gestureId The identifier (downTime) of the gesture that Flutter won. Unbuffered dispatch
+   *     is only enabled if this matches the currently active gesture's downTime.
    */
   public void onFlutterWonGesture(long gestureId) {
-    if (isGestureActive && (gestureId == 0 || currentDownTime == gestureId)) {
+    if (isGestureActive && currentDownTime == gestureId) {
       flutterWonGesture = true;
     }
-  }
-
-  /**
-   * Informs this view that Flutter has won the gesture arena for the active touch sequence.
-   *
-   * <p>Subsequent {@link MotionEvent#ACTION_MOVE} events will request unbuffered dispatch to
-   * minimize latency and prevent stutter for Flutter-driven gestures (e.g., scrolling).
-   */
-  public void onFlutterWonGesture() {
-    onFlutterWonGesture(0);
   }
 
   @VisibleForTesting
