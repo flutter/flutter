@@ -1102,12 +1102,25 @@ config("optimize_speed") {
 
 config("symbols") {
   if (is_win) {
-    if (use_rbe) {
-      cflags = [ "/Z7" ]  # No PDB file
-    } else {
-      cflags = [ "/Zi" ]  # Produce PDB file, no edit and continue.
+    cflags = [ "/Z7" ]  # Store CodeView debug info in .obj files
+    if (is_clang) {
+      cflags += [
+        "-gcodeview-ghash",          # Emit .debug$H type content hashes (Clang-cl)
+        "/clang:-ffile-compilation-dir=.",  # Normalize build machine source paths
+        "/clang:-ffunction-sections",
+        "/clang:-fdata-sections",
+      ]
     }
-    ldflags = [ "/DEBUG" ]
+    ldflags = [
+      "/DEBUG",
+      "/Brepro",             # Deterministic PE timestamps
+      "/pdbaltpath:%_PDB%",  # Strips host paths from debug directory
+    ]
+    if (is_clang) {
+      ldflags += [
+        "/DEBUG:GHASH",  # Global-hash PDB deduplication (LLD)
+      ]
+    }
   } else if (is_wasm) {
     if (wasm_use_dwarf) {
       cflags = [ "-g3" ]
@@ -1117,10 +1130,28 @@ config("symbols") {
       ldflags = [ "-gsource-map" ]
     }
   } else {
-    cflags = [ "-g2" ]
+    cflags = [
+      "-g2", # keep file, line, and variable/types
+      "-ffile-compilation-dir=.",
+      "-fno-ident",
+      "-fno-standalone-debug",
+      "-ffunction-sections",
+      "-fdata-sections",
+    ]
     asmflags = [ "-g" ]
     if (is_apple) {
       swiftflags = [ "-g" ]
+    } else {
+      # Linux & Android (ELF + LLD)
+      cflags += [
+        "-gdwarf-5", # Compact DWARF 5 standard
+        "-Wa,--compress-debug-sections=none",  # Already compressed by jar
+      ]
+      ldflags = [
+        "-Wl,--build-id=none", # Drop GUID (sha1) build id.
+        "-Wl,--sort-section=alignment", # Supposedly removes excess padding
+        "-Wl,-z,keep-text-section-prefix", # Keeps .text.hot, .text.unlikely structured
+      ]
     }
   }
 }
