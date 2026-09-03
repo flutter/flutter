@@ -2062,7 +2062,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
 
     // If [_markedForFocus] is no longer focusable, try to find an alternative
-    // focusable node within the nearest scope
+    // focusable node within the nearest scope.
     final FocusScopeNode scope = previousFocus?.nearestScope ?? rootScope;
     FocusNode? fallbackFocus;
 
