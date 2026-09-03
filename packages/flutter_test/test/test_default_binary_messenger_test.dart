@@ -112,4 +112,36 @@ void main() {
     final ByteData? result = await binaryMessenger.send('', null);
     expect(result?.buffer.asUint8List(), Uint8List.fromList(<int>[2, 3, 4]));
   });
+
+  group('closure of MockStreamHandlerEventSink does not hang', () {
+    const kTestEventChannelName = 'binary_messenger_test';
+
+    setUp(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
+        const EventChannel(kTestEventChannelName),
+        MockStreamHandler.inline(
+          onListen: (Object? rawArguments, MockStreamHandlerEventSink events) {
+            final Map<dynamic, dynamic> arguments = rawArguments as Map<dynamic, dynamic>? ?? {};
+            final bool close = arguments['close'] as bool? ?? false;
+
+            if (close) {
+              events.endOfStream();
+            }
+          },
+        ),
+      );
+    });
+
+    testWidgets('when sink is not closed', (WidgetTester tester) async {
+      const EventChannel(
+        kTestEventChannelName,
+      ).receiveBroadcastStream({'close': false}).listen((_) {});
+    });
+
+    testWidgets('when sink is closed', (WidgetTester tester) async {
+      const EventChannel(
+        kTestEventChannelName,
+      ).receiveBroadcastStream({'close': true}).listen((_) {});
+    }, timeout: const Timeout(Duration(seconds: 1)));
+  });
 }

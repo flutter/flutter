@@ -363,7 +363,11 @@ class TestDefaultBinaryMessenger extends BinaryMessenger {
     }
 
     final controller = StreamController<Object?>();
-    addTearDown(controller.close);
+    addTearDown(() {
+      if (!controller.isClosed) {
+        return controller.close();
+      }
+    });
 
     setMockMethodCallHandler(
       MethodChannel(channel.name, channel.codec),
