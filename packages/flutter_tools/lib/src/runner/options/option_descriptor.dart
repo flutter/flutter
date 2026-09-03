@@ -78,6 +78,12 @@ abstract class OptionDescriptor<T> {
     return target != null && target.options.contains(name) && target.wasParsed(name);
   }
 
+  /// Checks if this option is registered in [results].
+  bool isRegistered(ArgResults? results, {ArgResults? globalResults}) {
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    return target != null && target.options.contains(name);
+  }
+
   /// Checks if this option was explicitly parsed (alias for [wasProvided]).
   bool wasParsed(ArgResults? results, {ArgResults? globalResults}) =>
       wasProvided(results, globalResults: globalResults);
@@ -159,9 +165,9 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
 
   @override
   String? getValue(ArgResults? results, {ArgResults? globalResults}) {
-    if (wasProvided(results, globalResults: globalResults)) {
-      final ArgResults? target = _resolveTargetResults(results, globalResults);
-      return target?[name] as String?;
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      return target[name] as String?;
     }
     return defaultsTo;
   }
@@ -217,9 +223,9 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
 
   @override
   bool getValue(ArgResults? results, {ArgResults? globalResults}) {
-    if (wasProvided(results, globalResults: globalResults)) {
-      final ArgResults? target = _resolveTargetResults(results, globalResults);
-      return (target?[name] as bool?) ?? defaultsTo ?? false;
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      return (target[name] as bool?) ?? defaultsTo ?? false;
     }
     return defaultsTo ?? false;
   }
@@ -269,9 +275,9 @@ class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
 
   @override
   bool? getValue(ArgResults? results, {ArgResults? globalResults}) {
-    if (wasProvided(results, globalResults: globalResults)) {
-      final ArgResults? target = _resolveTargetResults(results, globalResults);
-      return target?[name] as bool?;
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      return target[name] as bool?;
     }
     return defaultsTo;
   }
@@ -331,9 +337,9 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
 
   @override
   List<String> getValue(ArgResults? results, {ArgResults? globalResults}) {
-    if (wasProvided(results, globalResults: globalResults)) {
-      final ArgResults? target = _resolveTargetResults(results, globalResults);
-      return (target?[name] as List<dynamic>?)?.cast<String>() ?? const <String>[];
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      return (target[name] as List<dynamic>?)?.cast<String>() ?? const <String>[];
     }
     return defaultsTo ?? const <String>[];
   }
