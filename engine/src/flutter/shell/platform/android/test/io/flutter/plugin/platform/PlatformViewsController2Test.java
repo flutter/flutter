@@ -591,6 +591,94 @@ public class PlatformViewsController2Test {
     verify(mockFlutterView, never()).invalidate();
   }
 
+  @Test
+  public void notifiesEngineOnlyOnFirstViewAndLastViewDisposal() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    PlatformViewRegistryImpl registry = new PlatformViewRegistryImpl();
+    controller.setRegistry(registry);
+
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView1 = mock(PlatformView.class);
+    PlatformView platformView2 = mock(PlatformView.class);
+    when(platformView1.getView()).thenReturn(mock(View.class));
+    when(platformView2.getView()).thenReturn(mock(View.class));
+    when(viewFactory.create(any(), eq(0), any())).thenReturn(platformView1);
+    when(viewFactory.create(any(), eq(1), any())).thenReturn(platformView2);
+    registry.registerViewFactory("testType", viewFactory);
+
+    FlutterJNI mockJNI = mock(FlutterJNI.class);
+    when(mockJNI.isAttached()).thenReturn(true);
+    controller.setFlutterJNI(mockJNI);
+
+    // 0 -> 1 transition: notifies true.
+    controller.createFlutterPlatformView(
+        PlatformViewCreationRequest.createHCPPRequest(
+            0, "testType", View.LAYOUT_DIRECTION_LTR, null));
+    verify(mockJNI, times(1)).setHasActivePlatformViews(true);
+
+    // 1 -> 2 transition: does not notify true again.
+    controller.createFlutterPlatformView(
+        PlatformViewCreationRequest.createHCPPRequest(
+            1, "testType", View.LAYOUT_DIRECTION_LTR, null));
+    verify(mockJNI, times(1)).setHasActivePlatformViews(true);
+
+    // 2 -> 1 transition: does not notify false yet.
+    controller.disposePlatformView(0);
+    verify(mockJNI, never()).setHasActivePlatformViews(false);
+
+    // 1 -> 0 transition: notifies false.
+    controller.disposePlatformView(1);
+    verify(mockJNI, times(1)).setHasActivePlatformViews(false);
+  }
+
+  @Test
+  public void platformViewsLifecycle_doesNotThrowOrNotifyWhenJNINotAttached() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    PlatformViewRegistryImpl registry = new PlatformViewRegistryImpl();
+    controller.setRegistry(registry);
+
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(mock(View.class));
+    when(viewFactory.create(any(), eq(0), any())).thenReturn(platformView);
+    registry.registerViewFactory("testType", viewFactory);
+
+    FlutterJNI mockJNI = mock(FlutterJNI.class);
+    when(mockJNI.isAttached()).thenReturn(false);
+    controller.setFlutterJNI(mockJNI);
+
+    // Creation while detached does not throw and does not notify native JNI.
+    controller.createFlutterPlatformView(
+        PlatformViewCreationRequest.createHCPPRequest(
+            0, "testType", View.LAYOUT_DIRECTION_LTR, null));
+    verify(mockJNI, never()).setHasActivePlatformViews(anyBoolean());
+  }
+
+  @Test
+  public void platformViewsLifecycle_notifiesWhenAttachingToPrePopulatedController() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    PlatformViewRegistryImpl registry = new PlatformViewRegistryImpl();
+    controller.setRegistry(registry);
+
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    when(platformView.getView()).thenReturn(mock(View.class));
+    when(viewFactory.create(any(), eq(0), any())).thenReturn(platformView);
+    registry.registerViewFactory("testType", viewFactory);
+
+    // Create view before JNI is attached.
+    controller.createFlutterPlatformView(
+        PlatformViewCreationRequest.createHCPPRequest(
+            0, "testType", View.LAYOUT_DIRECTION_LTR, null));
+
+    FlutterJNI mockJNI = mock(FlutterJNI.class);
+    when(mockJNI.isAttached()).thenReturn(true);
+
+    // Setting attached JNI on pre-populated controller notifies true.
+    controller.setFlutterJNI(mockJNI);
+    verify(mockJNI, times(1)).setHasActivePlatformViews(true);
+  }
+
   private static ByteBuffer encodeMethodCall(MethodCall call) {
     final ByteBuffer buffer = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
     buffer.rewind();

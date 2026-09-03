@@ -1768,7 +1768,9 @@ public class FlutterJNI {
   private native boolean nativeIsSurfaceControlEnabled(long nativeShellHolderId);
 
   /** Sets whether any platform views are currently active. */
+  @UiThread
   public void setHasActivePlatformViews(boolean hasViews) {
+    ensureRunningOnMainThread();
     ensureAttachedToNative();
     nativeSetHasActivePlatformViews(nativeShellHolderId, hasViews);
   }

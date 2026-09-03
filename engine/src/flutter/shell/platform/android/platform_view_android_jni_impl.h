@@ -139,6 +139,14 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
     has_active_platform_views_.store(has_views, std::memory_order_relaxed);
   }
 
+  bool FrameUsesJavaTransactions() const override {
+    return frame_uses_java_transactions_;
+  }
+
+  void SetFrameUsesJavaTransactions(bool uses_java) override {
+    frame_uses_java_transactions_ = uses_java;
+  }
+
   void swapTransaction() override;
 
   void applyTransaction() override;
@@ -171,6 +179,7 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
   // Reference to FlutterJNI object.
   const fml::jni::JavaObjectWeakGlobalRef java_object_;
   std::atomic<bool> has_active_platform_views_{false};
+  bool frame_uses_java_transactions_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroidJNIImpl);
 };

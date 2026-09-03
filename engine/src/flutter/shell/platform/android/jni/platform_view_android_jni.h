@@ -235,6 +235,18 @@ class PlatformViewAndroidJNI {
 
   virtual void SetHasActivePlatformViews(bool has_views) = 0;
 
+  // Returns whether the current frame submission is routed through Java
+  // transactions. This is read rather than consumed because a single
+  // SubmitFlutterView execution may synchronously submit both an overlay
+  // surface and the root surface, and both must route consistently.
+  // Called strictly on the raster thread.
+  virtual bool FrameUsesJavaTransactions() const = 0;
+
+  // Scopes whether the current frame uses Java transactions. This is latched
+  // by the external view embedder and reset via an RAII cleanup closure upon
+  // leaving SubmitFlutterView. Called strictly on the raster thread.
+  virtual void SetFrameUsesJavaTransactions(bool uses_java) = 0;
+
   virtual void swapTransaction() = 0;
 
   virtual void applyTransaction() = 0;

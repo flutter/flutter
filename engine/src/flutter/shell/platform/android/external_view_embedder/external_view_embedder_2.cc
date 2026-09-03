@@ -8,6 +8,7 @@
 
 #include "display_list/dl_color.h"
 #include "flow/view_slicer.h"
+#include "flutter/fml/closure.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/make_copyable.h"
@@ -93,27 +94,37 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
     std::unique_ptr<SurfaceFrame> frame) {
   TRACE_EVENT0("flutter", "AndroidExternalViewEmbedder2::SubmitFlutterView");
 
+  const bool uses_java_transactions = FrameHasPlatformLayers() ||
+                                      !views_visible_last_frame_.empty() ||
+                                      jni_facade_->HasActivePlatformViews();
+
+  fml::ScopedCleanupClosure restore_transaction_path;
+  if (uses_java_transactions) {
+    jni_facade_->SetFrameUsesJavaTransactions(true);
+    restore_transaction_path =
+        fml::ScopedCleanupClosure([jni_facade = jni_facade_]() {
+          jni_facade->SetFrameUsesJavaTransactions(false);
+        });
+  }
+
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
-    if (!jni_facade_->HasActivePlatformViews() &&
-        views_visible_last_frame_.empty()) {
-      return;
+    if (uses_java_transactions) {
+      task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
+          [this, jni_facade = jni_facade_,
+           views_visible_last_frame = views_visible_last_frame_]() {
+            // This pointer is guaranteed to not be dangling as long as
+            // DestroySurfaces is called before the embedder is deleted. See
+            // https://github.com/flutter/flutter/pull/176742#discussion_r2415229396.
+            this->HideOverlayLayerIfNeeded();
+            for (int64_t view_id : views_visible_last_frame) {
+              jni_facade->hidePlatformView2(view_id);
+            }
+
+            jni_facade->swapTransaction();
+            jni_facade->onEndFrame2();
+          }));
     }
-
-    task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
-        [this, jni_facade = jni_facade_,
-         views_visible_last_frame = views_visible_last_frame_]() {
-          // This pointer is guaranteed to not be dangling as long as
-          // DestroySurfaces is called before the embedder is deleted. See
-          // https://github.com/flutter/flutter/pull/176742#discussion_r2415229396.
-          this->HideOverlayLayerIfNeeded();
-          for (int64_t view_id : views_visible_last_frame) {
-            jni_facade->hidePlatformView2(view_id);
-          }
-
-          jni_facade->swapTransaction();
-          jni_facade->onEndFrame2();
-        }));
     views_visible_last_frame_.clear();
     return;
   }
