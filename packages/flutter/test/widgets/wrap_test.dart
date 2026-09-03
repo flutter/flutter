@@ -1041,4 +1041,68 @@ void main() {
     );
     verify(tester, <Offset>[const Offset(700.0, 0.0)]);
   });
+
+  testWidgets('Vertical Wrap constrains the width of its children', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/38503
+    late BoxConstraints childConstraints;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 300.0,
+            height: 400.0,
+            child: Wrap(
+              direction: Axis.vertical,
+              children: <Widget>[
+                LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    childConstraints = constraints;
+                    return const SizedBox(width: 100.0, height: 50.0);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(childConstraints, const BoxConstraints(maxWidth: 300.0, maxHeight: 400.0));
+  });
+
+  testWidgets('Vertical Wrap lays out its children within the available width', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/38503
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(
+            width: 100.0,
+            child: Wrap(
+              direction: Axis.vertical,
+              children: <Widget>[
+                Text(
+                  'A long line of text that has to wrap',
+                  style: TextStyle(height: 1.0, fontSize: 10.0),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(Text)).width, lessThanOrEqualTo(100.0));
+    expect(tester.getSize(find.byType(Wrap)).width, lessThanOrEqualTo(100.0));
+
+    // The dry layout must agree with the actual layout.
+    final RenderBox wrap = tester.renderObject<RenderBox>(find.byType(Wrap));
+    expect(
+      wrap.getDryLayout(const BoxConstraints(maxWidth: 100.0, maxHeight: 600.0)),
+      wrap.size,
+    );
+  });
 }
