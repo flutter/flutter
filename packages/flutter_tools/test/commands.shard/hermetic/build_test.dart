@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../src/common.dart';
@@ -53,6 +54,7 @@ void main() {
       artifacts: FakeArtifacts(),
       cache: FakeCache(),
       flutterVersion: FakeFlutterVersion(),
+      featureFlags: TestFeatureFlags(),
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
@@ -111,8 +113,9 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
       );
       try {
-        await createTestCommandRunner(command)
-            .run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']);
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']);
       } on Exception {
         fail('Unexpected exception thrown');
       }
@@ -171,8 +174,9 @@ void main() {
       );
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
       await expectLater(
-        createTestCommandRunner(command)
-            .run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
+        createTestCommandRunner(
+          command,
+        ).run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
         throwsToolExit(
           message:
               'Logger received warning output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
@@ -203,8 +207,9 @@ void main() {
       );
       testLogger.printError('Error: Danger Will Robinson!');
       await expectLater(
-        createTestCommandRunner(command)
-            .run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
+        createTestCommandRunner(
+          command,
+        ).run(<String>['build', 'test', '--${FlutterOptions.kFatalWarnings}']),
         throwsToolExit(
           message:
               'Logger received error output during the run, and "--${FlutterOptions.kFatalWarnings}" is enabled.',
@@ -254,7 +259,8 @@ class FakeBuildCommand extends BuildCommand {
     required super.artifacts,
     required super.cache,
     required super.flutterVersion,
-  }) : super(logger: logger) {
+    FeatureFlags? featureFlags,
+  }) : super(logger: logger, featureFlags: featureFlags ?? TestFeatureFlags()) {
     addSubcommand(FakeBuildSubcommand(logger: logger, verboseHelp: verboseHelp));
   }
 

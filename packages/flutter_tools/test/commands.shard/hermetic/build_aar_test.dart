@@ -76,6 +76,7 @@ flutter:
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
+        featureFlags: TestFeatureFlags(),
       );
 
       expect(
@@ -144,6 +145,7 @@ flutter:
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
+        featureFlags: TestFeatureFlags(),
       );
 
       await createTestCommandRunner(command).run(const <String>['build', 'aar', '--no-pub']);

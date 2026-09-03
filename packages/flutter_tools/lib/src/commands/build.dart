@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
@@ -47,6 +46,7 @@ class BuildCommand extends FlutterCommand {
     required BuildSystem buildSystem,
     required Cache cache,
     required Config config,
+    required FeatureFlags featureFlags,
     required FileSystem fileSystem,
     required FileSystemUtils fileSystemUtils,
     required FlutterVersion flutterVersion,
@@ -61,14 +61,9 @@ class BuildCommand extends FlutterCommand {
     required Terminal terminal,
     required super.toolContext,
     required Xcode? xcode,
-    Analytics? analytics,
-    FeatureFlags? featureFlags,
     super.outputPreferences,
     super.verboseHelp,
   }) : super() {
-    final Analytics effectiveAnalytics = analytics ?? const NoOpAnalytics();
-    final FeatureFlags effectiveFeatureFlags = featureFlags ?? const _DefaultFeatureFlags();
-
     _addSubcommand(
       BuildAarCommand(
         fileSystem: fileSystem,
@@ -123,11 +118,11 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildSwiftPackage(
         logger: logger,
-        analytics: effectiveAnalytics,
+        analytics: analytics,
         artifacts: artifacts,
         buildSystem: buildSystem,
         cache: cache,
-        featureFlags: effectiveFeatureFlags,
+        featureFlags: featureFlags,
         fileSystem: fileSystem,
         flutterVersion: flutterVersion,
         platform: platform,
@@ -158,15 +153,16 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildMacosCommand(
-        toolContext: toolContext,
         buildSystem: buildSystem,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
       BuildLinuxCommand(
         buildSystem: buildSystem,
-        featureFlags: effectiveFeatureFlags,
+        featureFlags: featureFlags,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
@@ -174,7 +170,7 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildWindowsCommand(
         buildSystem: buildSystem,
-        featureFlags: effectiveFeatureFlags,
+        featureFlags: featureFlags,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
         visualStudio: VisualStudio(
@@ -214,11 +210,9 @@ abstract class BuildSubCommand extends FlutterCommand {
   BuildSubCommand({
     required this.logger,
     required super.verboseHelp,
-    Analytics? analytics,
     super.outputPreferences,
     super.toolContext,
   }) {
-    _analytics = analytics;
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
@@ -226,62 +220,6 @@ abstract class BuildSubCommand extends FlutterCommand {
   @protected
   final Logger logger;
 
-  Analytics? _analytics;
-
-  @override
-  Analytics get analytics => _analytics ?? super.analytics;
-
   /// Whether this command is supported and should be shown.
   bool get supported => true;
-}
-
-class _DefaultFeatureFlags extends FeatureFlags {
-  const _DefaultFeatureFlags();
-
-  @override
-  bool isEnabled(Feature feature) => false;
-  @override
-  bool get isLinuxEnabled => false;
-  @override
-  bool get isMacOSEnabled => false;
-  @override
-  bool get isWindowsEnabled => false;
-  @override
-  bool get isWebEnabled => false;
-  @override
-  bool get isAndroidEnabled => false;
-  @override
-  bool get isIOSEnabled => false;
-  @override
-  bool get isFuchsiaEnabled => false;
-  @override
-  bool get areCustomDevicesEnabled => false;
-  @override
-  bool get isCliAnimationEnabled => false;
-  @override
-  bool get isNativeAssetsEnabled => false;
-  @override
-  bool get isDartDataAssetsEnabled => false;
-  @override
-  bool get isRecordUseEnabled => false;
-  @override
-  bool get isSwiftPackageManagerEnabled => false;
-  @override
-  bool get isOmitLegacyVersionFileEnabled => false;
-  @override
-  bool get isWindowingEnabled => false;
-  @override
-  bool get isAccessibilityEvaluationsEnabled => false;
-  @override
-  bool get isLLDBDebuggingEnabled => false;
-  @override
-  bool get isUISceneMigrationEnabled => false;
-  @override
-  bool get isHcppEnabled => false;
-  @override
-  bool get isMacOSArm64OnlyEnabled => false;
-  @override
-  bool get isRiscv64SupportEnabled => false;
-  @override
-  bool get isToolExtensionsEnabled => false;
 }

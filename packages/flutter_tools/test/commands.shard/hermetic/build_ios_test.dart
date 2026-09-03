@@ -234,6 +234,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -272,6 +273,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -287,8 +289,9 @@ void main() {
       createCoreMockProjectFiles();
 
       expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'ios', '--no-pub', '--debug', '--analyze-size']),
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'ios', '--no-pub', '--debug', '--analyze-size']),
         throwsToolExit(message: '--analyze-size" can only be used on release builds'),
       );
     },
@@ -311,6 +314,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -366,6 +370,7 @@ void main() {
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         processUtils: FakeProcessUtils(),
         processManager: processManager,
@@ -410,6 +415,7 @@ void main() {
         logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -460,6 +466,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -509,6 +516,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -523,8 +531,9 @@ void main() {
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ios', '--no-pub', '--no-publish-port', '--ci']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ios', '--no-pub', '--no-publish-port', '--ci']);
       expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
     },
     overrides: <Type, Generator>{
@@ -558,6 +567,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -572,8 +582,9 @@ void main() {
       );
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ios', '--no-pub', '--no-publish-port']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ios', '--no-pub', '--no-publish-port']);
       expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
     },
     overrides: <Type, Generator>{
@@ -606,6 +617,7 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -666,6 +678,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -716,6 +729,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -741,8 +755,9 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ios', '--no-pub', '--device-id', '1234']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ios', '--no-pub', '--device-id', '1234']);
       expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
     },
     overrides: <Type, Generator>{
@@ -766,6 +781,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -791,8 +807,9 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ios', '--simulator', '--no-pub']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ios', '--simulator', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -815,6 +832,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -863,6 +881,7 @@ void main() {
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
+        featureFlags: TestFeatureFlags(),
         platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
@@ -906,8 +925,9 @@ void main() {
       ]);
       createMinimalMockProjectFiles();
 
-      await createTestCommandRunner(command)
-          .run(const <String>['build', 'ios', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ios', '--no-pub', '--analyze-size']);
 
       expect(logger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
       expect(logger.statusText, contains('dart devtools --appSizeBase='));
@@ -953,6 +973,7 @@ void main() {
           logger: BufferLogger.test(),
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1011,6 +1032,7 @@ void main() {
           logger: BufferLogger.test(),
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1090,6 +1112,7 @@ void main() {
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1144,6 +1167,7 @@ void main() {
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1205,6 +1229,7 @@ void main() {
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1271,6 +1296,7 @@ void main() {
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1322,6 +1348,7 @@ void main() {
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1390,6 +1417,7 @@ void main() {
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1450,6 +1478,7 @@ void main() {
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1504,6 +1533,7 @@ void main() {
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1575,6 +1605,7 @@ void main() {
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1632,6 +1663,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1687,6 +1719,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1743,6 +1776,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1797,6 +1831,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1853,6 +1888,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1911,6 +1947,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1938,8 +1975,9 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         createMinimalMockProjectFiles();
 
         await expectLater(
-          createTestCommandRunner(command)
-              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          createTestCommandRunner(
+            command,
+          ).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(),
         );
 
@@ -1967,6 +2005,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -1994,8 +2033,9 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         createMinimalMockProjectFiles();
 
         await expectLater(
-          createTestCommandRunner(command)
-              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          createTestCommandRunner(
+            command,
+          ).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(),
         );
 
@@ -2027,6 +2067,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -2055,8 +2096,9 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         createMinimalMockProjectFiles();
 
         await expectLater(
-          createTestCommandRunner(command)
-              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          createTestCommandRunner(
+            command,
+          ).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(),
         );
 
@@ -2096,6 +2138,7 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           logger: logger,
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
+          featureFlags: TestFeatureFlags(),
           platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
@@ -2117,8 +2160,9 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         createMinimalMockProjectFiles();
 
         await expectLater(
-          createTestCommandRunner(command)
-              .run(const <String>['build', 'ios', '--simulator', '--no-pub']),
+          createTestCommandRunner(
+            command,
+          ).run(const <String>['build', 'ios', '--simulator', '--no-pub']),
           throwsToolExit(),
         );
 
