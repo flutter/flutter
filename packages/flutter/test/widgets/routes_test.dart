@@ -512,6 +512,112 @@ void main() {
       expect(observer.debugObservingRoute(pageRoute), false);
       expect(observer.debugObservingRoute(nextPageRoute), false);
     });
+
+    testWidgets(
+      'didPushNext is called on newly pushed route when pushed simultaneously with another',
+      (WidgetTester tester) async {
+        final observer = RouteObserver<PageRoute<dynamic>>();
+        final eventsA = <String>[];
+
+        await tester.pumpWidget(
+          WidgetsApp(
+            navigatorObservers: <NavigatorObserver>[observer],
+            color: const Color(0xFFFFFFFF),
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<void>(
+                pageBuilder:
+                    (
+                      BuildContext context,
+                      Animation<double> animation,
+                      Animation<double> secondaryAnimation,
+                    ) => const SizedBox(),
+              );
+            },
+          ),
+        );
+
+        final BuildContext context = tester.element(find.byType(SizedBox));
+        Navigator.of(context)
+          ..push(
+            PageRouteBuilder<void>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => _TestRouteAwareWidget(observer: observer, onEvent: eventsA.add),
+            ),
+          )
+          ..push(
+            PageRouteBuilder<void>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => const Text('Route B', textDirection: TextDirection.ltr),
+            ),
+          );
+
+        await tester.pumpAndSettle();
+
+        expect(eventsA, <String>['didPush', 'didPushNext']);
+      },
+    );
+
+    testWidgets(
+      'didPushNext is not called on newly pushed route when pushed simultaneously with a non-PageRoute',
+      (WidgetTester tester) async {
+        final observer = RouteObserver<PageRoute<dynamic>>();
+        final eventsA = <String>[];
+
+        await tester.pumpWidget(
+          WidgetsApp(
+            navigatorObservers: <NavigatorObserver>[observer],
+            color: const Color(0xFFFFFFFF),
+            onGenerateRoute: (RouteSettings settings) {
+              return PageRouteBuilder<void>(
+                pageBuilder:
+                    (
+                      BuildContext context,
+                      Animation<double> animation,
+                      Animation<double> secondaryAnimation,
+                    ) => const SizedBox(),
+              );
+            },
+          ),
+        );
+
+        final BuildContext context = tester.element(find.byType(SizedBox));
+        Navigator.of(context)
+          ..push(
+            PageRouteBuilder<void>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => _TestRouteAwareWidget(observer: observer, onEvent: eventsA.add),
+            ),
+          )
+          ..push(
+            RawDialogRoute<void>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) => const Text('Route B', textDirection: TextDirection.ltr),
+            ),
+          );
+
+        await tester.pumpAndSettle();
+
+        expect(eventsA, <String>[
+          'didPush',
+        ]); // didPushNext should NOT be called because RawDialogRoute is not a PageRoute
+      },
+    );
   });
 
   testWidgets('Can autofocus a TextField nested in a Focus in a route.', (
@@ -2888,9 +2994,21 @@ double _getOpacity(GlobalKey key, WidgetTester tester) {
   });
 }
 
-class MockPageRoute extends Fake implements PageRoute<dynamic> {}
+class MockPageRoute extends Fake implements PageRoute<dynamic> {
+  @override
+  bool get isActive => true;
 
-class MockRoute extends Fake implements Route<dynamic> {}
+  @override
+  bool get isCurrent => true;
+}
+
+class MockRoute extends Fake implements Route<dynamic> {
+  @override
+  bool get isActive => true;
+
+  @override
+  bool get isCurrent => true;
+}
 
 class MockRouteAware extends Fake implements RouteAware {
   int didPushCount = 0;
@@ -3143,4 +3261,37 @@ class _ConstantVelocitySimulation extends Simulation {
     final double nowX = x(time);
     return nowX > 1.0 || nowX < 0;
   }
+}
+
+class _TestRouteAwareWidget extends StatefulWidget {
+  const _TestRouteAwareWidget({required this.observer, required this.onEvent});
+  final RouteObserver<PageRoute<dynamic>> observer;
+  final ValueChanged<String> onEvent;
+  @override
+  State<_TestRouteAwareWidget> createState() => _TestRouteAwareWidgetState();
+}
+
+class _TestRouteAwareWidgetState extends State<_TestRouteAwareWidget> with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.observer.subscribe(this, ModalRoute.of(context)! as PageRoute<dynamic>);
+  }
+
+  @override
+  void dispose() {
+    widget.observer.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPush() => widget.onEvent('didPush');
+  @override
+  void didPop() => widget.onEvent('didPop');
+  @override
+  void didPushNext() => widget.onEvent('didPushNext');
+  @override
+  void didPopNext() => widget.onEvent('didPopNext');
+  @override
+  Widget build(BuildContext context) => const SizedBox();
 }
