@@ -86,6 +86,7 @@ class ParagraphStyle {
   size_t max_lines = std::numeric_limits<size_t>::max();
   std::u16string ellipsis;
   std::string locale;
+  bool fake_missing_font_styles = true;
 
   TextStyle GetTextStyle() const;
 
