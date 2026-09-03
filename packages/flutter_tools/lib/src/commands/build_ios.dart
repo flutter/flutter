@@ -488,12 +488,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final OperatingSystemUtils os = _toolContext.os;
-    final PlistParser plistParser = _appleContext.plistParser;
-    final ProcessUtils processUtils = _toolContext.processUtils;
-    final Terminal terminal = _toolContext.terminal;
-    final Xcode xcode = _appleContext.xcode;
+    final ToolContext(
+      :FileSystem fs,
+      :OperatingSystemUtils os,
+      :ProcessUtils processUtils,
+      :Terminal terminal,
+    ) = _toolContext;
+    final AppleContext(:PlistParser plistParser, :Xcode xcode) = _appleContext;
 
     final BuildInfo buildInfo = await cachedBuildInfo;
     final FlutterCommandResult xcarchiveResult = await super.runCommand();
