@@ -75,6 +75,7 @@ template("skwasm_variant") {
     if (invoker.use_impeller) {
       sources += [
         "canvas_text_impeller.cc",
+        "image_precache_impeller.cc",
         "images_impeller.cc",
         "render_context_impeller.cc",
         "shaders_impeller.cc",
