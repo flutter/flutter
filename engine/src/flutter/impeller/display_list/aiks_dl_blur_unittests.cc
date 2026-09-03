@@ -20,6 +20,7 @@
 #include "gmock/gmock.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/entity/render_target_cache.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "third_party/imgui/imgui.h"
@@ -296,28 +297,43 @@ TEST_P(AiksTest, CanRenderBackdropBlurWithSingleBackdropId) {
 TEST_P(AiksTest, CanRenderMultipleBackdropBlurWithSingleBackdropId) {
   auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
 
-  DisplayListBuilder builder;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    static bool enable_backdrop_group = true;
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::Checkbox("Enable BackdropGroup", &enable_backdrop_group);
+      ImGui::End();
+    }
 
-  DlPaint paint;
-  builder.DrawImage(image, DlPoint(50.0, 50.0),
-                    DlImageSampling::kNearestNeighbor, &paint);
+    DisplayListBuilder builder;
 
-  for (int i = 0; i < 6; i++) {
-    DlRoundRect rrect = DlRoundRect::MakeRectXY(
-        DlRect::MakeXYWH(50 + (i * 100), 250, 100, 100), 20, 20);
-    builder.Save();
-    builder.ClipRoundRect(rrect);
+    DlPaint paint;
+    builder.DrawImage(image, DlPoint(50.0, 50.0),
+                      DlImageSampling::kNearestNeighbor, &paint);
 
-    DlPaint save_paint;
-    save_paint.setBlendMode(DlBlendMode::kSrc);
-    auto backdrop_filter = DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
-    builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get(),
-                      /*backdrop_id=*/1);
-    builder.Restore();
-    builder.Restore();
-  }
+    std::optional<int64_t> backdrop_id =
+        enable_backdrop_group ? std::optional<int64_t>(1) : std::nullopt;
 
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+    for (int i = 0; i < 6; i++) {
+      DlRoundRect rrect = DlRoundRect::MakeRectXY(
+          DlRect::MakeXYWH(50 + (i * 100), 250, 100, 100), 20, 20);
+      builder.Save();
+      builder.ClipRoundRect(rrect);
+
+      DlPaint save_paint;
+      save_paint.setBlendMode(DlBlendMode::kSrc);
+      auto backdrop_filter =
+          DlImageFilter::MakeBlur(30, 30, DlTileMode::kClamp);
+      builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get(),
+                        backdrop_id);
+      builder.Restore();
+      builder.Restore();
+    }
+
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
 TEST_P(AiksTest,
@@ -1474,6 +1490,58 @@ TEST_P(AiksTest,
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, BackdropGroupUsesCoverageUnionSnapshot) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  builder.DrawImage(image, DlPoint(0.0, 0.0), DlImageSampling::kNearestNeighbor,
+                    &paint);
+
+  // Two grouped backdrop blurs covering (50, 50, 150, 150) and (200, 200, 300,
+  // 300)
+  for (int i = 0; i < 2; i++) {
+    DlRoundRect rrect = DlRoundRect::MakeRectXY(
+        DlRect::MakeXYWH(50 + (i * 150), 50 + (i * 150), 100, 100), 20, 20);
+    builder.Save();
+    builder.ClipRoundRect(rrect);
+
+    DlPaint save_paint;
+    save_paint.setBlendMode(DlBlendMode::kSrc);
+    auto backdrop_filter = DlImageFilter::MakeBlur(20, 20, DlTileMode::kClamp);
+    builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get(),
+                      /*backdrop_id=*/1);
+    builder.Restore();
+    builder.Restore();
+  }
+
+  AiksContext renderer(GetContext(), nullptr);
+  auto output = DisplayListToTexture(builder.Build(), {1000, 1000}, renderer);
+  EXPECT_TRUE(output);
+
+  // Inspect the RenderTargetCache to verify the intermediate blur render
+  // targets were sized according to the coverage union (<= 300x300) rather than
+  // creating extra full canvas sized textures (1000x1000).
+  auto cache = std::static_pointer_cast<RenderTargetCache>(
+      renderer.GetContentContext().GetRenderTargetCache());
+  bool found_union_sized_blur_target = false;
+  size_t full_sized_targets = 0;
+  for (auto it = cache->GetRenderTargetDataBegin();
+       it != cache->GetRenderTargetDataEnd(); ++it) {
+    ISize size = it->render_target.GetRenderTargetSize();
+    if (size.width >= 1000 && size.height >= 1000) {
+      full_sized_targets++;
+    } else if (size.width <= 300 && size.height <= 300 && size.width > 0) {
+      found_union_sized_blur_target = true;
+    }
+  }
+  EXPECT_TRUE(found_union_sized_blur_target);
+  // Only the root pass / flipped backdrop textures are full sized (at most 2),
+  // blur subpass textures are cropped to the union bounds.
+  EXPECT_LE(full_sized_targets, 2u);
 }
 
 TEST_P(AiksTest, BlurGradientWithOpacity) {
