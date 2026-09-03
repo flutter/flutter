@@ -1156,8 +1156,13 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// leaf widgets.
   ///
   /// It is also possible to trigger a rebuild without directly calling [State.setState].
-  /// One way to do so is by using [AnimatedBuilder] with a [Listenable],
-  /// which can be more performant in some situations.
+  /// For example, using a [ListenableBuilder] implicitly rebuilds a subtree whenever its
+  /// [ListenableBuilder.listenable] value changes.
+  ///
+  /// If a subtree under a [ListenableBuilder] does not depend on the listenable's state,
+  /// you can pass it to [ListenableBuilder.child] to boost performance. Flutter then passes
+  /// this pre-built [ListenableBuilder.child] into the [ListenableBuilder.builder] callback,
+  /// preventing unnecessary rebuilds of that subtree.
   ///
   /// See also:
   ///
