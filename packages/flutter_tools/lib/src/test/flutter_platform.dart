@@ -19,7 +19,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';

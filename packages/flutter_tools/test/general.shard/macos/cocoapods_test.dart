@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -88,7 +87,7 @@ environement:
   }
 
   setUp(() async {
-    globals.cache.flutterRoot = 'flutter';
+    const flutterRoot = 'flutter';
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
@@ -103,10 +102,11 @@ environement:
       platform: FakePlatform(operatingSystem: 'macos'),
       xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       analytics: fakeAnalytics,
+      flutterRoot: flutterRoot,
     );
     fileSystem.file(
         fileSystem.path.join(
-          globals.cache.flutterRoot,
+          flutterRoot,
           'packages',
           'flutter_tools',
           'templates',
@@ -118,7 +118,7 @@ environement:
       ..writeAsStringSync('iOS podfile template');
     fileSystem.file(
         fileSystem.path.join(
-          globals.cache.flutterRoot,
+          flutterRoot,
           'packages',
           'flutter_tools',
           'templates',

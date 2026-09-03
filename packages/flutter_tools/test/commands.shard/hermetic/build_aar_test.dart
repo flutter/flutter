@@ -33,7 +33,6 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem.test();
     final Directory flutterRoot = fs.directory('flutter');
-    globals.cache.flutterRoot = flutterRoot.path;
     logger = BufferLogger.test();
     platform = FakePlatform(environment: const <String, String>{'PATH': ''});
     processManager = FakeProcessManager.empty();
@@ -159,6 +158,7 @@ flutter:
       );
     },
     overrides: <Type, Generator>{
+      Cache: () => cache,
       FileSystem: () => fs,
       Platform: () => platform,
       ProcessManager: () => processManager,

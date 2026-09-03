@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -123,7 +122,7 @@ class TestBed {
       throw StateError('Do not inject ProcessUtils for testing, use ProcessManager instead.');
     }
     // Cache the original flutter root to restore after the test case.
-    final String? originalFlutterRoot = globals.cache.flutterRoot;
+    final String originalFlutterRoot = globals.cache.flutterRoot;
     // Track pending timers to verify that they were correctly cleaned up.
     final timers = <Timer, StackTrace>{};
 

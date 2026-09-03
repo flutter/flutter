@@ -47,12 +47,10 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    globals.cache.flutterRoot = '';
   });
 
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
-    globals.cache.flutterRoot = flutterRoot;
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),

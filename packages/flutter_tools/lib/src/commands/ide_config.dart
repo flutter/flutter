@@ -4,7 +4,6 @@
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../cache.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../template.dart';

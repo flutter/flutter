@@ -18,9 +18,11 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
     super.channel, {
     required super.fileSystem,
     required super.platform,
-    super.ipv6,
-    super.enableFlutterDds = true,
+    super.cache,
     super.enableAuthCodes,
+    super.enableFlutterDds = true,
+    super.flutterSdkRoot,
+    super.ipv6,
     super.logger,
     super.onError,
   });

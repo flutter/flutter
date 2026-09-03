@@ -20,7 +20,6 @@ import '../build_system/targets/ios.dart';
 import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
 import '../build_system/targets/windows.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
 import '../project.dart';

@@ -4,7 +4,6 @@
 
 import 'package:dap_adapters/dap_adapters.dart';
 import 'package:file/file.dart';
-import 'package:flutter_tools/src/cache.dart';
 
 import '../../src/common.dart';
 import '../test_data/integration_tests_project.dart';
@@ -18,10 +17,6 @@ void main() {
   late DapTestSession dap;
   late DapTestClient client;
   late TestsProject project;
-
-  setUpAll(() {
-    globals.cache.flutterRoot = getFlutterRoot();
-  });
 
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('flutter_test_adapter_test.');

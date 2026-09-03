@@ -182,8 +182,6 @@ void main() {
         const licenseText = 'This is the license!';
 
         setUp(() {
-          // cache.getLicenseFile() relies on the flutter root being set.
-          globals.cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
@@ -693,8 +691,6 @@ void main() {
         const licenseText = 'This is the license!';
 
         setUp(() {
-          // cache.getLicenseFile() relies on the flutter root being set.
-          globals.cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);

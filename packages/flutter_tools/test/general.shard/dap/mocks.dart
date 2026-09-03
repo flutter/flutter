@@ -16,6 +16,7 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
   factory FakeFlutterDebugAdapter({
     required FileSystem fileSystem,
     required Platform platform,
+    String? flutterSdkRoot,
     bool simulateAppStarted = true,
     bool simulateAppStopError = false,
     bool supportsRestart = true,
@@ -35,6 +36,7 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
       clientChannel: clientChannel,
       fileSystem: fileSystem,
       platform: platform,
+      flutterSdkRoot: flutterSdkRoot ?? (platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter'),
       simulateAppStarted: simulateAppStarted,
       simulateAppStopError: simulateAppStopError,
       supportsRestart: supportsRestart,
@@ -47,6 +49,7 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
     required this.clientChannel,
     required super.fileSystem,
     required super.platform,
+    super.flutterSdkRoot,
     this.simulateAppStarted = true,
     this.simulateAppStopError = false,
     this.supportsRestart = true,
@@ -218,6 +221,7 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
   factory FakeFlutterTestDebugAdapter({
     required FileSystem fileSystem,
     required Platform platform,
+    String? flutterSdkRoot,
   }) {
     final stdinController = StreamController<List<int>>();
     final stdoutController = StreamController<List<int>>();
@@ -229,6 +233,7 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
       channel,
       fileSystem: fileSystem,
       platform: platform,
+      flutterSdkRoot: flutterSdkRoot ?? (platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter'),
     );
   }
 
@@ -238,6 +243,7 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
     ByteStreamServerChannel channel, {
     required super.fileSystem,
     required super.platform,
+    super.flutterSdkRoot,
   }) : super(channel);
 
   final StreamSink<List<int>> stdin;

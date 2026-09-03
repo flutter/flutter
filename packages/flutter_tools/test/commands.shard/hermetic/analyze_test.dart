@@ -44,6 +44,7 @@ void main() {
     late Terminal terminal;
     late AnalyzeCommand command;
     late CommandRunner<void> runner;
+    late Cache cache;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -69,7 +70,11 @@ void main() {
 
       // Setup repo roots
       const homePath = '/home/user/flutter';
-      globals.cache.flutterRoot = homePath;
+      cache = Cache.test(
+        fileSystem: fileSystem,
+        processManager: processManager,
+        flutterRoot: homePath,
+      );
       for (final dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
@@ -107,6 +112,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
+        Cache: () => cache,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
       },
@@ -145,6 +151,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
+        Cache: () => cache,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
       },
@@ -185,6 +192,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
+        Cache: () => cache,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
       },
@@ -215,6 +223,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
+        Cache: () => cache,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
       },
@@ -242,6 +251,7 @@ void main() {
         await expectLater(runner.run(<String>['analyze', '--benchmark']), throwsA(isA<ToolExit>()));
       },
       overrides: <Type, Generator>{
+        Cache: () => cache,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
       },
@@ -271,6 +281,7 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
+        Cache: () => cache,
         FileSystem: () => fileSystem,
         ProcessManager: () => processManager,
       },
@@ -283,33 +294,38 @@ void main() {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
-    globals.cache.flutterRoot = _kFlutterRoot;
 
     // Absolute paths
-    expect(inRepo(<String>[tempDir.path], fileSystem), isFalse);
-    expect(inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem), isFalse);
-    expect(inRepo(<String>[globals.cache.flutterRoot], fileSystem), isTrue);
-    expect(inRepo(<String>[fileSystem.path.join(globals.cache.flutterRoot, 'foo')], fileSystem), isTrue);
+    expect(inRepo(<String>[tempDir.path], fileSystem, _kFlutterRoot), isFalse);
+    expect(
+      inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem, _kFlutterRoot),
+      isFalse,
+    );
+    expect(inRepo(<String>[_kFlutterRoot], fileSystem, _kFlutterRoot), isTrue);
+    expect(
+      inRepo(<String>[fileSystem.path.join(_kFlutterRoot, 'foo')], fileSystem, _kFlutterRoot),
+      isTrue,
+    );
 
     // Relative paths
-    fileSystem.currentDirectory = globals.cache.flutterRoot;
-    expect(inRepo(<String>['.'], fileSystem), isTrue);
-    expect(inRepo(<String>['foo'], fileSystem), isTrue);
+    fileSystem.currentDirectory = _kFlutterRoot;
+    expect(inRepo(<String>['.'], fileSystem, _kFlutterRoot), isTrue);
+    expect(inRepo(<String>['foo'], fileSystem, _kFlutterRoot), isTrue);
     fileSystem.currentDirectory = tempDir.path;
-    expect(inRepo(<String>['.'], fileSystem), isFalse);
-    expect(inRepo(<String>['foo'], fileSystem), isFalse);
+    expect(inRepo(<String>['.'], fileSystem, _kFlutterRoot), isFalse);
+    expect(inRepo(<String>['foo'], fileSystem, _kFlutterRoot), isFalse);
 
     // Ensure no exceptions
-    inRepo(null, fileSystem);
-    inRepo(<String>[], fileSystem);
+    inRepo(null, fileSystem, _kFlutterRoot);
+    inRepo(<String>[], fileSystem, _kFlutterRoot);
   });
 }
 
-bool inRepo(List<String>? fileList, FileSystem fileSystem) {
+bool inRepo(List<String>? fileList, FileSystem fileSystem, String flutterRoot) {
   if (fileList == null || fileList.isEmpty) {
     fileList = <String>[fileSystem.path.current];
   }
-  final String root = fileSystem.path.normalize(fileSystem.path.absolute(globals.cache.flutterRoot));
+  final String root = fileSystem.path.normalize(fileSystem.path.absolute(flutterRoot));
   final String prefix = root + fileSystem.path.separator;
   for (String file in fileList) {
     file = fileSystem.path.normalize(fileSystem.path.absolute(file));

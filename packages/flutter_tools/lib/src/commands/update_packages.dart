@@ -14,7 +14,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/net.dart';
-import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../project.dart';

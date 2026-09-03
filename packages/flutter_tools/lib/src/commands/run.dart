@@ -810,7 +810,11 @@ class RunCommand extends RunCommandBase {
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
         dartBuilder: hookRunner,
-        logger: globals.logger,
+        logger: toolContext?.logger ?? globals.logger,
+        artifacts: toolContext?.artifacts ?? globals.artifacts,
+        cache: toolContext?.cache ?? globals.cache,
+        fileSystem: toolContext?.fs ?? globals.fs,
+        processManager: toolContext?.processManager ?? globals.processManager,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -837,9 +841,14 @@ class RunCommand extends RunCommandBase {
       awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
       applicationBinary: applicationBinaryPath == null
           ? null
-          : globals.fs.file(applicationBinaryPath),
+          : (toolContext?.fs ?? globals.fs).file(applicationBinaryPath),
       stayResident: stayResident,
       dartBuilder: hookRunner,
+      artifacts: toolContext?.artifacts ?? globals.artifacts,
+      cache: toolContext?.cache ?? globals.cache,
+      fileSystem: toolContext?.fs ?? globals.fs,
+      logger: toolContext?.logger ?? globals.logger,
+      processManager: toolContext?.processManager ?? globals.processManager,
     );
   }
 
@@ -942,6 +951,10 @@ class RunCommand extends RunCommandBase {
           buildInfo: buildInfo,
           userIdentifier: userIdentifier,
           platform: globals.platform,
+          artifacts: globals.artifacts,
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
         ),
     ];
 

@@ -112,6 +112,7 @@ Future<void> main(List<String> args) async {
         fileSystem: toolDependencies.toolContext.fs,
         logger: toolDependencies.toolContext.logger,
         featureFlags: featureFlags,
+        cache: toolDependencies.toolContext.cache,
       );
       return generateCommands(
         toolDependencies: toolDependencies,

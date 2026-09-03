@@ -11,8 +11,8 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/commands/upgrade.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 
 import '../../src/context.dart';
@@ -30,7 +30,7 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-          });
+  });
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -121,7 +121,11 @@ void main() {
       expect(logger.statusText, contains("Transitioning from 'dev' to 'beta'..."));
     },
     overrides: <Type, Generator>{
-      Cache: () => Cache.test(rootOverride: fileSystem.directory(flutterRoot), processManager: processManager, fileSystem: fileSystem),
+      Cache: () => Cache.test(
+        rootOverride: fileSystem.directory(flutterRoot),
+        processManager: processManager,
+        fileSystem: fileSystem,
+      ),
       FileSystem: () => fileSystem,
       FlutterVersion: () => FakeFlutterVersion(branch: 'dev'),
       Logger: () => logger,
@@ -215,7 +219,11 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Cache: () => Cache.test(rootOverride: fileSystem.directory(flutterRoot), processManager: processManager, fileSystem: fileSystem),
+      Cache: () => Cache.test(
+        rootOverride: fileSystem.directory(flutterRoot),
+        processManager: processManager,
+        fileSystem: fileSystem,
+      ),
       FileSystem: () => fileSystem,
       FlutterVersion: () =>
           FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
@@ -308,7 +316,11 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Cache: () => Cache.test(rootOverride: fileSystem.directory(flutterRoot), processManager: processManager, fileSystem: fileSystem),
+      Cache: () => Cache.test(
+        rootOverride: fileSystem.directory(flutterRoot),
+        processManager: processManager,
+        fileSystem: fileSystem,
+      ),
       FileSystem: () => fileSystem,
       FlutterVersion: () => FakeFlutterVersion(
         branch: 'beta',
@@ -365,7 +377,11 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
-      Cache: () => Cache.test(rootOverride: fileSystem.directory(flutterRoot), processManager: processManager, fileSystem: fileSystem),
+      Cache: () => Cache.test(
+        rootOverride: fileSystem.directory(flutterRoot),
+        processManager: processManager,
+        fileSystem: fileSystem,
+      ),
       FileSystem: () => fileSystem,
       FlutterVersion: () =>
           FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
@@ -409,7 +425,11 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Cache: () => Cache.test(rootOverride: fileSystem.directory(flutterRoot), processManager: processManager, fileSystem: fileSystem),
+      Cache: () => Cache.test(
+        rootOverride: fileSystem.directory(flutterRoot),
+        processManager: processManager,
+        fileSystem: fileSystem,
+      ),
       FileSystem: () => fileSystem,
       FlutterVersion: () => FakeFlutterVersion(
         branch: 'stable',

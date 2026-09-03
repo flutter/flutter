@@ -58,7 +58,6 @@ void main() {
       processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
-      globals.cache.flutterRoot = '';
 
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
@@ -89,6 +88,7 @@ void main() {
         description,
         body,
         overrides: <Type, Generator>{
+          Cache: () => Cache.test(processManager: processManager, flutterRoot: ''),
           AndroidSdk: () => AndroidSdk(
             fileSystem.directory(missingSdkPath()),
             java: FakeJava(),

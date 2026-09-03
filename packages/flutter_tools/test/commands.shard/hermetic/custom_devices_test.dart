@@ -178,7 +178,6 @@ class FakeTerminal extends AnsiTerminal {
   void simulateStdin(String line) {
     stdio.simulateStdin(line);
   }
-
 }
 
 /// May take platform, logger, processManager and fileSystem from context if
@@ -205,6 +204,7 @@ CustomDevicesCommand createCustomDevicesCommand({
           fileSystem: fileSystem,
           directory: fileSystem.directory('/'),
           logger: logger,
+          flutterRoot: platform.isWindows ? windowsFlutterRoot : linuxFlutterRoot,
         );
 
   final operatingSystemUtils = FakeOperatingSystemUtils(
@@ -294,10 +294,6 @@ void main() {
   });
 
   group('linux', () {
-    setUp(() {
-      globals.cache.flutterRoot = linuxFlutterRoot;
-    });
-
     testWithoutContext(
       'custom-devices command shows config file in help when feature is enabled',
       () async {
@@ -1037,10 +1033,6 @@ void main() {
   });
 
   group('windows', () {
-    setUp(() {
-      globals.cache.flutterRoot = windowsFlutterRoot;
-    });
-
     testWithoutContext(
       'custom-devices add command correctly adds ssh device config on windows',
       () async {

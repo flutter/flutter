@@ -6,7 +6,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/experimental/templates.dart';
@@ -17,10 +16,6 @@ import 'package:test/test.dart';
 import '../../src/fakes.dart';
 
 void main() {
-  setUpAll(() {
-    globals.cache.flutterRoot = '/flutter';
-  });
-
   group('ExtensionTemplateManager', () {
     late MemoryFileSystem fs;
     late BufferLogger logger;
@@ -131,6 +126,7 @@ void main() {
         fileSystem: fs,
         logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        flutterRoot: '/flutter',
       );
 
       final Directory toolsDir = templateManager.resolveTemplateDirectory(

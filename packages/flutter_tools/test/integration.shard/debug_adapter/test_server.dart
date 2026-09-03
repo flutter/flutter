@@ -7,9 +7,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dap_adapters/dap_adapters.dart' show Logger;
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/server.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+
+import '../../src/common.dart';
 
 /// Enable to run from local source when running out-of-process (useful in
 /// development to avoid having to keep rebuilding the flutter tool).
@@ -34,6 +35,7 @@ class InProcessDapTestServer extends DapTestServer {
       stdoutController.sink,
       fileSystem: globals.fs,
       platform: globals.platform,
+      cache: globals.cache,
       // Simulate flags based on the args to aid testing.
       enableDds: !args.contains('--no-dds'),
       ipv6: args.contains('--ipv6'),
@@ -128,13 +130,14 @@ class OutOfProcessDapTestServer extends DapTestServer {
     // having to rebuild the flutter_tools snapshot.
     // runFromSource=false will run "flutter ..."
 
+    final String flutterRoot = getFlutterRoot();
     final String flutterToolPath = globals.fs.path.join(
-      globals.cache.flutterRoot,
+      flutterRoot,
       'bin',
       Platform.isWindows ? 'flutter.bat' : 'flutter',
     );
     final String flutterToolsEntryScript = globals.fs.path.join(
-      globals.cache.flutterRoot,
+      flutterRoot,
       'packages',
       'flutter_tools',
       'bin',

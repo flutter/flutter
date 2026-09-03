@@ -13,7 +13,6 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
-import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';

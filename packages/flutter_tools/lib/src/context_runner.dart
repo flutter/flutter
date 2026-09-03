@@ -315,6 +315,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         processManager: globals.processManager,
         botDetector: globals.botDetector,
         platform: globals.platform,
+        cache: globals.cache,
       ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),

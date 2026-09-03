@@ -270,6 +270,9 @@ class Cache {
     );
   }
 
+  @visibleForTesting
+  set flutterRoot(String? value) => _flutterRoot = value;
+
   String? _flutterRoot;
 
   /// Determine the absolute and normalized path for the root of the current

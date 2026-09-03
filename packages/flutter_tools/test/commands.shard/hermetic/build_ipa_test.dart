@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';

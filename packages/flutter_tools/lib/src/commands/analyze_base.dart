@@ -19,7 +19,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
-import '../cache.dart';
 import '../globals.dart' as globals;
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
@@ -152,12 +151,12 @@ class PackageDependency {
 
   bool get hasConflict => values.length > 1;
   bool get hasConflictAffectingFlutterRepo {
-    final String? flutterRoot = globals.cache.flutterRoot;
-    assert(flutterRoot != null && globals.fs.path.isAbsolute(flutterRoot));
+    final String flutterRoot = globals.cache.flutterRoot;
+    assert(globals.fs.path.isAbsolute(flutterRoot));
     for (final List<String> targetSources in values.values) {
       for (final source in targetSources) {
         assert(globals.fs.path.isAbsolute(source));
-        if (globals.fs.path.isWithin(flutterRoot!, source)) {
+        if (globals.fs.path.isWithin(flutterRoot, source)) {
           return true;
         }
       }

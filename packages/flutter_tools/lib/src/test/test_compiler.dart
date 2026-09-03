@@ -10,7 +10,6 @@ import 'package:package_config/package_config_types.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../cache.dart';
 import '../compile.dart';
 import '../dart/language_version.dart';
 import '../flutter_plugins.dart';

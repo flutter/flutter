@@ -25,7 +25,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart' as globals;

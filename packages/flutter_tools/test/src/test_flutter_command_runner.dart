@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import 'context.dart';
 import 'fakes.dart';
 
 export 'package:test/test.dart' hide isInstanceOf, test;
@@ -103,6 +102,6 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
 
   @override
   void printUsage() {
-    (toolContext.logger).printStatus(usage);
+    toolContext.logger.printStatus(usage);
   }
 }
