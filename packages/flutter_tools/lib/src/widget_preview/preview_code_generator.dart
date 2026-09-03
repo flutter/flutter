@@ -265,7 +265,7 @@ class PreviewCodeGenerator {
     required LibraryPreviewNode libraryDetails,
   }) {
     final args = <String, cb.Expression>{
-      _kPackageName: cb.literalString(preview.packageName!),
+      _kPackageName: cb.literalString(preview.packageName ?? ''),
       _kScriptUri: cb.literalString(preview.scriptUri.toString()),
       _kLine: cb.literalNum(preview.line),
       _kColumn: cb.literalNum(preview.column),
@@ -306,7 +306,7 @@ class PreviewCodeGenerator {
     required Uri uri,
   }) {
     final args = <String, cb.Expression>{
-      _kPackageName: cb.literalString(preview.packageName!),
+      _kPackageName: cb.literalString(preview.packageName ?? ''),
       _kScriptUri: cb.literalString(preview.scriptUri.toString()),
       _kLine: cb.literalNum(preview.position.line),
       _kColumn: cb.literalNum(preview.position.character),

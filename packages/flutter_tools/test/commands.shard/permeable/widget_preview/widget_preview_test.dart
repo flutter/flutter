@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:dart_style/dart_style.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -30,6 +31,7 @@ import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -662,6 +664,84 @@ List<_i1.WidgetPreview> previews() => [
           );
 
           expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
+          expectSinglePreviewLaunchTimingEvent();
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          DeviceManager: () => fakeDeviceManager,
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
+
+      testUsingContext(
+        'start finds existing previews outside lib/ with null packageName and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
+        () async {
+          final Directory rootProject = await createRootProject();
+          final File previewFile = rootProject.childFile('preview.dart')
+            ..writeAsStringSync(samplePreviewFile);
+
+          fakeDtdServices.nextUpdate = FlutterWidgetPreviews(
+            namespaces: <String, String>{
+              'widget_preview.dart': '_i1',
+              'utils.dart': '_i2',
+              previewFile.uri.toString(): '_i3',
+              'package:flutter/src/widget_previews/widget_previews.dart': '_i4',
+            },
+            previews: <FlutterWidgetPreviewDetails>[
+              FlutterWidgetPreviewDetails(
+                functionName: 'preview',
+                hasError: false,
+                dependencyHasErrors: false,
+                isBuilder: false,
+                isMultiPreview: false,
+                position: const Position(character: 1, line: 4),
+                previewAnnotation: "const _i4.Preview(name: 'preview')",
+                scriptUri: previewFile.uri,
+                libraryUri: previewFile.uri,
+              ),
+            ],
+            scriptUris: <Uri>[previewFile.uri],
+          );
+
+          await startWidgetPreview(rootProject: rootProject);
+
+          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
+            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
+          );
+
+          final String expectedGeneratedFileContentsOutsideLib =
+              DartFormatter(languageVersion: Version(3, 7, 0)).format('''
+// ignore_for_file: implementation_imports
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'widget_preview.dart' as _i1;
+import 'utils.dart' as _i2;
+import '${previewFile.uri}' as _i3;
+import 'package:flutter/src/widget_previews/widget_previews.dart' as _i4;
+
+List<_i1.WidgetPreview> previews() => [
+  _i2.buildWidgetPreview(
+    packageName: '',
+    scriptUri: 'STRIPPED',
+    line: 4,
+    column: 1,
+    previewFunction: () => _i3.preview(),
+    transformedPreview: const _i4.Preview(name: 'preview').transform(),
+  ),
+];
+''');
+
+          expect(
+            generatedFile.readAsStringSync().stripScriptUris,
+            expectedGeneratedFileContentsOutsideLib,
+          );
           expectSinglePreviewLaunchTimingEvent();
         },
         overrides: <Type, Generator>{

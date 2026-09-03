@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
+import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:process/process.dart';
@@ -458,6 +459,92 @@ import 'widget_preview.dart' as _i1;
 List<_i1.WidgetPreview> previews() => [];
 ''';
         expect(generatedPreviewFile.readAsStringSync(), emptyGeneratedPreviewFileContents);
+      },
+    );
+
+    testUsingContext(
+      'populatePreviewsInGeneratedPreviewScaffoldLsp handles previews with null packageName',
+      () async {
+        await previewDetector.initialize();
+        final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
+          PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
+        );
+        generatedPreviewFile.createSync(recursive: true);
+
+        final update = FlutterWidgetPreviews(
+          scriptUris: <Uri>[
+            Uri.file('/user/project/root_preview.dart'),
+            Uri.file('/user/project/root_error_preview.dart'),
+          ],
+          namespaces: <String, String>{
+            'widget_preview.dart': '_i1',
+            'utils.dart': '_i2',
+            'file:///user/project/root_error_preview.dart': '_i3',
+            'file:///user/project/root_preview.dart': '_i4',
+            'package:flutter/src/widget_previews/widget_previews.dart': '_i5',
+          },
+          previews: <FlutterWidgetPreviewDetails>[
+            FlutterWidgetPreviewDetails(
+              functionName: 'preview',
+              hasError: false,
+              dependencyHasErrors: false,
+              isBuilder: false,
+              isMultiPreview: false,
+              position: const Position(character: 1, line: 4),
+              previewAnnotation: "const _i5.Preview(name: 'preview')",
+              scriptUri: Uri.file('/user/project/root_preview.dart'),
+              libraryUri: Uri.parse('file:///user/project/root_preview.dart'),
+            ),
+            FlutterWidgetPreviewDetails(
+              functionName: 'errorPreview',
+              hasError: true,
+              dependencyHasErrors: false,
+              isBuilder: false,
+              isMultiPreview: false,
+              position: const Position(character: 1, line: 10),
+              previewAnnotation: "const _i5.Preview(name: 'errorPreview')",
+              scriptUri: Uri.file('/user/project/root_error_preview.dart'),
+              libraryUri: Uri.parse('file:///user/project/root_error_preview.dart'),
+            ),
+          ],
+        );
+
+        codeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(update);
+
+        const expectedGeneratedPreviewFileContents = '''
+// ignore_for_file: implementation_imports
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'widget_preview.dart' as _i1;
+import 'utils.dart' as _i2;
+import 'file:///user/project/root_error_preview.dart' as _i3;
+import 'file:///user/project/root_preview.dart' as _i4;
+import 'package:flutter/src/widget_previews/widget_previews.dart' as _i5;
+
+List<_i1.WidgetPreview> previews() => [
+  _i2.buildWidgetPreviewError(
+    packageName: '',
+    scriptUri: 'STRIPPED',
+    line: 10,
+    column: 1,
+    packageUri: 'file:///user/project/root_error_preview.dart',
+    functionName: 'errorPreview',
+    dependencyHasErrors: false,
+  ),
+  _i2.buildWidgetPreview(
+    packageName: '',
+    scriptUri: 'STRIPPED',
+    line: 4,
+    column: 1,
+    previewFunction: () => _i4.preview(),
+    transformedPreview: const _i5.Preview(name: 'preview').transform(),
+  ),
+];
+''';
+        expect(
+          generatedPreviewFile.readAsStringSync().stripScriptUris,
+          expectedGeneratedPreviewFileContents,
+        );
       },
     );
 
