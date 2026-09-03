@@ -104,7 +104,7 @@ class EmulatorsCommand extends FlutterCommand {
   Future<void> _listEmulators(String? searchText) async {
     final Logger logger = toolContext.logger;
     final List<Emulator> emulators = searchText == null
-        ? await emulatorManager!.getAllAvailableEmulators()
+        ? await emulatorManager.getAllAvailableEmulators()
         : await emulatorManager!.getEmulatorsMatching(searchText);
 
     if (emulators.isEmpty) {
