@@ -267,19 +267,26 @@ public class FlutterMutatorViewTest {
         MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 10.0f, 10.0f, 0);
     view.onTouchEvent(moveEvent2);
     assertEquals(moveEvent2, ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
+    assertFalse(view.getFlutterWonGesture());
 
     ShadowViewWithUnbufferedDispatch.lastRequestedEvent = null;
 
-    // Up event resets flutterWonGesture.
-    final MotionEvent upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 10.0f, 10.0f, 0);
+    // Subsequent move in the same gesture does not redundantly request unbuffered dispatch.
+    final MotionEvent moveEvent3 =
+        MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 11.0f, 11.0f, 0);
+    view.onTouchEvent(moveEvent3);
+    assertNull(ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
+
+    // Up event terminates gesture.
+    final MotionEvent upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 11.0f, 11.0f, 0);
     view.onTouchEvent(upEvent);
     assertNull(ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
     assertFalse(view.getFlutterWonGesture());
 
     // Subsequent gesture starts buffered again.
-    final MotionEvent moveEvent3 =
+    final MotionEvent moveEvent4 =
         MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 12.0f, 12.0f, 0);
-    view.onTouchEvent(moveEvent3);
+    view.onTouchEvent(moveEvent4);
     assertNull(ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
   }
 

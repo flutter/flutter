@@ -219,6 +219,7 @@ public class FlutterMutatorView extends FrameLayout {
     }
     if (flutterWonGesture && event.getActionMasked() == MotionEvent.ACTION_MOVE) {
       requestUnbufferedDispatch(event);
+      flutterWonGesture = false;
     }
     if (event.getActionMasked() == MotionEvent.ACTION_UP
         || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
