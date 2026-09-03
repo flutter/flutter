@@ -1736,6 +1736,86 @@ void main() {
       );
     });
 
+    testWidgets('doubleTapToZoom disabled does not change scale', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Center(
+          child: InteractiveViewer(
+            doubleTapToZoom: false,
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
+          ),
+        ),
+      );
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await tester.tapAt(center);
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(center);
+      await tester.pumpAndSettle();
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+    });
+
+    testWidgets('doubleTapToZoom enabled zooms to doubleTapScale', (WidgetTester tester) async {
+      const doubleTapScale = 1.8;
+      await tester.pumpWidget(
+        Center(
+          child: InteractiveViewer(
+            doubleTapScale: doubleTapScale,
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
+          ),
+        ),
+      );
+
+      expect(transformationController.value.getMaxScaleOnAxis(), equals(1.0));
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await tester.tapAt(center);
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(center);
+      await tester.pumpAndSettle();
+
+      expect(
+        transformationController.value.getMaxScaleOnAxis(),
+        moreOrLessEquals(doubleTapScale, epsilon: 0.001),
+      );
+    });
+
+    testWidgets('doubleTapToZoom resets to identity when already zoomed', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Center(
+          child: InteractiveViewer(
+            boundaryMargin: const EdgeInsets.all(double.infinity),
+            transformationController: transformationController,
+            child: const SizedBox(width: 200.0, height: 200.0),
+          ),
+        ),
+      );
+
+      // Manually zoom in past identity.
+      transformationController.value = Matrix4.identity()..scale(2.0);
+      await tester.pump();
+      expect(
+        transformationController.value.getMaxScaleOnAxis(),
+        moreOrLessEquals(2.0, epsilon: 0.001),
+      );
+
+      final Offset center = tester.getCenter(find.byType(InteractiveViewer));
+      await tester.tapAt(center);
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(center);
+      await tester.pumpAndSettle();
+
+      expect(transformationController.value, equals(Matrix4.identity()));
+    });
+
     testWidgets('does not accumulate listeners', (WidgetTester tester) async {
       await tester.pumpWidget(
         InteractiveViewer(

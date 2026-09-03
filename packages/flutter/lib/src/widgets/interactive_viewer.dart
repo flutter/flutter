@@ -86,6 +86,8 @@ class InteractiveViewer extends StatefulWidget {
     this.transformationController,
     this.alignment,
     this.trackpadScrollCausesScale = false,
+    this.doubleTapToZoom = true,
+    this.doubleTapScale = 2.0,
     required Widget this.child,
   }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
@@ -130,6 +132,8 @@ class InteractiveViewer extends StatefulWidget {
     this.transformationController,
     this.alignment,
     this.trackpadScrollCausesScale = false,
+    this.doubleTapToZoom = true,
+    this.doubleTapScale = 2.0,
     required InteractiveViewerWidgetBuilder this.builder,
   }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
@@ -259,6 +263,26 @@ class InteractiveViewer extends StatefulWidget {
 
   /// {@macro flutter.gestures.scale.trackpadScrollCausesScale}
   final bool trackpadScrollCausesScale;
+
+  /// Whether double-tapping zooms the child.
+  ///
+  /// When true, a double tap zooms in to half of [maxScale] (centered on the
+  /// tap position). If the child is already zoomed in past identity scale, a
+  /// double tap resets the transformation back to the identity matrix.
+  ///
+  /// Requires [scaleEnabled] to be true to have any effect.
+  ///
+  /// Defaults to true.
+  final bool doubleTapToZoom;
+
+  /// The scale to zoom to on a double tap when [doubleTapToZoom] is true.
+  ///
+  /// The value is clamped between [minScale] and [maxScale]. If the child is
+  /// already zoomed past identity scale, a double tap resets to identity
+  /// regardless of this value.
+  ///
+  /// Defaults to 2.0.
+  final double doubleTapScale;
 
   /// Determines the amount of scale to be performed per pointer scroll.
   ///
@@ -507,6 +531,15 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   double _currentRotation = 0.0; // Rotation of _transformationController.value.
   _GestureType? _gestureType;
 
+  late AnimationController _doubleTapController;
+  Animation<double>? _doubleTapAnimation;
+  // Decomposed begin/end state — scale + translation only (no rotation in InteractiveViewer).
+  double _doubleTapScaleBegin = 0;
+  double _doubleTapScaleEnd = 0;
+  Offset _doubleTapTranslationBegin = Offset.zero;
+  Offset _doubleTapTranslationEnd = Offset.zero;
+  Offset _doubleTapPosition = Offset.zero;
+
   // TODO(justinmc): Add rotateEnabled parameter to the widget and remove this
   // hardcoded value when the rotation feature is implemented.
   // https://github.com/flutter/flutter/issues/57698
@@ -714,6 +747,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       _scaleController.reset();
       _scaleAnimation?.removeListener(_handleScaleAnimation);
       _scaleAnimation = null;
+    }
+    if (_doubleTapController.isAnimating) {
+      _doubleTapController.stop();
+      _doubleTapController.reset();
+      _doubleTapAnimation?.removeListener(_handleDoubleTapAnimation);
+      _doubleTapAnimation = null;
     }
 
     _gestureType = null;
@@ -1013,11 +1052,97 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     setState(() {});
   }
 
+  void _onDoubleTapDown(TapDownDetails details) {
+    _doubleTapPosition = details.localPosition;
+  }
+
+  void _onDoubleTap() {
+    if (!widget.doubleTapToZoom || !widget.scaleEnabled) {
+      return;
+    }
+
+    _doubleTapAnimation?.removeListener(_handleDoubleTapAnimation);
+    _doubleTapAnimation = null;
+    _doubleTapController.stop();
+    _doubleTapController.reset();
+
+    final double currentScale = _transformer.value.getMaxScaleOnAxis();
+    final double targetScale;
+    final Offset targetTranslation;
+
+    if (currentScale > 1.0 + 0.001) {
+      // Already zoomed in — reset to identity.
+      targetScale = 1.0;
+      targetTranslation = Offset.zero;
+    } else {
+      // Zoom in to half of maxScale, centered on the tap position.
+      final double clampedScale = clampDouble(
+        widget.doubleTapScale,
+        widget.minScale,
+        widget.maxScale,
+      );
+      final Matrix4 scaledMatrix = _matrixScale(_transformer.value, clampedScale / currentScale);
+
+      // For a pure scale+translation matrix, toScene is just (p - translation) / scale.
+      // Compute the scene point under the tap in both the current and scaled matrices
+      // without a full Matrix4 inversion.
+      final Offset focalScene = _transformer.toScene(_doubleTapPosition);
+      final Vector3 scaledT = scaledMatrix.getTranslation();
+      final double scaledS = scaledMatrix.getMaxScaleOnAxis();
+      final focalSceneAfterScale = Offset(
+        (_doubleTapPosition.dx - scaledT.x) / scaledS,
+        (_doubleTapPosition.dy - scaledT.y) / scaledS,
+      );
+      final Matrix4 targetMatrix = _matrixTranslate(
+        scaledMatrix,
+        focalSceneAfterScale - focalScene,
+      );
+      targetScale = targetMatrix.getMaxScaleOnAxis();
+      final Vector3 t = targetMatrix.getTranslation();
+      targetTranslation = Offset(t.x, t.y);
+    }
+
+    // Decompose current transform into scale + translation for efficient per-frame lerp.
+    _doubleTapScaleBegin = currentScale;
+    _doubleTapScaleEnd = targetScale;
+    final Vector3 beginT = _transformer.value.getTranslation();
+    _doubleTapTranslationBegin = Offset(beginT.x, beginT.y);
+    _doubleTapTranslationEnd = targetTranslation;
+
+    _doubleTapController.duration = const Duration(milliseconds: 200);
+    _doubleTapAnimation = CurvedAnimation(parent: _doubleTapController, curve: Curves.easeInOut)
+      ..addListener(_handleDoubleTapAnimation);
+    _doubleTapController.forward();
+  }
+
+  void _handleDoubleTapAnimation() {
+    if (!_doubleTapController.isAnimating) {
+      _doubleTapAnimation?.removeListener(_handleDoubleTapAnimation);
+      _doubleTapAnimation = null;
+      _doubleTapController.reset();
+      return;
+    }
+    // Reconstruct the matrix each frame from just 3 interpolated values (scale, tx, ty)
+    // rather than lerping all 16 Matrix4 elements. InteractiveViewer never applies
+    // rotation so the transform is always a uniform scale + translation.
+    final double t = _doubleTapAnimation!.value;
+    final double scale = _doubleTapScaleBegin + (_doubleTapScaleEnd - _doubleTapScaleBegin) * t;
+    final Offset translation = Offset.lerp(
+      _doubleTapTranslationBegin,
+      _doubleTapTranslationEnd,
+      t,
+    )!;
+    _transformer.value = Matrix4.identity()
+      ..scale(scale)
+      ..setTranslation(Vector3(translation.dx, translation.dy, 0));
+  }
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this);
     _scaleController = AnimationController(vsync: this);
+    _doubleTapController = AnimationController(vsync: this);
 
     _transformer.addListener(_handleTransformation);
   }
@@ -1042,6 +1167,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   void dispose() {
     _controller.dispose();
     _scaleController.dispose();
+    _doubleTapController.dispose();
     _transformer.removeListener(_handleTransformation);
     if (widget.transformationController == null) {
       _transformer.dispose();
@@ -1089,6 +1215,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       onPointerSignal: _receivedPointerSignal,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque, // Necessary when panning off screen.
+        onDoubleTapDown: widget.doubleTapToZoom ? _onDoubleTapDown : null,
+        onDoubleTap: widget.doubleTapToZoom ? _onDoubleTap : null,
         onScaleEnd: _onScaleEnd,
         onScaleStart: _onScaleStart,
         onScaleUpdate: _onScaleUpdate,
