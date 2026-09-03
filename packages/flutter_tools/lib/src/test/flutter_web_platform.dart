@@ -655,18 +655,74 @@ window.\$dartLoader.loader.nextAttempt();
       _logger.printTrace('Running test suite $relativePath.');
     }
 
-    final RunnerSuite suite = await _browserManager!.load(
-      relativePath,
-      suiteUrl,
-      suiteConfig,
-      message,
-      onDone: () async {
-        lockResource.release();
-        if (_logger.isVerbose) {
-          _logger.printTrace('Test suite $relativePath finished.');
+    Timer? watchdogTimer45s;
+    Timer? watchdogTimer3m;
+    Completer<Never>? timeoutCompleter;
+
+    if (!_config.pauseAfterLoad) {
+      timeoutCompleter = Completer<Never>();
+
+      watchdogTimer45s = Timer(const Duration(seconds: 45), () async {
+        if (_browserManager != null) {
+          final String diagnostic = await _browserManager!.diagnoseHang();
+          _logger.printStatus(diagnostic);
         }
-      },
-    );
+      });
+
+      watchdogTimer3m = Timer(const Duration(minutes: 3), () async {
+        if (_browserManager != null) {
+          final String diagnostic = await _browserManager!.diagnoseHang();
+          _logger.printError(
+            '[flutter_tools] Hard timeout of 3 minutes reached for test suite $relativePath.\n'
+            '$diagnostic',
+          );
+        }
+        if (timeoutCompleter != null && !timeoutCompleter.isCompleted) {
+          try {
+            throwToolExit(
+              'Test suite $relativePath timed out after 3 minutes (stalled CanvasKit WASM fetch or unresponsive browser). '
+              'Exiting to prevent LUCI bot hanging.',
+            );
+          } catch (e, st) {
+            timeoutCompleter.completeError(e, st);
+          }
+        }
+      });
+    }
+
+    void cancelWatchdogs() {
+      watchdogTimer45s?.cancel();
+      watchdogTimer3m?.cancel();
+    }
+
+    final RunnerSuite suite;
+    try {
+      final Future<RunnerSuite> loadFuture = _browserManager!.load(
+        relativePath,
+        suiteUrl,
+        suiteConfig,
+        message,
+        onDone: () async {
+          cancelWatchdogs();
+          lockResource.release();
+          if (_logger.isVerbose) {
+            _logger.printTrace('Test suite $relativePath finished.');
+          }
+        },
+      );
+
+      if (!_config.pauseAfterLoad && timeoutCompleter != null) {
+        suite = await Future.any<RunnerSuite>(<Future<RunnerSuite>>[
+          loadFuture,
+          timeoutCompleter.future,
+        ]);
+      } else {
+        suite = await loadFuture;
+      }
+    } catch (_) {
+      cancelWatchdogs();
+      rethrow;
+    }
 
     if (_closed) {
       throw StateError('Load called on a closed FlutterWebPlatform');
@@ -769,7 +825,18 @@ class OneOffHandler {
 class BrowserManager {
   /// Creates a new BrowserManager that communicates with [_browser] over
   /// [webSocket].
-  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket, this._logger) {
+  BrowserManager._(
+    this._browser,
+    this._runtime,
+    WebSocketChannel webSocket,
+    this._logger, {
+    WipConnection? wipConnection,
+  }) : _wipConnection = wipConnection {
+    if (wipConnection != null) {
+      _networkTracker = CdpNetworkTracker(wipConnection);
+      unawaited(_networkTracker!.enable());
+    }
+
     unawaited(
       _browser.onExit.then((int exitCode) {
         if (!_closed) {
@@ -800,6 +867,7 @@ class BrowserManager {
         return stream.map((Object? message) {
           if (!_closed) {
             _timer.reset();
+            _lastMessageTime = DateTime.now();
           }
           for (final RunnerSuiteController controller in _controllers) {
             controller.setDebugging(false);
@@ -818,6 +886,9 @@ class BrowserManager {
   final Chromium _browser;
   final Runtime _runtime;
   final Logger _logger;
+  final WipConnection? _wipConnection;
+  CdpNetworkTracker? _networkTracker;
+  DateTime? _lastMessageTime;
 
   /// The channel used to communicate with the browser.
   ///
@@ -887,6 +958,7 @@ class BrowserManager {
       headless: headless,
       webBrowserFlags: webBrowserFlags,
     );
+    WipConnection? wipConnection;
     unawaited(
       Future<void>(() async {
         try {
@@ -896,6 +968,7 @@ class BrowserManager {
           );
           if (tab != null) {
             final WipConnection connection = await tab.connect();
+            wipConnection = connection;
             await connection.runtime.enable();
             connection.runtime.onConsoleAPICalled.listen((ConsoleAPIEvent event) {
               logger.printStatus(
@@ -932,7 +1005,9 @@ class BrowserManager {
           if (completer.isCompleted) {
             return;
           }
-          completer.complete(BrowserManager._(chrome, runtime, webSocket, logger));
+          completer.complete(
+            BrowserManager._(chrome, runtime, webSocket, logger, wipConnection: wipConnection),
+          );
         },
         onError: (Object error, StackTrace stackTrace) {
           chrome.close();
@@ -1066,12 +1141,76 @@ class BrowserManager {
     }
   }
 
+  /// Diagnoses potential test suite timeouts or browser hangs.
+  Future<String> diagnoseHang() async {
+    final report = StringBuffer();
+    report.writeln('[flutter_tools] --- Chrome Web Test Timeout Diagnostic ---');
+
+    final now = DateTime.now();
+    final Duration? timeSinceLastPing = _lastMessageTime != null
+        ? now.difference(_lastMessageTime!)
+        : null;
+
+    final bool isWsAlive =
+        timeSinceLastPing != null && timeSinceLastPing < const Duration(seconds: 5);
+    if (timeSinceLastPing != null) {
+      report.writeln(
+        '  WebSocket Traffic: ${isWsAlive ? "Active" : "Inactive"} (Last message received ${timeSinceLastPing.inSeconds}s ago)',
+      );
+    } else {
+      report.writeln('  WebSocket Traffic: Inactive (No WebSocket messages received)');
+    }
+
+    var isCdpResponsive = false;
+    final WipConnection? wipConnection = _wipConnection;
+    if (wipConnection != null) {
+      try {
+        final WipResponse response = await wipConnection
+            .sendCommand('Runtime.evaluate', <String, dynamic>{'expression': '1 + 1'})
+            .timeout(const Duration(seconds: 2));
+        final result = response.result?['result'] as Map<String, dynamic>?;
+        isCdpResponsive = result?['value'] == 2;
+      } on Object catch (_) {
+        isCdpResponsive = false;
+      }
+      report.writeln(
+        '  Chrome Host CDP Responsiveness: ${isCdpResponsive ? "Responsive" : "Unresponsive / Timed out"}',
+      );
+    } else {
+      report.writeln('  Chrome Host CDP Responsiveness: CDP connection unavailable.');
+    }
+
+    final List<String> pendingAssetRequests = _networkTracker?.getStalledRequests() ?? <String>[];
+
+    if (isWsAlive && isCdpResponsive && pendingAssetRequests.isNotEmpty) {
+      report.writeln('  Diagnosis: [Iframe WASM/Asset Fetch Stalled]');
+      report.writeln(
+        '    Chrome host process is healthy and sending WS pings, but asset request(s) are pending in the browser:',
+      );
+      for (final req in pendingAssetRequests) {
+        report.writeln('      - $req');
+      }
+    } else if (isWsAlive && isCdpResponsive) {
+      report.writeln('  Diagnosis: [Iframe JS Execution Stalled]');
+      report.writeln(
+        '    Chrome host process is healthy and no network requests are pending, but the test iframe JS execution stalled.',
+      );
+    } else {
+      report.writeln('  Diagnosis: [Browser Process Freeze / Crash]');
+      report.writeln('    Chrome process or main renderer thread is unresponsive or frozen.');
+    }
+    report.write('[flutter_tools] ---------------------------------------------');
+
+    return report.toString();
+  }
+
   /// Closes the manager and releases any resources it owns, including closing
   /// the browser.
   Future<dynamic> close() {
     return _closeMemoizer.runOnce(() {
       _closed = true;
       _timer.cancel();
+      unawaited(_networkTracker?.dispose());
       if (_pauseCompleter != null) {
         _pauseCompleter!.complete();
       }
@@ -1080,6 +1219,66 @@ class BrowserManager {
       return _browser.close();
     });
   }
+}
+
+/// Tracks active network requests via Chrome DevTools Protocol to identify pending or stalled asset fetches.
+class CdpNetworkTracker {
+  CdpNetworkTracker(this.connection);
+
+  final WipConnection connection;
+  final Map<String, _PendingRequestInfo> _pendingRequests = <String, _PendingRequestInfo>{};
+  StreamSubscription<WipEvent>? _subscription;
+
+  Future<void> enable() async {
+    try {
+      await connection.sendCommand('Network.enable');
+      _subscription = connection.onNotification.listen((WipEvent event) {
+        final Map<String, dynamic>? params = event.params;
+        if (params == null) {
+          return;
+        }
+        switch (event.method) {
+          case 'Network.requestWillBeSent':
+            final requestId = params['requestId'] as String?;
+            final request = params['request'] as Map<String, dynamic>?;
+            final url = request?['url'] as String?;
+            if (requestId != null && url != null) {
+              _pendingRequests[requestId] = _PendingRequestInfo(
+                url: url,
+                startTime: DateTime.now(),
+              );
+            }
+          case 'Network.loadingFinished':
+          case 'Network.loadingFailed':
+            final requestId = params['requestId'] as String?;
+            if (requestId != null) {
+              _pendingRequests.remove(requestId);
+            }
+        }
+      });
+    } on Object catch (_) {}
+  }
+
+  List<String> getStalledRequests({Duration threshold = const Duration(seconds: 5)}) {
+    final now = DateTime.now();
+    return _pendingRequests.values
+        .where((_PendingRequestInfo r) => now.difference(r.startTime) >= threshold)
+        .map(
+          (_PendingRequestInfo r) =>
+              '${r.url} (pending for ${now.difference(r.startTime).inSeconds}s)',
+        )
+        .toList();
+  }
+
+  Future<void> dispose() async {
+    await _subscription?.cancel();
+  }
+}
+
+class _PendingRequestInfo {
+  _PendingRequestInfo({required this.url, required this.startTime});
+  final String url;
+  final DateTime startTime;
 }
 
 /// An implementation of [Environment] for the browser.
