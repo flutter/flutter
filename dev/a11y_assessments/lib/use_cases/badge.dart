@@ -38,12 +38,10 @@ class MainWidgetState extends State<MainWidget> {
       appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: const Center(
         child: Badge(
-          label: Text(
-            '5',
-            semanticsLabel: '5 new messages',
-            style: TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.green,
+          // Use the badge colors from the theme. The hard coded white on green
+          // combination only reaches a 2.6:1 contrast ratio, below the 4.5:1
+          // required by WCAG AA for normal sized text.
+          label: Text('5', semanticsLabel: '5 new messages'),
           child: Icon(Icons.mail, semanticLabel: 'Messages'),
         ),
       ),
