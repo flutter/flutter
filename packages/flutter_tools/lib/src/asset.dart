@@ -176,6 +176,19 @@ abstract class AssetBundle {
   /// in a pubspec, indexed by component name and asset key.
   Map<String, Map<String, AssetBundleEntry>> get deferredComponentsEntries;
 
+  /// Asset keys that were present in [entries] after the previous successful
+  /// [build] call but are no longer present after the most recent one, e.g.
+  /// because the underlying file was deleted or renamed.
+  ///
+  /// Repopulated at the start of every [build] call. Does not include shader
+  /// entries; see [removedShaderEntries] for those.
+  Set<String> get removedEntries;
+
+  /// The same as [removedEntries], but for entries whose [AssetBundleEntry.kind]
+  /// was [AssetKind.shader], which are evicted from a running application
+  /// through a different service extension than other asset kinds.
+  Set<String> get removedShaderEntries;
+
   /// Additional files that this bundle depends on that are not included in the
   /// output result.
   List<File> get additionalDependencies;
@@ -254,6 +267,12 @@ class ManifestAssetBundle implements AssetBundle {
   final entries = <String, AssetBundleEntry>{};
 
   @override
+  final removedEntries = <String>{};
+
+  @override
+  final removedShaderEntries = <String>{};
+
+  @override
   final deferredComponentsEntries = <String, Map<String, AssetBundleEntry>>{};
 
   @override
@@ -328,6 +347,8 @@ class ManifestAssetBundle implements AssetBundle {
     String? flavor,
     bool includeAssetsFromDevDependencies = false,
   }) async {
+    final previousKeys = Set<String>.of(entries.keys);
+    final touchedKeys = <String>{};
     if (flutterProject == null) {
       try {
         flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);
@@ -355,6 +376,7 @@ class ManifestAssetBundle implements AssetBundle {
         kind: AssetKind.regular,
         transformers: const <AssetTransformerEntry>[],
       );
+      touchedKeys.add(_kAssetManifestBinFilename);
       // Create .bin.json on web builds.
       if (targetPlatform == TargetPlatform.web_javascript) {
         entries[_kAssetManifestBinJsonFilename] = AssetBundleEntry(
@@ -362,7 +384,9 @@ class ManifestAssetBundle implements AssetBundle {
           kind: AssetKind.regular,
           transformers: const <AssetTransformerEntry>[],
         );
+        touchedKeys.add(_kAssetManifestBinJsonFilename);
       }
+      _pruneRemovedEntries(previousKeys, touchedKeys);
       return 0;
     }
 
@@ -590,6 +614,7 @@ class ManifestAssetBundle implements AssetBundle {
             transformers: variant.transformers,
           ),
         );
+        touchedKeys.add(variant.entryUri.path);
       }
     }
     // Save the contents of each deferred component image, image variant, and font
@@ -646,6 +671,7 @@ class ManifestAssetBundle implements AssetBundle {
         kind: asset.kind,
         transformers: const <AssetTransformerEntry>[],
       );
+      touchedKeys.add(asset.entryUri.path);
     }
 
     // Update wildcard directories we can detect changes in them.
@@ -686,16 +712,42 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     _setIfChanged(_kAssetManifestBinFilename, assetManifestBinary, AssetKind.regular);
+    touchedKeys.add(_kAssetManifestBinFilename);
     // Create .bin.json on web builds.
     if (targetPlatform == TargetPlatform.web_javascript) {
       final assetManifestBinaryJson = DevFSStringContent(
         json.encode(base64.encode(assetManifestBinary.bytes)),
       );
       _setIfChanged(_kAssetManifestBinJsonFilename, assetManifestBinaryJson, AssetKind.regular);
+      touchedKeys.add(_kAssetManifestBinJsonFilename);
     }
     _setIfChanged(kFontManifestJson, fontManifest, AssetKind.regular);
+    touchedKeys.add(kFontManifestJson);
     _setLicenseIfChanged(licenseResult.combinedLicenses, targetPlatform);
+    touchedKeys.add(
+      targetPlatform == TargetPlatform.web_javascript ? _kNoticeFile : _kNoticeZippedFile,
+    );
+    _pruneRemovedEntries(previousKeys, touchedKeys);
     return 0;
+  }
+
+  /// Removes entries that existed in [previousKeys] but were not touched
+  /// during this build, and records their keys in [removedEntries] (or
+  /// [removedShaderEntries], for shaders) so that callers (e.g.
+  /// [DevFS.update]) can evict any stale cached copies from a running
+  /// application.
+  void _pruneRemovedEntries(Set<String> previousKeys, Set<String> touchedKeys) {
+    final Set<String> staleKeys = previousKeys.difference(touchedKeys);
+    removedEntries.clear();
+    removedShaderEntries.clear();
+    for (final key in staleKeys) {
+      if (entries[key]?.kind == AssetKind.shader) {
+        removedShaderEntries.add(key);
+      } else {
+        removedEntries.add(key);
+      }
+      entries.remove(key);
+    }
   }
 
   @override

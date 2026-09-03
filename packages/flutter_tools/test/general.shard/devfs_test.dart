@@ -1166,6 +1166,12 @@ class FakeBundle extends AssetBundle {
   final entries = <String, AssetBundleEntry>{};
 
   @override
+  final removedEntries = <String>{};
+
+  @override
+  final removedShaderEntries = <String>{};
+
+  @override
   List<File> get inputFiles => <File>[];
 
   @override
