@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devtools_launcher.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 
@@ -15,6 +16,7 @@ import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
 void main() {
+  globals.cache.flutterRoot = '';
 
   (BufferLogger, Artifacts) getTestState() => (BufferLogger.test(), Artifacts.test());
 

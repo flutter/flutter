@@ -8,33 +8,23 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/command_help.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/bundle.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/hook_runner.dart';
-import 'package:flutter_tools/src/isolated/build_targets.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -50,174 +40,6 @@ import 'resident_runner_helpers.dart';
 
 FakeAnalytics get fakeAnalytics => globals.analytics as FakeAnalytics;
 
-HotRunner createHotRunner(
-  List<FlutterDevice> flutterDevices, {
-  required DebuggingOptions debuggingOptions,
-  required String target,
-  Analytics? analytics,
-  File? applicationBinary,
-  Artifacts? artifacts,
-  bool benchmarkMode = false,
-  BuildSystem? buildSystem,
-  BuildTargets? buildTargets,
-  Cache? cache,
-  CommandHelp? commandHelp,
-  Config? config,
-  FlutterHookRunner? dartBuilder,
-  String? dillOutputPath,
-  FileSystem? fileSystem,
-  FlutterVersion? flutterVersion,
-  bool hostIsIde = false,
-  HotRunnerConfig? hotRunnerConfig,
-  Logger? logger,
-  bool machine = false,
-  String? nativeAssetsYamlFile,
-  OperatingSystemUtils? osUtils,
-  OutputPreferences? outputPreferences,
-  Platform? platform,
-  ProcessManager? processManager,
-  ProjectFileInvalidator? projectFileInvalidator,
-  String? projectRootPath,
-  ReassembleHelper? reassembleHelper,
-  ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
-  bool stayResident = true,
-  StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  Terminal? terminal,
-  Xcode? xcode,
-}) {
-  if (reassembleHelper != null) {
-    return HotRunner(
-      flutterDevices,
-      debuggingOptions: debuggingOptions,
-      target: target,
-      analytics: analytics,
-      applicationBinary: applicationBinary,
-      artifacts: artifacts ?? globals.artifacts,
-      benchmarkMode: benchmarkMode,
-      buildSystem: buildSystem,
-      buildTargets: buildTargets ?? const BuildTargetsImpl(),
-      cache: cache ?? globals.cache,
-      commandHelp: commandHelp,
-      config: config ?? globals.config,
-      dartBuilder: dartBuilder,
-      dillOutputPath: dillOutputPath,
-      fileSystem: fileSystem ?? globals.fs,
-      flutterVersion: flutterVersion,
-      hostIsIde: hostIsIde,
-      hotRunnerConfig: hotRunnerConfig,
-      logger: logger ?? globals.logger,
-      machine: machine,
-      nativeAssetsYamlFile: nativeAssetsYamlFile,
-      osUtils: osUtils ?? globals.os,
-      outputPreferences: outputPreferences ?? globals.outputPreferences,
-      platform: platform ?? globals.platform,
-      processManager: processManager ?? globals.processManager,
-      projectFileInvalidator: projectFileInvalidator,
-      projectRootPath: projectRootPath,
-      reassembleHelper: reassembleHelper,
-      reloadSourcesHelper: reloadSourcesHelper,
-      stayResident: stayResident,
-      stopwatchFactory: stopwatchFactory,
-      terminal: terminal ?? globals.terminal,
-      xcode: xcode,
-    );
-  }
-  return HotRunner(
-    flutterDevices,
-    debuggingOptions: debuggingOptions,
-    target: target,
-    analytics: analytics,
-    applicationBinary: applicationBinary,
-    artifacts: artifacts ?? globals.artifacts,
-    benchmarkMode: benchmarkMode,
-    buildSystem: buildSystem,
-    buildTargets: buildTargets ?? const BuildTargetsImpl(),
-    cache: cache ?? globals.cache,
-    commandHelp: commandHelp,
-    config: config ?? globals.config,
-    dartBuilder: dartBuilder,
-    dillOutputPath: dillOutputPath,
-    fileSystem: fileSystem ?? globals.fs,
-    flutterVersion: flutterVersion,
-    hostIsIde: hostIsIde,
-    hotRunnerConfig: hotRunnerConfig,
-    logger: logger ?? globals.logger,
-    machine: machine,
-    nativeAssetsYamlFile: nativeAssetsYamlFile,
-    osUtils: osUtils ?? globals.os,
-    outputPreferences: outputPreferences ?? globals.outputPreferences,
-    platform: platform ?? globals.platform,
-    processManager: processManager ?? globals.processManager,
-    projectFileInvalidator: projectFileInvalidator,
-    projectRootPath: projectRootPath,
-    reloadSourcesHelper: reloadSourcesHelper,
-    stayResident: stayResident,
-    stopwatchFactory: stopwatchFactory,
-    terminal: terminal ?? globals.terminal,
-    xcode: xcode,
-  );
-}
-
-ColdRunner createColdRunner(
-  List<FlutterDevice> flutterDevices, {
-  required DebuggingOptions debuggingOptions,
-  required String target,
-  Analytics? analytics,
-  File? applicationBinary,
-  Artifacts? artifacts,
-  bool awaitFirstFrameWhenTracing = true,
-  BuildSystem? buildSystem,
-  BuildTargets? buildTargets,
-  Cache? cache,
-  CommandHelp? commandHelp,
-  Config? config,
-  FlutterHookRunner? dartBuilder,
-  String? dillOutputPath,
-  FileSystem? fileSystem,
-  FlutterVersion? flutterVersion,
-  Logger? logger,
-  bool machine = false,
-  OperatingSystemUtils? osUtils,
-  OutputPreferences? outputPreferences,
-  Platform? platform,
-  ProcessManager? processManager,
-  String? projectRootPath,
-  bool stayResident = true,
-  Terminal? terminal,
-  bool traceStartup = false,
-  Xcode? xcode,
-}) {
-  return ColdRunner(
-    flutterDevices,
-    debuggingOptions: debuggingOptions,
-    target: target,
-    analytics: analytics,
-    applicationBinary: applicationBinary,
-    artifacts: artifacts ?? globals.artifacts,
-    awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
-    buildSystem: buildSystem,
-    buildTargets: buildTargets,
-    cache: cache ?? globals.cache,
-    commandHelp: commandHelp,
-    config: config ?? globals.config,
-    dartBuilder: dartBuilder,
-    dillOutputPath: dillOutputPath,
-    fileSystem: fileSystem ?? globals.fs,
-    flutterVersion: flutterVersion,
-    logger: logger ?? globals.logger,
-    machine: machine,
-    osUtils: osUtils ?? globals.os,
-    outputPreferences: outputPreferences ?? globals.outputPreferences,
-    platform: platform ?? globals.platform,
-    processManager: processManager ?? globals.processManager,
-    projectRootPath: projectRootPath,
-    stayResident: stayResident,
-    terminal: terminal ?? globals.terminal,
-    traceStartup: traceStartup,
-    xcode: xcode,
-  );
-}
-
 void main() {
   late TestBed testbed;
   late FakeFlutterDevice flutterDevice;
@@ -232,7 +54,7 @@ void main() {
         globals.fs.file(globals.fs.path.join('build', 'app.dill'))
           ..createSync(recursive: true)
           ..writeAsStringSync('ABC');
-        residentRunner = createHotRunner(
+        residentRunner = HotRunner(
           <FlutterDevice>[flutterDevice],
           stayResident: false,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -292,7 +114,7 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
       final residentCompiler = FakeResidentCompiler()
         ..nextOutput = const CompilerOutput('foo', 0, <Uri>[]);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -315,7 +137,7 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       final residentCompiler = FakeResidentCompiler()
         ..nextOutput = const CompilerOutput('foo', 1, <Uri>[]);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -336,7 +158,7 @@ void main() {
     () => testbed.run(() async {
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      residentRunner = createColdRunner(
+      residentRunner = ColdRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
@@ -356,7 +178,7 @@ void main() {
     () => testbed.run(() async {
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      residentRunner = createColdRunner(
+      residentRunner = ColdRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.release),
@@ -377,7 +199,7 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
       final residentCompiler = FakeResidentCompiler()
         ..nextOutput = const CompilerOutput('foo', 0, <Uri>[]);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         applicationBinary: globals.fs.file('app-debug.apk'),
         stayResident: false,
@@ -503,7 +325,7 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, listViews, listViews],
       );
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         target: 'main.dart',
@@ -569,7 +391,7 @@ void main() {
           ),
         ],
       );
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -801,7 +623,7 @@ void main() {
           FakeResidentCompiler(),
           devFS,
         )..vmService = fakeVmServiceHost!.vmService;
-        residentRunner = createHotRunner(
+        residentRunner = HotRunner(
           <FlutterDevice>[flutterDevice],
           stayResident: false,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -1138,7 +960,7 @@ void main() {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       expect(residentRunner.artifactDirectory.path, contains('flutter_tool.'));
 
-      final ResidentRunner otherRunner = createHotRunner(
+      final ResidentRunner otherRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -1246,7 +1068,7 @@ flutter:
         dartPluginClass: PathProviderLinux
 ''');
 
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -1309,7 +1131,7 @@ flutter:
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
       final residentCompiler = FakeResidentCompiler()
         ..nextOutput = const CompilerOutput('foo', 1, <Uri>[]);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -1328,19 +1150,6 @@ flutter:
 
       // Completing this future ensures that the daemon can exit correctly.
       expect(await residentRunner.waitForAppToFinish(), 1);
-    }),
-  );
-
-  testUsingContext(
-    'ResidentRunner runSourceGenerators is a no-op when buildTargets is null',
-    () => testbed.run(() async {
-      final runner = HotRunner(
-        <FlutterDevice>[flutterDevice],
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
-        target: 'main.dart',
-      );
-
-      await expectLater(runner.runSourceGenerators(), completes);
     }),
   );
 
@@ -1432,7 +1241,7 @@ flutter:
     'ResidentRunner printHelpDetails cold runner',
     () => testbed.run(() {
       fakeVmServiceHost = null;
-      residentRunner = createColdRunner(
+      residentRunner = ColdRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
@@ -1467,7 +1276,7 @@ flutter:
     'ResidentRunner printHelp cold runner',
     () => testbed.run(() {
       fakeVmServiceHost = null;
-      residentRunner = createColdRunner(
+      residentRunner = ColdRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
@@ -1507,7 +1316,7 @@ flutter:
         platform: FakePlatform(),
       );
 
-      final ResidentRunner residentRunner = createHotRunner(
+      final ResidentRunner residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.profile),
         target: 'lib/main.dart',
@@ -1527,7 +1336,7 @@ flutter:
     'ResidentRunner ignores DevtoolsLauncher when attaching with enableDevTools: false - cold mode',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
-      residentRunner = createColdRunner(
+      residentRunner = ColdRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(
@@ -1577,7 +1386,7 @@ flutter:
         wsAddress: testUri,
       );
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
@@ -1600,7 +1409,7 @@ flutter:
         wsAddress: testUri,
       );
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(
@@ -1638,7 +1447,7 @@ flutter:
         wsAddress: testUri,
       );
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(
@@ -1677,7 +1486,7 @@ flutter:
         wsAddress: testUri,
       );
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(
@@ -1716,7 +1525,7 @@ flutter:
         wsAddress: testUri,
       );
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -1747,7 +1556,7 @@ flutter:
         wsAddress: testUri,
       );
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         dillOutputPath: 'test',
@@ -1771,7 +1580,7 @@ flutter:
         wsAddress: testUri,
       );
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(
@@ -1810,7 +1619,7 @@ flutter:
         wsAddress: testUri,
       );
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -1831,7 +1640,7 @@ flutter:
           requests: <VmServiceExpectation>[listViews, listViews],
         );
         globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-        residentRunner = createHotRunner(
+        residentRunner = HotRunner(
           <FlutterDevice>[flutterDevice],
           stayResident: false,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, vmserviceOutFile: 'foo'),
@@ -1858,7 +1667,7 @@ flutter:
         wsAddress: testUri,
       );
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      residentRunner = createColdRunner(
+      residentRunner = ColdRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile, vmserviceOutFile: 'foo'),
@@ -1880,7 +1689,6 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                artifacts: globals.artifacts,
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1933,7 +1741,6 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                artifacts: globals.artifacts,
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -1987,7 +1794,6 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                artifacts: globals.artifacts,
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -2021,7 +1827,6 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                artifacts: globals.artifacts,
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -2054,7 +1859,6 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                artifacts: globals.artifacts,
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -2086,7 +1890,6 @@ flutter:
       final residentCompiler =
           (await FlutterDevice.create(
                 device,
-                artifacts: globals.artifacts,
                 buildInfo: const BuildInfo(
                   BuildMode.debug,
                   '',
@@ -2253,7 +2056,7 @@ flutter:
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, setAssetBundlePath, evict],
       );
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -2276,7 +2079,7 @@ flutter:
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, setAssetBundlePath, evictShader],
       );
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -2299,7 +2102,7 @@ flutter:
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listViews, setAssetBundlePath, reinitializeShaderLibrary],
       );
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -2333,7 +2136,7 @@ flutter:
           ),
         ],
       );
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[webFlutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -2354,7 +2157,7 @@ flutter:
     'HotRunner does not sets asset directory when no assets to evict',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -2373,7 +2176,7 @@ flutter:
     'HotRunner does not set asset directory if it has been set before',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, evict]);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -2415,7 +2218,7 @@ flutter:
       fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[listMultipleViews, setAssetBundlePathForActiveView, evict],
       );
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
@@ -2447,7 +2250,7 @@ flutter:
 
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[listViews, listViews]);
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      residentRunner = createHotRunner(
+      residentRunner = HotRunner(
         <FlutterDevice>[flutterDevice],
         stayResident: false,
         debuggingOptions: DebuggingOptions.enabled(
@@ -2506,12 +2309,6 @@ flutter:
             debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
             target: 'main.dart',
             analytics: fakeAnalytics,
-            fileSystem: globals.fs,
-            logger: globals.logger,
-            platform: globals.platform,
-            processManager: globals.processManager,
-            config: globals.config,
-            artifacts: globals.artifacts,
           );
           // Write the source dill file
           globals.fs.file(residentRunner.dillOutputPath)
@@ -2602,12 +2399,6 @@ class TestHotRunner extends HotRunner {
     required super.debuggingOptions,
     required super.target,
     required super.analytics,
-    super.fileSystem,
-    super.logger,
-    super.platform,
-    super.processManager,
-    super.config,
-    super.artifacts,
   });
 
   void testCacheInitialDillCompilation() {

@@ -30,6 +30,7 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/fake_http_client.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
@@ -552,7 +553,7 @@ void main() {
     expect(report.transferDuration, const Duration(seconds: 5));
   });
 
-  testWithoutContext('DevFS actually starts compile before processing bundle', () async {
+  testUsingContext('DevFS actually starts compile before processing bundle', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[createDevFSRequest],
@@ -613,7 +614,7 @@ void main() {
       frontendServerStdErr(),
       frontendServerStdIn,
     );
-    final generatorStdoutHandler = StdoutHandler(logger: logger, fileSystem: fileSystem);
+    final generatorStdoutHandler = StdoutHandler(logger: testLogger, fileSystem: fileSystem);
 
     final residentCompiler = DefaultResidentCompiler(
       'sdkroot',

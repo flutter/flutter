@@ -246,6 +246,7 @@ void main() {
     var fs = LocalFileSystem.test(signals: Signals.test());
 
     setUp(() async {
+      globals.cache.flutterRoot = getFlutterRoot();
       // Note: we don't use a MemoryFileSystem since we don't have a way to
       // provide it to package:analyzer APIs without writing a significant amount
       // of wrapper logic.
@@ -265,8 +266,8 @@ void main() {
         ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary)
         ..childFile('lib/src/custom_previews.dart').writeAsStringSync(kCustomPreviews);
       project = FlutterProject.fromDirectoryTest(projectDir);
-      final String? sdkPath = getFlutterRoot() != null
-          ? fs.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk')
+      final String? sdkPath = globals.cache.flutterRoot != null
+          ? fs.path.join(globals.cache.flutterRoot, 'bin', 'cache', 'dart-sdk')
           : null;
       final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
       previewDetector = PreviewDetector(
@@ -379,8 +380,8 @@ List<_i1.WidgetPreview> previews() => [
           size: _i7.Size(123.0, 456.0),
           textScaleFactor: 50.0,
           wrapper: _i8.wrapper,
-          theme: _i9.myThemeData,
           brightness: _i7.Brightness.dark,
+          theme: _i9.myThemeData,
           localizations: _i10.myLocalizations,
         ).transform(),
   ),

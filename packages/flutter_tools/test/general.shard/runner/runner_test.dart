@@ -358,8 +358,9 @@ void main() {
       () async {
         // Since crash reporting calls the doctor, which checks for the devtools
         // version file in the cache, write a version file to the memory fs.
+        globals.cache.flutterRoot = '/path/to/flutter';
         final Directory devtoolsDir = globals.fs.directory(
-          '${getFlutterRoot()}/bin/cache/dart-sdk/bin/resources/devtools',
+          '${globals.cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
         )..createSync(recursive: true);
         devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
@@ -466,8 +467,9 @@ void main() {
         () async {
           // Since crash reporting calls the doctor, which checks for the devtools
           // version file in the cache, write a version file to the memory fs.
+          globals.cache.flutterRoot = '/path/to/flutter';
           final Directory devtoolsDir = globals.fs.directory(
-            '${getFlutterRoot()}/bin/cache/dart-sdk/bin/resources/devtools',
+            '${globals.cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
           )..createSync(recursive: true);
           devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 

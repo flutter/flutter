@@ -285,14 +285,14 @@ class FakeCommandRunner extends FlutterCommandRunner {
     return context.run<void>(
       overrides: <Type, Generator>{Logger: () => logger},
       body: () {
-        getFlutterRoot() ??= Cache.defaultFlutterRoot(
+        globals.cache.flutterRoot ??= Cache.defaultFlutterRoot(
           platform: _platform,
           fileSystem: _fileSystem,
           userMessages: _userMessages,
         );
         // For compatibility with tests that set this to a relative path.
-        getFlutterRoot() = _fileSystem.path.normalize(
-          _fileSystem.path.absolute(getFlutterRoot()),
+        globals.cache.flutterRoot = _fileSystem.path.normalize(
+          _fileSystem.path.absolute(globals.cache.flutterRoot),
         );
         return super.runCommand(topLevelResults);
       },
@@ -407,6 +407,7 @@ void main() {
 
   group('linux', () {
     setUp(() {
+      globals.cache.flutterRoot = linuxFlutterRoot;
     });
 
     testUsingContext(
@@ -1140,6 +1141,7 @@ void main() {
 
   group('windows', () {
     setUp(() {
+      globals.cache.flutterRoot = windowsFlutterRoot;
     });
 
     testUsingContext(

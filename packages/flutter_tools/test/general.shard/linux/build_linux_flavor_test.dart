@@ -40,6 +40,7 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    globals.cache.flutterRoot = _kTestFlutterRoot;
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
   });

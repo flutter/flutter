@@ -35,11 +35,7 @@ class AnalyzeOnce extends AnalyzeBase {
     if (isFlutterRepo) {
       // check for conflicting dependencies
       final dependencies = PackageDependencyTracker();
-      dependencies.checkForConflictingDependencies(
-        repoPackages,
-        dependencies,
-        fileSystem: fileSystem,
-      );
+      dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       items.add(flutterRoot);
       if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
         items.add(currentDirectory);
@@ -66,7 +62,6 @@ class AnalyzeOnce extends AnalyzeBase {
       terminal: terminal,
       protocolTrafficLog: protocolTrafficLog,
       suppressAnalytics: suppressAnalytics,
-      withFineDependencies: false,
       usePlugins: usePlugins,
     );
 

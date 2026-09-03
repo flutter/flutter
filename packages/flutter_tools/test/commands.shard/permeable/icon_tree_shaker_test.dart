@@ -6,6 +6,7 @@ import 'dart:io' as io;
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
@@ -26,7 +27,7 @@ void main() {
   });
 
   testUsingContext('tool_backend.dart tree shakes icons successfully', () async {
-    final String flutterRoot = getFlutterRoot();
+    final String flutterRoot = globals.cache.flutterRoot;
     final String flutterBin = globals.fs.path.join(
       flutterRoot,
       'bin',

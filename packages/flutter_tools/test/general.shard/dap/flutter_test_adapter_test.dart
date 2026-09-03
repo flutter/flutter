@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
 import 'package:flutter_tools/src/globals.dart' as globals show platform;
 import 'package:test/test.dart';
@@ -25,6 +26,7 @@ void main() {
         : '/fake/flutter/bin/flutter';
 
     setUpAll(() {
+      globals.cache.flutterRoot = platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter';
     });
 
     test('includes toolArgs', () async {

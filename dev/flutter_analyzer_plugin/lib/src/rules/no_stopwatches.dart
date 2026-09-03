@@ -12,18 +12,20 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:path/path.dart' as path;
 
-import '../flutter_analysis_rule.dart';
-
 // The comment pattern representing the "flutter_ignore" inline directive that
 // indicates the line should be exempt from the stopwatch check.
 final Pattern _ignoreStopwatch = RegExp(r'// flutter_ignore: .*stopwatch .*\(see analyze\.dart\)');
 
-/// Verify that Stopwatch is not instantiated directly.
-class NoStopwatches extends FlutterAnalysisRule {
+/// Use of Stopwatches can introduce test flakes as the logical time of a
+/// stopwatch can fall out of sync with the mocked time of FakeAsync in testing.
+/// The Clock object provides a safe stopwatch instead, which is paired with
+/// FakeAsync as part of the test binding.
+class NoStopwatches extends AnalysisRule {
   NoStopwatches() : super(name: code.name, description: ruleDescription);
 
   static const String ruleDescription =
-      'Do not use new Stopwatch() or Stopwatch(). Use clock.stopwatch() instead.';
+      'Use of Stopwatches can introduce test flakes as the logical time of a stopwatch can fall '
+      'out of sync with the mocked time of FakeAsync in testing.';
 
   static const LintCode code = LintCode(
     'no_stopwatches',
@@ -36,7 +38,7 @@ class NoStopwatches extends FlutterAnalysisRule {
   DiagnosticCode get diagnosticCode => code;
 
   @override
-  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
     registry
       ..addConstructorName(this, visitor)
@@ -70,9 +72,9 @@ class _Visitor extends SimpleAstVisitor<void> {
     return classElement.library.isDartCore
         ? classElement.name == 'Stopwatch'
         : _isStopwatchClassElementCache.putIfAbsent(
-          classElement,
-          () => _checkIfImplementsStopwatchRecursively(classElement),
-        );
+            classElement,
+            () => _checkIfImplementsStopwatchRecursively(classElement),
+          );
   }
 
   bool _isInternal(LibraryElement libraryElement) {
@@ -98,8 +100,9 @@ class _Visitor extends SimpleAstVisitor<void> {
       return;
     }
     final bool isAllowed = switch (element.returnType) {
-      InterfaceType(element: final ClassElement classElement) =>
-        !_implementsStopwatch(classElement),
+      InterfaceType(element: final ClassElement classElement) => !_implementsStopwatch(
+        classElement,
+      ),
       InterfaceType(element: InterfaceElement()) => true,
     };
     if (isAllowed || _hasTrailingFlutterIgnore(node)) {

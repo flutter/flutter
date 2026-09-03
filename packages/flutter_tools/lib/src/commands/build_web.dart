@@ -170,7 +170,6 @@ class BuildWebCommand extends BuildSubCommand {
       logger: globals.logger,
       processManager: globals.processManager,
       buildSystem: globals.buildSystem,
-      buildTargets: globals.buildTargets,
       fileSystem: globals.fs,
       flutterVersion: globals.flutterVersion,
       analytics: globals.analytics,

@@ -7,23 +7,21 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../dart/analysis.dart';
+import '../globals.dart' as globals;
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
   AnalyzeContinuously(
     super.argResults,
     List<Directory> repoPackages, {
-    required super.artifacts,
     required super.fileSystem,
     required super.logger,
+    required super.terminal,
     required super.platform,
     required super.processManager,
-    required this.shutdownHooks,
+    required super.artifacts,
     required super.suppressAnalytics,
-    required super.terminal,
   }) : super(repoPackages: repoPackages);
-
-  final ShutdownHooks shutdownHooks;
 
   String? analysisTarget;
   bool firstAnalysis = true;
@@ -39,11 +37,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
     if (isFlutterRepo) {
       final dependencies = PackageDependencyTracker();
-      dependencies.checkForConflictingDependencies(
-        repoPackages,
-        dependencies,
-        fileSystem: fileSystem,
-      );
+      dependencies.checkForConflictingDependencies(repoPackages, dependencies);
 
       directories = <String>[flutterRoot];
       analysisTarget = 'Flutter repository';
@@ -136,7 +130,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       if (firstAnalysis && isBenchmarking) {
         writeBenchmark(analysisTimer, issueCount);
         server.dispose().whenComplete(() {
-          exitWithHooks(issueCount > 0 ? 1 : 0, shutdownHooks: shutdownHooks);
+          exitWithHooks(issueCount > 0 ? 1 : 0, shutdownHooks: globals.shutdownHooks);
         });
       }
 

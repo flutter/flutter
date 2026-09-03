@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:dap_adapters/dap_adapters.dart';
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:test/test.dart';
@@ -99,7 +100,7 @@ class SimpleFlutterRunner {
 
   static Future<SimpleFlutterRunner> start(Directory projectDirectory) async {
     final String flutterToolPath = globals.fs.path.join(
-      "",
+      globals.cache.flutterRoot,
       'bin',
       globals.platform.isWindows ? 'flutter.bat' : 'flutter',
     );

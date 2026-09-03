@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:analyzer/src/lint/registry.dart';
+import 'package:analyzer/utilities/package_config_file_builder.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
-import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:flutter_analyzer_plugin/src/rules/no_test_imports.dart';
 import 'package:test_reflective_loader/test_reflective_loader.dart';
 
@@ -20,9 +20,8 @@ class NoTestImportsTest extends AnalysisRuleTest {
     newFile('$testPackageLibPath/foo_test.dart', 'const int fooTest = 1;');
     newPackage('flutter_test').addFile('lib/flutter_test.dart', 'const int flutterTest = 1;');
     newPackage('test_api').addFile('lib/src/backend/live_test.dart', 'const int liveTest = 1;');
-    newPackage(
-      'integration_test',
-    ).addFile('lib/integration_test.dart', 'const int integrationTest = 1;');
+    newPackage('integration_test')
+        .addFile('lib/integration_test.dart', 'const int integrationTest = 1;');
     newPackage('some_pkg').addFile('lib/bar_test.dart', 'const int barTest = 1;');
     writeTestPackageConfig(PackageConfigFileBuilder());
   }

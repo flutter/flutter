@@ -12,7 +12,8 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
-import 'package:flutter_tools/src/features.dart';import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -51,7 +52,8 @@ Future<String> createProject(
   arguments ??= <String>['--no-pub'];
   final String projectPath = temp.fileSystem.path.join(temp.path, name);
   final command = CreateCommand();
-  final CommandRunner<void> runner = createTestCommandRunner(command);  await runner.run(<String>['create', ...arguments, projectPath]);
+  final CommandRunner<void> runner = createTestCommandRunner(command);
+  await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
 }
 

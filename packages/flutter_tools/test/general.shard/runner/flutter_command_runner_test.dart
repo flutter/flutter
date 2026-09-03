@@ -276,7 +276,8 @@ void main() {
         late String? oldFlutterRoot;
 
         setUp(() {
-          oldFlutterRoot = getFlutterRoot();
+          oldFlutterRoot = globals.cache.flutterRoot;
+          globals.cache.flutterRoot = _kFlutterRoot;
           fileSystem
               .directory(fileSystem.path.join(_kFlutterRoot, 'examples'))
               .createSync(recursive: true);
@@ -296,6 +297,7 @@ void main() {
         });
 
         tearDown(() {
+          globals.cache.flutterRoot = oldFlutterRoot;
         });
 
         testUsingContext(

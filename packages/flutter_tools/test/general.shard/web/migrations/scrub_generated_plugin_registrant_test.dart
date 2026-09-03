@@ -20,6 +20,7 @@ import '../../../src/throwing_pub.dart'; // legacy
 
 void main() {
   setUpAll(() {
+    globals.cache.flutterRoot = '';
     Cache.disableLocking();
   });
 

@@ -5,7 +5,6 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -15,7 +14,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/commands/build_macos_framework.dart';
 import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
-import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -77,12 +75,13 @@ void main() {
           const frameworkVersion = '0.0.0-unknown';
           final fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
-          final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+          final command = BuildIOSFrameworkCommand(
             logger: BufferLogger.test(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             platform: fakePlatform,
             flutterVersion: fakeFlutterVersion,
             cache: cache,
+            verboseHelp: false,
             codesign: FakeDarwinAddToAppCodesigning(),
           );
 
@@ -118,12 +117,13 @@ void main() {
             frameworkVersion: frameworkVersion,
           );
 
-          final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+          final command = BuildIOSFrameworkCommand(
             logger: BufferLogger.test(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             platform: fakePlatform,
             flutterVersion: fakeFlutterVersion,
             cache: cache,
+            verboseHelp: false,
             codesign: FakeDarwinAddToAppCodesigning(),
           );
 
@@ -156,12 +156,13 @@ void main() {
             ),
           );
 
-          final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+          final command = BuildIOSFrameworkCommand(
             logger: BufferLogger.test(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             platform: fakePlatform,
             flutterVersion: fakeFlutterVersion,
             cache: cache,
+            verboseHelp: false,
             codesign: FakeDarwinAddToAppCodesigning(),
           );
 
@@ -182,6 +183,7 @@ void main() {
 
         setUp(() {
           // cache.getLicenseFile() relies on the flutter root being set.
+          globals.cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
@@ -206,12 +208,13 @@ void main() {
                 frameworkVersion: frameworkVersionWithCommits,
               );
 
-              final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+              final command = BuildIOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
+                verboseHelp: false,
                 codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
@@ -248,12 +251,13 @@ void main() {
           testUsingContext(
             'contains license and version',
             () async {
-              final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+              final command = BuildIOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
+                verboseHelp: false,
                 codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
@@ -273,12 +277,13 @@ void main() {
           testUsingContext(
             'debug URL',
             () async {
-              final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+              final command = BuildIOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
+                verboseHelp: false,
                 codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
@@ -301,12 +306,13 @@ void main() {
           testUsingContext(
             'profile URL',
             () async {
-              final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+              final command = BuildIOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
+                verboseHelp: false,
                 codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
@@ -329,12 +335,13 @@ void main() {
           testUsingContext(
             'release URL',
             () async {
-              final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+              final command = BuildIOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
+                verboseHelp: false,
                 codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.release, outputDirectory);
@@ -405,7 +412,7 @@ void main() {
         projectDir.childFile('.metadata').createSync();
         memoryFileSystem.currentDirectory = projectDir;
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
@@ -429,6 +436,7 @@ void main() {
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -488,7 +496,7 @@ void main() {
         projectDir.childFile('.metadata').createSync();
         memoryFileSystem.currentDirectory = projectDir;
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
@@ -514,6 +522,7 @@ void main() {
           platform: fakePlatform,
           flutterVersion: fakeFlutterVersion,
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -577,12 +586,13 @@ void main() {
           const frameworkVersion = '0.0.0-unknown';
           final fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
-          final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+          final command = BuildMacOSFrameworkCommand(
             logger: BufferLogger.test(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             platform: fakePlatform,
             flutterVersion: fakeFlutterVersion,
             cache: cache,
+            verboseHelp: false,
             codesign: FakeDarwinAddToAppCodesigning(),
           );
 
@@ -618,12 +628,13 @@ void main() {
             frameworkVersion: frameworkVersion,
           );
 
-          final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+          final command = BuildMacOSFrameworkCommand(
             logger: BufferLogger.test(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             platform: fakePlatform,
             flutterVersion: fakeFlutterVersion,
             cache: cache,
+            verboseHelp: false,
             codesign: FakeDarwinAddToAppCodesigning(),
           );
 
@@ -656,12 +667,13 @@ void main() {
             ),
           );
 
-          final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+          final command = BuildMacOSFrameworkCommand(
             logger: BufferLogger.test(),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
             platform: fakePlatform,
             flutterVersion: fakeFlutterVersion,
             cache: cache,
+            verboseHelp: false,
             codesign: FakeDarwinAddToAppCodesigning(),
           );
 
@@ -682,6 +694,7 @@ void main() {
 
         setUp(() {
           // cache.getLicenseFile() relies on the flutter root being set.
+          globals.cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
@@ -705,12 +718,13 @@ void main() {
                 frameworkVersion: frameworkVersion,
               );
 
-              final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              final command = BuildMacOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
+                verboseHelp: false,
                 codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
@@ -746,12 +760,13 @@ void main() {
           testUsingContext(
             'contains license and version',
             () async {
-              final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              final command = BuildMacOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
+                verboseHelp: false,
                 codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
@@ -771,12 +786,13 @@ void main() {
           testUsingContext(
             'debug URL',
             () async {
-              final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              final command = BuildMacOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
+                verboseHelp: false,
                 codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
@@ -799,12 +815,13 @@ void main() {
           testUsingContext(
             'profile URL',
             () async {
-              final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              final command = BuildMacOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
+                verboseHelp: false,
                 codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
@@ -827,12 +844,13 @@ void main() {
           testUsingContext(
             'release URL',
             () async {
-              final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              final command = BuildMacOSFrameworkCommand(
                 logger: BufferLogger.test(),
                 buildSystem: TestBuildSystem.all(BuildResult(success: true)),
                 platform: fakePlatform,
                 flutterVersion: fakeFlutterVersion,
                 cache: cache,
+                verboseHelp: false,
                 codesign: FakeDarwinAddToAppCodesigning(),
               );
               command.produceFlutterPodspec(BuildMode.release, outputDirectory);
@@ -1238,12 +1256,13 @@ void main() {
     testUsingContext(
       'does nothing when Pods.xcodeproj does not exist',
       () async {
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: logger,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -1281,12 +1300,13 @@ void main() {
 }
 ''');
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: logger,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -1362,12 +1382,13 @@ void main() {
             .childDirectory('App.xcframework')
             .createSync(recursive: true);
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: logger,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -1415,12 +1436,13 @@ void main() {
         xcframework.childFile('Info.plist').writeAsStringSync('plist content');
         xcframework.childDirectory('ios-arm64').createSync();
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: logger,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -1471,12 +1493,13 @@ void main() {
               ..createSync(recursive: true);
         framework.childFile('MySDK').writeAsStringSync('binary');
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: logger,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -1523,12 +1546,13 @@ void main() {
 
         // Don't create the framework - it should be skipped
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: logger,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -1587,12 +1611,13 @@ void main() {
               ..createSync(recursive: true);
         xcframework2.childFile('Info.plist').writeAsStringSync('plist2');
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: logger,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -1652,12 +1677,13 @@ void main() {
           ..createSync(recursive: true);
         existingXcframework.childFile('Info.plist').writeAsStringSync('existing plist');
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: logger,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -1718,12 +1744,13 @@ void main() {
           ..createSync(recursive: true);
         appAuthFramework.childFile('Info.plist').writeAsStringSync('plist');
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: logger,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -1775,12 +1802,13 @@ void main() {
               ..createSync(recursive: true);
         xcframework.childFile('Info.plist').writeAsStringSync('resolved plist');
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: logger,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -1838,12 +1866,13 @@ void main() {
               ..createSync(recursive: true);
         xcframework.childFile('Info.plist').writeAsStringSync('nested plist');
 
-        final BuildIOSFrameworkCommand command = createBuildIOSFrameworkCommand(
+        final command = BuildIOSFrameworkCommand(
           logger: logger,
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           flutterVersion: FakeFlutterVersion(),
           cache: cache,
+          verboseHelp: false,
           codesign: FakeDarwinAddToAppCodesigning(),
         );
 
@@ -1900,104 +1929,4 @@ class FakeDarwinAddToAppCodesigning extends Fake implements DarwinAddToAppCodesi
   }) async {
     return null;
   }
-}
-
-BuildIOSFrameworkCommand createBuildIOSFrameworkCommand({
-  AppleContext? appleContext,
-  BuildSystem? buildSystem,
-  DarwinAddToAppCodesigning? codesign,
-  FlutterVersion? flutterVersion,
-  Cache? cache,
-  Logger? logger,
-  Platform? platform,
-  FileSystem? fileSystem,
-  ProcessManager? processManager,
-  bool verboseHelp = false,
-}) {
-  final Platform effectivePlatform =
-      platform ??
-      (context.get<Platform>() ??
-          FakePlatform(
-            operatingSystem: 'macos',
-            environment: <String, String>{
-              'FLUTTER_STORAGE_BASE_URL': 'https://fake.googleapis.com',
-            },
-          ));
-  final FileSystem effectiveFileSystem =
-      fileSystem ?? (context.get<FileSystem>() ?? MemoryFileSystem.test());
-  final Logger effectiveLogger = logger ?? (context.get<Logger>() ?? BufferLogger.test());
-  final ProcessManager effectiveProcessManager =
-      processManager ?? (context.get<ProcessManager>() ?? FakeProcessManager.any());
-  final Cache effectiveCache =
-      cache ??
-      (context.get<Cache>() ??
-          Cache.test(
-            processManager: effectiveProcessManager,
-            fileSystem: effectiveFileSystem,
-            platform: effectivePlatform,
-          ));
-  return BuildIOSFrameworkCommand(
-    appleContext: appleContext ?? FakeAppleContext(),
-    buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
-    codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
-    flutterVersion: flutterVersion,
-    toolContext: FakeToolContext(
-      cache: effectiveCache,
-      fs: effectiveFileSystem,
-      logger: effectiveLogger,
-      platform: effectivePlatform,
-      processManager: effectiveProcessManager,
-    ),
-    verboseHelp: verboseHelp,
-  );
-}
-
-BuildMacOSFrameworkCommand createBuildMacOSFrameworkCommand({
-  AppleContext? appleContext,
-  BuildSystem? buildSystem,
-  DarwinAddToAppCodesigning? codesign,
-  FlutterVersion? flutterVersion,
-  Cache? cache,
-  Logger? logger,
-  Platform? platform,
-  FileSystem? fileSystem,
-  ProcessManager? processManager,
-  bool verboseHelp = false,
-}) {
-  final Platform effectivePlatform =
-      platform ??
-      (context.get<Platform>() ??
-          FakePlatform(
-            operatingSystem: 'macos',
-            environment: <String, String>{
-              'FLUTTER_STORAGE_BASE_URL': 'https://fake.googleapis.com',
-            },
-          ));
-  final FileSystem effectiveFileSystem =
-      fileSystem ?? (context.get<FileSystem>() ?? MemoryFileSystem.test());
-  final Logger effectiveLogger = logger ?? (context.get<Logger>() ?? BufferLogger.test());
-  final ProcessManager effectiveProcessManager =
-      processManager ?? (context.get<ProcessManager>() ?? FakeProcessManager.any());
-  final Cache effectiveCache =
-      cache ??
-      (context.get<Cache>() ??
-          Cache.test(
-            processManager: effectiveProcessManager,
-            fileSystem: effectiveFileSystem,
-            platform: effectivePlatform,
-          ));
-  return BuildMacOSFrameworkCommand(
-    appleContext: appleContext ?? FakeAppleContext(),
-    buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
-    codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
-    flutterVersion: flutterVersion,
-    toolContext: FakeToolContext(
-      cache: effectiveCache,
-      fs: effectiveFileSystem,
-      logger: effectiveLogger,
-      platform: effectivePlatform,
-      processManager: effectiveProcessManager,
-    ),
-    verboseHelp: verboseHelp,
-  );
 }

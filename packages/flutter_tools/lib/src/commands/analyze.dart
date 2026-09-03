@@ -11,7 +11,6 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
-import '../context/tool_context.dart';
 import '../project.dart';
 import '../project_validator.dart';
 import '../runner/flutter_command.dart';
@@ -24,15 +23,24 @@ import 'validate_project.dart';
 
 class AnalyzeCommand extends FlutterCommand {
   AnalyzeCommand({
-    required List<ProjectValidator> allProjectValidators,
-    required bool suppressAnalytics,
-    required ToolContext toolContext,
     bool verboseHelp = false,
     this.workingDirectory,
-  }) : _allProjectValidators = allProjectValidators,
-       _suppressAnalytics = suppressAnalytics,
-       _toolContext = toolContext,
-       super(toolContext: toolContext) {
+    required FileSystem fileSystem,
+    required Platform platform,
+    required Terminal terminal,
+    required Logger logger,
+    required ProcessManager processManager,
+    required Artifacts artifacts,
+    required List<ProjectValidator> allProjectValidators,
+    required bool suppressAnalytics,
+  }) : _artifacts = artifacts,
+       _fileSystem = fileSystem,
+       _processManager = processManager,
+       _logger = logger,
+       _terminal = terminal,
+       _allProjectValidators = allProjectValidators,
+       _platform = platform,
+       _suppressAnalytics = suppressAnalytics {
     argParser.addFlag(
       'flutter-repo',
       negatable: false,
@@ -197,7 +205,12 @@ class AnalyzeCommand extends FlutterCommand {
   /// The working directory for testing analysis using dartanalyzer.
   final Directory? workingDirectory;
 
-  final ToolContext _toolContext;
+  final Artifacts _artifacts;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final Terminal _terminal;
+  final ProcessManager _processManager;
+  final Platform _platform;
   final List<ProjectValidator> _allProjectValidators;
   final bool _suppressAnalytics;
 
@@ -221,7 +234,7 @@ class AnalyzeCommand extends FlutterCommand {
     }
 
     // Or we're not in a project directory.
-    if (!_toolContext.fs.file('pubspec.yaml').existsSync()) {
+    if (!_fileSystem.file('pubspec.yaml').existsSync()) {
       return false;
     }
 
@@ -241,14 +254,6 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Artifacts artifacts = _toolContext.artifacts;
-    final FileSystem fileSystem = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final Platform platform = _toolContext.platform;
-    final ProcessManager processManager = _toolContext.processManager;
-    final FlutterProjectFactory projectFactory = _toolContext.projectFactory;
-    final Terminal terminal = _toolContext.terminal;
-
     if (boolArg('android')) {
       final AndroidAnalyzeOption option;
       final String? buildVariant;
@@ -270,11 +275,11 @@ class AnalyzeCommand extends FlutterCommand {
       } else {
         throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
       }
-      final Set<String> items = findDirectories(argResults!, fileSystem);
+      final Set<String> items = findDirectories(argResults!, _fileSystem);
       final String directoryPath;
       if (items.isEmpty) {
         // user did not specify any path
-        directoryPath = fileSystem.currentDirectory.path;
+        directoryPath = _fileSystem.currentDirectory.path;
       } else if (items.length > 1) {
         // if the user sends more than one path
         throwToolExit('The Android analyze can process only one directory path');
@@ -282,11 +287,11 @@ class AnalyzeCommand extends FlutterCommand {
         directoryPath = items.first;
       }
       await AndroidAnalyze(
-        fileSystem: fileSystem,
+        fileSystem: _fileSystem,
         option: option,
         userPath: directoryPath,
         buildVariant: buildVariant,
-        logger: logger,
+        logger: _logger,
       ).analyze();
     } else if (boolArg('ios')) {
       final IOSAnalyzeOption option;
@@ -315,11 +320,11 @@ class AnalyzeCommand extends FlutterCommand {
       } else {
         throwToolExit('No argument is provided to analyze. Use -h to see available commands.');
       }
-      final Set<String> items = findDirectories(argResults!, fileSystem);
+      final Set<String> items = findDirectories(argResults!, _fileSystem);
       final String directoryPath;
       if (items.isEmpty) {
         // user did not specify any path
-        directoryPath = fileSystem.currentDirectory.path;
+        directoryPath = _fileSystem.currentDirectory.path;
       } else if (items.length > 1) {
         // if the user sends more than one path
         throwToolExit('The iOS analyze can process only one directory path');
@@ -327,11 +332,11 @@ class AnalyzeCommand extends FlutterCommand {
         directoryPath = items.first;
       }
       await IOSAnalyze(
-        project: FlutterProject.fromDirectory(fileSystem.directory(directoryPath)),
+        project: FlutterProject.fromDirectory(_fileSystem.directory(directoryPath)),
         option: option,
         configuration: configuration,
         target: target,
-        logger: logger,
+        logger: _logger,
       ).analyze();
     } else if (boolArg('suggestions')) {
       final String directoryPath;
@@ -339,11 +344,11 @@ class AnalyzeCommand extends FlutterCommand {
         throwToolExit('flag --watch is not compatible with --suggestions');
       }
       if (workingDirectory == null) {
-        final Set<String> items = findDirectories(argResults!, fileSystem);
+        final Set<String> items = findDirectories(argResults!, _fileSystem);
         if (items.isEmpty) {
           // user did not specify any path
-          directoryPath = fileSystem.currentDirectory.path;
-          logger.printTrace('Showing suggestions for current directory: $directoryPath');
+          directoryPath = _fileSystem.currentDirectory.path;
+          _logger.printTrace('Showing suggestions for current directory: $directoryPath');
         } else if (items.length > 1) {
           // if the user sends more than one path
           throwToolExit('The suggestions flag can process only one directory path');
@@ -354,39 +359,37 @@ class AnalyzeCommand extends FlutterCommand {
         directoryPath = workingDirectory!.path;
       }
       return ValidateProject(
-        fileSystem: fileSystem,
-        logger: logger,
+        fileSystem: _fileSystem,
+        logger: _logger,
         allProjectValidators: _allProjectValidators,
         userPath: directoryPath,
-        processManager: processManager,
-        projectFactory: projectFactory,
+        processManager: _processManager,
         machine: outputMachineFormat,
       ).run();
     } else if (boolArg('watch')) {
       await AnalyzeContinuously(
         argResults!,
         runner!.getRepoPackages(),
-        artifacts: artifacts,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        shutdownHooks: _toolContext.shutdownHooks,
+        fileSystem: _fileSystem,
+        logger: _logger,
+        platform: _platform,
+        processManager: _processManager,
+        terminal: _terminal,
+        artifacts: _artifacts,
         suppressAnalytics: _suppressAnalytics,
-        terminal: terminal,
       ).analyze();
     } else {
       await AnalyzeOnce(
         argResults!,
         runner!.getRepoPackages(),
-        artifacts: artifacts,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        suppressAnalytics: _suppressAnalytics,
-        terminal: terminal,
         workingDirectory: workingDirectory,
+        fileSystem: _fileSystem,
+        logger: _logger,
+        platform: _platform,
+        processManager: _processManager,
+        terminal: _terminal,
+        artifacts: _artifacts,
+        suppressAnalytics: _suppressAnalytics,
       ).analyze();
     }
     return FlutterCommandResult.success();

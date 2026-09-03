@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart'
     show templateAndroidGradlePluginVersion;
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -23,7 +22,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart' show FakeAndroidContext, FakeFlutterVersion, FakeToolContext, TestFeatureFlags;
+import '../../src/fakes.dart' show FakeFlutterVersion, TestFeatureFlags;
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -206,13 +205,7 @@ void main() {
     );
 
     testUsingContext('alias aab', () async {
-      final command = BuildAppBundleCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(),
-        androidSdk: FakeAndroidSdk(globals.fs.directory('irrelevant')),
-        buildSystem: globals.buildSystem,
-        toolContext: FakeToolContext(logger: BufferLogger.test()),
-      );
+      final command = BuildAppBundleCommand(logger: BufferLogger.test());
       expect(command.aliases, contains('aab'));
     });
 
@@ -645,27 +638,10 @@ void main() {
 
 Future<BuildAppBundleCommand> runBuildAppBundleCommand(
   String target, {
-  AndroidSdk? androidSdk,
   List<String>? arguments,
 }) async {
-  final AndroidSdk effectiveAndroidSdk =
-      androidSdk ??
-      context.get<AndroidSdk>() ??
-      FakeAndroidSdk(globals.fs.directory('android-sdk'));
-  final command = BuildAppBundleCommand(
-    androidBuilder: context.get<AndroidBuilder>() ?? FakeAndroidBuilder(),
-    androidContext: FakeAndroidContext(androidSdk: effectiveAndroidSdk),
-    androidSdk: effectiveAndroidSdk,
-    buildSystem: globals.buildSystem,
-    toolContext: FakeToolContext(
-      fs: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      projectFactory: globals.projectFactory,
-    ),
-  );
-  final CommandRunner<void> runner = createTestCommandRunner(command, context.get<Analytics>());
+  final command = BuildAppBundleCommand(logger: BufferLogger.test());
+  final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
     'appbundle',
     ...?arguments,

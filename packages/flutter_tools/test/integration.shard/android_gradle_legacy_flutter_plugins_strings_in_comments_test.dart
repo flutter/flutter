@@ -6,6 +6,7 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/cache.dart';
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -14,6 +15,7 @@ void main() {
   late Directory tempDir;
 
   setUp(() {
+    globals.cache.flutterRoot = getFlutterRoot();
     tempDir = createResolvedTempDirectorySync('flutter_plugin_test.');
   });
 

@@ -12,7 +12,7 @@ import 'package:test_reflective_loader/test_reflective_loader.dart';
 class NoRuntimeTypeInToStringTest extends AnalysisRuleTest {
   @override
   void setUp() {
-    Registry.ruleRegistry.registerLintRule(NoRuntimeTypeInToString());
+    Registry.ruleRegistry.registerWarningRule(NoRuntimeTypeInToString());
     super.setUp();
   }
 

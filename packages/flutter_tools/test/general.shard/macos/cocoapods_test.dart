@@ -88,6 +88,7 @@ environement:
   }
 
   setUp(() async {
+    globals.cache.flutterRoot = 'flutter';
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
@@ -105,7 +106,7 @@ environement:
     );
     fileSystem.file(
         fileSystem.path.join(
-          getFlutterRoot(),
+          globals.cache.flutterRoot,
           'packages',
           'flutter_tools',
           'templates',
@@ -117,7 +118,7 @@ environement:
       ..writeAsStringSync('iOS podfile template');
     fileSystem.file(
         fileSystem.path.join(
-          getFlutterRoot(),
+          globals.cache.flutterRoot,
           'packages',
           'flutter_tools',
           'templates',
@@ -1477,19 +1478,16 @@ end''');
         FakeCommand(command: <String>['touch', 'project/ios/Podfile.lock']),
       ]);
 
-      final cocoaPodsUnderTestXcode143 = CocoaPods(
+      final cocoaPods = CocoaPods(
         fileSystem: fileSystem,
         processManager: fakeProcessManager,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
-        xcodeProjectInterpreter: XcodeProjectInterpreter.test(
-          processManager: fakeProcessManager,
-          version: Version(14, 3, 0),
-        ),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
         analytics: fakeAnalytics,
       );
 
-      final bool didInstall = await cocoaPodsUnderTestXcode143.processPods(
+      final bool didInstall = await cocoaPods.processPods(
         xcodeProject: projectUnderTest.ios,
         buildMode: BuildMode.debug,
       );

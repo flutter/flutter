@@ -12,7 +12,7 @@ import 'package:test_reflective_loader/test_reflective_loader.dart';
 class NullInitializedDebugExpensiveFieldsTest extends AnalysisRuleTest {
   @override
   void setUp() {
-    Registry.ruleRegistry.registerLintRule(NullInitializedDebugExpensiveFields());
+    Registry.ruleRegistry.registerWarningRule(NullInitializedDebugExpensiveFields());
     super.setUp();
   }
 

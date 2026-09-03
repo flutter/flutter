@@ -9,6 +9,8 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
@@ -28,12 +30,13 @@ void main() {
     late BufferLogger logger;
 
     setUp(() {
+      globals.cache.flutterRoot = getFlutterRoot();
       fs = LocalFileSystem.test(signals: FakeSignals());
       watcher = FakeWatcher();
       logger = BufferLogger.test();
       project = FlutterProject.fromDirectoryTest(fs.systemTempDirectory.createTempSync('root'));
-      final String? sdkPath = getFlutterRoot() != null
-          ? fs.path.join(getFlutterRoot(), 'bin', 'cache', 'dart-sdk')
+      final String? sdkPath = globals.cache.flutterRoot != null
+          ? fs.path.join(globals.cache.flutterRoot, 'bin', 'cache', 'dart-sdk')
           : null;
       final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
       previewDetector = PreviewDetector(

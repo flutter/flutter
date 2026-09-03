@@ -12,7 +12,7 @@ import 'package:test_reflective_loader/test_reflective_loader.dart';
 class RenderBoxIntrinsicCalculationRuleTest extends AnalysisRuleTest {
   @override
   void setUp() {
-    Registry.ruleRegistry.registerLintRule(RenderBoxIntrinsicCalculationRule());
+    Registry.ruleRegistry.registerWarningRule(RenderBoxIntrinsicCalculationRule());
     super.setUp();
   }
 
