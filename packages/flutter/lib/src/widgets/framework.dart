@@ -1152,11 +1152,24 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// For this reason, this method should only be called when the [build] method
   /// will, as a result of whatever state change was detected, change its result
   /// meaningfully.
+  /// To minimize the rebuild cost, it is recommended to call [State.setState] on
+  /// leaf widgets.
+  ///
+  /// It is also possible to trigger a rebuild without directly calling [State.setState].
+  /// For example, using a [ListenableBuilder] implicitly rebuilds a subtree whenever its
+  /// [ListenableBuilder.listenable] value changes.
+  ///
+  /// If a subtree under a [ListenableBuilder] does not depend on the listenable's state,
+  /// you can pass it to [ListenableBuilder.child] to boost performance. Flutter then passes
+  /// this pre-built [ListenableBuilder.child] into the [ListenableBuilder.builder] callback,
+  /// preventing unnecessary rebuilds of that subtree.
   ///
   /// See also:
   ///
   ///  * [StatefulWidget], the API documentation for which has a section on
   ///    performance considerations that are relevant here.
+  ///  * [Listenable], for more information on how to send notifications and notify
+  ///    clients when a change is detected to control when and how to rebuild.
   @protected
   void setState(VoidCallback fn) {
     assert(() {
