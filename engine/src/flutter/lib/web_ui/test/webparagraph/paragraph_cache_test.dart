@@ -649,4 +649,28 @@ Future<void> testMain() async {
       expect(nzScaleY, closeTo(5.0, epsilon));
     },
   );
+
+  test('CanvasKit canvas.getTransform() returns logical coordinates independent of DPR', () {
+    final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
+    try {
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.5);
+
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder, region);
+      canvas.translate(10.0, 20.0);
+      canvas.scale(2.0, 3.0);
+
+      final Float64List matrix = canvas.getTransform();
+
+      // If getTransform() included DPR (2.5), translation would be (25.0, 50.0)
+      // and scale would be (5.0, 7.5).
+      // In reality, it records purely in logical coordinates:
+      expect(matrix[12], closeTo(10.0, epsilon));
+      expect(matrix[13], closeTo(20.0, epsilon));
+      expect(matrix[0], closeTo(2.0, epsilon));
+      expect(matrix[5], closeTo(3.0, epsilon));
+    } finally {
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
+    }
+  });
 }
