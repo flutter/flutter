@@ -57,10 +57,6 @@ void main() {
     late FakeLockTrackingCache lockTrackingCache;
     late FakeLockCheckingPub lockCheckingPub;
 
-    setUpAll(() {
-      globals.cache.flutterRoot = '/path/to/sdk/flutter';
-    });
-
     setUp(() {
       Cache.disableLocking();
       cache = FakeCache();
@@ -2221,6 +2217,8 @@ class FakeIoProcessSignal extends Fake implements io.ProcessSignal {
 }
 
 class FakeCache extends Fake implements Cache {
+  @override
+  String get flutterRoot => '/path/to/sdk/flutter';
   List<Set<DevelopmentArtifact>> artifacts = <Set<DevelopmentArtifact>>[];
 
   @override
@@ -2301,6 +2299,8 @@ class DummyFlutterCommandWithPub extends FlutterCommand {
 }
 
 class FakeLockTrackingCache extends Fake implements Cache {
+  @override
+  String get flutterRoot => '/path/to/sdk/flutter';
   bool isLockHeld = false;
 
   @override
