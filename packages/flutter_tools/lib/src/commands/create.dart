@@ -11,6 +11,7 @@ import 'package:yaml/yaml.dart';
 
 import '../android/gradle_utils.dart' as gradle;
 import '../android/java.dart';
+import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
@@ -23,6 +24,8 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../base/version_range.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
+import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
@@ -51,24 +54,18 @@ const kPlatformHelp =
 class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMixin {
   CreateCommand({
     required ToolContext toolContext,
+    required this.androidContext,
+    required this.appleContext,
     ExtensionTemplateManager? extensionTemplateManager,
-    HttpClientFactory? httpClientFactory,
-    Java? java,
-    Net? net,
-    PlistParser? plistParser,
-    Pub? pub,
-    TemplateRenderer? templateRenderer,
+    required TemplateRenderer templateRenderer,
     bool verboseHelp = false,
   }) : _extensionTemplateManager = extensionTemplateManager,
-       _httpClientFactory = httpClientFactory,
-       _java = java,
-       _explicitNet = net,
-       _explicitPlistParser = plistParser,
-       _explicitPub = pub,
-       _templateRenderer = templateRenderer ?? const MustacheTemplateRenderer(),
+       _templateRenderer = templateRenderer,
        _verboseHelp = verboseHelp,
        super(toolContext: toolContext);
 
+  final AndroidContext androidContext;
+  final AppleContext appleContext;
   final bool _verboseHelp;
   final ExtensionTemplateManager? _extensionTemplateManager;
 
@@ -291,44 +288,12 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   );
 
   final TemplateRenderer _templateRenderer;
-  final HttpClientFactory? _httpClientFactory;
-  final Java? _java;
-  final Net? _explicitNet;
-  final PlistParser? _explicitPlistParser;
-  final Pub? _explicitPub;
 
   @override
   TemplateRenderer get templateRenderer => _templateRenderer;
 
   @override
   ToolContext get toolContext => super.toolContext!;
-
-  // Lazy-initialize the net utilities with values from the context.
-  late final Net _net =
-      _explicitNet ??
-      Net(
-        httpClientFactory: _httpClientFactory,
-        logger: toolContext.logger,
-        platform: toolContext.platform,
-      );
-
-  late final Pub _pub =
-      _explicitPub ??
-      Pub(
-        fileSystem: toolContext.fs,
-        logger: toolContext.logger,
-        processManager: toolContext.processManager,
-        platform: toolContext.platform,
-        botDetector: toolContext.botDetector,
-      );
-
-  late final PlistParser _plistParser =
-      _explicitPlistParser ??
-      PlistParser(
-        fileSystem: toolContext.fs,
-        processManager: toolContext.processManager,
-        logger: toolContext.logger,
-      );
 
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost =>
@@ -343,8 +308,11 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
       );
     }
 
+    final ToolContext(:Logger logger, :Platform platform) = toolContext;
+    final net = Net(logger: logger, platform: platform);
+
     final snippetsUri = Uri.https(_snippetsHost, 'snippets/$sampleId.dart');
-    final List<int>? data = await _net.fetchUrl(snippetsUri);
+    final data = await net.fetchUrl(snippetsUri);
     if (data == null || data.isEmpty) {
       return null;
     }
@@ -353,8 +321,11 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
 
   /// Fetches the samples index file from the Flutter docs website.
   Future<String?> _fetchSamplesIndexFromServer() async {
+    final ToolContext(:Logger logger, :Platform platform) = toolContext;
+    final net = Net(logger: logger, platform: platform);
+
     final snippetsUri = Uri.https(_snippetsHost, 'snippets/index.json');
-    final List<int>? data = await _net.fetchUrl(snippetsUri, maxAttempts: 2);
+    final data = await net.fetchUrl(snippetsUri, maxAttempts: 2);
     if (data == null || data.isEmpty) {
       return null;
     }
@@ -619,7 +590,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         terminal: terminal,
         fileSystem: fs,
         fileSystemUtils: fsUtils,
-        plistParser: _plistParser,
+        plistParser: appleContext.plistParser,
       );
     }
 
@@ -822,7 +793,21 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
 
     if (shouldCallPubGet) {
       final FlutterProject project = projectFactory.fromDirectory(relativeDir);
-      await _pub.get(
+      final ToolContext(
+        :FileSystem fs,
+        :Logger logger,
+        :ProcessManager processManager,
+        :Platform platform,
+        :BotDetector botDetector,
+      ) = toolContext;
+      final pub = Pub(
+        fileSystem: fs,
+        logger: logger,
+        processManager: processManager,
+        platform: platform,
+        botDetector: botDetector,
+      );
+      await pub.get(
         context: pubContext,
         project: project,
         offline: offline,
@@ -927,7 +912,7 @@ Your $application code is in $relativeAppMain.
 
     // Show warning for Java/AGP or Java/Gradle incompatibility if building for
     // Android and Java version has been detected.
-    final Java? java = _java;
+    final Java? java = androidContext.java;
     if (includeAndroid && java != null && java.version != null && template is FlutterTemplateType) {
       _printIncompatibleJavaAgpGradleVersionsWarning(
         fs: fs,

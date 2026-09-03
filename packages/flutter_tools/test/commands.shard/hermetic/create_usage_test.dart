@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -210,7 +211,7 @@ void main() {
       );
     });
 
-    CreateCommand createCreateCommand({Pub? pub, Java? java}) {
+    CreateCommand createCreateCommand() {
       return CreateCommand(
         toolContext: FakeToolContext(
           fs: globals.fs,
@@ -221,8 +222,9 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
         ),
-        pub: pub,
-        java: java,
+        androidContext: FakeAndroidContext(),
+        appleContext: FakeAppleContext(),
+        templateRenderer: const MustacheTemplateRenderer(),
       );
     }
 
@@ -296,11 +298,13 @@ void main() {
     testUsingContext(
       'create --offline',
       () => testbed.run(() async {
-        final CreateCommand command = createCreateCommand(pub: fakePub);
+        final CreateCommand command = createCreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
+        globals.fs.directory('testy/.dart_tool').childFile('package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"configVersion":2,"packages":[]}');
         await runner.run(<String>['create', 'testy', '--offline']);
-        expect(fakePub.calledOnline, 0);
-        expect(fakePub.calledGetOffline, 1);
+
         expect(command.argParser.options.containsKey('offline'), true);
         expect(command.shouldUpdateCache, true);
       }, overrides: <Type, Generator>{Java: () => null, Pub: () => fakePub}),

@@ -30,10 +30,11 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/experimental/templates.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_project_metadata.dart' show FlutterTemplateType;
 import 'package:flutter_tools/src/globals.dart' as globals;
-import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -5188,11 +5189,7 @@ bool _getBooleanValueFromPlist({required File plistFile, String? key}) {
 CreateCommand createCreateCommand({
   ToolContext? toolContext,
   TemplateRenderer? templateRenderer,
-  HttpClientFactory? httpClientFactory,
-  Java? java,
-  Net? net,
-  PlistParser? plistParser,
-  Pub? pub,
+  ExtensionTemplateManager? extensionTemplateManager,
   bool verboseHelp = false,
 }) {
   return CreateCommand(
@@ -5206,15 +5203,11 @@ CreateCommand createCreateCommand({
           cache: globals.cache,
           flutterVersion: FakeFlutterVersion(),
           projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
-          terminal: globals.terminal,
-          os: globals.os,
         ),
-    templateRenderer: templateRenderer,
-    httpClientFactory: httpClientFactory,
-    java: java,
-    net: net,
-    plistParser: plistParser,
-    pub: pub,
+    androidContext: FakeAndroidContext(),
+    appleContext: FakeAppleContext(),
+    extensionTemplateManager: extensionTemplateManager,
+    templateRenderer: templateRenderer ?? const MustacheTemplateRenderer(),
     verboseHelp: verboseHelp,
   );
 }

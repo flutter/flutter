@@ -303,9 +303,10 @@ List<FlutterCommand> generateCommands({
   CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
   CreateCommand(
     toolContext: toolDependencies.toolContext,
+    androidContext: toolDependencies.androidContext,
+    appleContext: toolDependencies.appleContext,
+    templateRenderer: const MustacheTemplateRenderer(),
     extensionTemplateManager: extensionTemplateManager,
-    java: toolDependencies.androidContext.java,
-    plistParser: toolDependencies.appleContext.plistParser,
     verboseHelp: verboseHelp,
   ),
   DaemonCommand(hidden: !verboseHelp),
