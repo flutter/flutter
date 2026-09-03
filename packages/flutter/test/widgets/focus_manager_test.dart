@@ -2416,6 +2416,82 @@ void main() {
       debugPrint = oldDebugPrint;
     }
   });
+  group('FocusNode.canRequestFocus regression tests', () {
+    // Reproduces https://github.com/flutter/flutter/issues/185076:
+    testWidgets('disabling all siblings in the same build does not leave '
+        'primary focus on an unfocusable node', (WidgetTester tester) async {
+      final nodes =
+          List<FocusNode>.generate(10, (int i) => FocusNode(debugLabel: 'node$i'));
+      for (final node in nodes) {
+        addTearDown(node.dispose);
+      }
+
+      var canRequestFocus = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return Column(
+                  children: List<Widget>.generate(
+                    10,
+                    (int i) => Focus(
+                      focusNode: nodes[i],
+                      canRequestFocus: canRequestFocus,
+                      child: Container(
+                        height: 50,
+                        color: const Color(0xFFFFFFFF),
+                        child: Text('Node $i'),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Simulate tabbing through the children to build up a navigation history.
+      for (final node in nodes) {
+        node.requestFocus();
+        await tester.pump();
+        expect(node.hasPrimaryFocus, isTrue);
+      }
+
+      // Focus is now on node9 (the last child), with a history of all the
+      // previously-focused siblings behind it.
+      setState(() {
+        canRequestFocus = false;
+      });
+      await tester.pumpAndSettle();
+
+      // Expected: no disabled node holds primary focus.
+      for (final node in nodes) {
+        expect(
+          node.hasPrimaryFocus,
+          isFalse,
+          reason: '${node.debugLabel} should not have primary focus after all '
+              'siblings were disabled in the same build',
+        );
+      }
+
+      // Invariant: whatever holds primary focus must be focusable.
+      final FocusNode? primary = FocusManager.instance.primaryFocus;
+      if (primary != null) {
+        expect(
+          primary.canRequestFocus,
+          isTrue,
+          reason: 'Invariant violation: focus node is not focusable',
+        );
+      }
+    });
+  });
 }
 
 class _LoggingTestFocusNode extends FocusNode {
