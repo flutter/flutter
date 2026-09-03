@@ -151,9 +151,8 @@ class FlutterProject {
             return glob.matches(relativePath);
           });
           if (isMember) {
-            return _projectFactory != null
-                ? _projectFactory.fromDirectory(candidate)
-                : FlutterProject.fromDirectory(candidate);
+            return _projectFactory?.fromDirectory(candidate) ??
+                FlutterProject.fromDirectory(candidate);
           }
         }
       } on Exception catch (_) {

@@ -10,8 +10,6 @@ import 'package:pool/pool.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -431,8 +429,6 @@ class PackagesGetCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
     final List<String> rest = argResults!.rest;
     var isHelp = false;
     var example = true;
@@ -453,7 +449,7 @@ class PackagesGetCommand extends FlutterCommand {
     FlutterProject? rootProject;
 
     if (!isHelp) {
-      target = findProjectRoot(fs, directoryOption);
+      target = findProjectRoot(_toolContext.fs, directoryOption);
       if (target == null) {
         if (directoryOption == null) {
           throwToolExit('Expected to find project root in current working directory.');
@@ -462,10 +458,10 @@ class PackagesGetCommand extends FlutterCommand {
         }
       }
 
-      rootProject = _toolContext.projectFactory.fromDirectory(fs.directory(target));
+      rootProject = _toolContext.projectFactory.fromDirectory(_toolContext.fs.directory(target));
       _rootProject = rootProject;
     }
-    final String? relativeTarget = target == null ? null : fs.path.relative(target);
+    final String? relativeTarget = target == null ? null : _toolContext.fs.path.relative(target);
 
     final List<String> subArgs = rest.toList()..removeWhere((String arg) => arg == '--');
     final timer = Stopwatch()..start();
@@ -514,14 +510,17 @@ class PackagesGetCommand extends FlutterCommand {
       // tooling if needed.
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         rootProject.packageConfig,
-        logger: logger,
+        logger: _toolContext.logger,
       );
       final PackageGraph graph = PackageGraph.load(rootProject);
 
       // Build a cache of all pubspec.yaml contents once, keyed by package root
       // URI. This avoids re-reading the same files for every workspace package
       // during post-processing.
-      final PubspecCache pubspecCache = await buildPubspecCache(packageConfig, fileSystem: fs);
+      final PubspecCache pubspecCache = await buildPubspecCache(
+        packageConfig,
+        fileSystem: _toolContext.fs,
+      );
       // Process workspace root packages concurrently, capped to 64 to
       // saturate I/O without exhausting file descriptors or system resources.
       await Pool(64).forEach<String, void>(graph.roots, (String workspaceRootName) async {
@@ -530,18 +529,20 @@ class PackagesGetCommand extends FlutterCommand {
         final Uri rootUri = rootPackage!.root;
 
         final FlutterProject project = _toolContext.projectFactory.fromDirectory(
-          fs.directory(rootUri),
+          _toolContext.fs.directory(rootUri),
         );
 
         if (project.manifest.generateLocalizations) {
           final environment = Environment(
             artifacts: _toolContext.artifacts,
-            logger: logger,
+            logger: _toolContext.logger,
             cacheDir: _toolContext.cache.getRoot(),
             engineVersion: _toolContext.flutterVersion.engineRevision,
-            fileSystem: fs,
-            flutterRootDir: fs.directory(Cache.flutterRoot),
-            outputDir: fs.directory(getBuildDirectory(_toolContext.config, fs)),
+            fileSystem: _toolContext.fs,
+            flutterRootDir: _toolContext.fs.directory(Cache.flutterRoot),
+            outputDir: _toolContext.fs.directory(
+              getBuildDirectory(_toolContext.config, _toolContext.fs),
+            ),
             processManager: _toolContext.processManager,
             platform: _toolContext.platform,
             analytics: analytics,

@@ -106,8 +106,7 @@ class DowngradeCommand extends FlutterCommand {
         'Use "flutter channel" to switch to an official channel. ',
       );
     }
-    final PersistentToolState persistentToolState = _persistentToolState;
-    final String? lastFlutterVersion = persistentToolState.lastActiveVersion(channel);
+    final String? lastFlutterVersion = _persistentToolState.lastActiveVersion(channel);
     final String currentFlutterVersion = _flutterVersion.frameworkRevision;
     if (lastFlutterVersion == null || currentFlutterVersion == lastFlutterVersion) {
       final String trailing = await _createErrorMessage(workingDirectory, channel);
@@ -135,11 +134,9 @@ class DowngradeCommand extends FlutterCommand {
     final String humanReadableVersion = parseResult.stdout;
 
     // If there is a terminal attached, prompt the user to confirm the downgrade.
-    final Stdio stdio = _stdio;
-    final Terminal terminal = _terminal;
-    if (stdio.hasTerminal && boolArg('prompt')) {
-      terminal.usesTerminalUi = true;
-      final String result = await terminal.promptForCharInput(
+    if (_stdio.hasTerminal && boolArg('prompt')) {
+      _terminal.usesTerminalUi = true;
+      final String result = await _terminal.promptForCharInput(
         const <String>['y', 'n'],
         prompt: 'Downgrade flutter to version $humanReadableVersion?',
         logger: _logger,

@@ -16,7 +16,6 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/pub.dart';
-import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'channel.dart';
@@ -307,8 +306,7 @@ class UpgradeCommandRunner {
   // re-entrantly with the `--continue` flag
   Future<void> _runCommandSecondHalf(FlutterVersion flutterVersion) async {
     // Make sure the welcome message re-display is delayed until the end.
-    final PersistentToolState persistentToolState = _toolContext.persistentToolState;
-    persistentToolState.setShouldRedisplayWelcomeMessage(false);
+    _toolContext.persistentToolState.setShouldRedisplayWelcomeMessage(false);
     await precacheArtifacts(
       workingDirectory: workingDirectory,
       fileSystem: _toolContext.fs,
@@ -319,7 +317,7 @@ class UpgradeCommandRunner {
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
-    persistentToolState.setShouldRedisplayWelcomeMessage(true);
+    _toolContext.persistentToolState.setShouldRedisplayWelcomeMessage(true);
     if (flutterVersion.channel == 'master' || flutterVersion.channel == 'main') {
       _toolContext.logger.printStatus(
         '\n'
