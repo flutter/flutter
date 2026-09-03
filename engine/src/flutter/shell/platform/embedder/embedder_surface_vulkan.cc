@@ -161,6 +161,14 @@ sk_sp<GrDirectContext> EmbedderSurfaceVulkan::CreateGrContext(
       reinterpret_cast<PFN_vkGetPhysicalDeviceFeatures2>(
           vk_->AcquireProc("vkGetPhysicalDeviceFeatures2",
                            vulkan::VulkanHandle<VkInstance>{instance}));
+  if (!vkGetPhysicalDeviceFeatures2Func) {
+    // On Vulkan 1.0, vkGetPhysicalDeviceFeatures2 is not a core function.
+    // Fall back to the KHR extension equivalent.
+    vkGetPhysicalDeviceFeatures2Func =
+        reinterpret_cast<PFN_vkGetPhysicalDeviceFeatures2>(
+            vk_->AcquireProc("vkGetPhysicalDeviceFeatures2KHR",
+                             vulkan::VulkanHandle<VkInstance>{instance}));
+  }
   if (vkGetPhysicalDeviceFeatures2Func) {
     vkGetPhysicalDeviceFeatures2Func(device_.GetPhysicalDeviceHandle(),
                                      &features2);
