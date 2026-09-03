@@ -98,7 +98,9 @@ void mockGetIntegerv(GLenum name, int* value) {
       *value = g_extensions.size();
     } break;
     case GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS:
+      // Minimum default; a registered mock may overwrite it.
       *value = 8;
+      CallMockMethod(&IMockGLESImpl::GetIntegerv, name, value);
       break;
     case GL_MAX_LABEL_LENGTH_KHR:
       *value = 64;
@@ -356,6 +358,13 @@ GLboolean mockIsTexture(GLuint texture) {
 static_assert(CheckSameSignature<decltype(mockIsTexture),  //
                                  decltype(glIsTexture)>::value);
 
+GLboolean mockIsProgram(GLuint program) {
+  return CallMockMethod(&IMockGLESImpl::IsProgram, program);
+}
+
+static_assert(CheckSameSignature<decltype(mockIsProgram),  //
+                                 decltype(glIsProgram)>::value);
+
 GLenum mockCheckFramebufferStatus(GLenum target) {
   return CallMockMethod(&IMockGLESImpl::CheckFramebufferStatus, target);
 }
@@ -559,6 +568,8 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockBufferSubData);
   } else if (strcmp(name, "glIsTexture") == 0) {
     return reinterpret_cast<void*>(mockIsTexture);
+  } else if (strcmp(name, "glIsProgram") == 0) {
+    return reinterpret_cast<void*>(mockIsProgram);
   } else if (strcmp(name, "glCheckFramebufferStatus") == 0) {
     return reinterpret_cast<void*>(mockCheckFramebufferStatus);
   } else if (strcmp(name, "glReadPixels") == 0) {

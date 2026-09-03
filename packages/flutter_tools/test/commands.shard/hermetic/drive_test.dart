@@ -87,10 +87,12 @@ void main() {
         'chrome',
         '--browser-name=chrome',
         '--chrome-binary=/tmp/custom-chrome',
+        '--web-define=FOO=bar',
       ]);
 
       expect(capturingDriverService.platformArgs, containsPair('no-launch-chrome', true));
       expect(capturingDriverService.platformArgs, isNot(contains('--no-launch-chrome')));
+      expect(capturingDriverService.webDefines, <String, String>{'FOO': 'bar'});
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -895,6 +897,60 @@ void main() {
       stringContainsInOrder(<String>['flutter drive', '--target', '--driver']),
     );
   }, overrides: <Type, Generator>{Logger: () => logger});
+
+  testUsingContext(
+    'flutter drive fails if driver test imports package:flutter_test',
+    () async {
+      final command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        signals: signals,
+      );
+
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      final File driverTest = fileSystem.file('test_driver/main_test.dart')
+        ..createSync(recursive: true);
+      driverTest.writeAsStringSync('''
+import 'package:flutter_test/flutter_test.dart';
+void main() {}
+''');
+      fileSystem.file('pubspec.yaml').createSync();
+
+      // Create a mock package_config.json
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "my_package",
+      "rootUri": "../",
+      "packageUriRoot": "lib/"
+    }
+  ]
+}
+''');
+
+      fakeDeviceManager.attachedDevices = <Device>[FakeChromiumDriveDevice()];
+
+      expect(
+        () => createTestCommandRunner(command).run(<String>['drive', '--no-pub', '-d', 'chrome']),
+        throwsToolExit(
+          message: 'flutter_driver test "/test_driver/main_test.dart" has invalid imports:',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => FakePub(),
+      DeviceManager: () => fakeDeviceManager,
+    },
+  );
 }
 
 class ThrowingScreenshotDevice extends ScreenshotDevice {
@@ -1045,6 +1101,7 @@ class FakeDriverService extends Fake implements DriverService {
 
 class CapturingDriverService extends Fake implements DriverService {
   Map<String, Object>? platformArgs;
+  Map<String, String>? webDefines;
 
   @override
   Future<void> start(
@@ -1056,8 +1113,10 @@ class CapturingDriverService extends Fake implements DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
+    Map<String, String> webDefines = const <String, String>{},
   }) async {
     this.platformArgs = platformArgs;
+    this.webDefines = webDefines;
   }
 
   @override

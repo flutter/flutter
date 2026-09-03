@@ -94,7 +94,8 @@ void ReusableFragmentShader::SetImageSampler(Dart_Handle index_handle,
   uniform_floats[float_count_ + 2 * index + 1] = image->height();
 }
 
-std::shared_ptr<DlImageFilter> ReusableFragmentShader::as_image_filter() const {
+std::shared_ptr<DlImageFilter> ReusableFragmentShader::as_image_filter(
+    DlImageSampling input_sampling) const {
   FML_CHECK(program_);
 
   // The lifetime of this object is longer than a frame, and the uniforms can be
@@ -104,7 +105,8 @@ std::shared_ptr<DlImageFilter> ReusableFragmentShader::as_image_filter() const {
   uniform_data->resize(uniform_data_->size());
   memcpy(uniform_data->data(), uniform_data_->bytes(), uniform_data->size());
 
-  return program_->MakeDlImageFilter(std::move(uniform_data), samplers_);
+  return program_->MakeDlImageFilter(std::move(uniform_data), samplers_,
+                                     input_sampling);
 }
 
 std::shared_ptr<DlColorSource> ReusableFragmentShader::shader(

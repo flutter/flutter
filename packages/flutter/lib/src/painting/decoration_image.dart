@@ -49,6 +49,7 @@ class DecorationImage {
   /// Creates an image to show in a [BoxDecoration].
   const DecorationImage({
     required this.image,
+    this.placeholder,
     this.onError,
     this.colorFilter,
     this.fit,
@@ -69,7 +70,18 @@ class DecorationImage {
   /// application) or a [NetworkImage] (for an image obtained from the network).
   final ImageProvider image;
 
-  /// An optional error callback for errors emitted when loading [image].
+  /// An optional image to paint while [image] is loading.
+  ///
+  /// This is typically a cheap, locally available image, such as an
+  /// [AssetImage], used to avoid showing an empty box while [image] is being
+  /// fetched.
+  ///
+  /// Once [image] has loaded, the placeholder is no longer painted and its
+  /// resources are released.
+  final ImageProvider? placeholder;
+
+  /// An optional error callback for errors emitted when loading [image] or
+  /// [placeholder].
   final ImageErrorListener? onError;
 
   /// A color filter to apply to the image before painting it.
@@ -193,6 +205,7 @@ class DecorationImage {
     }
     return other is DecorationImage &&
         other.image == image &&
+        other.placeholder == placeholder &&
         other.colorFilter == colorFilter &&
         other.fit == fit &&
         other.alignment == alignment &&
@@ -209,6 +222,7 @@ class DecorationImage {
   @override
   int get hashCode => Object.hash(
     image,
+    placeholder,
     colorFilter,
     fit,
     alignment,
@@ -226,6 +240,7 @@ class DecorationImage {
   String toString() {
     final properties = <String>[
       '$image',
+      if (placeholder != null) 'placeholder: $placeholder',
       if (colorFilter != null) '$colorFilter',
       if (fit != null &&
           !(fit == BoxFit.fill && centerSlice != null) &&
@@ -328,6 +343,9 @@ class _DecorationImagePainter implements DecorationImagePainter {
   ImageStream? _imageStream;
   ImageInfo? _image;
 
+  ImageStream? _placeholderStream;
+  ImageInfo? _placeholderImage;
+
   @override
   void paint(
     Canvas canvas,
@@ -370,6 +388,16 @@ class _DecorationImagePainter implements DecorationImagePainter {
       }
     }
 
+    if (_image == null && _details.placeholder != null) {
+      final ImageStream newPlaceholderStream = _details.placeholder!.resolve(configuration);
+      if (newPlaceholderStream.key != _placeholderStream?.key) {
+        final listener = ImageStreamListener(_handlePlaceholderImage, onError: _details.onError);
+        _placeholderStream?.removeListener(listener);
+        _placeholderStream = newPlaceholderStream;
+        _placeholderStream!.addListener(listener);
+      }
+    }
+
     final ImageStream newImageStream = _details.image.resolve(configuration);
     if (newImageStream.key != _imageStream?.key) {
       final listener = ImageStreamListener(_handleImage, onError: _details.onError);
@@ -377,7 +405,8 @@ class _DecorationImagePainter implements DecorationImagePainter {
       _imageStream = newImageStream;
       _imageStream!.addListener(listener);
     }
-    if (_image == null) {
+    final ImageInfo? imageInfo = _image ?? _placeholderImage;
+    if (imageInfo == null) {
       return;
     }
 
@@ -389,9 +418,9 @@ class _DecorationImagePainter implements DecorationImagePainter {
     paintImage(
       canvas: canvas,
       rect: rect,
-      image: _image!.image,
-      debugImageLabel: _image!.debugLabel,
-      scale: _details.scale * _image!.scale,
+      image: imageInfo.image,
+      debugImageLabel: imageInfo.debugLabel,
+      scale: _details.scale * imageInfo.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
       alignment: _details.alignment.resolve(configuration.textDirection),
@@ -420,9 +449,39 @@ class _DecorationImagePainter implements DecorationImagePainter {
     }
     _image?.dispose();
     _image = value;
+    _disposePlaceholder();
     if (!synchronousCall) {
       _onChanged();
     }
+  }
+
+  void _handlePlaceholderImage(ImageInfo value, bool synchronousCall) {
+    if (_image != null) {
+      // The image finished loading first; the placeholder is no longer needed.
+      value.dispose();
+      return;
+    }
+    if (_placeholderImage == value) {
+      return;
+    }
+    if (_placeholderImage != null && _placeholderImage!.isCloneOf(value)) {
+      value.dispose();
+      return;
+    }
+    _placeholderImage?.dispose();
+    _placeholderImage = value;
+    if (!synchronousCall) {
+      _onChanged();
+    }
+  }
+
+  void _disposePlaceholder() {
+    _placeholderStream?.removeListener(
+      ImageStreamListener(_handlePlaceholderImage, onError: _details.onError),
+    );
+    _placeholderStream = null;
+    _placeholderImage?.dispose();
+    _placeholderImage = null;
   }
 
   @override
@@ -431,6 +490,7 @@ class _DecorationImagePainter implements DecorationImagePainter {
     _imageStream?.removeListener(ImageStreamListener(_handleImage, onError: _details.onError));
     _image?.dispose();
     _image = null;
+    _disposePlaceholder();
   }
 
   @override
@@ -553,10 +613,16 @@ void paintImage({
   Size outputSize = rect.size;
   var inputSize = Size(image.width.toDouble(), image.height.toDouble());
   Offset? sliceBorder;
+  // Tracks whether the destination rect is large enough to fit the
+  // centerSlice's outer borders. When it is not, [applyBoxFit] is called with
+  // a non-positive size and degenerates to [Size.zero], which would otherwise
+  // trip the source/input-size assertion below for an unrelated reason.
+  var sliceFits = true;
   if (centerSlice != null) {
     sliceBorder = inputSize / scale - centerSlice.size as Offset;
     outputSize = outputSize - sliceBorder as Size;
     inputSize = inputSize - sliceBorder * scale as Size;
+    sliceFits = outputSize.width > 0.0 && outputSize.height > 0.0;
   }
   fit ??= centerSlice == null ? BoxFit.scaleDown : BoxFit.fill;
   assert(centerSlice == null || (fit != BoxFit.none && fit != BoxFit.cover));
@@ -567,9 +633,14 @@ void paintImage({
     outputSize += sliceBorder!;
     destinationSize += sliceBorder;
     // We don't have the ability to draw a subset of the image at the same time
-    // as we apply a nine-patch stretch.
+    // as we apply a nine-patch stretch. A tolerance is used to absorb
+    // floating-point rounding from the `inputSize / scale * scale` round trip
+    // when the image's pixel dimensions are not evenly divisible by `scale`.
+    final sourceInputDelta = (sourceSize - inputSize) as Offset;
     assert(
-      sourceSize == inputSize,
+      !sliceFits ||
+          (sourceInputDelta.dx.abs() <= precisionErrorTolerance &&
+              sourceInputDelta.dy.abs() <= precisionErrorTolerance),
       'centerSlice was used with a BoxFit that does not guarantee that the image is fully visible.',
     );
   }
@@ -793,6 +864,8 @@ class _BlendedDecorationImage implements DecorationImage {
 
   @override
   ImageProvider get image => b?.image ?? a!.image;
+  @override
+  ImageProvider? get placeholder => b?.placeholder ?? a!.placeholder;
   @override
   ImageErrorListener? get onError => b?.onError ?? a!.onError;
   @override

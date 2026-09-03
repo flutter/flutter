@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import Foundation
+@testable import InternalFlutterSwiftCommon
 import Testing
-
-import InternalFlutterSwiftCommon
-import test_utils_swift
+@testable import test_utils_swift
 
 @Suite struct LoggerTests {
 
@@ -55,4 +54,85 @@ import test_utils_swift
     #expect(writer.lastLine == "Hello world")
   }
 
+  @Test func testAutoclosureDoesNotEvaluateMessageBelowLogLevel() {
+    let writer = StringOutputWriter()
+    let logger = Logger(outputWriter: writer, logLevel: .warning)
+    var wasEvaluated = false
+
+    logger.log(
+      level: .info,
+      {
+        wasEvaluated = true
+        return "Hello world"
+      }())
+    #expect(!writer.didLog)
+    #expect(!wasEvaluated)
+  }
+
+  @Test func testAutoclosureEvaluatesMessageAtOrAboveLogLevel() {
+    let writer = StringOutputWriter()
+    let logger = Logger(outputWriter: writer, logLevel: .info)
+    var wasEvaluated = false
+
+    logger.log(
+      level: .info,
+      {
+        wasEvaluated = true
+        return "Hello world"
+      }())
+    #expect(writer.didLog)
+    #expect(wasEvaluated)
+  }
+
+  @Test func testStaticLogInfoDoesNotEvaluateMessageBelowLogLevel() {
+    let writer = StringOutputWriter()
+    let oldWriter = Logger.outputWriter
+    let oldLevel = Logger.logLevel
+    defer {
+      Logger.outputWriter = oldWriter
+      Logger.logLevel = oldLevel
+    }
+    Logger.outputWriter = writer
+    Logger.logLevel = .warning
+    var wasEvaluated = false
+
+    Logger.logInfo(
+      {
+        wasEvaluated = true
+        return "Hello world"
+      }())
+    #expect(!writer.didLog)
+    #expect(!wasEvaluated)
+  }
+
+  // Hammers the shared `Logger` from concurrent tasks so that unsynchronised access to mutable
+  // state is caught under TSan.
+  @Test func testConcurrentLoggingAndLevelMutation() async {
+    let writer = StringOutputWriter()
+    let oldWriter = Logger.outputWriter
+    let oldLevel = Logger.logLevel
+    defer {
+      Logger.outputWriter = oldWriter
+      Logger.logLevel = oldLevel
+    }
+    Logger.outputWriter = writer
+    Logger.logLevel = .info
+
+    await withTaskGroup(of: Void.self) { group in
+      for i in 0..<100 {
+        group.addTask {
+          if i % 2 == 0 {
+            Logger.logLevel = .warning
+          } else {
+            Logger.logLevel = .info
+          }
+          Logger.logInfo("Message \(i)")
+        }
+      }
+    }
+
+    // After concurrent mutations and logging, Logger should remain in a valid state without data
+    // races or crashes.
+    #expect(Logger.logLevel == .info || Logger.logLevel == .warning)
+  }
 }

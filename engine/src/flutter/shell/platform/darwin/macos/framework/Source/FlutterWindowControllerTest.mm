@@ -26,10 +26,10 @@ class FlutterWindowControllerTest : public FlutterEngineTest {
 
     signalled_ = false;
 
-    AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                        isolate_ = Isolate::Current();
-                        signalled_ = true;
-                      }));
+    AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                           isolate_ = Isolate::Current();
+                           signalled_ = true;
+                         }));
 
     while (!signalled_) {
       CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, false);

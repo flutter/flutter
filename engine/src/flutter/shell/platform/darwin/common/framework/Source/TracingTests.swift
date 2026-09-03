@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import Foundation
-import InternalFlutterSwiftCommon
+@testable import InternalFlutterSwiftCommon
 import Testing
 
 @Suite struct TracingTests {
@@ -41,7 +41,7 @@ import Testing
 
   @Test func testTraceScopeTokenDoesNotCrash() {
     let scope = Tracing.beginScope("TestScope")
-    defer { scope.end() }
+    scope.end()
   }
 }
 

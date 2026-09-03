@@ -38,6 +38,7 @@ import 'package:flutter/services.dart';
 import '../foundation/_features.dart';
 import '_accessibility_evaluations.dart';
 import '_window.dart';
+import 'accessibility_inspector.dart';
 import 'app.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -807,7 +808,7 @@ mixin WidgetsBinding
           return _forceRebuild();
         },
       );
-
+      AccessibilityInspector.instance.initServiceExtensions(registerServiceExtension);
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
 
       return true;
@@ -895,6 +896,9 @@ mixin WidgetsBinding
   Future<AppExitResponse> handleRequestAppExit() async {
     var didCancel = false;
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (!_observers.contains(observer)) {
+        continue;
+      }
       try {
         if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
           didCancel = true;
