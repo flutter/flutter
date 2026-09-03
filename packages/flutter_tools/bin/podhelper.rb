@@ -46,7 +46,7 @@ def flutter_additional_ios_build_settings(target)
   return unless target.platform_name == :ios
 
   # [target.deployment_target] is a [String] formatted as "8.0".
-  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 13
+  inherit_deployment_target = target.deployment_target[/\d+/].to_i < 15
 
   # ARC code targeting iOS 8 does not build on Xcode 14.3.
   force_to_arc_supported_min = target.deployment_target[/\d+/].to_i < 9
@@ -82,6 +82,13 @@ def flutter_additional_ios_build_settings(target)
     # ARC code targeting iOS 8 does not build on Xcode 14.3. Force to at least iOS 9.
     build_configuration.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0' if force_to_arc_supported_min
 
+    # Suppress warning/error when pod supports a version lower than the minimum supported by Xcode.
+    # Xcode 27+ produces an error while previous versions produced a warning.
+    # When it's just a warning, it's harmless but confusing--it's not a bad thing for dependencies to support a lower version.
+    # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
+    # If the pod only supports a higher version, do not delete to correctly produce an error.
+    build_configuration.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET' if inherit_deployment_target
+
     # Skip other updates if it does not depend on Flutter (including transitive dependency)
     next unless depends_on_flutter(target, 'Flutter')
 
@@ -103,11 +110,6 @@ def flutter_additional_ios_build_settings(target)
     build_configuration.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework Flutter'
 
     build_configuration.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = 'NO'
-    # Suppress warning when pod supports a version lower than the minimum supported by Xcode (Xcode 12 - iOS 9).
-    # This warning is harmless but confusing--it's not a bad thing for dependencies to support a lower version.
-    # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
-    # If the pod only supports a higher version, do not delete to correctly produce an error.
-    build_configuration.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET' if inherit_deployment_target
 
     # Override legacy Xcode 11 style VALID_ARCHS[sdk=iphonesimulator*]=x86_64 and prefer Xcode 12 EXCLUDED_ARCHS.
     build_configuration.build_settings['VALID_ARCHS[sdk=iphonesimulator*]'] = '$(ARCHS_STANDARD)'
@@ -128,11 +130,11 @@ def flutter_additional_macos_build_settings(target)
                                   (deployment_target_major.to_i < 10) ||
                                   (deployment_target_major.to_i == 10 && deployment_target_minor.to_i < 11)
 
-  # Suppress warning when pod supports a version lower than the minimum supported by the latest stable version of Xcode (currently 10.15).
-  # This warning is harmless but confusing--it's not a bad thing for dependencies to support a lower version.
+  # Suppress warning/error when pod supports a version lower than the minimum supported by the latest stable version of Xcode (currently 12.0).
+  # Xcode 27+ produces an error while previous versions produced a warning.
+  # When it's just a warning, it's harmless but confusing--it's not a bad thing for dependencies to support a lower version.
   inherit_deployment_target = !target.deployment_target.blank? &&
-    (deployment_target_major.to_i < 10) ||
-    (deployment_target_major.to_i == 10 && deployment_target_minor.to_i < 15)
+    (deployment_target_major.to_i < 12)
 
   # This podhelper script is at $FLUTTER_ROOT/packages/flutter_tools/bin.
   # Add search paths from $FLUTTER_ROOT/bin/cache/artifacts/engine.
@@ -153,6 +155,10 @@ def flutter_additional_macos_build_settings(target)
     # ARC code targeting macOS 10.10 does not build on Xcode 14.3. Force to at least macOS 10.11.
     build_configuration.build_settings['MACOSX_DEPLOYMENT_TARGET'] = '10.11' if force_to_arc_supported_min
 
+    # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
+    # If the pod only supports a higher version, do not delete to correctly produce an error.
+    build_configuration.build_settings.delete 'MACOSX_DEPLOYMENT_TARGET' if inherit_deployment_target
+
     # Skip other updates if it does not depend on Flutter (including transitive dependency)
     next unless depends_on_flutter(target, 'FlutterMacOS')
 
@@ -167,10 +173,6 @@ def flutter_additional_macos_build_settings(target)
         build_configuration.build_settings['FRAMEWORK_SEARCH_PATHS'] = "\"#{configuration_engine_dir}/#{xcframework_file}\" $(inherited)"
       end
     end
-
-    # When deleted, the deployment version will inherit from the higher version derived from the 'Runner' target.
-    # If the pod only supports a higher version, do not delete to correctly produce an error.
-    build_configuration.build_settings.delete 'MACOSX_DEPLOYMENT_TARGET' if inherit_deployment_target
 
     # Avoid error about Pods-Runner not supporting provisioning profiles.
     # Framework signing is handled at the app layer, not per framework, so disallow individual signing.
@@ -233,7 +235,7 @@ def flutter_install_ios_engine_pod(ios_application_path = nil)
         s.license          = { :type => 'BSD' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
-        s.ios.deployment_target = '13.0'
+        s.ios.deployment_target = '15.0'
         # Framework linking is handled by Flutter tooling, not CocoaPods.
         # Add a placeholder to satisfy `s.dependency 'Flutter'` plugin podspecs.
         s.vendored_frameworks = 'path/to/nothing'
@@ -271,7 +273,7 @@ def flutter_install_macos_engine_pod(mac_application_path = nil)
         s.license          = { :type => 'BSD' }
         s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
         s.source           = { :git => 'https://github.com/flutter/engine', :tag => s.version.to_s }
-        s.osx.deployment_target = '10.15'
+        s.osx.deployment_target = '12.0'
         # Framework linking is handled by Flutter tooling, not CocoaPods.
         # Add a placeholder to satisfy `s.dependency 'FlutterMacOS'` plugin podspecs.
         s.vendored_frameworks = 'path/to/nothing'

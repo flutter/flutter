@@ -25,8 +25,6 @@ typedef ParagraphImageGenerator = Uint8List Function();
 void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   _paintCanvas.width = rect.width.ceil();
   _paintCanvas.height = rect.height.ceil();
-  _paintCanvas.style.width = '${rect.width / devicePixelRatio}px';
-  _paintCanvas.style.height = '${rect.height / devicePixelRatio}px';
   _paintContext.scale(devicePixelRatio, devicePixelRatio);
 }
 
@@ -63,10 +61,10 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   );
   // Target rect will be scaled by the canvas transform, so we don't scale it here
   final targetRect = ui.Rect.fromLTWH(
-    (offset.dx + paragraph.paintBounds.left).floorToDouble(),
-    (offset.dy + paragraph.paintBounds.top).floorToDouble(),
-    (sourceRect.width / devicePixelRatio).ceilToDouble(),
-    (sourceRect.height / devicePixelRatio).ceilToDouble(),
+    offset.dx + paragraph.paintBounds.left,
+    offset.dy + paragraph.paintBounds.top,
+    sourceRect.width / devicePixelRatio,
+    sourceRect.height / devicePixelRatio,
   );
 
   return (sourceRect, targetRect);
@@ -151,6 +149,12 @@ abstract class WebParagraphPainter {
       offset,
       ui.window.devicePixelRatio,
     );
+
+    const epsilon = 0.001;
+    if (sourceRect.width.abs() < epsilon || sourceRect.height.abs() < epsilon) {
+      // If there is nothing to draw getImageData fails
+      return;
+    }
 
     // Draw background blocks directly on the output canvas
     // so it will be cached together with the text blocks on Canvas2D canvas

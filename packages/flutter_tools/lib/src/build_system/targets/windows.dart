@@ -151,6 +151,7 @@ abstract class BundleWindowsAssets extends Target {
       dartHookResult: dartHookResult,
       targetPlatform: targetPlatform,
       buildMode: buildMode,
+      flavor: environment.defines[kFlavor],
       additionalContent: <String, DevFSContent>{
         'NativeAssetsManifest.json': DevFSFileContent(
           environment.buildDir.childFile('native_assets.json'),

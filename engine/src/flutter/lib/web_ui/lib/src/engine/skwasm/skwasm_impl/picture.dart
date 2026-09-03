@@ -63,7 +63,10 @@ class SkwasmPicture implements LayerPicture, StackTraceDebugger {
     int width,
     int height, {
     ui.TargetPixelFormat targetFormat = ui.TargetPixelFormat.dontCare,
-  }) => SkwasmImage(imageCreateFromPicture(handle, width, height));
+  }) {
+    final ImageHandle handleImg = imageCreateFromPicture(handle, width, height);
+    return EngineImage(SkwasmImage(handleImg), width, height);
+  }
 
   @override
   ui.Rect get cullRect {

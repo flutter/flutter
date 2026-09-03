@@ -89,6 +89,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             '(Not recommended! This can open your device to remote code execution attacks!)',
       )
       ..addFlag(
+        'disable-service-origin-check',
+        negatable: false,
+        hide: !verboseHelp,
+        help:
+            'Allow connections to the VM service from any origin. '
+            '(Not recommended. This can open your device to remote code execution attacks.)',
+      )
+      ..addFlag(
         'start-paused',
         defaultsTo: startPausedDefault,
         help: 'Start in a paused mode and wait for a debugger to connect.',
@@ -224,6 +232,12 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         FlutterOptions.kWebWasmFlag,
         help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
         negatable: false,
+      )
+      ..addFlag(
+        'ios-profile-debugger',
+        negatable: false,
+        help:
+            'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
@@ -244,6 +258,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
     addEnableHcppFlag(verboseHelp: verboseHelp);
     addTestFlag(verboseHelp: verboseHelp);
+    usesAdbLogFilteringOption(hide: !verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -251,6 +266,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableDartProfiling => boolArg('enable-dart-profiling');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
+  bool get disableServiceOriginCheck => boolArg('disable-service-origin-check');
   bool get cacheStartupProfile => boolArg('cache-startup-profile');
   bool get runningWithPrebuiltApplication => prebuiltApplicationBinaryPath != null;
   String? get prebuiltApplicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
@@ -261,7 +277,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
-  bool get enableHcpp => boolArg('enable-hcpp');
   bool get testFlag => boolArg('test-flag');
 
   @override
@@ -300,6 +315,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     final bool? webCrossOriginIsolation = argResults!.wasParsed('cross-origin-isolation')
         ? boolArg('cross-origin-isolation')
         : null;
+    final bool? iosProfileDebugger = argResults!.wasParsed('ios-profile-debugger')
+        ? boolArg('ios-profile-debugger')
+        : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
@@ -327,8 +345,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
-        enableHcpp: enableHcpp,
+        enableHcpp: explicitEnableHcpp,
         testFlag: testFlag,
+        iosProfileDebugger: iosProfileDebugger,
         traceSystrace: traceSystrace,
       );
     } else {
@@ -336,8 +355,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         buildInfo,
         startPaused: boolArg('start-paused'),
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
+        disableServiceOriginCheck: boolArg('disable-service-origin-check'),
         cacheStartupProfile: cacheStartupProfile,
         enableDds: enableDds,
+        adbLogFiltering:
+            argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering'),
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         dartFlags: stringArg('dart-flags') ?? '',
         useTestFonts: argParser.options.containsKey('use-test-fonts') && boolArg('use-test-fonts'),
@@ -392,9 +414,10 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
-        enableHcpp: enableHcpp,
+        enableHcpp: explicitEnableHcpp,
         webDevServerConfig: webDevServerConfig,
         testFlag: testFlag,
+        iosProfileDebugger: iosProfileDebugger,
       );
     }
   }
@@ -469,7 +492,14 @@ class RunCommand extends RunCommandBase {
             'a test using "flutter run" for debugging purposes. This flag is '
             'only available when running in debug mode.',
       )
-      ..addFlag('build', defaultsTo: true, help: 'If necessary, build the app before running.')
+      ..addFlag(
+        'build',
+        defaultsTo: true,
+        hide: !verboseHelp,
+        help:
+            '(deprecated) If necessary, build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
+            'flag with an existing application artifact.',
+      )
       ..addOption('project-root', hide: !verboseHelp, help: 'Specify the project root directory.')
       ..addFlag(
         'hot',
@@ -658,7 +688,11 @@ class RunCommand extends RunCommandBase {
       runEnableImpeller: enableImpeller.asBool,
       runIOSInterfaceType: iOSInterfaceType,
       runIsTest: targetFile.endsWith('_test.dart'),
-      runEnableHcpp: enableHcpp,
+      // Best-effort estimate from the main manifest; does not account for build-type
+      // or flavor overlay manifests (e.g. EnableHcpp set only in src/debug/).
+      runEnableHcpp: anyAndroidDevices && project.android.existsSync()
+          ? (explicitEnableHcpp ?? project.android.computeHcppEnabled(ifAbsent: enableHcpp))
+          : null,
     );
   })();
 
@@ -720,36 +754,30 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
-    if (argResults?.wasParsed(FlutterOptions.kWebExperimentalHotReload) ?? false) {
-      final bool webEnableHotReload = boolArg(FlutterOptions.kWebExperimentalHotReload);
-      if (webEnableHotReload) {
-        globals.printWarning(
-          'Hot reload on the web is now enabled by default. '
-          'The "--${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
-          'and will be removed in an upcoming release.',
-        );
-      } else {
-        globals.printWarning(
-          'Hot reload on the web is now enabled by default. '
-          'The "--no-${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
-          'and will be removed in an upcoming release. '
-          'If your web development workflow depends on disabling hot reload, '
-          'please open an issue explaining why at '
-          'https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml.',
-        );
-      }
-    }
-
     final String? flavor = stringArg('flavor');
     final bool flavorsSupportedOnEveryDevice = devices!.every(
       (Device device) => device.supportsFlavors,
     );
     if (flavor != null && !flavorsSupportedOnEveryDevice) {
       globals.printWarning(
-        '--flavor is only supported for Android, macOS, and iOS devices. '
+        '--flavor is only supported for Android, Linux, macOS, iOS, and Windows devices. '
         'Flavor-related features may not function properly and could '
         'behave differently in a future release.',
       );
+    }
+
+    if (argResults!.wasParsed('build')) {
+      if (boolArg('build')) {
+        globals.printWarning(
+          'The "--build" flag is deprecated and will be removed in a future release. '
+          'Building is the default behavior, so this flag can be safely removed.',
+        );
+      } else {
+        globals.printWarning(
+          'The "--no-build" flag is deprecated and will be removed in a future release. '
+          'To use a prebuilt application, pass "--${FlutterOptions.kUseApplicationBinary}".',
+        );
+      }
     }
   }
 

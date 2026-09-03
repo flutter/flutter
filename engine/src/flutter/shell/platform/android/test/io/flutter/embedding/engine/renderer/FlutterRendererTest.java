@@ -28,6 +28,7 @@ import static org.robolectric.Shadows.shadowOf;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.hardware.SyncFence;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Looper;
@@ -779,8 +780,8 @@ public class FlutterRendererTest {
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
 
     // Default values.
-    assertEquals(producer.getWidth(), 1);
-    assertEquals(producer.getHeight(), 1);
+    assertEquals(1, producer.getWidth());
+    assertEquals(1, producer.getHeight());
 
     // Try setting width and height to 0.
     producer.setSize(0, 0);
@@ -789,8 +790,8 @@ public class FlutterRendererTest {
     assertNotNull(producer.getSurface());
 
     // Expect clamp to 1.
-    assertEquals(producer.getWidth(), 1);
-    assertEquals(producer.getHeight(), 1);
+    assertEquals(1, producer.getWidth());
+    assertEquals(1, producer.getHeight());
   }
 
   @Test
@@ -805,7 +806,7 @@ public class FlutterRendererTest {
       flutterRenderer.startRenderingToSurface(fakeSurface, false);
 
       // Verify behavior under test.
-      assertEquals(producer.id(), 0);
+      assertEquals(0, producer.id());
       verify(fakeFlutterJNI, times(1)).registerTexture(eq(producer.id()), any());
     } finally {
       FlutterRenderer.debugForceSurfaceProducerGlTextures = false;
@@ -988,6 +989,52 @@ public class FlutterRendererTest {
   }
 
   @Test
+  public void itDoesNotScheduleFramesOnADetachedFlutterJNI() {
+    // Setup the test.
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+
+    // While attached the frame request is forwarded.
+    flutterRenderer.scheduleEngineFrame();
+    verify(fakeFlutterJNI, times(1)).scheduleFrame();
+
+    // Execute the behavior under test.
+    engineRule.setJniIsAttached(false);
+    flutterRenderer.scheduleEngineFrame();
+
+    // Verify the behavior under test: still only the call made while attached.
+    verify(fakeFlutterJNI, times(1)).scheduleFrame();
+  }
+
+  @Test
+  public void ImageReaderSurfaceProducerDoesNotScheduleFrameWhenDetached() throws Exception {
+    // Regression test for https://github.com/flutter/flutter/issues/188300.
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    FlutterRenderer.ImageReaderSurfaceProducer texture =
+        (FlutterRenderer.ImageReaderSurfaceProducer) producer;
+    texture.disableFenceForTest();
+    texture.setSize(1, 1);
+
+    // The engine detaches, e.g. because the Activity was destroyed, while this producer still has
+    // a frame in flight.
+    engineRule.setJniIsAttached(false);
+
+    // Render a frame. The ImageReader callback is delivered on the platform thread and reaches
+    // scheduleEngineFrame after the detach.
+    Surface surface = texture.getSurface();
+    assertNotNull(surface);
+    Canvas canvas = surface.lockHardwareCanvas();
+    canvas.drawARGB(255, 255, 0, 0);
+    surface.unlockCanvasAndPost(canvas);
+    shadowOf(Looper.getMainLooper()).idle();
+
+    // The image still reaches scheduleEngineFrame, ...
+    verify(flutterRenderer, times(1)).scheduleEngineFrame();
+    // ... but it must not be forwarded to the detached FlutterJNI, which would throw.
+    verify(fakeFlutterJNI, never()).scheduleFrame();
+  }
+
+  @Test
   public void getSurface_doesNotReturnInvalidSurface() {
     FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
@@ -1073,5 +1120,17 @@ public class FlutterRendererTest {
     verify(imageReaderProducer2.callback).onSurfaceAvailable();
     assertFalse(imageReaderProducer1.notifiedDestroy);
     assertFalse(imageReaderProducer2.notifiedDestroy);
+  }
+
+  @Test
+  public void waitOnFence_closesFence() throws Exception {
+    FlutterRenderer.ImageReaderSurfaceProducer producer =
+        (FlutterRenderer.ImageReaderSurfaceProducer)
+            engineRule.getFlutterEngine().getRenderer().createSurfaceProducer();
+    Image image = mock(Image.class);
+    SyncFence fence = mock(SyncFence.class);
+    when(image.getFence()).thenReturn(fence);
+    producer.waitOnFence(image);
+    verify(fence, times(1)).close();
   }
 }

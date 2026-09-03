@@ -12,6 +12,7 @@
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -23,20 +24,31 @@ using ::flutter::testing::keycodes::kPhysicalKeyA;
 
 constexpr guint16 kKeyCodeKeyA = 0x26u;
 
-TEST(FlKeyboardHandlerTest, KeyboardChannelGetPressedState) {
+class FlKeyboardHandlerTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    messenger = fl_mock_binary_messenger_new();
+    g_clear_object(&engine);
+    engine =
+        fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+    manager = fl_keyboard_manager_new(engine);
+    StartEngine();
+    handler = fl_keyboard_handler_new(FL_BINARY_MESSENGER(messenger), manager);
+  }
+
+  ~FlKeyboardHandlerTest() {
+    g_clear_object(&handler);
+    g_clear_object(&manager);
+    g_clear_object(&messenger);
+  }
+
+  FlMockBinaryMessenger* messenger = nullptr;
+  FlKeyboardManager* manager = nullptr;
+  FlKeyboardHandler* handler = nullptr;
   ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+};
 
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlKeyboardManager) manager = fl_keyboard_manager_new(engine);
-
-  EXPECT_TRUE(fl_engine_start(engine, nullptr));
-
-  g_autoptr(FlKeyboardHandler) handler =
-      fl_keyboard_handler_new(FL_BINARY_MESSENGER(messenger), manager);
-  EXPECT_NE(handler, nullptr);
-
+TEST_F(FlKeyboardHandlerTest, KeyboardChannelGetPressedState) {
   // Send key event to set pressed state.
   fl_mock_binary_messenger_set_json_message_channel(
       messenger, "flutter/keyevent",
@@ -53,7 +65,6 @@ TEST(FlKeyboardHandlerTest, KeyboardChannelGetPressedState) {
         callback(false, user_data);
         return kSuccess;
       }));
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
   g_autoptr(FlKeyEvent) event = fl_key_event_new(
       0, TRUE, kKeyCodeKeyA, GDK_KEY_a, static_cast<GdkModifierType>(0), 0);
   fl_keyboard_manager_handle_event(

@@ -430,8 +430,8 @@ TEST_P(AiksTest, CanRenderLinearGradientManyColorsUnevenStops) {
 
     static int selected_tile_mode = 0;
     static Matrix matrix;
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
                    sizeof(tile_mode_names) / sizeof(char*));
       std::string label = "##1";
@@ -501,8 +501,8 @@ TEST_P(AiksTest, CanRenderRadialGradient) {
 
     static int selected_tile_mode = 0;
     static Matrix matrix;
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
                    sizeof(tile_mode_names) / sizeof(char*));
       std::string label = "##1";
@@ -546,8 +546,8 @@ TEST_P(AiksTest, CanRenderRadialGradientManyColors) {
         0, 0, 1, 0,  //
         0, 0, 0, 1   //
     };
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
                    sizeof(tile_mode_names) / sizeof(char*));
       std::string label = "##1";
@@ -762,8 +762,8 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
     static int selected_tile_mode = 0;
     static float alpha = 1;
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Scale", &scale, 0, 6);
       ImGui::Checkbox("Circle clip", &add_circle_clip);
       ImGui::SliderFloat("Alpha", &alpha, 0, 1);

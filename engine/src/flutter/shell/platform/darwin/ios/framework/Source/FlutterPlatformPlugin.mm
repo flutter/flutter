@@ -399,13 +399,8 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     if (flutterApplication) {
       rootViewController = flutterApplication.keyWindow.rootViewController;
     } else {
-      if (@available(iOS 15.0, *)) {
-        rootViewController =
-            [engineViewController flutterWindowSceneIfViewLoaded].keyWindow.rootViewController;
-      } else {
-        [FlutterLogger logWarning:@"rootViewController is not available in application extension "
-                                   "prior to iOS 15.0."];
-      }
+      rootViewController =
+          [engineViewController flutterWindowSceneIfViewLoaded].keyWindow.rootViewController;
     }
 
     if (engineViewController != rootViewController) {

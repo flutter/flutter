@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -103,12 +104,24 @@ FlTestApplication* fl_test_application_new(gboolean* dispose_called) {
   return self;
 }
 
-TEST(FlPlatformHandlerTest, PlaySound) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlPlatformHandler) handler =
-      fl_platform_handler_new(FL_BINARY_MESSENGER(messenger));
-  EXPECT_NE(handler, nullptr);
+class FlPlatformHandlerTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    messenger = fl_mock_binary_messenger_new();
+    handler = fl_platform_handler_new(FL_BINARY_MESSENGER(messenger));
+  }
 
+  ~FlPlatformHandlerTest() {
+    fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+    g_clear_object(&handler);
+    g_clear_object(&messenger);
+  }
+
+  FlMockBinaryMessenger* messenger = nullptr;
+  FlPlatformHandler* handler = nullptr;
+};
+
+TEST_F(FlPlatformHandlerTest, PlaySound) {
   gboolean called = FALSE;
   g_autoptr(FlValue) args = fl_value_new_string("SystemSoundType.alert");
   fl_mock_binary_messenger_invoke_json_method(
@@ -127,18 +140,9 @@ TEST(FlPlatformHandlerTest, PlaySound) {
       },
       &called);
   EXPECT_TRUE(called);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
-TEST(FlPlatformHandlerTest, ExitApplication) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlPlatformHandler) handler =
-      fl_platform_handler_new(FL_BINARY_MESSENGER(messenger));
-  EXPECT_NE(handler, nullptr);
-
+TEST_F(FlPlatformHandlerTest, ExitApplication) {
   // Indicate that the binding is initialized.
   gboolean called = FALSE;
   fl_mock_binary_messenger_invoke_json_method(
@@ -203,11 +207,9 @@ TEST(FlPlatformHandlerTest, ExitApplication) {
   g_main_loop_run(loop);
 
   EXPECT_TRUE(request_exit_called);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
-TEST(FlPlatformHandlerTest, ExitApplicationDispose) {
+TEST_F(FlPlatformHandlerTest, ExitApplicationDispose) {
   gtk_init(0, nullptr);
 
   gboolean dispose_called = false;

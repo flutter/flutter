@@ -459,6 +459,8 @@ Pod::Spec.new do |s|
   s.source           = { :path => '.' }
   s.source_files = "Classes", "Classes/**/*.{h,m}"
   s.dependency 'plugintest'
+  s.ios.deployment_target = '12.0'
+  s.osx.deployment_target = '10.14'
 end
 ''');
 
@@ -503,10 +505,10 @@ end
     final String versionString;
     if (isMultiPlatform) {
       versionString = target == 'ios'
-          ? "s.ios.deployment_target = '13.0'"
-          : "s.osx.deployment_target = '10.15'";
+          ? "s.ios.deployment_target = '15.0'"
+          : "s.osx.deployment_target = '12.0'";
     } else {
-      versionString = target == 'ios' ? "s.platform = :ios, '13.0'" : "s.platform = :osx, '10.11'";
+      versionString = target == 'ios' ? "s.platform = :ios, '15.0'" : "s.platform = :osx, '10.11'";
     }
 
     if (!podspecContent.contains(versionString)) {

@@ -292,4 +292,103 @@ Future<void> testMain() async {
     expect(paragraph.longestLine, closeTo(5.556640625, EPSILON));
     expect(paragraph.numberOfLines, 1);
   });
+
+  test('getGlyphInfoAt handles out of bounds offset', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    // Out of bounds should return null
+    final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(text.length);
+    expect(glyphInfo, isNull);
+  });
+
+  test('getGlyphInfoAt handles bidirectional text', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText('Hello مرحبا'); // LTR + RTL
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    // Get glyph info for LTR text
+    final ui.GlyphInfo? glyphInfoLtr = paragraph.getGlyphInfoAt(0);
+    // Get glyph info for RTL text
+    final ui.GlyphInfo? glyphInfoRtl = paragraph.getGlyphInfoAt(6);
+
+    expect(glyphInfoLtr, isNotNull);
+    expect(glyphInfoRtl, isNotNull);
+
+    if (glyphInfoLtr != null && glyphInfoRtl != null) {
+      expect(glyphInfoLtr.writingDirection == ui.TextDirection.ltr, true);
+      expect(glyphInfoRtl.writingDirection == ui.TextDirection.rtl, true);
+    }
+  });
+
+  test('getClosestGlyphInfoForOffset uses correct affinity', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello World';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForRange(0, 1);
+    if (boxes.isNotEmpty) {
+      final ui.Rect rect = boxes.first.toRect();
+      final ui.GlyphInfo? glyph = paragraph.getClosestGlyphInfoForOffset(rect.center);
+      expect(glyph, isNotNull);
+      expect(glyph!.graphemeClusterCodeUnitRange, const ui.TextRange(start: 0, end: 1));
+    }
+  });
+
+  test('Round-trip getBoxesForRange and getPositionForOffset', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello World';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    // Get boxes for a range
+    final List<ui.TextBox> boxes = paragraph.getBoxesForRange(0, 5);
+    expect(boxes.isNotEmpty, true);
+
+    if (boxes.isNotEmpty) {
+      final ui.Rect rect = boxes.first.toRect();
+      final ui.TextPosition position0 = paragraph.getPositionForOffset(
+        rect.centerLeft.translate(0.1, 0),
+      );
+      final ui.TextPosition position1 = paragraph.getPositionForOffset(
+        rect.centerRight.translate(-0.1, 0),
+      );
+      // Position should be within the range we queried
+      expect(position0.offset == 0, true);
+      expect(position1.offset == 5, true);
+    }
+  });
+
+  test('Consistency between getBoxesForRange and getGlyphInfoAt', () {
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 20);
+    const text = 'Hello World';
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.addText(text);
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
+
+    for (var i = 0; i < text.length; i++) {
+      final List<ui.TextBox> boxes = paragraph.getBoxesForRange(i, i + 1);
+      final ui.GlyphInfo? glyph = paragraph.getGlyphInfoAt(i);
+
+      if (boxes.isNotEmpty && glyph != null) {
+        // Both should return non-zero dimensions
+        expect(boxes.first.toRect().width > 0, true);
+        expect(glyph.graphemeClusterLayoutBounds.width > 0, true);
+      } else {
+        assert(false);
+      }
+    }
+  });
 }

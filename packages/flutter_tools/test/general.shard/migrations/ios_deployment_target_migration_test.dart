@@ -54,19 +54,21 @@ IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 ''');
 
       final migration = IOSDeploymentTargetMigration(mockIosProject, testLogger);
 
       await migration.migrate();
 
-      expect(testLogger.statusText, contains('Updating minimum iOS deployment target to 13.0.'));
+      expect(testLogger.statusText, contains('Updating minimum iOS deployment target to 15.0.'));
       expect(xcodeProjectInfoFile.readAsStringSync(), '''
-IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-IPHONEOS_DEPLOYMENT_TARGET = 13.0;
-IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 ''');
     });
 
@@ -76,18 +78,20 @@ platform :ios, '9.0'
 platform :ios, '11.0'
 platform :ios, '12.0'
 platform :ios, '13.0'
+platform :ios, '14.0'
 ''');
 
       final migration = IOSDeploymentTargetMigration(mockIosProject, testLogger);
 
       await migration.migrate();
 
-      expect(testLogger.statusText, contains('Updating minimum iOS deployment target to 13.0.'));
+      expect(testLogger.statusText, contains('Updating minimum iOS deployment target to 15.0.'));
       expect(podfile.readAsStringSync(), '''
-platform :ios, '13.0'
-platform :ios, '13.0'
-platform :ios, '13.0'
-platform :ios, '13.0'
+platform :ios, '15.0'
+platform :ios, '15.0'
+platform :ios, '15.0'
+platform :ios, '15.0'
+platform :ios, '15.0'
 ''');
     });
 
@@ -104,6 +108,10 @@ platform :ios, '13.0'
   <string>12.0</string>
   <key>MinimumOSVersion</key>
   <string>13.0</string>
+  <key>MinimumOSVersion</key>
+  <string>14.0</string>
+  <key>MinimumOSVersion</key>
+  <string>15.0</string>
 </dict>
 ''');
 
@@ -119,12 +127,12 @@ platform :ios, '13.0'
     });
 
     testWithoutContext('does not migrate if already up to date', () async {
-      xcodeProjectInfoFile.writeAsStringSync('IPHONEOS_DEPLOYMENT_TARGET = 14.0;');
-      podfile.writeAsStringSync("platform :ios, '14.0'");
+      xcodeProjectInfoFile.writeAsStringSync('IPHONEOS_DEPLOYMENT_TARGET = 16.0;');
+      podfile.writeAsStringSync("platform :ios, '16.0'");
       appFrameworkInfoPlist.writeAsStringSync('''
 <dict>
   <key>MinimumOSVersion</key>
-  <string>14.0</string>
+  <string>16.0</string>
 </dict>
 ''');
 
@@ -133,12 +141,12 @@ platform :ios, '13.0'
       await migration.migrate();
 
       expect(testLogger.statusText, isEmpty);
-      expect(xcodeProjectInfoFile.readAsStringSync(), 'IPHONEOS_DEPLOYMENT_TARGET = 14.0;');
-      expect(podfile.readAsStringSync(), "platform :ios, '14.0'");
+      expect(xcodeProjectInfoFile.readAsStringSync(), 'IPHONEOS_DEPLOYMENT_TARGET = 16.0;');
+      expect(podfile.readAsStringSync(), "platform :ios, '16.0'");
       expect(appFrameworkInfoPlist.readAsStringSync(), '''
 <dict>
   <key>MinimumOSVersion</key>
-  <string>14.0</string>
+  <string>16.0</string>
 </dict>
 ''');
     });

@@ -8,14 +8,27 @@
 
 #include <glib.h>
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-TEST(FlSettingsPortalTest, ClockFormat) {
-  g_autoptr(GVariantDict) settings = g_variant_dict_new(nullptr);
+class FlSettingsPortalTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    settings = g_variant_dict_new(nullptr);
+    portal = FL_SETTINGS(fl_settings_portal_new_with_values(settings));
+  }
 
-  g_autoptr(FlSettings) portal =
-      FL_SETTINGS(fl_settings_portal_new_with_values(settings));
+  ~FlSettingsPortalTest() {
+    g_clear_object(&portal);
+    g_clear_pointer(&settings, g_variant_dict_unref);
+  }
+
+  GVariantDict* settings = nullptr;
+  FlSettings* portal = nullptr;
+};
+
+TEST_F(FlSettingsPortalTest, ClockFormat) {
   EXPECT_EQ(fl_settings_get_clock_format(portal), FL_CLOCK_FORMAT_24H);
 
   g_variant_dict_insert_value(settings,
@@ -34,11 +47,7 @@ TEST(FlSettingsPortalTest, ClockFormat) {
   EXPECT_EQ(fl_settings_get_clock_format(portal), FL_CLOCK_FORMAT_24H);
 }
 
-TEST(FlSettingsPortalTest, ColorScheme) {
-  g_autoptr(GVariantDict) settings = g_variant_dict_new(nullptr);
-
-  g_autoptr(FlSettings) portal =
-      FL_SETTINGS(fl_settings_portal_new_with_values(settings));
+TEST_F(FlSettingsPortalTest, ColorScheme) {
   EXPECT_EQ(fl_settings_get_color_scheme(portal), FL_COLOR_SCHEME_LIGHT);
 
   g_variant_dict_insert_value(settings,
@@ -63,11 +72,7 @@ TEST(FlSettingsPortalTest, ColorScheme) {
   EXPECT_EQ(fl_settings_get_color_scheme(portal), FL_COLOR_SCHEME_LIGHT);
 }
 
-TEST(FlSettingsPortalTest, GtkTheme) {
-  g_autoptr(GVariantDict) settings = g_variant_dict_new(nullptr);
-
-  g_autoptr(FlSettings) portal =
-      FL_SETTINGS(fl_settings_portal_new_with_values(settings));
+TEST_F(FlSettingsPortalTest, GtkTheme) {
   EXPECT_EQ(fl_settings_get_color_scheme(portal), FL_COLOR_SCHEME_LIGHT);
 
   g_variant_dict_insert_value(settings,
@@ -97,11 +102,7 @@ TEST(FlSettingsPortalTest, GtkTheme) {
   EXPECT_EQ(fl_settings_get_color_scheme(portal), FL_COLOR_SCHEME_LIGHT);
 }
 
-TEST(FlSettingsPortalTest, EnableAnimations) {
-  g_autoptr(GVariantDict) settings = g_variant_dict_new(nullptr);
-
-  g_autoptr(FlSettings) portal =
-      FL_SETTINGS(fl_settings_portal_new_with_values(settings));
+TEST_F(FlSettingsPortalTest, EnableAnimations) {
   EXPECT_TRUE(fl_settings_get_enable_animations(portal));
 
   g_variant_dict_insert_value(settings,
@@ -110,11 +111,7 @@ TEST(FlSettingsPortalTest, EnableAnimations) {
   EXPECT_FALSE(fl_settings_get_enable_animations(portal));
 }
 
-TEST(FlSettingsPortalTest, HighContrast) {
-  g_autoptr(GVariantDict) settings = g_variant_dict_new(nullptr);
-
-  g_autoptr(FlSettings) portal =
-      FL_SETTINGS(fl_settings_portal_new_with_values(settings));
+TEST_F(FlSettingsPortalTest, HighContrast) {
   EXPECT_FALSE(fl_settings_get_high_contrast(portal));
 
   g_variant_dict_insert_value(settings,
@@ -123,11 +120,7 @@ TEST(FlSettingsPortalTest, HighContrast) {
   EXPECT_TRUE(fl_settings_get_high_contrast(portal));
 }
 
-TEST(FlSettingsPortalTest, TextScalingFactor) {
-  g_autoptr(GVariantDict) settings = g_variant_dict_new(nullptr);
-
-  g_autoptr(FlSettings) portal =
-      FL_SETTINGS(fl_settings_portal_new_with_values(settings));
+TEST_F(FlSettingsPortalTest, TextScalingFactor) {
   EXPECT_EQ(fl_settings_get_text_scaling_factor(portal), 1.0);
 
   g_variant_dict_insert_value(

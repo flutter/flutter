@@ -109,8 +109,9 @@ compiled_action("generate_snapshot_bin") {
   args = [
     "--snapshot_kind=core",
     "--enable_mirrors=false",
-    "--snapshot_data=" + rebase_path(isolate_snapshot_data),
-    "--snapshot_text=" + rebase_path(isolate_snapshot_instructions),
+    "--snapshot_data=" + rebase_path(isolate_snapshot_data, root_build_dir),
+    "--snapshot_text=" +
+        rebase_path(isolate_snapshot_instructions, root_build_dir),
   ]
 
   if (is_debug && flutter_runtime_mode != "profile" &&
@@ -119,7 +120,7 @@ compiled_action("generate_snapshot_bin") {
     args += [ "--enable_asserts" ]
   }
 
-  args += [ rebase_path(platform_kernel) ]
+  args += [ rebase_path(platform_kernel, root_build_dir) ]
 
   metadata = {
     entitlement_file_path = [ "gen_snapshot" ]
@@ -200,9 +201,11 @@ if (host_os == "mac" &&
       output_dir = get_label_info(gen_snapshot_target, "root_out_dir")
 
       args = [
-        rebase_path("${output_dir}/${gen_snapshot_target_name}"),
+        rebase_path("${output_dir}/${gen_snapshot_target_name}",
+                    root_build_dir),
         rebase_path(
-            "${root_out_dir}/artifacts_$host_cpu/gen_snapshot${gen_snapshot_suffix}"),
+            "${root_out_dir}/artifacts_$host_cpu/gen_snapshot${gen_snapshot_suffix}",
+            root_build_dir),
       ]
       outputs = [ "${root_out_dir}/artifacts_$host_cpu/gen_snapshot${gen_snapshot_suffix}" ]
       deps = [ gen_snapshot_target ]
@@ -237,12 +240,14 @@ if (host_os == "mac" &&
     args = [
       "--in-arm64",
       rebase_path(
-          "${root_out_dir}/artifacts_arm64/gen_snapshot${gen_snapshot_suffix}"),
+          "${root_out_dir}/artifacts_arm64/gen_snapshot${gen_snapshot_suffix}",
+          root_build_dir),
       "--in-x64",
       rebase_path(
-          "${root_out_dir}/artifacts_x64/gen_snapshot${gen_snapshot_suffix}"),
+          "${root_out_dir}/artifacts_x64/gen_snapshot${gen_snapshot_suffix}",
+          root_build_dir),
       "--out",
-      rebase_path(universal_output_path),
+      rebase_path(universal_output_path, root_build_dir),
     ]
     deps = [
       ":create_macos_gen_snapshot_arm64${gen_snapshot_suffix}",
@@ -266,7 +271,7 @@ source_set("snapshot") {
 # Compiles the Dart/Flutter core libraries to kernel bytecode.
 compile_platform("strong_platform") {
   single_root_scheme = "org-dartlang-sdk"
-  single_root_base = rebase_path("../../../")
+  single_root_base = rebase_path("../../../", root_build_dir)
   libraries_specification_uri =
       "org-dartlang-sdk:///flutter/lib/snapshot/libraries.json"
 

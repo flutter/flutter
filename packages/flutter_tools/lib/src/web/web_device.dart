@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
@@ -41,6 +40,9 @@ abstract class WebDevice extends Device {
   Uri? _devToolsUri;
 
   set devToolsUri(Uri? uri) => _devToolsUri = uri;
+
+  @override
+  Future<CpuArch> get cpuArch async => CpuArch.unknown;
 }
 
 /// A web device that supports a chromium browser.
@@ -370,11 +372,6 @@ class WebDevices extends PollingDeviceDiscovery {
 
   @override
   List<String> get wellKnownIds => const <String>['chrome', 'web-server', 'edge'];
-}
-
-@visibleForTesting
-String parseVersionForWindows(String input) {
-  return input.split(RegExp(r'\w')).last;
 }
 
 /// A special device type to allow serving for arbitrary browsers.

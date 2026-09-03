@@ -45,6 +45,8 @@ class MainWidgetState extends State<MainWidget> {
               _selected[index] = !_selected[index];
             });
           },
+          fillColor: Theme.of(context).colorScheme.primary,
+          selectedColor: Theme.of(context).colorScheme.onPrimary,
           children: <Widget>[
             Semantics(label: 'Bold', child: const Icon(Icons.format_bold)),
             Semantics(label: 'Italic', child: const Icon(Icons.format_italic)),

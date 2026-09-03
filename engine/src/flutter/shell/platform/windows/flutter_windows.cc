@@ -250,6 +250,36 @@ void FlutterDesktopEngineSetNextFrameCallback(FlutterDesktopEngineRef engine,
       [callback, user_data]() { callback(user_data); });
 }
 
+bool FlutterDesktopEngineIsPlatformThread(FlutterDesktopEngineRef engine) {
+  return EngineFromHandle(engine)->task_runner()->RunsTasksOnCurrentThread();
+}
+
+void FlutterDesktopEnginePostPlatformThreadTask(FlutterDesktopEngineRef engine,
+                                                VoidCallback callback,
+                                                VoidCallback on_cancel,
+                                                void* user_data) {
+  FML_DCHECK(callback) << "Callback must not be null";
+  struct Context {
+    VoidCallback callback;
+    VoidCallback on_cancel;
+    void* user_data;
+    bool invoked = false;
+
+    ~Context() {
+      if (!invoked && on_cancel) {
+        on_cancel(user_data);
+      }
+    }
+  };
+
+  auto context =
+      std::make_shared<Context>(Context{callback, on_cancel, user_data});
+  EngineFromHandle(engine)->task_runner()->PostTask([context]() {
+    context->invoked = true;
+    context->callback(context->user_data);
+  });
+}
+
 HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view) {
   return ViewFromHandle(view)->GetWindowHandle();
 }

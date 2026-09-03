@@ -287,7 +287,7 @@ generated_file("_embedder_yaml") {
 
 action("sky_engine") {
   package_name = "sky_engine"
-  pkg_directory = rebase_path("$root_gen_dir/dart-pkg")
+  pkg_directory = rebase_path("$root_gen_dir/dart-pkg", root_build_dir)
   stamp_file = "$root_gen_dir/dart-pkg/${package_name}.stamp"
 
   sources = [
@@ -320,19 +320,20 @@ action("sky_engine") {
 
   script = rebase_path("//flutter/build/dart/tools/dart_pkg.py", ".", "//")
 
-  inputs = [ script ] + rebase_path(sources)
+  inputs = [ script ] + sources
 
-  args = [
-           "--package-name",
-           package_name,
-           "--dart-sdk",
-           rebase_path(dart_sdk_root),
-           "--pkg-directory",
-           pkg_directory,
-           "--stamp-file",
-           rebase_path(stamp_file),
-           "--package-sources",
-         ] + rebase_path(sources) + [ "--sdk-ext-directories" ] +
-         rebase_path(sdk_ext_directory) + [ "--sdk-ext-files" ] +
-         rebase_path(sdk_ext_files) + [ "--sdk-ext-mappings" ]
+  args =
+      [
+        "--package-name",
+        package_name,
+        "--dart-sdk",
+        rebase_path(dart_sdk_root, root_build_dir),
+        "--pkg-directory",
+        pkg_directory,
+        "--stamp-file",
+        rebase_path(stamp_file, root_build_dir),
+        "--package-sources",
+      ] + rebase_path(sources, root_build_dir) + [ "--sdk-ext-directories" ] +
+      rebase_path(sdk_ext_directory, root_build_dir) + [ "--sdk-ext-files" ] +
+      rebase_path(sdk_ext_files, root_build_dir) + [ "--sdk-ext-mappings" ]
 }

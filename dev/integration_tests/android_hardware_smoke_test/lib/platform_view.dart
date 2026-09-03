@@ -8,24 +8,43 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-/// A custom widget embedding a native Android TextView inside the Flutter
-/// layout hierarchy using Hybrid Composition and drawing a Flutter overlay on top.
-class AndroidPlatformView extends StatelessWidget {
-  const AndroidPlatformView({super.key, this.onCreated});
+/// The active rendering mode for the platform view.
+enum PlatformViewMode {
+  /// Texture Layer Hybrid Composition (TLHC) using `initSurfaceAndroidView`.
+  textureLayer,
 
-  final VoidCallback? onCreated;
+  /// Hybrid Composition (HC) using `initExpensiveAndroidView`.
+  hybridComposition,
+
+  /// Hybrid Composition++ (HCPP) using `initHybridAndroidView`.
+  hybridCompositionPlusPlus,
+}
+
+/// A custom widget embedding a native Android TextView inside the Flutter
+/// layout hierarchy using the specified [PlatformViewMode] and drawing a Flutter overlay on top.
+class AndroidPlatformView extends StatelessWidget {
+  const AndroidPlatformView({super.key, required this.mode});
+
+  final PlatformViewMode mode;
 
   @override
   Widget build(BuildContext context) {
     const viewType = 'com.example.android_hardware_smoke_test/native_text_view';
-    const creationParams = <String, dynamic>{
-      'text': 'Native\n🐞 View 🪲\nContent ',
+    final String modeLabel = switch (mode) {
+      PlatformViewMode.textureLayer => 'TLHC',
+      PlatformViewMode.hybridComposition => 'HC',
+      PlatformViewMode.hybridCompositionPlusPlus => 'HCPP',
+    };
+    final creationParams = <String, dynamic>{
+      'text': 'Native ($modeLabel)\n🐞 View 🪲\nContent ',
     };
 
     return Stack(
       children: <Widget>[
         Positioned.fill(
           child: PlatformViewLink(
+            // Prevent hangs when switching between PlatformViewModes in subsequent test cases.
+            key: ValueKey<PlatformViewMode>(mode),
             viewType: viewType,
             surfaceFactory:
                 (BuildContext context, PlatformViewController controller) {
@@ -37,17 +56,38 @@ class AndroidPlatformView extends StatelessWidget {
                   );
                 },
             onCreatePlatformView: (PlatformViewCreationParams params) {
-              return PlatformViewsService.initAndroidView(
-                  id: params.id,
-                  viewType: viewType,
-                  layoutDirection: TextDirection.ltr,
-                  creationParams: creationParams,
-                  creationParamsCodec: const StandardMessageCodec(),
-                  onFocus: () => params.onFocusChanged(true),
-                )
+              final AndroidViewController controller = switch (mode) {
+                PlatformViewMode.textureLayer =>
+                  PlatformViewsService.initSurfaceAndroidView(
+                    id: params.id,
+                    viewType: viewType,
+                    layoutDirection: TextDirection.ltr,
+                    creationParams: creationParams,
+                    creationParamsCodec: const StandardMessageCodec(),
+                    onFocus: () => params.onFocusChanged(true),
+                  ),
+                PlatformViewMode.hybridComposition =>
+                  PlatformViewsService.initExpensiveAndroidView(
+                    id: params.id,
+                    viewType: viewType,
+                    layoutDirection: TextDirection.ltr,
+                    creationParams: creationParams,
+                    creationParamsCodec: const StandardMessageCodec(),
+                    onFocus: () => params.onFocusChanged(true),
+                  ),
+                PlatformViewMode.hybridCompositionPlusPlus =>
+                  PlatformViewsService.initHybridAndroidView(
+                    id: params.id,
+                    viewType: viewType,
+                    layoutDirection: TextDirection.ltr,
+                    creationParams: creationParams,
+                    creationParamsCodec: const StandardMessageCodec(),
+                    onFocus: () => params.onFocusChanged(true),
+                  ),
+              };
+              return controller
                 ..addOnPlatformViewCreatedListener((int id) {
                   params.onPlatformViewCreated(id);
-                  onCreated?.call();
                 })
                 ..create();
             },

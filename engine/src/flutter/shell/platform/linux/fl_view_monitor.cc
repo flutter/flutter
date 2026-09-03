@@ -32,9 +32,6 @@ static void first_frame_cb(FlViewMonitor* self) {
 static void fl_view_monitor_dispose(GObject* object) {
   FlViewMonitor* self = FL_VIEW_MONITOR(object);
 
-  // Disconnect all handlers using data. If we try and disconnect them
-  // individually they generate warnings after the widget has been destroyed.
-  g_signal_handlers_disconnect_by_data(self->view, self);
   g_clear_object(&self->view);
 
   G_OBJECT_CLASS(fl_view_monitor_parent_class)->dispose(object);
@@ -55,8 +52,8 @@ G_MODULE_EXPORT FlViewMonitor* fl_view_monitor_new(
   self->view = FL_VIEW(g_object_ref(view));
   self->isolate = flutter::Isolate::Current();
   self->on_first_frame = on_first_frame;
-  g_signal_connect_swapped(view, "first-frame", G_CALLBACK(first_frame_cb),
-                           self);
+  g_signal_connect_object(view, "first-frame", G_CALLBACK(first_frame_cb), self,
+                          G_CONNECT_SWAPPED);
 
   return self;
 }

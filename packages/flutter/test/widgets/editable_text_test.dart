@@ -26,7 +26,6 @@ import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
 import 'live_text_utils.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 Matcher matchesMethodCall(String method, {dynamic args}) =>
     _MatchesMethodCall(method, arguments: args == null ? null : wrapMatcher(args));
@@ -1039,6 +1038,82 @@ void main() {
         equals('TextInputType.text'),
       );
     });
+
+    testWidgets(
+      'infer keyboard types from autofillHints emailOTPCode: ios',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                node: focusScopeNode,
+                autofocus: true,
+                child: EditableText(
+                  controller: controller,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  autofillHints: const <String>[AutofillHints.emailOTPCode],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(EditableText));
+        await tester.showKeyboard(find.byType(EditableText));
+        controller.text = 'test';
+        await tester.idle();
+        expect(tester.testTextInput.editingState!['text'], equals('test'));
+        expect(
+          (tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'],
+          equals('TextInputType.text'),
+        );
+      },
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.iOS,
+        TargetPlatform.macOS,
+      }),
+    );
+
+    testWidgets(
+      'infer keyboard types from autofillHints emailOTPCode: non-ios',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: FocusScope(
+                node: focusScopeNode,
+                autofocus: true,
+                child: EditableText(
+                  controller: controller,
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: textStyle,
+                  cursorColor: cursorColor,
+                  autofillHints: const <String>[AutofillHints.emailOTPCode],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byType(EditableText));
+        await tester.showKeyboard(find.byType(EditableText));
+        controller.text = 'test';
+        await tester.idle();
+        expect(tester.testTextInput.editingState!['text'], equals('test'));
+        expect(
+          (tester.testTextInput.setClientArgs!['inputType'] as Map<String, dynamic>)['name'],
+          equals('TextInputType.text'),
+        );
+      },
+    );
   });
 
   testWidgets('multiline keyboard is requested when set explicitly', (WidgetTester tester) async {
@@ -16015,6 +16090,36 @@ void main() {
             controller: controller,
             focusNode: focusNode,
             keyboardType: TextInputType.visiblePassword,
+            style: const TextStyle(),
+            cursorColor: const Color(0xFF0000FF),
+            backgroundCursorColor: const Color(0xFF808080),
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: fakeSpellCheckService,
+              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+    });
+
+    testWidgets('Spell check disabled for numeric password input type', (
+      WidgetTester tester,
+    ) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            keyboardType: const TextInputType.numberWithOptions(password: true),
             style: const TextStyle(),
             cursorColor: const Color(0xFF0000FF),
             backgroundCursorColor: const Color(0xFF808080),

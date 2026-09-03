@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 
+#include <algorithm>
+
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
@@ -54,6 +56,10 @@ static const constexpr char* kTextureCompressionAstcHdrExt =
 // https://registry.khronos.org/OpenGL/extensions/APPLE/APPLE_texture_max_level.txt
 static const constexpr char* kAppleTextureMaxLevelExt =
     "GL_APPLE_texture_max_level";
+
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_filter_anisotropic.txt
+static const constexpr char* kTextureFilterAnisotropicExt =
+    "GL_EXT_texture_filter_anisotropic";
 
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
@@ -200,6 +206,29 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   supports_texture_max_level_ = !desc->IsES() ||
                                 desc->GetGlVersion().major_version >= 3 ||
                                 desc->HasExtension(kAppleTextureMaxLevelExt);
+
+  // 2D array textures (GL_TEXTURE_2D_ARRAY, sampled as sampler2DArray) need the
+  // 3D texture upload entry points. These are core on desktop GL 3.0 and
+  // OpenGL ES 3.0, and reachable below them via GL_EXT_texture_array (desktop
+  // GL 2.x) or GL_NV_texture_array (OpenGL ES 2.0). Gate on the resolved procs
+  // rather than the version so a context that advertises an extension but does
+  // not actually provide the entry points is treated as unsupported, and so
+  // ES 2.0 devices that do expose them are supported.
+  supports_texture_array_ = gl.TexImage3D.IsAvailable() &&
+                            gl.TexSubImage3D.IsAvailable() &&
+                            gl.CompressedTexSubImage3D.IsAvailable();
+
+  // Anisotropic filtering is not part of any core GL or GLES version; it is
+  // always gated on GL_EXT_texture_filter_anisotropic. The query and the
+  // texture parameter are applied with core ES 2.0 entry points (GetFloatv
+  // and TexParameterfv), so only the extension check is needed here.
+  if (desc->HasExtension(kTextureFilterAnisotropicExt)) {
+    GLfloat value = 1.0f;
+    gl.GetFloatv(IMPELLER_GL_MAX_TEXTURE_MAX_ANISOTROPY, &value);
+    // The extension guarantees a maximum of at least 2. The limit is a float
+    // but is always an integer in practice, so floor it.
+    max_sampler_anisotropy_ = static_cast<uint32_t>(std::max(value, 2.0f));
+  }
 }
 
 bool CapabilitiesGLES::IsES() const {
@@ -218,6 +247,10 @@ bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {
 
 bool CapabilitiesGLES::SupportsTextureMaxLevel() const {
   return supports_texture_max_level_;
+}
+
+bool CapabilitiesGLES::SupportsTextureArray() const {
+  return supports_texture_array_;
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
@@ -333,6 +366,10 @@ PixelFormat CapabilitiesGLES::GetDefaultGlyphAtlasFormat() const {
 
 ISize CapabilitiesGLES::GetMaximumRenderPassAttachmentSize() const {
   return max_texture_size;
+}
+
+uint32_t CapabilitiesGLES::GetMaxSamplerAnisotropy() const {
+  return max_sampler_anisotropy_;
 }
 
 size_t CapabilitiesGLES::GetMinimumUniformAlignment() const {

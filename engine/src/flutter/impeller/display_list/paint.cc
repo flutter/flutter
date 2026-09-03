@@ -62,13 +62,17 @@ void Paint::ConvertStops(const flutter::DlGradientColorSourceBase* gradient,
 }
 
 std::shared_ptr<ColorSourceContents> Paint::CreateContents(
-    const ContentContext& renderer,
-    const Geometry* geometry) const {
+    ContentContext& renderer,
+    const Geometry* geometry,
+    const std::optional<Matrix>& geometry_transform) const {
   if (color_source == nullptr) {
     auto contents = std::make_shared<SolidColorContents>(geometry);
     contents->SetColor(color);
     return contents;
   }
+
+  Matrix inverted_geometry_transform =
+      geometry_transform.has_value() ? geometry_transform->Invert() : Matrix();
 
   switch (color_source->type()) {
     case flutter::DlColorSourceType::kLinearGradient: {
@@ -90,7 +94,8 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetStops(std::move(stops));
       contents->SetEndPoints(start_point, end_point);
       contents->SetTileMode(tile_mode);
-      contents->SetEffectTransform(effect_transform);
+      contents->SetEffectTransform(inverted_geometry_transform *
+                                   effect_transform);
 
       std::array<Point, 2> bounds{start_point, end_point};
       auto intrinsic_size = Rect::MakePointBounds(bounds.begin(), bounds.end());
@@ -119,7 +124,8 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetStops(std::move(stops));
       contents->SetCenterAndRadius(center, radius);
       contents->SetTileMode(tile_mode);
-      contents->SetEffectTransform(effect_transform);
+      contents->SetEffectTransform(inverted_geometry_transform *
+                                   effect_transform);
 
       auto intrinsic_size = Rect::MakeCircleBounds(center, std::abs(radius));
       contents->SetColorSourceSize(intrinsic_size.GetSize().Max({1, 1}));
@@ -147,7 +153,8 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetStops(std::move(stops));
       contents->SetCenterAndRadius(center, radius);
       contents->SetTileMode(tile_mode);
-      contents->SetEffectTransform(effect_transform);
+      contents->SetEffectTransform(inverted_geometry_transform *
+                                   effect_transform);
       contents->SetFocus(focus_center, focus_radius);
 
       auto intrinsic_size = Rect::MakeCircleBounds(center, std::abs(radius));
@@ -176,7 +183,8 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetColors(std::move(colors));
       contents->SetStops(std::move(stops));
       contents->SetTileMode(tile_mode);
-      contents->SetEffectTransform(effect_transform);
+      contents->SetEffectTransform(inverted_geometry_transform *
+                                   effect_transform);
 
       return contents;
     }
@@ -202,7 +210,8 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
       contents->SetTexture(texture);
       contents->SetTileModes(x_tile_mode, y_tile_mode);
       contents->SetSamplerDescriptor(sampler_descriptor);
-      contents->SetEffectTransform(effect_transform);
+      contents->SetEffectTransform(inverted_geometry_transform *
+                                   effect_transform);
       if (color_filter || invert_colors) {
         TiledTextureContents::ColorFilterProc filter_proc =
             [color_filter = color_filter,
@@ -275,7 +284,7 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents(
 }
 
 std::shared_ptr<Contents> Paint::WithFilters(
-    const ContentContext& renderer,
+    ContentContext& renderer,
     std::shared_ptr<Contents> input) const {
   input = WithColorFilter(input, ColorFilterContents::AbsorbOpacity::kYes);
   auto image_filter = WithImageFilter(renderer, input, Matrix(),
@@ -287,7 +296,7 @@ std::shared_ptr<Contents> Paint::WithFilters(
 }
 
 std::shared_ptr<Contents> Paint::WithFiltersForSubpassTarget(
-    const ContentContext& renderer,
+    ContentContext& renderer,
     std::shared_ptr<Contents> input,
     const Matrix& effect_transform) const {
   auto image_filter =
@@ -311,7 +320,7 @@ std::shared_ptr<Contents> Paint::WithMaskBlur(std::shared_ptr<Contents> input,
 }
 
 std::shared_ptr<FilterContents> Paint::WithImageFilter(
-    const ContentContext& renderer,
+    ContentContext& renderer,
     const FilterInput::Variant& input,
     const Matrix& effect_transform,
     Entity::RenderingMode rendering_mode) const {
@@ -395,7 +404,7 @@ std::shared_ptr<FilterContents> Paint::MaskBlurDescriptor::CreateMaskBlur(
 
 std::shared_ptr<Contents> Paint::MaskBlurDescriptor::CreateMaskBlur(
     const Paint& paint,
-    const ContentContext& renderer,
+    ContentContext& renderer,
     const Geometry* geometry,
     std::shared_ptr<ColorSourceContents> contents,
     bool needs_color_filter,

@@ -662,7 +662,6 @@ class _CheckedPopupMenuItemState<T> extends PopupMenuItemState<T, CheckedPopupMe
 
 class _PopupMenu<T> extends StatefulWidget {
   const _PopupMenu({
-    super.key,
     required this.itemKeys,
     required this.route,
     required this.semanticLabel,

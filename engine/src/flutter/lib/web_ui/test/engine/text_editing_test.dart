@@ -53,6 +53,16 @@ void trackInputAction(String? inputAction) {
   lastInputAction = inputAction;
 }
 
+List<PlatformMessage> connectionClosedMessages(PlatformMessagesSpy spy) {
+  return spy.messages
+      .where(
+        (PlatformMessage message) =>
+            message.channel == 'flutter/textinput' &&
+            message.methodName == 'TextInputClient.onConnectionClosed',
+      )
+      .toList();
+}
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -102,6 +112,8 @@ Future<void> testMain() async {
       editingStrategy = GloballyPositionedTextEditingStrategy(testTextEditing);
       testTextEditing.debugTextEditingStrategyOverride = editingStrategy;
       testTextEditing.configuration = singlelineConfig;
+      editingStrategy!.debugDocumentHasFocusOverride = null;
+      editingStrategy!.debugDocumentVisibilityStateOverride = null;
     });
 
     test('Creates element when enabled and removes it when disabled', () async {
@@ -649,11 +661,101 @@ Future<void> testMain() async {
       expect(domDocument.activeElement, textEditing.strategy.domElement);
 
       final DomEvent event = createDomEvent('Event', 'blur');
+      editingStrategy!.debugDocumentHasFocusOverride = true;
       editingStrategy!.handleBlur(event);
 
       expect(spy.messages, hasLength(1));
       expect(spy.messages[0].channel, 'flutter/textinput');
       expect(spy.messages[0].methodName, 'TextInputClient.onConnectionClosed');
+
+      spy.tearDown();
+    });
+
+    test('defers closing input connection when document loses focus', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      editingStrategy!.debugDocumentHasFocusOverride = false;
+      editingStrategy!.debugDocumentVisibilityStateOverride = 'visible';
+
+      final DomEvent event = createDomEvent('Event', 'blur');
+      editingStrategy!.handleBlur(event);
+
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      final List<PlatformMessage> closedMessages = connectionClosedMessages(spy);
+      expect(closedMessages, hasLength(1));
+      expect(closedMessages.single.methodArguments, <dynamic>[
+        null, // Client ID
+      ]);
+
+      spy.tearDown();
+    });
+
+    test('keeps input connection open when blurred page becomes hidden', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      editingStrategy!.debugDocumentHasFocusOverride = false;
+      editingStrategy!.debugDocumentVisibilityStateOverride = 'visible';
+
+      final DomEvent event = createDomEvent('Event', 'blur');
+      editingStrategy!.handleBlur(event);
+
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      editingStrategy!.debugDocumentVisibilityStateOverride = 'hidden';
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
+
+      spy.tearDown();
+    });
+
+    test('keeps input connection open when document quickly regains focus', () async {
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      editingStrategy!.debugDocumentHasFocusOverride = false;
+      editingStrategy!.debugDocumentVisibilityStateOverride = 'visible';
+
+      final DomEvent event = createDomEvent('Event', 'blur');
+      editingStrategy!.handleBlur(event);
+
+      expect(connectionClosedMessages(spy), isEmpty);
+
+      editingStrategy!.debugDocumentHasFocusOverride = true;
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
 
       spy.tearDown();
     });
@@ -665,6 +767,7 @@ Future<void> testMain() async {
         spy.setUp();
 
         textEditing.configuration = singlelineConfig;
+        editingStrategy!.debugDocumentHasFocusOverride = true;
 
         final showCompleter = Completer<void>();
         textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
@@ -686,10 +789,16 @@ Future<void> testMain() async {
 
         expect(textEditing.isEditing, isTrue);
 
-        expect(domDocument.activeElement, textEditing.strategy.domElement);
+        if (isFirefox || isSafari) {
+          expect(
+            domDocument.activeElement,
+            anyOf(textEditing.strategy.domElement, domDocument.body),
+          );
+        } else {
+          expect(domDocument.activeElement, textEditing.strategy.domElement);
+        }
 
-        final EngineFlutterView flutterView = EnginePlatformDispatcher.instance.viewManager
-            .findViewForElement(textEditing.strategy.domElement)!;
+        final EngineFlutterView flutterView = EnginePlatformDispatcher.instance.implicitView!;
 
         flutterView.dom.rootElement.focusWithoutScroll();
         expect(spy.messages, isEmpty);
@@ -1875,9 +1984,8 @@ Future<void> testMain() async {
     });
 
     test('No capitalization: setClient, setEditingState, show', () {
-      // Create a configuration with an AutofillGroup of four text fields.
-      final Map<String, dynamic> capitalizeWordsConfig = createFlutterConfig('text');
-      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, capitalizeWordsConfig]);
+      final Map<String, dynamic> noCapitalizationConfig = createFlutterConfig('text');
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, noCapitalizationConfig]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
 
       const setEditingState1 = MethodCall('TextInput.setEditingState', <String, dynamic>{
@@ -1893,26 +2001,24 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(show));
       spy.messages.clear();
 
-      // Test for mobile Safari. `sentences` is the default attribute for
-      // mobile browsers. Check if `off` is added to the input element.
-      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'off');
-      } else {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), isNull);
-      }
+      expect(
+        textEditing!.strategy.domElement!.getAttribute('autocapitalize'),
+        anyOf('off', 'none'),
+      );
 
       spy.messages.clear();
       hideKeyboard();
     });
 
     test('All characters capitalization: setClient, setEditingState, show', () {
-      // Create a configuration with an AutofillGroup of four text fields.
-      final Map<String, dynamic> capitalizeWordsConfig = createFlutterConfig(
+      final Map<String, dynamic> capitalizeCharactersConfig = createFlutterConfig(
         'text',
         textCapitalization: 'TextCapitalization.characters',
       );
-      final setClient = MethodCall('TextInput.setClient', <dynamic>[123, capitalizeWordsConfig]);
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        capitalizeCharactersConfig,
+      ]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
 
       const setEditingState1 = MethodCall('TextInput.setEditingState', <String, dynamic>{
@@ -1928,18 +2034,43 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(show));
       spy.messages.clear();
 
-      // Test for mobile Safari.
-      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'characters');
-      }
+      expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'characters');
+
+      spy.messages.clear();
+      hideKeyboard();
+    });
+
+    test('Sentences capitalization: setClient, setEditingState, show', () {
+      final Map<String, dynamic> capitalizeSentencesConfig = createFlutterConfig(
+        'text',
+        textCapitalization: 'TextCapitalization.sentences',
+      );
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        capitalizeSentencesConfig,
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const setEditingState1 = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': '',
+        'selectionBase': 0,
+        'selectionExtent': 0,
+        'composingBase': -1,
+        'composingExtent': -1,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+      spy.messages.clear();
+
+      expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'sentences');
 
       spy.messages.clear();
       hideKeyboard();
     });
 
     test('Words capitalization: setClient, setEditingState, show', () {
-      // Create a configuration with an AutofillGroup of four text fields.
       final Map<String, dynamic> capitalizeWordsConfig = createFlutterConfig(
         'text',
         textCapitalization: 'TextCapitalization.words',
@@ -1960,11 +2091,7 @@ Future<void> testMain() async {
       sendFrameworkMessage(codec.encodeMethodCall(show));
       spy.messages.clear();
 
-      // Test for mobile Safari.
-      if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-          ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'words');
-      }
+      expect(textEditing!.strategy.domElement!.getAttribute('autocapitalize'), 'words');
 
       spy.messages.clear();
       hideKeyboard();
@@ -2599,6 +2726,63 @@ Future<void> testMain() async {
       hideKeyboard();
     });
 
+    test('multiTextField Autofill preserves changed dormant values on wake', () async {
+      final Map<String, dynamic> flutterMultiAutofillElementConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'username',
+        autofillHintsForFields: <String>['username', 'current-password'],
+      );
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        flutterMultiAutofillElementConfig,
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      var formElement = defaultTextEditingRoot.querySelector('form')! as DomHTMLFormElement;
+      final passwordElement = formElement.childNodes.toList()[1] as DomHTMLInputElement;
+
+      const clearClient = MethodCall('TextInput.clearClient');
+      sendFrameworkMessage(codec.encodeMethodCall(clearClient));
+      passwordElement.value = 'secret-password';
+      spy.messages.clear();
+
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      formElement = defaultTextEditingRoot.querySelector('form')! as DomHTMLFormElement;
+      final restoredPasswordElement = formElement.childNodes.toList()[1] as DomHTMLInputElement;
+      expect(restoredPasswordElement.value, 'secret-password');
+      final Iterable<PlatformMessage> autofillMessages = spy.messages.where(
+        (PlatformMessage message) =>
+            message.methodName == 'TextInputClient.updateEditingStateWithTag',
+      );
+      expect(autofillMessages, hasLength(1));
+      expect(autofillMessages.single.channel, 'flutter/textinput');
+      expect(autofillMessages.single.methodArguments, <dynamic>[
+        0,
+        <String, dynamic>{
+          'current-password': <String, dynamic>{
+            'text': 'secret-password',
+            'selectionBase': 15,
+            'selectionExtent': 15,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        },
+      ]);
+    });
+
     test('Multi-line mode also works', () async {
       final setClient = MethodCall('TextInput.setClient', <dynamic>[123, flutterMultilineConfig]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
@@ -3202,6 +3386,80 @@ Future<void> testMain() async {
   });
 
   group('EngineAutofillForm', () {
+    test('applies a programmatic change to a non-focused field instead of reverting it', () {
+      // A programmatic framework update to a non-focused autofill field must win
+      // over the stale DOM value, and must not be mistaken for a browser
+      // autofill. See the review on https://github.com/flutter/flutter/pull/187459.
+      Map<String, Object?> field(String hint, String id, String text) => <String, Object?>{
+        'inputType': <String, Object?>{
+          'name': 'TextInputType.text',
+          'signed': null,
+          'decimal': null,
+        },
+        'textCapitalization': 'TextCapitalization.none',
+        'autofill': <String, dynamic>{
+          'uniqueIdentifier': id,
+          'hints': <String>[hint],
+          'editingValue': <String, dynamic>{
+            'text': text,
+            'selectionBase': 0,
+            'selectionExtent': 0,
+            'selectionAffinity': 'TextAffinity.downstream',
+            'selectionIsDirectional': false,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        },
+      };
+
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+      try {
+        // Form 1: the non-focused password field holds 'pw-v1'.
+        final fields1 = <Map<String, Object?>>[
+          field('username', 'field1', 'user'),
+          field('password', 'field2', 'pw-v1'),
+        ];
+        final focusedMap1 = fields1.first['autofill']! as Map<String, Object?>;
+        final EngineAutofillForm form1 = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          focusedMap1,
+          fields1,
+        )!;
+        form1.wakeUp(createDomHTMLInputElement(), AutofillInfo.fromFrameworkMessage(focusedMap1));
+        final passwordElement = form1.elements['field2']! as DomHTMLInputElement;
+        expect(passwordElement.value, 'pw-v1');
+        form1.goDormant();
+
+        // The app programmatically changes the password to 'pw-v2'. A new config
+        // arrives as a new form that reuses the dormant one.
+        final fields2 = <Map<String, Object?>>[
+          field('username', 'field1', 'user'),
+          field('password', 'field2', 'pw-v2'),
+        ];
+        final focusedMap2 = fields2.first['autofill']! as Map<String, Object?>;
+        final EngineAutofillForm form2 = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          focusedMap2,
+          fields2,
+        )!;
+        spy.messages.clear();
+        form2.wakeUp(createDomHTMLInputElement(), AutofillInfo.fromFrameworkMessage(focusedMap2));
+
+        // The DOM must reflect the app's new value, not revert to 'pw-v1', and we
+        // must not forward the stale value as if the browser had autofilled it.
+        final reusedPassword = form2.elements['field2']! as DomHTMLInputElement;
+        expect(reusedPassword.value, 'pw-v2');
+        expect(
+          spy.messages.where((m) => m.methodName == 'TextInputClient.updateEditingStateWithTag'),
+          isEmpty,
+        );
+      } finally {
+        spy.tearDown();
+        clearForms();
+      }
+    });
+
     test('validate multi element form', () {
       final List<Map<String, Object?>> fields = createFieldValues(
         <String>['username', 'password', 'newPassword'],

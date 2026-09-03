@@ -17,12 +17,6 @@ ComputePassVK::ComputePassVK(std::shared_ptr<const Context> context,
                              std::shared_ptr<CommandBufferVK> command_buffer)
     : ComputePass(std::move(context)),
       command_buffer_(std::move(command_buffer)) {
-  // TOOD(dnfield): This should be moved to caps. But for now keeping this
-  // in parallel with Metal.
-  max_wg_size_ = ContextVK::Cast(*context_)
-                     .GetPhysicalDevice()
-                     .getProperties()
-                     .limits.maxComputeWorkGroupSize;
   is_valid_ = true;
 }
 
@@ -68,15 +62,16 @@ void ComputePassVK::SetPipeline(
 }
 
 // |ComputePass|
-fml::Status ComputePassVK::Compute(const ISize& grid_size) {
-  if (grid_size.IsEmpty() || !pipeline_valid_) {
+fml::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
+  if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
+      workgroup_count[2] == 0u || !pipeline_valid_) {
     bound_image_offset_ = 0u;
     bound_buffer_offset_ = 0u;
     descriptor_write_offset_ = 0u;
     has_label_ = false;
     pipeline_valid_ = false;
     return fml::Status(fml::StatusCode::kCancelled,
-                       "Invalid pipeline or empty grid.");
+                       "Invalid pipeline or empty workgroup count.");
   }
 
   const ContextVK& context_vk = ContextVK::Cast(*context_);
@@ -99,21 +94,11 @@ fml::Status ComputePassVK::Compute(const ISize& grid_size) {
       nullptr                           // offsets
   );
 
-  int64_t width = grid_size.width;
-  int64_t height = grid_size.height;
-
-  // Special case for linear processing.
-  if (height == 1) {
-    command_buffer_vk.dispatch(width, 1, 1);
-  } else {
-    while (width > max_wg_size_[0]) {
-      width = std::max(static_cast<int64_t>(1), width / 2);
-    }
-    while (height > max_wg_size_[1]) {
-      height = std::max(static_cast<int64_t>(1), height / 2);
-    }
-    command_buffer_vk.dispatch(width, height, 1);
-  }
+  // The arguments are workgroup counts. The per-workgroup invocation count (the
+  // local size) is baked into the shader module, so dispatch the counts
+  // directly.
+  command_buffer_vk.dispatch(workgroup_count[0], workgroup_count[1],
+                             workgroup_count[2]);
 
 #ifdef IMPELLER_DEBUG
   if (has_label_) {

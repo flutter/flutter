@@ -16,6 +16,7 @@ extern "C" {
 #include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
 #include "flutter/testing/testing.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -80,14 +81,27 @@ static void subscribe_signal(FlViewAccessible* accessible,
   }
 }
 
-TEST(FlAccessibilityHandlerTest, Announce) {
-  flutter::testing::fl_ensure_gtk_init();
+class FlAccessibilityHandlerTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    flutter::testing::fl_ensure_gtk_init();
+    messenger = fl_mock_binary_messenger_new();
+    g_clear_object(&engine);
+    engine =
+        fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+    view = fl_view_new_for_engine(engine);
+  }
 
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  FlView* view = fl_view_new_for_engine(engine);
+  ~FlAccessibilityHandlerTest() {
+    fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+    g_clear_object(&messenger);
+  }
 
+  FlMockBinaryMessenger* messenger = nullptr;
+  FlView* view = nullptr;
+};
+
+TEST_F(FlAccessibilityHandlerTest, Announce) {
   gboolean signalled = FALSE;
   subscribe_signal(fl_view_get_accessible(view), &signalled, FALSE);
 
@@ -115,18 +129,9 @@ TEST(FlAccessibilityHandlerTest, Announce) {
   if (atk_supports_announce()) {
     EXPECT_TRUE(signalled);
   }
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
-TEST(FlAccessibilityHandlerTest, AnnounceAssertive) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  FlView* view = fl_view_new_for_engine(engine);
-
+TEST_F(FlAccessibilityHandlerTest, AnnounceAssertive) {
   gboolean signalled = FALSE;
   subscribe_signal(fl_view_get_accessible(view), &signalled, TRUE);
 
@@ -157,18 +162,9 @@ TEST(FlAccessibilityHandlerTest, AnnounceAssertive) {
   if (atk_supports_announce()) {
     EXPECT_TRUE(signalled);
   }
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
-TEST(FlAccessibilityHandlerTest, AnnounceUnknownView) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  FlView* view = fl_view_new_for_engine(engine);
-
+TEST_F(FlAccessibilityHandlerTest, AnnounceUnknownView) {
   gboolean signalled = FALSE;
   subscribe_signal(fl_view_get_accessible(view), &signalled, FALSE);
 
@@ -196,18 +192,9 @@ TEST(FlAccessibilityHandlerTest, AnnounceUnknownView) {
       &called);
   EXPECT_TRUE(called);
   EXPECT_FALSE(signalled);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
-TEST(FlAccessibilityHandlerTest, UnknownType) {
-  flutter::testing::fl_ensure_gtk_init();
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  FlView* view = fl_view_new_for_engine(engine);
-
+TEST_F(FlAccessibilityHandlerTest, UnknownType) {
   gboolean signalled = FALSE;
   subscribe_signal(fl_view_get_accessible(view), &signalled, FALSE);
 
@@ -228,6 +215,4 @@ TEST(FlAccessibilityHandlerTest, UnknownType) {
       &called);
   EXPECT_TRUE(called);
   EXPECT_FALSE(signalled);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }

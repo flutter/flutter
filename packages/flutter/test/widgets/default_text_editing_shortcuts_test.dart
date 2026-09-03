@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_tester.dart';
 import 'keyboard_utils.dart';
-import 'widgets_app_tester.dart';
 
 const Color _blue = Color(0xFF0000FF);
 const Color _grey = Color(0xFF9E9E9E);

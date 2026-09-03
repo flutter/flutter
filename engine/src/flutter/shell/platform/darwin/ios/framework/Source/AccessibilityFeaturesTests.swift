@@ -78,8 +78,8 @@ struct AccessibilityFeaturesTests {
         #expect(AccessibilityFeatureFlag.deterministicCursor.rawValue == 1 << 10)
     }
 
-    @Test @MainActor
-    func flagsBitmaskIsCorrect() {
+    @MainActor
+    @Test func flagsBitmaskIsCorrect() {
         let features = MockAccessibilityFeatures()
         #expect(features.flags == 0)
 

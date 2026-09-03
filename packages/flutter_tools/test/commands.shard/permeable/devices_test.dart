@@ -58,6 +58,7 @@ void main() {
             'id': 'web-server',
             'isSupported': true,
             'targetPlatform': 'web-javascript',
+            'cpuArch': 'unknown',
             'emulator': false,
             'sdk': 'Flutter Tools',
             'capabilities': <String, Object>{

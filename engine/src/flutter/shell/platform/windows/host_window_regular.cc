@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/host_window_regular.h"
 
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
+#include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 
 namespace flutter {
 
@@ -46,6 +47,13 @@ HostWindowRegular::HostWindowRegular(WindowManager* window_manager,
       .sizing_delegate = sized_to_content ? AsSizingDelegate() : nullptr,
       .is_sized_to_content = sized_to_content,
   });
+}
+
+HostWindowRegular::~HostWindowRegular() {
+  // Reset the view while this most-derived object is still fully alive, to stop
+  // the raster thread from sizing it before any subobject is torn down. See the
+  // destructor comment in host_window_sized.h for the rationale.
+  view_controller_.reset();
 }
 
 Rect HostWindowRegular::GetInitialRect(FlutterWindowsEngine* engine,

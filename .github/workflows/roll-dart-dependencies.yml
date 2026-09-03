@@ -17,20 +17,23 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           repository: flutteractionsbot/flutter
           token: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           ref: master
+          persist-credentials: false
 
       - name: Configure git
+        run: |
+          gh auth setup-git
+          git config --global user.name "flutteractionsbot"
+          git config --global user.email "<flutter-actions-bot@google.com>"
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          REF_NAME: ${{ github.ref_name }}
-          DART_HASH: ${{ inputs.dart_hash }}
+
+      - name: Fetch upstream
         run: |
-          git config user.name "flutteractionsbot"
-          git config user.email "<flutter-actions-bot@google.com>"
           git remote add upstream https://github.com/flutter/flutter.git
           git fetch upstream $REF_NAME
 
@@ -38,11 +41,13 @@ jobs:
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
           git checkout -b "$BRANCH_NAME" upstream/$REF_NAME
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          REF_NAME: ${{ github.ref_name }}
+          DART_HASH: ${{ inputs.dart_hash }}
 
       - name: Download and Decode Dart DEPS
         id: download-deps
-        env:
-          DART_HASH: ${{ inputs.dart_hash }}
         run: |
           URL="https://dart.googlesource.com/sdk/+/$DART_HASH/DEPS?format=TEXT"
 
@@ -62,11 +67,11 @@ jobs:
             echo "::error::Downloaded DEPS file is empty or decoding failed."
             exit 1
           fi
+        env:
+          DART_HASH: ${{ inputs.dart_hash }}
 
       - name: Run Update Script
         id: run-script
-        env:
-          DART_HASH: ${{ inputs.dart_hash }}
         run: |
           DART_DEPS="dart_deps_file"
           FLUTTER_DEPS="DEPS" # Root of the repository
@@ -84,6 +89,8 @@ jobs:
             echo "::error::The python update script failed during execution."
             exit 1
           fi
+        env:
+          DART_HASH: ${{ inputs.dart_hash }}
 
       - name: Check for Changes
         id: git-check
@@ -101,11 +108,8 @@ jobs:
 
       - name: Create PR if Changed
         if: steps.git-check.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
-          DART_HASH: ${{ inputs.dart_hash }}
-          REF_NAME: ${{ github.ref_name }}
         run: |
+          gh auth setup-git
           git add DEPS
           git commit -m "Update flutter DEPS to dart $DART_HASH"
           git push origin "$BRANCH_NAME" --force
@@ -122,3 +126,7 @@ jobs:
           echo "Updated dart dependencies to \`$DART_HASH\`." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **View Pull Request:** $PR_URL" >> $GITHUB_STEP_SUMMARY
+        env:
+          GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          DART_HASH: ${{ inputs.dart_hash }}
+          REF_NAME: ${{ github.ref_name }}

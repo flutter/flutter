@@ -100,6 +100,11 @@ Thanks for your contribution.`;
     // Stale check
     if (issue.state === 'open') {
       if (labeledAt < closeDate) {
+        if (issue.locked) {
+          console.log(`Skipping #${issue.number} because the conversation is locked.`);
+          continue;
+        }
+
         console.log(`Closing #${issue.number} due to no response.`);
         const body = isPr ? prCloseComment : issueCloseComment;
         if (body) {

@@ -71,6 +71,9 @@ class Manager {
   // Gets the |EGLDisplay|.
   EGLDisplay egl_display() const { return display_; };
 
+  // Gets the |EGLConfig|.
+  EGLConfig egl_config() const { return config_; };
+
   // Gets the |ID3D11Device| chosen by ANGLE.
   bool GetDevice(ID3D11Device** device);
 

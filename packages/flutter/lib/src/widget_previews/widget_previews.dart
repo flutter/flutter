@@ -2,12 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'package:/flutter/cupertino.dart';
-/// @docImport 'package:/flutter/material.dart';
-library;
-
-import 'package:flutter/cupertino.dart' show CupertinoThemeData;
-import 'package:flutter/material.dart' show Brightness, ThemeData;
 import 'package:flutter/widgets.dart';
 
 /// Signature for callbacks that build theming data used when creating a [Preview].
@@ -397,41 +391,33 @@ base class PreviewLocalizationsData {
   final LocaleResolutionCallback? localeResolutionCallback;
 }
 
-/// A collection of [ThemeData] and [CupertinoThemeData] instances for use in
-/// widget previews.
+/// Interface for supplying theming data to a [Preview].
 ///
 /// NOTE: this interface is not stable and **will change**.
-base class PreviewThemeData {
-  /// Creates a collection of [ThemeData] and [CupertinoThemeData] instances
-  /// for use in widget previews.
-  ///
-  /// If a theme isn't provided for a specific configuration, no theme data
-  /// will be applied and the default theme will be used.
-  const PreviewThemeData({
-    this.materialLight,
-    this.materialDark,
-    this.cupertinoLight,
-    this.cupertinoDark,
-  });
+abstract base class PreviewThemeData {
+  /// Abstract const constructor.
+  const PreviewThemeData();
 
-  /// The Material [ThemeData] to apply when light mode is enabled.
-  final ThemeData? materialLight;
+  /// Applies this theme to the [child] widget.
+  Widget apply(BuildContext context, Widget child);
+}
 
-  /// The Material [ThemeData] to apply when dark mode is enabled.
-  final ThemeData? materialDark;
+/// A [PreviewThemeData] that applies multiple themes in sequence, where the
+/// first theme in the list is the outermost wrapper.
+final class MultiPreviewThemeData extends PreviewThemeData {
+  /// Creates a [MultiPreviewThemeData] that applies [themes] in sequence,
+  /// nesting them from first (outermost) to last (innermost).
+  const MultiPreviewThemeData(this.themes);
 
-  /// The Cupertino [CupertinoThemeData] to apply when light mode is enabled.
-  final CupertinoThemeData? cupertinoLight;
+  /// The list of themes to apply.
+  final List<PreviewThemeData> themes;
 
-  /// The Cupertino [CupertinoThemeData] to apply when dark mode is enabled.
-  final CupertinoThemeData? cupertinoDark;
-
-  /// Returns the pair of [ThemeData] and [CupertinoThemeData] corresponding to
-  /// the value of [brightness].
-  (ThemeData?, CupertinoThemeData?) themeForBrightness(Brightness brightness) {
-    if (brightness == Brightness.light) {
-      return (materialLight, cupertinoLight);
+  @override
+  Widget apply(BuildContext context, Widget child) {
+    var result = child;
+    for (final PreviewThemeData theme in themes.reversed) {
+      result = theme.apply(context, result);
     }
-    return (materialDark, cupertinoDark);
+    return result;
   }
 }

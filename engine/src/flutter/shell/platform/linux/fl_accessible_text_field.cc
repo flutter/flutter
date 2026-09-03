@@ -133,37 +133,48 @@ static gchar* get_sentence_at_offset(FlAccessibleTextField* self,
       start_offset, end_offset);
 }
 
+// Returns the line containing @offset, along with its start and end character
+// offsets. The line excludes the trailing line break. Returns nullptr if
+// @offset does not fall within any line.
 static gchar* get_line_at_offset(FlAccessibleTextField* self,
                                  gint offset,
                                  gint* start_offset,
                                  gint* end_offset) {
   g_autoptr(PangoLayout) layout = create_pango_layout(self);
+  const gchar* text = gtk_entry_buffer_get_text(self->buffer);
 
-  GSList* lines = pango_layout_get_lines_readonly(layout);
-  while (lines != nullptr) {
-    PangoLayoutLine* line = static_cast<PangoLayoutLine*>(lines->data);
-    if (offset >= line->start_index &&
-        offset <= line->start_index + line->length) {
+  for (GSList* node = pango_layout_get_lines_readonly(layout); node != nullptr;
+       node = node->next) {
+    PangoLayoutLine* line = static_cast<PangoLayoutLine*>(node->data);
+    // PangoLayoutLine uses byte indices, but ATK offsets are character
+    // offsets, so convert before comparing.
+    gint line_start = g_utf8_pointer_to_offset(text, text + line->start_index);
+    gint line_end =
+        g_utf8_pointer_to_offset(text, text + line->start_index + line->length);
+    if (offset >= line_start && offset <= line_end) {
       if (start_offset != nullptr) {
-        *start_offset = line->start_index;
+        *start_offset = line_start;
       }
       if (end_offset != nullptr) {
-        *end_offset = line->start_index + line->length;
+        *end_offset = line_end;
       }
-      return get_substring(self, line->start_index,
-                           line->start_index + line->length);
+      return get_substring(self, line_start, line_end);
     }
-    lines = lines->next;
   }
 
   return nullptr;
 }
 
+// Returns the paragraph containing @offset, along with its start and end
+// character offsets. A paragraph may span multiple wrapped lines and extends
+// from one paragraph start up to the following paragraph start. Returns nullptr
+// if @offset does not fall within any paragraph.
 static gchar* get_paragraph_at_offset(FlAccessibleTextField* self,
                                       gint offset,
                                       gint* start_offset,
                                       gint* end_offset) {
   g_autoptr(PangoLayout) layout = create_pango_layout(self);
+  const gchar* text = gtk_entry_buffer_get_text(self->buffer);
 
   PangoLayoutLine* start = nullptr;
   PangoLayoutLine* end = nullptr;
@@ -173,16 +184,22 @@ static gchar* get_paragraph_at_offset(FlAccessibleTextField* self,
     if (line->is_paragraph_start) {
       end = line;
     }
-    if (start != nullptr && end != nullptr && offset >= start->start_index &&
-        offset <= end->start_index + end->length) {
-      if (start_offset != nullptr) {
-        *start_offset = start->start_index;
+    if (start != nullptr && end != nullptr) {
+      // PangoLayoutLine uses byte indices, but ATK offsets are character
+      // offsets, so convert before comparing.
+      gint para_start =
+          g_utf8_pointer_to_offset(text, text + start->start_index);
+      gint para_end =
+          g_utf8_pointer_to_offset(text, text + end->start_index + end->length);
+      if (offset >= para_start && offset <= para_end) {
+        if (start_offset != nullptr) {
+          *start_offset = para_start;
+        }
+        if (end_offset != nullptr) {
+          *end_offset = para_end;
+        }
+        return get_substring(self, para_start, para_end);
       }
-      if (end_offset != nullptr) {
-        *end_offset = end->start_index + end->length;
-      }
-      return get_substring(self, start->start_index,
-                           end->start_index + end->length);
     }
     if (line->is_paragraph_start) {
       start = line;

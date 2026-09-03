@@ -22,6 +22,8 @@ std::size_t ComputePipelineDescriptor::GetHash() const {
   if (entrypoint_) {
     fml::HashCombineSeed(seed, entrypoint_->GetHash());
   }
+  fml::HashCombineSeed(seed, workgroup_size_[0], workgroup_size_[1],
+                       workgroup_size_[2]);
   return seed;
 }
 
@@ -29,7 +31,8 @@ std::size_t ComputePipelineDescriptor::GetHash() const {
 bool ComputePipelineDescriptor::IsEqual(
     const ComputePipelineDescriptor& other) const {
   return label_ == other.label_ &&
-         DeepComparePointer(entrypoint_, other.entrypoint_);
+         DeepComparePointer(entrypoint_, other.entrypoint_) &&
+         workgroup_size_ == other.workgroup_size_;
 }
 
 ComputePipelineDescriptor& ComputePipelineDescriptor::SetLabel(
@@ -57,6 +60,16 @@ ComputePipelineDescriptor& ComputePipelineDescriptor::SetStageEntrypoint(
 std::shared_ptr<const ShaderFunction>
 ComputePipelineDescriptor::GetStageEntrypoint() const {
   return entrypoint_;
+}
+
+ComputePipelineDescriptor& ComputePipelineDescriptor::SetWorkgroupSize(
+    std::array<uint32_t, 3> size) {
+  workgroup_size_ = size;
+  return *this;
+}
+
+std::array<uint32_t, 3> ComputePipelineDescriptor::GetWorkgroupSize() const {
+  return workgroup_size_;
 }
 
 const std::string& ComputePipelineDescriptor::GetLabel() const {

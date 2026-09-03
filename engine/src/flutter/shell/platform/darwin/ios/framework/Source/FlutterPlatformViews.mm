@@ -168,10 +168,8 @@ static BOOL _preparedOnce = NO;
   visualEffectView.frame = _frame;
 
   visualEffectView.layer.cornerRadius = _cornerRadius;
-  if (@available(iOS 13.0, *)) {
-    visualEffectView.layer.cornerCurve =
-        _isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
-  }
+  visualEffectView.layer.cornerCurve =
+      _isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
   visualEffectView.clipsToBounds = YES;
 
   self.backdropFilterView = visualEffectView;

@@ -126,6 +126,11 @@ class StandardCapabilities final : public Capabilities {
   }
 
   // |Capabilities|
+  uint32_t GetMaxSamplerAnisotropy() const override {
+    return max_sampler_anisotropy_;
+  }
+
+  // |Capabilities|
   size_t GetMinimumUniformAlignment() const override {
     return minimum_uniform_alignment_;
   }
@@ -152,6 +157,7 @@ class StandardCapabilities final : public Capabilities {
                        PixelFormat default_depth_stencil_format,
                        PixelFormat default_glyph_atlas_format,
                        ISize default_maximum_render_pass_attachment_size,
+                       uint32_t max_sampler_anisotropy,
                        size_t minimum_uniform_alignment,
                        bool needs_partitioned_host_buffer,
                        bool supports_texture_compression_bc,
@@ -177,6 +183,7 @@ class StandardCapabilities final : public Capabilities {
         default_glyph_atlas_format_(default_glyph_atlas_format),
         default_maximum_render_pass_attachment_size_(
             default_maximum_render_pass_attachment_size),
+        max_sampler_anisotropy_(max_sampler_anisotropy),
         minimum_uniform_alignment_(minimum_uniform_alignment),
         supports_texture_compression_bc_(supports_texture_compression_bc),
         supports_texture_compression_etc2_(supports_texture_compression_etc2),
@@ -203,6 +210,7 @@ class StandardCapabilities final : public Capabilities {
   PixelFormat default_depth_stencil_format_ = PixelFormat::kUnknown;
   PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
   ISize default_maximum_render_pass_attachment_size_ = ISize(1, 1);
+  uint32_t max_sampler_anisotropy_ = 1;
   size_t minimum_uniform_alignment_ = 256;
   bool supports_texture_compression_bc_ = false;
   bool supports_texture_compression_etc2_ = false;
@@ -330,6 +338,12 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsTextureCompression(
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetMaxSamplerAnisotropy(
+    uint32_t value) {
+  max_sampler_anisotropy_ = value;
+  return *this;
+}
+
 CapabilitiesBuilder& CapabilitiesBuilder::SetMinimumUniformAlignment(
     size_t value) {
   minimum_uniform_alignment_ = value;
@@ -361,6 +375,7 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       default_depth_stencil_format_.value_or(PixelFormat::kUnknown),       //
       default_glyph_atlas_format_.value_or(PixelFormat::kUnknown),         //
       default_maximum_render_pass_attachment_size_.value_or(ISize{1, 1}),  //
+      max_sampler_anisotropy_,                                             //
       minimum_uniform_alignment_,                                          //
       needs_partitioned_host_buffer_,                                      //
       supports_texture_compression_bc_,                                    //

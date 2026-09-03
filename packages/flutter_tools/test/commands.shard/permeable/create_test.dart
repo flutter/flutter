@@ -350,43 +350,47 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'can create a project in the engine examples directory',
-    () async {
-      final String flutterBin = globals.fs.path.join(
-        getFlutterRoot(),
-        'bin',
-        globals.platform.isWindows ? 'flutter.bat' : 'flutter',
-      );
-      final String engineExamplesDirectory = globals.fs.path.join(
-        getFlutterRoot(),
-        'engine',
-        'src',
-        'flutter',
-        'examples',
-      );
-      const projectName = 'flutter_project';
-      final ProcessResult exec = await Process.run(flutterBin, <String>[
-        'create',
-        projectName,
-      ], workingDirectory: engineExamplesDirectory);
-      expect(exec.exitCode, 0);
-      globals.fs
-          .file(globals.fs.path.join(engineExamplesDirectory, projectName))
-          .deleteSync(recursive: true);
-    },
-    overrides: {
-      Pub: () => Pub.test(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-        stdio: mockStdio,
-      ),
-      ...noColorTerminalOverride,
-    },
-  );
+  for (final (String description, List<String> examplesPath) in [
+    ('examples', ['examples']),
+    ('engine examples', ['engine', 'src', 'flutter', 'examples']),
+    ('package examples', ['packages', 'flutter', 'examples']),
+    ('dev', ['dev']),
+  ]) {
+    testUsingContext(
+      'can create a project in the $description directory',
+      () async {
+        final String flutterBin = globals.fs.path.join(
+          getFlutterRoot(),
+          'bin',
+          globals.platform.isWindows ? 'flutter.bat' : 'flutter',
+        );
+        final String examplesDirectory = globals.fs.path.joinAll([
+          getFlutterRoot(),
+          ...examplesPath,
+        ]);
+        const projectName = 'flutter_project';
+        final ProcessResult exec = await Process.run(flutterBin, <String>[
+          'create',
+          projectName,
+        ], workingDirectory: examplesDirectory);
+        expect(exec.exitCode, 0);
+        globals.fs
+            .file(globals.fs.path.join(examplesDirectory, projectName))
+            .deleteSync(recursive: true);
+      },
+      overrides: {
+        Pub: () => Pub.test(
+          fileSystem: globals.fs,
+          logger: globals.logger,
+          processManager: globals.processManager,
+          botDetector: globals.botDetector,
+          platform: globals.platform,
+          stdio: mockStdio,
+        ),
+        ...noColorTerminalOverride,
+      },
+    );
+  }
 
   testUsingContext(
     'Will create an app project if non-empty non-project directory exists without .metadata',
@@ -1514,6 +1518,38 @@ void main() {
         .readAsStringSync();
     expect(sdkMetaContents, contains('<root url="file:/'));
     expect(sdkMetaContents, contains('/bin/cache/dart-sdk/lib/core"'));
+  }, overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform});
+
+  testUsingContext('has correct content and formatting with plugin template', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--template=plugin',
+      '--no-pub',
+      '--org',
+      'com.foo.bar',
+      projectDir.path,
+    ]);
+
+    // The generated plugin and its example app should already be formatted, so
+    // `flutter create -t plugin` output passes `dart format` out of the box.
+    // Regression test for https://github.com/flutter/flutter/issues/175960.
+    for (final FileSystemEntity file in projectDir.listSync(recursive: true)) {
+      if (file is File && file.path.endsWith('.dart')) {
+        final String original = file.readAsStringSync();
+
+        final Process process = await Process.start(
+          globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+          <String>['format', '--output=show', file.path],
+          workingDirectory: projectDir.path,
+        );
+        final String formatted = await process.stdout.transform(utf8.decoder).join();
+
+        expect(formatted, contains(original), reason: file.path);
+      }
+    }
   }, overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform});
 
   testUsingContext(
@@ -3338,7 +3374,7 @@ void main() {
 
     for (final templatePath in iosPluginTemplates) {
       final String rawTemplate = globals.fs.file(templatePath).readAsStringSync();
-      expect(rawTemplate, contains("s.platform = :ios, '13.0'"));
+      expect(rawTemplate, contains("s.platform = :ios, '15.0'"));
     }
 
     final command = CreateCommand();
@@ -3356,7 +3392,7 @@ void main() {
         .childDirectory('ios')
         .childFile('flutter_project.podspec')
         .readAsString();
-    expect(rawPodSpec, contains("s.platform = :ios, '13.0'"));
+    expect(rawPodSpec, contains("s.platform = :ios, '15.0'"));
   });
 
   testUsingContext('default app uses flutter default versions', () async {
@@ -3465,8 +3501,8 @@ void main() {
 
     final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
     final String podspecContent = await podspec.readAsString();
-    expect(podspecContent, contains("s.ios.deployment_target = '13.0'"));
-    expect(podspecContent, contains("s.osx.deployment_target = '10.15'"));
+    expect(podspecContent, contains("s.ios.deployment_target = '15.0'"));
+    expect(podspecContent, contains("s.osx.deployment_target = '12.0'"));
 
     final File swiftFile = projectDir
         .childDirectory('darwin')
@@ -3554,8 +3590,8 @@ void main() {
           .childDirectory('darwin_plugin')
           .childFile('Package.swift');
       final String packageSwiftContent = await packageSwift.readAsString();
-      expect(packageSwiftContent, contains('.macOS("10.15")'));
-      expect(packageSwiftContent, contains('.iOS("13.0")'));
+      expect(packageSwiftContent, contains('.macOS("12.0")'));
+      expect(packageSwiftContent, contains('.iOS("15.0")'));
 
       // Verify podspec exists (CocoaPods)
       final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
@@ -3594,8 +3630,8 @@ void main() {
           .childDirectory('darwin_plugin')
           .childFile('Package.swift');
       final String packageSwiftContent = await packageSwift.readAsString();
-      expect(packageSwiftContent, contains('.macOS("10.15")'));
-      expect(packageSwiftContent, contains('.iOS("13.0")'));
+      expect(packageSwiftContent, contains('.macOS("12.0")'));
+      expect(packageSwiftContent, contains('.iOS("15.0")'));
 
       // Verify podspec exists (CocoaPods)
       final File podspec = projectDir.childDirectory('darwin').childFile('darwin_plugin.podspec');
@@ -4172,6 +4208,23 @@ void main() {
       ),
     },
   );
+
+  testUsingContext('analysis_options.yaml only excludes platforms that were generated', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--platforms', 'android,ios'],
+      <String>['analysis_options.yaml'],
+    );
+
+    final String analysisOptions = projectDir.childFile('analysis_options.yaml').readAsStringSync();
+    expect(analysisOptions, contains('- build/**'));
+    expect(analysisOptions, contains('- android/**'));
+    expect(analysisOptions, contains('- ios/**'));
+    expect(analysisOptions, isNot(contains('- web/**')));
+    expect(analysisOptions, isNot(contains('- windows/**')));
+    expect(analysisOptions, isNot(contains('- macos/**')));
+    expect(analysisOptions, isNot(contains('- linux/**')));
+  });
 
   testUsingContext('should escape ":" in project description', () async {
     await _createProject(

@@ -59,7 +59,7 @@ template("aot_snapshot") {
     args = [
       "--deterministic",
       "--snapshot_kind=app-aot-elf",
-      "--elf=" + rebase_path(snapshot_path),
+      "--elf=" + rebase_path(snapshot_path, root_build_dir),
     ]
 
     # No asserts in debug or release product.
@@ -69,7 +69,7 @@ template("aot_snapshot") {
       args += [ "--enable_asserts" ]
     }
 
-    args += [ rebase_path(shim_kernel) ]
+    args += [ rebase_path(shim_kernel, root_build_dir) ]
   }
 }
 

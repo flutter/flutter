@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -241,6 +244,8 @@ void main() {
           '"/output/shaders/my_shader.frag" failed with exit code 1.',
         ),
       );
+      expect(e.stdout, 'impellerc stdout');
+      expect(e.stderr, 'impellerc stderr');
     }
 
     expect(fileSystem.file(outputPath).existsSync(), false);
@@ -262,6 +267,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--depfile=/.tmp_rand0/0.8863148172405516.d',
         ],
         onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -281,6 +287,7 @@ void main() {
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
       fileSystem: fileSystem,
+      logger: logger,
       random: math.Random(0),
     );
 
@@ -311,6 +318,7 @@ void main() {
             '--input-type=frag',
             '--include=$fragDir',
             '--include=$shaderLibDir',
+            '--depfile=/.tmp_rand0/0.8863148172405516.d',
           ],
           onRun: (_) {
             fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -330,6 +338,7 @@ void main() {
       final developmentShaderCompiler = DevelopmentShaderCompiler(
         shaderCompiler: shaderCompiler,
         fileSystem: fileSystem,
+        logger: logger,
         random: math.Random(0),
       );
 
@@ -360,6 +369,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--depfile=/.tmp_rand0/0.8863148172405516.d',
         ],
         onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -379,6 +389,7 @@ void main() {
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
       fileSystem: fileSystem,
+      logger: logger,
       random: math.Random(0),
     );
 
@@ -409,6 +420,7 @@ void main() {
             '--input-type=frag',
             '--include=$fragDir',
             '--include=$shaderLibDir',
+            '--depfile=/.tmp_rand0/0.8863148172405516.d',
           ],
           onRun: (List<String> args) {
             fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -428,6 +440,7 @@ void main() {
       final developmentShaderCompiler = DevelopmentShaderCompiler(
         shaderCompiler: shaderCompiler,
         fileSystem: fileSystem,
+        logger: logger,
         random: math.Random(0),
       );
 
@@ -458,6 +471,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--depfile=/.tmp_rand0/0.8863148172405516.d',
         ],
         onRun: (List<String> args) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -477,6 +491,7 @@ void main() {
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
       fileSystem: fileSystem,
+      logger: logger,
       random: math.Random(0),
     );
 
@@ -505,6 +520,7 @@ void main() {
           '--input-type=frag',
           '--include=$fragDir',
           '--include=$shaderLibDir',
+          '--depfile=/.tmp_rand0/0.8863148172405516.d',
         ],
         onRun: (_) {
           fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv').createSync();
@@ -524,6 +540,7 @@ void main() {
     final developmentShaderCompiler = DevelopmentShaderCompiler(
       shaderCompiler: shaderCompiler,
       fileSystem: fileSystem,
+      logger: logger,
       random: math.Random(0),
     );
 
@@ -536,5 +553,751 @@ void main() {
     expect(await content!.contentsAsBytes(), <int>[1, 2, 3, 4]);
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv'), isNot(exists));
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp'), isNot(exists));
+  });
+
+  testWithoutContext('DevelopmentShaderCompiler tracks transitive imports', () async {
+    final String tempDir = fileSystem.systemTempDirectory.path;
+    const helperPath = '/shaders/helper.glsl';
+    fileSystem.file(helperPath).createSync(recursive: true);
+
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--sksl',
+          '--runtime-stage-gles',
+          '--runtime-stage-gles3',
+          '--runtime-stage-vulkan',
+          '--iplr',
+          '--sl=$tempDir/0.8255140718871702.temp',
+          '--spirv=$tempDir/0.8255140718871702.temp.spirv',
+          '--input=$fragPath',
+          '--input-type=frag',
+          '--include=$fragDir',
+          '--include=$shaderLibDir',
+          '--depfile=$tempDir/0.8863148172405516.d',
+        ],
+        onRun: (_) {
+          fileSystem.file('$tempDir/0.8255140718871702.temp.spirv').createSync();
+          fileSystem.file('$tempDir/0.8255140718871702.temp')
+            ..createSync()
+            ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+          fileSystem
+              .file('$tempDir/0.8863148172405516.d')
+              .writeAsStringSync('$tempDir/0.8255140718871702.temp: $fragPath $helperPath');
+        },
+      ),
+    ]);
+
+    fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
+    final shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
+      shaderCompiler: shaderCompiler,
+      fileSystem: fileSystem,
+      logger: logger,
+      random: math.Random(0),
+    );
+
+    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+
+    final shaderContent = DevFSFileContent(fileSystem.file(fragPath));
+
+    final DevFSContent? content = await developmentShaderCompiler.recompileShader(shaderContent);
+    expect(content, isNotNull);
+    expect(await content!.contentsAsBytes(), <int>[1, 2, 3, 4]);
+
+    expect(developmentShaderCompiler.areDependenciesModified(shaderContent), false);
+
+    fileSystem.file(helperPath).setLastModifiedSync(DateTime.now().add(const Duration(seconds: 1)));
+
+    expect(developmentShaderCompiler.areDependenciesModified(shaderContent), true);
+  });
+
+  testWithoutContext('DevelopmentShaderCompiler handles missing depfile gracefully', () async {
+    final String tempDir = fileSystem.systemTempDirectory.path;
+
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--sksl',
+          '--runtime-stage-gles',
+          '--runtime-stage-gles3',
+          '--runtime-stage-vulkan',
+          '--iplr',
+          '--sl=$tempDir/0.8255140718871702.temp',
+          '--spirv=$tempDir/0.8255140718871702.temp.spirv',
+          '--input=$fragPath',
+          '--input-type=frag',
+          '--include=$fragDir',
+          '--include=$shaderLibDir',
+          '--depfile=$tempDir/0.8863148172405516.d',
+        ],
+        onRun: (_) {
+          fileSystem.file('$tempDir/0.8255140718871702.temp.spirv').createSync();
+          fileSystem.file('$tempDir/0.8255140718871702.temp')
+            ..createSync()
+            ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+        },
+      ),
+    ]);
+
+    fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
+    final shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
+      shaderCompiler: shaderCompiler,
+      fileSystem: fileSystem,
+      logger: logger,
+      random: math.Random(0),
+    );
+
+    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+
+    final shaderContent = DevFSFileContent(fileSystem.file(fragPath));
+
+    final DevFSContent? content = await developmentShaderCompiler.recompileShader(shaderContent);
+    expect(content, isNotNull);
+    expect(await content!.contentsAsBytes(), <int>[1, 2, 3, 4]);
+
+    expect(developmentShaderCompiler.areDependenciesModified(shaderContent), false);
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('DevelopmentShaderCompiler handles malformed depfile gracefully', () async {
+    final String tempDir = fileSystem.systemTempDirectory.path;
+
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--sksl',
+          '--runtime-stage-gles',
+          '--runtime-stage-gles3',
+          '--runtime-stage-vulkan',
+          '--iplr',
+          '--sl=$tempDir/0.8255140718871702.temp',
+          '--spirv=$tempDir/0.8255140718871702.temp.spirv',
+          '--input=$fragPath',
+          '--input-type=frag',
+          '--include=$fragDir',
+          '--include=$shaderLibDir',
+          '--depfile=$tempDir/0.8863148172405516.d',
+        ],
+        onRun: (_) {
+          fileSystem.file('$tempDir/0.8255140718871702.temp.spirv').createSync();
+          fileSystem.file('$tempDir/0.8255140718871702.temp')
+            ..createSync()
+            ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+          fileSystem.file('$tempDir/0.8863148172405516.d').writeAsStringSync('malformed content');
+        },
+      ),
+    ]);
+
+    fileSystem.file(fragPath).writeAsBytesSync(<int>[1, 2, 3, 4]);
+    final shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
+      shaderCompiler: shaderCompiler,
+      fileSystem: fileSystem,
+      logger: logger,
+      random: math.Random(0),
+    );
+
+    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+
+    final shaderContent = DevFSFileContent(fileSystem.file(fragPath));
+
+    final DevFSContent? content = await developmentShaderCompiler.recompileShader(shaderContent);
+    expect(content, isNotNull);
+    expect(await content!.contentsAsBytes(), <int>[1, 2, 3, 4]);
+
+    expect(developmentShaderCompiler.areDependenciesModified(shaderContent), false);
+    expect(logger.errorText, contains('Invalid depfile:'));
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+  testWithoutContext('DevelopmentShaderCompiler handles non-file content gracefully', () async {
+    final String tempDir = fileSystem.systemTempDirectory.path;
+
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          impellerc,
+          '--sksl',
+          '--runtime-stage-gles',
+          '--runtime-stage-gles3',
+          '--runtime-stage-vulkan',
+          '--iplr',
+          '--sl=$tempDir/0.8255140718871702.temp',
+          '--spirv=$tempDir/0.8255140718871702.temp.spirv',
+          '--input=$tempDir/0.424722653321134.temp',
+          '--input-type=frag',
+          '--include=$tempDir',
+          '--include=$shaderLibDir',
+          '--depfile=$tempDir/0.8863148172405516.d',
+        ],
+        onRun: (_) {
+          fileSystem.file('$tempDir/0.8255140718871702.temp.spirv').createSync();
+          fileSystem.file('$tempDir/0.8255140718871702.temp')
+            ..createSync()
+            ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+        },
+      ),
+    ]);
+
+    final shaderCompiler = ShaderCompiler(
+      processManager: processManager,
+      logger: logger,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+    );
+    final developmentShaderCompiler = DevelopmentShaderCompiler(
+      shaderCompiler: shaderCompiler,
+      fileSystem: fileSystem,
+      logger: logger,
+      random: math.Random(0),
+    );
+
+    developmentShaderCompiler.configureCompiler(TargetPlatform.android);
+
+    final shaderContent = DevFSByteContent(Uint8List.fromList(<int>[1, 2, 3, 4]));
+
+    final DevFSContent? content = await developmentShaderCompiler.recompileShader(shaderContent);
+    expect(content, isNotNull);
+    expect(await content!.contentsAsBytes(), <int>[1, 2, 3, 4]);
+
+    expect(developmentShaderCompiler.areDependenciesModified(shaderContent), false);
+    expect(processManager.hasRemainingExpectations, false);
+  });
+
+  group('blocked shader compiler', () {
+    testWithoutContext(
+      'compileShader throws ToolExit and logs friendly message when impellerc is blocked by Windows Application Control',
+      () async {
+        final blockedException = ProcessException(
+          impellerc,
+          <String>[],
+          'An Application Control policy has blocked this file',
+          1260,
+        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--runtime-stage-metal',
+              '--iplr',
+              '--sl=$outputPath',
+              '--spirv=$outputPath.spirv',
+              '--input=$fragPath',
+              '--input-type=frag',
+              '--include=$fragDir',
+              '--include=$shaderLibDir',
+            ],
+            exception: blockedException,
+          ),
+        ]);
+        final shaderCompiler = ShaderCompiler(
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          artifacts: artifacts,
+          platform: FakePlatform(operatingSystem: 'windows'),
+        );
+
+        await expectLater(
+          shaderCompiler.compileShader(
+            input: fileSystem.file(fragPath),
+            outputPath: outputPath,
+            targetPlatform: TargetPlatform.ios,
+          ),
+          throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
+        );
+
+        expect(logger.errorText, contains('blocked by system'));
+        expect(logger.errorText, contains(impellerc));
+      },
+    );
+
+    testWithoutContext(
+      'compileShader throws ToolExit and logs friendly message when impellerc is blocked by WDAC (4551) '
+      '(regression test for https://github.com/flutter/flutter/issues/190232)',
+      () async {
+        final blockedException = ProcessException(
+          impellerc,
+          <String>[],
+          'An Application Control policy has blocked this file',
+          4551,
+        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--runtime-stage-metal',
+              '--iplr',
+              '--sl=$outputPath',
+              '--spirv=$outputPath.spirv',
+              '--input=$fragPath',
+              '--input-type=frag',
+              '--include=$fragDir',
+              '--include=$shaderLibDir',
+            ],
+            exception: blockedException,
+          ),
+        ]);
+        final shaderCompiler = ShaderCompiler(
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          artifacts: artifacts,
+          platform: FakePlatform(operatingSystem: 'windows'),
+        );
+
+        await expectLater(
+          shaderCompiler.compileShader(
+            input: fileSystem.file(fragPath),
+            outputPath: outputPath,
+            targetPlatform: TargetPlatform.ios,
+          ),
+          throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
+        );
+
+        expect(logger.errorText, contains('blocked by system'));
+        expect(logger.errorText, contains(impellerc));
+      },
+    );
+
+    testWithoutContext(
+      'compileShader throws ToolExit and logs friendly message when impellerc is blocked by group policy',
+      () async {
+        final blockedException = ProcessException(
+          impellerc,
+          <String>[],
+          'blocked by group policy',
+          1260,
+        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--runtime-stage-metal',
+              '--iplr',
+              '--sl=$outputPath',
+              '--spirv=$outputPath.spirv',
+              '--input=$fragPath',
+              '--input-type=frag',
+              '--include=$fragDir',
+              '--include=$shaderLibDir',
+            ],
+            exception: blockedException,
+          ),
+        ]);
+        final shaderCompiler = ShaderCompiler(
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          artifacts: artifacts,
+          platform: FakePlatform(operatingSystem: 'windows'),
+        );
+
+        await expectLater(
+          shaderCompiler.compileShader(
+            input: fileSystem.file(fragPath),
+            outputPath: outputPath,
+            targetPlatform: TargetPlatform.ios,
+          ),
+          throwsToolExit(message: 'Impeller shader compiler was blocked by security policy.'),
+        );
+
+        expect(logger.errorText, contains('blocked by system'));
+        expect(logger.errorText, contains(impellerc));
+      },
+    );
+
+    testWithoutContext(
+      'compileShader handles non-fatal security policy block gracefully',
+      () async {
+        final blockedException = ProcessException(
+          impellerc,
+          <String>[],
+          'blocked by group policy',
+          1260,
+        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--runtime-stage-metal',
+              '--iplr',
+              '--sl=$outputPath',
+              '--spirv=$outputPath.spirv',
+              '--input=$fragPath',
+              '--input-type=frag',
+              '--include=$fragDir',
+              '--include=$shaderLibDir',
+            ],
+            exception: blockedException,
+          ),
+        ]);
+        final shaderCompiler = ShaderCompiler(
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          artifacts: artifacts,
+          platform: FakePlatform(operatingSystem: 'windows'),
+        );
+
+        final bool success = await shaderCompiler.compileShader(
+          input: fileSystem.file(fragPath),
+          outputPath: outputPath,
+          targetPlatform: TargetPlatform.ios,
+          fatal: false,
+        );
+
+        expect(success, false);
+        expect(logger.errorText, contains('blocked by system'));
+        expect(logger.errorText, contains(impellerc));
+      },
+    );
+
+    testWithoutContext('compileShader rethrows other ProcessExceptions', () async {
+      final otherException = ProcessException(impellerc, <String>[], 'Some other error');
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--runtime-stage-metal',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
+            '--input=$fragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exception: otherException,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+      );
+
+      await expectLater(
+        shaderCompiler.compileShader(
+          input: fileSystem.file(fragPath),
+          outputPath: outputPath,
+          targetPlatform: TargetPlatform.ios,
+        ),
+        throwsA(
+          isA<ProcessException>().having(
+            (ProcessException e) => e.message,
+            'message',
+            contains('Some other error'),
+          ),
+        ),
+      );
+    });
+
+    testWithoutContext('compileShader only logs the security policy block error once', () async {
+      final blockedException = ProcessException(
+        impellerc,
+        <String>[],
+        'blocked by group policy',
+        1260,
+      );
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--runtime-stage-metal',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
+            '--input=$fragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exception: blockedException,
+        ),
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--runtime-stage-metal',
+            '--iplr',
+            '--sl=$outputPath',
+            '--spirv=$outputPath.spirv',
+            '--input=$fragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exception: blockedException,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'windows'),
+      );
+
+      final bool success1 = await shaderCompiler.compileShader(
+        input: fileSystem.file(fragPath),
+        outputPath: outputPath,
+        targetPlatform: TargetPlatform.ios,
+        fatal: false,
+      );
+      expect(success1, false);
+
+      final String firstErrorLog = logger.errorText;
+      expect(firstErrorLog, contains('blocked by system'));
+
+      const headerLine = '------------------------------------------------------------------------';
+      expect(headerLine.allMatches(logger.errorText).length, 2);
+
+      final bool success2 = await shaderCompiler.compileShader(
+        input: fileSystem.file(fragPath),
+        outputPath: outputPath,
+        targetPlatform: TargetPlatform.ios,
+        fatal: false,
+      );
+      expect(success2, false);
+
+      expect(headerLine.allMatches(logger.errorText).length, 2);
+    });
+  });
+
+  group('ShaderCompiler hints and diagnostics', () {
+    Future<void> expectShaderCompilerException({
+      required ShaderCompiler shaderCompiler,
+      required String inputPath,
+      required String outputPath,
+      required List<Matcher> matchers,
+    }) async {
+      await expectLater(
+        shaderCompiler.compileShader(
+          input: fileSystem.file(inputPath),
+          outputPath: outputPath,
+          targetPlatform: TargetPlatform.web_javascript,
+        ),
+        throwsA(
+          isA<ShaderCompilerException>().having(
+            (ShaderCompilerException e) => e.toString(),
+            'toString()',
+            allOf(matchers),
+          ),
+        ),
+      );
+    }
+
+    testWithoutContext('macOS and exit code -9 adds Gatekeeper/OOM hint', () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$outputPath',
+            '--spirv=$outputSpirvPath',
+            '--input=$notFragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exitCode: -9,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'macos'),
+      );
+
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: notFragPath,
+        outputPath: outputPath,
+        matchers: <Matcher>[
+          contains('blocked by macOS Gatekeeper or run out of memory (OOM)'),
+          contains('xattr -d com.apple.quarantine'),
+        ],
+      );
+    });
+
+    testWithoutContext('macOS and exit code -6 adds abort hint', () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$outputPath',
+            '--spirv=$outputSpirvPath',
+            '--input=$notFragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exitCode: -6,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'macos'),
+      );
+
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: notFragPath,
+        outputPath: outputPath,
+        matchers: <Matcher>[
+          contains('The shader compiler (impellerc) aborted during compilation.'),
+        ],
+      );
+    });
+
+    testWithoutContext('Linux and exit code -6 adds abort hint', () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$outputPath',
+            '--spirv=$outputSpirvPath',
+            '--input=$notFragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exitCode: -6,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(),
+      );
+
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: notFragPath,
+        outputPath: outputPath,
+        matchers: <Matcher>[
+          contains('The shader compiler (impellerc) aborted during compilation.'),
+        ],
+      );
+    });
+
+    testWithoutContext('Windows and exit code 3 adds abort hint', () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$outputPath',
+            '--spirv=$outputSpirvPath',
+            '--input=$notFragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exitCode: 3,
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: FakePlatform(operatingSystem: 'windows'),
+      );
+
+      await expectShaderCompilerException(
+        shaderCompiler: shaderCompiler,
+        inputPath: notFragPath,
+        outputPath: outputPath,
+        matchers: <Matcher>[
+          contains('The shader compiler (impellerc) aborted during compilation.'),
+          isNot(contains('Warning: The path contains non-ASCII characters')),
+        ],
+      );
+    });
+
+    testWithoutContext(
+      'Windows and exit code 3 with Unicode path adds Unicode path warning '
+      '(regression test for https://github.com/flutter/flutter/issues/190233)',
+      () async {
+        const unicodeFragPath = '/shaders/my_shåder.frag';
+        const unicodeOutputPath = '/output/shaders/my_shåder.frag';
+        const unicodeOutputSpirvPath = '/output/shaders/my_shåder.frag.spirv';
+        fileSystem.file(unicodeFragPath).createSync(recursive: true);
+
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              impellerc,
+              '--sksl',
+              '--iplr',
+              '--json',
+              '--sl=$unicodeOutputPath',
+              '--spirv=$unicodeOutputSpirvPath',
+              '--input=$unicodeFragPath',
+              '--input-type=frag',
+              '--include=$fragDir',
+              '--include=$shaderLibDir',
+            ],
+            exitCode: 3,
+          ),
+        ]);
+        final shaderCompiler = ShaderCompiler(
+          processManager: processManager,
+          logger: logger,
+          fileSystem: fileSystem,
+          artifacts: artifacts,
+          platform: FakePlatform(operatingSystem: 'windows'),
+        );
+
+        await expectShaderCompilerException(
+          shaderCompiler: shaderCompiler,
+          inputPath: unicodeFragPath,
+          outputPath: unicodeOutputPath,
+          matchers: <Matcher>[
+            contains('The shader compiler (impellerc) aborted during compilation.'),
+            contains('Warning: The path contains non-ASCII characters'),
+          ],
+        );
+      },
+    );
   });
 }
