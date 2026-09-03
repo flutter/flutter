@@ -100,6 +100,10 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
               (override));
   MOCK_METHOD(void, FlutterViewDestroyOverlaySurfaces, (), (override));
   MOCK_METHOD(ASurfaceTransaction*, createTransaction, (), (override));
+  MOCK_METHOD(bool, HasActivePlatformViews, (), (const, override));
+  MOCK_METHOD(void, SetHasActivePlatformViews, (bool), (override));
+  MOCK_METHOD(bool, FrameUsesJavaTransactions, (), (const, override));
+  MOCK_METHOD(void, SetFrameUsesJavaTransactions, (bool), (override));
   MOCK_METHOD(void, swapTransaction, (), (override));
   MOCK_METHOD(void, applyTransaction, (), (override));
   MOCK_METHOD(void, destroyOverlaySurface2, (), (override));
