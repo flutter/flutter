@@ -2056,7 +2056,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
   /// This method is called when [_markedForFocus] is set to a node that cannot
   /// request focus. It attempts to find an alternative focusable node.
   FocusNode _findValidFocusOrFallback(FocusNode? previousFocus) {
-    // Try to restore focus to previous node if it's still focusable
+    // Try to restore focus to previous node if it's still focusable.
     if (previousFocus != null && previousFocus.canRequestFocus) {
       return previousFocus;
     }
