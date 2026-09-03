@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import '_accessibility_evaluations.dart';
+import 'binding.dart';
 import 'service_extensions.dart';
 
 /// Service that handles accessibility and semantics inspection.
@@ -89,33 +90,21 @@ class AccessibilityInspector {
 
     final nodeIssues = <int, List<Map<String, Object?>>>{};
 
-    final List<Violation> tapTargetViolations = MinimumTapTargetEvaluation(
-      size: minSize,
-    ).traverse(root, view: renderView.flutterView);
-    for (final violation in tapTargetViolations) {
-      nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
-        <String, Object?>{'rule': 'tapTargetSize', 'description': violation.reason},
-      );
-    }
+    final evaluations = <(AccessibilityEvaluation, String)>[
+      (MinimumTapTargetEvaluation(size: minSize), 'tapTargetSize'),
+      (const LabeledTapTargetEvaluation(), 'missingLabel'),
+      (const UnlabeledLeafNodeEvaluation(), 'unlabeledLeafNode'),
+    ];
 
-    final List<Violation> labeledTapTargetViolations = const LabeledTapTargetEvaluation().traverse(
-      root,
-      view: renderView.flutterView,
-    );
-    for (final violation in labeledTapTargetViolations) {
-      nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
-        <String, Object?>{'rule': 'missingLabel', 'description': violation.reason},
-      );
-    }
-
-    final List<Violation> unlabeledLeafViolations = const UnlabeledLeafNodeEvaluation().traverse(
-      root,
-      view: renderView.flutterView,
-    );
-    for (final violation in unlabeledLeafViolations) {
-      nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
-        <String, Object?>{'rule': 'unlabeledLeafNode', 'description': violation.reason},
-      );
+    for (final (evaluation, rule) in evaluations) {
+      final EvaluationResult result = await evaluation.evaluate(WidgetsBinding.instance);
+      for (final Violation violation in result.violations) {
+        if (violation.node.owner == semanticsOwner) {
+          nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
+            <String, Object?>{'rule': rule, 'description': violation.reason},
+          );
+        }
+      }
     }
 
     final nodes = <String, Object?>{};
