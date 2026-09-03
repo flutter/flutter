@@ -15,6 +15,8 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/macos.dart';
 import '../cache.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../ios/plist_parser.dart';
@@ -257,12 +259,14 @@ end
     Directory macosBuildOutput,
     String? codesignIdentity,
   ) async {
-    final Artifacts artifacts = toolContext.artifacts;
-    final Cache cache = toolContext.cache;
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = toolContext.logger;
-    final Platform platform = toolContext.platform;
-    final ProcessManager processManager = toolContext.processManager;
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
 
     final Status status = logger.startProgress(' ├─Building App.xcframework...');
     try {
@@ -328,10 +332,12 @@ end
     Directory modeDirectory,
     String? codesignIdentity,
   ) async {
-    final Artifacts artifacts = toolContext.artifacts;
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = toolContext.logger;
-    final ProcessManager processManager = toolContext.processManager;
+    final ToolContext(
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+    ) = toolContext;
 
     final Status status = logger.startProgress(' ├─Copying FlutterMacOS.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = artifacts.getArtifactPath(
@@ -369,12 +375,13 @@ end
     BuildMode mode,
     String? codesignIdentity,
   ) async {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = toolContext.logger;
-    final PlistParser plistParser = appleContext.plistParser;
-    final ProcessManager processManager = toolContext.processManager;
-    final ProcessUtils processUtils = toolContext.processUtils;
-    final Xcode xcode = appleContext.xcode;
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+    ) = toolContext;
+    final AppleContext(:PlistParser plistParser, :Xcode xcode) = appleContext;
 
     final Status status = logger.startProgress(' ├─Building plugins...');
     try {

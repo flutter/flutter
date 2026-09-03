@@ -759,10 +759,12 @@ end
     Directory modeDirectory,
     String? codesignIdentity,
   ) async {
-    final Artifacts artifacts = _toolContext.artifacts;
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final ProcessManager processManager = _toolContext.processManager;
+    final ToolContext(
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+    ) = _toolContext;
 
     final Status status = logger.startProgress(' ├─Copying Flutter.xcframework...');
     final String engineCacheFlutterFrameworkDirectory = artifacts.getArtifactPath(
@@ -882,12 +884,13 @@ end
     Directory modeDirectory,
     String? codesignIdentity,
   ) async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final PlistParser plistParser = _appleContext.plistParser;
-    final ProcessManager processManager = _toolContext.processManager;
-    final ProcessUtils processUtils = _toolContext.processUtils;
-    final Xcode xcode = _appleContext.xcode;
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+    ) = _toolContext;
+    final AppleContext(:PlistParser plistParser, :Xcode xcode) = _appleContext;
 
     final Status status = logger.startProgress(' ├─Building plugins...');
     try {
