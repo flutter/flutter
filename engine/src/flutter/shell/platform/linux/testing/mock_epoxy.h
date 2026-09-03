@@ -49,6 +49,7 @@ class MockEpoxy {
               glDeleteRenderbuffers,
               (GLsizei n, const GLuint* renderbuffers));
   MOCK_METHOD(void, glDeleteTextures, (GLsizei n, const GLuint* textures));
+  MOCK_METHOD(void, glFinish, ());
   MOCK_METHOD(void, glGenFramebuffers, (GLsizei n, GLuint* framebuffers));
   MOCK_METHOD(void, glGenRenderbuffers, (GLsizei n, GLuint* renderbuffers));
   MOCK_METHOD(void, glGenTextures, (GLsizei n, GLuint* textures));

@@ -163,7 +163,7 @@ static void ApplyFramebufferBlend(Entity& entity) {
 /// @brief Create the subpass restore contents, appling any filters or opacity
 ///        from the provided paint object.
 static std::shared_ptr<Contents> CreateContentsForSubpassTarget(
-    const ContentContext& renderer,
+    ContentContext& renderer,
     const Paint& paint,
     const std::shared_ptr<Texture>& target,
     const Matrix& effect_transform) {
@@ -1886,6 +1886,8 @@ void Canvas::SaveLayer(const Paint& paint,
                   FilterInput::Make(std::move(input_texture)));
     backdrop_filter_contents->SetEffectTransform(
         transform_stack_.back().transform.Basis());
+    backdrop_filter_contents->SetLocalToPassTransform(
+        transform_stack_.back().transform);
     backdrop_filter_contents->SetRenderingMode(
         transform_stack_.back().transform.HasTranslation()
             ? Entity::RenderingMode::kSubpassPrependSnapshotTransform

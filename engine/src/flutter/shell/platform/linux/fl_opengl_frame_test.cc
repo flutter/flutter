@@ -49,6 +49,7 @@ TEST_F(FlOpenGLFrameTest, CompositeRGBA) {
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
+          .type = kFlutterOpenGLTargetTypeFramebuffer,
           .framebuffer = {.target = GL_RGBA8, .user_data = framebuffer}}};
   FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
                         .backing_store = &backing_store,
@@ -78,6 +79,7 @@ TEST_F(FlOpenGLFrameTest, CompositeBGRA) {
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
+          .type = kFlutterOpenGLTargetTypeFramebuffer,
           .framebuffer = {.target = GL_BGRA8_EXT, .user_data = framebuffer}}};
   FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
                         .backing_store = &backing_store,
@@ -107,6 +109,7 @@ TEST_F(FlOpenGLFrameTest, ZeroSizeClearsFrame) {
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
+          .type = kFlutterOpenGLTargetTypeFramebuffer,
           .framebuffer = {.target = GL_RGBA8, .user_data = framebuffer}}};
   FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
                         .backing_store = &backing_store,
@@ -132,4 +135,55 @@ TEST_F(FlOpenGLFrameTest, ZeroSizeClearsFrame) {
   fl_opengl_frame_get_size(frame, &frame_width, &frame_height);
   EXPECT_EQ(frame_width, 0u);
   EXPECT_EQ(frame_height, 0u);
+}
+
+// Checks a shareable frame is synchronized before it is handed to GTK, which
+// draws it using a different OpenGL context.
+// https://github.com/flutter/flutter/issues/191775
+TEST_F(FlOpenGLFrameTest, ShareableFrameSynchronized) {
+  constexpr size_t width = 100;
+  constexpr size_t height = 100;
+
+  g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new(/*shareable=*/TRUE);
+  g_autoptr(FlFramebuffer) framebuffer =
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
+  FlutterBackingStore backing_store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {
+          .type = kFlutterOpenGLTargetTypeFramebuffer,
+          .framebuffer = {.target = GL_RGBA8, .user_data = framebuffer}}};
+  FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
+                        .backing_store = &backing_store,
+                        .offset = {0, 0},
+                        .size = {width, height}};
+  const FlutterLayer* layers[1] = {&layer};
+
+  EXPECT_CALL(epoxy, glFinish());
+
+  fl_opengl_frame_composite(frame, compositor, layers, 1);
+}
+
+// Checks a frame that is copied into CPU memory does not pay for a second
+// synchronization - glReadPixels() already waits for the frame to be rendered.
+TEST_F(FlOpenGLFrameTest, UnshareableFrameNotSynchronizedTwice) {
+  constexpr size_t width = 100;
+  constexpr size_t height = 100;
+
+  g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new(/*shareable=*/FALSE);
+  g_autoptr(FlFramebuffer) framebuffer =
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
+  FlutterBackingStore backing_store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {
+          .type = kFlutterOpenGLTargetTypeFramebuffer,
+          .framebuffer = {.target = GL_RGBA8, .user_data = framebuffer}}};
+  FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
+                        .backing_store = &backing_store,
+                        .offset = {0, 0},
+                        .size = {width, height}};
+  const FlutterLayer* layers[1] = {&layer};
+
+  EXPECT_CALL(epoxy, glFinish()).Times(0);
+
+  fl_opengl_frame_composite(frame, compositor, layers, 1);
 }

@@ -56,6 +56,11 @@ extern NSString* const FlutterDefaultInitialRoute;
  * A newly initialized FlutterEngine will not actually run a Dart Isolate until
  * either `-runWithEntrypoint:` or `-runWithEntrypoint:libraryURI` is invoked.
  * One of these methods must be invoked before calling `-setViewController:`.
+ *
+ * `FlutterEngine` instances must be created and run on the main thread. The engine adopts the
+ * thread that runs it as its platform thread, which is also used for executing application UI code
+ * written in Dart. Running an engine on a background queue is not supported, apps and app
+ * extensions must dispatch to the main queue.
  */
 FLUTTER_DARWIN_EXPORT
 @interface FlutterEngine : NSObject <FlutterPluginRegistry>
@@ -76,7 +81,7 @@ FLUTTER_DARWIN_EXPORT
  * This means that the engine will continue to run regardless of whether a `FlutterViewController`
  * is attached to it or not, until `-destroyContext:` is called or the process finishes.
  */
-- (instancetype)init;
+- (instancetype)init NS_SWIFT_UI_ACTOR;
 
 /**
  * Initialize this FlutterEngine.
@@ -95,7 +100,7 @@ FLUTTER_DARWIN_EXPORT
  *   be unique across FlutterEngine instances, and is used in instrumentation to label
  *   the threads used by this FlutterEngine.
  */
-- (instancetype)initWithName:(NSString*)labelPrefix;
+- (instancetype)initWithName:(NSString*)labelPrefix NS_SWIFT_UI_ACTOR;
 
 /**
  * Initialize this FlutterEngine with a `FlutterDartProject`.
@@ -116,7 +121,8 @@ FLUTTER_DARWIN_EXPORT
  *   the threads used by this FlutterEngine.
  * @param project The `FlutterDartProject` to run.
  */
-- (instancetype)initWithName:(NSString*)labelPrefix project:(nullable FlutterDartProject*)project;
+- (instancetype)initWithName:(NSString*)labelPrefix
+                     project:(nullable FlutterDartProject*)project NS_SWIFT_UI_ACTOR;
 
 /**
  * Initialize this FlutterEngine with a `FlutterDartProject`.
@@ -137,7 +143,7 @@ FLUTTER_DARWIN_EXPORT
  */
 - (instancetype)initWithName:(NSString*)labelPrefix
                      project:(nullable FlutterDartProject*)project
-      allowHeadlessExecution:(BOOL)allowHeadlessExecution;
+      allowHeadlessExecution:(BOOL)allowHeadlessExecution NS_SWIFT_UI_ACTOR;
 
 /**
  * Initialize this FlutterEngine with a `FlutterDartProject`.
@@ -161,7 +167,7 @@ FLUTTER_DARWIN_EXPORT
 - (instancetype)initWithName:(NSString*)labelPrefix
                      project:(nullable FlutterDartProject*)project
       allowHeadlessExecution:(BOOL)allowHeadlessExecution
-          restorationEnabled:(BOOL)restorationEnabled NS_DESIGNATED_INITIALIZER;
+          restorationEnabled:(BOOL)restorationEnabled NS_DESIGNATED_INITIALIZER NS_SWIFT_UI_ACTOR;
 
 /**
  * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
@@ -171,9 +177,11 @@ FLUTTER_DARWIN_EXPORT
  * The first call to this method will create a new Isolate. Subsequent calls will return
  * immediately and have no effect.
  *
+ * This method must be called on the main thread. See the `FlutterEngine` class documentation.
+ *
  * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
  */
-- (BOOL)run;
+- (BOOL)run NS_SWIFT_UI_ACTOR;
 
 /**
  * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
@@ -182,6 +190,8 @@ FLUTTER_DARWIN_EXPORT
  * The first call to this method will create a new Isolate. Subsequent calls will return
  * immediately and have no effect.
  *
+ * This method must be called on the main thread. See the `FlutterEngine` class documentation.
+ *
  * @param entrypoint The name of a top-level function from the same Dart
  *   library that contains the app's main() function.  If this is FlutterDefaultDartEntrypoint (or
  *   nil) it will default to `main()`.  If it is not the app's main() function, that function must
@@ -189,7 +199,7 @@ FLUTTER_DARWIN_EXPORT
  *   compiler.
  * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
  */
-- (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint;
+- (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint NS_SWIFT_UI_ACTOR;
 
 /**
  * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
@@ -197,6 +207,8 @@ FLUTTER_DARWIN_EXPORT
  *
  * The first call to this method will create a new Isolate. Subsequent calls will return
  * immediately and have no effect.
+ *
+ * This method must be called on the main thread. See the `FlutterEngine` class documentation.
  *
  * @param entrypoint The name of a top-level function from the same Dart
  *   library that contains the app's main() function.  If this is FlutterDefaultDartEntrypoint (or
@@ -208,7 +220,7 @@ FLUTTER_DARWIN_EXPORT
  * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
  */
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint
-             initialRoute:(nullable NSString*)initialRoute;
+             initialRoute:(nullable NSString*)initialRoute NS_SWIFT_UI_ACTOR;
 
 /**
  * Runs a Dart program on an Isolate using the specified entrypoint and Dart library,
@@ -216,6 +228,8 @@ FLUTTER_DARWIN_EXPORT
  *
  * The first call to this method will create a new Isolate. Subsequent calls will return
  * immediately and have no effect.
+ *
+ * This method must be called on the main thread. See the `FlutterEngine` class documentation.
  *
  * @param entrypoint The name of a top-level function from a Dart library.  If this is
  *   FlutterDefaultDartEntrypoint (or nil); this will default to `main()`.  If it is not the app's
@@ -226,7 +240,8 @@ FLUTTER_DARWIN_EXPORT
  *   the same library as the `main()` function in the Dart program.
  * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
  */
-- (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint libraryURI:(nullable NSString*)uri;
+- (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint
+               libraryURI:(nullable NSString*)uri NS_SWIFT_UI_ACTOR;
 
 /**
  * Runs a Dart program on an Isolate using the specified entrypoint and Dart library,
@@ -234,6 +249,8 @@ FLUTTER_DARWIN_EXPORT
  *
  * The first call to this method will create a new Isolate. Subsequent calls will return
  * immediately and have no effect.
+ *
+ * This method must be called on the main thread. See the `FlutterEngine` class documentation.
  *
  * @param entrypoint The name of a top-level function from a Dart library.  If this is
  *   FlutterDefaultDartEntrypoint (or nil); this will default to `main()`.  If it is not the app's
@@ -248,7 +265,7 @@ FLUTTER_DARWIN_EXPORT
  */
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint
                libraryURI:(nullable NSString*)libraryURI
-             initialRoute:(nullable NSString*)initialRoute;
+             initialRoute:(nullable NSString*)initialRoute NS_SWIFT_UI_ACTOR;
 
 /**
  * Runs a Dart program on an Isolate using the specified entrypoint and Dart library,
@@ -256,6 +273,8 @@ FLUTTER_DARWIN_EXPORT
  *
  * The first call to this method will create a new Isolate. Subsequent calls will return
  * immediately and have no effect.
+ *
+ * This method must be called on the main thread. See the `FlutterEngine` class documentation.
  *
  * @param entrypoint The name of a top-level function from a Dart library.  If this is
  *   FlutterDefaultDartEntrypoint (or nil); this will default to `main()`.  If it is not the app's
@@ -272,7 +291,7 @@ FLUTTER_DARWIN_EXPORT
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint
                libraryURI:(nullable NSString*)libraryURI
              initialRoute:(nullable NSString*)initialRoute
-           entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
+           entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs NS_SWIFT_UI_ACTOR;
 
 /**
  * Destroy running context for an engine.
