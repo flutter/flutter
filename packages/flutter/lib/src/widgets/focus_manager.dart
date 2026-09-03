@@ -2011,7 +2011,7 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
       _markedForFocus = _findValidFocusOrFallback(previousFocus);
     }
 
-    // Handle the requested non-primary focus if focusable
+    // Handle the requested non-primary focus if focusable.
     if (_markedForFocus != null && _markedForFocus != _primaryFocus) {
       final Set<FocusNode> previousPath = previousFocus?.ancestors.toSet() ?? <FocusNode>{};
       final Set<FocusNode> nextPath = _markedForFocus!.ancestors.toSet();
