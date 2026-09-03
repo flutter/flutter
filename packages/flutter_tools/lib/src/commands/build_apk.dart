@@ -151,8 +151,7 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Logger logger = toolContext.logger;
-    final Terminal terminal = toolContext.terminal;
+    final ToolContext(:Logger logger, :Terminal terminal) = toolContext;
     if (androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }

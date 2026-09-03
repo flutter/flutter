@@ -142,8 +142,7 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject project = this.project;
-    final Logger logger = toolContext.logger;
-    final FileSystem fs = toolContext.fs;
+    final ToolContext(:Logger logger, :FileSystem fs) = toolContext;
     if (androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
@@ -204,7 +203,7 @@ class BuildAarCommand extends BuildSubCommand {
     if (remainingArguments.isEmpty) {
       return super.project;
     }
-    final FileSystem fs = toolContext.fs;
+    final ToolContext(:FileSystem fs) = toolContext;
     final File mainFile = fs.file(remainingArguments.first);
     final String path;
     if (!mainFile.existsSync()) {
