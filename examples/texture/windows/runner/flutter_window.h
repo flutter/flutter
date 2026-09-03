@@ -42,7 +42,11 @@ class FlutterWindow : public Win32Window {
   // Channel to receive texture requests from Flutter.
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> texture_channel_;
 
+  // The texture registrar used to register textures with the Flutter engine.
+  flutter::TextureRegistrar* texture_registrar_ = nullptr;
+
   // Texture we've created.
+  std::unique_ptr<flutter::TextureVariant> pixel_buffer_texture_;
   std::unique_ptr<MyTexture> my_texture_;
   int64_t texture_id_ = -1;
 };
