@@ -11,14 +11,9 @@
 
 namespace flutter {
 
-enum class IOSRenderingAPI {
-  kSoftware,
-  kMetal,
-};
-
-IOSRenderingAPI GetRenderingAPIForProcess();
-
-Class GetCoreAnimationLayerClassForRenderingAPI(IOSRenderingAPI rendering_api);
+// Returns the CoreAnimation layer class to back a Flutter view. Fails fast if
+// no Metal device is available.
+Class GetCoreAnimationLayerClass();
 
 }  // namespace flutter
 

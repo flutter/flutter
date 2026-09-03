@@ -356,6 +356,41 @@ TEST(AccessibilityBridgeTest, ReadOnlyTextFieldHasReadOnlyRestriction) {
             ax::mojom::Restriction::kReadOnly);
 }
 
+TEST(AccessibilityBridgeTest, ReadOnlyTextFieldHasTextFieldRole) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
+  auto flags = FlutterSemanticsFlags{
+      .is_enabled = FlutterTristate::kFlutterTristateTrue,
+      .is_text_field = true,
+      .is_read_only = true,
+  };
+  root.flags2 = &flags;
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kTextField);
+}
+
+TEST(AccessibilityBridgeTest, EditableTextFieldHasTextFieldRole) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
+  auto flags = FlutterSemanticsFlags{
+      .is_enabled = FlutterTristate::kFlutterTristateTrue,
+      .is_text_field = true,
+      .is_read_only = false,
+  };
+  root.flags2 = &flags;
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kTextField);
+  EXPECT_TRUE(root_node->GetData().HasState(ax::mojom::State::kEditable));
+}
+
 // Ensure that checkboxes have their checked status set apropriately
 // Previously, only Radios could have this flag updated
 // Resulted in the issue seen at

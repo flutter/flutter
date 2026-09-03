@@ -48,18 +48,23 @@ Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsMacOS(
   for (final asset in nativeAssets) {
     final String assetId = asset.codeAsset.id;
     final KernelAssetPath path =
-        idToPath[assetId] ?? _targetLocationMacOS(asset, absolutePath, alreadyTakenNames).path;
+        idToPath[assetId] ??
+        _targetLocationMacOS(asset, absolutePath, alreadyTakenNames, useInstallName: true).path;
     idToPath[assetId] = path;
     result[asset] = KernelAsset(id: assetId, target: asset.target, path: path);
   }
   return result;
 }
 
+/// [useInstallName] gives the name the asset is loaded with at runtime rather
+/// than the location it is bundled at. The two are different for a framework,
+/// and the native assets manifest needs the former: see [frameworkInstallName].
 KernelAsset _targetLocationMacOS(
   FlutterCodeAsset asset,
   Uri? absolutePath,
-  Set<String> alreadyTakenNames,
-) {
+  Set<String> alreadyTakenNames, {
+  bool useInstallName = false,
+}) {
   final LinkMode linkMode = asset.codeAsset.linkMode;
   final KernelAssetPath kernelAssetPath;
   switch (linkMode) {
@@ -80,6 +85,9 @@ KernelAsset _targetLocationMacOS(
         // "relative" in the context of native assets would be relative to the
         // kernel or aot snapshot.
         uri = frameworkUri(fileName, alreadyTakenNames);
+        if (useInstallName) {
+          uri = Uri(path: frameworkInstallName(uri));
+        }
       }
       kernelAssetPath = KernelAssetAbsolutePath(uri);
     default:
@@ -172,8 +180,7 @@ Future<List<File>> copyNativeCodeAssetsMacOS(
       ),
     );
 
-    final String dylibFileName = dylibFile.basename;
-    final newInstallName = '@rpath/$dylibFileName.framework/$dylibFileName';
+    final String newInstallName = frameworkInstallName(target);
     final Set<String> oldInstallNames = await getInstallNamesDylib(dylibFile);
     for (final oldInstallName in oldInstallNames) {
       oldToNewInstallNames[oldInstallName] = newInstallName;

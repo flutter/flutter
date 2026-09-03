@@ -160,7 +160,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// This sample demonstrates how to create an adapter widget that makes any
 /// child widget selectable.
 ///
-/// ** See code in examples/api/lib/material/selectable_region/selectable_region.0.dart **
+/// ** See code in examples/api/lib/widgets/selectable_region/selectable_region.0.dart **
 /// {@end-tool}
 ///
 /// ## Complex layout
@@ -173,7 +173,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// This sample demonstrates how to create a [SelectionContainer] that only
 /// allows selecting everything or nothing with no partial selection.
 ///
-/// ** See code in examples/api/lib/material/selection_container/selection_container.0.dart **
+/// ** See code in examples/api/lib/widgets/selection_container/selection_container.0.dart **
 /// {@end-tool}
 ///
 /// In the case where a group of widgets should be excluded from selection under
@@ -183,7 +183,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// {@tool dartpad}
 /// This sample demonstrates how to disable selection for a Text in a Column.
 ///
-/// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
+/// ** See code in examples/api/lib/widgets/selection_container/selection_container_disabled.0.dart **
 /// {@end-tool}
 ///
 /// To create a separate selection system from its parent selection area,
@@ -447,6 +447,10 @@ class SelectableRegionState extends State<SelectableRegion>
   /// Notifies its listeners when the selection state in this [SelectableRegion] changes.
   final _SelectableRegionSelectionStatusNotifier _selectionStatusNotifier =
       _SelectableRegionSelectionStatusNotifier._();
+
+  /// Preserves the selection status scope and root selection container when the
+  /// desktop web context menu wrapper is added or removed.
+  final GlobalKey _selectionStatusScopeKey = GlobalKey(debugLabel: 'selectionStatusScopeKey');
 
   @protected
   @override
@@ -1959,6 +1963,7 @@ class SelectableRegionState extends State<SelectableRegion>
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
     Widget result = SelectableRegionSelectionStatusScope._(
+      key: _selectionStatusScopeKey,
       selectionStatusNotifier: _selectionStatusNotifier,
       child: SelectionContainer(registrar: this, delegate: _selectionDelegate, child: widget.child),
     );
@@ -3516,6 +3521,7 @@ final class _SelectableRegionSelectionStatusNotifier extends ChangeNotifier
 /// does not change.
 final class SelectableRegionSelectionStatusScope extends InheritedWidget {
   const SelectableRegionSelectionStatusScope._({
+    super.key,
     required this.selectionStatusNotifier,
     required super.child,
   });

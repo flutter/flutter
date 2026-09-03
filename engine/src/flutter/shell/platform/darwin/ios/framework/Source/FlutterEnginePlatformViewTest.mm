@@ -86,7 +86,6 @@ flutter::FakeDelegate fake_delegate;
                                /*io=*/thread_task_runner);
   platform_view = std::make_unique<flutter::PlatformViewIOS>(
       /*delegate=*/fake_delegate,
-      /*rendering_api=*/flutter::IOSRenderingAPI::kMetal,
       /*platform_views_controller=*/nil,
       /*task_runners=*/runners,
       /*is_gpu_disabled_sync_switch=*/sync_switch);

@@ -4,10 +4,24 @@
 
 import 'package:flutter_devicelab/framework/devices.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
+import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/tasks/integration_tests.dart';
 
 /// Verify that dart defines work on iOS.
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(dartDefinesTask());
+  await task(() async {
+    TaskResult? result;
+    String? simulatorDeviceId;
+    try {
+      await testWithNewIOSSimulator('ios_defines_test', (String deviceId) async {
+        simulatorDeviceId = deviceId;
+        result = await dartDefinesTask(deviceIdOverride: deviceId).call();
+      });
+    } finally {
+      await removeIOSSimulator(simulatorDeviceId);
+    }
+    return result ?? TaskResult.failure('Simulator creation failed');
+  });
 }
