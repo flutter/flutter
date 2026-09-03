@@ -43,7 +43,6 @@ import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/file_generators/main_dart.dart' as main_dart;
 import '../web/web_device.dart';
 import '../web/web_runner.dart';
-import 'build_targets.dart';
 import 'devfs_web.dart';
 import 'web_expression_compiler.dart';
 
@@ -347,14 +346,9 @@ class ResidentWebRunner extends ResidentRunner {
             logger: _logger,
             processManager: globals.processManager,
             buildSystem: globals.buildSystem,
-            buildTargets: const BuildTargetsImpl(),
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
             analytics: globals.analytics,
-            artifacts: globals.artifacts!,
-            cache: globals.cache,
-            platform: globals.platform,
-            terminal: globals.terminal,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -513,14 +507,9 @@ class ResidentWebRunner extends ResidentRunner {
           logger: _logger,
           processManager: globals.processManager,
           buildSystem: globals.buildSystem,
-          buildTargets: const BuildTargetsImpl(),
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
           analytics: globals.analytics,
-          artifacts: globals.artifacts!,
-          cache: globals.cache,
-          platform: globals.platform,
-          terminal: globals.terminal,
         );
         await webBuilder.buildWeb(
           flutterProject,

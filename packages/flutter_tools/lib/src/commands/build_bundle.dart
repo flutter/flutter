@@ -9,7 +9,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../bundle.dart';
 import '../bundle_builder.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
@@ -41,7 +40,10 @@ class BuildBundleCommand extends BuildSubCommand {
     argParser
       ..addOption(
         'depfile',
-        defaultsTo: defaultDepfilePath(toolContext.fs),
+        defaultsTo: toolContext.fs.path.join(
+          getBuildDirectory(toolContext.config, toolContext.fs),
+          'snapshot_blob.bin.d',
+        ),
         help:
             'A file path where a depfile will be written. '
             'This contains all build inputs and outputs in a Make-style syntax.',

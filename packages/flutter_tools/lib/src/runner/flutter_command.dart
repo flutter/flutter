@@ -520,7 +520,8 @@ abstract class FlutterCommand extends Command<void> {
     if (rest != null && rest.isNotEmpty) {
       return rest.first;
     }
-    return bundle.defaultMainPath();
+    final ToolContext? context = toolContext;
+    return context != null ? context.fs.path.join('lib', 'main.dart') : bundle.defaultMainPath;
   }
 
   /// Indicates if the current command running has a terminal attached.

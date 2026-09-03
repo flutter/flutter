@@ -57,7 +57,6 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-            toolContext: FakeToolContext(),
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
@@ -99,7 +98,6 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-            toolContext: FakeToolContext(),
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
@@ -140,7 +138,6 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-            toolContext: FakeToolContext(),
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
@@ -183,7 +180,6 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-            toolContext: FakeToolContext(),
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,
@@ -225,7 +221,6 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-            toolContext: FakeToolContext(),
             androidSdk: FakeAndroidSdk(),
             buildSystem: buildSystem,
             fileSystem: fileSystem,

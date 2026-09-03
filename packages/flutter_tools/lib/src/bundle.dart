@@ -12,39 +12,17 @@ import 'compile.dart';
 import 'convert.dart';
 import 'globals.dart' as globals;
 
-FileSystem get _fs {
-  try {
-    return globals.fs;
-  } on UnsupportedError {
-    return globals.localFileSystem;
-  }
-}
-
-String defaultMainPath([FileSystem? fileSystem]) =>
-    (fileSystem ?? _fs).path.join('lib', 'main.dart');
-
+String get defaultMainPath => globals.fs.path.join('lib', 'main.dart');
 const defaultManifestPath = 'pubspec.yaml';
-String defaultDepfilePath([FileSystem? fileSystem]) {
-  final FileSystem fs = fileSystem ?? _fs;
-  return fs.path.join(getBuildDirectory(null, fs), 'snapshot_blob.bin.d');
-}
-
-String getDefaultApplicationKernelPath({
-  required bool trackWidgetCreation,
-  FileSystem? fileSystem,
-}) {
-  final FileSystem fs = fileSystem ?? _fs;
-  final String appDillPath = fs.path.join(getBuildDirectory(), 'app.dill');
-  return getKernelPathForTransformerOptions(appDillPath, trackWidgetCreation: trackWidgetCreation);
-}
+String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
 String getDefaultCachedKernelPath({
-  required Config config,
-  required List<String> dartDefines,
-  required FileSystem fileSystem,
   required bool trackWidgetCreation,
-  List<String> extraFrontEndOptions = const <String>[],
+  required List<String> dartDefines,
+  required Config config,
+  required FileSystem fileSystem,
   TargetModel? targetModel,
+  List<String> extraFrontEndOptions = const <String>[],
 }) {
   final buffer = StringBuffer();
   final List<String> cacheFrontEndOptions = extraFrontEndOptions.toList()

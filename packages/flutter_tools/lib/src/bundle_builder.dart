@@ -29,19 +29,19 @@ class BundleBuilder {
   /// The default `mainPath` is `lib/main.dart`.
   /// The default `manifestPath` is `pubspec.yaml`.
   Future<void> build({
-    required BuildInfo buildInfo,
     required TargetPlatform platform,
-    String? applicationKernelFilePath,
-    String? assetDirPath,
-    BuildSystem? buildSystem,
-    String? depfilePath,
+    required BuildInfo buildInfo,
+    FlutterProject? project,
     String? mainPath,
     String manifestPath = defaultManifestPath,
-    FlutterProject? project,
+    String? applicationKernelFilePath,
+    String? depfilePath,
+    String? assetDirPath,
+    BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
-    mainPath ??= defaultMainPath();
-    depfilePath ??= defaultDepfilePath();
+    mainPath ??= defaultMainPath;
+    depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
     buildSystem ??= globals.buildSystem;
 

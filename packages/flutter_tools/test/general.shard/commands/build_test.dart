@@ -19,7 +19,6 @@ void main() {
     final logger = BufferLogger.test();
     final fs = MemoryFileSystem.test();
     final command = BuildCommand(
-      toolContext: FakeToolContext(),
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fs,

@@ -3,23 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/build_targets.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
-import '../isolated/build_targets.dart';
 import '../runner/flutter_command.dart';
-import '../version.dart';
 import '../web/compile.dart';
 import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/web_constants.dart';
@@ -33,10 +25,8 @@ class BuildWebCommand extends BuildSubCommand {
     required FeatureFlags featureFlags,
     required ToolContext toolContext,
     required super.verboseHelp,
-    BuildTargets buildTargets = const BuildTargetsImpl(),
-    WebBuilder? webBuilder,
+    @visibleForTesting WebBuilder? webBuilder,
   }) : _buildSystem = buildSystem,
-       _buildTargets = buildTargets,
        _featureFlags = featureFlags,
        _webBuilder = webBuilder,
        super(
@@ -53,7 +43,6 @@ class BuildWebCommand extends BuildSubCommand {
   }
 
   final BuildSystem _buildSystem;
-  final BuildTargets _buildTargets;
   final FeatureFlags _featureFlags;
   final WebBuilder? _webBuilder;
 
@@ -80,9 +69,7 @@ class BuildWebCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FileSystem fs = toolContext.fs;
-    final FlutterVersion flutterVersion = toolContext.flutterVersion;
     final Logger logger = this.logger;
-    final ProcessManager processManager = toolContext.processManager;
 
     if (!_featureFlags.isWebEnabled) {
       throwToolExit(
@@ -201,28 +188,11 @@ class BuildWebCommand extends BuildSubCommand {
 
     final String? outputDirectoryPath = getValue(CommonOptions.outputDir);
 
-    final Artifacts artifacts = toolContext.artifacts;
-    final Cache cache = toolContext.cache;
-    final Platform platform = toolContext.platform;
-    final Terminal terminal = toolContext.terminal;
-
     final Map<String, String> webDefines = extractWebDefines();
 
     final WebBuilder webBuilder =
         _webBuilder ??
-        WebBuilder(
-          analytics: analytics,
-          artifacts: artifacts,
-          buildSystem: _buildSystem,
-          buildTargets: _buildTargets,
-          cache: cache,
-          fileSystem: fs,
-          flutterVersion: flutterVersion,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-          terminal: terminal,
-        );
+        WebBuilder(analytics: analytics, buildSystem: _buildSystem, toolContext: toolContext);
     await webBuilder.buildWeb(
       project,
       targetFile,

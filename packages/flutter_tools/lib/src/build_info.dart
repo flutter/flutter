@@ -417,6 +417,8 @@ class BuildInfo {
         'EXTRA_FRONT_END_OPTIONS': extraFrontEndOptions.join(','),
       if (extraGenSnapshotOptions.isNotEmpty)
         'EXTRA_GEN_SNAPSHOT_OPTIONS': extraGenSnapshotOptions.join(','),
+      'BUILD_NAME': ?buildName,
+      'BUILD_NUMBER': ?buildNumber,
       'SPLIT_DEBUG_INFO': ?splitDebugInfoPath,
       'TRACK_WIDGET_CREATION': trackWidgetCreation.toString(),
       'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
@@ -924,17 +926,26 @@ String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
   // TODO(andrewkolos): Prefer required parameters instead of falling back to globals.
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  Config? localConfig;
-  try {
-    localConfig = config ?? globals.config;
-  } on UnsupportedError {
-    localConfig = null;
+  var localConfig = config;
+  if (localConfig == null) {
+    try {
+      localConfig = globals.config;
+    } on UnsupportedError {
+      // In testWithoutContext, context.get is not supported.
+    }
   }
-  final FileSystem localFilesystem = fileSystem ?? globals.fs;
+  var localFilesystem = fileSystem;
+  if (localFilesystem == null) {
+    try {
+      localFilesystem = globals.fs;
+    } on UnsupportedError {
+      // In testWithoutContext, context.get is not supported.
+    }
+  }
 
   final String buildDir = localConfig?.getValue('build-dir') as String? ?? 'build';
-  if (localConfig != null && localFilesystem.path.isAbsolute(buildDir)) {
-    throw Exception('build-dir config setting in ${localConfig.configPath} must be relative');
+  if (localFilesystem != null && localFilesystem.path.isAbsolute(buildDir)) {
+    throw Exception('build-dir config setting in ${localConfig?.configPath} must be relative');
   }
   return buildDir;
 }
@@ -974,9 +985,17 @@ String getMacOSBuildDirectory({Config? config, FileSystem? fileSystem}) {
 }
 
 /// Returns the web build output directory.
-String getWebBuildDirectory([Config? config, FileSystem? fileSystem]) {
-  final FileSystem localFilesystem = fileSystem ?? globals.fs;
-  return localFilesystem.path.join(getBuildDirectory(config, fileSystem), 'web');
+String getWebBuildDirectory({Config? config, FileSystem? fileSystem}) {
+  var localFilesystem = fileSystem;
+  if (localFilesystem == null) {
+    try {
+      localFilesystem = globals.fs;
+    } on UnsupportedError {
+      // In testWithoutContext, context.get is not supported.
+    }
+  }
+  final String buildDir = getBuildDirectory(config, localFilesystem);
+  return localFilesystem != null ? localFilesystem.path.join(buildDir, 'web') : '$buildDir/web';
 }
 
 /// Returns the Linux build output directory.
