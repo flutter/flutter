@@ -163,6 +163,11 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureSkia(
             VK_FORMAT_FEATURE_MIDPOINT_CHROMA_SAMPLES_BIT);
   }
 
+  // YUV formats (e.g. NV12) only register kRGB_888x in Skia's GrVkCaps,
+  // so we must use kRGB_888x for YUV and kRGBA_8888 for standard RGBA formats.
+  SkColorType color_type =
+      is_yuv ? kRGB_888x_SkColorType : kRGBA_8888_SkColorType;
+
   auto gr_backend_texture =
       GrBackendTextures::MakeVk(width, height, image_info);
   SkImages::TextureReleaseProc release_proc = texture->destruction_callback;
@@ -170,7 +175,7 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureSkia(
       SkImages::BorrowTextureFrom(context,                   // context
                                   gr_backend_texture,        // texture handle
                                   kTopLeft_GrSurfaceOrigin,  // origin
-                                  kRGBA_8888_SkColorType,    // color type
+                                  color_type,                // color type
                                   kPremul_SkAlphaType,       // alpha type
                                   nullptr,                   // colorspace
                                   release_proc,       // texture release proc
