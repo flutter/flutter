@@ -1086,6 +1086,12 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
   String? emulatorPath;
 
   @override
+  String? get avdManagerPath => 'avdmanager';
+
+  @override
+  String? getAvdManagerPath() => 'avdmanager';
+
+  @override
   List<String> validateSdkWellFormed() => <String>[];
 }
 

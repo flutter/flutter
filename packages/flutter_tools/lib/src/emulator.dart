@@ -13,6 +13,7 @@ import 'android/android_workflow.dart';
 import 'android/java.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/process.dart';
 import 'device.dart';
@@ -120,60 +121,64 @@ class EmulatorManager {
       );
     }
 
-    final String? device = await _getPreferredAvailableDevice(avdManagerPath);
-    if (device == null) {
-      return CreateEmulatorResult(
-        emulatorName,
-        success: false,
-        error: 'No device definitions are available',
-      );
-    }
-
-    final String? sdkId = await _getPreferredSdkId(avdManagerPath);
-    if (sdkId == null) {
-      return CreateEmulatorResult(
-        emulatorName,
-        success: false,
-        error:
-            'No suitable Android AVD system images are available. You may need to install these'
-            ' using sdkmanager, for example:\n'
-            '  sdkmanager "system-images;android-27;google_apis_playstore;x86"',
-      );
-    }
-
-    // Cleans up error output from avdmanager to make it more suitable to show
-    // to flutter users. Specifically:
-    // - Removes lines that say "null" (!)
-    // - Removes lines that tell the user to use '--force' to overwrite emulators
-    String? cleanError(String? error) {
-      if (error == null || error.trim() == '') {
-        return null;
+    try {
+      final String? device = await _getPreferredAvailableDevice(avdManagerPath);
+      if (device == null) {
+        return CreateEmulatorResult(
+          emulatorName,
+          success: false,
+          error: 'No device definitions are available',
+        );
       }
-      return error
-          .split('\n')
-          .where((String l) => l.trim() != 'null')
-          .where((String l) => l.trim() != 'Use --force if you want to replace it.')
-          .join('\n')
-          .trim();
-    }
 
-    final RunResult runResult = await _processUtils.run(<String>[
-      avdManagerPath,
-      'create',
-      'avd',
-      '-n',
-      emulatorName,
-      '-k',
-      sdkId,
-      '-d',
-      device,
-    ], environment: _java?.environment);
-    return CreateEmulatorResult(
-      emulatorName,
-      success: runResult.exitCode == 0,
-      output: runResult.stdout,
-      error: cleanError(runResult.stderr),
-    );
+      final String? sdkId = await _getPreferredSdkId(avdManagerPath);
+      if (sdkId == null) {
+        return CreateEmulatorResult(
+          emulatorName,
+          success: false,
+          error:
+              'No suitable Android AVD system images are available. You may need to install these'
+              ' using sdkmanager, for example:\n'
+              '  sdkmanager "system-images;android-27;google_apis_playstore;x86"',
+        );
+      }
+
+      // Cleans up error output from avdmanager to make it more suitable to show
+      // to flutter users. Specifically:
+      // - Removes lines that say "null" (!)
+      // - Removes lines that tell the user to use '--force' to overwrite emulators
+      String? cleanError(String? error) {
+        if (error == null || error.trim() == '') {
+          return null;
+        }
+        return error
+            .split('\n')
+            .where((String l) => l.trim() != 'null')
+            .where((String l) => l.trim() != 'Use --force if you want to replace it.')
+            .join('\n')
+            .trim();
+      }
+
+      final RunResult runResult = await _processUtils.run(<String>[
+        avdManagerPath,
+        'create',
+        'avd',
+        '-n',
+        emulatorName,
+        '-k',
+        sdkId,
+        '-d',
+        device,
+      ], environment: _java?.environment);
+      return CreateEmulatorResult(
+        emulatorName,
+        success: runResult.exitCode == 0,
+        output: runResult.stdout,
+        error: cleanError(runResult.stderr),
+      );
+    } on ProcessException catch (error) {
+      return CreateEmulatorResult(emulatorName, success: false, error: error.message);
+    }
   }
 
   static const preferredDevices = <String>['pixel', 'pixel_xl'];
