@@ -326,6 +326,7 @@ class _DefaultPub implements Pub {
         flutterRoot: Cache.flutterRoot!,
         fs: _fileSystem,
         git: _git,
+        platform: _platform,
       );
 
       if (shouldSkipThirdPartyGenerator) {
@@ -739,6 +740,7 @@ class _DefaultPub implements Pub {
       flutterRoot: Cache.flutterRoot!,
       fs: _fileSystem,
       git: _git,
+      platform: _platform,
     );
     lastVersion.writeAsStringSync(versionFromFile.frameworkVersion);
 

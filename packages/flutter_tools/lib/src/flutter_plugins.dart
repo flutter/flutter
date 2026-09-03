@@ -1363,7 +1363,7 @@ Future<void> injectBuildTimePluginFilesForWebPlatform(
   FlutterProject project, {
   required Directory destination,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project, logger: globals.logger);
+  final List<Plugin> plugins = await findPlugins(project);
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
     plugins,
     pluginResolutionType: _PluginResolutionType.nativeOrDart,
@@ -1940,7 +1940,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   PackageConfig packageConfig,
   File mainFile,
 ) async {
-  final List<Plugin> plugins = await findPlugins(rootProject, logger: globals.logger);
+  final List<Plugin> plugins = await findPlugins(rootProject);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
     selectDartPluginsOnly: true,

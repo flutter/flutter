@@ -53,12 +53,10 @@ void main() {
           'ENV2': 'irrelevant',
         });
       processManager = FakeProcessManager.empty();
-      final toolContext = DelegatingToolContext();
-      fakeCommandRunner = FakeUpgradeCommandRunner(toolContext: toolContext)
-        ..clock = SystemClock.fixed(jan12026);
+      final toolContext = DelegatingToolContext(systemClock: SystemClock.fixed(jan12026));
+      fakeCommandRunner = FakeUpgradeCommandRunner(toolContext: toolContext);
       realCommandRunner = UpgradeCommandRunner(toolContext: toolContext)
-        ..workingDirectory = getFlutterRoot()
-        ..clock = SystemClock.fixed(jan12026);
+        ..workingDirectory = getFlutterRoot();
       fakeCommandRunner.willHaveUncommittedChanges = false;
     });
 
@@ -211,8 +209,9 @@ void main() {
         );
 
         final DateTime now = DateTime.now().subtract(const Duration(minutes: 25));
-        fakeCommandRunner.remoteVersion = latestVersion;
-        fakeCommandRunner.clock = SystemClock.fixed(now);
+        fakeCommandRunner = FakeUpgradeCommandRunner(
+          toolContext: DelegatingToolContext(systemClock: SystemClock.fixed(now)),
+        )..remoteVersion = latestVersion;
 
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
@@ -265,11 +264,11 @@ void main() {
           frameworkVersion: upstreamVersion,
         );
 
-        fakeCommandRunner.remoteVersion = latestVersion;
-
         final now = DateTime.now();
         final DateTime before = now.subtract(const Duration(minutes: 25));
-        fakeCommandRunner.clock = SystemClock.fixed(now);
+        fakeCommandRunner = FakeUpgradeCommandRunner(
+          toolContext: DelegatingToolContext(systemClock: SystemClock.fixed(now)),
+        )..remoteVersion = latestVersion;
 
         processManager.addCommands(<FakeCommand>[
           FakeCommand(

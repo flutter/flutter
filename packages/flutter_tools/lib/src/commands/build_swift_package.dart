@@ -33,7 +33,6 @@ import '../macos/swift_packages.dart';
 import '../macos/xcode.dart';
 import '../plugins.dart';
 import '../project.dart';
-
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../runner/flutter_command_runner.dart';

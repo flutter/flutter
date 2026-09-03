@@ -11,11 +11,12 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/time.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/pub.dart';
+import '../git.dart';
+import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'channel.dart';
@@ -101,22 +102,27 @@ class UpgradeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    _commandRunner.workingDirectory = stringArg('working-directory') ?? Cache.flutterRoot!;
+    final String? workingDirectory = stringArg('working-directory');
+    _commandRunner.workingDirectory = workingDirectory ?? Cache.flutterRoot!;
+    final Git git = _toolContext.git;
+    final Platform platform = _toolContext.platform;
+
     return _commandRunner.runCommand(
       _parsePhaseFromContinueArg(),
       force: boolArg('force'),
-      testFlow: stringArg('working-directory') != null,
+      testFlow: workingDirectory != null,
       gitTagVersion: GitTagVersion.determine(
-        _toolContext.platform,
-        git: _toolContext.git,
+        platform,
+        git: git,
         workingDirectory: _commandRunner.workingDirectory,
       ),
-      flutterVersion: stringArg('working-directory') == null
+      flutterVersion: workingDirectory == null
           ? _toolContext.flutterVersion
           : FlutterVersion(
               flutterRoot: _commandRunner.workingDirectory!,
               fs: _toolContext.fs,
-              git: _toolContext.git,
+              git: git,
+              platform: platform,
             ),
       verifyOnly: boolArg('verify-only'),
     );
@@ -144,19 +150,11 @@ final class _SecondHalf implements UpgradePhase {
 
 @visibleForTesting
 class UpgradeCommandRunner {
-  UpgradeCommandRunner({required ToolContext toolContext, SystemClock? clock})
-    : _toolContext = toolContext,
-      _clock = clock;
+  UpgradeCommandRunner({required ToolContext toolContext}) : _toolContext = toolContext;
 
   final ToolContext _toolContext;
 
   String? workingDirectory; // set in runCommand() above
-
-  SystemClock? _clock;
-
-  @visibleForTesting
-  SystemClock get clock => _clock ?? _toolContext.systemClock;
-  set clock(SystemClock value) => _clock = value;
 
   Future<FlutterCommandResult> runCommand(
     UpgradePhase phase, {
@@ -169,7 +167,7 @@ class UpgradeCommandRunner {
     switch (phase) {
       case _FirstHalf():
         await _runCommandFirstHalf(
-          startedAt: clock.now(),
+          startedAt: _toolContext.systemClock.now(),
           force: force,
           gitTagVersion: gitTagVersion,
           flutterVersion: flutterVersion,
@@ -179,7 +177,7 @@ class UpgradeCommandRunner {
       case _SecondHalf(:final DateTime? upgradeStartedAt):
         await _runCommandSecondHalf(flutterVersion);
         if (upgradeStartedAt != null) {
-          final Duration execution = clock.now().difference(upgradeStartedAt);
+          final Duration execution = _toolContext.systemClock.now().difference(upgradeStartedAt);
           _toolContext.logger.printStatus('Took ${getElapsedAsMinutesOrSeconds(execution)}');
         }
     }
@@ -194,31 +192,30 @@ class UpgradeCommandRunner {
     required bool testFlow,
     required bool verifyOnly,
   }) async {
+    final Logger logger = _toolContext.logger;
     final FlutterVersion upstreamVersion = await fetchLatestVersion(localVersion: flutterVersion);
     // It's possible for a given framework revision to have multiple tags (i.e., due to a release
     // rollback). Verify the upstream version tag isn't newer than the current tag.
     if (flutterVersion.frameworkRevision == upstreamVersion.frameworkRevision &&
         flutterVersion.gitTagVersion.gitTag.compareTo(upstreamVersion.gitTagVersion.gitTag) >= 0) {
-      _toolContext.logger.printStatus(
-        'Flutter is already up to date on channel ${flutterVersion.channel}',
-      );
-      _toolContext.logger.printStatus('$flutterVersion');
+      logger.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
+      logger.printStatus('$flutterVersion');
       return;
     } else if (verifyOnly) {
-      _toolContext.logger.printStatus(
+      logger.printStatus(
         'A new version of Flutter is available on channel ${flutterVersion.channel}\n',
       );
-      _toolContext.logger.printStatus(
+      logger.printStatus(
         'The latest version: ${upstreamVersion.frameworkVersion} (revision ${upstreamVersion.frameworkRevisionShort})',
         emphasis: true,
       );
-      _toolContext.logger.printStatus(
+      logger.printStatus(
         'Your current version: ${flutterVersion.frameworkVersion} (revision ${flutterVersion.frameworkRevisionShort})\n',
       );
-      _toolContext.logger.printStatus('To upgrade now, run "flutter upgrade".');
+      logger.printStatus('To upgrade now, run "flutter upgrade".');
       if (flutterVersion.channel == 'stable') {
-        _toolContext.logger.printStatus('\nSee the announcement and release notes:');
-        _toolContext.logger.printStatus('https://docs.flutter.dev/release/release-notes');
+        logger.printStatus('\nSee the announcement and release notes:');
+        logger.printStatus('https://docs.flutter.dev/release/release-notes');
       }
       return;
     }
@@ -255,11 +252,11 @@ class UpgradeCommandRunner {
     recordState(flutterVersion);
     await ChannelCommand.upgradeChannel(
       flutterVersion,
-      logger: _toolContext.logger,
+      logger: logger,
       git: _toolContext.git,
       cache: _toolContext.cache,
     );
-    _toolContext.logger.printStatus(
+    logger.printStatus(
       'Upgrading Flutter to ${upstreamVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in $workingDirectory...',
     );
     await attemptReset(upstreamVersion.frameworkRevision);
@@ -305,8 +302,9 @@ class UpgradeCommandRunner {
   // This method should only be called if the upgrade command is invoked
   // re-entrantly with the `--continue` flag
   Future<void> _runCommandSecondHalf(FlutterVersion flutterVersion) async {
+    final PersistentToolState persistentToolState = _toolContext.persistentToolState;
     // Make sure the welcome message re-display is delayed until the end.
-    _toolContext.persistentToolState.setShouldRedisplayWelcomeMessage(false);
+    persistentToolState.setShouldRedisplayWelcomeMessage(false);
     await precacheArtifacts(
       workingDirectory: workingDirectory,
       fileSystem: _toolContext.fs,
@@ -317,7 +315,7 @@ class UpgradeCommandRunner {
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
-    _toolContext.persistentToolState.setShouldRedisplayWelcomeMessage(true);
+    persistentToolState.setShouldRedisplayWelcomeMessage(true);
     if (flutterVersion.channel == 'master' || flutterVersion.channel == 'main') {
       _toolContext.logger.printStatus(
         '\n'
@@ -387,16 +385,13 @@ class UpgradeCommandRunner {
   /// Exits tool if HEAD isn't pointing to a branch, or there is no upstream.
   @visibleForTesting
   Future<FlutterVersion> fetchLatestVersion({required FlutterVersion localVersion}) async {
+    final Git git = _toolContext.git;
     String revision;
     try {
       // Fetch upstream branch's commits and tags
-      await _toolContext.git.run(
-        ['fetch', '--tags'],
-        throwOnError: true,
-        workingDirectory: workingDirectory,
-      );
+      await git.run(['fetch', '--tags'], throwOnError: true, workingDirectory: workingDirectory);
       // Get the latest commit revision of the upstream
-      final RunResult result = await _toolContext.git.run(
+      final RunResult result = await git.run(
         ['rev-parse', '--verify', kGitTrackingUpstream],
         throwOnError: true,
         workingDirectory: workingDirectory,
@@ -439,7 +434,7 @@ class UpgradeCommandRunner {
       flutterRoot: workingDirectory!,
       frameworkRevision: revision,
       fs: _toolContext.fs,
-      git: _toolContext.git,
+      git: git,
       platform: _toolContext.platform,
     );
   }
@@ -465,21 +460,23 @@ class UpgradeCommandRunner {
   /// Update the user's packages.
   @protected
   Future<void> updatePackages(FlutterVersion flutterVersion) async {
-    _toolContext.logger.printStatus('');
-    _toolContext.logger.printStatus(flutterVersion.toString());
-    final String? projectRoot = findProjectRoot(_toolContext.fs);
+    final Logger logger = _toolContext.logger;
+    final FileSystem fs = _toolContext.fs;
+    logger.printStatus('');
+    logger.printStatus(flutterVersion.toString());
+    final String? projectRoot = findProjectRoot(fs);
     if (projectRoot != null) {
-      _toolContext.logger.printStatus('');
+      logger.printStatus('');
       await Pub(
         botDetector: _toolContext.botDetector,
-        fileSystem: _toolContext.fs,
-        logger: _toolContext.logger,
+        fileSystem: fs,
+        logger: logger,
         platform: _toolContext.platform,
         processManager: _toolContext.processManager,
         stdio: _toolContext.stdio,
       ).get(
         context: PubContext.pubUpgrade,
-        project: _toolContext.projectFactory.fromDirectory(_toolContext.fs.directory(projectRoot)),
+        project: _toolContext.projectFactory.fromDirectory(fs.directory(projectRoot)),
         upgrade: true,
       );
     }
@@ -488,10 +485,11 @@ class UpgradeCommandRunner {
   /// Run flutter doctor in case requirements have changed.
   @protected
   Future<void> runDoctor() async {
-    _toolContext.logger.printStatus('');
-    _toolContext.logger.printStatus('Running flutter doctor...');
+    final Logger logger = _toolContext.logger;
+    logger.printStatus('');
+    logger.printStatus('Running flutter doctor...');
     await _toolContext.processUtils.stream(
-      [_toolContext.fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor'],
+      <String>[_toolContext.fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor'],
       allowReentrantFlutter: true,
       workingDirectory: workingDirectory,
     );

@@ -88,7 +88,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// On the first call, this will find plugins in the project.
   /// On subsequent calls, this will return the cached list of plugins.
   Future<List<Plugin>> getPlugins() async {
-    _plugins ??= await findPlugins(parent, logger: globals.logger);
+    _plugins ??= await findPlugins(parent);
     return _plugins!;
   }
 
