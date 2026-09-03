@@ -13,9 +13,9 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/terminal.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../custom_devices/custom_device.dart';
 import '../custom_devices/custom_device_config.dart';
@@ -26,108 +26,26 @@ import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 
 class CustomDevicesCommand extends FlutterCommand {
-  factory CustomDevicesCommand({
-    required CustomDevicesConfig customDevicesConfig,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Terminal terminal,
-    required Platform platform,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required FeatureFlags featureFlags,
-  }) {
-    return CustomDevicesCommand._common(
-      customDevicesConfig: customDevicesConfig,
-      operatingSystemUtils: operatingSystemUtils,
-      terminal: terminal,
-      platform: platform,
-      processManager: processManager,
-      fileSystem: fileSystem,
-      logger: logger,
-      featureFlags: featureFlags,
-    );
+  CustomDevicesCommand({required FeatureFlags featureFlags, required ToolContext toolContext})
+    : _featureFlags = featureFlags,
+      super(toolContext: toolContext) {
+    addSubcommand(CustomDevicesListCommand(featureFlags: featureFlags, toolContext: toolContext));
+    addSubcommand(CustomDevicesResetCommand(featureFlags: featureFlags, toolContext: toolContext));
+    addSubcommand(CustomDevicesAddCommand(featureFlags: featureFlags, toolContext: toolContext));
+    addSubcommand(CustomDevicesDeleteCommand(featureFlags: featureFlags, toolContext: toolContext));
   }
 
-  @visibleForTesting
-  factory CustomDevicesCommand.test({
-    required CustomDevicesConfig customDevicesConfig,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Terminal terminal,
-    required Platform platform,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required FeatureFlags featureFlags,
-  }) {
-    return CustomDevicesCommand._common(
-      customDevicesConfig: customDevicesConfig,
-      operatingSystemUtils: operatingSystemUtils,
-      terminal: terminal,
-      platform: platform,
-      processManager: processManager,
-      fileSystem: fileSystem,
-      logger: logger,
-      featureFlags: featureFlags,
-    );
-  }
-
-  CustomDevicesCommand._common({
-    required CustomDevicesConfig customDevicesConfig,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Terminal terminal,
-    required Platform platform,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required FeatureFlags featureFlags,
-  }) : _customDevicesConfig = customDevicesConfig,
-       _featureFlags = featureFlags {
-    addSubcommand(
-      CustomDevicesListCommand(
-        customDevicesConfig: customDevicesConfig,
-        featureFlags: featureFlags,
-        logger: logger,
-      ),
-    );
-    addSubcommand(
-      CustomDevicesResetCommand(
-        customDevicesConfig: customDevicesConfig,
-        featureFlags: featureFlags,
-        fileSystem: fileSystem,
-        logger: logger,
-      ),
-    );
-    addSubcommand(
-      CustomDevicesAddCommand(
-        customDevicesConfig: customDevicesConfig,
-        operatingSystemUtils: operatingSystemUtils,
-        terminal: terminal,
-        platform: platform,
-        featureFlags: featureFlags,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        logger: logger,
-      ),
-    );
-    addSubcommand(
-      CustomDevicesDeleteCommand(
-        customDevicesConfig: customDevicesConfig,
-        featureFlags: featureFlags,
-        fileSystem: fileSystem,
-        logger: logger,
-      ),
-    );
-  }
-
-  final CustomDevicesConfig _customDevicesConfig;
   final FeatureFlags _featureFlags;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get description {
     String configFileLine;
     if (_featureFlags.areCustomDevicesEnabled) {
       configFileLine =
-          '\nMakes changes to the config file at "${_customDevicesConfig.configPath}".\n';
+          '\nMakes changes to the config file at "${toolContext.customDevicesConfig.configPath}".\n';
     } else {
       configFileLine = '';
     }
@@ -160,21 +78,21 @@ Requires the custom devices feature to be enabled. You can enable it using "flut
 /// to the subcommands, like backing up the config file & checking if the
 /// feature is enabled.
 abstract class CustomDevicesCommandBase extends FlutterCommand {
-  CustomDevicesCommandBase({
-    required this.customDevicesConfig,
-    required this.featureFlags,
-    required this.fileSystem,
-    required this.logger,
-  });
+  CustomDevicesCommandBase({required this.featureFlags, required ToolContext toolContext})
+    : super(toolContext: toolContext);
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @protected
-  final CustomDevicesConfig customDevicesConfig;
+  CustomDevicesConfig get customDevicesConfig => toolContext.customDevicesConfig;
   @protected
   final FeatureFlags featureFlags;
+
   @protected
-  final FileSystem? fileSystem;
+  FileSystem get fileSystem => toolContext.fs;
   @protected
-  final Logger logger;
+  Logger get logger => toolContext.logger;
 
   /// The path to the (potentially non-existing) backup of the config file.
   @protected
@@ -185,7 +103,7 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
   /// doesn't exist. (True otherwise)
   @protected
   bool backup() {
-    final File configFile = fileSystem!.file(customDevicesConfig.configPath);
+    final File configFile = fileSystem.file(customDevicesConfig.configPath);
     if (configFile.existsSync()) {
       configFile.copySync(configBackupPath);
       return true;
@@ -208,11 +126,7 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
 }
 
 class CustomDevicesListCommand extends CustomDevicesCommandBase {
-  CustomDevicesListCommand({
-    required super.customDevicesConfig,
-    required super.featureFlags,
-    required super.logger,
-  }) : super(fileSystem: null);
+  CustomDevicesListCommand({required super.featureFlags, required super.toolContext});
 
   @override
   String get description => '''
@@ -233,10 +147,11 @@ List the currently configured custom devices, both enabled and disabled, reachab
       throwToolExit('Could not list custom devices.');
     }
 
+    final String configPath = customDevicesConfig.configPath;
     if (devices.isEmpty) {
-      logger.printStatus('No custom devices found in "${customDevicesConfig.configPath}"');
+      logger.printStatus('No custom devices found in "$configPath"');
     } else {
-      logger.printStatus('List of custom devices in "${customDevicesConfig.configPath}":');
+      logger.printStatus('List of custom devices in "$configPath":');
       for (final device in devices) {
         logger.printStatus(
           'id: ${device.id}, label: ${device.label}, enabled: ${device.enabled}',
@@ -251,12 +166,7 @@ List the currently configured custom devices, both enabled and disabled, reachab
 }
 
 class CustomDevicesResetCommand extends CustomDevicesCommandBase {
-  CustomDevicesResetCommand({
-    required super.customDevicesConfig,
-    required super.featureFlags,
-    required FileSystem super.fileSystem,
-    required super.logger,
-  });
+  CustomDevicesResetCommand({required super.featureFlags, required super.toolContext});
 
   @override
   String get description => '''
@@ -275,7 +185,7 @@ If a file already exists at the backup location, it will be overwritten.
 
     final bool wasBackedUp = backup();
 
-    ErrorHandlingFileSystem.deleteIfExists(fileSystem!.file(customDevicesConfig.configPath));
+    ErrorHandlingFileSystem.deleteIfExists(fileSystem.file(customDevicesConfig.configPath));
     customDevicesConfig.ensureFileExists();
 
     logger.printStatus(
@@ -289,19 +199,7 @@ If a file already exists at the backup location, it will be overwritten.
 }
 
 class CustomDevicesAddCommand extends CustomDevicesCommandBase {
-  CustomDevicesAddCommand({
-    required super.customDevicesConfig,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Terminal terminal,
-    required Platform platform,
-    required super.featureFlags,
-    required ProcessManager processManager,
-    required FileSystem super.fileSystem,
-    required super.logger,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       _terminal = terminal,
-       _platform = platform,
-       _processManager = processManager {
+  CustomDevicesAddCommand({required super.featureFlags, required super.toolContext}) {
     argParser.addFlag(
       _kCheck,
       help:
@@ -354,10 +252,6 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     r'^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$',
   );
 
-  final OperatingSystemUtils _operatingSystemUtils;
-  final Terminal _terminal;
-  final Platform _platform;
-  final ProcessManager _processManager;
   late StreamQueue<String> inputs;
 
   @override
@@ -373,7 +267,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Check this config by executing some of the commands, see if they run
   /// fine.
   Future<bool> _checkConfigWithLogging(CustomDeviceConfig config) async {
-    final device = CustomDevice(config: config, logger: logger, processManager: _processManager);
+    final ProcessManager pm = toolContext.processManager;
+    final device = CustomDevice(config: config, logger: logger, processManager: pm);
 
     var result = true;
 
@@ -388,7 +283,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       result = false;
     }
 
-    final Directory temp = await fileSystem!.systemTempDirectory.createTemp();
+    final Directory temp = await fileSystem.systemTempDirectory.createTemp();
 
     try {
       final bool ok = await device.tryInstall(localPath: temp.path, appName: temp.basename);
@@ -419,13 +314,13 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         deviceName: device.displayName,
         forwardPortCommand: config.forwardPortCommand!,
         forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
-        processManager: _processManager,
+        processManager: pm,
         logger: logger,
       );
 
       try {
         // find a random port we can forward
-        final int port = await _operatingSystemUtils.findFreePort();
+        final int port = await toolContext.os.findFreePort();
 
         final ForwardedPort? forwardedPort = await portForwarder.tryForward(port, port);
         if (forwardedPort == null) {
@@ -573,7 +468,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     // So instead, we add the keystrokes stream events to a new single-subscription
     // stream and listen to that instead.
     final nonClosingKeystrokes = StreamController<String>();
-    final StreamSubscription<String> keystrokesSubscription = _terminal.keystrokes.listen(
+    final Terminal terminal = toolContext.terminal;
+    final StreamSubscription<String> keystrokesSubscription = terminal.keystrokes.listen(
       (String s) => nonClosingKeystrokes.add(s.trim()),
       cancelOnError: true,
     );
@@ -718,13 +614,14 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
           : null,
     );
 
-    if (_platform.isWindows) {
+    final Platform platform = toolContext.platform;
+    if (platform.isWindows) {
       config = config.copyWith(
         pingCommand: <String>['ping', if (ipv6) '-6', '-n', '1', '-w', '500', targetStr],
         explicitPingSuccessRegex: true,
         pingSuccessRegex: RegExp(r'[<=]\d+ms'),
       );
-    } else if (_platform.isLinux || _platform.isMacOS) {
+    } else if (platform.isLinux || platform.isMacOS) {
       config = config.copyWith(
         pingCommand: <String>['ping', if (ipv6) '-6', '-c', '1', '-w', '1', targetStr],
         explicitPingSuccessRegex: true,
@@ -763,12 +660,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 }
 
 class CustomDevicesDeleteCommand extends CustomDevicesCommandBase {
-  CustomDevicesDeleteCommand({
-    required super.customDevicesConfig,
-    required super.featureFlags,
-    required FileSystem super.fileSystem,
-    required super.logger,
-  });
+  CustomDevicesDeleteCommand({required super.featureFlags, required super.toolContext});
 
   @override
   String get description => '''
@@ -783,17 +675,14 @@ Delete a device from the config file.
     checkFeatureEnabled();
 
     final id = globalResults![FlutterGlobalOptions.kDeviceIdOption] as String?;
+    final String configPath = customDevicesConfig.configPath;
     if (id == null || !customDevicesConfig.contains(id)) {
-      throwToolExit(
-        'Couldn\'t find device with id "$id" in config at "${customDevicesConfig.configPath}"',
-      );
+      throwToolExit('Couldn\'t find device with id "$id" in config at "$configPath"');
     }
 
     backup();
     customDevicesConfig.remove(id);
-    logger.printStatus(
-      'Successfully removed device with id "$id" from config at "${customDevicesConfig.configPath}"',
-    );
+    logger.printStatus('Successfully removed device with id "$id" from config at "$configPath"');
     return FlutterCommandResult.success();
   }
 }
