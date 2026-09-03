@@ -7,6 +7,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'layer.dart';
@@ -520,9 +521,13 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// The [granularity] contains the granularity which the selection edge should move by.
   /// This value defaults to [TextGranularity.character].
+  ///
+  /// The [deviceKind] contains the kind of the pointer device that is updating
+  /// the selection edge, if any.
   const SelectionEdgeUpdateEvent.forStart({
     required this.globalPosition,
     TextGranularity? granularity,
+    this.deviceKind,
   }) : granularity = granularity ?? TextGranularity.character,
        super._(SelectionEventType.startEdgeUpdate);
 
@@ -532,9 +537,13 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// The [granularity] contains the granularity which the selection edge should move by.
   /// This value defaults to [TextGranularity.character].
+  ///
+  /// The [deviceKind] contains the kind of the pointer device that is updating
+  /// the selection edge, if any.
   const SelectionEdgeUpdateEvent.forEnd({
     required this.globalPosition,
     TextGranularity? granularity,
+    this.deviceKind,
   }) : granularity = granularity ?? TextGranularity.character,
        super._(SelectionEventType.endEdgeUpdate);
 
@@ -547,6 +556,12 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// Defaults to [TextGranularity.character].
   final TextGranularity granularity;
+
+  /// The kind of the pointer device that is updating the selection edge.
+  ///
+  /// This is null when the selection edge is not updated by a pointer device,
+  /// for example when the selection is updated programmatically.
+  final PointerDeviceKind? deviceKind;
 }
 
 /// Extends the start or end of the selection by a given [TextGranularity].
