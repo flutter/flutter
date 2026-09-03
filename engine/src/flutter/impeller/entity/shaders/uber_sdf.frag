@@ -5,6 +5,7 @@
 precision mediump float;
 
 #include <impeller/color.glsl>
+#include <impeller/constants.glsl>
 #include <impeller/gradient.glsl>
 #include <impeller/texture.glsl>
 #include <impeller/types.glsl>
@@ -39,6 +40,8 @@ uniform FragInfo {
   vec2 center;
   /// The half-dimensions of the shape (half-width, half-height).
   vec2 size;
+  /// The size of a device pixel in local coordinates.
+  vec2 pixel_size;
 
   // --- Superellipse Parameters ---
   /// The exponent degree (n_x, n_y) of the superellipse curvature.
@@ -166,7 +169,7 @@ float distanceFromChamferRect(vec2 p, vec2 half_size, float chamfer_size) {
   p = abs(p);
   float d1 = max(p.x - half_size.x, p.y - half_size.y);
   float d2 =
-      (p.x + p.y - half_size.x - half_size.y + chamfer_size) * 0.70710678;
+      (p.x + p.y - half_size.x - half_size.y + chamfer_size) * kHalfSqrtTwo;
   return max(d1, d2);
 }
 
@@ -215,25 +218,14 @@ float distanceFromRoundedSuperellipse(vec2 p,
                                se_degree);
 }
 
-// Special case pixel size calculation for rectangles. The standard `pixelSize`
-// function uses SDF derivatives, which gives invalid results for very small
-// shapes, where adjacent device pixels span across opposing edges of the shape.
-// This function calculates pixel size for rectangles without using SDF
-// derivatives.
+// Calculates pixel size for rectangles using frag_info.pixel_size.
 float rectPixelSize(vec2 p) {
-  // The change in local coordinates per horizontal device pixel (device_dx)
-  // and vertical device pixel (device_dy).
-  vec2 device_dx = dFdx(v_position);
-  vec2 device_dy = dFdy(v_position);
-  // The size of a device pixel in terms of local coordinates.
-  vec2 device_pixel_size = vec2(length(vec2(device_dx.x, device_dy.x)),
-                                length(vec2(device_dx.y, device_dy.y)));
-
   // Get pixel size in the direction perpendicular to the closest edge of the
-  // rectangle: device_pixel_size.x when closer to a vertical edge, and
-  // pixel_size.y when closer to a horizontal edge.
+  // rectangle: frag_info.pixel_size.x when closer to a vertical edge, and
+  // frag_info.pixel_size.y when closer to a horizontal edge.
   vec2 distance = abs(abs(p) - frag_info.size);
-  return (distance.x < distance.y) ? device_pixel_size.x : device_pixel_size.y;
+  return (distance.x < distance.y) ? frag_info.pixel_size.x
+                                   : frag_info.pixel_size.y;
 }
 
 // Special case pixel size calculation for rounded rectangles, similar to
