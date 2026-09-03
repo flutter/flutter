@@ -3218,7 +3218,16 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         return;
       }
 
-      if ((!_wasRepaintBoundary || !isRepaintBoundary) && !parent.isRepaintBoundary) {
+      // If this node is a repaint boundary and already was one when it was
+      // last painted, the parent's compositing state cannot be changed by this
+      // update - but only if the parent already knows that it needs
+      // compositing. The parent may still think that it does not need
+      // compositing if it skipped painting this node (e.g. because it is
+      // scaled to zero or fully transparent) while this node was not a repaint
+      // boundary, which leaves `_wasRepaintBoundary` stale. In that case the
+      // update must keep walking up the tree.
+      if ((!_wasRepaintBoundary || !isRepaintBoundary || !parent._needsCompositing) &&
+          !parent.isRepaintBoundary) {
         parent.markNeedsCompositingBitsUpdate();
         return;
       }

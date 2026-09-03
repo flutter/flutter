@@ -513,6 +513,62 @@ void main() {
     expect(caughtErrors, isNull);
   });
 
+  test('markNeedsCompositingBitsUpdate reaches ancestors that skipped painting this subtree', () {
+    // Regression test for https://github.com/flutter/flutter/issues/151735.
+    //
+    // A RenderTransform paints nothing when its matrix is singular, which
+    // leaves the `_wasRepaintBoundary` state of the RenderOpacity below it
+    // stale. The compositing bits update that happens when the opacity becomes
+    // visible again must therefore still reach the RenderTransform, so that it
+    // composites its child through a TransformLayer instead of applying the
+    // transform to a canvas that the child no longer paints into.
+    final child = RenderSizedBox(const Size(50.0, 50.0));
+    final opacity = RenderOpacity(opacity: 0.0, child: child);
+    final transform = RenderTransform(
+      transform: Matrix4.diagonal3Values(0.0, 0.0, 1.0),
+      alignment: Alignment.center,
+      child: opacity,
+    );
+
+    // The transform applied to the layer of `opacity` by all the layers between
+    // it and the layer of the render view (exclusive).
+    double scaleOfOpacityLayer() {
+      final ContainerLayer root = TestRenderingFlutterBinding.instance.renderView.debugLayer!;
+      final layers = <Layer>[opacity.debugLayer!];
+      for (ContainerLayer? ancestor = layers.last.parent; ancestor != root; ancestor = ancestor.parent) {
+        layers.add(ancestor!);
+      }
+      final result = Matrix4.identity();
+      for (int index = layers.length - 1; index > 0; index -= 1) {
+        (layers[index] as ContainerLayer).applyTransform(layers[index - 1], result);
+      }
+      return result.getMaxScaleOnAxis();
+    }
+
+    layout(transform, phase: EnginePhase.composite);
+
+    // Run the "animation" once: the scale and the opacity both become visible.
+    transform.transform = Matrix4.diagonal3Values(2.0, 2.0, 1.0);
+    opacity.opacity = 1.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(transform.needsCompositing, isTrue);
+    expect(scaleOfOpacityLayer(), 2.0);
+
+    // Restart the "animation": the transform is singular again, so it paints
+    // nothing at all and the opacity below it is not painted either.
+    transform.transform = Matrix4.diagonal3Values(0.0, 0.0, 1.0);
+    opacity.opacity = 0.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(transform.needsCompositing, isFalse);
+
+    // The second run of the "animation" must be scaled just like the first one.
+    transform.transform = Matrix4.diagonal3Values(2.0, 2.0, 1.0);
+    opacity.opacity = 1.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(transform.needsCompositing, isTrue);
+    expect(scaleOfOpacityLayer(), 2.0);
+  });
+
   test('ContainerParentDataMixin asserts parentData type', () {
     final TestRenderObject renderObject = TestRenderObjectWithoutSetupParentData();
     final child = TestRenderObject();
