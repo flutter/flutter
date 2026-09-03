@@ -3,16 +3,29 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
+import '../android/android_sdk.dart';
+import '../artifacts.dart';
+import '../base/config.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/template.dart';
+import '../base/terminal.dart';
 import '../build_system/build_system.dart';
+import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
 import '../ios/code_signing.dart';
+import '../ios/plist_parser.dart';
+import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
 import 'build_appbundle.dart';
@@ -40,30 +53,27 @@ class BuildCommand extends FlutterCommand {
        _templateRenderer = templateRenderer,
        _toolContext = toolContext,
        super(toolContext: toolContext, verboseHelp: verboseHelp) {
-    // ignore: omit_obvious_local_variable_types
     final ToolContext(
-      :artifacts,
-      :cache,
-      :config,
-      fileSystemUtils: fsUtils,
-      :flutterVersion,
-      fs: fileSystem,
-      :logger,
-      os: osUtils,
-      :platform,
-      :processManager,
-      :processUtils,
-      :terminal,
+      :Artifacts artifacts,
+      :Cache cache,
+      :Config config,
+      :FileSystemUtils fileSystemUtils,
+      :FlutterVersion flutterVersion,
+      fs: FileSystem fileSystem,
+      :Logger logger,
+      os: OperatingSystemUtils osUtils,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+      :Terminal terminal,
     ) = toolContext;
-    // ignore: omit_obvious_local_variable_types
-    final AppleContext(:plistParser, :xcode) = appleContext;
-    // ignore: omit_obvious_local_variable_types
-    final AndroidContext(:androidSdk) = androidContext;
+    final AppleContext(:PlistParser plistParser, :Xcode? xcode) = appleContext;
+    final AndroidContext(:AndroidSdk? androidSdk) = androidContext;
 
     _addSubcommand(
       BuildAarCommand(
-        fileSystem: fileSystem,
         androidSdk: androidSdk,
+        fileSystem: fileSystem,
         logger: logger,
         verboseHelp: verboseHelp,
       ),
@@ -82,72 +92,72 @@ class BuildCommand extends FlutterCommand {
       BuildIOSFrameworkCommand(
         appleContext: _appleContext,
         buildSystem: _buildSystem,
+        toolContext: _toolContext,
+        verboseHelp: verboseHelp,
         codesign: DarwinAddToAppCodesigning(
           logger: logger,
           xcodeCodeSigningSettings: XcodeCodeSigningSettings(
             config: config,
-            fileSystem: fileSystem,
-            fileSystemUtils: fsUtils,
             logger: logger,
             platform: platform,
-            plistParser: plistParser,
             processUtils: processUtils,
+            fileSystem: fileSystem,
+            fileSystemUtils: fileSystemUtils,
             terminal: terminal,
+            plistParser: plistParser,
           ),
         ),
-        toolContext: _toolContext,
-        verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
       BuildMacOSFrameworkCommand(
         appleContext: _appleContext,
         buildSystem: _buildSystem,
+        toolContext: _toolContext,
+        verboseHelp: verboseHelp,
         codesign: DarwinAddToAppCodesigning(
           logger: logger,
           xcodeCodeSigningSettings: XcodeCodeSigningSettings(
             config: config,
-            fileSystem: fileSystem,
-            fileSystemUtils: fsUtils,
             logger: logger,
             platform: platform,
-            plistParser: plistParser,
             processUtils: processUtils,
+            fileSystem: fileSystem,
+            fileSystemUtils: fileSystemUtils,
             terminal: terminal,
+            plistParser: plistParser,
           ),
         ),
-        toolContext: _toolContext,
-        verboseHelp: verboseHelp,
       ),
     );
     _addSubcommand(
       BuildSwiftPackage(
+        logger: logger,
         analytics: analytics,
         artifacts: artifacts,
         buildSystem: _buildSystem,
         cache: cache,
+        featureFlags: featureFlags,
+        fileSystem: fileSystem,
+        flutterVersion: flutterVersion,
+        platform: platform,
+        processManager: processManager,
+        templateRenderer: _templateRenderer,
+        xcode: xcode,
         codesign: DarwinAddToAppCodesigning(
           logger: logger,
           xcodeCodeSigningSettings: XcodeCodeSigningSettings(
             config: config,
-            fileSystem: fileSystem,
-            fileSystemUtils: fsUtils,
             logger: logger,
             platform: platform,
-            plistParser: plistParser,
             processUtils: processUtils,
+            fileSystem: fileSystem,
+            fileSystemUtils: fileSystemUtils,
             terminal: terminal,
+            plistParser: plistParser,
           ),
         ),
-        featureFlags: featureFlags,
-        fileSystem: fileSystem,
-        flutterVersion: flutterVersion,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        templateRenderer: _templateRenderer,
         verboseHelp: verboseHelp,
-        xcode: xcode,
       ),
     );
 
@@ -196,7 +206,7 @@ class BuildCommand extends FlutterCommand {
   final description = 'Build an executable app or install bundle.';
 
   @override
-  final category = FlutterCommandCategory.project;
+  String get category => FlutterCommandCategory.project;
 
   @override
   Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();

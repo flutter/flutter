@@ -16,6 +16,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -418,32 +419,35 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final String plistPath = app.builtInfoPlistPathAfterArchive;
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final AppleContext(:PlistParser plistParser) = _appleContext;
 
-    if (!_toolContext.fs.file(plistPath).existsSync()) {
-      _toolContext.logger.printError('Invalid iOS archive. Does not contain Info.plist.');
+    if (!fs.file(plistPath).existsSync()) {
+      logger.printError('Invalid iOS archive. Does not contain Info.plist.');
       return <ValidationMessage>[];
     }
 
     final xcodeProjectSettingsMap = <String, String?>{};
 
-    xcodeProjectSettingsMap['Version Number'] = _appleContext.plistParser.getValueFromFile<String>(
+    xcodeProjectSettingsMap['Version Number'] = plistParser.getValueFromFile<String>(
       plistPath,
       PlistParser.kCFBundleShortVersionStringKey,
     );
-    xcodeProjectSettingsMap['Build Number'] = _appleContext.plistParser.getValueFromFile<String>(
+    xcodeProjectSettingsMap['Build Number'] = plistParser.getValueFromFile<String>(
       plistPath,
       PlistParser.kCFBundleVersionKey,
     );
     xcodeProjectSettingsMap['Display Name'] =
-        _appleContext.plistParser.getValueFromFile<String>(
-          plistPath,
-          PlistParser.kCFBundleDisplayNameKey,
-        ) ??
-        _appleContext.plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleNameKey);
-    xcodeProjectSettingsMap['Deployment Target'] = _appleContext.plistParser
-        .getValueFromFile<String>(plistPath, PlistParser.kMinimumOSVersionKey);
-    xcodeProjectSettingsMap['Bundle Identifier'] = _appleContext.plistParser
-        .getValueFromFile<String>(plistPath, PlistParser.kCFBundleIdentifierKey);
+        plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleDisplayNameKey) ??
+        plistParser.getValueFromFile<String>(plistPath, PlistParser.kCFBundleNameKey);
+    xcodeProjectSettingsMap['Deployment Target'] = plistParser.getValueFromFile<String>(
+      plistPath,
+      PlistParser.kMinimumOSVersionKey,
+    );
+    xcodeProjectSettingsMap['Bundle Identifier'] = plistParser.getValueFromFile<String>(
+      plistPath,
+      PlistParser.kCFBundleIdentifierKey,
+    );
 
     final List<ValidationMessage> validationMessages = xcodeProjectSettingsMap.entries.map((
       MapEntry<String, String?> entry,
@@ -998,12 +1002,16 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Artifacts artifacts = _toolContext.artifacts;
-    final FileSystem fs = _toolContext.fs;
-    final FileSystemUtils fsUtils = _toolContext.fileSystemUtils;
-    final OperatingSystemUtils os = _toolContext.os;
-    final PlistParser plistParser = _appleContext.plistParser;
-    final Terminal terminal = _toolContext.terminal;
+    final ToolContext(
+      :Artifacts artifacts,
+      fileSystemUtils: FileSystemUtils fsUtils,
+      :FileSystem fs,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :Terminal terminal,
+    ) = _toolContext;
+    final AppleContext(:PlistParser plistParser) = _appleContext;
 
     defaultBuildMode = environmentType == EnvironmentType.simulator
         ? BuildMode.debug

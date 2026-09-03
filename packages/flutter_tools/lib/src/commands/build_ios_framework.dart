@@ -796,7 +796,6 @@ end
     Directory simulatorBuildOutput,
     String? codesignIdentity,
   ) async {
-    // ignore: omit_obvious_local_variable_types
     final ToolContext(
       :Artifacts artifacts,
       :Cache cache,
@@ -805,7 +804,6 @@ end
       :Platform platform,
       :ProcessManager processManager,
     ) = _toolContext;
-    // ignore: omit_obvious_local_variable_types
     final AppleContext(:Xcode xcode) = _appleContext;
 
     const appFrameworkName = 'App.framework';
