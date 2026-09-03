@@ -482,6 +482,25 @@ To fix this, you can either:
     }
   }
 
+  /// Prints the suggestion of the first known Gradle error found in [output],
+  /// if there is one.
+  ///
+  /// Unlike app builds, AAR builds do not stream the Gradle output through
+  /// [_runGradleTask], so the known error handlers are applied to the captured
+  /// output instead. Only the suggestion is reported, the AAR build is never
+  /// retried.
+  Future<void> _reportKnownGradleError(FlutterProject project, String output) async {
+    final bool usesAndroidX = isAppUsingAndroidX(project.android.hostAppGradleRoot);
+    for (final String line in LineSplitter.split(output)) {
+      for (final GradleHandledError gradleError in gradleErrors) {
+        if (gradleError.test(line)) {
+          await gradleError.handler(line: line, project: project, usesAndroidX: usesAndroidX);
+          return;
+        }
+      }
+    }
+  }
+
   /// Builds an app.
   ///
   /// * [project] is typically [FlutterProject.current()].
@@ -957,6 +976,7 @@ To fix this, you can either:
       _logger.printStatus(result.stdout, wrap: false);
       _logger.printError(result.stderr, wrap: false);
       await _checkJavaAndGradleCompatibility(project, androidBuildInfo.buildInfo);
+      await _reportKnownGradleError(project, '${result.stdout}\n${result.stderr}');
       throwToolExit(
         'Gradle task $aarTask failed with exit code ${result.exitCode}.',
         exitCode: result.exitCode,

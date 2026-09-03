@@ -8,6 +8,7 @@ import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
+import '../base/version.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import 'gradle_utils.dart' as utils;
@@ -78,6 +79,7 @@ final gradleErrors = <GradleHandledError>[
   sslExceptionHandler,
   zipExceptionHandler,
   incompatibleJavaAndGradleVersionsHandler,
+  unsupportedJavaVersionHandler,
   remoteTerminatedHandshakeHandler,
   couldNotOpenCacheDirectoryHandler,
   incompatibleCompileSdk35AndAgpVersionHandler,
@@ -541,6 +543,43 @@ final incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
         return GradleBuildStatus.exit;
       },
   eventLabel: 'incompatible-java-gradle-version',
+);
+
+/// When the JDK that Gradle runs on is newer than the Java version that the
+/// build tooling (Gradle, the Android Gradle plugin, or the Kotlin Gradle
+/// plugin) knows how to parse, the build crashes while parsing the version
+/// string, for example:
+///
+///     java.lang.IllegalArgumentException: 25.0.2
+///         at org.jetbrains.kotlin.com.intellij.util.lang.JavaVersion.parse(JavaVersion.java:245)
+///
+/// The stack frame is matched instead of the exception message because the
+/// message is only the Java version, which is too generic to match on its own.
+/// The class is repackaged by some plugins, so only the end of the class name
+/// is matched.
+@visibleForTesting
+final unsupportedJavaVersionHandler = GradleHandledError(
+  test: _lineMatcher(const <String>['com.intellij.util.lang.JavaVersion.parse']),
+  handler:
+      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+        final Version? javaVersion = globals.java?.version;
+        final javaVersionText = javaVersion == null ? '' : ' ($javaVersion)';
+        globals.printBox(
+          '${globals.logger.terminal.warningMark} The Java version used by Flutter'
+          '$javaVersionText is not supported by the Gradle, Android Gradle plugin, '
+          'or Kotlin Gradle plugin versions used by this project.\n\n'
+          'To fix this issue, either select a supported Java version by running\n'
+          '`flutter config --jdk-dir=</path/to/jdk>`\n'
+          'or upgrade the Gradle, Android Gradle plugin, and Kotlin Gradle plugin '
+          'versions used by this project.\n\n'
+          'To check the Java version used by Flutter, run `flutter doctor --verbose`.\n'
+          'See the link below for more information on compatible Java/Gradle versions:\n'
+          '${AndroidProject.javaGradleCompatUrl}\n\n',
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'unsupported-java-version',
 );
 
 @visibleForTesting
