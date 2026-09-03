@@ -27,6 +27,8 @@ class AnalysisServer {
     required Platform platform,
     required Terminal terminal,
     required this.suppressAnalytics,
+    this.withFineDependencies = true,
+    this.usePlugins = true,
     String? protocolTrafficLog,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
@@ -35,6 +37,8 @@ class AnalysisServer {
        _terminal = terminal,
        _protocolTrafficLog = protocolTrafficLog;
 
+  final bool withFineDependencies;
+  final bool usePlugins;
   final String sdkPath;
   final List<String> directories;
   final FileSystem _fileSystem;
@@ -75,6 +79,8 @@ class AnalysisServer {
       sdkPath,
       '--disable-server-feature-completion',
       '--disable-server-feature-search',
+      if (!withFineDependencies) '--no-with-fine-dependencies',
+      if (!usePlugins) '--no-plugins',
       if (suppressAnalytics) '--suppress-analytics',
       if (_protocolTrafficLog != null) '--protocol-traffic-log=$_protocolTrafficLog',
     ];
@@ -144,7 +150,8 @@ class AnalysisServer {
   Future<int?>? _onExit;
 
   void _writeMessage({required String message}) {
-    _process?.stdin.write('Content-Length: ${message.length}\r\n\r\n$message');
+    final List<int> encodedMessage = utf8.encode(message);
+    _process?.stdin.write('Content-Length: ${encodedMessage.length}\r\n\r\n$message');
   }
 
   Future<Map<String, Object?>?> sendRequest(String method, Map<String, Object?> params) async {

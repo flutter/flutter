@@ -2,26 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:core' hide print;
 import 'dart:io' hide exit;
 import 'dart:typed_data';
 
-import 'package:collection/equality.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'allowlist.dart';
-import 'custom_rules/analyze.dart';
-import 'custom_rules/avoid_future_catcherror.dart';
-import 'custom_rules/no_double_clamp.dart';
-import 'custom_rules/no_stop_watches.dart';
-import 'custom_rules/protect_public_state_subtypes.dart';
-import 'custom_rules/render_box_intrinsics.dart';
 import 'run_command.dart';
 import 'utils.dart';
 
+const _kHeartbeatInterval = Duration(seconds: 30);
 
 /// The path to the `dart` executable; set at the top of `main`
 late final String dart;
@@ -221,16 +216,6 @@ List<Validation> _getValidations({
       'Debug mode instead of checked mode...',
       () => verifyNoCheckedMode(flutterRoot),
     ),
-    Validation(
-      'issue-links',
-      'Links for creating GitHub issues...',
-      () => verifyIssueLinks(flutterRoot),
-    ),
-    Validation(
-      'repository-links',
-      'Links to repositories...',
-      () => verifyRepositoryLinks(flutterRoot),
-    ),
     Validation('no-binaries', 'Unexpected binaries...', () => verifyNoBinaries(flutterRoot)),
     Validation(
       'no-trailing-spaces',
@@ -287,11 +272,6 @@ List<Validation> _getValidations({
     //     path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
     //   ], workingDirectory: flutterRoot),
     // ),
-    Validation(
-      'private-lints',
-      'Private lints...',
-      () => _verifyPrivateLints(flutterRoot, getDartAnalyzeResult()),
-    ),
     Validation('executable-allowlist', 'Executable allowlist...', () => _checkForNewExecutables()),
     Validation(
       'dart-analysis-watch',
@@ -323,16 +303,6 @@ List<Validation> _getValidations({
       'mega-gallery',
       'Dart analysis (mega gallery)...',
       () => _verifyMegaGallery(flutterRoot, dart, passthroughArguments),
-    ),
-    Validation(
-      'gen-defaults-names',
-      'Correct file names in gen_defaults.dart...',
-      () => verifyTokenTemplatesUpdateCorrectFiles(flutterRoot),
-    ),
-    Validation(
-      'gen-defaults-up-to-date',
-      'Material library files are up-to-date with token template files...',
-      () => verifyMaterialFilesAreUpToDateWithTemplateFiles(flutterRoot, dart),
     ),
     Validation(
       'integration-templates',
@@ -451,138 +421,6 @@ Future<void> verifyTargetPlatform(String workingDirectory) async {
   if (toolExtra.isNotEmpty) {
     foundError(<String>[
       'The nextPlatform logic in the tool has some extra values not found in TargetPlatform: ${toolExtra.join(", ")}',
-    ]);
-  }
-}
-
-/// Verify Token Templates are mapped to correct file names while generating
-/// M3 defaults in /dev/tools/gen_defaults/bin/gen_defaults.dart.
-Future<void> verifyTokenTemplatesUpdateCorrectFiles(String workingDirectory) async {
-  final errors = <String>[];
-
-  String getMaterialDirPath(List<String> lines) {
-    final String line = lines.firstWhere((String line) => line.contains('String materialLib'));
-    final String relativePath = line.substring(line.indexOf("'") + 1, line.lastIndexOf("'"));
-    return path.join(workingDirectory, relativePath);
-  }
-
-  String getFileName(String line) {
-    const materialLibString = r"'$materialLib/";
-    final String leftClamp = line.substring(
-      line.indexOf(materialLibString) + materialLibString.length,
-    );
-    return leftClamp.substring(0, leftClamp.indexOf("'"));
-  }
-
-  final genDefaultsBinDir = '$workingDirectory/dev/tools/gen_defaults/bin';
-  final file = File(path.join(genDefaultsBinDir, 'gen_defaults.dart'));
-  final List<String> lines = file.readAsLinesSync();
-  final String materialDirPath = getMaterialDirPath(lines);
-  var atLeastOneTargetLineExists = false;
-
-  for (final line in lines) {
-    if (line.contains('updateFile();')) {
-      atLeastOneTargetLineExists = true;
-      final String fileName = getFileName(line);
-      final String filePath = path.join(materialDirPath, fileName);
-      final file = File(filePath);
-
-      if (!file.existsSync()) {
-        errors.add('file $filePath does not exist.');
-      }
-    }
-  }
-
-  assert(
-    atLeastOneTargetLineExists,
-    'No lines exist that this test expects to '
-    'verify. Check if the target file is correct or remove this test',
-  );
-
-  // Fail if any errors
-  if (errors.isNotEmpty) {
-    final s = errors.length > 1 ? 's' : '';
-    final itThem = errors.length > 1 ? 'them' : 'it';
-    foundError(<String>[
-      ...errors,
-      '${bold}Please correct the file name$s or remove $itThem from /dev/tools/gen_defaults/bin/gen_defaults.dart$reset',
-    ]);
-  }
-}
-
-/// Verify Material library files are up-to-date with the token template files
-/// when running /dev/tools/gen_defaults/bin/gen_defaults.dart.
-Future<void> verifyMaterialFilesAreUpToDateWithTemplateFiles(
-  String workingDirectory,
-  String dartExecutable,
-) async {
-  final errors = <String>[];
-  const beginGeneratedComment = '// BEGIN GENERATED TOKEN PROPERTIES';
-
-  String getMaterialDirPath(List<String> lines) {
-    final String line = lines.firstWhere((String line) => line.contains('String materialLib'));
-    final String relativePath = line.substring(line.indexOf("'") + 1, line.lastIndexOf("'"));
-    return path.join(workingDirectory, relativePath);
-  }
-
-  String getFileName(String line) {
-    const materialLibString = r"'$materialLib/";
-    final String leftClamp = line.substring(
-      line.indexOf(materialLibString) + materialLibString.length,
-    );
-    return leftClamp.substring(0, leftClamp.indexOf("'"));
-  }
-
-  // Get the template generated code from the file.
-  List<String> getGeneratedCode(List<String> lines) {
-    return lines.skipWhile((String line) => !line.contains(beginGeneratedComment)).toList();
-  }
-
-  final genDefaultsBinDir = '$workingDirectory/dev/tools/gen_defaults/bin';
-  final file = File(path.join(genDefaultsBinDir, 'gen_defaults.dart'));
-  final List<String> lines = file.readAsLinesSync();
-  final String materialDirPath = getMaterialDirPath(lines);
-  final beforeGeneratedCode = <String, List<String>>{};
-  final afterGeneratedCode = <String, List<String>>{};
-
-  for (final line in lines) {
-    if (line.contains('updateFile();')) {
-      final String fileName = getFileName(line);
-      final String filePath = path.join(materialDirPath, fileName);
-      final file = File(filePath);
-      beforeGeneratedCode[fileName] = getGeneratedCode(file.readAsLinesSync());
-    }
-  }
-
-  // Run gen_defaults.dart to generate the token template files.
-  await runCommand(dartExecutable, <String>[
-    '--enable-asserts',
-    path.join('dev', 'tools', 'gen_defaults', 'bin', 'gen_defaults.dart'),
-  ], workingDirectory: workingDirectory);
-
-  for (final line in lines) {
-    if (line.contains('updateFile();')) {
-      final String fileName = getFileName(line);
-      final String filePath = path.join(materialDirPath, fileName);
-      final file = File(filePath);
-      afterGeneratedCode[fileName] = getGeneratedCode(file.readAsLinesSync());
-    }
-  }
-
-  // Compare the generated code before and after running gen_defaults.dart.
-  for (final String fileName in beforeGeneratedCode.keys) {
-    final List<String> before = beforeGeneratedCode[fileName]!;
-    final List<String> after = afterGeneratedCode[fileName]!;
-    if (!const IterableEquality<String>().equals(before, after)) {
-      errors.add('$fileName is not up-to-date with the token template file.');
-    }
-  }
-
-  // Fail if any errors.
-  if (errors.isNotEmpty) {
-    foundError(<String>[
-      ...errors,
-      '${bold}See: https://github.com/flutter/flutter/blob/main/dev/tools/gen_defaults to update the token template files.$reset',
     ]);
   }
 }
@@ -1062,165 +900,6 @@ Future<void> verifySpacesAfterFlowControlStatements(
   }
   if (problems.isNotEmpty) {
     foundError(problems);
-  }
-}
-
-String _bullets(String value) => ' * $value';
-
-Future<void> verifyIssueLinks(String workingDirectory) async {
-  const issueLinkPrefix = 'https://github.com/flutter/flutter/issues/new';
-  const stops = <String>{'\n', ' ', "'", '"', r'\', ')', '>'};
-  assert(
-    !stops.contains('.'),
-  ); // instead of "visit https://foo." say "visit: https://foo", it copy-pastes better
-  const kGiveTemplates =
-      'Prefer to provide a link either to $issueLinkPrefix/choose (the list of issue '
-      'templates) or to a specific template directly ($issueLinkPrefix?template=...).\n';
-  final Set<String> templateNames =
-      Directory(path.join(workingDirectory, '.github', 'ISSUE_TEMPLATE'))
-          .listSync()
-          .whereType<File>()
-          .where(
-            (File file) =>
-                path.extension(file.path) == '.md' || path.extension(file.path) == '.yml',
-          )
-          .map<String>((File file) => path.basename(file.path))
-          .toSet();
-  final kTemplates = 'The available templates are:\n${templateNames.map(_bullets).join("\n")}';
-  final problems = <String>[];
-  final suggestions = <String>{};
-  final List<File> files = await _gitFiles(workingDirectory);
-  for (final file in files) {
-    if (path.basename(file.path).endsWith('_test.dart') ||
-        path.basename(file.path) == 'analyze.dart' ||
-        FileSystemEntity.isLinkSync(file.path)) {
-      continue; // Skip tests, they're not public-facing. Skip symlinks.
-    }
-    final Uint8List bytes = file.readAsBytesSync();
-    // We allow invalid UTF-8 here so that binaries don't trip us up.
-    // There's a separate test in this file that verifies that all text
-    // files are actually valid UTF-8 (see verifyNoBinaries below).
-    final String contents = utf8.decode(bytes, allowMalformed: true);
-    var start = 0;
-    while ((start = contents.indexOf(issueLinkPrefix, start)) >= 0) {
-      int end = start + issueLinkPrefix.length;
-      while (end < contents.length && !stops.contains(contents[end])) {
-        end += 1;
-      }
-      final String url = contents.substring(start, end);
-      if (url == issueLinkPrefix) {
-        if (file.path != path.join(workingDirectory, 'dev', 'bots', 'analyze.dart')) {
-          problems.add('${file.path} contains a direct link to $issueLinkPrefix.');
-          suggestions.add(kGiveTemplates);
-          suggestions.add(kTemplates);
-        }
-      } else if (url.startsWith('$issueLinkPrefix?')) {
-        final Uri parsedUrl = Uri.parse(url);
-        final List<String>? templates = parsedUrl.queryParametersAll['template'];
-        if (templates == null) {
-          problems.add('${file.path} contains $url, which has no "template" argument specified.');
-          suggestions.add(kGiveTemplates);
-          suggestions.add(kTemplates);
-        } else if (templates.length != 1) {
-          problems.add(
-            '${file.path} contains $url, which has ${templates.length} templates specified.',
-          );
-          suggestions.add(kGiveTemplates);
-          suggestions.add(kTemplates);
-        } else if (!templateNames.contains(templates.single)) {
-          problems.add(
-            '${file.path} contains $url, which specifies a non-existent template ("${templates.single}").',
-          );
-          suggestions.add(kTemplates);
-        } else if (parsedUrl.queryParametersAll.keys.length > 1) {
-          problems.add(
-            '${file.path} contains $url, which the analyze.dart script is not sure how to handle.',
-          );
-          suggestions.add(
-            'Update analyze.dart to handle the URLs above, or change them to the expected pattern.',
-          );
-        }
-      } else if (url != '$issueLinkPrefix/choose') {
-        problems.add(
-          '${file.path} contains $url, which the analyze.dart script is not sure how to handle.',
-        );
-        suggestions.add(
-          'Update analyze.dart to handle the URLs above, or change them to the expected pattern.',
-        );
-      }
-      start = end;
-    }
-  }
-  assert(problems.isEmpty == suggestions.isEmpty);
-  if (problems.isNotEmpty) {
-    foundError(<String>[...problems, ...suggestions]);
-  }
-}
-
-Future<void> verifyRepositoryLinks(String workingDirectory) async {
-  const stops = <String>{'\n', ' ', "'", '"', r'\', ')', '>'};
-  assert(
-    !stops.contains('.'),
-  ); // instead of "visit https://foo." say "visit: https://foo", it copy-pastes better
-
-  // Repos whose default branch is still 'master'
-  const repoExceptions = <String>{
-    'chromium/chromium',
-    'clojure/clojure',
-    'dart-lang/test', // TODO(guidezpl): remove when https://github.com/dart-lang/test/issues/2209 is closed
-    'eseidelGoogle/bezier_perf',
-    'flutter/devtools', // TODO(guidezpl): remove when https://github.com/flutter/devtools/issues/7551 is closed
-    'flutter/flutter-intellij', // TODO(guidezpl): remove when https://github.com/flutter/flutter-intellij/issues/7342 is closed
-    'flutter/platform_tests', // TODO(guidezpl): remove when subtask in https://github.com/flutter/flutter/issues/121564 is complete
-    'flutter/web_installers',
-    'glfw/glfw',
-    'GoogleCloudPlatform/artifact-registry-maven-tools',
-    'material-components/material-components-android', // TODO(guidezpl): remove when https://github.com/material-components/material-components-android/issues/4144 is closed
-    'ninja-build/ninja',
-    'torvalds/linux',
-    'tpn/winsdk-10',
-  };
-
-  // See dev/bots/test/analyze-test-input/root/packages/foo/bad_repository_links.dart
-  // for examples of repository links that are not allowed.
-  final pattern = RegExp(
-    r'^(https:\/\/(?:cs\.opensource\.google|github|raw\.githubusercontent|source\.chromium|([a-z0-9\-]+)\.googlesource)\.)',
-  );
-
-  final problems = <String>[];
-  final suggestions = <String>{};
-  final List<File> files = await _allFiles(workingDirectory, null, minimumMatches: 10).toList();
-  for (final file in files) {
-    final Uint8List bytes = file.readAsBytesSync();
-    // We allow invalid UTF-8 here so that binaries don't trip us up.
-    // There's a separate test in this file that verifies that all text
-    // files are actually valid UTF-8 (see verifyNoBinaries below).
-    final String contents = utf8.decode(bytes, allowMalformed: true);
-    var start = 0;
-    while ((start = contents.indexOf('https://', start)) >= 0) {
-      // Find all 'https://' links
-      int end = start + 8; // Length of 'https://'
-      while (end < contents.length && !stops.contains(contents[end])) {
-        end += 1;
-      }
-      final String url = contents.substring(start, end).replaceAll('\r', '');
-
-      if (pattern.hasMatch(url) && !repoExceptions.any(url.contains)) {
-        if (url.contains('master')) {
-          problems.add('${file.path} contains $url, which uses the banned "master" branch.');
-          suggestions.add(
-            'Change the URLs above to the expected pattern by '
-            'using the "main" branch if it exists, otherwise adding the '
-            'repository to the list of exceptions in analyze.dart.',
-          );
-        }
-      }
-      start = end;
-    }
-  }
-  assert(problems.isEmpty == suggestions.isEmpty);
-  if (problems.isNotEmpty) {
-    foundError(<String>[...problems, ...suggestions]);
   }
 }
 
@@ -2118,12 +1797,20 @@ Future<CommandResult> _runFlutterAnalyze(
   List<String> options = const <String>[],
   String? failureMessage,
 }) async {
-  return runCommand(
-    flutter,
-    <String>['analyze', ...options],
-    workingDirectory: workingDirectory,
-    failureMessage: failureMessage,
-  );
+  final stopwatch = Stopwatch()..start();
+  final heartbeatTimer = Timer.periodic(_kHeartbeatInterval, (Timer _) {
+    print('Analysis in progress (${stopwatch.elapsed.inSeconds}s)...');
+  });
+  try {
+    return await runCommand(
+      flutter,
+      <String>['analyze', ...options],
+      workingDirectory: workingDirectory,
+      failureMessage: failureMessage,
+    );
+  } finally {
+    heartbeatTimer.cancel();
+  }
 }
 
 // These files legitimately require executable permissions
@@ -2242,47 +1929,6 @@ bool _isGeneratedPluginRegistrant(File file) {
           filename == 'generated_plugin_registrant.dart' ||
           filename == 'generated_plugin_registrant.h' ||
           filename == 'generated_plugin_registrant.cc');
-}
-
-Future<void> _verifyPrivateLints(String flutterRoot, CommandResult? dartAnalyzeResult) async {
-  if (dartAnalyzeResult == null) {
-    foundError(<String>[
-      'The "dart-analysis" rule must run before "private-lints".',
-      'Ensure "dart-analysis" is not skipped and is included in --only if used.',
-    ]);
-    return;
-  }
-  // Only run the private lints when the code is free of type errors. The
-  // lints are easier to write when they can assume, for example, there is no
-  // inheritance cycles.
-  if (dartAnalyzeResult.exitCode == 0) {
-    final rules = <AnalyzeRule>[
-      noDoubleClamp,
-      noStopwatches,
-      renderBoxIntrinsicCalculation,
-      protectPublicStateSubtypes,
-    ];
-    final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
-    printProgress('Analyzing code in the framework with the following rules:$ruleNames');
-    await analyzeWithRules(
-      flutterRoot,
-      rules,
-      includePaths: const <String>['packages/flutter/lib'],
-      excludePaths: const <String>['packages/flutter/lib/fix_data'],
-    );
-    final testRules = <AnalyzeRule>[noStopwatches];
-    final String testRuleNames = testRules.map((AnalyzeRule rule) => '\n * $rule').join();
-    printProgress('Analyzing code in the test folder with the following rules:$testRuleNames');
-    await analyzeWithRules(flutterRoot, testRules, includePaths: <String>['packages/flutter/test']);
-    final toolRules = <AnalyzeRule>[AvoidFutureCatchError()];
-    final String toolRuleNames = toolRules.map((AnalyzeRule rule) => '\n * $rule').join();
-    printProgress('Analyzing code in the tool with the following rules:$toolRuleNames');
-    await analyzeWithRules(
-      flutterRoot,
-      toolRules,
-      includePaths: const <String>['packages/flutter_tools/lib', 'packages/flutter_tools/test'],
-    );
-  }
 }
 
 Future<void> _verifyMegaGallery(

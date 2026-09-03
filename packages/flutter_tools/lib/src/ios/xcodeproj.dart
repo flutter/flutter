@@ -414,29 +414,33 @@ class XcodeProjectInterpreter {
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
     const corruptedProjectExitCode = 74;
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
-    final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
-      xcodeProject,
-      buildDirectory,
-    );
-    final RunResult result = await _processUtils.run(
-      <String>[
-        ...xcodebuildCommandArgs,
-        '-list',
-        if (projectFilename != null) ...<String>['-project', projectFilename],
-      ],
-      throwOnError: true,
-      allowedFailures: allowedFailures,
-      workingDirectory: xcodeProject.hostAppRoot.path,
-    );
-    if (allowedFailures(result.exitCode)) {
-      // User configuration error, tool exit instead of crashing.
-      throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
+    try {
+      final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
+        xcodeProject,
+        buildDirectory,
+      );
+      final RunResult result = await _processUtils.run(
+        <String>[
+          ...xcodebuildCommandArgs,
+          '-list',
+          if (projectFilename != null) ...<String>['-project', projectFilename],
+        ],
+        throwOnError: true,
+        allowedFailures: allowedFailures,
+        workingDirectory: xcodeProject.hostAppRoot.path,
+      );
+      if (allowedFailures(result.exitCode)) {
+        // User configuration error, tool exit instead of crashing.
+        throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
+      }
+      return XcodeProjectInfo.fromXcodeBuildOutput(
+        result.toString(),
+        _logger,
+        ignoredSchemes: await _ignoredSwiftPackageSchemes(xcodeProject, buildDirectory),
+      );
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to get Xcode project information:\n $exception');
     }
-    return XcodeProjectInfo.fromXcodeBuildOutput(
-      result.toString(),
-      _logger,
-      ignoredSchemes: await _ignoredSwiftPackageSchemes(xcodeProject, buildDirectory),
-    );
   }
 
   /// Returns scheme-name candidates for Swift packages that should be excluded from

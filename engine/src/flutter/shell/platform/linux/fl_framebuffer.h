@@ -24,40 +24,41 @@ G_DECLARE_FINAL_TYPE(FlFramebuffer, fl_framebuffer, FL, FRAMEBUFFER, GObject)
  * @format: format, e.g. GL_RGB, GL_BGR
  * @width: width of texture.
  * @height: height of texture.
- * @shareable: %TRUE if this framebuffer can be shared between contexts
- * (requires EGL).
  *
  * Creates a new frame buffer. Requires a valid OpenGL context to create.
  *
  * Returns: a new #FlFramebuffer.
  */
-FlFramebuffer* fl_framebuffer_new(GLint format,
-                                  size_t width,
-                                  size_t height,
-                                  gboolean shareable);
+FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height);
 
 /**
- * fl_framebuffer_get_shareable:
- * @framebuffer: an #FlFramebuffer.
+ * fl_framebuffer_new_multisample:
+ * @format: texture format, e.g. GL_RGBA, GL_BGRA_EXT.
+ * @width: width of framebuffer in pixels.
+ * @height: height of framebuffer in pixels.
+ * @use_msaa: %TRUE to enable multisample anti-aliasing (MSAA) attachments.
  *
- * Checks if this framebuffer can be shared between contexts (using
- * fl_framebuffer_create_sibling).
+ * Creates a new frame buffer, configuring MSAA attachments if supported and
+ * @use_msaa is %TRUE.
  *
- * Returns: %TRUE if this framebuffer can be shared.
- */
-gboolean fl_framebuffer_get_shareable(FlFramebuffer* framebuffer);
-
-/**
- * fl_framebuffer_create_sibling:
- * @framebuffer: an #FlFramebuffer.
+ * When @use_msaa is %TRUE, the framebuffer will configure 4x MSAA attachments
+ * using either implicit MSAA (multisampled texture via
+ * GL_EXT_multisampled_render_to_texture) with the requested @format or
+ * offscreen MSAA (multisample color renderbuffer). If offscreen MSAA is used,
+ * the framebuffer is backed by a GL_RGBA8 renderbuffer instead of a texture
+ * (fl_framebuffer_get_texture_id() returns 0) and must be resolved into a
+ * single-sample texture via glBlitFramebuffer before compositing.
  *
- * Creates a new framebuffer with the same backing texture as the original. This
- * uses EGLImage to share the texture and allows a framebuffer created in one
- * OpenGL context to be used in another.
+ * If @use_msaa is %FALSE or MSAA is not supported by the OpenGL context, a
+ * standard single-sample texture with @format and depth/stencil renderbuffer
+ * are created.
  *
  * Returns: a new #FlFramebuffer.
  */
-FlFramebuffer* fl_framebuffer_create_sibling(FlFramebuffer* framebuffer);
+FlFramebuffer* fl_framebuffer_new_multisample(GLint format,
+                                              size_t width,
+                                              size_t height,
+                                              gboolean use_msaa);
 
 /**
  * fl_framebuffer_get_id:

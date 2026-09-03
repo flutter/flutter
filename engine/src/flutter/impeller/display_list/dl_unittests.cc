@@ -1722,5 +1722,174 @@ TEST_P(DisplayListTest, DrawMaskBlursThatMightUseSaveLayers) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DisplayListTest, FirstPassDispatcherBackdropCoverageUnion) {
+  flutter::DisplayListBuilder builder;
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // Layer 1: clipped to (10, 20, 60, 80)
+  builder.Save();
+  builder.ClipRect(DlRect::MakeLTRB(10, 20, 60, 80));
+  builder.SaveLayer(std::nullopt, &save_paint, blur.get(), /*backdrop_id=*/1);
+  builder.Restore();
+  builder.Restore();
+
+  // Layer 2: translated by (100, 100), clipped to (0, 0, 50, 50) -> global
+  // (100, 100, 150, 150)
+  builder.Save();
+  builder.Translate(100, 100);
+  builder.ClipRect(DlRect::MakeLTRB(0, 0, 50, 50));
+  builder.SaveLayer(std::nullopt, &save_paint, blur.get(), /*backdrop_id=*/1);
+  builder.Restore();
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  auto it = backdrop_data.find(1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
+  EXPECT_TRUE(it->second.all_filters_equal);
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(10, 20, 150, 150));
+}
+
+TEST_P(DisplayListTest, FirstPassDispatcherBackdropCoverageUnionClippedOut) {
+  flutter::DisplayListBuilder builder;
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // Layer 1: clipped out completely (cull rect is outside initial cull rect or
+  // empty)
+  builder.Save();
+  builder.ClipRect(DlRect::MakeLTRB(-100, -100, -50, -50));
+  builder.SaveLayer(std::nullopt, &save_paint, blur.get(), /*backdrop_id=*/1);
+  builder.Restore();
+  builder.Restore();
+
+  // Layer 2: also clipped out completely
+  builder.Save();
+  builder.ClipRect(DlRect::MakeLTRB(-200, -200, -150, -150));
+  builder.SaveLayer(std::nullopt, &save_paint, blur.get(), /*backdrop_id=*/1);
+  builder.Restore();
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  auto it = backdrop_data.find(1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
+  EXPECT_TRUE(it->second.all_filters_equal);
+  EXPECT_TRUE(it->second.coverage_union.IsEmpty());
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(0, 0, 0, 0));
+}
+
+TEST_P(DisplayListTest,
+       FirstPassDispatcherBackdropCoverageUnionFirstClippedOut) {
+  flutter::DisplayListBuilder builder;
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // Layer 1: clipped out completely
+  builder.Save();
+  builder.ClipRect(DlRect::MakeLTRB(-100, -100, -50, -50));
+  builder.SaveLayer(std::nullopt, &save_paint, blur.get(), /*backdrop_id=*/1);
+  builder.Restore();
+  builder.Restore();
+
+  // Layer 2: visible at (10, 20, 60, 80)
+  builder.Save();
+  builder.ClipRect(DlRect::MakeLTRB(10, 20, 60, 80));
+  builder.SaveLayer(std::nullopt, &save_paint, blur.get(), /*backdrop_id=*/1);
+  builder.Restore();
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  auto it = backdrop_data.find(1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
+  EXPECT_TRUE(it->second.all_filters_equal);
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(10, 20, 60, 80));
+}
+
+TEST_P(DisplayListTest,
+       FirstPassDispatcherBackdropCoverageUnionDisjointBounds) {
+  flutter::DisplayListBuilder builder;
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // Layer 1: disjoint bounds (outside initial cull rect 0, 0, 1000, 1000)
+  builder.SaveLayer(DlRect::MakeLTRB(-100, -100, -50, -50), &save_paint,
+                    blur.get(), /*backdrop_id=*/1);
+  builder.Restore();
+
+  // Layer 2: visible at (10, 20, 60, 80)
+  builder.SaveLayer(DlRect::MakeLTRB(10, 20, 60, 80), &save_paint, blur.get(),
+                    /*backdrop_id=*/1);
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  auto it = backdrop_data.find(1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
+  EXPECT_TRUE(it->second.all_filters_equal);
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(10, 20, 60, 80));
+}
+
+TEST_P(DisplayListTest,
+       FirstPassDispatcherSaveLayerMaximalBoundsDoesNotClipCullRect) {
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  // A perspective transform where homogeneous coordinates (w) flip sign for
+  // distant points if maximal bounds are transformed.
+  Matrix transform(1.0f, 0.0f, 0.0f, 0.0001f,  //
+                   0.0f, 1.0f, 0.0f, 0.0f,     //
+                   0.0f, 0.0f, 1.0f, 0.0f,     //
+                   0.0f, 0.0f, 0.0f, 1.0f);
+  FirstPassDispatcher collector(GetContentContext(), transform,
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  flutter::SaveLayerOptions options;
+  options = options.with_bounds_from_caller();
+
+  // Maximal bounds with bounds_from_caller.
+  collector.saveLayer(DlRect::MakeMaximum(), options, nullptr, std::nullopt);
+  // Inner layer with backdrop filter.
+  collector.saveLayer(DlRect(), flutter::SaveLayerOptions(), blur.get(),
+                      /*backdrop_id=*/1);
+  collector.restore();
+  collector.restore();
+
+  auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 1u);
+  auto it = backdrop_data.find(1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_FALSE(it->second.coverage_union.IsEmpty());
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(0, 0, 1000, 1000));
+}
+
 }  // namespace testing
 }  // namespace impeller
