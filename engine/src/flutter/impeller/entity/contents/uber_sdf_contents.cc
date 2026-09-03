@@ -70,14 +70,22 @@ SamplerBinding SetupGradientParameters(
     const UberSDFParameters::GradientParameters& gradient,
     const ContentContext& renderer,
     FS::FragInfo& frag_info) {
-  FML_DCHECK(gradient.texture);
-  frag_info.gradient_start = gradient.start;
-  frag_info.gradient_end = gradient.end;
   frag_info.tile_mode = static_cast<Scalar>(gradient.tile_mode);
   auto texture_size = gradient.texture->GetSize();
   FML_DCHECK(!texture_size.IsEmpty());
-  frag_info.half_texel =
-      Point(0.5f, 0.5f) / Point(texture_size.width, texture_size.height);
+  frag_info.half_texel = 0.5f / texture_size.width;
+
+  if (gradient.type == UberSDFParameters::GradientParameters::Type::kLinear) {
+    Point delta = gradient.end - gradient.start;
+    Scalar length_sq = delta.x * delta.x + delta.y * delta.y;
+    Point direction = length_sq > 0.0f ? delta / length_sq : Point(0.0f, 0.0f);
+    frag_info.gradient_coords =
+        Vector4(gradient.start.x, gradient.start.y, direction.x, direction.y);
+  } else {
+    Scalar inv_radius = gradient.end.x > 0.0f ? 1.0f / gradient.end.x : 0.0f;
+    frag_info.gradient_coords =
+        Vector4(gradient.start.x, gradient.start.y, inv_radius, 0.0f);
+  }
 
   SamplerDescriptor sampler_desc;
   sampler_desc.min_filter = MinMagFilter::kLinear;
@@ -130,6 +138,9 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.circle_center_top = params_.circle_center_top;
   frag_info.circle_center_right = params_.circle_center_right;
   frag_info.radii = params_.radii;
+  frag_info.gradient_coords = Vector4();
+  frag_info.half_texel = 0.0f;
+  frag_info.tile_mode = 0.0f;
 
   SamplerBinding sampler_binding;
   if (params_.gradient) {

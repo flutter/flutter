@@ -8610,7 +8610,7 @@
             "longest_path_cycles": [
               4.1875,
               4.125,
-              2.15625,
+              2.125,
               4.1875,
               0.0,
               0.25,
@@ -8643,18 +8643,18 @@
               "arith_fma"
             ],
             "total_cycles": [
-              13.5,
-              13.5,
-              5.512499809265137,
-              12.75,
+              13.375,
+              13.375,
+              5.050000190734863,
+              12.625,
               0.0,
               0.25,
-              0.5
+              0.25
             ]
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 62,
+          "uniform_registers_used": 58,
           "work_registers_used": 32
         }
       }
@@ -8685,7 +8685,7 @@
               "arithmetic"
             ],
             "shortest_path_cycles": [
-              5.610000133514404,
+              5.28000020980835,
               3.0,
               0.0
             ],
@@ -8693,9 +8693,9 @@
               "arithmetic"
             ],
             "total_cycles": [
-              119.33333587646484,
-              8.0,
-              22.0
+              112.66666412353516,
+              7.0,
+              21.0
             ]
           },
           "thread_occupancy": 100,
@@ -11837,7 +11837,7 @@
             "longest_path_cycles": [
               4.125,
               3.65625,
-              2.362499952316284,
+              2.34375,
               4.125,
               0.0,
               0.25,
@@ -11871,18 +11871,18 @@
               "arith_sfu"
             ],
             "total_cycles": [
-              12.625,
-              12.5,
-              5.8125,
-              12.625,
+              12.5625,
+              12.375,
+              5.5,
+              12.5625,
               0.0,
               0.25,
-              0.5
+              0.25
             ]
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 66,
+          "uniform_registers_used": 64,
           "work_registers_used": 32
         }
       }
