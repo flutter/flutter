@@ -95,6 +95,8 @@ const int kPSLocaleIndex = 12;
 // encode slot (7), since slots 7-12 are reused only as mask-bit positions.
 const int kPSRenderSoftHyphensIndex = 13;
 const int kPSRenderSoftHyphensEncodeIndex = 7;
+const int kPSFakeMissingFontStylesIndex = 14;
+const int kPSFakeMissingFontStylesValueIndex = 15;
 
 const int kPSTextAlignMask = 1 << kPSTextAlignIndex;
 const int kPSTextDirectionMask = 1 << kPSTextDirectionIndex;
@@ -109,6 +111,9 @@ const int kPSStrutStyleMask = 1 << kPSStrutStyleIndex;
 const int kPSEllipsisMask = 1 << kPSEllipsisIndex;
 const int kPSLocaleMask = 1 << kPSLocaleIndex;
 const int kPSRenderSoftHyphensMask = 1 << kPSRenderSoftHyphensIndex;
+const int kPSFakeMissingFontStylesMask = 1 << kPSFakeMissingFontStylesIndex;
+const int kPSFakeMissingFontStylesValueMask =
+    1 << kPSFakeMissingFontStylesValueIndex;
 
 // TextShadows decoding
 
@@ -297,6 +302,10 @@ ParagraphBuilder::ParagraphBuilder(
 
   if (mask & kPSLocaleMask) {
     style.locale = locale;
+  }
+
+  if (mask & kPSFakeMissingFontStylesMask) {
+    style.fake_missing_font_styles = mask & kPSFakeMissingFontStylesValueMask;
   }
 
   FontCollection& font_collection = UIDartState::Current()
