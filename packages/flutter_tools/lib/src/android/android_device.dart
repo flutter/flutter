@@ -641,7 +641,8 @@ class AndroidDevice extends Device {
         '--user',
         userIdentifier,
       ],
-      builtPackage.launchActivity,
+      '-p',
+      builtPackage.id,
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.

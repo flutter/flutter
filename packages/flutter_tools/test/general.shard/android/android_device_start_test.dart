@@ -111,7 +111,8 @@ void main() {
             'android.intent.category.LAUNCHER',
             '-f',
             '0x20000000',
-            'FlutterActivity',
+            '-p',
+            'FlutterApp',
           ],
         ),
       );
@@ -188,7 +189,8 @@ void main() {
             '--ez',
             'enable-hcpp-and-surface-control',
             'true',
-            'FlutterActivity',
+            '-p',
+            'FlutterApp',
           ],
         ),
       );
@@ -541,7 +543,8 @@ void main() {
           '--ez', 'verbose-logging', 'true',
           '--es', 'route', '/custom/route',
           '--user', '10',
-          'FlutterActivity',
+          '-p',
+          'FlutterApp',
         ],
       ),
     );
