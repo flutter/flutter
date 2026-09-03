@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -16,8 +15,6 @@ import 'package:flutter_tools/src/desktop_device.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/macos/application_package.dart';
-import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
@@ -399,39 +396,6 @@ void main() {
     );
   });
 
-  testUsingContext(
-    'macOS devices print warning if Dart VM not found within timeframe in CI',
-    () async {
-      final logger = BufferLogger.test();
-      final device = FakeMacOSDevice(
-        fileSystem: MemoryFileSystem.test(),
-        processManager: FakeProcessManager.any(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        logger: logger,
-      );
-
-      final package = FakeMacOSApp();
-
-      FakeAsync().run((FakeAsync fakeAsync) {
-        device.startApp(
-          package,
-          prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.enabled(
-            BuildInfo.debug,
-            enableImpeller: ImpellerStatus.disabled,
-            dartEntrypointArgs: <String>[],
-            usingCISystem: true,
-          ),
-        );
-        fakeAsync.flushTimers();
-        expect(
-          logger.errorText,
-          contains('Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS'),
-        );
-      });
-    },
-  );
-
   group('DesktopLogReader', () {
     testWithoutContext('does not close logLines when a process exits', () async {
       final logReader = DesktopLogReader();
@@ -512,7 +476,7 @@ void main() {
     });
 
     testWithoutContext(
-      'dispose closes stringController and ignores subsequent VM Service events',
+      'dispose cancels subscriptions and allows subsequent VM Service connections',
       () async {
         final logReader = DesktopLogReader();
         final receivedLines = <String>[];
@@ -520,26 +484,52 @@ void main() {
           receivedLines.add,
         );
 
-        final fakeVmService = FakeVmService();
-        final fakeFlutterVmService = FakeFlutterVmService(fakeVmService);
+        final firstVmService = FakeVmService();
+        final firstFlutterVmService = FakeFlutterVmService(firstVmService);
 
-        await logReader.provideVmService(fakeFlutterVmService);
+        await logReader.provideVmService(firstFlutterVmService);
 
-        logReader.dispose();
-
-        // Adding events after dispose must not throw StateError.
-        fakeVmService.stdoutController.add(
+        firstVmService.stdoutController.add(
           vm_service.Event(
-            bytes: base64.encode(utf8.encode('late log\n')),
+            bytes: base64.encode(utf8.encode('first run\n')),
             kind: vm_service.EventKind.kWriteEvent,
             timestamp: 0,
           ),
         );
         await pumpEventQueue();
+        expect(receivedLines, <String>['first run']);
 
-        expect(receivedLines, isEmpty);
+        logReader.dispose();
+
+        // Adding events to the first VM Service after dispose must be ignored.
+        firstVmService.stdoutController.add(
+          vm_service.Event(
+            bytes: base64.encode(utf8.encode('ignored run\n')),
+            kind: vm_service.EventKind.kWriteEvent,
+            timestamp: 0,
+          ),
+        );
+        await pumpEventQueue();
+        expect(receivedLines, <String>['first run']);
+
+        // Connecting a new VM Service on a subsequent launch still streams logs.
+        final secondVmService = FakeVmService();
+        final secondFlutterVmService = FakeFlutterVmService(secondVmService);
+
+        await logReader.provideVmService(secondFlutterVmService);
+
+        secondVmService.stdoutController.add(
+          vm_service.Event(
+            bytes: base64.encode(utf8.encode('second run\n')),
+            kind: vm_service.EventKind.kWriteEvent,
+            timestamp: 0,
+          ),
+        );
+        await pumpEventQueue();
+        expect(receivedLines, <String>['first run', 'second run']);
 
         await subscription.cancel();
+        logReader.dispose();
       },
     );
 
@@ -781,54 +771,9 @@ class FakeDesktopDevice extends DesktopDevice {
 
 class FakeApplicationPackage extends Fake implements ApplicationPackage {}
 
-class FakeMacOSApp extends Fake implements MacOSApp {
-  @override
-  String get name => 'app';
-
-  @override
-  String? applicationBundle(BuildInfo buildInfo) => 'bundle';
-
-  @override
-  String executable(BuildInfo buildInfo) => 'executable';
-}
-
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   @override
   String get name => 'Example';
-}
-
-class FakeMacOSDevice extends MacOSDevice {
-  FakeMacOSDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  });
-
-  @override
-  String get name => 'dummy';
-
-  @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
-
-  @override
-  Future<bool> isSupported() async => true;
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
-
-  @override
-  Future<void> buildForDevice({
-    String? mainPath,
-    BuildInfo? buildInfo,
-    bool usingCISystem = false,
-  }) async {}
-
-  // Dummy implementation that just returns the build mode name.
-  @override
-  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) {
-    return buildInfo.mode.cliName;
-  }
 }
 
 class FakeFlutterVmService extends Fake implements FlutterVmService {

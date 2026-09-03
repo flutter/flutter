@@ -5,12 +5,14 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/macos/application_package.dart';
 import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:flutter_tools/src/macos/macos_workflow.dart';
@@ -239,50 +241,201 @@ void main() {
     expect(device.executablePathForDevice(package, BuildInfo.release), releasePath);
   });
 
-  testWithoutContext('onAttached brings app to foreground with open', () async {
+  testUsingContext('startApp in debug mode launches via open and parses VM Service URI', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final completer = Completer<void>();
+
     final device = MacOSDevice(
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: BufferLogger.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
       processManager: FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(command: const <String>['open', 'bundle'], onRun: (_) => completer.complete()),
+        FakeCommand(
+          command: <Pattern>[
+            'open',
+            '-n',
+            '-a',
+            'release/bundle.app',
+            '--args',
+            '--enable-dart-profiling=true',
+            '--enable-checked-mode=true',
+            '--verify-entry-points=true',
+            RegExp(r'^--write-service-info=(.*)$'),
+          ],
+          onRun: (List<String> command) {
+            // Extract the path passed to --write-service-info and write a mock VM Service JSON file
+            // to simulate Dart VM writing connection info on startup.
+            final String writeServiceInfoArg = command.firstWhere(
+              (String arg) => arg.startsWith('--write-service-info='),
+            );
+            final String filePath = writeServiceInfoArg.substring('--write-service-info='.length);
+            fileSystem
+                .file(filePath)
+                .writeAsStringSync('{"uri":"http://127.0.0.1:12345/auth_code/"}');
+            completer.complete();
+          },
+        ),
       ]),
     );
 
-    device.onAttached(FakeMacOSApp(), BuildInfo.debug, FakeProcess());
-    await completer.future;
-    expect(completer.isCompleted, true);
-  });
+    final package = FakeMacOSApp(bundle: 'release/bundle.app');
 
-  testWithoutContext('onAttached logs error if application bundle is not found', () async {
-    final logger = BufferLogger.test();
-    final device = MacOSDevice(
-      fileSystem: MemoryFileSystem.test(),
-      logger: logger,
-      operatingSystemUtils: FakeOperatingSystemUtils(),
-      processManager: FakeProcessManager.empty(),
+    final LaunchResult result = await device.startApp(
+      package,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      prebuiltApplication: true,
     );
 
-    device.onAttached(FakeMacOSApp(bundle: null), BuildInfo.debug, FakeProcess());
-    expect(logger.errorText, contains('Failed to foreground app; application bundle not found'));
+    expect(result.started, true);
+    expect(result.vmServiceUri, Uri.parse('http://127.0.0.1:12345/auth_code/'));
+
+    await completer.future;
   });
 
-  testWithoutContext('onAttached logs error if open command fails', () async {
+  testUsingContext(
+    'startApp writes VM Service info file in sandboxed container tmp directory when Info.plist exists',
+    () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final completer = Completer<void>();
+
+      fileSystem.file('/release/bundle.app/Contents/Info.plist').createSync(recursive: true);
+
+      String? writtenFilePath;
+      final device = MacOSDevice(
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <Pattern>[
+              'open',
+              '-n',
+              '-a',
+              '/release/bundle.app',
+              '--args',
+              '--enable-dart-profiling=true',
+              '--enable-checked-mode=true',
+              '--verify-entry-points=true',
+              RegExp(r'^--write-service-info=(.*)$'),
+            ],
+            onRun: (List<String> command) {
+              final String writeServiceInfoArg = command.firstWhere(
+                (String arg) => arg.startsWith('--write-service-info='),
+              );
+              writtenFilePath = writeServiceInfoArg.substring('--write-service-info='.length);
+              if (writtenFilePath case final String path) {
+                fileSystem
+                    .file(path)
+                    .writeAsStringSync('{"uri":"http://127.0.0.1:54321/auth_code/"}');
+              }
+              completer.complete();
+            },
+          ),
+        ]),
+      );
+
+      final package = FakeMacOSApp(bundle: '/release/bundle.app');
+
+      final LaunchResult result = await device.startApp(
+        package,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        prebuiltApplication: true,
+      );
+
+      expect(result.started, true);
+      expect(result.vmServiceUri, Uri.parse('http://127.0.0.1:54321/auth_code/'));
+      expect(writtenFilePath, contains('/Library/Containers/com.example.testApp/Data/tmp/'));
+
+      await completer.future;
+    },
+    overrides: <Type, Generator>{
+      FileSystemUtils: () => FileSystemUtils(
+        fileSystem: MemoryFileSystem.test(),
+        platform: FakePlatform(environment: <String, String>{'HOME': '/Users/testuser'}),
+      ),
+      PlistParser: () => FakePlistParser(<String, Object>{
+        PlistParser.kCFBundleIdentifierKey: 'com.example.testApp',
+      }),
+    },
+  );
+
+  testWithoutContext('stopApp uses pkill for all build modes', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final device = MacOSDevice(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['pkill', '-f', 'debug/executable']),
+      ]),
+    );
+
+    final package = FakeMacOSApp();
+    fileSystem.file('debug/executable').createSync(recursive: true);
+
+    final bool result = await device.stopApp(package);
+
+    expect(result, true);
+  });
+
+  testWithoutContext('stopApp succeeds if no process matching pattern is running', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final device = MacOSDevice(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(command: <String>['pkill', '-f', 'debug/executable'], exitCode: 1),
+      ]),
+    );
+
+    final package = FakeMacOSApp();
+    fileSystem.file('debug/executable').createSync(recursive: true);
+
+    final bool result = await device.stopApp(package);
+
+    expect(result, true);
+  });
+
+  testUsingContext('startApp prints warning if Dart VM not found within timeframe in CI', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final logger = BufferLogger.test();
     final device = MacOSDevice(
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: fileSystem,
       logger: logger,
       operatingSystemUtils: FakeOperatingSystemUtils(),
       processManager: FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>['open', 'bundle'], exitCode: 1),
+        FakeCommand(
+          command: <Pattern>[
+            'open',
+            '-n',
+            '-a',
+            'bundle',
+            '--args',
+            '--enable-dart-profiling=true',
+            '--enable-checked-mode=true',
+            '--verify-entry-points=true',
+            RegExp(r'^--write-service-info=(.*)$'),
+          ],
+        ),
+        const FakeCommand(command: <String>['pgrep', '-f', 'debug/executable'], exitCode: 1),
       ]),
     );
 
-    device.onAttached(FakeMacOSApp(), BuildInfo.debug, FakeProcess());
-    await pumpEventQueue();
-    expect(logger.errorText, contains('Failed to foreground app; open returned 1'));
-  });
+    final package = FakeMacOSApp();
+
+    final LaunchResult result = await device.startApp(
+      package,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, usingCISystem: true),
+      prebuiltApplication: true,
+    );
+
+    expect(result.started, false);
+    expect(
+      logger.errorText,
+      contains('Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS'),
+    );
+  }, overrides: <Type, Generator>{BotDetector: () => const FakeBotDetector(true)});
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {

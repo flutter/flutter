@@ -18,8 +18,6 @@ import 'build_info.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
-import 'globals.dart' as globals;
-import 'macos/macos_device.dart';
 import 'protocol_discovery.dart';
 import 'vmservice.dart';
 
@@ -149,42 +147,8 @@ abstract class DesktopDevice extends Device {
       logger: _logger,
     );
     try {
-      Timer? timer;
-      if (this is MacOSDevice) {
-        if (await globals.isRunningOnBot) {
-          const defaultTimeout = 5;
-          timer = Timer(const Duration(minutes: defaultTimeout), () {
-            // As of macOS 14, if sandboxing is enabled and the app is not codesigned,
-            // a dialog will prompt the user to allow the app to run. This will
-            // cause tests in CI to hang. In CI, we workaround this by setting
-            // the CODE_SIGN_ENTITLEMENTS build setting to a version with
-            // sandboxing disabled.
-            final String sandboxingMessage;
-            if (debuggingOptions.usingCISystem) {
-              sandboxingMessage =
-                  'Ensure sandboxing is disabled by checking '
-                  'the set CODE_SIGN_ENTITLEMENTS.';
-            } else {
-              sandboxingMessage =
-                  'Consider codesigning your app or disabling '
-                  'sandboxing. Flutter will attempt to disable sandboxing if '
-                  'the `--ci` flag is provided.';
-            }
-            _logger.printError(
-              'The Dart VM Service was not discovered after $defaultTimeout '
-              'minutes. If the app has sandboxing enabled and is not '
-              'codesigned or codesigning changed, this may be caused by a '
-              'system prompt asking for access. $sandboxingMessage\n'
-              'See https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox '
-              'for more information.',
-            );
-          });
-        }
-      }
-
       final Uri? vmServiceUri = await vmServiceDiscovery.uri;
       if (vmServiceUri != null) {
-        timer?.cancel();
         onAttached(package, buildInfo, process);
         return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
@@ -389,7 +353,6 @@ class DesktopLogReader extends DeviceLogReader {
   void dispose() {
     unawaited(_stdoutSubscription?.cancel());
     unawaited(_stderrSubscription?.cancel());
-    unawaited(_stringController.close());
   }
 
   /// Connects to the [FlutterVmService] to stream stdout and stderr logs.
@@ -414,7 +377,7 @@ class DesktopLogReader extends DeviceLogReader {
 
     void logMessage(vm_service.Event event) {
       final String message = processVmServiceMessage(event);
-      if (message.isNotEmpty && !_stringController.isClosed) {
+      if (message.isNotEmpty) {
         _stringController.add(message);
       }
     }
