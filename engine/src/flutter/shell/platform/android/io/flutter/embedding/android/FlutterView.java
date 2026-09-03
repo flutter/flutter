@@ -1151,6 +1151,12 @@ public class FlutterView extends FrameLayout
    * this {@code FlutterView} to the given {@link io.flutter.embedding.engine.FlutterEngine}, e.g.,
    * user touch events, accessibility events, keyboard events, and others.
    *
+   * <p>Attaching a {@code FlutterView} directly to a {@link FlutterEngine} does not automate
+   * lifecycle management. When bypassing {@link io.flutter.embedding.android.FlutterActivity} or
+   * {@link io.flutter.embedding.android.FlutterFragment}, the host application must manually
+   * forward Android lifecycle and focus events to the engine's {@link
+   * io.flutter.embedding.engine.systemchannels.LifecycleChannel}.
+   *
    * <p>See {@link #detachFromFlutterEngine()} for information on how to detach from a {@link
    * FlutterEngine}.
    */

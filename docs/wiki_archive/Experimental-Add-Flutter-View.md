@@ -38,20 +38,70 @@ flutterView.attachToFlutterEngine(flutterEngine);
 
 At this point you should see your Flutter UI rendering to your `FlutterView`, and touch interaction should work.
 
-### Create and configure platform plugin
+### Hook up lifecycle events
 
-TODO(mattcarroll): update this info about the platform plugin
+Flutter's internal lifecycle state (which controls rendering, pauses/resumes execution, and notifies Dart code of lifecycle changes) is managed by the engine's `LifecycleChannel`. When using `FlutterView` directly without `FlutterActivity` or `FlutterFragment`, you **must** forward Android lifecycle events and window focus changes to the `LifecycleChannel` manually.
 
-Fundamental communication between the Android platform and your Flutter app takes place over a `MethodChannel` with the name `"flutter/platform"`. For example, Android's `onPostResume()` call must be forwarded over the `flutterPlatformChannel` with the message `"AppLifecycleState.resumed"`.
+In your hosting `Activity` or `Fragment`, call the corresponding `LifecycleChannel` APIs:
 
 ```java
-  platformPlugin = new PlatformPlugin(activity);
-  MethodChannel flutterPlatformChannel = new MethodChannel(
-    flutterEngine.getDartExecutor(),
-    "flutter/platform",
-    JSONMethodCodec.INSTANCE
-  );
-  flutterPlatformChannel.setMethodCallHandler(platformPlugin);
+@Override
+protected void onResume() {
+  super.onResume();
+  // Tell Flutter that the app is resumed.
+  flutterEngine.getLifecycleChannel().appIsResumed();
+}
+
+@Override
+protected void onPause() {
+  super.onPause();
+  // Tell Flutter that the app is inactive (about to be paused).
+  flutterEngine.getLifecycleChannel().appIsInactive();
+}
+
+@Override
+protected void onStop() {
+  super.onStop();
+  // Tell Flutter that the app is paused.
+  flutterEngine.getLifecycleChannel().appIsPaused();
+}
+
+@Override
+protected void onDestroy() {
+  super.onDestroy();
+  // Tell Flutter that the host is detached from the engine.
+  flutterEngine.getLifecycleChannel().appIsDetached();
+  // Detach the view from the engine to prevent memory leaks.
+  flutterView.detachFromFlutterEngine();
+  // Clean up the PlatformPlugin.
+  if (platformPlugin != null) {
+    platformPlugin.destroy();
+    platformPlugin = null;
+  }
+}
+
+@Override
+public void onWindowFocusChanged(boolean hasFocus) {
+  super.onWindowFocusChanged(hasFocus);
+  if (hasFocus) {
+    flutterEngine.getLifecycleChannel().aWindowIsFocused();
+  } else {
+    flutterEngine.getLifecycleChannel().noWindowsAreFocused();
+  }
+}
+```
+
+Without these lifecycle notifications, Flutter may remain in a paused state and refuse to render frames, resulting in a blank screen.
+
+
+### Create and configure platform plugin
+
+The `PlatformPlugin` handles system-level services requested by the Flutter framework (e.g. sound effects, clipboard, system chrome, preferred screen orientation, navigation back events).
+
+To enable these platform services, instantiate a `PlatformPlugin` passing your `Activity` and the engine's `PlatformChannel`:
+
+```java
+platformPlugin = new PlatformPlugin(activity, flutterEngine.getPlatformChannel());
 ```
 
 ### Add accessibility support

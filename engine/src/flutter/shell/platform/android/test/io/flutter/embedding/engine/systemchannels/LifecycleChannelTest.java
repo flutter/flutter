@@ -7,6 +7,7 @@ package io.flutter.embedding.engine.systemchannels;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -131,5 +132,12 @@ public class LifecycleChannelTest {
     stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
     verify(mockChannel, times(3)).send(stringArgumentCaptor.capture());
     assertEquals("AppLifecycleState.resumed", stringArgumentCaptor.getValue());
+  }
+
+  @Test
+  public void lifecycleEvents_areNotSentAutomatically() {
+    // Verify that creating the LifecycleChannel does not automatically send any lifecycle state to
+    // Dart.
+    verify(mockChannel, never()).send(any(String.class));
   }
 }
