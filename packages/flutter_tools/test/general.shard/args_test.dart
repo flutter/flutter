@@ -14,6 +14,8 @@ import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
@@ -493,6 +495,8 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
     CrashReporter? crashReporter,
+    Doctor? doctor,
+    EmulatorManager? emulatorManager,
     ToolContext? toolContext,
   }) : analytics = analytics ?? FakeAnalytics(),
        androidContext = androidContext ?? FakeAndroidContext(),
@@ -500,6 +504,8 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        buildSystem = buildSystem ?? FakeBuildSystem(),
        buildTargets = buildTargets ?? FakeBuildTargets(),
        crashReporter = crashReporter ?? FakeCrashReporter(),
+       doctor = doctor ?? FakeDoctor(),
+       emulatorManager = emulatorManager ?? FakeEmulatorManager(),
        toolContext = toolContext ?? FakeToolContext();
 
   @override
@@ -519,6 +525,12 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   final CrashReporter crashReporter;
+
+  @override
+  final Doctor doctor;
+
+  @override
+  final EmulatorManager emulatorManager;
 
   @override
   final ToolContext toolContext;

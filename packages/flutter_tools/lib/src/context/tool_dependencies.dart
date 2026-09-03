@@ -9,6 +9,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
+import '../android/android_workflow.dart';
 import '../android/gradle_utils.dart';
 import '../android/java.dart';
 import '../artifacts.dart';
@@ -29,6 +30,8 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../custom_devices/custom_devices_config.dart';
+import '../doctor.dart';
+import '../emulator.dart';
 import '../flutter_cache.dart';
 import '../flutter_features.dart';
 import '../flutter_features_config.dart';
@@ -64,6 +67,8 @@ class ToolDependencies {
     required this.buildSystem,
     this.buildTargets,
     required this.crashReporter,
+    required this.doctor,
+    required this.emulatorManager,
     required this.toolContext,
   });
 
@@ -85,6 +90,12 @@ class ToolDependencies {
   /// Captures and submits unhandled tool crash reports and stack traces.
   final CrashReporter crashReporter;
 
+  /// System health diagnostics and toolchain validator.
+  final Doctor doctor;
+
+  /// Manager for discovering, launching, and creating emulators.
+  final EmulatorManager emulatorManager;
+
   /// Core container holding host environment and SDK configuration dependencies.
   final ToolContext toolContext;
 
@@ -102,6 +113,8 @@ class ToolDependencies {
     Config? config,
     CrashReporter? crashReporter,
     CustomDevicesConfig? customDevicesConfig,
+    Doctor? doctor,
+    EmulatorManager? emulatorManager,
     FileSystem? fs,
     Git? git,
     GradleUtils? gradleUtils,
@@ -428,6 +441,21 @@ class ToolDependencies {
           operatingSystemUtils: finalOS,
         );
 
+    // 13. Doctor and EmulatorManager Dependencies
+    final Doctor finalDoctor =
+        doctor ?? Doctor(clock: finalSystemClock, logger: finalLogger, analytics: finalAnalytics);
+
+    final EmulatorManager finalEmulatorManager =
+        emulatorManager ??
+        EmulatorManager(
+          androidWorkflow: AndroidWorkflow(androidSdk: finalAndroidSdk, featureFlags: featureFlags),
+          fileSystem: finalFS,
+          java: finalJava,
+          logger: finalLogger,
+          processManager: finalProcessManager,
+          androidSdk: finalAndroidSdk,
+        );
+
     return ToolDependencies(
       analytics: finalAnalytics,
       androidContext: AndroidContext(
@@ -449,6 +477,8 @@ class ToolDependencies {
       buildSystem: finalBuildSystem,
       buildTargets: finalBuildTargets,
       crashReporter: finalCrashReporter,
+      doctor: finalDoctor,
+      emulatorManager: finalEmulatorManager,
       toolContext: ToolContext(
         artifacts: finalArtifacts,
         botDetector: finalBotDetector,
