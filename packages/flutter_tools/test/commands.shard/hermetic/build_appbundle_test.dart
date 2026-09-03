@@ -85,12 +85,11 @@ flutter:
 
   testWithoutContext('has alias aab', () async {
     final command = BuildAppBundleCommand(
-      androidBuilder: FakeAndroidBuilder(),
-      androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+androidBuilder: FakeAndroidBuilder(),
+androidContext: androidContext,
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
     expect(command.aliases, contains('aab'));
   });
 
@@ -98,12 +97,11 @@ flutter:
     createMinimalProject();
 
     final command = BuildAppBundleCommand(
-      androidBuilder: FakeAndroidBuilder(),
-      androidContext: FakeAndroidContext(),
-      androidSdk: null,
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+androidBuilder: FakeAndroidBuilder(),
+androidContext: FakeAndroidContext(),
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
 
     expect(
       createTestCommandRunner(command).run(const <String>['appbundle', '--no-pub']),
@@ -130,12 +128,11 @@ flutter:
     );
 
     final command = BuildAppBundleCommand(
-      androidBuilder: fakeBuilder,
-      androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+androidBuilder: fakeBuilder,
+androidContext: androidContext,
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
 
     await createTestCommandRunner(
       command,
@@ -152,12 +149,11 @@ flutter:
     createMinimalProject();
 
     final command = BuildAppBundleCommand(
-      androidBuilder: FakeAndroidBuilder(),
-      androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+androidBuilder: FakeAndroidBuilder(),
+androidContext: androidContext,
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
 
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['appbundle', '--no-pub']);
@@ -195,12 +191,11 @@ flutter:
     );
 
     final command = BuildAppBundleCommand(
-      androidBuilder: fakeBuilder,
-      androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+androidBuilder: fakeBuilder,
+androidContext: androidContext,
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
 
     await createTestCommandRunner(command).run(const <String>[
       'appbundle',

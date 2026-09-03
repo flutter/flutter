@@ -500,15 +500,10 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: fileSystem,
-      processManager: processManager,
-      allProjectValidators: <ProjectValidator>[],
-      suppressAnalytics: true,
-    );
+allProjectValidators: <ProjectValidator>[],
+suppressAnalytics: true,
+toolContext: FakeToolContext(terminal: Terminal.test(), artifacts: artifacts, logger: logger, platform: FakePlatform(), fs: fileSystem, processManager: processManager)
+);
 
     final commandRunner = TestFlutterCommandRunner();
     commandRunner.addCommand(command);

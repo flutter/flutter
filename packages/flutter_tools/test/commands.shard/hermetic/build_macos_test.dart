@@ -966,9 +966,9 @@ STDERR STUFF
     );
 
     final bool supported = BuildMacosCommand(
-      logger: BufferLogger.test(),
-      verboseHelp: false,
-    ).supported;
+verboseHelp: false,
+appleContext: FakeAppleContext(), buildSystem: TestBuildSystem.all(BuildResult(success: true)), appleContext: FakeAppleContext(), buildSystem: TestBuildSystem.all(BuildResult(success: true)), toolContext: FakeToolContext(logger: BufferLogger.test())
+).supported;
     expect(
       () => runner.run(<String>['build', 'macos', '--no-pub']),
       supported ? throwsToolExit() : throwsA(isA<UsageException>()),
@@ -978,7 +978,10 @@ STDERR STUFF
   testUsingContext(
     'hidden when not enabled on macOS host',
     () {
-      expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, true);
+      expect(BuildMacosCommand(
+verboseHelp: false,
+appleContext: FakeAppleContext(), buildSystem: TestBuildSystem.all(BuildResult(success: true)), appleContext: FakeAppleContext(), buildSystem: TestBuildSystem.all(BuildResult(success: true)), toolContext: FakeToolContext(logger: BufferLogger.test())
+).hidden, true);
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(),
@@ -989,7 +992,10 @@ STDERR STUFF
   testUsingContext(
     'Not hidden when enabled and on macOS host',
     () {
-      expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, false);
+      expect(BuildMacosCommand(
+verboseHelp: false,
+appleContext: FakeAppleContext(), buildSystem: TestBuildSystem.all(BuildResult(success: true)), appleContext: FakeAppleContext(), buildSystem: TestBuildSystem.all(BuildResult(success: true)), toolContext: FakeToolContext(logger: BufferLogger.test())
+).hidden, false);
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),

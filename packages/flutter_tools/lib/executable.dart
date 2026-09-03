@@ -223,14 +223,14 @@ List<FlutterCommand> generateCommands({
   ExtensionManager? extensionManager,
   ExtensionTemplateManager? extensionTemplateManager,
 }) => <FlutterCommand>[
-  AnalyzeCommand(
+  AnalyzeCommand(toolContext: toolDependencies.toolContext, 
     verboseHelp: verboseHelp,
-    fileSystem: toolDependencies.toolContext.fs,
-    platform: toolDependencies.toolContext.platform,
-    processManager: toolDependencies.toolContext.processManager,
-    logger: toolDependencies.toolContext.logger,
-    terminal: toolDependencies.toolContext.terminal,
-    artifacts: toolDependencies.toolContext.artifacts,
+
+
+
+
+
+
     // new ProjectValidators should be added here for the --suggestions to run
     allProjectValidators: <ProjectValidator>[
       GeneralInfoProjectValidator(),
@@ -243,7 +243,7 @@ List<FlutterCommand> generateCommands({
     ],
     suppressAnalytics: !toolDependencies.analytics.okToSend,
   ),
-  AssembleCommand(verboseHelp: verboseHelp, buildSystem: toolDependencies.buildSystem),
+  AssembleCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp, buildSystem: toolDependencies.buildSystem),
   AttachCommand(
     verboseHelp: verboseHelp,
     stdio: toolDependencies.toolContext.stdio,
@@ -299,8 +299,8 @@ List<FlutterCommand> generateCommands({
     logger: toolDependencies.toolContext.logger,
   ),
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
-  DaemonCommand(hidden: !verboseHelp),
-  DebugAdapterCommand(verboseHelp: verboseHelp),
+  DaemonCommand(toolContext: toolDependencies.toolContext, hidden: !verboseHelp),
+  DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),
   DoctorCommand(
     verbose: verbose,
@@ -311,14 +311,14 @@ List<FlutterCommand> generateCommands({
     extensionManager: extensionManager,
   ),
   DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
-  DriveCommand(
+  DriveCommand(toolContext: toolDependencies.toolContext, 
     verboseHelp: verboseHelp,
-    fileSystem: toolDependencies.toolContext.fs,
-    logger: toolDependencies.toolContext.logger,
-    platform: toolDependencies.toolContext.platform,
-    terminal: toolDependencies.toolContext.terminal,
-    outputPreferences: toolDependencies.toolContext.outputPreferences,
-    signals: toolDependencies.toolContext.signals,
+
+
+
+
+
+
   ),
   EmulatorsCommand(),
   GenerateCommand(),
@@ -338,7 +338,7 @@ List<FlutterCommand> generateCommands({
     platform: toolDependencies.toolContext.platform,
     featureFlags: featureFlags,
   ),
-  RunCommand(verboseHelp: verboseHelp),
+  RunCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   ScreenshotCommand(fs: toolDependencies.toolContext.fs),
   ShellCompletionCommand(),
   TestCommand(
@@ -362,7 +362,7 @@ List<FlutterCommand> generateCommands({
   UpgradeCommand(verboseHelp: verboseHelp),
   SymbolizeCommand(toolContext: toolDependencies.toolContext),
   // Development-only commands. These are always hidden,
-  IdeConfigCommand(),
+  IdeConfigCommand(toolContext: toolDependencies.toolContext, ),
   UpdatePackagesCommand(verboseHelp: verboseHelp),
 ];
 

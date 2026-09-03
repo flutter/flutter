@@ -5194,8 +5194,7 @@ CreateCommand createCreateCommand({
   bool verboseHelp = false,
 }) {
   return CreateCommand(
-    toolContext:
-        toolContext ??
+toolContext: toolContext ??
         FakeToolContext(
           fs: globals.fs,
           logger: globals.logger,
@@ -5207,12 +5206,12 @@ CreateCommand createCreateCommand({
           terminal: globals.terminal,
           os: globals.os,
         ),
-    templateRenderer: templateRenderer,
-    httpClientFactory: httpClientFactory,
-    java: java,
-    net: net,
-    plistParser: plistParser,
-    pub: pub,
-    verboseHelp: verboseHelp,
-  );
+templateRenderer: templateRenderer,
+httpClientFactory: httpClientFactory,
+net: net,
+pub: pub,
+verboseHelp: verboseHelp,
+appleContext: FakeAppleContext(plistParser: plistParser),
+androidContext: FakeAndroidContext(java: java)
+);
 }

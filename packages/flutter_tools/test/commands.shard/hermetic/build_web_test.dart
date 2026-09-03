@@ -541,10 +541,9 @@ void main() {
     () async {
       expect(
         BuildWebCommand(
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          verboseHelp: false,
-        ).hidden,
+verboseHelp: false,
+toolContext: FakeToolContext(fs: fileSystem, logger: BufferLogger.test())
+).hidden,
         true,
       );
     },
@@ -561,10 +560,9 @@ void main() {
     () async {
       expect(
         BuildWebCommand(
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          verboseHelp: false,
-        ).hidden,
+verboseHelp: false,
+toolContext: FakeToolContext(fs: fileSystem, logger: BufferLogger.test())
+).hidden,
         false,
       );
     },
@@ -1136,10 +1134,9 @@ class UrlLauncherPlugin {}
 class TestWebBuildCommand extends FlutterCommand {
   TestWebBuildCommand({required FileSystem fileSystem, bool verboseHelp = false})
     : webCommand = BuildWebCommand(
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        verboseHelp: verboseHelp,
-      ) {
+verboseHelp: verboseHelp,
+toolContext: FakeToolContext(fs: fileSystem, logger: BufferLogger.test())
+) {
     addSubcommand(webCommand);
   }
 

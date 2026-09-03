@@ -325,10 +325,10 @@ void main() {
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
 
-      final bool supported = BuildIOSCommand(
-        logger: BufferLogger.test(),
-        verboseHelp: false,
-      ).supported;
+      final bool supported = BuildIOSCommand(appleContext: FakeAppleContext(), buildSystem: TestBuildSystem.all(BuildResult(success: true)), appleContext: FakeAppleContext(), buildSystem: TestBuildSystem.all(BuildResult(success: true)), 
+verboseHelp: false,
+toolContext: FakeToolContext(logger: BufferLogger.test())
+).supported;
       expect(
         createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']),
         supported ? throwsToolExit() : throwsA(isA<UsageException>()),

@@ -147,10 +147,9 @@ void main() {
 
   testWithoutContext('flutter assemble sends assemble-deferred-components', () async {
     final command = AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-      analytics: fakeAnalytics,
-    );
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     await commandRunner.run(<String>[
       'assemble',
@@ -173,10 +172,9 @@ void main() {
 
   testWithoutContext('flutter assemble sends usage values correctly with platform', () async {
     final command = AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-      analytics: fakeAnalytics,
-    );
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     await commandRunner.run(<String>[
       'assemble',

@@ -87,12 +87,11 @@ flutter:
     createMinimalProject();
 
     final command = BuildApkCommand(
-      androidBuilder: FakeAndroidBuilder(),
-      androidContext: FakeAndroidContext(),
-      androidSdk: null,
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+androidBuilder: FakeAndroidBuilder(),
+androidContext: FakeAndroidContext(),
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
 
     expect(
       createTestCommandRunner(command).run(const <String>['apk', '--no-pub']),
@@ -117,12 +116,11 @@ flutter:
     );
 
     final command = BuildApkCommand(
-      androidBuilder: fakeBuilder,
-      androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+androidBuilder: fakeBuilder,
+androidContext: androidContext,
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
 
     await createTestCommandRunner(command, fakeAnalytics).run(const <String>['apk', '--no-pub']);
     expect(buildApkCalled, isTrue);
@@ -136,12 +134,11 @@ flutter:
     createMinimalProject();
 
     final command = BuildApkCommand(
-      androidBuilder: FakeAndroidBuilder(),
-      androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+androidBuilder: FakeAndroidBuilder(),
+androidContext: androidContext,
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
 
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['apk', '--no-pub']);
@@ -176,12 +173,11 @@ flutter:
     );
 
     final command = BuildApkCommand(
-      androidBuilder: fakeBuilder,
-      androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+androidBuilder: fakeBuilder,
+androidContext: androidContext,
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
 
     await createTestCommandRunner(command).run(const <String>[
       'apk',

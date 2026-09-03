@@ -46,18 +46,17 @@ void main() {
     List<String>? arguments,
   }) async {
     final command = BuildAarCommand(
-      androidBuilder: context.get<AndroidBuilder>() ?? FakeAndroidBuilder(),
-      androidContext: FakeAndroidContext(androidSdk: androidSdk),
-      androidSdk: androidSdk,
-      buildSystem: globals.buildSystem,
-      toolContext: FakeToolContext(
+androidBuilder: context.get<AndroidBuilder>() ?? FakeAndroidBuilder(),
+androidContext: FakeAndroidContext(androidSdk: androidSdk),
+buildSystem: globals.buildSystem,
+toolContext: FakeToolContext(
         fs: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
         processManager: globals.processManager,
         projectFactory: globals.projectFactory,
-      ),
-    );
+      )
+);
     final CommandRunner<void> runner = createTestCommandRunner(command, context.get<Analytics>());
     await runner.run(<String>['aar', ...?arguments, target]);
     return command;

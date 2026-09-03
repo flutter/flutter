@@ -1939,19 +1939,18 @@ BuildIOSFrameworkCommand createBuildIOSFrameworkCommand({
             platform: effectivePlatform,
           ));
   return BuildIOSFrameworkCommand(
-    appleContext: appleContext ?? FakeAppleContext(),
-    buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
-    codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
-    flutterVersion: flutterVersion,
-    toolContext: FakeToolContext(
+appleContext: appleContext ?? FakeAppleContext(),
+buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
+codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
+toolContext: FakeToolContext(
       cache: effectiveCache,
       fs: effectiveFileSystem,
       logger: effectiveLogger,
       platform: effectivePlatform,
       processManager: effectiveProcessManager,
     ),
-    verboseHelp: verboseHelp,
-  );
+verboseHelp: verboseHelp
+);
 }
 
 BuildMacOSFrameworkCommand createBuildMacOSFrameworkCommand({

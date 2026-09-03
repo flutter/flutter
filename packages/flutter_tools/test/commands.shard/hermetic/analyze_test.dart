@@ -1,3 +1,4 @@
+import '../../src/fakes.dart';
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -56,15 +57,10 @@ void main() {
       processManager = FakeProcessManager.empty();
       terminal = Terminal.test();
       command = AnalyzeCommand(
-        artifacts: Artifacts.test(),
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        terminal: terminal,
-        allProjectValidators: <ProjectValidator>[],
-        suppressAnalytics: true,
-      );
+allProjectValidators: <ProjectValidator>[],
+suppressAnalytics: true,
+toolContext: FakeToolContext(artifacts: Artifacts.test(), fs: fileSystem, logger: logger, platform: platform, processManager: processManager, terminal: terminal)
+);
       runner = createTestCommandRunner(command);
 
       // Setup repo roots

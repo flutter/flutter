@@ -190,13 +190,11 @@ void main() {
       projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
     );
     return BuildLinuxCommand(
-      analytics: fakeAnalytics,
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      featureFlags: effectiveFeatureFlags,
-      operatingSystemUtils: effectiveOsUtils,
-      toolContext: toolContext,
-      verboseHelp: verboseHelp,
-    );
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+featureFlags: effectiveFeatureFlags,
+toolContext: toolContext,
+verboseHelp: verboseHelp
+);
   }
 
   testUsingContext(

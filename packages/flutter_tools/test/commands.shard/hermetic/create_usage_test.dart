@@ -223,7 +223,7 @@ void main() {
 
     CreateCommand createCreateCommand({Pub? pub, Java? java}) {
       return CreateCommand(
-        toolContext: FakeToolContext(
+toolContext: FakeToolContext(
           fs: globals.fs,
           logger: globals.logger,
           platform: globals.platform,
@@ -236,9 +236,9 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
           projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
         ),
-        pub: pub,
-        java: java,
-      );
+pub: pub,
+androidContext: FakeAndroidContext(java: java)
+);
     }
 
     testUsingContext(

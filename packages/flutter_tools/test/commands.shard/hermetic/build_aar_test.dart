@@ -67,12 +67,11 @@ flutter:
 ''');
 
     final command = BuildAarCommand(
-      androidBuilder: FakeAndroidBuilder(),
-      androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+androidBuilder: FakeAndroidBuilder(),
+androidContext: androidContext,
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
 
     expect(
       createTestCommandRunner(command).run(const <String>['aar', '--no-pub']),
@@ -93,12 +92,11 @@ flutter:
     dotAndroidDir.childFile('gradlew').createSync();
 
     final command = BuildAarCommand(
-      androidBuilder: FakeAndroidBuilder(),
-      androidContext: androidContext,
-      androidSdk: FakeAndroidSdk(),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+androidBuilder: FakeAndroidBuilder(),
+androidContext: androidContext,
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
 
     await createTestCommandRunner(command, fakeAnalytics).run(const <String>['aar', '--no-pub']);
     expect(
@@ -124,12 +122,11 @@ flutter:
 ''');
 
     final command = BuildAarCommand(
-      androidBuilder: FakeAndroidBuilder(),
-      androidContext: FakeAndroidContext(),
-      androidSdk: null,
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      toolContext: toolContext,
-    );
+androidBuilder: FakeAndroidBuilder(),
+androidContext: FakeAndroidContext(),
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+toolContext: toolContext
+);
 
     expect(
       createTestCommandRunner(command).run(const <String>['aar', '--no-pub']),

@@ -1,3 +1,4 @@
+import '../../src/fakes.dart';
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -136,18 +137,13 @@ environment:
       () async {
         final loggerTest = BufferLogger.test();
         final command = AnalyzeCommand(
-          artifacts: Artifacts.test(),
-          fileSystem: fileSystem,
-          logger: loggerTest,
-          platform: platform,
-          terminal: terminal,
-          processManager: processManager,
-          allProjectValidators: <ProjectValidator>[
+allProjectValidators: <ProjectValidator>[
             ProjectValidatorDummy(),
             ProjectValidatorSecondDummy(),
           ],
-          suppressAnalytics: true,
-        );
+suppressAnalytics: true,
+toolContext: FakeToolContext(artifacts: Artifacts.test(), fs: fileSystem, logger: loggerTest, platform: platform, terminal: terminal, processManager: processManager)
+);
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['analyze', '--suggestions', '--no-pub', './']);
@@ -176,15 +172,10 @@ environment:
     testUsingContext('crash', () async {
       final loggerTest = BufferLogger.test();
       final command = AnalyzeCommand(
-        artifacts: Artifacts.test(),
-        fileSystem: fileSystem,
-        logger: loggerTest,
-        platform: platform,
-        terminal: terminal,
-        processManager: processManager,
-        allProjectValidators: <ProjectValidator>[ProjectValidatorCrash()],
-        suppressAnalytics: true,
-      );
+allProjectValidators: <ProjectValidator>[ProjectValidatorCrash()],
+suppressAnalytics: true,
+toolContext: FakeToolContext(artifacts: Artifacts.test(), fs: fileSystem, logger: loggerTest, platform: platform, terminal: terminal, processManager: processManager)
+);
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['analyze', '--suggestions', '--no-pub', './']);
@@ -197,15 +188,10 @@ environment:
     testUsingContext('--watch and --suggestions not compatible together', () async {
       final loggerTest = BufferLogger.test();
       final command = AnalyzeCommand(
-        artifacts: Artifacts.test(),
-        fileSystem: fileSystem,
-        logger: loggerTest,
-        platform: platform,
-        terminal: terminal,
-        processManager: processManager,
-        allProjectValidators: <ProjectValidator>[],
-        suppressAnalytics: true,
-      );
+allProjectValidators: <ProjectValidator>[],
+suppressAnalytics: true,
+toolContext: FakeToolContext(artifacts: Artifacts.test(), fs: fileSystem, logger: loggerTest, platform: platform, terminal: terminal, processManager: processManager)
+);
       final CommandRunner<void> runner = createTestCommandRunner(command);
       Future<void> result() =>
           runner.run(<String>['analyze', '--suggestions', '--watch', '--no-pub']);

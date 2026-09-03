@@ -32,10 +32,9 @@ CommandRunner<void> createTestCommandRunner([
 ]) {
   final ToolContext? effectiveToolContext = toolContext ?? command?.toolContext;
   final runner = TestFlutterCommandRunner(
-    analytics: analytics,
-    featureFlags: featureFlags,
-    toolContext: effectiveToolContext,
-  );
+featureFlags: featureFlags,
+toolContext: effectiveToolContext
+);
   if (command != null) {
     runner.addCommand(command);
   }

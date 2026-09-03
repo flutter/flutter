@@ -189,13 +189,12 @@ void main() {
         projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: BufferLogger.test()),
       );
       final command = BuildWindowsCommand(
-        analytics: fakeAnalytics,
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-        toolContext: toolContext,
-        verboseHelp: false,
-        visualStudioOverride: fakeVisualStudio,
-      );
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+toolContext: toolContext,
+verboseHelp: false,
+visualStudioOverride: fakeVisualStudio
+);
 
       await createTestCommandRunner(
         command,
@@ -240,13 +239,12 @@ void main() {
         projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: BufferLogger.test()),
       );
       final command = BuildWindowsCommand(
-        analytics: fakeAnalytics,
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-        toolContext: toolContext,
-        verboseHelp: false,
-        visualStudioOverride: fakeVisualStudio,
-      );
+buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+toolContext: toolContext,
+verboseHelp: false,
+visualStudioOverride: fakeVisualStudio
+);
 
       await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
       expect(processManager, hasNoRemainingExpectations);
