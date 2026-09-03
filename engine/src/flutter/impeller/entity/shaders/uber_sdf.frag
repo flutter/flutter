@@ -30,6 +30,17 @@ uniform FragInfo {
   /// bottom-right), or the circular cap radii for rounded superellipses in
   /// radii.xy (top octant in x, right octant in y).
   vec4 radii;
+  /// Gradient parameters packed to avoid shader-side uniform division:
+  ///   - Linear gradient:
+  ///       xy: Start point in local coordinates.
+  ///       zw: Pre-scaled direction vector (delta / dot(delta, delta)), such
+  ///           that dot(v_position - xy, zw) yields the [0, 1] parameter t.
+  ///   - Radial gradient:
+  ///       xy: Center point in local coordinates.
+  ///       z:  Inverse radius (1.0 / radius), such that
+  ///           length(v_position - xy) * z yields the [0, 1] parameter t.
+  ///       w:  Unused (0.0).
+  vec4 gradient_coords;
 
   // ===========================================================================
   // vec2 fields
@@ -55,17 +66,6 @@ uniform FragInfo {
   /// The center of the corner transition circle for the right octant of a
   /// rounded superellipse.
   vec2 circle_center_right;
-
-  // --- Gradient Parameters ---
-  /// The starting point of a linear gradient, or the center point of a radial
-  /// gradient.
-  vec2 gradient_start;
-  /// The ending point of a linear gradient, or (radius, 0.0) for a radial
-  /// gradient.
-  vec2 gradient_end;
-  /// Half the size of a single gradient texel in normalized texture
-  /// coordinates.
-  vec2 half_texel;
 
   // ===========================================================================
   // float fields
@@ -105,6 +105,9 @@ uniform FragInfo {
   ///   2: Mirror
   ///   3: Decal
   float tile_mode;
+  /// Half the size of a single gradient texel in normalized texture
+  /// coordinates along the gradient ramp (x axis).
+  float half_texel;
 }
 frag_info;
 
@@ -118,17 +121,19 @@ vec4 getColor() {
   if (frag_info.color_source_type < 0.5) {
     // Solid color
     color = frag_info.color;
-  } else if (frag_info.color_source_type < 1.5) {
-    // Linear gradient
-    vec4 gradient_color = IPSampleLinearGradient(
-        color_source_sampler, frag_info.gradient_start, frag_info.gradient_end,
-        v_position, frag_info.half_texel, frag_info.tile_mode, vec4(0.0));
-    color = vec4(gradient_color.rgb, gradient_color.a * frag_info.color.a);
   } else {
-    // Radial gradient
-    vec4 gradient_color = IPSampleRadialGradient(
-        color_source_sampler, frag_info.gradient_start,
-        frag_info.gradient_end.x, v_position, frag_info.half_texel,
+    float t;
+    if (frag_info.color_source_type < 1.5) {
+      // Linear gradient
+      t = dot(v_position - frag_info.gradient_coords.xy,
+              frag_info.gradient_coords.zw);
+    } else {
+      // Radial gradient
+      t = length(v_position - frag_info.gradient_coords.xy) *
+          frag_info.gradient_coords.z;
+    }
+    vec4 gradient_color = IPSampleLinearWithTileMode(
+        color_source_sampler, vec2(t, 0.5), vec2(frag_info.half_texel, 0.5),
         frag_info.tile_mode, vec4(0.0));
     color = vec4(gradient_color.rgb, gradient_color.a * frag_info.color.a);
   }
