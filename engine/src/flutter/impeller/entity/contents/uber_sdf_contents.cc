@@ -70,6 +70,7 @@ SamplerBinding SetupGradientParameters(
     const UberSDFParameters::GradientParameters& gradient,
     const ContentContext& renderer,
     FS::FragInfo& frag_info) {
+  FML_DCHECK(gradient.texture);
   frag_info.tile_mode = static_cast<Scalar>(gradient.tile_mode);
   auto texture_size = gradient.texture->GetSize();
   FML_DCHECK(!texture_size.IsEmpty());
