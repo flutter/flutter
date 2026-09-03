@@ -26,9 +26,23 @@ IF "%PROCESSOR_ARCHITECTURE%"=="x86" (
 
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
+SET use_aot_snapshot=false
+IF "%FLUTTER_TOOLS_USE_AOT_SNAPSHOT%"=="1" SET use_aot_snapshot=true
+IF /I "%FLUTTER_TOOLS_USE_AOT_SNAPSHOT%"=="true" SET use_aot_snapshot=true
+REM FLUTTER_TOOL_ARGS may contain VM options that the AOT runtime does not support.
+IF DEFINED FLUTTER_TOOL_ARGS SET use_aot_snapshot=false
+SET snapshot_kind=app-jit
 SET snapshot_path=%cache_dir%\flutter_tools.snapshot
 SET snapshot_path_old=%cache_dir%\flutter_tools.snapshot.old
 SET stamp_path=%cache_dir%\flutter_tools.stamp
+SET flutter_tool_runtime=%cache_dir%\dart-sdk\bin\dart.exe
+IF "%use_aot_snapshot%"=="true" (
+  SET snapshot_kind=aot
+  SET snapshot_path=%cache_dir%\flutter_tools.aot_snapshot
+  SET snapshot_path_old=%cache_dir%\flutter_tools.aot_snapshot.old
+  SET stamp_path=%cache_dir%\flutter_tools.aot_stamp
+  SET flutter_tool_runtime=%cache_dir%\dart-sdk\bin\dartaotruntime.exe
+)
 SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 SET dart_sdk_path=%cache_dir%\dart-sdk
 SET engine_stamp=%cache_dir%\engine-dart-sdk.stamp
@@ -76,7 +90,7 @@ GOTO :after_subroutine
       SET revision=%%r
     )
   )
-  SET compilekey="%revision%:%FLUTTER_TOOL_ARGS%"
+  SET compilekey="%revision%:%FLUTTER_TOOL_ARGS%:%snapshot_kind%"
 
   REM Invalidate cache if:
   REM  * SNAPSHOT_PATH is not a file, or
@@ -216,10 +230,14 @@ GOTO :after_subroutine
         )
       )
 
-    IF "%FLUTTER_TOOL_ARGS%" == "" (
-      "%dart%" --verbosity=error --snapshot="%snapshot_path%" --snapshot-kind="app-jit" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" --no-enable-mirrors "%script_path%" > NUL
+    IF "%snapshot_kind%"=="aot" (
+      "%dart%" compile aot-snapshot --verbosity=error --output="%snapshot_path%" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" "%script_path%" > NUL
     ) else (
-      "%dart%" "%FLUTTER_TOOL_ARGS%" --verbosity=error --snapshot="%snapshot_path%" --snapshot-kind="app-jit" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" "%script_path%" > NUL
+      IF "%FLUTTER_TOOL_ARGS%" == "" (
+        "%dart%" --verbosity=error --snapshot="%snapshot_path%" --snapshot-kind="app-jit" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" --no-enable-mirrors "%script_path%" > NUL
+      ) else (
+        "%dart%" "%FLUTTER_TOOL_ARGS%" --verbosity=error --snapshot="%snapshot_path%" --snapshot-kind="app-jit" --packages="%flutter_tools_dir%\.dart_tool\package_config.json" "%script_path%" > NUL
+      )
     )
     IF "%ERRORLEVEL%" NEQ "0" (
       ECHO Error: Unable to create dart snapshot for flutter tool. 1>&2
@@ -237,4 +255,4 @@ GOTO :after_subroutine
 :after_subroutine
 
 :final_exit
-  EXIT /B %exit_code%
+  ENDLOCAL & SET "flutter_tool_runtime=%flutter_tool_runtime%" & SET "flutter_tool_snapshot_path=%snapshot_path%" & EXIT /B %exit_code%
