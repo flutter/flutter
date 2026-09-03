@@ -140,8 +140,7 @@ object DependencyVersionChecker {
         }
 
         val kgpVersion: Version? = VersionFetcher.getKGPVersion(project)
-        val usesBuiltInKotlin =
-            project.findProperty("android.builtInKotlin")?.toString()?.toBoolean() == true
+        val usesBuiltInKotlin = FlutterPluginUtils.isBuiltInKotlinEnabled(project, agpVersion)
 
         if (kgpVersion != null && !usesBuiltInKotlin) {
             checkKGPVersion(kgpVersion, project)

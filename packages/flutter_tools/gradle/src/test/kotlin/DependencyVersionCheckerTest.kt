@@ -41,6 +41,8 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.internal.extensions.core.extra
 import kotlin.test.Test
@@ -172,11 +174,11 @@ class DependencyVersionCheckerTest {
     }
 
     @Test
-    fun `AGP built-in Kotlin skips KGP min version enforcement`() {
+    fun `AGP 9 built-in Kotlin skips KGP min version enforcement by default`() {
         val mockProject =
             MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(
                 kgpVersion = "2.2.10",
-                usesBuiltInKotlin = true
+                builtInKotlinProperty = null
             )
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -446,7 +448,7 @@ private object MockProjectFactory {
         gradleVersion: String = SUPPORTED_GRADLE_VERSION,
         agpVersion: AndroidPluginVersion = SUPPORTED_AGP_VERSION,
         kgpVersion: String = SUPPORTED_KGP_VERSION,
-        usesBuiltInKotlin: Boolean = false,
+        builtInKotlinProperty: String? = "false",
         minSdkVersions: List<MinSdkVersion> = listOf(SUPPORTED_SDK_VERSION)
     ): Project {
         // Java
@@ -465,7 +467,11 @@ private object MockProjectFactory {
         // KGP
         every { mockProject.hasProperty(eq("kotlin_version")) } returns true
         every { mockProject.properties["kotlin_version"] } returns kgpVersion
-        every { mockProject.findProperty("android.builtInKotlin") } returns usesBuiltInKotlin.toString()
+        val mockBuiltInKotlinProperty = mockk<Provider<String>>()
+        every { mockBuiltInKotlinProperty.orNull } returns builtInKotlinProperty
+        val mockProviders = mockk<ProviderFactory>()
+        every { mockProviders.gradleProperty("android.builtInKotlin") } returns mockBuiltInKotlinProperty
+        every { mockProject.providers } returns mockProviders
 
         // Logger
         val mockLogger = mockk<Logger>()
