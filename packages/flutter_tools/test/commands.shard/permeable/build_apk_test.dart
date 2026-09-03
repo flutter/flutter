@@ -7,7 +7,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart'
     show templateAndroidGradlePluginVersion;
 import 'package:flutter_tools/src/android/gradle_utils.dart';
@@ -17,8 +16,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
-import 'package:flutter_tools/src/context/android_context.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
@@ -1098,34 +1095,22 @@ void main() {
 
 Future<BuildApkCommand> runBuildApkCommand(
   String target, {
-  List<String>? arguments,
   AndroidBuilder? androidBuilder,
-  AndroidSdk? androidSdk,
+  List<String>? arguments,
 }) async {
-  final AndroidSdk effectiveAndroidSdk =
-      androidSdk ??
-      context.get<AndroidSdk>() ??
-      FakeAndroidSdk(globals.fs.directory('android-sdk'));
-  final ToolContext toolContext = FakeToolContext(
-    fs: globals.fs,
-    logger: globals.logger,
-    platform: globals.platform,
-    processManager: globals.processManager,
-    projectFactory: globals.projectFactory,
-  );
-  final AndroidContext androidContext = FakeAndroidContext(androidSdk: effectiveAndroidSdk);
   final command = BuildApkCommand(
-    androidBuilder:
-        androidBuilder ??
-        context.get<AndroidBuilder>() ??
-        AndroidGradleBuilder(
-          toolContext: toolContext,
-          androidContext: androidContext,
-          analytics: globals.analytics,
-        ),
-    androidContext: androidContext,
+    androidBuilder: androidBuilder ?? context.get<AndroidBuilder>()!,
+    androidContext: FakeAndroidContext(
+      androidSdk: globals.androidSdk ?? FakeAndroidSdk(globals.fs.directory('android-sdk')),
+    ),
     buildSystem: globals.buildSystem,
-    toolContext: toolContext,
+    toolContext: FakeToolContext(
+      fs: globals.fs,
+      logger: globals.logger,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      projectFactory: globals.projectFactory,
+    ),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[

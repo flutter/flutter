@@ -7,15 +7,12 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
-import 'package:flutter_tools/src/context/android_context.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -49,26 +46,17 @@ void main() {
     AndroidSdk? androidSdk = const _FakeAndroidSdk(),
     List<String>? arguments,
   }) async {
-    final ToolContext toolContext = FakeToolContext(
-      fs: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      projectFactory: globals.projectFactory,
-    );
-    final AndroidContext androidContext = FakeAndroidContext(androidSdk: androidSdk);
     final command = BuildAarCommand(
-      androidBuilder:
-          androidBuilder ??
-          context.get<AndroidBuilder>() ??
-          AndroidGradleBuilder(
-            toolContext: toolContext,
-            androidContext: androidContext,
-            analytics: globals.analytics,
-          ),
-      androidContext: androidContext,
+      androidBuilder: androidBuilder ?? context.get<AndroidBuilder>()!,
+      androidContext: FakeAndroidContext(androidSdk: androidSdk),
       buildSystem: globals.buildSystem,
-      toolContext: toolContext,
+      toolContext: FakeToolContext(
+        fs: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+        processManager: globals.processManager,
+        projectFactory: globals.projectFactory,
+      ),
     );
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['aar', ...?arguments, target]);

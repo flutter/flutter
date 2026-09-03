@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 
+import '../../../src/android_common.dart';
 import '../../../src/context.dart'; // legacy
 import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
@@ -57,24 +58,25 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-  buildSystem: buildSystem,
-  templateRenderer: FakeTemplateRenderer(),
-  toolContext: FakeToolContext(
-    artifacts: FakeArtifacts(),
-    cache: FakeCache(),
-    config: FakeConfig(),
-    fs: fileSystem,
-    flutterVersion: FakeFlutterVersion(),
-    logger: BufferLogger.test(),
-    os: FakeOperatingSystemUtils(),
-    platform: FakePlatform(),
-    processManager: FakeProcessManager.any(),
-    processUtils: FakeProcessUtils(),
-    terminal: FakeTerminal(),
-  ),
-),
+            androidBuilder: FakeAndroidBuilder(),
+            androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+            appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+            buildSystem: buildSystem,
+            templateRenderer: FakeTemplateRenderer(),
+            toolContext: FakeToolContext(
+              artifacts: FakeArtifacts(),
+              cache: FakeCache(),
+              config: FakeConfig(),
+              fs: fileSystem,
+              flutterVersion: FakeFlutterVersion(),
+              logger: BufferLogger.test(),
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+              processManager: FakeProcessManager.any(),
+              processUtils: FakeProcessUtils(),
+              terminal: FakeTerminal(),
+            ),
+          ),
         ).run(<String>['build', 'web', '--no-pub']);
 
         final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
@@ -98,24 +100,25 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-  buildSystem: buildSystem,
-  templateRenderer: FakeTemplateRenderer(),
-  toolContext: FakeToolContext(
-    artifacts: FakeArtifacts(),
-    cache: FakeCache(),
-    config: FakeConfig(),
-    fs: fileSystem,
-    flutterVersion: FakeFlutterVersion(),
-    logger: logger,
-    os: FakeOperatingSystemUtils(),
-    platform: FakePlatform(),
-    processManager: FakeProcessManager.any(),
-    processUtils: FakeProcessUtils(),
-    terminal: FakeTerminal(),
-  ),
-),
+            androidBuilder: FakeAndroidBuilder(),
+            androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+            appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+            buildSystem: buildSystem,
+            templateRenderer: FakeTemplateRenderer(),
+            toolContext: FakeToolContext(
+              artifacts: FakeArtifacts(),
+              cache: FakeCache(),
+              config: FakeConfig(),
+              fs: fileSystem,
+              flutterVersion: FakeFlutterVersion(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+              processManager: FakeProcessManager.any(),
+              processUtils: FakeProcessUtils(),
+              terminal: FakeTerminal(),
+            ),
+          ),
         ).run(<String>['build', 'web', '--no-pub']);
 
         expect(gitignore.readAsStringSync(), contentsBeforeBuild);
@@ -138,24 +141,25 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-  buildSystem: buildSystem,
-  templateRenderer: FakeTemplateRenderer(),
-  toolContext: FakeToolContext(
-    artifacts: FakeArtifacts(),
-    cache: FakeCache(),
-    config: FakeConfig(),
-    fs: fileSystem,
-    flutterVersion: FakeFlutterVersion(),
-    logger: logger,
-    os: FakeOperatingSystemUtils(),
-    platform: FakePlatform(),
-    processManager: FakeProcessManager.any(),
-    processUtils: FakeProcessUtils(),
-    terminal: FakeTerminal(),
-  ),
-),
+            androidBuilder: FakeAndroidBuilder(),
+            androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+            appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+            buildSystem: buildSystem,
+            templateRenderer: FakeTemplateRenderer(),
+            toolContext: FakeToolContext(
+              artifacts: FakeArtifacts(),
+              cache: FakeCache(),
+              config: FakeConfig(),
+              fs: fileSystem,
+              flutterVersion: FakeFlutterVersion(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+              processManager: FakeProcessManager.any(),
+              processUtils: FakeProcessUtils(),
+              terminal: FakeTerminal(),
+            ),
+          ),
         ).run(<String>['build', 'web', '--no-pub']);
 
         expect(
@@ -180,24 +184,25 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-  buildSystem: buildSystem,
-  templateRenderer: FakeTemplateRenderer(),
-  toolContext: FakeToolContext(
-    artifacts: FakeArtifacts(),
-    cache: FakeCache(),
-    config: FakeConfig(),
-    fs: fileSystem,
-    flutterVersion: FakeFlutterVersion(),
-    logger: logger,
-    os: FakeOperatingSystemUtils(),
-    platform: FakePlatform(),
-    processManager: FakeProcessManager.any(),
-    processUtils: FakeProcessUtils(),
-    terminal: FakeTerminal(),
-  ),
-),
+            androidBuilder: FakeAndroidBuilder(),
+            androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+            appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+            buildSystem: buildSystem,
+            templateRenderer: FakeTemplateRenderer(),
+            toolContext: FakeToolContext(
+              artifacts: FakeArtifacts(),
+              cache: FakeCache(),
+              config: FakeConfig(),
+              fs: fileSystem,
+              flutterVersion: FakeFlutterVersion(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+              processManager: FakeProcessManager.any(),
+              processUtils: FakeProcessUtils(),
+              terminal: FakeTerminal(),
+            ),
+          ),
         ).run(<String>['build', 'web', '--no-pub']);
 
         expect(registrant.existsSync(), isFalse);
@@ -221,24 +226,25 @@ void main() {
 
         await createTestCommandRunner(
           BuildCommand(
-  androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-  appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-  buildSystem: buildSystem,
-  templateRenderer: FakeTemplateRenderer(),
-  toolContext: FakeToolContext(
-    artifacts: FakeArtifacts(),
-    cache: FakeCache(),
-    config: FakeConfig(),
-    fs: fileSystem,
-    flutterVersion: FakeFlutterVersion(),
-    logger: logger,
-    os: FakeOperatingSystemUtils(),
-    platform: FakePlatform(),
-    processManager: FakeProcessManager.any(),
-    processUtils: FakeProcessUtils(),
-    terminal: FakeTerminal(),
-  ),
-),
+            androidBuilder: FakeAndroidBuilder(),
+            androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
+            appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+            buildSystem: buildSystem,
+            templateRenderer: FakeTemplateRenderer(),
+            toolContext: FakeToolContext(
+              artifacts: FakeArtifacts(),
+              cache: FakeCache(),
+              config: FakeConfig(),
+              fs: fileSystem,
+              flutterVersion: FakeFlutterVersion(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+              platform: FakePlatform(),
+              processManager: FakeProcessManager.any(),
+              processUtils: FakeProcessUtils(),
+              terminal: FakeTerminal(),
+            ),
+          ),
         ).run(<String>['build', 'web', '--no-pub']);
 
         expect(registrant.existsSync(), isFalse);

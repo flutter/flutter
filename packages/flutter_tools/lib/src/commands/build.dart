@@ -6,7 +6,6 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
-import '../android/gradle.dart';
 import '../artifacts.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
@@ -43,12 +42,12 @@ import 'darwin_add_to_app.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({
+    required AndroidBuilder androidBuilder,
     required AndroidContext androidContext,
     required AppleContext appleContext,
     required BuildSystem buildSystem,
     required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
-    AndroidBuilder? androidBuilder,
     bool verboseHelp = false,
   }) : super(verboseHelp: verboseHelp) {
     final ToolContext(
@@ -67,17 +66,9 @@ class BuildCommand extends FlutterCommand {
     ) = toolContext;
     final AppleContext(:PlistParser plistParser, :Xcode? xcode) = appleContext;
 
-    final AndroidBuilder effectiveAndroidBuilder =
-        androidBuilder ??
-        AndroidGradleBuilder(
-          toolContext: toolContext,
-          androidContext: androidContext,
-          analytics: analytics,
-        );
-
     _addSubcommand(
       BuildAarCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: androidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -86,7 +77,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildApkCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: androidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -95,7 +86,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildAppBundleCommand(
-        androidBuilder: effectiveAndroidBuilder,
+        androidBuilder: androidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
