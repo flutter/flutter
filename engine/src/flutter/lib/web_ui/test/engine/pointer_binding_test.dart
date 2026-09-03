@@ -1373,14 +1373,10 @@ void testMain() {
       context.wheel(buttons: 0, clientX: 10, clientY: 10, deltaX: 200, deltaY: 100),
     );
 
-    keyboardConverter.handleEvent(keyDownEvent('ShiftLeft', 'Shift', kShift));
-
     // With Shift pressed: macOS flips the axis, so we flip it back to normalize.
     rootElement.dispatchEvent(
-      context.wheel(buttons: 0, clientX: 10, clientY: 10, deltaX: 210, deltaY: 110),
+      context.wheel(buttons: 0, clientX: 10, clientY: 10, deltaX: 210, deltaY: 110, shiftKey: true),
     );
-
-    keyboardConverter.handleEvent(keyUpEvent('ShiftLeft', 'Shift', 0));
 
     // After Shift is released: axes are not flipped again.
     rootElement.dispatchEvent(
@@ -3685,7 +3681,9 @@ mixin _ButtonedEventMixin on _BasicEventContext {
     return mouseUp(button: 0, clientX: clientX, clientY: clientY);
   }
 
-  /// Creates a synthetic DOM wheel event for testing.
+  /// Creates a synthetic DOM `WheelEvent` for testing. It inherits from DOM
+  /// `MouseEvent` and `Event` classes.
+  /// See MDN: https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent
   ///
   /// [buttons] is a bitmask of pressed mouse buttons (0 = none, 1 = primary,
   /// 2 = secondary). See MDN: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
@@ -3708,6 +3706,10 @@ mixin _ButtonedEventMixin on _BasicEventContext {
   /// "Ctrl" is not physically held. Flutter uses it to emit
   /// [ui.PointerSignalKind.scale] instead of [ui.PointerSignalKind.scroll],
   /// unless the physical "Ctrl" key is also down.
+  /// See MDN: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/ctrlKey
+  ///
+  /// [shiftKey] emulates a left or right "Shift" key press.
+  /// See MDN: https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/shiftKey
   DomEvent wheel({
     required int? buttons,
     required double? clientX,
@@ -3718,6 +3720,7 @@ mixin _ButtonedEventMixin on _BasicEventContext {
     double? wheelDeltaY,
     int? timeStamp,
     bool ctrlKey = false,
+    bool shiftKey = false,
   }) {
     final DomEvent event = createDomWheelEvent('wheel', <String, Object>{
       'buttons': ?buttons,
@@ -3728,6 +3731,7 @@ mixin _ButtonedEventMixin on _BasicEventContext {
       'wheelDeltaX': ?wheelDeltaX,
       'wheelDeltaY': ?wheelDeltaY,
       'ctrlKey': ctrlKey,
+      'shiftKey': shiftKey,
       'cancelable': true,
       'bubbles': true,
       'composed': true,

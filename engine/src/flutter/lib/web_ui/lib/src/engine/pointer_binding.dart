@@ -756,9 +756,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     // The same conversion happens on the native side, see:
     // https://github.com/flutter/flutter/commit/be9ae4793d1e6aff6ad108200c4319fb1c82db96
     if (isMacOS && kind == ui.PointerDeviceKind.mouse) {
-      final shiftKeyPressed =
-          (_keyboardConverter?.keyIsPressed(kPhysicalShiftLeft) ?? false) ||
-          (_keyboardConverter?.keyIsPressed(kPhysicalShiftRight) ?? false);
+      final shiftKeyPressed = event.getModifierState('Shift');
       if (shiftKeyPressed) {
         final double temp = deltaX;
         deltaX = deltaY;
