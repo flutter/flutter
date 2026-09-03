@@ -93,18 +93,30 @@ float distanceFromRect(vec2 p, vec2 b) {
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 }
 
-float distanceFromOval(vec2 p, vec2 ab) {
-  p = abs(p);
-  vec2 q = ab * (p - ab);
+// Calculates signed distance to an oval (ellipse with semi-axes `ab`) and
+// computes its outward surface normal vector at the closest boundary point.
+//
+// The ellipse boundary is parameterized by angle w as (a * cos(w), b * sin(w)).
+// The tangent vector is (-a * sin(w), b * cos(w)), so the outward normal
+// is orthogonal: (b * cos(w), a * sin(w)).
+float distanceFromOval(vec2 p, vec2 ab, out vec2 normal) {
+  vec2 p_abs = abs(p);
+  vec2 q = ab * (p_abs - ab);
   float w = (q.x < q.y) ? 1.570796327 : 0.0;
+  vec2 cs;
   for (int i = 0; i < 5; i++) {
-    vec2 cs = vec2(cos(w), sin(w));
+    cs = vec2(cos(w), sin(w));
     vec2 u = ab * vec2(cs.x, cs.y);
     vec2 v = ab * vec2(-cs.y, cs.x);
-    w = w + dot(p - u, v) / (dot(p - u, u) + dot(v, v));
+    w = w + dot(p_abs - u, v) / (dot(p_abs - u, u) + dot(v, v));
   }
-  float d = length(p - ab * vec2(cos(w), sin(w)));
-  return (dot(p / ab, p / ab) > 1.0) ? d : -d;
+  cs = vec2(cos(w), sin(w));
+  float d = length(p_abs - ab * cs);
+
+  vec2 s = vec2(p.x >= 0.0 ? 1.0 : -1.0, p.y >= 0.0 ? 1.0 : -1.0);
+  normal = s * normalize(vec2(ab.y * cs.x, ab.x * cs.y));
+
+  return (dot(p_abs / ab, p_abs / ab) > 1.0) ? d : -d;
 }
 
 float distanceFromRoundedRect(in vec2 p, in vec2 b, in vec4 r) {
@@ -235,8 +247,9 @@ vec2 filledSDF(vec2 p) {
     // Rect has its own separate logic for calculating pixel size.
     pixel_size = rectPixelSize(p);
   } else if (frag_info.type < 2.5) {  // Oval
-    sdf = distanceFromOval(p, frag_info.size);
-    pixel_size = pixelSize(sdf);
+    vec2 normal;
+    sdf = distanceFromOval(p, frag_info.size, normal);
+    pixel_size = directionalPixelSize(normal);
   } else if (frag_info.type < 3.5) {  // Rounded Rect
     sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
     // RoundRect has its own separate logic for calculating pixel size.
