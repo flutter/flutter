@@ -15,9 +15,7 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:test/fake.dart';
 
-import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../../src/context.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
@@ -116,23 +114,6 @@ dev_dependencies:
   test: 1.28.0
 
 # PUBSPEC CHECKSUM: qlfuuh
-''';
-
-const kFlutterAnalyzerPluginPubspecYaml = r'''
-name: flutter_analyzer_plugin
-description: Custom analysis rules for flutter/flutter
-version: 0.0.1
-publish_to: none
-
-resolution: workspace
-
-environment:
-  sdk: ^3.7.0
-
-dependencies:
-  typed_data: ^1.1.6
-
-# PUBSPEC CHECKSUM: 3si79p
 ''';
 
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
@@ -281,12 +262,6 @@ void main() {
       flutterSdk.childFile('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(kFlutterWorkspacePubspecYaml);
-      final Directory flutterAnalyzerPlugin = flutterSdk
-          .childDirectory('dev')
-          .childDirectory('flutter_analyzer_plugin');
-      flutterAnalyzerPlugin.childFile('pubspec.yaml')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(kFlutterAnalyzerPluginPubspecYaml);
       widgetPreviewScaffold = flutterSdk
           .childDirectory('dev')
           .childDirectory('integration_tests')
@@ -306,125 +281,165 @@ void main() {
       processManager = FakeProcessManager.empty();
     });
 
-    UpdatePackagesCommand createCommand() {
-      final toolContext = FakeToolContext(
-        fs: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        cache: Cache.test(processManager: processManager),
-      );
-      return UpdatePackagesCommand(toolContext: toolContext, pub: pub, verboseHelp: false);
-    }
+    testUsingContext(
+      'updates packages - only runs pub get',
+      () async {
+        final command = UpdatePackagesCommand(verboseHelp: false);
+        await createTestCommandRunner(command).run(<String>['update-packages']);
+        expect(
+          pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
+          Pubspec.parse(kFlutterWorkspacePubspecYaml).dependencies,
+        );
+      },
+      overrides: <Type, Generator>{
+        Pub: () => pub,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => Cache.test(processManager: processManager),
+      },
+    );
 
-    testWithoutContext('updates packages - only runs pub get', () async {
-      final UpdatePackagesCommand command = createCommand();
-      await createTestCommandRunner(command).run(<String>['update-packages']);
-      expect(
-        pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
-        Pubspec.parse(kFlutterWorkspacePubspecYaml).dependencies,
-      );
-    });
+    testUsingContext(
+      '--force-upgrade updates packages',
+      () async {
+        //
+        expect(
+          Pubspec.parse(kFlutterToolsPubspecYaml).dependencies['test_api'],
+          HostedDependency(version: VersionConstraint.parse('0.7.4')),
+        );
 
-    testWithoutContext('--force-upgrade updates packages', () async {
-      expect(
-        Pubspec.parse(kFlutterToolsPubspecYaml).dependencies['test_api'],
-        HostedDependency(version: VersionConstraint.parse('0.7.4')),
-      );
+        expect(
+          Pubspec.parse(kFlutterWorkspacePubspecYaml).dependencies['test_api'],
+          HostedDependency(version: VersionConstraint.parse('0.7.4')),
+        );
 
-      expect(
-        Pubspec.parse(kFlutterWorkspacePubspecYaml).dependencies['test_api'],
-        HostedDependency(version: VersionConstraint.parse('0.7.4')),
-      );
+        final command = UpdatePackagesCommand(verboseHelp: false);
+        await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
+        expect(
+          pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
+          (Pubspec.parse(kFlutterWorkspacePubspecYaml)
+                ..dependencies['typed_data'] = HostedDependency(
+                  version: VersionConstraint.parse('^1.1.1'),
+                )
+                ..dependencies['test_api'] = HostedDependency(
+                  version: VersionConstraint.parse('0.7.5'),
+                ))
+              .dependencies,
+        );
+        expect(
+          pub.pubspecs[flutterTools.absolute.path]!.first.dependencies,
+          (Pubspec.parse(kFlutterToolsPubspecYaml)
+                ..dependencies['unified_analytics'] = HostedDependency(
+                  version: VersionConstraint.parse('8.0.10'),
+                )
+                ..dependencies['test_api'] = HostedDependency(
+                  version: VersionConstraint.parse('0.7.5'),
+                ))
+              .dependencies,
+        );
+      },
+      overrides: <Type, Generator>{
+        Pub: () => pub,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => Cache.test(processManager: processManager),
+      },
+    );
 
-      final UpdatePackagesCommand command = createCommand();
-      await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
+    testUsingContext(
+      '--cherry-pick-package',
+      () async {
+        final command = UpdatePackagesCommand(verboseHelp: false);
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['update-packages', '--cherry-pick=vector_math:2.0.9']);
+        expect(
+          pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
+          (Pubspec.parse(kFlutterWorkspacePubspecYaml)
+                ..dependencies['vector_math'] = HostedDependency(
+                  version: VersionConstraint.parse('2.0.9'),
+                ))
+              .dependencies,
+        );
+      },
+      overrides: <Type, Generator>{
+        Pub: () => pub,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => Cache.test(processManager: processManager),
+        Logger: () => logger,
+      },
+    );
 
-      expect(
-        pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
-        (Pubspec.parse(kFlutterWorkspacePubspecYaml)
-              ..dependencies['typed_data'] = HostedDependency(
-                version: VersionConstraint.parse('^1.1.1'),
-              )
-              ..dependencies['test_api'] = HostedDependency(
-                version: VersionConstraint.parse('0.7.5'),
-              ))
-            .dependencies,
-      );
-      expect(
-        pub.pubspecs[flutterTools.absolute.path]!.first.dependencies,
-        (Pubspec.parse(kFlutterToolsPubspecYaml)
-              ..dependencies['unified_analytics'] = HostedDependency(
-                version: VersionConstraint.parse('8.0.10'),
-              )
-              ..dependencies['test_api'] = HostedDependency(
-                version: VersionConstraint.parse('0.7.5'),
-              ))
-            .dependencies,
-      );
+    testUsingContext(
+      '--cherry-pick-package with caret',
+      () async {
+        final command = UpdatePackagesCommand(verboseHelp: false);
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['update-packages', '--cherry-pick=vector_math:^2.0.9']);
+        expect(
+          pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
+          (Pubspec.parse(kFlutterWorkspacePubspecYaml)
+                ..dependencies['vector_math'] = HostedDependency(
+                  version: VersionConstraint.parse('^2.0.9'),
+                ))
+              .dependencies,
+        );
+      },
+      overrides: <Type, Generator>{
+        Pub: () => pub,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => Cache.test(processManager: processManager),
+        Logger: () => logger,
+      },
+    );
 
-      final File updatedPluginPubspec = flutterSdk
-          .childDirectory('dev')
-          .childDirectory('flutter_analyzer_plugin')
-          .childFile('pubspec.yaml');
-      final parsedPluginPubspec = Pubspec.parse(updatedPluginPubspec.readAsStringSync());
-      expect(
-        parsedPluginPubspec.dependencies['typed_data'],
-        HostedDependency(version: VersionConstraint.parse('^1.1.1')),
-      );
-    });
+    testUsingContext(
+      '--cherry-pick-package muliple',
+      () async {
+        final command = UpdatePackagesCommand(verboseHelp: false);
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['update-packages', '--cherry-pick=vector_math:^2.0.9,meta:1.0.5']);
+        expect(
+          pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
+          (Pubspec.parse(kFlutterWorkspacePubspecYaml)
+                ..dependencies['vector_math'] = HostedDependency(
+                  version: VersionConstraint.parse('^2.0.9'),
+                )
+                ..dependencies['meta'] = HostedDependency(
+                  version: VersionConstraint.parse('1.0.5'),
+                ))
+              .dependencies,
+        );
+      },
+      overrides: <Type, Generator>{
+        Pub: () => pub,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => Cache.test(processManager: processManager),
+        Logger: () => logger,
+      },
+    );
 
-    testWithoutContext('--cherry-pick-package', () async {
-      final UpdatePackagesCommand command = createCommand();
-      await createTestCommandRunner(
-        command,
-      ).run(<String>['update-packages', '--cherry-pick=vector_math:2.0.9']);
-      expect(
-        pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
-        (Pubspec.parse(kFlutterWorkspacePubspecYaml)
-              ..dependencies['vector_math'] = HostedDependency(
-                version: VersionConstraint.parse('2.0.9'),
-              ))
-            .dependencies,
-      );
-    });
+    testUsingContext(
+      '--force-upgrade',
+      () async {
+        final command = UpdatePackagesCommand(verboseHelp: false);
+        await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
+      },
+      overrides: <Type, Generator>{
+        Pub: () => pub,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => Cache.test(processManager: processManager),
+        Logger: () => logger,
+      },
+    );
 
-    testWithoutContext('--cherry-pick-package with caret', () async {
-      final UpdatePackagesCommand command = createCommand();
-      await createTestCommandRunner(
-        command,
-      ).run(<String>['update-packages', '--cherry-pick=vector_math:^2.0.9']);
-      expect(
-        pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
-        (Pubspec.parse(kFlutterWorkspacePubspecYaml)
-              ..dependencies['vector_math'] = HostedDependency(
-                version: VersionConstraint.parse('^2.0.9'),
-              ))
-            .dependencies,
-      );
-    });
-
-    testWithoutContext('--cherry-pick-package muliple', () async {
-      final UpdatePackagesCommand command = createCommand();
-      await createTestCommandRunner(
-        command,
-      ).run(<String>['update-packages', '--cherry-pick=vector_math:^2.0.9,meta:1.0.5']);
-      expect(
-        pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
-        (Pubspec.parse(kFlutterWorkspacePubspecYaml)
-              ..dependencies['vector_math'] = HostedDependency(
-                version: VersionConstraint.parse('^2.0.9'),
-              )
-              ..dependencies['meta'] = HostedDependency(version: VersionConstraint.parse('1.0.5')))
-            .dependencies,
-      );
-    });
-
-    testWithoutContext('--force-upgrade', () async {
-      final UpdatePackagesCommand command = createCommand();
-      await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
-    });
-
-    testWithoutContext(
+    testUsingContext(
       '--force-upgrade succeeds when flutter_tools has workspace subpackages and path dependencies',
       () async {
         const subpackagePubspecYaml = r'''
@@ -523,7 +538,7 @@ dependencies:
             .childFile('pubspec.yaml')
             .writeAsStringSync(flutterToolsWithWorkspacePubspecYaml);
 
-        final UpdatePackagesCommand command = createCommand();
+        final command = UpdatePackagesCommand(verboseHelp: false);
         await createTestCommandRunner(
           command,
         ).run(<String>['update-packages', '--force-upgrade', '--update-hashes']);
@@ -561,6 +576,13 @@ dependencies:
           parsedCustomPubspec.dependencies['unified_analytics'],
           HostedDependency(version: VersionConstraint.parse('8.0.10')),
         );
+      },
+      overrides: <Type, Generator>{
+        Pub: () => pub,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => Cache.test(processManager: processManager),
+        Logger: () => logger,
       },
     );
   });

@@ -14,15 +14,33 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/version.dart';
 
-import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
+import '../../src/fake_tool_context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
+import '../../src/test_flutter_command_runner.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
+import '../../src/test_flutter_command_runner.dart';
+import '../../src/fake_tool_context.dart';
+import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
+import '../../src/test_flutter_command_runner.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeFlutterVersion;
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late FakeProcessManager processManager;
+  UpgradeCommand command;
+  late CommandRunner<void> runner;
   const flutterRoot = '/path/to/flutter';
 
   setUpAll(() {
@@ -34,28 +52,15 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
-  });
-
-  CommandRunner<void> createRunner({FlutterVersion? flutterVersion}) {
-    final toolContext = FakeToolContext(
-      fs: fileSystem,
-      flutterVersion: flutterVersion,
-      logger: logger,
-      processManager: processManager,
-    );
-    final command = UpgradeCommand(
-      toolContext: toolContext,
+    command = UpgradeCommand(
       verboseHelp: false,
-      commandRunner: UpgradeCommandRunner(toolContext: toolContext)
+      commandRunner: UpgradeCommandRunner(toolContext: FakeToolContext())
         ..clock = SystemClock.fixed(DateTime.utc(2026)),
     );
-    return createTestCommandRunner(command);
-  }
+    runner = createTestCommandRunner(command);
+  });
 
   testWithoutContext('can auto-migrate a user from dev to beta', () async {
-    final CommandRunner<void> runner = createRunner(
-      flutterVersion: FakeFlutterVersion(branch: 'dev'),
-    );
     const startingTag = '3.0.0-1.2.pre';
     const latestUpstreamTag = '3.0.0-1.3.pre';
     const upstreamHeadRevision = 'deadbeef';
@@ -136,9 +141,6 @@ void main() {
   const upstreamHeadRevision = '5765737420536964652053746f7279';
 
   testWithoutContext('can push people from master to beta', () async {
-    final CommandRunner<void> runner = createRunner(
-      flutterVersion: FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
-    );
     final reEntryCompleter = Completer<void>();
 
     Future<void> reEnterTool(List<String> args) async {
@@ -219,13 +221,6 @@ void main() {
   });
 
   testWithoutContext('do not push people from beta to anything else', () async {
-    final CommandRunner<void> runner = createRunner(
-      flutterVersion: FakeFlutterVersion(
-        branch: 'beta',
-        frameworkVersion: startingTag,
-        engineRevision: 'engine',
-      ),
-    );
     final reEntryCompleter = Completer<void>();
 
     Future<void> reEnterTool(List<String> command) async {
@@ -303,13 +298,9 @@ void main() {
       'Took 0.0s\n',
     );
   });
-
   testWithoutContext(
     'allows upgrading if the only local modifications are pubspec.lock files',
     () async {
-      final CommandRunner<void> runner = createRunner(
-        flutterVersion: FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
-      );
       final reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> args) async {
@@ -355,13 +346,6 @@ void main() {
   );
 
   testWithoutContext('fails upgrading on stable if pubspec.lock files are modified', () async {
-    final CommandRunner<void> runner = createRunner(
-      flutterVersion: FakeFlutterVersion(
-        branch: 'stable',
-        frameworkVersion: startingTag,
-        engineRevision: 'engine',
-      ),
-    );
     processManager.addCommands(<FakeCommand>[
       const FakeCommand(
         command: <String>['git', 'tag', '--points-at', 'HEAD'],

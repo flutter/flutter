@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -40,32 +40,25 @@ void main() {
     bufferLogger = BufferLogger.test(terminal: terminal);
   });
 
-  DowngradeCommand createCommand({
-    FakeFlutterVersion? flutterVersion,
-    PersistentToolState? persistentToolState,
-  }) {
-    final toolContext = FakeToolContext(
-      fs: fileSystem,
-      logger: bufferLogger,
-      processManager: processManager,
-      stdio: stdio,
-      terminal: terminal,
-      flutterVersion: flutterVersion ?? FakeFlutterVersion(),
-    );
-    return DowngradeCommand(
-      toolContext: toolContext,
-      persistentToolState:
-          persistentToolState ??
-          PersistentToolState.test(directory: fileSystem.currentDirectory, logger: bufferLogger),
-    );
-  }
-
   testWithoutContext('Downgrade exits on unknown channel', () async {
     final fakeFlutterVersion = FakeFlutterVersion(branch: 'WestSideStory'); // an unknown branch
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"invalid"}');
-    final DowngradeCommand command = createCommand(flutterVersion: fakeFlutterVersion);
+    final command = DowngradeCommand(
+      toolContext: FakeToolContext(
+        outputPreferences: OutputPreferences.test(),
+        processManager: processManager,
+        logger: bufferLogger,
+        persistentToolState: PersistentToolState.test(
+          directory: fileSystem.currentDirectory,
+          logger: bufferLogger,
+        ),
+        terminal: terminal,
+        stdio: stdio,
+        flutterVersion: fakeFlutterVersion,
+      ),
+    );
 
     expect(
       createTestCommandRunner(command).run(const ['downgrade']),
@@ -82,7 +75,20 @@ void main() {
       'Downgrade exits on unexpected positional arguments: ${positionalArguments.join(' ')}',
       () async {
         final fakeFlutterVersion = FakeFlutterVersion();
-        final DowngradeCommand command = createCommand(flutterVersion: fakeFlutterVersion);
+        final command = DowngradeCommand(
+          toolContext: FakeToolContext(
+            outputPreferences: OutputPreferences.test(),
+            processManager: processManager,
+            logger: bufferLogger,
+            persistentToolState: PersistentToolState.test(
+              directory: fileSystem.currentDirectory,
+              logger: bufferLogger,
+            ),
+            terminal: terminal,
+            stdio: stdio,
+            flutterVersion: fakeFlutterVersion,
+          ),
+        );
 
         expect(
           createTestCommandRunner(command).run(<String>['downgrade', ...positionalArguments]),
@@ -103,7 +109,20 @@ void main() {
     processManager.addCommands(const [
       FakeCommand(command: ['git', 'describe', '--tags', 'abcd'], stdout: 'v1.2.3'),
     ]);
-    final DowngradeCommand command = createCommand(flutterVersion: fakeFlutterVersion);
+    final command = DowngradeCommand(
+      toolContext: FakeToolContext(
+        outputPreferences: OutputPreferences.test(),
+        processManager: processManager,
+        logger: bufferLogger,
+        persistentToolState: PersistentToolState.test(
+          directory: fileSystem.currentDirectory,
+          logger: bufferLogger,
+        ),
+        terminal: terminal,
+        stdio: stdio,
+        flutterVersion: fakeFlutterVersion,
+      ),
+    );
 
     expect(
       createTestCommandRunner(command).run(const ['downgrade']),
@@ -128,7 +147,20 @@ Channel "master" was previously on: v1.2.3.''',
     processManager.addCommands(const [
       FakeCommand(command: ['git', 'describe', '--tags', 'invalid'], exitCode: 1),
     ]);
-    final DowngradeCommand command = createCommand(flutterVersion: fakeFlutterVersion);
+    final command = DowngradeCommand(
+      toolContext: FakeToolContext(
+        outputPreferences: OutputPreferences.test(),
+        processManager: processManager,
+        logger: bufferLogger,
+        persistentToolState: PersistentToolState.test(
+          directory: fileSystem.currentDirectory,
+          logger: bufferLogger,
+        ),
+        terminal: terminal,
+        stdio: stdio,
+        flutterVersion: fakeFlutterVersion,
+      ),
+    );
 
     expect(
       createTestCommandRunner(command).run(const ['downgrade']),
@@ -147,7 +179,20 @@ Channel "master" was previously on: v1.2.3.''',
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
-    final DowngradeCommand command = createCommand(flutterVersion: fakeFlutterVersion);
+    final command = DowngradeCommand(
+      toolContext: FakeToolContext(
+        outputPreferences: OutputPreferences.test(),
+        processManager: processManager,
+        logger: bufferLogger,
+        persistentToolState: PersistentToolState.test(
+          directory: fileSystem.currentDirectory,
+          logger: bufferLogger,
+        ),
+        terminal: terminal,
+        stdio: stdio,
+        flutterVersion: fakeFlutterVersion,
+      ),
+    );
 
     terminal.addPrompt(const ['y', 'n'], 'y');
 
@@ -167,7 +212,20 @@ Channel "master" was previously on: v1.2.3.''',
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
-    final DowngradeCommand command = createCommand(flutterVersion: fakeFlutterVersion);
+    final command = DowngradeCommand(
+      toolContext: FakeToolContext(
+        outputPreferences: OutputPreferences.test(),
+        processManager: processManager,
+        logger: bufferLogger,
+        persistentToolState: PersistentToolState.test(
+          directory: fileSystem.currentDirectory,
+          logger: bufferLogger,
+        ),
+        terminal: terminal,
+        stdio: stdio,
+        flutterVersion: fakeFlutterVersion,
+      ),
+    );
 
     terminal.addPrompt(const ['y', 'n'], 'n');
 
@@ -187,7 +245,20 @@ Channel "master" was previously on: v1.2.3.''',
     fileSystem.currentDirectory
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
-    final DowngradeCommand command = createCommand(flutterVersion: fakeFlutterVersion);
+    final command = DowngradeCommand(
+      toolContext: FakeToolContext(
+        outputPreferences: OutputPreferences.test(),
+        processManager: processManager,
+        logger: bufferLogger,
+        persistentToolState: PersistentToolState.test(
+          directory: fileSystem.currentDirectory,
+          logger: bufferLogger,
+        ),
+        terminal: terminal,
+        stdio: stdio,
+        flutterVersion: fakeFlutterVersion,
+      ),
+    );
 
     await createTestCommandRunner(command).run(const ['downgrade']);
 
@@ -205,7 +276,20 @@ Channel "master" was previously on: v1.2.3.''',
       FakeCommand(command: ['git', 'reset', '--hard', 'g6b00b5e88']),
       FakeCommand(command: ['git', 'checkout', 'master', '--']),
     ]);
-    final DowngradeCommand command = createCommand(flutterVersion: fakeFlutterVersion);
+    final command = DowngradeCommand(
+      toolContext: FakeToolContext(
+        outputPreferences: OutputPreferences.test(),
+        processManager: processManager,
+        logger: bufferLogger,
+        persistentToolState: PersistentToolState.test(
+          directory: fileSystem.currentDirectory,
+          logger: bufferLogger,
+        ),
+        terminal: terminal,
+        stdio: stdio,
+        flutterVersion: fakeFlutterVersion,
+      ),
+    );
 
     await createTestCommandRunner(command).run(const ['downgrade']);
 
@@ -241,10 +325,8 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 class FakeStdio extends Fake implements Stdio {
   @override
   bool hasTerminal = true;
-
   @override
-  int? terminalColumns = 80;
-
+  int get terminalColumns => 80;
   @override
-  int? terminalLines = 24;
+  int get terminalLines => 24;
 }
