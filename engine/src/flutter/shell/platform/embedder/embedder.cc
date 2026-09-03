@@ -2397,6 +2397,7 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
               size_t height) -> std::unique_ptr<FlutterVulkanTexture> {
         std::unique_ptr<FlutterVulkanTexture> texture =
             std::make_unique<FlutterVulkanTexture>();
+        texture->struct_size = sizeof(FlutterVulkanTexture);
         if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
           return nullptr;
         }

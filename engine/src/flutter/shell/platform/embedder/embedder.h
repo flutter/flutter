@@ -940,9 +940,6 @@ typedef void* FlutterVulkanQueueHandle;
 /// Alias for VkImage.
 typedef uint64_t FlutterVulkanImageHandle;
 
-/// Alias for VkDeviceMemory.
-typedef uint64_t FlutterVulkanDeviceMemoryHandle;
-
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterVulkanImage).
   size_t struct_size;
@@ -977,8 +974,6 @@ typedef struct {
   /// Handle to the VkImage that is owned by the embedder. The engine will
   /// bind this image for writing the frame.
   FlutterVulkanImageHandle image;
-  /// The VkDeviceMemory that backs the iamge.
-  FlutterVulkanDeviceMemoryHandle image_memory;
   /// The VkFormat of the image (for example: VK_FORMAT_R8G8B8A8_UNORM).
   uint32_t format;
   /// User data to be returned on the invocation of the destruction callback.
