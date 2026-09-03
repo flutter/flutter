@@ -90,6 +90,8 @@ const int kPSHeightIndex = 9;
 const int kPSStrutStyleIndex = 10;
 const int kPSEllipsisIndex = 11;
 const int kPSLocaleIndex = 12;
+const int kPSFakeMissingFontStylesIndex = 13;
+const int kPSFakeMissingFontStylesValueIndex = 14;
 
 const int kPSTextAlignMask = 1 << kPSTextAlignIndex;
 const int kPSTextDirectionMask = 1 << kPSTextDirectionIndex;
@@ -103,6 +105,9 @@ const int kPSTextHeightBehaviorMask = 1 << kPSTextHeightBehaviorIndex;
 const int kPSStrutStyleMask = 1 << kPSStrutStyleIndex;
 const int kPSEllipsisMask = 1 << kPSEllipsisIndex;
 const int kPSLocaleMask = 1 << kPSLocaleIndex;
+const int kPSFakeMissingFontStylesMask = 1 << kPSFakeMissingFontStylesIndex;
+const int kPSFakeMissingFontStylesValueMask =
+    1 << kPSFakeMissingFontStylesValueIndex;
 
 // TextShadows decoding
 
@@ -285,6 +290,10 @@ ParagraphBuilder::ParagraphBuilder(
 
   if (mask & kPSLocaleMask) {
     style.locale = locale;
+  }
+
+  if (mask & kPSFakeMissingFontStylesMask) {
+    style.fake_missing_font_styles = mask & kPSFakeMissingFontStylesValueMask;
   }
 
   FontCollection& font_collection = UIDartState::Current()
