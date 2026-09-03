@@ -40,6 +40,7 @@ const kHotRestartServiceName = 'hotRestart';
 const kFlutterVersionServiceName = 'flutterVersion';
 const kCompileExpressionServiceName = 'compileExpression';
 const kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
+const kFlutterDeviceInfoServiceName = 'flutterDeviceInfo';
 
 /// The error response code from an unrecoverable compilation failure.
 const kIsolateReloadBarred = 1005;
@@ -299,6 +300,18 @@ Future<vm_service.VmService> setUpVmService({
     });
     registrationRequests.add(
       vmService.registerService(kFlutterMemoryInfoServiceName, kFlutterToolAlias),
+    );
+
+    vmService.registerServiceCallback(kFlutterDeviceInfoServiceName, (
+      Map<String, Object?> params,
+    ) async {
+      final bool isEmulator = await device.isLocalEmulator;
+      return <String, Object>{
+        'result': <String, Object>{kResultType: kResultTypeSuccess, 'emulator': isEmulator},
+      };
+    });
+    registrationRequests.add(
+      vmService.registerService(kFlutterDeviceInfoServiceName, kFlutterToolAlias),
     );
   }
 
