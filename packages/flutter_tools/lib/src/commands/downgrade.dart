@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -12,10 +11,9 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../cache.dart';
-import '../git.dart';
-import '../globals.dart' as globals;
-import '../persistent_tool_state.dart';
 import '../context/tool_context.dart';
+import '../git.dart';
+import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
@@ -110,7 +108,7 @@ class DowngradeCommand extends FlutterCommand {
     }
     final PersistentToolState persistentToolState = _persistentToolState;
     final String? lastFlutterVersion = persistentToolState.lastActiveVersion(channel);
-    final String? currentFlutterVersion = _flutterVersion.frameworkRevision;
+    final String currentFlutterVersion = _flutterVersion.frameworkRevision;
     if (lastFlutterVersion == null || currentFlutterVersion == lastFlutterVersion) {
       final String trailing = await _createErrorMessage(workingDirectory, channel);
       throwToolExit(

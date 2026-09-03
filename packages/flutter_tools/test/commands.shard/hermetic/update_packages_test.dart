@@ -16,6 +16,7 @@ import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:test/fake.dart';
 
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 // An example pubspec.yaml from flutter, not necessary for it to be up to date.
@@ -284,7 +285,10 @@ void main() {
     testUsingContext(
       'updates packages - only runs pub get',
       () async {
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(
+          toolContext: DelegatingToolContext(),
+          verboseHelp: false,
+        );
         await createTestCommandRunner(command).run(<String>['update-packages']);
         expect(
           pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
@@ -313,7 +317,10 @@ void main() {
           HostedDependency(version: VersionConstraint.parse('0.7.4')),
         );
 
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(
+          toolContext: DelegatingToolContext(),
+          verboseHelp: false,
+        );
         await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
         expect(
           pub.pubspecs[flutterSdk.absolute.path]!.first.dependencies,
@@ -349,7 +356,10 @@ void main() {
     testUsingContext(
       '--cherry-pick-package',
       () async {
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(
+          toolContext: DelegatingToolContext(),
+          verboseHelp: false,
+        );
         await createTestCommandRunner(
           command,
         ).run(<String>['update-packages', '--cherry-pick=vector_math:2.0.9']);
@@ -374,7 +384,10 @@ void main() {
     testUsingContext(
       '--cherry-pick-package with caret',
       () async {
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(
+          toolContext: DelegatingToolContext(),
+          verboseHelp: false,
+        );
         await createTestCommandRunner(
           command,
         ).run(<String>['update-packages', '--cherry-pick=vector_math:^2.0.9']);
@@ -399,7 +412,10 @@ void main() {
     testUsingContext(
       '--cherry-pick-package muliple',
       () async {
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(
+          toolContext: DelegatingToolContext(),
+          verboseHelp: false,
+        );
         await createTestCommandRunner(
           command,
         ).run(<String>['update-packages', '--cherry-pick=vector_math:^2.0.9,meta:1.0.5']);
@@ -427,7 +443,10 @@ void main() {
     testUsingContext(
       '--force-upgrade',
       () async {
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(
+          toolContext: DelegatingToolContext(),
+          verboseHelp: false,
+        );
         await createTestCommandRunner(command).run(<String>['update-packages', '--force-upgrade']);
       },
       overrides: <Type, Generator>{
@@ -538,7 +557,10 @@ dependencies:
             .childFile('pubspec.yaml')
             .writeAsStringSync(flutterToolsWithWorkspacePubspecYaml);
 
-        final command = UpdatePackagesCommand(verboseHelp: false);
+        final command = UpdatePackagesCommand(
+          toolContext: DelegatingToolContext(),
+          verboseHelp: false,
+        );
         await createTestCommandRunner(
           command,
         ).run(<String>['update-packages', '--force-upgrade', '--update-hashes']);

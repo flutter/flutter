@@ -342,7 +342,11 @@ List<FlutterCommand> generateCommands({
   ),
   InstallCommand(verboseHelp: verboseHelp),
   LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
-  PackagesCommand(toolContext: toolDependencies.toolContext),
+  PackagesCommand(
+    buildSystem: toolDependencies.buildSystem,
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
+  ),
   PrecacheCommand(
     verboseHelp: verboseHelp,
     cache: toolDependencies.toolContext.cache,

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -22,16 +23,9 @@ import 'package:yaml/yaml.dart';
 import '../../integration.shard/test_utils.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_tool_context.dart';
-import '../../src/fakes.dart';
-import '../../src/test_build_system.dart';
-import '../../src/test_flutter_command_runner.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import '../../src/fakes.dart';
-import '../../src/test_build_system.dart';
-import '../../src/test_flutter_command_runner.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -84,8 +78,8 @@ void main() {
       List<String>? globalArgs,
     }) async {
       final command = PackagesCommand(
-        toolContext: FakeToolContext(logger: logger ?? BufferLogger.test()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildSystem: globals.buildSystem,
+        toolContext: DelegatingToolContext(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
@@ -242,7 +236,7 @@ void main() {
       }
     }
 
-    testWithoutContext(
+    testUsingContext(
       'get fetches packages and has output from pub',
       () async {
         final String projectPath = await createProject(
@@ -290,7 +284,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'get --offline fetches packages',
       () async {
         final String projectPath = await createProject(
@@ -317,7 +311,7 @@ void main() {
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'get fetches packages for a workspace',
       () async {
         tempDir.childFile('pubspec.yaml').writeAsStringSync('''
@@ -392,7 +386,7 @@ workspace:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'get creates plugin registrants for each app in workspace',
       () async {
         tempDir.childFile('pubspec.yaml').writeAsStringSync('''
@@ -469,7 +463,7 @@ workspace:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'get does not generate platform tooling for a non-Flutter workspace root',
       // Regression test for https://github.com/flutter/flutter/issues/189550.
       () async {
@@ -515,7 +509,7 @@ workspace:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'get generates files into lib/l10n',
       () async {
         final String projectPath = await createProject(
@@ -554,7 +548,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'set no plugins as usage value',
       () async {
         final String projectPath = await createProject(
@@ -586,7 +580,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'set the number of plugins as usage value',
       () async {
         final String projectPath = await createProject(
@@ -623,7 +617,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'indicate that the project is not a module in usage value',
       () async {
         final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
@@ -652,7 +646,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'indicate that the project is a module in usage value',
       () async {
         final String projectPath = await createProject(
@@ -684,7 +678,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'indicate that Android project reports v2 in usage value',
       () async {
         final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub']);
@@ -713,7 +707,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'upgrade fetches packages',
       () async {
         final String projectPath = await createProject(
@@ -740,7 +734,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'get fetches packages and injects plugin',
       () async {
         final String projectPath = await createProjectWithPlugin(
@@ -767,7 +761,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'get fetches packages and injects plugin in plugin project',
       () async {
         final String projectPath = await createProject(
@@ -800,7 +794,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'get explicit-packages-resolution omits ".flutter-plugins"',
       () async {
         final String projectPath = await createProject(
@@ -841,7 +835,7 @@ flutter:
       mockStdio = FakeStdio()..stdout.terminalColumns = 80;
     });
 
-    testWithoutContext(
+    testUsingContext(
       'test without bot',
       () async {
         Cache.flutterRoot = '';
@@ -860,8 +854,8 @@ flutter:
         );
         await createTestCommandRunner(
           PackagesCommand(
-            toolContext: FakeToolContext(logger: logger ?? BufferLogger.test()),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
           ),
         ).run(<String>['packages', 'test']);
 
@@ -884,7 +878,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'test with bot',
       () async {
         Cache.flutterRoot = '';
@@ -903,8 +897,8 @@ flutter:
         );
         await createTestCommandRunner(
           PackagesCommand(
-            toolContext: FakeToolContext(logger: logger ?? BufferLogger.test()),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
           ),
         ).run(<String>['packages', 'test']);
 
@@ -927,7 +921,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'run pass arguments through to pub',
       () async {
         Cache.flutterRoot = '';
@@ -948,8 +942,8 @@ flutter:
         );
         await createTestCommandRunner(
           PackagesCommand(
-            toolContext: FakeToolContext(logger: logger ?? BufferLogger.test()),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
           ),
         ).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
 
@@ -971,7 +965,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'token pass arguments through to pub',
       () async {
         Cache.flutterRoot = '';
@@ -991,8 +985,8 @@ flutter:
         );
         await createTestCommandRunner(
           PackagesCommand(
-            toolContext: FakeToolContext(logger: logger ?? BufferLogger.test()),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
           ),
         ).run(<String>['packages', '--verbose', 'pub', 'token', 'list']);
 
@@ -1014,7 +1008,7 @@ flutter:
       },
     );
 
-    testWithoutContext(
+    testUsingContext(
       'upgrade does not check for pubspec.yaml if -h/--help is passed',
       () async {
         Cache.flutterRoot = '';
@@ -1032,8 +1026,8 @@ flutter:
         );
         await createTestCommandRunner(
           PackagesCommand(
-            toolContext: FakeToolContext(logger: logger ?? BufferLogger.test()),
             buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+            toolContext: DelegatingToolContext(),
           ),
         ).run(<String>['pub', 'upgrade', '-h']);
 

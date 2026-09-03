@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
@@ -15,24 +16,11 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../../src/context.dart';
-import '../../src/fake_tool_context.dart';
+import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
-import '../../src/test_build_system.dart';
-import '../../src/test_flutter_command_runner.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import '../../src/fakes.dart';
-import '../../src/test_build_system.dart';
-import '../../src/test_flutter_command_runner.dart';
-import '../../src/fake_tool_context.dart';
-import '../../src/fakes.dart';
-import '../../src/test_build_system.dart';
-import '../../src/test_flutter_command_runner.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import '../../src/fakes.dart';
-import '../../src/test_flutter_command_runner.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
 import '../../src/package_config.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 const minimalV2EmbeddingManifest = r'''
@@ -62,10 +50,32 @@ void main() {
     Cache.enableLocking();
   });
 
-  testWithoutContext('pub shows help', () async {
-    final command = PackagesCommand(
-      toolContext: FakeToolContext(),
+  PackagesGetCommand createPackagesGetCommand(
+    String commandName,
+    String description,
+    PubContext context,
+  ) {
+    final toolContext = FakeToolContext(
+      fs: fileSystem,
+      logger: logger,
+      processManager: FakeProcessManager.any(),
+    );
+    return PackagesGetCommand(
+      commandName,
+      description,
+      context,
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      toolContext: toolContext,
+      pub: pub,
+    );
+  }
+
+  testWithoutContext('pub shows help', () async {
+    final toolContext = FakeToolContext(fs: fileSystem, logger: logger);
+    final command = PackagesCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      toolContext: toolContext,
+      pub: pub,
     );
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['pub']);
@@ -89,13 +99,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-      final command = PackagesGetCommand(
-        'get',
-        '',
-        PubContext.pubGet,
-        toolContext: FakeToolContext(fs: fileSystem, processManager: FakeProcessManager.any()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      );
+      final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['get']);
@@ -126,13 +130,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-      final command = PackagesGetCommand(
-        'get',
-        '',
-        PubContext.pubGet,
-        toolContext: FakeToolContext(fs: fileSystem, processManager: FakeProcessManager.any()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      );
+      final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['get']);
@@ -155,17 +153,11 @@ void main() {
     final Directory targetDirectory = fileSystem.currentDirectory.childDirectory('target');
     targetDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
 
-    final command = PackagesGetCommand(
-      'get',
-      '',
-      PubContext.pubGet,
-      toolContext: FakeToolContext(fs: fileSystem, processManager: FakeProcessManager.any()),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-    );
+    final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
     await commandRunner.run(<String>['get', '--directory=${targetDirectory.path}']);
-    final FlutterProject rootProject = FlutterProject.fromDirectory(targetDirectory);
+    final FlutterProject rootProject = FlutterProject.fromDirectoryTest(targetDirectory, logger);
     final File packageConfigFile = rootProject.dartTool.childFile('package_config.json');
 
     expect(packageConfigFile.existsSync(), true);
@@ -185,13 +177,7 @@ void main() {
   testWithoutContext("pub get doesn't treat unknown flag as directory", () async {
     fileSystem.currentDirectory.childDirectory('target').createSync();
     fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
-    final command = PackagesGetCommand(
-      'get',
-      '',
-      PubContext.pubGet,
-      toolContext: FakeToolContext(fs: fileSystem, processManager: FakeProcessManager.any()),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-    );
+    final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     pub.expectedArguments = <String>['get', '--unknown-flag', '--example', '--directory', '.'];
     await commandRunner.run(<String>['get', '--unknown-flag']);
@@ -200,13 +186,7 @@ void main() {
   testWithoutContext("pub get doesn't treat -v as directory", () async {
     fileSystem.currentDirectory.childDirectory('target').createSync();
     fileSystem.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
-    final command = PackagesGetCommand(
-      'get',
-      '',
-      PubContext.pubGet,
-      toolContext: FakeToolContext(fs: fileSystem, processManager: FakeProcessManager.any()),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-    );
+    final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     pub.expectedArguments = <String>['get', '-v', '--example', '--directory', '.'];
     await commandRunner.run(<String>['get', '-v']);
@@ -222,13 +202,7 @@ void main() {
       ..createSync(recursive: true)
       ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-    final command = PackagesGetCommand(
-      'add',
-      '',
-      PubContext.pubAdd,
-      toolContext: FakeToolContext(fs: fileSystem, processManager: FakeProcessManager.any()),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-    );
+    final PackagesGetCommand command = createPackagesGetCommand('add', '', PubContext.pubAdd);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
     const availableSyntax = <String>[
       'foo:{"path":"../foo"}',
@@ -251,13 +225,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(minimalV2EmbeddingManifest);
 
-      final command = PackagesGetCommand(
-        'get',
-        '',
-        PubContext.pubGet,
-        toolContext: FakeToolContext(fs: fileSystem, processManager: FakeProcessManager.any()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      );
+      final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
       final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
       await commandRunner.run(<String>['get']);
@@ -276,13 +244,7 @@ void main() {
   );
 
   testWithoutContext('pub get throws error on missing directory', () async {
-    final command = PackagesGetCommand(
-      'get',
-      '',
-      PubContext.pubGet,
-      toolContext: FakeToolContext(fs: fileSystem, processManager: FakeProcessManager.any()),
-      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-    );
+    final PackagesGetCommand command = createPackagesGetCommand('get', '', PubContext.pubGet);
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
     try {
@@ -308,6 +270,9 @@ class FakePub extends Fake implements Pub {
     bool touchesPackageConfig = false,
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
+    if (expectedArguments != null) {
+      expect(arguments, expectedArguments);
+    }
     if (project != null) {
       writePackageConfigFiles(directory: project.directory, mainLibName: 'my_app');
     }
