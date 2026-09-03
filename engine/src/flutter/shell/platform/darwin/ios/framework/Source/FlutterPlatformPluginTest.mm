@@ -5,6 +5,7 @@
 #import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
@@ -24,6 +25,7 @@ FLUTTER_ASSERT_ARC
 - (void)showShareViewController:(NSString*)content;
 - (void)playSystemSound:(NSString*)soundType;
 - (void)vibrateHapticFeedback:(NSString*)feedbackType;
+- (void)showTranslateViewControllerForTerm:(NSString*)term;
 @end
 
 @interface UIViewController ()
@@ -33,6 +35,74 @@ FLUTTER_ASSERT_ARC
 @end
 
 @implementation FlutterPlatformPluginTest
+
+- (void)testTranslateInvoked {
+  if (@available(iOS 17.4, *)) {
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+    [engine runWithEntrypoint:nil];
+
+    FlutterViewController* engineViewController =
+        [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+    FlutterViewController* mockEngineViewController = OCMPartialMock(engineViewController);
+
+    FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+
+    FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"Translate.invoke"
+                                                                      arguments:@"Test"];
+    __block BOOL resultCalled = NO;
+    [plugin handleMethodCall:methodCall
+                      result:^(id result) {
+                        resultCalled = YES;
+                      }];
+    XCTAssertTrue(resultCalled);
+    OCMVerify([mockEngineViewController
+        addChildViewController:[OCMArg isKindOfClass:[FlutterTranslateViewController class]]]);
+  }
+}
+
+- (void)testTranslateNotInvokedWhenUnavailable {
+  if (!@available(iOS 17.4, *)) {
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+    [engine runWithEntrypoint:nil];
+
+    FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+
+    FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"Translate.invoke"
+                                                                      arguments:@"Test"];
+    __block BOOL resultCalled = NO;
+    [plugin handleMethodCall:methodCall
+                      result:^(id result) {
+                        XCTAssertEqualObjects(result, FlutterMethodNotImplemented);
+                        resultCalled = YES;
+                      }];
+    XCTAssertTrue(resultCalled);
+  }
+}
+
+- (void)testTranslateInvokedWithEmptyTermDoesNotAddChildViewController {
+  if (@available(iOS 17.4, *)) {
+    FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+    [engine runWithEntrypoint:nil];
+
+    FlutterViewController* engineViewController =
+        [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+    FlutterViewController* mockEngineViewController = OCMPartialMock(engineViewController);
+
+    FlutterPlatformPlugin* plugin = [[FlutterPlatformPlugin alloc] initWithEngine:engine];
+
+    OCMReject([mockEngineViewController
+        addChildViewController:[OCMArg isKindOfClass:[FlutterTranslateViewController class]]]);
+
+    FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"Translate.invoke"
+                                                                      arguments:@""];
+    __block BOOL resultCalled = NO;
+    [plugin handleMethodCall:methodCall
+                      result:^(id result) {
+                        resultCalled = YES;
+                      }];
+    XCTAssertTrue(resultCalled);
+  }
+}
 
 - (void)testSearchWebInvokedWithEscapedTerm {
   id mockApplication = OCMClassMock([UIApplication class]);
