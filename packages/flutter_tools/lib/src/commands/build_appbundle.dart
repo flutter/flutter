@@ -11,7 +11,6 @@ import '../android/build_validation.dart';
 import '../android/deferred_components_prebuild_validator.dart';
 import '../android/deferred_components_validator.dart';
 import '../android/gradle_utils.dart';
-import '../base/context.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -28,7 +27,7 @@ import 'build.dart';
 
 class BuildAppBundleCommand extends BuildSubCommand {
   BuildAppBundleCommand({
-    required AndroidBuilder? androidBuilder,
+    required AndroidBuilder androidBuilder,
     required AndroidContext androidContext,
     required BuildSystem buildSystem,
     required ToolContext toolContext,
@@ -85,11 +84,11 @@ class BuildAppBundleCommand extends BuildSubCommand {
     );
   }
 
-  final AndroidBuilder? _androidBuilder;
+  final AndroidBuilder _androidBuilder;
   final AndroidContext _androidContext;
   final BuildSystem _buildSystem;
   @visibleForTesting
-  AndroidBuilder? get androidBuilder => _androidBuilder;
+  AndroidBuilder get androidBuilder => _androidBuilder;
 
   @visibleForTesting
   AndroidContext get androidContext => _androidContext;
@@ -154,7 +153,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(:Logger logger, :Platform platform, :Terminal terminal) = toolContext;
     if (androidSdk == null) {
-      exitWithNoSdkMessage(analytics: analytics, logger: logger);
+      exitWithNoSdkMessage(analytics: analytics, logger: toolContext.logger);
     }
     final androidBuildInfo = AndroidBuildInfo(
       await getBuildInfo(),
@@ -205,7 +204,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     validateBuild(androidBuildInfo);
     terminal.usesTerminalUi = true;
-    await (_androidBuilder ?? context.get<AndroidBuilder>())?.buildAab(
+    await _androidBuilder.buildAab(
       project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,

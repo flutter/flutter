@@ -9,7 +9,6 @@ import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/build_validation.dart';
 import '../android/gradle_utils.dart';
-import '../base/context.dart';
 import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
@@ -23,7 +22,7 @@ import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
   BuildApkCommand({
-    required AndroidBuilder? androidBuilder,
+    required AndroidBuilder androidBuilder,
     required AndroidContext androidContext,
     required BuildSystem buildSystem,
     required ToolContext toolContext,
@@ -72,11 +71,11 @@ class BuildApkCommand extends BuildSubCommand {
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
-  final AndroidBuilder? _androidBuilder;
+  final AndroidBuilder _androidBuilder;
   final AndroidContext _androidContext;
   final BuildSystem _buildSystem;
   @visibleForTesting
-  AndroidBuilder? get androidBuilder => _androidBuilder;
+  AndroidBuilder get androidBuilder => _androidBuilder;
 
   @visibleForTesting
   AndroidContext get androidContext => _androidContext;
@@ -153,7 +152,7 @@ class BuildApkCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(:Logger logger, :Terminal terminal) = toolContext;
     if (androidSdk == null) {
-      exitWithNoSdkMessage(analytics: analytics, logger: logger);
+      exitWithNoSdkMessage(analytics: analytics, logger: toolContext.logger);
     }
     final BuildInfo buildInfo = await getBuildInfo();
 
@@ -164,7 +163,7 @@ class BuildApkCommand extends BuildSubCommand {
     );
     validateBuild(androidBuildInfo);
     terminal.usesTerminalUi = true;
-    await (_androidBuilder ?? context.get<AndroidBuilder>())?.buildApk(
+    await _androidBuilder.buildApk(
       project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,

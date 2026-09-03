@@ -9,9 +9,7 @@ import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -24,7 +22,7 @@ import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({
-    required AndroidBuilder? androidBuilder,
+    required AndroidBuilder androidBuilder,
     required AndroidContext androidContext,
     required BuildSystem buildSystem,
     required ToolContext toolContext,
@@ -70,11 +68,11 @@ class BuildAarCommand extends BuildSubCommand {
     );
   }
 
-  final AndroidBuilder? _androidBuilder;
+  final AndroidBuilder _androidBuilder;
   final AndroidContext _androidContext;
   final BuildSystem _buildSystem;
   @visibleForTesting
-  AndroidBuilder? get androidBuilder => _androidBuilder;
+  AndroidBuilder get androidBuilder => _androidBuilder;
 
   @visibleForTesting
   AndroidContext get androidContext => _androidContext;
@@ -143,9 +141,8 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Logger logger) = toolContext;
     if (androidSdk == null) {
-      exitWithNoSdkMessage(analytics: analytics, logger: logger);
+      exitWithNoSdkMessage(analytics: analytics, logger: toolContext.logger);
     }
     final androidBuildInfo = <AndroidBuildInfo>{};
 
@@ -179,7 +176,7 @@ class BuildAarCommand extends BuildSubCommand {
       throwToolExit('Please specify a build mode and try again.');
     }
 
-    await (_androidBuilder ?? context.get<AndroidBuilder>())?.buildAar(
+    await _androidBuilder.buildAar(
       project: project,
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
@@ -219,6 +216,6 @@ class BuildAarCommand extends BuildSubCommand {
     if (projectRoot == null) {
       throwToolExit('${mainFile.parent.path} is not a valid flutter project');
     }
-    return FlutterProject.fromDirectory(_fileSystem.directory(projectRoot));
+    return toolContext.projectFactory.fromDirectory(_fileSystem.directory(projectRoot));
   }
 }

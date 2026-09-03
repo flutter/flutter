@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
+import '../android/gradle.dart';
 import '../artifacts.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
@@ -66,9 +67,17 @@ class BuildCommand extends FlutterCommand {
     ) = toolContext;
     final AppleContext(:PlistParser plistParser, :Xcode? xcode) = appleContext;
 
+    final AndroidBuilder effectiveAndroidBuilder =
+        androidBuilder ??
+        AndroidGradleBuilder(
+          toolContext: toolContext,
+          androidContext: androidContext,
+          analytics: analytics,
+        );
+
     _addSubcommand(
       BuildAarCommand(
-        androidBuilder: androidBuilder,
+        androidBuilder: effectiveAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -77,7 +86,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildApkCommand(
-        androidBuilder: androidBuilder,
+        androidBuilder: effectiveAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -86,7 +95,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildAppBundleCommand(
-        androidBuilder: androidBuilder,
+        androidBuilder: effectiveAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
