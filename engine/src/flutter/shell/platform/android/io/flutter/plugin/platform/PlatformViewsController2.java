@@ -438,6 +438,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     channelHandler.dispose(viewId);
   }
 
+  @VisibleForTesting
+  public FlutterMutatorView getPlatformViewParent(int viewId) {
+    return platformViewParent.get(viewId);
+  }
+
   /**
    * Initializes a platform view and adds it to the view hierarchy.
    *
@@ -866,6 +871,14 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
             return;
           }
           embeddedView.clearFocus();
+        }
+
+        @Override
+        public void onRejectGesture(int viewId) {
+          final FlutterMutatorView parentView = platformViewParent.get(viewId);
+          if (parentView != null) {
+            parentView.onFlutterWonGesture();
+          }
         }
 
         @Override

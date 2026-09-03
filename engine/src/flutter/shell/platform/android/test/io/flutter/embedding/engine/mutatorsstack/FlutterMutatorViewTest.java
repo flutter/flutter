@@ -238,6 +238,86 @@ public class FlutterMutatorViewTest {
     assertFalse(eventSent);
   }
 
+  @Test
+  @Config(
+      shadows = {
+        ShadowViewWithUnbufferedDispatch.class,
+      })
+  public void requestsUnbufferedDispatchOnMoveOnly_afterFlutterWonGesture() {
+    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
+    final FlutterMutatorView view = new FlutterMutatorView(ctx, 1.0f, touchProcessor);
+
+    ShadowViewWithUnbufferedDispatch.lastRequestedEvent = null;
+
+    // Before Flutter wins the arena: touches are buffered.
+    final MotionEvent downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    view.onTouchEvent(downEvent);
+    assertNull(ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
+
+    final MotionEvent moveEvent1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0);
+    view.onTouchEvent(moveEvent1);
+    assertNull(ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
+
+    // Flutter wins the gesture arena.
+    view.onFlutterWonGesture();
+    assertTrue(view.getFlutterWonGesture());
+
+    // Subsequent move events are unbuffered.
+    final MotionEvent moveEvent2 =
+        MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 10.0f, 10.0f, 0);
+    view.onTouchEvent(moveEvent2);
+    assertEquals(moveEvent2, ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
+
+    ShadowViewWithUnbufferedDispatch.lastRequestedEvent = null;
+
+    // Up event resets flutterWonGesture.
+    final MotionEvent upEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_UP, 10.0f, 10.0f, 0);
+    view.onTouchEvent(upEvent);
+    assertNull(ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
+    assertFalse(view.getFlutterWonGesture());
+
+    // Subsequent gesture starts buffered again.
+    final MotionEvent moveEvent3 =
+        MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 12.0f, 12.0f, 0);
+    view.onTouchEvent(moveEvent3);
+    assertNull(ShadowViewWithUnbufferedDispatch.lastRequestedEvent);
+  }
+
+  @Test
+  @Config(
+      shadows = {
+        ShadowViewWithUnbufferedDispatch.class,
+      })
+  public void resetsFlutterWonGestureOnCancelAndDown() {
+    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
+    final FlutterMutatorView view = new FlutterMutatorView(ctx, 1.0f, touchProcessor);
+
+    // Cancel resets flutterWonGesture.
+    view.onFlutterWonGesture();
+    assertTrue(view.getFlutterWonGesture());
+    final MotionEvent cancelEvent =
+        MotionEvent.obtain(0, 0, MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
+    view.onTouchEvent(cancelEvent);
+    assertFalse(view.getFlutterWonGesture());
+
+    // Down resets flutterWonGesture.
+    view.onFlutterWonGesture();
+    assertTrue(view.getFlutterWonGesture());
+    final MotionEvent downEvent = MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    view.onTouchEvent(downEvent);
+    assertFalse(view.getFlutterWonGesture());
+  }
+
+  @Implements(View.class)
+  public static class ShadowViewWithUnbufferedDispatch extends org.robolectric.shadows.ShadowView {
+    public static MotionEvent lastRequestedEvent;
+
+    @Implementation
+    protected void requestUnbufferedDispatch(MotionEvent event) {
+      lastRequestedEvent = event;
+    }
+  }
+
   @Implements(ViewGroup.class)
   public static class ShadowViewGroup extends org.robolectric.shadows.ShadowViewGroup {
     @Implementation

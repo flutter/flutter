@@ -631,6 +631,44 @@ void main() {
     expect(config.isSemanticBoundary, true);
     expect(config.platformViewId, 0);
   });
+
+  test('rejectGesture invokes rejectGesture on the controller', () {
+    final viewController = FakePlatformViewController(0);
+    final renderBox = PlatformViewRenderBox(
+      controller: viewController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
+      },
+    );
+    layout(renderBox);
+
+    expect(viewController.rejectGestureCount, 0);
+
+    // Compete in the arena: add a pointer down, then resolve the arena with rejection.
+    renderBox.handleEvent(
+      const PointerDownEvent(pointer: 1, position: Offset(10, 10)),
+      BoxHitTestEntry(renderBox, const Offset(10, 10)),
+    );
+
+    // Close and reject the gesture for this pointer by having another member win.
+    final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(
+      1,
+      _WinningGestureArenaMember(),
+    );
+    GestureBinding.instance.gestureArena.close(1);
+    entry.resolve(GestureDisposition.accepted);
+
+    expect(viewController.rejectGestureCount, 1);
+  });
+}
+
+class _WinningGestureArenaMember extends GestureArenaMember {
+  @override
+  void acceptGesture(int pointer) {}
+
+  @override
+  void rejectGesture(int pointer) {}
 }
 
 ui.PointerData _pointerData(

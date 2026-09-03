@@ -27,10 +27,13 @@ class FakePlatformViewController extends PlatformViewController {
     dispatchedPointerEvents.add(event);
   }
 
+  int rejectGestureCount = 0;
+
   void clearTestingVariables() {
     dispatchedPointerEvents.clear();
     disposed = false;
     focusCleared = false;
+    rejectGestureCount = 0;
   }
 
   @override
@@ -41,6 +44,11 @@ class FakePlatformViewController extends PlatformViewController {
   @override
   Future<void> clearFocus() async {
     focusCleared = true;
+  }
+
+  @override
+  Future<void> rejectGesture() async {
+    rejectGestureCount++;
   }
 }
 
@@ -158,6 +166,13 @@ class FakeAndroidViewController implements AndroidViewController {
 
   @override
   bool requiresViewComposition;
+
+  int rejectGestureCount = 0;
+
+  @override
+  Future<void> rejectGesture() async {
+    rejectGestureCount++;
+  }
 }
 
 class FakeAndroidPlatformViewsController {

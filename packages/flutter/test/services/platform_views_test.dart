@@ -656,4 +656,30 @@ void main() {
       'motionEventId: 0)',
     );
   });
+
+  test(
+    'HybridAndroidViewController.rejectGesture invokes rejectGesture on platform_views_2',
+    () async {
+      final calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform_views_2,
+        (MethodCall call) async {
+          calls.add(call);
+          return null;
+        },
+      );
+
+      final HybridAndroidViewController controller = PlatformViewsService.initHybridAndroidView(
+        id: 42,
+        viewType: 'test_view',
+        layoutDirection: TextDirection.ltr,
+      );
+
+      await controller.rejectGesture();
+
+      expect(calls, hasLength(1));
+      expect(calls.first.method, 'rejectGesture');
+      expect(calls.first.arguments, <String, dynamic>{'id': 42});
+    },
+  );
 }

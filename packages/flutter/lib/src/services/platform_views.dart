@@ -1045,6 +1045,9 @@ abstract class AndroidViewController extends PlatformViewController {
       await _sendDisposeMessage();
     }
   }
+
+  @override
+  Future<void> rejectGesture() async {}
 }
 
 /// Controls an Android view that is composed using a GL texture.
@@ -1237,6 +1240,11 @@ class HybridAndroidViewController extends AndroidViewController {
   Future<void> sendMotionEvent(AndroidMotionEvent event) async {
     await SystemChannels.platform_views_2.invokeMethod<dynamic>('touch', event._asList(viewId));
   }
+
+  @override
+  Future<void> rejectGesture() {
+    return _internals.rejectGesture(viewId: viewId);
+  }
 }
 
 /// Controls an Android view that is rendered as a texture.
@@ -1316,6 +1324,11 @@ class TextureAndroidViewController extends AndroidViewController {
     }
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
+
+  @override
+  Future<void> rejectGesture() {
+    return _internals.rejectGesture(viewId: viewId);
+  }
 }
 
 // The base class for an implementation of AndroidViewController.
@@ -1374,6 +1387,8 @@ abstract class _AndroidViewControllerInternals {
   });
 
   Future<void> sendDisposeMessage({required int viewId});
+
+  Future<void> rejectGesture({required int viewId}) => Future<void>.value();
 }
 
 // An AndroidViewController implementation for views whose contents are
@@ -1526,6 +1541,13 @@ class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInter
     return SystemChannels.platform_views_2.invokeMethod<void>('dispose', <String, dynamic>{
       'id': viewId,
       'hybrid': true,
+    });
+  }
+
+  @override
+  Future<void> rejectGesture({required int viewId}) {
+    return SystemChannels.platform_views_2.invokeMethod<void>('rejectGesture', <String, dynamic>{
+      'id': viewId,
     });
   }
 }
@@ -1716,4 +1738,10 @@ abstract class PlatformViewController {
 
   /// Clears the view's focus on the platform side.
   Future<void> clearFocus();
+
+  /// Rejects an active gesture sequence for this platform view.
+  ///
+  /// This is called when Flutter wins the gesture arena for a touch sequence that
+  /// started on this platform view.
+  Future<void> rejectGesture() async {}
 }

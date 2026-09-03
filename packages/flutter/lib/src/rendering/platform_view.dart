@@ -5,6 +5,7 @@
 /// @docImport 'package:flutter/widgets.dart';
 library;
 
+import 'dart:async';
 import 'dart:ui' as ui show SemanticsHitTestBehavior;
 
 import 'package:flutter/foundation.dart';
@@ -582,8 +583,9 @@ typedef _HandlePointerEvent = Future<void> Function(PointerEvent event);
 class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   _PlatformViewGestureRecognizer(
     _HandlePointerEvent handlePointerEvent,
-    this.gestureRecognizerFactories,
-  ) {
+    this.gestureRecognizerFactories, {
+    this.onRejectGesture,
+  }) {
     team = GestureArenaTeam()..captain = this;
     _gestureRecognizers = gestureRecognizerFactories.map((
       Factory<OneSequenceGestureRecognizer> recognizerFactory,
@@ -604,6 +606,8 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
     }).toSet();
     _handlePointerEvent = handlePointerEvent;
   }
+
+  final VoidCallback? onRejectGesture;
 
   late _HandlePointerEvent _handlePointerEvent;
 
@@ -657,6 +661,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   void rejectGesture(int pointer) {
     stopTrackingPointer(pointer);
     cachedEvents.remove(pointer);
+    onRejectGesture?.call();
   }
 
   void _cacheEvent(PointerEvent event) {
@@ -737,7 +742,13 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
-    _updateGestureRecognizersWithCallBack(gestureRecognizers, _controller.dispatchPointerEvent);
+    _updateGestureRecognizersWithCallBack(
+      gestureRecognizers,
+      _controller.dispatchPointerEvent,
+      onRejectGesture: () {
+        unawaited(_controller.rejectGesture());
+      },
+    );
   }
 
   @override
@@ -794,8 +805,9 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
   /// set of gesture recognizers is changed.
   void _updateGestureRecognizersWithCallBack(
     Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-    _HandlePointerEvent handlePointerEvent,
-  ) {
+    _HandlePointerEvent handlePointerEvent, {
+    VoidCallback? onRejectGesture,
+  }) {
     assert(
       _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
       'There were multiple gesture recognizer factories for the same type, there must only be a single '
@@ -808,7 +820,11 @@ mixin _PlatformViewGestureMixin on RenderBox implements MouseTrackerAnnotation {
       return;
     }
     _gestureRecognizer?.dispose();
-    _gestureRecognizer = _PlatformViewGestureRecognizer(handlePointerEvent, gestureRecognizers);
+    _gestureRecognizer = _PlatformViewGestureRecognizer(
+      handlePointerEvent,
+      gestureRecognizers,
+      onRejectGesture: onRejectGesture,
+    );
     _handlePointerEvent = handlePointerEvent;
   }
 
