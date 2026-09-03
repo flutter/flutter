@@ -30,10 +30,10 @@ final linux = FakePlatform();
 void main() {
   testWithoutContext('default configuration', () async {
     final device = MacOSDevice(
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
       processManager: FakeProcessManager.any(),
+      logger: BufferLogger.test(),
+      fileSystem: MemoryFileSystem.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final package = FakeMacOSApp();
 
@@ -55,8 +55,6 @@ void main() {
     final completer = Completer<void>();
     final device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['release/executable'],
@@ -65,6 +63,8 @@ void main() {
           completer: completer,
         ),
       ]),
+      logger: BufferLogger.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final package = FakeMacOSApp();
 
@@ -86,14 +86,14 @@ void main() {
     expect(
       await MacOSDevices(
         fileSystem: MemoryFileSystem.test(),
+        processManager: FakeProcessManager.any(),
         logger: BufferLogger.test(),
+        platform: linux,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
         macOSWorkflow: MacOSWorkflow(
           featureFlags: TestFeatureFlags(isMacOSEnabled: true),
           platform: linux,
         ),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        platform: linux,
-        processManager: FakeProcessManager.any(),
       ).devices(),
       isEmpty,
     );
@@ -104,11 +104,11 @@ void main() {
     () async {
       final macOSDevices = MacOSDevices(
         fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
-        macOSWorkflow: MacOSWorkflow(featureFlags: TestFeatureFlags(), platform: macOS),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        platform: macOS,
         processManager: FakeProcessManager.any(),
+        logger: BufferLogger.test(),
+        platform: macOS,
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+        macOSWorkflow: MacOSWorkflow(featureFlags: TestFeatureFlags(), platform: macOS),
       );
 
       expect(await macOSDevices.devices(), isEmpty);
@@ -118,14 +118,14 @@ void main() {
   testWithoutContext('devices listed if platform is supported and feature is enabled', () async {
     final macOSDevices = MacOSDevices(
       fileSystem: MemoryFileSystem.test(),
+      processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
+      platform: macOS,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
-      platform: macOS,
-      processManager: FakeProcessManager.any(),
     );
 
     expect(await macOSDevices.devices(), hasLength(1));
@@ -134,14 +134,14 @@ void main() {
   testWithoutContext('has a well known device id macos', () async {
     final macOSDevices = MacOSDevices(
       fileSystem: MemoryFileSystem.test(),
+      processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
+      platform: macOS,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
-      platform: macOS,
-      processManager: FakeProcessManager.any(),
     );
 
     expect(macOSDevices.wellKnownIds, <String>['macos']);
@@ -150,14 +150,14 @@ void main() {
   testWithoutContext('can discover devices with a provided timeout', () async {
     final macOSDevices = MacOSDevices(
       fileSystem: MemoryFileSystem.test(),
+      processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
+      platform: macOS,
+      operatingSystemUtils: FakeOperatingSystemUtils(),
       macOSWorkflow: MacOSWorkflow(
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
-      platform: macOS,
-      processManager: FakeProcessManager.any(),
     );
 
     // Timeout ignored.
@@ -173,8 +173,8 @@ void main() {
     final device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
       processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
     fileSystem.file('pubspec.yaml').createSync();
@@ -190,8 +190,8 @@ void main() {
     final device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      operatingSystemUtils: fakeOperatingSystemUtils,
       processManager: FakeProcessManager.any(),
+      operatingSystemUtils: fakeOperatingSystemUtils,
     );
 
     expect(await device.targetPlatformDisplayName, 'darwin-x64');
@@ -203,8 +203,8 @@ void main() {
     final device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      operatingSystemUtils: fakeOperatingSystemUtils,
       processManager: FakeProcessManager.any(),
+      operatingSystemUtils: fakeOperatingSystemUtils,
     );
 
     expect(await device.targetPlatformDisplayName, 'darwin-arm64');
@@ -215,8 +215,8 @@ void main() {
     final device = MacOSDevice(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
       processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
@@ -229,8 +229,8 @@ void main() {
     final device = MacOSDevice(
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
       processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     const debugPath = 'debug/executable';
     const profilePath = 'profile/executable';

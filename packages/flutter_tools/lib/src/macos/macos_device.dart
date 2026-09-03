@@ -26,20 +26,20 @@ import 'macos_workflow.dart';
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({
-    required super.fileSystem,
-    required super.logger,
-    required super.operatingSystemUtils,
     required super.processManager,
-  }) : _fileSystem = fileSystem,
+    required super.logger,
+    required super.fileSystem,
+    required super.operatingSystemUtils,
+  }) : _processManager = processManager,
        _logger = logger,
+       _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
-       _processManager = processManager,
-       super('macos', ephemeral: false, platformType: PlatformType.macos);
+       super('macos', platformType: PlatformType.macos, ephemeral: false);
 
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final OperatingSystemUtils _operatingSystemUtils;
   final ProcessManager _processManager;
+  final Logger _logger;
+  final FileSystem _fileSystem;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   Future<bool> isSupported() async => true;
@@ -85,11 +85,9 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) =>
-      switch (package) {
-        final MacOSApp macosApp => macosApp.executable(buildInfo),
-        _ => null,
-      };
+  String? executablePathForDevice(covariant MacOSApp package, BuildInfo buildInfo) {
+    return package.executable(buildInfo);
+  }
 
   /// Converts engine switches from environment variables into CLI arguments.
   ///
@@ -350,30 +348,48 @@ class MacOSDevice extends DesktopDevice {
     // pkill returns 0 on success (processes matched and killed) or 1 if no matching processes were found.
     return result.exitCode == 0 || result.exitCode == 1;
   }
+
+  @override
+  void onAttached(covariant MacOSApp package, BuildInfo buildInfo, Process process) {
+    // Bring app to foreground. Ideally this would be done post-launch rather
+    // than post-attach, since this won't run for release builds, but there's
+    // no general-purpose way of knowing when a process is far enough along in
+    // the launch process for 'open' to foreground it.
+    final String? applicationBundle = package.applicationBundle(buildInfo);
+    if (applicationBundle == null) {
+      _logger.printError('Failed to foreground app; application bundle not found');
+      return;
+    }
+    _processManager.run(<String>['open', applicationBundle]).then((ProcessResult result) {
+      if (result.exitCode != 0) {
+        _logger.printError('Failed to foreground app; open returned ${result.exitCode}');
+      }
+    });
+  }
 }
 
 class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required MacOSWorkflow macOSWorkflow,
-    required OperatingSystemUtils operatingSystemUtils,
     required Platform platform,
+    required MacOSWorkflow macOSWorkflow,
     required ProcessManager processManager,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _macOSWorkflow = macOSWorkflow,
-       _operatingSystemUtils = operatingSystemUtils,
+    required Logger logger,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+  }) : _logger = logger,
        _platform = platform,
+       _macOSWorkflow = macOSWorkflow,
        _processManager = processManager,
+       _fileSystem = fileSystem,
+       _operatingSystemUtils = operatingSystemUtils,
        super('macOS devices');
 
-  final FileSystem _fileSystem;
-  final Logger _logger;
   final MacOSWorkflow _macOSWorkflow;
-  final OperatingSystemUtils _operatingSystemUtils;
   final Platform _platform;
   final ProcessManager _processManager;
+  final Logger _logger;
+  final FileSystem _fileSystem;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -383,18 +399,18 @@ class MacOSDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> pollingGetDevices({
-    bool forWirelessDiscovery = false,
     Duration? timeout,
+    bool forWirelessDiscovery = false,
   }) async {
     if (!canListAnything) {
       return const <Device>[];
     }
     return <Device>[
       MacOSDevice(
-        fileSystem: _fileSystem,
-        logger: _logger,
-        operatingSystemUtils: _operatingSystemUtils,
         processManager: _processManager,
+        logger: _logger,
+        fileSystem: _fileSystem,
+        operatingSystemUtils: _operatingSystemUtils,
       ),
     ];
   }
