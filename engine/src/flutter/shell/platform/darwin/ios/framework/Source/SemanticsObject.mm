@@ -331,15 +331,7 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (void)setChildrenInHitTestOrder:(NSArray<SemanticsObject*>*)childrenInHitTestOrder {
-  for (SemanticsObject* child in _childrenInHitTestOrder) {
-    if (child.parent == self) {
-      child.parent = nil;
-    }
-  }
   _childrenInHitTestOrder = [childrenInHitTestOrder copy];
-  for (SemanticsObject* child in _childrenInHitTestOrder) {
-    child.parent = self;
-  }
 }
 
 - (BOOL)hasChildren {
