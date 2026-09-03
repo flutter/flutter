@@ -21,14 +21,6 @@ class MockEpoxy {
   MOCK_METHOD(bool, epoxy_has_gl_extension, (const char* extension));
   MOCK_METHOD(bool, epoxy_is_desktop_gl, ());
   MOCK_METHOD(int, epoxy_gl_version, ());
-  MOCK_METHOD(void,
-              eglCreateImageKHR,
-              (EGLDisplay dpy,
-               EGLContext ctx,
-               EGLenum target,
-               EGLClientBuffer buffer,
-               const EGLint* attrib_list));
-  MOCK_METHOD(EGLBoolean, eglDestroyImageKHR, (EGLDisplay dpy, EGLImage image));
   MOCK_METHOD(void, glClearColor, (GLfloat r, GLfloat g, GLfloat b, GLfloat a));
   MOCK_METHOD(void,
               glBlitFramebuffer,
@@ -49,6 +41,7 @@ class MockEpoxy {
               glDeleteRenderbuffers,
               (GLsizei n, const GLuint* renderbuffers));
   MOCK_METHOD(void, glDeleteTextures, (GLsizei n, const GLuint* textures));
+  MOCK_METHOD(void, glFinish, ());
   MOCK_METHOD(void, glGenFramebuffers, (GLsizei n, GLuint* framebuffers));
   MOCK_METHOD(void, glGenRenderbuffers, (GLsizei n, GLuint* renderbuffers));
   MOCK_METHOD(void, glGenTextures, (GLsizei n, GLuint* textures));
@@ -75,6 +68,15 @@ class MockEpoxy {
                GLsizei samples));
   MOCK_METHOD(void, glGetIntegerv, (GLenum pname, GLint* data));
   MOCK_METHOD(const GLubyte*, glGetString, (GLenum pname));
+  MOCK_METHOD(void,
+              glReadPixels,
+              (GLint x,
+               GLint y,
+               GLsizei width,
+               GLsizei height,
+               GLenum format,
+               GLenum type,
+               void* pixels));
   MOCK_METHOD(
       void,
       glRenderbufferStorage,

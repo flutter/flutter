@@ -989,6 +989,52 @@ public class FlutterRendererTest {
   }
 
   @Test
+  public void itDoesNotScheduleFramesOnADetachedFlutterJNI() {
+    // Setup the test.
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+
+    // While attached the frame request is forwarded.
+    flutterRenderer.scheduleEngineFrame();
+    verify(fakeFlutterJNI, times(1)).scheduleFrame();
+
+    // Execute the behavior under test.
+    engineRule.setJniIsAttached(false);
+    flutterRenderer.scheduleEngineFrame();
+
+    // Verify the behavior under test: still only the call made while attached.
+    verify(fakeFlutterJNI, times(1)).scheduleFrame();
+  }
+
+  @Test
+  public void ImageReaderSurfaceProducerDoesNotScheduleFrameWhenDetached() throws Exception {
+    // Regression test for https://github.com/flutter/flutter/issues/188300.
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    FlutterRenderer.ImageReaderSurfaceProducer texture =
+        (FlutterRenderer.ImageReaderSurfaceProducer) producer;
+    texture.disableFenceForTest();
+    texture.setSize(1, 1);
+
+    // The engine detaches, e.g. because the Activity was destroyed, while this producer still has
+    // a frame in flight.
+    engineRule.setJniIsAttached(false);
+
+    // Render a frame. The ImageReader callback is delivered on the platform thread and reaches
+    // scheduleEngineFrame after the detach.
+    Surface surface = texture.getSurface();
+    assertNotNull(surface);
+    Canvas canvas = surface.lockHardwareCanvas();
+    canvas.drawARGB(255, 255, 0, 0);
+    surface.unlockCanvasAndPost(canvas);
+    shadowOf(Looper.getMainLooper()).idle();
+
+    // The image still reaches scheduleEngineFrame, ...
+    verify(flutterRenderer, times(1)).scheduleEngineFrame();
+    // ... but it must not be forwarded to the detached FlutterJNI, which would throw.
+    verify(fakeFlutterJNI, never()).scheduleFrame();
+  }
+
+  @Test
   public void getSurface_doesNotReturnInvalidSurface() {
     FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
