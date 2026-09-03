@@ -2171,6 +2171,54 @@ void main() {
     );
     expect(tester.getSize(find.byType(ReorderableDelayedDragStartListener)), Size.zero);
   });
+
+  testWidgets('SliverReorderableList does not crash when the drop target is not laid out', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/87093
+    const itemHeights = <double>[100, 2000];
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: CustomScrollView(
+          controller: scrollController,
+          cacheExtent: 0,
+          slivers: <Widget>[
+            SliverReorderableList(
+              itemBuilder: (BuildContext context, int index) {
+                return ReorderableDragStartListener(
+                  key: ValueKey<int>(index),
+                  index: index,
+                  child: SizedBox(height: itemHeights[index], child: Text('item $index')),
+                );
+              },
+              itemCount: itemHeights.length,
+              onReorderItem: (_, _) {},
+              autoScrollerVelocityScalar: 50,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final TestGesture drag = await tester.startGesture(tester.getCenter(find.text('item 0')));
+    await tester.pump(kLongPressTimeout);
+
+    // Drag the first item down to the bottom edge so the auto scroller kicks
+    // in and scrolls the first item out of the (zero extent) cache area.
+    await drag.moveBy(const Offset(0, 560));
+    for (var i = 0; i < 20; i += 1) {
+      await tester.pump(const Duration(milliseconds: 51));
+      await tester.idle();
+    }
+    expect(scrollController.offset, greaterThan(itemHeights[0]));
+
+    await drag.up();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }
 
 class TestList extends StatelessWidget {
