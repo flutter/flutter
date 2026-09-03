@@ -81,7 +81,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       )
       ..addFlag(
         'cocoapods',
-        help: 'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
+        help:
+            'Produce a Flutter.podspec instead of an engine Flutter.xcframework (recommended if host app uses CocoaPods).',
       )
       ..addFlag(
         'plugins',
@@ -92,7 +93,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       )
       ..addFlag(
         'static',
-        help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
+        help:
+            'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
       )
       ..addOption(
         'output',
@@ -103,7 +105,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       ..addFlag(
         'force',
         abbr: 'f',
-        help: 'Force Flutter.podspec creation on the master channel. This is only intended for testing the tool itself.',
+        help:
+            'Force Flutter.podspec creation on the master channel. This is only intended for testing the tool itself.',
         hide: !verboseHelp,
       );
   }
@@ -793,13 +796,17 @@ end
     Directory simulatorBuildOutput,
     String? codesignIdentity,
   ) async {
-    final Artifacts artifacts = _toolContext.artifacts;
-    final Cache cache = _toolContext.cache;
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final Platform platform = _toolContext.platform;
-    final ProcessManager processManager = _toolContext.processManager;
-    final Xcode xcode = _appleContext.xcode;
+    // ignore: omit_obvious_local_variable_types
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = _toolContext;
+    // ignore: omit_obvious_local_variable_types
+    final AppleContext(:Xcode xcode) = _appleContext;
 
     const appFrameworkName = 'App.framework';
     final Status status = logger.startProgress(' ├─Building App.xcframework...');
