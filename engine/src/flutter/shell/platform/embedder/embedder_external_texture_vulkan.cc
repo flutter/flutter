@@ -129,9 +129,6 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureSkia(
   VkFormat vk_format = static_cast<VkFormat>(texture->format);
   bool is_yuv = IsYuvFormat(vk_format);
 
-  // Set fAlloc.fMemory from texture->image_memory. Without this, Skia's
-  // GrVkImage has a null memory handle, which can cause issues during
-  // texture creation and lifecycle management.
   GrVkImageInfo image_info = {
       .fImage = reinterpret_cast<VkImage>(texture->image),
       .fImageTiling = VK_IMAGE_TILING_OPTIMAL,

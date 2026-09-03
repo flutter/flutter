@@ -35,8 +35,6 @@ EmbedderExternalTextureSourceVulkan::EmbedderExternalTextureSourceVulkan(
   const auto& device = context.GetDevice();
   texture_image_ =
       impeller::vk::Image(reinterpret_cast<VkImage>(embedder_desc->image));
-  texture_device_memory_ = impeller::vk::DeviceMemory(
-      reinterpret_cast<VkDeviceMemory>(embedder_desc->image_memory));
   destruction_callback_ = embedder_desc->destruction_callback;
   user_data_ = embedder_desc->user_data;
 
