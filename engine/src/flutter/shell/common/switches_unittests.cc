@@ -122,6 +122,40 @@ TEST(SwitchesTest, NoEnableImpeller) {
   }
 }
 
+TEST(SwitchesTest, NoEnableHcppAndSurfaceControl) {
+  {
+    // enable with value
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-hcpp-and-surface-control=true"});
+    EXPECT_TRUE(command_line.HasOption("enable-hcpp-and-surface-control"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_surface_control, true);
+  }
+  {
+    // enable without value
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-hcpp-and-surface-control"});
+    EXPECT_TRUE(command_line.HasOption("enable-hcpp-and-surface-control"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_surface_control, true);
+  }
+  {
+    // disable
+    fml::CommandLine command_line = fml::CommandLineFromInitializerList(
+        {"command", "--enable-hcpp-and-surface-control=false"});
+    EXPECT_TRUE(command_line.HasOption("enable-hcpp-and-surface-control"));
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_surface_control, false);
+  }
+  {
+    // default (absent)
+    fml::CommandLine command_line =
+        fml::CommandLineFromInitializerList({"command"});
+    Settings settings = SettingsFromCommandLine(command_line);
+    EXPECT_EQ(settings.enable_surface_control, false);
+  }
+}
+
 TEST(SwitchesTest, ProfileStartup) {
   {
     fml::CommandLine command_line =
