@@ -136,12 +136,7 @@ sk_sp<DlImage> EmbedderExternalTextureVulkan::ResolveTextureSkia(
   GrVkImageInfo image_info = {
       .fImage = reinterpret_cast<VkImage>(texture->image),
       .fImageTiling = VK_IMAGE_TILING_OPTIMAL,
-      // The embedder has already transitioned the image to
-      // SHADER_READ_ONLY_OPTIMAL.  Reporting UNDEFINED here would cause Skia
-      // to issue a spurious UNDEFINED -> SHADER_READ_ONLY_OPTIMAL barrier that
-      // discards the image contents.
-      .fImageLayout = is_yuv ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-                             : VK_IMAGE_LAYOUT_UNDEFINED,
+      .fImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
       .fFormat = vk_format,
       .fImageUsageFlags = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
                           VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
