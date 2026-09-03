@@ -136,6 +136,11 @@ class StandardCapabilities final : public Capabilities {
   }
 
   // |Capabilities|
+  size_t GetMaxPushConstantSize() const override {
+    return max_push_constant_size_;
+  }
+
+  // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override {
     return needs_partitioned_host_buffer_;
   }
@@ -159,6 +164,7 @@ class StandardCapabilities final : public Capabilities {
                        ISize default_maximum_render_pass_attachment_size,
                        uint32_t max_sampler_anisotropy,
                        size_t minimum_uniform_alignment,
+                       size_t max_push_constant_size,
                        bool needs_partitioned_host_buffer,
                        bool supports_texture_compression_bc,
                        bool supports_texture_compression_etc2,
@@ -185,6 +191,7 @@ class StandardCapabilities final : public Capabilities {
             default_maximum_render_pass_attachment_size),
         max_sampler_anisotropy_(max_sampler_anisotropy),
         minimum_uniform_alignment_(minimum_uniform_alignment),
+        max_push_constant_size_(max_push_constant_size),
         supports_texture_compression_bc_(supports_texture_compression_bc),
         supports_texture_compression_etc2_(supports_texture_compression_etc2),
         supports_texture_compression_astc_(supports_texture_compression_astc),
@@ -212,6 +219,7 @@ class StandardCapabilities final : public Capabilities {
   ISize default_maximum_render_pass_attachment_size_ = ISize(1, 1);
   uint32_t max_sampler_anisotropy_ = 1;
   size_t minimum_uniform_alignment_ = 256;
+  size_t max_push_constant_size_ = 0u;
   bool supports_texture_compression_bc_ = false;
   bool supports_texture_compression_etc2_ = false;
   bool supports_texture_compression_astc_ = false;
@@ -350,6 +358,11 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetMinimumUniformAlignment(
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetMaxPushConstantSize(size_t value) {
+  max_push_constant_size_ = value;
+  return *this;
+}
+
 CapabilitiesBuilder& CapabilitiesBuilder::SetNeedsPartitionedHostBuffer(
     bool value) {
   needs_partitioned_host_buffer_ = value;
@@ -377,6 +390,7 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       default_maximum_render_pass_attachment_size_.value_or(ISize{1, 1}),  //
       max_sampler_anisotropy_,                                             //
       minimum_uniform_alignment_,                                          //
+      max_push_constant_size_,                                             //
       needs_partitioned_host_buffer_,                                      //
       supports_texture_compression_bc_,                                    //
       supports_texture_compression_etc2_,                                  //

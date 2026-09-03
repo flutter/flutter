@@ -55,6 +55,15 @@ struct PassBindingsCacheMTL {
                  uint64_t offset,
                  id<MTLBuffer> buffer);
 
+  /// @brief Set inline bytes for the given shader stage and binding.
+  ///
+  /// The driver owns the copy, so there is nothing to compare against and the
+  /// call is always made. Any buffer cached at this index is forgotten.
+  bool SetBytes(ShaderStage stage,
+                uint64_t index,
+                const void* bytes,
+                size_t length);
+
   /// @brief Set the texture for the given stage and binding.
   ///
   /// If the same texture is already bound at the index for this stage, no

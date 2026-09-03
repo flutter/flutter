@@ -11,6 +11,15 @@
 
 namespace impeller {
 
+/// @brief The push constant size reported by backends with no hardware ceiling
+///        worth reporting.
+///
+///        Metal copies anything up to 4 KB inline before it allocates a buffer
+///        anyway, and OpenGL ES lowers the block to plain uniforms bounded by
+///        the stage's uniform budget. Vulkan reports the device's own
+///        `maxPushConstantsSize` instead, whose guaranteed floor is 128 bytes.
+inline constexpr size_t kDefaultMaxPushConstantSize = 4096u;
+
 class Capabilities {
  public:
   virtual ~Capabilities();
@@ -157,6 +166,14 @@ class Capabilities {
   /// @brief The minimum alignment of uniform value offsets in bytes.
   virtual size_t GetMinimumUniformAlignment() const = 0;
 
+  /// @brief The maximum size in bytes of the push constant block a single
+  ///        shader stage can read.
+  ///
+  ///        Zero means the backend has no push constant path at all. The
+  ///        portable floor is small and varies by backend, so callers check
+  ///        this rather than assume a constant.
+  virtual size_t GetMaxPushConstantSize() const = 0;
+
   /// @brief The minimum alignment of storage buffer value offsets in bytes.
   virtual size_t GetMinimumStorageBufferAlignment() const;
 
@@ -218,6 +235,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetMinimumUniformAlignment(size_t value);
 
+  CapabilitiesBuilder& SetMaxPushConstantSize(size_t value);
+
   CapabilitiesBuilder& SetNeedsPartitionedHostBuffer(bool value);
 
   std::unique_ptr<Capabilities> Build();
@@ -247,6 +266,7 @@ class CapabilitiesBuilder {
       std::nullopt;
   uint32_t max_sampler_anisotropy_ = 1;
   size_t minimum_uniform_alignment_ = 256;
+  size_t max_push_constant_size_ = 0u;
 
   CapabilitiesBuilder(const CapabilitiesBuilder&) = delete;
 

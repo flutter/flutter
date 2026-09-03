@@ -153,6 +153,8 @@ test_fixtures("file_fixtures") {
     "embarcadero.jpg",
     "flutter_gpu_instanced.frag",
     "flutter_gpu_instanced.vert",
+    "flutter_gpu_push_constants.frag",
+    "flutter_gpu_push_constants.vert",
     "flutter_gpu_texture.frag",
     "flutter_gpu_texture.vert",
     "flutter_gpu_unlit.frag",
@@ -212,10 +214,12 @@ impellerc("flutter_gpu_shaders") {
     "flutter_gpu_unlit.vert",
     "flutter_gpu_texture.frag",
     "flutter_gpu_texture.vert",
+    "flutter_gpu_push_constants.frag",
+    "flutter_gpu_push_constants.vert",
   ]
 
   fixtures = rebase_path("//flutter/impeller/fixtures")
-  shader_bundle = "{\"InstancedFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_instanced.frag\"}, \"InstancedVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_instanced.vert\"}, \"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_texture.vert\"}}"
+  shader_bundle = "{\"InstancedFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_instanced.frag\"}, \"InstancedVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_instanced.vert\"}, \"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_texture.vert\"}, \"PushConstantsFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_push_constants.frag\"}, \"PushConstantsVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_push_constants.vert\"}}"
   shader_bundle_output = "playground.shaderbundle"
 }
 

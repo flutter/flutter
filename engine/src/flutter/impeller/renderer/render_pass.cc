@@ -205,15 +205,44 @@ bool RenderPass::ValidateIndexBuffer(const BufferView& index_buffer,
   return true;
 }
 
+bool RenderPass::SetPushConstants(ShaderStage stage,
+                                  const ShaderPushConstantSlot& slot,
+                                  const ShaderMetadata* metadata,
+                                  const uint8_t* data,
+                                  size_t length) {
+  if (data == nullptr || length < slot.size_in_bytes) {
+    VALIDATION_LOG << "Push constant data is smaller than the block declared "
+                      "by the shader.";
+    return false;
+  }
+  if (!push_constants_start_.has_value()) {
+    push_constants_start_ = push_constants_.size();
+  }
+
+  Range range = {push_constant_data_.size(), slot.size_in_bytes};
+  push_constant_data_.insert(push_constant_data_.end(), data,
+                             data + slot.size_in_bytes);
+  push_constants_.push_back(PushConstantBinding{
+      .slot = slot,
+      .stage = stage,
+      .metadata = metadata ? *metadata : ShaderMetadata{},
+      .data = range,
+  });
+  pending_.push_constants.length++;
+  return true;
+}
+
 fml::Status RenderPass::Draw() {
   pending_.bound_buffers.offset = bound_buffers_start_.value_or(0u);
   pending_.bound_textures.offset = bound_textures_start_.value_or(0u);
   pending_.vertex_buffers.offset = vertex_buffers_start_.value_or(0u);
+  pending_.push_constants.offset = push_constants_start_.value_or(0u);
   auto result = AddCommand(std::move(pending_));
   pending_ = Command{};
   bound_textures_start_ = std::nullopt;
   bound_buffers_start_ = std::nullopt;
   vertex_buffers_start_ = std::nullopt;
+  push_constants_start_ = std::nullopt;
   if (result) {
     return fml::Status();
   }

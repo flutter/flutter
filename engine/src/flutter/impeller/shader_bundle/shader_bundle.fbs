@@ -8,7 +8,7 @@ namespace impeller.fb.shaderbundle;
 // incremented any time there is a change to this file which changes the
 // resulting flat buffer format.
 enum ShaderBundleFormatVersion:uint32 {
-  kVersion = 2
+  kVersion = 3
 }
 
 enum ShaderStage:byte {
@@ -96,6 +96,15 @@ table ShaderUniformTexture {
   binding: uint64;
 }
 
+// A `layout(push_constant)` block. A stage declares at most one and always
+// reads it from offset zero, so it carries no set or binding.
+table ShaderPushConstantBlock {
+  name: string;
+  ext_res_0: uint64;
+  size_in_bytes: uint64; // Includes all alignment padding.
+  fields: [ShaderUniformStructField];
+}
+
 table BackendShader {
   stage: ShaderStage;
   entrypoint: string;
@@ -103,6 +112,7 @@ table BackendShader {
   uniform_structs: [ShaderUniformStruct];
   uniform_textures: [ShaderUniformTexture];
   shader: [ubyte];
+  push_constants: ShaderPushConstantBlock;
 }
 
 table Shader {

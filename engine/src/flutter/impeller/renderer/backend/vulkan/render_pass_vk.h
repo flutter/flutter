@@ -5,6 +5,9 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_RENDER_PASS_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_RENDER_PASS_VK_H_
 
+#include <cstdint>
+#include <vector>
+
 #include "impeller/core/buffer_view.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
@@ -51,6 +54,10 @@ class RenderPassVK final : public RenderPass {
   bool has_label_ = false;
   PipelineRef pipeline_ = PipelineRef(nullptr);
   bool pipeline_uses_input_attachments_ = false;
+  // Push constant state, kept across draws to match the persistence every
+  // backend gives it. Reused rather than reallocated per draw.
+  std::vector<uint8_t> vertex_push_constants_;
+  std::vector<uint8_t> fragment_push_constants_;
   std::shared_ptr<SamplerVK> immutable_sampler_;
 
   RenderPassVK(const std::shared_ptr<const Context>& context,
@@ -87,6 +94,13 @@ class RenderPassVK final : public RenderPass {
 
   // |RenderPass|
   bool SetIndexBuffer(BufferView index_buffer, IndexType index_type) override;
+
+  // |RenderPass|
+  bool SetPushConstants(ShaderStage stage,
+                        const ShaderPushConstantSlot& slot,
+                        const ShaderMetadata* metadata,
+                        const uint8_t* data,
+                        size_t length) override;
 
   // |RenderPass|
   fml::Status Draw() override;
