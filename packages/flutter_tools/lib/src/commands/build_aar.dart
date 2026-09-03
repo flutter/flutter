@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/android_builder.dart';
@@ -12,25 +11,21 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
 import '../cache.dart';
-import '../context/android_context.dart';
-import '../context/tool_context.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({
-    required AndroidBuilder androidBuilder,
-    required AndroidContext androidContext,
-    required BuildSystem buildSystem,
-    required ToolContext toolContext,
+    required AndroidSdk? androidSdk,
+    required FileSystem fileSystem,
+    required super.logger,
     bool verboseHelp = false,
-  }) : _androidBuilder = androidBuilder,
-       _androidContext = androidContext,
-       _buildSystem = buildSystem,
-       super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
+  }) : _androidSdk = androidSdk,
+       _fileSystem = fileSystem,
+       super(verboseHelp: verboseHelp) {
     argParser
       ..addFlag('debug', defaultsTo: true, help: 'Build a debug version of the current project.')
       ..addFlag(
@@ -67,26 +62,8 @@ class BuildAarCommand extends BuildSubCommand {
       help: 'The target platform for which the project is compiled.',
     );
   }
-
-  final AndroidBuilder _androidBuilder;
-  final AndroidContext _androidContext;
-  final BuildSystem _buildSystem;
-  @visibleForTesting
-  AndroidBuilder get androidBuilder => _androidBuilder;
-
-  @visibleForTesting
-  AndroidContext get androidContext => _androidContext;
-
-  @visibleForTesting
-  AndroidSdk? get androidSdk => _androidContext.androidSdk;
-
-  @visibleForTesting
-  BuildSystem get buildSystem => _buildSystem;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
-
-  FileSystem get _fileSystem => toolContext.fs;
+  final AndroidSdk? _androidSdk;
+  final FileSystem _fileSystem;
 
   @override
   final name = 'aar';
@@ -141,8 +118,8 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (androidSdk == null) {
-      exitWithNoSdkMessage(analytics: analytics, logger: toolContext.logger);
+    if (_androidSdk == null) {
+      exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final androidBuildInfo = <AndroidBuildInfo>{};
 
@@ -176,7 +153,7 @@ class BuildAarCommand extends BuildSubCommand {
       throwToolExit('Please specify a build mode and try again.');
     }
 
-    await _androidBuilder.buildAar(
+    await androidBuilder?.buildAar(
       project: project,
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
@@ -189,7 +166,7 @@ class BuildAarCommand extends BuildSubCommand {
     final buildLabel = impellerEnabled
         ? 'manifest-aar-impeller-enabled'
         : 'manifest-aar-impeller-disabled';
-    analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
+    globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
 
     return FlutterCommandResult.success();
   }
@@ -216,6 +193,6 @@ class BuildAarCommand extends BuildSubCommand {
     if (projectRoot == null) {
       throwToolExit('${mainFile.parent.path} is not a valid flutter project');
     }
-    return toolContext.projectFactory.fromDirectory(_fileSystem.directory(projectRoot));
+    return FlutterProject.fromDirectory(_fileSystem.directory(projectRoot));
   }
 }

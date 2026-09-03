@@ -68,10 +68,9 @@ class BuildCommand extends FlutterCommand {
 
     _addSubcommand(
       BuildAarCommand(
-        androidBuilder: androidBuilder,
-        androidContext: androidContext,
-        buildSystem: buildSystem,
-        toolContext: toolContext,
+        fileSystem: fileSystem,
+        androidSdk: androidContext.androidSdk,
+        logger: logger,
         verboseHelp: verboseHelp,
       ),
     );
@@ -84,15 +83,7 @@ class BuildCommand extends FlutterCommand {
         verboseHelp: verboseHelp,
       ),
     );
-    _addSubcommand(
-      BuildAppBundleCommand(
-        androidBuilder: androidBuilder,
-        androidContext: androidContext,
-        buildSystem: buildSystem,
-        toolContext: toolContext,
-        verboseHelp: verboseHelp,
-      ),
-    );
+    _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
       BuildIOSFrameworkCommand(

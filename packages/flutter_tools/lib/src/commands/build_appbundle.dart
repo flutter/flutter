@@ -2,40 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/android_builder.dart';
-import '../android/android_sdk.dart';
 import '../android/build_validation.dart';
 import '../android/deferred_components_prebuild_validator.dart';
 import '../android/deferred_components_validator.dart';
 import '../android/gradle_utils.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
-import '../build_system/build_system.dart';
 import '../cache.dart';
-import '../context/android_context.dart';
-import '../context/tool_context.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAppBundleCommand extends BuildSubCommand {
-  BuildAppBundleCommand({
-    required AndroidBuilder androidBuilder,
-    required AndroidContext androidContext,
-    required BuildSystem buildSystem,
-    required ToolContext toolContext,
-    bool verboseHelp = false,
-  }) : _androidBuilder = androidBuilder,
-       _androidContext = androidContext,
-       _buildSystem = buildSystem,
-       super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
+  BuildAppBundleCommand({required super.logger, bool verboseHelp = false})
+    : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -83,24 +68,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
           'setup verification. This flag has no effect on non-deferred components apps.',
     );
   }
-
-  final AndroidBuilder _androidBuilder;
-  final AndroidContext _androidContext;
-  final BuildSystem _buildSystem;
-  @visibleForTesting
-  AndroidBuilder get androidBuilder => _androidBuilder;
-
-  @visibleForTesting
-  AndroidContext get androidContext => _androidContext;
-
-  @visibleForTesting
-  AndroidSdk? get androidSdk => _androidContext.androidSdk;
-
-  @visibleForTesting
-  BuildSystem get buildSystem => _buildSystem;
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'appbundle';
@@ -151,9 +118,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ToolContext(:Logger logger, :Platform platform, :Terminal terminal) = toolContext;
-    if (androidSdk == null) {
-      exitWithNoSdkMessage(analytics: analytics, logger: toolContext.logger);
+    if (globals.androidSdk == null) {
+      exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final androidBuildInfo = AndroidBuildInfo(
       await getBuildInfo(),
@@ -175,7 +141,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       final validator = DeferredComponentsPrebuildValidator(
         project.directory,
         logger,
-        platform,
+        globals.platform,
         title: 'Deferred components prebuild validation',
         outputDir: project.buildDirectory.childDirectory(
           DeferredComponentsValidator.kDeferredComponentsTempDirectory,
@@ -203,8 +169,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
     }
 
     validateBuild(androidBuildInfo);
-    terminal.usesTerminalUi = true;
-    await _androidBuilder.buildAab(
+    globals.terminal.usesTerminalUi = true;
+    await androidBuilder?.buildAab(
       project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
