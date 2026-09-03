@@ -26,6 +26,8 @@ G_DECLARE_FINAL_TYPE(FlFramebuffer, fl_framebuffer, FL, FRAMEBUFFER, GObject)
  * @height: height of texture.
  * @shareable: %TRUE if this framebuffer can be shared between contexts
  * (requires EGL).
+ * @depth_stencil: %TRUE to attach a depth/stencil buffer, which is required to
+ * render into this framebuffer.
  *
  * Creates a new frame buffer. Requires a valid OpenGL context to create.
  *
@@ -34,7 +36,8 @@ G_DECLARE_FINAL_TYPE(FlFramebuffer, fl_framebuffer, FL, FRAMEBUFFER, GObject)
 FlFramebuffer* fl_framebuffer_new(GLint format,
                                   size_t width,
                                   size_t height,
-                                  gboolean shareable);
+                                  gboolean shareable,
+                                  gboolean depth_stencil);
 
 /**
  * fl_framebuffer_new_multisample:

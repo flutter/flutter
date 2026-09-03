@@ -45,7 +45,7 @@ TEST_F(FlOpenGLFrameTest, CompositeRGBA) {
 
   g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new(/*shareable=*/TRUE);
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
@@ -75,7 +75,7 @@ TEST_F(FlOpenGLFrameTest, CompositeBGRA) {
 
   g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new(/*shareable=*/TRUE);
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_BGRA_EXT, width, height, FALSE);
+      fl_framebuffer_new(GL_BGRA_EXT, width, height, FALSE, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
@@ -105,7 +105,7 @@ TEST_F(FlOpenGLFrameTest, ZeroSizeClearsFrame) {
 
   g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new(/*shareable=*/TRUE);
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
@@ -146,7 +146,7 @@ TEST_F(FlOpenGLFrameTest, ShareableFrameSynchronized) {
 
   g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new(/*shareable=*/TRUE);
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
@@ -171,7 +171,7 @@ TEST_F(FlOpenGLFrameTest, UnshareableFrameNotSynchronizedTwice) {
 
   g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new(/*shareable=*/FALSE);
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
