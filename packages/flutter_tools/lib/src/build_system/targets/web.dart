@@ -1201,9 +1201,9 @@ class WebBuiltInAssets extends Target {
       globals.artifacts!.getHostArtifact(HostArtifact.flutterJsDirectory).path,
     );
     for (final fileName in <String>['flutter.js', 'flutter.js.map']) {
-      final File flutterJsFile = flutterJsDirectory.childFile(fileName);
-      final String flutterJsOut = fileSystem.path.join(environment.outputDir.path, fileName);
-      flutterJsFile.copySync(flutterJsOut);
+      final File sourceFile = flutterJsDirectory.childFile(fileName);
+      final File targetFile = environment.outputDir.childFile(fileName);
+      sourceFile.copySync(targetFile.path);
     }
   }
 }
