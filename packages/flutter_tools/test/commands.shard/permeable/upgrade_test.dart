@@ -25,10 +25,10 @@ import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   setUpAll(() {
+    Cache.disableLocking();
     Cache.flutterRoot = getFlutterRoot();
     Cache.disableLocking();
   });
-
   group('UpgradeCommandRunner', () {
     final jan12026 = DateTime.utc(2026);
 
@@ -661,13 +661,20 @@ void main() {
           },
         );
 
-        await runInContext(() async {
-          await runner.run(<String>['upgrade', '--continue']);
-          // Verify that ensureVersionFile() was invoked, which will create flutter.version.json
-          // if it doesn't exist.
-          expect(latestVersion.didEnsureVersionFile, true);
-          expect(latestVersion.didDeleteVersionFile, false);
-        }, overrides: {FlutterVersion: () => latestVersion});
+        await runInContext(
+          () async {
+            await runner.run(<String>['upgrade', '--continue']);
+            // Verify that ensureVersionFile() was invoked, which will create flutter.version.json
+            // if it doesn't exist.
+            expect(latestVersion.didEnsureVersionFile, true);
+            expect(latestVersion.didDeleteVersionFile, false);
+          },
+          overrides: <Type, Generator>{
+            FlutterVersion: () => latestVersion,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => fakePlatform,
+          },
+        );
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
@@ -842,7 +849,6 @@ void main() {
         late FileSystem fs;
 
         setUp(() {
-          Cache.disableLocking();
           fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
             const FakeCommand(command: <String>['git', 'tag', '--points-at', 'HEAD']),
             const FakeCommand(
@@ -856,7 +862,6 @@ void main() {
         });
 
         tearDown(() {
-          Cache.enableLocking();
           tryToDelete(tempDir);
         });
 

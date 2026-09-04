@@ -13,11 +13,7 @@ void main() {
       () => validateBuild(
         const AndroidBuildInfo(
           BuildInfo.release,
-          targetArchs: <CpuArch>[
-            CpuArch.x64,
-            CpuArch.armv7,
-            CpuArch.arm64,
-          ],
+          targetArchs: <CpuArch>[CpuArch.x64, CpuArch.armv7, CpuArch.arm64],
         ),
       ),
       returnsNormally,
