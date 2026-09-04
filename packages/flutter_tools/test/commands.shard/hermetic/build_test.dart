@@ -6,7 +6,6 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -16,6 +15,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -35,8 +35,7 @@ void main() {
       exitCode = code;
     });
 
-    final command = BuildCommand(
-      toolContext: FakeToolContext(logger: testLogger),
+    final BuildCommand command = createFakeBuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
@@ -93,24 +92,11 @@ void main() {
 
     testUsingContext("doesn't fail if --fatal-warnings specified and no warnings occur", () async {
       command = FakeBuildCommand(
-        toolContext: FakeToolContext(logger: testLogger),
-        androidSdk: FakeAndroidSdk(),
+        androidContext: FakeAndroidContext(),
+        appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fs,
-        logger: testLogger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
+        toolContext: FakeToolContext(fs: fs, logger: testLogger),
       );
       try {
         await createTestCommandRunner(
@@ -123,27 +109,13 @@ void main() {
 
     testUsingContext("doesn't fail if --fatal-warnings not specified", () async {
       command = FakeBuildCommand(
-        toolContext: FakeToolContext(logger: testLogger),
-        androidSdk: FakeAndroidSdk(),
+        androidContext: FakeAndroidContext(),
+        appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fs,
-        logger: testLogger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
+        toolContext: FakeToolContext(fs: fs, logger: testLogger),
       );
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
-      testLogger.printError('Error: Danger Will Robinson!');
       try {
         await createTestCommandRunner(command).run(<String>['build', 'test']);
       } on Exception {
@@ -153,24 +125,11 @@ void main() {
 
     testUsingContext('fails if --fatal-warnings specified and warnings emitted', () async {
       command = FakeBuildCommand(
-        toolContext: FakeToolContext(logger: testLogger),
-        androidSdk: FakeAndroidSdk(),
+        androidContext: FakeAndroidContext(),
+        appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fs,
-        logger: testLogger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
+        toolContext: FakeToolContext(fs: fs, logger: testLogger),
       );
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
       await expectLater(
@@ -186,24 +145,11 @@ void main() {
 
     testUsingContext('fails if --fatal-warnings specified and errors emitted', () async {
       command = FakeBuildCommand(
-        toolContext: FakeToolContext(logger: testLogger),
-        androidSdk: FakeAndroidSdk(),
+        androidContext: FakeAndroidContext(),
+        appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: fs,
-        logger: testLogger,
-        osUtils: FakeOperatingSystemUtils(),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        fileSystemUtils: FakeFileSystemUtils(),
-        terminal: FakeTerminal(),
-        plistParser: FakePlistParser(),
-        processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        flutterVersion: FakeFlutterVersion(),
+        toolContext: FakeToolContext(fs: fs, logger: testLogger),
       );
       testLogger.printError('Error: Danger Will Robinson!');
       await expectLater(
@@ -240,28 +186,15 @@ class FakeBuildInfoCommand extends FlutterCommand {
 
 class FakeBuildCommand extends BuildCommand {
   FakeBuildCommand({
-    required super.toolContext,
-    required super.fileSystem,
+    required super.androidContext,
+    required super.appleContext,
     required super.buildSystem,
-    required super.osUtils,
-    required Logger logger,
-    required super.androidSdk,
-    bool verboseHelp = false,
-    required super.config,
-    required super.platform,
-    required super.fileSystemUtils,
-    required super.terminal,
-    required super.plistParser,
-    required super.processUtils,
-    required super.processManager,
     required super.templateRenderer,
-    required super.xcode,
-    required super.artifacts,
-    required super.cache,
-    required super.flutterVersion,
+    required super.toolContext,
     FeatureFlags? featureFlags,
-  }) : super(logger: logger, featureFlags: featureFlags ?? TestFeatureFlags()) {
-    addSubcommand(FakeBuildSubcommand(logger: logger, verboseHelp: verboseHelp));
+    bool verboseHelp = false,
+  }) : super(featureFlags: featureFlags ?? TestFeatureFlags(), verboseHelp: verboseHelp) {
+    addSubcommand(FakeBuildSubcommand(logger: toolContext.logger, verboseHelp: verboseHelp));
   }
 
   @override

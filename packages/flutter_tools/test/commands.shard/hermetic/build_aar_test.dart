@@ -13,6 +13,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
@@ -57,8 +58,7 @@ flutter:
         null
 ''');
 
-      final command = BuildCommand(
-        toolContext: FakeToolContext(),
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
@@ -126,8 +126,7 @@ flutter:
 
       cache.getArtifactDirectory('gradle_wrapper').createSync(recursive: true);
 
-      final command = BuildCommand(
-        toolContext: FakeToolContext(),
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,

@@ -292,8 +292,7 @@ static void fl_view_renderer_subsurface_present_layers(
     GLint general_format =
         fl_compositor_opengl_get_frame_format(layers, layers_count);
     g_clear_object(&self->framebuffer);
-    self->framebuffer =
-        fl_framebuffer_new(general_format, width, height, FALSE);
+    self->framebuffer = fl_framebuffer_new(general_format, width, height);
   }
 
   // Bind the target framebuffer so the compositor draws into it.
@@ -311,14 +310,20 @@ static void fl_view_renderer_subsurface_present_layers(
   // before the other context uses it - making a context current only flushes
   // the previous one, which guarantees the commands have been submitted, not
   // that they have finished.
-  glFinish();
+  g_autoptr(FlGLFence) fence = nullptr;
+  if (fl_compositor_opengl_can_fence(self->compositor)) {
+    fence = fl_gl_fence_new(fl_engine_get_opengl_manager(self->engine));
+  } else {
+    // No fences on this driver, wait for the rendering here instead.
+    glFinish();
+  }
 
   // Present the composited frame directly to the subsurface using its own EGL
   // context. This reads the engine's frame texture directly, as the subsurface
   // context shares resources with the engine.
   fl_subsurface_egl_present(self->egl,
                             fl_framebuffer_get_texture_id(self->framebuffer),
-                            width, height);
+                            width, height, fence);
 
   g_mutex_unlock(&self->frame_mutex);
 

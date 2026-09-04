@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/web/compile.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
@@ -53,9 +54,7 @@ void main() {
     () async {
       fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(
-          featureFlags: TestFeatureFlags(isWebEnabled: true),
-          toolContext: FakeToolContext(),
+        createFakeBuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
@@ -97,9 +96,7 @@ void main() {
     'Refuses to build for web when feature is disabled',
     () async {
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(
-          featureFlags: TestFeatureFlags(),
-          toolContext: FakeToolContext(),
+        createFakeBuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: MemoryFileSystem.test(),
@@ -139,9 +136,7 @@ void main() {
   testUsingContext(
     'Setup for a web build with default output directory',
     () async {
-      final buildCommand = BuildCommand(
-        featureFlags: TestFeatureFlags(isWebEnabled: true),
-        toolContext: FakeToolContext(),
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -204,9 +199,7 @@ void main() {
   testUsingContext(
     'Passes --web-define values to environment defines with prefix',
     () async {
-      final buildCommand = BuildCommand(
-        featureFlags: TestFeatureFlags(isWebEnabled: true),
-        toolContext: FakeToolContext(),
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -257,9 +250,7 @@ void main() {
   testUsingContext(
     'Builds successfully without --web-define',
     () async {
-      final buildCommand = BuildCommand(
-        featureFlags: TestFeatureFlags(isWebEnabled: true),
-        toolContext: FakeToolContext(),
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -306,9 +297,7 @@ void main() {
     'Infers target entrypoint correctly from --target',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/136830.
-      final buildCommand = BuildCommand(
-        featureFlags: TestFeatureFlags(isWebEnabled: true),
-        toolContext: FakeToolContext(),
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -371,9 +360,7 @@ void main() {
     'Infers target entrypoint correctly from positional argument list',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/136830.
-      final buildCommand = BuildCommand(
-        featureFlags: TestFeatureFlags(isWebEnabled: true),
-        toolContext: FakeToolContext(),
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -435,9 +422,7 @@ void main() {
   testUsingContext(
     'Does not allow -O0 optimization level',
     () async {
-      final buildCommand = BuildCommand(
-        featureFlags: TestFeatureFlags(isWebEnabled: true),
-        toolContext: FakeToolContext(),
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -488,9 +473,7 @@ void main() {
   testUsingContext(
     'Setup for a web build with a user specified output directory',
     () async {
-      final buildCommand = BuildCommand(
-        featureFlags: TestFeatureFlags(isWebEnabled: true),
-        toolContext: FakeToolContext(),
+      final BuildCommand buildCommand = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
@@ -1056,9 +1039,7 @@ void main() {
     () async {
       fileSystem.file(fileSystem.path.join('web')).deleteSync(recursive: true);
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(
-          featureFlags: TestFeatureFlags(isWebEnabled: true),
-          toolContext: FakeToolContext(),
+        createFakeBuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,

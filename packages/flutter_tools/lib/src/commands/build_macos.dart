@@ -15,6 +15,7 @@ import '../context/tool_context.dart';
 import '../features.dart';
 import '../macos/build_macos.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command_runner.dart' show FlutterGlobalOptions;
 import 'build.dart';
 
 /// A command to build a macOS desktop target through a build shell script.
@@ -89,7 +90,7 @@ class BuildMacosCommand extends BuildSubCommand {
       flutterProject: project,
       buildInfo: buildInfo,
       targetOverride: targetFile,
-      verboseLogging: logger.isVerbose,
+      verboseLogging: logger.isVerbose || globalResults?[FlutterGlobalOptions.kVerboseFlag] == true,
       configOnly: configOnly,
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: fs,
