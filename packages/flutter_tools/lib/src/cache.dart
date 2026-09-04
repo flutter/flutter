@@ -444,10 +444,23 @@ class Cache {
   /// The version of DevTools currently bundled in the Dart SDK cache.
   String get devToolsVersion {
     _validateDartSdkIntegrity();
-    return _devToolsVersion;
+    if (_devToolsVersion == null) {
+      final Directory devToolsDir = getCacheDir(_kDevToolsDirPath, shouldCreate: false);
+      final File versionFile = devToolsDir.childFile(_kDevToolsVersionJson);
+      if (!versionFile.existsSync()) {
+        throw Exception('Could not find file at ${versionFile.path}');
+      }
+      final Object? data = jsonDecode(versionFile.readAsStringSync());
+      if (data case {'version': final String version} when version.trim().isNotEmpty) {
+        _devToolsVersion = version;
+      } else {
+        throw Exception('Could not parse DevTools version from ${versionFile.path}');
+      }
+    }
+    return _devToolsVersion!;
   }
 
-  late final String _devToolsVersion;
+  String? _devToolsVersion;
 
   /// Performs a lightweight, once-per-run integrity check verifying that critical
   /// Dart SDK and DevTools resource files exist and are not corrupted.
