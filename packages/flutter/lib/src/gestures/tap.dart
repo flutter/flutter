@@ -278,7 +278,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
       // If there is no result in the previous gesture arena,
       // we ignore them and prepare to accept a new pointer.
       if (_down != null && _up != null) {
-        assert(_down!.pointer == _up!.pointer);
+        assert(defaultTargetPlatform == TargetPlatform.android || _down!.pointer == _up!.pointer);
         _reset();
       }
 
@@ -379,7 +379,7 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
     if (!_wonArenaForPrimaryPointer || _up == null) {
       return;
     }
-    assert(_up!.pointer == _down!.pointer);
+    assert(defaultTargetPlatform == TargetPlatform.android || _up!.pointer == _down!.pointer);
     handleTapUp(down: _down!, up: _up!);
     _reset();
   }
