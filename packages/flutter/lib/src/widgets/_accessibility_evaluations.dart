@@ -99,15 +99,13 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
     final violations = <Violation>[];
     for (final RenderView view in binding.renderViews) {
-      violations.addAll(
-        _traverse(view.flutterView, view.owner!.semanticsOwner!.rootSemanticsNode!),
-      );
+      violations.addAll(_traverse(view, view.owner!.semanticsOwner!.rootSemanticsNode!));
     }
 
     return EvaluationResult(violations);
   }
 
-  List<Violation> _traverse(ui.FlutterView view, SemanticsNode node) {
+  List<Violation> _traverse(RenderView view, SemanticsNode node) {
     final violations = <Violation>[];
     node.visitChildren((SemanticsNode child) {
       violations.addAll(_traverse(view, child));
@@ -136,13 +134,18 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
       current = current.parent;
     }
 
-    final Rect viewRect = Offset.zero & view.physicalSize;
+    // The semantics tree's paint bounds are in the physical coordinate space
+    // defined by the RenderView's configuration (whose device pixel ratio can
+    // differ from the FlutterView's, e.g. under debugViewMetricsOverrides or a
+    // test configuration), so the comparisons below must use the configuration
+    // rather than raw FlutterView metrics.
+    final Rect viewRect = view.paintBounds;
     if (_isAtBoundary(paintBounds, viewRect)) {
       return violations;
     }
 
     // Shrink by device pixel ratio.
-    final Size candidateSize = paintBounds.size / view.devicePixelRatio;
+    final Size candidateSize = paintBounds.size / view.configuration.devicePixelRatio;
     if (candidateSize.width < size.width - precisionErrorTolerance ||
         candidateSize.height < size.height - precisionErrorTolerance) {
       violations.add(
@@ -248,7 +251,11 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
       final layer = renderView.debugLayer! as OffsetLayer;
       final SemanticsNode root = renderView.owner!.semanticsOwner!.rootSemanticsNode!;
 
-      final double ratio = 1 / renderView.flutterView.devicePixelRatio;
+      // The layer tree is in the physical space defined by the configuration,
+      // which can differ from the FlutterView (e.g. under
+      // debugViewMetricsOverrides), so the image must be scaled back to logical
+      // pixels with the configuration's ratio.
+      final double ratio = 1 / renderView.configuration.devicePixelRatio;
       final ui.Image image = await layer.toImage(renderView.paintBounds, pixelRatio: ratio);
       final ByteData byteData = (await image.toByteData())!;
       violations.addAll(await _evaluateNode(root, image, byteData, renderView));
@@ -308,8 +315,11 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
   /// Returns if a rectangle of node is off the screen.
   ///
   /// Allows node to be off screen partially before culling the node.
-  bool _isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
-    final Size windowLogicalSize = window.physicalSize / window.devicePixelRatio;
+  bool _isNodeOffScreen(Rect paintBounds, RenderView renderView) {
+    // RenderView.size is the logical size the view actually laid out at, which
+    // accounts for any configuration that differs from the raw FlutterView
+    // (e.g. under debugViewMetricsOverrides or a test configuration).
+    final Size windowLogicalSize = renderView.size;
     return paintBounds.top < -50.0 ||
         paintBounds.left < -50.0 ||
         paintBounds.bottom > windowLogicalSize.height + 50.0 ||
@@ -455,7 +465,7 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
       throw StateError('Unexpected widget type: ${widget.runtimeType}');
     }
 
-    if (_isNodeOffScreen(paintBoundsWithOffset, renderView.flutterView)) {
+    if (_isNodeOffScreen(paintBoundsWithOffset, renderView)) {
       return <Violation>[];
     }
 
@@ -561,7 +571,7 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
       current = current.parent;
     }
 
-    final double devicePixelRatio = renderView.flutterView.devicePixelRatio;
+    final double devicePixelRatio = renderView.configuration.devicePixelRatio;
     final logicalBounds = Rect.fromLTRB(
       nodeBounds.left / devicePixelRatio,
       nodeBounds.top / devicePixelRatio,
@@ -571,7 +581,7 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
 
     final Rect inflatedBounds = logicalBounds.inflate(4.0);
 
-    if (_isNodeOffScreen(inflatedBounds, renderView.flutterView)) {
+    if (_isNodeOffScreen(inflatedBounds, renderView)) {
       return violations;
     }
 
