@@ -441,33 +441,25 @@ class Cache {
     }
   }
 
+  /// The version of DevTools currently bundled in the Dart SDK cache.
   String get devToolsVersion {
     _validateDartSdkIntegrity();
-    if (_devToolsVersion == null) {
-      final Directory devToolsDir = getCacheDir(_kDevToolsDirPath, shouldCreate: false);
-      final File versionFile = devToolsDir.childFile(_kDevToolsVersionJson);
-      if (!versionFile.existsSync()) {
-        throw Exception('Could not find file at ${versionFile.path}');
-      }
-      final dynamic data = jsonDecode(versionFile.readAsStringSync());
-      if (data is! Map<String, Object?>) {
-        throw Exception(
-          "Expected object of type 'Map<String, Object?>' but got one of type '${data.runtimeType}'",
-        );
-      }
-      final Object? version = data['version'];
-      if (version is! String) {
-        throw Exception(
-          "Could not parse DevTools version. Expected object of type 'String', but got one of type '${version?.runtimeType}'",
-        );
-      }
-      _devToolsVersion = version;
-    }
-    return _devToolsVersion!;
+    return _devToolsVersion;
   }
 
-  String? _devToolsVersion;
+  late final String _devToolsVersion;
 
+  /// Performs a lightweight, once-per-run integrity check verifying that critical
+  /// Dart SDK and DevTools resource files exist and are not corrupted.
+  ///
+  /// Antivirus software (especially on Windows) or interrupted extractions can
+  /// leave the SDK in a partially extracted state where `engine-dart-sdk.stamp`
+  /// exists, but critical files like `dart-sdk/version` or DevTools `version.json`
+  /// are missing or corrupted.
+  ///
+  /// If any corruption is detected, this calls [_handleSdkCorruption] to delete the
+  /// stamp file and invalidate the cache, triggering a clean re-download on the next
+  /// command run.
   void _validateDartSdkIntegrity() {
     if (_isDartSdkValidated) {
       return;
@@ -520,7 +512,7 @@ class Cache {
         );
       }
 
-      Object? data;
+      final Object? data;
       try {
         data = jsonDecode(content);
       } on Object catch (e, s) {
@@ -531,25 +523,22 @@ class Cache {
         );
       }
 
-      if (data is! Map<String, Object?>) {
-        _handleSdkCorruption(
-          'Expected JSON object of type "Map<String, Object?>" in ${devToolsVersionFile.path} but got type "${data.runtimeType}"',
-        );
-      }
-      final Object? version = data['version'];
-      if (version == null) {
-        _handleSdkCorruption(
+      final String version = switch (data) {
+        {'version': final String v} when v.trim().isNotEmpty => v,
+        {'version': final String _} => _handleSdkCorruption(
+          'DevTools version is empty in ${devToolsVersionFile.path}',
+        ),
+        {'version': final Object v} => _handleSdkCorruption(
+          'Expected DevTools version to be a String in ${devToolsVersionFile.path} but got type "${v.runtimeType}"',
+        ),
+        {'version': null} || Map<String, Object?>() => _handleSdkCorruption(
           'DevTools version key is null or missing in ${devToolsVersionFile.path}',
-        );
-      }
-      if (version is! String) {
-        _handleSdkCorruption(
-          'Expected DevTools version to be a String in ${devToolsVersionFile.path} but got type "${version.runtimeType}"',
-        );
-      }
-      if (version.trim().isEmpty) {
-        _handleSdkCorruption('DevTools version is empty in ${devToolsVersionFile.path}');
-      }
+        ),
+        _ => _handleSdkCorruption(
+          'Expected JSON object of type "Map<String, Object?>" in ${devToolsVersionFile.path} but got type "${data.runtimeType}"',
+        ),
+      };
+      _devToolsVersion = version;
     } on ToolExit {
       rethrow;
     } on Object catch (err, stackTrace) {
@@ -559,6 +548,14 @@ class Cache {
     _isDartSdkValidated = true;
   }
 
+  /// Handles Dart SDK cache corruption by invalidating the cache and throwing a [ToolExit].
+  ///
+  /// Deleting `engine-dart-sdk.stamp` is the critical step that signals the wrapper
+  /// scripts (`update_dart_sdk.ps1` and `update_dart_sdk.sh`) on the next `flutter`
+  /// command invocation to perform a clean re-download and re-extraction of the Dart SDK.
+  ///
+  /// Also attempts to delete the corrupted SDK directory immediately, safely catching
+  /// any file-locking errors if executables are currently locked by the running process on Windows.
   Never _handleSdkCorruption(String message, [Object? error, StackTrace? stackTrace]) {
     _logger.printError(
       'Error: The Dart SDK cache at "${getCacheDir(_kDartSdkDir, shouldCreate: false).path}" appears to be corrupted or incomplete.\n'
