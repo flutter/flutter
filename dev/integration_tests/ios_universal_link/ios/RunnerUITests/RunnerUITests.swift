@@ -6,7 +6,7 @@ import XCTest
 
 class RunnerUITests: XCTestCase {
 
-  override func setUpWithError() throws {
+  override func setUp() {
     continueAfterFailure = false
   }
 
