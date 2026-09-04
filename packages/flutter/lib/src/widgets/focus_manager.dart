@@ -851,6 +851,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       'Setting the context is typically done with the attach method.',
     );
     final RenderObject object = context!.findRenderObject()!;
+    // A box that hasn't been laid out yet has no size to read, so report zero
+    // until it does.
+    if (object is RenderBox && !object.hasSize) {
+      return Offset.zero;
+    }
     return MatrixUtils.transformPoint(object.getTransformTo(null), object.semanticBounds.topLeft);
   }
 
@@ -866,6 +871,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       'Setting the context is typically done with the attach method.',
     );
     final RenderObject object = context!.findRenderObject()!;
+    // A box that hasn't been laid out yet has no size to read, so report zero
+    // until it does.
+    if (object is RenderBox && !object.hasSize) {
+      return Rect.zero;
+    }
     final Offset topLeft = MatrixUtils.transformPoint(
       object.getTransformTo(null),
       object.semanticBounds.topLeft,

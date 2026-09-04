@@ -112,6 +112,27 @@ void main() {
       expect(focusNode2.offset, equals(const Offset(443.0, 194.5)));
     });
 
+    test('rect, offset, and size return zero when the RenderObject is not laid out', () {
+      // Regression test for https://github.com/flutter/flutter/issues/191508.
+      // Reading the bounds of a focus node whose box isn't laid out yet used to
+      // throw "RenderBox was not laid out"; it should report zero instead.
+      final owner = PipelineOwner();
+      addTearDown(() => owner.rootNode = null);
+      final RenderBox box = RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 10, height: 10),
+      );
+      owner.rootNode = box;
+      expect(box.hasSize, isFalse);
+
+      final node = FocusNode();
+      addTearDown(node.dispose);
+      node.attach(_UnlaidOutBuildContext(box));
+
+      expect(node.rect, Rect.zero);
+      expect(node.offset, Offset.zero);
+      expect(node.size, Size.zero);
+    });
+
     testWidgets('descendantsAreFocusable disables focus for descendants.', (
       WidgetTester tester,
     ) async {
@@ -2435,4 +2456,16 @@ class _LoggingTestFocusNode extends FocusNode {
   }) {
     throw StateError("Shouldn't call toStringDeep here");
   }
+}
+
+class _UnlaidOutBuildContext implements BuildContext {
+  _UnlaidOutBuildContext(this._renderObject);
+
+  final RenderObject _renderObject;
+
+  @override
+  RenderObject findRenderObject() => _renderObject;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
