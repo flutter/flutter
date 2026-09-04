@@ -11,6 +11,10 @@ dependencies:
     sdk: flutter
 
 
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
 flutter:
   assets:
     - assets/flutter-mark-square-64.png
