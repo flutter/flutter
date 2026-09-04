@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 
 /// A class representing rich content (such as a PNG image) inserted via the
@@ -20,12 +22,23 @@ class KeyboardInsertedContent {
   const KeyboardInsertedContent({required this.mimeType, required this.uri, this.data});
 
   /// Converts JSON received from the Flutter Engine into the Dart class.
+  ///
+  /// This constructor handles the legacy JSON-based format from the textinput channel.
   KeyboardInsertedContent.fromJson(Map<String, dynamic> metadata)
     : mimeType = metadata['mimeType'] as String,
       uri = metadata['uri'] as String,
       data = metadata['data'] != null
           ? Uint8List.fromList(List<int>.from(metadata['data'] as Iterable<dynamic>))
           : null;
+
+  /// Converts binary data received from the binary contentinsertion channel.
+  ///
+  /// This constructor handles efficient binary transfer where the data is already
+  /// in Uint8List format, avoiding the need for per-element boxing/parsing.
+  KeyboardInsertedContent.fromBinary(Map<String, dynamic> metadata)
+    : mimeType = metadata['mimeType'] as String,
+      uri = metadata['uri'] as String,
+      data = metadata['data'] as Uint8List?;
 
   /// The mime type of the inserted content.
   final String mimeType;
