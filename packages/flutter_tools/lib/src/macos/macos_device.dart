@@ -167,40 +167,7 @@ class MacOSDevice extends DesktopDevice {
     // than the app bundle itself. This often leads to silent permission denials or crashes.
     // Launching via `open -n -a <bundle> --args <args>` runs the application within its proper
     // bundle context, ensuring correct TCC attribution and preventing reusing existing instances.
-    //
-    // Under macOS App Sandbox, sandboxed applications are forbidden by kernel sandbox policy
-    // from writing outside their sandbox container directory (`~/Library/Containers/<bundleId>/Data/tmp/`)
-    // unless granted specific user-selected file entitlements.
-    //
-    // Attempting to write `--write-service-info` to the system temporary directory (e.g. `/tmp` or
-    // `/Volumes/Work/...`) is blocked by `sandboxd`, preventing the Dart VM from creating `vm_service_info.json`.
-    //
-    // To ensure the VM can write the connection file, resolve the application's bundle identifier
-    // from `Info.plist` and create the temporary file inside the application's sandbox container:
-    // `~/Library/Containers/<bundleId>/Data/tmp/`
-    // If the bundle identifier cannot be resolved or container directory creation fails, fall back to
-    // `_fileSystem.systemTempDirectory`.
-    Directory tempDirectory = _fileSystem.systemTempDirectory;
-    final String plistPath = _fileSystem.path.join(bundlePath, 'Contents', 'Info.plist');
-    if (_fileSystem.file(plistPath).existsSync()) {
-      try {
-        final String? bundleId = globals.plistParser.getValueFromFile<String>(
-          plistPath,
-          PlistParser.kCFBundleIdentifierKey,
-        );
-        final String? homeDirPath = globals.fsUtils.homeDirPath;
-        if (bundleId != null && bundleId.isNotEmpty && homeDirPath != null) {
-          final Directory containerTmpDir = _fileSystem.directory(
-            _fileSystem.path.join(homeDirPath, 'Library', 'Containers', bundleId, 'Data', 'tmp'),
-          );
-          containerTmpDir.createSync(recursive: true);
-          tempDirectory = containerTmpDir;
-        }
-      } on Exception catch (e) {
-        _logger.printTrace('Could not resolve or create sandbox container tmp directory: $e');
-      }
-    }
-
+    final Directory tempDirectory = _resolveTempDirectory(bundlePath);
     final File vmServiceInfoFile = tempDirectory
         .createTempSync('flutter_tools_macos_device.')
         .childFile('vm_service_info.json');
@@ -232,36 +199,11 @@ class MacOSDevice extends DesktopDevice {
         return LaunchResult.failed();
       }
 
-      final stopwatch = Stopwatch()..start();
       final timeout = (await globals.isRunningOnBot)
           ? const Duration(minutes: 5)
           : const Duration(seconds: 30);
 
-      _logger.printTrace('Waiting for VM Service info file at ${vmServiceInfoFile.path}');
-      while (stopwatch.elapsed < timeout) {
-        if (_readVmServiceUri(vmServiceInfoFile) case final Uri uri) {
-          vmServiceUri = uri;
-          break;
-        }
-
-        await Future<void>.delayed(const Duration(milliseconds: 100));
-
-        // Check if the application exited or crashed prematurely before writing the VM Service URI.
-        final ProcessResult pgrepResult = await _processManager.run(<String>[
-          'pgrep',
-          '-f',
-          RegExp.escape(executable),
-        ]);
-        if (pgrepResult.exitCode != 0) {
-          // App is no longer running. Check one last time if the file was written before exiting.
-          if (_readVmServiceUri(vmServiceInfoFile) case final Uri uri) {
-            vmServiceUri = uri;
-            break;
-          }
-          _logger.printError('Application exited before VM Service connected.');
-          break;
-        }
-      }
+      vmServiceUri = await _pollForVmServiceUri(vmServiceInfoFile, executable, timeout);
     } finally {
       try {
         vmServiceInfoFile.parent.deleteSync(recursive: true);
@@ -271,23 +213,99 @@ class MacOSDevice extends DesktopDevice {
     }
 
     if (vmServiceUri == null) {
-      if (await globals.isRunningOnBot) {
-        final sandboxingMessage = debuggingOptions.usingCISystem
-            ? 'Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS.'
-            : 'Consider codesigning your app or disabling sandboxing. Flutter will attempt to disable sandboxing if the `--ci` flag is provided.';
-        _logger.printError(
-          'The Dart VM Service was not discovered after 5 minutes. '
-          'If the app has sandboxing enabled and is not codesigned or codesigning changed, '
-          'this may be caused by a system prompt asking for access. $sandboxingMessage\n'
-          'See https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox '
-          'for more information.',
-        );
-      }
-      _logger.printError('Failed to connect to VM Service. Timeout or app crashed.');
+      await _logVmServiceError(debuggingOptions);
       return LaunchResult.failed();
     }
 
     return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
+  }
+
+  /// Resolves the directory to store temporary files for the application.
+  ///
+  /// Under macOS App Sandbox, sandboxed applications are forbidden by kernel sandbox policy
+  /// from writing outside their sandbox container directory (`~/Library/Containers/<bundleId>/Data/tmp/`)
+  /// unless granted specific user-selected file entitlements.
+  ///
+  /// Attempting to write `--write-service-info` to the system temporary directory (e.g. `/tmp` or
+  /// `/Volumes/Work/...`) is blocked by `sandboxd`, preventing the Dart VM from creating `vm_service_info.json`.
+  ///
+  /// To ensure the VM can write the connection file, resolve the application's bundle identifier
+  /// from `Info.plist` and create the temporary file inside the application's sandbox container:
+  /// `~/Library/Containers/<bundleId>/Data/tmp/`
+  /// If the bundle identifier cannot be resolved or container directory creation fails, fall back to
+  /// `_fileSystem.systemTempDirectory`.
+  Directory _resolveTempDirectory(String bundlePath) {
+    final String plistPath = _fileSystem.path.join(bundlePath, 'Contents', 'Info.plist');
+    if (_fileSystem.file(plistPath).existsSync()) {
+      try {
+        final String? bundleId = globals.plistParser.getValueFromFile<String>(
+          plistPath,
+          PlistParser.kCFBundleIdentifierKey,
+        );
+        final String? homeDirPath = globals.fsUtils.homeDirPath;
+        if (bundleId != null && bundleId.isNotEmpty && homeDirPath != null) {
+          final Directory containerTmpDir = _fileSystem.directory(
+            _fileSystem.path.join(homeDirPath, 'Library', 'Containers', bundleId, 'Data', 'tmp'),
+          );
+          containerTmpDir.createSync(recursive: true);
+          return containerTmpDir;
+        }
+      } on Exception catch (e) {
+        _logger.printTrace('Could not resolve or create sandbox container tmp directory: $e');
+      }
+    }
+    return _fileSystem.systemTempDirectory;
+  }
+
+  /// Polls [vmServiceInfoFile] until the VM Service URI is written, the app exits,
+  /// or [timeout] elapses.
+  Future<Uri?> _pollForVmServiceUri(
+    File vmServiceInfoFile,
+    String executable,
+    Duration timeout,
+  ) async {
+    final stopwatch = Stopwatch()..start();
+    _logger.printTrace('Waiting for VM Service info file at ${vmServiceInfoFile.path}');
+    while (stopwatch.elapsed < timeout) {
+      if (_readVmServiceUri(vmServiceInfoFile) case final Uri uri) {
+        return uri;
+      }
+
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      // Check if the application exited or crashed prematurely before writing the VM Service URI.
+      final ProcessResult pgrepResult = await _processManager.run(<String>[
+        'pgrep',
+        '-f',
+        RegExp.escape(executable),
+      ]);
+      if (pgrepResult.exitCode != 0) {
+        // App is no longer running. Check one last time if the file was written before exiting.
+        if (_readVmServiceUri(vmServiceInfoFile) case final Uri uri) {
+          return uri;
+        }
+        _logger.printError('Application exited before VM Service connected.');
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /// Logs error and diagnostic information when the VM Service fails to connect.
+  Future<void> _logVmServiceError(DebuggingOptions debuggingOptions) async {
+    if (await globals.isRunningOnBot) {
+      final sandboxingMessage = debuggingOptions.usingCISystem
+          ? 'Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS.'
+          : 'Consider codesigning your app or disabling sandboxing. Flutter will attempt to disable sandboxing if the `--ci` flag is provided.';
+      _logger.printError(
+        'The Dart VM Service was not discovered after 5 minutes. '
+        'If the app has sandboxing enabled and is not codesigned or codesigning changed, '
+        'this may be caused by a system prompt asking for access. $sandboxingMessage\n'
+        'See https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox '
+        'for more information.',
+      );
+    }
+    _logger.printError('Failed to connect to VM Service. Timeout or app crashed.');
   }
 
   Uri? _readVmServiceUri(File file) {
@@ -306,6 +324,23 @@ class MacOSDevice extends DesktopDevice {
     return null;
   }
 
+  /// Finds the executable path for [macosApp] across build modes.
+  String? _findExecutable(MacOSApp macosApp) {
+    for (final BuildMode mode in BuildMode.values) {
+      final buildInfo = BuildInfo(
+        mode,
+        null,
+        packageConfigPath: '.dart_tool/package_config.json',
+        treeShakeIcons: false,
+      );
+      if (macosApp.executable(buildInfo) case final String path
+          when _fileSystem.file(path).existsSync()) {
+        return path;
+      }
+    }
+    return null;
+  }
+
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     if (app is! MacOSApp) {
@@ -316,22 +351,7 @@ class MacOSDevice extends DesktopDevice {
     // Stop any app process tracked by DesktopDevice.
     final bool superStopped = await super.stopApp(app, userIdentifier: userIdentifier);
 
-    // Find the executable for the application across build modes.
-    String? executable;
-    for (final BuildMode mode in BuildMode.values) {
-      final buildInfo = BuildInfo(
-        mode,
-        null,
-        packageConfigPath: '.dart_tool/package_config.json',
-        treeShakeIcons: false,
-      );
-      if (macosApp.executable(buildInfo) case final String path
-          when _fileSystem.file(path).existsSync()) {
-        executable = path;
-        break;
-      }
-    }
-
+    final String? executable = _findExecutable(macosApp);
     if (executable == null) {
       _logger.printTrace('Could not find executable path for ${app.name} to stop.');
       return superStopped;
