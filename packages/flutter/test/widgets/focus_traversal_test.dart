@@ -638,6 +638,65 @@ void main() {
     expect(node3.hasFocus, isFalse);
   });
 
+  testWidgets('Nested navigator with no focusable widget does not trap focus', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/151061.
+    final node1 = FocusNode();
+    addTearDown(node1.dispose);
+    final node2 = FocusNode();
+    addTearDown(node2.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FocusTraversalGroup(
+          policy: ReadingOrderTraversalPolicy(),
+          child: FocusScope(
+            child: Column(
+              children: <Widget>[
+                Focus(focusNode: node1, child: const SizedBox.square(dimension: 100.0)),
+                SizedBox.square(
+                  dimension: 100.0,
+                  child: Navigator(
+                    pages: const <Page<void>>[
+                      TestPage<void>(child: SizedBox.square(dimension: 100.0)),
+                    ],
+                    onPopPage: (_, _) => false,
+                  ),
+                ),
+                Focus(focusNode: node2, child: const SizedBox.square(dimension: 100.0)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // The route of the nested navigator takes the focus when it is pushed, even
+    // though it has no focusable widget in it.
+    expect(primaryFocus, isA<FocusScopeNode>());
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isFalse);
+
+    // Moving forward from the empty route continues in the enclosing scope.
+    primaryFocus!.nextFocus();
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasPrimaryFocus, isTrue);
+
+    node2.previousFocus();
+    await tester.pump();
+    expect(node1.hasFocus, isFalse);
+    expect(node2.hasFocus, isFalse);
+
+    // Moving backwards from the empty route continues in the enclosing scope.
+    primaryFocus!.previousFocus();
+    await tester.pump();
+    expect(node1.hasPrimaryFocus, isTrue);
+    expect(node2.hasFocus, isFalse);
+  });
+
   group(ReadingOrderTraversalPolicy, () {
     testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
