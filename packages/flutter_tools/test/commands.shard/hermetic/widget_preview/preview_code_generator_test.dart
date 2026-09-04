@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
+import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:process/process.dart';
@@ -460,6 +461,78 @@ List<_i1.WidgetPreview> previews() => [];
         expect(generatedPreviewFile.readAsStringSync(), emptyGeneratedPreviewFileContents);
       },
     );
+
+    testUsingContext('ignores previews with null packageName for LSP updates', () async {
+      await previewDetector.initialize();
+      final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
+        PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
+      );
+      generatedPreviewFile.createSync(recursive: true);
+
+      final update = FlutterWidgetPreviews(
+        namespaces: <String, String>{
+          'widget_preview.dart': '_i1',
+          'utils.dart': '_i2',
+          'package:foo_project/preview.dart': '_i3',
+          'preview.dart': '_i4',
+          'package:flutter/src/widget_previews/widget_previews.dart': '_i5',
+        },
+        previews: <FlutterWidgetPreviewDetails>[
+          FlutterWidgetPreviewDetails(
+            functionName: 'validPreview',
+            hasError: false,
+            dependencyHasErrors: false,
+            isBuilder: false,
+            isMultiPreview: false,
+            packageName: 'foo_project',
+            position: const Position(character: 1, line: 4),
+            previewAnnotation: "const _i5.Preview(name: 'valid')",
+            scriptUri: Uri.file('/user/flutter_project/lib/preview.dart'),
+            libraryUri: Uri.parse('package:foo_project/preview.dart'),
+          ),
+          FlutterWidgetPreviewDetails(
+            functionName: 'rootPreview',
+            hasError: false,
+            dependencyHasErrors: false,
+            isBuilder: false,
+            isMultiPreview: false,
+            position: const Position(character: 1, line: 4),
+            previewAnnotation: "const _i5.Preview(name: 'root')",
+            scriptUri: Uri.file('/user/flutter_project/preview.dart'),
+            libraryUri: Uri.parse('preview.dart'),
+          ),
+        ],
+        scriptUris: <Uri>[
+          Uri.file('/user/flutter_project/lib/preview.dart'),
+          Uri.file('/user/flutter_project/preview.dart'),
+        ],
+      );
+
+      codeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(update);
+
+      const expectedGeneratedPreviewFileContents = '''
+// ignore_for_file: implementation_imports
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'widget_preview.dart' as _i1;
+import 'utils.dart' as _i2;
+import 'package:foo_project/preview.dart' as _i3;
+import 'preview.dart' as _i4;
+import 'package:flutter/src/widget_previews/widget_previews.dart' as _i5;
+
+List<_i1.WidgetPreview> previews() => [
+  _i2.buildWidgetPreview(
+    packageName: 'foo_project',
+    scriptUri: 'file:///user/flutter_project/lib/preview.dart',
+    line: 4,
+    column: 1,
+    previewFunction: () => _i3.validPreview(),
+    transformedPreview: const _i5.Preview(name: 'valid').transform(),
+  ),
+];
+''';
+      expect(generatedPreviewFile.readAsStringSync(), expectedGeneratedPreviewFileContents);
+    });
 
     testUsingContext(
       'correctly generates ${PreviewCodeGenerator.getGeneratedDtdConnectionInfoFilePath(fs)}',

@@ -247,7 +247,9 @@ class PreviewCodeGenerator {
     builder
       ..body = cb.literalList([
         for (final preview in sortedPreviews)
-          _buildPreviewsLsp(preview: preview, uri: preview.libraryUri),
+          // Previews can only be defined under the lib/ directory.
+          if (preview.packageName != null)
+            _buildPreviewsLsp(preview: preview, uri: preview.libraryUri),
       ]).code
       ..name = _kPreviewsFunctionName
       ..returns =
