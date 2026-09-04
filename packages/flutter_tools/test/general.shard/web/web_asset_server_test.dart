@@ -771,7 +771,7 @@ void main() {
       );
     });
     testWithoutContext(
-      'release asset server returns 404 for missing static file asset requests across all 5 static cases',
+      'release asset server returns 404 for missing static file asset requests across all static cases',
       () async {
         final assetServer = ReleaseAssetServer(
           Uri.base,
@@ -816,6 +816,30 @@ void main() {
           Request('GET', Uri.parse('http://localhost:8080/main.dart.js')),
         );
         expect(jsResponse.statusCode, equals(404));
+
+        // Case 6: *.css file missing
+        final Response cssResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/styles.css')),
+        );
+        expect(cssResponse.statusCode, equals(404));
+
+        // Case 7: *.json file missing
+        final Response jsonResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/manifest.json')),
+        );
+        expect(jsonResponse.statusCode, equals(404));
+
+        // Case 8: *.ico file missing
+        final Response icoResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/favicon.ico')),
+        );
+        expect(icoResponse.statusCode, equals(404));
+
+        // Case 9: *.map file missing
+        final Response mapResponse = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/main.dart.js.map')),
+        );
+        expect(mapResponse.statusCode, equals(404));
       },
     );
 
@@ -835,14 +859,16 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('<html>index</html>');
 
-        // Client-side route paths like /settings or /profile must fall back to index.html
-        final Response routeResponse = await assetServer.handle(
-          Request('GET', Uri.parse('http://localhost:8080/settings')),
-        );
+        // Client-side route paths like /settings, /assets, or /canvaskit must fall back to index.html
+        for (final route in <String>['/settings', '/assets', '/canvaskit']) {
+          final Response routeResponse = await assetServer.handle(
+            Request('GET', Uri.parse('http://localhost:8080$route')),
+          );
 
-        expect(routeResponse.statusCode, equals(200));
-        expect(routeResponse.headers['Content-Type'], equals('text/html'));
-        expect(await routeResponse.readAsString(), equals('<html>index</html>'));
+          expect(routeResponse.statusCode, equals(200));
+          expect(routeResponse.headers['Content-Type'], equals('text/html'));
+          expect(await routeResponse.readAsString(), equals('<html>index</html>'));
+        }
       },
     );
   });

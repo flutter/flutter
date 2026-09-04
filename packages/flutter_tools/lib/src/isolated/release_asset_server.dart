@@ -52,6 +52,16 @@ class ReleaseAssetServer {
   // contains generated, publishable assets.
   static const Set<String> _sourceMapExtensions = <String>{'.dart', '.map'};
 
+  static const Set<String> _staticAssetExtensions = <String>{
+    '.wasm',
+    '.mjs',
+    '.js',
+    '.css',
+    '.json',
+    '.ico',
+    '.map',
+  };
+
   // Locations where source files, assets, or source maps may be located, paired
   // with the set of file extensions allowed to be served from each location. An
   // empty set means no extension restriction is applied.
@@ -116,14 +126,11 @@ class ReleaseAssetServer {
     // functions properly. SPA index.html fallback is preserved for navigation routes and
     // unallowed project path fallthroughs.
     final String cleanPath = requestPath.startsWith('/') ? requestPath.substring(1) : requestPath;
+    final String extension = _fileSystem.path.extension(cleanPath);
     final bool isMissingStaticAsset =
+        _staticAssetExtensions.contains(extension) ||
         cleanPath.startsWith('assets/') ||
-        cleanPath == 'assets' ||
-        cleanPath.startsWith('canvaskit/') ||
-        cleanPath == 'canvaskit' ||
-        cleanPath.endsWith('.wasm') ||
-        cleanPath.endsWith('.mjs') ||
-        cleanPath.endsWith('.js');
+        cleanPath.startsWith('canvaskit/');
     if (isMissingStaticAsset) {
       return shelf.Response.notFound('');
     }
