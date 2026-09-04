@@ -615,13 +615,13 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   //
   // Invariant: On Android, AndroidTouchProcessor packs MotionEvent downTime into the
   // PointerDownEvent timeStamp (`event.getEventTime() * 1000`, where eventTime == downTime
-  // on ACTION_DOWN). PointerEventResampler only resamples move and hover events, so
-  // PointerDownEvent.timeStamp is dispatched unaltered.
+  // on ACTION_DOWN).
   //
   // When Flutter wins the gesture arena, this timestamp is passed as `gestureId` to the
   // platform side to correlate with the active MotionEvent sequence. If timestamps do not
-  // match (or on non-Android embedders), the optimization safely degrades to standard
-  // buffered touch dispatch.
+  // match (e.g. when PointerEventResampler is enabled, which resamples PointerDownEvent
+  // timeStamp to sampleTime, or on non-Android embedders), the optimization safely degrades
+  // to standard buffered touch dispatch.
   final Map<int, int> _downTimes = <int, int>{};
   int? _currentDownTime;
 

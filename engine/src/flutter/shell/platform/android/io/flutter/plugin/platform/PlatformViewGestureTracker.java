@@ -5,7 +5,6 @@
 package io.flutter.plugin.platform;
 
 import android.view.MotionEvent;
-import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
@@ -18,7 +17,9 @@ public class PlatformViewGestureTracker {
   private boolean isGestureActive = false;
   private long currentDownTime = -1;
 
-  /** Callback interface for requesting unbuffered dispatch on a target {@link View}. */
+  /**
+   * Callback interface for requesting unbuffered dispatch on a target {@link android.view.View}.
+   */
   public interface UnbufferedRequester {
     void requestUnbuffered(@NonNull MotionEvent event);
   }
@@ -37,19 +38,6 @@ public class PlatformViewGestureTracker {
     if (isGestureActive && currentDownTime == gestureId) {
       flutterWonGesture = true;
     }
-  }
-
-  /**
-   * Updates tracking state for the given {@link MotionEvent}.
-   *
-   * <p>If Flutter has won the gesture arena and the event is {@link MotionEvent#ACTION_MOVE}, this
-   * invokes {@link View#requestUnbufferedDispatch(MotionEvent)} on the target view.
-   *
-   * @param event The motion event being processed.
-   * @param targetView The view on which to request unbuffered dispatch.
-   */
-  public void onTouchEvent(@NonNull MotionEvent event, @NonNull View targetView) {
-    onTouchEvent(event, targetView::requestUnbufferedDispatch);
   }
 
   /**
