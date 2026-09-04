@@ -9,8 +9,10 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
+import '../isolated/build_targets.dart';
 import '../runner/flutter_command.dart';
 import '../web/compile.dart';
 import '../web/web_constants.dart';
@@ -24,8 +26,10 @@ class BuildWebCommand extends BuildSubCommand {
     required FeatureFlags featureFlags,
     required ToolContext toolContext,
     required super.verboseHelp,
+    @visibleForTesting BuildTargets? buildTargets,
     @visibleForTesting WebBuilder? webBuilder,
   }) : _buildSystem = buildSystem,
+       _buildTargets = buildTargets,
        _featureFlags = featureFlags,
        _webBuilder = webBuilder,
        super(
@@ -42,6 +46,7 @@ class BuildWebCommand extends BuildSubCommand {
   }
 
   final BuildSystem _buildSystem;
+  final BuildTargets? _buildTargets;
   final FeatureFlags _featureFlags;
   final WebBuilder? _webBuilder;
 
@@ -191,7 +196,16 @@ class BuildWebCommand extends BuildSubCommand {
 
     final WebBuilder webBuilder =
         _webBuilder ??
-        WebBuilder(analytics: analytics, buildSystem: _buildSystem, toolContext: toolContext);
+        WebBuilder(
+          analytics: analytics,
+          buildSystem: _buildSystem,
+          buildTargets: _buildTargets ?? const BuildTargetsImpl(),
+          fileSystem: fs,
+          flutterVersion: toolContext.flutterVersion,
+          logger: toolContext.logger,
+          processManager: toolContext.processManager,
+          toolContext: toolContext,
+        );
     await webBuilder.buildWeb(
       project,
       targetFile,

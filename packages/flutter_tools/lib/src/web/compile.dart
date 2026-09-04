@@ -19,7 +19,6 @@ import '../cache.dart';
 import '../context/tool_context.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
-import '../isolated/build_targets.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -54,7 +53,7 @@ class WebBuilder {
     FlutterVersion? flutterVersion,
     Logger? logger,
     ProcessManager? processManager,
-    BuildTargets buildTargets = const BuildTargetsImpl(),
+    BuildTargets? buildTargets,
   }) : _analytics = analytics,
        _buildSystem = buildSystem,
        _buildTargets = buildTargets,
@@ -66,7 +65,7 @@ class WebBuilder {
 
   final Analytics _analytics;
   final BuildSystem _buildSystem;
-  final BuildTargets _buildTargets;
+  final BuildTargets? _buildTargets;
   final FileSystem? _fileSystem;
   final FlutterVersion? _flutterVersion;
   final Logger? _logger;
@@ -122,11 +121,12 @@ class WebBuilder {
     final migration = ProjectMigration(migrators);
     await migration.run();
 
+    final BuildTargets buildTargets = _buildTargets ?? globals.buildTargets;
     final Status status = logger.startProgress('Compiling $target for the Web...');
     final sw = Stopwatch()..start();
     try {
       final BuildResult result = await _buildSystem.build(
-        _buildTargets.webServiceWorker(fileSystem, compilerConfigs, _analytics),
+        buildTargets.webServiceWorker(fileSystem, compilerConfigs, _analytics),
         Environment(
           projectDir: flutterProject.directory,
           outputDir: outputDirectory,
