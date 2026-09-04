@@ -558,6 +558,10 @@ bool CapabilitiesVK::SupportsManuallyMippedTextures() const {
   return true;
 }
 
+bool CapabilitiesVK::SupportsTextureArrays() const {
+  return true;
+}
+
 void CapabilitiesVK::SetOffscreenFormat(PixelFormat pixel_format) const {
   default_color_format_ = pixel_format;
 }
