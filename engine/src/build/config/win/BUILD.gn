@@ -187,3 +187,53 @@ config("lean_and_mean") {
 config("nominmax") {
   defines = [ "NOMINMAX" ]
 }
+
+# Relative paths --------------------------------------------------------------
+
+config("relative_paths") {
+  cflags = [
+    # This makes sure that include directories in the toolchain are
+    # represented as relative to the build directory (because that's how
+    # we invoke the compiler), rather than absolute.  This can affect
+    # __FILE__ expansions (e.g. assertions in system headers).  We
+    # normally run a compiler that's someplace within the source tree
+    # (//buildtools/...), so its absolute installation path will have a
+    # prefix matching absolute_path and hence be mapped to relative_path
+    # in the debugging information, so this should actually be
+    # superfluous for purposes of the debugging information.
+    "-no-canonical-prefixes",
+
+    # Remove absolute paths from the debug information.
+    "-ffile-compilation-dir=.",
+  ]
+}
+
+if (is_clang) {
+  build_timestamp = exec_script("//build/config/win/make_coff_timestamp.py", [], "trim string")
+}
+
+config("deterministic_builds") {
+  if (is_clang) {
+    # /Brepro lets the compiler not write the mtime field in the .obj output.
+    # link.exe /incremental relies on this field to work correctly, but lld
+    # never looks at this timestamp, so it's safe to pass this flag with
+    # lld and get more deterministic compiler output in return.
+    # In LTO builds, the compiler doesn't write .obj files containing mtimes,
+    # so /Brepro is ignored there.
+    cflags = [ "/Brepro" ]
+
+    # lld defaults to writing the current time in the pe/coff header.
+    # For build reproducibility, pass an explicit timestamp. See
+    # build/compute_build_timestamp.py for how the timestamp is chosen.
+    # (link.exe also writes the current time, but it doesn't have a flag to
+    # override that behavior.)
+    ldflags = [ "/TIMESTAMP:" + build_timestamp ]
+
+    # Use a fake fixed base directory for paths in the pdb to make the pdb
+    # output fully deterministic and independent of the build directory.
+    ldflags += [ "/PDBSourcePath:o:\fake\prefix" ]
+
+    # Don't include absolute path to PDB file.
+    ldflags += [ "/pdbaltpath:%_PDB%" ]
+  }
+}
