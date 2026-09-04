@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -112,9 +111,9 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
 
   static FeatureFlags? _defaultFeatureFlags() {
     try {
-      return context.get<FeatureFlags>() ?? TestFeatureFlags();
+      return context.get<FeatureFlags>();
     } on UnsupportedError {
-      return TestFeatureFlags();
+      return null;
     }
   }
 
@@ -125,30 +124,36 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
     final contextOverrides = <Type, Object?>{
       if (topLevelResults['verbose'] as bool)
         Logger: VerboseLogger(topLevelLogger)
-      else
+      else if (!context.hasExplicitOverride<Logger>())
         Logger: topLevelLogger,
-      FileSystem: toolContext.fs,
-      Platform: toolContext.platform,
-      ProcessManager: toolContext.processManager,
-      ProcessUtils: toolContext.processUtils,
-      OperatingSystemUtils: toolContext.os,
-      AnsiTerminal: toolContext.terminal,
-      FlutterVersion: toolContext.flutterVersion,
-      Artifacts: toolContext.artifacts,
-      Cache: toolContext.cache,
-      Config: toolContext.config,
-      ProcessInfo: toolContext.processInfo,
-      Analytics: analytics,
-      FlutterProjectFactory: FlutterProjectFactory(
-        fileSystem: toolContext.fs,
-        logger: toolContext.logger,
-      ),
+      if (!context.hasExplicitOverride<FileSystem>()) FileSystem: toolContext.fs,
+      if (!context.hasExplicitOverride<Platform>()) Platform: toolContext.platform,
+      if (!context.hasExplicitOverride<ProcessManager>())
+        ProcessManager: toolContext.processManager,
+      if (!context.hasExplicitOverride<OperatingSystemUtils>())
+        OperatingSystemUtils: toolContext.os,
+      if (!context.hasExplicitOverride<AnsiTerminal>()) AnsiTerminal: toolContext.terminal,
+      if (!context.hasExplicitOverride<FlutterVersion>())
+        FlutterVersion: toolContext.flutterVersion,
+      if (!context.hasExplicitOverride<Artifacts>()) Artifacts: toolContext.artifacts,
+      if (!context.hasExplicitOverride<Cache>()) Cache: toolContext.cache,
+      if (!context.hasExplicitOverride<Config>()) Config: toolContext.config,
+      if (!context.hasExplicitOverride<ProcessInfo>()) ProcessInfo: toolContext.processInfo,
+      if (!context.hasExplicitOverride<Analytics>()) Analytics: analytics,
+      if (!context.hasExplicitOverride<FlutterProjectFactory>())
+        FlutterProjectFactory: FlutterProjectFactory(
+          fileSystem: toolContext.fs,
+          logger: toolContext.logger,
+        ),
       if (effectiveAppleContext case final AppleContext appleContext) ...<Type, Object?>{
-        if (appleContext.xcode case final Xcode xcode) Xcode: xcode,
+        if (appleContext.xcode case final Xcode xcode)
+          if (!context.hasExplicitOverride<Xcode>()) Xcode: xcode,
         if (appleContext.xcodeProjectInterpreter
             case final XcodeProjectInterpreter xcodeProjectInterpreter)
-          XcodeProjectInterpreter: xcodeProjectInterpreter,
-        if (appleContext.plistParser case final PlistParser plistParser) PlistParser: plistParser,
+          if (!context.hasExplicitOverride<XcodeProjectInterpreter>())
+            XcodeProjectInterpreter: xcodeProjectInterpreter,
+        if (appleContext.plistParser case final PlistParser plistParser)
+          if (!context.hasExplicitOverride<PlistParser>()) PlistParser: plistParser,
       },
     };
     return context.run<void>(

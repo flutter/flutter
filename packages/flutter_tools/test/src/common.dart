@@ -259,6 +259,12 @@ class _NoContext implements AppContext {
   String get name => 'No Context';
 
   @override
+  bool hasExplicitOverride<T>() => false;
+
+  @override
+  bool hasExplicitOverrideFor(Type type) => false;
+
+  @override
   Future<V> run<V>({
     required FutureOr<V> Function() body,
     String? name,

@@ -125,6 +125,23 @@ class AppContext {
     return _unboxNull(value ?? _generateIfNecessary(T, _fallbacks)) as T?;
   }
 
+  /// Whether this context or an enclosing child context has an explicit
+  /// override for [T] before reaching the base testbed mocks or root.
+  bool hasExplicitOverride<T>() => hasExplicitOverrideFor(T);
+
+  /// Whether this context or an enclosing child context has an explicit
+  /// override for [type] before reaching the base testbed mocks or root.
+  bool hasExplicitOverrideFor(Type type) {
+    AppContext? ctx = this;
+    while (ctx != null && ctx.name != 'mocks' && ctx != AppContext._root) {
+      if (ctx._overrides.containsKey(type)) {
+        return true;
+      }
+      ctx = ctx._parent;
+    }
+    return false;
+  }
+
   /// Runs [body] in a child context and returns the value returned by [body].
   ///
   /// If [overrides] is specified, the child context will return corresponding
