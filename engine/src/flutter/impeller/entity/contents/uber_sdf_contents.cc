@@ -126,10 +126,8 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       params_.color.WithAlpha(params_.color.alpha * GetOpacityFactor());
   frag_info.center = params_.center;
   frag_info.size = params_.size;
-  Vector2 transform_scaling = entity.GetTransform().GetBasisScaleXY();
-  frag_info.pixel_size =
-      Point(transform_scaling.x != 0.0f ? 1.0f / transform_scaling.x : 0.0f,
-            transform_scaling.y != 0.0f ? 1.0f / transform_scaling.y : 0.0f);
+  Vector2 pixel_size = entity.GetTransform().GetTransformedPixelSize();
+  frag_info.pixel_size = Point(pixel_size.x, pixel_size.y);
   frag_info.stroked = params_.stroke ? 1.0f : 0.0f;
   frag_info.stroke_width = params_.stroke ? params_.stroke->width : 0.0f;
   frag_info.stroke_join =

@@ -404,6 +404,28 @@ struct Matrix {
     return Vector2(GetBasisX2D().GetLength(), GetBasisY2D().GetLength());
   }
 
+  /// @brief Returns the size of a screen/device pixel in local coordinates
+  ///        along the local X and Y axes, accounting for 2D scale, rotation,
+  ///        and skew.
+  ///
+  ///        For an affine transform, this corresponds to the magnitude of the
+  ///        gradients of local x and y with respect to screen coordinates:
+  ///          pixel_size.x = ||\nabla x|| = ||Basis Y 2D|| / |det 2D|
+  ///          pixel_size.y = ||\nabla y|| = ||Basis X 2D|| / |det 2D|
+  inline Vector2 GetTransformedPixelSize() const {
+    if (m[1] == 0.0f && m[4] == 0.0f) {
+      return Vector2(m[0] != 0.0f ? 1.0f / std::abs(m[0]) : 0.0f,
+                     m[5] != 0.0f ? 1.0f / std::abs(m[5]) : 0.0f);
+    }
+    Scalar det = m[0] * m[5] - m[1] * m[4];
+    if (ScalarNearlyZero(det)) {
+      return Vector2();
+    }
+    Scalar abs_det = std::abs(det);
+    return Vector2(GetBasisY2D().GetLength() / abs_det,
+                   GetBasisX2D().GetLength() / abs_det);
+  }
+
   inline Scalar GetDirectionScale(Vector3 direction) const {
     return 1.0f / (this->Basis().Invert() * direction.Normalize()).GetLength() *
            direction.GetLength();
