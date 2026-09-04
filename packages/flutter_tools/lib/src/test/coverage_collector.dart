@@ -7,10 +7,11 @@ import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
-import '../globals.dart' as globals;
 import '../vmservice.dart';
-
 import 'test_device.dart';
 import 'test_time_recorder.dart';
 import 'watcher.dart';
@@ -24,7 +25,22 @@ class CoverageCollector extends TestWatcher {
     this.resolver,
     this.testTimeRecorder,
     this.branchCoverage = false,
-  });
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessUtils processUtils,
+    OperatingSystemUtils? os,
+  }) : _fileSystem = fileSystem,
+       _logger = logger,
+       _platform = platform,
+       _processUtils = processUtils,
+       _os = os;
+
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final Platform _platform;
+  final ProcessUtils _processUtils;
+  final OperatingSystemUtils? _os;
 
   /// True when log messages should be emitted.
   final bool verbose;
@@ -70,9 +86,9 @@ class CoverageCollector extends TestWatcher {
       return;
     }
     if (error) {
-      globals.printError(line);
+      _logger.printError(line);
     } else {
-      globals.printTrace(line);
+      _logger.printTrace(line);
     }
   }
 
@@ -97,7 +113,8 @@ class CoverageCollector extends TestWatcher {
     // This may not be a safe assumption in non-standard environments, such as
     // when building under build systems such as Bazel. In those cases, this
     // getter should be overridden.
-    return globals.fs.directory(globals.fs.file(packagesPath).dirname).dirname;
+    final FileSystem fs = _fileSystem;
+    return fs.directory(fs.file(packagesPath).dirname).dirname;
   }
 
   /// Collects coverage for an isolate using the given `port`.
@@ -210,7 +227,7 @@ class CoverageCollector extends TestWatcher {
     if (formatter == null) {
       final coverage.Resolver usedResolver =
           resolver ?? this.resolver ?? await CoverageCollector.getResolver(packagesPath);
-      final String packagePath = globals.fs.currentDirectory.path;
+      final String packagePath = _fileSystem.currentDirectory.path;
       // find paths for libraryNames so we can include them to report
       final List<String>? libraryPaths = libraryNames
           ?.map((String e) => usedResolver.resolve('package:$e'))
@@ -232,29 +249,33 @@ class CoverageCollector extends TestWatcher {
     bool mergeCoverageData = false,
     Directory? coverageDirectory,
   }) async {
+    final FileSystem fs = _fileSystem;
+    final Platform platform = _platform;
+    final OperatingSystemUtils? os = _os;
+
     final String? coverageData = await finalizeCoverage(coverageDirectory: coverageDirectory);
     _logMessage('coverage information collection complete');
     if (coverageData == null) {
       return false;
     }
 
-    final File coverageFile = globals.fs.file(coveragePath)
+    final File coverageFile = fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
     _logMessage('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
     const baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
-      if (!globals.fs.isFileSync(baseCoverageData)) {
+      if (!fs.isFileSync(baseCoverageData)) {
         _logMessage('Missing "$baseCoverageData". Unable to merge coverage data.', error: true);
         return false;
       }
 
-      if (globals.os.which('lcov') == null) {
+      if (os?.which('lcov') == null) {
         var installMessage = 'Please install lcov.';
-        if (globals.platform.isLinux) {
+        if (platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
-        } else if (globals.platform.isMacOS) {
+        } else if (platform.isMacOS) {
           installMessage = 'Consider running "brew install lcov".';
         }
         _logMessage(
@@ -264,14 +285,14 @@ class CoverageCollector extends TestWatcher {
         return false;
       }
 
-      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+      final Directory tempDir = fs.systemTempDirectory.createTempSync(
         'flutter_tools_test_coverage.',
       );
       try {
         final File sourceFile = coverageFile.copySync(
-          globals.fs.path.join(tempDir.path, 'lcov.source.info'),
+          fs.path.join(tempDir.path, 'lcov.source.info'),
         );
-        final RunResult result = globals.processUtils.runSync(<String>[
+        final RunResult result = _processUtils.runSync(<String>[
           'lcov',
           '--add-tracefile',
           baseCoverageData,
