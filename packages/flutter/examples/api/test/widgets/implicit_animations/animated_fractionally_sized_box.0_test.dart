@@ -4,10 +4,10 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/widgets/implicit_animations/animated_fractionally_sized_box.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   testWidgets('AnimatedFractionallySizedBox animates on tap', (

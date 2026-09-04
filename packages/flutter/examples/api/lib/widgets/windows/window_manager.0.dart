@@ -6,8 +6,8 @@
 // See: https://github.com/flutter/flutter/issues/177586
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
-import 'package:flutter/widgets.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:flutter/widgets.dart';
 
 void main() {
   try {

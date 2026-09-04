@@ -4,11 +4,11 @@
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_api_samples/widgets/editable_text/editable_text.on_content_inserted.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   testWidgets('Image.memory displays inserted content', (

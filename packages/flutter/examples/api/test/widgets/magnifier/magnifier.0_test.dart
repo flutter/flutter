@@ -7,10 +7,10 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_api_samples/widgets/magnifier/magnifier.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   testWidgets('should update magnifier position on drag', (
