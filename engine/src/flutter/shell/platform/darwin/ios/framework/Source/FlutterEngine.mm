@@ -285,6 +285,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
   self.sceneLifeCycleDelegate = [[FlutterEnginePluginSceneLifeCycleDelegate alloc] init];
 
+  if (!FlutterSharedApplication.application.supportsMultipleScenes) {
+    [FlutterPluginSceneLifeCycleDelegate registerEngineForSingleScene:self];
+  }
+
   return self;
 }
 
@@ -329,11 +333,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
-  // If the application is not available, use the scene for lifecycle notifications if available.
-  [center addObserver:self
-             selector:@selector(sceneWillConnect:)
-                 name:UISceneWillConnectNotification
-               object:nil];
   if (!FlutterSharedApplication.isAvailable) {
     [center addObserver:self
                selector:@selector(sceneWillEnterForeground:)
@@ -353,26 +352,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
              selector:@selector(applicationDidEnterBackground:)
                  name:UIApplicationDidEnterBackgroundNotification
                object:nil];
-}
-
-- (void)sceneWillConnect:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
-  if (self.viewController && ![self.viewController shouldHandleSceneNotification:notification]) {
-    return;
-  }
-  UIScene* scene = notification.object;
-  if (!FlutterSharedApplication.application.supportsMultipleScenes) {
-    // Since there is only one scene, we can assume that the FlutterEngine is within this scene and
-    // register it to the scene.
-    // The FlutterEngine needs to be registered with the scene when the scene connects in order for
-    // plugins to receive the `scene:willConnectToSession:options` event.
-    // If we want to support multi-window on iPad later, we may need to add a way for deveopers to
-    // register their FlutterEngine to the scene manually during this event.
-    FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate =
-        [FlutterPluginSceneLifeCycleDelegate fromScene:scene];
-    if (sceneLifeCycleDelegate != nil) {
-      return [sceneLifeCycleDelegate engine:self receivedConnectNotificationFor:scene];
-    }
-  }
 }
 
 - (void)recreatePlatformViewsController {

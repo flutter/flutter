@@ -19,6 +19,7 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     button.tap()
 
     let expectedStartEvents = [
+      "sceneWillConnect",
       "sceneWillEnterForeground", "sceneDidBecomeActive",
     ]
     let startEventsPredicate = NSPredicate(
@@ -37,6 +38,7 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     button.tap()
 
     let expectedEventsAfterBackgroundAndReactivate = [
+      "sceneWillConnect",
       "sceneWillEnterForeground", "sceneDidBecomeActive",
       "sceneWillResignActive", "sceneDidEnterBackground",
       "sceneWillEnterForeground", "sceneDidBecomeActive",
