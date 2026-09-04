@@ -1045,9 +1045,6 @@ abstract class AndroidViewController extends PlatformViewController {
       await _sendDisposeMessage();
     }
   }
-
-  @override
-  Future<void> rejectGesture({int? gestureId}) async {}
 }
 
 /// Controls an Android view that is composed using a GL texture.
@@ -1755,12 +1752,18 @@ abstract class PlatformViewController {
   /// Clears the view's focus on the platform side.
   Future<void> clearFocus();
 
-  /// Rejects an active gesture sequence for this platform view.
+  /// Informs the platform view that Flutter has won the gesture arena for an active
+  /// touch sequence.
   ///
-  /// This is called when Flutter wins the gesture arena for a touch sequence that
-  /// started on this platform view.
+  /// On Android, this serves as a latency hint. When Flutter wins the gesture arena for a
+  /// sequence (such as when a parent scroll view begins scrolling), subsequent touch move
+  /// events request unbuffered dispatch on the native view to eliminate touch lag during
+  /// Flutter-driven gestures.
   ///
-  /// The optional [gestureId] identifies the specific gesture (e.g. its downTime timestamp in
-  /// milliseconds) that was rejected.
+  /// On other platforms, or if unbuffered dispatch is not supported, this is a no-op.
+  /// (On iOS, platform view touch rejection uses `DarwinPlatformViewController.rejectGesture`.)
+  ///
+  /// The optional [gestureId] identifies the specific gesture (e.g., its `downTime` timestamp
+  /// in milliseconds on Android) that was rejected by the arena.
   Future<void> rejectGesture({int? gestureId}) async {}
 }

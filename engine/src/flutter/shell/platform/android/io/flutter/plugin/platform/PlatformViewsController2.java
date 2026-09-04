@@ -439,7 +439,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   @VisibleForTesting
-  public FlutterMutatorView getPlatformViewParent(int viewId) {
+  FlutterMutatorView getPlatformViewParent(int viewId) {
     return platformViewParent.get(viewId);
   }
 
@@ -777,8 +777,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   //// Message Handler ///////
 
-  @VisibleForTesting
-  PlatformViewsChannel2.PlatformViewsHandler channelHandler =
+  final PlatformViewsChannel2.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel2.PlatformViewsHandler() {
 
         @Override

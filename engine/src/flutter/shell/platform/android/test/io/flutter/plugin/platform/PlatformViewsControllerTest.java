@@ -2043,6 +2043,12 @@ public class PlatformViewsControllerTest {
         "flutter/platform_views", encodeMethodCall(rejectCall), /*replyId=*/ 0, /*messageData=*/ 0);
 
     assertTrue(parent.getFlutterWonGesture());
+
+    // Subsequent ACTION_MOVE triggers unbuffered dispatch and consumes flutterWonGesture.
+    final MotionEvent moveEvent =
+        MotionEvent.obtain(100, 101, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0);
+    parent.onTouchEvent(moveEvent);
+    assertFalse(parent.getFlutterWonGesture());
   }
 
   @Test
@@ -2106,6 +2112,12 @@ public class PlatformViewsControllerTest {
         "flutter/platform_views", encodeMethodCall(rejectCall), /*replyId=*/ 0, /*messageData=*/ 0);
 
     assertTrue(wrapper.getFlutterWonGesture());
+
+    // Subsequent ACTION_MOVE triggers unbuffered dispatch and consumes flutterWonGesture.
+    final MotionEvent moveEvent =
+        MotionEvent.obtain(100, 101, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0);
+    wrapper.onTouchEvent(moveEvent);
+    assertFalse(wrapper.getFlutterWonGesture());
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {

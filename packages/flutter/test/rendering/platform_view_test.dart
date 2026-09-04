@@ -666,6 +666,55 @@ void main() {
     expect(viewController.rejectGestureCount, 1);
     expect(viewController.lastRejectGestureId, 12345);
   });
+
+  test('rejectGesture preserves initial downTime across multi-touch sequence', () {
+    final viewController = FakePlatformViewController(0);
+    final renderBox = PlatformViewRenderBox(
+      controller: viewController,
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+        Factory<VerticalDragGestureRecognizer>(() => VerticalDragGestureRecognizer()),
+      },
+    );
+    layout(renderBox);
+
+    // Finger 1 down at T1 = 10000ms.
+    renderBox.handleEvent(
+      const PointerDownEvent(
+        pointer: 1,
+        position: Offset(10, 10),
+        timeStamp: Duration(milliseconds: 10000),
+      ),
+      BoxHitTestEntry(renderBox, const Offset(10, 10)),
+    );
+
+    // Finger 1 wins the gesture arena (accepted).
+    GestureBinding.instance.gestureArena.close(1);
+    GestureBinding.instance.gestureArena.sweep(1);
+
+    // Finger 2 down at T2 = 10050ms while Finger 1 is still down.
+    renderBox.handleEvent(
+      const PointerDownEvent(
+        pointer: 2,
+        position: Offset(20, 20),
+        timeStamp: Duration(milliseconds: 10050),
+      ),
+      BoxHitTestEntry(renderBox, const Offset(20, 20)),
+    );
+
+    // Finger 2 is rejected by the arena (e.g. Flutter scroll wins).
+    final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(
+      2,
+      _WinningGestureArenaMember(),
+    );
+    GestureBinding.instance.gestureArena.close(2);
+    entry.resolve(GestureDisposition.accepted);
+
+    // The rejectGesture call must pass the initial gesture downTime (10000ms),
+    // matching Android's MotionEvent.getDownTime() for the active multi-touch gesture.
+    expect(viewController.rejectGestureCount, 1);
+    expect(viewController.lastRejectGestureId, 10000);
+  });
 }
 
 class _WinningGestureArenaMember extends GestureArenaMember {

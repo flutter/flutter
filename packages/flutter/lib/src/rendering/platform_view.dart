@@ -611,6 +611,17 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   late _HandlePointerEvent _handlePointerEvent;
 
+  // Maps active pointer IDs to the downTime timestamp (in milliseconds) of the gesture.
+  //
+  // Invariant: On Android, AndroidTouchProcessor packs MotionEvent downTime into the
+  // PointerDownEvent timeStamp (`event.getEventTime() * 1000`, where eventTime == downTime
+  // on ACTION_DOWN). PointerEventResampler only resamples move and hover events, so
+  // PointerDownEvent.timeStamp is dispatched unaltered.
+  //
+  // When Flutter wins the gesture arena, this timestamp is passed as `gestureId` to the
+  // platform side to correlate with the active MotionEvent sequence. If timestamps do not
+  // match (or on non-Android embedders), the optimization safely degrades to standard
+  // buffered touch dispatch.
   final Map<int, int> _downTimes = <int, int>{};
   int? _currentDownTime;
 
@@ -660,10 +671,6 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void acceptGesture(int pointer) {
-    _downTimes.remove(pointer);
-    if (_downTimes.isEmpty) {
-      _currentDownTime = null;
-    }
     _flushPointerCache(pointer);
     forwardedPointers.add(pointer);
   }
@@ -764,7 +771,9 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
       gestureRecognizers,
       _controller.dispatchPointerEvent,
       onRejectGesture: (int? gestureId) {
-        unawaited(_controller.rejectGesture(gestureId: gestureId));
+        if (gestureId != null) {
+          _controller.rejectGesture(gestureId: gestureId).ignore();
+        }
       },
     );
   }

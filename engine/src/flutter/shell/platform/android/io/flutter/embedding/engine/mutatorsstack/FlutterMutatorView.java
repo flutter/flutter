@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.android.AndroidTouchProcessor;
+import io.flutter.plugin.platform.PlatformViewGestureTracker;
 import io.flutter.util.ViewUtils;
 
 /**
@@ -35,6 +36,7 @@ public class FlutterMutatorView extends FrameLayout {
   private int top;
 
   private final AndroidTouchProcessor androidTouchProcessor;
+  private final PlatformViewGestureTracker gestureTracker = new PlatformViewGestureTracker();
   private Paint paint;
 
   /**
@@ -191,10 +193,6 @@ public class FlutterMutatorView extends FrameLayout {
     return super.requestSendAccessibilityEvent(child, event);
   }
 
-  private boolean flutterWonGesture = false;
-  private boolean isGestureActive = false;
-  private long currentDownTime = 0;
-
   /**
    * Informs this view that Flutter has won the gesture arena for the active touch sequence.
    *
@@ -205,24 +203,22 @@ public class FlutterMutatorView extends FrameLayout {
    *     is only enabled if this matches the currently active gesture's downTime.
    */
   public void onFlutterWonGesture(long gestureId) {
-    if (isGestureActive && currentDownTime == gestureId) {
-      flutterWonGesture = true;
-    }
+    gestureTracker.onFlutterWonGesture(gestureId);
   }
 
   @VisibleForTesting
   public boolean getFlutterWonGesture() {
-    return flutterWonGesture;
+    return gestureTracker.getFlutterWonGesture();
   }
 
   @VisibleForTesting
-  public boolean isGestureActive() {
-    return isGestureActive;
+  boolean isGestureActive() {
+    return gestureTracker.isGestureActive();
   }
 
   @VisibleForTesting
-  public long getCurrentDownTime() {
-    return currentDownTime;
+  long getCurrentDownTime() {
+    return gestureTracker.getCurrentDownTime();
   }
 
   @VisibleForTesting
@@ -236,24 +232,7 @@ public class FlutterMutatorView extends FrameLayout {
     if (androidTouchProcessor == null) {
       return super.onTouchEvent(event);
     }
-    switch (event.getActionMasked()) {
-      case MotionEvent.ACTION_DOWN:
-        isGestureActive = true;
-        currentDownTime = event.getDownTime();
-        flutterWonGesture = false;
-        break;
-      case MotionEvent.ACTION_MOVE:
-        if (flutterWonGesture) {
-          requestUnbuffered(event);
-          flutterWonGesture = false;
-        }
-        break;
-      case MotionEvent.ACTION_UP:
-      case MotionEvent.ACTION_CANCEL:
-        isGestureActive = false;
-        flutterWonGesture = false;
-        break;
-    }
+    gestureTracker.onTouchEvent(event, this::requestUnbuffered);
     final Matrix screenMatrix = new Matrix();
     screenMatrix.postTranslate(getLeft(), getTop());
     return androidTouchProcessor.onTouchEvent(event, screenMatrix);

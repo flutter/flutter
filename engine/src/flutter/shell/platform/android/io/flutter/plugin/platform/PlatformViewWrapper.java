@@ -47,6 +47,8 @@ public class PlatformViewWrapper extends FrameLayout {
   private AndroidTouchProcessor touchProcessor;
   private PlatformViewRenderTarget renderTarget;
 
+  private final PlatformViewGestureTracker gestureTracker = new PlatformViewGestureTracker();
+
   private ViewTreeObserver.OnGlobalFocusChangeListener activeFocusListener;
 
   public PlatformViewWrapper(@NonNull Context context) {
@@ -187,10 +189,6 @@ public class PlatformViewWrapper extends FrameLayout {
     }
   }
 
-  private boolean flutterWonGesture = false;
-  private boolean isGestureActive = false;
-  private long currentDownTime = 0;
-
   /**
    * Informs this view that Flutter has won the gesture arena for the active touch sequence.
    *
@@ -201,24 +199,22 @@ public class PlatformViewWrapper extends FrameLayout {
    *     is only enabled if this matches the currently active gesture's downTime.
    */
   public void onFlutterWonGesture(long gestureId) {
-    if (isGestureActive && currentDownTime == gestureId) {
-      flutterWonGesture = true;
-    }
+    gestureTracker.onFlutterWonGesture(gestureId);
   }
 
   @VisibleForTesting
-  public boolean getFlutterWonGesture() {
-    return flutterWonGesture;
+  boolean getFlutterWonGesture() {
+    return gestureTracker.getFlutterWonGesture();
   }
 
   @VisibleForTesting
-  public boolean isGestureActive() {
-    return isGestureActive;
+  boolean isGestureActive() {
+    return gestureTracker.isGestureActive();
   }
 
   @VisibleForTesting
-  public long getCurrentDownTime() {
-    return currentDownTime;
+  long getCurrentDownTime() {
+    return gestureTracker.getCurrentDownTime();
   }
 
   @VisibleForTesting
@@ -232,24 +228,7 @@ public class PlatformViewWrapper extends FrameLayout {
     if (touchProcessor == null) {
       return super.onTouchEvent(event);
     }
-    switch (event.getActionMasked()) {
-      case MotionEvent.ACTION_DOWN:
-        isGestureActive = true;
-        currentDownTime = event.getDownTime();
-        flutterWonGesture = false;
-        break;
-      case MotionEvent.ACTION_MOVE:
-        if (flutterWonGesture) {
-          requestUnbuffered(event);
-          flutterWonGesture = false;
-        }
-        break;
-      case MotionEvent.ACTION_UP:
-      case MotionEvent.ACTION_CANCEL:
-        isGestureActive = false;
-        flutterWonGesture = false;
-        break;
-    }
+    gestureTracker.onTouchEvent(event, this::requestUnbuffered);
     final Matrix screenMatrix = new Matrix();
     switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
@@ -265,6 +244,7 @@ public class PlatformViewWrapper extends FrameLayout {
         prevTop = top;
         break;
       case MotionEvent.ACTION_UP:
+      case MotionEvent.ACTION_CANCEL:
       default:
         screenMatrix.postTranslate(left, top);
         break;

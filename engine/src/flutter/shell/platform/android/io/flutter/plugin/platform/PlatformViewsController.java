@@ -158,8 +158,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   private static boolean enableSurfaceProducerRenderTarget = true;
 
-  @VisibleForTesting
-  PlatformViewsChannel.PlatformViewsHandler channelHandler =
+  final PlatformViewsChannel.PlatformViewsHandler channelHandler =
       new PlatformViewsChannel.PlatformViewsHandler() {
 
         @Override
@@ -528,12 +527,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   }
 
   @VisibleForTesting
-  public FlutterMutatorView getPlatformViewParent(int viewId) {
+  FlutterMutatorView getPlatformViewParent(int viewId) {
     return platformViewParent.get(viewId);
   }
 
   @VisibleForTesting
-  public PlatformViewWrapper getViewWrapper(int viewId) {
+  PlatformViewWrapper getViewWrapper(int viewId) {
     return viewWrappers.get(viewId);
   }
 

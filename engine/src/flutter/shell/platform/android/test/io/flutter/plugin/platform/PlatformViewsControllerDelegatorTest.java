@@ -107,29 +107,35 @@ public class PlatformViewsControllerDelegatorTest {
   public void onRejectGesture_delegatesToPVC2ifPresent() {
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
     PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
-    platformViewsController2.channelHandler =
+    PlatformViewsChannel.PlatformViewsHandler pvcHandler =
+        mock(PlatformViewsChannel.PlatformViewsHandler.class);
+    PlatformViewsChannel2.PlatformViewsHandler pvc2Handler =
         mock(PlatformViewsChannel2.PlatformViewsHandler.class);
-    platformViewsController.channelHandler = mock(PlatformViewsChannel.PlatformViewsHandler.class);
     View pv2 = mock(View.class);
     when(platformViewsController2.getPlatformViewById(0)).thenReturn(pv2);
 
     PlatformViewsControllerDelegator delegator =
-        new PlatformViewsControllerDelegator(platformViewsController, platformViewsController2);
+        new PlatformViewsControllerDelegator(
+            platformViewsController, platformViewsController2, pvcHandler, pvc2Handler);
     delegator.onRejectGesture(0, 12345L);
 
-    verify(platformViewsController2.channelHandler).onRejectGesture(0, 12345L);
+    verify(pvc2Handler).onRejectGesture(0, 12345L);
   }
 
   @Test
   public void onRejectGesture_delegatesToPVC1ifNotPresentInPVC2() {
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
     PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
-    platformViewsController.channelHandler = mock(PlatformViewsChannel.PlatformViewsHandler.class);
+    PlatformViewsChannel.PlatformViewsHandler pvcHandler =
+        mock(PlatformViewsChannel.PlatformViewsHandler.class);
+    PlatformViewsChannel2.PlatformViewsHandler pvc2Handler =
+        mock(PlatformViewsChannel2.PlatformViewsHandler.class);
 
     PlatformViewsControllerDelegator delegator =
-        new PlatformViewsControllerDelegator(platformViewsController, platformViewsController2);
+        new PlatformViewsControllerDelegator(
+            platformViewsController, platformViewsController2, pvcHandler, pvc2Handler);
     delegator.onRejectGesture(0, 12345L);
 
-    verify(platformViewsController.channelHandler).onRejectGesture(0, 12345L);
+    verify(pvcHandler).onRejectGesture(0, 12345L);
   }
 }

@@ -8,10 +8,12 @@ import android.content.Context;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.PlatformViewCreationRequest;
 import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
+import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.TextureRegistry;
 
@@ -20,12 +22,29 @@ public class PlatformViewsControllerDelegator
 
   PlatformViewsController platformViewsController;
   PlatformViewsController2 platformViewsController2;
+  private final PlatformViewsChannel.PlatformViewsHandler channelHandler;
+  private final PlatformViewsChannel2.PlatformViewsHandler channelHandler2;
 
   public PlatformViewsControllerDelegator(
       PlatformViewsController platformViewsController,
       PlatformViewsController2 platformViewsController2) {
+    this(
+        platformViewsController,
+        platformViewsController2,
+        platformViewsController.channelHandler,
+        platformViewsController2.channelHandler);
+  }
+
+  @VisibleForTesting
+  PlatformViewsControllerDelegator(
+      PlatformViewsController platformViewsController,
+      PlatformViewsController2 platformViewsController2,
+      PlatformViewsChannel.PlatformViewsHandler channelHandler,
+      PlatformViewsChannel2.PlatformViewsHandler channelHandler2) {
     this.platformViewsController = platformViewsController;
     this.platformViewsController2 = platformViewsController2;
+    this.channelHandler = channelHandler;
+    this.channelHandler2 = channelHandler2;
   }
 
   @Nullable
@@ -58,9 +77,9 @@ public class PlatformViewsControllerDelegator
   @Override
   public void dispose(int viewId) {
     if (platformViewsController2.getPlatformViewById(viewId) != null) {
-      platformViewsController2.channelHandler.dispose(viewId);
+      channelHandler2.dispose(viewId);
     } else {
-      platformViewsController.channelHandler.dispose(viewId);
+      channelHandler.dispose(viewId);
     }
   }
 
@@ -71,7 +90,7 @@ public class PlatformViewsControllerDelegator
     if (platformViewsController2.getPlatformViewById(request.viewId) != null) {
       // no op
     } else {
-      platformViewsController.channelHandler.resize(request, onComplete);
+      channelHandler.resize(request, onComplete);
     }
   }
 
@@ -80,48 +99,48 @@ public class PlatformViewsControllerDelegator
     if (platformViewsController2.getPlatformViewById(viewId) != null) {
       // no op
     } else {
-      platformViewsController.channelHandler.offset(viewId, top, left);
+      channelHandler.offset(viewId, top, left);
     }
   }
 
   @Override
   public void onTouch(@NonNull PlatformViewTouch touch) {
     if (platformViewsController2.getPlatformViewById(touch.viewId) != null) {
-      platformViewsController2.channelHandler.onTouch(touch);
+      channelHandler2.onTouch(touch);
     } else {
-      platformViewsController.channelHandler.onTouch(touch);
+      channelHandler.onTouch(touch);
     }
   }
 
   @Override
   public void setDirection(int viewId, int direction) {
     if (platformViewsController2.getPlatformViewById(viewId) != null) {
-      platformViewsController2.channelHandler.setDirection(viewId, direction);
+      channelHandler2.setDirection(viewId, direction);
     } else {
-      platformViewsController.channelHandler.setDirection(viewId, direction);
+      channelHandler.setDirection(viewId, direction);
     }
   }
 
   @Override
   public void clearFocus(int viewId) {
     if (platformViewsController2.getPlatformViewById(viewId) != null) {
-      platformViewsController2.channelHandler.clearFocus(viewId);
+      channelHandler2.clearFocus(viewId);
     } else {
-      platformViewsController.channelHandler.clearFocus(viewId);
+      channelHandler.clearFocus(viewId);
     }
   }
 
   @Override
   public void synchronizeToNativeViewHierarchy(boolean yes) {
-    platformViewsController.channelHandler.synchronizeToNativeViewHierarchy(yes);
+    channelHandler.synchronizeToNativeViewHierarchy(yes);
   }
 
   @Override
   public void onRejectGesture(int viewId, long gestureId) {
     if (platformViewsController2.getPlatformViewById(viewId) != null) {
-      platformViewsController2.channelHandler.onRejectGesture(viewId, gestureId);
+      channelHandler2.onRejectGesture(viewId, gestureId);
     } else {
-      platformViewsController.channelHandler.onRejectGesture(viewId, gestureId);
+      channelHandler.onRejectGesture(viewId, gestureId);
     }
   }
 
@@ -134,19 +153,19 @@ public class PlatformViewsControllerDelegator
   // hc only
   @Override
   public void createForPlatformViewLayer(@NonNull PlatformViewCreationRequest request) {
-    platformViewsController.channelHandler.createForPlatformViewLayer(request);
+    channelHandler.createForPlatformViewLayer(request);
   }
 
   // tlhc w/ fallbacks
   @Override
   public long createForTextureLayer(@NonNull PlatformViewCreationRequest request) {
-    return platformViewsController.channelHandler.createForTextureLayer(request);
+    return channelHandler.createForTextureLayer(request);
   }
 
   // hcpp
   @Override
   public void createPlatformViewHcpp(@NonNull PlatformViewCreationRequest request) {
-    platformViewsController2.channelHandler.createPlatformView(request);
+    channelHandler2.createPlatformView(request);
   }
 
   public void attach(
