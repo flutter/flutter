@@ -337,15 +337,9 @@ abstract class FlutterCommand extends Command<void> {
   /// easily reference it or overwrite as necessary.
   Analytics get analytics => _analytics;
 
-  final Map<String, OptionDescriptor<Object?>> _optionRegistry =
-      <String, OptionDescriptor<Object?>>{};
-
-  /// Option descriptor registry for type-safe lookups.
-  Map<String, OptionDescriptor<Object?>> get optionRegistry => _optionRegistry;
-
   /// Registers an [OptionBundle] with this command.
   void registerOptionBundle(OptionBundle bundle) {
-    bundle.register(this, argParser, _optionRegistry);
+    bundle.register(this, argParser);
   }
 
   /// Registers multiple [OptionBundle] instances with this command.
