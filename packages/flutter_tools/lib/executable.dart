@@ -299,21 +299,19 @@ List<FlutterCommand> generateCommands({
     featureFlags: featureFlags,
     extensionManager: extensionManager,
   ),
-  CustomDevicesCommand(
-    customDevicesConfig: toolDependencies.toolContext.customDevicesConfig,
-    operatingSystemUtils: toolDependencies.toolContext.os,
-    terminal: toolDependencies.toolContext.terminal,
-    platform: toolDependencies.toolContext.platform,
-    featureFlags: featureFlags,
-    processManager: toolDependencies.toolContext.processManager,
-    fileSystem: toolDependencies.toolContext.fs,
-    logger: toolDependencies.toolContext.logger,
-  ),
+  CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
   DevicesCommand(verboseHelp: verboseHelp),
-  DoctorCommand(verbose: verbose, extensionManager: extensionManager),
+  DoctorCommand(
+    verbose: verbose,
+    toolContext: toolDependencies.toolContext,
+    // Provide the shared singleton from globals until dependent commands
+    // (e.g. DevicesCommand, EmulatorsCommand) are migrated to DI.
+    doctor: globals.doctor,
+    extensionManager: extensionManager,
+  ),
   DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
   DriveCommand(
     verboseHelp: verboseHelp,
@@ -337,7 +335,7 @@ List<FlutterCommand> generateCommands({
     artifacts: toolDependencies.toolContext.artifacts,
     processManager: toolDependencies.toolContext.processManager,
   ),
-  InstallCommand(verboseHelp: verboseHelp),
+  InstallCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
   PackagesCommand(),
   PrecacheCommand(
