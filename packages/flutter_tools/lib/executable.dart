@@ -336,7 +336,7 @@ List<FlutterCommand> generateCommands({
     processManager: toolDependencies.toolContext.processManager,
   ),
   InstallCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
-  LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
+  LogsCommand(toolContext: toolDependencies.toolContext),
   PackagesCommand(),
   PrecacheCommand(
     verboseHelp: verboseHelp,
