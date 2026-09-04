@@ -58,7 +58,7 @@ class MessageLoopImpl : public Wakeable,
 
   void RunExpiredTasksNow();
 
-  void RunSingleExpiredTaskNow();
+  bool RunSingleExpiredTaskNow(fml::TimePoint from_time);
 
  protected:
   MessageLoopImpl();
@@ -69,7 +69,7 @@ class MessageLoopImpl : public Wakeable,
 
   std::atomic_bool terminated_;
 
-  void FlushTasks(FlushType type);
+  bool FlushTasks(FlushType type, fml::TimePoint from_time);
 
   FML_DISALLOW_COPY_AND_ASSIGN(MessageLoopImpl);
 };

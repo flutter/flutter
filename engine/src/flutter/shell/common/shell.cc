@@ -1231,14 +1231,15 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  task_runners_.GetUITaskRunner()->PostTask(
+  const uint64_t flow_id = next_pointer_flow_id_++;
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
       fml::MakeCopyable([engine = weak_engine_, packet = std::move(packet),
-                         flow_id = next_pointer_flow_id_]() mutable {
+                         flow_id]() mutable {
         if (engine) {
           engine->DispatchPointerDataPacket(std::move(packet), flow_id);
         }
       }));
-  next_pointer_flow_id_++;
 }
 
 HitTestResponse Shell::OnPlatformViewHitTest(int64_t view_id,

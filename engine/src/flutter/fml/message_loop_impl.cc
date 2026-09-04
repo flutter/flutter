@@ -115,14 +115,15 @@ void MessageLoopImpl::DoTerminate() {
   Terminate();
 }
 
-void MessageLoopImpl::FlushTasks(FlushType type) {
-  const auto now = fml::TimePoint::Now();
+bool MessageLoopImpl::FlushTasks(FlushType type, fml::TimePoint from_time) {
   fml::closure invocation;
+  bool ran_task = false;
   do {
-    invocation = task_queue_->GetNextTaskToRun(queue_id_, now);
+    invocation = task_queue_->GetNextTaskToRun(queue_id_, from_time);
     if (!invocation) {
       break;
     }
+    ran_task = true;
     invocation();
     std::vector<fml::closure> observers =
         task_queue_->GetObserversToNotify(queue_id_);
@@ -133,14 +134,15 @@ void MessageLoopImpl::FlushTasks(FlushType type) {
       break;
     }
   } while (invocation);
+  return ran_task;
 }
 
 void MessageLoopImpl::RunExpiredTasksNow() {
-  FlushTasks(FlushType::kAll);
+  FlushTasks(FlushType::kAll, fml::TimePoint::Now());
 }
 
-void MessageLoopImpl::RunSingleExpiredTaskNow() {
-  FlushTasks(FlushType::kSingle);
+bool MessageLoopImpl::RunSingleExpiredTaskNow(fml::TimePoint from_time) {
+  return FlushTasks(FlushType::kSingle, from_time);
 }
 
 TaskQueueId MessageLoopImpl::GetTaskQueueId() const {

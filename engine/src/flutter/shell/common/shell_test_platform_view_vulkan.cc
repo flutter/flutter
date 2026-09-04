@@ -77,7 +77,7 @@ ShellTestPlatformViewVulkan::CreateExternalViewEmbedder() {
 // |PlatformView|
 PointerDataDispatcherMaker ShellTestPlatformViewVulkan::GetDispatcherMaker() {
   return [](DefaultPointerDataDispatcher::Delegate& delegate) {
-    return std::make_unique<SmoothPointerDataDispatcher>(delegate);
+    return std::make_unique<DefaultPointerDataDispatcher>(delegate);
   };
 }
 
