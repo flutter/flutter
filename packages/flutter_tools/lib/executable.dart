@@ -196,9 +196,8 @@ Future<void> main(List<String> args) async {
 String? findCommandName(List<String> args, {ToolContext? toolContext}) {
   final ArgResults results;
   try {
-    results = FlutterCommandRunner(
-      toolContext: toolContext ?? _FallbackToolContext(),
-    ).argParser.parse(args);
+    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
+        .parse(args);
   } on ArgParserException {
     // The real parser will complain about these later.
     return null;
@@ -300,21 +299,24 @@ List<FlutterCommand> generateCommands({
     featureFlags: featureFlags,
     extensionManager: extensionManager,
   ),
-  CustomDevicesCommand(
-    customDevicesConfig: toolDependencies.toolContext.customDevicesConfig,
-    operatingSystemUtils: toolDependencies.toolContext.os,
-    terminal: toolDependencies.toolContext.terminal,
-    platform: toolDependencies.toolContext.platform,
-    featureFlags: featureFlags,
-    processManager: toolDependencies.toolContext.processManager,
-    fileSystem: toolDependencies.toolContext.fs,
-    logger: toolDependencies.toolContext.logger,
-  ),
+  CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
-  DevicesCommand(verboseHelp: verboseHelp),
-  DoctorCommand(verbose: verbose, extensionManager: extensionManager),
+  DevicesCommand(
+    deviceManager: globals.deviceManager!,
+    doctor: globals.doctor!,
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
+  ),
+  DoctorCommand(
+    verbose: verbose,
+    toolContext: toolDependencies.toolContext,
+    // Provide the shared singleton from globals until dependent commands
+    // (e.g. DevicesCommand, EmulatorsCommand) are migrated to DI.
+    doctor: globals.doctor,
+    extensionManager: extensionManager,
+  ),
   DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
   DriveCommand(
     verboseHelp: verboseHelp,
@@ -333,8 +335,8 @@ List<FlutterCommand> generateCommands({
     artifacts: toolDependencies.toolContext.artifacts,
     processManager: toolDependencies.toolContext.processManager,
   ),
-  InstallCommand(verboseHelp: verboseHelp),
-  LogsCommand(sigint: ProcessSignal.sigint, sigterm: ProcessSignal.sigterm),
+  InstallCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
+  LogsCommand(toolContext: toolDependencies.toolContext),
   PackagesCommand(),
   PrecacheCommand(
     verboseHelp: verboseHelp,
@@ -344,7 +346,7 @@ List<FlutterCommand> generateCommands({
     featureFlags: featureFlags,
   ),
   RunCommand(verboseHelp: verboseHelp),
-  ScreenshotCommand(fs: toolDependencies.toolContext.fs),
+  ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(),
   TestCommand(
     verboseHelp: verboseHelp,
