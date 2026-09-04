@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
@@ -45,7 +46,12 @@ CommandRunner<void> createTestCommandRunner([
 ]) {
   final ToolContext? effectiveToolContext = toolContext ?? command?.toolContext;
   final AppleContext? effectiveAppleContext =
-      appleContext ?? (command is BuildCommand ? command.appleContext : null);
+      appleContext ??
+      (command is BuildCommand
+          ? command.appleContext
+          : command is BuildFrameworkCommand
+          ? command.appleContext
+          : null);
   final runner = TestFlutterCommandRunner(
     analytics: analytics,
     featureFlags: featureFlags,
@@ -81,13 +87,15 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
     FeatureFlags? featureFlags,
     ToolContext? toolContext,
   }) : _appleContext = appleContext,
+       _testFeatureFlags = featureFlags,
        super(
          analytics: analytics ?? _defaultAnalytics(),
-         featureFlags: featureFlags ?? _defaultFeatureFlags(),
+         featureFlags: featureFlags ?? _defaultFeatureFlags() ?? TestFeatureFlags(),
          toolContext: toolContext ?? DelegatingToolContext(),
        );
 
   final AppleContext? _appleContext;
+  final FeatureFlags? _testFeatureFlags;
 
   AppleContext? get _effectiveAppleContext {
     if (_appleContext != null) {
@@ -95,6 +103,9 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
     }
     for (final Command<void> cmd in commands.values) {
       if (cmd is BuildCommand) {
+        return cmd.appleContext;
+      }
+      if (cmd is BuildFrameworkCommand) {
         return cmd.appleContext;
       }
     }
@@ -138,6 +149,8 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
       if (!context.hasExplicitOverride<Artifacts>()) Artifacts: toolContext.artifacts,
       if (!context.hasExplicitOverride<Cache>()) Cache: toolContext.cache,
       if (!context.hasExplicitOverride<Config>()) Config: toolContext.config,
+      if (!context.hasExplicitOverride<FeatureFlags>())
+        FeatureFlags: _testFeatureFlags ?? TestFeatureFlags(),
       if (!context.hasExplicitOverride<ProcessInfo>()) ProcessInfo: toolContext.processInfo,
       if (!context.hasExplicitOverride<Analytics>()) Analytics: analytics,
       if (!context.hasExplicitOverride<FlutterProjectFactory>())

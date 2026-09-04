@@ -129,20 +129,22 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       await _produceAppFramework(buildInfo, modeDirectory, buildOutput, codesignIdentity);
 
       // Build and copy plugins.
-      await processPodsIfNeeded(
-        project.macos,
-        getMacOSBuildDirectory(),
-        buildInfo.mode,
-        forceCocoaPodsOnly: true,
-      );
-      if (boolArg('plugins') && hasPlugins(project)) {
-        await _producePlugins(
-          xcodeBuildConfiguration,
-          buildOutput,
-          modeDirectory,
+      if (boolArg('plugins')) {
+        await processPodsIfNeeded(
+          project.macos,
+          getMacOSBuildDirectory(config: toolContext.config, fileSystem: toolContext.fs),
           buildInfo.mode,
-          codesignIdentity,
+          forceCocoaPodsOnly: true,
         );
+        if (hasPlugins(project)) {
+          await _producePlugins(
+            xcodeBuildConfiguration,
+            buildOutput,
+            modeDirectory,
+            buildInfo.mode,
+            codesignIdentity,
+          );
+        }
       }
 
       logger.printStatus(' └─Moving to ${fs.path.relative(modeDirectory.path)}');

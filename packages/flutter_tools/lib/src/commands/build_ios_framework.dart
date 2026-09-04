@@ -41,7 +41,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   }) : _appleContext = appleContext,
        _buildSystem = buildSystem,
        _toolContext = toolContext,
-       super(logger: toolContext.logger, verboseHelp: verboseHelp) {
+       super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     usesPubOption();
@@ -112,7 +112,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   final BuildSystem _buildSystem;
   final ToolContext _toolContext;
 
-  @protected
   AppleContext get appleContext => _appleContext;
 
   @protected
@@ -548,10 +547,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         releaseMode: buildInfo.mode.isRelease,
       );
 
-      final String? productBundleIdentifier = await project.ios.productBundleIdentifier(buildInfo);
-      _toolContext.logger.printStatus(
-        'Building frameworks for $productBundleIdentifier in ${buildInfo.mode.cliName} mode...',
-      );
+      _toolContext.logger.printStatus('Building frameworks in ${buildInfo.mode.cliName} mode...');
 
       final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
@@ -583,21 +579,23 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       );
 
       // Build and copy plugins.
-      await processPodsIfNeeded(
-        project.ios,
-        getIosBuildDirectory(),
-        buildInfo.mode,
-        forceCocoaPodsOnly: true,
-      );
-      if (boolArg('plugins') && hasPlugins(project)) {
-        await _producePlugins(
+      if (boolArg('plugins')) {
+        await processPodsIfNeeded(
+          project.ios,
+          getIosBuildDirectory(config: _toolContext.config, fileSystem: _toolContext.fs),
           buildInfo.mode,
-          xcodeBuildConfiguration,
-          iPhoneBuildOutput,
-          simulatorBuildOutput,
-          modeDirectory,
-          codesignIdentity,
+          forceCocoaPodsOnly: true,
         );
+        if (hasPlugins(project)) {
+          await _producePlugins(
+            buildInfo.mode,
+            xcodeBuildConfiguration,
+            iPhoneBuildOutput,
+            simulatorBuildOutput,
+            modeDirectory,
+            codesignIdentity,
+          );
+        }
       }
 
       final Status status = _toolContext.logger.startProgress(
