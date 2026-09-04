@@ -1113,7 +1113,8 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=hC3s2YdtWt8}
 ///
-/// Only works if it's the child of a [Stack].
+/// Only works if it's the child of a [Stack] or of an [Overlay]; see
+/// [Positioned] for the exact restrictions.
 ///
 /// This widget is a good choice if the _size_ of the child would end up
 /// changing as a result of this animation. If the size is intended to remain
@@ -1290,7 +1291,8 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
 /// The ambient [Directionality] is used to determine whether [start] is to the
 /// left or to the right.
 ///
-/// Only works if it's the child of a [Stack].
+/// Only works if it's the child of a [Stack] or of an [Overlay]; see
+/// [PositionedDirectional] for the exact restrictions.
 ///
 /// This widget is a good choice if the _size_ of the child would end up
 /// changing as a result of this animation. If the size is intended to remain
