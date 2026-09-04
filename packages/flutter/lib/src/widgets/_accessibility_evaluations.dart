@@ -65,6 +65,14 @@ abstract class AccessibilityEvaluation {
   /// A const constructor allows subclasses to be const.
   const AccessibilityEvaluation();
 
+  /// Traverses the given [node] and returns all found violations.
+  ///
+  /// The [view] parameter provides the [ui.FlutterView] context for evaluations
+  /// that require physical metrics (such as tap target size).
+  List<Violation> traverse(SemanticsNode node, {required ui.FlutterView view}) {
+    return const <Violation>[];
+  }
+
   /// Evaluate whether the current state of the `binding` conforms to the rule.
   FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
     if (!isAccessibilityEvaluationsEnabled) {
@@ -100,17 +108,18 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
     final violations = <Violation>[];
     for (final RenderView view in binding.renderViews) {
       violations.addAll(
-        _traverse(view.flutterView, view.owner!.semanticsOwner!.rootSemanticsNode!),
+        traverse(view.owner!.semanticsOwner!.rootSemanticsNode!, view: view.flutterView),
       );
     }
 
     return EvaluationResult(violations);
   }
 
-  List<Violation> _traverse(ui.FlutterView view, SemanticsNode node) {
+  @override
+  List<Violation> traverse(SemanticsNode node, {required ui.FlutterView view}) {
     final violations = <Violation>[];
     node.visitChildren((SemanticsNode child) {
-      violations.addAll(_traverse(view, child));
+      violations.addAll(traverse(child, view: view));
       return true;
     });
     if (node.isMergedIntoParent) {
@@ -199,16 +208,19 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
     final violations = <Violation>[];
 
     for (final RenderView view in binding.renderViews) {
-      violations.addAll(_traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
+      violations.addAll(
+        traverse(view.owner!.semanticsOwner!.rootSemanticsNode!, view: view.flutterView),
+      );
     }
 
     return EvaluationResult(violations);
   }
 
-  List<Violation> _traverse(SemanticsNode node) {
+  @override
+  List<Violation> traverse(SemanticsNode node, {required ui.FlutterView view}) {
     final violations = <Violation>[];
     node.visitChildren((SemanticsNode child) {
-      violations.addAll(_traverse(child));
+      violations.addAll(traverse(child, view: view));
       return true;
     });
     if (node.isMergedIntoParent ||
@@ -783,17 +795,20 @@ class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
   FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
     final violations = <Violation>[];
     for (final RenderView view in binding.renderViews) {
-      violations.addAll(_traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
+      violations.addAll(
+        traverse(view.owner!.semanticsOwner!.rootSemanticsNode!, view: view.flutterView),
+      );
     }
     return EvaluationResult(violations);
   }
 
-  List<Violation> _traverse(SemanticsNode node) {
+  @override
+  List<Violation> traverse(SemanticsNode node, {required ui.FlutterView view}) {
     final violations = <Violation>[];
     var hasChildren = false;
     node.visitChildren((SemanticsNode child) {
       hasChildren = true;
-      violations.addAll(_traverse(child));
+      violations.addAll(traverse(child, view: view));
       return true;
     });
 

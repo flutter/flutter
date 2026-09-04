@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import '_accessibility_evaluations.dart';
 import 'service_extensions.dart';
 
 /// Service that handles accessibility and semantics inspection.
@@ -64,15 +65,57 @@ class AccessibilityInspector {
     if (!SemanticsBinding.instance.semanticsEnabled) {
       return <String, Object?>{'error': 'Semantics not enabled.'};
     }
-    final PipelineOwner? pipelineOwner = _findPipelineOwner();
+    final RenderView? renderView = _findRenderView();
+    final PipelineOwner? pipelineOwner = renderView?.owner;
     final SemanticsOwner? semanticsOwner = pipelineOwner?.semanticsOwner;
-    if (semanticsOwner == null) {
+    if (renderView == null || semanticsOwner == null) {
       return <String, Object?>{'error': 'No PipelineOwner with SemanticsOwner found'};
     }
     final SemanticsNode? root = semanticsOwner.rootSemanticsNode;
     if (root == null) {
       RendererBinding.instance.ensureVisualUpdate();
       return <String, Object?>{'error': 'rootSemanticsNode is null', 'needsFrame': true};
+    }
+
+    // The violations are displayed in Devtool.
+    // TODO(hannah-hyj): If we add a "target platforms" option on the devtool side,
+    // we can display violations for both iOS/android standards
+    // regardless of the testing device platform.
+    final Size minSize = switch (defaultTargetPlatform) {
+      TargetPlatform.android => const Size(48.0, 48.0),
+      TargetPlatform.iOS || TargetPlatform.macOS => const Size(44.0, 44.0),
+      _ => const Size(48.0, 48.0),
+    };
+
+    final nodeIssues = <int, List<Map<String, Object?>>>{};
+
+    final List<Violation> tapTargetViolations = MinimumTapTargetEvaluation(
+      size: minSize,
+    ).traverse(root, view: renderView.flutterView);
+    for (final violation in tapTargetViolations) {
+      nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
+        <String, Object?>{'rule': 'tapTargetSize', 'description': violation.reason},
+      );
+    }
+
+    final List<Violation> labeledTapTargetViolations = const LabeledTapTargetEvaluation().traverse(
+      root,
+      view: renderView.flutterView,
+    );
+    for (final violation in labeledTapTargetViolations) {
+      nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
+        <String, Object?>{'rule': 'missingLabel', 'description': violation.reason},
+      );
+    }
+
+    final List<Violation> unlabeledLeafViolations = const UnlabeledLeafNodeEvaluation().traverse(
+      root,
+      view: renderView.flutterView,
+    );
+    for (final violation in unlabeledLeafViolations) {
+      nodeIssues.putIfAbsent(violation.node.id, () => <Map<String, Object?>>[]).add(
+        <String, Object?>{'rule': 'unlabeledLeafNode', 'description': violation.reason},
+      );
     }
 
     final nodes = <String, Object?>{};
@@ -83,7 +126,12 @@ class AccessibilityInspector {
       if (!visited.add(node.id)) {
         continue;
       }
-      nodes[node.id.toString()] = node.toJson();
+
+      nodes[node.id.toString()] = <String, Object?>{
+        'node': node.toJson(),
+        'issues': nodeIssues[node.id] ?? <Map<String, Object?>>[],
+      };
+
       for (final SemanticsNode child in node.debugListChildrenInOrder(
         DebugSemanticsDumpOrder.traversalOrder,
       )) {
@@ -103,18 +151,14 @@ class AccessibilityInspector {
     return <String, Object?>{'data': nodes};
   }
 
-  // TODO(hannahjin): This returns the first SemanticsOwner of any RenderView.
+  // TODO(hannah-hyj): https://github.com/flutter/devtools/issues/9991 - This returns the first RenderView with a SemanticsOwner.
   // This getSemanticsTree feature is used in DevTools, which currently only supports
   // single-view inspection. Add multi-view support when DevTools needs it.
-  PipelineOwner? _findPipelineOwner() {
+  RenderView? _findRenderView() {
     for (final RenderView renderView in RendererBinding.instance.renderViews) {
       if (renderView.owner?.semanticsOwner != null) {
-        return renderView.owner;
+        return renderView;
       }
-    }
-    final PipelineOwner deprecatedOwner = RendererBinding.instance.pipelineOwner;
-    if (deprecatedOwner.semanticsOwner != null) {
-      return deprecatedOwner;
     }
     return null;
   }
