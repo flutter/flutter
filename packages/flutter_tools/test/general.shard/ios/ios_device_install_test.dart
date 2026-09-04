@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -360,11 +361,15 @@ IOSDevice setUpIOSDevice({
     artifacts: <ArtifactSet>[FakeDyldEnvironmentArtifact()],
     processManager: FakeProcessManager.any(),
   );
+  final FileSystem testFileSystem = fileSystem ?? MemoryFileSystem.test();
   return IOSDevice(
     '1234',
     name: 'iPhone 1',
     logger: logger,
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
+    fileSystem: testFileSystem,
+    fileSystemUtils: FileSystemUtils(fileSystem: testFileSystem, platform: platform),
+    processUtils: ProcessUtils(processManager: processManager, logger: logger),
+    xcode: null,
     sdkVersion: '13.3',
     cpuArchitecture: DarwinArch.arm64,
     platform: platform,

@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -100,7 +101,10 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
   return IOSDevice(
     'test',
     fileSystem: fileSystem,
+    fileSystemUtils: FileSystemUtils(fileSystem: fileSystem, platform: platform),
     logger: logger,
+    processUtils: ProcessUtils(processManager: processManager, logger: logger),
+    xcode: null,
     iosDeploy: IOSDeploy(
       platform: platform,
       logger: logger,
