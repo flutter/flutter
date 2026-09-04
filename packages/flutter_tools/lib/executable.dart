@@ -113,8 +113,8 @@ Future<void> main(List<String> args) async {
     args,
     (ToolDependencies toolDependencies) {
       final manager = ExtensionManager(
-        hostPlatform: globals.os.hostPlatform,
-        logger: globals.logger,
+        hostPlatform: toolDependencies.toolContext.os.hostPlatform,
+        logger: toolDependencies.toolContext.logger,
         entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
         featureFlags: featureFlags,
       );
@@ -304,7 +304,7 @@ List<FlutterCommand> generateCommands({
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
   DaemonCommand(hidden: !verboseHelp),
   DebugAdapterCommand(verboseHelp: verboseHelp),
-  DevicesCommand(verboseHelp: verboseHelp),
+  DevicesCommand(verboseHelp: verboseHelp, extensionManager: extensionManager),
   DoctorCommand(
     verbose: verbose,
     toolContext: toolDependencies.toolContext,
