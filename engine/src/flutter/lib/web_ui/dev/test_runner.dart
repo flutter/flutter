@@ -86,6 +86,14 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
             '.dart_tool/goldens. Use this option to bulk-update all screenshots, '
             'for example, when a new browser version affects pixels.',
       )
+      ..addFlag(
+        'offline',
+        help: 'Do not query Skia Gold network APIs; use locally cached baseline goldens.',
+      )
+      ..addFlag(
+        'refresh-goldens',
+        help: 'Force re-downloading baseline goldens from Skia Gold even if cached.',
+      )
       ..addMultiOption('browser', help: 'Filter test suites by browser.')
       ..addMultiOption('compiler', help: 'Filter test suites by compiler.')
       ..addMultiOption('renderer', help: 'Filter test suites by renderer.')
@@ -141,6 +149,12 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
   /// When running screenshot tests writes them to the file system into
   /// ".dart_tool/goldens".
   bool get doUpdateScreenshotGoldens => boolArg('update-screenshot-goldens');
+
+  /// When running screenshot tests, do not query Skia Gold network APIs.
+  bool get isOffline => boolArg('offline');
+
+  /// When running screenshot tests, force re-downloading baseline goldens.
+  bool get refreshGoldens => boolArg('refresh-goldens');
 
   /// Path to a CanvasKit build. Overrides the default CanvasKit.
   String? get overridePathToCanvasKit => argResults!['canvaskit-path'] as String?;
@@ -397,6 +411,8 @@ class TestCommand extends Command<bool> with ArgUtils<bool> {
               overridePathToCanvasKit: overridePathToCanvasKit,
               testFiles: testFiles,
               useDwarf: boolArg('dwarf'),
+              isOffline: isOffline,
+              refreshGoldens: refreshGoldens,
             ),
       ],
     );

@@ -10,6 +10,9 @@ dependencies:
   skia_gold_client:
     path: ../../testing/skia_gold_client
 
+dev_dependencies:
+  test: any
+
 dependency_overrides:
   engine_repo_tools:
     path: ../../tools/pkg/engine_repo_tools

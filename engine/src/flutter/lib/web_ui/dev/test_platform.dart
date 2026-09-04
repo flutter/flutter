@@ -55,6 +55,8 @@ class BrowserPlatform extends PlatformPlugin {
     required this.packageConfig,
     required this.skiaClient,
     required this.overridePathToCanvasKit,
+    required this.isOffline,
+    required this.refreshGoldens,
   }) {
     // The cascade of request handlers.
     final shelf.Cascade cascade = shelf.Cascade()
@@ -110,6 +112,8 @@ class BrowserPlatform extends PlatformPlugin {
     required SkiaGoldClient? skiaClient,
     required String? overridePathToCanvasKit,
     required bool isVerbose,
+    bool isOffline = false,
+    bool refreshGoldens = false,
   }) async {
     final server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
     return BrowserPlatform._(
@@ -122,10 +126,18 @@ class BrowserPlatform extends PlatformPlugin {
       packageConfig: await loadPackageConfigUri((await Isolate.packageConfig)!),
       skiaClient: skiaClient,
       overridePathToCanvasKit: overridePathToCanvasKit,
+      isOffline: isOffline,
+      refreshGoldens: refreshGoldens,
     );
   }
 
   final TestSuite suite;
+
+  /// Provides the environment for the browser running tests.
+  final BrowserEnvironment browserEnvironment;
+
+  /// The underlying server.
+  final shelf.Server server;
 
   /// If true, runs the browser with a visible windows (i.e. not headless) and
   /// pauses before running the tests to give the developer a chance to set
@@ -134,29 +146,8 @@ class BrowserPlatform extends PlatformPlugin {
 
   final bool isVerbose;
 
-  /// The underlying server.
-  final shelf.Server server;
-
-  /// Provides the environment for the browser running tests.
-  final BrowserEnvironment browserEnvironment;
-
-  /// The URL for this server.
-  Uri get url => server.url.resolve('/');
-
-  /// A [OneOffHandler] for servicing WebSocket connections for
-  /// [BrowserManager]s.
-  ///
-  /// This is one-off because each [BrowserManager] can only connect to a single
-  /// WebSocket,
-  final OneOffHandler _webSocketHandler = OneOffHandler();
-
-  /// Whether [close] has been called.
-  bool get _closed => _closeMemo.hasRun;
-
   /// Whether to update screenshot golden files.
   final bool doUpdateScreenshotGoldens;
-
-  late final shelf.Handler _packageUrlHandler = packagesDirHandler();
 
   final PackageConfig packageConfig;
 
@@ -165,6 +156,27 @@ class BrowserPlatform extends PlatformPlugin {
   final SkiaGoldClient? skiaClient;
 
   final String? overridePathToCanvasKit;
+
+  /// Whether to run tests offline using cached baselines without querying Skia Gold.
+  final bool isOffline;
+
+  /// Whether to force re-downloading baseline images from Skia Gold even if cached.
+  final bool refreshGoldens;
+
+  /// The URL for this server.
+  Uri get url => server.url.resolve('/');
+
+  /// A [OneOffHandler] for servicing WebSocket connections for
+  /// [BrowserManager]s.
+  ///
+  /// This is one-off because each [BrowserManager] can only connect to a single
+  /// WebSocket.
+  final OneOffHandler _webSocketHandler = OneOffHandler();
+
+  /// Whether [close] has been called.
+  bool get _closed => _closeMemo.hasRun;
+
+  late final shelf.Handler _packageUrlHandler = packagesDirHandler();
 
   /// If a path to a custom local build of CanvasKit was specified, serve from
   /// there instead of serving the default CanvasKit in the build/ directory.
@@ -386,16 +398,33 @@ class BrowserPlatform extends PlatformPlugin {
 
     final region = requestData['region'] as Map<String, dynamic>;
     final isCanvaskitTest = requestData['isCanvaskitTest'] as bool;
-    final String result = await _diffScreenshot(filename, region, isCanvaskitTest);
+    final pixelComparisonName = requestData['pixelComparison'] as String?;
+    final PixelComparison pixelComparison = pixelComparisonName == 'precise'
+        ? PixelComparison.precise
+        : PixelComparison.fuzzy;
+    final double? maxDiffRate = (requestData['maxDiffRate'] as num?)?.toDouble();
+    final pixelColorDeltaPerChannel = requestData['pixelColorDeltaPerChannel'] as int?;
+
+    final String result = await _diffScreenshot(
+      filename,
+      region,
+      isCanvaskitTest,
+      pixelComparison: pixelComparison,
+      maxDiffRate: maxDiffRate,
+      pixelColorDeltaPerChannel: pixelColorDeltaPerChannel,
+    );
     return shelf.Response.ok(json.encode(result));
   }
 
   Future<String> _diffScreenshot(
     String filename,
     Map<String, dynamic> region,
-    bool isCanvaskitTest,
-  ) async {
-    final regionAsRectange = Rectangle<num>(
+    bool isCanvaskitTest, {
+    PixelComparison pixelComparison = PixelComparison.fuzzy,
+    double? maxDiffRate,
+    int? pixelColorDeltaPerChannel,
+  }) async {
+    final regionAsRectangle = Rectangle<num>(
       region['x'] as num,
       region['y'] as num,
       region['width'] as num,
@@ -403,7 +432,7 @@ class BrowserPlatform extends PlatformPlugin {
     );
 
     // Take screenshot.
-    final Image screenshot = await (await browserManager).captureScreenshot(regionAsRectange);
+    final Image screenshot = await (await browserManager).captureScreenshot(regionAsRectangle);
 
     return compareImage(
       screenshot,
@@ -413,6 +442,12 @@ class BrowserPlatform extends PlatformPlugin {
       skiaClient,
       isCanvaskitTest: isCanvaskitTest,
       verbose: isVerbose,
+      pixelComparison: pixelComparison,
+      maxDiffRate: maxDiffRate,
+      pixelColorDeltaPerChannel: pixelColorDeltaPerChannel,
+      isOffline: isOffline,
+      refreshGoldens: refreshGoldens,
+      cacheDirectory: env.environment.webUiGoldensCacheDirectory,
     );
   }
 
