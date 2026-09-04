@@ -527,7 +527,7 @@ class FlutterPlatform extends PlatformPlugin {
   static const _kExtension = 'ext.$_kEventName';
 
   Future<void> _listenToVmServiceForGoldens({required Uri uri, required String testPath}) async {
-    final goldensBaseUri = Uri.file(testPath, windows: globals.platform.isWindows);
+    final Uri goldensBaseUri = _resolveTestUrl(testPath);
     final FlutterVmService vmService = await connectToVmService(uri, logger: logger);
     final IsolateRef testAppIsolate = await vmService.findExtensionIsolate(_kExtension);
     await vmService.service.streamListen(_kEventName);
@@ -801,9 +801,7 @@ class FlutterPlatform extends PlatformPlugin {
 
     // Prepare the Dart file that will talk to us and start the test.
     final File listenerFile = directory.childFile('listener_$ourTestCount.dart')
-      ..writeAsStringSync(
-        _generateTestMain(testUrl: _fileSystem.path.toUri(_fileSystem.path.absolute(testPath))),
-      );
+      ..writeAsStringSync(_generateTestMain(testUrl: _resolveTestUrl(testPath)));
     if (flutterProject != null || projectRootDirectory != null) {
       finalizers.add(() async {
         globals.printTrace('test $ourTestCount: deleting test listener file');
@@ -817,6 +815,21 @@ class FlutterPlatform extends PlatformPlugin {
       });
     }
     return listenerFile.path;
+  }
+
+  /// Resolves [testPath] to a file [Uri], preserving query parameters and handling
+  /// both file paths and `file://` URI string formats (e.g. from IDE test runners).
+  Uri _resolveTestUrl(String testPath) {
+    if (testPath.startsWith('file://')) {
+      return Uri.parse(testPath);
+    }
+    final int queryIndex = testPath.indexOf('?');
+    if (queryIndex != -1) {
+      final String pathPart = testPath.substring(0, queryIndex);
+      final String queryPart = testPath.substring(queryIndex + 1);
+      return _fileSystem.path.toUri(_fileSystem.path.absolute(pathPart)).replace(query: queryPart);
+    }
+    return _fileSystem.path.toUri(_fileSystem.path.absolute(testPath));
   }
 
   String _generateTestMain({required Uri testUrl}) {

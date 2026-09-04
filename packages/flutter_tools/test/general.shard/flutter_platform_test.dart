@@ -813,6 +813,144 @@ void main() {
         Artifacts: () => artifacts,
       },
     );
+
+    testUsingContext(
+      'creates listener file with correct import when testPath is a file URI with query parameters',
+      () async {
+        final Directory projectDir = windowsFs.directory(r'C:\custom_project')
+          ..createSync(recursive: true);
+        windowsFs.file(r'C:\custom_project\test\test1.dart').createSync(recursive: true);
+
+        final device = _WorkingDevice();
+        final platform = FlutterPlatform(
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          flutterTesterBinPath: 'flutter_tester',
+          enableVmService: false,
+          projectRootDirectory: projectDir.uri,
+          integrationTestDevice: device,
+          host: InternetAddress.anyIPv4,
+          updateGoldens: false,
+          buildInfo: BuildInfo.debug,
+          fileSystem: windowsFs,
+          processManager: processManager,
+          logger: logger,
+        );
+
+        final StreamChannel<Object?> channel = platform.loadChannel(
+          'file:///C:/custom_project/test/test1.dart?line=11',
+          fakeSuitePlatform,
+        );
+        unawaited(channel.stream.drain<void>());
+        await pumpEventQueue();
+
+        final String expectedPath = windowsFs.path.join(
+          projectDir.path,
+          'build',
+          'test',
+          'listener_0.dart',
+        );
+        expect(device.lastMainPath, equals(expectedPath));
+        final File listenerFile = windowsFs.file(device.lastMainPath);
+        expect(listenerFile.existsSync(), isTrue);
+        expect(
+          listenerFile.readAsStringSync(),
+          contains("import 'file:///C:/custom_project/test/test1.dart?line=11' as test;"),
+        );
+
+        await channel.sink.close();
+        await pumpEventQueue();
+
+        expect(windowsFs.file(expectedPath).existsSync(), isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => windowsFs,
+        ProcessManager: () => processManager,
+        Logger: () => logger,
+        VMServiceConnector: () =>
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              Logger? logger,
+            }) async => _FakeFlutterVmService(),
+        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
+        Artifacts: () => artifacts,
+      },
+    );
+
+    testUsingContext(
+      'creates listener file with correct import when testPath has query parameters',
+      () async {
+        final Directory projectDir = windowsFs.directory(r'C:\custom_project')
+          ..createSync(recursive: true);
+        windowsFs.file(r'C:\custom_project\test\test1.dart').createSync(recursive: true);
+
+        final device = _WorkingDevice();
+        final platform = FlutterPlatform(
+          debuggingOptions: DebuggingOptions.disabled(BuildInfo.debug),
+          flutterTesterBinPath: 'flutter_tester',
+          enableVmService: false,
+          projectRootDirectory: projectDir.uri,
+          integrationTestDevice: device,
+          host: InternetAddress.anyIPv4,
+          updateGoldens: false,
+          buildInfo: BuildInfo.debug,
+          fileSystem: windowsFs,
+          processManager: processManager,
+          logger: logger,
+        );
+
+        final StreamChannel<Object?> channel = platform.loadChannel(
+          r'C:\custom_project\test\test1.dart?line=11',
+          fakeSuitePlatform,
+        );
+        unawaited(channel.stream.drain<void>());
+        await pumpEventQueue();
+
+        final String expectedPath = windowsFs.path.join(
+          projectDir.path,
+          'build',
+          'test',
+          'listener_0.dart',
+        );
+        expect(device.lastMainPath, equals(expectedPath));
+        final File listenerFile = windowsFs.file(device.lastMainPath);
+        expect(listenerFile.existsSync(), isTrue);
+        expect(
+          listenerFile.readAsStringSync(),
+          contains("import 'file:///C:/custom_project/test/test1.dart?line=11' as test;"),
+        );
+
+        await channel.sink.close();
+        await pumpEventQueue();
+
+        expect(windowsFs.file(expectedPath).existsSync(), isFalse);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => windowsFs,
+        ProcessManager: () => processManager,
+        Logger: () => logger,
+        VMServiceConnector: () =>
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              Logger? logger,
+            }) async => _FakeFlutterVmService(),
+        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
+        Artifacts: () => artifacts,
+      },
+    );
   });
 }
 
