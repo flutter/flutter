@@ -367,7 +367,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-DeepLinks.swift':
+      r'$TEMPLATE_DIR/native/UITests-DeepLinks-SceneEvents.swift':
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
     'AppMigrated-FlutterSceneDelegate-PluginNotMigrated-DeepLink': <String, String>{
@@ -376,7 +376,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-DeepLinks.swift':
+      r'$TEMPLATE_DIR/native/UITests-DeepLinks-ApplicationEvents.swift':
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
   };
