@@ -2974,16 +2974,17 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   // The [pointerEventSource] that was active when each currently-down
-  // pointer's down event was handled. Cancel events for a pointer (e.g. the
-  // ones `GestureBinding.cancelPointer` schedules in a microtask when the
-  // [Navigator] cancels active pointers on a route push) can arrive outside
-  // the `withPointerEventSource` scope that produced the down event, so
-  // [pointerEventSource] can no longer be trusted to reflect where the
-  // pointer actually came from by the time the cancel is handled. Routing
-  // such a cancel as a [TestBindingEventSource.device] event would silently
-  // drop it (see [deviceEventDispatcher]) instead of delivering it to the
-  // recognizers that are still tracking the pointer, permanently wedging
-  // them. See https://github.com/flutter/flutter/issues/191757.
+  // pointer's down event was handled, kept for the rest of that pointer's
+  // lifecycle (cleared on up/cancel/pan-zoom-end). Later events for a
+  // pointer (e.g. the cancel that `GestureBinding.cancelPointer` schedules
+  // in a microtask when the [Navigator] cancels active pointers on a route
+  // push) can arrive outside the `withPointerEventSource` scope that
+  // produced the down event, so [pointerEventSource] can no longer be
+  // trusted to reflect where the pointer actually came from by the time
+  // such an event is handled. Routing it as a [TestBindingEventSource.device]
+  // event would silently drop it (see [deviceEventDispatcher]) instead of
+  // delivering it to the recognizers that are still tracking the pointer,
+  // permanently wedging them. See https://github.com/flutter/flutter/issues/191757.
   final Map<int, TestBindingEventSource> _pointerEventSourceForPointer =
       <int, TestBindingEventSource>{};
 
@@ -2991,10 +2992,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
       _pointerEventSourceForPointer[event.pointer] = pointerEventSource;
     }
-    final TestBindingEventSource? originSource =
-        event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent
-        ? _pointerEventSourceForPointer.remove(event.pointer)
-        : null;
+    final TestBindingEventSource? originSource = _pointerEventSourceForPointer[event.pointer];
+    if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerPanZoomEndEvent) {
+      _pointerEventSourceForPointer.remove(event.pointer);
+    }
     if (originSource != null && originSource != pointerEventSource) {
       withPointerEventSource(originSource, () => _dispatchPointerEvent(event));
     } else {
