@@ -316,6 +316,64 @@ void main() {
       expect(Actions.maybeFind<DoNothingIntent>(containerKey.currentContext!), isNull);
     });
 
+    testWidgets('Actions.handler forwards the intent type and finds the bound action', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/191045.
+      final GlobalKey containerKey = GlobalKey();
+      var invoked = false;
+      final testAction = TestAction(
+        onInvoke: (Intent intent) {
+          invoked = true;
+          return invoked;
+        },
+      );
+      await tester.pumpWidget(
+        Actions(
+          actions: <Type, Action<Intent>>{TestIntent: testAction},
+          child: Container(key: containerKey),
+        ),
+      );
+
+      final VoidCallback? handler = Actions.handler(
+        containerKey.currentContext!,
+        const TestIntent(),
+      );
+      expect(handler, isNotNull);
+
+      handler!();
+      expect(invoked, isTrue);
+    });
+
+    testWidgets('Actions.handler returns null when the action is disabled', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey containerKey = GlobalKey();
+      final testAction = TestAction(onInvoke: (Intent intent) => null)..enabled = false;
+      await tester.pumpWidget(
+        Actions(
+          actions: <Type, Action<Intent>>{TestIntent: testAction},
+          child: Container(key: containerKey),
+        ),
+      );
+
+      expect(Actions.handler(containerKey.currentContext!, const TestIntent()), isNull);
+    });
+
+    testWidgets('Actions.handler returns null when no matching action is found', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey containerKey = GlobalKey();
+      await tester.pumpWidget(
+        Actions(
+          actions: const <Type, Action<Intent>>{},
+          child: Container(key: containerKey),
+        ),
+      );
+
+      expect(Actions.handler(containerKey.currentContext!, const TestIntent()), isNull);
+    });
+
     testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (
       WidgetTester tester,
     ) async {
@@ -927,6 +985,81 @@ void main() {
       await tester.pump();
       expect(buttonNode1.hasFocus, isFalse);
       expect(buttonNode2.hasFocus, isFalse);
+    });
+
+    testWidgets('FocusableActionDetector forwards skipTraversal to Focus', (
+      WidgetTester tester,
+    ) async {
+      Focus innerFocus() => tester.widget<Focus>(
+        find
+            .descendant(of: find.byType(FocusableActionDetector), matching: find.byType(Focus))
+            .first,
+      );
+
+      await tester.pumpWidget(
+        const TestWidgetsApp(home: FocusableActionDetector(child: Text('a'))),
+      );
+      expect(innerFocus().skipTraversal, isFalse);
+
+      await tester.pumpWidget(
+        const TestWidgetsApp(home: FocusableActionDetector(skipTraversal: true, child: Text('a'))),
+      );
+      expect(innerFocus().skipTraversal, isTrue);
+    });
+
+    testWidgets('FocusableActionDetector can be skipped by focus traversal', (
+      WidgetTester tester,
+    ) async {
+      final buttonNode1 = FocusNode(debugLabel: 'Button Node 1');
+      final detectorNode = FocusNode(debugLabel: 'Detector Node');
+      final buttonNode2 = FocusNode(debugLabel: 'Button Node 2');
+
+      addTearDown(() {
+        buttonNode1.dispose();
+        detectorNode.dispose();
+        buttonNode2.dispose();
+      });
+
+      Widget build({bool? skipTraversal}) {
+        return TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              TestButton(onPressed: () {}, focusNode: buttonNode1, child: const Text('Node 1')),
+              FocusableActionDetector(
+                focusNode: detectorNode,
+                skipTraversal: skipTraversal,
+                child: const Text('Detector'),
+              ),
+              TestButton(onPressed: () {}, focusNode: buttonNode2, child: const Text('Node 2')),
+            ],
+          ),
+        );
+      }
+
+      // By default the detector takes part in traversal.
+      await tester.pumpWidget(build());
+      buttonNode1.requestFocus();
+      await tester.pump();
+      primaryFocus!.nextFocus();
+      await tester.pump();
+      expect(detectorNode.hasFocus, isTrue);
+      expect(buttonNode2.hasFocus, isFalse);
+
+      // With skipTraversal, traversal moves straight past it to the next node.
+      await tester.pumpWidget(build(skipTraversal: true));
+      buttonNode1.requestFocus();
+      await tester.pump();
+      primaryFocus!.nextFocus();
+      await tester.pump();
+      expect(detectorNode.hasFocus, isFalse);
+      expect(buttonNode2.hasFocus, isTrue);
+
+      // Skipping traversal does not make it unfocusable: it can still be
+      // focused explicitly, which is the whole point of skipTraversal over
+      // canRequestFocus.
+      detectorNode.requestFocus();
+      await tester.pump();
+      expect(detectorNode.hasFocus, isTrue);
     });
 
     testWidgets('FocusableActionDetector can exclude Focus semantics', (WidgetTester tester) async {

@@ -7,6 +7,12 @@
 
 #include "flutter/fml/endianness.h"
 #include "impeller/renderer/capabilities.h"
+
+#if IMPELLER_SUPPORTS_RENDERING
+#include "impeller/renderer/command_buffer_scheduling_receipt.h"
+#include "impeller/renderer/testing/mocks.h"
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
 #include "include/core/SkColorType.h"
 #include "third_party/skia/include/codec/SkPngDecoder.h"
 
@@ -75,6 +81,76 @@ float DecodeBGR10(uint32_t x) {
   const float intercept = min;
   const float slope = (max - min) / 1024.0f;
   return (x * slope) + intercept;
+}
+
+TEST(ImageDecoderNoGLTest, ImpellerUploadTracksSchedulingReceipt) {
+#if !IMPELLER_SUPPORTS_RENDERING
+  GTEST_SKIP() << "Test only supported with Impeller rendering.";
+#else
+  using ::impeller::testing::MockBlitPass;
+  using ::impeller::testing::MockCommandBuffer;
+  using ::impeller::testing::MockCommandQueue;
+  using ::impeller::testing::MockImpellerContext;
+  using ::testing::_;
+  using ::testing::Return;
+
+  auto context = std::make_shared<MockImpellerContext>();
+  auto allocator = std::make_shared<impeller::TestImpellerAllocator>();
+  auto command_buffer = std::make_shared<MockCommandBuffer>(context);
+  const std::shared_ptr<impeller::CommandBuffer> submitted_command_buffer =
+      command_buffer;
+  auto blit_pass = std::make_shared<MockBlitPass>();
+  auto command_queue = std::make_shared<MockCommandQueue>();
+  std::shared_ptr<impeller::CommandBufferSchedulingReceipt> receipt =
+      std::make_shared<impeller::CommandBufferSchedulingReceiptState>();
+
+  EXPECT_CALL(*context, GetBackendType)
+      .WillOnce(Return(impeller::Context::BackendType::kMetal));
+  EXPECT_CALL(*context, GetResourceAllocator).WillOnce(Return(allocator));
+  EXPECT_CALL(*context, CreateCommandBuffer).WillOnce(Return(command_buffer));
+  EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
+  EXPECT_CALL(*context, TrackPendingImageUpload(receipt));
+  EXPECT_CALL(*command_buffer, SetLabel(_));
+  EXPECT_CALL(*command_buffer, OnCreateBlitPass).WillOnce(Return(blit_pass));
+  EXPECT_CALL(*command_buffer, OnWaitUntilCompleted);
+  EXPECT_CALL(*blit_pass, IsValid).WillOnce(Return(true));
+  EXPECT_CALL(*blit_pass, OnSetLabel(_)).Times(2);
+  EXPECT_CALL(*blit_pass, OnCopyBufferToTextureCommand(_, _, _, _, _, _, _))
+      .WillOnce(Return(true));
+  EXPECT_CALL(*blit_pass, EncodeCommands).WillOnce(Return(true));
+  EXPECT_CALL(*command_queue, SubmitWithReceipt(submitted_command_buffer, _))
+      .WillOnce([receipt](const std::shared_ptr<impeller::CommandBuffer>&,
+                          const impeller::CommandQueue::CompletionCallback&) {
+        return impeller::CommandQueue::SubmitResult{
+            .status = fml::Status(),
+            .scheduling_receipt = receipt,
+        };
+      });
+
+  impeller::DeviceBufferDescriptor buffer_descriptor;
+  buffer_descriptor.size = 4u;
+  auto buffer =
+      std::make_shared<impeller::TestImpellerDeviceBuffer>(buffer_descriptor);
+  auto gpu_disabled_switch = std::make_shared<fml::SyncSwitch>(false);
+  sk_sp<DlImage> image;
+  std::string decode_error;
+  bool callback_called = false;
+
+  ImageDecoderImpeller::UploadTextureToPrivate(
+      [&](const sk_sp<DlImage>& result, const std::string& error) {
+        image = result;
+        decode_error = error;
+        callback_called = true;
+      },
+      context, buffer,
+      {.size = impeller::ISize(1, 1),
+       .format = impeller::PixelFormat::kR8G8B8A8UNormInt},
+      std::nullopt, gpu_disabled_switch);
+
+  EXPECT_TRUE(callback_called);
+  EXPECT_NE(image, nullptr);
+  EXPECT_TRUE(decode_error.empty());
+#endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
 TEST(ImageDecoderNoGLTest, ImpellerWideGamutDisplayP3) {

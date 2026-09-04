@@ -221,7 +221,7 @@ class _RallyTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FocusTraversalOrder(
-      order: const NumericFocusOrder(0),
+      order: const .numeric(0),
       child: TabBar(
         // Setting isScrollable to true prevents the tabs from being
         // wrapped in [Expanded] widgets, which allows for more

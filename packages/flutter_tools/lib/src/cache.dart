@@ -223,6 +223,7 @@ class Cache {
   final Platform _platform;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _osUtils;
+  OperatingSystemUtils get osUtils => _osUtils;
   final Directory? _rootOverride;
   final List<ArtifactSet> _artifacts;
   final Stdio? _stdio;
@@ -1097,17 +1098,18 @@ abstract class CachedArtifact extends ArtifactSet {
         );
       }
     }
+    final String? version = this.version;
+    if (version == null) {
+      logger.printWarning(
+        'No known version for the artifact name "$name". '
+        'Flutter can continue, but the artifact may be re-downloaded on '
+        'subsequent invocations until the problem is resolved.',
+      );
+      return;
+    }
     await updateInner(artifactUpdater, fileSystem, operatingSystemUtils);
     try {
-      if (version == null) {
-        logger.printWarning(
-          'No known version for the artifact name "$name". '
-          'Flutter can continue, but the artifact may be re-downloaded on '
-          'subsequent invocations until the problem is resolved.',
-        );
-      } else {
-        cache.setStampFor(stampName, version!);
-      }
+      cache.setStampFor(stampName, version);
     } on FileSystemException catch (err) {
       logger.printWarning(
         'The new artifact "$name" was downloaded, but Flutter failed to update '

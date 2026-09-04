@@ -5,9 +5,11 @@
 import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -292,6 +294,20 @@ void main() {
     });
   });
 
+  testWithoutContext('toEnvironmentConfig includes build name and build number', () {
+    const buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      buildName: '4.5.6',
+      buildNumber: '7',
+      treeShakeIcons: false,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+    );
+
+    expect(buildInfo.toEnvironmentConfig()['BUILD_NAME'], '4.5.6');
+    expect(buildInfo.toEnvironmentConfig()['BUILD_NUMBER'], '7');
+  });
+
   testWithoutContext('toGradleConfig encoding of standard values', () {
     const buildInfo = BuildInfo(
       BuildMode.debug,
@@ -322,6 +338,58 @@ void main() {
       '-Pfoo=bar',
       '-Pfizz=bazz',
     ]);
+  });
+
+  testWithoutContext('toGradleConfig encoding of androidEnableHcpp', () {
+    const buildInfo = BuildInfo(
+      BuildMode.debug,
+      '',
+      treeShakeIcons: true,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+      androidEnableHcpp: true,
+      explicitAndroidEnableHcpp: true,
+    );
+
+    expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=true'));
+    expect(buildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
+    expect(
+      buildInfo.copyWith().androidEnableHcpp,
+      isTrue,
+      reason: 'copyWith should preserve androidEnableHcpp',
+    );
+    expect(
+      buildInfo.copyWith().explicitAndroidEnableHcpp,
+      isTrue,
+      reason: 'copyWith should preserve explicitAndroidEnableHcpp',
+    );
+
+    const disabledBuildInfo = BuildInfo(
+      BuildMode.debug,
+      '',
+      treeShakeIcons: true,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+      androidEnableHcpp: false,
+      explicitAndroidEnableHcpp: false,
+    );
+    expect(disabledBuildInfo.toGradleConfig(), contains('-Penable-hcpp=false'));
+    expect(disabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=false'));
+
+    const unsetBuildInfo = BuildInfo(
+      BuildMode.debug,
+      '',
+      treeShakeIcons: true,
+      packageConfigPath: 'foo/.dart_tool/package_config.json',
+    );
+    expect(
+      unsetBuildInfo.toGradleConfig(),
+      isNot(anyElement(contains('-Penable-hcpp'))),
+      reason: 'no property should be passed when unset',
+    );
+    expect(
+      unsetBuildInfo.toGradleConfig(),
+      isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
+      reason: 'no property should be passed when unset',
+    );
   });
 
   testWithoutContext('encodeDartDefines encodes define values with base64 encoded components', () {
@@ -403,5 +471,36 @@ void main() {
     expect(CpuArch.x86.name, 'x86');
     expect(CpuArch.x64.name, 'x64');
     expect(CpuArch.riscv64.name, 'riscv64');
+  });
+
+  group('getBuildDirectory', () {
+    testWithoutContext('defaults to "build" when config does not specify build-dir', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      expect(getBuildDirectory(config, fileSystem), 'build');
+    });
+
+    testWithoutContext('uses passed in config', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      config.setValue('build-dir', 'custom_build_out');
+      expect(getBuildDirectory(config, fileSystem), 'custom_build_out');
+    });
+
+    testWithoutContext('throws exception when configured build-dir is absolute', () {
+      final fileSystem = MemoryFileSystem.test();
+      final config = Config.test();
+      config.setValue('build-dir', '/absolute/path/to/build');
+      expect(() => getBuildDirectory(config, fileSystem), throwsException);
+    });
+
+    testUsingContext('defaults to "build" when config does not specify build-dir in context', () {
+      expect(getBuildDirectory(), 'build');
+    }, overrides: <Type, Generator>{Config: () => Config.test()});
+
+    testUsingContext('uses zone injected config', () {
+      globals.config.setValue('build-dir', 'injected_build_dir');
+      expect(getBuildDirectory(), 'injected_build_dir');
+    }, overrides: <Type, Generator>{Config: () => Config.test()});
   });
 }

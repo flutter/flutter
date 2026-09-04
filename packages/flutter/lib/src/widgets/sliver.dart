@@ -1412,23 +1412,13 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
 ///
 /// {@macro flutter.widgets.IgnorePointer.semantics}
 ///
-/// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
-///
 /// See also:
 ///
 ///  * [IgnorePointer], the equivalent widget for boxes.
 class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a sliver widget that is invisible to hit testing.
-  const SliverIgnorePointer({
-    super.key,
-    this.ignoring = true,
-    @Deprecated(
-      'Create a custom sliver ignore pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    this.ignoringSemantics,
-    Widget? sliver,
-  }) : super(child: sliver);
+  const SliverIgnorePointer({super.key, this.ignoring = true, Widget? sliver})
+    : super(child: sliver);
 
   /// Whether this sliver is ignored during hit testing.
   ///
@@ -1438,35 +1428,20 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// {@macro flutter.widgets.IgnorePointer.semantics}
   final bool ignoring;
 
-  /// Whether the semantics of this sliver is ignored when compiling the
-  /// semantics tree.
-  ///
-  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
-  @Deprecated(
-    'Create a custom sliver ignore pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  final bool? ignoringSemantics;
-
   @override
   RenderSliverIgnorePointer createRenderObject(BuildContext context) {
-    return RenderSliverIgnorePointer(ignoring: ignoring, ignoringSemantics: ignoringSemantics);
+    return RenderSliverIgnorePointer(ignoring: ignoring);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverIgnorePointer renderObject) {
-    renderObject
-      ..ignoring = ignoring
-      ..ignoringSemantics = ignoringSemantics;
+    renderObject.ignoring = ignoring;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
-    properties.add(
-      DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null),
-    );
   }
 }
 
