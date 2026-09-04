@@ -21,6 +21,9 @@ struct _FlCompositorOpenGL {
   // TRUE if glBlitFramebuffer can be used to composite the first layer.
   gboolean can_blit;
 
+  // TRUE if fences can be used to synchronize frames with other contexts.
+  gboolean can_fence;
+
   // Flutter OpenGL contexts.
   FlOpenGLManager* opengl_manager;
 
@@ -55,6 +58,7 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlOpenGLManager* opengl_manager) {
   // Determine once whether glBlitFramebuffer is available on this driver.
   fl_opengl_manager_make_current(opengl_manager);
   self->can_blit = fl_opengl_manager_can_blit(opengl_manager);
+  self->can_fence = fl_opengl_manager_can_fence(opengl_manager);
 
   return self;
 }
@@ -181,4 +185,41 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   glUseProgram(saved_current_program);
   glBlendFuncSeparate(saved_src_rgb, saved_dst_rgb, saved_src_alpha,
                       saved_dst_alpha);
+}
+
+FlOpenGLManager* fl_compositor_opengl_get_opengl_manager(
+    FlCompositorOpenGL* self) {
+  g_return_val_if_fail(FL_IS_COMPOSITOR_OPENGL(self), nullptr);
+  return self->opengl_manager;
+}
+
+gboolean fl_compositor_opengl_can_fence(FlCompositorOpenGL* self) {
+  g_return_val_if_fail(FL_IS_COMPOSITOR_OPENGL(self), FALSE);
+  return self->can_fence;
+}
+
+GLint fl_compositor_opengl_get_frame_format(const FlutterLayer** layers,
+                                            size_t layers_count) {
+  // Every backing store in a frame is created by the same engine code from
+  // context-wide capabilities, so they all share a format and the first one
+  // describes the frame. Layers that aren't OpenGL framebuffer backing stores,
+  // e.g. platform views, don't have a format to match; fl_engine.cc only
+  // creates framebuffers, so there is nothing else to read a format from.
+  for (size_t i = 0; i < layers_count; i++) {
+    const FlutterLayer* layer = layers[i];
+    if (layer == nullptr ||
+        layer->type != kFlutterLayerContentTypeBackingStore ||
+        layer->backing_store == nullptr ||
+        layer->backing_store->type != kFlutterBackingStoreTypeOpenGL ||
+        layer->backing_store->open_gl.type !=
+            kFlutterOpenGLTargetTypeFramebuffer) {
+      continue;
+    }
+
+    return layer->backing_store->open_gl.framebuffer.target == GL_BGRA8_EXT
+               ? GL_BGRA_EXT
+               : GL_RGBA;
+  }
+
+  return GL_RGBA;
 }

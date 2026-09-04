@@ -289,13 +289,10 @@ static void fl_view_renderer_subsurface_present_layers(
   if (self->framebuffer == nullptr ||
       fl_framebuffer_get_width(self->framebuffer) != width ||
       fl_framebuffer_get_height(self->framebuffer) != height) {
-    GLint general_format = GL_RGBA;
-    if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
-      general_format = GL_BGRA_EXT;
-    }
+    GLint general_format =
+        fl_compositor_opengl_get_frame_format(layers, layers_count);
     g_clear_object(&self->framebuffer);
-    self->framebuffer =
-        fl_framebuffer_new(general_format, width, height, FALSE);
+    self->framebuffer = fl_framebuffer_new(general_format, width, height);
   }
 
   // Bind the target framebuffer so the compositor draws into it.
@@ -308,12 +305,25 @@ static void fl_view_renderer_subsurface_present_layers(
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, saved_draw_framebuffer_binding);
 
+  // The frame is presented below using the subsurface's own OpenGL context.
+  // Sharing a texture between contexts requires the rendering to have completed
+  // before the other context uses it - making a context current only flushes
+  // the previous one, which guarantees the commands have been submitted, not
+  // that they have finished.
+  g_autoptr(FlGLFence) fence = nullptr;
+  if (fl_compositor_opengl_can_fence(self->compositor)) {
+    fence = fl_gl_fence_new(fl_engine_get_opengl_manager(self->engine));
+  } else {
+    // No fences on this driver, wait for the rendering here instead.
+    glFinish();
+  }
+
   // Present the composited frame directly to the subsurface using its own EGL
   // context. This reads the engine's frame texture directly, as the subsurface
   // context shares resources with the engine.
   fl_subsurface_egl_present(self->egl,
                             fl_framebuffer_get_texture_id(self->framebuffer),
-                            width, height);
+                            width, height, fence);
 
   g_mutex_unlock(&self->frame_mutex);
 

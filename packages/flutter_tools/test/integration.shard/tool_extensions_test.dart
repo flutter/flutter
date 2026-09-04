@@ -43,6 +43,21 @@ void main() {
     expect(result.exitCode, 0);
   });
 
+  testWithoutContext('flutter config outputs extension settings when enabled', () async {
+    final ProcessResult result = await processManager.run(
+      <String>[flutterBin, 'config', '--list'],
+      environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
+    );
+
+    if (isLinux) {
+      expect(result.stdout, contains('Extension Settings:'));
+      expect(result.stdout, contains('  Linux Custom Extension Prototype:'));
+      expect(result.stdout, contains('    enable-linux-custom-prototype:'));
+    } else {
+      expect(result.stdout, isNot(contains('Extension Settings:')));
+    }
+    expect(result.exitCode, 0);
+  });
   testWithoutContext('tool extensions are disabled by default', () async {
     final ProcessResult doctorResult = await processManager.run(<String>[
       flutterBin,
@@ -51,5 +66,59 @@ void main() {
     ], environment: baseEnv);
     expect(doctorResult.stdout, isNot(contains('Linux Custom Extension Prototype')));
     expect(doctorResult.exitCode, 0);
+    final ProcessResult configResult = await processManager.run(<String>[
+      flutterBin,
+      'config',
+      '--list',
+    ], environment: baseEnv);
+    expect(configResult.stdout, isNot(contains('Extension Settings:')));
+    expect(configResult.exitCode, 0);
+  });
+
+  testWithoutContext('flutter create with custom template succeeds when enabled', () async {
+    final Directory projectDir = tempHome.childDirectory('custom_app');
+    if (projectDir.existsSync()) {
+      projectDir.deleteSync(recursive: true);
+    }
+
+    final ProcessResult result = await processManager.run(
+      <String>[flutterBin, 'create', '--template=custom-linux-app', projectDir.path],
+      environment: <String, String>{...baseEnv, 'FLUTTER_TOOL_EXTENSIONS': 'true'},
+    );
+
+    if (isLinux) {
+      expect(result.exitCode, 0, reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}');
+      expect(projectDir.existsSync(), isTrue);
+      final File verificationFile = projectDir.childFile('.custom_device_extension_info');
+      expect(verificationFile.existsSync(), isTrue);
+      expect(
+        verificationFile.readAsStringSync().trim(),
+        'Custom Linux Device Extension App Template Verified',
+      );
+    } else {
+      expect(
+        result.exitCode,
+        isNot(0),
+        reason: 'stdout: ${result.stdout}\nstderr: ${result.stderr}',
+      );
+      expect(result.stderr, contains('custom-linux-app'));
+      expect(projectDir.existsSync(), isFalse);
+    }
+  });
+
+  testWithoutContext('flutter create with custom template fails when disabled', () async {
+    final Directory projectDir = tempHome.childDirectory('custom_app_disabled');
+    if (projectDir.existsSync()) {
+      projectDir.deleteSync(recursive: true);
+    }
+
+    final ProcessResult result = await processManager.run(
+      <String>[flutterBin, 'create', '--template=custom-linux-app', projectDir.path],
+      environment: baseEnv, // disabled by default
+    );
+
+    expect(result.exitCode, isNot(0));
+    expect(result.stderr, contains('is not an allowed value for option "--template"'));
+    expect(projectDir.existsSync(), isFalse);
   });
 }
