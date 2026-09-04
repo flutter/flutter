@@ -2108,7 +2108,10 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     final artifacts = <DevelopmentArtifact>{DevelopmentArtifact.universal};
     for (final device in devices) {
       final TargetPlatform targetPlatform = await device.targetPlatform;
-      final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(targetPlatform);
+      final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(
+        targetPlatform,
+        featureFlags,
+      );
       if (developmentArtifact != null) {
         artifacts.add(developmentArtifact);
       }
@@ -2120,7 +2123,10 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
 // Returns the development artifact for the target platform, or null
 // if none is supported
 @protected
-DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
+DevelopmentArtifact? artifactFromTargetPlatform(
+  TargetPlatform targetPlatform,
+  FeatureFlags featureFlags,
+) {
   switch (targetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
@@ -2129,6 +2135,9 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
       return DevelopmentArtifact.androidGenSnapshot;
     case TargetPlatform.web_javascript:
       return DevelopmentArtifact.web;
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+      return null;
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin:
@@ -2149,8 +2158,6 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
         return DevelopmentArtifact.linux;
       }
       return null;
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
     case TargetPlatform.unsupported:
       return null;
