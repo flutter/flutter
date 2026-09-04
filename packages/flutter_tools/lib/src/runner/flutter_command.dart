@@ -556,9 +556,10 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   Uri? get devToolsServerAddress {
-    final StringOptionDescriptor descriptor = DebuggingOptionDescriptors.devToolsServerAddress();
-    if (wasParsed(descriptor)) {
-      final Uri? uri = Uri.tryParse(getValue(descriptor)!);
+    if (wasParsed(DebuggingOptionDescriptors.devToolsServerAddressOption)) {
+      final Uri? uri = Uri.tryParse(
+        getValue(DebuggingOptionDescriptors.devToolsServerAddressOption)!,
+      );
       if (uri != null && uri.host.isNotEmpty && uri.port != 0) {
         return uri;
       }

@@ -184,7 +184,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     } else {
       return DebuggingOptions.enabled(
         buildInfo,
-        startPaused: getValue(DebuggingOptionDescriptors.startPaused()),
+        startPaused: getValue(DebuggingOptionDescriptors.startPausedOption),
         disableServiceAuthCodes: disableServiceAuthCodes,
         disableServiceOriginCheck: disableServiceOriginCheck,
         cacheStartupProfile: cacheStartupProfile,

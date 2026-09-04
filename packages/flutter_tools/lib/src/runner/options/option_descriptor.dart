@@ -544,7 +544,7 @@ extension ArgParserDescriptorExtension on ArgParser {
     bool verboseHelp = false,
     bool? hideOverride,
   }) {
-    for (final OptionDescriptor<Object?> descriptor in descriptors) {
+    for (final descriptor in descriptors) {
       descriptor.addTo(this, verboseHelp: verboseHelp, hideOverride: hideOverride);
     }
   }
