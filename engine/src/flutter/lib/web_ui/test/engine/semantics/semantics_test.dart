@@ -943,7 +943,10 @@ class MockSemanticsEnabler implements SemanticsEnabler {
   List<DomElement> get placeholders => throw UnimplementedError();
 
   @override
-  DomElement addPlaceholder() => throw UnimplementedError();
+  DomElement? placeholderHostFor(DomElement viewRoot) => throw UnimplementedError();
+
+  @override
+  void removeAllPlaceholders() {}
 
   @override
   void addPlaceholderForView(DomElement viewRoot) {

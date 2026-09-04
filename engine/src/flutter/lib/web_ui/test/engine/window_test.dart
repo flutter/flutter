@@ -958,7 +958,10 @@ class _RecordingSemanticsEnabler implements SemanticsEnabler {
   List<DomElement> get placeholders => <DomElement>[];
 
   @override
-  DomElement addPlaceholder() => throw UnimplementedError();
+  DomElement? placeholderHostFor(DomElement viewRoot) => throw UnimplementedError();
+
+  @override
+  void removeAllPlaceholders() {}
 
   @override
   bool get isWaitingToEnableSemantics => false;

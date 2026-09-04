@@ -21,8 +21,8 @@ void testMain() {
     setUp(() {
       EngineSemantics.instance.semanticsEnabled = false;
       desktopSemanticsEnabler = DesktopSemanticsEnabler();
-      placeholder = desktopSemanticsEnabler.addPlaceholder();
-      domDocument.body!.append(placeholder!);
+      desktopSemanticsEnabler.addPlaceholderForView(createDomElement('flutter-view'));
+      placeholder = desktopSemanticsEnabler.placeholders.single;
     });
 
     tearDown(() {
@@ -117,8 +117,8 @@ void testMain() {
     });
 
     test('shares one page-level placeholder across views', () {
-      // The desktop placeholder must stay out of the <flutter-view> and be the
-      // first thing in the body. Once browser focus enters a view, Flutter's
+      // The desktop placeholder must stay out of the <flutter-view> and be at
+      // the front of the body. Once browser focus enters a view, Flutter's
       // focus traversal can consume Tab and never hand it back, which would
       // leave a nested placeholder unreachable by keyboard.
       final enabler = DesktopSemanticsEnabler();
@@ -133,6 +133,8 @@ void testMain() {
       enabler.addPlaceholderForView(firstView);
       enabler.addPlaceholderForView(secondView);
 
+      // Both views resolve to the body, so they share a single button rather
+      // than stacking up Tab stops ahead of the page content.
       expect(enabler.placeholders, hasLength(1));
       final DomElement shared = enabler.placeholders.single;
       expect(shared.parent, domDocument.body);
@@ -140,13 +142,15 @@ void testMain() {
       expect(firstView.querySelector('flt-semantics-placeholder'), isNull);
       expect(secondView.querySelector('flt-semantics-placeholder'), isNull);
 
-      // The placeholder outlives any single view, and goes when the last one
-      // does.
+      // The shared placeholder outlives any single view, and goes when the
+      // last one does.
       enabler.removePlaceholderForView(firstView);
+      expect(enabler.placeholders, <DomElement>[shared]);
       expect(shared.isConnected, isTrue);
+
       enabler.removePlaceholderForView(secondView);
-      expect(shared.isConnected, isFalse);
       expect(enabler.placeholders, isEmpty);
+      expect(shared.isConnected, isFalse);
 
       firstView.remove();
       secondView.remove();
@@ -162,8 +166,10 @@ void testMain() {
       setUp(() {
         EngineSemantics.instance.semanticsEnabled = false;
         mobileSemanticsEnabler = MobileSemanticsEnabler();
-        placeholder = mobileSemanticsEnabler.addPlaceholder();
-        domDocument.body!.append(placeholder!);
+        // The body stands in for a view here, so the placeholder covers the
+        // page and the existing center-of-the-page assertions still hold.
+        mobileSemanticsEnabler.addPlaceholderForView(domDocument.body!);
+        placeholder = mobileSemanticsEnabler.placeholders.single;
       });
 
       tearDown(() {
@@ -262,8 +268,8 @@ void testMain() {
         // placeholder's rect must be compared in the same coordinate system,
         // and a view at the origin would hide a mismatch between the two.
         final DomElement view = _createFakeViewElement(left: 40, top: 60, width: 100, height: 80);
-        final DomElement secondPlaceholder = mobileSemanticsEnabler.addPlaceholder();
-        view.append(secondPlaceholder);
+        mobileSemanticsEnabler.addPlaceholderForView(view);
+        final DomElement secondPlaceholder = view.children.first;
 
         expect(mobileSemanticsEnabler.semanticsActivationTimer, isNull);
 
@@ -304,7 +310,10 @@ void testMain() {
         ui_web.accessibilityPlaceholderMessage = testLabel;
         addTearDown(() => ui_web.accessibilityPlaceholderMessage = 'Enable accessibility');
 
-        final DomElement laterPlaceholder = mobileSemanticsEnabler.addPlaceholder();
+        final DomElement laterView = _createFakeViewElement(left: 0, top: 0, width: 10, height: 10);
+        addTearDown(() => laterView.remove());
+        mobileSemanticsEnabler.addPlaceholderForView(laterView);
+        final DomElement laterPlaceholder = laterView.children.first;
         expect(laterPlaceholder.getAttribute('aria-label'), testLabel);
 
         const anotherLabel = 'Another label for placeholder';
@@ -372,14 +381,7 @@ class FakeSemanticsEnabler extends SemanticsEnabler {
   bool get isWaitingToEnableSemantics => true;
 
   @override
-  void addPlaceholderForView(DomElement viewRoot) {
-    throw UnimplementedError();
-  }
-
-  @override
-  void removePlaceholderForView(DomElement viewRoot) {
-    throw UnimplementedError();
-  }
+  DomElement? placeholderHostFor(DomElement viewRoot) => throw UnimplementedError();
 
   int tryEnableSemanticsCallCount = 0;
 

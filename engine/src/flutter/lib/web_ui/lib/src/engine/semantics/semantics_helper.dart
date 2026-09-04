@@ -71,7 +71,7 @@ class SemanticsHelper {
   /// placeholders.
   ///
   /// This is used when semantics is enabled programmatically and therefore the
-  /// placeholder is no longer needed.
+  /// placeholders are no longer needed.
   void dispose() {
     _semanticsEnabler.dispose();
   }
@@ -110,35 +110,91 @@ abstract class SemanticsEnabler {
   /// should be forwarded to the framework.
   bool tryEnableSemantics(DomEvent event);
 
+  /// The placeholder each view is using, keyed by the view's root element.
+  ///
+  /// Views that share a host share one placeholder, so several entries can
+  /// point at the same element. See [addPlaceholderForView].
+  final Map<DomElement, DomElement> _placeholderByViewRoot = <DomElement, DomElement>{};
+
   /// The placeholders that are currently waiting for the user to enable
   /// accessibility.
   ///
-  /// See [addPlaceholderForView] for how many there are and where they live.
+  /// One per host, so one for the whole page on desktop and one per view on
+  /// mobile.
   @visibleForTesting
-  final List<DomElement> placeholders = <DomElement>[];
+  Iterable<DomElement> get placeholders => _placeholderByViewRoot.values.toSet();
 
-  /// Places a placeholder for the Flutter view rooted at [viewRoot].
+  /// The element the placeholder for [viewRoot] is prepended to.
   ///
-  /// Subclasses decide both how many placeholders exist and where they are
-  /// attached, because the two form factors need opposite things. See
-  /// [DesktopSemanticsEnabler] and [MobileSemanticsEnabler].
-  void addPlaceholderForView(DomElement viewRoot);
+  /// This is the only thing the two form factors disagree on, and they
+  /// disagree for a reason. See [DesktopSemanticsEnabler] and
+  /// [MobileSemanticsEnabler].
+  ///
+  /// Returning null means no placeholder can be placed right now.
+  DomElement? placeholderHostFor(DomElement viewRoot);
 
-  /// Removes whatever [addPlaceholderForView] put in place for [viewRoot].
-  void removePlaceholderForView(DomElement viewRoot);
-
-  /// Creates a placeholder element and adds it to [placeholders].
+  /// Gives the Flutter view rooted at [viewRoot] a placeholder inside
+  /// [placeholderHostFor].
+  ///
+  /// Views that resolve to the same host share one placeholder, because
+  /// enabling semantics is a page-wide setting and a second button would only
+  /// add another stop for the assistive technology user to step over. On
+  /// desktop every view resolves to the body, so the page gets a single
+  /// placeholder no matter how many views it holds.
   ///
   /// On focus the element announces that accessibility can be enabled by
   /// tapping/clicking. (Announcement depends on the assistive technology)
+  void addPlaceholderForView(DomElement viewRoot) {
+    if (_placeholderByViewRoot.containsKey(viewRoot)) {
+      // Already registered, so the view either owns a placeholder or is
+      // already sharing one.
+      return;
+    }
+    final DomElement? host = placeholderHostFor(viewRoot);
+    if (host == null) {
+      return;
+    }
+    DomElement? placeholder = _placeholderIn(host);
+    if (placeholder == null) {
+      placeholder = _prepareAccessibilityPlaceholder();
+      // First child, so that whatever else the host holds stays on top of it
+      // and keeps receiving DOM events, platform views in particular. Pointer
+      // events that do land on the placeholder still bubble up to the view
+      // root, where [PointerBinding] listens for them.
+      host.prepend(placeholder);
+    }
+    _placeholderByViewRoot[viewRoot] = placeholder;
+  }
+
+  /// The placeholder already attached to [host], if there is one.
+  DomElement? _placeholderIn(DomElement host) {
+    for (final DomElement placeholder in placeholders) {
+      if (placeholder.parent == host) {
+        return placeholder;
+      }
+    }
+    return null;
+  }
+
+  /// Removes the placeholder [addPlaceholderForView] gave [viewRoot], unless
+  /// another view is still sharing it.
+  void removePlaceholderForView(DomElement viewRoot) {
+    final DomElement? placeholder = _placeholderByViewRoot.remove(viewRoot);
+    if (placeholder != null && !_placeholderByViewRoot.containsValue(placeholder)) {
+      placeholder.remove();
+    }
+  }
+
+  /// Removes every placeholder, so the engine stops waiting for the user to
+  /// enable semantics.
   ///
-  /// Only touches [placeholders]. The caller attaches the element and keeps
-  /// its own bookkeeping in sync, so this is for [addPlaceholderForView]
-  /// implementations rather than outside callers.
-  DomElement addPlaceholder() {
-    final DomElement placeholder = _prepareAccessibilityPlaceholder();
-    placeholders.add(placeholder);
-    return placeholder;
+  /// Separate from [dispose] so that the enabler can retire its placeholders
+  /// without destroying itself.
+  void removeAllPlaceholders() {
+    for (final DomElement placeholder in placeholders) {
+      placeholder.remove();
+    }
+    _placeholderByViewRoot.clear();
   }
 
   DomElement _prepareAccessibilityPlaceholder();
@@ -156,15 +212,13 @@ abstract class SemanticsEnabler {
   /// they activate the semantics.
   ///
   /// If not they are sent to framework as normal events.
-  bool get isWaitingToEnableSemantics => placeholders.isNotEmpty;
+  bool get isWaitingToEnableSemantics => _placeholderByViewRoot.isNotEmpty;
 
-  /// Stops waiting for the user to enable semantics and removes all
-  /// placeholders.
+  /// Releases everything this enabler owns.
+  ///
+  /// Only the owner of the enabler calls this.
   void dispose() {
-    for (final DomElement placeholder in placeholders) {
-      placeholder.remove();
-    }
-    placeholders.clear();
+    removeAllPlaceholders();
   }
 }
 
@@ -178,46 +232,28 @@ abstract class SemanticsEnabler {
 /// and enables semantics.
 @visibleForTesting
 class DesktopSemanticsEnabler extends SemanticsEnabler {
-  /// The roots of the views that registered for a placeholder and are still
-  /// alive.
+  /// Hosts the placeholder in the document body, never inside the view.
   ///
-  /// Only used to know when the last one is gone and the shared placeholder
-  /// can be dropped. Deliberately survives [dispose]: if semantics is turned
-  /// off again and a new view creates another shared placeholder, that
-  /// placeholder must outlive the new view for as long as the older views are
-  /// around.
-  final Set<DomElement> _viewRoots = <DomElement>{};
-
-  /// Adds a single placeholder for the whole page, shared by all views.
+  /// Every view answers with the same host, so the page ends up with one
+  /// shared placeholder rather than one per view. Semantics is enabled for the
+  /// whole engine at once, so a second button would do nothing new and would
+  /// only add another Tab stop ahead of the page content.
   ///
-  /// It must *not* go inside the <flutter-view>. It has to be the first thing
-  /// the user tabs to, because once browser focus enters a view, Flutter's own
-  /// focus traversal can consume Tab and never hand it back: a `Navigator` not
-  /// built by `WidgetsApp` traverses with `TraversalEdgeBehavior.parentScope`,
-  /// which closed-loops within the view, reports the key as handled, and the
-  /// engine then calls `preventDefault`. Screen reader users in focus mode
-  /// reach this button by Tab, so nesting it would put it out of reach.
+  /// It has to be the first thing the user tabs to, because once browser focus
+  /// enters a view, Flutter's own focus traversal can consume Tab and never
+  /// hand it back: a `Navigator` not built by `WidgetsApp` traverses with
+  /// `TraversalEdgeBehavior.parentScope`, which closed-loops within the view,
+  /// reports the key as handled, and the engine then calls `preventDefault`.
+  /// Screen reader users in focus mode reach this button by Tab, so nesting it
+  /// would put it out of reach.
   ///
-  /// Being 1x1 and offscreen, it never covers page content, so it does not
-  /// need scoping to a view the way
-  /// [MobileSemanticsEnabler.addPlaceholderForView] does.
+  /// Being 1x1 and offscreen it never covers page content, which is why it can
+  /// live in the body at all. Compare with [MobileSemanticsEnabler], which has
+  /// the opposite constraint.
   ///
   /// See https://github.com/flutter/flutter/issues/152838
   @override
-  void addPlaceholderForView(DomElement viewRoot) {
-    _viewRoots.add(viewRoot);
-    if (placeholders.isEmpty) {
-      domDocument.body?.prepend(addPlaceholder());
-    }
-  }
-
-  @override
-  void removePlaceholderForView(DomElement viewRoot) {
-    final bool wasRegistered = _viewRoots.remove(viewRoot);
-    if (wasRegistered && _viewRoots.isEmpty) {
-      dispose();
-    }
-  }
+  DomElement? placeholderHostFor(DomElement viewRoot) => domDocument.body;
 
   @override
   bool tryEnableSemantics(DomEvent event) {
@@ -258,7 +294,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
     }
 
     EngineSemantics.instance.semanticsEnabled = true;
-    dispose();
+    removeAllPlaceholders();
     return false;
   }
 
@@ -326,44 +362,17 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
   /// this issue.
   bool _schedulePlaceholderRemoval = false;
 
-  /// The placeholder covering each view, keyed by the view's root element.
-  final Map<DomElement, DomElement> _placeholderByViewRoot = <DomElement, DomElement>{};
-
-  /// Adds a placeholder covering just this view.
+  /// Hosts the placeholder inside the view it belongs to.
   ///
-  /// One per view, rather than one for the page. This placeholder fills its
-  /// offset parent, so a single page-level one would sit on top of the whole
-  /// document and swallow every tap aimed at the HTML around an embedded view.
-  ///
-  /// Do not collapse this into the desktop strategy. The two are deliberately
-  /// opposite: see [DesktopSemanticsEnabler.addPlaceholderForView], which must
-  /// stay out of the view to remain reachable by keyboard.
+  /// This placeholder fills its host so that touch exploration can find it
+  /// anywhere in the app, so hosting it in the document body would put it on
+  /// top of the whole page and swallow every tap aimed at the HTML around an
+  /// embedded view. Compare with [DesktopSemanticsEnabler], which has the
+  /// opposite constraint.
   ///
   /// See https://github.com/flutter/flutter/issues/152838
   @override
-  void addPlaceholderForView(DomElement viewRoot) {
-    if (_placeholderByViewRoot.containsKey(viewRoot)) {
-      // Registering twice would strand the first placeholder, tracked and
-      // attached, with nothing left holding a reference to it.
-      return;
-    }
-    final DomElement placeholder = addPlaceholder();
-    _placeholderByViewRoot[viewRoot] = placeholder;
-    // First child, so that the rest of the view stays on top of it and keeps
-    // receiving DOM events, platform views in particular. Pointer events that
-    // do land on the placeholder still bubble up to the view root, where
-    // [PointerBinding] listens for them.
-    viewRoot.prepend(placeholder);
-  }
-
-  @override
-  void removePlaceholderForView(DomElement viewRoot) {
-    final DomElement? placeholder = _placeholderByViewRoot.remove(viewRoot);
-    if (placeholder != null) {
-      placeholders.remove(placeholder);
-      placeholder.remove();
-    }
-  }
+  DomElement? placeholderHostFor(DomElement viewRoot) => viewRoot;
 
   @override
   bool tryEnableSemantics(DomEvent event) {
@@ -382,7 +391,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
           event.type == 'pointerup' ||
           event.type == 'click';
       if (removeNow) {
-        dispose();
+        removeAllPlaceholders();
       }
       return true;
     }
@@ -479,7 +488,8 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       assert(semanticsActivationTimer == null);
       _schedulePlaceholderRemoval = true;
       semanticsActivationTimer = Timer(_periodToConsumeEvents, () {
-        dispose();
+        semanticsActivationTimer = null;
+        removeAllPlaceholders();
         EngineSemantics.instance.semanticsEnabled = true;
       });
       return false;
@@ -521,9 +531,8 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
 
   @override
   void dispose() {
-    super.dispose();
-    _placeholderByViewRoot.clear();
     semanticsActivationTimer?.cancel();
     semanticsActivationTimer = null;
+    super.dispose();
   }
 }
