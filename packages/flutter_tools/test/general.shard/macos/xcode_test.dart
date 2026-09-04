@@ -496,6 +496,35 @@ void main() {
           });
         });
 
+        group('SDK Version', () {
+          testWithoutContext('--show-sdk-version iphoneos', () async {
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-version'],
+                stdout: '21.4',
+              ),
+            );
+
+            expect(await xcode.sdkVersion('iphoneos'), '21.4');
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+
+          testWithoutContext('--show-sdk-version fails', () async {
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-version'],
+                exitCode: 1,
+                stderr: 'xcrun: error:',
+              ),
+            );
+
+            expect(
+              () async => xcode.sdkVersion('iphoneos'),
+              throwsToolExit(message: 'Could not find SDK version: xcrun: error:'),
+            );
+            expect(fakeProcessManager, hasNoRemainingExpectations);
+          });
+        });
         group('SDK Platform Version', () {
           testWithoutContext('--show-sdk-platform-version iphonesimulator', () async {
             fakeProcessManager.addCommand(

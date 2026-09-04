@@ -267,6 +267,28 @@ class Xcode {
     return runResult.stdout.trim();
   }
 
+  final Map<String, Future<String>> _sdkVersionCache = <String, Future<String>>{};
+
+  /// Returns the SDK version for the given [sdkName].
+  ///
+  /// Examples of [sdkName] include 'iphoneos', 'iphonesimulator', and 'macosx'.
+  Future<String> sdkVersion(String sdkName) {
+    return _sdkVersionCache.putIfAbsent(sdkName, () async {
+      final RunResult runResult = await _processUtils.run(<String>[
+        ...xcrunCommand(),
+        '--sdk',
+        sdkName,
+        '--show-sdk-version',
+      ]);
+      if (runResult.exitCode != 0) {
+        // If it fails, remove from cache so we can try again later if needed.
+        unawaited(_sdkVersionCache.remove(sdkName));
+        throwToolExit('Could not find SDK version: ${runResult.stderr}');
+      }
+      return runResult.stdout.trim();
+    });
+  }
+
   String? getSimulatorPath() {
     final String? selectPath = xcodeSelectPath;
     if (selectPath == null) {
