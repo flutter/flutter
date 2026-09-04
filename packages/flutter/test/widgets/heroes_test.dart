@@ -307,6 +307,37 @@ class _SimpleState extends State<_SimpleStatefulWidget> {
   Widget build(BuildContext context) => Text(state.toString());
 }
 
+class _LifecycleTrackingWidget extends StatefulWidget {
+  const _LifecycleTrackingWidget(this.tracker);
+
+  final _LifecycleTracker tracker;
+
+  @override
+  State<_LifecycleTrackingWidget> createState() => _LifecycleTrackingState();
+}
+
+class _LifecycleTrackingState extends State<_LifecycleTrackingWidget> {
+  @override
+  void initState() {
+    super.initState();
+    widget.tracker.states.add(this);
+  }
+
+  @override
+  void dispose() {
+    widget.tracker.disposals += 1;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.expand();
+}
+
+class _LifecycleTracker {
+  final List<State<_LifecycleTrackingWidget>> states = <State<_LifecycleTrackingWidget>>[];
+  int disposals = 0;
+}
+
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({super.key, this.value = '123'});
   final String value;
@@ -1753,6 +1784,86 @@ Future<void> main() async {
     // Pop flight finished
     await tester.pump(observer.transitionDuration);
     expect(find.text('456'), findsOneWidget);
+  });
+
+  testWidgets('Destination Hero child state is preserved during push and pop flights', (
+    WidgetTester tester,
+  ) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    final homeTracker = _LifecycleTracker();
+    final destinationTracker = _LifecycleTracker();
+
+    // Build the source Hero and remember its child State for the later pop flight.
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Hero(
+          tag: 'H',
+          child: SizedBox(width: 100, height: 100, child: _LifecycleTrackingWidget(homeTracker)),
+        ),
+      ),
+    );
+    final State<_LifecycleTrackingWidget> homeState = homeTracker.states.single;
+
+    // Push a route and build its destination Hero before the flight starts.
+    navigatorKey.currentState!.push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => Hero(
+          tag: 'H',
+          child: SizedBox(
+            width: 200,
+            height: 200,
+            child: _LifecycleTrackingWidget(destinationTracker),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(destinationTracker.states, hasLength(1));
+    final State<_LifecycleTrackingWidget> destinationState = destinationTracker.states.single;
+    expect(destinationTracker.disposals, 0);
+    expect(destinationState.mounted, isTrue);
+    expect(homeTracker.states, hasLength(1));
+    expect(homeTracker.disposals, 0);
+    expect(homeState.mounted, isTrue);
+
+    // Start the push flight. The destination child moves into the overlay.
+    await tester.pump();
+    expect(destinationTracker.states, hasLength(1));
+    expect(destinationTracker.disposals, 0);
+    expect(destinationState.mounted, isTrue);
+    expect(homeTracker.states, hasLength(1));
+    expect(homeTracker.disposals, 0);
+    expect(homeState.mounted, isTrue);
+
+    // Finish the push flight. The same State moves back into the destination route.
+    await tester.pumpAndSettle();
+    expect(destinationTracker.states, hasLength(1));
+    expect(destinationTracker.disposals, 0);
+    expect(destinationState.mounted, isTrue);
+    expect(homeTracker.states, hasLength(1));
+    expect(homeTracker.disposals, 0);
+    expect(homeState.mounted, isTrue);
+
+    // Start the pop flight. The home Hero is now the destination Hero.
+    navigatorKey.currentState!.pop();
+    await tester.pump();
+    expect(destinationTracker.states, hasLength(1));
+    expect(destinationTracker.disposals, 0);
+    expect(destinationState.mounted, isTrue);
+    expect(homeTracker.states, hasLength(1));
+    expect(homeTracker.disposals, 0);
+    expect(homeState.mounted, isTrue);
+
+    // Finish the pop flight and verify that the original home State is restored.
+    await tester.pumpAndSettle();
+    expect(destinationTracker.states, hasLength(1));
+    expect(destinationTracker.disposals, 1);
+    expect(destinationState.mounted, isFalse);
+    expect(homeTracker.states, hasLength(1));
+    expect(homeTracker.disposals, 0);
+    expect(homeState.mounted, isTrue);
   });
 
   testWidgets('Hero createRectTween', (WidgetTester tester) async {
