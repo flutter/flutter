@@ -49,10 +49,6 @@ const javaVersionNot17 =
 @visibleForTesting
 const javaVersionNotFound = 'Version of Java not found, no migration attempted.';
 @visibleForTesting
-const conflictDetected =
-    'Conflict detected between versions of Android Studio '
-    'and Gradle, upgrading Gradle version from current to 7.4';
-@visibleForTesting
 const gradleVersionNotFound =
     'Failed to parse Gradle version from distribution url, '
     'skipping Gradle-Java version compatibility check.';
