@@ -989,7 +989,10 @@ class FakeConfig extends Fake implements Config {
 
 class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
 
-class FakeTerminal extends Fake implements Terminal {}
+class FakeTerminal extends Fake implements AnsiTerminal {
+  @override
+  String get successMark => '✓';
+}
 
 class FakeProcessUtils extends Fake implements ProcessUtils {}
 

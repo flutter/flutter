@@ -9,6 +9,8 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../ios/code_signing.dart';
@@ -26,6 +28,17 @@ class DarwinAddToAppCodesigning {
     required Logger logger,
   }) : _logger = logger,
        _xcodeCodeSigningSettings = xcodeCodeSigningSettings;
+
+  DarwinAddToAppCodesigning.fromContexts({
+    required AppleContext appleContext,
+    required ToolContext toolContext,
+  }) : this(
+         logger: toolContext.logger,
+         xcodeCodeSigningSettings: XcodeCodeSigningSettings.fromContexts(
+           appleContext: appleContext,
+           toolContext: toolContext,
+         ),
+       );
 
   final XcodeCodeSigningSettings _xcodeCodeSigningSettings;
   final Logger _logger;
