@@ -801,6 +801,20 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Use [enclosingScope] to look for scopes above this node.
   FocusScopeNode? get nearestScope => enclosingScope;
 
+  /// Returns the innermost [FocusScopeNode.focusedChild] within this node, or
+  /// this node itself if it is not a scope with a focused child.
+  ///
+  /// For a [FocusScopeNode], this recursively descends through the
+  /// [FocusScopeNode.focusedChild] of any nested scopes to find the innermost
+  /// node that would receive focus if the scope were focused. For any other
+  /// [FocusNode], this returns the node itself.
+  ///
+  /// See also:
+  ///
+  ///  * [nearestScope], which also resolves depending on whether the node is
+  ///    a scope, and returns the nearest scope at or above this node.
+  FocusNode get innermostFocusedChild => this;
+
   FocusScopeNode? _enclosingScope;
   void _clearEnclosingScopeCache() {
     final FocusScopeNode? cachedScope = _enclosingScope;
@@ -1412,6 +1426,16 @@ class FocusScopeNode extends FocusNode {
   // A stack of the children that have been set as the focusedChild, most recent
   // last (which is the top of the stack).
   final List<FocusNode> _focusedChildren = <FocusNode>[];
+
+  /// Returns the innermost [focusedChild] within this scope.
+  ///
+  /// If the [focusedChild] of this scope is itself a [FocusScopeNode], this
+  /// recursively descends into it, stopping at the first focused child that
+  /// is not a scope, or at a scope that has no focused child of its own.
+  ///
+  /// Returns this scope if it has no [focusedChild].
+  @override
+  FocusNode get innermostFocusedChild => focusedChild?.innermostFocusedChild ?? this;
 
   /// An iterator over the children that are allowed to be traversed by the
   /// [FocusTraversalPolicy].
