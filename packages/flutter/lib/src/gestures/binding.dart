@@ -123,7 +123,16 @@ class _Resampler {
     // Initialize `_frameTime` if needed. This will be used for periodic
     // sampling when frame callbacks are not received.
     if (_frameTime == Duration.zero) {
-      _frameTime = Duration(milliseconds: clock.now().millisecondsSinceEpoch);
+      // Initialize using the event's clock domain (typically boot-clock based)
+      // to align with subsequent updates from scheduler.currentSystemFrameTimeStamp.
+      // This prevents resampled timestamps from jumping backward.
+      _frameTime = _lastEventTime;
+      if (_frameTime == Duration.zero) {
+        _frameTime = scheduler.currentSystemFrameTimeStamp;
+        if (_frameTime == Duration.zero) {
+          _frameTime = Duration(milliseconds: clock.now().millisecondsSinceEpoch);
+        }
+      }
       _frameTimeAge = clock.stopwatch()..start();
     }
 
