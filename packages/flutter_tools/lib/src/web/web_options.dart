@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/utils.dart';
 import '../runner/options/option_bundle.dart';
 import '../runner/options/option_descriptor.dart';
 import '../web_template.dart';
@@ -48,14 +47,13 @@ abstract final class WebOptions {
         'When this is set, it will replace all $kStaticAssetsUrlPlaceholder in web/index.html for the given value.',
   );
 
-  static final pwaStrategy = StringOptionDescriptor(
+  static const pwaStrategy = EnumOptionDescriptor<ServiceWorkerStrategy>(
     name: 'pwa-strategy',
     hide: true,
     help:
         'This option is deprecated and will be removed in a future Flutter release.\n'
         'The caching strategy to be used by the PWA service worker.',
-    allowed: ServiceWorkerStrategy.values.map((ServiceWorkerStrategy e) => e.cliName).toList(),
-    allowedHelp: CliEnum.allowedHelp(ServiceWorkerStrategy.values),
+    values: ServiceWorkerStrategy.values,
   );
 
   static const webResourcesCdn = FlagOptionDescriptor(
