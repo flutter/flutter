@@ -56,7 +56,7 @@ Future<String> createProject(
     androidContext: FakeAndroidContext(),
     appleContext: FakeAppleContext(),
     templateRenderer: const MustacheTemplateRenderer(),
-    toolContext: FakeToolContext(fs: temp.fileSystem),
+    toolContext: DelegatingToolContext(fs: temp.fileSystem),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...arguments, projectPath]);

@@ -1085,6 +1085,9 @@ class FakeCache extends Fake implements Cache {
   Directory getWebSdkDirectory() => _fileSystem.directory('/bin/cache/flutter_web_sdk');
 
   @override
+  String get dartSdkBuild => '12345';
+
+  @override
   MapEntry<String, String> get dyLdLibEntry =>
       const MapEntry<String, String>('DYLD_LIBRARY_PATH', 'fake_path');
 }
