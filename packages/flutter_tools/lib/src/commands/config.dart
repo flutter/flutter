@@ -265,18 +265,12 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
     if (argResults!.wasParsed('select-ios-signing-settings')) {
       final settings = XcodeCodeSigningSettings(
-        config: config,
-        logger: logger,
-        platform: _toolContext.platform,
-        processUtils: _toolContext.processUtils,
-        fileSystem: fs,
-        fileSystemUtils: _toolContext.fileSystemUtils,
-        terminal: _toolContext.terminal,
         plistParser: PlistParser(
           fileSystem: fs,
           logger: logger,
           processManager: _toolContext.processManager,
         ),
+        toolContext: _toolContext,
       );
 
       await settings.selectSettings();
