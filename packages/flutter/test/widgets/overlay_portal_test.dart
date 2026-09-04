@@ -3242,6 +3242,72 @@ void main() {
         ),
       );
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/187198.
+    //
+    // Showing and hiding an overlay child moves a SemanticsNode between the
+    // anchor's semantics parent and the overlay portal's node. The node it is
+    // taken from keeps a stale entry in its child list, and re-attaching that
+    // node used to re-attach the stale child along with it, leaving a
+    // SemanticsNode that was attached but had no parent.
+    testWidgets('toggling an overlay child does not leave a parentless attached semantics node', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      final controller = OverlayPortalController();
+      final siblingController = OverlayPortalController();
+
+      late final OverlayEntry entry;
+      addTearDown(() {
+        entry.remove();
+        entry.dispose();
+      });
+
+      // A second anchor is required: the node that goes stale belongs to the
+      // sibling, not to the portal being toggled.
+      final Widget sibling = OverlayPortal.overlayChildLayoutBuilder(
+        controller: siblingController,
+        overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) =>
+            const SizedBox.shrink(),
+        child: Semantics(explicitChildNodes: true, child: const Text('sibling')),
+      );
+
+      Widget portal = OverlayPortal.overlayChildLayoutBuilder(
+        controller: controller,
+        overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) =>
+            const Align(alignment: Alignment.topLeft, child: Text('overlay child')),
+        child: Semantics(explicitChildNodes: true, child: const Text('anchor')),
+      );
+      portal = Overlay.wrap(child: ExcludeSemantics(child: portal));
+      portal = SizedBox(width: 200, height: 100, child: portal);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry = OverlayEntry(
+                builder: (BuildContext context) =>
+                    Semantics(container: true, child: Column(children: <Widget>[sibling, portal])),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // The corruption only becomes observable on the second round trip.
+      for (var i = 0; i < 2; i += 1) {
+        controller.show();
+        await tester.pumpAndSettle();
+        expect(find.text('overlay child'), findsOneWidget);
+
+        controller.hide();
+        await tester.pumpAndSettle();
+        expect(find.text('overlay child'), findsNothing);
+      }
+
+      semantics.dispose();
+    });
   });
 
   testWidgets(
