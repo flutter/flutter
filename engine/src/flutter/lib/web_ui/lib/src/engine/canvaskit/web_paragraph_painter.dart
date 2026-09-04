@@ -35,7 +35,9 @@ class CanvasKitPainter extends WebParagraphPainter {
     required ParagraphImageGenerator generateParagraphImage,
   }) {
     final double dpr = ui.window.devicePixelRatio;
-    if (_lastDevicePixelRatio != dpr) {
+    if (_lastDevicePixelRatio != dpr ||
+        _singleImageCache?.width != sourceRect.width.toInt() ||
+        _singleImageCache?.height != sourceRect.height.toInt()) {
       clearCache();
     }
     _lastDevicePixelRatio = dpr;

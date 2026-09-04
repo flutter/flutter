@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -1338,10 +1339,61 @@ Future<void> testMain() async {
         expect(targetRect!.width, closeTo(sourceRect.width / dpr, 0.0001));
         expect(targetRect.height, closeTo(sourceRect.height / dpr, 0.0001));
 
-        // Verify subpixel position precision
-        expect(targetRect.left, closeTo(offset.dx + paragraph.paintBounds.left, 0.0001));
-        expect(targetRect.top, closeTo(offset.dy + paragraph.paintBounds.top, 0.0001));
+        // Verify targetRect origin is not snapped (uses raw logical coordinates)
+        expect(targetRect.left, offset.dx + paragraph.paintBounds.left);
+        expect(targetRect.top, offset.dy + paragraph.paintBounds.top);
       }
+    } finally {
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
+    }
+  });
+
+  test('WebParagraph correctly handles canvas scale and translation', () {
+    final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
+    try {
+      const dpr = 2.0;
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
+
+      final arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+      final builder = WebParagraphBuilder(arialStyle);
+      builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
+      builder.addText('Scaled canvas text');
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: double.infinity));
+
+      final mockCanvas = _MockCanvas();
+      // Canvas with scale 1.5 and translation (10.2, 5.7)
+      const scaleX = 1.5;
+      const scaleY = 1.5;
+      const tx = 10.2;
+      const ty = 5.7;
+      final matrix = Matrix4.identity()
+        ..translate(tx, ty)
+        ..scale(scaleX, scaleY);
+      mockCanvas.mockTransform = Float64List.fromList(matrix.storage);
+
+      const offset = Offset(12.3, 24.6);
+      paragraph.paint(mockCanvas, offset);
+
+      final Rect? sourceRect = mockCanvas.lastSourceRect;
+      final Rect? targetRect = mockCanvas.lastTargetRect;
+
+      expect(sourceRect, isNotNull);
+      expect(targetRect, isNotNull);
+
+      // Verify sourceRect accounts for both canvas scale and DPR
+      const double totalScaleX = scaleX * dpr;
+      const double totalScaleY = scaleY * dpr;
+      expect(sourceRect!.width, (paragraph.paintBounds.width * totalScaleX).ceilToDouble());
+      expect(sourceRect.height, (paragraph.paintBounds.height * totalScaleY).ceilToDouble());
+
+      // Verify targetRect dimensions preserve exact 1:1 physical pixel scale
+      expect(targetRect!.width, closeTo(sourceRect.width / totalScaleX, 0.0001));
+      expect(targetRect.height, closeTo(sourceRect.height / totalScaleY, 0.0001));
+
+      // Verify targetRect origin matches offset + paintBounds (no snapping applied)
+      expect(targetRect.left, offset.dx + paragraph.paintBounds.left);
+      expect(targetRect.top, offset.dy + paragraph.paintBounds.top);
     } finally {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
     }
@@ -1351,6 +1403,16 @@ Future<void> testMain() async {
 class _MockCanvas implements Canvas {
   Rect? lastSourceRect;
   Rect? lastTargetRect;
+  Float64List? mockTransform;
+
+  @override
+  Float64List getTransform() =>
+      mockTransform ??
+      (Float64List(16)
+        ..[0] = 1.0
+        ..[5] = 1.0
+        ..[10] = 1.0
+        ..[15] = 1.0);
 
   @override
   void drawImageRect(Image image, Rect src, Rect dst, Paint paint) {

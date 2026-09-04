@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/ui.dart' as ui;
@@ -22,10 +23,10 @@ typedef ParagraphImageGenerator = Uint8List Function();
 ///
 /// The paint canvas is scaled by the device pixel ratio to avoid pixelation
 /// that would happen if it wasn't resized.
-void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
+void _resizePaintCanvas(double scaleX, double scaleY, ui.Rect rect) {
   _paintCanvas.width = rect.width.ceil();
   _paintCanvas.height = rect.height.ceil();
-  _paintContext.scale(devicePixelRatio, devicePixelRatio);
+  _paintContext.scale(scaleX, scaleY);
 }
 
 /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for a text block.
@@ -45,26 +46,26 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   return (sourceRect, targetRect);
 }
 
-/// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for the entire paragraph
+/// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for the entire paragraph.
 (ui.Rect sourceRect, ui.Rect targetRect) _calculateParagraph(
   WebParagraph paragraph,
   ui.Offset offset,
-  double devicePixelRatio,
+  double scaleX,
+  double scaleY,
 ) {
-  // Define the paragraph rect (using advances, not selected rects)
-  // Source rect must take in account the scaling
   final sourceRect = ui.Rect.fromLTWH(
     0,
     0,
-    ((paragraph.paintBounds.width) * devicePixelRatio).ceilToDouble(),
-    ((paragraph.paintBounds.height) * devicePixelRatio).ceilToDouble(),
+    ((paragraph.paintBounds.width) * scaleX).ceilToDouble(),
+    ((paragraph.paintBounds.height) * scaleY).ceilToDouble(),
   );
+
   // Target rect will be scaled by the canvas transform, so we don't scale it here
   final targetRect = ui.Rect.fromLTWH(
     offset.dx + paragraph.paintBounds.left,
     offset.dy + paragraph.paintBounds.top,
-    sourceRect.width / devicePixelRatio,
-    sourceRect.height / devicePixelRatio,
+    sourceRect.width / scaleX,
+    sourceRect.height / scaleY,
   );
 
   return (sourceRect, targetRect);
@@ -144,10 +145,20 @@ abstract class WebParagraphPainter {
 
     final TextLayout layout = _paragraph.getLayout();
 
+    final Float64List canvasTransform = canvas.getTransform();
+    final double dpr = ui.window.devicePixelRatio;
+    final (double scaleX, double scaleY) = canvasTransform != null
+        ? canvasTransform.getScale()
+        : (1.0, 1.0);
+
+    final double totalScaleX = scaleX * dpr;
+    final double totalScaleY = scaleY * dpr;
+
     final (ui.Rect sourceRect, ui.Rect targetRect) = _calculateParagraph(
       _paragraph,
       offset,
-      ui.window.devicePixelRatio,
+      totalScaleX,
+      totalScaleY,
     );
 
     const epsilon = 0.001;
@@ -165,7 +176,7 @@ abstract class WebParagraphPainter {
       sourceRect,
       targetRect,
       generateParagraphImage: () {
-        _resizePaintCanvas(ui.window.devicePixelRatio, sourceRect);
+        _resizePaintCanvas(totalScaleX, totalScaleY, sourceRect);
 
         // We only want to paint the actual paint bounds of the paragraph.
         _paintContext.translate(-_paragraph.paintBounds.left, -_paragraph.paintBounds.top);
@@ -275,5 +286,13 @@ class DomCanvasParagraphPainter {
     _paintContext.shadowOffsetY = shadow.offset.dy;
 
     webTextCluster.addToContext(_paintContext, 0, 0);
+  }
+}
+
+extension on Float64List {
+  (double, double) getScale() {
+    final double scaleX = math.sqrt(this[0] * this[0] + this[1] * this[1] + this[2] * this[2]);
+    final double scaleY = math.sqrt(this[4] * this[4] + this[5] * this[5] + this[6] * this[6]);
+    return (scaleX == 0.0 ? 1.0 : scaleX, scaleY == 0.0 ? 1.0 : scaleY);
   }
 }
