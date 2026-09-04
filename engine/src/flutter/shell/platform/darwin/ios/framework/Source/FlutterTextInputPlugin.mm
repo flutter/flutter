@@ -2319,12 +2319,16 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     self.temporarilyDeletedComposedCharacter = nil;
   }
 
+  // insertText finalizes composing text and should replace the whole marked
+  // range, not just the last reported selection within it. See
+  // https://github.com/flutter/flutter/issues/59541#issuecomment-4617810595.
+  UITextRange* replacedRange = self.markedTextRange ?: _selectedTextRange;
+
   NSMutableArray<FlutterTextSelectionRect*>* copiedRects =
       [[NSMutableArray alloc] initWithCapacity:[_selectionRects count]];
-  NSAssert([_selectedTextRange.start isKindOfClass:[FlutterTextPosition class]],
-           @"Expected a FlutterTextPosition for position (got %@).",
-           [_selectedTextRange.start class]);
-  NSUInteger insertPosition = ((FlutterTextPosition*)_selectedTextRange.start).index;
+  NSAssert([replacedRange.start isKindOfClass:[FlutterTextPosition class]],
+           @"Expected a FlutterTextPosition for position (got %@).", [replacedRange.start class]);
+  NSUInteger insertPosition = ((FlutterTextPosition*)replacedRange.start).index;
   for (NSUInteger i = 0; i < [_selectionRects count]; i++) {
     NSUInteger rectPosition = _selectionRects[i].position;
     if (rectPosition == insertPosition) {
@@ -2349,7 +2353,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   [self resetScribbleInteractionStatusIfEnding];
   self.selectionRects = copiedRects;
   _selectionAffinity = kTextAffinityDownstream;
-  [self replaceRange:_selectedTextRange withText:text];
+  [self replaceRange:replacedRange withText:text];
 }
 
 - (UITextPlaceholder*)insertTextPlaceholderWithSize:(CGSize)size API_AVAILABLE(ios(13.0)) {
