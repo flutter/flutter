@@ -71,26 +71,13 @@ void main() {
       projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
     );
     return BuildCommand(
-      androidSdk: FakeAndroidSdk(),
-      artifacts: FakeArtifacts(),
+      androidContext: FakeAndroidContext(),
+      appleContext: FakeAppleContext(),
       buildSystem: buildSystem,
-      cache: FakeCache(),
-      config: FakeConfig(),
       featureFlags: featureFlags ?? TestFeatureFlags(isWebEnabled: true),
-      fileSystem: fileSystem,
-      fileSystemUtils: FakeFileSystemUtils(),
-      flutterVersion: FakeFlutterVersion(),
-      logger: effectiveLogger,
-      osUtils: FakeOperatingSystemUtils(),
-      platform: effectivePlatform,
-      plistParser: FakePlistParser(),
-      processManager: effectiveProcessManager,
-      processUtils: FakeProcessUtils(),
       templateRenderer: FakeTemplateRenderer(),
-      terminal: FakeTerminal(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,
-      xcode: FakeXcode(),
     );
   }
 
