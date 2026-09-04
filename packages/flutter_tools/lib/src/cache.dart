@@ -447,15 +447,12 @@ class Cache {
     if (_devToolsVersion == null) {
       final Directory devToolsDir = getCacheDir(_kDevToolsDirPath, shouldCreate: false);
       final File versionFile = devToolsDir.childFile(_kDevToolsVersionJson);
-      if (!versionFile.existsSync()) {
-        throw Exception('Could not find file at ${versionFile.path}');
-      }
-      final Object? data = jsonDecode(versionFile.readAsStringSync());
-      if (data case {'version': final String version} when version.trim().isNotEmpty) {
-        _devToolsVersion = version;
-      } else {
-        throw Exception('Could not parse DevTools version from ${versionFile.path}');
-      }
+      _devToolsVersion = _parseDevToolsVersion(
+        versionFile,
+        onError: (String message, [Object? error, StackTrace? stackTrace]) {
+          throw Exception(error != null ? '$message: $error' : message);
+        },
+      );
     }
     return _devToolsVersion!;
   }
@@ -510,48 +507,7 @@ class Cache {
       }
 
       final File devToolsVersionFile = devToolsDir.childFile(_kDevToolsVersionJson);
-      if (!devToolsVersionFile.existsSync()) {
-        _handleSdkCorruption('DevTools version file does not exist at ${devToolsVersionFile.path}');
-      }
-
-      String content;
-      try {
-        content = devToolsVersionFile.readAsStringSync();
-      } on Object catch (e, s) {
-        _handleSdkCorruption(
-          'Failed to read DevTools version file at ${devToolsVersionFile.path}',
-          e,
-          s,
-        );
-      }
-
-      final Object? data;
-      try {
-        data = jsonDecode(content);
-      } on Object catch (e, s) {
-        _handleSdkCorruption(
-          'Failed to parse JSON from DevTools version file at ${devToolsVersionFile.path}',
-          e,
-          s,
-        );
-      }
-
-      final String version = switch (data) {
-        {'version': final String v} when v.trim().isNotEmpty => v,
-        {'version': final String _} => _handleSdkCorruption(
-          'DevTools version is empty in ${devToolsVersionFile.path}',
-        ),
-        {'version': final Object v} => _handleSdkCorruption(
-          'Expected DevTools version to be a String in ${devToolsVersionFile.path} but got type "${v.runtimeType}"',
-        ),
-        {'version': null} || Map<String, Object?>() => _handleSdkCorruption(
-          'DevTools version key is null or missing in ${devToolsVersionFile.path}',
-        ),
-        _ => _handleSdkCorruption(
-          'Expected JSON object of type "Map<String, Object?>" in ${devToolsVersionFile.path} but got type "${data.runtimeType}"',
-        ),
-      };
-      _devToolsVersion = version;
+      _devToolsVersion = _parseDevToolsVersion(devToolsVersionFile, onError: _handleSdkCorruption);
     } on ToolExit {
       rethrow;
     } on Object catch (err, stackTrace) {
@@ -559,6 +515,43 @@ class Cache {
     }
 
     _isDartSdkValidated = true;
+  }
+
+  static String _parseDevToolsVersion(
+    File versionFile, {
+    required Never Function(String message, [Object? error, StackTrace? stackTrace]) onError,
+  }) {
+    if (!versionFile.existsSync()) {
+      onError('DevTools version file does not exist at ${versionFile.path}');
+    }
+
+    final String content;
+    try {
+      content = versionFile.readAsStringSync();
+    } on Object catch (e, s) {
+      onError('Failed to read DevTools version file at ${versionFile.path}', e, s);
+    }
+
+    final Object? data;
+    try {
+      data = jsonDecode(content);
+    } on Object catch (e, s) {
+      onError('Failed to parse JSON from DevTools version file at ${versionFile.path}', e, s);
+    }
+
+    return switch (data) {
+      {'version': final String v} when v.trim().isNotEmpty => v,
+      {'version': final String _} => onError('DevTools version is empty in ${versionFile.path}'),
+      {'version': final Object v} => onError(
+        'Expected DevTools version to be a String in ${versionFile.path} but got type "${v.runtimeType}"',
+      ),
+      {'version': null} || Map<String, Object?>() => onError(
+        'DevTools version key is null or missing in ${versionFile.path}',
+      ),
+      _ => onError(
+        'Expected JSON object of type "Map<String, Object?>" in ${versionFile.path} but got type "${data.runtimeType}"',
+      ),
+    };
   }
 
   /// Handles Dart SDK cache corruption by invalidating the cache and throwing a [ToolExit].
