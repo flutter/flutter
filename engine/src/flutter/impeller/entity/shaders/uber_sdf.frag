@@ -126,13 +126,13 @@ vec4 getColor() {
     float t;
     if (frag_info.color_source_type < 1.5) {
       // Linear gradient
-      t = dot(v_position - frag_info.gradient_coords.xy,
-              frag_info.gradient_coords.zw) *
-          frag_info.inv_gradient_length;
+      t = IPComputeLinearGradientT(v_position, frag_info.gradient_coords.xy,
+                                   frag_info.gradient_coords.zw,
+                                   frag_info.inv_gradient_length);
     } else {
       // Radial gradient
-      t = length(v_position - frag_info.gradient_coords.xy) *
-          frag_info.inv_gradient_length;
+      t = IPComputeRadialGradientT(v_position, frag_info.gradient_coords.xy,
+                                   frag_info.inv_gradient_length);
     }
     vec4 gradient_color = IPSampleLinearWithTileMode(
         color_source_sampler, vec2(t, 0.5), vec2(frag_info.half_texel, 0.5),
