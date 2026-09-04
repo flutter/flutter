@@ -1255,23 +1255,54 @@ void _createPlatformPluginSymlinks(
     // new link to avoid FileSystemException collisions (such as
     // ERROR_ALREADY_EXISTS on Windows or EEXIST on POSIX).
     final FileSystemEntityType entityType = link.fileSystem.typeSync(link.path, followLinks: false);
-    if (entityType == FileSystemEntityType.link) {
-      try {
-        final String target = link.targetSync();
-        if (link.fileSystem.path.canonicalize(target) == link.fileSystem.path.canonicalize(path) &&
-            link.existsSync()) {
-          continue;
-        }
-      } on FileSystemException {
-        // Fall through to delete and recreate if resolving target throws.
-      }
-      ErrorHandlingFileSystem.deleteIfExists(link);
-    } else if (entityType != FileSystemEntityType.notFound) {
-      ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
-    }
     try {
+      if (entityType == FileSystemEntityType.link) {
+        try {
+          final String target = link.targetSync();
+          if (link.fileSystem.path.canonicalize(target) ==
+                  link.fileSystem.path.canonicalize(path) &&
+              link.existsSync()) {
+            continue;
+          }
+        } on FileSystemException {
+          // Fall through to delete and recreate if resolving target throws.
+        }
+        ErrorHandlingFileSystem.deleteIfExists(link);
+      } else if (entityType != FileSystemEntityType.notFound) {
+        ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
+      }
       link.createSync(path);
     } on FileSystemException catch (e) {
+      const windowsErrorAlreadyExists = 183;
+      const posixErrorFileExists = 17;
+      final bool isAlreadyExists =
+          e.osError?.errorCode == windowsErrorAlreadyExists ||
+          e.osError?.errorCode == posixErrorFileExists;
+      if (isAlreadyExists) {
+        final FileSystemEntityType currentType = link.fileSystem.typeSync(
+          link.path,
+          followLinks: false,
+        );
+        if (currentType == FileSystemEntityType.link) {
+          try {
+            final String target = link.targetSync();
+            if (link.fileSystem.path.canonicalize(target) ==
+                link.fileSystem.path.canonicalize(path)) {
+              continue;
+            }
+          } on FileSystemException {
+            // Target could not be read; fall through to retry recreation.
+          }
+        }
+        // If a conflicting or stale entity was created concurrently, attempt to remove it and retry.
+        try {
+          ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
+          link.createSync(path);
+          continue;
+        } on FileSystemException {
+          // If retry fails, fall through to handleSymlinkException and rethrow.
+        }
+      }
       handleSymlinkException(
         e,
         platform: globals.platform,
