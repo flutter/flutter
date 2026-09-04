@@ -30,17 +30,13 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  testUsingContext(
-    'devices can display no connected devices with the --machine flag',
-    () async {
-      final command = DevicesCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await runner.run(<String>['devices', '--machine']);
+  testUsingContext('devices can display no connected devices with the --machine flag', () async {
+    final command = DevicesCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['devices', '--machine']);
 
-      expect(json.decode(logger.statusText), isEmpty);
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
-  );
+    expect(json.decode(logger.statusText), isEmpty);
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(), Logger: () => logger});
 
   testUsingContext(
     'devices can display via the --machine flag',

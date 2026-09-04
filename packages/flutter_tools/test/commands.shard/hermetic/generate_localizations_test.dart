@@ -636,25 +636,19 @@ format: false
     );
   });
 
-  testUsingContext(
-    'prints warning when --no-synthetic-package is provided',
-    () async {
-      final command = GenerateLocalizationsCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        artifacts: artifacts,
-        processManager: processManager,
-      );
-      fileSystem
-          .file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
-          .createSync(recursive: true);
-      final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
-      pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-      await createTestCommandRunner(command).run(<String>['gen-l10n', '--no-synthetic-package']);
-      expect(logger.warningText, contains('synthetic-package'));
-    },
-    overrides: <Type, Generator>{Logger: () => logger},
-  );
+  testUsingContext('prints warning when --no-synthetic-package is provided', () async {
+    final command = GenerateLocalizationsCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      artifacts: artifacts,
+      processManager: processManager,
+    );
+    fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb')).createSync(recursive: true);
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
+    await createTestCommandRunner(command).run(<String>['gen-l10n', '--no-synthetic-package']);
+    expect(logger.warningText, contains('synthetic-package'));
+  }, overrides: <Type, Generator>{Logger: () => logger});
 
   group(AppResourceBundle, () {
     testWithoutContext("can be parsed without FormatException when it's content is empty", () {
