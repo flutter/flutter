@@ -15,7 +15,7 @@ class FlCompositorOpenGLGtk4Test : public flutter::testing::LinuxTest {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
 };
 
-TEST_F(FlCompositorOpenGLGtk4Test, SharedGLTextureFallbackSynchronizes) {
+TEST_F(FlCompositorOpenGLGtk4Test, SharedGLTextureFallbackUsesFence) {
   g_autoptr(FlCompositorOpenGL) compositor = FL_COMPOSITOR_OPENGL(
       g_object_new(fl_compositor_opengl_get_type(), nullptr));
   compositor->shareable = TRUE;
@@ -23,6 +23,23 @@ TEST_F(FlCompositorOpenGLGtk4Test, SharedGLTextureFallbackSynchronizes) {
   // environment and of GTK's DMA-BUF support.
   compositor->dmabuf_disabled = TRUE;
 
+  EXPECT_CALL(epoxy,
+              eglCreateSyncKHR(::testing::_, EGL_SYNC_FENCE_KHR, ::testing::_));
+  EXPECT_CALL(epoxy, glFinish()).Times(0);
+
+  fl_compositor_opengl_gtk4_finish_present(compositor, GL_RGBA, 1, 1);
+}
+
+TEST_F(FlCompositorOpenGLGtk4Test,
+       SharedGLTextureFallbackWithoutFencesCompletesFrame) {
+  g_autoptr(FlCompositorOpenGL) compositor = FL_COMPOSITOR_OPENGL(
+      g_object_new(fl_compositor_opengl_get_type(), nullptr));
+  compositor->shareable = TRUE;
+  compositor->dmabuf_disabled = TRUE;
+
+  EXPECT_CALL(epoxy, eglQueryString(::testing::_, EGL_EXTENSIONS))
+      .WillRepeatedly(::testing::Return(""));
+  EXPECT_CALL(epoxy, eglCreateSyncKHR).Times(0);
   EXPECT_CALL(epoxy, glFinish());
 
   fl_compositor_opengl_gtk4_finish_present(compositor, GL_RGBA, 1, 1);

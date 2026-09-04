@@ -26,6 +26,71 @@ static gboolean gtk4_dmabuf_enabled() {
   return g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_DMABUF"), "1") == 0;
 }
 
+static void clear_native_texture_sync(FlCompositorOpenGL* self) {
+  if (self->native_texture_sync != EGL_NO_SYNC_KHR) {
+    eglDestroySyncKHR(self->native_texture_sync_display,
+                      self->native_texture_sync);
+  }
+  self->native_texture_sync_display = EGL_NO_DISPLAY;
+  self->native_texture_sync = EGL_NO_SYNC_KHR;
+  self->native_texture_sync_can_wait = FALSE;
+}
+
+// Creates a fence after Flutter has rendered a shareable framebuffer. The
+// GDK GL context waits on this fence before it samples the framebuffer, so the
+// raster context can continue instead of blocking in glFinish().
+static gboolean create_native_texture_sync(FlCompositorOpenGL* self) {
+  clear_native_texture_sync(self);
+
+  EGLDisplay display = eglGetCurrentDisplay();
+  if (display == EGL_NO_DISPLAY ||
+      !epoxy_has_egl_extension(display, "EGL_KHR_fence_sync")) {
+    return FALSE;
+  }
+
+  EGLSyncKHR sync = eglCreateSyncKHR(display, EGL_SYNC_FENCE_KHR, nullptr);
+  // The fence only becomes reachable when the producer command stream has
+  // been submitted. This is intentionally not a completion wait.
+  glFlush();
+  if (sync == EGL_NO_SYNC_KHR) {
+    return FALSE;
+  }
+
+  self->native_texture_sync_display = display;
+  self->native_texture_sync = sync;
+  self->native_texture_sync_can_wait =
+      epoxy_has_egl_extension(display, "EGL_KHR_wait_sync");
+  return TRUE;
+}
+
+static void wait_for_native_texture_sync(FlCompositorOpenGL* self) {
+  if (self->native_texture_sync == EGL_NO_SYNC_KHR) {
+    return;
+  }
+
+  // GDK may use GLX rather than EGL. In that case EGL cannot add a GPU wait to
+  // its context, but a client wait is still correct and avoids stalling the
+  // raster context that produced the frame.
+  if (self->native_texture_sync_can_wait &&
+      eglGetCurrentDisplay() == self->native_texture_sync_display &&
+      eglGetCurrentContext() != EGL_NO_CONTEXT) {
+    if (!eglWaitSyncKHR(self->native_texture_sync_display,
+                        self->native_texture_sync, 0)) {
+      g_warning("Failed to wait for GTK4 shared OpenGL texture fence");
+    }
+  } else {
+    constexpr EGLTimeKHR kFenceTimeoutNanoseconds = 1000000000;  // 1s
+    EGLint result = eglClientWaitSyncKHR(self->native_texture_sync_display,
+                                         self->native_texture_sync, 0,
+                                         kFenceTimeoutNanoseconds);
+    if (result == EGL_TIMEOUT_EXPIRED_KHR) {
+      g_warning("Timed out waiting for GTK4 shared OpenGL texture fence");
+    }
+  }
+
+  clear_native_texture_sync(self);
+}
+
 static void update_dmabuf_sync(FlCompositorOpenGL* self) {
   if (self->dmabuf_sync_fd >= 0) {
     close(self->dmabuf_sync_fd);
@@ -505,7 +570,12 @@ GdkTexture* fl_compositor_opengl_acquire_texture(FlCompositor* compositor,
       self->dmabuf_path_logged = TRUE;
     }
     if (texture == nullptr) {
+      wait_for_native_texture_sync(self);
       texture = acquire_shareable_texture(self->framebuffer, context);
+    } else {
+      // A DMA-BUF texture has its own native fence, so the GL fence is not
+      // needed once GDK has accepted the exported snapshot.
+      clear_native_texture_sync(self);
     }
   } else {
     if (gtk4_readback_disabled()) {
@@ -526,22 +596,29 @@ void fl_compositor_opengl_gtk4_finish_present(FlCompositorOpenGL* self,
                                               GLint format,
                                               size_t width,
                                               size_t height) {
-  if (self->shareable && publish_dmabuf_snapshot(self, format, width, height)) {
-    update_dmabuf_sync(self);
-    return;
-  }
-
-  if (self->dmabuf_sync_fd >= 0) {
-    close(self->dmabuf_sync_fd);
-    self->dmabuf_sync_fd = -1;
-  }
-
   if (self->shareable) {
-    // The GdkGLTexture fallback is sampled by GTK using a different OpenGL
-    // context. glFlush() only submits the raster context's work, so wait for
-    // it to finish before the texture can be exposed to GTK. A successful
-    // DMA-BUF export returns above and uses its native fence instead.
-    glFinish();
+    const gboolean has_native_texture_sync = create_native_texture_sync(self);
+    if (publish_dmabuf_snapshot(self, format, width, height)) {
+      update_dmabuf_sync(self);
+      if (has_native_texture_sync) {
+        return;
+      }
+      // The DMA-BUF path has its own fence, but it can still fall back to a
+      // shared GL texture if GDK rejects the exported buffer. Complete the
+      // frame now when no EGL fence can protect that fallback.
+      glFinish();
+      return;
+    }
+
+    if (self->dmabuf_sync_fd >= 0) {
+      close(self->dmabuf_sync_fd);
+      self->dmabuf_sync_fd = -1;
+    }
+    if (!has_native_texture_sync) {
+      // Drivers without EGL fences must wait on the producer context before
+      // GTK samples the shared texture from its own context.
+      glFinish();
+    }
   } else {
     // Readback below uses glReadPixels(), which synchronizes the frame.
     glFlush();
@@ -550,6 +627,7 @@ void fl_compositor_opengl_gtk4_finish_present(FlCompositorOpenGL* self,
 
 void fl_compositor_opengl_gtk4_reset_frame_failure(FlCompositorOpenGL* self) {
   self->dmabuf_frame_failed = FALSE;
+  clear_native_texture_sync(self);
   if (self->dmabuf_sync_fd >= 0) {
     close(self->dmabuf_sync_fd);
     self->dmabuf_sync_fd = -1;
@@ -557,11 +635,14 @@ void fl_compositor_opengl_gtk4_reset_frame_failure(FlCompositorOpenGL* self) {
 }
 
 void fl_compositor_opengl_gtk4_init(FlCompositorOpenGL* self) {
+  self->native_texture_sync_display = EGL_NO_DISPLAY;
+  self->native_texture_sync = EGL_NO_SYNC_KHR;
   self->dmabuf_published_snapshot = -1;
   self->dmabuf_sync_fd = -1;
 }
 
 void fl_compositor_opengl_gtk4_dispose(FlCompositorOpenGL* self) {
+  clear_native_texture_sync(self);
   for (Gtk4DmabufSnapshot& snapshot : self->dmabuf_snapshots) {
     g_clear_object(&snapshot.framebuffer);
   }

@@ -38,6 +38,11 @@ struct _FlCompositorOpenGL {
 
 #if FLUTTER_LINUX_GTK4
   Gtk4DmabufSnapshot dmabuf_snapshots[kGtk4DmabufSnapshotCount];
+  // Fence for a shareable framebuffer handed to GDK through a different GL
+  // context. DMA-BUF textures have their own native fence.
+  EGLDisplay native_texture_sync_display;
+  EGLSyncKHR native_texture_sync;
+  gboolean native_texture_sync_can_wait;
   gint dmabuf_published_snapshot;
   gboolean dmabuf_path_logged;
   gboolean dmabuf_capabilities_logged;

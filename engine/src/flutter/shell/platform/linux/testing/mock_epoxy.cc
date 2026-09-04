@@ -50,8 +50,7 @@ typedef struct {
 } MockSurface;
 
 typedef struct {
-  int dummy;
-} MockSync;
+} MockImage;
 
 static MockEpoxy* mock = nullptr;
 static bool display_initialized = false;
@@ -59,16 +58,23 @@ static MockDisplay mock_display;
 static MockConfig mock_config;
 static MockContext mock_context;
 static MockSurface mock_surface;
+static MockImage mock_image;
+typedef struct {
+  int dummy;
+} MockSync;
 static MockSync mock_sync;
 
 static EGLint mock_error = EGL_SUCCESS;
 
 MockEpoxy::MockEpoxy() {
   mock = this;
-
   // Assume a driver that supports fences; tests that care override this.
   ON_CALL(*this, epoxy_has_egl_extension)
       .WillByDefault(::testing::Return(true));
+  ON_CALL(*this, eglQueryString(::testing::_, EGL_EXTENSIONS))
+      .WillByDefault(::testing::Return("EGL_KHR_fence_sync EGL_KHR_wait_sync"));
+  ON_CALL(*this, eglQueryString(::testing::_, ::testing::Ne(EGL_EXTENSIONS)))
+      .WillByDefault(::testing::Return(""));
   ON_CALL(*this, eglCreateSyncKHR).WillByDefault(::testing::Return(&mock_sync));
   ON_CALL(*this, eglDestroySyncKHR).WillByDefault(::testing::Return(EGL_TRUE));
   ON_CALL(*this, eglClientWaitSyncKHR)
@@ -420,12 +426,21 @@ EGLBoolean _eglSwapInterval(EGLDisplay dpy, EGLint interval) {
   return bool_success();
 }
 
-EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
-  if (!check_display(dpy) || !check_initialized(dpy)) {
-    return EGL_FALSE;
-  }
+EGLImageKHR _eglCreateImageKHR(EGLDisplay dpy,
+                               EGLContext ctx,
+                               EGLenum target,
+                               EGLClientBuffer buffer,
+                               const EGLint* attrib_list) {
+  mock->eglCreateImageKHR(dpy, ctx, target, buffer, attrib_list);
+  return &mock_image;
+}
 
-  return bool_success();
+EGLBoolean _eglDestroyImageKHR(EGLDisplay dpy, EGLImage image) {
+  return mock->eglDestroyImageKHR(dpy, image);
+}
+
+const char* _eglQueryString(EGLDisplay dpy, EGLint name) {
+  return mock->eglQueryString(dpy, name);
 }
 
 EGLSyncKHR _eglCreateSyncKHR(EGLDisplay dpy,
@@ -447,6 +462,14 @@ EGLint _eglClientWaitSyncKHR(EGLDisplay dpy,
 
 EGLint _eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags) {
   return mock->eglWaitSyncKHR(dpy, sync, flags);
+}
+
+EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
+  if (!check_display(dpy) || !check_initialized(dpy)) {
+    return EGL_FALSE;
+  }
+
+  return bool_success();
 }
 
 static GLuint bound_texture_2d;
@@ -820,6 +843,13 @@ EGLBoolean (*epoxy_eglQuerySurface)(EGLDisplay dpy,
 EGLBoolean (*epoxy_eglDestroySurface)(EGLDisplay dpy, EGLSurface surface);
 EGLBoolean (*epoxy_eglDestroyContext)(EGLDisplay dpy, EGLContext ctx);
 EGLBoolean (*epoxy_eglSwapInterval)(EGLDisplay dpy, EGLint interval);
+EGLImageKHR (*epoxy_eglCreateImageKHR)(EGLDisplay dpy,
+                                       EGLContext ctx,
+                                       EGLenum target,
+                                       EGLClientBuffer buffer,
+                                       const EGLint* attrib_list);
+EGLBoolean (*epoxy_eglDestroyImageKHR)(EGLDisplay dpy, EGLImage image);
+const char* (*epoxy_eglQueryString)(EGLDisplay dpy, EGLint name);
 EGLSyncKHR (*epoxy_eglCreateSyncKHR)(EGLDisplay dpy,
                                      EGLenum type,
                                      const EGLint* attrib_list);
@@ -933,6 +963,9 @@ static void library_init() {
   epoxy_eglDestroySurface = _eglDestroySurface;
   epoxy_eglDestroyContext = _eglDestroyContext;
   epoxy_eglSwapInterval = _eglSwapInterval;
+  epoxy_eglCreateImageKHR = _eglCreateImageKHR;
+  epoxy_eglDestroyImageKHR = _eglDestroyImageKHR;
+  epoxy_eglQueryString = _eglQueryString;
   epoxy_eglCreateSyncKHR = _eglCreateSyncKHR;
   epoxy_eglDestroySyncKHR = _eglDestroySyncKHR;
   epoxy_eglClientWaitSyncKHR = _eglClientWaitSyncKHR;
