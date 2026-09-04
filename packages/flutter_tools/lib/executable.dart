@@ -196,9 +196,8 @@ Future<void> main(List<String> args) async {
 String? findCommandName(List<String> args, {ToolContext? toolContext}) {
   final ArgResults results;
   try {
-    results = FlutterCommandRunner(
-      toolContext: toolContext ?? _FallbackToolContext(),
-    ).argParser.parse(args);
+    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
+        .parse(args);
   } on ArgParserException {
     // The real parser will complain about these later.
     return null;
@@ -341,7 +340,13 @@ List<FlutterCommand> generateCommands({
     platform: toolDependencies.toolContext.platform,
     featureFlags: featureFlags,
   ),
-  RunCommand(verboseHelp: verboseHelp),
+  RunCommand(
+    toolContext: toolDependencies.toolContext,
+    appleContext: toolDependencies.appleContext,
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: toolDependencies.buildTargets,
+    verboseHelp: verboseHelp,
+  ),
   ScreenshotCommand(fs: toolDependencies.toolContext.fs),
   ShellCompletionCommand(),
   TestCommand(
@@ -400,15 +405,15 @@ class LoggerFactory {
     Logger logger;
     if (windows) {
       logger = WindowsStdoutLogger(
-        terminal: _terminal,
         stdio: _stdio,
+        terminal: _terminal,
         outputPreferences: _outputPreferences,
         stopwatchFactory: _stopwatchFactory,
       );
     } else {
       logger = StdoutLogger(
-        terminal: _terminal,
         stdio: _stdio,
+        terminal: _terminal,
         outputPreferences: _outputPreferences,
         stopwatchFactory: _stopwatchFactory,
       );
@@ -420,7 +425,11 @@ class LoggerFactory {
       logger = PrefixedErrorLogger(logger);
     }
     if (widgetPreviews) {
-      return WidgetPreviewMachineAwareLogger(logger, machine: machine, verbose: verbose);
+      return WidgetPreviewMachineAwareLogger(
+        logger,
+        machine: machine,
+        verbose: verbose,
+      );
     }
     if (daemon) {
       return NotifyingLogger(verbose: verbose, parent: logger);
