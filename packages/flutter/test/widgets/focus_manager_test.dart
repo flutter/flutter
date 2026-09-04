@@ -2416,6 +2416,99 @@ void main() {
       debugPrint = oldDebugPrint;
     }
   });
+  group('FocusNode.canRequestFocus regression tests', () {
+    testWidgets('Batch-disabling all focusable nodes does not give focus to '
+        'unfocusable previously-focused sibling', (WidgetTester tester) async {
+      // This test reproduces the bug from https://github.com/flutter/flutter/issues/185076
+      // where setting canRequestFocus=false for all siblings in the same build
+      // causes a previously-focused node (that becomes unfocusable) to receive
+      // primary focus, violating the invariant that focused nodes must be focusable.
+      final node0 = FocusNode(debugLabel: 'node0');
+      final node1 = FocusNode(debugLabel: 'node1');
+      addTearDown(node0.dispose);
+      addTearDown(node1.dispose);
+
+      var canRequestFocus = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setter) {
+                setState = setter;
+                return Column(
+                  children: [
+                    Focus(
+                      focusNode: node0,
+                      canRequestFocus: canRequestFocus,
+                      child: Container(
+                        height: 50,
+                        color: const Color(0xFFFFFFFF),
+                        child: const Text('Node 0'),
+                      ),
+                    ),
+                    Focus(
+                      focusNode: node1,
+                      canRequestFocus: canRequestFocus,
+                      child: Container(
+                        height: 50,
+                        color: const Color(0xFFFFFFFF),
+                        child: const Text('Node 1'),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Establish focus history: node1 (later child) focused first
+      node1.requestFocus();
+      await tester.pump();
+      expect(node1.hasPrimaryFocus, true);
+      expect(node0.hasPrimaryFocus, false);
+
+      // Switch focus to node0 (earlier child). Now the focused child history
+      // in the scope has [node1 (previous), node0 (current)] in that order.
+      node0.requestFocus();
+      await tester.pump();
+      expect(node0.hasPrimaryFocus, true);
+      expect(node1.hasPrimaryFocus, false);
+
+      // Batch disable: set canRequestFocus=false for all widgets.
+      setState(() {
+        canRequestFocus = false;
+      });
+      await tester.pumpAndSettle();
+
+      // Verify: neither node should have primary focus
+      expect(
+        node0.hasPrimaryFocus,
+        false,
+        reason: 'node0 should not have focus after batch disable',
+      );
+      expect(
+        node1.hasPrimaryFocus,
+        false,
+        reason: 'node1 should not have focus after batch disable',
+      );
+
+      // Invariant check: if any node has primaryFocus, it must be focusable
+      final FocusNode? primary = FocusManager.instance.primaryFocus;
+      if (primary != null) {
+        expect(
+          primary.canRequestFocus,
+          true,
+          reason: 'Invariant violation: focus node is not focusable',
+        );
+      }
+    });
+  });
 }
 
 class _LoggingTestFocusNode extends FocusNode {

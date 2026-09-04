@@ -253,7 +253,7 @@ class _ViewState extends State<View> with WidgetsBindingObserver {
           case ViewFocusDirection.forward:
             nextFocus = _policy.findFirstFocus(_scopeNode, ignoreCurrentFocus: true) ?? _scopeNode;
           case ViewFocusDirection.backward:
-            nextFocus = _policy.findLastFocus(_scopeNode, ignoreCurrentFocus: true);
+            nextFocus = _policy.findLastFocus(_scopeNode, ignoreCurrentFocus: true) ?? _scopeNode;
           case ViewFocusDirection.undefined:
             nextFocus = _scopeNode;
         }

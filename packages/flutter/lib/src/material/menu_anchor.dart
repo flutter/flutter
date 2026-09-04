@@ -757,7 +757,7 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
     }
     final FocusTraversalPolicy policy =
         FocusTraversalGroup.maybeOf(_menuScopeNode.context!) ?? ReadingOrderTraversalPolicy();
-    final FocusNode lastFocus = policy.findLastFocus(_menuScopeNode, ignoreCurrentFocus: true);
+    final FocusNode lastFocus = policy.findLastFocus(_menuScopeNode, ignoreCurrentFocus: true) ?? _menuScopeNode;
     lastFocus.requestFocus();
   }
 
