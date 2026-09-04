@@ -5,7 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../android/android_sdk.dart';
+import '../android/android_builder.dart';
 import '../artifacts.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
@@ -17,6 +17,9 @@ import '../base/template.dart';
 import '../base/terminal.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
 import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
@@ -39,35 +42,57 @@ import 'darwin_add_to_app.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({
-    required Artifacts artifacts,
-    required Cache cache,
-    required FileSystem fileSystem,
-    required FlutterVersion flutterVersion,
+    required AndroidBuilder androidBuilder,
+    required AndroidContext androidContext,
+    required AppleContext appleContext,
     required BuildSystem buildSystem,
-    required OperatingSystemUtils osUtils,
-    required Logger logger,
-    required AndroidSdk? androidSdk,
-    required Config config,
-    required Platform platform,
-    required ProcessUtils processUtils,
-    required ProcessManager processManager,
-    required FileSystemUtils fileSystemUtils,
     required TemplateRenderer templateRenderer,
-    required Terminal terminal,
-    required PlistParser plistParser,
-    required Xcode? xcode,
+    required ToolContext toolContext,
     bool verboseHelp = false,
-  }) {
+  }) : super(verboseHelp: verboseHelp) {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :Config config,
+      fs: FileSystem fileSystem,
+      :FileSystemUtils fileSystemUtils,
+      :FlutterVersion flutterVersion,
+      :Logger logger,
+      os: OperatingSystemUtils osUtils,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+      :Terminal terminal,
+    ) = toolContext;
+    final AppleContext(:PlistParser plistParser, :Xcode? xcode) = appleContext;
+
     _addSubcommand(
       BuildAarCommand(
-        fileSystem: fileSystem,
-        androidSdk: androidSdk,
-        logger: logger,
+        androidBuilder: androidBuilder,
+        androidContext: androidContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),
     );
-    _addSubcommand(BuildApkCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(
+      BuildApkCommand(
+        androidBuilder: androidBuilder,
+        androidContext: androidContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
+    _addSubcommand(
+      BuildAppBundleCommand(
+        androidBuilder: androidBuilder,
+        androidContext: androidContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
     _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
       BuildIOSFrameworkCommand(
@@ -174,13 +199,23 @@ class BuildCommand extends FlutterCommand {
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand({required this.logger, required super.verboseHelp}) {
+  BuildSubCommand({
+    Logger? logger,
+    required super.verboseHelp,
+    OutputPreferences? outputPreferences,
+    super.toolContext,
+  }) : _toolContext = toolContext,
+       _logger = logger,
+       super(outputPreferences: outputPreferences ?? toolContext?.outputPreferences) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
+  final ToolContext? _toolContext;
+  final Logger? _logger;
+
   @protected
-  final Logger logger;
+  Logger get logger => _logger ?? _toolContext!.logger;
 
   /// Whether this command is supported and should be shown.
   bool get supported => true;

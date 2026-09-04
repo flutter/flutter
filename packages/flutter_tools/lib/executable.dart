@@ -7,6 +7,7 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
+import 'src/android/gradle.dart';
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -267,24 +268,17 @@ List<FlutterCommand> generateCommands({
     fileSystem: toolDependencies.toolContext.fs,
   ),
   BuildCommand(
-    fileSystem: toolDependencies.toolContext.fs,
+    androidBuilder: AndroidGradleBuilder(
+      toolContext: toolDependencies.toolContext,
+      androidContext: toolDependencies.androidContext,
+      analytics: toolDependencies.analytics,
+    ),
+    androidContext: toolDependencies.androidContext,
+    appleContext: toolDependencies.appleContext,
     buildSystem: toolDependencies.buildSystem,
-    osUtils: toolDependencies.toolContext.os,
-    verboseHelp: verboseHelp,
-    androidSdk: toolDependencies.androidContext.androidSdk,
-    logger: toolDependencies.toolContext.logger,
-    config: toolDependencies.toolContext.config,
-    platform: toolDependencies.toolContext.platform,
-    fileSystemUtils: toolDependencies.toolContext.fileSystemUtils,
-    terminal: toolDependencies.toolContext.terminal,
-    plistParser: toolDependencies.appleContext.plistParser,
-    processUtils: toolDependencies.toolContext.processUtils,
-    processManager: toolDependencies.toolContext.processManager,
     templateRenderer: const MustacheTemplateRenderer(),
-    xcode: toolDependencies.appleContext.xcode,
-    artifacts: toolDependencies.toolContext.artifacts,
-    cache: toolDependencies.toolContext.cache,
-    flutterVersion: toolDependencies.toolContext.flutterVersion,
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
   ),
   ChannelCommand(verboseHelp: verboseHelp, toolContext: toolDependencies.toolContext),
   CleanCommand(

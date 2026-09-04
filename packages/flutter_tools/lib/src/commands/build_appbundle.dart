@@ -2,25 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../android/android_builder.dart';
+import '../android/android_sdk.dart';
 import '../android/build_validation.dart';
 import '../android/deferred_components_prebuild_validator.dart';
 import '../android/deferred_components_validator.dart';
 import '../android/gradle_utils.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/platform.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
 import '../cache.dart';
-import '../globals.dart' as globals;
+import '../context/android_context.dart';
+import '../context/tool_context.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 class BuildAppBundleCommand extends BuildSubCommand {
-  BuildAppBundleCommand({required super.logger, bool verboseHelp = false})
-    : super(verboseHelp: verboseHelp) {
+  BuildAppBundleCommand({
+    required AndroidBuilder androidBuilder,
+    required AndroidContext androidContext,
+    required BuildSystem buildSystem,
+    required ToolContext toolContext,
+    bool verboseHelp = false,
+  }) : _androidBuilder = androidBuilder,
+       _androidContext = androidContext,
+       _buildSystem = buildSystem,
+       super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -68,6 +83,24 @@ class BuildAppBundleCommand extends BuildSubCommand {
           'setup verification. This flag has no effect on non-deferred components apps.',
     );
   }
+
+  final AndroidBuilder _androidBuilder;
+  final AndroidContext _androidContext;
+  final BuildSystem _buildSystem;
+  @visibleForTesting
+  AndroidBuilder get androidBuilder => _androidBuilder;
+
+  @visibleForTesting
+  AndroidContext get androidContext => _androidContext;
+
+  @visibleForTesting
+  AndroidSdk? get androidSdk => _androidContext.androidSdk;
+
+  @visibleForTesting
+  BuildSystem get buildSystem => _buildSystem;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'appbundle';
@@ -118,8 +151,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (globals.androidSdk == null) {
-      exitWithNoSdkMessage();
+    final ToolContext(:Logger logger, :Platform platform, :Terminal terminal) = toolContext;
+    if (androidSdk == null) {
+      exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final androidBuildInfo = AndroidBuildInfo(
       await getBuildInfo(),
@@ -130,7 +164,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     final List<DeferredComponent>? deferredComponents = project.manifest.deferredComponents;
     if (deferredComponents != null && boolArg('deferred-components')) {
       // Record to analytics that DeferredComponents is being used.
-      globals.analytics.send(
+      analytics.send(
         Event.flutterBuildInfo(label: 'build-appbundle-deferred-components', buildType: 'android'),
       );
     }
@@ -140,8 +174,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
         !boolArg('debug')) {
       final validator = DeferredComponentsPrebuildValidator(
         project.directory,
-        globals.logger,
-        globals.platform,
+        logger,
+        platform,
         title: 'Deferred components prebuild validation',
         outputDir: project.buildDirectory.childDirectory(
           DeferredComponentsValidator.kDeferredComponentsTempDirectory,
@@ -169,8 +203,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
     }
 
     validateBuild(androidBuildInfo);
-    globals.terminal.usesTerminalUi = true;
-    await androidBuilder?.buildAab(
+    terminal.usesTerminalUi = true;
+    await _androidBuilder.buildAab(
       project: project,
       target: targetFile,
       androidBuildInfo: androidBuildInfo,
@@ -180,7 +214,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     final bool impellerEnabled = project.android.computeImpellerEnabled();
     final buildLabel = impellerEnabled ? 'manifest-impeller-enabled' : 'manifest-impeller-disabled';
-    globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
+    analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
     return FlutterCommandResult.success();
   }
 }
