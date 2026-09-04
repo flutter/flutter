@@ -17,9 +17,7 @@ public class SliderRoleConfigurator extends BaseRoleConfigurator {
   protected void configureRole(
       AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     result.setClassName("android.widget.SeekBar");
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24) {
-      result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS);
-    }
+    result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS);
     if (node.value != null) {
       float min = Float.NEGATIVE_INFINITY;
       float max = Float.POSITIVE_INFINITY;
