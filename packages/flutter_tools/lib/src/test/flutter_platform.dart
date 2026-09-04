@@ -252,7 +252,7 @@ void main() {
   if (flutterTestDep) {
     buffer.write('''
     goldenFileComparator = LocalFileComparator(Uri.parse('$testUrl'));
-    autoUpdateGoldens = $updateGoldens;
+    autoUpdateGoldenFiles = $updateGoldens;
 ''');
   }
   if (integrationTest) {
