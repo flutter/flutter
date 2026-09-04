@@ -624,7 +624,9 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonPressButtonRelease) {
   fl_pointer_manager_handle_button_press(manager, 1234,
                                          kFlutterPointerDeviceKindMouse, 4.0,
                                          8.0, GDK_BUTTON_PRIMARY, 0, 0);
-  // Ignore duplicate press
+  // A second press without a release means the release was lost, e.g. it went
+  // to the window manager at the end of an interactive move. The stale press
+  // is cancelled and this press is handled.
   fl_pointer_manager_handle_button_press(manager, 1234,
                                          kFlutterPointerDeviceKindMouse, 6.0,
                                          10.0, GDK_BUTTON_PRIMARY, 0, 0);
@@ -632,21 +634,156 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonPressButtonRelease) {
                                            kFlutterPointerDeviceKindMouse, 5.0,
                                            9.0, GDK_BUTTON_PRIMARY, 0, 0);
 
-  EXPECT_EQ(pointer_events.size(), 3u);
+  EXPECT_EQ(pointer_events.size(), 5u);
 
   // Ignore first synthetic enter event
+  EXPECT_EQ(pointer_events[1].phase, kDown);
   EXPECT_EQ(pointer_events[1].timestamp, 1234000u);
   EXPECT_EQ(pointer_events[1].x, 4.0);
   EXPECT_EQ(pointer_events[1].y, 8.0);
   EXPECT_EQ(pointer_events[1].device_kind, kFlutterPointerDeviceKindMouse);
   EXPECT_EQ(pointer_events[1].buttons, kFlutterPointerButtonMousePrimary);
   EXPECT_EQ(pointer_events[1].view_id, 42);
-  EXPECT_EQ(pointer_events[2].timestamp, 1235000u);
-  EXPECT_EQ(pointer_events[2].x, 5.0);
-  EXPECT_EQ(pointer_events[2].y, 9.0);
-  EXPECT_EQ(pointer_events[2].device_kind, kFlutterPointerDeviceKindMouse);
+  EXPECT_EQ(pointer_events[2].phase, kCancel);
+  EXPECT_EQ(pointer_events[2].timestamp, 1234000u);
+  EXPECT_EQ(pointer_events[2].x, 6.0);
+  EXPECT_EQ(pointer_events[2].y, 10.0);
   EXPECT_EQ(pointer_events[2].buttons, 0);
   EXPECT_EQ(pointer_events[2].view_id, 42);
+  EXPECT_EQ(pointer_events[3].phase, kDown);
+  EXPECT_EQ(pointer_events[3].timestamp, 1234000u);
+  EXPECT_EQ(pointer_events[3].x, 6.0);
+  EXPECT_EQ(pointer_events[3].y, 10.0);
+  EXPECT_EQ(pointer_events[3].buttons, kFlutterPointerButtonMousePrimary);
+  EXPECT_EQ(pointer_events[3].view_id, 42);
+  EXPECT_EQ(pointer_events[4].phase, kUp);
+  EXPECT_EQ(pointer_events[4].timestamp, 1235000u);
+  EXPECT_EQ(pointer_events[4].x, 5.0);
+  EXPECT_EQ(pointer_events[4].y, 9.0);
+  EXPECT_EQ(pointer_events[4].device_kind, kFlutterPointerDeviceKindMouse);
+  EXPECT_EQ(pointer_events[4].buttons, 0);
+  EXPECT_EQ(pointer_events[4].view_id, 42);
+}
+
+TEST_F(FlPointerManagerTest, GrabBroken) {
+  StartEngine();
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  fl_pointer_manager_handle_button_press(manager, 1234,
+                                         kFlutterPointerDeviceKindMouse, 4.0,
+                                         8.0, GDK_BUTTON_PRIMARY, 0, 0);
+  fl_pointer_manager_handle_motion(
+      manager, 1235, kFlutterPointerDeviceKindMouse, 5.0, 9.0, 0, 0);
+  // The grab was taken by the window manager, e.g. an interactive move
+  // started. The press is cancelled at the last known position.
+  EXPECT_TRUE(fl_pointer_manager_handle_grab_broken(manager, 1236));
+  // A later press is not dropped.
+  fl_pointer_manager_handle_button_press(manager, 1237,
+                                         kFlutterPointerDeviceKindMouse, 6.0,
+                                         10.0, GDK_BUTTON_PRIMARY, 0, 0);
+
+  EXPECT_EQ(pointer_events.size(), 5u);
+
+  // Ignore first synthetic enter event
+  EXPECT_EQ(pointer_events[1].phase, kDown);
+  EXPECT_EQ(pointer_events[2].phase, kMove);
+  EXPECT_EQ(pointer_events[2].buttons, kFlutterPointerButtonMousePrimary);
+  EXPECT_EQ(pointer_events[3].phase, kCancel);
+  EXPECT_EQ(pointer_events[3].timestamp, 1236000u);
+  EXPECT_EQ(pointer_events[3].x, 5.0);
+  EXPECT_EQ(pointer_events[3].y, 9.0);
+  EXPECT_EQ(pointer_events[3].buttons, 0);
+  EXPECT_EQ(pointer_events[3].view_id, 42);
+  EXPECT_EQ(pointer_events[4].phase, kDown);
+  EXPECT_EQ(pointer_events[4].timestamp, 1237000u);
+  EXPECT_EQ(pointer_events[4].x, 6.0);
+  EXPECT_EQ(pointer_events[4].y, 10.0);
+  EXPECT_EQ(pointer_events[4].buttons, kFlutterPointerButtonMousePrimary);
+  EXPECT_EQ(pointer_events[4].view_id, 42);
+}
+
+TEST_F(FlPointerManagerTest, GrabBrokenAfterLeave) {
+  StartEngine();
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  fl_pointer_manager_handle_button_press(manager, 1234,
+                                         kFlutterPointerDeviceKindMouse, 4.0,
+                                         8.0, GDK_BUTTON_PRIMARY, 0, 0);
+  // The pointer was dragged out of the view, the remove is delayed until the
+  // button is released.
+  fl_pointer_manager_handle_leave(manager, 1235, kFlutterPointerDeviceKindMouse,
+                                  5.0, 9.0, 0, 0);
+  // The release never arrives as the grab was broken, so the pointer is
+  // cancelled and removed.
+  EXPECT_TRUE(fl_pointer_manager_handle_grab_broken(manager, 1236));
+
+  EXPECT_EQ(pointer_events.size(), 4u);
+
+  // Ignore first synthetic enter event
+  EXPECT_EQ(pointer_events[1].phase, kDown);
+  EXPECT_EQ(pointer_events[2].phase, kCancel);
+  EXPECT_EQ(pointer_events[2].x, 5.0);
+  EXPECT_EQ(pointer_events[2].y, 9.0);
+  EXPECT_EQ(pointer_events[3].phase, kRemove);
+  EXPECT_EQ(pointer_events[3].timestamp, 1236000u);
+  EXPECT_EQ(pointer_events[3].x, 5.0);
+  EXPECT_EQ(pointer_events[3].y, 9.0);
+  EXPECT_EQ(pointer_events[3].buttons, 0);
+  EXPECT_EQ(pointer_events[3].view_id, 42);
+
+  // The pointer is added again when it returns.
+  fl_pointer_manager_handle_enter(manager, 1237, kFlutterPointerDeviceKindMouse,
+                                  6.0, 10.0, 0, 0);
+  EXPECT_EQ(pointer_events.size(), 5u);
+  EXPECT_EQ(pointer_events[4].phase, kAdd);
+}
+
+TEST_F(FlPointerManagerTest, GrabBrokenNoButtons) {
+  StartEngine();
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  fl_pointer_manager_handle_enter(manager, 1234, kFlutterPointerDeviceKindMouse,
+                                  1.0, 2.0, 0, 0);
+  // Nothing to cancel if no buttons are pressed.
+  EXPECT_FALSE(fl_pointer_manager_handle_grab_broken(manager, 1235));
+
+  EXPECT_EQ(pointer_events.size(), 1u);
 }
 
 TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseButtonRelease) {

@@ -9,6 +9,16 @@ static constexpr int kMicrosecondsPerMillisecond = 1000;
 static const int kMinTouchDeviceId = 0;
 static const int kMaxTouchDeviceId = 128;
 
+// State of a touch point that has been added to the engine.
+typedef struct {
+  // Sequence number this touch point was generated from.
+  uint32_t number;
+
+  // Last known location of this touch point.
+  gdouble x;
+  gdouble y;
+} FlTouchPoint;
+
 struct _FlTouchManager {
   GObject parent_instance;
 
@@ -16,8 +26,9 @@ struct _FlTouchManager {
 
   FlutterViewId view_id;
 
-  // List of touch device IDs that have been added to the engine.
-  GList* added_touch_devices;
+  // Table of touch ID to #FlTouchPoint for the touch devices that have been
+  // added to the engine.
+  GHashTable* added_touch_devices;
 
   GHashTable* number_to_id;
 
@@ -32,7 +43,7 @@ static void fl_touch_manager_dispose(GObject* object) {
 
   g_weak_ref_clear(&self->engine);
 
-  g_list_free(self->added_touch_devices);
+  g_clear_pointer(&self->added_touch_devices, g_hash_table_unref);
 
   g_clear_pointer(&self->number_to_id, g_hash_table_unref);
 
@@ -57,21 +68,28 @@ FlTouchManager* fl_touch_manager_new(FlEngine* engine, FlutterViewId view_id) {
   self->number_to_id =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr, nullptr);
 
+  self->added_touch_devices =
+      g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr, g_free);
+
   self->min_touch_device_id = kMinTouchDeviceId;
 
   return self;
 }
 
-// Ensures that a touch add event is sent for the given device.
+// Ensures that a touch add event is sent for the given device and records the
+// location of this touch point.
 static void ensure_touch_added(_FlTouchManager* self,
                                guint event_time,
                                gdouble x,
                                gdouble y,
+                               uint32_t number,
                                int32_t touch_id,
                                int32_t device_id) {
-  // Check if we need to send a touch add event.
-  if (g_list_find(self->added_touch_devices, GINT_TO_POINTER(touch_id)) !=
-      nullptr) {
+  FlTouchPoint* point = static_cast<FlTouchPoint*>(g_hash_table_lookup(
+      self->added_touch_devices, GINT_TO_POINTER(touch_id)));
+  if (point != nullptr) {
+    point->x = x;
+    point->y = y;
     return;
   }
 
@@ -84,8 +102,12 @@ static void ensure_touch_added(_FlTouchManager* self,
                                  event_time * kMicrosecondsPerMillisecond, x, y,
                                  device_id);
 
-  self->added_touch_devices =
-      g_list_append(self->added_touch_devices, GINT_TO_POINTER(touch_id));
+  point = g_new0(FlTouchPoint, 1);
+  point->number = number;
+  point->x = x;
+  point->y = y;
+  g_hash_table_insert(self->added_touch_devices, GINT_TO_POINTER(touch_id),
+                      point);
 }
 
 // Generates a unique ID to represent |number|. The generated ID is the
@@ -128,6 +150,14 @@ static void release_number(_FlTouchManager* self, uint32_t number) {
   }
 }
 
+// Forgets a touch point that is no longer in contact with the screen.
+static void remove_touch_point(_FlTouchManager* self,
+                               uint32_t number,
+                               uint32_t touch_id) {
+  release_number(self, number);
+  g_hash_table_remove(self->added_touch_devices, GINT_TO_POINTER(touch_id));
+}
+
 void fl_touch_manager_handle_touch_event(FlTouchManager* self,
                                          GdkEventTouch* touch_event,
                                          gint scale_factor) {
@@ -157,7 +187,7 @@ void fl_touch_manager_handle_touch_event(FlTouchManager* self,
 
   guint event_time = gdk_event_get_time(event);
 
-  ensure_touch_added(self, event_time, x, y, touch_id, device_id);
+  ensure_touch_added(self, event_time, x, y, id, touch_id, device_id);
 
   GdkEventType touch_event_type = gdk_event_get_event_type(event);
 
@@ -180,11 +210,55 @@ void fl_touch_manager_handle_touch_event(FlTouchManager* self,
       fl_engine_send_touch_remove_event(
           engine, self->view_id, event_time * kMicrosecondsPerMillisecond, x, y,
           device_id);
-      release_number(self, id);
-      self->added_touch_devices =
-          g_list_remove(self->added_touch_devices, GINT_TO_POINTER(touch_id));
+      remove_touch_point(self, id, touch_id);
+      break;
+    case GDK_TOUCH_CANCEL:
+      // The touch sequence was aborted, e.g. the compositor took over the
+      // touch to move or resize the window. No touch end event will be
+      // received, so cancel the touch point here.
+      fl_engine_send_touch_cancel_event(
+          engine, self->view_id, event_time * kMicrosecondsPerMillisecond, x, y,
+          device_id);
+
+      fl_engine_send_touch_remove_event(
+          engine, self->view_id, event_time * kMicrosecondsPerMillisecond, x, y,
+          device_id);
+      remove_touch_point(self, id, touch_id);
       break;
     default:
       break;
+  }
+}
+
+void fl_touch_manager_handle_grab_broken(FlTouchManager* self,
+                                         guint event_time) {
+  g_return_if_fail(FL_IS_TOUCH_MANAGER(self));
+
+  if (g_hash_table_size(self->added_touch_devices) == 0) {
+    return;
+  }
+
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
+  if (engine == nullptr) {
+    return;
+  }
+
+  g_autoptr(GList) touch_ids = g_hash_table_get_keys(self->added_touch_devices);
+  for (GList* link = touch_ids; link != nullptr; link = link->next) {
+    uint32_t touch_id = GPOINTER_TO_UINT(link->data);
+    FlTouchPoint* point = static_cast<FlTouchPoint*>(
+        g_hash_table_lookup(self->added_touch_devices, link->data));
+    int32_t device_id =
+        static_cast<int32_t>(kFlutterPointerDeviceKindTouch) << 28 | touch_id;
+
+    fl_engine_send_touch_cancel_event(engine, self->view_id,
+                                      event_time * kMicrosecondsPerMillisecond,
+                                      point->x, point->y, device_id);
+
+    fl_engine_send_touch_remove_event(engine, self->view_id,
+                                      event_time * kMicrosecondsPerMillisecond,
+                                      point->x, point->y, device_id);
+
+    remove_touch_point(self, point->number, touch_id);
   }
 }

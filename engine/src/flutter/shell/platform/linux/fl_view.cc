@@ -352,6 +352,46 @@ static gboolean button_release_event_cb(FlView* self,
       button, rotation, pressure);
 }
 
+// Cancels any pointers and touches that are in contact with this view because
+// their events are no longer being delivered to it.
+static gboolean cancel_input(FlView* self, guint event_time) {
+  if (self->touch_manager != nullptr) {
+    fl_touch_manager_handle_grab_broken(self->touch_manager, event_time);
+  }
+
+  if (self->pointer_manager == nullptr) {
+    return FALSE;
+  }
+  return fl_pointer_manager_handle_grab_broken(self->pointer_manager,
+                                               event_time);
+}
+
+// Signal handler for GtkWidget::grab-broken-event
+static gboolean grab_broken_event_cb(FlView* self,
+                                     GdkEventGrabBroken* grab_broken_event) {
+  GdkEvent* event = reinterpret_cast<GdkEvent*>(grab_broken_event);
+  return cancel_input(self, gdk_event_get_time(event));
+}
+
+// Signal handler for GtkWidget::grab-notify
+static void grab_notify_cb(FlView* self, gboolean was_grabbed) {
+  // A GTK grab has been taken by another widget, e.g. a menu has been opened.
+  // Events are redirected to that widget, so the button releases that end the
+  // current presses will not be received.
+  if (was_grabbed) {
+    return;
+  }
+
+  cancel_input(self, gtk_get_current_event_time());
+}
+
+// Signal handler for GtkWidget::unmap
+static void unmap_cb(FlView* self) {
+  // The view is no longer visible, so no further input events will be
+  // received for the presses currently in progress.
+  cancel_input(self, gtk_get_current_event_time());
+}
+
 // Signal handler for GtkWidget::scroll-event
 static gboolean scroll_event_cb(FlView* self, GdkEventScroll* event) {
   // TODO(robert-ancell): Update to use GtkEventControllerScroll when we can
@@ -694,6 +734,12 @@ static void fl_view_init(FlView* self) {
                            G_CALLBACK(button_press_event_cb), self);
   g_signal_connect_swapped(self->event_box, "button-release-event",
                            G_CALLBACK(button_release_event_cb), self);
+  g_signal_connect_swapped(self->event_box, "grab-broken-event",
+                           G_CALLBACK(grab_broken_event_cb), self);
+  g_signal_connect_swapped(self->event_box, "grab-notify",
+                           G_CALLBACK(grab_notify_cb), self);
+  g_signal_connect_swapped(self->event_box, "unmap", G_CALLBACK(unmap_cb),
+                           self);
   g_signal_connect_swapped(self->event_box, "scroll-event",
                            G_CALLBACK(scroll_event_cb), self);
   g_signal_connect_swapped(self->event_box, "motion-notify-event",
