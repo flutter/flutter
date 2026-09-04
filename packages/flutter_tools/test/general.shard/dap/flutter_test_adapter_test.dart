@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:dap_adapters/dap_adapters.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -121,6 +122,41 @@ void main() {
         expect(adapter.processArgs, isNot(contains('--machine')));
         expect(adapter.processArgs, contains('tool_args'));
       });
+    });
+
+    test('surfaces clean error when process terminates before debugger initialized', () async {
+      final debuggerCompleter = Completer<void>();
+      final adapter = FakeFlutterTestDebugAdapter(
+        fileSystem: MemoryFileSystem.test(style: fsStyle),
+        platform: platform,
+        customDebuggerInitialized: debuggerCompleter.future,
+      );
+      final responseCompleter = Completer<void>();
+      final request = FakeRequest();
+      final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart', noDebug: false);
+
+      await adapter.configurationDoneRequest(request, null, () {});
+      final Future<void> launchFuture = adapter.launchRequest(
+        request,
+        args,
+        responseCompleter.complete,
+      );
+      await pumpEventQueue();
+
+      expect(adapter.waitingForDebugger, isTrue);
+
+      adapter.handleExitCode(255);
+
+      expect(
+        launchFuture,
+        throwsA(
+          isA<DebugAdapterException>().having(
+            (DebugAdapterException e) => e.message,
+            'message',
+            'Session terminated before debugger initialized: (255)',
+          ),
+        ),
+      );
     });
   });
 }

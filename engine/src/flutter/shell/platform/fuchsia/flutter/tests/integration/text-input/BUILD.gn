@@ -33,6 +33,7 @@ executable("text-input-test-bin") {
     "${fuchsia_sdk}/fidl/fuchsia.ui.app",
     "${fuchsia_sdk}/fidl/fuchsia.ui.display.singleton",
     "${fuchsia_sdk}/fidl/fuchsia.ui.input",
+    "${fuchsia_sdk}/fidl/fuchsia.ui.pointerinjector",
     "${fuchsia_sdk}/fidl/fuchsia.ui.test.input",
     "${fuchsia_sdk}/fidl/fuchsia.ui.test.scene",
     "${fuchsia_sdk}/pkg/async",

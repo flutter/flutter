@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
+
+const _kHeartbeatInterval = Duration(seconds: 30);
 
 /// Run each benchmark this many times and compute average, min, max.
 ///
@@ -65,16 +68,23 @@ abstract class _Benchmark {
 
   Directory get directory;
 
-  List<String> get options => <String>['--benchmark', if (watch) '--watch'];
+  List<String> get options => <String>['--benchmark', '--no-plugins', if (watch) '--watch'];
 
   Future<double> execute(int iteration, int targetIterations) async {
     section('Analyze $title ${watch ? 'with watcher' : ''} - ${iteration + 1} / $targetIterations');
     final stopwatch = Stopwatch();
-    await inDirectory<void>(directory, () async {
-      stopwatch.start();
-      await flutter('analyze', options: options);
-      stopwatch.stop();
+    final heartbeatTimer = Timer.periodic(_kHeartbeatInterval, (Timer _) {
+      print('Analysis in progress (${stopwatch.elapsed.inSeconds}s)...');
     });
+    try {
+      await inDirectory<void>(directory, () async {
+        stopwatch.start();
+        await flutter('analyze', options: options);
+        stopwatch.stop();
+      });
+    } finally {
+      heartbeatTimer.cancel();
+    }
     return stopwatch.elapsedMicroseconds / (1000.0 * 1000.0);
   }
 }

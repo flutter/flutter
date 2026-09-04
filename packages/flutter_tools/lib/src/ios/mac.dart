@@ -149,6 +149,11 @@ Future<XcodeBuildResult> buildXcodeProject({
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
       config: globals.config,
+      analytics: globals.analytics,
+      hostPlatform: globals.platform,
+      operatingSystemUtils: globals.os,
+      flutterVersion: globals.flutterVersion,
+      reportCrashes: !await globals.isRunningOnBot
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
@@ -182,6 +187,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     fileSystem: globals.fs,
     logger: globals.logger,
     cocoapods: globals.cocoaPods,
+    analytics: globals.analytics,
+    featureFlags: featureFlags,
   );
 
   await removeExtendedAttributesForProject(
@@ -911,6 +918,7 @@ Future<void> diagnoseXcodeBuildFailure(
     platform: platform,
     logger: logger,
     fileSystem: fileSystem,
+    analytics: analytics,
     device: device,
   );
 
@@ -1093,7 +1101,8 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       missingModule: _parseMissingModule(message),
     );
   } else if (message.toLowerCase().contains('has been modified since') ||
-      (message.toLowerCase().contains('module map file') && message.toLowerCase().contains('not found'))) {
+      (message.toLowerCase().contains('module map file') &&
+          message.toLowerCase().contains('not found'))) {
     return _XCResultIssueHandlingResult(
       requiresProvisioningProfile: false,
       hasProvisioningProfileIssue: false,
@@ -1136,6 +1145,7 @@ Future<bool> _handleIssues(
   required FlutterDarwinPlatform platform,
   required Logger logger,
   required FileSystem fileSystem,
+  required Analytics analytics,
   Device? device,
 }) async {
   var requiresProvisioningProfile = false;
@@ -1226,6 +1236,11 @@ Future<bool> _handleIssues(
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
     final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     if (usesCocoapods && usesSwiftPackageManager) {
+      for (final module in duplicateModules) {
+        analytics.send(
+          Event.appleUsageEvent(workflow: 'duplicate-modules-build-failure', parameter: module),
+        );
+      }
       logger.printError(
         'Your project uses both CocoaPods and Swift Package Manager, which can '
         'cause the above error. It may be caused by there being both a CocoaPod '
