@@ -473,5 +473,54 @@ TEST(MatrixTest, MinMaxScales2D) {
   }
 }
 
+TEST(MatrixTest, GetTransformedPixelSize) {
+  {
+    // Identity matrix: 1 device pixel = 1 local unit.
+    Matrix identity;
+    EXPECT_EQ(identity.GetTransformedPixelSize(), Vector2(1.0f, 1.0f));
+  }
+
+  {
+    // Pure scaling: 1 device pixel = 1/scale local units.
+    Matrix scale = Matrix::MakeScale({2.0f, 4.0f, 1.0f});
+    EXPECT_EQ(scale.GetTransformedPixelSize(), Vector2(0.5f, 0.25f));
+  }
+
+  {
+    // Negative scaling: pixel size is always positive.
+    Matrix neg_scale = Matrix::MakeScale({-2.0f, 4.0f, 1.0f});
+    EXPECT_EQ(neg_scale.GetTransformedPixelSize(), Vector2(0.5f, 0.25f));
+  }
+
+  {
+    // Rotation: 1 device pixel = 1 local unit.
+    Matrix rotation = Matrix::MakeRotationZ(Radians(kPiOver2));
+    Vector2 rot_size = rotation.GetTransformedPixelSize();
+    EXPECT_NEAR(rot_size.x, 1.0f, 1e-5);
+    EXPECT_NEAR(rot_size.y, 1.0f, 1e-5);
+  }
+
+  {
+    // Skew: accounts for non-orthogonal axes and determinant.
+    Matrix skew = Matrix::MakeSkew(0.75f, 0.5f);
+    Vector2 skew_size = skew.GetTransformedPixelSize();
+    // det = 1.0 * 1.0 - 0.75 * 0.5 = 0.625
+    // Basis Y length = sqrt(0.75^2 + 1.0^2) = 1.25 -> pixel_size.x = 1.25 /
+    // 0.625 = 2.0 Basis X length = sqrt(1.0^2 + 0.5^2) = sqrt(1.25) ->
+    // pixel_size.y = sqrt(1.25) / 0.625
+    EXPECT_NEAR(skew_size.x, 2.0f, 1e-5);
+    EXPECT_NEAR(skew_size.y, 1.7888544f, 1e-5);
+  }
+
+  {
+    // Singular matrix: returns zero.
+    Matrix singular(1.0f, 2.0f, 0.0f, 0.0f,  //
+                    2.0f, 4.0f, 0.0f, 0.0f,  //
+                    0.0f, 0.0f, 1.0f, 0.0f,  //
+                    0.0f, 0.0f, 0.0f, 1.0f);
+    EXPECT_EQ(singular.GetTransformedPixelSize(), Vector2(0.0f, 0.0f));
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller
