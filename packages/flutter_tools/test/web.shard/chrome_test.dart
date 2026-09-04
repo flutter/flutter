@@ -1047,6 +1047,91 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
       ),
     );
   });
+
+  testWithoutContext('skips Flutter default browser flags when webBrowserDefaultFlags is false', () async {
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          '--incognito',
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      ),
+    );
+
+    await expectReturnsNormallyLater(
+      chromeLauncher.launch(
+        'example_url',
+        skipCheck: true,
+        webBrowserDefaultFlags: false,
+        webBrowserFlags: <String>['--incognito'],
+      ),
+    );
+  });
+
+  testWithoutContext('keeps headless flags when webBrowserDefaultFlags is false', () async {
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          '--no-sandbox',
+          '--headless',
+          '--window-size=1024,1024',
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      ),
+    );
+
+    await expectReturnsNormallyLater(
+      chromeLauncher.launch(
+        'example_url',
+        skipCheck: true,
+        headless: true,
+        webBrowserDefaultFlags: false,
+      ),
+    );
+  });
+
+  testWithoutContext('does not delete custom user data directory when cacheDir is provided', () async {
+    const customUserDataDir = '/custom/chrome/data/dir';
+    final exitCompleter = Completer<void>.sync();
+    final Directory cacheDir = fileSystem.directory('chrome-stuff')..createSync();
+
+    processManager.addCommand(
+      FakeCommand(
+        command: const <String>[
+          'example_chrome',
+          '--user-data-dir=$customUserDataDir',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        completer: exitCompleter,
+        stderr: kDevtoolsStderr,
+      ),
+    );
+
+    await chromeLauncher.launch(
+      'example_url',
+      skipCheck: true,
+      cacheDir: cacheDir,
+      webBrowserFlags: <String>['--user-data-dir=$customUserDataDir'],
+    );
+
+    expect(fileSystem.directory(customUserDataDir), exists);
+
+    exitCompleter.complete();
+    await Future<void>.delayed(const Duration(milliseconds: 1));
+
+    // Custom profile must survive process exit (no deleteSync / cache restore).
+    expect(fileSystem.directory(customUserDataDir), exists);
+  });
 }
 
 /// Fake chrome connection that fails to get tabs a few times.

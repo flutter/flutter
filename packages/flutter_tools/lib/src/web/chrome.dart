@@ -181,7 +181,9 @@ class ChromiumLauncher {
   /// and other session data. Using a temporary directory ensures a clean state
   /// for each launch, while allowing custom directories through flags for
   /// persistent configurations.
-  Directory _createUserDataDirectory(List<String> webBrowserFlags) {
+  ///
+  /// Returns the directory and whether it came from a custom `--user-data-dir` flag.
+  ({Directory directory, bool isCustom}) _createUserDataDirectory(List<String> webBrowserFlags) {
     if (webBrowserFlags.isNotEmpty) {
       final String? userDataDirFlag = webBrowserFlags.firstWhereOrNull(
         (String flag) => flag.startsWith('--user-data-dir='),
@@ -189,11 +191,16 @@ class ChromiumLauncher {
 
       if (userDataDirFlag != null) {
         final Directory userDataDir = _fileSystem.directory(userDataDirFlag.split('=')[1]);
+        // Ensure custom profile path exists before Chrome launch.
+        userDataDir.createSync(recursive: true);
         webBrowserFlags.remove(userDataDirFlag);
-        return userDataDir;
+        return (directory: userDataDir, isCustom: true);
       }
     }
-    return _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.');
+    return (
+      directory: _fileSystem.systemTempDirectory.createTempSync('flutter_tools_chrome_device.'),
+      isCustom: false,
+    );
   }
 
   /// Launch a Chromium browser to a particular `host` page.
@@ -207,6 +214,9 @@ class ChromiumLauncher {
   /// [skipCheck] does not attempt to make a devtools connection before returning.
   ///
   /// [webBrowserFlags] add arbitrary browser flags.
+  ///
+  /// [webBrowserDefaultFlags] controls Flutter's convenience browser launch flags.
+  /// Essential flags (`--user-data-dir`, `--remote-debugging-port`) are always applied.
   Future<Chromium> launch(
     String url, {
     bool headless = false,
@@ -214,6 +224,7 @@ class ChromiumLauncher {
     bool skipCheck = false,
     Directory? cacheDir,
     List<String> webBrowserFlags = const <String>[],
+    bool webBrowserDefaultFlags = true,
   }) async {
     if (currentCompleter.isCompleted) {
       throwToolExit('Only one instance of chrome can be started.');
@@ -240,44 +251,52 @@ class ChromiumLauncher {
       }
     }
 
-    final Directory userDataDir = _createUserDataDirectory(webBrowserFlags);
+    // Mutable copy so --user-data-dir can be removed after extraction.
+    final List<String> mutableWebBrowserFlags = List<String>.from(webBrowserFlags);
+    final ({Directory directory, bool isCustom}) userData = _createUserDataDirectory(
+      mutableWebBrowserFlags,
+    );
+    final Directory userDataDir = userData.directory;
+    final bool usingCustomUserDataDir = userData.isCustom;
 
-    if (cacheDir != null) {
-      // Seed data dir with previous state.
+    // Only seed session cache for temporary profiles managed by the tool.
+    if (cacheDir != null && !usingCustomUserDataDir) {
       _restoreUserSessionInformation(cacheDir, userDataDir);
     }
 
     final int port = debugPort ?? await _operatingSystemUtils.findFreePort();
     final args = <String>[
       chromeExecutable,
-      // Using a tmp directory ensures that a new instance of chrome launches
-      // allowing for the remote debug port to be enabled.
+      // Essential: isolate this Chrome instance and enable the debug protocol.
       '--user-data-dir=${userDataDir.path}',
       '--remote-debugging-port=$port',
-      // When the DevTools has focus we don't want to slow down the application.
-      '--disable-background-timer-throttling',
-      '--disable-renderer-backgrounding',
-      '--disable-background-networking',
-      '--disable-sync',
-      '--disable-client-side-phishing-detection',
-      '--disable-notifications',
-      ...kGcmDisabledFlags,
-      // Since we are using a temp profile, disable features that slow the
-      // Chrome launch.
-      '--disable-extensions',
-      '--disable-popup-blocking',
-      '--bwsi',
-      '--no-first-run',
-      '--no-default-browser-check',
-      '--disable-default-apps',
-      '--disable-translate',
-      '--password-store=basic',
-      if (_platform.isMacOS) '--use-mock-keychain',
+      // Flutter convenience defaults (disable with --no-web-browser-default-flags).
+      if (webBrowserDefaultFlags) ...<String>[
+        // When the DevTools has focus we don't want to slow down the application.
+        '--disable-background-timer-throttling',
+        '--disable-renderer-backgrounding',
+        '--disable-background-networking',
+        '--disable-sync',
+        '--disable-client-side-phishing-detection',
+        '--disable-notifications',
+        ...kGcmDisabledFlags,
+        // Since we are using a temp profile, disable features that slow the
+        // Chrome launch.
+        '--disable-extensions',
+        '--disable-popup-blocking',
+        '--bwsi',
+        '--no-first-run',
+        '--no-default-browser-check',
+        '--disable-default-apps',
+        '--disable-translate',
+        '--password-store=basic',
+        if (_platform.isMacOS) '--use-mock-keychain',
 
-      // Remove the search engine choice screen. It's irrelevant for app
-      // debugging purposes.
-      // See: https://github.com/flutter/flutter/issues/153928
-      '--disable-search-engine-choice-screen',
+        // Remove the search engine choice screen. It's irrelevant for app
+        // debugging purposes.
+        // See: https://github.com/flutter/flutter/issues/153928
+        '--disable-search-engine-choice-screen',
+      ],
 
       // SwiftShader support on ARM macs is disabled until they upgrade to a newer
       // version of LLVM, see https://issuetracker.google.com/issues/165000222. In
@@ -298,15 +317,15 @@ class ChromiumLauncher {
           '--disable-gpu-sandbox',
         ],
       ],
-      ...webBrowserFlags,
+      ...mutableWebBrowserFlags,
       url,
     ];
 
     final _SpawnResult spawnResult = await _spawnChromiumProcess(args, chromeExecutable);
     final Process process = spawnResult.process;
 
-    // When the process exits, copy the user settings back to the provided data-dir.
-    if (cacheDir != null) {
+    // Cache/cleanup only for temporary profiles (never delete a custom profile).
+    if (cacheDir != null && !usingCustomUserDataDir) {
       unawaited(
         process.exitCode.whenComplete(() {
           _cacheUserSessionInformation(userDataDir, cacheDir);

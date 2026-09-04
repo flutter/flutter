@@ -311,6 +311,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     final List<String> webBrowserFlags = featureFlags.isWebEnabled
         ? stringsArg(FlutterOptions.kWebBrowserFlag)
         : const <String>[];
+    // When web is disabled, keep Flutter defaults (true).
+    final bool webBrowserDefaultFlags = !featureFlags.isWebEnabled ||
+        boolArg(FlutterOptions.kWebBrowserDefaultFlags);
 
     final bool? webCrossOriginIsolation = argResults!.wasParsed('cross-origin-isolation')
         ? boolArg('cross-origin-isolation')
@@ -333,6 +336,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
+        webBrowserDefaultFlags: webBrowserDefaultFlags,
         webCrossOriginIsolation: webCrossOriginIsolation,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
@@ -394,6 +398,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
+        webBrowserDefaultFlags: webBrowserDefaultFlags,
         webEnableExpressionEvaluation:
             featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
         webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
