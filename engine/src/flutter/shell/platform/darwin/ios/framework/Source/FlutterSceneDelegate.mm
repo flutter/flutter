@@ -104,12 +104,12 @@ FLUTTER_ASSERT_ARC
 
 #pragma mark - Helpers
 
-- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine {
-  return [self.sceneLifeCycleDelegate registerSceneLifeCycleWithFlutterEngine:engine];
+- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine scene:(UIScene*)scene {
+  return [self.sceneLifeCycleDelegate registerSceneLifeCycleWithFlutterEngine:engine scene:scene];
 }
 
-- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine {
-  return [self.sceneLifeCycleDelegate unregisterSceneLifeCycleWithFlutterEngine:engine];
+- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine scene:(UIScene*)scene {
+  return [self.sceneLifeCycleDelegate unregisterSceneLifeCycleWithFlutterEngine:engine scene:scene];
 }
 
 - (void)moveRootViewControllerFrom:(NSObject<UIApplicationDelegate>*)appDelegate

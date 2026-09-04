@@ -21,6 +21,8 @@
                  options:(UISceneConnectionOptions*)connectionOptions;
 - (NSArray*)allEngines;
 
++ (void)resetSceneWillConnectFallbackCalledForTesting;
+
 @end
 
 @interface FlutterAppDelegate (Test)

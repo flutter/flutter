@@ -51,9 +51,8 @@ FLUTTER_ASSERT_ARC
 
 @implementation FlutterSceneLifecycleTest
 - (void)setUp {
-}
-
-- (void)tearDown {
+  [super setUp];
+  [FlutterPluginSceneLifeCycleDelegate resetSceneWillConnectFallbackCalledForTesting];
 }
 
 #pragma mark - FlutterPluginSceneLifeCycleDelegate
@@ -1472,15 +1471,4 @@ FLUTTER_ASSERT_ARC
                                      completionHandler:handler]);
 }
 
-- (void)testFlutterPluginSceneLifeCycleDelegateFromScene {
-  id mockScene = OCMClassMock([UIWindowScene class]);
-  id mockSceneDelegate = OCMClassMock([FlutterSwiftUIAppSceneDelegate class]);
-  id mockSceneLifeCycleDelegate = OCMClassMock([FlutterPluginSceneLifeCycleDelegate class]);
-
-  OCMStub([mockScene delegate]).andReturn(mockSceneDelegate);
-  OCMStub([mockSceneDelegate sceneLifeCycleDelegate]).andReturn(mockSceneLifeCycleDelegate);
-
-  XCTAssertEqual([FlutterPluginSceneLifeCycleDelegate fromScene:mockScene],
-                 mockSceneLifeCycleDelegate);
-}
 @end

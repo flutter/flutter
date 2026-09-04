@@ -228,7 +228,7 @@ Future<void> _installPlugins({
 
   await flutter(
     'build',
-    options: <String>['ios', '--config-only', '-v'],
+    options: <String>['ios', '--simulator', '--config-only', '-v'],
     workingDirectory: appDir.path,
   );
   await flutter('pub', options: <String>['get'], workingDirectory: appDir.path);
