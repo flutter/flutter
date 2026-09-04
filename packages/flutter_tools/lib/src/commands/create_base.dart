@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 import 'package:yaml/yaml.dart';
@@ -12,6 +13,7 @@ import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../experimental/templates.dart';
 import '../flutter_project_metadata.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -82,8 +84,8 @@ mixin CreateBase on FlutterCommand {
 
   /// Adds `--pub` and `--offline` options.
   @protected
-  void addPubOptions() {
-    argParser
+  void addPubOptions({ArgParser? parser}) {
+    (parser ?? argParser)
       ..addFlag(
         'pub',
         defaultsTo: true,
@@ -102,8 +104,12 @@ mixin CreateBase on FlutterCommand {
   ///
   /// The help message of the argument is replaced with `customHelp` if `customHelp` is not null.
   @protected
-  void addPlatformsOptions({String? customHelp, required Map<String, String> allowedHelp}) {
-    argParser.addMultiOption(
+  void addPlatformsOptions({
+    ArgParser? parser,
+    String? customHelp,
+    required Map<String, String> allowedHelp,
+  }) {
+    (parser ?? argParser).addMultiOption(
       'platforms',
       help: customHelp ?? _kDefaultPlatformArgumentHelp,
       aliases: <String>['platform'],
@@ -148,13 +154,19 @@ mixin CreateBase on FlutterCommand {
   /// Throws assertion if [projectDir] does not exist or empty.
   /// Returns null if no project type can be determined.
   @protected
-  FlutterTemplateType? determineTemplateType() {
+  ParsedFlutterTemplateType? determineTemplateType({
+    required ExtensionTemplateManager? extensionTemplateManager,
+  }) {
     assert(projectDir.existsSync() && projectDir.listSync().isNotEmpty);
     final File metadataFile = globals.fs.file(
       globals.fs.path.join(projectDir.absolute.path, '.metadata'),
     );
-    final projectMetadata = FlutterProjectMetadata(metadataFile, globals.logger);
-    final FlutterTemplateType? projectType = projectMetadata.projectType;
+    final projectMetadata = FlutterProjectMetadata(
+      metadataFile,
+      globals.logger,
+      extensionTemplateManager: extensionTemplateManager,
+    );
+    final ParsedFlutterTemplateType? projectType = projectMetadata.projectType;
     if (projectType != null) {
       return projectType;
     }
@@ -541,6 +553,7 @@ mixin CreateBase on FlutterCommand {
         projectType: projectType,
         migrateConfig: MigrateConfig(),
         logger: globals.logger,
+        extensionTemplateManager: null,
       );
       metadata.populate(
         platforms: platformsForMigrateConfig,
