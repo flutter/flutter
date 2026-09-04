@@ -138,4 +138,21 @@ public class PlatformViewsControllerDelegatorTest {
 
     verify(pvcHandler).onRejectGesture(0, 12345L);
   }
+
+  @Test
+  public void constructor_handlesNullControllersWithoutThrowing() {
+    PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
+    PlatformViewsControllerDelegator delegatorWithNullSecond =
+        new PlatformViewsControllerDelegator(platformViewsController, null);
+    Assert.assertNotNull(delegatorWithNullSecond);
+
+    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
+    PlatformViewsControllerDelegator delegatorWithNullFirst =
+        new PlatformViewsControllerDelegator(null, platformViewsController2);
+    Assert.assertNotNull(delegatorWithNullFirst);
+
+    PlatformViewsControllerDelegator delegatorWithBothNull =
+        new PlatformViewsControllerDelegator(null, null);
+    Assert.assertNotNull(delegatorWithBothNull);
+  }
 }

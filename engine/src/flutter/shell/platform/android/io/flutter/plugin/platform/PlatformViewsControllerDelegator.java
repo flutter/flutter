@@ -26,21 +26,21 @@ public class PlatformViewsControllerDelegator
   private final PlatformViewsChannel2.PlatformViewsHandler channelHandler2;
 
   public PlatformViewsControllerDelegator(
-      PlatformViewsController platformViewsController,
-      PlatformViewsController2 platformViewsController2) {
+      @Nullable PlatformViewsController platformViewsController,
+      @Nullable PlatformViewsController2 platformViewsController2) {
     this(
         platformViewsController,
         platformViewsController2,
-        platformViewsController.channelHandler,
-        platformViewsController2.channelHandler);
+        platformViewsController != null ? platformViewsController.channelHandler : null,
+        platformViewsController2 != null ? platformViewsController2.channelHandler : null);
   }
 
   @VisibleForTesting
   PlatformViewsControllerDelegator(
-      PlatformViewsController platformViewsController,
-      PlatformViewsController2 platformViewsController2,
-      PlatformViewsChannel.PlatformViewsHandler channelHandler,
-      PlatformViewsChannel2.PlatformViewsHandler channelHandler2) {
+      @Nullable PlatformViewsController platformViewsController,
+      @Nullable PlatformViewsController2 platformViewsController2,
+      @Nullable PlatformViewsChannel.PlatformViewsHandler channelHandler,
+      @Nullable PlatformViewsChannel2.PlatformViewsHandler channelHandler2) {
     this.platformViewsController = platformViewsController;
     this.platformViewsController2 = platformViewsController2;
     this.channelHandler = channelHandler;
