@@ -1935,11 +1935,8 @@ void main() {
     tester.view.physicalSize = Size.zero;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: ColoredBox(color: Color(0xFFAABBCC), child: Placeholder()),
-        ),
+      Center(
+        child: ColoredBox(color: Color(0xFFAABBCC), child: Placeholder()),
       ),
     );
     expect(tester.getSize(find.byType(ColoredBox)), Size.zero);

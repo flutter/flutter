@@ -211,11 +211,8 @@ void main() {
     tester.view.physicalSize = Size.zero;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: Flow(delegate: OpacityFlowDelegate(0.2), children: const <Widget>[Placeholder()]),
-        ),
+      Center(
+        child: Flow(delegate: OpacityFlowDelegate(0.2), children: const <Widget>[Placeholder()]),
       ),
     );
     expect(tester.getSize(find.byType(Flow)), Size.zero);
