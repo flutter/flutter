@@ -349,6 +349,8 @@ class ManifestAssetBundle implements AssetBundle {
   }) async {
     final previousKeys = Set<String>.of(entries.keys);
     final touchedKeys = <String>{};
+    removedEntries.clear();
+    removedShaderEntries.clear();
     if (flutterProject == null) {
       try {
         flutterProject = FlutterProject.fromDirectory(_fileSystem.file(manifestPath).parent);
