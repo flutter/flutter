@@ -44,7 +44,6 @@ Future<Stream<String>> startWidgetPreview({
   Uri? dtdUri,
   bool useWebServer = false,
   Uri? devToolsServerAddress,
-  bool legacyPreviewDetection = false,
   ProcessManager processManager = _processManager, // Allow overriding for testing if needed
 }) async {
   final Process process = await processManager.start(<String>[
@@ -58,7 +57,6 @@ Future<Stream<String>> startWidgetPreview({
     if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUrl}=$dtdUri',
     if (devToolsServerAddress != null)
       '--${FlutterCommand.kDevToolsServerAddress}=$devToolsServerAddress',
-    if (legacyPreviewDetection) '--legacy-preview-detection',
   ], workingDirectory: tempDir.path);
 
   addTearDown(() async {
@@ -115,7 +113,6 @@ Future<Stream<String>> runWidgetPreview({
   Uri? dtdUri,
   bool useWebServer = false,
   Uri? devToolsServerAddress,
-  bool legacyPreviewDetection = false,
   ProcessManager processManager = _processManager,
 }) async {
   expect(expectedMessages, isNotEmpty);

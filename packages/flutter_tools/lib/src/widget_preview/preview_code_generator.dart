@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:analyzer/dart/constant/value.dart';
-import 'package:analyzer/dart/element/element.dart' as analyzer;
-import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:code_builder/code_builder.dart' as cb;
 import 'package:dart_style/dart_style.dart';
@@ -13,11 +9,8 @@ import 'package:pub_semver/pub_semver.dart';
 
 import '../base/file_system.dart';
 import '../project.dart';
-import 'dependency_graph.dart';
 import 'dtd_types.dart';
 import 'preview_details.dart';
-
-typedef _PreviewMappingEntry = MapEntry<PreviewPath, LibraryPreviewNode>;
 
 /// Generates the Dart source responsible for importing widget previews from the developer's project
 /// into the widget preview scaffold.
@@ -155,24 +148,6 @@ class PreviewCodeGenerator {
   ///   ),
   /// ];
   /// ```
-  void populatePreviewsInGeneratedPreviewScaffold(PreviewDependencyGraph previews) {
-    final emitter = cb.DartEmitter.scoped(useNullSafetySyntax: true);
-    final lib = cb.Library(
-      (cb.LibraryBuilder b) => b
-        ..ignoreForFile.add('implementation_imports')
-        ..body.addAll(<cb.Spec>[
-          cb.Method(
-            (cb.MethodBuilder b) => _buildGeneratedPreviewMethod(
-              allocator: emitter.allocator,
-              previews: previews,
-              builder: b,
-            ),
-          ),
-        ]),
-    );
-    _writeGeneratedPreviewFile(lib: lib, emitter: emitter);
-  }
-
   void populatePreviewsInGeneratedPreviewScaffoldLsp(FlutterWidgetPreviews update) {
     final allocator = PreviewPrefixedAllocator()..populateKnownImportPrefixes(update.namespaces);
     final emitter = cb.DartEmitter(useNullSafetySyntax: true, allocator: allocator);
@@ -199,39 +174,6 @@ class PreviewCodeGenerator {
     );
   }
 
-  void _buildGeneratedPreviewMethod({
-    required PreviewDependencyGraph previews,
-    required cb.Allocator allocator,
-    required cb.MethodBuilder builder,
-  }) {
-    // Sort the entries by URI so that the code generator assigns import prefixes in a
-    // deterministic manner, mainly for testing purposes. This also results in previews being
-    // displayed in the same order across platforms with differing path styles.
-    final List<_PreviewMappingEntry> sortedPreviews = previews.entries.toList()
-      ..sort((_PreviewMappingEntry a, _PreviewMappingEntry b) {
-        return a.key.uri.toString().compareTo(b.key.uri.toString());
-      });
-
-    builder
-      ..body = cb.literalList([
-        for (final libraryPreviews in sortedPreviews)
-          for (final preview in libraryPreviews.value.previews)
-            _buildPreviews(
-              preview: preview,
-              uri: libraryPreviews.key.uri,
-              libraryDetails: libraryPreviews.value,
-            ),
-      ]).code
-      ..name = _kPreviewsFunctionName
-      ..returns =
-          (cb.TypeReferenceBuilder()
-                ..symbol = _kListType
-                ..types = ListBuilder<cb.Reference>(<cb.Reference>[
-                  cb.refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri),
-                ]))
-              .build();
-  }
-
   void _buildGeneratedPreviewMethodLsp({
     required FlutterWidgetPreviews previews,
     required cb.MethodBuilder builder,
@@ -247,7 +189,8 @@ class PreviewCodeGenerator {
     builder
       ..body = cb.literalList([
         for (final preview in sortedPreviews)
-          _buildPreviewsLsp(preview: preview, uri: preview.libraryUri),
+          if (preview.packageName != null)
+            _buildPreviewsLsp(preview: preview, uri: preview.libraryUri),
       ]).code
       ..name = _kPreviewsFunctionName
       ..returns =
@@ -257,48 +200,6 @@ class PreviewCodeGenerator {
                   cb.refer(_kWidgetPreviewClass, _kWidgetPreviewLibraryUri),
                 ]))
               .build();
-  }
-
-  cb.Expression _buildPreviews({
-    required PreviewDetails preview,
-    required Uri uri,
-    required LibraryPreviewNode libraryDetails,
-  }) {
-    final args = <String, cb.Expression>{
-      _kPackageName: cb.literalString(preview.packageName!),
-      _kScriptUri: cb.literalString(preview.scriptUri.toString()),
-      _kLine: cb.literalNum(preview.line),
-      _kColumn: cb.literalNum(preview.column),
-    };
-    // TODO(bkonyi): improve the error related code.
-    if (libraryDetails.hasErrors || libraryDetails.dependencyHasErrors) {
-      return cb.refer(_kBuildWidgetPreviewError, _kUtilsUri).call([], {
-        ...args,
-        _kPackageUri: cb.literalString(uri.toString()),
-        _kPreviewFunctionName: cb.literalString(preview.functionName),
-        _kDependencyHasErrors: cb.literalBool(libraryDetails.dependencyHasErrors),
-      });
-    }
-
-    final cb.Expression previewWidget = cb
-        .refer(preview.functionName, uri.toString())
-        .call(<cb.Expression>[]);
-
-    args.addAll({
-      _kPreviewFunction: cb.Method((builder) => builder.body = previewWidget.code).closure,
-    });
-
-    if (preview.isMultiPreview) {
-      return cb.refer(_kBuildMultiWidgetPreview, _kUtilsUri).call([], {
-        ...args,
-        _kPreview: preview.previewAnnotation.toExpression(),
-      }).spread;
-    }
-
-    return cb.refer(_kBuildWidgetPreview, _kUtilsUri).call([], {
-      ...args,
-      _kTransformedPreview: preview.previewAnnotation.toExpression().property(_kTransform).call([]),
-    });
   }
 
   cb.Expression _buildPreviewsLsp({
@@ -338,100 +239,11 @@ class PreviewCodeGenerator {
 
     return cb.refer(_kBuildWidgetPreview, _kUtilsUri).call([], {
       ...args,
-      _kTransformedPreview: cb.CodeExpression(
-        cb.Code(preview.previewAnnotation),
-      ).property(_kTransform).call([]),
+      _kTransformedPreview: cb.CodeExpression(cb.Code(preview.previewAnnotation))
+          .property(_kTransform)
+          .call([]),
     });
   }
-}
-
-extension on DartObject {
-  cb.Expression toExpression() {
-    final DartType type = this.type!;
-    return switch (type) {
-      DartType(isDartCoreBool: true) => cb.literalBool(toBoolValue()!),
-      DartType(isDartCoreDouble: true) => cb.literalNum(toDoubleValue()!),
-      DartType(isDartCoreInt: true) => cb.literalNum(toIntValue()!),
-      DartType(isDartCoreString: true) => cb.literalString(toStringValue()!),
-      DartType(isDartCoreNull: true) => cb.literalNull,
-      DartType(isDartCoreList: true) => cb.literalList([
-        for (final item in toListValue()!) item.toExpression(),
-      ]),
-      DartType(isDartCoreMap: true) => cb.literalMap(
-        toMapValue()!.map(
-          (key, value) => MapEntry(
-            key?.toExpression() ?? cb.literalNull,
-            value?.toExpression() ?? cb.literalNull,
-          ),
-        ),
-      ),
-      DartType(isDartCoreSet: true) => cb.literalSet([
-        for (final item in toSetValue()!) item.toExpression(),
-      ]),
-      RecordType() => () {
-        final (:Map<String, DartObject> named, :List<DartObject> positional) = toRecordValue()!;
-        return cb.literalRecord(
-          positional.map((field) => field.toExpression()).toList(),
-          named.map((key, value) => MapEntry(key, value.toExpression())),
-        );
-      }(),
-      InterfaceType(element: EnumElement()) => _createEnumInstance(this),
-      InterfaceType() => _createInstance(type, this),
-      FunctionType() => _createTearoff(toFunctionValue()!),
-      _ => throw UnsupportedError('Unexpected DartObject type: $runtimeType'),
-    };
-  }
-
-  cb.Expression _createTearoff(ExecutableElement element) {
-    return cb.refer(element.displayName, _elementToLibraryIdentifier(element));
-  }
-
-  cb.Expression _createEnumInstance(DartObject object) {
-    final VariableElement variable = object.variable!;
-    return switch (variable) {
-      FieldElement(
-        isEnumConstant: true,
-        displayName: final enumValue,
-        enclosingElement: EnumElement(displayName: final enumName),
-      ) =>
-        cb.refer('$enumName.$enumValue', _elementToLibraryIdentifier(variable)),
-      PropertyInducingElement(:final displayName) => cb.refer(
-        displayName,
-        _elementToLibraryIdentifier(variable),
-      ),
-      _ => throw UnsupportedError('Unexpected enum variable type: ${variable.runtimeType}'),
-    };
-  }
-
-  cb.Expression _createInstance(InterfaceType dartType, DartObject object) {
-    final ConstructorInvocation constructorInvocation = object.constructorInvocation!;
-    final ConstructorElement constructor = constructorInvocation.constructor;
-    final cb.Expression type = cb.refer(
-      dartType.element.name!,
-      _elementToLibraryIdentifier(dartType.element),
-    );
-    final String? name = constructor.name == 'new' ? null : constructor.name;
-
-    final List<cb.Expression> positionalArguments = constructorInvocation.positionalArguments
-        .map((e) => e.toExpression())
-        .toList();
-    final namedArguments = <String, cb.Expression>{
-      for (final MapEntry(key: name, :value) in constructorInvocation.namedArguments.entries)
-        name: value.toExpression(),
-    };
-    // TODO(bkonyi): handle type arguments?
-    final typeArguments = <cb.Reference>[];
-    return cb.InvokeExpression.constOf(
-      type,
-      positionalArguments,
-      namedArguments,
-      typeArguments,
-      name,
-    );
-  }
-
-  /// Returns the import URI for the [analyzer.LibraryElement] containing [element].
-  String? _elementToLibraryIdentifier(analyzer.Element? element) => element?.library!.identifier;
 }
 
 class PreviewPrefixedAllocator implements cb.Allocator {
