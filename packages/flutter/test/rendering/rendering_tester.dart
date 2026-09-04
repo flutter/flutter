@@ -90,6 +90,11 @@ class TestRenderingFlutterBinding extends BindingBase
       onSemanticsOwnerDisposed: () {
         renderView.clearSemantics();
       },
+      onFlushedPaint: (bool isDirty) {
+        if (isDirty) {
+          renderView.markNeedsCompositeFrame();
+        }
+      },
     );
   }
 
