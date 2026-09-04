@@ -21,12 +21,11 @@ import 'dart:ui'
         PlatformDispatcher,
         Size,
         ViewConstraints,
-        ViewPadding,
-        VoidCallback;
+        ViewPadding;
 
 import 'package:meta/meta.dart';
 
-import '_view_metrics.dart' show debugForEachOverriddenPlatformDispatcher;
+import '_view_metrics.dart' show debugReplayViewMetricsNotifications;
 import 'assertions.dart';
 import 'diagnostics.dart';
 import 'memory_allocations.dart';
@@ -956,8 +955,9 @@ bool debugClearViewMetricsOverrides() {
 //
 // The callbacks are invoked on every dispatcher an override applies to rather
 // than on ui.PlatformDispatcher.instance, because a binding that supplies its
-// own dispatcher registers the framework's callbacks on that one; see
-// [debugForEachOverriddenPlatformDispatcher].
+// own dispatcher registers the framework's callbacks on that one, and each runs
+// in the zone it was registered in; see
+// [debugReplayViewMetricsNotifications], which owns both.
 //
 // Only the notifications whose metrics actually changed are replayed, so that
 // toggling an accessibility flag does not tell the application its window
@@ -992,47 +992,11 @@ void _debugReplayPlatformNotifications(
     platformConfiguration =
         platformConfiguration || before._platformConfiguration != after._platformConfiguration;
   }
-  debugForEachOverriddenPlatformDispatcher((ui.PlatformDispatcher dispatcher) {
-    if (platformConfiguration) {
-      _debugNotify(() => dispatcher.onPlatformConfigurationChanged?.call());
-    }
-    if (textScaleFactor) {
-      _debugNotify(() => dispatcher.onTextScaleFactorChanged?.call());
-    }
-    if (platformBrightness) {
-      _debugNotify(() => dispatcher.onPlatformBrightnessChanged?.call());
-    }
-    if (accessibilityFeatures) {
-      _debugNotify(() => dispatcher.onAccessibilityFeaturesChanged?.call());
-    }
-    if (viewMetrics) {
-      _debugNotify(() => dispatcher.onMetricsChanged?.call());
-    }
-  });
-}
-
-// Delivers one notification, reporting a failure rather than letting it cancel
-// the notifications after it.
-//
-// A metric that changed and was not reported leaves the framework reading a
-// value nothing told it to re-read, which is the state this whole replay
-// exists to prevent — a handler that throws must not put another metric, or
-// another dispatcher, into it. Reading the callback is inside the guard too:
-// on a dispatcher that implements `dart:ui` through noSuchMethod, that read is
-// itself what throws.
-void _debugNotify(ui.VoidCallback notification) {
-  try {
-    notification();
-  } catch (exception, stack) {
-    FlutterError.reportError(
-      FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'foundation library',
-        context: ErrorDescription(
-          'while telling a PlatformDispatcher that a debug view metrics override changed',
-        ),
-      ),
-    );
-  }
+  debugReplayViewMetricsNotifications(
+    platformConfiguration: platformConfiguration,
+    textScaleFactor: textScaleFactor,
+    platformBrightness: platformBrightness,
+    accessibilityFeatures: accessibilityFeatures,
+    viewMetrics: viewMetrics,
+  );
 }

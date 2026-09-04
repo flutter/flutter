@@ -170,6 +170,25 @@ Widget _capture(void Function(MediaQueryData data) onData, {Widget? child}) {
   );
 }
 
+/// A [TextScaler] whose factor is not a number, which [TextScaler] permits:
+/// [TextScaler.textScaleFactor] is documented as an estimate, with no range.
+class _NaNTextScaler extends TextScaler {
+  const _NaNTextScaler();
+  @override
+  double get textScaleFactor => double.nan;
+  @override
+  double scale(double fontSize) => fontSize;
+}
+
+/// The same, for a factor below the zero [TextScaler.linear] requires.
+class _NegativeTextScaler extends TextScaler {
+  const _NegativeTextScaler();
+  @override
+  double get textScaleFactor => -1.0;
+  @override
+  double scale(double fontSize) => fontSize;
+}
+
 void main() {
   // Overrides have to be cleared inside the test body rather than in a tear
   // down: debugAssertAllFoundationVarsUnset runs from the test binding's
@@ -611,6 +630,221 @@ void main() {
 
       debugClearViewMetricsOverrides();
       expect(debugViewWithMetricsOverrides(rawView), same(applied));
+    });
+
+    testWidgets('equality stays an equivalence across scaling strategies', (
+      WidgetTester tester,
+    ) async {
+      // Three values that report the same text scale factor: one scaling by the
+      // platform's own curve, one by a linear scaler of its own, and one by an
+      // override that supplies the factor. However they are grouped, equality
+      // has to be symmetric and transitive — MediaQueryData is a public value
+      // type, and a Set or a Map of one answers by insertion order otherwise.
+      final dispatcher = _CurvedTextScalingPlatformDispatcher();
+      final ui.FlutterView view = debugApplyViewMetricsOverrides(dispatcher).implicitView!;
+
+      final platform = MediaQueryData.fromView(view);
+      final MediaQueryData linear = platform.copyWith(textScaler: const TextScaler.linear(2.0));
+      debugSetViewMetricsOverride(
+        view.viewId,
+        const DebugViewMetricsOverride(textScaleFactor: 2.0),
+      );
+      final overridden = MediaQueryData.fromView(view);
+      debugClearViewMetricsOverrides();
+
+      expect(platform.textScaler.textScaleFactor, 2.0);
+      expect(linear.textScaler.textScaleFactor, 2.0);
+      expect(overridden.textScaler.textScaleFactor, 2.0);
+
+      final values = <MediaQueryData>[platform, linear, overridden];
+      for (final x in values) {
+        expect(x == x, isTrue, reason: 'equality is not reflexive');
+        for (final y in values) {
+          expect(x == y, y == x, reason: 'equality is not symmetric');
+          for (final z in values) {
+            if (x == y && y == z) {
+              expect(x == z, isTrue, reason: 'equality is not transitive');
+            }
+          }
+        }
+      }
+
+      // The classes: the override's factor is applied as a multiplication, so
+      // it scales unlike the platform's curve, and the data built from it has
+      // to compare unequal to the data built before it was installed.
+      expect(platform == overridden, isFalse);
+      expect(linear == overridden, isFalse);
+      // What a caller set for itself is compared as it always was.
+      expect(platform == linear, isTrue);
+      // Hash codes stay consistent with all of it, including the pair that is
+      // equal despite disagreeing about where its scaler came from: at a factor
+      // of 1.0 there is nothing for an override to have changed, and a value
+      // that hashed that disagreement would break equal-hashes-alike.
+      expect(platform.hashCode, linear.hashCode);
+      debugSetViewMetricsOverride(
+        view.viewId,
+        const DebugViewMetricsOverride(textScaleFactor: 1.0),
+      );
+      final unscaledOverride = MediaQueryData.fromView(view);
+      debugClearViewMetricsOverrides();
+      final MediaQueryData unscaledPlatform = platform.copyWith(textScaler: TextScaler.noScaling);
+      expect(unscaledOverride.textScaler.textScaleFactor, 1.0);
+      expect(unscaledOverride == unscaledPlatform, isTrue);
+      expect(unscaledPlatform == unscaledOverride, isTrue);
+      expect(unscaledOverride.hashCode, unscaledPlatform.hashCode);
+      // The scaler owes the same promise, for the same reason: it makes the
+      // same exemption at a factor of 1.0.
+      expect(unscaledOverride.textScaler == unscaledPlatform.textScaler, isTrue);
+      expect(unscaledOverride.textScaler.hashCode, unscaledPlatform.textScaler.hashCode);
+    });
+
+    testWidgets('equality tolerates a scaler that reports a factor it cannot have', (
+      WidgetTester tester,
+    ) async {
+      // TextScaler is public and subclassable, and textScaleFactor is only
+      // documented as an estimate. Asking whether such a scaler is a linear one
+      // must not be what builds a TextScaler.linear out of the answer, because
+      // that asserts on a factor like this.
+      tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(textScaleFactor: 2.0),
+      );
+      final overridden = MediaQueryData.fromView(tester.view);
+      debugClearViewMetricsOverrides();
+
+      for (final scaler in const <TextScaler>[_NaNTextScaler(), _NegativeTextScaler()]) {
+        expect(() => overridden.copyWith(textScaler: scaler), returnsNormally);
+      }
+    });
+
+    testWidgets('carries what supplied the scaler through every copy of the data', (
+      WidgetTester tester,
+    ) async {
+      // The override reports the factor the platform already reports, so
+      // nothing but where the scaler came from tells two of these apart — and
+      // a copy of the data holds a scaler that came from the same place.
+      tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final ui.FlutterView nested = FakeView(tester.view);
+      MediaQueryData styled(MediaQueryData data) => data.applyTextStyleOverrides(
+        lineHeightScaleFactorOverride: null,
+        letterSpacingOverride: null,
+        wordSpacingOverride: null,
+        paragraphSpacingOverride: null,
+      );
+
+      final reported = MediaQueryData.fromView(tester.view);
+      final inheritedFromReported = MediaQueryData.fromView(nested, platformData: reported);
+      final MediaQueryData styledFromReported = styled(reported);
+      final MediaQueryData radiiFromReported = reported.applyDisplayCornerRadii(null);
+
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(textScaleFactor: 2.0),
+      );
+      final overridden = MediaQueryData.fromView(tester.view);
+      debugClearViewMetricsOverrides();
+
+      expect(overridden.textScaler.textScaleFactor, reported.textScaler.textScaleFactor);
+      expect(overridden == reported, isFalse);
+      // A view with no override of its own takes the scaler an ancestor
+      // supplied, so it takes what that scaler is as well.
+      expect(
+        MediaQueryData.fromView(nested, platformData: overridden) == inheritedFromReported,
+        isFalse,
+      );
+      // So does every copy, whichever method made it.
+      expect(styled(overridden) == styledFromReported, isFalse);
+      expect(overridden.applyDisplayCornerRadii(null) == radiiFromReported, isFalse);
+      expect(
+        overridden.copyWith(devicePixelRatio: 3.0) == reported.copyWith(devicePixelRatio: 3.0),
+        isFalse,
+      );
+      // Except a copy whose scaler was replaced by one that scales by its
+      // factor and nothing else: there is nothing left for an override to have
+      // changed about it. The factor is not 1.0, so it is the replacement and
+      // not the factor that makes these two equal.
+      expect(
+        overridden.copyWith(textScaler: const TextScaler.linear(3.0)) ==
+            reported.copyWith(textScaler: const TextScaler.linear(3.0)),
+        isTrue,
+      );
+      // A copy that replaces nothing is equal to what it copied, whatever the
+      // two disagree about — including data a caller built for itself around a
+      // scaler an override supplied, which the const constructor cannot ask
+      // about and so records as not overridden.
+      expect(overridden.copyWith() == overridden, isTrue);
+      expect(reported.copyWith() == reported, isTrue);
+      final built = MediaQueryData(textScaler: overridden.textScaler);
+      expect(built.copyWith() == built, isTrue);
+      expect(
+        built.copyWith(devicePixelRatio: 3.0) == built.copyWith(devicePixelRatio: 3.0),
+        isTrue,
+      );
+      // Handing back the scaler it already holds is keeping it too, which is
+      // what MediaQuery.withClampedTextScaling does at its default bounds:
+      // TextScaler.clamp returns the scaler it was asked to clamp.
+      expect(built.copyWith(textScaler: built.textScaler) == built, isTrue);
+      expect(built.copyWith(textScaler: built.textScaler.clamp()) == built, isTrue);
+      // A scaler a caller built out of this data's own keeps this data's
+      // answer, which is what the clamped scaler
+      // MediaQuery.withClampedTextScaling installs is.
+      expect(
+        overridden.copyWith(textScaler: overridden.textScaler.clamp(maxScaleFactor: 1.5)) ==
+            reported.copyWith(textScaler: reported.textScaler.clamp(maxScaleFactor: 1.5)),
+        isFalse,
+      );
+      // And a copy handed the scaler of data that was built over an override
+      // takes that answer from the scaler, rather than from the data it is
+      // copying: the scaler is what does the scaling.
+      expect(reported.copyWith(textScaler: overridden.textScaler) == reported, isFalse);
+      expect(
+        overridden.copyWith(textScaler: reported.textScaler) == reported,
+        isTrue,
+        reason: "a platform scaler copied onto overridden data is still the platform's",
+      );
+      // A metric that is not the text scale factor says nothing about how text
+      // scales, so it must not make two of these differ. Compared against the
+      // data itself rather than a copy of it, because a copy asks the scaler
+      // and would answer correctly however this data was built.
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(boldText: true),
+      );
+      final boldOnly = MediaQueryData.fromView(tester.view);
+      debugClearViewMetricsOverrides();
+      expect(boldOnly == reported.copyWith(boldText: true), isTrue);
+    });
+
+    testWidgets('says so when it prints data whose scaler an override supplied', (
+      WidgetTester tester,
+    ) async {
+      // Two values that compare unequal have to print differently, or a
+      // diagnostic dump of the rebuild this causes shows nothing that changed.
+      tester.platformDispatcher.textScaleFactorTestValue = 2.0;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final reported = MediaQueryData.fromView(tester.view);
+
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(textScaleFactor: 2.0),
+      );
+      final overridden = MediaQueryData.fromView(tester.view);
+      debugClearViewMetricsOverrides();
+
+      expect(overridden == reported, isFalse);
+      // On the scaler, which is the thing the override changed, and nowhere
+      // else: a marker on another property would say the wrong thing changed.
+      expect(overridden.toString(), contains('textScaler: ${overridden.textScaler} (overridden)'));
+      expect(reported.toString(), contains('textScaler: ${reported.textScaler},'));
+      expect(reported.toString(), isNot(contains('(overridden)')));
+      expect(
+        overridden.toString().replaceAll(' (overridden)', ''),
+        reported.toString(),
+        reason: 'nothing but where the scaler came from should differ',
+      );
     });
 
     testWidgets('rebuilds when an override changes how text scales, not by how much', (
