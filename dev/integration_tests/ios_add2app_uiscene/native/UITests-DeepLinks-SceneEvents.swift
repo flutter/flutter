@@ -6,7 +6,7 @@ import XCTest
 
 final class NativeUIKitSwiftExperimentUITests: XCTestCase {
 
-  override func setUpWithError() throws {
+  override func setUp() {
     continueAfterFailure = false
   }
 
@@ -37,7 +37,7 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     )
     let eventsElement = app.staticTexts.element(matching: eventsPredicate)
     if !eventsElement.waitForExistence(timeout: 5) {
-      let allLabels = app.staticTexts.allElementsBoundByIndex.map { $0.label }.joined(separator: "\n---\n")
+      let allLabels = app.staticTexts.allElementsBoundByIndex.map(\.label).joined(separator: "\n---\n")
       XCTFail("Cold start Universal Link lifecycle sequence failed. Actual:\n\(allLabels)")
     }
   }
@@ -69,7 +69,7 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     )
     let eventsElement = app.staticTexts.element(matching: eventsPredicate)
     if !eventsElement.waitForExistence(timeout: 5) {
-      let allLabels = app.staticTexts.allElementsBoundByIndex.map { $0.label }.joined(separator: "\n---\n")
+      let allLabels = app.staticTexts.allElementsBoundByIndex.map(\.label).joined(separator: "\n---\n")
       XCTFail("Cold start Custom Scheme lifecycle sequence failed. Actual:\n\(allLabels)")
     }
   }
@@ -113,7 +113,7 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     )
     let eventsElement = app.staticTexts.element(matching: eventsPredicate)
     if !eventsElement.waitForExistence(timeout: 5) {
-      let allLabels = app.staticTexts.allElementsBoundByIndex.map { $0.label }.joined(separator: "\n---\n")
+      let allLabels = app.staticTexts.allElementsBoundByIndex.map(\.label).joined(separator: "\n---\n")
       XCTFail("Warm start Universal Link lifecycle sequence failed. Actual:\n\(allLabels)")
     }
   }
@@ -157,7 +157,7 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     )
     let eventsElement = app.staticTexts.element(matching: eventsPredicate)
     if !eventsElement.waitForExistence(timeout: 5) {
-      let allLabels = app.staticTexts.allElementsBoundByIndex.map { $0.label }.joined(separator: "\n---\n")
+      let allLabels = app.staticTexts.allElementsBoundByIndex.map(\.label).joined(separator: "\n---\n")
       XCTFail("Warm start Custom Scheme lifecycle sequence failed. Actual:\n\(allLabels)")
     }
   }

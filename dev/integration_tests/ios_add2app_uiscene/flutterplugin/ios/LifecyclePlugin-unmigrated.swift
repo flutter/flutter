@@ -69,7 +69,6 @@ public class MyPlugin: NSObject, FlutterPlugin {
     events.append("applicationWillTerminate")
   }
 
-  @objc(application:openURL:options:)
   public func application(
     _ application: UIApplication,
     open url: URL,
@@ -89,11 +88,10 @@ public class MyPlugin: NSObject, FlutterPlugin {
     return true
   }
 
-  @objc(application:continueUserActivity:restorationHandler:)
   public func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
-    restorationHandler: (([Any]?) -> Void)?
+    restorationHandler: @escaping ([Any]) -> Void
   ) -> Bool {
     events.append("applicationContinueUserActivity")
     if userActivity.activityType == NSUserActivityTypeBrowsingWeb,

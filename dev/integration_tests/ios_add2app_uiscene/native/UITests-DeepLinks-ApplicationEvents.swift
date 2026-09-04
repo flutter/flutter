@@ -6,7 +6,7 @@ import XCTest
 
 final class NativeUIKitSwiftExperimentUITests: XCTestCase {
 
-  override func setUpWithError() throws {
+  override func setUp() {
     continueAfterFailure = false
   }
 
@@ -24,6 +24,8 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     XCTAssertTrue(button.waitForExistence(timeout: 10))
     button.tap()
 
+    // Unmigrated plugins receive applicationDidFinishLaunchingWithOptions twice on cold start:
+    // once during plugin registration with FlutterEngine, and once when FlutterAppDelegate forwards it.
     let expectedEvents = [
       "applicationDidFinishLaunchingWithOptions",
       "applicationDidFinishLaunchingWithOptions",
@@ -37,7 +39,7 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     )
     let eventsElement = app.staticTexts.element(matching: eventsPredicate)
     if !eventsElement.waitForExistence(timeout: 5) {
-      let allLabels = app.staticTexts.allElementsBoundByIndex.map { $0.label }.joined(separator: "\n---\n")
+      let allLabels = app.staticTexts.allElementsBoundByIndex.map(\.label).joined(separator: "\n---\n")
       XCTFail("Cold start Universal Link fallback lifecycle sequence failed. Actual:\n\(allLabels)")
     }
   }
@@ -56,6 +58,8 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     XCTAssertTrue(button.waitForExistence(timeout: 10))
     button.tap()
 
+    // Unmigrated plugins receive applicationDidFinishLaunchingWithOptions twice on cold start:
+    // once during plugin registration with FlutterEngine, and once when FlutterAppDelegate forwards it.
     let expectedEvents = [
       "applicationDidFinishLaunchingWithOptions",
       "applicationDidFinishLaunchingWithOptions",
@@ -69,7 +73,7 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     )
     let eventsElement = app.staticTexts.element(matching: eventsPredicate)
     if !eventsElement.waitForExistence(timeout: 5) {
-      let allLabels = app.staticTexts.allElementsBoundByIndex.map { $0.label }.joined(separator: "\n---\n")
+      let allLabels = app.staticTexts.allElementsBoundByIndex.map(\.label).joined(separator: "\n---\n")
       XCTFail("Cold start Custom Scheme fallback lifecycle sequence failed. Actual:\n\(allLabels)")
     }
   }
@@ -95,6 +99,8 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     XCTAssertTrue(button.waitForExistence(timeout: 10))
     button.tap()
 
+    // On warm start, the app was already launched so applicationDidFinishLaunchingWithOptions
+    // is only logged once. The deep link resumes the backgrounded app via scene continuation.
     let expectedEvents = [
       "applicationDidFinishLaunchingWithOptions",
       "applicationWillEnterForeground",
@@ -112,7 +118,7 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     )
     let eventsElement = app.staticTexts.element(matching: eventsPredicate)
     if !eventsElement.waitForExistence(timeout: 5) {
-      let allLabels = app.staticTexts.allElementsBoundByIndex.map { $0.label }.joined(separator: "\n---\n")
+      let allLabels = app.staticTexts.allElementsBoundByIndex.map(\.label).joined(separator: "\n---\n")
       XCTFail("Warm start Universal Link fallback lifecycle sequence failed. Actual:\n\(allLabels)")
     }
   }
@@ -138,6 +144,8 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     XCTAssertTrue(button.waitForExistence(timeout: 10))
     button.tap()
 
+    // On warm start, applicationDidFinishLaunchingWithOptions was only logged once during initial launch.
+    // The custom scheme deep link resumes the backgrounded app via openURL.
     let expectedEvents = [
       "applicationDidFinishLaunchingWithOptions",
       "applicationWillEnterForeground",
@@ -155,7 +163,7 @@ final class NativeUIKitSwiftExperimentUITests: XCTestCase {
     )
     let eventsElement = app.staticTexts.element(matching: eventsPredicate)
     if !eventsElement.waitForExistence(timeout: 5) {
-      let allLabels = app.staticTexts.allElementsBoundByIndex.map { $0.label }.joined(separator: "\n---\n")
+      let allLabels = app.staticTexts.allElementsBoundByIndex.map(\.label).joined(separator: "\n---\n")
       XCTFail("Warm start Custom Scheme fallback lifecycle sequence failed. Actual:\n\(allLabels)")
     }
   }
