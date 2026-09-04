@@ -96,7 +96,9 @@ void Switches::PrintHelp(std::ostream& stream) {
   stream << optional_prefix
          << "--shader-bundle=<bundle_spec> (causes --sl "
             "file to be "
-            "emitted in Flutter GPU's shader bundle format)"
+            "emitted in Flutter GPU's shader bundle format. Platform flags "
+            "select which backends the bundle contains, and may be combined. "
+            "Defaults to every backend when none are given)"
          << std::endl;
   stream << optional_prefix << "--reflection-json=<reflection_json_file>"
          << std::endl;
@@ -142,6 +144,17 @@ static TargetPlatform TargetPlatformFromCommandLine(
     }
   }
   return target;
+}
+
+static std::vector<TargetPlatform> TargetPlatformsFromCommandLine(
+    const fml::CommandLine& command_line) {
+  std::vector<TargetPlatform> platforms;
+  for (const auto& platform : kKnownPlatforms) {
+    if (command_line.HasOption(platform.first)) {
+      platforms.push_back(platform.second);
+    }
+  }
+  return platforms;
 }
 
 static std::vector<TargetPlatform> RuntimeStagesFromCommandLine(
@@ -207,6 +220,7 @@ Switches::Switches(const fml::CommandLine& command_line)
           command_line.HasOption("require-framebuffer-fetch")),
       verbose(command_line.HasOption("verbose")),
       target_platform_(TargetPlatformFromCommandLine(command_line)),
+      target_platforms_(TargetPlatformsFromCommandLine(command_line)),
       runtime_stages_(RuntimeStagesFromCommandLine(command_line)) {
   auto language = ToLowerCase(
       command_line.GetOptionValueWithDefault("source-language", "glsl"));
@@ -314,6 +328,21 @@ std::vector<TargetPlatform> Switches::PlatformsToCompile() const {
     return runtime_stages_;
   }
   return {target_platform_};
+}
+
+std::vector<TargetPlatform> Switches::PlatformsToBundle() const {
+  if (target_platforms_.empty()) {
+    // Every backend the bundle format can hold. Keep in sync with the fields
+    // of the `Shader` table in shader_bundle.fbs.
+    return {
+        TargetPlatform::kMetalIOS,       //
+        TargetPlatform::kMetalDesktop,   //
+        TargetPlatform::kOpenGLES,       //
+        TargetPlatform::kOpenGLDesktop,  //
+        TargetPlatform::kVulkan,         //
+    };
+  }
+  return target_platforms_;
 }
 
 SourceOptions Switches::CreateSourceOptions() const {
