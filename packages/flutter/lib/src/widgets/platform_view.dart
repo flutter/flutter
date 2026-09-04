@@ -16,6 +16,7 @@ import 'basic.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 
 // Examples can assume:
@@ -723,6 +724,7 @@ class _AndroidViewState extends State<AndroidView> {
     return Focus(
       focusNode: _focusNode,
       onFocusChange: _onFocusChange,
+      onKeyEvent: (FocusNode node, KeyEvent event) => KeyEventResult.skipRemainingHandlers,
       child: _AndroidPlatformView(
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
@@ -799,6 +801,7 @@ class _AndroidViewState extends State<AndroidView> {
       onFocus: () {
         _focusNode!.requestFocus();
       },
+      onFocusSearchFailed: _handlePlatformFocusSearchFailed,
     );
     if (widget.onPlatformViewCreated != null) {
       _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated!);
@@ -832,6 +835,7 @@ class _AndroidViewState extends State<AndroidView> {
       });
       return;
     }
+    _controller.requestFocus();
     SystemChannels.textInput
         .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
           'platformViewId': _id,
@@ -856,6 +860,26 @@ class _AndroidViewState extends State<AndroidView> {
             );
           }
         });
+  }
+
+  void _handlePlatformFocusSearchFailed(PlatformViewFocusDirection direction) {
+    if (!_focusNode!.hasFocus) {
+      return;
+    }
+    switch (direction) {
+      case PlatformViewFocusDirection.backward:
+        FocusManager.instance.primaryFocus?.previousFocus();
+      case PlatformViewFocusDirection.forward:
+        FocusManager.instance.primaryFocus?.nextFocus();
+      case PlatformViewFocusDirection.left:
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.left);
+      case PlatformViewFocusDirection.up:
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.up);
+      case PlatformViewFocusDirection.right:
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.right);
+      case PlatformViewFocusDirection.down:
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.down);
+    }
   }
 }
 
@@ -885,6 +909,7 @@ abstract class _DarwinViewState<
     return Focus(
       focusNode: focusNode,
       onFocusChange: (bool isFocused) => _onFocusChange(isFocused, controller),
+      onKeyEvent: (FocusNode node, KeyEvent event) => KeyEventResult.skipRemainingHandlers,
       child: childPlatformView(),
     );
   }
@@ -1158,6 +1183,7 @@ class PlatformViewCreationParams {
     required this.viewType,
     required this.onPlatformViewCreated,
     required this.onFocusChanged,
+    required this.onFocusSearchFailed,
   });
 
   /// The unique identifier for the new platform view.
@@ -1178,6 +1204,11 @@ class PlatformViewCreationParams {
   ///
   /// The value is true when the platform view gains focus and false when it loses focus.
   final ValueChanged<bool> onFocusChanged;
+
+  /// Callback invoked when the platform view cannot find a view to focus in the given direction.
+  ///
+  /// The value is a [PlatformViewFocusDirection] representing the directional navigation.
+  final ValueChanged<PlatformViewFocusDirection> onFocusSearchFailed;
 }
 
 /// A factory for a surface presenting a platform view as part of the widget hierarchy.
@@ -1288,6 +1319,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     return Focus(
       focusNode: _focusNode,
       onFocusChange: _handleFrameworkFocusChanged,
+      onKeyEvent: (FocusNode node, KeyEvent event) => KeyEventResult.skipRemainingHandlers,
       child: _surface!,
     );
   }
@@ -1320,6 +1352,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
         viewType: widget.viewType,
         onPlatformViewCreated: _onPlatformViewCreated,
         onFocusChanged: _handlePlatformFocusChanged,
+        onFocusSearchFailed: _handlePlatformFocusSearchFailed,
       ),
     );
   }
@@ -1335,7 +1368,9 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   void _handleFrameworkFocusChanged(bool isFocused) {
     if (!isFocused) {
       _controller?.clearFocus();
+      return;
     }
+    _controller?.requestFocus();
     SystemChannels.textInput
         .invokeMethod<void>('TextInput.setPlatformViewClient', <String, dynamic>{
           'platformViewId': _id,
@@ -1355,6 +1390,26 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   void _handlePlatformFocusChanged(bool isFocused) {
     if (isFocused) {
       _focusNode!.requestFocus();
+    }
+  }
+
+  void _handlePlatformFocusSearchFailed(PlatformViewFocusDirection direction) {
+    if (!_focusNode!.hasFocus) {
+      return;
+    }
+    switch (direction) {
+      case PlatformViewFocusDirection.backward:
+        FocusManager.instance.primaryFocus?.previousFocus();
+      case PlatformViewFocusDirection.forward:
+        FocusManager.instance.primaryFocus?.nextFocus();
+      case PlatformViewFocusDirection.left:
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.left);
+      case PlatformViewFocusDirection.up:
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.up);
+      case PlatformViewFocusDirection.right:
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.right);
+      case PlatformViewFocusDirection.down:
+        FocusManager.instance.primaryFocus?.focusInDirection(TraversalDirection.down);
     }
   }
 
