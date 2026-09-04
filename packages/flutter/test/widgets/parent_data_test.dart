@@ -479,6 +479,29 @@ void main() {
     expect(parentData.string, 'Bar');
   });
 
+  testWidgets('debugIsValidRenderObject still functions as deprecated method', (
+    WidgetTester tester,
+  ) async {
+    final renderParagraph = RenderParagraph(
+      const TextSpan(text: 'Test'),
+      textDirection: TextDirection.ltr,
+    );
+    renderParagraph.parentData = FlexParentData();
+    const flexible = Flexible(child: SizedBox());
+    const positioned = Positioned(child: SizedBox());
+
+    // ignore: deprecated_member_use_from_same_package
+    expect(flexible.debugIsValidRenderObject(renderParagraph), isTrue);
+    // ignore: deprecated_member_use_from_same_package
+    expect(positioned.debugIsValidRenderObject(renderParagraph), isFalse);
+
+    renderParagraph.parentData = StackParentData();
+    // ignore: deprecated_member_use_from_same_package
+    expect(positioned.debugIsValidRenderObject(renderParagraph), isTrue);
+    // ignore: deprecated_member_use_from_same_package
+    expect(flexible.debugIsValidRenderObject(renderParagraph), isFalse);
+  });
+
   testWidgets('applyParentData is not called when ParentData is incompatible', (
     WidgetTester tester,
   ) async {
