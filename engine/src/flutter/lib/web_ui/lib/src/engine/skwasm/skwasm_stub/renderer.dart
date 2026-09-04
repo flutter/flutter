@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -70,39 +69,67 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.Gradient createConicalGradient(
-    ui.Offset focal,
-    double focalRadius,
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix,
-  ]) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.ImageShader createImageShader(
-    ui.Image image,
-    ui.TileMode tmx,
-    ui.TileMode tmy,
-    Float64List matrix4,
-    ui.FilterQuality? filterQuality,
+  BackendGradient createGradientLinear(
+    Float32List endPoints,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
   ) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
   @override
-  ui.Gradient createLinearGradient(
-    ui.Offset from,
-    ui.Offset to,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+  BackendGradient createGradientRadial(
+    double centerX,
+    double centerY,
+    double radius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]) {
+  ) {
+    throw UnimplementedError('Skwasm not implemented on this platform.');
+  }
+
+  @override
+  BackendGradient createGradientConical(
+    double startX,
+    double startY,
+    double startRadius,
+    double endX,
+    double endY,
+    double endRadius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) {
+    throw UnimplementedError('Skwasm not implemented on this platform.');
+  }
+
+  @override
+  BackendGradient createGradientSweep(
+    double centerX,
+    double centerY,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    double startAngle,
+    double endAngle,
+    Float32List? matrix4,
+  ) {
+    throw UnimplementedError('Skwasm not implemented on this platform.');
+  }
+
+  @override
+  BackendImageShader createImageShader(
+    EngineImage image,
+    ui.TileMode tmx,
+    ui.TileMode tmy,
+    Float64List? matrix4,
+    ui.FilterQuality filterQuality,
+  ) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
@@ -145,18 +172,6 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.Gradient createRadialGradient(
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix4,
-  ]) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
   ui.SceneBuilder createSceneBuilder() {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
@@ -173,19 +188,6 @@ class SkwasmRenderer extends Renderer {
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
   }) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.Gradient createSweepGradient(
-    ui.Offset center,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    double startAngle = 0.0,
-    double endAngle = math.pi * 2,
-    Float32List? matrix4,
-  ]) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 

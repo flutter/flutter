@@ -8,17 +8,19 @@ import '../framework/talkback.dart' hide adbPath;
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-TaskFunction createChannelsIntegrationTest() {
+TaskFunction createChannelsIntegrationTest({String? deviceIdOverride}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/channels',
     'integration_test/main_test.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createPlatformInteractionTest() {
+TaskFunction createPlatformInteractionTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/platform_interaction',
     'lib/main.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
@@ -67,10 +69,11 @@ TaskFunction createPlatformChannelSampleTest({String? deviceIdOverride}) {
   ).call;
 }
 
-TaskFunction createPlatformChannelSwiftSampleTest() {
+TaskFunction createPlatformChannelSwiftSampleTest({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/examples/platform_channel_swift',
     'test_driver/button_tap.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
@@ -86,14 +89,6 @@ TaskFunction createAndroidSemanticsIntegrationTest() {
     '${flutterDirectory.path}/dev/integration_tests/android_semantics_testing',
     'integration_test/main_test.dart',
     withTalkBack: true,
-  ).call;
-}
-
-TaskFunction createIOSPlatformViewTests() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/ios_platform_view_tests',
-    'lib/main.dart',
-    extraOptions: <String>['--dart-define=ENABLE_DRIVER_EXTENSION=true'],
   ).call;
 }
 
@@ -195,10 +190,11 @@ TaskFunction createDisplayCutoutTest() {
   ).call;
 }
 
-TaskFunction dartDefinesTask() {
+TaskFunction dartDefinesTask({String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/defines.dart',
+    deviceIdOverride: deviceIdOverride,
     extraOptions: <String>[
       '--dart-define=test.valueA=Example,A',
       '--dart-define=test.valueB=Value',
@@ -217,17 +213,19 @@ TaskFunction featureFlagsTask() {
   };
 }
 
-TaskFunction createEndToEndIntegrationTest() {
+TaskFunction createEndToEndIntegrationTest({String? deviceIdOverride}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'integration_test/integration_test.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 
-TaskFunction createSpellCheckIntegrationTest() {
+TaskFunction createSpellCheckIntegrationTest({String? deviceIdOverride}) {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/spell_check',
     'integration_test/integration_test.dart',
+    deviceIdOverride: deviceIdOverride,
   ).call;
 }
 

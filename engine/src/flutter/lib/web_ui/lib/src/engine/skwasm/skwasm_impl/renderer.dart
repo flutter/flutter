@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:js_interop';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -32,27 +31,6 @@ class SkwasmRenderer extends Renderer {
   ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
     return SkwasmCanvas(recorder as SkwasmPictureRecorder, cullRect ?? ui.Rect.largest);
   }
-
-  @override
-  ui.Gradient createConicalGradient(
-    ui.Offset focal,
-    double focalRadius,
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix,
-  ]) => SkwasmGradient.conical(
-    focal: focal,
-    focalRadius: focalRadius,
-    center: center,
-    centerRadius: radius,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    matrix4: matrix,
-  );
 
   @override
   BackendImageFilter createBlurImageFilter({
@@ -95,29 +73,78 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.ImageShader createImageShader(
-    ui.Image image,
+  BackendImageShader createImageShader(
+    EngineImage image,
     ui.TileMode tmx,
     ui.TileMode tmy,
-    Float64List matrix4,
-    ui.FilterQuality? filterQuality,
-  ) => SkwasmImageShader.imageShader(image, tmx, tmy, matrix4, filterQuality);
+    Float64List? matrix4,
+    ui.FilterQuality filterQuality,
+  ) => SkwasmImageShader(image.backendImage as SkwasmImage, tmx, tmy, matrix4, filterQuality);
 
   @override
-  ui.Gradient createLinearGradient(
-    ui.Offset from,
-    ui.Offset to,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+  BackendGradient createGradientLinear(
+    Float32List endPoints,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]) => SkwasmGradient.linear(
-    from: from,
-    to: to,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    matrix4: matrix4,
+  ) => SkwasmGradient.linear(endPoints, colors, colorStops, tileMode, matrix4);
+
+  @override
+  BackendGradient createGradientRadial(
+    double centerX,
+    double centerY,
+    double radius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) => SkwasmGradient.radial(centerX, centerY, radius, colors, colorStops, tileMode, matrix4);
+
+  @override
+  BackendGradient createGradientConical(
+    double startX,
+    double startY,
+    double startRadius,
+    double endX,
+    double endY,
+    double endRadius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) => SkwasmGradient.conical(
+    startX,
+    startY,
+    startRadius,
+    endX,
+    endY,
+    endRadius,
+    colors,
+    colorStops,
+    tileMode,
+    matrix4,
+  );
+
+  @override
+  BackendGradient createGradientSweep(
+    double centerX,
+    double centerY,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    double startAngle,
+    double endAngle,
+    Float32List? matrix4,
+  ) => SkwasmGradient.sweep(
+    centerX,
+    centerY,
+    colors,
+    colorStops,
+    tileMode,
+    startAngle,
+    endAngle,
+    matrix4,
   );
 
   @override
@@ -171,23 +198,6 @@ class SkwasmRenderer extends Renderer {
   ui.PictureRecorder createPictureRecorder() => SkwasmPictureRecorder();
 
   @override
-  ui.Gradient createRadialGradient(
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix4,
-  ]) => SkwasmGradient.radial(
-    center: center,
-    radius: radius,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    matrix4: matrix4,
-  );
-
-  @override
   ui.SceneBuilder createSceneBuilder() => LayerSceneBuilder();
 
   @override
@@ -211,25 +221,6 @@ class SkwasmRenderer extends Renderer {
     fontWeight: fontWeight,
     fontStyle: fontStyle,
     forceStrutHeight: forceStrutHeight,
-  );
-
-  @override
-  ui.Gradient createSweepGradient(
-    ui.Offset center,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    double startAngle = 0.0,
-    double endAngle = math.pi * 2,
-    Float32List? matrix4,
-  ]) => SkwasmGradient.sweep(
-    center: center,
-    colors: colors,
-    colorStops: colorStops,
-    tileMode: tileMode,
-    startAngle: startAngle,
-    endAngle: endAngle,
-    matrix4: matrix4,
   );
 
   @override
