@@ -992,7 +992,10 @@ class FakeConfig extends Fake implements Config {
 
 class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
 
-class FakeTerminal extends Fake implements Terminal {}
+class FakeTerminal extends Fake implements AnsiTerminal {
+  @override
+  String get successMark => '✓';
+}
 
 class FakeProcessUtils extends Fake implements ProcessUtils {}
 
@@ -1169,6 +1172,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     CrashReporter? crashReporter,
     Doctor? doctor,
     EmulatorManager? emulatorManager,
+    FeatureFlags? featureFlags,
     ToolContext? toolContext,
   }) : _analytics = analytics,
        _androidContext = androidContext,
@@ -1178,6 +1182,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        _crashReporter = crashReporter,
        _doctor = doctor,
        _emulatorManager = emulatorManager,
+       _featureFlags = featureFlags,
        _toolContext = toolContext;
 
   final Analytics? _analytics;
@@ -1188,6 +1193,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final CrashReporter? _crashReporter;
   final Doctor? _doctor;
   final EmulatorManager? _emulatorManager;
+  final FeatureFlags? _featureFlags;
   final ToolContext? _toolContext;
 
   @override
@@ -1213,6 +1219,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   EmulatorManager get emulatorManager => _emulatorManager ?? FakeEmulatorManager();
+
+  @override
+  FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();
 
   @override
   ToolContext get toolContext => _toolContext ?? FakeToolContext();

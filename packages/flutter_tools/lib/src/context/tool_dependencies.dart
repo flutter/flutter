@@ -32,6 +32,7 @@ import '../cache.dart';
 import '../custom_devices/custom_devices_config.dart';
 import '../doctor.dart';
 import '../emulator.dart';
+import '../features.dart';
 import '../flutter_cache.dart';
 import '../flutter_features.dart';
 import '../flutter_features_config.dart';
@@ -65,11 +66,12 @@ class ToolDependencies {
     required this.androidContext,
     required this.appleContext,
     required this.buildSystem,
-    this.buildTargets,
     required this.crashReporter,
     required this.doctor,
     required this.emulatorManager,
+    required this.featureFlags,
     required this.toolContext,
+    this.buildTargets,
   });
 
   /// Telemetry and analytics reporter for command and feature usage.
@@ -96,6 +98,9 @@ class ToolDependencies {
   /// Manager for discovering, launching, and creating emulators.
   final EmulatorManager emulatorManager;
 
+  /// Feature flags that govern tool capabilities and rollouts.
+  final FeatureFlags featureFlags;
+
   /// Core container holding host environment and SDK configuration dependencies.
   final ToolContext toolContext;
 
@@ -115,6 +120,7 @@ class ToolDependencies {
     CustomDevicesConfig? customDevicesConfig,
     Doctor? doctor,
     EmulatorManager? emulatorManager,
+    FeatureFlags? featureFlags,
     FileSystem? fs,
     Git? git,
     GradleUtils? gradleUtils,
@@ -389,19 +395,21 @@ class ToolDependencies {
       logger: finalLogger,
     );
 
-    final featureFlags = FlutterFeatureFlags(
-      flutterVersion: finalFlutterVersion,
-      featuresConfig: FlutterFeaturesConfig(
-        globalConfig: finalConfig,
-        platform: finalPlatform,
-        projectManifest: projectManifest,
-      ),
-      platform: finalPlatform,
-    );
+    final FeatureFlags finalFeatureFlags =
+        featureFlags ??
+        FlutterFeatureFlags(
+          flutterVersion: finalFlutterVersion,
+          featuresConfig: FlutterFeaturesConfig(
+            globalConfig: finalConfig,
+            platform: finalPlatform,
+            projectManifest: projectManifest,
+          ),
+          platform: finalPlatform,
+        );
 
     final IOSWorkflow finalIOSWorkflow =
         iosWorkflow ??
-        IOSWorkflow(featureFlags: featureFlags, xcode: finalXcode, platform: finalPlatform);
+        IOSWorkflow(featureFlags: finalFeatureFlags, xcode: finalXcode, platform: finalPlatform);
 
     final IOSSimulatorUtils finalIOSSimulatorUtils =
         iosSimulatorUtils ??
@@ -448,7 +456,10 @@ class ToolDependencies {
     final EmulatorManager finalEmulatorManager =
         emulatorManager ??
         EmulatorManager(
-          androidWorkflow: AndroidWorkflow(androidSdk: finalAndroidSdk, featureFlags: featureFlags),
+          androidWorkflow: AndroidWorkflow(
+            androidSdk: finalAndroidSdk,
+            featureFlags: finalFeatureFlags,
+          ),
           fileSystem: finalFS,
           java: finalJava,
           logger: finalLogger,
@@ -479,6 +490,7 @@ class ToolDependencies {
       crashReporter: finalCrashReporter,
       doctor: finalDoctor,
       emulatorManager: finalEmulatorManager,
+      featureFlags: finalFeatureFlags,
       toolContext: ToolContext(
         artifacts: finalArtifacts,
         botDetector: finalBotDetector,

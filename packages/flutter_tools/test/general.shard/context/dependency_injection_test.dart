@@ -15,6 +15,7 @@ import 'package:test/test.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {}
 
@@ -79,6 +80,7 @@ void main() {
       expect(dependencies.crashReporter, isNotNull);
       expect(dependencies.doctor, isNotNull);
       expect(dependencies.emulatorManager, isNotNull);
+      expect(dependencies.featureFlags, isNotNull);
       expect(dependencies.toolContext.cache, isNotNull);
       expect(dependencies.toolContext.config, isNotNull);
       expect(dependencies.toolContext.git, isNotNull);
@@ -133,6 +135,20 @@ void main() {
       );
 
       expect(dependencies.buildTargets, same(mockBuildTargets));
+    });
+
+    testUsingContext('respects explicit overrides for FeatureFlags', () async {
+      final mockFeatureFlags = TestFeatureFlags();
+
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        featureFlags: mockFeatureFlags,
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+
+      expect(dependencies.featureFlags, same(mockFeatureFlags));
     });
   });
 }
