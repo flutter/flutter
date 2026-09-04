@@ -563,3 +563,38 @@ class DefaultedEnumOptionDescriptor<T extends Enum> extends _EnumOptionDescripto
     return defaultsTo!;
   }
 }
+
+/// Extension on [ArgParser] for registering [OptionDescriptor] instances directly.
+extension ArgParserDescriptorExtension on ArgParser {
+  /// Registers [descriptor] with this parser.
+  void addDescriptor(
+    OptionDescriptor<Object?> descriptor, {
+    Map<String, OptionDescriptor<Object?>>? registry,
+    bool verboseHelp = false,
+    bool? hideOverride,
+  }) {
+    descriptor.addTo(
+      this,
+      registry: registry,
+      verboseHelp: verboseHelp,
+      hideOverride: hideOverride,
+    );
+  }
+
+  /// Registers multiple [descriptors] with this parser.
+  void addDescriptors(
+    Iterable<OptionDescriptor<Object?>> descriptors, {
+    Map<String, OptionDescriptor<Object?>>? registry,
+    bool verboseHelp = false,
+    bool? hideOverride,
+  }) {
+    for (final OptionDescriptor<Object?> descriptor in descriptors) {
+      descriptor.addTo(
+        this,
+        registry: registry,
+        verboseHelp: verboseHelp,
+        hideOverride: hideOverride,
+      );
+    }
+  }
+}

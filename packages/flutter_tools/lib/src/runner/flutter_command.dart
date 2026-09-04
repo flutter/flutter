@@ -356,26 +356,28 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebOptions({required bool verboseHelp}) {
-    WebOptions.webHeader.addTo(argParser, hideOverride: !verboseHelp);
-    WebOptions.webHostname.addTo(argParser, hideOverride: !verboseHelp);
-    WebOptions.webPort.addTo(argParser, hideOverride: !verboseHelp);
-    WebOptions.webTlsCertPath.addTo(argParser);
-    WebOptions.webTlsCertKeyPath.addTo(argParser);
-    WebOptions.webServerDebugProtocol.addTo(argParser, hideOverride: !verboseHelp);
-    WebOptions.webServerDebugBackendProtocol.addTo(argParser, hideOverride: !verboseHelp);
-    WebOptions.webServerDebugInjectedClientProtocol.addTo(argParser, hideOverride: !verboseHelp);
-    WebOptions.webAllowExposeUrl.addTo(argParser, hideOverride: !verboseHelp);
-    WebOptions.webRunHeadless.addTo(argParser, hideOverride: !verboseHelp);
-    WebOptions.webBrowserDebugPort.addTo(argParser, hideOverride: !verboseHelp);
-    WebOptions.webEnableExpressionEvaluation.addTo(argParser, hideOverride: !verboseHelp);
-    WebOptions.webLaunchUrl.addTo(argParser);
-    WebOptions.webBrowserFlags.addTo(argParser, hideOverride: !verboseHelp);
-    WebOptions.crossOriginIsolation.addTo(argParser, hideOverride: !verboseHelp);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      WebOptions.webHeader,
+      WebOptions.webHostname,
+      WebOptions.webPort,
+      WebOptions.webTlsCertPath,
+      WebOptions.webTlsCertKeyPath,
+      WebOptions.webServerDebugProtocol,
+      WebOptions.webServerDebugBackendProtocol,
+      WebOptions.webServerDebugInjectedClientProtocol,
+      WebOptions.webAllowExposeUrl,
+      WebOptions.webRunHeadless,
+      WebOptions.webBrowserDebugPort,
+      WebOptions.webEnableExpressionEvaluation,
+      WebOptions.webLaunchUrl,
+      WebOptions.webBrowserFlags,
+      WebOptions.crossOriginIsolation,
+    ], verboseHelp: verboseHelp);
     usesBaseHrefOption();
   }
 
   void usesBaseHrefOption() {
-    WebOptions.baseHref.addTo(argParser);
+    argParser.addDescriptor(WebOptions.baseHref);
   }
 
   void usesTargetOption() {
@@ -510,17 +512,22 @@ abstract class FlutterCommand extends Command<void> {
 
   void addDevToolsOptions({required bool verboseHelp, bool includeEnableDevTools = true}) {
     if (includeEnableDevTools) {
-      DebuggingOptionDescriptors.enableDevTools.addTo(argParser, hideOverride: !verboseHelp);
+      argParser.addDescriptor(DebuggingOptionDescriptors.enableDevTools, verboseHelp: verboseHelp);
     }
-    DebuggingOptionDescriptors.devToolsServerAddress(
-      includeEnableDevTools: includeEnableDevTools,
-    ).addTo(argParser, hideOverride: !verboseHelp);
+    argParser.addDescriptor(
+      DebuggingOptionDescriptors.devToolsServerAddress(
+        includeEnableDevTools: includeEnableDevTools,
+      ),
+      verboseHelp: verboseHelp,
+    );
   }
 
   void addDdsOptions({required bool verboseHelp}) {
-    DebuggingOptionDescriptors.ddsPort.addTo(argParser);
-    DebuggingOptionDescriptors.dds.addTo(argParser);
-    DebuggingOptionDescriptors.disableDds.addTo(argParser, hideOverride: !verboseHelp);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      DebuggingOptionDescriptors.ddsPort,
+      DebuggingOptionDescriptors.dds,
+      DebuggingOptionDescriptors.disableDds,
+    ], verboseHelp: verboseHelp);
   }
 
   late final bool enableDds = getValue(DebuggingOptionDescriptors.dds);
@@ -555,7 +562,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   Uri? get devToolsServerAddress {
-    final descriptor = DebuggingOptionDescriptors.devToolsServerAddress();
+    final StringOptionDescriptor descriptor = DebuggingOptionDescriptors.devToolsServerAddress();
     if (wasParsed(descriptor)) {
       final Uri? uri = Uri.tryParse(getValue(descriptor)!);
       if (uri != null && uri.host.isNotEmpty && uri.port != 0) {
@@ -621,7 +628,7 @@ abstract class FlutterCommand extends Command<void> {
   Future<bool> get disablePortPublication async => !boolArg('publish-port');
 
   void usesIpv6Flag({required bool verboseHelp}) {
-    DebuggingOptionDescriptors.ipv6.addTo(argParser, hideOverride: !verboseHelp);
+    argParser.addDescriptor(DebuggingOptionDescriptors.ipv6, verboseHelp: verboseHelp);
     _usesIpv6Flag = true;
   }
 
@@ -702,7 +709,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesAdbLogFilteringOption({required bool hide}) {
-    DebuggingOptionDescriptors.adbLogFiltering.addTo(argParser, hideOverride: hide);
+    argParser.addDescriptor(DebuggingOptionDescriptors.adbLogFiltering, hideOverride: hide);
   }
 
   void usesApplicationBinaryOption() {
@@ -975,19 +982,22 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addEnableImpellerFlag({required bool verboseHelp}) {
-    DebuggingOptionDescriptors.enableImpeller.addTo(argParser, hideOverride: !verboseHelp);
+    argParser.addDescriptor(DebuggingOptionDescriptors.enableImpeller, verboseHelp: verboseHelp);
   }
 
   void addEnableFlutterGpuFlag({required bool verboseHelp}) {
-    DebuggingOptionDescriptors.enableFlutterGpu.addTo(argParser, hideOverride: !verboseHelp);
+    argParser.addDescriptor(DebuggingOptionDescriptors.enableFlutterGpu, verboseHelp: verboseHelp);
   }
 
   void addEnableVulkanValidationFlag({required bool verboseHelp}) {
-    DebuggingOptionDescriptors.enableVulkanValidation.addTo(argParser, hideOverride: !verboseHelp);
+    argParser.addDescriptor(
+      DebuggingOptionDescriptors.enableVulkanValidation,
+      verboseHelp: verboseHelp,
+    );
   }
 
   void addEnableEmbedderApiFlag({required bool verboseHelp}) {
-    DebuggingOptionDescriptors.enableEmbedderApi.addTo(argParser, hideOverride: !verboseHelp);
+    argParser.addDescriptor(DebuggingOptionDescriptors.enableEmbedderApi, verboseHelp: verboseHelp);
   }
 
   void addMachineOutputFlag({required bool verboseHelp}) {
@@ -1000,7 +1010,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addEnableHcppFlag({required bool verboseHelp}) {
-    DebuggingOptionDescriptors.enableHcpp.addTo(argParser, hideOverride: !verboseHelp);
+    argParser.addDescriptor(DebuggingOptionDescriptors.enableHcpp, verboseHelp: verboseHelp);
   }
 
   /// The explicit `--[no-]enable-hcpp` value, or null when the flag was not
@@ -1028,7 +1038,7 @@ abstract class FlutterCommand extends Command<void> {
   bool get enableHcpp => explicitEnableHcpp ?? featureFlags.isHcppEnabled;
 
   void addTestFlag({required bool verboseHelp}) {
-    DebuggingOptionDescriptors.testFlag.addTo(argParser, hideOverride: !verboseHelp);
+    argParser.addDescriptor(DebuggingOptionDescriptors.testFlag, verboseHelp: verboseHelp);
   }
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,

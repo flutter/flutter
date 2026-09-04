@@ -367,7 +367,7 @@ class CommonBuildOptionsBundle extends OptionBundle {
   ];
 }
 
-/// Typed option descriptors specific to [DebuggingOptions] and resident runners (`run`, `drive`, `test`).
+/// Typed option descriptors specific to `DebuggingOptions` and resident runners (`run`, `drive`, `test`).
 abstract final class DebuggingOptionDescriptors {
   static const enableImpeller = NullableFlagOptionDescriptor(
     name: FlutterOptions.kEnableImpeller,

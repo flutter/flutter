@@ -27,7 +27,6 @@ import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
-import '../web/web_constants.dart';
 import '../web/web_options.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
@@ -42,37 +41,33 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
     usesApplicationBinaryOption();
-    DebuggingOptionDescriptors.traceStartup.addTo(argParser);
-    DebuggingOptionDescriptors.cacheStartupProfile.addTo(argParser);
-    DebuggingOptionDescriptors.verboseSystemLogs.addTo(argParser);
-    DebuggingOptionDescriptors.purgePersistentCache.addTo(argParser);
-    DebuggingOptionDescriptors.route.addTo(argParser);
-    DebuggingOptionDescriptors.vmserviceOutFile.addTo(argParser, hideOverride: !verboseHelp);
-    DebuggingOptionDescriptors.disableServiceAuthCodes.addTo(argParser, hideOverride: !verboseHelp);
-    DebuggingOptionDescriptors.disableServiceOriginCheck.addTo(
-      argParser,
-      hideOverride: !verboseHelp,
-    );
-    DebuggingOptionDescriptors.startPaused(defaultsTo: startPausedDefault).addTo(argParser);
-    DebuggingOptionDescriptors.dartFlags.addTo(argParser, hideOverride: !verboseHelp);
-    DebuggingOptionDescriptors.endlessTraceBuffer.addTo(argParser);
-    DebuggingOptionDescriptors.traceSystrace.addTo(argParser);
-    DebuggingOptionDescriptors.traceToFile.addTo(argParser);
-    DebuggingOptionDescriptors.profileMicrotasks.addTo(argParser, hideOverride: !verboseHelp);
-    DebuggingOptionDescriptors.traceSkia.addTo(argParser);
-    DebuggingOptionDescriptors.traceAllowlist.addTo(argParser, hideOverride: !verboseHelp);
-    DebuggingOptionDescriptors.traceSkiaAllowlist.addTo(argParser, hideOverride: !verboseHelp);
-    DebuggingOptionDescriptors.enableDartProfiling.addTo(argParser);
-    DebuggingOptionDescriptors.profileStartup.addTo(argParser, hideOverride: !verboseHelp);
-    DebuggingOptionDescriptors.enableSoftwareRendering.addTo(argParser, hideOverride: !verboseHelp);
-    DebuggingOptionDescriptors.skiaDeterministicRendering.addTo(
-      argParser,
-      hideOverride: !verboseHelp,
-    );
-    DebuggingOptionDescriptors.dartEntrypointArgs.addTo(argParser);
-    DebuggingOptionDescriptors.uninstallFirst.addTo(argParser, hideOverride: !verboseHelp);
-    WebOptions.wasm.addTo(argParser);
-    DebuggingOptionDescriptors.iosProfileDebugger.addTo(argParser);
+    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+      DebuggingOptionDescriptors.traceStartup,
+      DebuggingOptionDescriptors.cacheStartupProfile,
+      DebuggingOptionDescriptors.verboseSystemLogs,
+      DebuggingOptionDescriptors.purgePersistentCache,
+      DebuggingOptionDescriptors.route,
+      DebuggingOptionDescriptors.vmserviceOutFile,
+      DebuggingOptionDescriptors.disableServiceAuthCodes,
+      DebuggingOptionDescriptors.disableServiceOriginCheck,
+      DebuggingOptionDescriptors.startPaused(defaultsTo: startPausedDefault),
+      DebuggingOptionDescriptors.dartFlags,
+      DebuggingOptionDescriptors.endlessTraceBuffer,
+      DebuggingOptionDescriptors.traceSystrace,
+      DebuggingOptionDescriptors.traceToFile,
+      DebuggingOptionDescriptors.profileMicrotasks,
+      DebuggingOptionDescriptors.traceSkia,
+      DebuggingOptionDescriptors.traceAllowlist,
+      DebuggingOptionDescriptors.traceSkiaAllowlist,
+      DebuggingOptionDescriptors.enableDartProfiling,
+      DebuggingOptionDescriptors.profileStartup,
+      DebuggingOptionDescriptors.enableSoftwareRendering,
+      DebuggingOptionDescriptors.skiaDeterministicRendering,
+      DebuggingOptionDescriptors.dartEntrypointArgs,
+      DebuggingOptionDescriptors.uninstallFirst,
+      WebOptions.wasm,
+      DebuggingOptionDescriptors.iosProfileDebugger,
+    ], verboseHelp: verboseHelp);
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -312,7 +307,7 @@ class RunCommand extends RunCommandBase {
     addPublishPort(verboseHelp: verboseHelp);
     addIgnoreDeprecationOption();
     addMachineOutputFlag(verboseHelp: verboseHelp);
-    DebuggingOptionDescriptors.useTestFonts.addTo(argParser);
+    argParser.addDescriptor(DebuggingOptionDescriptors.useTestFonts);
     argParser
       ..addFlag(
         'await-first-frame-when-tracing',
