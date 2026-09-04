@@ -3860,6 +3860,17 @@ class EditableTextState extends State<EditableText>
         _lastTextPosition = currentTextPosition;
         renderEditable.setFloatingCursor(point.state, _lastBoundedOffset!, _lastTextPosition!);
       case FloatingCursorDragState.Update:
+        if (_pointOffsetOrigin == null || _startCaretCenter == null) {
+          // The Start of this drag never reached this client. The input
+          // connection can change hands mid-drag (focus moved, or the field
+          // re-attached), and the platform keeps sending updates to whichever
+          // client is current. Anchor the floating cursor at this client's
+          // caret and treat this point as the drag origin.
+          updateFloatingCursor(
+            RawFloatingCursorPoint(state: FloatingCursorDragState.Start, offset: point.offset),
+          );
+          return;
+        }
         final Offset centeredPoint = point.offset! - _pointOffsetOrigin!;
         final Offset rawCursorOffset = _startCaretCenter! + centeredPoint - _floatingCursorOffset;
 

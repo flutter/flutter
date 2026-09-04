@@ -13177,6 +13177,86 @@ void main() {
     expect(tester.hasRunningAnimations, isFalse);
   });
 
+  testWidgets('Floating cursor Update without a Start anchors at the caret', (
+    WidgetTester tester,
+  ) async {
+    // The platform sends floating cursor messages to whichever client is
+    // current, so a client that took over the input connection mid-drag sees
+    // Update and End with no preceding Start.
+    EditableText.debugDeterministicCursor = true;
+    final GlobalKey key = GlobalKey();
+    controller.text = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    controller.selection = const TextSelection.collapsed(offset: 0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          key: key,
+          autofocus: true,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: Colors.blue,
+          backgroundCursorColor: Colors.grey,
+          cursorOpacityAnimates: true,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    Future<void> sendFloatingCursor(String state, Offset offset) async {
+      final ByteData? message = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'method': 'TextInputClient.updateFloatingCursor',
+        'args': <dynamic>[
+          -1, // The magic client id that points to the current client.
+          'FloatingCursorDragState.$state',
+          <String, dynamic>{'X': offset.dx, 'Y': offset.dy},
+        ],
+      });
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        message,
+        (ByteData? _) {},
+      );
+    }
+
+    await sendFloatingCursor('update', const Offset(30, 0));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+
+    // The first Update stands in for the missing Start: the floating cursor
+    // appears at the caret.
+    expect(
+      key.currentContext!.findRenderObject(),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTWH(0.5, 1, 3, 12),
+          const Radius.circular(1),
+        ),
+      ),
+    );
+
+    // Later Updates move relative to that first point.
+    await sendFloatingCursor('update', const Offset(80, 0));
+    await tester.pump();
+    expect(
+      key.currentContext!.findRenderObject(),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTWH(50.5, 1, 3, 12),
+          const Radius.circular(1),
+        ),
+      ),
+    );
+
+    await sendFloatingCursor('end', Offset.zero);
+    await tester.pumpAndSettle(const Duration(milliseconds: 125));
+    expect(tester.takeException(), isNull);
+    expect(controller.selection.isCollapsed, isTrue);
+    expect(controller.selection.baseOffset, 4);
+    EditableText.debugDeterministicCursor = false;
+  });
+
   testWidgets('Floating cursor affinity', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final GlobalKey key = GlobalKey();
