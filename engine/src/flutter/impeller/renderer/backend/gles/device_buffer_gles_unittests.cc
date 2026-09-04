@@ -88,5 +88,62 @@ TEST(DeviceBufferGLESTest, BindUniformData) {
   EXPECT_TRUE(device_buffer.GetHandle().has_value());
 }
 
+TEST(DeviceBufferGLESTest, BufferOrphaningOnRebindAtOffsetZero) {
+  auto mock_gles_impl = std::make_unique<MockGLESImpl>();
+
+  int buffer_data_count = 0;
+  int buffer_sub_data_count = 0;
+  EXPECT_CALL(*mock_gles_impl, BufferData(_, _, _, _))
+      .Times(2)
+      .WillRepeatedly(
+          [&](GLenum target, GLsizeiptr size, const void* data, GLenum usage) {
+            ++buffer_data_count;
+            EXPECT_EQ(data, nullptr);
+            EXPECT_EQ(size, 64);
+            EXPECT_EQ(usage, static_cast<GLenum>(GL_DYNAMIC_DRAW));
+          });
+
+  EXPECT_CALL(*mock_gles_impl, BufferSubData(_, _, _, _))
+      .Times(3)
+      .WillRepeatedly([&](GLenum target, GLintptr offset, GLsizeiptr size,
+                          const void* data) { ++buffer_sub_data_count; });
+
+  std::shared_ptr<MockGLES> mock_gles =
+      MockGLES::Init(std::move(mock_gles_impl));
+  ProcTableGLES::Resolver resolver = kMockResolverGLES;
+  auto proc_table = std::make_unique<ProcTableGLES>(resolver);
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+
+  auto backing_store = std::make_unique<Allocation>();
+  ASSERT_TRUE(backing_store->Truncate(Bytes{64}));
+  DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = 64}, reactor,
+                                 std::move(backing_store));
+
+  // First upload: initializes buffer with glBufferData, then glBufferSubData.
+  device_buffer.Flush(Range{0, 16});
+  EXPECT_TRUE(device_buffer.BindAndUploadDataIfNecessary(
+      DeviceBufferGLES::BindingType::kArrayBuffer));
+  EXPECT_EQ(buffer_data_count, 1);
+  EXPECT_EQ(buffer_sub_data_count, 1);
+
+  // Subsequent append at non-zero offset: does not orphan, only
+  // glBufferSubData.
+  device_buffer.Flush(Range{16, 16});
+  EXPECT_TRUE(device_buffer.BindAndUploadDataIfNecessary(
+      DeviceBufferGLES::BindingType::kArrayBuffer));
+  EXPECT_EQ(buffer_data_count, 1);
+  EXPECT_EQ(buffer_sub_data_count, 2);
+
+  // Rebind starting at offset 0 (e.g. frame/buffer reset): orphans buffer via
+  // glBufferData.
+  device_buffer.Flush(Range{0, 32});
+  EXPECT_TRUE(device_buffer.BindAndUploadDataIfNecessary(
+      DeviceBufferGLES::BindingType::kArrayBuffer));
+  EXPECT_EQ(buffer_data_count, 2);
+  EXPECT_EQ(buffer_sub_data_count, 3);
+}
+
 }  // namespace testing
 }  // namespace impeller
