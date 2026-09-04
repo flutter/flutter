@@ -505,24 +505,21 @@ STDERR STUFF
       await createTestCommandRunner(
         command,
       ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
-      expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
-      expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
-      expect(testLogger.errorText, contains('STDOUT STUFF'));
-      expect(testLogger.errorText, contains('STDERR STUFF'));
+      expect(logger.statusText, isNot(contains('STDOUT STUFF')));
+      expect(logger.traceText, isNot(contains('STDOUT STUFF')));
+      expect(logger.errorText, contains('STDOUT STUFF'));
+      expect(logger.errorText, contains('STDERR STUFF'));
       // Filters out some xcodebuild logging spew.
-      expect(testLogger.errorText, isNot(contains('xcodebuild[2096:1927385]')));
-      expect(testLogger.errorText, isNot(contains('Using new build system')));
-      expect(testLogger.errorText, isNot(contains('Building targets in dependency order')));
-      expect(testLogger.errorText, isNot(contains('DVTAssertions: Warning in')));
-      expect(testLogger.errorText, isNot(contains('createItemModels')));
-      expect(testLogger.errorText, isNot(contains('_NSMainThread:')));
-      expect(testLogger.errorText, isNot(contains('IDELogStore')));
-      expect(testLogger.errorText, isNot(contains('LogStoreManifest.plist')));
-      expect(testLogger.errorText, isNot(contains('NSUnderlyingError')));
-      expect(
-        testLogger.errorText,
-        isNot(contains('Please file a bug at https://feedbackassistant')),
-      );
+      expect(logger.errorText, isNot(contains('xcodebuild[2096:1927385]')));
+      expect(logger.errorText, isNot(contains('Using new build system')));
+      expect(logger.errorText, isNot(contains('Building targets in dependency order')));
+      expect(logger.errorText, isNot(contains('DVTAssertions: Warning in')));
+      expect(logger.errorText, isNot(contains('createItemModels')));
+      expect(logger.errorText, isNot(contains('_NSMainThread:')));
+      expect(logger.errorText, isNot(contains('IDELogStore')));
+      expect(logger.errorText, isNot(contains('LogStoreManifest.plist')));
+      expect(logger.errorText, isNot(contains('NSUnderlyingError')));
+      expect(logger.errorText, isNot(contains('Please file a bug at https://feedbackassistant')));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -561,7 +558,7 @@ STDERR STUFF
 
       await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(RegExp(r'✓ Built build/macos/Build/Products/Release/example.app \(\d+\.\d+MB\)')),
       );
     },
@@ -1055,7 +1052,7 @@ STDERR STUFF
         ),
       );
 
-      expect(testLogger.statusText, isEmpty);
+      expect(logger.statusText, isEmpty);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -1104,10 +1101,10 @@ STDERR STUFF
       ).run(const <String>['build', 'macos', '--no-pub', '--analyze-size']);
 
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('A summary of your macOS bundle analysis can be found at'),
       );
-      expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
+      expect(logger.statusText, contains('dart devtools --appSizeBase='));
       expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'macos')));
     },
     overrides: <Type, Generator>{
@@ -1648,7 +1645,7 @@ STDERR STUFF
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
-        logger: testLogger,
+        logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
         platform: macosPlatform,
@@ -1669,7 +1666,7 @@ STDERR STUFF
       ).run(<String>['build', 'macos', '--release', '--no-pub']);
 
       expect(
-        testLogger.warningText,
+        logger.warningText,
         contains(
           'Xcode 27 no longer requires macOS binaries to support the x86_64 architecture. '
           'To build ARM-only macOS apps now, run: "flutter config --enable-macos-arm64-only". '
