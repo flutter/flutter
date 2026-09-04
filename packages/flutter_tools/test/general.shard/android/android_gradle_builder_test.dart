@@ -96,7 +96,7 @@ void main() {
       AndroidStudio? androidStudio,
       AndroidSdk? androidSdk,
     }) {
-      return AndroidGradleBuilder(
+      return AndroidGradleBuilder.fromContexts(
         toolContext:
             toolContext ??
             FakeToolContext(

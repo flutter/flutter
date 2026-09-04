@@ -119,7 +119,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (globals.androidSdk == null) {
-      exitWithNoSdkMessage(analytics: analytics, logger: logger);
+      exitWithNoSdkMessage();
     }
     final androidBuildInfo = AndroidBuildInfo(
       await getBuildInfo(),
@@ -130,7 +130,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     final List<DeferredComponent>? deferredComponents = project.manifest.deferredComponents;
     if (deferredComponents != null && boolArg('deferred-components')) {
       // Record to analytics that DeferredComponents is being used.
-      analytics.send(
+      globals.analytics.send(
         Event.flutterBuildInfo(label: 'build-appbundle-deferred-components', buildType: 'android'),
       );
     }
@@ -140,7 +140,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
         !boolArg('debug')) {
       final validator = DeferredComponentsPrebuildValidator(
         project.directory,
-        logger,
+        globals.logger,
         globals.platform,
         title: 'Deferred components prebuild validation',
         outputDir: project.buildDirectory.childDirectory(
@@ -180,7 +180,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     final bool impellerEnabled = project.android.computeImpellerEnabled();
     final buildLabel = impellerEnabled ? 'manifest-impeller-enabled' : 'manifest-impeller-disabled';
-    analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
+    globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
     return FlutterCommandResult.success();
   }
 }

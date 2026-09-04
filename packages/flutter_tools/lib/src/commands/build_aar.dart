@@ -19,10 +19,10 @@ import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({
+    required super.logger,
     required AndroidSdk? androidSdk,
     required FileSystem fileSystem,
-    required super.logger,
-    bool verboseHelp = false,
+    required bool verboseHelp,
   }) : _androidSdk = androidSdk,
        _fileSystem = fileSystem,
        super(verboseHelp: verboseHelp) {
@@ -119,7 +119,7 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (_androidSdk == null) {
-      exitWithNoSdkMessage(analytics: analytics, logger: logger);
+      exitWithNoSdkMessage();
     }
     final androidBuildInfo = <AndroidBuildInfo>{};
 

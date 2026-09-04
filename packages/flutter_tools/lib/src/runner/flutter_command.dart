@@ -23,6 +23,7 @@ import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -30,8 +31,6 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
-import '../flutter_features.dart';
-import '../flutter_features_config.dart';
 import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
@@ -315,6 +314,7 @@ abstract class FlutterCommand extends Command<void> {
   bool get outputMachineFormat =>
       argParser.options.containsKey(FlutterGlobalOptions.kMachineFlag) &&
       boolArg(FlutterGlobalOptions.kMachineFlag);
+
   bool get shouldUpdateCache => true;
 
   bool get deprecated => false;
@@ -520,7 +520,7 @@ abstract class FlutterCommand extends Command<void> {
     if (rest != null && rest.isNotEmpty) {
       return rest.first;
     }
-    return _fs.path.join('lib', 'main.dart');
+    return bundle.defaultMainPath;
   }
 
   /// Indicates if the current command running has a terminal attached.
@@ -1234,7 +1234,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp => explicitEnableHcpp ?? _featureFlags.isHcppEnabled;
+  bool get enableHcpp => explicitEnableHcpp ?? featureFlags.isHcppEnabled;
 
   void addTestFlag({required bool verboseHelp}) {
     argParser.addFlag(
@@ -1246,7 +1246,7 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  FlutterProject get project => _projectFactory.fromDirectory(_fs.currentDirectory);
+  FlutterProject get project => FlutterProject.current();
 
   /// The path to the package config for the current project.
   ///
@@ -1457,35 +1457,6 @@ abstract class FlutterCommand extends Command<void> {
     ]);
   }
 
-  FeatureFlags? _cachedFeatureFlags;
-
-  FeatureFlags get _featureFlags {
-    if (_cachedFeatureFlags != null) {
-      return _cachedFeatureFlags!;
-    }
-    try {
-      final FeatureFlags? contextFeatureFlags = context.get<FeatureFlags>();
-      if (contextFeatureFlags != null) {
-        return _cachedFeatureFlags = contextFeatureFlags;
-      }
-    } on UnsupportedError {
-      // In testWithoutContext, context.get is not supported.
-    }
-    final ToolContext? toolContext = this.toolContext;
-    if (toolContext != null) {
-      return _cachedFeatureFlags = FlutterFeatureFlags(
-        flutterVersion: toolContext.flutterVersion,
-        featuresConfig: FlutterFeaturesConfig(
-          globalConfig: toolContext.config,
-          platform: toolContext.platform,
-          projectManifest: null,
-        ),
-        platform: toolContext.platform,
-      );
-    }
-    return _cachedFeatureFlags = featureFlags;
-  }
-
   void _addFeatureFlagsToDartDefines(List<String> dartDefines) {
     if (dartDefines.any((String define) => define.startsWith(kEnabledFeatureFlags))) {
       throwToolExit(
@@ -1496,8 +1467,8 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    final String enabledFeatureFlags = _featureFlags.allFeatures
-        .where((Feature feature) => _featureFlags.isEnabled(feature))
+    final String enabledFeatureFlags = featureFlags.allFeatures
+        .where((Feature feature) => featureFlags.isEnabled(feature))
         .where((Feature feature) => feature.runtimeId != null)
         .map((Feature feature) => feature.runtimeId!)
         .join(',');

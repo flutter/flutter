@@ -49,6 +49,7 @@ void main() {
       androidSdk: androidSdk,
       fileSystem: globals.fs,
       logger: BufferLogger.test(),
+      verboseHelp: false,
     );
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['aar', ...?arguments, target]);

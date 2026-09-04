@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
+import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
@@ -18,7 +19,6 @@ import '../base/terminal.dart';
 import '../build_system/build_system.dart';
 import '../cache.dart';
 import '../context/android_context.dart';
-import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
 import '../ios/code_signing.dart';
@@ -42,47 +42,47 @@ import 'darwin_add_to_app.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({
-    required AndroidBuilder androidBuilder,
-    required AndroidContext androidContext,
-    required AppleContext appleContext,
+    required AndroidSdk? androidSdk,
+    required Artifacts artifacts,
     required BuildSystem buildSystem,
+    required Cache cache,
+    required Config config,
+    required FileSystem fileSystem,
+    required FileSystemUtils fileSystemUtils,
+    required FlutterVersion flutterVersion,
+    required Logger logger,
+    required OperatingSystemUtils osUtils,
+    required Platform platform,
+    required PlistParser plistParser,
+    required ProcessManager processManager,
+    required ProcessUtils processUtils,
     required TemplateRenderer templateRenderer,
-    required ToolContext toolContext,
+    required Terminal terminal,
+    required Xcode? xcode,
+    AndroidBuilder? androidBuilder,
+    AndroidContext? androidContext,
+    ToolContext? toolContext,
     bool verboseHelp = false,
-  }) : super(verboseHelp: verboseHelp) {
-    final ToolContext(
-      :Artifacts artifacts,
-      :Cache cache,
-      :Config config,
-      fs: FileSystem fileSystem,
-      :FileSystemUtils fileSystemUtils,
-      :FlutterVersion flutterVersion,
-      :Logger logger,
-      os: OperatingSystemUtils osUtils,
-      :Platform platform,
-      :ProcessManager processManager,
-      :ProcessUtils processUtils,
-      :Terminal terminal,
-    ) = toolContext;
-    final AppleContext(:PlistParser plistParser, :Xcode? xcode) = appleContext;
-
+  }) {
     _addSubcommand(
       BuildAarCommand(
         fileSystem: fileSystem,
-        androidSdk: androidContext.androidSdk,
+        androidSdk: androidSdk,
         logger: logger,
         verboseHelp: verboseHelp,
       ),
     );
-    _addSubcommand(
-      BuildApkCommand(
-        androidBuilder: androidBuilder,
-        androidContext: androidContext,
-        buildSystem: buildSystem,
-        toolContext: toolContext,
-        verboseHelp: verboseHelp,
-      ),
-    );
+    if (androidBuilder != null && androidContext != null && toolContext != null) {
+      _addSubcommand(
+        BuildApkCommand(
+          androidBuilder: androidBuilder,
+          androidContext: androidContext,
+          buildSystem: buildSystem,
+          toolContext: toolContext,
+          verboseHelp: verboseHelp,
+        ),
+      );
+    }
     _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
@@ -190,23 +190,13 @@ class BuildCommand extends FlutterCommand {
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand({
-    Logger? logger,
-    required super.verboseHelp,
-    OutputPreferences? outputPreferences,
-    super.toolContext,
-  }) : _toolContext = toolContext,
-       _logger = logger,
-       super(outputPreferences: outputPreferences ?? toolContext?.outputPreferences) {
+  BuildSubCommand({required this.logger, required super.verboseHelp, super.toolContext}) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
-  final ToolContext? _toolContext;
-  final Logger? _logger;
-
   @protected
-  Logger get logger => _logger ?? _toolContext!.logger;
+  final Logger logger;
 
   /// Whether this command is supported and should be shown.
   bool get supported => true;
