@@ -79,13 +79,14 @@ SamplerBinding SetupGradientParameters(
   if (gradient.type == UberSDFParameters::GradientParameters::Type::kLinear) {
     Point delta = gradient.end - gradient.start;
     Scalar length_sq = delta.x * delta.x + delta.y * delta.y;
-    Point direction = length_sq > 0.0f ? delta / length_sq : Point(0.0f, 0.0f);
     frag_info.gradient_coords =
-        Vector4(gradient.start.x, gradient.start.y, direction.x, direction.y);
+        Vector4(gradient.start.x, gradient.start.y, delta.x, delta.y);
+    frag_info.inv_gradient_length = length_sq > 0.0f ? 1.0f / length_sq : 0.0f;
   } else {
-    Scalar inv_radius = gradient.end.x > 0.0f ? 1.0f / gradient.end.x : 0.0f;
     frag_info.gradient_coords =
-        Vector4(gradient.start.x, gradient.start.y, inv_radius, 0.0f);
+        Vector4(gradient.start.x, gradient.start.y, 0.0f, 0.0f);
+    frag_info.inv_gradient_length =
+        gradient.end.x > 0.0f ? 1.0f / gradient.end.x : 0.0f;
   }
 
   SamplerDescriptor sampler_desc;
@@ -142,6 +143,7 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.gradient_coords = Vector4();
   frag_info.half_texel = 0.0f;
   frag_info.tile_mode = 0.0f;
+  frag_info.inv_gradient_length = 0.0f;
 
   SamplerBinding sampler_binding;
   if (params_.gradient) {
