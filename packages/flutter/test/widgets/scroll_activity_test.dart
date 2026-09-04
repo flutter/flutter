@@ -71,6 +71,33 @@ void main() {
     expect(controller.position.pixels, thirty + 100.0); // and ends up at the end
   });
 
+  testWidgets(
+    'DrivenScrollActivity keeps animating when the curve overshoots the scroll extent',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/160880
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView(controller: controller, children: children(10)),
+        ),
+      );
+      expect(controller.offset, 0.0);
+
+      // Curves.elasticInOut goes below its start value at the beginning of the
+      // animation, which overscrolls the position that is already at the
+      // minimum scroll extent. The animation must not be cancelled by it.
+      controller.animateTo(
+        100.0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.elasticInOut,
+      );
+      await tester.pumpAndSettle();
+      expect(controller.offset, 100.0);
+    },
+  );
+
   testWidgets('DrivenScrollActivity allows overriding applyMoveTo', (WidgetTester tester) async {
     final controller = ScrollController();
     addTearDown(controller.dispose);
