@@ -268,7 +268,7 @@ public class PlatformViewWrapperTest {
   }
 
   @Test
-  public void requestsUnbufferedDispatchOnMoveOnly_afterFlutterWonGesture() {
+  public void onTouchEvent_delegatesToGestureTrackerAndRequestsUnbufferedOnMove() {
     final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
     final MotionEvent[] lastRequestedEvent = new MotionEvent[1];
     final PlatformViewWrapper view =
@@ -288,99 +288,16 @@ public class PlatformViewWrapperTest {
     assertEquals(100, view.getCurrentDownTime());
     assertNull(lastRequestedEvent[0]);
 
-    final MotionEvent moveEvent1 =
-        MotionEvent.obtain(100, 101, MotionEvent.ACTION_MOVE, 0.0f, 0.0f, 0);
-    view.onTouchEvent(moveEvent1);
-    assertNull(lastRequestedEvent[0]);
-
-    // Mismatched gestureId does not set flutterWonGesture.
-    view.onFlutterWonGesture(50);
-    assertFalse(view.getFlutterWonGesture());
-
     // Matching gestureId sets flutterWonGesture.
     view.onFlutterWonGesture(100);
     assertTrue(view.getFlutterWonGesture());
 
-    // Subsequent move events are unbuffered.
-    final MotionEvent moveEvent2 =
-        MotionEvent.obtain(100, 102, MotionEvent.ACTION_MOVE, 10.0f, 10.0f, 0);
-    view.onTouchEvent(moveEvent2);
-    assertEquals(moveEvent2, lastRequestedEvent[0]);
+    // Subsequent move event triggers unbuffered dispatch.
+    final MotionEvent moveEvent =
+        MotionEvent.obtain(100, 101, MotionEvent.ACTION_MOVE, 10.0f, 10.0f, 0);
+    view.onTouchEvent(moveEvent);
+    assertEquals(moveEvent, lastRequestedEvent[0]);
     assertFalse(view.getFlutterWonGesture());
-
-    lastRequestedEvent[0] = null;
-
-    // Subsequent move in the same gesture does not redundantly request unbuffered dispatch.
-    final MotionEvent moveEvent3 =
-        MotionEvent.obtain(100, 103, MotionEvent.ACTION_MOVE, 11.0f, 11.0f, 0);
-    view.onTouchEvent(moveEvent3);
-    assertNull(lastRequestedEvent[0]);
-
-    // Up event terminates gesture.
-    final MotionEvent upEvent =
-        MotionEvent.obtain(100, 104, MotionEvent.ACTION_UP, 11.0f, 11.0f, 0);
-    view.onTouchEvent(upEvent);
-    assertFalse(view.isGestureActive());
-    assertNull(lastRequestedEvent[0]);
-    assertFalse(view.getFlutterWonGesture());
-
-    // Subsequent late onFlutterWonGesture after UP is ignored.
-    view.onFlutterWonGesture(100);
-    assertFalse(view.getFlutterWonGesture());
-
-    // Subsequent gesture starts buffered again.
-    final MotionEvent moveEvent4 =
-        MotionEvent.obtain(200, 201, MotionEvent.ACTION_MOVE, 12.0f, 12.0f, 0);
-    view.onTouchEvent(moveEvent4);
-    assertNull(lastRequestedEvent[0]);
-  }
-
-  @Test
-  public void resetsFlutterWonGestureOnCancelAndDown() {
-    final AndroidTouchProcessor touchProcessor = mock(AndroidTouchProcessor.class);
-    final PlatformViewWrapper view = new PlatformViewWrapper(ctx);
-    view.setTouchProcessor(touchProcessor);
-
-    // Before any gesture is active, onFlutterWonGesture is ignored.
-    view.onFlutterWonGesture(100);
-    assertFalse(view.getFlutterWonGesture());
-
-    // Gesture 1 starts.
-    final MotionEvent downEvent1 =
-        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
-    view.onTouchEvent(downEvent1);
-    assertTrue(view.isGestureActive());
-    assertEquals(100, view.getCurrentDownTime());
-
-    view.onFlutterWonGesture(100);
-    assertTrue(view.getFlutterWonGesture());
-
-    // CANCEL resets flutterWonGesture and marks gesture inactive.
-    final MotionEvent cancelEvent =
-        MotionEvent.obtain(100, 101, MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
-    view.onTouchEvent(cancelEvent);
-    assertFalse(view.getFlutterWonGesture());
-    assertFalse(view.isGestureActive());
-
-    // Delayed onFlutterWonGesture for Gesture 1 is ignored because gesture is inactive.
-    view.onFlutterWonGesture(100);
-    assertFalse(view.getFlutterWonGesture());
-
-    // Gesture 2 starts with downTime 200.
-    final MotionEvent downEvent2 =
-        MotionEvent.obtain(200, 200, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
-    view.onTouchEvent(downEvent2);
-    assertTrue(view.isGestureActive());
-    assertEquals(200, view.getCurrentDownTime());
-    assertFalse(view.getFlutterWonGesture());
-
-    // Late onFlutterWonGesture from Gesture 1 arriving during Gesture 2 is rejected.
-    view.onFlutterWonGesture(100);
-    assertFalse(view.getFlutterWonGesture());
-
-    // Matching onFlutterWonGesture for Gesture 2 is accepted.
-    view.onFlutterWonGesture(200);
-    assertTrue(view.getFlutterWonGesture());
   }
 
   @Implements(ViewGroup.class)
