@@ -404,37 +404,41 @@ class ToolDependencies {
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
     // 12. AndroidContext Dependencies
-    final AndroidStudio? finalAndroidStudio = androidStudio ?? AndroidStudio.latestValid();
+    final AndroidSdk? Function() androidSdkBuilder = androidSdk != null
+        ? () => androidSdk
+        : AndroidSdk.locateAndroidSdk;
 
-    final AndroidSdk? finalAndroidSdk = androidSdk ?? AndroidSdk.locateAndroidSdk();
+    final AndroidStudio? Function() androidStudioBuilder = androidStudio != null
+        ? () => androidStudio
+        : AndroidStudio.latestValid;
 
-    final Java? finalJava =
-        java ??
-        Java.find(
-          config: finalConfig,
-          androidStudio: finalAndroidStudio,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-        );
+    final Java? Function() javaBuilder = java != null
+        ? () => java
+        : () => Java.find(
+            androidStudioBuilder: androidStudioBuilder,
+            config: finalConfig,
+            fileSystem: finalFS,
+            logger: finalLogger,
+            platform: finalPlatform,
+            processManager: finalProcessManager,
+          );
 
-    final GradleUtils finalGradleUtils =
-        gradleUtils ??
-        GradleUtils(
-          platform: finalPlatform,
-          logger: finalLogger,
-          cache: finalCache,
-          operatingSystemUtils: finalOS,
-        );
+    final GradleUtils Function() gradleUtilsBuilder = gradleUtils != null
+        ? () => gradleUtils
+        : () => GradleUtils(
+            platform: finalPlatform,
+            logger: finalLogger,
+            cache: finalCache,
+            operatingSystemUtils: finalOS,
+          );
 
     return ToolDependencies(
       analytics: finalAnalytics,
       androidContext: AndroidContext(
-        androidSdk: finalAndroidSdk,
-        androidStudio: finalAndroidStudio,
-        gradleUtils: finalGradleUtils,
-        java: finalJava,
+        androidSdkBuilder: androidSdkBuilder,
+        androidStudioBuilder: androidStudioBuilder,
+        gradleUtilsBuilder: gradleUtilsBuilder,
+        javaBuilder: javaBuilder,
       ),
       appleContext: AppleContext(
         cocoaPods: finalCocoaPods,
