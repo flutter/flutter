@@ -1716,6 +1716,7 @@ class _RenderDecoration extends RenderBox
       _InputDecoratorState._kPrefixIconSemanticsTag,
       _InputDecoratorState._kSuffixSemanticsTag,
       _InputDecoratorState._kSuffixIconSemanticsTag,
+      if (defaultTargetPlatform == TargetPlatform.android) _InputDecoratorState._kLabelSemanticsTag,
     };
 
     for (final childConfig in childConfigs) {
@@ -2018,6 +2019,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   static const SemanticsTag _kSuffixIconSemanticsTag = SemanticsTag(
     '_InputDecoratorState.suffixIcon',
   );
+  static const SemanticsTag _kLabelSemanticsTag = SemanticsTag('_InputDecoratorState.label');
 
   @override
   void initState() {
@@ -2406,6 +2408,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           ),
         ),
       );
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        label = Semantics(tagForChildren: _kLabelSemanticsTag, child: label);
+      }
     }
 
     final bool hasPrefix = decoration.prefix != null || decoration.prefixText != null;

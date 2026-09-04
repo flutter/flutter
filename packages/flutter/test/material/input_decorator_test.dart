@@ -14,6 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../widgets/semantics_tester.dart';
 
 const Duration kTransitionDuration = Duration(milliseconds: 167);
 
@@ -15769,5 +15770,129 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(InputDecorator)), Size.zero);
+  });
+
+  testWidgets('TextField label semantics is split on Android, merged on iOS', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    addTearDown(semantics.dispose);
+
+    // 1. Android - Split Label Semantics
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    addTearDown(() {
+      debugDefaultTargetPlatformOverride = null;
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.android),
+        home: Scaffold(
+          body: TextField(
+            decoration: const InputDecoration(labelText: 'Label Text'),
+            controller: TextEditingController(text: 'Input Text'),
+          ),
+        ),
+      ),
+    );
+
+    // Verify that 'Label Text' and 'Input Text' are in separate semantics nodes.
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(label: 'Label Text', textDirection: TextDirection.ltr),
+                        TestSemantics(
+                          value: 'Input Text',
+                          textDirection: TextDirection.ltr,
+                          inputType: SemanticsInputType.text,
+                          currentValueLength: 10,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    // 2. iOS - Merged Label Semantics
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          body: TextField(
+            decoration: const InputDecoration(labelText: 'Label Text'),
+            controller: TextEditingController(text: 'Input Text'),
+          ),
+        ),
+      ),
+    );
+
+    // On iOS, they are merged into one node.
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          label: 'Label Text',
+                          value: 'Input Text',
+                          textDirection: TextDirection.ltr,
+                          inputType: SemanticsInputType.text,
+                          currentValueLength: 10,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocusable,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
+
+    semantics.dispose();
+    debugDefaultTargetPlatformOverride = null;
   });
 }
