@@ -965,8 +965,6 @@ public class PlatformViewsControllerTest {
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void createPlatformViewMessage_setsAndroidViewLayoutDirection() {
     PlatformViewsController platformViewsController = new PlatformViewsController();
-    PlatformViewsControllerDelegator platformViewsControllerDelegator =
-        new PlatformViewsControllerDelegator(platformViewsController, null);
     platformViewsController.setSoftwareRendering(true);
 
     int platformViewId = 0;
