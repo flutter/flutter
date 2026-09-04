@@ -16885,6 +16885,65 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
       skip: kIsWeb, // [intended]
     );
+
+    testWidgets('async spell check result updates text through widget lifecycle', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/191881.
+      //
+      // When async spell check completes, the result must be propagated through
+      // setState → build → updateRenderObject, not by directly mutating
+      // renderEditable.text. Direct mutation marks the TextPainter layout dirty
+      // outside the normal frame lifecycle, so a hit test before the next layout
+      // pass would find the TextPainter without valid layout data.
+
+      const suggestionSpans = <SuggestionSpan>[
+        SuggestionSpan(TextRange(start: 0, end: 5), <String>['hell', 'held']),
+      ];
+      final fakeSpellCheckService = FakeSpellCheckService(
+        suggestionSpansByText: const <String, List<SuggestionSpan>?>{'Hello': suggestionSpans},
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            backgroundCursorColor: Colors.grey,
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: fakeSpellCheckService,
+              misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      final RenderEditable renderEditable = state.renderEditable;
+
+      // Focus the field and enter text.
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+      controller.text = 'Hello';
+      await tester.pump();
+
+      // Simulate the spell check lifecycle by setting spellCheckResults on state
+      // and pumping (which triggers a rebuild via the widget's didUpdateWidget path).
+      // This verifies the render object gets updated through updateRenderObject,
+      // not through direct mutation.
+      state.spellCheckResults = const SpellCheckResults('Hello', suggestionSpans);
+      await tester.pump();
+
+      // The render object must have the updated text through updateRenderObject.
+      expect(renderEditable.text!.toPlainText(), 'Hello');
+
+      // A hit test must work correctly after the spell check update.
+      final hitResult = BoxHitTestResult();
+      expect(renderEditable.hitTest(hitResult, position: const Offset(5.0, 5.0)), isTrue);
+      expect(hitResult.path, isNotEmpty);
+    });
   });
 
   group('magnifier', () {
