@@ -115,7 +115,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       'The "flutter build $platform-framework" command is deprecated and has been replaced by '
       '"flutter build swift-package --platform $platform". '
       'For more information, see: '
-      'https://docs.flutter.dev/add-to-app/ios/project-setup',
+      'https://docs.flutter.dev/add-to-app/$platform/project-setup',
     );
   }
 
