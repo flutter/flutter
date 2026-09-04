@@ -19,8 +19,7 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     registrar.addSceneDelegate(instance)
   }
 
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult)
-  {
+  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "getLifecycleEvents":
       result(events.joined(separator: "\n"))
@@ -67,7 +66,7 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     events.append("applicationWillTerminate")
   }
 
-    public func application(
+  public func application(
     _ application: UIApplication,
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
@@ -76,7 +75,6 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     events.append("url:\(url.absoluteString)")
     return true
   }
-
 
   public func application(
     _ application: UIApplication,
@@ -87,7 +85,7 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     return true
   }
 
-    public func application(
+  public func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
     restorationHandler: @escaping ([Any]) -> Void
@@ -100,10 +98,9 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     return true
   }
 
-
   // MARK: - Scene Events
 
-    public func scene(
+  public func scene(
     _ scene: UIScene,
     willConnectTo session: UISceneSession,
     options connectionOptions: UIScene.ConnectionOptions?
@@ -118,7 +115,6 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     }
     return true
   }
-
 
   public func sceneDidDisconnect(_ scene: UIScene) {
     events.append("sceneDidDisconnect")
@@ -140,7 +136,7 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     events.append("sceneDidEnterBackground")
   }
 
-    public func scene(
+  public func scene(
     _ scene: UIScene,
     openURLContexts URLContexts: Set<UIOpenURLContext>
   ) -> Bool {
@@ -151,8 +147,7 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     return true
   }
 
-
-    public func scene(_ scene: UIScene, continue userActivity: NSUserActivity) -> Bool {
+  public func scene(_ scene: UIScene, continue userActivity: NSUserActivity) -> Bool {
     events.append("sceneContinueUserActivity")
     if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
        let url = userActivity.webpageURL {
@@ -160,7 +155,6 @@ public class MyPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     }
     return true
   }
-
 
   public func windowScene(
     _ windowScene: UIWindowScene,
