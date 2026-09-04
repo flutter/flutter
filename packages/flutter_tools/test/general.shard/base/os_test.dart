@@ -455,7 +455,7 @@ void main() {
         final File fakeZipFile = fileSystem.file("archive's.zip")..createSync();
         fakeProcessManager.excludedExecutables.add('tar');
         const command =
-            r'$ErrorActionPreference = "Stop"; '
+            r"$ErrorActionPreference = 'Stop'; "
             "Expand-Archive -LiteralPath 'archive''s.zip' -DestinationPath 'output' -Force";
         fakeProcessManager.addCommand(
           const FakeCommand(
@@ -478,7 +478,7 @@ void main() {
         final File fakeZipFile = fileSystem.file('archive.zip')..createSync();
         fakeProcessManager.excludedExecutables.addAll(<String>['tar', 'powershell']);
         const command =
-            r'$ErrorActionPreference = "Stop"; '
+            r"$ErrorActionPreference = 'Stop'; "
             "Expand-Archive -LiteralPath 'archive.zip' -DestinationPath 'output' -Force";
         fakeProcessManager.addCommand(
           const FakeCommand(

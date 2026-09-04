@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../application_package.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cmake.dart';
@@ -43,6 +44,8 @@ abstract class WindowsApp extends ApplicationPackage {
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_app.');
     try {
       globals.os.unzip(globals.fs.file(applicationBinary), tempDir);
+    } on ToolExit {
+      rethrow;
     } on Exception {
       globals.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
       return null;

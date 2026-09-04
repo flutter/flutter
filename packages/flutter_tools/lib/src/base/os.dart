@@ -566,7 +566,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       final String escapedFilePath = file.path.replaceAll("'", "''");
       final String escapedTargetPath = targetDirectory.path.replaceAll("'", "''");
       final script =
-          r'$ErrorActionPreference = "Stop"; '
+          r"$ErrorActionPreference = 'Stop'; "
           "Expand-Archive -LiteralPath '$escapedFilePath' -DestinationPath '$escapedTargetPath' -Force";
       _processUtils.runSync(
         <String>[powershellExec, '-NoProfile', '-NonInteractive', '-Command', script],
