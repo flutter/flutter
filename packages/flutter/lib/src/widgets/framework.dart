@@ -1604,6 +1604,21 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
     return renderObject.parentData is T;
   }
 
+  /// Checks if this widget can apply its parent data to the provided
+  /// `renderObject`.
+  ///
+  /// The [RenderObject.parentData] of the provided `renderObject` is
+  /// typically set up by an ancestor [RenderObjectWidget] of the type returned
+  /// by [debugTypicalAncestorWidgetClass].
+  ///
+  /// This is called just before [applyParentData] is invoked with the same
+  /// [RenderObject] provided to that method.
+  @Deprecated(
+    'This method is no longer used by the framework and will be removed in a future release. '
+    'This feature was deprecated after v3.48.0-0.4.pre.',
+  )
+  bool debugIsValidRenderObject(RenderObject renderObject) => _isValidRenderObject(renderObject);
+
   /// Describes the [RenderObjectWidget] that is typically used to set up the
   /// [ParentData] that [applyParentData] will write to.
   ///
