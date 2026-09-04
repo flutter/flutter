@@ -7,8 +7,9 @@
 #include <windows.h>
 
 #include <algorithm>
+#include <filesystem>
 
-#include "flutter/fml/paths.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/platform/win/wstring_conversion.h"
 
 namespace fml {
@@ -55,8 +56,8 @@ size_t LastSeparator(const std::string& path) {
 }  // namespace
 
 std::pair<bool, std::string> GetExecutablePath() {
-  HMODULE module = GetModuleHandle(NULL);
-  if (module == NULL) {
+  HMODULE module = GetModuleHandle(nullptr);
+  if (module == nullptr) {
     return {false, ""};
   }
   wchar_t path[MAX_PATH];
@@ -68,9 +69,19 @@ std::pair<bool, std::string> GetExecutablePath() {
 }
 
 std::string AbsolutePath(const std::string& path) {
-  char absPath[MAX_PATH];
-  _fullpath(absPath, path.c_str(), MAX_PATH);
-  return std::string(absPath);
+  std::error_code ec;
+  std::filesystem::path p(std::u8string_view(
+      reinterpret_cast<const char8_t*>(path.data()), path.size()));
+  std::filesystem::path abs_path = std::filesystem::absolute(p, ec);
+  if (ec) {
+    FML_DLOG(ERROR) << "Failed to resolve absolute path for '" << path
+                    << "': " << ec.message();
+    return std::string();
+  }
+  abs_path = abs_path.lexically_normal();
+  std::u8string u8_str = abs_path.u8string();
+  return std::string(reinterpret_cast<const char*>(u8_str.data()),
+                     u8_str.size());
 }
 
 std::string GetDirectoryName(const std::string& path) {

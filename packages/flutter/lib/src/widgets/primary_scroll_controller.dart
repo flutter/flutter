@@ -147,7 +147,7 @@ class PrimaryScrollController extends InheritedWidget {
   ///
   /// See also:
   ///
-  /// * [PrimaryScrollController.maybeOf], which is similar to this method, but
+  /// * [PrimaryScrollController.of], which is similar to this method, but
   ///   asserts if no [PrimaryScrollController] ancestor is found.
   static ScrollController? maybeOf(BuildContext context) {
     final PrimaryScrollController? result = context

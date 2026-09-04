@@ -1,7 +1,7 @@
 name: Report a Flutter WebAssembly (Wasm) issue
 description: |
   You hit a compilation, packaging, or runtime blocker while targeting WebAssembly (Wasm) in Flutter Web.
-labels: ['platform-web', 'e: wasm']
+labels: ['platform-web', 'e: wasm', 'c: tfw4']
 body:
   - type: markdown
     attributes:

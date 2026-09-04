@@ -1,0 +1,27 @@
+name: engine_integration_golden_test
+description: Integration tests that capture rendering snapshots and upload them to Skia Gold for engine-based render tests.
+publish_to: none
+
+environment:
+  sdk: ^3.11.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  google_fonts: any
+  integration_test:
+    sdk: flutter
+  path: any
+
+dev_dependencies:
+  flutter_goldens:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  test: any
+
+# PUBSPEC CHECKSUM: 3hii4d

@@ -95,17 +95,13 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
 
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    return child?.getDistanceToActualBaseline(baseline) ??
-        super.computeDistanceToActualBaseline(baseline);
+    return child?.getDistanceToActualBaseline(baseline);
   }
 
   @override
   @protected
   double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
-    final RenderBox? child = this.child;
-    return child == null
-        ? super.computeDryBaseline(constraints, baseline)
-        : child.getDryBaseline(constraints, baseline);
+    return child?.getDryBaseline(constraints, baseline);
   }
 
   @override
@@ -159,6 +155,22 @@ enum HitTestBehavior {
 
   /// Translucent targets both receive events within their bounds and permit
   /// targets visually behind them to also receive events.
+  ///
+  /// When both a translucent target and its descendant are listening to the
+  /// same pointer event, both will receive it. Events are dispatched to the
+  /// most specific target first (the descendant), then to the translucent
+  /// target. In gesture arena competitions for the same gesture, the
+  /// descendant typically wins because it enters the arena first (first come,
+  /// first served). The translucent target's gesture is not invoked unless the
+  /// descendant's gesture is rejected or the descendant listens to a different
+  /// gesture.
+  ///
+  /// See also:
+  ///
+  ///  * [HitTestResult.path], which describes the order in which hit test
+  ///    entries receive events.
+  ///  * [GestureDetector.behavior], which configures the hit test behavior
+  ///    used for gesture detection.
   translucent,
 }
 
@@ -1387,6 +1399,8 @@ class RenderBackdropFilter extends RenderProxyBox {
 ///  * [ClipRRect], which can be customized with a [CustomClipper<RRect>].
 ///  * [ClipOval], which can be customized with a [CustomClipper<Rect>].
 ///  * [ClipPath], which can be customized with a [CustomClipper<Path>].
+///  * [SliverClipRect], which can be customized with a [CustomClipper<Rect>].
+///  * [SliverClipRRect], which can be customized with a [CustomClipper<RRect>].
 ///  * [ShapeBorderClipper], for specifying a clip path using a [ShapeBorder].
 abstract class CustomClipper<T> extends Listenable {
   /// Creates a custom clipper.
@@ -3738,25 +3752,15 @@ class RenderRepaintBoundary extends RenderProxyBox {
 ///
 /// {@macro flutter.widgets.IgnorePointer.semantics}
 ///
-/// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
-///
 /// See also:
 ///
 ///  * [RenderAbsorbPointer], which takes the pointer events but prevents any
 ///    nodes in the subtree from seeing them.
 class RenderIgnorePointer extends RenderProxyBox {
   /// Creates a render object that is invisible to hit testing.
-  RenderIgnorePointer({
-    RenderBox? child,
-    bool ignoring = true,
-    @Deprecated(
-      'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    bool? ignoringSemantics,
-  }) : _ignoring = ignoring,
-       _ignoringSemantics = ignoringSemantics,
-       super(child);
+  RenderIgnorePointer({RenderBox? child, bool ignoring = true})
+    : _ignoring = ignoring,
+      super(child);
 
   /// Whether this render object is ignored during hit testing.
   ///
@@ -3771,27 +3775,6 @@ class RenderIgnorePointer extends RenderProxyBox {
       return;
     }
     _ignoring = value;
-    if (ignoringSemantics == null) {
-      markNeedsSemanticsUpdate();
-    }
-  }
-
-  /// Whether the semantics of this render object is ignored when compiling the semantics tree.
-  ///
-  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
-  @Deprecated(
-    'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  bool? get ignoringSemantics => _ignoringSemantics;
-  bool? _ignoringSemantics;
-  set ignoringSemantics(bool? value) {
-    if (value == _ignoringSemantics) {
-      return;
-    }
-    _ignoringSemantics = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3801,32 +3784,15 @@ class RenderIgnorePointer extends RenderProxyBox {
   }
 
   @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (_ignoringSemantics ?? false) {
-      return;
-    }
-    super.visitChildrenForSemantics(visitor);
-  }
-
-  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    // Do not block user interactions if _ignoringSemantics is false; otherwise,
-    // delegate to _ignoring
-    config.isBlockingUserActions = _ignoring && (_ignoringSemantics ?? true);
+    config.isBlockingUserActions = _ignoring;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('ignoring', _ignoring));
-    properties.add(
-      DiagnosticsProperty<bool>(
-        'ignoringSemantics',
-        _ignoringSemantics,
-        description: _ignoringSemantics == null ? null : 'implicitly $_ignoringSemantics',
-      ),
-    );
   }
 }
 
@@ -3988,25 +3954,15 @@ class RenderOffstage extends RenderProxyBox {
 ///
 /// {@macro flutter.widgets.AbsorbPointer.semantics}
 ///
-/// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
-///
 /// See also:
 ///
 ///  * [RenderIgnorePointer], which has the opposite effect: removing the
 ///    subtree from considering entirely for the purposes of hit testing.
 class RenderAbsorbPointer extends RenderProxyBox {
   /// Creates a render object that absorbs pointers during hit testing.
-  RenderAbsorbPointer({
-    RenderBox? child,
-    bool absorbing = true,
-    @Deprecated(
-      'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    bool? ignoringSemantics,
-  }) : _absorbing = absorbing,
-       _ignoringSemantics = ignoringSemantics,
-       super(child);
+  RenderAbsorbPointer({RenderBox? child, bool absorbing = true})
+    : _absorbing = absorbing,
+      super(child);
 
   /// Whether this render object absorbs pointers during hit testing.
   ///
@@ -4022,28 +3978,6 @@ class RenderAbsorbPointer extends RenderProxyBox {
       return;
     }
     _absorbing = value;
-    if (ignoringSemantics == null) {
-      markNeedsSemanticsUpdate();
-    }
-  }
-
-  /// Whether the semantics of this render object is ignored when compiling the
-  /// semantics tree.
-  ///
-  /// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
-  @Deprecated(
-    'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  bool? get ignoringSemantics => _ignoringSemantics;
-  bool? _ignoringSemantics;
-  set ignoringSemantics(bool? value) {
-    if (value == _ignoringSemantics) {
-      return;
-    }
-    _ignoringSemantics = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4053,32 +3987,15 @@ class RenderAbsorbPointer extends RenderProxyBox {
   }
 
   @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (_ignoringSemantics ?? false) {
-      return;
-    }
-    super.visitChildrenForSemantics(visitor);
-  }
-
-  @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    // Do not block user interactions if _ignoringSemantics is false; otherwise,
-    // delegate to absorbing
-    config.isBlockingUserActions = absorbing && (_ignoringSemantics ?? true);
+    config.isBlockingUserActions = absorbing;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('absorbing', absorbing));
-    properties.add(
-      DiagnosticsProperty<bool>(
-        'ignoringSemantics',
-        ignoringSemantics,
-        description: ignoringSemantics == null ? null : 'implicitly $ignoringSemantics',
-      ),
-    );
   }
 }
 

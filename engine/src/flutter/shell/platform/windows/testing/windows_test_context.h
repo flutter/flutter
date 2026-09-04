@@ -44,6 +44,15 @@ class WindowsTestContext {
   // where `IdentifyingName` matches the |name| parameter to this method.
   void AddNativeFunction(std::string_view name, Dart_NativeFunction function);
 
+  // Registers an FFI function callable from Dart code in test fixtures. In
+  // the Dart test fixture, the associated function can be declared as:
+  //
+  //   @Native<ReturnType Function()>(symbol: 'IdentifyingName')
+  //   external ReturnType functionName();
+  //
+  // where `IdentifyingName` matches the |name| parameter to this method.
+  void AddFfiNativeFunction(std::string_view name, void* function);
+
   // Returns the root isolate create callback to register with the Flutter
   // runtime.
   fml::closure GetRootIsolateCallback();

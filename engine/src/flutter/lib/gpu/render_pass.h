@@ -54,6 +54,18 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   void SetPipeline(fml::RefPtr<RenderPipeline> pipeline);
 
+  /// Set the face culling mode for subsequent draws.
+  void SetCullMode(impeller::CullMode mode);
+
+  /// Set the front-face winding order for subsequent draws.
+  void SetWindingOrder(impeller::WindingOrder order);
+
+  /// Set the primitive topology for subsequent draws.
+  void SetPrimitiveType(impeller::PrimitiveType type);
+
+  /// Set the polygon fill mode for subsequent draws.
+  void SetPolygonMode(impeller::PolygonMode mode);
+
   void ClearBindings();
 
   /// Append a draw to the underlying render pass. [element_count] is the

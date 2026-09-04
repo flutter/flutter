@@ -318,7 +318,7 @@ void AccessibilityBridge::SetRoleFromFlutterUpdate(ui::AXNodeData& node_data,
     node_data.role = ax::mojom::Role::kButton;
     return;
   }
-  if (flags->is_text_field && !flags->is_read_only) {
+  if (flags->is_text_field) {
     node_data.role = ax::mojom::Role::kTextField;
     return;
   }

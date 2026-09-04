@@ -35,9 +35,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter android hardware smoke test',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
       home: MyWidget(imageLoader: imageLoader),
     );
   }
@@ -56,10 +54,7 @@ class MyWidget extends StatefulWidget {
 
 class _MyState extends State<MyWidget> {
   static const _nativeChannel = MethodChannel(nativeSupportChannelName);
-  static const _testChannel = BasicMessageChannel<Object?>(
-    testChannelName,
-    JSONMessageCodec(),
-  );
+  static const _testChannel = BasicMessageChannel<Object?>(testChannelName, JSONMessageCodec());
 
   String _message = 'Waiting for message...';
   late Future<String?> _goldenVariantFuture;
@@ -90,9 +85,7 @@ class _MyState extends State<MyWidget> {
         goldenVariantValue,
       );
 
-      return <String, Object?>{
-        keyMessage: failureMessage ?? 'Comparison Success',
-      };
+      return <String, Object?>{keyMessage: failureMessage ?? 'Comparison Success'};
     }
 
     final testName = messageMap?[keyTestName] as String?;
@@ -102,8 +95,7 @@ class _MyState extends State<MyWidget> {
     // Widget tests pass captureScreenshot: false.
     // Image.toByteData runs async on a native thread, which results in an unresolvable deadlock in the widget test's FakeAsync zone.
     // Comparing pixels is not a responsibility of widget tests anyway, that should be reserved for the integration tests.
-    final bool captureScreenshot =
-        messageMap?[keyCaptureScreenshot] as bool? ?? true;
+    final bool captureScreenshot = messageMap?[keyCaptureScreenshot] as bool? ?? true;
 
     if (testName == kPlatformViewHybridCompositionPlusPlusTest) {
       final bool isHcpp = await HybridAndroidViewController.checkIfSupported();
@@ -135,16 +127,13 @@ class _MyState extends State<MyWidget> {
           _loadedImage = img;
         });
       } catch (e, stackTrace) {
-        return <String, Object?>{
-          keyMessage: 'Failed to load image asset: $e\n$stackTrace',
-        };
+        return <String, Object?>{keyMessage: 'Failed to load image asset: $e\n$stackTrace'};
       }
     }
 
     final completer = Completer<Map<String, Object?>>();
 
-    final bool isPlatformView =
-        testName?.startsWith(platformViewPrefix) ?? false;
+    final bool isPlatformView = testName?.startsWith(platformViewPrefix) ?? false;
     if (isPlatformView) {
       _platformViewDrawnCompleter = Completer<void>();
     } else {
@@ -180,9 +169,7 @@ class _MyState extends State<MyWidget> {
   void initState() {
     super.initState();
 
-    _goldenVariantFuture = _nativeChannel.invokeMethod<String>(
-      methodImpellerBackend,
-    );
+    _goldenVariantFuture = _nativeChannel.invokeMethod<String>(methodImpellerBackend);
     _nativeChannel.setMethodCallHandler((MethodCall call) async {
       if (call.method == 'onDraw') {
         if (_platformViewDrawnCompleter?.isCompleted == false) {
@@ -214,6 +201,7 @@ class _MyState extends State<MyWidget> {
       kPlatformViewHybridCompositionPlusPlusTest => const AndroidPlatformView(
         mode: PlatformViewMode.hybridCompositionPlusPlus,
       ),
+
       kTextTest => const TextDrawingCanvas(),
       kImageTest => ImageDrawingCanvas(image: _loadedImage),
       _ => VectorDrawingsCanvas(message: _message),
