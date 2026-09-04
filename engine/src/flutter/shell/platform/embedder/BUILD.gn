@@ -299,6 +299,10 @@ if (enable_unittests) {
       "tests/embedder_unittests_util.cc",
     ]
 
+    if (impeller_supports_rendering) {
+      sources += [ "embedder_external_view_embedder_unittests.cc" ]
+    }
+
     public_deps = [
       ":embedder",
       ":embedder_gpu_configuration",
@@ -314,6 +318,13 @@ if (enable_unittests) {
       "//flutter/testing:skia",
       "//flutter/third_party/tonic",
     ]
+
+    if (impeller_supports_rendering) {
+      public_deps += [
+        "//flutter/impeller/display_list",
+        "//flutter/impeller/renderer/testing:mocks",
+      ]
+    }
 
     if (test_enable_gl) {
       sources += [
