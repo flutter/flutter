@@ -30,16 +30,13 @@ uniform FragInfo {
   /// bottom-right), or the circular cap radii for rounded superellipses in
   /// radii.xy (top octant in x, right octant in y).
   vec4 radii;
-  /// Gradient parameters packed to avoid shader-side uniform division:
+  /// Gradient parameters:
   ///   - Linear gradient:
   ///       xy: Start point in local coordinates.
-  ///       zw: Pre-scaled direction vector (delta / dot(delta, delta)), such
-  ///           that dot(v_position - xy, zw) yields the [0, 1] parameter t.
+  ///       zw: Delta vector (end - start) in local coordinates.
   ///   - Radial gradient:
   ///       xy: Center point in local coordinates.
-  ///       z:  Inverse radius (1.0 / radius), such that
-  ///           length(v_position - xy) * z yields the [0, 1] parameter t.
-  ///       w:  Unused (0.0).
+  ///       zw: Unused (0.0).
   vec4 gradient_coords;
 
   // ===========================================================================
@@ -108,6 +105,10 @@ uniform FragInfo {
   /// Half the size of a single gradient texel in normalized texture
   /// coordinates along the gradient ramp (x axis).
   float half_texel;
+  /// Inverse gradient length:
+  ///   - Linear gradient: 1.0 / dot(delta, delta)
+  ///   - Radial gradient: 1.0 / radius
+  float inv_gradient_length;
 }
 frag_info;
 
@@ -126,11 +127,12 @@ vec4 getColor() {
     if (frag_info.color_source_type < 1.5) {
       // Linear gradient
       t = dot(v_position - frag_info.gradient_coords.xy,
-              frag_info.gradient_coords.zw);
+              frag_info.gradient_coords.zw) *
+          frag_info.inv_gradient_length;
     } else {
       // Radial gradient
       t = length(v_position - frag_info.gradient_coords.xy) *
-          frag_info.gradient_coords.z;
+          frag_info.inv_gradient_length;
     }
     vec4 gradient_color = IPSampleLinearWithTileMode(
         color_source_sampler, vec2(t, 0.5), vec2(frag_info.half_texel, 0.5),
