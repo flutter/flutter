@@ -17,7 +17,7 @@ Future<void> main() async {
     await testWithNewIOSSimulator('UniversalLinkTestSim', (String deviceId) async {
       try {
         Future<bool> buildAndTestApp(String projectName) async {
-          print('--- Building and testing $projectName ---');
+          section('Building and testing $projectName');
           final String projectDir = path.join(
             flutterDirectory.path,
             'dev',
@@ -29,33 +29,18 @@ Future<void> main() async {
             await flutter('build', options: <String>['ios', '--simulator']);
           });
 
-          // Run XCUITest
-          print('Running XCUITest for $projectName...');
           final String iosDir = path.join(projectDir, 'ios');
           final String buildDir = path.join(projectDir, 'build', 'ios');
 
-          final int exitCode = await exec(
-            'xcodebuild',
-            <String>[
-              'test',
-              '-workspace',
-              'Runner.xcworkspace',
-              '-scheme',
-              'RunnerUITests',
-              '-destination',
-              'id=$deviceId',
-              'SYMROOT=$buildDir',
-            ],
-            workingDirectory: iosDir,
-            canFail: true,
+          return runXcodeTests(
+            platformDirectory: iosDir,
+            destination: 'id=$deviceId',
+            testName: projectName,
+            configuration: 'Debug',
+            scheme: 'RunnerUITests',
+            skipCodesign: true,
+            extraOptions: <String>['SYMROOT=$buildDir'],
           );
-
-          if (exitCode != 0) {
-            print('XCUITest failed for $projectName with exit code $exitCode');
-            return false;
-          }
-
-          return true;
         }
 
         final bool success = await buildAndTestApp('ios_universal_link');

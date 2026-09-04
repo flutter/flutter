@@ -6,37 +6,107 @@ import XCTest
 
 class RunnerUITests: XCTestCase {
 
-    @available(iOS 16.4, *)
-    func testDeepLinks() throws {
-        var app = XCUIApplication()
-        // Pre-warm the app and simulator caches so the initial launch does not exceed
-        // FlutterEngine's 3.0s first-frame deadline.
-        app.launch()
-        app.terminate()
+  override func setUpWithError() throws {
+    continueAfterFailure = false
+  }
 
-        // Cold start HTTPS
-        app = XCUIApplication()
-        var url = URL(string: "https://flutter-dashboard.appspot.com/invalid_cold")!
-        app.open(url)
-
-        XCTAssertTrue(app.staticTexts["https://flutter-dashboard.appspot.com/invalid_cold"].waitForExistence(timeout: 10), "Cold start HTTPS deep link failed")
-
-        // Warm start HTTPS
-        url = URL(string: "https://flutter-dashboard.appspot.com/invalid_warm")!
-        app.open(url)
-        XCTAssertTrue(app.staticTexts["https://flutter-dashboard.appspot.com/invalid_warm"].waitForExistence(timeout: 10), "Warm start HTTPS deep link failed")
-
-        app.terminate()
-
-        // Cold start custom scheme
-        app = XCUIApplication()
-        url = URL(string: "testscheme://flutter/custom_cold")!
-        app.open(url)
-        XCTAssertTrue(app.staticTexts["testscheme://flutter/custom_cold"].waitForExistence(timeout: 10), "Cold start custom scheme deep link failed")
-
-        // Warm start custom scheme
-        url = URL(string: "testscheme://flutter/custom_warm")!
-        app.open(url)
-        XCTAssertTrue(app.staticTexts["testscheme://flutter/custom_warm"].waitForExistence(timeout: 10), "Warm start custom scheme deep link failed")
+  @MainActor
+  func testColdStartUniversalLink() throws {
+    guard #available(iOS 16.4, *) else {
+      throw XCTSkip("app.open(url) is only available on iOS 16.4+")
     }
+
+    let app = XCUIApplication()
+    let url = URL(string: "https://flutter-dashboard.appspot.com/invalid_cold")!
+    app.open(url)
+
+    XCTAssertTrue(
+      app.staticTexts["https://flutter-dashboard.appspot.com/invalid_cold"].waitForExistence(timeout: 10),
+      "Cold start Universal Link deep link failed"
+    )
+    XCTAssertFalse(
+      app.staticTexts["Home Page"].exists,
+      "App remained on Home Page instead of navigating"
+    )
+  }
+
+  @MainActor
+  func testColdStartCustomScheme() throws {
+    guard #available(iOS 16.4, *) else {
+      throw XCTSkip("app.open(url) is only available on iOS 16.4+")
+    }
+
+    let app = XCUIApplication()
+    let url = URL(string: "testscheme://flutter/custom_cold")!
+    app.open(url)
+
+    XCTAssertTrue(
+      app.staticTexts["testscheme://flutter/custom_cold"].waitForExistence(timeout: 10),
+      "Cold start Custom Scheme deep link failed"
+    )
+    XCTAssertFalse(
+      app.staticTexts["Home Page"].exists,
+      "App remained on Home Page instead of navigating"
+    )
+  }
+
+  @MainActor
+  func testWarmStartUniversalLink() throws {
+    guard #available(iOS 16.4, *) else {
+      throw XCTSkip("system.open(url) is only available on iOS 16.4+")
+    }
+
+    let app = XCUIApplication()
+    app.launch()
+
+    XCTAssertTrue(
+      app.staticTexts["Home Page"].waitForExistence(timeout: 10),
+      "Initial launch failed"
+    )
+
+    // Background the app before sending deep link to test warm start
+    XCUIDevice.shared.press(.home)
+
+    let url = URL(string: "https://flutter-dashboard.appspot.com/invalid_warm")!
+    XCUIDevice.shared.system.open(url)
+
+    XCTAssertTrue(
+      app.staticTexts["https://flutter-dashboard.appspot.com/invalid_warm"].waitForExistence(timeout: 10),
+      "Warm start Universal Link deep link failed"
+    )
+    XCTAssertFalse(
+      app.staticTexts["Home Page"].exists,
+      "App remained on Home Page instead of navigating"
+    )
+  }
+
+  @MainActor
+  func testWarmStartCustomScheme() throws {
+    guard #available(iOS 16.4, *) else {
+      throw XCTSkip("system.open(url) is only available on iOS 16.4+")
+    }
+
+    let app = XCUIApplication()
+    app.launch()
+
+    XCTAssertTrue(
+      app.staticTexts["Home Page"].waitForExistence(timeout: 10),
+      "Initial launch failed"
+    )
+
+    // Background the app before sending deep link to test warm start
+    XCUIDevice.shared.press(.home)
+
+    let url = URL(string: "testscheme://flutter/custom_warm")!
+    XCUIDevice.shared.system.open(url)
+
+    XCTAssertTrue(
+      app.staticTexts["testscheme://flutter/custom_warm"].waitForExistence(timeout: 10),
+      "Warm start Custom Scheme deep link failed"
+    )
+    XCTAssertFalse(
+      app.staticTexts["Home Page"].exists,
+      "App remained on Home Page instead of navigating"
+    )
+  }
 }
