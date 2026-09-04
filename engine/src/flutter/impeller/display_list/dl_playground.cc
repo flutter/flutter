@@ -36,15 +36,15 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
     return false;
   }
   return Playground::OpenPlaygroundHere(
-      [&context, &callback](RenderTarget& render_target) -> bool {
+      [&context, &callback](RenderTarget& render_target,
+                            bool is_onscreen) -> bool {
         return RenderToTarget(
             context.GetContentContext(),  //
             render_target,                //
             callback(),                   //
             Rect::MakeWH(render_target.GetRenderTargetSize().width,
                          render_target.GetRenderTargetSize().height),  //
-            /*reset_host_buffer=*/true,                                //
-            /*is_onscreen=*/false                                      //
+            /*reset_host_buffer=*/true, is_onscreen                    //
         );
       });
 }

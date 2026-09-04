@@ -75,9 +75,6 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
   auto desc = BoxPipelineBuilder::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
   ASSERT_TRUE(InitializePipelineDescriptorForRendering(*desc));
-  desc->SetSampleCount(SampleCount::kCount4);
-  desc->ClearStencilAttachments();
-  desc->ClearDepthAttachment();
 
   // Vertex buffer.
   VertexBufferBuilder<VS::PerVertexData> vertex_builder;
@@ -537,7 +534,8 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
   ASSERT_TRUE(vertex_buffer);
 
   auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
-  Playground::RenderCallback callback = [&](RenderTarget& render_target) {
+  Playground::RenderCallback callback = [&](RenderTarget& render_target,
+                                            bool is_onscreen) {
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
       return false;
@@ -595,8 +593,14 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
       pass->EncodeCommands();
     }
 
-    if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
-      return false;
+    if (is_onscreen) {
+      if (!context->SubmitOnscreen({buffer})) {
+        return false;
+      }
+    } else {
+      if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
+        return false;
+      }
     }
     data_host_buffer->Reset();
     return true;
@@ -658,7 +662,8 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
   ASSERT_TRUE(vertex_buffer);
 
   auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
-  Playground::RenderCallback callback = [&](RenderTarget& render_target) {
+  Playground::RenderCallback callback = [&](RenderTarget& render_target,
+                                            bool is_onscreen) {
     {
       auto buffer = context->CreateCommandBuffer();
       if (!buffer) {
@@ -675,8 +680,14 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
       pass->AddCopy(bridge, device_buffer);
       pass->EncodeCommands();
 
-      if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
-        return false;
+      if (is_onscreen) {
+        if (!context->SubmitOnscreen({buffer})) {
+          return false;
+        }
+      } else {
+        if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
+          return false;
+        }
       }
     }
 
@@ -722,9 +733,16 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
 
         pass->Draw().ok();
       }
+
       pass->EncodeCommands();
-      if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
-        return false;
+      if (is_onscreen) {
+        if (!context->SubmitOnscreen({buffer})) {
+          return false;
+        }
+      } else {
+        if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
+          return false;
+        }
       }
     }
     data_host_buffer->Reset();
@@ -771,7 +789,8 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
 
   bool first_frame = true;
   auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
-  Playground::RenderCallback callback = [&](RenderTarget& render_target) {
+  Playground::RenderCallback callback = [&](RenderTarget& render_target,
+                                            bool is_onscreen) {
     const char* mip_filter_names[] = {"Base", "Nearest", "Linear"};
     const MipFilter mip_filters[] = {MipFilter::kBase, MipFilter::kNearest,
                                      MipFilter::kLinear};
@@ -848,8 +867,14 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
       pass->EncodeCommands();
     }
 
-    if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
-      return false;
+    if (is_onscreen) {
+      if (!context->SubmitOnscreen({buffer})) {
+        return false;
+      }
+    } else {
+      if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
+        return false;
+      }
     }
     data_host_buffer->Reset();
     return true;
@@ -1222,7 +1247,8 @@ TEST_P(RendererTest, StencilMask) {
       CompareFunctionUI().IndexOf(CompareFunction::kLessEqual);
 
   auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
-  Playground::RenderCallback callback = [&](RenderTarget& render_target) {
+  Playground::RenderCallback callback = [&](RenderTarget& render_target,
+                                            bool is_onscreen) {
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
       return false;
@@ -1324,8 +1350,14 @@ TEST_P(RendererTest, StencilMask) {
       pass->EncodeCommands();
     }
 
-    if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
-      return false;
+    if (is_onscreen) {
+      if (!context->SubmitOnscreen({buffer})) {
+        return false;
+      }
+    } else {
+      if (!context->GetCommandQueue()->Submit({buffer}).ok()) {
+        return false;
+      }
     }
     data_host_buffer->Reset();
     return true;
