@@ -27,6 +27,8 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
+import 'package:flutter_tools/src/globals.dart' as globals;
+
 void main() {
   late MemoryFileSystem memoryFileSystem;
   late Directory outputDirectory;
@@ -62,9 +64,8 @@ void main() {
             .childDirectory('lib')
             .childFile('main.dart')
             .createSync(recursive: true);
-        final logger = BufferLogger.test();
         final command = BuildIOSFrameworkCommand(
-          logger: logger,
+          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           verboseHelp: false,
@@ -77,14 +78,14 @@ void main() {
           throwsToolExit(message: 'Project does not support iOS'),
         );
         expect(
-          logger.warningText,
+          (globals.logger as BufferLogger).warningText,
           contains(
             'The "flutter build ios-framework" command is deprecated and has been replaced by '
             '"flutter build swift-package --platform ios".',
           ),
         );
         expect(
-          logger.warningText,
+          (globals.logger as BufferLogger).warningText,
           contains('https://docs.flutter.dev/add-to-app/ios/project-setup'),
         );
       },
@@ -616,9 +617,8 @@ void main() {
             .childDirectory('lib')
             .childFile('main.dart')
             .createSync(recursive: true);
-        final logger = BufferLogger.test();
         final command = BuildMacOSFrameworkCommand(
-          logger: logger,
+          logger: BufferLogger.test(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           platform: fakePlatform,
           verboseHelp: false,
@@ -631,15 +631,15 @@ void main() {
           throwsToolExit(message: 'Project does not support macOS'),
         );
         expect(
-          logger.warningText,
+          (globals.logger as BufferLogger).warningText,
           contains(
             'The "flutter build macos-framework" command is deprecated and has been replaced by '
             '"flutter build swift-package --platform macos".',
           ),
         );
         expect(
-          logger.warningText,
-          contains('https://docs.flutter.dev/add-to-app/ios/project-setup'),
+          (globals.logger as BufferLogger).warningText,
+          contains('https://docs.flutter.dev/add-to-app/macos/project-setup'),
         );
       },
       overrides: <Type, Generator>{

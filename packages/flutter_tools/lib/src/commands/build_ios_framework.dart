@@ -109,16 +109,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   }
   final DarwinAddToAppCodesigning codesign;
 
-  @protected
-  void printMigrationWarning(String platform) {
-    logger.printWarning(
-      'The "flutter build $platform-framework" command is deprecated and has been replaced by '
-      '"flutter build swift-package --platform $platform". '
-      'For more information, see: '
-      'https://docs.flutter.dev/add-to-app/$platform/project-setup',
-    );
-  }
-
   final BuildSystem? _buildSystem;
   @protected
   BuildSystem get buildSystem => _buildSystem ?? globals.buildSystem;
@@ -506,9 +496,17 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   bool get regeneratePlatformSpecificToolingDuringVerify => false;
 
   @override
-  Future<FlutterCommandResult> runCommand() async {
-    printMigrationWarning('ios');
+  bool get deprecated => true;
 
+  @override
+  String get deprecationWarning {
+    return '${globals.logger.terminal.warningMark} The "flutter build ios-framework" command is '
+        'deprecated and has been replaced by "flutter build swift-package --platform ios". '
+        'For more information, see: https://docs.flutter.dev/add-to-app/ios/project-setup\n';
+  }
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
         stringArg('output') ??
         globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'ios', 'framework');

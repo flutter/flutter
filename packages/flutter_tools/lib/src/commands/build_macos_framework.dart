@@ -57,9 +57,17 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   bool get regeneratePlatformSpecificToolingDuringVerify => false;
 
   @override
-  Future<FlutterCommandResult> runCommand() async {
-    printMigrationWarning('macos');
+  bool get deprecated => true;
 
+  @override
+  String get deprecationWarning {
+    return '${globals.logger.terminal.warningMark} The "flutter build macos-framework" command is '
+        'deprecated and has been replaced by "flutter build swift-package --platform macos". '
+        'For more information, see: https://docs.flutter.dev/add-to-app/macos/project-setup\n';
+  }
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
         stringArg('output') ??
         globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'macos', 'framework');
