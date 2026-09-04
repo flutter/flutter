@@ -487,6 +487,19 @@ Could not build the precompiled application for the device.''',
           'plugin_1_name, plugin_2_name.',
         ),
       );
+      expect(
+        fakeAnalytics.sentEvents,
+        containsAll(<Event>[
+          Event.appleUsageEvent(
+            workflow: 'duplicate-modules-build-failure',
+            parameter: 'plugin_1_name',
+          ),
+          Event.appleUsageEvent(
+            workflow: 'duplicate-modules-build-failure',
+            parameter: 'plugin_2_name',
+          ),
+        ]),
+      );
     });
 
     testWithoutContext('parses duplicate symbols error with arch and number', () async {
@@ -533,6 +546,15 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           'plugin_1_name.',
         ),
       );
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.appleUsageEvent(
+            workflow: 'duplicate-modules-build-failure',
+            parameter: 'plugin_1_name',
+          ),
+        ),
+      );
     });
 
     testWithoutContext('parses duplicate symbols error with number', () async {
@@ -576,6 +598,15 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           'plugin_1_name.',
         ),
       );
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.appleUsageEvent(
+            workflow: 'duplicate-modules-build-failure',
+            parameter: 'plugin_1_name',
+          ),
+        ),
+      );
     });
 
     testWithoutContext('parses duplicate symbols error without arch and number', () async {
@@ -616,6 +647,15 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           'cause the above error. It may be caused by there being both a CocoaPod '
           'and Swift Package Manager dependency for the following module(s): '
           'plugin_1_name.',
+        ),
+      );
+      expect(
+        fakeAnalytics.sentEvents,
+        contains(
+          Event.appleUsageEvent(
+            workflow: 'duplicate-modules-build-failure',
+            parameter: 'plugin_1_name',
+          ),
         ),
       );
     });
