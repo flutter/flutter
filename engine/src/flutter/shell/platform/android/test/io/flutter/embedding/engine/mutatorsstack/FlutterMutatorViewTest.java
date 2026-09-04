@@ -238,6 +238,31 @@ public class FlutterMutatorViewTest {
     assertFalse(eventSent);
   }
 
+  @Test
+  public void mutatorsStack_pushStretchEffect() {
+    final FlutterMutatorsStack stack = new FlutterMutatorsStack();
+    stack.pushStretchEffect(0.2f, 0.5f, 1.0f, 0.7f);
+
+    assertEquals(1, stack.getMutators().size());
+    final FlutterMutatorsStack.FlutterMutator mutator = stack.getMutators().get(0);
+    assertEquals(FlutterMutatorsStack.FlutterMutatorType.STRETCH_EFFECT, mutator.getType());
+    assertEquals(0.2f, mutator.getOverscrollX(), 0.001f);
+    assertEquals(0.5f, mutator.getOverscrollY(), 0.001f);
+    assertEquals(1.0f, mutator.getMaxStretchIntensity(), 0.001f);
+    assertEquals(0.7f, mutator.getInterpolationStrength(), 0.001f);
+
+    assertEquals(0.2f, stack.getFinalOverscrollX(), 0.001f);
+    assertEquals(0.5f, stack.getFinalOverscrollY(), 0.001f);
+    assertEquals(1.0f, stack.getFinalMaxStretchIntensity(), 0.001f);
+    assertEquals(0.7f, stack.getFinalInterpolationStrength(), 0.001f);
+
+    final FlutterMutatorView view = new FlutterMutatorView(ctx);
+    view.readyToDisplay(stack, 0, 0, 100, 100);
+
+    final FlutterMutatorsStack emptyStack = new FlutterMutatorsStack();
+    view.readyToDisplay(emptyStack, 0, 0, 100, 100);
+  }
+
   @Implements(ViewGroup.class)
   public static class ShadowViewGroup extends org.robolectric.shadows.ShadowViewGroup {
     @Implementation

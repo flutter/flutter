@@ -117,6 +117,15 @@ void MutatorsStack::PushPlatformViewClipPath(const DlPath& path) {
       std::make_shared<Mutator>(BackdropClipPath(path));
   vector_.push_back(element);
 }
+void MutatorsStack::PushOverscrollStretch(DlScalar overscroll_x,
+                                          DlScalar overscroll_y,
+                                          DlScalar max_stretch_intensity,
+                                          DlScalar interpolation_strength) {
+  std::shared_ptr<Mutator> element = std::make_shared<Mutator>(
+      OverscrollStretchMutation(overscroll_x, overscroll_y,
+                                max_stretch_intensity, interpolation_strength));
+  vector_.push_back(element);
+}
 
 void MutatorsStack::Pop() {
   vector_.pop_back();

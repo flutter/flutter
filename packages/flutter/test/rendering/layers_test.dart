@@ -380,6 +380,24 @@ void main() {
     expect(info, contains('blendMode: clear'));
   });
 
+  test('OverscrollStretchLayer prints properties in debug info', () {
+    final filter = ImageFilter.blur(sigmaX: 2.0, sigmaY: 3.0);
+    final layer = OverscrollStretchLayer(
+      imageFilter: filter,
+      overscrollX: 0.2,
+      overscrollY: 0.5,
+      maxStretchIntensity: 0.8,
+      interpolationStrength: 0.6,
+    );
+    final List<String> info = getDebugInfo(layer);
+
+    expect(info, contains('imageFilter: ImageFilter.blur(${2.0}, ${3.0}, clamp)'));
+    expect(info, contains('overscrollX: 0.2'));
+    expect(info, contains('overscrollY: 0.5'));
+    expect(info, contains('maxStretchIntensity: 0.8'));
+    expect(info, contains('interpolationStrength: 0.6'));
+  });
+
   test('PictureLayer prints picture, raster cache hints in debug info', () {
     final recorder = PictureRecorder();
     final canvas = Canvas(recorder);
@@ -520,6 +538,25 @@ void main() {
     final layer = BackdropFilterLayer(filter: ImageFilter.blur());
     checkNeedsAddToScene(layer, () {
       layer.filter = ImageFilter.blur(sigmaX: 1.0);
+    });
+  });
+
+  test('mutating OverscrollStretchLayer fields triggers needsAddToScene', () {
+    final layer = OverscrollStretchLayer(imageFilter: ImageFilter.blur());
+    checkNeedsAddToScene(layer, () {
+      layer.imageFilter = ImageFilter.blur(sigmaX: 1.0);
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.overscrollX = 0.5;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.overscrollY = 0.5;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.maxStretchIntensity = 0.8;
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.interpolationStrength = 0.9;
     });
   });
 

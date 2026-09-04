@@ -190,6 +190,7 @@ void EmbedderLayers::PushPlatformViewLayer(
         case MutatorType::kBackdropClipRRect:
         case MutatorType::kBackdropClipRSuperellipse:
         case MutatorType::kBackdropClipPath:
+        case MutatorType::kOverscrollStretch:
           break;
       }
     }

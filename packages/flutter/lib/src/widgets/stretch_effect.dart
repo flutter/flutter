@@ -9,12 +9,24 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
-import 'image_filter.dart';
 
 /// A widget that applies a stretching visual effect to its child.
 ///
 /// When shader-based effects are supported, this effect replicates the native Android stretch overscroll effect.
 /// Otherwise, a matrix transform provides an approximation.
+///
+/// On Android 13 (API level 33) and above, this stretch effect is applied to
+/// embedded Android Platform Views across all composition modes:
+/// - Virtual Display (VD)
+/// - Texture Layer Hybrid Composition (TLHC)
+/// - Hybrid Composition (HC)
+/// - Hybrid Composition++ (HCPP)
+///
+/// On Android 12 (API levels 31-32) and earlier:
+/// - Platform views rendered via Virtual Display (VD) and Texture Layer Hybrid
+///   Composition (TLHC) are fully supported and will stretch via the GPU shader.
+/// - Platform views rendered via Hybrid Composition (HC) and Hybrid Composition++ (HCPP)
+///   will remain unstretched while the surrounding Flutter content stretches.
 ///
 /// Used by [StretchingOverscrollIndicator] widget.
 class StretchEffect extends StatelessWidget {
@@ -152,6 +164,9 @@ class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
   ui.FragmentShader? _fragmentShader;
 
   /// The maximum scale multiplier applied during a stretch effect.
+  ///
+  /// Retained for cross-platform support and forward compatibility with future
+  /// shader parameterizations.
   static const double maxStretchIntensity = 1.0;
 
   /// The strength of the interpolation used for smoothing the effect.
@@ -199,8 +214,15 @@ class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
       imageFilter = _emptyFilter;
     }
 
-    return ImageFiltered(
+    final double overscrollX = widget.axis == Axis.horizontal ? widget.stretchStrength : 0.0;
+    final double overscrollY = widget.axis == Axis.vertical ? widget.stretchStrength : 0.0;
+
+    return _OverscrollStretch(
       imageFilter: imageFilter,
+      overscrollX: overscrollX,
+      overscrollY: overscrollY,
+      maxStretchIntensity: maxStretchIntensity,
+      interpolationStrength: interpolationStrength,
       enabled: isShaderNeeded,
       // A nearly-transparent pixels is used to ensure the shader gets applied,
       // even when the child is visually transparent or has no paint operations.
@@ -209,6 +231,141 @@ class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
         child: widget.child,
       ),
     );
+  }
+}
+
+class _OverscrollStretch extends SingleChildRenderObjectWidget {
+  const _OverscrollStretch({
+    required this.imageFilter,
+    required this.overscrollX,
+    required this.overscrollY,
+    required this.maxStretchIntensity,
+    required this.interpolationStrength,
+    required this.enabled,
+    super.child,
+  });
+
+  final ui.ImageFilter imageFilter;
+  final double overscrollX;
+  final double overscrollY;
+  final double maxStretchIntensity;
+  final double interpolationStrength;
+  final bool enabled;
+
+  @override
+  _RenderOverscrollStretch createRenderObject(BuildContext context) {
+    return _RenderOverscrollStretch(
+      imageFilter: imageFilter,
+      overscrollX: overscrollX,
+      overscrollY: overscrollY,
+      maxStretchIntensity: maxStretchIntensity,
+      interpolationStrength: interpolationStrength,
+      enabled: enabled,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderOverscrollStretch renderObject) {
+    renderObject
+      ..imageFilter = imageFilter
+      ..overscrollX = overscrollX
+      ..overscrollY = overscrollY
+      ..maxStretchIntensity = maxStretchIntensity
+      ..interpolationStrength = interpolationStrength
+      ..enabled = enabled;
+  }
+}
+
+class _RenderOverscrollStretch extends RenderProxyBox {
+  _RenderOverscrollStretch({
+    required ui.ImageFilter imageFilter,
+    required double overscrollX,
+    required double overscrollY,
+    required double maxStretchIntensity,
+    required double interpolationStrength,
+    required bool enabled,
+  }) : _imageFilter = imageFilter,
+       _overscrollX = overscrollX,
+       _overscrollY = overscrollY,
+       _maxStretchIntensity = maxStretchIntensity,
+       _interpolationStrength = interpolationStrength,
+       _enabled = enabled;
+
+  bool get enabled => _enabled;
+  bool _enabled;
+  set enabled(bool value) {
+    if (_enabled == value) {
+      return;
+    }
+    final bool wasRepaintBoundary = isRepaintBoundary;
+    _enabled = value;
+    if (isRepaintBoundary != wasRepaintBoundary) {
+      markNeedsCompositingBitsUpdate();
+    }
+    markNeedsPaint();
+  }
+
+  ui.ImageFilter get imageFilter => _imageFilter;
+  ui.ImageFilter _imageFilter;
+  set imageFilter(ui.ImageFilter value) {
+    if (value != _imageFilter) {
+      _imageFilter = value;
+      markNeedsCompositedLayerUpdate();
+    }
+  }
+
+  double get overscrollX => _overscrollX;
+  double _overscrollX;
+  set overscrollX(double value) {
+    if (value != _overscrollX) {
+      _overscrollX = value;
+      markNeedsCompositedLayerUpdate();
+    }
+  }
+
+  double get overscrollY => _overscrollY;
+  double _overscrollY;
+  set overscrollY(double value) {
+    if (value != _overscrollY) {
+      _overscrollY = value;
+      markNeedsCompositedLayerUpdate();
+    }
+  }
+
+  double get maxStretchIntensity => _maxStretchIntensity;
+  double _maxStretchIntensity;
+  set maxStretchIntensity(double value) {
+    if (value != _maxStretchIntensity) {
+      _maxStretchIntensity = value;
+      markNeedsCompositedLayerUpdate();
+    }
+  }
+
+  double get interpolationStrength => _interpolationStrength;
+  double _interpolationStrength;
+  set interpolationStrength(double value) {
+    if (value != _interpolationStrength) {
+      _interpolationStrength = value;
+      markNeedsCompositedLayerUpdate();
+    }
+  }
+
+  @override
+  bool get alwaysNeedsCompositing => child != null && enabled;
+
+  @override
+  bool get isRepaintBoundary => alwaysNeedsCompositing;
+
+  @override
+  OffsetLayer updateCompositedLayer({required covariant OverscrollStretchLayer? oldLayer}) {
+    final OverscrollStretchLayer layer = oldLayer ?? OverscrollStretchLayer();
+    layer
+      ..imageFilter = imageFilter
+      ..overscrollX = overscrollX
+      ..overscrollY = overscrollY
+      ..maxStretchIntensity = maxStretchIntensity
+      ..interpolationStrength = interpolationStrength;
+    return layer;
   }
 }
 
