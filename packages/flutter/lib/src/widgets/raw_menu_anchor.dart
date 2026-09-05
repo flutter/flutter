@@ -31,9 +31,19 @@ import 'tap_region.dart';
 
 const bool _kDebugMenus = false;
 
-const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
+// Shortcuts that are bound to the anchor while its menu is closed.
+//
+// Directional traversal shortcuts are omitted so that widgets in the anchor
+// which handle arrow keys themselves, such as text fields, keep receiving them
+// while the menu is closed.
+const Map<ShortcutActivator, Intent> _kClosedMenuShortcuts = <ShortcutActivator, Intent>{
   SingleActivator(LogicalKeyboardKey.gameButtonA): ActivateIntent(),
   SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
+};
+
+// Shortcuts that are bound to the anchor while its menu is open.
+const Map<ShortcutActivator, Intent> _kMenuTraversalShortcuts = <ShortcutActivator, Intent>{
+  ..._kClosedMenuShortcuts,
   SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(TraversalDirection.down),
   SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(TraversalDirection.up),
   SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
@@ -843,7 +853,9 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
   Widget buildAnchor(BuildContext context) {
     final Widget child = Shortcuts(
       includeSemantics: false,
-      shortcuts: _kMenuTraversalShortcuts,
+      // Directional traversal shortcuts are only bound while the menu is open,
+      // so that the anchor doesn't swallow arrow keys that its child needs.
+      shortcuts: isOpen ? _kMenuTraversalShortcuts : _kClosedMenuShortcuts,
       child: TapRegion(
         groupId: root.menuController,
         consumeOutsideTaps: root.isOpen && widget.consumeOutsideTaps,
