@@ -146,11 +146,15 @@ class CrashReportSender {
   /// Sends one crash report.
   ///
   /// The report is populated from data in [error] and [stackTrace].
+  ///
+  /// If [typeId] is provided, it will be used as the type of the crash, otherwise will default to
+  /// being a Dart error ([_kDartTypeId]).
   Future<void> sendReport({
     required Object error,
     required StackTrace stackTrace,
     required String Function() getFlutterVersion,
     required String command,
+    String? typeId,
   }) async {
     // Only send one crash report per run.
     if (_crashReportSent) {
@@ -176,7 +180,7 @@ class CrashReportSender {
       req.fields['version'] = flutterVersion;
       req.fields['osName'] = _platform.operatingSystem;
       req.fields['osVersion'] = _operatingSystemUtils.name; // this actually includes version
-      req.fields['type'] = _kDartTypeId;
+      req.fields['type'] = typeId ?? _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
       req.fields['error_message'] = '$error';
       req.fields['comments'] = command;

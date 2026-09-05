@@ -6,6 +6,8 @@ import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
+import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -30,6 +33,7 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
+import '../../src/throwing_pub.dart';
 
 class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInterpreter {
   FakeXcodeProjectInterpreterWithBuildSettings({Map<String, String>? overrides, Version? version})
@@ -80,7 +84,6 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = getFlutterRoot();
   });
 
   setUp(() {
@@ -145,18 +148,21 @@ void main() {
     Platform? platformParam,
     PlistParser? plistParser,
     ProcessManager? processManagerParam,
-    Xcode? xcode,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
+    Xcode? xcode,
   }) {
-    final FileSystem effectiveFileSystem = fileSystemParam ?? fileSystem;
-    final Logger effectiveLogger = loggerParam ?? logger;
-    final Platform effectivePlatform = platformParam ?? macosPlatform;
-    final ProcessManager effectiveProcessManager = processManagerParam ?? fakeProcessManager;
+    final FileSystem effectiveFileSystem =
+        fileSystemParam ?? (context.get<FileSystem>() ?? fileSystem);
+    final Logger effectiveLogger = loggerParam ?? (context.get<Logger>() ?? logger);
+    final Platform effectivePlatform = platformParam ?? (context.get<Platform>() ?? macosPlatform);
+    final ProcessManager effectiveProcessManager =
+        processManagerParam ?? (context.get<ProcessManager>() ?? fakeProcessManager);
+    final Xcode effectiveXcode = xcode ?? (context.get<Xcode>() ?? FakeXcode());
     final XcodeProjectInterpreter effectiveXcodeProjectInterpreter =
-        xcodeProjectInterpreter ?? FakeXcodeProjectInterpreterWithBuildSettings();
-    final Xcode effectiveXcode =
-        xcode ?? FakeXcode(currentVersion: effectiveXcodeProjectInterpreter.version);
-    final PlistParser effectivePlistParser = plistParser ?? plistUtils;
+        xcodeProjectInterpreter ??
+        (context.get<XcodeProjectInterpreter>() ?? FakeXcodeProjectInterpreterWithBuildSettings());
+    final PlistParser effectivePlistParser =
+        plistParser ?? (context.get<PlistParser>() ?? plistUtils);
     return createFakeBuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -273,70 +279,117 @@ void main() {
     );
   }
 
-  testUsingContext('ipa build fails when there is no ios project', () async {
-    final BuildCommand command = createBuildCommand();
-    createCoreMockProjectFiles();
+  testUsingContext(
+    'ipa build fails when there is no ios project',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      createCoreMockProjectFiles();
 
-    expect(
-      createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
-      throwsToolExit(message: 'Application not configured for iOS'),
-    );
-  });
+      expect(
+        createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
+        throwsToolExit(message: 'Application not configured for iOS'),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
 
-  testUsingContext('ipa build fails in debug with code analysis', () async {
-    final BuildCommand command = createBuildCommand();
-    createCoreMockProjectFiles();
+  testUsingContext(
+    'ipa build fails in debug with code analysis',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      createCoreMockProjectFiles();
 
-    expect(
-      createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'ipa', '--no-pub', '--debug', '--analyze-size']),
-      throwsToolExit(message: '--analyze-size" can only be used on release builds'),
-    );
-  });
+      expect(
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'ipa', '--no-pub', '--debug', '--analyze-size']),
+        throwsToolExit(message: '--analyze-size" can only be used on release builds'),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
 
-  testUsingContext('ipa build fails on non-macOS platform', () async {
-    final BuildCommand command = createBuildCommand(platformParam: notMacosPlatform);
-    fileSystem.file('pubspec.yaml').createSync();
-    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-    fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+  testUsingContext(
+    'ipa build fails on non-macOS platform',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      fileSystem.file('pubspec.yaml').createSync();
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+      fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
 
-    final bool supported = BuildIOSArchiveCommand(
-      appleContext: FakeAppleContext(),
-      buildSystem: FakeBuildSystem(),
-      toolContext: FakeToolContext(logger: BufferLogger.test()),
-      verboseHelp: false,
-    ).supported;
-    expect(
-      createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
-      supported ? throwsToolExit() : throwsA(isA<UsageException>()),
-    );
-  });
+      final bool supported = BuildIOSArchiveCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: FakeBuildSystem(),
+        toolContext: FakeToolContext(logger: BufferLogger.test()),
+        verboseHelp: false,
+      ).supported;
+      expect(
+        createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
+        supported ? throwsToolExit() : throwsA(isA<UsageException>()),
+      );
+    },
+    overrides: <Type, Generator>{
+      Platform: () => notMacosPlatform,
+      Logger: () => logger,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
 
-  testUsingContext('ipa build fails when export plist does not exist', () async {
-    final BuildCommand command = createBuildCommand();
-    createMinimalMockProjectFiles();
+  testUsingContext(
+    'ipa build fails when export plist does not exist',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      createMinimalMockProjectFiles();
 
-    await expectToolExitLater(
-      createTestCommandRunner(
-        command,
-      ).run(<String>['build', 'ipa', '--export-options-plist', 'bogus.plist', '--no-pub']),
-      contains('property list does not exist'),
-    );
-  });
+      await expectToolExitLater(
+        createTestCommandRunner(
+          command,
+        ).run(<String>['build', 'ipa', '--export-options-plist', 'bogus.plist', '--no-pub']),
+        contains('property list does not exist'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
 
-  testUsingContext('ipa build fails when export plist is not a file', () async {
-    final Directory bogus = fileSystem.directory('bogus')..createSync();
-    final BuildCommand command = createBuildCommand();
-    createMinimalMockProjectFiles();
+  testUsingContext(
+    'ipa build fails when export plist is not a file',
+    () async {
+      final Directory bogus = fileSystem.directory('bogus')..createSync();
+      final BuildCommand command = createBuildCommand();
+      createMinimalMockProjectFiles();
 
-    await expectToolExitLater(
-      createTestCommandRunner(
-        command,
-      ).run(<String>['build', 'ipa', '--export-options-plist', bogus.path, '--no-pub']),
-      contains('is not a file.'),
-    );
-  });
+      await expectToolExitLater(
+        createTestCommandRunner(
+          command,
+        ).run(<String>['build', 'ipa', '--export-options-plist', bogus.path, '--no-pub']),
+        contains('is not a file.'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
+  );
 
   testUsingContext(
     'ipa build fails when --export-options-plist and --export-method are used together',
@@ -357,32 +410,46 @@ void main() {
         contains('"--export-options-plist" is not compatible with "--export-method"'),
       );
     },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+    },
   );
 
-  testUsingContext('ipa build reports method from --export-method when used', () async {
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
-    createMinimalMockProjectFiles();
-    await createTestCommandRunner(
-      command,
-    ).run(const <String>['build', 'ipa', '--export-method', 'ad-hoc', '--no-pub']);
+  testUsingContext(
+    'ipa build reports method from --export-method when used',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
+      createMinimalMockProjectFiles();
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--export-method', 'ad-hoc', '--no-pub']);
 
-    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-    expect(logger.statusText, contains('Building ad-hoc IPA'));
-  });
+      expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+      expect(logger.statusText, contains('Building ad-hoc IPA'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
   testUsingContext(
     'ipa build uses "debugging" export method for development distribution',
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
-      final BuildCommand command = createBuildCommand(
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(
-          version: Version(16, null, null),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       fakeProcessManager.addCommands(<FakeCommand>[
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
@@ -415,17 +482,23 @@ void main() {
       expect(actualIpaPlistContents, expectedIpaPlistContents);
       expect(logger.statusText, contains('Building debugging IPA'));
     },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
+      Artifacts: () => Artifacts.test(),
+    },
   );
 
   testUsingContext(
     'ipa build uses new "release-testing" export method for ad-hoc distribution',
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
-      final BuildCommand command = createBuildCommand(
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(
-          version: Version(16, null, null),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       fakeProcessManager.addCommands(<FakeCommand>[
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
@@ -458,17 +531,23 @@ void main() {
       expect(actualIpaPlistContents, expectedIpaPlistContents);
       expect(logger.statusText, contains('Building release-testing IPA'));
     },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
+      Artifacts: () => Artifacts.test(),
+    },
   );
 
   testUsingContext(
     'ipa build uses "app-store-connect" export method for app-store distribution',
     () async {
       final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
-      final BuildCommand command = createBuildCommand(
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(
-          version: Version(16, null, null),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       fakeProcessManager.addCommands(<FakeCommand>[
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(
@@ -501,16 +580,22 @@ void main() {
       expect(actualIpaPlistContents, expectedIpaPlistContents);
       expect(logger.statusText, contains('Building App Store IPA'));
     },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
+      Artifacts: () => Artifacts.test(),
+    },
   );
 
   testUsingContext(
     'ipa build accepts "enterprise" export method when on Xcode versions <= 15.3',
     () async {
-      final BuildCommand command = createBuildCommand(
-        xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(
-          version: Version(15, 3, null),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       fakeProcessManager.addCommands(<FakeCommand>[
         setUpFakeXcodeBuildHandler(),
         exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
@@ -521,28 +606,36 @@ void main() {
       ).run(const <String>['build', 'ipa', '--export-method', 'enterprise', '--no-pub']);
       expect(logger.statusText, contains('Building enterprise IPA'));
     },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
+      Artifacts: () => Artifacts.test(),
+    },
   );
 
-  testUsingContext('ipa build accepts "enterprise" export method', () async {
-    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
-    final BuildCommand command = createBuildCommand(
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(
-        version: Version(16, null, null),
-      ),
-    );
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(),
-      exportArchiveCommand(
-        exportOptionsPlist: _exportOptionsPlist,
-        cachePlist: cachedExportOptionsPlist,
-      ),
-    ]);
-    createMinimalMockProjectFiles();
-    await createTestCommandRunner(
-      command,
-    ).run(const <String>['build', 'ipa', '--export-method', 'enterprise', '--no-pub']);
+  testUsingContext(
+    'ipa build accepts "enterprise" export method',
+    () async {
+      final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(),
+        exportArchiveCommand(
+          exportOptionsPlist: _exportOptionsPlist,
+          cachePlist: cachedExportOptionsPlist,
+        ),
+      ]);
+      createMinimalMockProjectFiles();
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--export-method', 'enterprise', '--no-pub']);
 
-    const expectedIpaPlistContents = '''
+      const expectedIpaPlistContents = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -555,92 +648,137 @@ void main() {
 </plist>
 ''';
 
-    final String actualIpaPlistContents = fileSystem
-        .file(cachedExportOptionsPlist)
-        .readAsStringSync();
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
 
-    expect(actualIpaPlistContents, expectedIpaPlistContents);
-    expect(logger.statusText, contains('Building enterprise IPA'));
-  });
+      expect(actualIpaPlistContents, expectedIpaPlistContents);
+      expect(logger.statusText, contains('Building enterprise IPA'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(16, null, null)),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('ipa build accepts legacy methods when on Xcode versions <= 15.3', () async {
-    final BuildCommand command = createBuildCommand(
-      xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(
-        version: Version(15, 3, null),
-      ),
-    );
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
-    createMinimalMockProjectFiles();
-    await createTestCommandRunner(
-      command,
-    ).run(const <String>['build', 'ipa', '--export-method', 'app-store', '--no-pub']);
-    expect(logger.statusText, contains('Building App Store IPA'));
-  });
+  testUsingContext(
+    'ipa build accepts legacy methods when on Xcode versions <= 15.3',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
+      createMinimalMockProjectFiles();
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--export-method', 'app-store', '--no-pub']);
+      expect(logger.statusText, contains('Building App Store IPA'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () =>
+          FakeXcodeProjectInterpreterWithBuildSettings(version: Version(15, 3, null)),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('ipa build reports method from --export-options-plist when used', () async {
-    final File exportOptions = fileSystem.file('/ExportOptions.plist')..createSync();
-    createMinimalMockProjectFiles();
+  testUsingContext(
+    'ipa build reports method from --export-options-plist when used',
+    () async {
+      final File exportOptions = fileSystem.file('/ExportOptions.plist')..createSync();
+      createMinimalMockProjectFiles();
 
-    plistUtils.fileContents[exportOptions.path] = <String, String>{
-      'CFBundleIdentifier': 'io.flutter.someProject',
-      'method': 'enterprise',
-    };
+      plistUtils.fileContents[exportOptions.path] = <String, String>{
+        'CFBundleIdentifier': 'io.flutter.someProject',
+        'method': 'enterprise',
+      };
 
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(),
-      exportArchiveCommand(exportOptionsPlist: exportOptions.path),
-    ]);
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(
-      command,
-    ).run(<String>['build', 'ipa', '--export-options-plist', exportOptions.path, '--no-pub']);
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(),
+        exportArchiveCommand(exportOptionsPlist: exportOptions.path),
+      ]);
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'ipa', '--export-options-plist', exportOptions.path, '--no-pub']);
 
-    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-    expect(logger.statusText, contains('Building enterprise IPA'));
-  });
+      expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+      expect(logger.statusText, contains('Building enterprise IPA'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      PlistParser: () => plistUtils,
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('ipa build reports when IPA fails', () async {
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(),
-      const FakeCommand(
-        command: <String>[
-          'xcrun',
-          'xcodebuild',
-          '-exportArchive',
-          '-allowProvisioningDeviceRegistration',
-          '-allowProvisioningUpdates',
-          '-archivePath',
-          '/build/ios/archive/Runner.xcarchive',
-          '-exportPath',
-          '/build/ios/ipa',
-          '-exportOptionsPlist',
-          _exportOptionsPlist,
-        ],
-        exitCode: 1,
-        stderr: 'error: exportArchive: "Runner.app" requires a provisioning profile.',
-      ),
-    ]);
-    createMinimalMockProjectFiles();
+  testUsingContext(
+    'ipa build reports when IPA fails',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(),
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-exportArchive',
+            '-allowProvisioningDeviceRegistration',
+            '-allowProvisioningUpdates',
+            '-archivePath',
+            '/build/ios/archive/Runner.xcarchive',
+            '-exportPath',
+            '/build/ios/ipa',
+            '-exportOptionsPlist',
+            _exportOptionsPlist,
+          ],
+          exitCode: 1,
+          stderr: 'error: exportArchive: "Runner.app" requires a provisioning profile.',
+        ),
+      ]);
+      createMinimalMockProjectFiles();
 
-    fileSystem.directory('build/ios/archive/Runner.xcarchive').createSync(recursive: true);
+      fileSystem.directory('build/ios/archive/Runner.xcarchive').createSync(recursive: true);
 
-    await createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']);
+      await createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']);
 
-    expect(logger.statusText, contains('Built build/ios/archive/Runner.xcarchive'));
-    expect(logger.statusText, contains('Building App Store IPA'));
-    expect(logger.errorText, contains('Encountered error while creating the IPA:'));
-    expect(
-      logger.errorText,
-      contains('error: exportArchive: "Runner.app" requires a provisioning profile.'),
-    );
-    expect(logger.errorText, contains('Try distributing the app in Xcode:'));
-    expect(logger.errorText, contains('open /build/ios/archive/Runner.xcarchive'));
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
+      expect(logger.statusText, contains('Built build/ios/archive/Runner.xcarchive'));
+      expect(logger.statusText, contains('Building App Store IPA'));
+      expect(logger.errorText, contains('Encountered error while creating the IPA:'));
+      expect(
+        logger.errorText,
+        contains('error: exportArchive: "Runner.app" requires a provisioning profile.'),
+      );
+      expect(logger.errorText, contains('Try distributing the app in Xcode:'));
+      expect(logger.errorText, contains('open /build/ios/archive/Runner.xcarchive'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
   testUsingContext(
     'ipa build ignores deletion failure if generatedExportPlist does not exist',
@@ -660,23 +798,34 @@ void main() {
       await createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']);
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
   );
 
-  testUsingContext('ipa build invokes xcodebuild and archives for app store', () async {
-    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(),
-      exportArchiveCommand(
-        exportOptionsPlist: _exportOptionsPlist,
-        cachePlist: cachedExportOptionsPlist,
-      ),
-    ]);
-    createMinimalMockProjectFiles();
+  testUsingContext(
+    'ipa build invokes xcodebuild and archives for app store',
+    () async {
+      final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(),
+        exportArchiveCommand(
+          exportOptionsPlist: _exportOptionsPlist,
+          cachePlist: cachedExportOptionsPlist,
+        ),
+      ]);
+      createMinimalMockProjectFiles();
 
-    await createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']);
+      await createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']);
 
-    const expectedIpaPlistContents = '''
+      const expectedIpaPlistContents = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -689,36 +838,48 @@ void main() {
 </plist>
 ''';
 
-    final String actualIpaPlistContents = fileSystem
-        .file(cachedExportOptionsPlist)
-        .readAsStringSync();
-    expect(actualIpaPlistContents, expectedIpaPlistContents);
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
+      expect(actualIpaPlistContents, expectedIpaPlistContents);
 
-    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-    expect(logger.statusText, contains('Building App Store IPA'));
-    expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
-    expect(logger.statusText, contains('To upload to the App Store'));
-    expect(logger.statusText, contains('Apple Transporter macOS app'));
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
+      expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+      expect(logger.statusText, contains('Building App Store IPA'));
+      expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
+      expect(logger.statusText, contains('To upload to the App Store'));
+      expect(logger.statusText, contains('Apple Transporter macOS app'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('ipa build invokes xcodebuild and archives for ad-hoc distribution', () async {
-    final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(),
-      exportArchiveCommand(
-        exportOptionsPlist: _exportOptionsPlist,
-        cachePlist: cachedExportOptionsPlist,
-      ),
-    ]);
-    createMinimalMockProjectFiles();
+  testUsingContext(
+    'ipa build invokes xcodebuild and archives for ad-hoc distribution',
+    () async {
+      final File cachedExportOptionsPlist = fileSystem.file('/CachedExportOptions.plist');
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(),
+        exportArchiveCommand(
+          exportOptionsPlist: _exportOptionsPlist,
+          cachePlist: cachedExportOptionsPlist,
+        ),
+      ]);
+      createMinimalMockProjectFiles();
 
-    await createTestCommandRunner(
-      command,
-    ).run(const <String>['build', 'ipa', '--no-pub', '--export-method', 'ad-hoc']);
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--no-pub', '--export-method', 'ad-hoc']);
 
-    const expectedIpaPlistContents = '''
+      const expectedIpaPlistContents = '''
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -731,18 +892,28 @@ void main() {
 </plist>
 ''';
 
-    final String actualIpaPlistContents = fileSystem
-        .file(cachedExportOptionsPlist)
-        .readAsStringSync();
-    expect(actualIpaPlistContents, expectedIpaPlistContents);
+      final String actualIpaPlistContents = fileSystem
+          .file(cachedExportOptionsPlist)
+          .readAsStringSync();
+      expect(actualIpaPlistContents, expectedIpaPlistContents);
 
-    expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
-    expect(logger.statusText, contains('Building ad-hoc IPA'));
-    expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
-    // Don't instruct how to upload to the App Store.
-    expect(logger.statusText, isNot(contains('To upload')));
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
+      expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
+      expect(logger.statusText, contains('Building ad-hoc IPA'));
+      expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
+      // Don't instruct how to upload to the App Store.
+      expect(logger.statusText, isNot(contains('To upload')));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
   testUsingContext(
     'ipa build invokes xcodebuild and archives for enterprise distribution',
@@ -783,106 +954,165 @@ void main() {
       expect(logger.statusText, contains('build/ios/archive/Runner.xcarchive'));
       expect(logger.statusText, contains('Building enterprise IPA'));
       expect(logger.statusText, contains(RegExp(r'Built IPA to build/ios/ipa \(\d+\.\d+MB\)')));
-      // Don't instruct how to upload to the App Store.
+      // Don'ltruct how to upload to the App Store.
       expect(logger.statusText, isNot(contains('To upload')));
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
   );
 
-  testUsingContext('ipa build invokes xcode build with verbosity', () async {
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(verbose: true),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
-    createMinimalMockProjectFiles();
+  testUsingContext(
+    'ipa build invokes xcode build with verbosity',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(verbose: true),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
+      createMinimalMockProjectFiles();
 
-    await createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub', '-v']);
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
+      await createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub', '-v']);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('ipa build invokes xcode build without disablePortPublication', () async {
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
-    createMinimalMockProjectFiles();
+  testUsingContext(
+    'ipa build invokes xcode build without disablePortPublication',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
+      createMinimalMockProjectFiles();
 
-    await createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub', '--ci']);
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
-
-  testUsingContext('ipa build --no-codesign skips codesigning and IPA creation', () async {
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      const FakeCommand(
-        command: <String>[
-          'xcrun',
-          'xcodebuild',
-          '-configuration',
-          'Release',
-          '-quiet',
-          '-workspace',
-          'Runner.xcworkspace',
-          '-scheme',
-          'Runner',
-          '-sdk',
-          'iphoneos',
-          '-destination',
-          'generic/platform=iOS',
-          'CODE_SIGNING_ALLOWED=NO',
-          'CODE_SIGNING_REQUIRED=NO',
-          'CODE_SIGNING_IDENTITY=""',
-          '-resultBundlePath',
-          '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle',
-          '-resultBundleVersion',
-          '3',
-          'FLUTTER_SUPPRESS_ANALYTICS=true',
-          'COMPILER_INDEX_STORE_ENABLE=NO',
-          '-archivePath',
-          '/build/ios/archive/Runner',
-          'archive',
-        ],
-      ),
-    ]);
-    createMinimalMockProjectFiles();
-
-    await createTestCommandRunner(
-      command,
-    ).run(const <String>['build', 'ipa', '--no-pub', '--no-codesign']);
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-    expect(logger.statusText, contains('Codesigning disabled with --no-codesign, skipping IPA'));
-  });
-
-  testUsingContext('code size analysis fails when app not found', () async {
-    final BuildCommand command = createBuildCommand();
-    createMinimalMockProjectFiles();
-
-    fakeProcessManager.addCommand(setUpFakeXcodeBuildHandler());
-    await expectToolExitLater(
-      createTestCommandRunner(
+      await createTestCommandRunner(
         command,
-      ).run(const <String>['build', 'ipa', '--no-pub', '--analyze-size']),
-      contains('Could not find app to analyze code size'),
-    );
-  });
+      ).run(const <String>['build', 'ipa', '--no-pub', '--ci']);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('Performs code size analysis and sends analytics', () async {
-    final BuildCommand command = createBuildCommand();
-    createMinimalMockProjectFiles();
+  testUsingContext(
+    'ipa build --no-codesign skips codesigning and IPA creation',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-configuration',
+            'Release',
+            '-quiet',
+            '-workspace',
+            'Runner.xcworkspace',
+            '-scheme',
+            'Runner',
+            '-sdk',
+            'iphoneos',
+            '-destination',
+            'generic/platform=iOS',
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGNING_IDENTITY=""',
+            '-resultBundlePath',
+            '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle',
+            '-resultBundleVersion',
+            '3',
+            'FLUTTER_SUPPRESS_ANALYTICS=true',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+            '-archivePath',
+            '/build/ios/archive/Runner',
+            'archive',
+          ],
+        ),
+      ]);
+      createMinimalMockProjectFiles();
 
-    fileSystem.file(
-        'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Frameworks/App.framework/App',
-      )
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--no-pub', '--no-codesign']);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(logger.statusText, contains('Codesigning disabled with --no-codesign, skipping IPA'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
+
+  testUsingContext(
+    'code size analysis fails when app not found',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      createMinimalMockProjectFiles();
+
+      fakeProcessManager.addCommand(setUpFakeXcodeBuildHandler());
+      await expectToolExitLater(
+        createTestCommandRunner(
+          command,
+        ).run(const <String>['build', 'ipa', '--no-pub', '--analyze-size']),
+        contains('Could not find app to analyze code size'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
+
+  testUsingContext(
+    'Performs code size analysis and sends analytics',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      createMinimalMockProjectFiles();
+
+      fileSystem.file(
+          'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Frameworks/App.framework/App',
+        )
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file('build/flutter_size_01/snapshot.arm64.json')
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
 [
   {
     "l": "dart:_internal",
@@ -891,266 +1121,379 @@ void main() {
     "s": 2400
   }
 ]''');
-          fileSystem.file('build/flutter_size_01/trace.arm64.json')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('{}');
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
-
-    await createTestCommandRunner(
-      command,
-      fakeAnalytics,
-    ).run(const <String>['build', 'ipa', '--no-pub', '--analyze-size']);
-
-    expect(logger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
-    expect(logger.statusText, contains('dart devtools --appSizeBase='));
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-    expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'ios')));
-  });
-
-  testUsingContext('ipa build invokes xcode build export archive when passed plist', () async {
-    final String outputPath = fileSystem.path.relative(fileSystem.path.join('build', 'ios', 'ipa'));
-    final File exportOptions = fileSystem.file('ExportOptions.plist')..createSync();
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(),
-      exportArchiveCommand(),
-    ]);
-    createMinimalMockProjectFiles();
-
-    await createTestCommandRunner(
-      command,
-    ).run(<String>['build', 'ipa', '--no-pub', '--export-options-plist', exportOptions.path]);
-
-    expect(
-      logger.statusText,
-      contains(
-        RegExp(
-          'Built IPA to $outputPath '
-          r'\(\d+\.\d+MB\)',
+            fileSystem.file('build/flutter_size_01/trace.arm64.json')
+              ..createSync(recursive: true)
+              ..writeAsStringSync('{}');
+          },
         ),
-      ),
-    );
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
 
-  testUsingContext('Trace error if xcresult is empty.', () async {
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        exitCode: 1,
-        onRun: (_) {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
-        },
-      ),
-      setUpLegacyXCResultCommand(),
-    ]);
-    createMinimalMockProjectFiles();
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'ipa', '--no-pub', '--analyze-size']);
 
-    await expectLater(
-      createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
-      throwsToolExit(),
-    );
+      expect(logger.statusText, contains('A summary of your iOS bundle analysis can be found at'));
+      expect(logger.statusText, contains('dart devtools --appSizeBase='));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'ios')));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),
+      Analytics: () => fakeAnalytics,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-    expect(logger.traceText, contains('xcresult parser: Unrecognized top level json format.'));
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
+  testUsingContext(
+    'ipa build invokes xcode build export archive when passed plist',
+    () async {
+      final String outputPath = fileSystem.path.relative(
+        fileSystem.path.join('build', 'ios', 'ipa'),
+      );
+      final File exportOptions = fileSystem.file('ExportOptions.plist')..createSync();
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(),
+        exportArchiveCommand(),
+      ]);
+      createMinimalMockProjectFiles();
 
-  testUsingContext('Display xcresult issues on console if parsed.', () async {
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        exitCode: 1,
-        onRun: (_) {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
-        },
-      ),
-      setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
-    ]);
-    createMinimalMockProjectFiles();
+      await createTestCommandRunner(
+        command,
+      ).run(<String>['build', 'ipa', '--no-pub', '--export-options-plist', exportOptions.path]);
 
-    await expectLater(
-      createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
-      throwsToolExit(),
-    );
+      expect(
+        logger.statusText,
+        contains(
+          RegExp(
+            'Built IPA to $outputPath '
+            r'\(\d+\.\d+MB\)',
+          ),
+        ),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-    expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
-    expect(
-      logger.errorText,
-      contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'),
-    );
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
+  testUsingContext(
+    'Trace error if xcresult is empty.',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          exitCode: 1,
+          onRun: (_) {
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          },
+        ),
+        setUpLegacyXCResultCommand(),
+      ]);
+      createMinimalMockProjectFiles();
 
-  testUsingContext('Do not display xcresult issues that needs to be discarded.', () async {
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        exitCode: 1,
-        onRun: (_) {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
-        },
-      ),
-      setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
-    ]);
-    createMinimalMockProjectFiles();
+      await expectLater(
+        createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
+        throwsToolExit(),
+      );
 
-    await expectLater(
-      createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
-      throwsToolExit(),
-    );
+      expect(logger.traceText, contains('xcresult parser: Unrecognized top level json format.'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-    expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
-    expect(
-      logger.errorText,
-      contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'),
-    );
-    expect(
-      logger.errorText,
-      isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')),
-    );
-    expect(
-      logger.warningText,
-      isNot(contains('but the range of supported deployment target versions')),
-    );
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
+  testUsingContext(
+    'Display xcresult issues on console if parsed.',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          exitCode: 1,
+          onRun: (_) {
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          },
+        ),
+        setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
+      ]);
+      createMinimalMockProjectFiles();
 
-  testUsingContext('Trace if xcresult bundle does not exist.', () async {
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[setUpFakeXcodeBuildHandler(exitCode: 1)]);
-    createMinimalMockProjectFiles();
+      await expectLater(
+        createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
+        throwsToolExit(),
+      );
 
-    await expectLater(
-      createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
-      throwsToolExit(),
-    );
+      expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
+      expect(
+        logger.errorText,
+        contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-    expect(
-      logger.traceText,
-      contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'),
-    );
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
+  testUsingContext(
+    'Do not display xcresult issues that needs to be discarded.',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          exitCode: 1,
+          onRun: (_) {
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          },
+        ),
+        setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssuesToBeDiscarded),
+      ]);
+      createMinimalMockProjectFiles();
 
-  testUsingContext('Extra error message for provision profile issue in xcresult bundle.', () async {
-    final BuildCommand command = createBuildCommand();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        exitCode: 1,
-        onRun: (_) {
-          fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
-        },
-      ),
-      setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
-    ]);
-    createMinimalMockProjectFiles();
+      await expectLater(
+        createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
+        throwsToolExit(),
+      );
 
-    await expectLater(
-      createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
-      throwsToolExit(),
-    );
+      expect(logger.errorText, contains("Use of undeclared identifier 'asdas'"));
+      expect(
+        logger.errorText,
+        contains('/Users/m/Projects/test_create/ios/Runner/AppDelegate.m:7:56'),
+      );
+      expect(
+        logger.errorText,
+        isNot(contains('Command PhaseScriptExecution failed with a nonzero exit code')),
+      );
+      expect(
+        logger.warningText,
+        isNot(contains('but the range of supported deployment target versions')),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-    expect(logger.errorText, contains('Some Provisioning profile issue.'));
-    expect(logger.errorText, contains('Error: could not code sign the application.'));
-    expect(logger.errorText, contains('To resolve this issue, try the following steps:'));
-    expect(logger.errorText, contains('open ios/Runner.xcworkspace'));
-    expect(logger.errorText, contains('In Runner > Signing & Capabilities, verify:'));
-    expect(
-      logger.errorText,
-      contains('In Xcode Settings > Accounts, verify the correct Apple Developer account is added'),
-    );
-    expect(
-      logger.errorText,
-      contains('Run Product > Build and fix any code signing issues shown by Xcode.'),
-    );
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  });
+  testUsingContext(
+    'Trace if xcresult bundle does not exist.',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[setUpFakeXcodeBuildHandler(exitCode: 1)]);
+      createMinimalMockProjectFiles();
 
-  testUsingContext('Validate basic Xcode settings with missing settings', () async {
-    const plistPath =
-        'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.file(plistPath).createSync(recursive: true);
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
+      await expectLater(
+        createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
+        throwsToolExit(),
+      );
 
-    createMinimalMockProjectFiles();
+      expect(
+        logger.traceText,
+        contains('The xcresult bundle are not generated. Displaying xcresult is disabled.'),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-    plistUtils.fileContents[plistPath] = <String, String>{
-      'CFBundleIdentifier': 'io.flutter.someProject',
-    };
+  testUsingContext(
+    'Extra error message for provision profile issue in xcresult bundle.',
+    () async {
+      final BuildCommand command = createBuildCommand();
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          exitCode: 1,
+          onRun: (_) {
+            fileSystem.systemTempDirectory.childDirectory(_xcBundleFilePath).createSync();
+          },
+        ),
+        setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithProvisionIssue),
+      ]);
+      createMinimalMockProjectFiles();
 
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+      await expectLater(
+        createTestCommandRunner(command).run(const <String>['build', 'ipa', '--no-pub']),
+        throwsToolExit(),
+      );
 
-    expect(
-      logger.statusText,
-      contains(
-        '[!] App Settings Validation\n'
-        '    ! Version Number: Missing\n'
-        '    ! Build Number: Missing\n'
-        '    ! Display Name: Missing\n'
-        '    ! Deployment Target: Missing\n'
-        '    • Bundle Identifier: io.flutter.someProject\n'
-        '    ! You must set up the missing app settings.\n',
-      ),
-    );
-    expect(
-      logger.statusText,
-      contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy'),
-    );
-  });
+      expect(logger.errorText, contains('Some Provisioning profile issue.'));
+      expect(logger.errorText, contains('Error: could not code sign the application.'));
+      expect(logger.errorText, contains('To resolve this issue, try the following steps:'));
+      expect(logger.errorText, contains('open ios/Runner.xcworkspace'));
+      expect(logger.errorText, contains('In Runner > Signing & Capabilities, verify:'));
+      expect(
+        logger.errorText,
+        contains(
+          'In Xcode Settings > Accounts, verify the correct Apple Developer account is added',
+        ),
+      );
+      expect(
+        logger.errorText,
+        contains('Run Product > Build and fix any code signing issues shown by Xcode.'),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('Validate basic Xcode settings with full settings', () async {
-    const plistPath =
-        'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.file(plistPath).createSync(recursive: true);
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
+  testUsingContext(
+    'Validate basic Xcode settings with missing settings',
+    () async {
+      const plistPath =
+          'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(plistPath).createSync(recursive: true);
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
 
-    createMinimalMockProjectFiles();
+      createMinimalMockProjectFiles();
 
-    plistUtils.fileContents[plistPath] = <String, String>{
-      'CFBundleIdentifier': 'io.flutter.someProject',
-      'CFBundleDisplayName': 'Awesome Gallery',
-      // Will not use CFBundleName since CFBundleDisplayName is present.
-      'CFBundleName': 'Awesome Gallery 2',
-      'MinimumOSVersion': '18.0',
-      'CFBundleVersion': '666',
-      'CFBundleShortVersionString': '12.34.56',
-    };
+      plistUtils.fileContents[plistPath] = <String, String>{
+        'CFBundleIdentifier': 'io.flutter.someProject',
+      };
 
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
-    expect(
-      logger.statusText,
-      contains(
-        '[✓] App Settings Validation\n'
-        '    • Version Number: 12.34.56\n'
-        '    • Build Number: 666\n'
-        '    • Display Name: Awesome Gallery\n'
-        '    • Deployment Target: 18.0\n'
-        '    • Bundle Identifier: io.flutter.someProject\n',
-      ),
-    );
-    expect(
-      logger.statusText,
-      contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy'),
-    );
-  });
+      expect(
+        logger.statusText,
+        contains(
+          '[!] App Settings Validation\n'
+          '    ! Version Number: Missing\n'
+          '    ! Build Number: Missing\n'
+          '    ! Display Name: Missing\n'
+          '    ! Deployment Target: Missing\n'
+          '    • Bundle Identifier: io.flutter.someProject\n'
+          '    ! You must set up the missing app settings.\n',
+        ),
+      );
+      expect(
+        logger.statusText,
+        contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      PlistParser: () => plistUtils,
+      Artifacts: () => Artifacts.test(),
+    },
+  );
+
+  testUsingContext(
+    'Validate basic Xcode settings with full settings',
+    () async {
+      const plistPath =
+          'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(plistPath).createSync(recursive: true);
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
+
+      createMinimalMockProjectFiles();
+
+      plistUtils.fileContents[plistPath] = <String, String>{
+        'CFBundleIdentifier': 'io.flutter.someProject',
+        'CFBundleDisplayName': 'Awesome Gallery',
+        // Will not use CFBundleName since CFBundleDisplayName is present.
+        'CFBundleName': 'Awesome Gallery 2',
+        'MinimumOSVersion': '18.0',
+        'CFBundleVersion': '666',
+        'CFBundleShortVersionString': '12.34.56',
+      };
+
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+
+      expect(
+        logger.statusText,
+        contains(
+          '[✓] App Settings Validation\n'
+          '    • Version Number: 12.34.56\n'
+          '    • Build Number: 666\n'
+          '    • Display Name: Awesome Gallery\n'
+          '    • Deployment Target: 18.0\n'
+          '    • Bundle Identifier: io.flutter.someProject\n',
+        ),
+      );
+      expect(
+        logger.statusText,
+        contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      PlistParser: () => plistUtils,
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
   testUsingContext(
     'Validate basic Xcode settings with CFBundleDisplayName fallback to CFBundleName',
@@ -1196,84 +1539,122 @@ void main() {
         contains('To update the settings, please refer to https://flutter.dev/to/ios-deploy'),
       );
     },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      PlistParser: () => plistUtils,
+      Artifacts: () => Artifacts.test(),
+    },
   );
 
-  testUsingContext('Validate basic Xcode settings with default bundle identifier prefix', () async {
-    const plistPath =
-        'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.file(plistPath).createSync(recursive: true);
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
+  testUsingContext(
+    'Validate basic Xcode settings with default bundle identifier prefix',
+    () async {
+      const plistPath =
+          'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(plistPath).createSync(recursive: true);
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
 
-    createMinimalMockProjectFiles();
+      createMinimalMockProjectFiles();
 
-    plistUtils.fileContents[plistPath] = <String, String>{
-      'CFBundleIdentifier': 'com.example.my_app',
-    };
+      plistUtils.fileContents[plistPath] = <String, String>{
+        'CFBundleIdentifier': 'com.example.my_app',
+      };
 
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
-    expect(
-      logger.statusText,
-      contains(
-        '    ! Your application still contains the default "com.example" bundle identifier.',
-      ),
-    );
-  });
-
-  testUsingContext('Validate basic Xcode settings with custom bundle identifier prefix', () async {
-    const plistPath =
-        'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.file(plistPath).createSync(recursive: true);
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
-
-    createMinimalMockProjectFiles();
-
-    plistUtils.fileContents[plistPath] = <String, String>{
-      'CFBundleIdentifier': 'com.my_company.my_app',
-    };
-
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
-
-    expect(
-      logger.statusText,
-      isNot(
+      expect(
+        logger.statusText,
         contains(
           '    ! Your application still contains the default "com.example" bundle identifier.',
         ),
-      ),
-    );
-  });
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      PlistParser: () => plistUtils,
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('Validate template app icons with conflicts', () async {
-    const projectIconContentsJsonPath =
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
-    const projectIconImagePath =
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
-    final templateIconContentsJsonPath =
-        '${Cache.flutterRoot!}/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
-    const templateIconImagePath =
-        '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+  testUsingContext(
+    'Validate basic Xcode settings with custom bundle identifier prefix',
+    () async {
+      const plistPath =
+          'build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist';
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(plistPath).createSync(recursive: true);
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
 
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.file(templateIconContentsJsonPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+      createMinimalMockProjectFiles();
+
+      plistUtils.fileContents[plistPath] = <String, String>{
+        'CFBundleIdentifier': 'com.my_company.my_app',
+      };
+
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+
+      expect(
+        logger.statusText,
+        isNot(
+          contains(
+            '    ! Your application still contains the default "com.example" bundle identifier.',
+          ),
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Platform: () => macosPlatform,
+      Pub: ThrowingPub.new,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      PlistParser: () => plistUtils,
+      Artifacts: () => Artifacts.test(),
+    },
+  );
+
+  testUsingContext(
+    'Validate template app icons with conflicts',
+    () async {
+      const projectIconContentsJsonPath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+      const projectIconImagePath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+      final templateIconContentsJsonPath =
+          '${Cache.flutterRoot!}/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+      const templateIconImagePath =
+          '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(templateIconContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
 {
   "images": [
     {
@@ -1289,13 +1670,13 @@ void main() {
   }
 }
 ''');
-          fileSystem.file(templateIconImagePath)
-            ..createSync(recursive: true)
-            ..writeAsBytes(<int>[1, 2, 3]);
+            fileSystem.file(templateIconImagePath)
+              ..createSync(recursive: true)
+              ..writeAsBytes(<int>[1, 2, 3]);
 
-          fileSystem.file(projectIconContentsJsonPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+            fileSystem.file(projectIconContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
 {
   "images": [
     {
@@ -1311,41 +1692,55 @@ void main() {
   }
 }
 ''');
-          fileSystem.file(projectIconImagePath)
-            ..createSync(recursive: true)
-            ..writeAsBytes(<int>[1, 2, 3]);
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
+            fileSystem.file(projectIconImagePath)
+              ..createSync(recursive: true)
+              ..writeAsBytes(<int>[1, 2, 3]);
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
 
-    createMinimalMockProjectFiles();
+      createMinimalMockProjectFiles();
 
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
-    expect(
-      logger.statusText,
-      contains('    ! App icon is set to the default placeholder icon. Replace with unique icons.'),
-    );
-  });
+      expect(
+        logger.statusText,
+        contains(
+          '    ! App icon is set to the default placeholder icon. Replace with unique icons.',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('Validate template app icons without conflicts', () async {
-    const projectIconContentsJsonPath =
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
-    const projectIconImagePath =
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
-    final templateIconContentsJsonPath =
-        '${Cache.flutterRoot!}/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
-    const templateIconImagePath =
-        '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+  testUsingContext(
+    'Validate template app icons without conflicts',
+    () async {
+      const projectIconContentsJsonPath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+      const projectIconImagePath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+      final templateIconContentsJsonPath =
+          '${Cache.flutterRoot!}/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+      const templateIconImagePath =
+          '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.file(templateIconContentsJsonPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(templateIconContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
 {
   "images": [
     {
@@ -1361,13 +1756,13 @@ void main() {
   }
 }
 ''');
-          fileSystem.file(templateIconImagePath)
-            ..createSync(recursive: true)
-            ..writeAsBytes(<int>[1, 2, 3]);
+            fileSystem.file(templateIconImagePath)
+              ..createSync(recursive: true)
+              ..writeAsBytes(<int>[1, 2, 3]);
 
-          fileSystem.file(projectIconContentsJsonPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+            fileSystem.file(projectIconContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
 {
   "images": [
     {
@@ -1383,39 +1778,51 @@ void main() {
   }
 }
 ''');
-          fileSystem.file(projectIconImagePath)
-            ..createSync(recursive: true)
-            ..writeAsBytes(<int>[4, 5, 6]);
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
+            fileSystem.file(projectIconImagePath)
+              ..createSync(recursive: true)
+              ..writeAsBytes(<int>[4, 5, 6]);
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
 
-    createMinimalMockProjectFiles();
+      createMinimalMockProjectFiles();
 
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
-    expect(
-      logger.statusText,
-      isNot(
-        contains('! App icon is set to the default placeholder icon. Replace with unique icons.'),
-      ),
-    );
-  });
+      expect(
+        logger.statusText,
+        isNot(
+          contains('! App icon is set to the default placeholder icon. Replace with unique icons.'),
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('Validate app icon using the wrong width', () async {
-    const projectIconContentsJsonPath =
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
-    const projectIconImagePath =
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+  testUsingContext(
+    'Validate app icon using the wrong width',
+    () async {
+      const projectIconContentsJsonPath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+      const projectIconImagePath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.file(projectIconContentsJsonPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(projectIconContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
 {
   "images": [
     {
@@ -1431,44 +1838,59 @@ void main() {
   }
 }
 ''');
-          fileSystem.file(projectIconImagePath)
-            ..createSync(recursive: true)
-            ..writeAsBytes(Uint8List(16))
-            // set width to 1 pixel
-            ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append)
-            // set height to 40 pixels
-            ..writeAsBytes(
-              Uint8List(4)..buffer.asByteData().setInt32(0, 40),
-              mode: FileMode.append,
-            );
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
+            fileSystem.file(projectIconImagePath)
+              ..createSync(recursive: true)
+              ..writeAsBytes(Uint8List(16))
+              // set width to 1 pixel
+              ..writeAsBytes(
+                Uint8List(4)..buffer.asByteData().setInt32(0, 1),
+                mode: FileMode.append,
+              )
+              // set height to 40 pixels
+              ..writeAsBytes(
+                Uint8List(4)..buffer.asByteData().setInt32(0, 40),
+                mode: FileMode.append,
+              );
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
 
-    createMinimalMockProjectFiles();
+      createMinimalMockProjectFiles();
 
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
-    expect(
-      logger.statusText,
-      contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).'),
-    );
-  });
+      expect(
+        logger.statusText,
+        contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('Validate app icon using the wrong height', () async {
-    const projectIconContentsJsonPath =
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
-    const projectIconImagePath =
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+  testUsingContext(
+    'Validate app icon using the wrong height',
+    () async {
+      const projectIconContentsJsonPath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+      const projectIconImagePath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.file(projectIconContentsJsonPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(projectIconContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
 {
   "images": [
     {
@@ -1484,41 +1906,59 @@ void main() {
   }
 }
 ''');
-          fileSystem.file(projectIconImagePath)
-            ..createSync(recursive: true)
-            ..writeAsBytes(Uint8List(16))
-            // set width to 40 pixels
-            ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 40), mode: FileMode.append)
-            // set height to 1 pixel
-            ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append);
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
+            fileSystem.file(projectIconImagePath)
+              ..createSync(recursive: true)
+              ..writeAsBytes(Uint8List(16))
+              // set width to 40 pixels
+              ..writeAsBytes(
+                Uint8List(4)..buffer.asByteData().setInt32(0, 40),
+                mode: FileMode.append,
+              )
+              // set height to 1 pixel
+              ..writeAsBytes(
+                Uint8List(4)..buffer.asByteData().setInt32(0, 1),
+                mode: FileMode.append,
+              );
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
 
-    createMinimalMockProjectFiles();
+      createMinimalMockProjectFiles();
 
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
-    expect(
-      logger.statusText,
-      contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).'),
-    );
-  });
+      expect(
+        logger.statusText,
+        contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('Validate app icon using the correct width and height', () async {
-    const projectIconContentsJsonPath =
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
-    const projectIconImagePath =
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+  testUsingContext(
+    'Validate app icon using the correct width and height',
+    () async {
+      const projectIconContentsJsonPath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+      const projectIconImagePath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.file(projectIconContentsJsonPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(projectIconContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
 {
   "images": [
     {
@@ -1534,45 +1974,60 @@ void main() {
   }
 }
 ''');
-          fileSystem.file(projectIconImagePath)
-            ..createSync(recursive: true)
-            ..writeAsBytes(Uint8List(16))
-            // set width to 40 pixels
-            ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 40), mode: FileMode.append)
-            // set height to 40 pixel
-            ..writeAsBytes(
-              Uint8List(4)..buffer.asByteData().setInt32(0, 40),
-              mode: FileMode.append,
-            );
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
+            fileSystem.file(projectIconImagePath)
+              ..createSync(recursive: true)
+              ..writeAsBytes(Uint8List(16))
+              // set width to 40 pixels
+              ..writeAsBytes(
+                Uint8List(4)..buffer.asByteData().setInt32(0, 40),
+                mode: FileMode.append,
+              )
+              // set height to 40 pixel
+              ..writeAsBytes(
+                Uint8List(4)..buffer.asByteData().setInt32(0, 40),
+                mode: FileMode.append,
+              );
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
 
-    createMinimalMockProjectFiles();
+      createMinimalMockProjectFiles();
 
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
-    expect(
-      logger.statusText,
-      isNot(contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')),
-    );
-  });
+      expect(
+        logger.statusText,
+        isNot(contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
-  testUsingContext('Validate app icon should skip validation for unknown format version', () async {
-    const projectIconContentsJsonPath =
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
-    const projectIconImagePath =
-        'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
+  testUsingContext(
+    'Validate app icon should skip validation for unknown format version',
+    () async {
+      const projectIconContentsJsonPath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json';
+      const projectIconImagePath =
+          'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png';
 
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          // Uses unknown format version 123.
-          fileSystem.file(projectIconContentsJsonPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            // Uses unknown format version 123.
+            fileSystem.file(projectIconContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
 {
   "images": [
     {
@@ -1588,29 +2043,45 @@ void main() {
   }
 }
 ''');
-          fileSystem.file(projectIconImagePath)
-            ..createSync(recursive: true)
-            ..writeAsBytes(Uint8List(16))
-            // set width to 1 pixel
-            ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append)
-            // set height to 1 pixel
-            ..writeAsBytes(Uint8List(4)..buffer.asByteData().setInt32(0, 1), mode: FileMode.append);
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
+            fileSystem.file(projectIconImagePath)
+              ..createSync(recursive: true)
+              ..writeAsBytes(Uint8List(16))
+              // set width to 1 pixel
+              ..writeAsBytes(
+                Uint8List(4)..buffer.asByteData().setInt32(0, 1),
+                mode: FileMode.append,
+              )
+              // set height to 1 pixel
+              ..writeAsBytes(
+                Uint8List(4)..buffer.asByteData().setInt32(0, 1),
+                mode: FileMode.append,
+              );
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
 
-    createMinimalMockProjectFiles();
+      createMinimalMockProjectFiles();
 
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
-    // The validation should be skipped, even when the icon size is incorrect.
-    expect(
-      logger.statusText,
-      isNot(contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')),
-    );
-  });
+      // The validation should be skipped, even when the icon size is incorrect.
+      expect(
+        logger.statusText,
+        isNot(contains('    ! App icon is using the incorrect size (e.g. Icon-App-20x20@2x.png).')),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 
   testUsingContext(
     'Validate app icon should skip validation of an icon image if invalid format',
@@ -1715,24 +2186,35 @@ void main() {
         );
       }
     },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
   );
 
-  testUsingContext('Validate template launch images with conflicts', () async {
-    const projectLaunchImageContentsJsonPath =
-        'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
-    const projectLaunchImagePath =
-        'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
-    final templateLaunchImageContentsJsonPath =
-        '${Cache.flutterRoot!}/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
-    const templateLaunchImagePath =
-        '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
+  testUsingContext(
+    'Validate template launch images with conflicts',
+    () async {
+      const projectLaunchImageContentsJsonPath =
+          'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+      const projectLaunchImagePath =
+          'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
+      final templateLaunchImageContentsJsonPath =
+          '${Cache.flutterRoot!}/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+      const templateLaunchImagePath =
+          '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
 
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.file(templateLaunchImageContentsJsonPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(templateLaunchImageContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
 {
   "images": [
     {
@@ -1747,13 +2229,13 @@ void main() {
   }
 }
 ''');
-          fileSystem.file(templateLaunchImagePath)
-            ..createSync(recursive: true)
-            ..writeAsBytes(<int>[1, 2, 3]);
+            fileSystem.file(templateLaunchImagePath)
+              ..createSync(recursive: true)
+              ..writeAsBytes(<int>[1, 2, 3]);
 
-          fileSystem.file(projectLaunchImageContentsJsonPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
+            fileSystem.file(projectLaunchImageContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
 {
   "images": [
     {
@@ -1768,100 +2250,122 @@ void main() {
   }
 }
 ''');
-          fileSystem.file(projectLaunchImagePath)
-            ..createSync(recursive: true)
-            ..writeAsBytes(<int>[1, 2, 3]);
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
+            fileSystem.file(projectLaunchImagePath)
+              ..createSync(recursive: true)
+              ..writeAsBytes(<int>[1, 2, 3]);
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
 
-    createMinimalMockProjectFiles();
+      createMinimalMockProjectFiles();
 
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
 
-    expect(
-      logger.statusText,
-      contains(
-        '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.',
-      ),
-    );
-  });
-
-  testUsingContext('Validate template launch images without conflicts', () async {
-    const projectLaunchImageContentsJsonPath =
-        'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
-    const projectLaunchImagePath =
-        'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
-    final templateLaunchImageContentsJsonPath =
-        '${Cache.flutterRoot!}/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
-    const templateLaunchImagePath =
-        '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
-
-    fakeProcessManager.addCommands(<FakeCommand>[
-      setUpFakeXcodeBuildHandler(
-        onRun: (_) {
-          fileSystem.file(templateLaunchImageContentsJsonPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
-{
-  "images": [
-    {
-      "idiom": "iphone",
-      "filename": "LaunchImage@2x.png",
-      "scale": "2x"
-    }
-  ],
-  "info": {
-    "version": 1,
-    "author": "xcode"
-  }
-}
-''');
-          fileSystem.file(templateLaunchImagePath)
-            ..createSync(recursive: true)
-            ..writeAsBytes(<int>[1, 2, 3]);
-
-          fileSystem.file(projectLaunchImageContentsJsonPath)
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
-{
-  "images": [
-    {
-      "idiom": "iphone",
-      "filename": "LaunchImage@2x.png",
-      "scale": "2x"
-    }
-  ],
-  "info": {
-    "version": 1,
-    "author": "xcode"
-  }
-}
-''');
-          fileSystem.file(projectLaunchImagePath)
-            ..createSync(recursive: true)
-            ..writeAsBytes(<int>[4, 5, 6]);
-        },
-      ),
-      exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
-    ]);
-
-    createMinimalMockProjectFiles();
-
-    final BuildCommand command = createBuildCommand();
-    await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
-
-    expect(
-      logger.statusText,
-      isNot(
+      expect(
+        logger.statusText,
         contains(
           '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.',
         ),
-      ),
-    );
-  });
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
+
+  testUsingContext(
+    'Validate template launch images without conflicts',
+    () async {
+      const projectLaunchImageContentsJsonPath =
+          'ios/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+      const projectLaunchImagePath =
+          'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
+      final templateLaunchImageContentsJsonPath =
+          '${Cache.flutterRoot!}/packages/flutter_tools/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/Contents.json';
+      const templateLaunchImagePath =
+          '/flutter_template_images/templates/app/ios.tmpl/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png';
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          onRun: (_) {
+            fileSystem.file(templateLaunchImageContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "idiom": "iphone",
+      "filename": "LaunchImage@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+            fileSystem.file(templateLaunchImagePath)
+              ..createSync(recursive: true)
+              ..writeAsBytes(<int>[1, 2, 3]);
+
+            fileSystem.file(projectLaunchImageContentsJsonPath)
+              ..createSync(recursive: true)
+              ..writeAsStringSync('''
+{
+  "images": [
+    {
+      "idiom": "iphone",
+      "filename": "LaunchImage@2x.png",
+      "scale": "2x"
+    }
+  ],
+  "info": {
+    "version": 1,
+    "author": "xcode"
+  }
+}
+''');
+            fileSystem.file(projectLaunchImagePath)
+              ..createSync(recursive: true)
+              ..writeAsBytes(<int>[4, 5, 6]);
+          },
+        ),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
+
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createBuildCommand();
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+
+      expect(
+        logger.statusText,
+        isNot(
+          contains(
+            '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.',
+          ),
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
 }
 
 const _xcBundleFilePath = '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';

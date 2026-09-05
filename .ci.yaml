@@ -3670,6 +3670,20 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_advanced_blend_perf__timeline_summary
 
+  - name: Mac ios_universal_link_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      task_name: ios_universal_link_test
+
   - name: Mac_ios animated_advanced_blend_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4502,8 +4516,9 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac module_uiscene_test_ios
+  - name: Mac uiscene_plugin_lifecycle_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4512,7 +4527,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: module_uiscene_test_ios
+      task_name: uiscene_plugin_lifecycle_test_ios
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -7151,7 +7166,6 @@ targets:
   - name: Windows tool_tests_commands_2_2
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-

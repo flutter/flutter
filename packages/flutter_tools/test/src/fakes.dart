@@ -992,7 +992,6 @@ class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
 class FakeTerminal extends Fake implements AnsiTerminal {
   @override
   String get successMark => '✓';
-
   @override
   String get warningMark => '!';
 
@@ -1151,6 +1150,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
     CrashReporter? crashReporter,
+    FeatureFlags? featureFlags,
     ToolContext? toolContext,
   }) : _analytics = analytics,
        _androidContext = androidContext,
@@ -1158,6 +1158,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        _buildSystem = buildSystem,
        _buildTargets = buildTargets,
        _crashReporter = crashReporter,
+       _featureFlags = featureFlags,
        _toolContext = toolContext;
 
   final Analytics? _analytics;
@@ -1166,6 +1167,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final BuildSystem? _buildSystem;
   final BuildTargets? _buildTargets;
   final CrashReporter? _crashReporter;
+  final FeatureFlags? _featureFlags;
   final ToolContext? _toolContext;
 
   @override
@@ -1185,6 +1187,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   CrashReporter get crashReporter => _crashReporter ?? FakeCrashReporter();
+
+  @override
+  FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();
 
   @override
   ToolContext get toolContext => _toolContext ?? FakeToolContext();
