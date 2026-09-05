@@ -314,14 +314,22 @@ class KernelCompiler {
     String? dartPluginRegistrantUri;
     if (dartPluginRegistrant != null && dartPluginRegistrant.existsSync()) {
       final Uri dartPluginRegistrantFileUri = dartPluginRegistrant.uri;
-      dartPluginRegistrantUri =
-          packageConfig.toPackageUriForWorkspace(dartPluginRegistrantFileUri)?.toString() ??
-          toMultiRootPath(
-            dartPluginRegistrantFileUri,
-            _fileSystemScheme,
-            _fileSystemRoots,
-            _fileSystem.path.separator == r'\',
-          );
+
+      final dartPluginRegistrantPackageUri = packageConfig
+          .toPackageUriForWorkspace(dartPluginRegistrantFileUri)
+          ?.toString();
+      if (dartPluginRegistrantPackageUri != null) {
+        dartPluginRegistrantUri = dartPluginRegistrantPackageUri;
+      } else {
+        fileSystemScheme ??= 'org-dartlang-plugin-registrant';
+        fileSystemRoots = <String>[...?fileSystemRoots, dartPluginRegistrant.parent.path];
+        dartPluginRegistrantUri = toMultiRootPath(
+          dartPluginRegistrantFileUri,
+          fileSystemScheme,
+          fileSystemRoots,
+          _fileSystem.path.separator == r'\',
+        );
+      }
     }
 
     final List<String> commandToStartFrontendServer;
