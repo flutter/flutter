@@ -304,6 +304,17 @@ class MatrixTransition extends AnimatedWidget {
   /// When the animation is stopped (either in [AnimationStatus.dismissed] or
   /// [AnimationStatus.completed]), the filter quality argument will be ignored.
   ///
+  /// While the animation is running, a null value applies the updated matrix
+  /// directly to the child's painting operations on each animation tick. This
+  /// does not rebuild or lay out the child subtree, does not create an
+  /// [ImageFilterLayer], and lets repaint boundaries retain descendant layers.
+  ///
+  /// A non-null value renders the child into an intermediate bitmap and applies
+  /// the matrix through an [ImageFilterLayer] with the selected sampling
+  /// quality. This path forces compositing and incurs an offscreen `saveLayer`
+  /// operation while the animation is running. Consider profiling both paths
+  /// when the child is complex or the animation is performance-sensitive.
+  ///
   /// {@macro flutter.widgets.Transform.optional.FilterQuality}
   final FilterQuality? filterQuality;
 
