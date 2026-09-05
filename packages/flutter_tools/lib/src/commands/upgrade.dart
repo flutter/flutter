@@ -47,7 +47,7 @@ class UpgradeCommand extends FlutterCommand {
         negatable: false,
         help:
             'Continues the upgrade flow starting with the new version of the '
-            'Flutter tool. Must be used with --continue-started-at.',
+            'Flutter tool. Must be used with "--continue-started-at".',
       )
       ..addOption(
         'continue-started-at',
