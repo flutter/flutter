@@ -328,6 +328,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// The [Analytics] instance.
   Analytics get analytics => _analytics;
 
+  /// The [FeatureFlags] instance, if provided.
+  FeatureFlags? get featureFlags => _featureFlags;
+
   /// The [ToolContext] instance.
   ToolContext get toolContext => _toolContext;
 
@@ -565,6 +568,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
       contextOverrides.addAll(<Type, Object?>{
         Artifacts: Artifacts.getLocalEngine(engineBuildPaths),
       });
+    }
+    if (_featureFlags != null) {
+      contextOverrides[FeatureFlags] = _featureFlags;
     }
 
     await context.run<void>(

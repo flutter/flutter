@@ -23,7 +23,6 @@ import '../base/time.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart' as bundle;
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -215,6 +214,16 @@ abstract class FlutterCommand extends Command<void> {
   FlutterVersion get _flutterVersion =>
       _explicitToolContext?.flutterVersion ?? globals.flutterVersion;
   FileSystemUtils get _fsUtils => _explicitToolContext?.fileSystemUtils ?? globals.fsUtils;
+  FeatureFlags? get _featureFlags {
+    if (runner?.featureFlags case final FeatureFlags flags) {
+      return flags;
+    }
+    try {
+      return context.get<FeatureFlags>();
+    } on UnsupportedError {
+      return null;
+    }
+  }
 
   /// The currently executing command (or sub-command).
 
@@ -520,7 +529,7 @@ abstract class FlutterCommand extends Command<void> {
     if (rest != null && rest.isNotEmpty) {
       return rest.first;
     }
-    return bundle.defaultMainPath;
+    return _fs.path.join('lib', 'main.dart');
   }
 
   /// Indicates if the current command running has a terminal attached.
@@ -1234,7 +1243,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp => explicitEnableHcpp ?? featureFlags.isHcppEnabled;
+  bool get enableHcpp => explicitEnableHcpp ?? _featureFlags?.isHcppEnabled ?? false;
 
   void addTestFlag({required bool verboseHelp}) {
     argParser.addFlag(
@@ -1467,6 +1476,11 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
+    final FeatureFlags? featureFlags = _featureFlags;
+    if (featureFlags == null) {
+      return;
+    }
+
     final String enabledFeatureFlags = featureFlags.allFeatures
         .where((Feature feature) => featureFlags.isEnabled(feature))
         .where((Feature feature) => feature.runtimeId != null)
@@ -1511,7 +1525,10 @@ abstract class FlutterCommand extends Command<void> {
 
     return context.run<void>(
       name: 'command',
-      overrides: <Type, Generator>{FlutterCommand: () => this},
+      overrides: <Type, Generator>{
+        FlutterCommand: () => this,
+        if (_featureFlags case final FeatureFlags flags) FeatureFlags: () => flags,
+      },
       body: () async {
         if (_usesFatalWarnings) {
           _logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
