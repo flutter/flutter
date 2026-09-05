@@ -820,6 +820,9 @@ class FakeFlutterProjectFactory implements FlutterProjectFactory {
 
   @override
   Map<String, FlutterProject> get projects => throw UnimplementedError();
+
+  @override
+  void invalidate(Directory directory) {}
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
@@ -1083,6 +1086,9 @@ class FakeCache extends Fake implements Cache {
 
   @override
   Directory getWebSdkDirectory() => _fileSystem.directory('/bin/cache/flutter_web_sdk');
+
+  @override
+  String get dartSdkBuild => '12345';
 
   @override
   MapEntry<String, String> get dyLdLibEntry =>
@@ -1524,15 +1530,18 @@ class FakeAndroidContext extends Fake implements AndroidContext {
     AndroidStudio? androidStudio,
     GradleUtils? gradleUtils,
     Java? java,
+    Java? Function()? javaBuilder,
   }) : _androidSdk = androidSdk,
        _androidStudio = androidStudio,
        _gradleUtils = gradleUtils,
-       _java = java;
+       _java = java,
+       _javaBuilder = javaBuilder;
 
   final AndroidSdk? _androidSdk;
   final AndroidStudio? _androidStudio;
   final GradleUtils? _gradleUtils;
   final Java? _java;
+  final Java? Function()? _javaBuilder;
 
   @override
   AndroidSdk? get androidSdk => _androidSdk;
@@ -1544,7 +1553,7 @@ class FakeAndroidContext extends Fake implements AndroidContext {
   late final GradleUtils gradleUtils = _gradleUtils ?? FakeGradleUtils();
 
   @override
-  Java? get java => _java;
+  Java? get java => _javaBuilder != null ? _javaBuilder() : _java;
 }
 
 class FakeAppleContext extends Fake implements AppleContext {

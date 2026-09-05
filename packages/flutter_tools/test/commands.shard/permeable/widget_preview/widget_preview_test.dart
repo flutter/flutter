@@ -79,7 +79,7 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   }
 }
 
-class FakeTerminal extends Fake implements Terminal {}
+class FakeTerminal extends Fake implements AnsiTerminal {}
 
 class FakeAnalysisServer extends Fake implements AnalysisServer {
   @override
@@ -216,27 +216,30 @@ void main() {
     List<String> arguments, {
     Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) async {
+    final fakeToolContext = FakeToolContext(
+      artifacts: Artifacts.test(),
+      cache: Cache.test(processManager: loggingProcessManager, platform: platform),
+      fs: fs,
+      logger: logger,
+      os: OperatingSystemUtils(
+        fileSystem: fs,
+        logger: logger,
+        platform: platform,
+        processManager: loggingProcessManager,
+      ),
+      platform: platform,
+      processManager: loggingProcessManager,
+      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+      terminal: FakeTerminal(),
+    );
     final CommandRunner<void> runner = createTestCommandRunner(
       WidgetPreviewCommand(
-        verboseHelp: false,
-        logger: logger,
-        fs: fs,
-        projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
-        cache: Cache.test(processManager: loggingProcessManager, platform: platform),
-        platform: platform,
         shutdownHooks: shutdownHooks,
-        os: OperatingSystemUtils(
-          fileSystem: fs,
-          processManager: loggingProcessManager,
-          logger: logger,
-          platform: platform,
-        ),
-        artifacts: Artifacts.test(),
-        processManager: loggingProcessManager,
-        terminal: FakeTerminal(),
-        dtdServicesOverride: fakeDtdServices,
+        toolContext: fakeToolContext,
+        verboseHelp: false,
         analysisServerFactoryOverride:
             analysisServerFactoryOverride ?? () async => FakeAnalysisServer(),
+        dtdServicesOverride: fakeDtdServices,
       ),
     );
     await runner.run(<String>['widget-preview', ...arguments]);
