@@ -776,6 +776,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   double _lerp(double value) {
     assert(value >= 0.0);
     assert(value <= 1.0);
+    if (widget.divisions != null) {
+      return widget.min +
+          (value * widget.divisions!).round() * (widget.max - widget.min) / widget.divisions!;
+    }
     return value * (widget.max - widget.min) + widget.min;
   }
 
