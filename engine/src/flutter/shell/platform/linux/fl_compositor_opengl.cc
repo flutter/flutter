@@ -314,10 +314,14 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
   size_t width = layers[0]->size.width;
   size_t height = layers[0]->size.height;
   if (self->framebuffer == nullptr ||
+#if FLUTTER_LINUX_GTK4
+      self->framebuffer_published ||
+#endif
       fl_framebuffer_get_width(self->framebuffer) != width ||
       fl_framebuffer_get_height(self->framebuffer) != height) {
     g_clear_object(&self->framebuffer);
 #if FLUTTER_LINUX_GTK4
+    self->framebuffer_published = FALSE;
     fl_compositor_opengl_gtk4_reset_frame_failure(self);
 #endif
 #if FLUTTER_LINUX_GTK4

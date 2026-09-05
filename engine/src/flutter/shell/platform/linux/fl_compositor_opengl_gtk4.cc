@@ -572,6 +572,9 @@ GdkTexture* fl_compositor_opengl_acquire_texture(FlCompositor* compositor,
     if (texture == nullptr) {
       wait_for_native_texture_sync(self);
       texture = acquire_shareable_texture(self->framebuffer, context);
+      if (texture != nullptr) {
+        self->framebuffer_published = TRUE;
+      }
     } else {
       // A DMA-BUF texture has its own native fence, so the GL fence is not
       // needed once GDK has accepted the exported snapshot.
