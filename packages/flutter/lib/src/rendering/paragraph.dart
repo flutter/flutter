@@ -680,6 +680,7 @@ class RenderParagraph extends RenderBox
       'TextOverflow.ellipsisStart and TextOverflow.ellipsisMiddle place the ellipsis inside a '
       'single line of text, so maxLines must be null or 1.',
     );
+    final bool wasTruncating = _truncatesText;
     _overflow = value;
     // Restore the untruncated text: the next layout recomputes the truncation
     // from scratch, and the other overflow modes lay out the text in full.
@@ -688,6 +689,13 @@ class RenderParagraph extends RenderBox
       ..maxLines = _truncatesText ? 1 : _maxLines
       ..text = _text;
     _renderedPlainText = null;
+    if (wasTruncating && !_truncatesText) {
+      // The full text is back in the text painter as of this assignment, so
+      // the state indexing into the truncated text is already stale. Entering
+      // a truncating mode does not need this, because the truncated text is
+      // only computed during the layout that follows, which does it there.
+      _didChangeRenderedText();
+    }
     markNeedsLayout();
   }
 
@@ -1187,6 +1195,13 @@ class RenderParagraph extends RenderBox
       return;
     }
     _renderedPlainText = plainText;
+    _didChangeRenderedText();
+  }
+
+  // Rebuilds the state that addresses the text the text painter holds: the
+  // semantics information and the selectable fragments, both of which index
+  // into it by code unit offset.
+  void _didChangeRenderedText() {
     _cachedAttributedLabels = null;
     _cachedCombinedSemanticsInfos = null;
     markNeedsSemanticsUpdate();

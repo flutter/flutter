@@ -1989,6 +1989,24 @@ void main() {
           expect(paragraph.debugRenderedText, contains('…'));
         });
 
+        test('selection covers the full text again after switching to clip', () async {
+          final registrar = TestSelectionRegistrar();
+          final RenderParagraph paragraph = makeParagraph(overflow, registrar: registrar);
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+          expect(paragraph.debugRenderedText, contains('…'));
+
+          // Leaving a truncating mode puts the full text back in the text
+          // painter, so the fragments built over the truncated text have to be
+          // rebuilt or selecting everything yields the truncated string,
+          // ellipsis and all.
+          paragraph.overflow = TextOverflow.clip;
+          pumpFrame();
+
+          final Selectable selectable = registrar.selectables.single;
+          selectable.dispatchSelectionEvent(const SelectAllSelectionEvent());
+          expect(selectable.getSelectedContent()!.plainText, kText26);
+        });
+
         test('selection covers the text that is rendered', () async {
           final registrar = TestSelectionRegistrar();
           final RenderParagraph paragraph = makeParagraph(overflow, registrar: registrar);
