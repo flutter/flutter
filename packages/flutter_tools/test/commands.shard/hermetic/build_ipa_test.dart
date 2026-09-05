@@ -328,7 +328,9 @@ void main() {
       fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
 
       final bool supported = BuildIOSArchiveCommand(
-        logger: BufferLogger.test(),
+        appleContext: FakeAppleContext(),
+        buildSystem: FakeBuildSystem(),
+        toolContext: FakeToolContext(logger: BufferLogger.test()),
         verboseHelp: false,
       ).supported;
       expect(
