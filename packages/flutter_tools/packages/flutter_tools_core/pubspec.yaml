@@ -9,6 +9,6 @@ dependencies:
   meta: 1.19.0
 
 dev_dependencies:
-  test: 1.31.2
+  test: 1.32.0
 
-# PUBSPEC CHECKSUM: 12mc60
+# PUBSPEC CHECKSUM: ua9vva
