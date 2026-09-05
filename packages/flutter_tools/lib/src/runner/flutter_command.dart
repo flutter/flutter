@@ -1784,8 +1784,9 @@ abstract class FlutterCommand extends Command<void> {
       Event.flutterCommandResult(
         commandPath: commandPath,
         result: commandResult.toString(),
-        maxRss: maxRss,
         commandHasTerminal: hasTerminal,
+        hostArch: globals.os.hostPlatform.cliName,
+        maxRss: maxRss,
       ),
     );
 
