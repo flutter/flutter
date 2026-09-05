@@ -337,15 +337,9 @@ abstract class FlutterCommand extends Command<void> {
   /// easily reference it or overwrite as necessary.
   Analytics get analytics => _analytics;
 
-  final Map<String, OptionDescriptor<Object?>> _optionRegistry =
-      <String, OptionDescriptor<Object?>>{};
-
-  /// Option descriptor registry for type-safe lookups.
-  Map<String, OptionDescriptor<Object?>> get optionRegistry => _optionRegistry;
-
   /// Registers an [OptionBundle] with this command.
   void registerOptionBundle(OptionBundle bundle) {
-    bundle.register(this, argParser, _optionRegistry);
+    bundle.register(this, argParser);
   }
 
   /// Registers multiple [OptionBundle] instances with this command.
@@ -356,144 +350,28 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebOptions({required bool verboseHelp}) {
-    argParser.addMultiOption(
-      'web-header',
-      help:
-          'Additional key-value pairs that will added by the web server '
-          'as headers to all responses. Multiple headers can be passed by '
-          'repeating "--web-header" multiple times.',
-      valueHelp: 'X-Custom-Header=header-value',
-      splitCommas: false,
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
-      'web-hostname',
-      help:
-          'The hostname that the web server will use to resolve an IP to serve '
-          'from. The unresolved hostname is used to launch Chrome when using '
-          'the chrome Device. The name "any" may also be used to serve on any '
-          'IPV4 for either the Chrome or web-server device.',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
-      'web-port',
-      help:
-          'The host port to serve the web application from. If not provided, the tool '
-          'will select a random open port on the host.',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
-      'web-tls-cert-path',
-      help:
-          'The certificate that host will use to serve using TLS connection. '
-          'If not provided, the tool will use default http scheme.',
-    );
-    argParser.addOption(
-      'web-tls-cert-key-path',
-      help:
-          'The certificate key that host will use to authenticate cert. '
-          'If not provided, the tool will use default http scheme.',
-    );
-    argParser.addOption(
-      'web-server-debug-protocol',
-      allowed: <String>['sse', 'ws'],
-      defaultsTo: 'ws',
-      help:
-          'The protocol (SSE or WebSockets) to use for the debug service proxy '
-          'when using the Web Server device and Dart Debug extension. '
-          'This is useful for editors/debug adapters that do not support debugging '
-          'over SSE (the default protocol for Web Server/Dart Debugger extension).',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
-      'web-server-debug-backend-protocol',
-      allowed: <String>['sse', 'ws'],
-      defaultsTo: 'ws',
-      help:
-          'The protocol (SSE or WebSockets) to use for the Dart Debug Extension '
-          'backend service when using the Web Server device. '
-          'Using WebSockets can improve performance but may fail when connecting through '
-          'some proxy servers.',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
-      'web-server-debug-injected-client-protocol',
-      allowed: <String>['sse', 'ws'],
-      defaultsTo: 'ws',
-      help:
-          'The protocol (SSE or WebSockets) to use for the injected client '
-          'when using the Web Server device. '
-          'Using WebSockets can improve performance but may fail when connecting through '
-          'some proxy servers.',
-      hide: !verboseHelp,
-    );
-    argParser.addFlag(
-      'web-allow-expose-url',
-      help:
-          'Enables daemon-to-editor requests (app.exposeUrl) for exposing URLs '
-          'when running on remote machines.',
-      hide: !verboseHelp,
-    );
-    argParser.addFlag(
-      'web-run-headless',
-      help:
-          'Launches the browser in headless mode. Currently only Chrome '
-          'supports this option.',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
-      'web-browser-debug-port',
-      help:
-          'The debug port the browser should use. If not specified, a '
-          'random port is selected. Currently only Chrome supports this option. '
-          'It serves the Chrome DevTools Protocol '
-          '(https://chromedevtools.github.io/devtools-protocol/).',
-      hide: !verboseHelp,
-    );
-    argParser.addFlag(
-      'web-enable-expression-evaluation',
-      defaultsTo: true,
-      help: 'Enables expression evaluation in the debugger.',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
-      'web-launch-url',
-      help:
-          'The URL to provide to the browser. Defaults to an HTTP URL with the host '
-          'name of "--web-hostname", the port of "--web-port", and the path set to "/".',
-    );
-    argParser.addMultiOption(
-      FlutterOptions.kWebBrowserFlag,
-      help:
-          'Additional flag to pass to a browser instance at startup.\n'
-          'Chrome: https://www.chromium.org/developers/how-tos/run-chromium-with-flags/\n'
-          'Firefox: https://wiki.mozilla.org/Firefox/CommandLineOptions\n'
-          'Multiple flags can be passed by repeating "--${FlutterOptions.kWebBrowserFlag}" multiple times.',
-      valueHelp: '--foo=bar',
-      hide: !verboseHelp,
-    );
-    argParser.addFlag(
-      'cross-origin-isolation',
-      help:
-          'Adds the Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy '
-          'headers to the web server. These headers are required for using APIs like '
-          'SharedArrayBuffer. This is on by default for the "skwasm" web renderer, '
-          'and this flag can be used to override the default. To disable this for the '
-          'skwasm renderer, use "--no-cross-origin-isolation".',
-      hide: !verboseHelp,
-    );
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      WebOptions.webHeader,
+      WebOptions.webHostname,
+      WebOptions.webPort,
+      WebOptions.webTlsCertPath,
+      WebOptions.webTlsCertKeyPath,
+      WebOptions.webServerDebugProtocol,
+      WebOptions.webServerDebugBackendProtocol,
+      WebOptions.webServerDebugInjectedClientProtocol,
+      WebOptions.webAllowExposeUrl,
+      WebOptions.webRunHeadless,
+      WebOptions.webBrowserDebugPort,
+      WebOptions.webEnableExpressionEvaluation,
+      WebOptions.webLaunchUrl,
+      WebOptions.webBrowserFlags,
+      WebOptions.crossOriginIsolation,
+    ], verboseHelp: verboseHelp);
     usesBaseHrefOption();
   }
 
   void usesBaseHrefOption() {
-    argParser.addOption(
-      'base-href',
-      help:
-          'Overrides the href attribute of the <base> tag in web/index.html. '
-          'No change is made to web/index.html file if this flag is not provided. '
-          'The value must start and end with "/". '
-          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base',
-    );
+    argParser.addDescriptor(WebOptions.baseHref);
   }
 
   void usesTargetOption() {
@@ -628,58 +506,25 @@ abstract class FlutterCommand extends Command<void> {
 
   void addDevToolsOptions({required bool verboseHelp, bool includeEnableDevTools = true}) {
     if (includeEnableDevTools) {
-      argParser.addFlag(
-        kEnableDevTools,
-        hide: !verboseHelp,
-        defaultsTo: true,
-        help:
-            'Enable (or disable, with "--no-$kEnableDevTools") the launching of the '
-            'Flutter DevTools debugger and profiler. '
-            'If "--no-$kEnableDevTools" is specified, "--$kDevToolsServerAddress" is ignored.',
-      );
+      argParser.addDescriptor(DebuggingOptionDescriptors.enableDevTools, verboseHelp: verboseHelp);
     }
-    final ignoredMessage = includeEnableDevTools
-        ? ' Ignored if "--no-$kEnableDevTools" is specified.'
-        : '';
-    argParser.addOption(
-      kDevToolsServerAddress,
-      hide: !verboseHelp,
-      help:
-          'When this value is provided, the Flutter tool will not spin up a '
-          'new DevTools server instance, and will instead use the one provided '
-          'at the given address.$ignoredMessage',
+    argParser.addDescriptor(
+      DebuggingOptionDescriptors.devToolsServerAddress(
+        includeEnableDevTools: includeEnableDevTools,
+      ),
+      verboseHelp: verboseHelp,
     );
   }
 
   void addDdsOptions({required bool verboseHelp}) {
-    argParser.addOption(
-      'dds-port',
-      help:
-          'When this value is provided, the Dart Development Service (DDS) will be '
-          'bound to the provided port.\n'
-          'Specifying port 0 (the default) will find a random free port.',
-    );
-    argParser.addFlag(
-      'dds',
-      defaultsTo: true,
-      help:
-          'Enable the Dart Developer Service (DDS).\n'
-          'It may be necessary to disable this when attaching to an application with '
-          'an existing DDS instance (e.g., attaching to an application currently '
-          'connected to by "flutter run"), or when running certain tests.\n'
-          'Disabling this feature may degrade IDE functionality if a DDS instance is '
-          'not already connected to the target application.',
-    );
-    argParser.addFlag(
-      'disable-dds',
-      hide: !verboseHelp,
-      help:
-          '(deprecated; use "--no-dds" instead) '
-          'Disable the Dart Developer Service (DDS).',
-    );
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      DebuggingOptionDescriptors.ddsPort,
+      DebuggingOptionDescriptors.dds,
+      DebuggingOptionDescriptors.disableDds,
+    ], verboseHelp: verboseHelp);
   }
 
-  late final bool enableDds = boolArg('dds');
+  late final bool enableDds = getValue(DebuggingOptionDescriptors.dds);
 
   bool get _hostVmServicePortProvided =>
       (argResults?.wasParsed(vmServicePortOption) ?? false) ||
@@ -699,20 +544,22 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   int get ddsPort {
-    if (argResults?.wasParsed('dds-port') != true && _hostVmServicePortProvided) {
+    if (!wasParsed(DebuggingOptionDescriptors.ddsPort) && _hostVmServicePortProvided) {
       // If an explicit DDS port is _not_ provided, use the host-vmservice-port for DDS.
       return _tryParseHostVmservicePort();
-    } else if (argResults?.wasParsed('dds-port') ?? false) {
+    } else if (wasParsed(DebuggingOptionDescriptors.ddsPort)) {
       // If an explicit DDS port is provided, use dds-port for DDS.
-      return int.tryParse(stringArg('dds-port')!) ?? 0;
+      return int.tryParse(getValue(DebuggingOptionDescriptors.ddsPort)!) ?? 0;
     }
     // Otherwise, DDS can bind to a random port.
     return 0;
   }
 
   Uri? get devToolsServerAddress {
-    if (argResults?.wasParsed(kDevToolsServerAddress) ?? false) {
-      final Uri? uri = Uri.tryParse(stringArg(kDevToolsServerAddress)!);
+    if (wasParsed(DebuggingOptionDescriptors.devToolsServerAddressOption)) {
+      final Uri? uri = Uri.tryParse(
+        getValue(DebuggingOptionDescriptors.devToolsServerAddressOption)!,
+      );
       if (uri != null && uri.host.isNotEmpty && uri.port != 0) {
         return uri;
       }
@@ -741,7 +588,7 @@ abstract class FlutterCommand extends Command<void> {
     // If DDS is enabled and no explicit DDS port is provided, use the
     // host-vmservice-port for DDS instead and bind the VM service to a random
     // port.
-    if (enableDds && argResults?.wasParsed('dds-port') != true) {
+    if (enableDds && !wasParsed(DebuggingOptionDescriptors.ddsPort)) {
       return null;
     }
     return _tryParseHostVmservicePort();
@@ -776,18 +623,11 @@ abstract class FlutterCommand extends Command<void> {
   Future<bool> get disablePortPublication async => !boolArg('publish-port');
 
   void usesIpv6Flag({required bool verboseHelp}) {
-    argParser.addFlag(
-      ipv6Flag,
-      negatable: false,
-      help:
-          'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
-          'forwards the host port to a device port.',
-      hide: !verboseHelp,
-    );
+    argParser.addDescriptor(DebuggingOptionDescriptors.ipv6, verboseHelp: verboseHelp);
     _usesIpv6Flag = true;
   }
 
-  bool? get ipv6 => _usesIpv6Flag ? boolArg('ipv6') : null;
+  bool? get ipv6 => _usesIpv6Flag ? getValue(DebuggingOptionDescriptors.ipv6) : null;
 
   void usesBuildNumberOption() {
     CommonOptions.buildNumber.addTo(argParser);
@@ -864,12 +704,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesAdbLogFilteringOption({required bool hide}) {
-    argParser.addFlag(
-      FlutterOptions.kAdbLogFiltering,
-      defaultsTo: true,
-      help: 'Whether to filter ADB logcat tags/messages on the Dart side.',
-      hide: hide,
-    );
+    argParser.addDescriptor(DebuggingOptionDescriptors.adbLogFiltering, hideOverride: hide);
   }
 
   void usesApplicationBinaryOption() {
@@ -1142,49 +977,22 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addEnableImpellerFlag({required bool verboseHelp}) {
-    argParser.addFlag(
-      FlutterOptions.kEnableImpeller,
-      hide: !verboseHelp,
-      defaultsTo: null,
-      help:
-          'Whether to enable the Impeller rendering engine. '
-          'Impeller is the default renderer on iOS. On Android, Impeller '
-          'is available but not the default. This flag will cause Impeller '
-          'to be used on Android. On other platforms, this flag will be '
-          'ignored.',
-    );
+    argParser.addDescriptor(DebuggingOptionDescriptors.enableImpeller, verboseHelp: verboseHelp);
   }
 
   void addEnableFlutterGpuFlag({required bool verboseHelp}) {
-    argParser.addFlag(
-      'enable-flutter-gpu',
-      hide: !verboseHelp,
-      defaultsTo: null,
-      help:
-          'Whether to enable the Flutter GPU API (https://api.flutter.dev/flutter/flutter_gpu/). '
-          'This feature is only supported with the Impeller rendering engine, '
-          'which can be enabled via the "--${FlutterOptions.kEnableImpeller}" '
-          'option.',
-    );
+    argParser.addDescriptor(DebuggingOptionDescriptors.enableFlutterGpu, verboseHelp: verboseHelp);
   }
 
   void addEnableVulkanValidationFlag({required bool verboseHelp}) {
-    argParser.addFlag(
-      'enable-vulkan-validation',
-      hide: !verboseHelp,
-      help:
-          'Enable vulkan validation on the Impeller rendering backend if '
-          'Vulkan is in use and the validation layers are available to the '
-          'application.',
+    argParser.addDescriptor(
+      DebuggingOptionDescriptors.enableVulkanValidation,
+      verboseHelp: verboseHelp,
     );
   }
 
   void addEnableEmbedderApiFlag({required bool verboseHelp}) {
-    argParser.addFlag(
-      'enable-embedder-api',
-      hide: !verboseHelp,
-      help: 'Whether to enable the experimental embedder API on iOS.',
-    );
+    argParser.addDescriptor(DebuggingOptionDescriptors.enableEmbedderApi, verboseHelp: verboseHelp);
   }
 
   void addMachineOutputFlag({required bool verboseHelp}) {
@@ -1197,17 +1005,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addEnableHcppFlag({required bool verboseHelp}) {
-    argParser.addFlag(
-      'enable-hcpp',
-      hide: !verboseHelp,
-      help:
-          'Enable the use of the HCPP platform view rendering mode on the Impeller rendering '
-          'backend. An explicit value takes priority over the EnableHcpp metadata in '
-          'AndroidManifest.xml: build commands write it into the manifest of the artifact they '
-          'produce, and "run", "test", and "drive" additionally apply it at launch. Without the '
-          'flag, the manifest decides, and if the manifest does not set it either, the '
-          'enable-hcpp feature flag does.',
-    );
+    argParser.addDescriptor(DebuggingOptionDescriptors.enableHcpp, verboseHelp: verboseHelp);
   }
 
   /// The explicit `--[no-]enable-hcpp` value, or null when the flag was not
@@ -1218,13 +1016,11 @@ abstract class FlutterCommand extends Command<void> {
   /// manifest over any value already there. Commands that launch the app
   /// (run/test/drive) additionally forward it to the device.
   bool? get explicitEnableHcpp {
-    final ArgResults? results = argResults;
-    if (results == null ||
-        !results.options.contains('enable-hcpp') ||
-        !results.wasParsed('enable-hcpp')) {
+    if (!hasOption(DebuggingOptionDescriptors.enableHcpp) ||
+        !wasParsed(DebuggingOptionDescriptors.enableHcpp)) {
       return null;
     }
-    return boolArg('enable-hcpp');
+    return getValue(DebuggingOptionDescriptors.enableHcpp);
   }
 
   /// The HCPP value for an Android artifact when the developer did not pass
@@ -1237,11 +1033,7 @@ abstract class FlutterCommand extends Command<void> {
   bool get enableHcpp => explicitEnableHcpp ?? featureFlags.isHcppEnabled;
 
   void addTestFlag({required bool verboseHelp}) {
-    argParser.addFlag(
-      'test-flag',
-      hide: !verboseHelp,
-      help: 'No-op flag for testing purposes; use for testing flag priorities only.',
-    );
+    argParser.addDescriptor(DebuggingOptionDescriptors.testFlag, verboseHelp: verboseHelp);
   }
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
