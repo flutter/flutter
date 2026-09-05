@@ -139,14 +139,21 @@ abstract class ChromiumDevice extends WebDevice {
     }
     final launchChrome = platformArgs['no-launch-chrome'] != true;
     if (launchChrome) {
+      // Custom --user-data-dir must not use the project session cache/delete path.
+      final bool hasCustomUserDataDir = debuggingOptions.webBrowserFlags.any(
+        (String flag) => flag.startsWith('--user-data-dir='),
+      );
       _chrome = await chromeLauncher.launch(
         url,
-        cacheDir: _fileSystem.currentDirectory
-            .childDirectory('.dart_tool')
-            .childDirectory('chrome-device'),
+        cacheDir: hasCustomUserDataDir
+            ? null
+            : _fileSystem.currentDirectory
+                  .childDirectory('.dart_tool')
+                  .childDirectory('chrome-device'),
         headless: debuggingOptions.webRunHeadless,
         debugPort: debuggingOptions.webBrowserDebugPort,
         webBrowserFlags: debuggingOptions.webBrowserFlags,
+        webBrowserDefaultFlags: debuggingOptions.webBrowserDefaultFlags,
       );
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
