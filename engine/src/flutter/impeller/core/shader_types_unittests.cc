@@ -91,6 +91,22 @@ TEST(ShaderTypesTest, VertexAttributeFormatRejectsBadBitWidth) {
       VertexAttributeFormat::kInvalid);
 }
 
+TEST(ShaderTypesTest, VertexAttributeFormatUsesExplicitFormat) {
+  // Normalized formats have no shader-side spelling; the shader declares a
+  // float input and the explicit format says how the bytes are stored.
+  ShaderStageIOSlot slot = MakeSlot(ShaderType::kFloat, 32u, 4u);
+  slot.vertex_format = VertexAttributeFormat::kUNorm8x4;
+  EXPECT_EQ(slot.GetVertexAttributeFormat(), VertexAttributeFormat::kUNorm8x4);
+}
+
+TEST(ShaderTypesTest, VertexAttributeFormatIsPartOfSlotIdentity) {
+  ShaderStageIOSlot derived = MakeSlot(ShaderType::kFloat, 32u, 4u);
+  ShaderStageIOSlot explicit_format = derived;
+  explicit_format.vertex_format = VertexAttributeFormat::kUNorm8x4;
+  EXPECT_FALSE(derived == explicit_format);
+  EXPECT_NE(derived.GetHash(), explicit_format.GetHash());
+}
+
 TEST(ShaderTypesTest, VertexAttributeFormatRejectsUnsupportedScalarKinds) {
   EXPECT_EQ(MakeSlot(ShaderType::kBoolean, 8u, 1u).GetVertexAttributeFormat(),
             VertexAttributeFormat::kInvalid);

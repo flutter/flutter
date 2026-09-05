@@ -10,6 +10,8 @@
 
 namespace impeller {
 
+vk::Format ToVertexDescriptorFormat(VertexAttributeFormat format);
+
 vk::Format ToVertexDescriptorFormat(const ShaderStageIOSlot& input);
 
 }  // namespace impeller

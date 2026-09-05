@@ -47,17 +47,20 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
       }
       VertexAttribPointer attrib;
       attrib.index = input.location;
-      // Component counts must be 1, 2, 3 or 4. Do that validation now.
-      if (input.vec_size < 1u || input.vec_size > 4u) {
+      // The component count, GL type, and normalization all come from the
+      // attribute format, which also rejects component counts outside 1 to 4.
+      std::optional<VertexAttribGLES> format =
+          ToVertexAttribGLES(input.GetVertexAttributeFormat(),
+                             gl.GetCapabilities()->GetVertexFormatSupport());
+      if (!format.has_value()) {
+        VALIDATION_LOG << "Vertex attribute '" << input.name
+                       << "' has a format this device cannot read.";
         return false;
       }
-      attrib.size = input.vec_size;
-      auto type = ToVertexAttribType(input.GetVertexAttributeFormat());
-      if (!type.has_value()) {
-        return false;
-      }
-      attrib.type = type.value();
-      attrib.normalized = GL_FALSE;
+      attrib.size = format->size;
+      attrib.type = format->type;
+      attrib.normalized = format->normalized;
+      attrib.integer = format->integer;
       attrib.offset = input.offset;
       attrib.stride = layout.stride;
       attrib.vertex_attrib_divisor =
@@ -238,14 +241,26 @@ bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
     if (array.vertex_attrib_divisor != 0u) {
       attribute_offset += instance * static_cast<size_t>(array.stride);
     }
-    gl.VertexAttribPointer(array.index,       // index
-                           array.size,        // size (must be 1, 2, 3, or 4)
-                           array.type,        // type
-                           array.normalized,  // normalized
-                           array.stride,      // stride
-                           reinterpret_cast<const GLvoid*>(
-                               static_cast<uintptr_t>(attribute_offset))  // ptr
-    );
+    const auto* pointer = reinterpret_cast<const GLvoid*>(
+        static_cast<uintptr_t>(attribute_offset));
+    if (array.integer) {
+      // Integer inputs take the unconverted path. There is no normalization
+      // argument, since the value reaches the shader as-is.
+      gl.VertexAttribIPointer(array.index,   // index
+                              array.size,    // size
+                              array.type,    // type
+                              array.stride,  // stride
+                              pointer        // ptr
+      );
+    } else {
+      gl.VertexAttribPointer(array.index,       // index
+                             array.size,        // size
+                             array.type,        // type
+                             array.normalized,  // normalized
+                             array.stride,      // stride
+                             pointer            // ptr
+      );
+    }
     // Set the instancing divisor when the driver supports it. It is core
     // on ES 3.0+ and comes from GL_EXT_instanced_arrays on ES 2.0. When
     // unavailable, only per-vertex (divisor 0) bindings are possible,

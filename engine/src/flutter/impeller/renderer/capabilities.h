@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "impeller/core/formats.h"
+#include "impeller/core/shader_types.h"
 
 namespace impeller {
 
@@ -146,6 +147,12 @@ class Capabilities {
   ///        always supported. Metal and Vulkan support this; the GLES backend
   ///        does not yet, so it returns false there.
   virtual bool SupportsFramebufferRenderMipmap() const = 0;
+
+  /// @brief Whether the given vertex attribute format can be read by a
+  ///        pipeline on this device. Only the GLES backend constrains the set,
+  ///        since it targets an OpenGL ES 2.0 floor; callers that use anything
+  ///        beyond 32-bit floats must check this before building a pipeline.
+  virtual bool SupportsVertexFormat(VertexAttributeFormat format) const = 0;
 
   /// @brief The maximum anisotropy clamp supported by device samplers.
   ///

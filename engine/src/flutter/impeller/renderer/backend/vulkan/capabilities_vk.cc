@@ -9,6 +9,7 @@
 
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
+#include "impeller/renderer/backend/vulkan/vertex_descriptor_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/backend/vulkan/workarounds_vk.h"
 
@@ -914,6 +915,17 @@ bool CapabilitiesVK::SupportsExtendedRangeFormats() const {
 
 bool CapabilitiesVK::SupportsFramebufferRenderMipmap() const {
   return true;
+}
+
+bool CapabilitiesVK::SupportsVertexFormat(VertexAttributeFormat format) const {
+  const vk::Format vk_format = ToVertexDescriptorFormat(format);
+  if (vk_format == vk::Format::eUndefined || !physical_device_) {
+    return false;
+  }
+  // Most vertex formats are mandatory in Vulkan, but a few (notably the
+  // blue/green/red/alpha byte ordering) are not, so ask the device.
+  return !!(physical_device_.getFormatProperties(vk_format).bufferFeatures &
+            vk::FormatFeatureFlagBits::eVertexBuffer);
 }
 
 bool CapabilitiesVK::SupportsTextureCompression(
