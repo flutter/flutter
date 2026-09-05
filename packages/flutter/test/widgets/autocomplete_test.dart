@@ -4005,6 +4005,291 @@ void main() {
       expect(targetFocus.hasFocus, isTrue);
     },
   );
+
+  testWidgets('removes the listener from a caller-provided focusNode on dispose', (
+    WidgetTester tester,
+  ) async {
+    final focusNode = _SpyFocusNode();
+    addTearDown(focusNode.dispose);
+    final textEditingController = TextEditingController();
+    addTearDown(textEditingController.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: RawAutocomplete<String>(
+          focusNode: focusNode,
+          textEditingController: textEditingController,
+          optionsBuilder: (TextEditingValue textEditingValue) => const <String>[],
+          fieldViewBuilder:
+              (
+                BuildContext context,
+                TextEditingController fieldTextEditingController,
+                FocusNode fieldFocusNode,
+                VoidCallback onFieldSubmitted,
+              ) {
+                return TestTextField(
+                  focusNode: fieldFocusNode,
+                  controller: fieldTextEditingController,
+                );
+              },
+          optionsViewBuilder:
+              (
+                BuildContext context,
+                AutocompleteOnSelected<String> onSelected,
+                Iterable<String> options,
+              ) {
+                return const SizedBox.shrink();
+              },
+        ),
+      ),
+    );
+    expect(focusNode.hasListeners, isTrue);
+
+    // Unmounting the RawAutocomplete removes everything it added to the
+    // caller-owned focusNode, so that it cannot fire on a disposed State.
+    await tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink()));
+    expect(focusNode.hasListeners, isFalse);
+  });
+
+  testWidgets('refreshes the internal focus state when the focusNode changes', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey optionsKey = GlobalKey();
+    final focusNode1 = _SpyFocusNode();
+    addTearDown(focusNode1.dispose);
+    final focusNode2 = _SpyFocusNode();
+    addTearDown(focusNode2.dispose);
+    final textEditingController = TextEditingController();
+    addTearDown(textEditingController.dispose);
+
+    Future<void> pumpRawAutocomplete(FocusNode focusNode) {
+      return tester.pumpWidget(
+        TestWidgetsApp(
+          home: RawAutocomplete<String>(
+            focusNode: focusNode,
+            textEditingController: textEditingController,
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  return TestTextField(
+                    focusNode: fieldFocusNode,
+                    controller: fieldTextEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return Container(key: optionsKey);
+                },
+          ),
+        ),
+      );
+    }
+
+    // Focus the field, then enter text that matches no options.
+    await pumpRawAutocomplete(focusNode1);
+    focusNode1.requestFocus();
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+    textEditingController.text = 'xyz';
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+
+    // Swap in a focus node that, unlike the old one, is unfocused.
+    await pumpRawAutocomplete(focusNode2);
+    await tester.pump();
+    expect(focusNode2.hasFocus, isFalse);
+    expect(focusNode1.hasListeners, isFalse);
+
+    // Make options available again, without changing the focus state.
+    textEditingController.text = '';
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+
+    // Focusing the new node opens the options view: the internal focus state
+    // was refreshed at the swap, not left stale from the old node.
+    // (The second pump renders the update from the focus-change notification,
+    // which can land after the first pump's frame.)
+    focusNode2.requestFocus();
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+
+    // The listener that the swap added to the new node is removed on dispose,
+    // like in initState/dispose.
+    await tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink()));
+    expect(focusNode2.hasListeners, isFalse);
+  });
+
+  testWidgets('keeps working when swapping between internal and caller-provided focusNode', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey optionsKey = GlobalKey();
+    late FocusNode fieldFocusNode;
+    final customFocusNode = FocusNode();
+    addTearDown(customFocusNode.dispose);
+    final customTextEditingController = TextEditingController();
+    addTearDown(customTextEditingController.dispose);
+
+    // RawAutocomplete requires focusNode and textEditingController to be both
+    // null or both non-null (see the dartdoc on those parameters), so they are
+    // swapped together.
+    Future<void> pumpRawAutocomplete({
+      FocusNode? focusNode,
+      TextEditingController? textEditingController,
+    }) {
+      return tester.pumpWidget(
+        TestWidgetsApp(
+          home: RawAutocomplete<String>(
+            focusNode: focusNode,
+            textEditingController: textEditingController,
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode builderFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  fieldFocusNode = builderFocusNode;
+                  return TestTextField(
+                    focusNode: builderFocusNode,
+                    controller: fieldTextEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return Container(key: optionsKey);
+                },
+          ),
+        ),
+      );
+    }
+
+    // The second pump after each focus change renders the update from the
+    // focus-change notification, which can land after the first pump's frame.
+    Future<void> checkFocusOpensAndClosesOptions(FocusNode focusNode) async {
+      focusNode.requestFocus();
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(optionsKey), findsOneWidget);
+      focusNode.unfocus();
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(optionsKey), findsNothing);
+    }
+
+    // Start with the internal focus node (null focusNode parameter).
+    await pumpRawAutocomplete();
+    await checkFocusOpensAndClosesOptions(fieldFocusNode);
+
+    // Swap internal → caller-provided.
+    await pumpRawAutocomplete(
+      focusNode: customFocusNode,
+      textEditingController: customTextEditingController,
+    );
+    await checkFocusOpensAndClosesOptions(customFocusNode);
+
+    // Swap caller-provided → internal.
+    await pumpRawAutocomplete();
+    await checkFocusOpensAndClosesOptions(fieldFocusNode);
+  });
+
+  testWidgets('does not update options view visibility when the focusNode changes', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey optionsKey = GlobalKey();
+    final focusNode1 = FocusNode();
+    addTearDown(focusNode1.dispose);
+    final focusNode2 = FocusNode();
+    addTearDown(focusNode2.dispose);
+    final textEditingController = TextEditingController();
+    addTearDown(textEditingController.dispose);
+
+    Future<void> pumpRawAutocomplete(FocusNode focusNode) {
+      return tester.pumpWidget(
+        TestWidgetsApp(
+          home: RawAutocomplete<String>(
+            focusNode: focusNode,
+            textEditingController: textEditingController,
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder:
+                (
+                  BuildContext context,
+                  TextEditingController fieldTextEditingController,
+                  FocusNode fieldFocusNode,
+                  VoidCallback onFieldSubmitted,
+                ) {
+                  return TestTextField(
+                    focusNode: fieldFocusNode,
+                    controller: fieldTextEditingController,
+                  );
+                },
+            optionsViewBuilder:
+                (
+                  BuildContext context,
+                  AutocompleteOnSelected<String> onSelected,
+                  Iterable<String> options,
+                ) {
+                  return Container(key: optionsKey);
+                },
+          ),
+        ),
+      );
+    }
+
+    await pumpRawAutocomplete(focusNode1);
+    focusNode1.requestFocus();
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsOneWidget);
+
+    // Swap in an unfocused node while the options view is showing. One might
+    // expect the view to hide, since the new node is unfocused, but
+    // didUpdateWidget runs during the build phase, when
+    // OverlayPortalController can't show or hide. So the view stays showing
+    // until the next visibility update.
+    await pumpRawAutocomplete(focusNode2);
+    await tester.pump();
+    expect(focusNode2.hasFocus, isFalse);
+    expect(find.byKey(optionsKey), findsOneWidget);
+
+    // The next visibility update, here from a text change, consults the new
+    // node's focus state and hides the options view.
+    textEditingController.text = 'a';
+    await tester.pump();
+    expect(find.byKey(optionsKey), findsNothing);
+  });
+}
+
+class _SpyFocusNode extends FocusNode {
+  @override
+  bool get hasListeners => super.hasListeners;
 }
 
 /// A simple tappable widget used as a replacement for [InkWell] in tests.
