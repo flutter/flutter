@@ -41,6 +41,8 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.ExtraPropertiesExtension
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.internal.extensions.core.extra
 import kotlin.test.Test
@@ -166,6 +168,30 @@ class DependencyVersionCheckerTest {
                     warnKGPVersion.toString(),
                     getPotentialKGPFix(FAKE_PROJECT_ROOT_DIR)
                 )
+            )
+        }
+        verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
+    }
+
+    @Test
+    fun `AGP 9 built-in Kotlin skips KGP min version enforcement by default`() {
+        val mockProject =
+            MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(
+                kgpVersion = "2.2.10",
+                builtInKotlinProperty = null
+            )
+
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
+        val mockLogger = mockProject.logger
+        every { mockLogger.debug(any()) } returns Unit
+
+        DependencyVersionChecker.checkDependencyVersions(mockProject)
+
+        verify {
+            mockLogger.debug(
+                "Skipping Kotlin min-version enforcement because the project uses " +
+                    "AGP built-in Kotlin or does not apply KGP."
             )
         }
         verify(exactly = 0) { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true) }
@@ -422,6 +448,7 @@ private object MockProjectFactory {
         gradleVersion: String = SUPPORTED_GRADLE_VERSION,
         agpVersion: AndroidPluginVersion = SUPPORTED_AGP_VERSION,
         kgpVersion: String = SUPPORTED_KGP_VERSION,
+        builtInKotlinProperty: String? = "false",
         minSdkVersions: List<MinSdkVersion> = listOf(SUPPORTED_SDK_VERSION)
     ): Project {
         // Java
@@ -440,6 +467,11 @@ private object MockProjectFactory {
         // KGP
         every { mockProject.hasProperty(eq("kotlin_version")) } returns true
         every { mockProject.properties["kotlin_version"] } returns kgpVersion
+        val mockBuiltInKotlinProperty = mockk<Provider<String>>()
+        every { mockBuiltInKotlinProperty.orNull } returns builtInKotlinProperty
+        val mockProviders = mockk<ProviderFactory>()
+        every { mockProviders.gradleProperty("android.builtInKotlin") } returns mockBuiltInKotlinProperty
+        every { mockProject.providers } returns mockProviders
 
         // Logger
         val mockLogger = mockk<Logger>()
