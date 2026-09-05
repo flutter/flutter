@@ -11,7 +11,7 @@ export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
     console.error('Flutter Web: wimp_heavy is required but it hasn\'t been implemented yet.');
   }
   const fileStem = needsHeavy
-     ? 'skwasm_heavy'
+     ? (config.enableWimp ? 'wimp_heavy' : 'skwasm_heavy')
      : (config.enableWimp ? 'wimp' : 'skwasm');
   const rawSkwasmUrl = resolveUrlWithSegments(baseUrl, `${fileStem}.js`)
   let skwasmUrl = rawSkwasmUrl;
