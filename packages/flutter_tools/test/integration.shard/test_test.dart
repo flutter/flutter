@@ -401,7 +401,7 @@ void main() {
     final String stdout = (result.stdout as String).replaceAll('\r', '\n');
     expect(stdout, contains(RegExp(r'\+\d+: All tests passed\!')));
     expect(stdout, contains('test 0: Starting flutter_tester process with command'));
-    expect(stdout, contains('test 0: deleting temporary directory'));
+    expect(stdout, contains('test 0: deleting test listener file'));
     expect(stdout, contains('test 0: finished'));
     expect(stdout, contains('test package returned with exit code 0'));
     if ((result.stderr as String).isNotEmpty) {
@@ -448,7 +448,7 @@ void main() {
       );
       expect(stdout, contains(RegExp(r'\+\d+: All tests passed\!')));
       expect(stdout, contains('test 0: Starting flutter_tester process with command'));
-      expect(stdout, contains('test 0: deleting temporary directory'));
+      expect(stdout, contains('test 0: deleting test listener file'));
       expect(stdout, contains('test 0: finished'));
       expect(stdout, contains('test package returned with exit code 0'));
       if ((result.stderr as String).isNotEmpty) {
@@ -495,7 +495,7 @@ void main() {
       final String stdout = (result.stdout as String).replaceAll('\r', '\n');
       expect(result.stdout, contains(RegExp(r'\+\d+: All tests passed\!')));
       expect(stdout, contains('test 0: Starting flutter_tester process with command'));
-      expect(stdout, contains('test 0: deleting temporary directory'));
+      expect(stdout, contains('test 0: deleting test listener file'));
       expect(stdout, contains('test 0: finished'));
       expect(stdout, contains('test package returned with exit code 0'));
       if ((result.stderr as String).isNotEmpty) {

@@ -302,11 +302,11 @@ typedef Finalizer = Future<void> Function();
 /// The flutter test platform used to integrate with package:test.
 class FlutterPlatform extends PlatformPlugin {
   FlutterPlatform({
-    required this.flutterTesterBinPath,
-    required this.debuggingOptions,
     required this.buildInfo,
-    required this.logger,
+    required this.debuggingOptions,
     required FileSystem fileSystem,
+    required this.flutterTesterBinPath,
+    required this.logger,
     required ProcessManager processManager,
     this.watcher,
     this.enableVmService,
@@ -324,7 +324,8 @@ class FlutterPlatform extends PlatformPlugin {
     this.testTimeRecorder,
     this.nativeAssetsBuilder,
     this.shutdownHooks,
-  }) {
+  }) : _fileSystem = fileSystem,
+       _processManager = processManager {
     _testGoldenComparator = TestGoldenComparator(
       flutterTesterBinPath: flutterTesterBinPath,
       compilerFactory: () =>
@@ -335,6 +336,8 @@ class FlutterPlatform extends PlatformPlugin {
     );
   }
 
+  final FileSystem _fileSystem;
+  final ProcessManager _processManager;
   final String flutterTesterBinPath;
   final DebuggingOptions debuggingOptions;
   final TestWatcher? watcher;
@@ -491,9 +494,9 @@ class FlutterPlatform extends PlatformPlugin {
     return FlutterTesterTestDevice(
       id: ourTestCount,
       platform: globals.platform,
-      fileSystem: globals.fs,
-      processManager: globals.processManager,
-      logger: globals.logger,
+      fileSystem: _fileSystem,
+      processManager: _processManager,
+      logger: logger,
       flutterTesterBinPath: flutterTesterBinPath,
       enableVmService: enableVmService!,
       machine: machine,
@@ -524,7 +527,7 @@ class FlutterPlatform extends PlatformPlugin {
   static const _kExtension = 'ext.$_kEventName';
 
   Future<void> _listenToVmServiceForGoldens({required Uri uri, required String testPath}) async {
-    final goldensBaseUri = Uri.file(testPath, windows: globals.platform.isWindows);
+    final Uri goldensBaseUri = _resolveTestUrl(testPath);
     final FlutterVmService vmService = await connectToVmService(uri, logger: logger);
     final IsolateRef testAppIsolate = await vmService.findExtensionIsolate(_kExtension);
     await vmService.service.streamListen(_kEventName);
@@ -628,7 +631,7 @@ class FlutterPlatform extends PlatformPlugin {
             precompiledDillPath: precompiledDillPath,
             testTimeRecorder: testTimeRecorder,
           );
-          final Uri uri = globals.fs.file(path).uri;
+          final Uri uri = _fileSystem.file(path).uri;
           // Trigger a compilation to initialize the resident compiler.
           unawaited(compiler!.compile(uri));
         }
@@ -654,7 +657,7 @@ class FlutterPlatform extends PlatformPlugin {
             flutterProject,
             testTimeRecorder: testTimeRecorder,
           );
-          switch (await compiler!.compile(globals.fs.file(mainDart).uri)) {
+          switch (await compiler!.compile(_fileSystem.file(mainDart).uri)) {
             case TestCompilerComplete(:final String outputPath):
               mainDart = outputPath;
             case TestCompilerFailure(:final String? error):
@@ -777,39 +780,75 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   String _createListenerDart(List<Finalizer> finalizers, int ourTestCount, String testPath) {
-    // Prepare a temporary directory to store the Dart file that will talk to us.
-    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-      'flutter_test_listener.',
-    );
-    finalizers.add(() async {
-      globals.printTrace('test $ourTestCount: deleting temporary directory');
-      tempDir.deleteSync(recursive: true);
-    });
+    // Prepare a directory to store the Dart file that will talk to us.
+    final Directory directory;
+    if (flutterProject != null) {
+      directory = flutterProject!.buildDirectory.childDirectory('test');
+    } else if (projectRootDirectory != null) {
+      directory = _fileSystem
+          .directory(_fileSystem.path.fromUri(projectRootDirectory))
+          .childDirectory(getBuildDirectory(null, _fileSystem))
+          .childDirectory('test');
+    } else {
+      directory = _fileSystem.systemTempDirectory.createTempSync('flutter_test_listener.');
+      finalizers.add(() async {
+        globals.printTrace('test $ourTestCount: deleting temporary directory');
+        directory.deleteSync(recursive: true);
+      });
+    }
+
+    directory.createSync(recursive: true);
 
     // Prepare the Dart file that will talk to us and start the test.
-    final File listenerFile = globals.fs.file('${tempDir.path}/listener.dart');
-    listenerFile.createSync();
-    listenerFile.writeAsStringSync(
-      _generateTestMain(testUrl: globals.fs.path.toUri(globals.fs.path.absolute(testPath))),
-    );
+    final File listenerFile = directory.childFile('listener_$ourTestCount.dart')
+      ..writeAsStringSync(_generateTestMain(testUrl: _resolveTestUrl(testPath)));
+    if (flutterProject != null || projectRootDirectory != null) {
+      finalizers.add(() async {
+        globals.printTrace('test $ourTestCount: deleting test listener file');
+        try {
+          if (listenerFile.existsSync()) {
+            listenerFile.deleteSync();
+          }
+        } on FileSystemException catch (error) {
+          globals.printTrace('test $ourTestCount: failed to delete listener file: $error');
+        }
+      });
+    }
     return listenerFile.path;
+  }
+
+  /// Resolves [testPath] to a file [Uri], preserving query parameters and handling
+  /// both file paths and `file://` URI string formats (e.g. from IDE test runners).
+  Uri _resolveTestUrl(String testPath) {
+    if (testPath.startsWith('file://')) {
+      return Uri.parse(testPath);
+    }
+    final int queryIndex = testPath.indexOf('?');
+    if (queryIndex != -1) {
+      final String pathPart = testPath.substring(0, queryIndex);
+      final String queryPart = testPath.substring(queryIndex + 1);
+      return _fileSystem.path.toUri(_fileSystem.path.absolute(pathPart)).replace(query: queryPart);
+    }
+    return _fileSystem.path.toUri(_fileSystem.path.absolute(testPath));
   }
 
   String _generateTestMain({required Uri testUrl}) {
     assert(testUrl.scheme == 'file');
-    final File file = globals.fs.file(testUrl);
+    final File file = _fileSystem.file(_fileSystem.path.fromUri(testUrl));
     final PackageConfig packageConfig = debuggingOptions.buildInfo.packageConfig;
 
+    final String? appName = flutterProject?.manifest.appName;
+    final Package? package = appName != null ? packageConfig[appName] : null;
     final LanguageVersion languageVersion = determineLanguageVersion(
       file,
-      packageConfig[flutterProject!.manifest.appName],
+      package,
       Cache.flutterRoot!,
     );
     return generateTestBootstrap(
       testUrl: testUrl,
-      testConfigFile: findTestConfigFile(globals.fs.file(testUrl), globals.logger),
+      testConfigFile: findTestConfigFile(file, logger),
       // This MUST be a file URI.
-      packageConfigUri: globals.fs.path.toUri(buildInfo.packageConfigPath),
+      packageConfigUri: _fileSystem.path.toUri(buildInfo.packageConfigPath),
       host: host!,
       updateGoldens: updateGoldens!,
       flutterTestDep: packageConfig['flutter_test'] != null,
