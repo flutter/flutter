@@ -331,7 +331,8 @@ class SwiftPackagePackageDependency {
     // dependencies: [
     //     .package(name: "image_picker_ios", path: "/path/to/packages/image_picker/image_picker_ios/ios/image_picker_ios"),
     // ],
-    return '.package(name: "$name", path: "$path")';
+    final String posixPath = path.replaceAll(r'\', '/');
+    return '.package(name: "$name", path: "$posixPath")';
   }
 }
 

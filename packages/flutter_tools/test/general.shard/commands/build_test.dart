@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/commands/build.dart';
 import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
@@ -19,9 +20,8 @@ void main() {
   testUsingContext('Include only supported sub commands', () {
     final logger = BufferLogger.test();
     final fs = MemoryFileSystem.test();
-    final command = BuildCommand(
+    final BuildCommand command = createFakeBuildCommand(
       androidBuilder: FakeAndroidBuilder(),
-      androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
       androidSdk: FakeAndroidSdk(),
       artifacts: FakeArtifacts(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -38,18 +38,6 @@ void main() {
       processUtils: FakeProcessUtils(),
       templateRenderer: FakeTemplateRenderer(),
       terminal: FakeTerminal(),
-      toolContext: FakeToolContext(
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        config: FakeConfig(),
-        flutterVersion: FakeFlutterVersion(),
-        fs: fs,
-        logger: logger,
-        os: FakeOperatingSystemUtils(),
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.any(),
-        processUtils: FakeProcessUtils(),
-      ),
       xcode: FakeXcode(),
     );
     for (final Command<void> x in command.subcommands.values) {

@@ -1478,7 +1478,7 @@ Or run on an iOS simulator without code signing
     testWithoutContext('cancels if terminal does not have stdin', () async {
       final logger = BufferLogger.test();
       final config = Config.test();
-      final settings = XcodeCodeSigningSettings(
+      final settings = XcodeCodeSigningSettings.test(
         config: config,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -1497,7 +1497,7 @@ Or run on an iOS simulator without code signing
     testWithoutContext('cancels if code-signing tools are not found', () async {
       final logger = BufferLogger.test();
       final config = Config.test();
-      final settings = XcodeCodeSigningSettings(
+      final settings = XcodeCodeSigningSettings.test(
         config: config,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -1521,7 +1521,7 @@ Or run on an iOS simulator without code signing
         const FakeCommand(command: <String>['which', 'security']),
         const FakeCommand(command: <String>['which', 'openssl']),
       ]);
-      final settings = XcodeCodeSigningSettings(
+      final settings = XcodeCodeSigningSettings.test(
         config: config,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -1546,7 +1546,7 @@ Or run on an iOS simulator without code signing
         const FakeCommand(command: <String>['which', 'security']),
         const FakeCommand(command: <String>['which', 'openssl']),
       ]);
-      final settings = XcodeCodeSigningSettings(
+      final settings = XcodeCodeSigningSettings.test(
         config: config,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -1573,7 +1573,7 @@ Or run on an iOS simulator without code signing
       final terminal = FakeTerminal();
       terminal.setPrompt(<String>['1', '2', 'q'], 'q');
 
-      final settings = XcodeCodeSigningSettings(
+      final settings = XcodeCodeSigningSettings.test(
         config: config,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -1608,7 +1608,7 @@ Or run on an iOS simulator without code signing
           ),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -1677,7 +1677,7 @@ Or run on an iOS simulator without code signing
           ),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -1746,7 +1746,7 @@ Or run on an iOS simulator without code signing
           ),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -1812,7 +1812,7 @@ Or run on an iOS simulator without code signing
           ),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -1854,7 +1854,7 @@ Or run on an iOS simulator without code signing
           const FakeCommand(command: <String>['which', 'openssl']),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -1961,7 +1961,7 @@ Or run on an iOS simulator without code signing
           ),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -2070,7 +2070,7 @@ Or run on an iOS simulator without code signing
             ),
           ]);
 
-          final settings = XcodeCodeSigningSettings(
+          final settings = XcodeCodeSigningSettings.test(
             config: config,
             logger: logger,
             platform: FakePlatform(operatingSystem: 'macos'),
@@ -2272,7 +2272,7 @@ Or run on an iOS simulator without code signing
           ),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -2343,7 +2343,7 @@ Or run on an iOS simulator without code signing
       ),
     ]);
 
-    final settings = XcodeCodeSigningSettings(
+    final settings = XcodeCodeSigningSettings.test(
       config: config,
       logger: logger,
       platform: FakePlatform(operatingSystem: 'macos'),
@@ -2369,7 +2369,7 @@ Or run on an iOS simulator without code signing
     final fileSystem = MemoryFileSystem.test();
     config.setValue('ios-signing-cert', 'Apple Development: Company Development (12ABCD234E)');
 
-    final settings = XcodeCodeSigningSettings(
+    final settings = XcodeCodeSigningSettings.test(
       config: config,
       logger: logger,
       platform: FakePlatform(operatingSystem: 'macos'),
@@ -2386,6 +2386,25 @@ Or run on an iOS simulator without code signing
     expect(await settings.getIdentityFromCertFromConfig(validCodeSigningIdentities), isNotNull);
     expect(logger.errorText, isEmpty);
     expect(logger.warningText, isEmpty);
+  });
+
+  testWithoutContext('fromContexts constructor initializes dependencies', () {
+    final appleContext = FakeAppleContext(plistParser: FakePlistParser());
+    final toolContext = FakeToolContext(
+      config: Config.test(),
+      fs: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'macos'),
+      processManager: FakeProcessManager.empty(),
+      terminal: FakeTerminal(),
+    );
+
+    final settings = XcodeCodeSigningSettings.fromContexts(
+      appleContext: appleContext,
+      toolContext: toolContext,
+    );
+
+    expect(settings, isNotNull);
   });
 }
 

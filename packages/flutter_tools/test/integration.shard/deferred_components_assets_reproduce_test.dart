@@ -26,39 +26,36 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  testWithoutContext(
-    'deferred components assets are not missing on clean build',
-    () async {
-      final project = DeferredComponentsProject(BasicDeferredComponentsConfig());
-      await project.setUpIn(tempDir);
+  testWithoutContext('deferred components assets are not missing on clean build', () async {
+    final project = DeferredComponentsProject(BasicDeferredComponentsConfig());
+    await project.setUpIn(tempDir);
 
-      final ProcessResult result = await processManager.run(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'build',
-        'appbundle',
-        '--target-platform=android-arm64',
-        '--no-validate-deferred-components',
-      ], workingDirectory: tempDir.path);
+    final ProcessResult result = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'build',
+      'appbundle',
+      '--target-platform=android-arm64',
+      '--no-validate-deferred-components',
+    ], workingDirectory: tempDir.path);
 
-      expect(result.stdout.toString(), contains('app-release.aab'));
+    expect(result.stdout.toString(), contains('app-release.aab'));
 
-      final String line = result.stdout
-          .toString()
-          .split('\n')
-          .firstWhere((String line) => line.contains('app-release.aab'));
+    final String line = result.stdout
+        .toString()
+        .split('\n')
+        .firstWhere((String line) => line.contains('app-release.aab'));
 
-      final String outputFilePath = line.split(' ')[2].trim();
-      final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
-      expect(outputFile, exists);
+    final String outputFilePath = line.split(' ')[2].trim();
+    final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
+    expect(outputFile, exists);
 
-      final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
+    final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
 
-      // Verification: asset2.txt inside component1 should be present.
-      expect(
-        archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt') != null,
-        true,
-      );
-    },
-  );
+    // Verification: asset2.txt inside component1 should be present.
+    expect(
+      archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt') != null,
+      true,
+    );
+  });
 }
