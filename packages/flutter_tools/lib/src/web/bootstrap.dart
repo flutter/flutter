@@ -348,9 +348,9 @@ indeterminate.className = "indeterminate";
 loader.appendChild(indeterminate);
 
 document.addEventListener('dart-app-ready', function (e) {
-   loader.parentNode.removeChild(loader);
-   styleSheet.parentNode.removeChild(styleSheet);
-});
+   loader.remove();
+   styleSheet.remove();
+}, { once: true });
 ''';
 }
 
