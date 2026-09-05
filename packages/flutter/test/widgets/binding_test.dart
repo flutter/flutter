@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -771,6 +772,67 @@ void main() {
 
     expect(tester.binding.lifecycleState, isNull);
     expect(tester.binding.framesEnabled, isTrue);
+  });
+
+  testWidgets('a build scheduled during persistentCallbacks still produces a frame', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/189976.
+    //
+    // A build scheduled while the scheduler is in
+    // SchedulerPhase.persistentCallbacks - for example from State.dispose()
+    // while BuildOwner.finalizeTree() unmounts elements - used to reach
+    // ensureVisualUpdate(), which is a documented no-op in that phase. Nothing
+    // else requested a frame afterwards, and because BuildOwner only calls
+    // onBuildScheduled() on the false-to-true edge of its internal flag, no
+    // later build re-triggered it either, so the app stopped producing frames.
+    //
+    // This test reproduces that scheduler phase rather than that exact call
+    // site: by the time BuildOwner.finalizeTree() runs, buildScope() has
+    // already returned and reset its flag, so a build scheduled from a
+    // persistent frame callback reaches _handleBuildScheduled() in the same
+    // state, without needing to unmount anything.
+    late StateSetter markNeedsBuild;
+    var buildCount = 0;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          markNeedsBuild = setState;
+          buildCount += 1;
+          return const SizedBox();
+        },
+      ),
+    );
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    final buildCountBefore = buildCount;
+
+    // Persistent frame callbacks run in SchedulerPhase.persistentCallbacks,
+    // just after WidgetsBinding.drawFrame() has completed.
+    var didRequestBuild = false;
+    SchedulerPhase? phaseWhenBuildWasRequested;
+    // Persistent frame callbacks cannot be removed, so make sure this one is
+    // inert for every later test in this file, however this test ends.
+    addTearDown(() => didRequestBuild = true);
+    tester.binding.addPersistentFrameCallback((Duration timeStamp) {
+      if (didRequestBuild) {
+        return;
+      }
+      didRequestBuild = true;
+      phaseWhenBuildWasRequested = tester.binding.schedulerPhase;
+      markNeedsBuild(() {});
+    });
+
+    tester.binding.scheduleFrame();
+    await tester.pump();
+    expect(didRequestBuild, isTrue);
+    expect(phaseWhenBuildWasRequested, SchedulerPhase.persistentCallbacks);
+
+    // The build requested mid-frame must schedule a follow-up frame...
+    expect(tester.binding.hasScheduledFrame, isTrue);
+
+    // ...and that frame must actually rebuild the dirty widget.
+    await tester.pump();
+    expect(buildCount, greaterThan(buildCountBefore));
   });
 
   testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
