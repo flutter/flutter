@@ -332,4 +332,10 @@ void main() {
 class FakeAssetBundle extends Fake implements AssetBundle {
   @override
   final entries = <String, AssetBundleEntry>{};
+
+  @override
+  final removedEntries = <String>{};
+
+  @override
+  final removedShaderEntries = <String>{};
 }

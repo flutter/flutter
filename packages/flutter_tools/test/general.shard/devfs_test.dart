@@ -1089,6 +1089,119 @@ void main() {
         expect(dirtyEntries, isEmpty);
       },
     );
+
+    test(
+      'DevFS.updateBundle evicts assets that were removed from the bundle since the last build',
+      () async {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final dirtyEntries = <Uri, DevFSContent>{};
+        final assetBundle = FakeBundle();
+        assetBundle.removedEntries.add('assets/removed.txt');
+
+        const shaderCompiler = FakeShaderCompiler();
+        final assetTransformer = DevelopmentAssetTransformer(
+          fileSystem: fileSystem,
+          transformer: AssetTransformer(
+            processManager: FakeProcessManager.any(),
+            fileSystem: fileSystem,
+            dartBinaryPath: 'dart',
+            buildMode: BuildMode.debug,
+          ),
+          logger: BufferLogger.test(),
+        );
+
+        final assetPathsToEvict = <String>{};
+        await DevFS.updateBundle(
+          bundle: assetBundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: 'assets',
+          assetTransformer: assetTransformer,
+          shaderCompiler: shaderCompiler,
+          fileSystem: fileSystem,
+          rootDirectoryPath: '/',
+          assetPathsToEvict: assetPathsToEvict,
+          shaderPathsToEvict: <String>{},
+          bundleFirstUpload: false,
+        );
+
+        expect(assetPathsToEvict, unorderedEquals(<String>['assets/removed.txt']));
+      },
+    );
+
+    test(
+      'DevFS.updateBundle evicts removed shaders via shaderPathsToEvict, not assetPathsToEvict',
+      () async {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final dirtyEntries = <Uri, DevFSContent>{};
+        final assetBundle = FakeBundle();
+        assetBundle.removedShaderEntries.add('assets/removed.frag');
+
+        const shaderCompiler = FakeShaderCompiler();
+        final assetTransformer = DevelopmentAssetTransformer(
+          fileSystem: fileSystem,
+          transformer: AssetTransformer(
+            processManager: FakeProcessManager.any(),
+            fileSystem: fileSystem,
+            dartBinaryPath: 'dart',
+            buildMode: BuildMode.debug,
+          ),
+          logger: BufferLogger.test(),
+        );
+
+        final assetPathsToEvict = <String>{};
+        final shaderPathsToEvict = <String>{};
+        await DevFS.updateBundle(
+          bundle: assetBundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: 'assets',
+          assetTransformer: assetTransformer,
+          shaderCompiler: shaderCompiler,
+          fileSystem: fileSystem,
+          rootDirectoryPath: '/',
+          assetPathsToEvict: assetPathsToEvict,
+          shaderPathsToEvict: shaderPathsToEvict,
+          bundleFirstUpload: false,
+        );
+
+        expect(shaderPathsToEvict, unorderedEquals(<String>['assets/removed.frag']));
+        expect(assetPathsToEvict, isEmpty);
+      },
+    );
+
+    test('DevFS.updateBundle does not evict removed assets on the first upload', () async {
+      final FileSystem fileSystem = MemoryFileSystem.test();
+      final dirtyEntries = <Uri, DevFSContent>{};
+      final assetBundle = FakeBundle();
+      assetBundle.removedEntries.add('assets/removed.txt');
+
+      const shaderCompiler = FakeShaderCompiler();
+      final assetTransformer = DevelopmentAssetTransformer(
+        fileSystem: fileSystem,
+        transformer: AssetTransformer(
+          processManager: FakeProcessManager.any(),
+          fileSystem: fileSystem,
+          dartBinaryPath: 'dart',
+          buildMode: BuildMode.debug,
+        ),
+        logger: BufferLogger.test(),
+      );
+
+      final assetPathsToEvict = <String>{};
+      await DevFS.updateBundle(
+        bundle: assetBundle,
+        dirtyEntries: dirtyEntries,
+        assetDirectory: 'assets',
+        assetTransformer: assetTransformer,
+        shaderCompiler: shaderCompiler,
+        fileSystem: fileSystem,
+        rootDirectoryPath: '/',
+        assetPathsToEvict: assetPathsToEvict,
+        shaderPathsToEvict: <String>{},
+        bundleFirstUpload: true,
+      );
+
+      expect(assetPathsToEvict, isEmpty);
+    });
   });
 }
 
@@ -1164,6 +1277,12 @@ class FakeBundle extends AssetBundle {
 
   @override
   final entries = <String, AssetBundleEntry>{};
+
+  @override
+  final removedEntries = <String>{};
+
+  @override
+  final removedShaderEntries = <String>{};
 
   @override
   List<File> get inputFiles => <File>[];
