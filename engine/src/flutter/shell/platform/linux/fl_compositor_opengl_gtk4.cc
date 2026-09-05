@@ -231,16 +231,18 @@ static void log_dmabuf_fallback(FlCompositorOpenGL* self,
   }
 }
 
-static void import_dmabuf_sync(FlCompositorOpenGL* self,
+static gboolean import_dmabuf_sync(FlCompositorOpenGL* self,
                                const Gtk4DmabufTextureData* data) {
   if (self->dmabuf_sync_fd < 0) {
-    return;
+    // The producer completed the snapshot synchronously when no FD was made.
+    return TRUE;
   }
 
   dma_buf_import_sync_file sync = {
       .flags = DMA_BUF_SYNC_WRITE,
       .fd = self->dmabuf_sync_fd,
   };
+  gboolean imported = TRUE;
   for (int i = 0; i < data->n_planes; ++i) {
     if (ioctl(data->fds[i], DMA_BUF_IOCTL_IMPORT_SYNC_FILE, &sync) != 0) {
       if (!self->dmabuf_sync_warning_logged) {
@@ -249,12 +251,14 @@ static void import_dmabuf_sync(FlCompositorOpenGL* self,
                           g_strerror(errno));
         self->dmabuf_sync_warning_logged = TRUE;
       }
+      imported = FALSE;
       break;
     }
   }
 
   close(self->dmabuf_sync_fd);
   self->dmabuf_sync_fd = -1;
+  return imported;
 }
 
 static void release_native_texture_data(gpointer user_data) {
@@ -384,7 +388,11 @@ static GdkTexture* acquire_dmabuf_texture(FlCompositorOpenGL* self,
     release_dmabuf_texture_data(data);
     return nullptr;
   }
-  import_dmabuf_sync(self, data);
+  if (!import_dmabuf_sync(self, data)) {
+    log_dmabuf_fallback(self, "DMA-BUF fence import failed", FALSE);
+    release_dmabuf_texture_data(data);
+    return nullptr;
+  }
 
   FlGtk4DmabufDescriptor descriptor = {
       .width = static_cast<guint>(fl_framebuffer_get_width(framebuffer)),
@@ -603,6 +611,12 @@ void fl_compositor_opengl_gtk4_finish_present(FlCompositorOpenGL* self,
     const gboolean has_native_texture_sync = create_native_texture_sync(self);
     if (publish_dmabuf_snapshot(self, format, width, height)) {
       update_dmabuf_sync(self);
+      if (self->dmabuf_sync_fd < 0) {
+        // The snapshot blit follows the ordinary GL fence. Without a native
+        // fence, finish the blit before publishing the DMA-BUF to GDK.
+        glFinish();
+        return;
+      }
       if (has_native_texture_sync) {
         return;
       }
