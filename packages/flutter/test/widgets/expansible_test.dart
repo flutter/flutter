@@ -533,4 +533,62 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Body'), findsOneWidget);
   });
+
+  testWidgets('Does not crash when PageStorage holds a non-bool value', (
+    WidgetTester tester,
+  ) async {
+    // A Scrollable and other widgets save doubles into PageStorage. If one of
+    // those values ends up in the Expansible's slot, reading it back should not
+    // crash. Regression test for
+    // https://github.com/flutter/flutter/issues/192184.
+    final bucket = PageStorageBucket();
+    const key = PageStorageKey<String>('tile');
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageStorage(
+          bucket: bucket,
+          child: const _PageStorageWriter(key: key, value: 42.0),
+        ),
+      ),
+    );
+
+    final controller = ExpansibleController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageStorage(
+          bucket: bucket,
+          child: Expansible(
+            key: key,
+            controller: controller,
+            bodyBuilder: (BuildContext context, Animation<double> animation) => const Text('Body'),
+            headerBuilder: (BuildContext context, Animation<double> animation) =>
+                const Text('Header'),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Header'), findsOneWidget);
+    expect(find.text('Body'), findsNothing);
+  });
+}
+
+// Saves a value into the shared PageStorage bucket. Using the same
+// PageStorageKey as the Expansible puts it in the same slot.
+class _PageStorageWriter extends StatelessWidget {
+  const _PageStorageWriter({super.key, required this.value});
+
+  final Object value;
+
+  @override
+  Widget build(BuildContext context) {
+    PageStorage.maybeOf(context)?.writeState(context, value);
+    return const SizedBox();
+  }
 }
