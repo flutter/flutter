@@ -27,6 +27,8 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
+import 'package:flutter_tools/src/globals.dart' as globals;
+
 void main() {
   late MemoryFileSystem memoryFileSystem;
   late Directory outputDirectory;
@@ -52,6 +54,48 @@ void main() {
   });
 
   group('build ios-framework', () {
+    testUsingContext(
+      'prints migration warning',
+      () async {
+        memoryFileSystem.currentDirectory
+            .childFile('pubspec.yaml')
+            .writeAsStringSync('name: project');
+        memoryFileSystem.currentDirectory
+            .childDirectory('lib')
+            .childFile('main.dart')
+            .createSync(recursive: true);
+        final command = BuildIOSFrameworkCommand(
+          logger: BufferLogger.test(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+
+        await expectLater(
+          () => runner.run(<String>['ios-framework', '--no-pub']),
+          throwsToolExit(message: 'Project does not support iOS'),
+        );
+        expect(
+          (globals.logger as BufferLogger).warningText,
+          contains(
+            'The "flutter build ios-framework" command is deprecated and has been replaced by '
+            '"flutter build swift-package --platform ios".',
+          ),
+        );
+        expect(
+          (globals.logger as BufferLogger).warningText,
+          contains('https://docs.flutter.dev/add-to-app/ios/project-setup'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
+      },
+    );
+
     group('podspec', () {
       const engineRevision = '0123456789abcdef';
       late Cache cache;
@@ -563,6 +607,48 @@ void main() {
   });
 
   group('build macos-framework', () {
+    testUsingContext(
+      'prints migration warning',
+      () async {
+        memoryFileSystem.currentDirectory
+            .childFile('pubspec.yaml')
+            .writeAsStringSync('name: project');
+        memoryFileSystem.currentDirectory
+            .childDirectory('lib')
+            .childFile('main.dart')
+            .createSync(recursive: true);
+        final command = BuildMacOSFrameworkCommand(
+          logger: BufferLogger.test(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          verboseHelp: false,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+
+        await expectLater(
+          () => runner.run(<String>['macos-framework', '--no-pub']),
+          throwsToolExit(message: 'Project does not support macOS'),
+        );
+        expect(
+          (globals.logger as BufferLogger).warningText,
+          contains(
+            'The "flutter build macos-framework" command is deprecated and has been replaced by '
+            '"flutter build swift-package --platform macos".',
+          ),
+        );
+        expect(
+          (globals.logger as BufferLogger).warningText,
+          contains('https://docs.flutter.dev/add-to-app/macos/project-setup'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => memoryFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(fileSystem: memoryFileSystem),
+      },
+    );
+
     group('podspec', () {
       const engineRevision = '0123456789abcdef';
       late Cache cache;
