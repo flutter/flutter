@@ -15,7 +15,12 @@ import 'target_platform.dart';
 @immutable
 final class Device {
   /// Creates a device with the given [name], [id], and [targetPlatform].
-  const Device({required this.name, required this.id, required this.targetPlatform});
+  const Device({
+    required this.name,
+    required this.id,
+    required this.targetPlatform,
+    this.emulator = false,
+  });
 
   /// Parses a device from the given [json].
   factory Device.fromJson(Map<String, Object?> json) {
@@ -24,6 +29,7 @@ final class Device {
         name: o.string('name'),
         id: o.string('id'),
         targetPlatform: TargetPlatform.parse(o.string('targetPlatform')),
+        emulator: o.booleanOrNull('emulator') ?? false,
       );
     });
   }
@@ -37,21 +43,30 @@ final class Device {
   /// Target platform of the device.
   final TargetPlatform targetPlatform;
 
+  /// Whether this device is an emulator or simulator.
+  final bool emulator;
+
   @override
   bool operator ==(Object other) {
     return other is Device &&
         other.name == name &&
         other.id == id &&
-        other.targetPlatform == targetPlatform;
+        other.targetPlatform == targetPlatform &&
+        other.emulator == emulator;
   }
 
   @override
-  int get hashCode => Object.hash(name, id, targetPlatform);
+  int get hashCode => Object.hash(name, id, targetPlatform, emulator);
 
   /// Converts this device to a JSON object, for use within tests.
   @visibleForTesting
   JsonObject toJson() {
-    return JsonObject({'name': name, 'id': id, 'targetPlatform': targetPlatform.identifier});
+    return JsonObject({
+      'name': name,
+      'id': id,
+      'targetPlatform': targetPlatform.identifier,
+      'emulator': emulator,
+    });
   }
 
   @override
