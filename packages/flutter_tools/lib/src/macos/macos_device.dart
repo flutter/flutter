@@ -2,16 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:process/process.dart';
 
+import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
+import '../ios/plist_parser.dart';
 import '../project.dart';
 import 'application_package.dart';
 import 'build_macos.dart';
@@ -26,11 +32,13 @@ class MacOSDevice extends DesktopDevice {
     required super.operatingSystemUtils,
   }) : _processManager = processManager,
        _logger = logger,
+       _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
        super('macos', platformType: PlatformType.macos, ephemeral: false);
 
   final ProcessManager _processManager;
   final Logger _logger;
+  final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
@@ -79,6 +87,286 @@ class MacOSDevice extends DesktopDevice {
   @override
   String? executablePathForDevice(covariant MacOSApp package, BuildInfo buildInfo) {
     return package.executable(buildInfo);
+  }
+
+  /// Converts engine switches from environment variables into CLI arguments.
+  ///
+  /// When launching via the macOS `open` command, environment variables cannot be
+  /// passed directly to the subprocess in the same manner as `ProcessManager.start`.
+  /// Instead, engine switches (like `--enable-dart-profiling`) must be passed as
+  /// command-line arguments following the `--args` flag.
+  List<String> _computeArgs(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
+    final Map<String, String> env = computeEnvironment(debuggingOptions, traceStartup, route);
+    final args = <String>[];
+
+    if (env['FLUTTER_ENGINE_SWITCHES'] case final String countStr) {
+      final int count = int.tryParse(countStr) ?? 0;
+      for (var i = 1; i <= count; i++) {
+        if (env['FLUTTER_ENGINE_SWITCH_$i'] case final String value) {
+          args.add('--$value');
+        }
+      }
+    }
+    return args;
+  }
+
+  @override
+  Future<LaunchResult> startApp(
+    ApplicationPackage package, {
+    required DebuggingOptions debuggingOptions,
+    String? mainPath,
+    Map<String, dynamic> platformArgs = const <String, dynamic>{},
+    bool prebuiltApplication = false,
+    String? route,
+    String? userIdentifier,
+  }) async {
+    if (package is! MacOSApp) {
+      _logger.printError('Expected MacOSApp package, got ${package.runtimeType}');
+      return LaunchResult.failed();
+    }
+    final MacOSApp macosPackage = package;
+    if (!prebuiltApplication) {
+      await buildForDevice(
+        buildInfo: debuggingOptions.buildInfo,
+        mainPath: mainPath,
+        usingCISystem: debuggingOptions.usingCISystem,
+      );
+    }
+
+    final BuildInfo buildInfo = debuggingOptions.buildInfo;
+    final String? bundlePath = macosPackage.applicationBundle(buildInfo);
+    if (bundlePath == null) {
+      _logger.printError('Unable to find application bundle');
+      return LaunchResult.failed();
+    }
+
+    final String? executable = macosPackage.executable(buildInfo);
+    if (executable == null) {
+      _logger.printError('Unable to find executable to run');
+      return LaunchResult.failed();
+    }
+
+    // In release mode, the VM Service is disabled and cannot be discovered via
+    // `--write-service-info`. Fall back to direct binary execution to preserve
+    // stdout/stderr log streaming.
+    if (buildInfo.isRelease) {
+      return super.startApp(
+        package,
+        debuggingOptions: debuggingOptions,
+        mainPath: mainPath,
+        platformArgs: platformArgs,
+        prebuiltApplication: prebuiltApplication,
+        route: route,
+        userIdentifier: userIdentifier,
+      );
+    }
+
+    // Under macOS Transparency, Consent, and Control (TCC), running an application
+    // binary directly from an IDE or terminal process attributes permission requests
+    // (e.g. Camera, Microphone, Contacts) to the parent IDE/terminal process rather
+    // than the app bundle itself. This often leads to silent permission denials or crashes.
+    // Launching via `open -n -a <bundle> --args <args>` runs the application within its proper
+    // bundle context, ensuring correct TCC attribution and preventing reusing existing instances.
+    final Directory tempDirectory = _resolveTempDirectory(bundlePath);
+    final File vmServiceInfoFile = tempDirectory
+        .createTempSync('flutter_tools_macos_device.')
+        .childFile('vm_service_info.json');
+
+    final List<String> args = _computeArgs(
+      debuggingOptions,
+      platformArgs['trace-startup'] as bool? ?? false,
+      route,
+    );
+    args.add('--write-service-info=${vmServiceInfoFile.path}');
+    if (debuggingOptions.dartEntrypointArgs.isNotEmpty) {
+      args.addAll(debuggingOptions.dartEntrypointArgs);
+    }
+
+    final openCommand = <String>[
+      'open',
+      '-n',
+      '-a',
+      bundlePath,
+      if (args.isNotEmpty) ...<String>['--args', ...args],
+    ];
+
+    Uri? vmServiceUri;
+    try {
+      _logger.printTrace('Launching: ${openCommand.join(' ')}');
+      final ProcessResult result = await _processManager.run(openCommand);
+      if (result.exitCode != 0) {
+        _logger.printError('Failed to launch app via open: ${result.stderr}');
+        return LaunchResult.failed();
+      }
+
+      final timeout = (await globals.isRunningOnBot)
+          ? const Duration(minutes: 5)
+          : const Duration(seconds: 30);
+
+      vmServiceUri = await _pollForVmServiceUri(vmServiceInfoFile, executable, timeout);
+    } finally {
+      try {
+        vmServiceInfoFile.parent.deleteSync(recursive: true);
+      } on Exception catch (e) {
+        _logger.printTrace('Failed to delete temp directory: $e');
+      }
+    }
+
+    if (vmServiceUri == null) {
+      await _logVmServiceError(debuggingOptions);
+      return LaunchResult.failed();
+    }
+
+    return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
+  }
+
+  /// Resolves the directory to store temporary files for the application.
+  ///
+  /// Under macOS App Sandbox, sandboxed applications are forbidden by kernel sandbox policy
+  /// from writing outside their sandbox container directory (`~/Library/Containers/<bundleId>/Data/tmp/`)
+  /// unless granted specific user-selected file entitlements.
+  ///
+  /// Attempting to write `--write-service-info` to the system temporary directory (e.g. `/tmp` or
+  /// `/Volumes/Work/...`) is blocked by `sandboxd`, preventing the Dart VM from creating `vm_service_info.json`.
+  ///
+  /// To ensure the VM can write the connection file, resolve the application's bundle identifier
+  /// from `Info.plist` and create the temporary file inside the application's sandbox container:
+  /// `~/Library/Containers/<bundleId>/Data/tmp/`
+  /// If the bundle identifier cannot be resolved or container directory creation fails, fall back to
+  /// `_fileSystem.systemTempDirectory`.
+  Directory _resolveTempDirectory(String bundlePath) {
+    final String plistPath = _fileSystem.path.join(bundlePath, 'Contents', 'Info.plist');
+    if (_fileSystem.file(plistPath).existsSync()) {
+      try {
+        final String? bundleId = globals.plistParser.getValueFromFile<String>(
+          plistPath,
+          PlistParser.kCFBundleIdentifierKey,
+        );
+        final String? homeDirPath = globals.fsUtils.homeDirPath;
+        if (bundleId != null && bundleId.isNotEmpty && homeDirPath != null) {
+          final Directory containerTmpDir = _fileSystem.directory(
+            _fileSystem.path.join(homeDirPath, 'Library', 'Containers', bundleId, 'Data', 'tmp'),
+          );
+          containerTmpDir.createSync(recursive: true);
+          return containerTmpDir;
+        }
+      } on Exception catch (e) {
+        _logger.printTrace('Could not resolve or create sandbox container tmp directory: $e');
+      }
+    }
+    return _fileSystem.systemTempDirectory;
+  }
+
+  /// Polls [vmServiceInfoFile] until the VM Service URI is written, the app exits,
+  /// or [timeout] elapses.
+  Future<Uri?> _pollForVmServiceUri(
+    File vmServiceInfoFile,
+    String executable,
+    Duration timeout,
+  ) async {
+    final stopwatch = Stopwatch()..start();
+    _logger.printTrace('Waiting for VM Service info file at ${vmServiceInfoFile.path}');
+    while (stopwatch.elapsed < timeout) {
+      if (_readVmServiceUri(vmServiceInfoFile) case final Uri uri) {
+        return uri;
+      }
+
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      // Check if the application exited or crashed prematurely before writing the VM Service URI.
+      final ProcessResult pgrepResult = await _processManager.run(<String>[
+        'pgrep',
+        '-f',
+        RegExp.escape(executable),
+      ]);
+      if (pgrepResult.exitCode != 0) {
+        // App is no longer running. Check one last time if the file was written before exiting.
+        if (_readVmServiceUri(vmServiceInfoFile) case final Uri uri) {
+          return uri;
+        }
+        _logger.printError('Application exited before VM Service connected.');
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /// Logs error and diagnostic information when the VM Service fails to connect.
+  Future<void> _logVmServiceError(DebuggingOptions debuggingOptions) async {
+    if (await globals.isRunningOnBot) {
+      final sandboxingMessage = debuggingOptions.usingCISystem
+          ? 'Ensure sandboxing is disabled by checking the set CODE_SIGN_ENTITLEMENTS.'
+          : 'Consider codesigning your app or disabling sandboxing. Flutter will attempt to disable sandboxing if the `--ci` flag is provided.';
+      _logger.printError(
+        'The Dart VM Service was not discovered after 5 minutes. '
+        'If the app has sandboxing enabled and is not codesigned or codesigning changed, '
+        'this may be caused by a system prompt asking for access. $sandboxingMessage\n'
+        'See https://developer.apple.com/documentation/security/app_sandbox/accessing_files_from_the_macos_app_sandbox '
+        'for more information.',
+      );
+    }
+    _logger.printError('Failed to connect to VM Service. Timeout or app crashed.');
+  }
+
+  Uri? _readVmServiceUri(File file) {
+    if (file.existsSync()) {
+      try {
+        final String content = file.readAsStringSync();
+        if (content.isNotEmpty) {
+          if (jsonDecode(content) case {'uri': final String uriStr}) {
+            return Uri.tryParse(uriStr);
+          }
+        }
+      } on Exception catch (e) {
+        _logger.printTrace('Error reading VM Service info file: $e. Retrying...');
+      }
+    }
+    return null;
+  }
+
+  /// Finds the executable path for [macosApp] across build modes.
+  String? _findExecutable(MacOSApp macosApp) {
+    for (final BuildMode mode in BuildMode.values) {
+      final buildInfo = BuildInfo(
+        mode,
+        null,
+        packageConfigPath: '.dart_tool/package_config.json',
+        treeShakeIcons: false,
+      );
+      if (macosApp.executable(buildInfo) case final String path
+          when _fileSystem.file(path).existsSync()) {
+        return path;
+      }
+    }
+    return null;
+  }
+
+  @override
+  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+    if (app is! MacOSApp) {
+      return false;
+    }
+    final MacOSApp macosApp = app;
+
+    // Stop any app process tracked by DesktopDevice.
+    final bool superStopped = await super.stopApp(app, userIdentifier: userIdentifier);
+
+    final String? executable = _findExecutable(macosApp);
+    if (executable == null) {
+      _logger.printTrace('Could not find executable path for ${app.name} to stop.');
+      return superStopped;
+    }
+
+    // Because debug and profile applications are launched via `open`, we do not
+    // have a persistent `Process` instance to kill directly. Use `pkill` to terminate
+    // matching application processes.
+    final ProcessResult result = await _processManager.run(<String>[
+      'pkill',
+      '-f',
+      RegExp.escape(executable),
+    ]);
+    // pkill returns 0 on success (processes matched and killed) or 1 if no matching processes were found.
+    return result.exitCode == 0 || result.exitCode == 1;
   }
 
   @override
