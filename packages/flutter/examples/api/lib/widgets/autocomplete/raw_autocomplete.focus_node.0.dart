@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// #region body
 import 'package:flutter/material.dart';
 
 /// Flutter code sample for [RawAutocomplete.focusNode].
@@ -85,3 +86,4 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
     );
   }
 }
+// #endregion body
