@@ -21,14 +21,9 @@ using FireCallbackCallback =
 
 using AwaitVsyncCallback = std::function<void(FireCallbackCallback)>;
 
-using AwaitVsyncForSecondaryCallbackCallback =
-    std::function<void(FireCallbackCallback)>;
-
 class VsyncWaiter final : public flutter::VsyncWaiter {
  public:
   VsyncWaiter(AwaitVsyncCallback await_vsync_callback,
-              AwaitVsyncForSecondaryCallbackCallback
-                  await_vsync_for_secondary_callback_callback,
               flutter::TaskRunners task_runners);
 
   ~VsyncWaiter() override;
@@ -37,14 +32,9 @@ class VsyncWaiter final : public flutter::VsyncWaiter {
   // |flutter::VsyncWaiter|
   void AwaitVSync() override;
 
-  // |flutter::VsyncWaiter|
-  void AwaitVSyncForSecondaryCallback() override;
-
   FireCallbackCallback fire_callback_callback_;
 
   AwaitVsyncCallback await_vsync_callback_;
-  AwaitVsyncForSecondaryCallbackCallback
-      await_vsync_for_secondary_callback_callback_;
 
   fml::WeakPtr<VsyncWaiter> weak_ui_;
   std::unique_ptr<fml::WeakPtrFactory<VsyncWaiter>> weak_factory_ui_;
