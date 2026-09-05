@@ -1067,9 +1067,9 @@ class RenderParagraph extends RenderBox
   // in full.
   //
   // Null is returned when the text already fits, when it is empty, and when it
-  // cannot be split because it contains spans other than [TextSpan]s, such as
-  // the [PlaceholderSpan] of a [WidgetSpan]. In the last case the text falls
-  // back to being clipped.
+  // cannot be split because it contains anything but plain [TextSpan]s, such as
+  // the [PlaceholderSpan] of a [WidgetSpan] or a [TextSpan] subclass. In the
+  // last case the text falls back to being clipped.
   InlineSpan? _truncatedSpan(double maxWidth) {
     assert(_truncatesText);
     if (_cachedTruncationWidth == maxWidth) {
@@ -1101,9 +1101,14 @@ class RenderParagraph extends RenderBox
     final int clusterCount = boundaries.length - 1;
 
     // Find the largest number of grapheme clusters that fits alongside the
-    // ellipsis. The width of a candidate grows monotonically with the number
-    // of clusters it keeps, so this is a binary search; `low` is always a
-    // number of clusters that fits and `high` one that may not.
+    // ellipsis, by binary search; `low` is always a number of clusters that
+    // fits and `high` one that may not.
+    //
+    // Keeping more clusters usually makes a candidate wider, but not always:
+    // the ellipsis is styled after the first cluster it replaces, and for
+    // TextOverflow.ellipsisMiddle that cluster moves through the text as more
+    // of it is kept, so the ellipsis itself can become narrower. The two
+    // passes after the search correct for that.
     var low = 0;
     int high = clusterCount - 1;
     while (low < high) {
@@ -1115,14 +1120,26 @@ class RenderParagraph extends RenderBox
       }
     }
 
-    // Kerning and ligatures across the ellipsis can make the width of a
-    // candidate very slightly non-monotonic, so shrink until the result really
-    // does fit. The loop almost always exits without iterating; keeping only
-    // the ellipsis is the last resort, even if the ellipsis alone overflows.
+    // Shrink until the result really does fit, so that the text is never
+    // rendered wider than maxWidth. Keeping only the ellipsis is the last
+    // resort, even if the ellipsis alone overflows.
     var keptClusters = low;
     InlineSpan truncated = _buildTruncatedSpan(boundaries, keptClusters);
     while (keptClusters > 0 && _measureWidth(truncated) > maxWidth) {
       truncated = _buildTruncatedSpan(boundaries, --keptClusters);
+    }
+
+    // Then grow again while the next candidate also fits, so that a candidate
+    // the binary search stepped over because a wider ellipsis made it overflow
+    // is not left behind. Both loops stop immediately unless the elided text
+    // spans more than one style.
+    while (keptClusters < clusterCount - 1) {
+      final InlineSpan wider = _buildTruncatedSpan(boundaries, keptClusters + 1);
+      if (_measureWidth(wider) > maxWidth) {
+        break;
+      }
+      keptClusters += 1;
+      truncated = wider;
     }
     return truncated;
   }
@@ -1155,7 +1172,14 @@ class RenderParagraph extends RenderBox
     if (leadingClusters > 0) {
       children.add(_SpanSlicer(0, boundaries[leadingClusters]).slice(_text)!);
     }
-    children.add(TextSpan(text: _kEllipsis, style: _text.style));
+    // The ellipsis takes the style of the first grapheme cluster it replaces,
+    // which is what the text engine does for TextOverflow.ellipsis and what
+    // UIKit does for its head and middle truncation modes. Only the style is
+    // taken: a gesture recognizer or a semantics label describes the text that
+    // was elided, not the glyph standing in for it.
+    children.add(
+      TextSpan(text: _kEllipsis, style: _StyleAtOffset(boundaries[leadingClusters]).of(_text)),
+    );
     if (trailingClusters > 0) {
       children.add(
         _SpanSlicer(boundaries[clusterCount - trailingClusters], boundaries.last).slice(_text)!,
@@ -1780,6 +1804,48 @@ class RenderParagraph extends RenderBox
   }
 }
 
+/// Finds the style that applies to a code unit offset in an [InlineSpan] tree,
+/// merging the styles of the spans containing that offset from the outside in.
+class _StyleAtOffset {
+  _StyleAtOffset(this.offset) : assert(offset >= 0);
+
+  /// The code unit offset whose style to resolve.
+  final int offset;
+
+  int _cursor = 0;
+  bool _found = false;
+  TextStyle? _style;
+
+  /// The style [offset] is rendered with, or null if [span] has no text at that
+  /// offset or no style applies to it.
+  TextStyle? of(InlineSpan span) {
+    _visit(span, null);
+    return _style;
+  }
+
+  void _visit(InlineSpan span, TextStyle? inherited) {
+    final TextStyle? style = inherited?.merge(span.style) ?? span.style;
+    if (span is! TextSpan) {
+      return;
+    }
+    final String? text = span.text;
+    if (text != null) {
+      if (offset < _cursor + text.length) {
+        _found = true;
+        _style = style;
+        return;
+      }
+      _cursor += text.length;
+    }
+    for (final InlineSpan child in span.children ?? const <InlineSpan>[]) {
+      _visit(child, style);
+      if (_found) {
+        return;
+      }
+    }
+  }
+}
+
 /// Rebuilds an [InlineSpan] tree so that it only contains the text within a
 /// code unit range, preserving the style and the other properties of every span
 /// the range intersects.
@@ -1797,14 +1863,15 @@ class _SpanSlicer {
   /// The code unit offset within the paragraph of the span being visited.
   int _offset = 0;
 
-  /// Whether [span] is made up entirely of [TextSpan]s, and so can be split at
-  /// an arbitrary code unit offset.
+  /// Whether [span] is made up entirely of plain [TextSpan]s, and so can be
+  /// split at an arbitrary code unit offset.
   ///
   /// A [PlaceholderSpan] stands for a single code unit that renders an inline
-  /// widget, and other [InlineSpan] subclasses cannot be copied, so neither can
-  /// be split.
+  /// widget, so it cannot be split. Subclasses of [TextSpan] are rejected as
+  /// well: slicing rebuilds the tree out of plain [TextSpan]s, which would
+  /// silently drop whatever state and behavior a subclass adds.
   static bool canSlice(InlineSpan span) {
-    if (span is! TextSpan) {
+    if (span is! TextSpan || span.runtimeType != TextSpan) {
       return false;
     }
     var result = true;

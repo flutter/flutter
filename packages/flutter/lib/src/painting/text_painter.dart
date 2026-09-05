@@ -83,8 +83,10 @@ enum TextOverflow {
   /// rather than the full string. Use [Text.semanticsLabel] to announce the
   /// full string to assistive technologies.
   ///
-  /// A paragraph that contains a [WidgetSpan] (or any other [PlaceholderSpan])
-  /// cannot be split, so it falls back to [TextOverflow.clip].
+  /// The text is only truncated when it is made up entirely of plain
+  /// [TextSpan]s. A paragraph containing a [WidgetSpan] (or any other
+  /// [PlaceholderSpan]), or a subclass of [TextSpan], cannot be split and falls
+  /// back to [TextOverflow.clip].
   ellipsisStart,
 
   /// Use an ellipsis in the middle of the text to indicate that the text has
@@ -106,8 +108,10 @@ enum TextOverflow {
   /// rather than the full string. Use [Text.semanticsLabel] to announce the
   /// full string to assistive technologies.
   ///
-  /// A paragraph that contains a [WidgetSpan] (or any other [PlaceholderSpan])
-  /// cannot be split, so it falls back to [TextOverflow.clip].
+  /// The text is only truncated when it is made up entirely of plain
+  /// [TextSpan]s. A paragraph containing a [WidgetSpan] (or any other
+  /// [PlaceholderSpan]), or a subclass of [TextSpan], cannot be split and falls
+  /// back to [TextOverflow.clip].
   ellipsisMiddle,
 
   /// Render overflowing text outside of its container.

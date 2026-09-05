@@ -1889,6 +1889,159 @@ void main() {
           expect(hitSpan.recognizer, same(recognizer));
         });
 
+        test('the ellipsis takes the style of the first cluster it replaces', () {
+          // The root carries no colour, so an ellipsis styled after the root
+          // would render in the default colour instead of matching the text it
+          // stands in for.
+          const red = TextStyle(fontSize: 10.0, color: Color(0xFFFF0000));
+          const green = TextStyle(fontSize: 10.0, color: Color(0xFF00FF00));
+          final RenderParagraph paragraph = makeParagraph(
+            overflow,
+            span: const TextSpan(
+              children: <InlineSpan>[
+                TextSpan(text: 'AAAAAAAAAA', style: red),
+                TextSpan(text: 'BBBBBBBBBB', style: green),
+              ],
+            ),
+          );
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+
+          final String rendered = paragraph.debugRenderedText;
+          final int ellipsisIndex = rendered.indexOf('…');
+          final Offset caret = paragraph.getOffsetForCaret(
+            TextPosition(offset: ellipsisIndex),
+            Rect.zero,
+          );
+          final result = BoxHitTestResult();
+          paragraph.hitTest(result, position: Offset(caret.dx + 1.0, 5.0));
+          final TextSpan hit = result.path
+              .map((HitTestEntry entry) => entry.target)
+              .whereType<TextSpan>()
+              .single;
+          // ellipsisStart elides from the start, so the first elided cluster is
+          // always red; ellipsisMiddle elides from the middle of this text,
+          // which also falls in the red run at this width.
+          expect(hit.style?.color, const Color(0xFFFF0000));
+        });
+
+        test('the ellipsis does not inherit the recognizer of the elided text', () {
+          final recognizer = TapGestureRecognizer();
+          addTearDown(recognizer.dispose);
+          final RenderParagraph paragraph = makeParagraph(
+            overflow,
+            span: TextSpan(
+              style: kStyle,
+              children: <InlineSpan>[
+                TextSpan(text: 'AAAAAAAAAA', recognizer: recognizer),
+                const TextSpan(text: 'BBBBBBBBBB'),
+              ],
+            ),
+          );
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+
+          final String rendered = paragraph.debugRenderedText;
+          final Offset caret = paragraph.getOffsetForCaret(
+            TextPosition(offset: rendered.indexOf('…')),
+            Rect.zero,
+          );
+          final result = BoxHitTestResult();
+          paragraph.hitTest(result, position: Offset(caret.dx + 1.0, 5.0));
+          final Iterable<TextSpan> hits = result.path
+              .map((HitTestEntry entry) => entry.target)
+              .whereType<TextSpan>();
+          // The glyph stands in for hidden text, so tapping it must do nothing.
+          expect(hits.every((TextSpan span) => span.recognizer == null), isTrue);
+        });
+
+        test('keeps as much text as fits when the elided text changes size', () {
+          // A large run followed by a small one: as more of the text is kept,
+          // the cluster the ellipsis is styled after crosses from the large run
+          // into the small one and the ellipsis narrows, so candidate widths do
+          // not grow monotonically with the number of clusters kept.
+          const span = TextSpan(
+            children: <InlineSpan>[
+              TextSpan(text: 'AAAAA', style: TextStyle(fontSize: 40.0)),
+              TextSpan(text: 'BBBBBBBBBB', style: TextStyle(fontSize: 10.0)),
+            ],
+          );
+          var previousKept = 0;
+          for (var width = 20.0; width <= 300.0; width += 10.0) {
+            final RenderParagraph paragraph = makeParagraph(overflow, span: span);
+            layout(paragraph, constraints: BoxConstraints(maxWidth: width));
+            final String rendered = paragraph.debugRenderedText;
+
+            // The caret past the last character sits at the right edge of the
+            // text, which is the width it actually occupies.
+            final double renderedRight = paragraph
+                .getOffsetForCaret(TextPosition(offset: rendered.length), Rect.zero)
+                .dx;
+            expect(
+              renderedRight,
+              lessThanOrEqualTo(width),
+              reason: 'overflowed at maxWidth $width with "$rendered"',
+            );
+
+            // Widening the box never renders less of the text, which is what a
+            // candidate skipped by the binary search would look like.
+            final int kept = rendered.replaceAll('…', '').length;
+            expect(
+              kept,
+              greaterThanOrEqualTo(previousKept),
+              reason:
+                  'kept $kept clusters at maxWidth $width after $previousKept in a narrower box',
+            );
+            previousKept = kept;
+          }
+        });
+
+        test('mixed bidirectional text is elided in logical order and fits', () {
+          // One LTR character, five RTL characters, then six LTR characters.
+          const bidi = 'AاااااAAAAAA';
+          for (final width in <double>[40.0, 60.0, 80.0, 100.0]) {
+            final RenderParagraph paragraph = makeParagraph(
+              overflow,
+              span: const TextSpan(text: bidi, style: kStyle),
+            );
+            layout(paragraph, constraints: BoxConstraints(maxWidth: width));
+            final String rendered = paragraph.debugRenderedText;
+            expect(
+              renderedWidth(paragraph),
+              lessThanOrEqualTo(width),
+              reason: 'overflowed at maxWidth $width with "$rendered"',
+            );
+            // What is kept is a logical prefix and/or a logical suffix of the
+            // original text, whichever the mode asks for; the text direction
+            // only decides where the engine paints them.
+            final List<String> parts = rendered.split('…');
+            expect(parts.length, 2);
+            expect(bidi, startsWith(parts.first));
+            expect(bidi, endsWith(parts.last));
+          }
+        });
+
+        test('falls back to clipping when the text contains a TextSpan subclass', () {
+          // Truncating rebuilds the tree out of plain TextSpans, which would
+          // drop what the subclass carries, so such a tree is left alone.
+          final RenderParagraph paragraph = makeParagraph(
+            overflow,
+            span: const TextSpan(
+              style: kStyle,
+              children: <InlineSpan>[_PayloadSpan(text: kText26, payload: 'kept')],
+            ),
+          );
+          layout(paragraph, constraints: const BoxConstraints(maxWidth: 80.0));
+          expect(paragraph.debugRenderedText, kText26);
+          expect(paragraph.debugRenderedText, isNot(contains('…')));
+
+          final result = BoxHitTestResult();
+          paragraph.hitTest(result, position: const Offset(5.0, 5.0));
+          final TextSpan hit = result.path
+              .map((HitTestEntry entry) => entry.target)
+              .whereType<TextSpan>()
+              .first;
+          expect(hit, isA<_PayloadSpan>());
+        });
+
         test('falls back to clipping when the text contains a WidgetSpan', () {
           final child = RenderConstrainedBox(
             additionalConstraints: const BoxConstraints.tightFor(width: 20.0, height: 20.0),
@@ -2113,6 +2266,13 @@ class MockPaintingContext extends Fake implements PaintingContext {
     operations.add('pushLayer');
     pushedLayers.add(childLayer);
   }
+}
+
+// A TextSpan subclass carrying state that rebuilding the tree would discard.
+class _PayloadSpan extends TextSpan {
+  const _PayloadSpan({super.text, required this.payload});
+
+  final String payload;
 }
 
 class TestSelectionRegistrar extends SelectionRegistrar {
