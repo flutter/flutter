@@ -1400,6 +1400,46 @@ name: my_app
   );
 
   testUsingContext(
+    'Does not allow concurrent restarts',
+    () async {
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        systemClock: SystemClock.fixed(DateTime(2001)),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ...kAttachExpectations,
+          const FakeVmServiceRequest(method: 'hotRestart'),
+        ],
+      );
+      flutterDevice.device = WebServerDevice(logger: logger);
+      webDevFS.report = UpdateFSReport(success: true);
+
+      final appStartedCompleter = Completer<void>();
+      unawaited(residentWebRunner.run(appStartedCompleter: appStartedCompleter));
+
+      await appStartedCompleter.future;
+
+      final Future<OperationResult> firstRestart = residentWebRunner.restart(fullRestart: true);
+      final OperationResult secondRestart = await residentWebRunner.restart(fullRestart: true);
+
+      expect(secondRestart.code, 1);
+      expect(secondRestart.message, 'A restart is already in progress.');
+
+      final OperationResult firstResult = await firstRestart;
+      expect(firstResult.code, 0);
+    },
+    overrides: <Type, Generator>{
+      Analytics: () => fakeAnalytics,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'web resident runner is debuggable',
     () {
       final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
