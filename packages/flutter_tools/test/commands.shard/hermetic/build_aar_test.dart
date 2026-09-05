@@ -11,9 +11,9 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
@@ -58,25 +58,24 @@ flutter:
         null
 ''');
 
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+      final BuildCommand command = createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fs,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fs,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       expect(
@@ -126,25 +125,24 @@ flutter:
 
       cache.getArtifactDirectory('gradle_wrapper').createSync(recursive: true);
 
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+      final BuildCommand command = createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fs,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fs,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
 
       await createTestCommandRunner(command).run(const <String>['build', 'aar', '--no-pub']);

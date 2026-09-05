@@ -11,12 +11,13 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -94,7 +95,7 @@ flutter:
     expect(command.aliases, contains('aab'));
   });
 
-  testWithoutContext('throws ToolExit if androidSdk is null', () async {
+  testUsingContext('throws ToolExit if androidSdk is null', () async {
     createMinimalProject();
 
     final command = BuildAppBundleCommand(
@@ -108,9 +109,9 @@ flutter:
       createTestCommandRunner(command).run(const <String>['appbundle', '--no-pub']),
       throwsToolExit(message: 'No Android SDK found'),
     );
-  });
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
-  testWithoutContext('builds AppBundle successfully with default arguments', () async {
+  testUsingContext('builds AppBundle successfully with default arguments', () async {
     createMinimalProject();
 
     var buildAabCalled = false;
@@ -144,9 +145,9 @@ flutter:
       fakeAnalytics.sentEvents,
       contains(Event.flutterBuildInfo(label: 'manifest-impeller-enabled', buildType: 'android')),
     );
-  });
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
-  testWithoutContext('records unified analytics usage values', () async {
+  testUsingContext('records unified analytics usage values', () async {
     createMinimalProject();
 
     final command = BuildAppBundleCommand(
@@ -169,9 +170,9 @@ flutter:
         buildBundleEnableHcpp: true,
       ),
     );
-  });
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true)});
 
-  testWithoutContext('passes targetPlatform and deferred components options', () async {
+  testUsingContext('passes targetPlatform and deferred components options', () async {
     createMinimalProject();
 
     AndroidBuildInfo? capturedBuildInfo;
@@ -210,7 +211,7 @@ flutter:
     expect(capturedBuildInfo!.targetArchs, <CpuArch>[CpuArch.arm64]);
     expect(capturedBuildInfo!.buildInfo.mode, BuildMode.profile);
     expect(capturedDeferredComponentsEnabled, isFalse);
-  });
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 }
 
 class _RecordingAndroidBuilder extends FakeAndroidBuilder {
