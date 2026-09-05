@@ -21,6 +21,7 @@ import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../features.dart';
 import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -321,6 +322,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           ? _logger
           : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
       logToStdout: true,
+      featureFlags: featureFlags,
     );
 
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
