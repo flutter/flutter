@@ -495,6 +495,19 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         public void synchronizeToNativeViewHierarchy(boolean yes) {
           synchronizeToNativeViewHierarchy = yes;
         }
+
+        @Override
+        public void onRejectGesture(int viewId, long gestureId) {
+          final FlutterMutatorView parentView = platformViewParent.get(viewId);
+          if (parentView != null) {
+            parentView.onFlutterWonGesture(gestureId);
+            return;
+          }
+          final PlatformViewWrapper viewWrapper = viewWrappers.get(viewId);
+          if (viewWrapper != null) {
+            viewWrapper.onFlutterWonGesture(gestureId);
+          }
+        }
       };
 
   private void ensureValidRequest(@NonNull PlatformViewCreationRequest request) {
@@ -511,6 +524,16 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
   /** Returns the platform views channel. */
   public PlatformViewsChannel getPlatformViewsChannel() {
     return platformViewsChannel;
+  }
+
+  @VisibleForTesting
+  FlutterMutatorView getPlatformViewParent(int viewId) {
+    return platformViewParent.get(viewId);
+  }
+
+  @VisibleForTesting
+  PlatformViewWrapper getViewWrapper(int viewId) {
+    return viewWrappers.get(viewId);
   }
 
   // Creates a platform view based on `request`, performs configuration that's common to

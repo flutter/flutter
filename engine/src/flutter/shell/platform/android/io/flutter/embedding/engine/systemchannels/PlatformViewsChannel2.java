@@ -79,6 +79,9 @@ public class PlatformViewsChannel2 {
             case "clearFocus":
               clearFocus(call, result);
               break;
+            case "rejectGesture":
+              rejectGesture(call, result);
+              break;
             case "isSurfaceControlEnabled":
               isSurfaceControlEnabled(call, result);
               break;
@@ -172,6 +175,19 @@ public class PlatformViewsChannel2 {
           }
         }
 
+        private void rejectGesture(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+          final Map<String, Object> args = call.arguments();
+          final int viewId = (int) args.get("id");
+          final Number gestureIdNumber = (Number) args.get("gestureId");
+          final long gestureId = gestureIdNumber != null ? gestureIdNumber.longValue() : 0;
+          try {
+            handler.onRejectGesture(viewId, gestureId);
+            result.success(null);
+          } catch (IllegalStateException exception) {
+            result.error("error", detailedExceptionString(exception), null);
+          }
+        }
+
         private void isSurfaceControlEnabled(
             @NonNull MethodCall call, @NonNull MethodChannel.Result result) {
           result.success(handler.isSurfaceControlEnabled());
@@ -218,6 +234,16 @@ public class PlatformViewsChannel2 {
 
     /** Clears the focus from the platform view with a give id if it is currently focused. */
     void clearFocus(int viewId);
+
+    /**
+     * Informs the handler that Flutter has won the gesture arena and rejected the platform view.
+     *
+     * @param viewId The ID of the platform view that was rejected.
+     * @param gestureId The identifier (downTime in milliseconds) of the specific gesture that was
+     *     won by Flutter. If non-zero, this matches the MotionEvent downTime. If non-matching or
+     *     zero, embedders safely fall back to standard buffered dispatch.
+     */
+    default void onRejectGesture(int viewId, long gestureId) {}
 
     /** Whether the SurfaceControl swapchain is enabled. */
     boolean isSurfaceControlEnabled();

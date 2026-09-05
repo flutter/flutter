@@ -366,7 +366,14 @@ public class AndroidTouchProcessor {
             ? PointerSignalKind.SCROLL
             : PointerSignalKind.NONE;
 
-    long timeStamp = event.getEventTime() * 1000; // Convert from milliseconds to microseconds.
+    // Convert from milliseconds to microseconds.
+    // Invariant: On ACTION_DOWN, event.getEventTime() == event.getDownTime(). Flutter
+    // framework caches this timestamp from PointerDownEvent as the gestureId and passes
+    // it back on rejectGesture to correlate with the active MotionEvent sequence on the
+    // platform view. If timestamps do not match (e.g. when resampling is enabled, which
+    // resamples PointerDownEvent timeStamp to sampleTime), the optimization safely degrades
+    // to standard buffered touch dispatch.
+    long timeStamp = event.getEventTime() * 1000;
 
     packet.putLong(motionEventId); // motionEventId
     packet.putLong(timeStamp); // time_stamp

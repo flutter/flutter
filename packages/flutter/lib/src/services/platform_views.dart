@@ -1116,6 +1116,11 @@ class SurfaceAndroidViewController extends AndroidViewController {
   Future<void> setOffset(Offset off) {
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
+
+  @override
+  Future<void> rejectGesture({int? gestureId}) {
+    return _internals.rejectGesture(viewId: viewId, gestureId: gestureId);
+  }
 }
 
 /// Controls an Android view that is composed using the Android view hierarchy.
@@ -1170,6 +1175,11 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   @override
   Future<void> setOffset(Offset off) {
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
+  }
+
+  @override
+  Future<void> rejectGesture({int? gestureId}) {
+    return _internals.rejectGesture(viewId: viewId, gestureId: gestureId);
   }
 }
 
@@ -1236,6 +1246,11 @@ class HybridAndroidViewController extends AndroidViewController {
   @override
   Future<void> sendMotionEvent(AndroidMotionEvent event) async {
     await SystemChannels.platform_views_2.invokeMethod<dynamic>('touch', event._asList(viewId));
+  }
+
+  @override
+  Future<void> rejectGesture({int? gestureId}) {
+    return _internals.rejectGesture(viewId: viewId, gestureId: gestureId);
   }
 }
 
@@ -1316,6 +1331,11 @@ class TextureAndroidViewController extends AndroidViewController {
     }
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
+
+  @override
+  Future<void> rejectGesture({int? gestureId}) {
+    return _internals.rejectGesture(viewId: viewId, gestureId: gestureId);
+  }
 }
 
 // The base class for an implementation of AndroidViewController.
@@ -1374,6 +1394,13 @@ abstract class _AndroidViewControllerInternals {
   });
 
   Future<void> sendDisposeMessage({required int viewId});
+
+  Future<void> rejectGesture({required int viewId, int? gestureId}) {
+    return SystemChannels.platform_views.invokeMethod<void>('rejectGesture', <String, dynamic>{
+      'id': viewId,
+      if (gestureId != null) 'gestureId': gestureId,
+    });
+  }
 }
 
 // An AndroidViewController implementation for views whose contents are
@@ -1526,6 +1553,14 @@ class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInter
     return SystemChannels.platform_views_2.invokeMethod<void>('dispose', <String, dynamic>{
       'id': viewId,
       'hybrid': true,
+    });
+  }
+
+  @override
+  Future<void> rejectGesture({required int viewId, int? gestureId}) {
+    return SystemChannels.platform_views_2.invokeMethod<void>('rejectGesture', <String, dynamic>{
+      'id': viewId,
+      if (gestureId != null) 'gestureId': gestureId,
     });
   }
 }
@@ -1716,4 +1751,19 @@ abstract class PlatformViewController {
 
   /// Clears the view's focus on the platform side.
   Future<void> clearFocus();
+
+  /// Informs the platform view that Flutter has won the gesture arena for an active
+  /// touch sequence.
+  ///
+  /// On Android, this serves as a latency hint. When Flutter wins the gesture arena for a
+  /// sequence (such as when a parent scroll view begins scrolling), subsequent touch move
+  /// events request unbuffered dispatch on the native view to eliminate touch lag during
+  /// Flutter-driven gestures.
+  ///
+  /// On other platforms, or if unbuffered dispatch is not supported, this is a no-op.
+  /// (On iOS, platform view touch rejection uses `DarwinPlatformViewController.rejectGesture`.)
+  ///
+  /// The optional [gestureId] identifies the specific gesture (e.g., its `downTime` timestamp
+  /// in milliseconds on Android) that was rejected by the arena.
+  Future<void> rejectGesture({int? gestureId}) async {}
 }

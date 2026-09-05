@@ -591,6 +591,51 @@ public class PlatformViewsController2Test {
     verify(mockFlutterView, never()).invalidate();
   }
 
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void itInformsMutatorViewWhenGestureIsRejected() {
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 platformViewsController = new PlatformViewsController2();
+    platformViewsController.setRegistry(registryImpl);
+
+    int platformViewId = 0;
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController.getRegistry().registerViewFactory("testType", viewFactory);
+
+    FlutterJNI jni = new FlutterJNI();
+    jni.attachToNative();
+    attach(jni, platformViewsController);
+
+    createPlatformView(jni, platformViewsController, platformViewId, "testType");
+
+    assertTrue(platformViewsController.initializePlatformViewIfNeeded(platformViewId));
+
+    FlutterMutatorView parentView = platformViewsController.getPlatformViewParent(platformViewId);
+    assertNotNull(parentView);
+    assertFalse(parentView.getFlutterWonGesture());
+
+    // Without active gesture, rejectGesture has no effect.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 100L);
+    assertFalse(parentView.getFlutterWonGesture());
+
+    // Start active gesture with downTime 100.
+    final MotionEvent downEvent =
+        MotionEvent.obtain(100, 100, MotionEvent.ACTION_DOWN, 0.0f, 0.0f, 0);
+    parentView.onTouchEvent(downEvent);
+
+    // Mismatched gestureId does not set flutterWonGesture.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 50L);
+    assertFalse(parentView.getFlutterWonGesture());
+
+    // Matching gestureId sets flutterWonGesture.
+    rejectGesturePlatformView(jni, platformViewsController, platformViewId, 100L);
+    assertTrue(parentView.getFlutterWonGesture());
+  }
+
   private static ByteBuffer encodeMethodCall(MethodCall call) {
     final ByteBuffer buffer = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
     buffer.rewind();
@@ -647,6 +692,24 @@ public class PlatformViewsController2Test {
     jni.handlePlatformMessage(
         "flutter/platform_views_2",
         encodeMethodCall(platformDisposeMethodCall),
+        /*replyId=*/ 0,
+        /*messageData=*/ 0);
+  }
+
+  private static void rejectGesturePlatformView(
+      FlutterJNI jni,
+      PlatformViewsController2 platformViewsController,
+      int platformViewId,
+      long gestureId) {
+    final Map<String, Object> args = new HashMap<>();
+    args.put("id", platformViewId);
+    args.put("gestureId", gestureId);
+
+    final MethodCall platformRejectGestureMethodCall = new MethodCall("rejectGesture", args);
+
+    jni.handlePlatformMessage(
+        "flutter/platform_views_2",
+        encodeMethodCall(platformRejectGestureMethodCall),
         /*replyId=*/ 0,
         /*messageData=*/ 0);
   }

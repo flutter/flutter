@@ -75,6 +75,9 @@ public class PlatformViewsChannel {
             case "synchronizeToNativeViewHierarchy":
               synchronizeToNativeViewHierarchy(call, result);
               break;
+            case "rejectGesture":
+              rejectGesture(call, result);
+              break;
             default:
               result.notImplemented();
           }
@@ -258,6 +261,19 @@ public class PlatformViewsChannel {
             result.error("error", detailedExceptionString(exception), null);
           }
         }
+
+        private void rejectGesture(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
+          final Map<String, Object> args = call.arguments();
+          final int viewId = (int) args.get("id");
+          final Number gestureIdNumber = (Number) args.get("gestureId");
+          final long gestureId = gestureIdNumber != null ? gestureIdNumber.longValue() : 0;
+          try {
+            handler.onRejectGesture(viewId, gestureId);
+            result.success(null);
+          } catch (IllegalStateException exception) {
+            result.error("error", detailedExceptionString(exception), null);
+          }
+        }
       };
 
   /**
@@ -370,6 +386,16 @@ public class PlatformViewsChannel {
      * to true.
      */
     void synchronizeToNativeViewHierarchy(boolean yes);
+
+    /**
+     * Flutter has won the gesture arena and rejected the platform view.
+     *
+     * @param viewId The ID of the platform view that lost the gesture.
+     * @param gestureId The identifier (downTime in milliseconds) of the specific gesture that was
+     *     won by Flutter. If non-zero, this matches the MotionEvent downTime. If non-matching or
+     *     zero, embedders safely fall back to standard buffered dispatch.
+     */
+    default void onRejectGesture(int viewId, long gestureId) {}
   }
 
   /** Request sent from Flutter to resize a platform view. */

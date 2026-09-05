@@ -357,6 +357,7 @@ android_java_sources = [
   "io/flutter/plugin/platform/PlatformPlugin.java",
   "io/flutter/plugin/platform/PlatformView.java",
   "io/flutter/plugin/platform/PlatformViewFactory.java",
+  "io/flutter/plugin/platform/PlatformViewGestureTracker.java",
   "io/flutter/plugin/platform/PlatformViewRegistry.java",
   "io/flutter/plugin/platform/PlatformViewRegistryImpl.java",
   "io/flutter/plugin/platform/PlatformViewRenderTarget.java",
