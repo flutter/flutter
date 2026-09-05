@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "انتخاب همه",
   "searchResultsFound": "نتایج جستجو پیدا شد",
   "noResultsFound": "نتیجه‌ای پیدا نشد",
-  "radioButtonUnselectedLabel": "انتخاب‌نشده"
+  "radioButtonUnselectedLabel": "انتخاب‌نشده",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

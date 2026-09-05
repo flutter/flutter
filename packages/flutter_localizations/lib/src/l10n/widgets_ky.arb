@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Баарын тандоо",
   "searchResultsFound": "Изделген нерсе табылды",
   "noResultsFound": "Эч нерсе табылган жок",
-  "radioButtonUnselectedLabel": "Тандалган жок"
+  "radioButtonUnselectedLabel": "Тандалган жок",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

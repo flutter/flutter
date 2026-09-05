@@ -14,5 +14,11 @@
   "shareButtonLabel": "ھەمبەھرلەش",
   "pasteButtonLabel": "چاپلاش",
   "selectAllButtonLabel": "ھەممىنى تاللاش",
-  "radioButtonUnselectedLabel": "تاللانمىدى"
+  "radioButtonUnselectedLabel": "تاللانمىدى",
+  "expansibleExpandedHint": "يىغىش ئۈچۈن قوش چېكىڭ",
+  "expansibleCollapsedHint": "يېيىش ئۈچۈن قوش چېكىڭ",
+  "expansibleExpandedTapHint": "يىغىش",
+  "expansibleCollapsedTapHint": "تېخىمۇ كۆپ تەپسىلاتلار ئۈچۈن يېيىڭ",
+  "expandedHint": "يىغىلدى",
+  "collapsedHint": "يېيىلدى"
 }

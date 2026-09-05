@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "ସବୁ ଚୟନ କରନ୍ତୁ",
   "searchResultsFound": "ସର୍ଚ୍ଚ ଫଳାଫଳ ମିଳିଛି",
   "noResultsFound": "କୌଣସି ଫଳାଫଳ ମିଳିଲା ନାହିଁ",
-  "radioButtonUnselectedLabel": "ଚୟନ କରାଯାଇନାହିଁ"
+  "radioButtonUnselectedLabel": "ଚୟନ କରାଯାଇନାହିଁ",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

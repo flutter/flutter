@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Նշել բոլորը",
   "searchResultsFound": "Գտնվել են արդյունքներ",
   "noResultsFound": "Ոչինչ չի գտնվել",
-  "radioButtonUnselectedLabel": "Ընտրված չէ"
+  "radioButtonUnselectedLabel": "Ընտրված չէ",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

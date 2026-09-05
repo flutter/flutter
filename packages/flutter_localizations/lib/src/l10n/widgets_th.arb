@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "เลือกทั้งหมด",
   "searchResultsFound": "พบผลการค้นหา",
   "noResultsFound": "ไม่พบผลลัพธ์",
-  "radioButtonUnselectedLabel": "ไม่ได้เลือก"
+  "radioButtonUnselectedLabel": "ไม่ได้เลือก",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

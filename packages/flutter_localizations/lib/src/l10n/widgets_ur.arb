@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "سبھی کو منتخب کریں",
   "searchResultsFound": "تلاش کے نتائج مل گئے",
   "noResultsFound": "کوئی نتائج نہیں ملے",
-  "radioButtonUnselectedLabel": "غیر منتخب کردہ"
+  "radioButtonUnselectedLabel": "غیر منتخب کردہ",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

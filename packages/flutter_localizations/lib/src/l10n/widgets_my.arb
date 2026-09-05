@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "အားလုံး ရွေးရန်",
   "searchResultsFound": "ရှာဖွေမှုရလဒ်များ တွေ့ထားသည်",
   "noResultsFound": "ရလဒ်မတွေ့ပါ",
-  "radioButtonUnselectedLabel": "ရွေးမထားပါ"
+  "radioButtonUnselectedLabel": "ရွေးမထားပါ",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
