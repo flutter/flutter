@@ -675,14 +675,17 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
           final String path;
           if (uriString != null) {
             final Uri uri = Uri.parse(uriString);
-            // Need to remove scheme and authority.
-            path = Uri.decodeComponent(
-              Uri(
-                path: uri.path.isEmpty ? '/' : uri.path,
-                queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
-                fragment: uri.fragment.isEmpty ? null : uri.fragment,
-              ).toString(),
-            );
+            // Need to remove scheme and authority while preserving the
+            // percent-encoding of the path, query, and fragment exactly as
+            // reported by the framework. Decoding the URL here would make the
+            // browser's address bar diverge from the route the app is on
+            // (e.g. `/a%2Fb` would turn into `/a/b`), so a refresh or a
+            // shared link would no longer round-trip to the same route.
+            // See https://github.com/flutter/flutter/issues/180373.
+            path =
+                '${uri.path.isEmpty ? '/' : uri.path}'
+                '${uri.hasQuery ? '?${uri.query}' : ''}'
+                '${uri.hasFragment ? '#${uri.fragment}' : ''}';
           } else {
             path = arguments.tryString('location')!;
           }
