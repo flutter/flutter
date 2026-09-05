@@ -11,6 +11,7 @@
 #include <android/hardware_buffer.h>
 
 #include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/fml/trace_event.h"
 
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 
@@ -25,6 +26,7 @@ AndroidImageGenerator::AndroidImageGenerator(sk_sp<SkData> data)
     : data_(std::move(data)), image_info_(SkImageInfo::MakeUnknown(-1, -1)) {}
 
 const SkImageInfo& AndroidImageGenerator::GetInfo() {
+  TRACE_EVENT0("flutter", "AndroidImageGenerator::GetInfo");
   header_decoded_latch_.Wait();
   return image_info_;
 }
@@ -53,6 +55,7 @@ bool AndroidImageGenerator::GetPixels(const SkImageInfo& info,
                                       size_t row_bytes,
                                       unsigned int frame_index,
                                       std::optional<unsigned int> prior_frame) {
+  TRACE_EVENT0("flutter", "AndroidImageGenerator::GetPixels");
   fully_decoded_latch_.Wait();
 
   if (!software_decoded_data_) {
@@ -89,6 +92,7 @@ bool AndroidImageGenerator::GetPixels(const SkImageInfo& info,
 }
 
 void AndroidImageGenerator::DecodeImage() {
+  TRACE_EVENT0("flutter", "AndroidImageGenerator::DecodeImage");
   DoDecodeImage();
 
   header_decoded_latch_.Signal();
@@ -96,6 +100,7 @@ void AndroidImageGenerator::DecodeImage() {
 }
 
 void AndroidImageGenerator::DoDecodeImage() {
+  TRACE_EVENT0("flutter", "AndroidImageGenerator::DoDecodeImage");
   FML_DCHECK(g_flutter_jni_class);
   FML_DCHECK(g_decode_image_method);
 
@@ -151,6 +156,7 @@ void AndroidImageGenerator::DoDecodeImage() {
 }
 
 bool AndroidImageGenerator::Register(JNIEnv* env) {
+  TRACE_EVENT0("flutter", "AndroidImageGenerator::Register");
   g_flutter_jni_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
       env, env->FindClass("io/flutter/embedding/engine/FlutterJNI"));
   FML_DCHECK(!g_flutter_jni_class->is_null());
@@ -179,6 +185,7 @@ bool AndroidImageGenerator::Register(JNIEnv* env) {
 std::shared_ptr<ImageGenerator> AndroidImageGenerator::MakeFromData(
     sk_sp<SkData> data,
     const fml::RefPtr<fml::TaskRunner>& task_runner) {
+  TRACE_EVENT0("flutter", "AndroidImageGenerator::MakeFromData");
   std::shared_ptr<AndroidImageGenerator> generator(
       new AndroidImageGenerator(std::move(data)));
 
@@ -209,6 +216,7 @@ void AndroidImageGenerator::NativeImageHeaderCallback(JNIEnv* env,
                                                       jlong generator_address,
                                                       int width,
                                                       int height) {
+  TRACE_EVENT0("flutter", "AndroidImageGenerator::NativeImageHeaderCallback");
   AndroidImageGenerator* generator =
       reinterpret_cast<AndroidImageGenerator*>(generator_address);
 

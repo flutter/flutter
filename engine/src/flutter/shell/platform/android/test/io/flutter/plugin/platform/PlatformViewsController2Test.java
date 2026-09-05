@@ -175,8 +175,8 @@ public class PlatformViewsController2Test {
   public void itUsesActionEventTypeFromFrameworkEventAsActionChanged() {
     MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
     PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
-    PlatformViewsController2 PlatformViewsController2 = new PlatformViewsController2();
-    PlatformViewsController2.setRegistry(registryImpl);
+    PlatformViewsController2 platformViewsController2 = new PlatformViewsController2();
+    platformViewsController2.setRegistry(registryImpl);
 
     MotionEvent original =
         MotionEvent.obtain(
@@ -209,11 +209,324 @@ public class PlatformViewsController2Test {
             original.getFlags(),
             motionEventId.getId());
     MotionEvent resolvedEvent =
-        PlatformViewsController2.toMotionEvent(
+        platformViewsController2.toMotionEvent(
             1, // density
             frameWorkTouch);
-    assertEquals(resolvedEvent.getAction(), original.getAction());
-    assertNotEquals(resolvedEvent.getAction(), frameWorkTouch.action);
+    assertEquals(frameWorkTouch.action, resolvedEvent.getAction());
+    assertNotEquals(original.getAction(), resolvedEvent.getAction());
+  }
+
+  @Test
+  public void toMotionEvent_handlesPointerCountMatch() {
+    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
+    PlatformViewsController2 platformViewsController2 = new PlatformViewsController2();
+
+    MotionEvent original =
+        MotionEvent.obtain(
+            10, // downTime
+            10, // eventTime
+            MotionEvent.ACTION_DOWN,
+            100, // x
+            100, // y
+            0 // metaState
+            );
+
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
+
+    List<List<Integer>> pointerProperties =
+        Arrays.asList(Arrays.asList(original.getPointerId(0), original.getToolType(0)));
+    List<List<Double>> pointerCoords =
+        Arrays.asList(
+            Arrays.asList(
+                (double) original.getOrientation(),
+                (double) original.getPressure(),
+                (double) original.getSize(),
+                (double) original.getToolMajor(),
+                (double) original.getToolMinor(),
+                (double) original.getTouchMajor(),
+                (double) original.getTouchMinor(),
+                110.0, // x - slightly offset
+                110.0 // y - slightly offset
+                ));
+
+    PlatformViewTouch touch =
+        new PlatformViewTouch(
+            0, // viewId
+            original.getDownTime(),
+            original.getEventTime(),
+            original.getAction(),
+            1, // pointerCount - matches original
+            pointerProperties,
+            pointerCoords,
+            original.getMetaState(),
+            original.getButtonState(),
+            original.getXPrecision(),
+            original.getYPrecision(),
+            original.getDeviceId(),
+            original.getEdgeFlags(),
+            original.getSource(),
+            original.getFlags(),
+            motionEventId.getId());
+
+    MotionEvent resolvedEvent =
+        platformViewsController2.toMotionEvent(
+            1, // density
+            touch);
+
+    assertEquals(110.0f, resolvedEvent.getX(), 0.001f);
+    assertEquals(110.0f, resolvedEvent.getY(), 0.001f);
+    assertEquals(original.getDownTime(), resolvedEvent.getDownTime());
+    assertEquals(original.getEventTime(), resolvedEvent.getEventTime());
+    assertEquals(original.getAction(), resolvedEvent.getAction());
+  }
+
+  @Test
+  public void toMotionEvent_handlesPointerCountMismatch() {
+    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
+    PlatformViewsController2 platformViewsController2 = new PlatformViewsController2();
+
+    MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[2];
+    properties[0] = new MotionEvent.PointerProperties();
+    properties[0].id = 0;
+    properties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
+    properties[1] = new MotionEvent.PointerProperties();
+    properties[1].id = 1;
+    properties[1].toolType = MotionEvent.TOOL_TYPE_FINGER;
+
+    MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[2];
+    coords[0] = new MotionEvent.PointerCoords();
+    coords[0].x = 100;
+    coords[0].y = 100;
+    coords[1] = new MotionEvent.PointerCoords();
+    coords[1].x = 200;
+    coords[1].y = 200;
+
+    MotionEvent original =
+        MotionEvent.obtain(
+            10, // downTime
+            10, // eventTime
+            MotionEvent.ACTION_MOVE,
+            2, // pointerCount
+            properties,
+            coords,
+            0, // metaState
+            0, // buttonState
+            1.0f, // xPrecision
+            1.0f, // yPrecision
+            0, // deviceId
+            0, // edgeFlags
+            0, // source
+            0 // flags
+            );
+
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
+
+    List<List<Integer>> frameworkPointerProperties =
+        Arrays.asList(Arrays.asList(0, MotionEvent.TOOL_TYPE_FINGER));
+
+    List<List<Double>> frameworkPointerCoords =
+        Arrays.asList(Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0));
+
+    PlatformViewTouch touch =
+        new PlatformViewTouch(
+            0, // viewId
+            original.getDownTime(),
+            original.getEventTime(),
+            original.getAction(),
+            1, // pointerCount - mismatch! (original has 2)
+            frameworkPointerProperties,
+            frameworkPointerCoords,
+            original.getMetaState(),
+            original.getButtonState(),
+            original.getXPrecision(),
+            original.getYPrecision(),
+            original.getDeviceId(),
+            original.getEdgeFlags(),
+            original.getSource(),
+            original.getFlags(),
+            motionEventId.getId());
+
+    MotionEvent resolvedEvent =
+        platformViewsController2.toMotionEvent(
+            1, // density
+            touch);
+
+    assertEquals(1, resolvedEvent.getPointerCount());
+    assertEquals(100.0f, resolvedEvent.getX(0), 0.001f);
+    assertEquals(100.0f, resolvedEvent.getY(0), 0.001f);
+    assertEquals(original.getDownTime(), resolvedEvent.getDownTime());
+    assertEquals(original.getEventTime(), resolvedEvent.getEventTime());
+    assertEquals(original.getAction(), resolvedEvent.getAction());
+    assertEquals(original.getMetaState(), resolvedEvent.getMetaState());
+  }
+
+  @Test
+  public void toMotionEvent_multiTouchWithPointerCountMismatch() {
+    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
+    PlatformViewsController2 platformViewsController2 = new PlatformViewsController2();
+
+    MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[3];
+    properties[0] = new MotionEvent.PointerProperties();
+    properties[0].id = 0;
+    properties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
+    properties[1] = new MotionEvent.PointerProperties();
+    properties[1].id = 1;
+    properties[1].toolType = MotionEvent.TOOL_TYPE_FINGER;
+    properties[2] = new MotionEvent.PointerProperties();
+    properties[2].id = 2;
+    properties[2].toolType = MotionEvent.TOOL_TYPE_FINGER;
+
+    MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[3];
+    coords[0] = new MotionEvent.PointerCoords();
+    coords[0].x = 100;
+    coords[0].y = 100;
+    coords[1] = new MotionEvent.PointerCoords();
+    coords[1].x = 200;
+    coords[1].y = 200;
+    coords[2] = new MotionEvent.PointerCoords();
+    coords[2].x = 300;
+    coords[2].y = 300;
+
+    MotionEvent original =
+        MotionEvent.obtain(
+            10, // downTime
+            10, // eventTime
+            MotionEvent.ACTION_MOVE,
+            3, // pointerCount
+            properties,
+            coords,
+            0, // metaState
+            0, // buttonState
+            1.0f, // xPrecision
+            1.0f, // yPrecision
+            0, // deviceId
+            0, // edgeFlags
+            0, // source
+            0 // flags
+            );
+
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
+
+    List<List<Integer>> frameworkPointerProperties =
+        Arrays.asList(
+            Arrays.asList(0, MotionEvent.TOOL_TYPE_FINGER),
+            Arrays.asList(1, MotionEvent.TOOL_TYPE_FINGER));
+
+    List<List<Double>> frameworkPointerCoords =
+        Arrays.asList(
+            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 50.0, 50.0), // pointer 0
+            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0) // pointer 1
+            );
+
+    PlatformViewTouch touch =
+        new PlatformViewTouch(
+            0, // viewId
+            original.getDownTime(),
+            original.getEventTime(),
+            original.getAction(),
+            2, // pointerCount - mismatch! (original has 3)
+            frameworkPointerProperties,
+            frameworkPointerCoords,
+            original.getMetaState(),
+            original.getButtonState(),
+            original.getXPrecision(),
+            original.getYPrecision(),
+            original.getDeviceId(),
+            original.getEdgeFlags(),
+            original.getSource(),
+            original.getFlags(),
+            motionEventId.getId());
+
+    MotionEvent resolvedEvent =
+        platformViewsController2.toMotionEvent(
+            1, // density
+            touch);
+
+    assertEquals(2, resolvedEvent.getPointerCount());
+    assertEquals(50.0f, resolvedEvent.getX(0), 0.001f);
+    assertEquals(50.0f, resolvedEvent.getY(0), 0.001f);
+    assertEquals(100.0f, resolvedEvent.getX(1), 0.001f);
+    assertEquals(100.0f, resolvedEvent.getY(1), 0.001f);
+  }
+
+  @Test
+  public void toMotionEvent_handlesActionMismatch() {
+    MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
+    PlatformViewsController2 platformViewsController2 = new PlatformViewsController2();
+
+    MotionEvent.PointerProperties[] properties = new MotionEvent.PointerProperties[2];
+    properties[0] = new MotionEvent.PointerProperties();
+    properties[0].id = 0;
+    properties[0].toolType = MotionEvent.TOOL_TYPE_FINGER;
+    properties[1] = new MotionEvent.PointerProperties();
+    properties[1].id = 1;
+    properties[1].toolType = MotionEvent.TOOL_TYPE_FINGER;
+
+    MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[2];
+    coords[0] = new MotionEvent.PointerCoords();
+    coords[0].x = 100;
+    coords[0].y = 100;
+    coords[1] = new MotionEvent.PointerCoords();
+    coords[1].x = 200;
+    coords[1].y = 200;
+
+    MotionEvent original =
+        MotionEvent.obtain(
+            10, // downTime
+            10, // eventTime
+            MotionEvent.ACTION_POINTER_UP, // action = 6
+            2, // pointerCount
+            properties,
+            coords,
+            0, // metaState
+            0, // buttonState
+            1.0f, // xPrecision
+            1.0f, // yPrecision
+            0, // deviceId
+            0, // edgeFlags
+            0, // source
+            0 // flags
+            );
+
+    MotionEventTracker.MotionEventId motionEventId = motionEventTracker.track(original);
+
+    List<List<Integer>> frameworkPointerProperties =
+        Arrays.asList(
+            Arrays.asList(0, MotionEvent.TOOL_TYPE_FINGER),
+            Arrays.asList(1, MotionEvent.TOOL_TYPE_FINGER));
+
+    List<List<Double>> frameworkPointerCoords =
+        Arrays.asList(
+            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 100.0, 100.0),
+            Arrays.asList(0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 200.0, 200.0));
+
+    PlatformViewTouch touch =
+        new PlatformViewTouch(
+            0, // viewId
+            original.getDownTime(),
+            original.getEventTime(),
+            MotionEvent.ACTION_MOVE, // Framework sends ACTION_MOVE (2)
+            2, // pointerCount - matches original!
+            frameworkPointerProperties,
+            frameworkPointerCoords,
+            original.getMetaState(),
+            original.getButtonState(),
+            original.getXPrecision(),
+            original.getYPrecision(),
+            original.getDeviceId(),
+            original.getEdgeFlags(),
+            original.getSource(),
+            original.getFlags(),
+            motionEventId.getId());
+
+    MotionEvent resolvedEvent =
+        platformViewsController2.toMotionEvent(
+            1, // density
+            touch);
+
+    assertEquals(MotionEvent.ACTION_MOVE, resolvedEvent.getAction());
+    assertNotEquals(original.getAction(), resolvedEvent.getAction());
+    assertEquals(2, resolvedEvent.getPointerCount());
   }
 
   private MotionEvent makePlatformViewTouchAndInvokeToMotionEvent(
@@ -589,6 +902,76 @@ public class PlatformViewsController2Test {
     controller.onEndFrame();
 
     verify(mockFlutterView, never()).invalidate();
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createFlutterPlatformViewEagerlyAttachesToFlutterView() {
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(registryImpl);
+    FlutterJNI jni = new FlutterJNI();
+    FlutterView flutterView = attach(jni, controller);
+
+    PlatformViewRegistry registry = controller.getRegistry();
+    registry.registerViewFactory(
+        CountingPlatformView.VIEW_TYPE_ID,
+        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+          @Override
+          public PlatformView create(Context context, int viewId, Object args) {
+            return new CountingPlatformView(context);
+          }
+        });
+
+    int viewId = 0;
+    final PlatformViewCreationRequest request =
+        PlatformViewCreationRequest.createHCPPRequest(
+            viewId, CountingPlatformView.VIEW_TYPE_ID, View.LAYOUT_DIRECTION_LTR, null);
+    PlatformView pView = controller.createFlutterPlatformView(request);
+    assertNotNull(pView);
+    assertNotNull(pView.getView().getParent());
+    assertTrue(pView.getView().getParent() instanceof FlutterMutatorView);
+    FlutterMutatorView mutatorView = (FlutterMutatorView) pView.getView().getParent();
+    assertEquals(flutterView, mutatorView.getParent());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void attachToViewEagerlyAttachesPreExistingPlatformViews() {
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(registryImpl);
+    final Context context = ApplicationProvider.getApplicationContext();
+    FlutterJNI jni = new FlutterJNI();
+    final DartExecutor executor = new DartExecutor(jni, mock(AssetManager.class));
+    executor.onAttachedToJNI();
+    controller.attach(context, executor);
+
+    PlatformViewRegistry registry = controller.getRegistry();
+    registry.registerViewFactory(
+        CountingPlatformView.VIEW_TYPE_ID,
+        new PlatformViewFactory(StandardMessageCodec.INSTANCE) {
+          @Override
+          public PlatformView create(Context context, int viewId, Object args) {
+            return new CountingPlatformView(context);
+          }
+        });
+
+    int viewId = 0;
+    final PlatformViewCreationRequest request =
+        PlatformViewCreationRequest.createHCPPRequest(
+            viewId, CountingPlatformView.VIEW_TYPE_ID, View.LAYOUT_DIRECTION_LTR, null);
+    PlatformView pView = controller.createFlutterPlatformView(request);
+    assertNotNull(pView);
+    assertNull(pView.getView().getParent());
+
+    FlutterView flutterView = new FlutterView(context, new FlutterSurfaceView(context));
+    controller.attachToView(flutterView);
+
+    assertNotNull(pView.getView().getParent());
+    assertTrue(pView.getView().getParent() instanceof FlutterMutatorView);
+    FlutterMutatorView mutatorView = (FlutterMutatorView) pView.getView().getParent();
+    assertEquals(flutterView, mutatorView.getParent());
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {

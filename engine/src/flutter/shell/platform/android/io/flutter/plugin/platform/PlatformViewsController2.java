@@ -127,6 +127,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     embeddedView.setLayoutDirection(request.direction);
     platformViews.put(request.viewId, platformView);
     maybeInvokeOnFlutterViewAttached(platformView);
+    if (flutterView != null) {
+      initializePlatformViewIfNeeded(request.viewId);
+    }
     return platformView;
   }
 
@@ -164,19 +167,47 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
         parsePointerCoordsList(touch.rawPointerCoords, density)
             .toArray(new PointerCoords[touch.pointerCount]);
 
-    if (trackedEvent != null) {
-      // We have the original event, deliver it after offsetting as it will pass the verifiable
-      // input check.
-      translateMotionEvent(trackedEvent, pointerCoords);
-      return trackedEvent;
-    }
-    // We don't have a reference to the original MotionEvent.
-    // In this case we manually recreate a MotionEvent to be delivered. This MotionEvent
-    // will fail the verifiable input check.
     PointerProperties[] pointerProperties =
         parsePointerPropertiesList(touch.rawPointerPropertiesList)
             .toArray(new PointerProperties[touch.pointerCount]);
 
+    if (trackedEvent != null) {
+      // We have the original event. Check if pointer counts and actions match.
+      if (trackedEvent.getPointerCount() == touch.pointerCount
+          && trackedEvent.getAction() == touch.action) {
+        // This preserves the verifiable input flag.
+        translateMotionEvent(trackedEvent, pointerCoords);
+        return trackedEvent;
+      }
+
+      // Pointer count or action mismatch detected
+      // (e.g., gesture recognizer filtered some pointers).
+      // This commonly occurs when:
+      // - Multi-touch gestures (zoom/pinch) are filtered by gesture recognizers
+      //
+      // We must reconstruct the event with the correct pointer count and action from Flutter.
+      // Unfortunately, this loses Android's verifiable input flag because there is no
+      // public API to modify pointer count while preserving verifiability.
+      return MotionEvent.obtain(
+          trackedEvent.getDownTime(),
+          trackedEvent.getEventTime(),
+          touch.action, // Use framework's action
+          touch.pointerCount, // Use framework's pointer count
+          pointerProperties,
+          pointerCoords,
+          trackedEvent.getMetaState(),
+          trackedEvent.getButtonState(),
+          trackedEvent.getXPrecision(),
+          trackedEvent.getYPrecision(),
+          trackedEvent.getDeviceId(),
+          trackedEvent.getEdgeFlags(),
+          trackedEvent.getSource(),
+          trackedEvent.getFlags());
+    }
+
+    // We don't have a reference to the original MotionEvent.
+    // In this case we manually recreate a MotionEvent to be delivered. This MotionEvent
+    // will fail the verifiable input check.
     return MotionEvent.obtain(
         touch.downTime.longValue(),
         touch.eventTime.longValue(),
@@ -240,10 +271,16 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
    */
   public void attachToView(@NonNull FlutterView newFlutterView) {
     flutterView = newFlutterView;
+    for (int index = 0; index < platformViews.size(); index++) {
+      final int viewId = platformViews.keyAt(index);
+      initializePlatformViewIfNeeded(viewId);
+    }
     // Add wrapper for platform views that are composed at the view hierarchy level.
     for (int index = 0; index < platformViewParent.size(); index++) {
       final FlutterMutatorView view = platformViewParent.valueAt(index);
-      flutterView.addView(view);
+      if (view.getParent() == null) {
+        flutterView.addView(view);
+      }
     }
     // Notify platform views that they are now attached to a FlutterView.
     for (int index = 0; index < platformViews.size(); index++) {
@@ -453,6 +490,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (platformViewParent.get(viewId) != null) {
       return true;
     }
+    if (flutterView == null) {
+      return false;
+    }
     final View embeddedView = platformView.getView();
     if (embeddedView == null) {
       throw new IllegalStateException(
@@ -494,6 +534,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   public void attachToFlutterRenderer(@NonNull FlutterRenderer flutterRenderer) {
     androidTouchProcessor = new AndroidTouchProcessor(flutterRenderer, /*trackMotionEvents=*/ true);
+    for (int index = 0; index < platformViewParent.size(); index++) {
+      final FlutterMutatorView view = platformViewParent.valueAt(index);
+      view.setTouchProcessor(androidTouchProcessor);
+    }
   }
 
   /**
@@ -808,6 +852,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
           // The platform view is displayed using a PlatformViewLayer.
           final FlutterMutatorView parentView = platformViewParent.get(viewId);
           if (parentView != null) {
+            parentView.setTouchProcessor(null);
             parentView.removeAllViews();
             parentView.unsetOnDescendantFocusChangeListener();
 

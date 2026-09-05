@@ -155,9 +155,18 @@ sk_sp<DlImage> EmbedderExternalTextureGL::ResolveTextureImpeller(
     return nullptr;
   }
 
+#ifndef GL_TEXTURE_EXTERNAL_OES
+#define GL_TEXTURE_EXTERNAL_OES 0x8D65
+#endif
+
   impeller::TextureDescriptor desc;
-  desc.size = impeller::ISize(texture->width, texture->height);
+  desc.size = (texture->width != 0 && texture->height != 0)
+                  ? impeller::ISize(texture->width, texture->height)
+                  : impeller::ISize(size.width(), size.height());
   desc.format = impeller::PixelFormat::kR8G8B8A8UNormInt;
+  desc.type = (texture->target == GL_TEXTURE_EXTERNAL_OES)
+                  ? impeller::TextureType::kTextureExternalOES
+                  : impeller::TextureType::kTexture2D;
 
   impeller::ContextGLES& context =
       impeller::ContextGLES::Cast(*aiks_context->GetContext());
