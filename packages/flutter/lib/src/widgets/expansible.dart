@@ -8,6 +8,7 @@ library;
 import 'basic.dart';
 import 'framework.dart';
 import 'page_storage.dart';
+import 'size_changed_layout_notifier.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
 
@@ -461,16 +462,22 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
       child: TickerMode(enabled: !closed, child: widget.bodyBuilder(context, _animationController)),
     );
 
-    return AnimatedBuilder(
-      animation: _animationController.view,
-      builder: (BuildContext context, Widget? child) {
-        final Widget header = widget.headerBuilder(context, _animationController);
-        final Widget body = ClipRect(
-          child: Align(heightFactor: _heightFactor.value, child: child),
-        );
-        return widget.expansibleBuilder(context, header, body, _animationController);
-      },
-      child: shouldRemoveBody ? null : result,
+    // Expanding and collapsing moves the widgets that follow this one. Ancestors
+    // that paint relative to the position of their descendants, such as the ink
+    // effects painted by Material, only repaint when they are notified of a
+    // layout change, so dispatch one whenever this widget resizes.
+    return SizeChangedLayoutNotifier(
+      child: AnimatedBuilder(
+        animation: _animationController.view,
+        builder: (BuildContext context, Widget? child) {
+          final Widget header = widget.headerBuilder(context, _animationController);
+          final Widget body = ClipRect(
+            child: Align(heightFactor: _heightFactor.value, child: child),
+          );
+          return widget.expansibleBuilder(context, header, body, _animationController);
+        },
+        child: shouldRemoveBody ? null : result,
+      ),
     );
   }
 }
