@@ -15,6 +15,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
 
+import '../gestures/distance.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -471,14 +472,14 @@ class InteractiveViewer extends StatefulWidget {
       InteractiveViewer.getNearestPointOnLine(point, quad.point2, quad.point3),
       InteractiveViewer.getNearestPointOnLine(point, quad.point3, quad.point0),
     ];
-    double minDistance = double.infinity;
+    double minDistanceSquared = double.infinity;
     late Vector3 closestOverall;
     for (final closePoint in closestPoints) {
-      final double distance = math.sqrt(
-        math.pow(point.x - closePoint.x, 2) + math.pow(point.y - closePoint.y, 2),
-      );
-      if (distance < minDistance) {
-        minDistance = distance;
+      final double distanceX = point.x - closePoint.x;
+      final double distanceY = point.y - closePoint.y;
+      final double distanceSquared = distanceX * distanceX + distanceY * distanceY;
+      if (distanceSquared < minDistanceSquared) {
+        minDistanceSquared = distanceSquared;
         closestOverall = closePoint;
       }
     }
@@ -826,7 +827,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
     switch (_gestureType) {
       case _GestureType.pan:
-        if (details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
+        if (!offsetExceedsThreshold(details.velocity.pixelsPerSecond, kMinFlingVelocity)) {
           _currentAxis = null;
           return;
         }
