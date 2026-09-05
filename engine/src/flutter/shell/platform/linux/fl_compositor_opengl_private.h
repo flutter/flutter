@@ -68,6 +68,7 @@ gboolean fl_compositor_opengl_ensure_pixel_buffer(FlCompositorOpenGL* self,
                                                   size_t height);
 
 #if FLUTTER_LINUX_GTK4
+gboolean fl_compositor_opengl_gtk4_wait_for_texture(FlCompositorOpenGL* self);
 GdkTexture* fl_compositor_opengl_acquire_texture(FlCompositor* compositor,
                                                  FlGdkSurface* surface,
                                                  GdkGLContext* context,

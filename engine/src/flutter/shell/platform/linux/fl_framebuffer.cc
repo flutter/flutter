@@ -116,9 +116,9 @@ static void attach_depth_stencil(GLuint depth_stencil) {
 }
 
 static FlFramebuffer* fl_framebuffer_new_internal(GLint format,
-                                                   size_t width,
-                                                   size_t height,
-                                                   gboolean shareable) {
+                                                  size_t width,
+                                                  size_t height,
+                                                  gboolean shareable) {
   FlFramebuffer* self =
       FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
   self->width = width;
@@ -154,8 +154,8 @@ FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
 
 #if FLUTTER_LINUX_GTK4
 FlFramebuffer* fl_framebuffer_new_shareable(GLint format,
-                                             size_t width,
-                                             size_t height) {
+                                            size_t width,
+                                            size_t height) {
   return fl_framebuffer_new_internal(format, width, height, TRUE);
 }
 #endif

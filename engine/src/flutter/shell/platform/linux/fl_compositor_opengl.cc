@@ -712,11 +712,10 @@ gboolean fl_compositor_opengl_present_to_subsurface(
     glFinish();
   }
 
-  fl_subsurface_egl_present(subsurface_egl,
-                            fl_framebuffer_get_texture_id(self->framebuffer),
-                            fl_framebuffer_get_width(self->framebuffer),
-                            fl_framebuffer_get_height(self->framebuffer),
-                            fence);
+  fl_subsurface_egl_present(
+      subsurface_egl, fl_framebuffer_get_texture_id(self->framebuffer),
+      fl_framebuffer_get_width(self->framebuffer),
+      fl_framebuffer_get_height(self->framebuffer), fence);
   g_mutex_unlock(&self->frame_mutex);
   return TRUE;
 }

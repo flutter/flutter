@@ -63,9 +63,9 @@ static gboolean create_native_texture_sync(FlCompositorOpenGL* self) {
   return TRUE;
 }
 
-static void wait_for_native_texture_sync(FlCompositorOpenGL* self) {
+gboolean fl_compositor_opengl_gtk4_wait_for_texture(FlCompositorOpenGL* self) {
   if (self->native_texture_sync == EGL_NO_SYNC_KHR) {
-    return;
+    return TRUE;
   }
 
   // GDK may use GLX rather than EGL. In that case EGL cannot add a GPU wait to
@@ -77,6 +77,7 @@ static void wait_for_native_texture_sync(FlCompositorOpenGL* self) {
     if (!eglWaitSyncKHR(self->native_texture_sync_display,
                         self->native_texture_sync, 0)) {
       g_warning("Failed to wait for GTK4 shared OpenGL texture fence");
+      return FALSE;
     }
   } else {
     constexpr EGLTimeKHR kFenceTimeoutNanoseconds = 1000000000;  // 1s
@@ -85,10 +86,16 @@ static void wait_for_native_texture_sync(FlCompositorOpenGL* self) {
                                          kFenceTimeoutNanoseconds);
     if (result == EGL_TIMEOUT_EXPIRED_KHR) {
       g_warning("Timed out waiting for GTK4 shared OpenGL texture fence");
+      return FALSE;
+    }
+    if (result != EGL_CONDITION_SATISFIED_KHR) {
+      g_warning("Failed to complete GTK4 shared OpenGL texture fence");
+      return FALSE;
     }
   }
 
   clear_native_texture_sync(self);
+  return TRUE;
 }
 
 static void update_dmabuf_sync(FlCompositorOpenGL* self) {
@@ -127,8 +134,9 @@ static void log_dmabuf_format(guint32 fourcc,
                               gpointer user_data) {
   (void)user_data;
   flutter_linux_gtk4_dbg("gtk4_dmabuf_capabilities",
-                    "gdk_format fourcc=0x%x modifier=0x%" G_GINT64_MODIFIER "x",
-                    fourcc, modifier);
+                         "gdk_format fourcc=0x%x modifier=0x%" G_GINT64_MODIFIER
+                         "x",
+                         fourcc, modifier);
 }
 
 static void log_dmabuf_capabilities(FlCompositorOpenGL* self,
@@ -160,14 +168,14 @@ static void log_dmabuf_capabilities(FlCompositorOpenGL* self,
   }
 
   flutter_linux_gtk4_dbg("gtk4_dmabuf_capabilities",
-                    "gtk_runtime=%u.%u.%u gtk_dmabuf=%d egl_current=%d "
-                    "egl_import=%d egl_modifiers=%d egl_mesa_export=%d "
-                    "native_fence=%d export_prototype_enabled=%d",
-                    gtk_get_major_version(), gtk_get_minor_version(),
-                    gtk_get_micro_version(), has_gtk_dmabuf,
-                    egl_display != EGL_NO_DISPLAY, has_egl_import,
-                    has_egl_modifiers, has_egl_export, has_native_fence,
-                    gtk4_dmabuf_enabled());
+                         "gtk_runtime=%u.%u.%u gtk_dmabuf=%d egl_current=%d "
+                         "egl_import=%d egl_modifiers=%d egl_mesa_export=%d "
+                         "native_fence=%d export_prototype_enabled=%d",
+                         gtk_get_major_version(), gtk_get_minor_version(),
+                         gtk_get_micro_version(), has_gtk_dmabuf,
+                         egl_display != EGL_NO_DISPLAY, has_egl_import,
+                         has_egl_modifiers, has_egl_export, has_native_fence,
+                         gtk4_dmabuf_enabled());
 }
 
 // Used only by the GTK4 readback/memory-texture fallback. The native
@@ -232,7 +240,7 @@ static void log_dmabuf_fallback(FlCompositorOpenGL* self,
 }
 
 static gboolean import_dmabuf_sync(FlCompositorOpenGL* self,
-                               const Gtk4DmabufTextureData* data) {
+                                   const Gtk4DmabufTextureData* data) {
   if (self->dmabuf_sync_fd < 0) {
     // The producer completed the snapshot synchronously when no FD was made.
     return TRUE;
@@ -247,8 +255,8 @@ static gboolean import_dmabuf_sync(FlCompositorOpenGL* self,
     if (ioctl(data->fds[i], DMA_BUF_IOCTL_IMPORT_SYNC_FILE, &sync) != 0) {
       if (!self->dmabuf_sync_warning_logged) {
         flutter_linux_gtk4_dbg("gtk4_dmabuf",
-                          "failed to import frame fence for plane %d: %s", i,
-                          g_strerror(errno));
+                               "failed to import frame fence for plane %d: %s",
+                               i, g_strerror(errno));
         self->dmabuf_sync_warning_logged = TRUE;
       }
       imported = FALSE;
@@ -365,9 +373,9 @@ static GdkTexture* acquire_dmabuf_texture(FlCompositorOpenGL* self,
   if (!fl_gtk_runtime_dmabuf_format_supported(display, fourcc, modifier)) {
     if (!self->dmabuf_fallback_logged) {
       flutter_linux_gtk4_dbg("gtk4_dmabuf",
-                        "fallback=GDK rejected format fourcc=0x%x "
-                        "modifier=0x%" G_GINT64_MODIFIER "x planes=%d",
-                        fourcc, modifier, n_planes);
+                             "fallback=GDK rejected format fourcc=0x%x "
+                             "modifier=0x%" G_GINT64_MODIFIER "x planes=%d",
+                             fourcc, modifier, n_planes);
       self->dmabuf_fallback_logged = TRUE;
       self->dmabuf_disabled = TRUE;
     }
@@ -415,8 +423,8 @@ static GdkTexture* acquire_dmabuf_texture(FlCompositorOpenGL* self,
       display, &descriptor, release_dmabuf_texture_data, data, &error);
   if (texture == nullptr) {
     flutter_linux_gtk4_dbg("gtk4_dmabuf",
-                      "failed to build texture: %s; using GL texture",
-                      error != nullptr ? error->message : "unknown error");
+                           "failed to build texture: %s; using GL texture",
+                           error != nullptr ? error->message : "unknown error");
     self->dmabuf_fallback_logged = TRUE;
     self->dmabuf_frame_failed = TRUE;
     release_dmabuf_texture_data(data);
@@ -578,7 +586,10 @@ GdkTexture* fl_compositor_opengl_acquire_texture(FlCompositor* compositor,
       self->dmabuf_path_logged = TRUE;
     }
     if (texture == nullptr) {
-      wait_for_native_texture_sync(self);
+      if (!fl_compositor_opengl_gtk4_wait_for_texture(self)) {
+        g_mutex_unlock(&self->frame_mutex);
+        return nullptr;
+      }
       texture = acquire_shareable_texture(self->framebuffer, context);
       if (texture != nullptr) {
         self->framebuffer_published = TRUE;

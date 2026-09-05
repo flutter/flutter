@@ -37,8 +37,8 @@ FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height);
 
 #if FLUTTER_LINUX_GTK4
 FlFramebuffer* fl_framebuffer_new_shareable(GLint format,
-                                             size_t width,
-                                             size_t height);
+                                            size_t width,
+                                            size_t height);
 #endif
 
 /**

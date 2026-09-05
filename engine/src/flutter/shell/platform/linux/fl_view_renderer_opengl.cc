@@ -136,8 +136,8 @@ static void fl_view_renderer_opengl_realize(GtkWidget* widget) {
   self->frame = fl_opengl_frame_new();
   self->task_runner =
       FL_TASK_RUNNER(g_object_ref(fl_engine_get_task_runner(self->engine)));
-  self->compositor =
-      fl_compositor_opengl_new(fl_engine_get_opengl_manager(self->engine), FALSE);
+  self->compositor = fl_compositor_opengl_new(
+      fl_engine_get_opengl_manager(self->engine), FALSE);
 }
 
 // Implements GtkWidget::draw.
