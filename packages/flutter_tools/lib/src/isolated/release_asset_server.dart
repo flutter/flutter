@@ -52,6 +52,16 @@ class ReleaseAssetServer {
   // contains generated, publishable assets.
   static const Set<String> _sourceMapExtensions = <String>{'.dart', '.map'};
 
+  static const Set<String> _staticAssetExtensions = <String>{
+    '.wasm',
+    '.mjs',
+    '.js',
+    '.css',
+    '.json',
+    '.ico',
+    '.map',
+  };
+
   // Locations where source files, assets, or source maps may be located, paired
   // with the set of file extensions allowed to be served from each location. An
   // empty set means no extension restriction is applied.
@@ -111,7 +121,24 @@ class ReleaseAssetServer {
       );
     }
 
+    // Requests for specific compiled web build artifacts (.wasm, .mjs, .js, assets/, canvaskit/)
+    // that do not exist on disk must return 404 Not Found so browser entrypoint fallback
+    // functions properly. SPA index.html fallback is preserved for navigation routes and
+    // unallowed project path fallthroughs.
+    final String cleanPath = requestPath.startsWith('/') ? requestPath.substring(1) : requestPath;
+    final String extension = _fileSystem.path.extension(cleanPath);
+    final bool isMissingStaticAsset =
+        _staticAssetExtensions.contains(extension) ||
+        cleanPath.startsWith('assets/') ||
+        cleanPath.startsWith('canvaskit/');
+    if (isMissingStaticAsset) {
+      return shelf.Response.notFound('');
+    }
+
     final File file = _fileSystem.file(_fileSystem.path.join(_webBuildDirectory!, 'index.html'));
+    if (!file.existsSync()) {
+      return shelf.Response.notFound('');
+    }
     return shelf.Response.ok(
       file.readAsBytesSync(),
       headers: <String, String>{
