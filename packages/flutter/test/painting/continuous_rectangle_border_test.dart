@@ -7,6 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui' show PathMetric;
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -28,6 +30,16 @@ Widget _buildGoldenTest({required Color color, required BorderRadiusGeometry bor
       ),
     ),
   );
+}
+
+// The total length of every contour in [path]. A contour that doubles back over
+// itself is longer than the outline it is supposed to draw.
+double _perimeterOf(Path path) {
+  var length = 0.0;
+  for (final PathMetric metric in path.computeMetrics()) {
+    length += metric.length;
+  }
+  return length;
 }
 
 void main() {
@@ -136,6 +148,106 @@ void main() {
 
     expect(border.getOuterPath(rect, textDirection: TextDirection.rtl), looksLikeRectRtl);
     expect(border.getInnerPath(rect, textDirection: TextDirection.rtl), looksLikeRectRtl);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/132947
+  test('ContinuousRectangleBorder scales down radii that overflow the rect', () {
+    const rect = Rect.fromLTWH(0.0, 0.0, 18.0, 18.0);
+
+    // Two corner radii share each side, so a radius greater than half of the
+    // shortest side has to be scaled down. Otherwise the outline overshoots
+    // and doubles back on itself, which is invisible when the shape is filled
+    // but is drawn as a self-intersecting outline when the shape is stroked.
+    const overflowing = ContinuousRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(24.0)),
+    );
+    const scaled = ContinuousRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+    );
+
+    expect(
+      overflowing.getOuterPath(rect),
+      coversSameAreaAs(scaled.getOuterPath(rect), areaToCompare: rect.inflate(2.0)),
+    );
+
+    // Radii that already fit are left alone.
+    const fitting = ContinuousRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(4.0)),
+    );
+    expect(
+      fitting.getOuterPath(rect),
+      coversSameAreaAs(
+        ContinuousRectangleBorder(
+          borderRadius: BorderRadius.circular(4.0),
+        ).getOuterPath(rect),
+        areaToCompare: rect.inflate(2.0),
+      ),
+    );
+    expect(
+      fitting.getOuterPath(rect),
+      isNot(coversSameAreaAs(scaled.getOuterPath(rect), areaToCompare: rect.inflate(2.0))),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/132947
+  test('ContinuousRectangleBorder scales down elliptical radii that overflow a side', () {
+    // This shape spends the x radii along the vertical sides and the y radii
+    // along the horizontal ones, so an elliptical radius overflows the side it
+    // is actually drawn along. Here the bottom side is 20.0 wide but is asked
+    // for 15.0 from the bottom right corner and 15.0 from the bottom left one.
+    const rect = Rect.fromLTWH(0.0, 0.0, 20.0, 100.0);
+    const overflowing = ContinuousRectangleBorder(
+      borderRadius: BorderRadius.only(
+        bottomRight: Radius.elliptical(0.0, 15.0),
+        bottomLeft: Radius.elliptical(15.0, 0.0),
+      ),
+    );
+    // 20.0 / (15.0 + 15.0) leaves 10.0 for each of the two corners.
+    const scaled = ContinuousRectangleBorder(
+      borderRadius: BorderRadius.only(
+        bottomRight: Radius.elliptical(0.0, 10.0),
+        bottomLeft: Radius.elliptical(10.0, 0.0),
+      ),
+    );
+
+    final Path overflowingPath = overflowing.getOuterPath(rect);
+    expect(
+      overflowingPath,
+      coversSameAreaAs(scaled.getOuterPath(rect), areaToCompare: rect.inflate(2.0)),
+    );
+    // The two curves would otherwise overshoot and the straight segment between
+    // them would run backwards, which covers the same area but makes the
+    // stroked outline double back over itself.
+    expect(_perimeterOf(overflowingPath), moreOrLessEquals(_perimeterOf(scaled.getOuterPath(rect))));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/132947
+  test('ContinuousRectangleBorder treats a negative radius as zero while scaling', () {
+    // The radii are scaled down by comparing the sum of the two radii drawn
+    // along a side against the length of that side. A negative radius has to be
+    // clamped to zero before that sum is taken, otherwise it cancels out part of
+    // the radius of the corner it shares the side with and lets that corner
+    // overflow.
+    const rect = Rect.fromLTWH(0.0, 0.0, 20.0, 100.0);
+    const mixed = ContinuousRectangleBorder(
+      borderRadius: BorderRadius.only(
+        bottomRight: Radius.elliptical(0.0, 40.0),
+        bottomLeft: Radius.elliptical(-15.0, 0.0),
+      ),
+    );
+    const clamped = ContinuousRectangleBorder(
+      borderRadius: BorderRadius.only(bottomRight: Radius.elliptical(0.0, 40.0)),
+    );
+
+    // A negative radius is documented to behave exactly like a zero radius.
+    final Path mixedPath = mixed.getOuterPath(rect);
+    expect(
+      mixedPath,
+      coversSameAreaAs(clamped.getOuterPath(rect), areaToCompare: rect.inflate(2.0)),
+    );
+    expect(_perimeterOf(mixedPath), moreOrLessEquals(_perimeterOf(clamped.getOuterPath(rect))));
+    // The outline never leaves the rect it was given.
+    expect(mixedPath.getBounds(), rect);
   });
 
   testWidgets('Golden test even radii', (WidgetTester tester) async {
