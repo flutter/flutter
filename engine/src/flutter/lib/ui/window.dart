@@ -301,6 +301,35 @@ class FlutterView {
   ///   applications.
   ViewPadding get padding => _viewConfiguration.padding;
 
+  /// Whether the soft keyboard is currently visible on the screen.
+  ///
+  /// On Android API 30+ and iOS, this is reported for both docked
+  /// keyboards and undocked ones (such as floating or split keyboards).
+  /// On earlier Android versions, as well as on mobile web browsers,
+  /// the visibility can only be determined for docked keyboards;
+  /// for undocked keyboards the value remains `false`.
+  /// On all other platforms the value is always `false`.
+  ///
+  /// This reflects keyboard visibility on the screen as a whole: in
+  /// multi-window environments (such as split screen), it is `true` even
+  /// when the keyboard was opened by, and is receiving input for, another
+  /// application.
+  ///
+  /// When this changes, [PlatformDispatcher.onMetricsChanged] is called.
+  /// When using the Flutter framework, using [MediaQuery.keyboardVisibleOf] to
+  /// obtain the keyboard visibility (via [MediaQueryData.keyboardVisible]),
+  /// instead of directly obtaining the [keyboardVisible] from a [FlutterView],
+  /// will automatically cause any widgets dependent on the keyboard visibility
+  /// to rebuild when it changes, without having to listen to
+  /// [PlatformDispatcher.onMetricsChanged].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this value changes.
+  ///  * [MediaQuery.keyboardVisibleOf], a simpler mechanism for the same.
+  bool get keyboardVisible => _viewConfiguration.keyboardVisible;
+
   /// Additional configuration for touch gestures performed on this view.
   ///
   /// For example, the touch slop defined in physical pixels may be provided

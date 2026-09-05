@@ -2820,6 +2820,72 @@ void main() {
     expect(focusNode.hasFocus, true);
   });
 
+  testWidgets('Route below always regains focus when the top-most page is removed', (
+    WidgetTester tester,
+  ) async {
+    final outsideNode = FocusNode(debugLabel: 'outside');
+    addTearDown(outsideNode.dispose);
+    final innerNode = FocusNode(debugLabel: 'inner');
+    addTearDown(innerNode.dispose);
+
+    const newPage = CupertinoPage<void>(key: ValueKey<String>('new'), child: Text('New Page'));
+    final pages = <Page<void>>[
+      CupertinoPage<void>(
+        key: const ValueKey<String>('home'),
+        child: Focus(focusNode: innerNode, child: const Text('Home')),
+      ),
+    ];
+
+    late StateSetter setPages;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            Focus(focusNode: outsideNode, child: const Text('Outside')),
+            Expanded(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  setPages = setState;
+                  return Navigator(
+                    pages: List<Page<void>>.of(pages),
+                    onDidRemovePage: (Page<Object?> page) {
+                      pages.remove(page);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    innerNode.requestFocus();
+    await tester.pump();
+    expect(innerNode.hasFocus, isTrue);
+
+    // Add a page on top of the home page.
+    setPages(() => pages.add(newPage));
+    await tester.pumpAndSettle();
+    expect(innerNode.hasFocus, isFalse);
+
+    // Move primary focus outside the navigator, so that the page being
+    // removed below does not hold focus when it goes away.
+    outsideNode.requestFocus();
+    await tester.pump();
+    expect(outsideNode.hasFocus, isTrue);
+
+    // Remove the top page declaratively; the routes change during build.
+    setPages(() => pages.remove(newPage));
+    await tester.pumpAndSettle();
+    expect(find.text('New Page'), findsNothing);
+
+    // The home route became the top-most route again and returns focus to its
+    // previously focused node, the same way popping the route above it would.
+    expect(innerNode.hasFocus, isTrue);
+    expect(outsideNode.hasFocus, isFalse);
+  });
+
   testWidgets('showGeneralDialog applies custom barrierBuilder', (WidgetTester tester) async {
     const expectedPadding = 12.0;
     const barrierKey = ValueKey<String>('custom-barrier-padding');

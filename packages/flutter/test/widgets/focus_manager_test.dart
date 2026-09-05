@@ -486,6 +486,56 @@ void main() {
   });
 
   group(FocusScopeNode, () {
+    testWidgets('setFirstFocus grants a route regained-focus token only when requested.', (
+      WidgetTester tester,
+    ) async {
+      final BuildContext context = await setupWidget(tester);
+      final parentScope = FocusScopeNode(debugLabel: 'Parent Scope');
+      addTearDown(parentScope.dispose);
+      parentScope.attach(context).reparent(parent: tester.binding.focusManager.rootScope);
+      final scope1 = FocusScopeNode(debugLabel: 'Scope 1');
+      addTearDown(scope1.dispose);
+      scope1.attach(context).reparent(parent: parentScope);
+      final scope2 = FocusScopeNode(debugLabel: 'Scope 2');
+      addTearDown(scope2.dispose);
+      scope2.attach(context).reparent(parent: parentScope);
+      final node = FocusNode(debugLabel: 'Node');
+      addTearDown(node.dispose);
+      node.attach(context).reparent(parent: scope1);
+
+      // A direct focus request does not grant a route regained-focus token.
+      node.requestFocus();
+      await tester.pump();
+      expect(node.hasPrimaryFocus, isTrue);
+      expect(node.consumeRouteRegainedFocusToken(), isFalse);
+
+      // Move focus to another scope, as if a route was pushed above the node.
+      parentScope.setFirstFocus(scope2, isRouteRegainingFocus: true);
+      await tester.pump();
+      expect(node.hasPrimaryFocus, isFalse);
+
+      // Restore focus to scope1's remembered child, as if that route was
+      // popped. The node receives the token, and consuming it works only once.
+      parentScope.setFirstFocus(scope1, isRouteRegainingFocus: true);
+      await tester.pump();
+      expect(node.hasPrimaryFocus, isTrue);
+      expect(node.consumeRouteRegainedFocusToken(), isTrue);
+      expect(node.consumeRouteRegainedFocusToken(), isFalse);
+
+      // A leftover token is cleared by a subsequent direct focus request.
+      parentScope.setFirstFocus(scope2, isRouteRegainingFocus: true);
+      await tester.pump();
+      parentScope.setFirstFocus(scope1, isRouteRegainingFocus: true);
+      await tester.pump();
+      expect(node.hasPrimaryFocus, isTrue);
+      node.unfocus();
+      await tester.pump();
+      node.requestFocus();
+      await tester.pump();
+      expect(node.hasPrimaryFocus, isTrue);
+      expect(node.consumeRouteRegainedFocusToken(), isFalse);
+    });
+
     testWidgets('Can setFirstFocus on a scope with no manager.', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final scope = FocusScopeNode(debugLabel: 'Scope');

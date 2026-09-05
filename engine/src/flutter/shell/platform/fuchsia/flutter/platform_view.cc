@@ -361,6 +361,7 @@ void PlatformView::OnGetLayout(fuchsia::ui::composition::LayoutInfo info) {
       0.0f,                     // p_physical_system_gesture_inset_right
       0.0f,                     // p_physical_system_gesture_inset_bottom
       0.0f,                     // p_physical_system_gesture_inset_left,
+      false,                    // p_keyboard_visible,
       -1.0,                     // p_physical_touch_slop,
       {},                       // p_physical_display_features_bounds
       {},                       // p_physical_display_features_type

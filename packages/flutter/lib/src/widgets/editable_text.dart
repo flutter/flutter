@@ -790,6 +790,13 @@ class _DiscreteKeyFrameSimulation extends Simulation {
 ///  * When the user changes the selection of the text field, or changes the
 ///    text when the text field is not [readOnly].
 ///  * When the virtual keyboard pops up.
+///
+/// An exception is when the text field regains focus only because the route
+/// it is in became the top-most route again (for example, after a route above
+/// it is popped): the caret is then kept visible within the text field, but
+/// the text field itself is not brought into view. If the virtual keyboard
+/// reopens, though, the text field and its caret are still brought into view,
+/// above the keyboard.
 /// {@endtemplate}
 ///
 /// ## Scrolling Considerations
@@ -3744,11 +3751,11 @@ class EditableTextState extends State<EditableText>
       _startCursorBlink();
     }
 
-    // Wherever the value is changed by the user, schedule a showCaretOnScreen
-    // to make sure the user can see the changes they just made. Programmatic
-    // changes to `textEditingValue` do not trigger the behavior even if the
-    // text field is focused.
-    _scheduleShowCaretOnScreen(withAnimation: true);
+    // Wherever the value is changed by the user, schedule a showCaret with
+    // onScreen set to true, to make sure the user can see the changes they
+    // just made. Programmatic changes to `textEditingValue` do not trigger
+    // the behavior even if the text field is focused.
+    _scheduleShowCaret(onScreen: true, withAnimation: true);
   }
 
   bool _checkNeedsAdjustAffinity(TextEditingValue value) {
@@ -4127,7 +4134,7 @@ class EditableTextState extends State<EditableText>
 
   // Must be called after layout.
   // See https://github.com/flutter/flutter/issues/126312
-  void _openInputConnection() {
+  void _openInputConnection([bool isRouteRegainingFocus = false]) {
     if (!_shouldCreateInputConnection) {
       return;
     }
@@ -4149,8 +4156,17 @@ class EditableTextState extends State<EditableText>
       _schedulePeriodicPostFrameCallbacks();
       _textInputConnection!
         ..updateStyle(_getTextInputStyle(context))
-        ..setEditingState(localValue)
-        ..show();
+        ..setEditingState(localValue);
+      // When this widget regains focus because its route became the top-most
+      // route again (e.g. the route above it was popped), restore the soft
+      // keyboard's previous visibility instead of unconditionally showing it.
+      // In all other cases (such as a direct focus request from a tap), always
+      // show the keyboard.
+      if (!isRouteRegainingFocus ||
+          !_keyboardVisibilityIsReliable ||
+          (_wasKeyboardVisible ?? true)) {
+        _textInputConnection!.show();
+      }
       if (_needsAutofill) {
         // Request autofill AFTER the size and the transform have been sent to
         // the platform text input plugin.
@@ -4172,9 +4188,9 @@ class EditableTextState extends State<EditableText>
     }
   }
 
-  void _openOrCloseInputConnectionIfNeeded() {
+  void _openOrCloseInputConnectionIfNeeded([bool isRouteRegainingFocus = false]) {
     if (_hasFocus && widget.focusNode.consumeKeyboardToken()) {
-      _openInputConnection();
+      _openInputConnection(isRouteRegainingFocus);
     } else if (!_hasFocus) {
       _closeInputConnectionIfNeeded();
       widget.controller.clearComposing();
@@ -4583,15 +4599,27 @@ class EditableTextState extends State<EditableText>
   static const Duration _caretAnimationDuration = Duration(milliseconds: 100);
   static const Curve _caretAnimationCurve = Curves.fastOutSlowIn;
 
-  bool _showCaretOnScreenScheduled = false;
+  bool _showCaretScheduled = false;
+  // Whether the scheduled showCaret callback should bring the caret on screen
+  // by also scrolling the editable text itself into view, in addition to
+  // scrolling the text within the editable text.
+  bool _showCaretOnScreen = true;
 
-  void _scheduleShowCaretOnScreen({required bool withAnimation}) {
-    if (_showCaretOnScreenScheduled) {
+  // Schedules scrolling the text within the editable text so that the caret is
+  // visible in the editable text's own viewport. If [onScreen] is true, the
+  // editable text's ancestor scrollables are also scrolled, so that the caret
+  // ends up visible on screen.
+  void _scheduleShowCaret({required bool onScreen, required bool withAnimation}) {
+    // A single scheduled callback serves all the requests made during the
+    // frame; the last request decides whether the caret is also brought on
+    // screen.
+    _showCaretOnScreen = onScreen;
+    if (_showCaretScheduled) {
       return;
     }
-    _showCaretOnScreenScheduled = true;
+    _showCaretScheduled = true;
     SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-      _showCaretOnScreenScheduled = false;
+      _showCaretScheduled = false;
       // Since we are in a post frame callback, check currentContext in case
       // RenderEditable has been disposed (in which case it will be null).
       final renderEditable = _editableKey.currentContext?.findRenderObject() as RenderEditable?;
@@ -4648,19 +4676,34 @@ class EditableTextState extends State<EditableText>
           duration: _caretAnimationDuration,
           curve: _caretAnimationCurve,
         );
-        renderEditable.showOnScreen(
-          rect: caretPadding.inflateRect(rectToReveal),
-          duration: _caretAnimationDuration,
-          curve: _caretAnimationCurve,
-        );
+        if (_showCaretOnScreen) {
+          renderEditable.showOnScreen(
+            rect: caretPadding.inflateRect(rectToReveal),
+            duration: _caretAnimationDuration,
+            curve: _caretAnimationCurve,
+          );
+        }
       } else {
         _scrollController.jumpTo(targetOffset.offset);
-        renderEditable.showOnScreen(rect: caretPadding.inflateRect(rectToReveal));
+        if (_showCaretOnScreen) {
+          renderEditable.showOnScreen(rect: caretPadding.inflateRect(rectToReveal));
+        }
       }
     }, debugLabel: 'EditableText.showCaret');
   }
 
   late double _lastBottomViewInset;
+  // The soft keyboard's visibility as last observed while this widget held
+  // focus. Only consulted when this widget regains focus because its route
+  // became the top-most route again, to decide whether the soft keyboard
+  // should be brought back.
+  bool? _wasKeyboardVisible;
+  // Whether this view has ever reported keyboardVisible == true. On some
+  // configurations the platform cannot determine the soft keyboard's
+  // visibility (e.g. undocked keyboards on Android API < 30),
+  // so keyboardVisible stays false unconditionally there and a
+  // false must not be treated as "the keyboard was hidden" here.
+  bool _keyboardVisibilityIsReliable = false;
 
   @override
   void didChangeMetrics() {
@@ -4675,10 +4718,12 @@ class EditableTextState extends State<EditableText>
       if (_lastBottomViewInset < view.viewInsets.bottom) {
         // Because the metrics change signal from engine will come here every frame
         // (on both iOS and Android). So we don't need to show caret with animation.
-        _scheduleShowCaretOnScreen(withAnimation: false);
+        _scheduleShowCaret(onScreen: true, withAnimation: false);
       }
     }
     _lastBottomViewInset = view.viewInsets.bottom;
+    _wasKeyboardVisible = view.keyboardVisible;
+    _keyboardVisibilityIsReliable |= view.keyboardVisible;
   }
 
   Future<void> _performSpellCheck(String text) async {
@@ -4962,15 +5007,26 @@ class EditableTextState extends State<EditableText>
   }
 
   void _handleFocusChanged() {
-    _openOrCloseInputConnectionIfNeeded();
+    final bool isRouteRegainingFocus =
+        _hasFocus && widget.focusNode.consumeRouteRegainedFocusToken();
+    _openOrCloseInputConnectionIfNeeded(isRouteRegainingFocus);
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
     if (_hasFocus) {
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance.addObserver(this);
-      _lastBottomViewInset = View.of(context).viewInsets.bottom;
+      final ui.FlutterView view = View.of(context);
+      _lastBottomViewInset = view.viewInsets.bottom;
+      _wasKeyboardVisible = view.keyboardVisible;
+      _keyboardVisibilityIsReliable |= view.keyboardVisible;
+      // When this widget regains focus only because its route became the
+      // top-most route again, keep the caret visible within the editable text
+      // (so that a focused editable text does not show without its caret), but
+      // do not bring the editable text itself into view. If the soft keyboard
+      // reopens, though, didChangeMetrics will still bring the editable text
+      // and its caret into view, above the keyboard.
       if (!widget.readOnly) {
-        _scheduleShowCaretOnScreen(withAnimation: true);
+        _scheduleShowCaret(onScreen: !isRouteRegainingFocus, withAnimation: true);
       }
       final TextSelection? updatedSelection = _adjustedSelectionWhenFocused();
       if (updatedSelection != null) {
@@ -5174,7 +5230,7 @@ class EditableTextState extends State<EditableText>
     // TextEditingValue value, in case the formatter would reject the change.
     final shouldShowCaret = widget.readOnly ? _value.selection != value.selection : _value != value;
     if (shouldShowCaret) {
-      _scheduleShowCaretOnScreen(withAnimation: true);
+      _scheduleShowCaret(onScreen: true, withAnimation: true);
     }
 
     // Even if the value doesn't change, it may be necessary to focus and build
