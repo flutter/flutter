@@ -112,6 +112,41 @@ void fl_accessibility_semantics_store_handle_update(
       self->root_node_present = TRUE;
     }
   }
+
+  if (!self->root_node_present) {
+    return;
+  }
+
+  // Updates contain only changed nodes. Compute reachability after applying
+  // the entire batch so reordered nodes and unchanged descendants survive.
+  g_autoptr(GHashTable) reachable =
+      g_hash_table_new(g_direct_hash, g_direct_equal);
+  g_autoptr(GArray) pending = g_array_new(FALSE, FALSE, sizeof(int32_t));
+  int32_t root_id = 0;
+  g_array_append_val(pending, root_id);
+  while (pending->len > 0) {
+    int32_t id = g_array_index(pending, int32_t, pending->len - 1);
+    g_array_set_size(pending, pending->len - 1);
+    if (!g_hash_table_add(reachable, GINT_TO_POINTER(id))) {
+      continue;
+    }
+    const auto* node = fl_accessibility_semantics_store_lookup_node(self, id);
+    if (node != nullptr && node->children_in_traversal_order != nullptr) {
+      for (size_t i = 0; i < node->child_count; i++) {
+        int32_t child_id = node->children_in_traversal_order[i];
+        g_array_append_val(pending, child_id);
+      }
+    }
+  }
+
+  GHashTableIter iter;
+  gpointer key;
+  g_hash_table_iter_init(&iter, self->nodes_by_id);
+  while (g_hash_table_iter_next(&iter, &key, nullptr)) {
+    if (!g_hash_table_contains(reachable, key)) {
+      g_hash_table_iter_remove(&iter);
+    }
+  }
 }
 
 const FlAccessibilitySemanticsNode*

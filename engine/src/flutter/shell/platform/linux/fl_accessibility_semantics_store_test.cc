@@ -6,6 +6,44 @@
 
 #include "gtest/gtest.h"
 
+TEST(FlAccessibilitySemanticsStoreTest, PrunesDetachedSubtreesAfterBatch) {
+  g_autoptr(FlAccessibilitySemanticsStore) store =
+      fl_accessibility_semantics_store_new(123);
+  int32_t children[] = {1};
+  int32_t grandchildren[] = {2};
+  FlutterSemanticsNode2 root = {};
+  root.id = 0;
+  root.child_count = 1;
+  root.children_in_traversal_order = children;
+  FlutterSemanticsNode2 child = {};
+  child.id = 1;
+  child.child_count = 1;
+  child.children_in_traversal_order = grandchildren;
+  FlutterSemanticsNode2 grandchild = {};
+  grandchild.id = 2;
+  FlutterSemanticsNode2* nodes[] = {&grandchild, &child, &root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = 123;
+  update.node_count = 3;
+  update.nodes = nodes;
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  ASSERT_NE(fl_accessibility_semantics_store_lookup_node(store, 2), nullptr);
+
+  // A root-only update must preserve descendants omitted from the batch.
+  FlutterSemanticsNode2* root_only[] = {&root};
+  update.node_count = 1;
+  update.nodes = root_only;
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  EXPECT_NE(fl_accessibility_semantics_store_lookup_node(store, 2), nullptr);
+
+  root.child_count = 0;
+  root.children_in_traversal_order = nullptr;
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  EXPECT_NE(fl_accessibility_semantics_store_lookup_node(store, 0), nullptr);
+  EXPECT_EQ(fl_accessibility_semantics_store_lookup_node(store, 1), nullptr);
+  EXPECT_EQ(fl_accessibility_semantics_store_lookup_node(store, 2), nullptr);
+}
+
 TEST(FlAccessibilitySemanticsStoreTest, StoresNodesForMatchingView) {
   g_autoptr(FlAccessibilitySemanticsStore) store =
       fl_accessibility_semantics_store_new(123);
