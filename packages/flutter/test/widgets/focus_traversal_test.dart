@@ -4206,6 +4206,58 @@ void main() {
       expect(enabledButton2Node.hasPrimaryFocus, isTrue);
     },
   );
+  testWidgets('Focus traversal ignores nodes that are not attached to the widget tree', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/66106
+    final detachedNode1 = FocusNode(debugLabel: 'detached 1');
+    addTearDown(detachedNode1.dispose);
+    final detachedNode2 = FocusNode(debugLabel: 'detached 2');
+    addTearDown(detachedNode2.dispose);
+    final node1 = FocusNode(debugLabel: '1');
+    addTearDown(node1.dispose);
+    final node2 = FocusNode(debugLabel: '2');
+    addTearDown(node2.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FocusScope(
+          child: Column(
+            children: <Widget>[
+              Focus(focusNode: node1, child: const SizedBox(width: 100, height: 100)),
+              Focus(focusNode: node2, child: const SizedBox(width: 100, height: 100)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final FocusScopeNode scope = FocusScope.of(node1.context!);
+    // Requesting focus for a node that no widget owns, as
+    // `FocusScope.of(context).requestFocus(FocusNode())` does, adds the node to
+    // the focus tree even though it has no context, and therefore no geometry.
+    scope.requestFocus(detachedNode1);
+    scope.requestFocus(detachedNode2);
+    await tester.pump();
+    expect(detachedNode2.hasPrimaryFocus, isTrue);
+
+    // Traversal starts over from the beginning of the scope, because the
+    // currently focused node cannot take part in traversal.
+    expect(node1.nextFocus(), isTrue);
+    await tester.pump();
+    expect(node1.hasPrimaryFocus, isTrue);
+
+    expect(node1.nextFocus(), isTrue);
+    await tester.pump();
+    expect(node2.hasPrimaryFocus, isTrue);
+
+    expect(node2.previousFocus(), isTrue);
+    await tester.pump();
+    expect(node1.hasPrimaryFocus, isTrue);
+
+    expect(scope.traversalDescendants, <FocusNode>[node1, node2]);
+  });
 }
 
 class TestPage<T> extends Page<T> {

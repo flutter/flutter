@@ -726,11 +726,20 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   /// Returns all descendants which do not have the [skipTraversal] and do have
   /// the [canRequestFocus] flag set.
+  ///
+  /// Descendants that are not attached to the widget tree (i.e. whose [context]
+  /// is null) are also excluded, because focus traversal needs their geometry
+  /// in order to decide where to move the focus. A node can be part of the
+  /// focus tree without being attached to a widget when focus is requested for
+  /// a node that no widget owns, e.g.
+  /// `FocusScope.of(context).requestFocus(FocusNode())`.
   Iterable<FocusNode> get traversalDescendants {
     if (!descendantsAreFocusable) {
       return const Iterable<FocusNode>.empty();
     }
-    return descendants.where((FocusNode node) => !node.skipTraversal && node.canRequestFocus);
+    return descendants.where(
+      (FocusNode node) => !node.skipTraversal && node.canRequestFocus && node.context != null,
+    );
   }
 
   /// An [Iterable] over the ancestors of this node.
