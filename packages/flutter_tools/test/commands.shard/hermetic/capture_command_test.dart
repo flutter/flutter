@@ -20,10 +20,14 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-FileSystemUtils _testFsUtils([FileSystem? fs]) =>
-    FileSystemUtils(fileSystem: fs ?? MemoryFileSystem.test(), platform: FakePlatform());
+FakeToolContext _testToolContext({FileSystem? fs, Logger? logger}) => FakeToolContext(
+  fs: fs ?? MemoryFileSystem.test(),
+  logger: logger ?? testLogger,
+  platform: FakePlatform(),
+);
 
 void main() {
   setUpAll(() {
@@ -31,10 +35,16 @@ void main() {
   });
 
   group('flutter screenshot (backward compat)', () {
+    testWithoutContext('has non-nullable toolContext', () {
+      final toolContext = FakeToolContext();
+      final command = ScreenshotCommand(toolContext: toolContext);
+      expect(command.toolContext, same(toolContext));
+    });
+
     testUsingContext('requires device for device type', () async {
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
+          ScreenshotCommand(toolContext: _testToolContext()),
         ).run(<String>['screenshot']),
         throwsToolExit(message: 'Must have a connected device for screenshot type device'),
       );
@@ -43,7 +53,7 @@ void main() {
     testUsingContext('rejects VM Service URI for device type', () async {
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
+          ScreenshotCommand(toolContext: _testToolContext()),
         ).run(<String>['screenshot', '--vm-service-url=http://localhost:8181']),
         throwsToolExit(message: 'VM Service URI cannot be provided for screenshot type device'),
       );
@@ -52,7 +62,7 @@ void main() {
     testUsingContext('requires VM Service URI for skia type', () async {
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
+          ScreenshotCommand(toolContext: _testToolContext()),
         ).run(<String>['screenshot', '--type=skia']),
         throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia'),
       );
@@ -67,7 +77,7 @@ void main() {
 
       await expectLater(
         () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
+          ScreenshotCommand(toolContext: _testToolContext()),
         ).run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']),
         throwsA(
           isException.having(
@@ -79,93 +89,115 @@ void main() {
       );
     });
 
-    testUsingContext('takes a screenshot', () async {
-      await createTestCommandRunner(
-        ScreenshotCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
-      ).run(<String>['screenshot']);
+    testUsingContext(
+      'takes a screenshot',
+      () async {
+        await createTestCommandRunner(
+          ScreenshotCommand(toolContext: _testToolContext()),
+        ).run(<String>['screenshot']);
 
-      expect(testLogger.statusText, contains('Screenshot written to'));
-    }, overrides: <Type, Generator>{
-      DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-        ..devices = <Device>[_CaptureDevice(id: '123', name: 'TestDevice')],
-    });
+        expect(testLogger.statusText, contains('Screenshot written to'));
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () =>
+            _TestDeviceManager(logger: BufferLogger.test())
+              ..devices = <Device>[_CaptureDevice(id: '123', name: 'TestDevice')],
+      },
+    );
 
-    testUsingContext('rejects unsupported device', () async {
-      await expectLater(
-        () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
-        ).run(<String>['screenshot']),
-        throwsToolExit(message: 'Screenshot not supported'),
-      );
-    }, overrides: <Type, Generator>{
-      DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-        ..devices = <Device>[
-          _CaptureDevice(id: '123', name: 'NoScreenshot', supportsScreenshot: false),
-        ],
-    });
+    testUsingContext(
+      'rejects unsupported device',
+      () async {
+        await expectLater(
+          () => createTestCommandRunner(
+            ScreenshotCommand(toolContext: _testToolContext()),
+          ).run(<String>['screenshot']),
+          throwsToolExit(message: 'Screenshot not supported'),
+        );
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
+          ..devices = <Device>[
+            _CaptureDevice(id: '123', name: 'NoScreenshot', supportsScreenshot: false),
+          ],
+      },
+    );
 
-    testUsingContext('should not throw for single device unsupported for project', () async {
-      await createTestCommandRunner(
-        ScreenshotCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
-      ).run(<String>['screenshot']);
-    }, overrides: <Type, Generator>{
-      DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-        ..devices = <Device>[
-          _CaptureDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
-        ],
-    });
+    testUsingContext(
+      'should not throw for single device unsupported for project',
+      () async {
+        await createTestCommandRunner(
+          ScreenshotCommand(toolContext: _testToolContext()),
+        ).run(<String>['screenshot']);
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
+          ..devices = <Device>[
+            _CaptureDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
+          ],
+      },
+    );
 
-    testUsingContext('should tool exit for multiple devices unsupported for project', () async {
-      await expectLater(
-        () => createTestCommandRunner(
-          ScreenshotCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
-        ).run(<String>['screenshot']),
-        throwsToolExit(message: 'Must have a connected device for screenshot type device'),
-      );
+    testUsingContext(
+      'should tool exit for multiple devices unsupported for project',
+      () async {
+        await expectLater(
+          () => createTestCommandRunner(
+            ScreenshotCommand(toolContext: _testToolContext()),
+          ).run(<String>['screenshot']),
+          throwsToolExit(message: 'Must have a connected device for screenshot type device'),
+        );
 
-      expect(
-        testLogger.statusText,
-        contains('''
+        expect(
+          testLogger.statusText,
+          contains('''
 More than one device connected; please specify a device with the '-d <deviceId>' flag, or use '-d all' to act on all devices.
 
 Device 1 (mobile) • 123 • android • 1.2.3
 Device 2 (mobile) • 456 • android • 1.2.3
 '''),
-      );
-    }, overrides: <Type, Generator>{
-      DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-        ..devices = <Device>[
-          _CaptureDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
-          _CaptureDevice(id: '456', name: 'Device 2', isSupportedForProject: false),
-        ],
-    });
+        );
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
+          ..devices = <Device>[
+            _CaptureDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
+            _CaptureDevice(id: '456', name: 'Device 2', isSupportedForProject: false),
+          ],
+      },
+    );
   });
 
   group('capture screenshot', () {
     testUsingContext('requires a connected device', () async {
       await expectLater(
         () => createTestCommandRunner(
-          CaptureCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
+          CaptureCommand(toolContext: _testToolContext()),
         ).run(<String>['capture', 'screenshot']),
         throwsToolExit(message: 'Must have a connected device for screenshot type device'),
       );
     });
 
-    testUsingContext('takes a screenshot', () async {
-      await createTestCommandRunner(
-        CaptureCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
-      ).run(<String>['capture', 'screenshot']);
+    testUsingContext(
+      'takes a screenshot',
+      () async {
+        await createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext()),
+        ).run(<String>['capture', 'screenshot']);
 
-      expect(testLogger.statusText, contains('Screenshot written to'));
-    }, overrides: <Type, Generator>{
-      DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-        ..devices = <Device>[_CaptureDevice(id: '123', name: 'TestDevice')],
-    });
+        expect(testLogger.statusText, contains('Screenshot written to'));
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () =>
+            _TestDeviceManager(logger: BufferLogger.test())
+              ..devices = <Device>[_CaptureDevice(id: '123', name: 'TestDevice')],
+      },
+    );
 
     testUsingContext('supports --type and --vm-service-url', () async {
       await expectLater(
         () => createTestCommandRunner(
-          CaptureCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
+          CaptureCommand(toolContext: _testToolContext()),
         ).run(<String>['capture', 'screenshot', '--type=skia']),
         throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia'),
       );
@@ -176,80 +208,80 @@ Device 2 (mobile) • 456 • android • 1.2.3
     testUsingContext('requires a connected device', () async {
       await expectLater(
         () => createTestCommandRunner(
-          CaptureCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
+          CaptureCommand(toolContext: _testToolContext()),
         ).run(<String>['capture', 'recording']),
         throwsToolExit(message: 'No connected device found'),
       );
     });
 
-    testUsingContext('rejects device that does not support recording', () async {
-      await expectLater(
-        () => createTestCommandRunner(
-          CaptureCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
-        ).run(<String>['capture', 'recording']),
-        throwsToolExit(message: 'Screen recording not supported'),
-      );
-    }, overrides: <Type, Generator>{
-      DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-        ..devices = <Device>[
-          _CaptureDevice(
-            id: '123',
-            name: 'NoRecord',
-          ),
-        ],
-    });
+    testUsingContext(
+      'rejects device that does not support recording',
+      () async {
+        await expectLater(
+          () => createTestCommandRunner(
+            CaptureCommand(toolContext: _testToolContext()),
+          ).run(<String>['capture', 'recording']),
+          throwsToolExit(message: 'Screen recording not supported'),
+        );
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () =>
+            _TestDeviceManager(logger: BufferLogger.test())
+              ..devices = <Device>[_CaptureDevice(id: '123', name: 'NoRecord')],
+      },
+    );
 
-    testUsingContext('records video with a single device', () async {
-      await createTestCommandRunner(
-        CaptureCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
-      ).run(<String>['capture', 'recording']);
+    testUsingContext(
+      'records video with a single device',
+      () async {
+        await createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext()),
+        ).run(<String>['capture', 'recording']);
 
-      expect(testLogger.statusText, contains('Recording written to'));
-    }, overrides: <Type, Generator>{
-      DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-        ..devices = <Device>[
-          _CaptureDevice(
-            id: '123',
-            name: 'TestDevice',
-            supportsScreenRecording: true,
-          ),
-        ],
-    });
+        expect(testLogger.statusText, contains('Recording written to'));
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
+          ..devices = <Device>[
+            _CaptureDevice(id: '123', name: 'TestDevice', supportsScreenRecording: true),
+          ],
+      },
+    );
 
-    testUsingContext('shows duration message when duration specified', () async {
-      await createTestCommandRunner(
-        CaptureCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
-      ).run(<String>['capture', 'recording', '-d', '5']);
+    testUsingContext(
+      'shows duration message when duration specified',
+      () async {
+        await createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext()),
+        ).run(<String>['capture', 'recording', '-d', '5']);
 
-      expect(testLogger.statusText, contains('5 seconds'));
-    }, overrides: <Type, Generator>{
-      DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-        ..devices = <Device>[
-          _CaptureDevice(
-            id: '123',
-            name: 'TestDevice',
-            supportsScreenRecording: true,
-          ),
-        ],
-    });
+        expect(testLogger.statusText, contains('5 seconds'));
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
+          ..devices = <Device>[
+            _CaptureDevice(id: '123', name: 'TestDevice', supportsScreenRecording: true),
+          ],
+      },
+    );
 
-    testUsingContext('rejects invalid duration', () async {
-      await expectLater(
-        () => createTestCommandRunner(
-          CaptureCommand(fs: MemoryFileSystem.test(), logger: testLogger, fsUtils: _testFsUtils()),
-        ).run(<String>['capture', 'recording', '-d', 'abc']),
-        throwsToolExit(message: 'Invalid duration'),
-      );
-    }, overrides: <Type, Generator>{
-      DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-        ..devices = <Device>[
-          _CaptureDevice(
-            id: '123',
-            name: 'TestDevice',
-            supportsScreenRecording: true,
-          ),
-        ],
-    });
+    testUsingContext(
+      'rejects invalid duration',
+      () async {
+        await expectLater(
+          () => createTestCommandRunner(
+            CaptureCommand(toolContext: _testToolContext()),
+          ).run(<String>['capture', 'recording', '-d', 'abc']),
+          throwsToolExit(message: 'Invalid duration'),
+        );
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
+          ..devices = <Device>[
+            _CaptureDevice(id: '123', name: 'TestDevice', supportsScreenRecording: true),
+          ],
+      },
+    );
   });
 
   group('Screenshot file validation', () {

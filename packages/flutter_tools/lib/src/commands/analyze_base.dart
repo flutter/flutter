@@ -98,6 +98,14 @@ abstract class AnalyzeBase {
   bool get isBenchmarking => argResults['benchmark'] as bool;
   String? get protocolTrafficLog => argResults['protocol-traffic-log'] as String?;
 
+  @protected
+  bool get usePlugins {
+    if (argResults.options.contains('plugins') && argResults.wasParsed('plugins')) {
+      return argResults['plugins'] as bool;
+    }
+    return !isBenchmarking;
+  }
+
   /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
   static String generateErrorsMessage({
     required int issueCount,

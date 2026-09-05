@@ -12,6 +12,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../runner/flutter_command.dart';
@@ -26,9 +27,12 @@ const String _kSkiaType = 'skia';
 /// Shared screenshot logic used by [ScreenshotCommand], [CaptureCommand] (bare
 /// invocation), and [CaptureScreenshotCommand].
 mixin ScreenshotMixin on FlutterCommand {
-  FileSystem get fs;
-  Logger get logger;
-  FileSystemUtils get fsUtils;
+  @override
+  ToolContext get toolContext => super.toolContext!;
+
+  FileSystem get fs => toolContext.fs;
+  Logger get logger => toolContext.logger;
+  FileSystemUtils get fsUtils => toolContext.fileSystemUtils;
 
   void addScreenshotOptions() {
     argParser.addOption(
@@ -131,12 +135,12 @@ mixin ScreenshotMixin on FlutterCommand {
     }
   }
 
+  /// Connector used to reach the VM Service; overridable for tests.
+  VMServiceConnector get vmServiceConnector => connectToVmService;
+
   Future<bool> _runSkiaScreenshot(File? outputFile) async {
     final Uri vmServiceUrl = Uri.parse(stringArg(_kVmServiceUrl)!);
-    final FlutterVmService vmService = await connectToVmService(
-      vmServiceUrl,
-      logger: logger,
-    );
+    final FlutterVmService vmService = await vmServiceConnector(vmServiceUrl, logger: logger);
     final vm_service.Response? skp = await vmService.screenshotSkp();
     if (skp == null) {
       logger.printError(
@@ -189,18 +193,15 @@ mixin ScreenshotMixin on FlutterCommand {
 ///
 /// Shares screenshot logic with [CaptureScreenshotCommand] via [ScreenshotMixin].
 class ScreenshotCommand extends FlutterCommand with ScreenshotMixin {
-  ScreenshotCommand({required this.fs, required this.logger, required this.fsUtils}) {
+  ScreenshotCommand({required super.toolContext, VMServiceConnector? vmServiceConnector})
+    : _vmServiceConnector = vmServiceConnector ?? connectToVmService {
     addScreenshotOptions();
   }
 
-  @override
-  final FileSystem fs;
+  final VMServiceConnector _vmServiceConnector;
 
   @override
-  final Logger logger;
-
-  @override
-  final FileSystemUtils fsUtils;
+  VMServiceConnector get vmServiceConnector => _vmServiceConnector;
 
   @override
   String get name => 'screenshot';
@@ -228,10 +229,13 @@ class ScreenshotCommand extends FlutterCommand with ScreenshotMixin {
 }
 
 class CaptureCommand extends FlutterCommand {
-  CaptureCommand({required FileSystem fs, required Logger logger, required FileSystemUtils fsUtils}) {
-    addSubcommand(CaptureScreenshotCommand(fs: fs, logger: logger, fsUtils: fsUtils));
-    addSubcommand(CaptureRecordingCommand(fs: fs, logger: logger, fsUtils: fsUtils));
+  CaptureCommand({required super.toolContext}) {
+    addSubcommand(CaptureScreenshotCommand(toolContext: toolContext));
+    addSubcommand(CaptureRecordingCommand(toolContext: toolContext));
   }
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => 'capture';
@@ -247,18 +251,15 @@ class CaptureCommand extends FlutterCommand {
 }
 
 class CaptureScreenshotCommand extends FlutterCommand with ScreenshotMixin {
-  CaptureScreenshotCommand({required this.fs, required this.logger, required this.fsUtils}) {
+  CaptureScreenshotCommand({required super.toolContext, VMServiceConnector? vmServiceConnector})
+    : _vmServiceConnector = vmServiceConnector ?? connectToVmService {
     addScreenshotOptions();
   }
 
-  @override
-  final FileSystem fs;
+  final VMServiceConnector _vmServiceConnector;
 
   @override
-  final Logger logger;
-
-  @override
-  final FileSystemUtils fsUtils;
+  VMServiceConnector get vmServiceConnector => _vmServiceConnector;
 
   @override
   String get name => 'screenshot';
@@ -283,11 +284,7 @@ class CaptureScreenshotCommand extends FlutterCommand with ScreenshotMixin {
 }
 
 class CaptureRecordingCommand extends FlutterCommand {
-  CaptureRecordingCommand({
-    required this.fs,
-    required this.logger,
-    required this.fsUtils,
-  }) {
+  CaptureRecordingCommand({required super.toolContext}) {
     argParser.addOption(
       _kOut,
       abbr: 'o',
@@ -298,16 +295,20 @@ class CaptureRecordingCommand extends FlutterCommand {
       'duration',
       abbr: 'd',
       valueHelp: 'seconds',
-      help: 'Maximum recording duration in seconds. '
+      help:
+          'Maximum recording duration in seconds. '
           'If not specified, recording continues until Ctrl-C is pressed.',
     );
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
   }
 
-  final FileSystem fs;
-  final Logger logger;
-  final FileSystemUtils fsUtils;
+  @override
+  ToolContext get toolContext => super.toolContext!;
+
+  FileSystem get fs => toolContext.fs;
+  Logger get logger => toolContext.logger;
+  FileSystemUtils get fsUtils => toolContext.fileSystemUtils;
 
   @override
   String get name => 'recording';
@@ -352,13 +353,9 @@ class CaptureRecordingCommand extends FlutterCommand {
     }
 
     if (duration != null) {
-      logger.printStatus(
-        'Recording ${_device!.displayName} for ${duration.inSeconds} seconds...',
-      );
+      logger.printStatus('Recording ${_device!.displayName} for ${duration.inSeconds} seconds...');
     } else {
-      logger.printStatus(
-        'Recording ${_device!.displayName}... Press Ctrl-C to stop.',
-      );
+      logger.printStatus('Recording ${_device!.displayName}... Press Ctrl-C to stop.');
     }
 
     StreamSubscription<ProcessSignal>? sigintSubscription;
