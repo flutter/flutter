@@ -212,7 +212,7 @@ void main() {
     // widget_inspector_test.dart for tests of the ext.flutter.inspector service
     // extensions) or accessibility inspector (see accessibility_inspector_test.dart).
     // Any test counted here must be tested in this file!
-    const serviceExtensionCount = 31;
+    const serviceExtensionCount = 32;
 
     // The tests are in the widgets/accessibility_evaluations_service_extension_test.dart
     // They can't be moved here because they need to run in a WidgetTester environment.
@@ -1412,6 +1412,130 @@ void main() {
     expect(brightnessValue, 'Brightness.light');
 
     testedExtensions.add(FoundationServiceExtensions.brightnessOverride.name);
+  });
+
+  test('Service extensions - viewMetricsOverride', () async {
+    final int viewId = binding.platformDispatcher.views.single.viewId;
+    addTearDown(debugClearViewMetricsOverrides);
+    // Every client listening for extension state changes has to learn about an
+    // override, not just the one that asked for it.
+    final Iterable<Map<String, dynamic>> extensionChangedEvents = binding
+        .getServiceExtensionStateChangedEvents(
+          'ext.flutter.${FoundationServiceExtensions.viewMetricsOverride.name}',
+        );
+
+    // Reading with no override installed.
+    Map<String, dynamic> result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '$viewId'},
+    );
+    expect(result['overrides'], <String, Object?>{});
+    expect(result['overriddenViewIds'], <int>[]);
+    expect(extensionChangedEvents, isEmpty);
+
+    // Installing an override.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"boldText": true, "devicePixelRatio": 3.5}',
+      },
+    );
+    expect(result['overrides'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+    expect(result['overriddenViewIds'], <int>[viewId]);
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(devicePixelRatio: 3.5, boldText: true),
+    );
+    expect(extensionChangedEvents.length, 1);
+    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{
+      '$viewId': <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true},
+    });
+
+    // Installing the same override again changes nothing, and says nothing.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"boldText": true, "devicePixelRatio": 3.5}',
+      },
+    );
+    expect(result['overrides'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+    expect(extensionChangedEvents.length, 1);
+
+    // A second view's override: the event reports the whole registry, so that a
+    // client that missed the earlier ones is not left with half of it.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '${viewId + 1}', 'overrides': '{"textScaleFactor": 2.0}'},
+    );
+    expect(extensionChangedEvents.length, 2);
+    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{
+      '$viewId': <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true},
+      '${viewId + 1}': <String, Object?>{'textScaleFactor': 2.0},
+    });
+
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '${viewId + 1}', 'overrides': '{}'},
+    );
+    expect(extensionChangedEvents.length, 3);
+
+    // Reading it back.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '$viewId'},
+    );
+    expect(result['overrides'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
+    expect(extensionChangedEvents.length, 3);
+
+    // A malformed payload is rejected and leaves the installed override alone.
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"devicePixelRatio": 0}',
+      }),
+      throwsA(isA<FormatException>()),
+    );
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(devicePixelRatio: 3.5, boldText: true),
+    );
+
+    // An unparsable viewId is rejected.
+    await expectLater(
+      binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+        'viewId': 'not-a-number',
+      }),
+      throwsA(isA<Exception>()),
+    );
+
+    // Clearing everything.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'clearAll': 'true'},
+    );
+    expect(result['overrides'], <String, Object?>{});
+    expect(result['overriddenViewIds'], <int>[]);
+    expect(debugViewMetricsOverrides, isEmpty);
+    expect(extensionChangedEvents.length, 4);
+    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{});
+
+    // Clearing again removes nothing, and says nothing.
+    await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'clearAll': 'true'},
+    );
+    expect(extensionChangedEvents.length, 4);
+
+    // Changing the override replays the corresponding platform notifications.
+    // In particular, the accessibility-features change above schedules a frame.
+    // Consume it so that randomized tests do not inherit this test's work.
+    expect(binding.frameScheduled, isTrue);
+    await binding.doFrame();
+    expect(binding.frameScheduled, isFalse);
+
+    testedExtensions.add(FoundationServiceExtensions.viewMetricsOverride.name);
   });
 
   test('Service extensions - activeDevToolsServerAddress', () async {
