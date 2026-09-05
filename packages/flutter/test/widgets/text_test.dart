@@ -1869,6 +1869,143 @@ void main() {
     );
     expect(tester.getSize(find.byType(Text)), Size.zero);
   });
+
+  group('TextOverflow.ellipsisStart and TextOverflow.ellipsisMiddle', () {
+    const kPath = '/Users/someone/Documents/report.txt';
+    const kStyle = TextStyle(fontSize: 10.0);
+
+    Widget boxed(double width, Widget child) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox(width: width, child: child),
+        ),
+      );
+    }
+
+    String rendered(WidgetTester tester) {
+      return tester.renderObject<RenderParagraph>(find.byType(RichText)).debugRenderedText;
+    }
+
+    testWidgets('Text truncates at the position the overflow asks for', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        boxed(100.0, const Text(kPath, style: kStyle, overflow: TextOverflow.ellipsisStart)),
+      );
+      expect(rendered(tester), '…eport.txt');
+
+      await tester.pumpWidget(
+        boxed(100.0, const Text(kPath, style: kStyle, overflow: TextOverflow.ellipsisMiddle)),
+      );
+      expect(rendered(tester), '/User….txt');
+    });
+
+    testWidgets('Text retruncates when its box is resized in place', (WidgetTester tester) async {
+      const text = Text(kPath, style: kStyle, overflow: TextOverflow.ellipsisStart);
+      await tester.pumpWidget(boxed(100.0, text));
+      final Element element = tester.element(find.byType(Text));
+      expect(rendered(tester), '…eport.txt');
+
+      await tester.pumpWidget(boxed(200.0, text));
+      // The same element was updated in place rather than rebuilt from scratch.
+      expect(tester.element(find.byType(Text)), same(element));
+      expect(rendered(tester), '…ocuments/report.txt');
+
+      await tester.pumpWidget(boxed(40.0, text));
+      expect(tester.element(find.byType(Text)), same(element));
+      expect(rendered(tester), '…txt');
+    });
+
+    testWidgets('Text.rich keeps the styles of the spans it truncates into', (
+      WidgetTester tester,
+    ) async {
+      const fileNameStyle = TextStyle(fontSize: 10.0, fontWeight: FontWeight.bold);
+      await tester.pumpWidget(
+        boxed(
+          100.0,
+          const Text.rich(
+            TextSpan(
+              style: kStyle,
+              children: <InlineSpan>[
+                TextSpan(text: '/Users/someone/Documents/'),
+                TextSpan(text: 'report.txt', style: fileNameStyle),
+              ],
+            ),
+            overflow: TextOverflow.ellipsisStart,
+          ),
+        ),
+      );
+      final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+      // The bold file name is wider than the rest of the text, so exactly how
+      // much of it fits is font dependent; what matters is that the tail of
+      // the path is what was kept.
+      expect(paragraph.debugRenderedText, startsWith('…'));
+      expect(kPath, endsWith(paragraph.debugRenderedText.substring(1)));
+      // The bold file name is still bold after the truncation.
+      final result = BoxHitTestResult();
+      final Offset endOfText = paragraph.getOffsetForCaret(
+        TextPosition(offset: paragraph.debugRenderedText.length),
+        Rect.zero,
+      );
+      paragraph.hitTest(result, position: Offset(endOfText.dx - 1.0, 5.0));
+      final TextSpan hit = result.path
+          .map((HitTestEntry entry) => entry.target)
+          .whereType<TextSpan>()
+          .single;
+      expect(hit.style, fileNameStyle);
+    });
+
+    testWidgets('semantics describe the truncated text, and semanticsLabel overrides it', (
+      WidgetTester tester,
+    ) async {
+      final semantics = SemanticsTester(tester);
+      await tester.pumpWidget(
+        boxed(100.0, const Text(kPath, style: kStyle, overflow: TextOverflow.ellipsisStart)),
+      );
+      expect(semantics, includesNodeWith(label: '…eport.txt'));
+
+      await tester.pumpWidget(
+        boxed(
+          100.0,
+          const Text(
+            kPath,
+            style: kStyle,
+            overflow: TextOverflow.ellipsisStart,
+            semanticsLabel: kPath,
+          ),
+        ),
+      );
+      expect(semantics, includesNodeWith(label: kPath));
+      semantics.dispose();
+    });
+
+    testWidgets('Text asserts when maxLines is above 1', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        boxed(
+          100.0,
+          const Text(kPath, style: kStyle, maxLines: 2, overflow: TextOverflow.ellipsisStart),
+        ),
+      );
+      expect(tester.takeException(), isAssertionError);
+    });
+
+    testWidgets('an overflow inherited from DefaultTextStyle truncates too', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        boxed(
+          100.0,
+          const DefaultTextStyle(
+            style: kStyle,
+            overflow: TextOverflow.ellipsisMiddle,
+            child: Text(kPath),
+          ),
+        ),
+      );
+      expect(rendered(tester), '/User….txt');
+    });
+  });
 }
 
 Future<void> _pumpTextWidget({
