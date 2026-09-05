@@ -19,10 +19,26 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
 
   static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
+  static const kHotReloadPreviewer = 'hotReloadPreviewer';
   static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
   static const kGetDevToolsUri = 'getDevToolsUri';
+  static const kGetWebPreviewUrl = 'getWebPreviewUrl';
+  static const kGetServiceInfo = 'getServiceInfo';
+  static const kRegisterSyntheticPreview = 'registerSyntheticPreview';
+  static const kUnregisterSyntheticPreview = 'unregisterSyntheticPreview';
+  static const kClearSyntheticPreviews = 'clearSyntheticPreviews';
+
+  static const kWidgetPreviewConnectedEvent = 'Connected';
+  static const kLayoutExceptionEvent = 'LayoutException';
+  static const kCompilationSucceededEvent = 'CompilationSucceeded';
+  static const kCompilationFailedEvent = 'CompilationFailed';
+  static const kPreviewsUpdatedEvent = 'PreviewsUpdated';
+  static const kSyntheticPreviewStateChangedEvent = 'SyntheticPreviewStateChanged';
+
+  /// Protocol version for agent widget preview services.
+  static const kProtocolVersion = '1.0.0';
 
   /// Error code for RpcException thrown when attempting to load a key from
   /// persistent preferences that doesn't have an entry.
@@ -37,13 +53,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
   Future<void> connect({Uri? dtdUri}) async {
     final Uri dtdWsUri = dtdUri ?? Uri.parse(kWidgetPreviewDtdUri);
     dtd = await DartToolingDaemon.connect(dtdWsUri);
-    unawaited(
-      dtd.postEvent(
-        kWidgetPreviewScaffoldStream,
-        'Connected',
-        const <String, Object?>{},
-      ),
-    );
+    unawaited(dtd.postEvent(kWidgetPreviewScaffoldStream, 'Connected', const <String, Object?>{}));
     await _determineIfWindows();
     await initializeEditorService(this);
   }
@@ -55,22 +65,37 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
     await dtd.close();
   }
 
-  Future<DTDResponse?> _call(
-    String methodName, {
-    Map<String, Object?>? params,
-  }) => dtd.safeCall(kWidgetPreviewService, methodName, params: params);
+  Future<DTDResponse?> _call(String methodName, {Map<String, Object?>? params}) =>
+      dtd.safeCall(kWidgetPreviewService, methodName, params: params);
 
   /// Returns `true` if the operating system is Windows.
   late final bool isWindows;
 
   Future<void> _determineIfWindows() async {
-    isWindows = (BoolResponse.fromDTDResponse(
-      (await _call(kIsWindows))!,
-    )).value!;
+    isWindows = (BoolResponse.fromDTDResponse((await _call(kIsWindows))!)).value!;
   }
 
   /// Trigger a hot restart of the widget preview scaffold.
   Future<void> hotRestartPreviewer() => _call(kHotRestartPreviewer);
+
+  /// Trigger a hot reload of the widget preview scaffold.
+  Future<void> hotReloadPreviewer() => _call(kHotReloadPreviewer);
+
+  /// Retrieves the active web preview URL from the Flutter tool daemon.
+  Future<Uri?> getWebPreviewUrl() async {
+    final response = await _call(kGetWebPreviewUrl);
+    if (response == null) {
+      return null;
+    }
+    final urlString = response.result['url'] as String?;
+    return urlString != null ? Uri.parse(urlString) : null;
+  }
+
+  /// Retrieves metadata describing the active widget preview service.
+  Future<Map<String, Object?>?> getServiceInfo() async {
+    final response = await _call(kGetServiceInfo);
+    return response?.result;
+  }
 
   /// Resolves a package:// URI to a file:// URI using the package_config.
   ///
@@ -119,9 +144,7 @@ class WidgetPreviewScaffoldDtdServices with DtdEditorService {
 
   /// Retrieves the DevTools URI for the previewer instance.
   Future<Uri> getDevToolsUri() async {
-    final result = StringResponse.fromDTDResponse(
-      (await _call(kGetDevToolsUri))!,
-    );
+    final result = StringResponse.fromDTDResponse((await _call(kGetDevToolsUri))!);
     return Uri.parse(result.value!);
   }
 
