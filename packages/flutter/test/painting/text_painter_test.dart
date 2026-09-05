@@ -1266,6 +1266,15 @@ void main() {
     painter.dispose();
   });
 
+  test('TextPainter set hyphens test', () {
+    final painter = TextPainter()..textDirection = TextDirection.ltr;
+
+    expect(painter.hyphens, Hyphens.manual);
+    painter.hyphens = Hyphens.hidden;
+    expect(painter.hyphens, Hyphens.hidden);
+    painter.dispose();
+  });
+
   test('TextPainter line metrics', () {
     final painter = TextPainter()..textDirection = TextDirection.ltr;
 

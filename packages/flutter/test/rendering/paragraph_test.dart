@@ -399,6 +399,26 @@ void main() {
     expect(getRectForA(), const Rect.fromLTWH(90, 0, 10, 10));
   });
 
+  test('RenderParagraph hyphens control test', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(text: 'Hello'),
+      textDirection: TextDirection.ltr,
+    );
+    expect(paragraph.hyphens, Hyphens.manual);
+    layout(paragraph);
+    pumpFrame(phase: EnginePhase.paint);
+    expect(paragraph.debugNeedsLayout, isFalse);
+
+    // Setting the same value is a no-op.
+    paragraph.hyphens = Hyphens.manual;
+    expect(paragraph.debugNeedsLayout, isFalse);
+
+    // A new value triggers relayout.
+    paragraph.hyphens = Hyphens.hidden;
+    expect(paragraph.hyphens, Hyphens.hidden);
+    expect(paragraph.debugNeedsLayout, isTrue);
+  });
+
   test('RenderParagraph devicePixelRatio control test', () {
     final paragraph = RenderParagraph(
       const TextSpan(text: 'Hello'),
