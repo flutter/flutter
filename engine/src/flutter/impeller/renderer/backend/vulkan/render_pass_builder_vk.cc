@@ -35,6 +35,12 @@ RenderPassBuilderVK::RenderPassBuilderVK() = default;
 
 RenderPassBuilderVK::~RenderPassBuilderVK() = default;
 
+RenderPassBuilderVK& RenderPassBuilderVK::SetFramebufferFetchEnabled(
+    bool enabled) {
+  supports_framebuffer_fetch_ = enabled;
+  return *this;
+}
+
 RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
     size_t index,
     PixelFormat format,
@@ -181,57 +187,115 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
 
   vk::SubpassDescription subpass0;
   subpass0.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
-  subpass0.setPInputAttachments(color_refs.data());
-  subpass0.setInputAttachmentCount(color_index);
+  if (supports_framebuffer_fetch_) {
+    subpass0.setPInputAttachments(color_refs.data());
+    subpass0.setInputAttachmentCount(color_index);
+  } else {
+    subpass0.setPInputAttachments(nullptr);
+    subpass0.setInputAttachmentCount(0);
+  }
   subpass0.setPColorAttachments(color_refs.data());
   subpass0.setColorAttachmentCount(color_index);
   subpass0.setPResolveAttachments(resolve_refs.data());
 
   subpass0.setPDepthStencilAttachment(&depth_stencil_ref);
 
-  vk::SubpassDependency deps[3];
-  // Incoming dependency. If the attachments were previously used
+  // Build subpass dependencies. When framebuffer fetch is supported, a
+  // self-dependency (subpass 0 -> subpass 0) is included so that fragment
+  // shaders can read back the color attachment as an input attachment.
+  // When framebuffer fetch is not supported (e.g. Mesa dzn), the
+  // self-dependency is omitted because some drivers (D3D12 translation
+  // layers) fail when a subpass self-dependency is present.
+  constexpr size_t kMaxDeps = 3;
+  vk::SubpassDependency deps[kMaxDeps];
+  size_t dep_count = 0;
+
+  // Incoming external dependency. If the attachments were previously used
   // as attachments for a render pass, or sampled from/transfered to,
   // then these operations must complete before we resolve anything
   // to the onscreen.
-  deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
-  deps[0].dstSubpass = 0u;
-  deps[0].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                         vk::PipelineStageFlagBits::eFragmentShader;
-  deps[0].srcAccessMask = vk::AccessFlagBits::eShaderRead |
-                          vk::AccessFlagBits::eColorAttachmentWrite;
-  deps[0].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  deps[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
-  deps[0].dependencyFlags = kSelfDependencyFlags;
+  // Note: dependencyFlags is {} (no flags) because VK_DEPENDENCY_BY_REGION_BIT
+  // is only meaningful for self-dependencies (srcSubpass == dstSubpass).
+  // Per Vulkan spec section 7.1, for non-self-dependencies the by-region
+  // flag is implementation-dependent and may be silently ignored.
+  deps[dep_count].srcSubpass = VK_SUBPASS_EXTERNAL;
+  deps[dep_count].dstSubpass = 0u;
+  // Include depth/stencil stages when a depth attachment is present.
+  // The previous render pass writes depth at eLateFragmentTests; the
+  // implicit layout transition inside vkCmdBeginRenderPass also writes
+  // the depth image, so we must synchronize that previous write against
+  // the new implicit write. This fixes SYNC-HAZARD-WRITE-AFTER-WRITE on
+  // vkCmdBeginRenderPass reported by VK_LAYER_KHRONOS_validation sync.
+  deps[dep_count].srcStageMask =
+      vk::PipelineStageFlagBits::eColorAttachmentOutput |
+      vk::PipelineStageFlagBits::eFragmentShader |
+      (depth_stencil_.has_value()
+           ? (vk::PipelineStageFlagBits::eEarlyFragmentTests |
+              vk::PipelineStageFlagBits::eLateFragmentTests)
+           : vk::PipelineStageFlags{});
+  deps[dep_count].srcAccessMask =
+      vk::AccessFlagBits::eShaderRead |
+      vk::AccessFlagBits::eColorAttachmentWrite |
+      (depth_stencil_.has_value()
+           ? vk::AccessFlagBits::eDepthStencilAttachmentWrite
+           : vk::AccessFlags{});
+  deps[dep_count].dstStageMask =
+      vk::PipelineStageFlagBits::eColorAttachmentOutput |
+      (depth_stencil_.has_value()
+           ? vk::PipelineStageFlagBits::eEarlyFragmentTests
+           : vk::PipelineStageFlags{});
+  deps[dep_count].dstAccessMask =
+      vk::AccessFlagBits::eColorAttachmentWrite |
+      (depth_stencil_.has_value()
+           ? (vk::AccessFlagBits::eDepthStencilAttachmentWrite |
+              vk::AccessFlagBits::eDepthStencilAttachmentRead)
+           : vk::AccessFlags{});
+  deps[dep_count].dependencyFlags = {};
+  dep_count++;
 
-  // Self dependency for reading back the framebuffer, necessary for
-  // programmable blend support / framebuffer fetch.
-  deps[1].srcSubpass = 0u;  // first subpass
-  deps[1].dstSubpass = 0u;  // to itself
-  deps[1].srcStageMask = kSelfDependencySrcStageMask;
-  deps[1].srcAccessMask = kSelfDependencySrcAccessMask;
-  deps[1].dstStageMask = kSelfDependencyDstStageMask;
-  deps[1].dstAccessMask = kSelfDependencyDstAccessMask;
-  deps[1].dependencyFlags = kSelfDependencyFlags;
+  if (supports_framebuffer_fetch_) {
+    // Self dependency for reading back the framebuffer, necessary for
+    // programmable blend support / framebuffer fetch.
+    deps[dep_count].srcSubpass = 0u;  // first subpass
+    deps[dep_count].dstSubpass = 0u;  // to itself
+    deps[dep_count].srcStageMask = kSelfDependencySrcStageMask;
+    deps[dep_count].srcAccessMask = kSelfDependencySrcAccessMask;
+    deps[dep_count].dstStageMask = kSelfDependencyDstStageMask;
+    deps[dep_count].dstAccessMask = kSelfDependencyDstAccessMask;
+    deps[dep_count].dependencyFlags = kSelfDependencyFlags;
+    dep_count++;
+  }
 
-  // Outgoing dependency. The resolve step or color attachment must complete
-  // before we can sample from the image. This dependency is ignored for the
-  // onscreen as we will already insert a barrier before presenting the
-  // swapchain.
-  deps[2].srcSubpass = 0u;  // first subpass
-  deps[2].dstSubpass = VK_SUBPASS_EXTERNAL;
-  deps[2].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  deps[2].srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
-  deps[2].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
-  deps[2].dstAccessMask = vk::AccessFlagBits::eShaderRead;
-  deps[2].dependencyFlags = kSelfDependencyFlags;
+  // Outgoing external dependency. The resolve step or color attachment must
+  // complete before we can sample from the image. This dependency is ignored
+  // for the onscreen as we will already insert a barrier before presenting
+  // the swapchain. Also cover depth writes so the next render pass's incoming
+  // dependency can see them.
+  // dependencyFlags is {} for the same reason as the incoming dependency
+  // (VK_DEPENDENCY_BY_REGION_BIT is meaningless for VK_SUBPASS_EXTERNAL).
+  deps[dep_count].srcSubpass = 0u;  // first subpass
+  deps[dep_count].dstSubpass = VK_SUBPASS_EXTERNAL;
+  deps[dep_count].srcStageMask =
+      vk::PipelineStageFlagBits::eColorAttachmentOutput |
+      (depth_stencil_.has_value()
+           ? vk::PipelineStageFlagBits::eLateFragmentTests
+           : vk::PipelineStageFlags{});
+  deps[dep_count].srcAccessMask =
+      vk::AccessFlagBits::eColorAttachmentWrite |
+      (depth_stencil_.has_value()
+           ? vk::AccessFlagBits::eDepthStencilAttachmentWrite
+           : vk::AccessFlags{});
+  deps[dep_count].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
+  deps[dep_count].dstAccessMask = vk::AccessFlagBits::eShaderRead;
+  deps[dep_count].dependencyFlags = {};
+  dep_count++;
 
   vk::RenderPassCreateInfo render_pass_desc;
   render_pass_desc.setPAttachments(attachments.data());
   render_pass_desc.setAttachmentCount(attachments_index);
   render_pass_desc.setSubpasses(subpass0);
   render_pass_desc.setPDependencies(deps);
-  render_pass_desc.setDependencyCount(3);
+  render_pass_desc.setDependencyCount(dep_count);
 
   auto [result, pass] = device.createRenderPassUnique(render_pass_desc);
   if (result != vk::Result::eSuccess) {

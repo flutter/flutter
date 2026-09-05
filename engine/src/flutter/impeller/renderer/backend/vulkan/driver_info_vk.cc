@@ -295,6 +295,15 @@ DriverInfoVK::DriverInfoVK(const vk::PhysicalDevice& device) {
     driver_name_ = props.deviceName.data();
   }
 
+  // Query driver ID via VkPhysicalDeviceDriverProperties (Vulkan 1.2+ or
+  // VK_KHR_driver_properties). This gives us a reliable enum-based driver
+  // identification rather than fragile string matching on device names.
+  if (api_version_.IsAtLeast(Version{1, 2, 0})) {
+    auto props2 = device.getProperties2<vk::PhysicalDeviceProperties2,
+                                        vk::PhysicalDeviceDriverProperties>();
+    driver_id_ = props2.get<vk::PhysicalDeviceDriverProperties>().driverID;
+  }
+
   switch (vendor_) {
     case VendorVK::kQualcomm:
       adreno_gpu_ = GetAdrenoVersion(driver_name_);
@@ -328,6 +337,10 @@ const std::string& DriverInfoVK::GetDriverName() const {
   return driver_name_;
 }
 
+vk::DriverId DriverInfoVK::GetDriverID() const {
+  return driver_id_;
+}
+
 void DriverInfoVK::DumpToLog() const {
   std::vector<std::pair<std::string, std::string>> items;
   items.emplace_back("Name", driver_name_);
@@ -335,6 +348,8 @@ void DriverInfoVK::DumpToLog() const {
   items.emplace_back("Driver Version", std::to_string(driver_version_));
   items.emplace_back("Vendor", VendorToString(vendor_));
   items.emplace_back("Device Type", DeviceTypeToString(type_));
+  items.emplace_back("Driver ID",
+                     std::to_string(static_cast<int32_t>(driver_id_)));
   items.emplace_back("Is Emulator", std::to_string(IsEmulator()));
 
   size_t padding = 0;

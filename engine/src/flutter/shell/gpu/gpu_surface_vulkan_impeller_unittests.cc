@@ -110,5 +110,55 @@ TEST(GPUSurfaceVulkanImpeller, RecreatesTransientsWhenFrameSizeChanges) {
   EXPECT_EQ(surface->transients_size_, impeller::ISize(200, 100));
 }
 
+TEST(GPUSurfaceVulkanImpeller, TeardownAfterDeviceLossAbandonsResources) {
+  impeller::ContextVK::Settings context_settings;
+  context_settings.proc_address_callback = vkGetInstanceProcAddr;
+  context_settings.shader_libraries_data = ShaderLibraryMappings();
+  auto context = impeller::ContextVK::Create(std::move(context_settings));
+
+  TestGPUSurfaceVulkanDelegate delegate;
+
+  auto surface = std::make_unique<GPUSurfaceVulkanImpeller>(&delegate, context);
+
+  // Populate the image view cache and exercise the fence ring with a frame.
+  auto frame = surface->AcquireFrame(DlISize(100, 100));
+  ASSERT_NE(frame, nullptr);
+  frame.reset();
+
+  // Take the raw handles before the device loss; the surface must abandon
+  // them, not destroy them.
+  std::vector<impeller::vk::ImageView> cached_views;
+  for (const auto& [image, view] : surface->cached_image_views_) {
+    cached_views.push_back(view.get());
+  }
+  std::vector<impeller::vk::Fence> fences;
+  for (const auto& fence : surface->frame_fences_) {
+    if (fence) {
+      fences.push_back(fence.get());
+    }
+  }
+  ASSERT_FALSE(fences.empty());
+
+  // Teardown after a device loss must not wait on the frame fences or
+  // destroy the cached image views; on a corrupted driver either can fault
+  // inside the ICD. The surface abandons the handles and must come down
+  // cleanly.
+  context->MarkDeviceLost();
+  surface.reset();
+
+  // Only the lost flag was set; the test device itself is healthy. Destroying
+  // the captured handles here cleans them up (keeping LeakSanitizer quiet)
+  // and verifies the abandonment: had the surface destroyed them, these calls
+  // would be double destroys.
+  const auto& device = context->GetDevice();
+  ASSERT_EQ(device.waitIdle(), impeller::vk::Result::eSuccess);
+  for (const auto& view : cached_views) {
+    device.destroyImageView(view);
+  }
+  for (const auto& fence : fences) {
+    device.destroyFence(fence);
+  }
+}
+
 }  // namespace testing
 }  // namespace flutter
