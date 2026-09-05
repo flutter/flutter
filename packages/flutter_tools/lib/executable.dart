@@ -21,6 +21,7 @@ import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
+import 'src/commands/capture.dart';
 import 'src/commands/channel.dart';
 import 'src/commands/clean.dart';
 import 'src/commands/config.dart';
@@ -41,7 +42,6 @@ import 'src/commands/logs.dart';
 import 'src/commands/packages.dart';
 import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
-import 'src/commands/screenshot.dart';
 import 'src/commands/shell_completion.dart';
 import 'src/commands/symbolize.dart';
 import 'src/commands/test.dart';
@@ -196,8 +196,9 @@ Future<void> main(List<String> args) async {
 String? findCommandName(List<String> args, {ToolContext? toolContext}) {
   final ArgResults results;
   try {
-    results = FlutterCommandRunner(toolContext: toolContext ?? _FallbackToolContext()).argParser
-        .parse(args);
+    results = FlutterCommandRunner(
+      toolContext: toolContext ?? _FallbackToolContext(),
+    ).argParser.parse(args);
   } on ArgParserException {
     // The real parser will complain about these later.
     return null;
@@ -270,6 +271,7 @@ List<FlutterCommand> generateCommands({
     processInfo: ProcessInfo(toolDependencies.toolContext.fs),
     fileSystem: toolDependencies.toolContext.fs,
   ),
+  CaptureCommand(toolContext: toolDependencies.toolContext),
   BuildCommand(
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
