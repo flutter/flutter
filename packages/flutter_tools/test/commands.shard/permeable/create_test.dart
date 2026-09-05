@@ -1001,7 +1001,7 @@ void main() {
     // The revisions written to .metadata must look like git hashes; a purely
     // numeric revision would be parsed back as a number by YAML and rejected
     // by the migrate config validation.
-    final _MutableFakeFlutterVersion mutableFlutterVersion = _MutableFakeFlutterVersion(
+    final mutableFlutterVersion = _MutableFakeFlutterVersion(
       'abcdef1234567890abcdef1234567890abcdef12',
       frameworkChannel,
     );
@@ -1019,7 +1019,7 @@ void main() {
     // .metadata is a YAML file, so read it back through FlutterProjectMetadata.
     // Besides the requested platforms it always tracks a 'root' entry that
     // records the revisions for the project itself.
-    final FlutterProjectMetadata initialMetadata = FlutterProjectMetadata(
+    final initialMetadata = FlutterProjectMetadata(
       metadataFile,
       globals.logger,
       extensionTemplateManager: null,
@@ -1046,7 +1046,7 @@ void main() {
     mutableFlutterVersion.frameworkRevision = 'fedcba9876543210fedcba9876543210fedcba98';
     await runner.run(<String>['create', '--no-pub', '--platforms=ios', projectDir.path]);
 
-    final FlutterProjectMetadata updatedMetadata = FlutterProjectMetadata(
+    final updatedMetadata = FlutterProjectMetadata(
       metadataFile,
       globals.logger,
       extensionTemplateManager: null,
@@ -1733,7 +1733,7 @@ void main() {
       // The revisions written to .metadata must look like git hashes; a
       // purely numeric revision would be parsed back as a number by YAML and
       // rejected by the migrate config validation.
-      final _MutableFakeFlutterVersion mutableFlutterVersion = _MutableFakeFlutterVersion(
+      final mutableFlutterVersion = _MutableFakeFlutterVersion(
         'abcdef1234567890abcdef1234567890abcdef12',
         frameworkChannel,
       );
@@ -1769,7 +1769,7 @@ void main() {
         final yamlMap = loadYaml(metadataFile.readAsStringSync()) as YamlMap;
         final migration = yamlMap['migration'] as YamlMap;
         final platforms = migration['platforms'] as YamlList;
-        final platformEntries = platforms.whereType<YamlMap>().toList();
+        final List<YamlMap> platformEntries = platforms.whereType<YamlMap>().toList();
 
         // Each entry in the platforms list is a map that tracks the platform
         // name along with the revisions it was created at; extract the names.
@@ -1784,7 +1784,7 @@ void main() {
         // The existing android entry is overwritten with the revisions of the
         // most recent create run instead of keeping the old ones.
         const latestRevision = 'fedcba9876543210fedcba9876543210fedcba98';
-        final androidEntry = platformEntries.singleWhere(
+        final YamlMap androidEntry = platformEntries.singleWhere(
           (YamlMap platform) => platform['platform'] == 'android',
         );
         expect(androidEntry['create_revision'], latestRevision);
@@ -1792,7 +1792,7 @@ void main() {
 
         // The root platform is always part of every create run, so its entry
         // is overwritten the same way.
-        final rootEntry = platformEntries.singleWhere(
+        final YamlMap rootEntry = platformEntries.singleWhere(
           (YamlMap platform) => platform['platform'] == 'root',
         );
         expect(rootEntry['create_revision'], latestRevision);

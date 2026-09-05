@@ -552,7 +552,7 @@ mixin CreateBase on FlutterCommand {
       // added ones, and without overwriting their recorded revisions.
       // See https://github.com/flutter/flutter/issues/191567.
 
-      MigrateConfig migrateConfig = MigrateConfig();
+      var migrateConfig = MigrateConfig();
       if (metadataFile.existsSync()) {
         try {
           migrateConfig = FlutterProjectMetadata(
@@ -560,7 +560,7 @@ mixin CreateBase on FlutterCommand {
             globals.logger,
             extensionTemplateManager: null,
           ).migrateConfig;
-        } catch (error) {
+        } on Exception catch (error) {
           globals.logger.printTrace('Failed to parse existing .metadata file: $error');
         }
       }
