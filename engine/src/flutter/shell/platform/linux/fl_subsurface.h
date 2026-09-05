@@ -57,6 +57,17 @@ struct wl_surface* fl_subsurface_get_surface(FlSubsurface* subsurface);
  */
 void fl_subsurface_set_position(FlSubsurface* subsurface, gint x, gint y);
 
+/**
+ * fl_subsurface_commit_parent:
+ * @subsurface: an #FlSubsurface.
+ *
+ * Commits the parent surface. The subsurface is synchronized with its parent,
+ * so pending state such as a newly presented frame or position is only shown
+ * once the parent surface is committed. This applies that state without
+ * requiring the parent to be redrawn.
+ */
+void fl_subsurface_commit_parent(FlSubsurface* subsurface);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_SUBSURFACE_H_
