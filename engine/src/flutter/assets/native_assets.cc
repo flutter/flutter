@@ -118,6 +118,12 @@ std::vector<std::string> NativeAssetsManager::LookupNativeAsset(
   return parsed_mapping_[as_string];
 }
 
+bool NativeAssetsManager::ContainsNativeAsset(std::string_view asset_id) const {
+  // Cpp17 does not support unordered_map lookup with std::string_view on a
+  // std::string key.
+  return parsed_mapping_.find(std::string(asset_id)) != parsed_mapping_.end();
+}
+
 std::string NativeAssetsManager::AvailableNativeAssets() {
   if (parsed_mapping_.empty()) {
     return std::string("No available native assets.");

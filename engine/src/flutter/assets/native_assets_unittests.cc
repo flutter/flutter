@@ -69,6 +69,7 @@ TEST(NativeAssetsManagerTest, NoAvailableAssets) {
   NativeAssetsManager manager;
   std::string available_assets = manager.AvailableNativeAssets();
   ASSERT_EQ(available_assets, "No available native assets.");
+  ASSERT_FALSE(manager.ContainsNativeAsset("non_existing_asset"));
 }
 
 TEST(NativeAssetsManagerTest, NativeAssetsManifestParsing) {
@@ -80,6 +81,10 @@ TEST(NativeAssetsManagerTest, NativeAssetsManifestParsing) {
   ASSERT_EQ(available_assets,
             "Available native assets: "
             "package:my_package/my_package_bindings_generated.dart.");
+
+  ASSERT_TRUE(manager.ContainsNativeAsset(
+      "package:my_package/my_package_bindings_generated.dart"));
+  ASSERT_FALSE(manager.ContainsNativeAsset("non_existing_asset"));
 
   std::vector<std::string> existing_asset = manager.LookupNativeAsset(
       "package:my_package/my_package_bindings_generated.dart");
