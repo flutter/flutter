@@ -288,7 +288,9 @@ void main() {
     expect(paragraph.devicePixelRatio, 4.0);
   });
 
-  testWidgets('RichText defaults to 1.0 devicePixelRatio when no View or MediaQuery is present', (WidgetTester tester) async {
+  testWidgets('RichText defaults to 1.0 devicePixelRatio when no View or MediaQuery is present', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       RawView(
         view: tester.view,
@@ -304,5 +306,19 @@ void main() {
 
     final RenderParagraph paragraph = tester.renderObject(find.byType(RichText));
     expect(paragraph.devicePixelRatio, 1.0);
+  });
+
+  testWidgets('RichText does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RichText(text: const TextSpan(text: 'text')),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RichText)), Size.zero);
   });
 }
