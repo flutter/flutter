@@ -28,10 +28,12 @@ void main() {
     expect(kAlwaysCompleteAnimation, hasOneLineDescription);
     expect(kAlwaysDismissedAnimation, hasOneLineDescription);
     expect(const AlwaysStoppedAnimation<double>(0.5), hasOneLineDescription);
-    var curvedAnimation = CurvedAnimation(parent: kAlwaysDismissedAnimation, curve: Curves.ease);
+
+    final curvedAnimation = CurvedAnimation(parent: kAlwaysDismissedAnimation, curve: Curves.ease);
     expect(curvedAnimation, hasOneLineDescription);
     curvedAnimation.reverseCurve = Curves.elasticOut;
     expect(curvedAnimation, hasOneLineDescription);
+
     final controller = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: const TestVSync(),
@@ -39,12 +41,12 @@ void main() {
     controller
       ..value = 0.5
       ..reverse();
-    curvedAnimation = CurvedAnimation(
+    final asymmetricCurvedAnimation = AsymmetricCurvedAnimation(
       parent: controller,
       curve: Curves.ease,
       reverseCurve: Curves.elasticOut,
     );
-    expect(curvedAnimation, hasOneLineDescription);
+    expect(asymmetricCurvedAnimation, hasOneLineDescription);
     controller.stop();
   });
 
@@ -274,17 +276,39 @@ FlutterError
     );
   });
 
+  test('AsymmetricCurvedAnimation with bogus curve', () {
+    final controller = AnimationController(vsync: const TestVSync());
+    final curved = AsymmetricCurvedAnimation(parent: controller, curve: const BogusCurve());
+    FlutterError? error;
+    try {
+      curved.value;
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(
+      error!.toStringDeep(),
+      // RegExp matcher is required here due to flutter web and flutter mobile generating
+      // slightly different floating point numbers
+      // in Flutter web 0.0 sometimes just appears as 0. or 0
+      matches(
+        RegExp(r'''
+FlutterError
+   Invalid curve endpoint at \d+(\.\d*)?\.
+   Curves must map 0\.0 to near zero and 1\.0 to near one but
+   BogusCurve mapped \d+(\.\d*)? to \d+(\.\d*)?, which is near \d+(\.\d*)?\.
+''', multiLine: true),
+      ),
+    );
+  });
+
   test('CurvedAnimation running with different forward and reverse durations.', () {
     final controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       reverseDuration: const Duration(milliseconds: 50),
       vsync: const TestVSync(),
     );
-    final curved = CurvedAnimation(
-      parent: controller,
-      curve: Curves.linear,
-      reverseCurve: Curves.linear,
-    );
+    final curved = CurvedAnimation(parent: controller, curve: Curves.linear);
 
     controller.forward();
     tick(Duration.zero);
@@ -323,7 +347,52 @@ FlutterError
     expect(curved.value, moreOrLessEquals(0.0));
   });
 
-  test('CurvedAnimation stops listening to parent when disposed.', () async {
+  test('AsymmetricCurvedAnimation running with different forward and reverse durations.', () {
+    final controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 50),
+      vsync: const TestVSync(),
+    );
+    final curved = AsymmetricCurvedAnimation(parent: controller, curve: Curves.linear);
+
+    controller.forward();
+    tick(Duration.zero);
+    tick(const Duration(milliseconds: 10));
+    expect(curved.value, moreOrLessEquals(0.1));
+    tick(const Duration(milliseconds: 20));
+    expect(curved.value, moreOrLessEquals(0.2));
+    tick(const Duration(milliseconds: 30));
+    expect(curved.value, moreOrLessEquals(0.3));
+    tick(const Duration(milliseconds: 40));
+    expect(curved.value, moreOrLessEquals(0.4));
+    tick(const Duration(milliseconds: 50));
+    expect(curved.value, moreOrLessEquals(0.5));
+    tick(const Duration(milliseconds: 60));
+    expect(curved.value, moreOrLessEquals(0.6));
+    tick(const Duration(milliseconds: 70));
+    expect(curved.value, moreOrLessEquals(0.7));
+    tick(const Duration(milliseconds: 80));
+    expect(curved.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 90));
+    expect(curved.value, moreOrLessEquals(0.9));
+    tick(const Duration(milliseconds: 100));
+    expect(curved.value, moreOrLessEquals(1.0));
+    controller.reverse();
+    tick(const Duration(milliseconds: 110));
+    expect(curved.value, moreOrLessEquals(1.0));
+    tick(const Duration(milliseconds: 120));
+    expect(curved.value, moreOrLessEquals(0.8));
+    tick(const Duration(milliseconds: 130));
+    expect(curved.value, moreOrLessEquals(0.6));
+    tick(const Duration(milliseconds: 140));
+    expect(curved.value, moreOrLessEquals(0.4));
+    tick(const Duration(milliseconds: 150));
+    expect(curved.value, moreOrLessEquals(0.2));
+    tick(const Duration(milliseconds: 160));
+    expect(curved.value, moreOrLessEquals(0.0));
+  });
+
+  test('AsymmetricCurvedAnimation stops listening to parent when disposed.', () async {
     const forwardCurve = Interval(0.0, 0.5);
     const reverseCurve = Interval(0.5, 1.0);
 
@@ -332,7 +401,7 @@ FlutterError
       reverseDuration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    final curved = CurvedAnimation(
+    final curved = AsymmetricCurvedAnimation(
       parent: controller,
       curve: forwardCurve,
       reverseCurve: reverseCurve,
@@ -371,7 +440,11 @@ FlutterError
       vsync: const TestVSync(),
     );
     final reversed = ReverseAnimation(
-      CurvedAnimation(parent: controller, curve: Curves.linear, reverseCurve: Curves.linear),
+      AsymmetricCurvedAnimation(
+        parent: controller,
+        curve: Curves.linear,
+        reverseCurve: Curves.linear,
+      ),
     );
 
     controller.forward();
@@ -498,7 +571,10 @@ FlutterError
     expect(animation.value, 10.0);
   });
 
-  test('$CurvedAnimation dispatches memory events', () async {
+  // During the migration period, [CurvedAnimation] is mimicking
+  // [AsymmetricCurvedAnimation]: verify it's disposed.
+  // This test can be removed after the migration period.
+  test('$CurvedAnimation disposes its internal AsymmetricCurvedAnimation', () async {
     await expectLater(
       await memoryEvents(
         () => CurvedAnimation(
@@ -508,7 +584,23 @@ FlutterError
           ),
           curve: Curves.linear,
         ).dispose(),
-        CurvedAnimation,
+        AsymmetricCurvedAnimation,
+      ),
+      areCreateAndDispose,
+    );
+  });
+
+  test('$AsymmetricCurvedAnimation dispatches memory events', () async {
+    await expectLater(
+      await memoryEvents(
+        () => AsymmetricCurvedAnimation(
+          parent: AnimationController(
+            duration: const Duration(milliseconds: 100),
+            vsync: const TestVSync(),
+          ),
+          curve: Curves.linear,
+        ).dispose(),
+        AsymmetricCurvedAnimation,
       ),
       areCreateAndDispose,
     );
