@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
@@ -21,10 +22,12 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/version.dart';
 
+import 'android_common.dart';
 import 'fake_process_manager.dart';
 import 'fakes.dart';
 
 BuildCommand createFakeBuildCommand({
+  AndroidBuilder? androidBuilder,
   AndroidSdk? androidSdk,
   BuildSystem? buildSystem,
   FileSystem? fileSystem,
@@ -48,6 +51,7 @@ BuildCommand createFakeBuildCommand({
   final FileSystem fs = fileSystem ?? MemoryFileSystem.test();
   final Platform effectivePlatform = platform ?? FakePlatform();
   return BuildCommand(
+    androidBuilder: androidBuilder ?? FakeAndroidBuilder(),
     androidContext: FakeAndroidContext(androidSdk: androidSdk),
     appleContext: FakeAppleContext(
       plistParser: plistParser ?? FakePlistParser(),

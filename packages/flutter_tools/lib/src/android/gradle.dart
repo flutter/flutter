@@ -28,6 +28,8 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/android_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
@@ -36,8 +38,8 @@ import 'android_builder.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
-import 'gradle_utils.dart';
 import 'gradle_utils.dart' as gradle;
+import 'gradle_utils.dart';
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/cmake_android_16k_pages_migration.dart';
@@ -163,37 +165,52 @@ const kMaxRetryTime = Duration(seconds: 10);
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder({
+    required Analytics analytics,
+    required Artifacts artifacts,
+    required FileSystem fileSystem,
+    required GradleUtils gradleUtils,
     required Java? java,
     required Logger logger,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required Analytics analytics,
-    required GradleUtils gradleUtils,
     required Platform platform,
+    required ProcessManager processManager,
     required AndroidStudio? androidStudio,
     AndroidSdk? androidSdk,
-  }) : _java = java,
-       _logger = logger,
-       _fileSystem = fileSystem,
+  }) : _analytics = analytics,
        _artifacts = artifacts,
-       _analytics = analytics,
+       _fileSystem = fileSystem,
        _gradleUtils = gradleUtils,
+       _java = java,
+       _logger = logger,
        _androidStudio = androidStudio,
        _androidSdk = androidSdk,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
+  AndroidGradleBuilder.fromContexts({
+    required Analytics analytics,
+    required AndroidContext androidContext,
+    required ToolContext toolContext,
+  }) : _analytics = analytics,
+       _artifacts = toolContext.artifacts,
+       _fileSystem = toolContext.fs,
+       _gradleUtils = androidContext.gradleUtils,
+       _java = androidContext.java,
+       _logger = toolContext.logger,
+       _androidStudio = androidContext.androidStudio,
+       _androidSdk = androidContext.androidSdk,
+       _fileSystemUtils = toolContext.fileSystemUtils,
+       _processUtils = toolContext.processUtils;
+
+  final Analytics _analytics;
   final Java? _java;
   final Logger _logger;
-  final ProcessUtils _processUtils;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
-  final Analytics _analytics;
   final GradleUtils _gradleUtils;
-  final FileSystemUtils _fileSystemUtils;
   final AndroidStudio? _androidStudio;
   final AndroidSdk? _androidSdk;
+  final FileSystemUtils _fileSystemUtils;
+  final ProcessUtils _processUtils;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -745,13 +762,14 @@ To fix this, you can either:
       );
       return false;
     }
-    if (!_androidSdk.cmdlineToolsAvailable) {
+    final AndroidSdk androidSdk = _androidSdk;
+    if (!androidSdk.cmdlineToolsAvailable) {
       _logger.printTrace(
         'Failed to find cmdline-tools when checking final appbundle for debug symbols.',
       );
       return false;
     }
-    final String? apkAnalyzerPath = _androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName);
+    final String? apkAnalyzerPath = androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName);
     if (apkAnalyzerPath == null) {
       _logger.printTrace(
         'Failed to find apkanalyzer when checking final appbundle for debug symbols.',
