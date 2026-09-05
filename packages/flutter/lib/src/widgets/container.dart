@@ -337,6 +337,20 @@ class Container extends StatelessWidget {
   ///
   /// The [child] is not clipped to the decoration. To clip a child to the shape
   /// of a particular [ShapeDecoration], consider using a [ClipPath] widget.
+  ///
+  /// A child that clips itself to the same corner radius as the decoration can
+  /// leave gaps along the inside of a border because [Decoration.padding]
+  /// insets the child. Reducing the child's corner radii by the corresponding
+  /// per-axis padding insets aligns the curves. Moving the border to
+  /// [foregroundDecoration] avoids the mismatch.
+  ///
+  /// {@tool dartpad}
+  /// This example shows the resulting gaps next to an otherwise identical
+  /// child clipped to the corner radius minus the border width, which
+  /// aligns the curves.
+  ///
+  /// ** See code in examples/api/lib/widgets/container/container.decoration.0.dart **
+  /// {@end-tool}
   final Decoration? decoration;
 
   /// The decoration to paint in front of the [child].
@@ -373,6 +387,24 @@ class Container extends StatelessWidget {
   /// for the provided decoration must return a clip path. (This is not
   /// supported by all decorations; the default implementation of that
   /// method throws an [UnsupportedError].)
+  ///
+  /// The clip is applied to the outer edge returned by
+  /// [Decoration.getClipPath], not to the inside of a border that the
+  /// decoration paints. Since [decoration] is painted behind the child, an
+  /// opaque child can cover such a border.
+  ///
+  /// For a border that must remain visible on top of the child, consider
+  /// painting it with a border-only [foregroundDecoration] of the same
+  /// geometry, keeping [decoration] (without the border) to define the clip
+  /// path.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a border covered by an opaque child next to the same
+  /// border painted by [foregroundDecoration], which stays visible on top of
+  /// the child.
+  ///
+  /// ** See code in examples/api/lib/widgets/container/container.clip_behavior.0.dart **
+  /// {@end-tool}
   final Clip clipBehavior;
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {
