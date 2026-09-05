@@ -310,7 +310,7 @@ class BuildSwiftPackage extends BuildSubCommand {
       throwToolExit('--build-mode is required.');
     }
 
-    final List<Plugin> plugins = await findPlugins(project);
+    final List<Plugin> plugins = await findPlugins(project, logger: logger);
     plugins.sort((Plugin left, Plugin right) => left.name.compareTo(right.name));
     await pluginSwiftDependencies.processPlugins(
       cacheDirectory: cacheDirectory,

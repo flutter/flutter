@@ -71,11 +71,12 @@ abstract class FlutterVersion {
   /// Parses the Flutter version from currently available tags in the local
   /// repo.
   factory FlutterVersion({
-    SystemClock clock = const SystemClock(),
+    required String flutterRoot,
     required FileSystem fs,
     required Git git,
-    required String flutterRoot,
+    SystemClock clock = const SystemClock(),
     @protected bool fetchTags = false,
+    Platform? platform,
   }) {
     final File versionFile = getVersionFile(fs, flutterRoot);
 
@@ -125,27 +126,29 @@ abstract class FlutterVersion {
       flutterRoot: flutterRoot,
       fetchTags: fetchTags,
       git: git,
+      platform: platform ?? globals.platform,
     );
   }
 
   FlutterVersion._({
     required SystemClock clock,
-    required Git git,
     required this.flutterRoot,
     required this.fs,
+    required Git git,
   }) : _clock = clock,
        _git = git;
 
   factory FlutterVersion.fromRevision({
-    SystemClock clock = const SystemClock(),
+    required Platform platform,
     required String flutterRoot,
     required String frameworkRevision,
     required FileSystem fs,
     required Git git,
+    SystemClock clock = const SystemClock(),
     bool fetchTags = false,
   }) {
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
-      globals.platform,
+      platform,
       git: git,
       gitRef: frameworkRevision,
       workingDirectory: flutterRoot,
