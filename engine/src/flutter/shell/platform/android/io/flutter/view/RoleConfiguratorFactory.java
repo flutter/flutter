@@ -11,6 +11,8 @@ package io.flutter.view;
 public class RoleConfiguratorFactory {
   private static final AccessibilityNodeConfigurator progressBarConfigurator =
       new ProgressBarRoleConfigurator();
+  private static final AccessibilityNodeConfigurator sliderConfigurator =
+      new SliderRoleConfigurator();
   private static final AccessibilityNodeConfigurator comboBoxConfigurator =
       new ComboBoxRoleConfigurator();
   private static final AccessibilityNodeConfigurator menuConfigurator = new MenuRoleConfigurator();
@@ -27,6 +29,8 @@ public class RoleConfiguratorFactory {
     switch (role) {
       case PROGRESS_BAR:
         return progressBarConfigurator;
+      case SLIDER:
+        return sliderConfigurator;
       case COMBO_BOX:
         return comboBoxConfigurator;
       case MENU:
