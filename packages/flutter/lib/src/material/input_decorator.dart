@@ -113,7 +113,7 @@ class _InputBorderTween extends Tween<InputBorder> {
 // Passes the _InputBorderGap parameters along to an InputBorder's paint method.
 class _InputBorderPainter extends CustomPainter {
   _InputBorderPainter({
-    required Listenable repaint,
+    required super.repaint,
     required this.borderAnimation,
     required this.border,
     required this.gapAnimation,
@@ -122,7 +122,7 @@ class _InputBorderPainter extends CustomPainter {
     required this.fillColor,
     required this.hoverAnimation,
     required this.hoverColorTween,
-  }) : super(repaint: repaint);
+  });
 
   final Animation<double> borderAnimation;
   final _InputBorderTween border;
