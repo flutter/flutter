@@ -2107,6 +2107,8 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
   @override
   List<ForwardedPort> forwardedPorts = <ForwardedPort>[];
 
+  final Map<(int, int), Future<int>> _pendingForwards = <(int, int), Future<int>>{};
+
   @visibleForTesting
   void addForwardedPorts(List<ForwardedPort> ports) {
     ports.forEach(forwardedPorts.add);
@@ -2116,6 +2118,27 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<int> forward(int devicePort, {int? hostPort}) async {
+    for (final ForwardedPort port in forwardedPorts) {
+      if (port.devicePort == devicePort &&
+          (hostPort == null || hostPort == 0 || port.hostPort == hostPort)) {
+        return port.hostPort;
+      }
+    }
+    final (int, int) key = (devicePort, hostPort ?? 0);
+    if (_pendingForwards.containsKey(key)) {
+      return _pendingForwards[key]!;
+    }
+
+    final Future<int> future = _forwardInternal(devicePort, hostPort: hostPort);
+    _pendingForwards[key] = future;
+    try {
+      return await future;
+    } finally {
+      unawaited(_pendingForwards.remove(key));
+    }
+  }
+
+  Future<int> _forwardInternal(int devicePort, {int? hostPort}) async {
     final bool autoselect = hostPort == null || hostPort == 0;
     if (autoselect) {
       final int freePort = await _operatingSystemUtils.findFreePort();
