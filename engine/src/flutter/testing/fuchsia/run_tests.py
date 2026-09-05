@@ -96,6 +96,8 @@ def main() -> int:
   sys.argv.append('--test-realm=/core/testing/system-tests')
   if VARIANT.endswith('_arm64') or VARIANT.endswith('_arm64_tester'):
     sys.argv.append('--product=terminal.qemu-arm64')
+  elif VARIANT.endswith('_x64') or VARIANT.endswith('_x64_tester'):
+    sys.argv.append('--orchestrate')
 
   sys.argv.append('--logs-dir=' + os.environ.get('FLUTTER_LOGS_DIR', '/tmp/log'))
   with open(os.path.join(os.path.dirname(__file__), 'test_suites.yaml'), 'r') as file:
