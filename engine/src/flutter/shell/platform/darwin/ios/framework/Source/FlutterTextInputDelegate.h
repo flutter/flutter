@@ -66,6 +66,8 @@ typedef NS_ENUM(NSInteger, FlutterFloatingCursorDragState) {
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     didResignFirstResponderWithTextInputClient:(int)client;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    didRestoreFirstResponderWithTextInputClient:(int)client;
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     willDismissEditMenuWithTextInputClient:(int)client;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
            shareSelectedText:(NSString*)selectedText;

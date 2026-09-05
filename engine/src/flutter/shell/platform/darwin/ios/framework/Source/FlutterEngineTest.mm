@@ -424,6 +424,19 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/textinput" message:encodedMethodCall]);
 }
 
+- (void)testFlutterTextInputViewDidRestoreFirstResponderWillCallTextInputClientOnFocusReceived {
+  id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine setBinaryMessenger:mockBinaryMessenger];
+  [engine runWithEntrypoint:FlutterDefaultDartEntrypoint initialRoute:@"test"];
+  [engine flutterTextInputView:nil didRestoreFirstResponderWithTextInputClient:123];
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInputClient.onFocusReceived"
+                                        arguments:@[ @(123) ]];
+  NSData* encodedMethodCall = [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:methodCall];
+  OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/textinput" message:encodedMethodCall]);
+}
+
 - (void)testFlutterEngineUpdatesDisplays {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   id mockEngine = OCMPartialMock(engine);
