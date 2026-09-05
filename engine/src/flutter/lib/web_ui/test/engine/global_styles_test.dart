@@ -112,6 +112,44 @@ void testMain() {
     expect(autofillOverlayFocused, isTrue);
     expect(autofillOverlayActive, isTrue);
   }, skip: !browserHasAutofillOverlay());
+
+  // iOS auto-zooms the page when it focuses an input under 16px. The semantic
+  // input sets no font size, so it inherits the browser default (11px on iOS)
+  // and tapping a text field zooms the page to ~1.45x.
+  // See: https://github.com/flutter/flutter/issues/192327
+  test('Sets a 16px font-size on semantic inputs on iOS Safari', () {
+    final DomHTMLStyleElement iosStyleElement = createDomHTMLStyleElement(null);
+    debugEmulateIosSafari = true;
+    try {
+      applyGlobalCssRulesToSheet(iosStyleElement, defaultCssFont: _kDefaultCssFont);
+    } finally {
+      debugEmulateIosSafari = false;
+    }
+
+    expect(
+      hasCssRule(iosStyleElement, selector: 'flt-semantics input', declaration: 'font-size: 16px'),
+      isTrue,
+    );
+    expect(
+      hasCssRule(
+        iosStyleElement,
+        selector: 'flt-semantics textarea',
+        declaration: 'font-size: 16px',
+      ),
+      isTrue,
+    );
+
+    iosStyleElement.remove();
+  });
+
+  // Only iOS auto-zooms, so no other browser should pay for the override. The
+  // `styleElement` under test is the one built by setUp, without the flag.
+  test('Does not set the semantic input font-size on other browsers', () {
+    expect(
+      hasCssRule(styleElement, selector: 'flt-semantics input', declaration: 'font-size: 16px'),
+      isFalse,
+    );
+  }, skip: isIosSafari);
 }
 
 /// Finds out whether a given CSS Rule ([selector] { [declaration]; }) exists in a [styleElement].

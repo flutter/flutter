@@ -123,6 +123,27 @@ void applyGlobalCssRulesToSheet(
     '}',
   );
 
+  if (isIosSafari) {
+    // iOS auto-zooms the page whenever it focuses an input whose font size is
+    // under 16px, scaling by exactly the ratio that brings it up to 16px. The
+    // semantic input never sets a font size, so it inherits the browser
+    // default (11px on iOS), and tapping a text field zooms the page to
+    // ~1.45x and leaves it there.
+    //
+    // 16px only has to satisfy that threshold, it is never seen: the whole
+    // semantics tree is painted at `filter: opacity(0%)` and the visible text
+    // is drawn on the canvas. Sizing is unaffected too, since the element's
+    // width and height are set from the semantics rect.
+    //
+    // See: https://github.com/flutter/flutter/issues/192327
+    styleElement.appendText(
+      '$cssSelectorPrefix flt-semantics input,'
+      '$cssSelectorPrefix flt-semantics textarea {'
+      '  font-size: 16px;'
+      '}',
+    );
+  }
+
   // By default on iOS, Safari would highlight the element that's being tapped
   // on using gray background. This CSS rule disables that.
   if (isSafari) {
