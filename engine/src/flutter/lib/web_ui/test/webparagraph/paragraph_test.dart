@@ -1307,21 +1307,21 @@ Future<void> testMain() async {
     await matchGoldenFile('web_paragraph.fallback_fonts.png', region: region);
   });
 
-  test('WebParagraph correctly handles fractional devicePixelRatio', () {
+  test('WebParagraph matches horizontal subpixel phase and renders 1:1 in physical pixels', () {
     final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
     try {
-      for (final dpr in <double>[1.5, 2.0, 2.5]) {
+      for (final dpr in <double>[1.0, 1.5, 2.0, 2.5]) {
         EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
 
         final arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
         final builder = WebParagraphBuilder(arialStyle);
         builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
-        builder.addText('Fractional DPR text');
+        builder.addText('Subpixel aligned text');
         final WebParagraph paragraph = builder.build();
         paragraph.layout(const ParagraphConstraints(width: double.infinity));
 
         final mockCanvas = _MockCanvas();
-        const offset = Offset(10.25, 20.75); // Subpixel offset
+        const offset = Offset(10.25, 20.75); // Subpixel offset in logical coordinates
         paragraph.paint(mockCanvas, offset);
 
         final Rect? sourceRect = mockCanvas.lastSourceRect;
@@ -1330,17 +1330,40 @@ Future<void> testMain() async {
         expect(sourceRect, isNotNull);
         expect(targetRect, isNotNull);
 
-        // Verify sourceRect dimensions are exact integers (physical pixels rounded up via ceilToDouble)
+        // Verify sourceRect dimensions are exact integers in physical pixels
         expect(sourceRect!.width % 1.0, 0.0);
         expect(sourceRect.height % 1.0, 0.0);
 
-        // Verify targetRect dimensions perfectly map to sourceRect without being forced to integer values
-        expect(targetRect!.width, closeTo(sourceRect.width / dpr, 0.0001));
-        expect(targetRect.height, closeTo(sourceRect.height / dpr, 0.0001));
+        // Verify targetRect has 1:1 physical pixel dimensions matching sourceRect
+        expect(targetRect!.width, sourceRect.width);
+        expect(targetRect.height, sourceRect.height);
 
-        // Verify subpixel position precision
-        expect(targetRect.left, closeTo(offset.dx + paragraph.paintBounds.left, 0.0001));
-        expect(targetRect.top, closeTo(offset.dy + paragraph.paintBounds.top, 0.0001));
+        // Verify targetRect.left is an exact integer in physical device pixels
+        expect(targetRect.left % 1.0, 0.0);
+
+        // Verify that the horizontal subpixel fractional phase on Canvas2D (source) matches target offset fractional phase
+        final (Rect, Rect, Offset) paragraphInfo = calculateParagraphForTest(
+          paragraph,
+          offset,
+          dpr,
+        );
+        final Offset canvas2dShift = paragraphInfo.$3;
+        final double targetPhysicalX = offset.dx * dpr;
+        final double targetFracX = targetPhysicalX - targetPhysicalX.floorToDouble();
+        final double sourcePhysicalShiftX = canvas2dShift.dx * dpr;
+        final double sourceFracX = sourcePhysicalShiftX - sourcePhysicalShiftX.floorToDouble();
+        expect(sourceFracX, closeTo(targetFracX, 0.0001));
+
+        // Verify canvas scale is reset to 1/dpr around drawImageRect
+        expect(
+          mockCanvas.log,
+          containsAllInOrder(<String>[
+            'save',
+            'scale(${1 / dpr}, ${1 / dpr})',
+            'drawImageRect',
+            'restore',
+          ]),
+        );
       }
     } finally {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
@@ -1351,11 +1374,28 @@ Future<void> testMain() async {
 class _MockCanvas implements Canvas {
   Rect? lastSourceRect;
   Rect? lastTargetRect;
+  final List<String> log = <String>[];
+
+  @override
+  void save() {
+    log.add('save');
+  }
+
+  @override
+  void scale(double sx, [double? sy]) {
+    log.add('scale($sx, ${sy ?? sx})');
+  }
 
   @override
   void drawImageRect(Image image, Rect src, Rect dst, Paint paint) {
+    log.add('drawImageRect');
     lastSourceRect = src;
     lastTargetRect = dst;
+  }
+
+  @override
+  void restore() {
+    log.add('restore');
   }
 
   @override
