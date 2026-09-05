@@ -2232,6 +2232,47 @@ void main() {
     );
   });
   group('Semantics tests for android platform', () {
+    // Regression test for https://github.com/flutter/flutter/issues/188298.
+    testWidgets('ExpansionTile supports a nested WidgetSpan title', (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Text.rich(
+              TextSpan(
+                children: <InlineSpan>[
+                  WidgetSpan(
+                    child: SizedBox(
+                      width: 400,
+                      child: ExpansionTile(
+                        title: Text.rich(
+                          TextSpan(
+                            children: <InlineSpan>[
+                              WidgetSpan(
+                                child: Text.rich(
+                                  TextSpan(
+                                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                                    text: 'Header',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        children: <Widget>[Text('These are the details.')],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      handle.dispose();
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}));
+
     testWidgets(
       'Semantics liveregion updates when expansion state changes',
       (WidgetTester tester) async {
