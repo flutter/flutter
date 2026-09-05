@@ -89,6 +89,8 @@ PlatformViewLayer::PlatformViewLayer(FlutterPlatformViewIdentifier identifier,
 }
 @end
 
+@class FlutterPlatformViewMouseInterceptor;
+
 @interface FlutterMutatorView () {
   // Each of these views clips to a CGPathRef. These views, if present,
   // are nested (first is child of FlutterMutatorView and last is parent of
@@ -100,6 +102,8 @@ PlatformViewLayer::PlatformViewLayer(FlutterPlatformViewIdentifier identifier,
   NSView* _platformViewContainer;
 
   NSView* _platformView;
+
+  FlutterPlatformViewMouseInterceptor* _mouseInterceptorView;
 
   FlutterCursorCoordinator* _cursorCoordinator;
 
@@ -132,6 +136,221 @@ PlatformViewLayer::PlatformViewLayer(FlutterPlatformViewIdentifier identifier,
   // coordinate values increasing downwards. This affects the view, view transforms, and
   // sublayerTransforms.
   return YES;
+}
+
+@end
+
+@interface FlutterPlatformViewMouseInterceptor : NSView
+- (instancetype)initWithPlatformView:(NSView*)platformView;
+- (void)releaseGesture;
+- (void)blockGesture;
+@end
+
+@implementation FlutterPlatformViewMouseInterceptor {
+  __weak NSView* _platformView;
+  __weak NSView* _forwardingTargetView;
+  NSMutableArray<NSEvent*>* _pendingMouseEvents;
+  BOOL _forwardingGesture;
+}
+
+- (instancetype)initWithPlatformView:(NSView*)platformView {
+  if (self = [super initWithFrame:NSZeroRect]) {
+    _platformView = platformView;
+    _pendingMouseEvents = [[NSMutableArray alloc] init];
+  }
+  return self;
+}
+
+- (BOOL)isFlipped {
+  return YES;
+}
+
+- (BOOL)acceptsFirstMouse:(NSEvent*)event {
+  return YES;
+}
+
+- (NSView*)hitTest:(NSPoint)point {
+  return NSPointInRect(point, self.bounds) ? self : nil;
+}
+
+- (void)releaseGesture {
+  _forwardingGesture = YES;
+  if (_pendingMouseEvents.count != 0) {
+    NSArray<NSEvent*>* pendingMouseEvents = [_pendingMouseEvents copy];
+    [_pendingMouseEvents removeAllObjects];
+    _forwardingTargetView = [self targetViewForPlatformEvent:pendingMouseEvents.firstObject];
+    for (NSEvent* event in pendingMouseEvents) {
+      [self dispatchMouseEvent:event toPlatformTarget:_forwardingTargetView];
+    }
+    _forwardingGesture = ![self isMouseUpEvent:pendingMouseEvents.lastObject];
+    if (!_forwardingGesture) {
+      _forwardingTargetView = nil;
+    }
+  }
+}
+
+- (void)blockGesture {
+  [_pendingMouseEvents removeAllObjects];
+  _forwardingTargetView = nil;
+  _forwardingGesture = NO;
+}
+
+- (BOOL)isMouseUpEvent:(NSEvent*)event {
+  switch (event.type) {
+    case NSEventTypeRightMouseUp:
+    case NSEventTypeOtherMouseUp:
+    case NSEventTypeLeftMouseUp:
+      return YES;
+    default:
+      return NO;
+  }
+}
+
+- (NSView*)targetViewForPlatformEvent:(NSEvent*)event {
+  NSPoint point = [_platformView convertPoint:event.locationInWindow fromView:nil];
+  return [_platformView hitTest:point] ?: _platformView;
+}
+
+- (NSView*)forwardingTargetForEvent:(NSEvent*)event {
+  if (_forwardingTargetView == nil) {
+    _forwardingTargetView = [self targetViewForPlatformEvent:event];
+  }
+  return _forwardingTargetView;
+}
+
+- (void)dispatchMouseEvent:(NSEvent*)event toPlatformTarget:(NSResponder*)target {
+  switch (event.type) {
+    case NSEventTypeRightMouseDown:
+    case NSEventTypeOtherMouseDown:
+    case NSEventTypeLeftMouseDown:
+      [self dispatchMouseDownEventToResponder:target event:event];
+      break;
+    case NSEventTypeRightMouseDragged:
+    case NSEventTypeOtherMouseDragged:
+    case NSEventTypeLeftMouseDragged:
+      [self dispatchMouseDraggedEventToResponder:target event:event];
+      break;
+    case NSEventTypeRightMouseUp:
+    case NSEventTypeOtherMouseUp:
+    case NSEventTypeLeftMouseUp:
+      [self dispatchMouseUpEventToResponder:target event:event];
+      break;
+    default:
+      break;
+  }
+}
+
+- (void)dispatchMouseDownEventToResponder:(NSResponder*)responder event:(NSEvent*)event {
+  switch (event.type) {
+    case NSEventTypeRightMouseDown:
+      [responder rightMouseDown:event];
+      break;
+    case NSEventTypeOtherMouseDown:
+      [responder otherMouseDown:event];
+      break;
+    case NSEventTypeLeftMouseDown:
+    default:
+      [responder mouseDown:event];
+      break;
+  }
+}
+
+- (void)dispatchMouseDraggedEventToResponder:(NSResponder*)responder event:(NSEvent*)event {
+  switch (event.type) {
+    case NSEventTypeRightMouseDragged:
+      [responder rightMouseDragged:event];
+      break;
+    case NSEventTypeOtherMouseDragged:
+      [responder otherMouseDragged:event];
+      break;
+    case NSEventTypeLeftMouseDragged:
+    default:
+      [responder mouseDragged:event];
+      break;
+  }
+}
+
+- (void)dispatchMouseUpEventToResponder:(NSResponder*)responder event:(NSEvent*)event {
+  switch (event.type) {
+    case NSEventTypeRightMouseUp:
+      [responder rightMouseUp:event];
+      break;
+    case NSEventTypeOtherMouseUp:
+      [responder otherMouseUp:event];
+      break;
+    case NSEventTypeLeftMouseUp:
+    default:
+      [responder mouseUp:event];
+      break;
+  }
+}
+
+- (void)handleMouseDown:(NSEvent*)event {
+  [_pendingMouseEvents removeAllObjects];
+  [_pendingMouseEvents addObject:event];
+  _forwardingTargetView = nil;
+  _forwardingGesture = NO;
+  [self dispatchMouseDownEventToResponder:self.nextResponder event:event];
+}
+
+- (void)handleMouseDragged:(NSEvent*)event {
+  if (_forwardingGesture) {
+    [self dispatchMouseDraggedEventToResponder:[self forwardingTargetForEvent:event] event:event];
+  } else {
+    [_pendingMouseEvents addObject:event];
+    [self dispatchMouseDraggedEventToResponder:self.nextResponder event:event];
+  }
+}
+
+- (void)handleMouseUp:(NSEvent*)event {
+  if (_forwardingGesture) {
+    [self dispatchMouseUpEventToResponder:[self forwardingTargetForEvent:event] event:event];
+  } else {
+    [_pendingMouseEvents addObject:event];
+    [self dispatchMouseUpEventToResponder:self.nextResponder event:event];
+  }
+  _forwardingTargetView = nil;
+  _forwardingGesture = NO;
+}
+
+- (void)mouseDown:(NSEvent*)event {
+  [self handleMouseDown:event];
+}
+
+- (void)rightMouseDown:(NSEvent*)event {
+  [self handleMouseDown:event];
+}
+
+- (void)otherMouseDown:(NSEvent*)event {
+  [self handleMouseDown:event];
+}
+
+- (void)mouseDragged:(NSEvent*)event {
+  [self handleMouseDragged:event];
+}
+
+- (void)rightMouseDragged:(NSEvent*)event {
+  [self handleMouseDragged:event];
+}
+
+- (void)otherMouseDragged:(NSEvent*)event {
+  [self handleMouseDragged:event];
+}
+
+- (void)mouseUp:(NSEvent*)event {
+  [self handleMouseUp:event];
+}
+
+- (void)rightMouseUp:(NSEvent*)event {
+  [self handleMouseUp:event];
+}
+
+- (void)otherMouseUp:(NSEvent*)event {
+  [self handleMouseUp:event];
+}
+
+- (void)scrollWheel:(NSEvent*)event {
+  [[self targetViewForPlatformEvent:event] scrollWheel:event];
 }
 
 @end
@@ -531,6 +750,14 @@ NSMutableArray* ClipPathFromMutations(CGRect master_clip, const MutationVector& 
   self->_hitTestIgnoreRegion.push_back(region);
 }
 
+- (void)releaseGesture {
+  [_mouseInterceptorView releaseGesture];
+}
+
+- (void)blockGesture {
+  [_mouseInterceptorView blockGesture];
+}
+
 - (void)mouseMoved:(NSEvent*)event {
   [_cursorCoordinator processMouseMoveEvent:event
                              forMutatorView:self
@@ -609,11 +836,24 @@ NSMutableArray* ClipPathFromMutations(CGRect master_clip, const MutationVector& 
     [_platformViewContainer addSubview:_platformView];
   }
 
+  if (_mouseInterceptorView == nil) {
+    _mouseInterceptorView =
+        [[FlutterPlatformViewMouseInterceptor alloc] initWithPlatformView:_platformView];
+  }
+
   // Originally first subview would be the _platformView. However during WKWebView full screen
   // the platform view gets replaced with a placeholder. Given that _platformViewContainer does
   // not contain any other views it is safe to assume that any subview found can be treated
   // as the platform view.
-  _platformViewContainer.subviews.firstObject.frame = untransformedBounds;
+  for (NSView* subview in _platformViewContainer.subviews) {
+    if (subview != _mouseInterceptorView) {
+      subview.frame = untransformedBounds;
+      break;
+    }
+  }
+
+  [_platformViewContainer addSubview:_mouseInterceptorView positioned:NSWindowAbove relativeTo:nil];
+  _mouseInterceptorView.frame = untransformedBounds;
 
   // Transform for the platform view is finalTransform adjusted for bounding rect origin.
   CATransform3D translation =
