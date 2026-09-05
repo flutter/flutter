@@ -1168,7 +1168,7 @@ void updateLocalProperties({
   bool requireAndroidSdk = true,
 }) {
   if (requireAndroidSdk && globals.androidSdk == null) {
-    exitWithNoSdkMessage();
+    exitWithNoSdkMessage(analytics: globals.analytics, logger: globals.logger);
   }
   final File localProperties = project.android.localPropertiesFile;
   var changed = false;
@@ -1220,16 +1220,15 @@ void updateLocalProperties({
   }
 }
 
-void exitWithNoSdkMessage() {
-  globals.analytics.send(
-    Event.flutterBuildInfo(
-      label: 'unsupported-project',
-      buildType: 'gradle',
-      error: 'android-sdk-not-found',
-    ),
+/// Logs an analytics event indicating the Android SDK is missing and throws a [ToolExit].
+void exitWithNoSdkMessage({Analytics? analytics, Logger? logger}) {
+  final Analytics effectiveAnalytics = analytics ?? globals.analytics;
+  final Logger effectiveLogger = logger ?? globals.logger;
+  effectiveAnalytics.send(
+    Event.flutterBuildInfo(label: 'unsupported-project', buildType: 'gradle'),
   );
   throwToolExit(
-    '${globals.logger.terminal.warningMark} No Android SDK found. '
+    '${effectiveLogger.terminal.warningMark} No Android SDK found. '
     'Try setting the ANDROID_HOME environment variable.',
   );
 }

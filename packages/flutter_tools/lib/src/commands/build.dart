@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
@@ -37,6 +38,7 @@ import 'darwin_add_to_app.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({
+    required AndroidBuilder androidBuilder,
     required AndroidContext androidContext,
     required AppleContext appleContext,
     required BuildSystem buildSystem,
@@ -70,7 +72,15 @@ class BuildCommand extends FlutterCommand {
         verboseHelp: verboseHelp,
       ),
     );
-    _addSubcommand(BuildApkCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(
+      BuildApkCommand(
+        androidBuilder: androidBuilder,
+        androidContext: androidContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
     _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
@@ -142,7 +152,7 @@ class BuildCommand extends FlutterCommand {
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand({required this.logger, required super.verboseHelp}) {
+  BuildSubCommand({required this.logger, required super.verboseHelp, super.toolContext}) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
