@@ -3191,15 +3191,19 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (void)updateConfig:(NSDictionary*)dictionary {
   BOOL isSecureTextEntry = [dictionary[kSecureTextEntry] boolValue];
+  UIKeyboardType keyboardType = ToUIKeyboardType(dictionary[kKeyboardType]);
+  UIReturnKeyType returnKeyType = ToUIReturnKeyType(dictionary[kInputAction]);
   for (UIView* view in self.textInputViews) {
     if ([view isKindOfClass:[FlutterTextInputView class]]) {
       FlutterTextInputView* inputView = (FlutterTextInputView*)view;
-      // The feature of holding and draging spacebar to move cursor is affected by
-      // secureTextEntry, so when obscureText is updated, we need to update secureTextEntry
-      // and call reloadInputViews.
+      // Keyboard traits alter the keyboard layout (e.g. the return-key action button), so the
+      // keyboard needs to be reloaded for the changes to take effect.
       // https://github.com/flutter/flutter/issues/122139
-      if (inputView.isSecureTextEntry != isSecureTextEntry) {
+      if (inputView.isSecureTextEntry != isSecureTextEntry ||
+          inputView.keyboardType != keyboardType || inputView.returnKeyType != returnKeyType) {
         inputView.secureTextEntry = isSecureTextEntry;
+        inputView.keyboardType = keyboardType;
+        inputView.returnKeyType = returnKeyType;
         [inputView reloadInputViews];
       }
     }
