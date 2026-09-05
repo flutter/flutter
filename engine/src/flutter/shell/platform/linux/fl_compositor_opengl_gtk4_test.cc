@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "gmock/gmock.h"
+
 #include "flutter/shell/platform/linux/fl_compositor_opengl_private.h"
 
 #include "flutter/shell/platform/linux/testing/linux_test.h"
@@ -37,8 +39,8 @@ TEST_F(FlCompositorOpenGLGtk4Test,
   compositor->shareable = TRUE;
   compositor->dmabuf_disabled = TRUE;
 
-  EXPECT_CALL(epoxy, eglQueryString(::testing::_, EGL_EXTENSIONS))
-      .WillRepeatedly(::testing::Return(""));
+  EXPECT_CALL(epoxy, epoxy_has_egl_extension(::testing::_, ::testing::_))
+      .WillRepeatedly(::testing::Return(false));
   EXPECT_CALL(epoxy, eglCreateSyncKHR).Times(0);
   EXPECT_CALL(epoxy, glFinish());
 

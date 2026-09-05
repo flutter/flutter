@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "gtest/gtest.h"
+
 #include "flutter/shell/platform/linux/fl_view_gtk4_accessibility.h"
 
 #include <cstring>
