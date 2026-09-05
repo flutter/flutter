@@ -99,6 +99,8 @@ TEST(BlitCommandGLESTest, BlitCopyBufferToTextureCommandGLESRGBA) {
   auto worker = std::make_shared<MockWorker>();
   reactor->AddWorker(worker);
 
+  EXPECT_CALL(mock_gles_impl_ref, GenTextures(1, _))
+      .WillOnce(::testing::SetArgPointee<1>(7));
   // Dest texture with RGBA format.
   std::shared_ptr<TextureGLES> dest_texture =
       CreateTexture(reactor, PixelFormat::kR8G8B8A8UNormInt);
@@ -106,6 +108,11 @@ TEST(BlitCommandGLESTest, BlitCopyBufferToTextureCommandGLESRGBA) {
   BlitCopyBufferToTextureCommandGLES command =
       CreateCopyBufferToTextureCommand(source_buffer, dest_texture);
 
+  {
+    ::testing::InSequence sequence;
+    EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_2D, 0u));
+    EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_2D, 7u));
+  }
   // Expect gl TexSubImage2D with GL_RGBA.
   EXPECT_CALL(mock_gles_impl_ref,
               TexSubImage2D(GL_TEXTURE_2D, _, _, _, _, _, GL_RGBA, _, _))
@@ -504,7 +511,7 @@ TEST(BlitCommandGLESTest,
 
   // The bind target is the cubemap parent, even though allocation/upload
   // calls use the per-face target.
-  EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_CUBE_MAP, _)).Times(1);
+  EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_CUBE_MAP, _)).Times(2);
   EXPECT_CALL(mock_gles_impl_ref,
               TexImage2D(face_target, 0, _, 4, 4, _, _, _, nullptr))
       .Times(1);
