@@ -48,6 +48,9 @@ class RenderPassVK final : public RenderPass {
   size_t base_vertex_ = 0u;
   size_t element_count_ = 0u;
   bool has_index_buffer_ = false;
+  vk::Buffer indirect_buffer_ = {};
+  vk::DeviceSize indirect_buffer_offset_ = 0u;
+  bool has_indirect_buffer_ = false;
   bool has_label_ = false;
   PipelineRef pipeline_ = PipelineRef(nullptr);
   bool pipeline_uses_input_attachments_ = false;
@@ -87,6 +90,9 @@ class RenderPassVK final : public RenderPass {
 
   // |RenderPass|
   bool SetIndexBuffer(BufferView index_buffer, IndexType index_type) override;
+
+  // |RenderPass|
+  bool SetIndirectBuffer(BufferView indirect_args) override;
 
   // |RenderPass|
   fml::Status Draw() override;

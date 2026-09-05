@@ -136,6 +136,9 @@ class CapabilitiesGLES final
   bool SupportsPrimitiveRestart() const override;
 
   // |Capabilities|
+  bool SupportsIndirectDraw() const override;
+
+  // |Capabilities|
   bool Supports32BitPrimitiveIndices() const override;
 
   // |Capabilities|
@@ -181,6 +184,7 @@ class CapabilitiesGLES final
   bool supports_32bit_primitive_indices_ = false;
   bool supports_texture_max_level_ = false;
   bool supports_texture_array_ = false;
+  bool supports_indirect_draw_ = false;
   bool is_angle_ = false;
   bool is_es_ = false;
   bool supports_texture_compression_bc_ = false;

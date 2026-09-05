@@ -270,6 +270,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsPrimitiveRestart() const override;
 
   // |Capabilities|
+  bool SupportsIndirectDraw() const override;
+
+  // |Capabilities|
   bool Supports32BitPrimitiveIndices() const override;
 
   // |Capabilities|

@@ -16,6 +16,10 @@
 #define IMPELLER_GL_TEXTURE_MAX_ANISOTROPY 0x84FE
 #define IMPELLER_GL_MAX_TEXTURE_MAX_ANISOTROPY 0x84FF
 
+// OpenGL ES 3.1 / desktop GL 4.0. Not in the ES 3.0 headers this backend
+// builds against.
+#define IMPELLER_GL_DRAW_INDIRECT_BUFFER 0x8F3F
+
 #define GL_GLEXT_PROTOTYPES
 #include "GLES2/gl2ext.h"
 // IWYU pragma: end_exports

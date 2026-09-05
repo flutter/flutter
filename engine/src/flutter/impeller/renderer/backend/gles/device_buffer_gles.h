@@ -36,6 +36,7 @@ class DeviceBufferGLES final
     kArrayBuffer,
     kElementArrayBuffer,
     kUniformBuffer,
+    kDrawIndirectBuffer,
   };
 
   [[nodiscard]] bool BindAndUploadDataIfNecessary(BindingType type) const;

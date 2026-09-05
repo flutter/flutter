@@ -499,6 +499,25 @@ bool RenderPassVK::SetIndexBuffer(BufferView index_buffer,
 }
 
 // |RenderPass|
+bool RenderPassVK::SetIndirectBuffer(BufferView indirect_args) {
+  if (!ValidateIndirectBuffer(indirect_args)) {
+    return false;
+  }
+
+  std::shared_ptr<const DeviceBuffer> device_buffer =
+      indirect_args.TakeBuffer();
+  if (device_buffer && !command_buffer_->Track(device_buffer)) {
+    return false;
+  }
+
+  indirect_buffer_ =
+      DeviceBufferVK::Cast(*indirect_args.GetBuffer()).GetBuffer();
+  indirect_buffer_offset_ = indirect_args.GetRange().offset;
+  has_indirect_buffer_ = true;
+  return true;
+}
+
+// |RenderPass|
 fml::Status RenderPassVK::Draw() {
   if (!pipeline_) {
     return fml::Status(fml::StatusCode::kCancelled,
@@ -571,7 +590,27 @@ fml::Status RenderPassVK::Draw() {
         command_buffer_vk_, TextureVK::Cast(*color_image_vk_).GetImage());
   }
 
-  if (has_index_buffer_) {
+  if (has_indirect_buffer_) {
+    // A single draw. Multi-draw is gated behind the multiDrawIndirect device
+    // feature and has no Metal or GLES equivalent.
+    // TODO(bdero): Widen this to a draw count once every backend can express
+    // it, natively or by looping the encode.
+    if (has_index_buffer_) {
+      command_buffer_vk_.drawIndexedIndirect(
+          indirect_buffer_,                                       //
+          indirect_buffer_offset_,                                //
+          1u,                                                     // draw count
+          static_cast<uint32_t>(sizeof(DrawIndexedIndirectArgs))  // stride
+      );
+    } else {
+      command_buffer_vk_.drawIndirect(
+          indirect_buffer_,                                //
+          indirect_buffer_offset_,                         //
+          1u,                                              // draw count
+          static_cast<uint32_t>(sizeof(DrawIndirectArgs))  // stride
+      );
+    }
+  } else if (has_index_buffer_) {
     command_buffer_vk_.drawIndexed(element_count_,   // index count
                                    instance_count_,  // instance count
                                    0u,               // first index
@@ -593,6 +632,9 @@ fml::Status RenderPassVK::Draw() {
 #endif  // IMPELLER_DEBUG
   has_label_ = false;
   has_index_buffer_ = false;
+  has_indirect_buffer_ = false;
+  indirect_buffer_ = {};
+  indirect_buffer_offset_ = 0u;
   bound_image_offset_ = 0u;
   bound_buffer_offset_ = 0u;
   descriptor_write_offset_ = 0u;

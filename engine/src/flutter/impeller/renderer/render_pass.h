@@ -168,6 +168,26 @@ class RenderPass : public ResourceBinder {
   ///
   virtual bool SetIndexBuffer(BufferView index_buffer, IndexType index_type);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Source the next draw's parameters from a buffer read by the
+  ///             GPU instead of from `SetElementCount`, `SetInstanceCount`,
+  ///             and `SetBaseVertex`.
+  ///
+  ///             The buffer holds one `DrawIndirectArgs`, or one
+  ///             `DrawIndexedIndirectArgs` when an index buffer is bound. Its
+  ///             contents are read at draw time and are never validated, the
+  ///             same as the contents of an index buffer.
+  ///
+  ///             Only usable when `Capabilities::SupportsIndirectDraw` is
+  ///             true. Like the rest of the per-draw state, this is cleared
+  ///             once `Draw` records the command.
+  ///
+  /// @param[in]  indirect_args  The buffer view holding the draw arguments.
+  ///
+  /// @return     Returns false if the buffer view is invalid.
+  ///
+  virtual bool SetIndirectBuffer(BufferView indirect_args);
+
   /// Record the currently pending command.
   virtual fml::Status Draw();
 
@@ -270,6 +290,8 @@ class RenderPass : public ResourceBinder {
 
   static bool ValidateIndexBuffer(const BufferView& index_buffer,
                                   IndexType index_type);
+
+  static bool ValidateIndirectBuffer(const BufferView& indirect_args);
 
   virtual void OnSetLabel(std::string_view label) = 0;
 

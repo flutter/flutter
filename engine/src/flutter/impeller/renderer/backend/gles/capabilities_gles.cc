@@ -218,6 +218,12 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
                             gl.TexSubImage3D.IsAvailable() &&
                             gl.CompressedTexSubImage3D.IsAvailable();
 
+  // Indirect draw is core on OpenGL ES 3.1 and desktop GL 4.0. Gate on the
+  // resolved entry points rather than the version so a driver that reports the
+  // version without providing them is treated as unsupported.
+  supports_indirect_draw_ = gl.DrawArraysIndirect.IsAvailable() &&
+                            gl.DrawElementsIndirect.IsAvailable();
+
   // Anisotropic filtering is not part of any core GL or GLES version; it is
   // always gated on GL_EXT_texture_filter_anisotropic. The query and the
   // texture parameter are applied with core ES 2.0 entry points (GetFloatv
@@ -328,6 +334,10 @@ bool CapabilitiesGLES::IsANGLE() const {
 
 bool CapabilitiesGLES::SupportsPrimitiveRestart() const {
   return false;
+}
+
+bool CapabilitiesGLES::SupportsIndirectDraw() const {
+  return supports_indirect_draw_;
 }
 
 bool CapabilitiesGLES::Supports32BitPrimitiveIndices() const {
