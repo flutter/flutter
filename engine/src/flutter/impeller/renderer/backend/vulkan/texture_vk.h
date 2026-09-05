@@ -29,6 +29,13 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
 
   vk::ImageView GetImageView() const;
 
+  /// The view to sample this texture through.
+  ///
+  /// This is `GetImageView` everywhere except on drivers that generate corrupt
+  /// mip levels, where a texture mipped by that generation is sampled through a
+  /// view that stops at the base level.
+  vk::ImageView GetSampledImageView() const;
+
   vk::ImageView GetRenderTargetView(uint32_t mip_level = 0,
                                     uint32_t array_layer = 0) const;
 

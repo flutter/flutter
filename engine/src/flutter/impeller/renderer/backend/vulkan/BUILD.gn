@@ -44,6 +44,7 @@ impeller_component("vulkan_unittests") {
     "test/pipeline_compile_queue_vulkan_unittests.cc",
     "test/sampler_library_vk_unittests.cc",
     "test/swapchain_unittests.cc",
+    "texture_vk_unittests.cc",
   ]
   deps = [
     ":mock_vulkan",

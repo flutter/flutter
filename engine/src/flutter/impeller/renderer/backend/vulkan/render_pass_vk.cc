@@ -693,7 +693,7 @@ bool RenderPassVK::BindResource(ShaderStage stage,
   vk::DescriptorImageInfo image_info;
   image_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
   image_info.sampler = sampler_vk.GetSampler();
-  image_info.imageView = texture_vk.GetImageView();
+  image_info.imageView = texture_vk.GetSampledImageView();
   image_workspace_[bound_image_offset_++] = image_info;
 
   vk::WriteDescriptorSet write_set;
