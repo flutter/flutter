@@ -6,6 +6,7 @@
 #include "flutter/display_list/dl_tile_mode.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
+#include "flutter/fml/closure.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/core/formats.h"
@@ -19,6 +20,7 @@
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/renderer/render_target.h"
+#include "impeller/renderer/testing/mocks.h"
 #include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
@@ -33,6 +35,10 @@ std::unique_ptr<Canvas> CreateTestCanvas(
   onscreen_desc.format =
       context.GetDeviceCapabilities().GetDefaultColorFormat();
   onscreen_desc.usage = TextureUsage::kRenderTarget;
+  if (requires_readback) {
+    onscreen_desc.usage = onscreen_desc.usage | static_cast<TextureUsageMask>(
+                                                    TextureUsage::kShaderRead);
+  }
   onscreen_desc.storage_mode = StorageMode::kDevicePrivate;
   onscreen_desc.sample_count = SampleCount::kCount1;
   std::shared_ptr<Texture> onscreen =
@@ -595,6 +601,174 @@ TEST(CanvasTest, NonAntialiasedPaintIncompatibleWithSDFRendering) {
 TEST(CanvasTest, AntialiasedPaintCompatibleWithSDFRendering) {
   Paint paint;
   EXPECT_TRUE(Canvas::IsCompatibleWithSDFRendering(paint));
+}
+
+TEST_P(AiksTest, ClipDepthMaintainedAcrossBackdropFilterAndLayers) {
+  ContentContext& context = GetContentContext();
+  if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+    GTEST_SKIP() << "Test requires device with framebuffer fetch";
+  }
+
+  struct ScopedOnscreenOverride {
+    ScopedOnscreenOverride() {
+      Canvas::SetOverrideShouldUseOnscreenForTesting(true);
+    }
+    ~ScopedOnscreenOverride() {
+      Canvas::SetOverrideShouldUseOnscreenForTesting(std::nullopt);
+    }
+  } scoped_override;
+
+  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 800, 600),
+                                 /*requires_readback=*/true);
+
+  // 1. Root route saves and applies ClipRoundSuperellipse.
+  canvas->Save(/*total_content_depth=*/20);
+  Rect sheet_rect = Rect::MakeXYWH(0, 42, 400, 500);
+  canvas->ClipGeometry(*Geometry::MakeRoundSuperellipse(sheet_rect, 12.0f),
+                       Entity::ClipOperation::kIntersect);
+
+  uint64_t initial_clip_depth = canvas->GetMaxOpDepth();
+
+  // 2. Child layer (body Ink items) renders and restores.
+  canvas->Save(/*total_content_depth=*/5);
+  for (int i = 0; i < 5; i++) {
+    canvas->DrawRect(Rect::MakeXYWH(0, i * 50, 400, 45),
+                     Paint{.color = Color::Azure()});
+  }
+  canvas->Restore();
+
+  // 3. Child layer (_glassBar BackdropFilter) renders and restores.
+  auto blur = flutter::DlImageFilter::MakeBlur(12.0f, 12.0f,
+                                               flutter::DlTileMode::kClamp);
+  Rect glass_rect = Rect::MakeXYWH(20, 350, 360, 60);
+  canvas->SaveLayer(Paint{}, glass_rect, blur.get(),
+                    ContentBoundsPromise::kContainsContents,
+                    /*total_content_depth=*/2);
+  canvas->DrawRect(glass_rect, Paint{.color = Color::Orange()});
+  canvas->Restore();
+
+  // 4. Next layer (AppBar header) renders.
+  // Invariant: Subsequent draw operations must NOT exceed the active clip's
+  // depth, and depth must stay within the precision bounds of kMaxDepth.
+  EXPECT_LE(initial_clip_depth, Canvas::kMaxDepth);
+  canvas->Save(/*total_content_depth=*/2);
+  canvas->DrawRect(Rect::MakeXYWH(0, 0, 400, 80),
+                   Paint{.color = Color::White()});
+  EXPECT_LE(canvas->GetOpDepth(), initial_clip_depth);
+  EXPECT_LE(canvas->GetOpDepth(), Canvas::kMaxDepth);
+  canvas->Restore();
+
+  canvas->Restore();
+}
+
+TEST_P(AiksTest, ParentClipDepthBudgetPreservedAfterBackdropLayerRestore) {
+  ContentContext& context = GetContentContext();
+  if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
+    GTEST_SKIP() << "Test requires device with framebuffer fetch";
+  }
+
+  struct ScopedOnscreenOverride {
+    ScopedOnscreenOverride() {
+      Canvas::SetOverrideShouldUseOnscreenForTesting(true);
+    }
+    ~ScopedOnscreenOverride() {
+      Canvas::SetOverrideShouldUseOnscreenForTesting(std::nullopt);
+    }
+  } scoped_override;
+
+  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 800, 600),
+                                 /*requires_readback=*/true);
+
+  // 1. Root pass with finite clip depth budget.
+  canvas->Save(/*total_content_depth=*/50);
+  Rect sheet_rect = Rect::MakeXYWH(0, 42, 400, 500);
+  canvas->ClipGeometry(*Geometry::MakeRoundSuperellipse(sheet_rect, 12.0f),
+                       Entity::ClipOperation::kIntersect);
+
+  uint64_t parent_clip_depth = canvas->GetMaxOpDepth();
+  EXPECT_LT(parent_clip_depth, Canvas::kMaxDepth);
+
+  // 2. BackdropFilter save layer executes FlipBackdrop.
+  auto blur = flutter::DlImageFilter::MakeBlur(12.0f, 12.0f,
+                                               flutter::DlTileMode::kClamp);
+  Rect glass_rect = Rect::MakeXYWH(20, 350, 360, 60);
+  canvas->SaveLayer(Paint{}, glass_rect, blur.get(),
+                    ContentBoundsPromise::kContainsContents,
+                    /*total_content_depth=*/2);
+  canvas->DrawRect(glass_rect, Paint{.color = Color::Orange()});
+  canvas->Restore();
+
+  // 3. Verify that parent scope clip_depth was NOT permanently overwritten with
+  // kMaxDepth.
+  EXPECT_EQ(canvas->GetMaxOpDepth(), parent_clip_depth);
+
+  canvas->Restore();
+}
+
+TEST_P(AiksTest, EmulatedAdvancedBlendPreservesDepthMonotonicity) {
+  if (GetParam() != PlaygroundBackend::kMetal) {
+    GTEST_SKIP()
+        << "This backend doesn't yet support setting device capabilities.";
+  }
+
+  // 1. Mock capabilities to emulate non-framebuffer-fetch devices (e.g.
+  // OpenGLES).
+  std::shared_ptr<const Capabilities> old_capabilities =
+      GetContext()->GetCapabilities();
+  fml::ScopedCleanupClosure cleanup(fml::closure([&]() {
+    std::ignore = SetCapabilities(
+        std::const_pointer_cast<Capabilities>(old_capabilities));
+  }));
+
+  auto mock_capabilities =
+      std::make_shared<::testing::NiceMock<MockCapabilities>>();
+  EXPECT_CALL(*mock_capabilities, SupportsFramebufferFetch())
+      .Times(::testing::AtLeast(1))
+      .WillRepeatedly(::testing::Return(false));
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultColorFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              GetDefaultDepthStencilFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsOffscreenMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsImplicitResolvingMSAA);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsReadFromResolve);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsSSBO);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsCompute);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsTextureToTextureBlits);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetDefaultGlyphAtlasFormat);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsTriangleFan);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              SupportsDecalSamplerAddressMode);
+  FLT_FORWARD(mock_capabilities, old_capabilities, SupportsPrimitiveRestart);
+  FLT_FORWARD(mock_capabilities, old_capabilities,
+              Supports32BitPrimitiveIndices);
+  FLT_FORWARD(mock_capabilities, old_capabilities, NeedsPartitionedHostBuffer);
+  FLT_FORWARD(mock_capabilities, old_capabilities, GetMinimumUniformAlignment);
+  ASSERT_TRUE(SetCapabilities(mock_capabilities).ok());
+
+  // 2. Record sequential save scopes with emulated advanced blends.
+  ContentContext& context = GetContentContext();
+  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 800, 600),
+                                 /*requires_readback=*/true);
+
+  uint64_t previous_depth = 0;
+  for (int i = 0; i < 3; ++i) {
+    canvas->Save(/*total_content_depth=*/2);
+    canvas->DrawRect(Rect::MakeXYWH(i * 50, 0, 40, 40),
+                     Paint{.color = Color::Blue()});
+    canvas->DrawRect(
+        Rect::MakeXYWH(i * 50, 0, 40, 40),
+        Paint{.color = Color::Orange(), .blend_mode = BlendMode::kScreen});
+
+    // 3. Verify that emulated backdrop flips advance depth monotonically across
+    // sequential draw calls.
+    EXPECT_GT(canvas->GetOpDepth(), previous_depth);
+    previous_depth = canvas->GetOpDepth();
+
+    canvas->Restore();
+  }
 }
 
 }  // namespace testing

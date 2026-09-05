@@ -1774,7 +1774,11 @@ void Canvas::Save(uint32_t total_content_depth) {
 
   auto entry = CanvasStackEntry{};
   entry.transform = transform_stack_.back().transform;
-  entry.clip_depth = current_depth_ + total_content_depth;
+  entry.clip_depth =
+      (total_content_depth == kMaxDepth)
+          ? transform_stack_.back().clip_depth
+          : std::min<uint32_t>(current_depth_ + total_content_depth,
+                               transform_stack_.back().clip_depth);
   entry.distributed_opacity = transform_stack_.back().distributed_opacity;
   FML_DCHECK(entry.clip_depth <= transform_stack_.back().clip_depth)
       << entry.clip_depth << " <=? " << transform_stack_.back().clip_depth
@@ -1939,9 +1943,9 @@ void Canvas::SaveLayer(const Paint& paint,
       // 1. The device supports framebuffer fetch
       // 2. There are no more backdrop filters
       // 3. The current render pass is for the onscreen pass.
-      const bool should_use_onscreen =
+      const bool should_use_onscreen = override_should_use_onscreen_.value_or(
           renderer_.GetDeviceCapabilities().SupportsFramebufferFetch() &&
-          backdrop_count_ == 0 && render_passes_.size() == 1u;
+          backdrop_count_ == 0 && render_passes_.size() == 1u);
       input_texture = FlipBackdrop(
           GetGlobalPassPosition(),                                //
           /*should_remove_texture=*/will_cache_backdrop_texture,  //
@@ -2027,7 +2031,11 @@ void Canvas::SaveLayer(const Paint& paint,
 
   CanvasStackEntry entry;
   entry.transform = transform_stack_.back().transform;
-  entry.clip_depth = current_depth_ + total_content_depth;
+  entry.clip_depth =
+      (total_content_depth == kMaxDepth)
+          ? transform_stack_.back().clip_depth
+          : std::min<uint32_t>(current_depth_ + total_content_depth,
+                               transform_stack_.back().clip_depth);
   FML_DCHECK(entry.clip_depth <= transform_stack_.back().clip_depth)
       << entry.clip_depth << " <=? " << transform_stack_.back().clip_depth
       << " after allocating " << total_content_depth;
@@ -2075,9 +2083,12 @@ bool Canvas::Restore() {
   // to be overly conservative, but we need to jump the depth to
   // the clip depth so that the next rendering op will get a
   // larger depth (it will pre-increment the current_depth_ value).
-  FML_DCHECK(current_depth_ <= transform_stack_.back().clip_depth)
-      << current_depth_ << " <=? " << transform_stack_.back().clip_depth;
-  current_depth_ = transform_stack_.back().clip_depth;
+  if (transform_stack_.back().num_clips > 0 &&
+      transform_stack_.back().clip_depth < kMaxDepth) {
+    FML_DCHECK(current_depth_ <= transform_stack_.back().clip_depth)
+        << current_depth_ << " <=? " << transform_stack_.back().clip_depth;
+    current_depth_ = transform_stack_.back().clip_depth;
+  }
 
   if (IsSkipping()) {
     transform_stack_.pop_back();
@@ -2627,8 +2638,6 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
     return nullptr;
   }
 
-  // Restore any clips that were recorded before the backdrop filter was
-  // applied.
   auto& replay_entities = clip_coverage_stack_.GetReplayEntities();
   uint64_t current_depth =
       post_depth_increment ? current_depth_ - 1 : current_depth_;
@@ -2640,7 +2649,7 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
     SetClipScissor(replay.clip_coverage, current_render_pass,
                    global_pass_position);
     if (!replay.clip_contents.Render(renderer_, current_render_pass,
-                                     replay.clip_depth)) {
+                                     replay.clip_depth, replay.transform)) {
       VALIDATION_LOG << "Failed to render entity for clip restore.";
     }
   }
