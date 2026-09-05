@@ -102,6 +102,31 @@ def GetSysrootDict(sysroots_json_path, target_platform, target_arch):
     if sysroot_key not in sysroots:
         raise Error("No sysroot for: %s %s" % (target_platform, target_arch))
     return sysroots[sysroot_key]
+def PatchAtkVersionHeader(sysroot):
+  """Patch atkversion.h in the sysroot to add C linkage declarations.
+
+  The atkversion.h header in at-spi2-core (used by Debian Bullseye and
+  Trixie sysroots) lacks G_BEGIN_DECLS/G_END_DECLS, causing link failures
+  when the header is included from C++ code.  This was fixed upstream in
+  https://gitlab.gnome.org/GNOME/at-spi2-core/-/merge_requests/219
+  but the fix has not yet propagated to all Debian stable releases.
+  """
+  for atkversion in glob.glob(
+      os.path.join(sysroot, "usr", "include", "atk-1.0", "atk", "atkversion.h")):
+    with open(atkversion, "r") as f:
+      content = f.read()
+    if "G_BEGIN_DECLS" in content or 'extern "C"' in content:
+      continue  # Already has C linkage declarations
+    # Add G_BEGIN_DECLS after #include <glib.h> and G_END_DECLS
+    # before the final #endif.
+    content = content.replace(
+        "#include <glib.h>\n", "#include <glib.h>\n\nG_BEGIN_DECLS\n", 1)
+    content = content.replace(
+        '#endif /* __ATK_VERSION_H__ */',
+        'G_END_DECLS\n\n#endif /* __ATK_VERSION_H__ */', 1)
+    with open(atkversion, "w") as f:
+      f.write(content)
+
 def InstallSysroot(sysroots_json_path, target_platform, target_arch):
     sysroot_dict = GetSysrootDict(sysroots_json_path, target_platform,
                                   target_arch)
@@ -120,6 +145,7 @@ def InstallSysroot(sysroots_json_path, target_platform, target_arch):
             os.path.join(sysroot, ".*_is_first_class_gcs")):
         with open(stamp) as s:
             if s.read() == url:
+                PatchAtkVersionHeader(sysroot)
                 return
     print("Installing Debian %s %s root image: %s" %
           (target_platform, target_arch, sysroot))
@@ -145,6 +171,7 @@ def InstallSysroot(sysroots_json_path, target_platform, target_arch):
         raise Error("Tarball sha256sum is wrong."
                     "Expected %s, actual: %s" % (tarball_sha256sum, sha256sum))
     subprocess.check_call(["tar", "mxf", tarball, "-C", sysroot])
+    PatchAtkVersionHeader(sysroot)
     os.remove(tarball)
     with open(stamp, "w") as s:
         s.write(url)
