@@ -1070,6 +1070,12 @@
         "download_jdk": false,
         "download_emsdk": true
       },
+      "dependencies": [
+        {
+          "dependency": "open_jdk",
+          "version": "version:21"
+        }
+      ],
       "gn": [
         "--web",
         "--runtime-mode=release",
@@ -1085,13 +1091,7 @@
       "properties": {
         "$flutter/osx_sdk": {
           "sdk_version": "17c52"
-        },
-        "dependencies": [
-          {
-            "dependency": "open_jdk",
-            "version": "version:21"
-          }
-        ]
+        }
       },
       "cas_archive": false
     },
@@ -1106,6 +1106,12 @@
         "download_jdk": false,
         "download_emsdk": true
       },
+      "dependencies": [
+        {
+          "dependency": "open_jdk",
+          "version": "version:21"
+        }
+      ],
       "gn": [
         "--web",
         "--runtime-mode=debug",
@@ -1122,13 +1128,7 @@
       "properties": {
         "$flutter/osx_sdk": {
           "sdk_version": "17c52"
-        },
-        "dependencies": [
-          {
-            "dependency": "open_jdk",
-            "version": "version:21"
-          }
-        ]
+        }
       },
       "cas_archive": false
     }
