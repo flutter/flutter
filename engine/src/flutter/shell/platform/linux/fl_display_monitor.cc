@@ -23,6 +23,12 @@ struct _FlDisplayMonitor {
 
 G_DEFINE_TYPE(FlDisplayMonitor, fl_display_monitor, G_TYPE_OBJECT)
 
+// Get the refresh rate of a GDK monitor in Hz, or 0 if unknown.
+static gdouble get_monitor_refresh_rate(GdkMonitor* monitor) {
+  // GDK reports the refresh rate in millihertz.
+  return gdk_monitor_get_refresh_rate(monitor) / 1000.0;
+}
+
 // Send the current monitor state to the engine.
 static void notify_display_update(FlDisplayMonitor* self) {
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
@@ -52,7 +58,7 @@ static void notify_display_update(FlDisplayMonitor* self) {
     display->struct_size = sizeof(FlutterEngineDisplay);
     display->display_id = display_id;
     display->single_display = false;
-    display->refresh_rate = gdk_monitor_get_refresh_rate(monitor) / 1000.0;
+    display->refresh_rate = get_monitor_refresh_rate(monitor);
     display->width = geometry.width;
     display->height = geometry.height;
     display->device_pixel_ratio = gdk_monitor_get_scale_factor(monitor);
@@ -117,4 +123,34 @@ FlutterEngineDisplayId fl_display_monitor_get_display_id(FlDisplayMonitor* self,
   g_return_val_if_fail(FL_IS_DISPLAY_MONITOR(self), 0);
   return GPOINTER_TO_INT(
       g_hash_table_lookup(self->display_ids_by_monitor, monitor));
+}
+
+gdouble fl_display_monitor_get_refresh_rate(FlDisplayMonitor* self,
+                                            FlutterEngineDisplayId display_id) {
+  g_return_val_if_fail(FL_IS_DISPLAY_MONITOR(self), 0.0);
+
+  GHashTableIter iter;
+  g_hash_table_iter_init(&iter, self->display_ids_by_monitor);
+  gpointer key, value;
+  while (g_hash_table_iter_next(&iter, &key, &value)) {
+    if (static_cast<FlutterEngineDisplayId>(GPOINTER_TO_INT(value)) ==
+        display_id) {
+      return get_monitor_refresh_rate(GDK_MONITOR(key));
+    }
+  }
+
+  return 0.0;
+}
+
+gdouble fl_display_monitor_get_max_refresh_rate(FlDisplayMonitor* self) {
+  g_return_val_if_fail(FL_IS_DISPLAY_MONITOR(self), 0.0);
+
+  gdouble max_refresh_rate = 0.0;
+  int n_monitors = gdk_display_get_n_monitors(self->display);
+  for (int i = 0; i < n_monitors; i++) {
+    GdkMonitor* monitor = gdk_display_get_monitor(self->display, i);
+    max_refresh_rate = MAX(max_refresh_rate, get_monitor_refresh_rate(monitor));
+  }
+
+  return max_refresh_rate;
 }

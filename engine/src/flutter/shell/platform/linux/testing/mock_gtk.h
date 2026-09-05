@@ -25,6 +25,7 @@ class MockGtk {
   MOCK_METHOD(GdkWindowState, gdk_window_get_state, (GdkWindow * window));
   MOCK_METHOD(int, gdk_window_get_width, (GdkWindow * window));
   MOCK_METHOD(int, gdk_window_get_height, (GdkWindow * window));
+  MOCK_METHOD(int, gdk_monitor_get_refresh_rate, (GdkMonitor * monitor));
   MOCK_METHOD(void, gtk_window_new, (GtkWindow * window, GtkWindowType type));
   MOCK_METHOD(void,
               gtk_window_set_default_size,

@@ -6,6 +6,8 @@
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
+#include <functional>
+
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
@@ -13,6 +15,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
+#include "flutter/shell/platform/linux/testing/mock_gtk.h"
 #include "flutter/shell/platform/linux/testing/mock_renderable.h"
 
 // MOCK_ENGINE_PROC is leaky by design
@@ -70,6 +73,131 @@ TEST_F(FlEngineTest, NotifyDisplayUpdate) {
   fl_engine_notify_display_update(engine, displays, 2);
 
   EXPECT_TRUE(called);
+}
+
+// Starts the engine, capturing the vsync callback it registers, and mocks the
+// clock so vsync times are deterministic. The engine is started at time zero.
+static VsyncCallback start_engine_with_vsync(
+    FlEngine* engine,
+    uint64_t* current_time_nanos,
+    std::function<void(uint64_t, uint64_t)> on_vsync) {
+  static VsyncCallback callback;
+  callback = nullptr;
+  fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
+      Initialize, ([](size_t version, const FlutterRendererConfig* config,
+                      const FlutterProjectArgs* args, void* user_data,
+                      FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        callback = args->vsync_callback;
+        return kSuccess;
+      }));
+  fl_engine_get_embedder_api(engine)->RunInitialized =
+      MOCK_ENGINE_PROC(RunInitialized, ([](auto engine) { return kSuccess; }));
+  fl_engine_get_embedder_api(engine)->GetCurrentTime = MOCK_ENGINE_PROC(
+      GetCurrentTime, ([current_time_nanos]() { return *current_time_nanos; }));
+  fl_engine_get_embedder_api(engine)->OnVsync = MOCK_ENGINE_PROC(
+      OnVsync,
+      ([on_vsync](auto engine, intptr_t baton, uint64_t frame_start_time_nanos,
+                  uint64_t frame_target_time_nanos) {
+        EXPECT_EQ(baton, 42);
+        on_vsync(frame_start_time_nanos, frame_target_time_nanos);
+        return kSuccess;
+      }));
+
+  *current_time_nanos = 0;
+  EXPECT_TRUE(fl_engine_start(engine, nullptr));
+  EXPECT_NE(callback, nullptr);
+  return callback;
+}
+
+// Checks vsync events are generated at the display refresh rate.
+TEST_F(FlEngineTest, Vsync) {
+  constexpr uint64_t kFrameInterval = 1000000000 / 60;
+
+  uint64_t current_time = 0;
+  uint64_t frame_start_time = 0, frame_target_time = 0;
+  int vsync_count = 0;
+  VsyncCallback vsync_callback = start_engine_with_vsync(
+      engine, &current_time, [&](uint64_t start_time, uint64_t target_time) {
+        vsync_count++;
+        frame_start_time = start_time;
+        frame_target_time = target_time;
+      });
+
+  // Part way through the first frame - snaps to the next tick.
+  current_time = 10000000;
+  vsync_callback(engine, 42);
+  EXPECT_EQ(vsync_count, 1);
+  EXPECT_EQ(frame_start_time, kFrameInterval);
+  EXPECT_EQ(frame_target_time, 2 * kFrameInterval);
+
+  // Exactly on a tick - the frame can start now.
+  current_time = 3 * kFrameInterval;
+  vsync_callback(engine, 42);
+  EXPECT_EQ(vsync_count, 2);
+  EXPECT_EQ(frame_start_time, 3 * kFrameInterval);
+  EXPECT_EQ(frame_target_time, 4 * kFrameInterval);
+}
+
+// Checks vsync events follow the refresh rate of a high refresh rate display.
+TEST_F(FlEngineTest, VsyncHighRefreshRate) {
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+  EXPECT_CALL(mock_gtk, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillRepeatedly(::testing::Return(144000));
+  constexpr uint64_t kFrameInterval = 1000000000 / 144;
+
+  uint64_t current_time = 0;
+  uint64_t frame_start_time = 0, frame_target_time = 0;
+  int vsync_count = 0;
+  VsyncCallback vsync_callback = start_engine_with_vsync(
+      engine, &current_time, [&](uint64_t start_time, uint64_t target_time) {
+        vsync_count++;
+        frame_start_time = start_time;
+        frame_target_time = target_time;
+      });
+
+  current_time = 10000000;
+  vsync_callback(engine, 42);
+  EXPECT_EQ(vsync_count, 1);
+  EXPECT_EQ(frame_start_time, 2 * kFrameInterval);
+  EXPECT_EQ(frame_target_time, 3 * kFrameInterval);
+  EXPECT_LT(frame_target_time - frame_start_time, 7000000u);
+}
+
+// Checks the vsync rate follows the display a view is on.
+TEST_F(FlEngineTest, VsyncFollowsViewDisplay) {
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+  constexpr uint64_t kFrameInterval60 = 1000000000 / 60;
+  constexpr uint64_t kFrameInterval144 = 1000000000 / 144;
+
+  uint64_t current_time = 0;
+  uint64_t frame_start_time = 0, frame_target_time = 0;
+  VsyncCallback vsync_callback = start_engine_with_vsync(
+      engine, &current_time, [&](uint64_t start_time, uint64_t target_time) {
+        frame_start_time = start_time;
+        frame_target_time = target_time;
+      });
+
+  // The (single, mocked) display switches to 144Hz after the engine started,
+  // so the recorded display rate is still 60Hz until the engine is told about
+  // a view on that display.
+  ON_CALL(mock_gtk, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillByDefault(::testing::Return(144000));
+
+  // A view on an unknown display uses the fastest display.
+  fl_engine_send_window_metrics_event(engine, 0, 1, 100, 100, 100, 100, 1.0);
+  vsync_callback(engine, 42);
+  EXPECT_EQ(frame_target_time - frame_start_time, kFrameInterval144);
+
+  // A view on display 1.
+  fl_engine_send_window_metrics_event(engine, 1, 1, 100, 100, 100, 100, 1.0);
+  vsync_callback(engine, 42);
+  EXPECT_EQ(frame_target_time - frame_start_time, kFrameInterval144);
+
+  ON_CALL(mock_gtk, gdk_monitor_get_refresh_rate(::testing::_))
+      .WillByDefault(::testing::Return(60000));
+  fl_engine_send_window_metrics_event(engine, 1, 1, 100, 100, 100, 100, 1.0);
+  vsync_callback(engine, 42);
+  EXPECT_EQ(frame_target_time - frame_start_time, kFrameInterval60);
 }
 
 // Checks sending window metrics events works.
