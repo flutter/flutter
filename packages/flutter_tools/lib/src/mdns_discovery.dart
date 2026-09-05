@@ -28,6 +28,13 @@ You can grant this permission in System Settings > Privacy & Security > Local Ne
 $err
 ''';
 
+String _missingNetworkInstructions(String err) =>
+    '''
+Flutter could not access the network.
+
+$err
+''';
+
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
   /// Creates a new [MDnsVmServiceDiscovery] object.
@@ -116,8 +123,9 @@ class MDnsVmServiceDiscovery {
         applicationId: applicationId,
         deviceVmservicePort: deviceVmservicePort,
         ipv6: ipv6,
-        useDeviceIPAsHost: useDeviceIPAsHost,
+        throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
         timeout: timeout,
+        useDeviceIPAsHost: useDeviceIPAsHost,
       );
     } else if (results.length > 1) {
       final buffer = StringBuffer();
@@ -264,15 +272,15 @@ class MDnsVmServiceDiscovery {
     try {
       return await completer.future;
     } on SocketException catch (e, stackTrace) {
-      if (!globals.platform.isMacOS) {
-        rethrow;
-      }
-
       _logger.printTrace(stackTrace.toString());
+      final String errorMessage = globals.platform.isMacOS
+          ? _missingLocalNetworkPermissionsInstructions(e.toString())
+          : _missingNetworkInstructions(e.toString());
+
       if (throwOnMissingLocalNetworkPermissionsError) {
-        throwToolExit(_missingLocalNetworkPermissionsInstructions(e.toString()));
+        throwToolExit(errorMessage);
       } else {
-        _logger.printError(_missingLocalNetworkPermissionsInstructions(e.toString()));
+        _logger.printError(errorMessage);
         return <MDnsVmServiceDiscoveryResult>[];
       }
     }
@@ -463,18 +471,20 @@ class MDnsVmServiceDiscovery {
   Future<Uri?> getVMServiceUriForAttach(
     String? applicationId,
     Device device, {
-    bool usesIpv6 = false,
-    int? hostVmservicePort,
     int? deviceVmservicePort,
-    bool useDeviceIPAsHost = false,
+    int? hostVmservicePort,
+    bool throwOnMissingLocalNetworkPermissionsError = true,
     Duration timeout = const Duration(minutes: 10),
+    bool useDeviceIPAsHost = false,
+    bool usesIpv6 = false,
   }) async {
     final MDnsVmServiceDiscoveryResult? result = await queryForAttach(
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       ipv6: usesIpv6,
-      useDeviceIPAsHost: useDeviceIPAsHost,
+      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
       timeout: timeout,
+      useDeviceIPAsHost: useDeviceIPAsHost,
     );
     return _handleResult(
       result,
