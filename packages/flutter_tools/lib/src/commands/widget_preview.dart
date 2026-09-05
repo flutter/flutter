@@ -34,12 +34,10 @@ import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import '../web/web_device.dart';
 import '../widget_preview/analytics.dart';
-import '../widget_preview/dependency_graph.dart';
 import '../widget_preview/dtd_services.dart';
 import '../widget_preview/dtd_types.dart';
 import '../widget_preview/lsp_preview_detector.dart';
 import '../widget_preview/preview_code_generator.dart';
-import '../widget_preview/preview_detector.dart';
 import '../widget_preview/preview_manifest.dart';
 import '../widget_preview/preview_pubspec_builder.dart';
 import 'create_base.dart';
@@ -188,13 +186,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         kDisableDtdServiceUuid,
         help: 'Disables the addition of a UUID to the widget preview DTD service and stream.',
         hide: !verbose,
-      )
-      ..addFlag(
-        kLegacyPreviewDetection,
-        help:
-            'Enables the legacy preview detection mechanism that uses '
-            'package:analyzer instead of LSP.',
-        hide: !verbose,
       );
   }
 
@@ -205,7 +196,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   static const kWebServer = 'web-server';
   static const kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
   static const kDisableDtdServiceUuid = 'disable-dtd-service-uuid';
-  static const kLegacyPreviewDetection = 'legacy-preview-detection';
 
   @visibleForTesting
   static const kBrowserNotFoundErrorMessage =
@@ -262,16 +252,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     previewManifest: _previewManifest,
   );
 
-  late final _previewDetector = PreviewDetector(
-    artifacts: artifacts,
-    platform: platform,
-    previewAnalytics: previewAnalytics,
-    project: rootProject,
-    logger: logger,
-    fs: fs,
-    onChangeDetected: onLegacyChangeDetected,
-    onPubspecChangeDetected: _onPubspecChangeDetected,
-  );
+  
 
   late final _lspPreviewDetector = LspPreviewDetector(
     platform: platform,
@@ -404,22 +385,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       );
     }
 
-    final bool legacyDetection = boolArg('legacy-preview-detection');
 
     shutdownHooks.addShutdownHook(() async {
       await _widgetPreviewApp?.exitApp();
-      if (legacyDetection) {
-        await _previewDetector.dispose();
-      } else {
-        await _lspPreviewDetector.dispose();
-      }
+      await _lspPreviewDetector.dispose();
     });
 
-    if (legacyDetection) {
-      final PreviewDependencyGraph graph = await _previewDetector.initialize();
-      _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(graph);
-    } else {
-      await configureDtd();
+    await configureDtd();
 
       await _lspPreviewDetector.initialize();
 
@@ -448,8 +420,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           'Ensure that the analysis server is running and reachable. Details: $e',
         );
       }
-      _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(originalPreviews);
-    }
+    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(originalPreviews);
 
     final int result = await runPreviewEnvironment(
       widgetPreviewScaffoldProject: widgetPreviewScaffoldProject,
@@ -476,12 +447,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     }
   }
 
-  void onLegacyChangeDetected(PreviewDependencyGraph previews) {
-    _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(previews);
-    logger.printStatus('Triggering reload based on change to preview set: $previews');
-    _widgetPreviewApp?.restart();
-  }
-
+  
   void onHotRestartRequest() {
     logger.printStatus('Triggering restart based on request from preview environment.');
     _widgetPreviewApp?.restart(fullRestart: true);

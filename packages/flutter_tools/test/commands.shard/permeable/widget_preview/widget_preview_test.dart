@@ -265,14 +265,12 @@ void main() {
   Future<void> startWidgetPreview({
     required Directory? rootProject,
     List<String>? arguments,
-    bool legacyDetection = false,
     Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) async {
     // This might get changed during the test, so keep track of the original directory.
     final Directory current = fs.currentDirectory;
     await runWidgetPreviewCommand(<String>[
       'start',
-      if (legacyDetection) '--legacy-preview-detection',
       ...?arguments,
       '--no-launch-previewer',
       '--verbose',
@@ -786,108 +784,6 @@ List<_i1.WidgetPreview> previews() => [
           );
 
           await startWidgetPreview(rootProject: rootProject);
-          expectSinglePreviewLaunchTimingEvent();
-        },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
-      );
-    });
-
-    group('Legacy preview detection', () {
-      testUsingContext(
-        'start finds existing previews and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
-        () async {
-          final Directory rootProject = await createRootProject();
-          rootProject
-              .childDirectory('lib')
-              .childFile('foo.dart')
-              .writeAsStringSync(samplePreviewFile);
-
-          await startWidgetPreview(rootProject: rootProject, legacyDetection: true);
-
-          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
-            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-          );
-
-          expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
-          expectSinglePreviewLaunchTimingEvent();
-        },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
-      );
-
-      testUsingContext(
-        'start finds existing previews in the CWD and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
-        () async {
-          final Directory rootProject = await createRootProject();
-          rootProject
-              .childDirectory('lib')
-              .childFile('foo.dart')
-              .writeAsStringSync(samplePreviewFile);
-
-          // Try to execute using the CWD.
-          fs.currentDirectory = rootProject;
-          await startWidgetPreview(rootProject: null, legacyDetection: true);
-
-          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
-            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-          );
-
-          expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
-          expectSinglePreviewLaunchTimingEvent();
-        },
-        overrides: <Type, Generator>{
-          Analytics: () => fakeAnalytics,
-          DeviceManager: () => fakeDeviceManager,
-          FileSystem: () => fs,
-          ProcessManager: () => loggingProcessManager,
-          Pub: () => Pub.test(
-            fileSystem: fs,
-            logger: logger,
-            processManager: loggingProcessManager,
-            botDetector: botDetector,
-            platform: platform,
-            stdio: mockStdio,
-          ),
-        },
-      );
-
-      testUsingContext(
-        'start finds existing previews in the provided directory and injects them into ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
-        () async {
-          final Directory rootProject = await createRootProject();
-          rootProject
-              .childDirectory('lib')
-              .childFile('foo.dart')
-              .writeAsStringSync(samplePreviewFile);
-
-          await startWidgetPreview(rootProject: rootProject, legacyDetection: true);
-
-          final File generatedFile = WidgetPreviewStartCommand.widgetPreviewScaffold.childFile(
-            PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
-          );
-
-          expect(generatedFile.readAsStringSync().stripScriptUris, expectedGeneratedFileContents);
           expectSinglePreviewLaunchTimingEvent();
         },
         overrides: <Type, Generator>{

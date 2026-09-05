@@ -17,7 +17,6 @@ import '../base/terminal.dart';
 import '../dart/analysis.dart';
 import '../project.dart';
 import 'analytics.dart';
-import 'dependency_graph.dart';
 import 'dtd_services.dart';
 import 'dtd_types.dart';
 import 'utils.dart';

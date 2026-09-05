@@ -11,7 +11,6 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
 
-import 'dependency_graph.dart';
 
 extension TokenExtension on Token {
   /// Convenience getter to identify tokens for private fields and functions.
@@ -65,11 +64,6 @@ extension StringExtension on String {
   bool get isPubspec => endsWith('pubspec.yaml');
   bool get doesContainDartTool => contains('.dart_tool');
   bool get doesContainWidgetPreview => split(_pathSeparator).contains('.widget_preview');
-}
-
-extension LibraryElementExtension on LibraryElement {
-  /// Convenience method to package path and [uri] into a [PreviewPath]
-  PreviewPath toPreviewPath() => (path: firstFragment.source.fullName, uri: uri);
 }
 
 /// Used to protect global state accessed in blocks containing calls to
