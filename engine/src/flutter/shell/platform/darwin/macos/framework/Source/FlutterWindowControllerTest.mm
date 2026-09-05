@@ -13,6 +13,9 @@
 #import "flutter/testing/testing.h"
 #import "third_party/googletest/googletest/include/gtest/gtest.h"
 
+// CREATE_NATIVE_ENTRY is leaky.
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter::testing {
 
 class FlutterWindowControllerTest : public FlutterEngineTest {
@@ -57,6 +60,8 @@ class FlutterWindowControllerTest : public FlutterEngineTest {
 
 class FlutterWindowControllerRetainTest : public ::testing::Test {};
 
+class FlutterWindowControllerSizeTest : public FlutterEngineTest {};
+
 TEST_F(FlutterWindowControllerTest, FixMoveRunLoopMode) {
   FlutterEngine* engine = GetFlutterEngine();
   [engine.windowController fixMoveRunLoopModeIfNeeded];
@@ -75,6 +80,7 @@ TEST_F(FlutterWindowControllerTest, CreateRegularWindow) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -104,6 +110,7 @@ TEST_F(FlutterWindowControllerTest, CreateTooltipWindow) {
   auto request = FlutterWindowCreationRequest{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -128,6 +135,7 @@ TEST_F(FlutterWindowControllerTest, CreateTooltipWindow) {
           .max_width = 1000,
           .max_height = 1000,
       },
+      .resizable = true,
       .parent_view_id = parentViewId,
       .on_should_close = [] {},
       .on_will_close = [] {},
@@ -148,6 +156,7 @@ TEST_F(FlutterWindowControllerTest, CreatePopupWindow) {
   auto request = FlutterWindowCreationRequest{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -172,6 +181,7 @@ TEST_F(FlutterWindowControllerTest, CreatePopupWindow) {
           .max_width = 1000,
           .max_height = 1000,
       },
+      .resizable = true,
       .parent_view_id = parentViewId,
       .on_should_close = [] {},
       .on_will_close = [] {},
@@ -188,6 +198,7 @@ TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -211,6 +222,8 @@ TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
     weakEngine = engine;
     [engine runWithEntrypoint:@"testWindowControllerRetainCycle"];
 
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, false);
+
     int64_t engineId = reinterpret_cast<int64_t>(engine);
 
     {
@@ -220,6 +233,8 @@ TEST_F(FlutterWindowControllerRetainTest, WindowControllerDoesNotRetainEngine) {
       int64_t handle = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
       EXPECT_EQ(handle, 1);
     }
+
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, false);
 
     [engine.windowController closeAllWindows];
     [engine shutDownEngine];
@@ -231,6 +246,7 @@ TEST_F(FlutterWindowControllerTest, DestroyRegularWindow) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -252,6 +268,7 @@ TEST_F(FlutterWindowControllerTest, InternalFlutterWindowGetHandle) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -272,6 +289,7 @@ TEST_F(FlutterWindowControllerTest, WindowStates) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -310,6 +328,7 @@ TEST_F(FlutterWindowControllerTest, ClosesAllWindowsOnEngineRestart) {
   FlutterWindowCreationRequest request{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -353,6 +372,7 @@ TEST_F(FlutterWindowControllerTest, ViewMetricsRespectPositionCallbackConstraint
   auto parentRequest = FlutterWindowCreationRequest{
       .has_size = true,
       .size = {.width = 800, .height = 600},
+      .resizable = true,
       .on_should_close = [] {},
       .on_will_close = [] {},
       .notify_listeners = [] {},
@@ -398,7 +418,7 @@ TEST_F(FlutterWindowControllerTest, ViewMetricsRespectPositionCallbackConstraint
 
   CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, false);
 
-  [flutterView.sizingDelegate viewDidUpdateContents:flutterView withSize:NSMakeSize(1000, 1000)];
+  [flutterView.contentDelegate viewDidUpdateContents:flutterView withSize:NSMakeSize(1000, 1000)];
 
   // The constraints from request are 1000x1000, but additional constraints came from the positioner
   // and must be respected.
@@ -442,4 +462,136 @@ TEST_F(FlutterWindowControllerTest, GetOffsetInParent) {
   [childWindow close];
   [parentWindow close];
 }
+
+const CFAbsoluteTime kTestTimeout = 30.0;
+
+TEST_F(FlutterWindowControllerSizeTest, SizedToContentResizable) {
+  FlutterWindowCreationRequest request{
+      .has_size = false,
+      .has_constraints = true,
+      .constraints{
+          .min_width = 0,
+          .min_height = 0,
+          .max_width = 1000,
+          .max_height = 1000,
+      },
+      .resizable = true,
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+  };
+
+  auto engine = GetFlutterEngine();
+  [engine runWithEntrypoint:@"testRenderSizedToContentResizable"];
+
+  auto engineId = reinterpret_cast<int64_t>(GetFlutterEngine());
+
+  std::optional<Isolate> isolate;
+
+  bool signaled = false;
+  AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                      signaled = true;
+                      isolate = Isolate::Current();
+                    }));
+
+  while (!signaled) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
+  }
+
+  int64_t viewId = 0;
+  {
+    IsolateScope isolate_scope(*isolate);
+    viewId = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
+  }
+
+  auto controller = [engine viewControllerForIdentifier:viewId];
+  auto window = controller.view.window;
+  CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
+  double pixelRatio = [window backingScaleFactor];
+  while (window.frame.size.width != 300 / pixelRatio &&
+         CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
+  }
+
+  NSRect contentRect = [window contentRectForFrameRect:window.frame];
+  EXPECT_EQ(contentRect.size.width, 300 / pixelRatio);
+  EXPECT_EQ(contentRect.size.height, 300 / pixelRatio);
+  EXPECT_TRUE((window.styleMask & NSWindowStyleMaskResizable) != 0);
+
+  [engine.windowController closeAllWindows];
+  [engine shutDownEngine];
+}
+
+TEST_F(FlutterWindowControllerSizeTest, SizedToContentNotResizable) {
+  FlutterWindowCreationRequest request{
+      .has_size = false,
+      .has_constraints = true,
+      .constraints{
+          .min_width = 0,
+          .min_height = 0,
+          .max_width = 1000,
+          .max_height = 1000,
+      },
+      .resizable = false,
+      .on_should_close = [] {},
+      .on_will_close = [] {},
+      .notify_listeners = [] {},
+  };
+
+  auto engine = GetFlutterEngine();
+  [engine runWithEntrypoint:@"testRenderSizedToContent"];
+
+  auto engineId = reinterpret_cast<int64_t>(GetFlutterEngine());
+
+  std::optional<Isolate> isolate;
+
+  bool signaled = false;
+  AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                      signaled = true;
+                      isolate = Isolate::Current();
+                    }));
+
+  while (!signaled) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
+  }
+
+  int64_t viewId = 0;
+  {
+    IsolateScope isolate_scope(*isolate);
+    viewId = InternalFlutter_WindowController_CreateRegularWindow(engineId, &request);
+  }
+
+  auto controller = [engine viewControllerForIdentifier:viewId];
+  auto window = controller.view.window;
+
+  CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
+  double pixelRatio = [window backingScaleFactor];
+  while (window.frame.size.width != 300 / pixelRatio &&
+         CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
+  }
+
+  NSRect contentRect = [window contentRectForFrameRect:window.frame];
+  EXPECT_EQ(contentRect.size.width, 300 / pixelRatio);
+  EXPECT_EQ(contentRect.size.height, 300 / pixelRatio);
+  EXPECT_TRUE((window.styleMask & NSWindowStyleMaskResizable) == 0);
+
+  // Wait until the second frame is rendered, which should resize the window based
+  // on new content.
+  startTime = CFAbsoluteTimeGetCurrent();
+  while (window.frame.size.width == 300 / pixelRatio &&
+         CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
+  }
+
+  contentRect = [window contentRectForFrameRect:window.frame];
+  EXPECT_EQ(contentRect.size.width, 200 / pixelRatio);
+  EXPECT_EQ(contentRect.size.height, 200 / pixelRatio);
+
+  [engine.windowController closeAllWindows];
+  [engine shutDownEngine];
+}
+
 }  // namespace flutter::testing
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)
