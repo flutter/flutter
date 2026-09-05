@@ -520,7 +520,8 @@ abstract class FlutterCommand extends Command<void> {
     if (rest != null && rest.isNotEmpty) {
       return rest.first;
     }
-    return bundle.defaultMainPath;
+    final ToolContext? context = toolContext;
+    return context != null ? context.fs.path.join('lib', 'main.dart') : bundle.defaultMainPath;
   }
 
   /// Indicates if the current command running has a terminal attached.
@@ -1234,7 +1235,20 @@ abstract class FlutterCommand extends Command<void> {
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp => explicitEnableHcpp ?? featureFlags.isHcppEnabled;
+  bool get enableHcpp {
+    if (explicitEnableHcpp case final bool explicit) {
+      return explicit;
+    }
+    FeatureFlags? flags = runner?.featureFlags;
+    if (flags == null) {
+      try {
+        flags = context.get<FeatureFlags>();
+      } on UnsupportedError {
+        flags = null;
+      }
+    }
+    return flags?.isHcppEnabled ?? false;
+  }
 
   void addTestFlag({required bool verboseHelp}) {
     argParser.addFlag(
@@ -1467,8 +1481,21 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    final String enabledFeatureFlags = featureFlags.allFeatures
-        .where((Feature feature) => featureFlags.isEnabled(feature))
+    FeatureFlags? flags = runner?.featureFlags;
+    if (flags == null) {
+      try {
+        flags = context.get<FeatureFlags>();
+      } on UnsupportedError {
+        return;
+      }
+    }
+    if (flags == null) {
+      return;
+    }
+    final FeatureFlags effectiveFeatureFlags = flags;
+
+    final String enabledFeatureFlags = effectiveFeatureFlags.allFeatures
+        .where((Feature feature) => effectiveFeatureFlags.isEnabled(feature))
         .where((Feature feature) => feature.runtimeId != null)
         .map((Feature feature) => feature.runtimeId!)
         .join(',');
