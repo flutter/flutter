@@ -998,10 +998,7 @@ TEST_F(WindowManagerTest, CreateRegularWindowSizedToContent) {
   EXPECT_GE(view_id, 0);
 }
 
-// TODO(team-windows): Fix flakes. See:
-// https://github.com/flutter/flutter/issues/177172
-TEST_F(WindowManagerTest,
-       DISABLED_RegularWindowSizedToContentResizesToContent) {
+TEST_F(WindowManagerTest, RegularWindowSizedToContentResizesToContent) {
   IsolateScope isolate_scope(isolate());
 
   RegularWindowCreationRequest creation_request{
@@ -1075,11 +1072,8 @@ TEST_F(WindowManagerTest, RegularWindowSizedToContentResizableHasThickFrame) {
   EXPECT_NE(style & WS_MAXIMIZEBOX, 0L);
 }
 
-// TODO(team-windows): Fix flakes. See:
-// https://github.com/flutter/flutter/issues/177172
-TEST_F(
-    WindowManagerTest,
-    DISABLED_RegularWindowSizedToContentResizableStopsTrackingAfterFirstFrame) {
+TEST_F(WindowManagerTest,
+       RegularWindowSizedToContentResizableStopsTrackingAfterFirstFrame) {
   IsolateScope isolate_scope(isolate());
 
   RegularWindowCreationRequest creation_request{
@@ -1146,9 +1140,7 @@ TEST_F(WindowManagerTest, CreateModalDialogSizedToContent) {
   EXPECT_GE(view_id, 0);
 }
 
-// TODO(team-windows): Fix flakes. See:
-// https://github.com/flutter/flutter/issues/177172
-TEST_F(WindowManagerTest, DISABLED_DialogWindowSizedToContentResizesToContent) {
+TEST_F(WindowManagerTest, DialogWindowSizedToContentResizesToContent) {
   IsolateScope isolate_scope(isolate());
 
   DialogWindowCreationRequest creation_request{
