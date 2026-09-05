@@ -107,6 +107,7 @@ class BuildCommand extends FlutterCommand {
         verboseHelp: verboseHelp,
       ),
     );
+    _addSubcommand(BuildIOSArchiveCommand(logger: logger, verboseHelp: verboseHelp));
     if (effectiveFeatureFlags != null) {
       _addSubcommand(
         BuildSwiftPackage(
