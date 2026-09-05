@@ -11,6 +11,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
+import 'android_environment_resolver.dart';
 import 'android_studio.dart';
 
 const _javaExecutable = 'java';
@@ -28,8 +29,6 @@ enum JavaSource {
   /// JDK specified in Flutter's configuration.
   flutterConfig,
 }
-
-typedef _JavaHomePathWithSource = ({String path, JavaSource source});
 
 /// Represents an installation of Java.
 class Java {
@@ -82,38 +81,33 @@ class Java {
       platform: platform,
       processManager: processManager,
     );
-    final _JavaHomePathWithSource? home = _findJavaHome(
+    final locator = JavaCandidateLocator(
       config: config,
-      logger: logger,
       androidStudio: androidStudio,
       platform: platform,
     );
-    final String? binary = _findJavaBinary(
-      logger: logger,
-      javaHome: home?.path,
-      fileSystem: fileSystem,
-      operatingSystemUtils: os,
-      platform: platform,
-    );
-
-    if (binary == null) {
-      return null;
+    for (final JavaHomeCandidate candidate in locator.candidates) {
+      final String? binary = _findJavaBinary(
+        logger: logger,
+        javaHome: candidate.path,
+        fileSystem: fileSystem,
+        operatingSystemUtils: os,
+        platform: platform,
+      );
+      if (binary != null && processManager.canRun(binary)) {
+        return Java(
+          javaHome: candidate.path,
+          binaryPath: binary,
+          javaSource: candidate.source,
+          logger: logger,
+          fileSystem: fileSystem,
+          os: os,
+          platform: platform,
+          processManager: processManager,
+        );
+      }
     }
-
-    // If javaHome == null and binary is not null, it means that
-    // binary obtained from PATH as fallback.
-    final JavaSource javaSource = home?.source ?? JavaSource.path;
-
-    return Java(
-      javaHome: home?.path,
-      binaryPath: binary,
-      javaSource: javaSource,
-      logger: logger,
-      fileSystem: fileSystem,
-      os: os,
-      platform: platform,
-      processManager: processManager,
-    );
+    return null;
   }
 
   /// The path of the runtime environments' home directory.
@@ -221,29 +215,6 @@ class Java {
   bool canRun() {
     return _processManager.canRun(binaryPath);
   }
-}
-
-_JavaHomePathWithSource? _findJavaHome({
-  required Config config,
-  required Logger logger,
-  required AndroidStudio? androidStudio,
-  required Platform platform,
-}) {
-  final Object? configured = config.getValue('jdk-dir');
-  if (configured != null) {
-    return (path: configured as String, source: JavaSource.flutterConfig);
-  }
-
-  final String? androidStudioJavaPath = androidStudio?.javaPath;
-  if (androidStudioJavaPath != null) {
-    return (path: androidStudioJavaPath, source: JavaSource.androidStudio);
-  }
-
-  final String? javaHomeEnv = platform.environment[Java.javaHomeEnvironmentVariable];
-  if (javaHomeEnv != null) {
-    return (path: javaHomeEnv, source: JavaSource.javaHome);
-  }
-  return null;
 }
 
 String? _findJavaBinary({

@@ -13,6 +13,7 @@ import '../base/process.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
+import 'android_environment_resolver.dart';
 import 'java.dart';
 
 // ANDROID_SDK_ROOT is deprecated.
@@ -81,81 +82,23 @@ class AndroidSdk {
   bool get licensesAvailable => directory.childDirectory('licenses').existsSync();
 
   static AndroidSdk? locateAndroidSdk() {
-    String? findAndroidHomeDir() {
-      String? androidHomeDir;
-      if (globals.config.containsKey('android-sdk')) {
-        androidHomeDir = globals.config.getValue('android-sdk') as String?;
-      } else if (globals.platform.environment.containsKey(kAndroidHome)) {
-        androidHomeDir = globals.platform.environment[kAndroidHome];
-      } else if (globals.platform.environment.containsKey(kAndroidSdkRoot)) {
-        androidHomeDir = globals.platform.environment[kAndroidSdkRoot];
-      } else if (globals.platform.isLinux) {
-        if (globals.fsUtils.homeDirPath != null) {
-          androidHomeDir = globals.fs.path.join(globals.fsUtils.homeDirPath!, 'Android', 'Sdk');
-        }
-      } else if (globals.platform.isMacOS) {
-        if (globals.fsUtils.homeDirPath != null) {
-          androidHomeDir = globals.fs.path.join(
-            globals.fsUtils.homeDirPath!,
-            'Library',
-            'Android',
-            'sdk',
-          );
-        }
-      } else if (globals.platform.isWindows) {
-        if (globals.fsUtils.homeDirPath != null) {
-          androidHomeDir = globals.fs.path.join(
-            globals.fsUtils.homeDirPath!,
-            'AppData',
-            'Local',
-            'Android',
-            'sdk',
-          );
-        }
-      }
-
-      if (androidHomeDir != null) {
-        if (validSdkDirectory(androidHomeDir)) {
-          return androidHomeDir;
-        }
-        if (validSdkDirectory(globals.fs.path.join(androidHomeDir, 'sdk'))) {
-          return globals.fs.path.join(androidHomeDir, 'sdk');
-        }
-      }
-
-      // in build-tools/$version/aapt
-      final List<File> aaptBins = globals.os.whichAll('aapt');
-      for (var aaptBin in aaptBins) {
-        // Make sure we're using the aapt from the SDK.
-        aaptBin = globals.fs.file(aaptBin.resolveSymbolicLinksSync());
-        final String dir = aaptBin.parent.parent.parent.path;
-        if (validSdkDirectory(dir)) {
-          return dir;
-        }
-      }
-
-      // in platform-tools/adb
-      final List<File> adbBins = globals.os.whichAll('adb');
-      for (var adbBin in adbBins) {
-        // Make sure we're using the adb from the SDK.
-        adbBin = globals.fs.file(adbBin.resolveSymbolicLinksSync());
-        final String dir = adbBin.parent.parent.path;
-        if (validSdkDirectory(dir)) {
-          return dir;
-        }
-      }
-
-      return null;
+    final AndroidEnvironmentResolver? resolver = globals.androidEnvironmentResolver;
+    if (resolver != null) {
+      return resolver.resolve()?.sdk;
     }
-
-    final String? androidHomeDir = findAndroidHomeDir();
-    if (androidHomeDir == null) {
-      // No dice.
+    final locator = SdkCandidateLocator(
+      config: globals.config,
+      platform: globals.platform,
+      fileSystem: globals.fs,
+      operatingSystemUtils: globals.os,
+      fileSystemUtils: globals.fsUtils,
+    );
+    final Directory? sdkDir = locator.candidates.firstOrNull;
+    if (sdkDir == null) {
       globals.printTrace('Unable to locate an Android SDK.');
       return null;
     }
-
-    return AndroidSdk(globals.fs.directory(androidHomeDir));
+    return AndroidSdk(sdkDir);
   }
 
   static bool validSdkDirectory(String dir) {
@@ -335,116 +278,35 @@ class AndroidSdk {
   String? getAvdManagerPath() =>
       getCmdlineToolsPath(globals.platform.isWindows ? 'avdmanager.bat' : 'avdmanager');
 
-  /// From https://developer.android.com/ndk/guides/other_build_systems.
-  static const _llvmHostDirectoryName = <String, String>{
-    'macos': 'darwin-x86_64',
-    'linux': 'linux-x86_64',
-    'windows': 'windows-x86_64',
-  };
-
   /// Locates the binary path for an NDK binary.
-  ///
-  /// The order of resolution is as follows:
-  ///
-  /// 1. If [globals.config] defines an `'android-ndk'` use that.
-  /// 2. If the environment variable `ANDROID_NDK_HOME` is defined, use that.
-  /// 3. If the environment variable `ANDROID_NDK_PATH` is defined, use that.
-  /// 4. If the environment variable `ANDROID_NDK_ROOT` is defined, use that.
-  /// 5. Look for the default install location inside the Android SDK:
-  ///    [directory]/ndk/\<version\>/. If multiple versions exist, use the
-  ///    newest.
   Iterable<Directory> getNdkDirectoriesInResolutionOrder({Platform? platform, Config? config}) {
     platform ??= globals.platform;
     config ??= globals.config;
+    return NdkCandidateLocator(sdkRoot: directory, config: config, platform: platform).candidates;
+  }
 
-    final ndkDirectories = <Directory>[];
-    String? androidNdkHomeDir;
-    if (config.containsKey('android-ndk')) {
-      androidNdkHomeDir = config.getValue('android-ndk') as String?;
-    } else if (platform.environment.containsKey(kAndroidNdkHome)) {
-      androidNdkHomeDir = platform.environment[kAndroidNdkHome];
-    } else if (platform.environment.containsKey(kAndroidNdkPath)) {
-      androidNdkHomeDir = platform.environment[kAndroidNdkPath];
-    } else if (platform.environment.containsKey(kAndroidNdkRoot)) {
-      androidNdkHomeDir = platform.environment[kAndroidNdkRoot];
-    }
-    if (androidNdkHomeDir != null) {
-      ndkDirectories.add(directory.fileSystem.directory(androidNdkHomeDir));
-    }
-
-    // Look for the default install location of the NDK inside the Android
-    // SDK when installed through `sdkmanager` or Android studio.
-    final Directory ndk = directory.childDirectory('ndk');
-    if (!ndk.existsSync()) {
-      return ndkDirectories;
-    }
-    final List<Version> ndkVersions =
-        ndk
-            .listSync()
-            .map((FileSystemEntity entity) {
-              try {
-                return Version.parse(entity.basename);
-              } on Exception {
-                return null;
-              }
-            })
-            .whereType<Version>()
-            .toList()
-          // Use latest NDK first.
-          ..sort((Version a, Version b) => -a.compareTo(b));
-    for (final ndkVersion in ndkVersions) {
-      ndkDirectories.add(ndk.childDirectory(ndkVersion.toString()));
-    }
-    return ndkDirectories;
+  AndroidNdk? _resolveNdk(Platform? platform, Config? config) {
+    return AndroidNdk.locate(
+      config: config ?? globals.config,
+      platform: platform ?? globals.platform,
+      sdkDir: directory,
+    );
   }
 
   String? getNdkBinaryPath(String binaryName, {Platform? platform, Config? config}) {
-    platform ??= globals.platform;
-    config ??= globals.config;
-    for (final Directory androidNdkHomeDir in getNdkDirectoriesInResolutionOrder(
-      platform: platform,
-      config: config,
-    )) {
-      final File executable = androidNdkHomeDir
-          .childDirectory('toolchains')
-          .childDirectory('llvm')
-          .childDirectory('prebuilt')
-          .childDirectory(_llvmHostDirectoryName[platform.operatingSystem]!)
-          .childDirectory('bin')
-          .childFile(binaryName);
-      if (executable.existsSync()) {
-        // LLVM missing in this NDK version.
-        return executable.path;
-      }
-    }
-    return null;
+    return _resolveNdk(platform, config)?.getBinaryPath(binaryName);
   }
 
   String? getNdkClangPath({Platform? platform, Config? config}) {
-    platform ??= globals.platform;
-    return getNdkBinaryPath(
-      platform.isWindows ? 'clang.exe' : 'clang',
-      platform: platform,
-      config: config,
-    );
+    return _resolveNdk(platform, config)?.clangPath;
   }
 
   String? getNdkArPath({Platform? platform, Config? config}) {
-    platform ??= globals.platform;
-    return getNdkBinaryPath(
-      platform.isWindows ? 'llvm-ar.exe' : 'llvm-ar',
-      platform: platform,
-      config: config,
-    );
+    return _resolveNdk(platform, config)?.arPath;
   }
 
   String? getNdkLdPath({Platform? platform, Config? config}) {
-    platform ??= globals.platform;
-    return getNdkBinaryPath(
-      platform.isWindows ? 'ld.lld.exe' : 'ld.lld',
-      platform: platform,
-      config: config,
-    );
+    return _resolveNdk(platform, config)?.ldPath;
   }
 
   /// Sets up various paths used internally.
