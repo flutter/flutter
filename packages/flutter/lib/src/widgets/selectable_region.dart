@@ -351,7 +351,10 @@ class SelectableRegionState extends State<SelectableRegion>
     implements SelectionRegistrar {
   late final Map<Type, Action<Intent>> _actions = <Type, Action<Intent>>{
     SelectAllTextIntent: _makeOverridable(_SelectAllAction(this)),
-    CopySelectionTextIntent: _makeOverridable(_CopySelectionAction(this)),
+    // TODO(dantup): Uncommenting this does not result in Cmd+C being handled
+    //  natively. Is _makeOverridable necessary for web?
+    // TODO(dantup): This needs to be conditional only for web.
+    // CopySelectionTextIntent: _makeOverridable(DoNothingAction()),
     ExtendSelectionToNextWordBoundaryOrCaretLocationIntent: _makeOverridable(
       _GranularlyExtendSelectionAction<ExtendSelectionToNextWordBoundaryOrCaretLocationIntent>(
         this,
@@ -1968,7 +1971,7 @@ class SelectableRegionState extends State<SelectableRegion>
       child: SelectionContainer(registrar: this, delegate: _selectionDelegate, child: widget.child),
     );
     if (_webContextMenuEnabled) {
-      result = PlatformSelectableRegionContextMenu(child: result);
+      result = PlatformSelectableRegionContextMenu(client: _selectionDelegate, child: result);
     }
     return TapRegion(
       groupId: SelectableRegion,
