@@ -50,6 +50,7 @@ struct _FlGtk4AccessibleNode {
   FlutterViewId view_id;
   GtkAccessibleRole role;
   GtkATContext* at_context;
+  guint64 semantics_revision;
 
   gchar* text;
   guint text_selection_base;
@@ -628,6 +629,9 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
     FlutterViewId view_id,
     const FlAccessibilitySemanticsNode* semantics,
     FlGtk4AccessibleNode* self) {
+  if (self != nullptr && self->semantics_revision == semantics->revision) {
+    return self;
+  }
   const GtkAccessibleRole role = fl_view_gtk4_accessibility_get_role(semantics);
   const gboolean supports_text =
       semantics->flags.is_text_field && !semantics->flags.is_obscured &&
@@ -648,6 +652,7 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
   }
   self->view = view;
   self->view_id = view_id;
+  self->semantics_revision = semantics->revision;
 
   const FlutterSemanticsFlags* flags = &semantics->flags;
   const gboolean is_enabled = flags->is_enabled != kFlutterTristateFalse;
@@ -770,6 +775,22 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
 static void fl_gtk4_accessible_node_attach_children(
     FlGtk4AccessibleNode* parent,
     GPtrArray* children) {
+  g_autoptr(GHashTable) retained =
+      g_hash_table_new(g_direct_hash, g_direct_equal);
+  for (guint i = 0; i < children->len; i++) {
+    g_hash_table_add(retained, g_ptr_array_index(children, i));
+  }
+  for (guint i = 0; i < parent->children->len; i++) {
+    auto* child =
+        FL_GTK4_ACCESSIBLE_NODE(g_ptr_array_index(parent->children, i));
+    if (!g_hash_table_contains(retained, child) && child->parent == parent) {
+      child->parent = nullptr;
+      child->next_sibling = nullptr;
+      fl_gtk_runtime_accessible_set_accessible_parent(GTK_ACCESSIBLE(child),
+                                                      nullptr, nullptr);
+    }
+  }
+  gboolean same_children = parent->children->len == children->len;
   for (guint i = 0; i < children->len; i++) {
     FlGtk4AccessibleNode* child =
         FL_GTK4_ACCESSIBLE_NODE(g_ptr_array_index(children, i));
@@ -777,12 +798,22 @@ static void fl_gtk4_accessible_node_attach_children(
         i + 1 < children->len
             ? FL_GTK4_ACCESSIBLE_NODE(g_ptr_array_index(children, i + 1))
             : nullptr;
-    child->parent = parent;
-    child->next_sibling = next_sibling;
-    g_ptr_array_add(parent->children, g_object_ref(child));
-    fl_gtk_runtime_accessible_set_accessible_parent(
-        GTK_ACCESSIBLE(child), GTK_ACCESSIBLE(parent),
-        GTK_ACCESSIBLE(next_sibling));
+    if (child->parent != parent || child->next_sibling != next_sibling) {
+      child->parent = parent;
+      child->next_sibling = next_sibling;
+      fl_gtk_runtime_accessible_set_accessible_parent(
+          GTK_ACCESSIBLE(child), GTK_ACCESSIBLE(parent),
+          GTK_ACCESSIBLE(next_sibling));
+    }
+    same_children =
+        same_children && g_ptr_array_index(parent->children, i) == child;
+  }
+  if (!same_children) {
+    g_ptr_array_set_size(parent->children, 0);
+    for (guint i = 0; i < children->len; i++) {
+      g_ptr_array_add(parent->children,
+                      g_object_ref(g_ptr_array_index(children, i)));
+    }
   }
 }
 
@@ -853,7 +884,6 @@ static void fl_view_gtk4_accessibility_rebuild_native_tree(
     FlViewGtk4Accessibility* self) {
   FlRenderTextureGtk4* render_area =
       FL_RENDER_TEXTURE_GTK4(self->view->render_area);
-  fl_render_texture_gtk4_set_accessible_child(render_area, nullptr);
 
   if (!fl_gtk_runtime_supports_native_accessibility_tree()) {
     return;
@@ -873,19 +903,13 @@ static void fl_view_gtk4_accessibility_rebuild_native_tree(
   GHashTableIter nodes_iter;
   gpointer node_key = nullptr;
   gpointer node_value = nullptr;
-  g_hash_table_iter_init(&nodes_iter, self->native_nodes_by_id);
-  while (g_hash_table_iter_next(&nodes_iter, &node_key, &node_value)) {
-    FlGtk4AccessibleNode* node = FL_GTK4_ACCESSIBLE_NODE(node_value);
-    g_ptr_array_set_size(node->children, 0);
-    node->parent = nullptr;
-    node->next_sibling = nullptr;
-  }
 
   g_autoptr(GHashTable) visited =
       g_hash_table_new(g_direct_hash, g_direct_equal);
+  FlGtk4AccessibleNode* previous_root = self->root_node;
   self->root_node =
       fl_view_gtk4_accessibility_build_native_node(self, root, visited);
-  if (self->root_node != nullptr) {
+  if (self->root_node != nullptr && self->root_node != previous_root) {
     fl_gtk_runtime_accessible_set_accessible_parent(
         GTK_ACCESSIBLE(self->root_node),
         GTK_ACCESSIBLE(self->view->render_area), nullptr);
@@ -947,7 +971,31 @@ void fl_view_gtk4_accessibility_handle_update(
   fl_accessibility_semantics_store_handle_update(self->semantics_store, update);
 #if defined(FLUTTER_LINUX_GTK4_NATIVE_ACCESSIBILITY_TREE)
   if (fl_gtk_runtime_supports_native_accessibility_tree()) {
-    fl_view_gtk4_accessibility_rebuild_native_tree(self);
+    gboolean rebuild = self->root_node == nullptr ||
+                       fl_accessibility_semantics_store_structure_changed(
+                           self->semantics_store);
+    if (!rebuild) {
+      for (size_t i = 0; i < update->node_count; i++) {
+        const int32_t id = update->nodes[i]->id;
+        auto* node = static_cast<FlGtk4AccessibleNode*>(
+            g_hash_table_lookup(self->native_nodes_by_id, GINT_TO_POINTER(id)));
+        const auto* semantics = fl_accessibility_semantics_store_lookup_node(
+            self->semantics_store, id);
+        if (node == nullptr || semantics == nullptr) {
+          continue;
+        }
+        auto* updated = fl_gtk4_accessible_node_update(
+            self->view, self->view_id, semantics, node);
+        if (updated != node) {
+          g_hash_table_insert(self->native_nodes_by_id, GINT_TO_POINTER(id),
+                              updated);
+          rebuild = TRUE;
+        }
+      }
+    }
+    if (rebuild) {
+      fl_view_gtk4_accessibility_rebuild_native_tree(self);
+    }
     fl_view_gtk4_accessibility_update_accessible_name(self);
   } else {
     fl_view_gtk4_accessibility_update_accessible_name(self);

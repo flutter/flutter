@@ -27,6 +27,7 @@ typedef struct {
   size_t child_count;
   int32_t* children_in_traversal_order;
   int32_t heading_level;
+  guint64 revision;
 } FlAccessibilitySemanticsNode;
 
 G_DECLARE_FINAL_TYPE(FlAccessibilitySemanticsStore,
@@ -48,6 +49,9 @@ fl_accessibility_semantics_store_lookup_node(
     int32_t node_id);
 
 gboolean fl_accessibility_semantics_store_has_root(
+    FlAccessibilitySemanticsStore* self);
+
+gboolean fl_accessibility_semantics_store_structure_changed(
     FlAccessibilitySemanticsStore* self);
 
 G_END_DECLS

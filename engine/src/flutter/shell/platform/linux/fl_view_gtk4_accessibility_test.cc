@@ -179,6 +179,28 @@ TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
     EXPECT_STREQ(text_data, "one two");
     EXPECT_EQ(text_length, std::strlen("one two"));
   }
+
+  // Reordering and removal must preserve retained objects and repair sibling
+  // links even when the children themselves are absent from the update.
+  int32_t reordered[] = {2, 1};
+  root.child_count = 2;
+  root.children_in_traversal_order = reordered;
+  FlutterSemanticsNode2* root_only[] = {&root};
+  update.node_count = 1;
+  update.nodes = root_only;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) reordered_first =
+      fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
+          native_root);
+  EXPECT_EQ(reordered_first, second_child);
+  g_autoptr(GtkAccessible) reordered_second =
+      fl_view_gtk4_accessibility_ref_next_native_sibling_for_testing(
+          second_child);
+  EXPECT_EQ(reordered_second, first_child);
+  EXPECT_EQ(fl_view_gtk4_accessibility_ref_next_native_sibling_for_testing(
+                first_child),
+            nullptr);
 }
 
 }  // namespace

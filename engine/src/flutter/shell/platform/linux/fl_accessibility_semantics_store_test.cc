@@ -107,6 +107,44 @@ TEST(FlAccessibilitySemanticsStoreTest, IgnoresOtherViewUpdates) {
   EXPECT_EQ(fl_accessibility_semantics_store_lookup_node(store, 0), nullptr);
 }
 
+TEST(FlAccessibilitySemanticsStoreTest,
+     DistinguishesContentAndStructureChanges) {
+  g_autoptr(FlAccessibilitySemanticsStore) store =
+      fl_accessibility_semantics_store_new(123);
+  FlutterSemanticsNode2 root = {};
+  root.label = "before";
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = 123;
+  update.node_count = 1;
+  update.nodes = nodes;
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  EXPECT_TRUE(fl_accessibility_semantics_store_structure_changed(store));
+  const auto* original = fl_accessibility_semantics_store_lookup_node(store, 0);
+  const guint64 revision = original->revision;
+
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  EXPECT_FALSE(fl_accessibility_semantics_store_structure_changed(store));
+  EXPECT_EQ(fl_accessibility_semantics_store_lookup_node(store, 0), original);
+  EXPECT_EQ(original->revision, revision);
+
+  root.label = "after";
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  EXPECT_FALSE(fl_accessibility_semantics_store_structure_changed(store));
+  EXPECT_GT(fl_accessibility_semantics_store_lookup_node(store, 0)->revision,
+            revision);
+
+  int32_t children[] = {1, 2};
+  root.child_count = 2;
+  root.children_in_traversal_order = children;
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  EXPECT_TRUE(fl_accessibility_semantics_store_structure_changed(store));
+  children[0] = 2;
+  children[1] = 1;
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  EXPECT_TRUE(fl_accessibility_semantics_store_structure_changed(store));
+}
+
 TEST(FlAccessibilitySemanticsStoreTest, ReplacesNodesOnSubsequentUpdates) {
   g_autoptr(FlAccessibilitySemanticsStore) store =
       fl_accessibility_semantics_store_new(123);

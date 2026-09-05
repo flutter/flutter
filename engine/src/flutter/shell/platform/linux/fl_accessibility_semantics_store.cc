@@ -14,6 +14,8 @@ struct _FlAccessibilitySemanticsStore {
   FlutterViewId view_id;
   GHashTable* nodes_by_id;
   gboolean root_node_present;
+  gboolean structure_changed;
+  guint64 revision;
 };
 
 G_DEFINE_TYPE(FlAccessibilitySemanticsStore,
@@ -103,17 +105,52 @@ void fl_accessibility_semantics_store_handle_update(
     return;
   }
 
+  self->structure_changed = FALSE;
   for (size_t i = 0; i < update->node_count; i++) {
     FlutterSemanticsNode2* semantics = update->nodes[i];
+    const auto* previous =
+        fl_accessibility_semantics_store_lookup_node(self, semantics->id);
+    const gboolean same_children =
+        previous != nullptr &&
+        previous->child_count == semantics->child_count &&
+        (semantics->child_count == 0 ||
+         (previous->children_in_traversal_order != nullptr &&
+          semantics->children_in_traversal_order != nullptr &&
+          memcmp(previous->children_in_traversal_order,
+                 semantics->children_in_traversal_order,
+                 semantics->child_count * sizeof(int32_t)) == 0));
+    self->structure_changed |= !same_children;
+    FlutterSemanticsFlags flags = {};
+    if (semantics->flags2 != nullptr) {
+      flags = *semantics->flags2;
+    }
+    // Byte comparisons are conservative: padding differences may cause an
+    // extra update, but never suppress a changed field.
+    if (same_children && g_strcmp0(previous->label, semantics->label) == 0 &&
+        g_strcmp0(previous->hint, semantics->hint) == 0 &&
+        g_strcmp0(previous->value, semantics->value) == 0 &&
+        g_strcmp0(previous->tooltip, semantics->tooltip) == 0 &&
+        memcmp(&previous->flags, &flags, sizeof(flags)) == 0 &&
+        previous->actions == semantics->actions &&
+        previous->text_selection_base == semantics->text_selection_base &&
+        previous->text_selection_extent == semantics->text_selection_extent &&
+        previous->text_direction == semantics->text_direction &&
+        memcmp(&previous->rect, &semantics->rect, sizeof(FlutterRect)) == 0 &&
+        memcmp(&previous->transform, &semantics->transform,
+               sizeof(FlutterTransformation)) == 0 &&
+        previous->heading_level == semantics->heading_level) {
+      continue;
+    }
     FlAccessibilitySemanticsNode* node =
         fl_accessibility_semantics_node_new(semantics);
+    node->revision = ++self->revision;
     g_hash_table_replace(self->nodes_by_id, GINT_TO_POINTER(node->id), node);
     if (node->id == 0) {
       self->root_node_present = TRUE;
     }
   }
 
-  if (!self->root_node_present) {
+  if (!self->root_node_present || !self->structure_changed) {
     return;
   }
 
@@ -164,4 +201,10 @@ gboolean fl_accessibility_semantics_store_has_root(
   g_return_val_if_fail(FL_IS_ACCESSIBILITY_SEMANTICS_STORE(self), FALSE);
 
   return self->root_node_present;
+}
+
+gboolean fl_accessibility_semantics_store_structure_changed(
+    FlAccessibilitySemanticsStore* self) {
+  g_return_val_if_fail(FL_IS_ACCESSIBILITY_SEMANTICS_STORE(self), FALSE);
+  return self->structure_changed;
 }
