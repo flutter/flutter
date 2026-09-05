@@ -21,6 +21,7 @@ void main() async {
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
     await nativeDriver.configureForScreenshotTesting();
     await flutterDriver.waitUntilFirstFrameRasterized();
+    await nativeDriver.waitUntilFirstFrameDisplayed();
   });
 
   tearDownAll(() async {

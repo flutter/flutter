@@ -23,6 +23,7 @@ void main() async {
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
     await nativeDriver.configureForScreenshotTesting();
     await flutterDriver.waitUntilFirstFrameRasterized();
+    await nativeDriver.waitUntilFirstFrameDisplayed();
   });
 
   tearDownAll(() async {
@@ -36,14 +37,10 @@ void main() async {
     expect(response['supported'], true);
   }, timeout: Timeout.none);
 
-  test(
-    'should get a PlatformException when TLHC pv falls back to HC with HCPP enabled',
-    () async {
-      await flutterDriver.tap(find.byValueKey('LoadPlatformView'));
-      final response = json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
+  test('should get a PlatformException when TLHC pv falls back to HC with HCPP enabled', () async {
+    await flutterDriver.tap(find.byValueKey('LoadPlatformView'));
+    final response = json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
 
-      expect(response['checkErrorText'], contains('HC++'));
-    },
-    timeout: Timeout.none,
-  );
+    expect(response['checkErrorText'], contains('HC++'));
+  }, timeout: Timeout.none);
 }

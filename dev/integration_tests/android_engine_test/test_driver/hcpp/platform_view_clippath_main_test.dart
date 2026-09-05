@@ -38,6 +38,7 @@ void main() async {
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
     await nativeDriver.configureForScreenshotTesting();
     await flutterDriver.waitUntilFirstFrameRasterized();
+    await nativeDriver.waitUntilFirstFrameDisplayed();
   });
 
   tearDownAll(() async {
@@ -75,22 +76,18 @@ void main() async {
     timeout: Timeout.none,
   );
 
-  test(
-    'should start with wave cutoff on bottom, and toggle to no wave cutoff on bottom',
-    () async {
-      await flutterDriver.tap(find.byValueKey('clipper_button_cubicWave'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.only_cubicWave.png'),
-      );
-      await flutterDriver.tap(find.byValueKey('clipper_button_cubicWave'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.no_path_clipping.png'),
-      );
-    },
-    timeout: Timeout.none,
-  );
+  test('should start with wave cutoff on bottom, and toggle to no wave cutoff on bottom', () async {
+    await flutterDriver.tap(find.byValueKey('clipper_button_cubicWave'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.only_cubicWave.png'),
+    );
+    await flutterDriver.tap(find.byValueKey('clipper_button_cubicWave'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.no_path_clipping.png'),
+    );
+  }, timeout: Timeout.none);
 
   test('should start with box cutout (nonZero), and toggle to no box cutout', () async {
     await flutterDriver.tap(find.byValueKey('clipper_button_overlappingNonZero'));
