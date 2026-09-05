@@ -81,6 +81,9 @@ name: foo
             .file('bin/cache/flutter_web_sdk/flutter_js/flutter.js')
             .createSync(recursive: true);
         globals.fs
+            .file('bin/cache/flutter_web_sdk/flutter_js/flutter.js.map')
+            .createSync(recursive: true);
+        globals.fs
             .file('engine/src/flutter/txt/third_party/fonts/Roboto-Regular.ttf')
             .createSync(recursive: true);
 
@@ -1720,6 +1723,25 @@ _flutter.loader.load();
       );
 
       expect(result, '');
+    }),
+  );
+
+  test(
+    'WebBuiltInAssets declares and copies the Flutter loader source map',
+    () => testbed.run(() async {
+      final File flutterJsMapInput = globals.fs.file(
+        'bin/cache/flutter_web_sdk/flutter_js/flutter.js.map',
+      )..createSync(recursive: true);
+      flutterJsMapInput.writeAsStringSync('source map', flush: true);
+      globals.fs.directory('bin/cache/flutter_web_sdk/canvaskit').createSync(recursive: true);
+
+      final target = WebBuiltInAssets(globals.fs);
+      expect(target.outputs, contains(const Source.pattern('{BUILD_DIR}/flutter.js.map')));
+      await target.build(environment);
+
+      final File flutterJsMapOutput = environment.outputDir.childFile('flutter.js.map');
+      expect(flutterJsMapOutput, exists);
+      expect(flutterJsMapOutput.readAsStringSync(), 'source map');
     }),
   );
 
