@@ -44,17 +44,24 @@ final _sdkVersionRe = RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 // $ANDROID_HOME/platforms/android-23/android.jar
 // $ANDROID_HOME/platforms/android-N/android.jar
 class AndroidSdk {
-  AndroidSdk(this.directory, {Java? java, FileSystem? fileSystem}) : _java = java {
-    reinitialize(fileSystem: fileSystem);
-  }
+  AndroidSdk(this.directory, {Java? java}) : _java = java;
 
   /// The Android SDK root directory.
   final Directory directory;
 
   final Java? _java;
 
-  var _sdkVersions = <AndroidSdkVersion>[];
+  List<AndroidSdkVersion> _sdkVersions = <AndroidSdkVersion>[];
   AndroidSdkVersion? _latestVersion;
+  bool _reinitialized = false;
+
+  void _ensureInitialized() {
+    if (_reinitialized) {
+      return;
+    }
+    _reinitialized = true;
+    reinitialize();
+  }
 
   /// Whether the `cmdline-tools` directory exists in the Android SDK.
   ///
@@ -170,9 +177,15 @@ class AndroidSdk {
     return globals.fs.isDirectorySync(globals.fs.path.join(dir, 'licenses'));
   }
 
-  List<AndroidSdkVersion> get sdkVersions => _sdkVersions;
+  List<AndroidSdkVersion> get sdkVersions {
+    _ensureInitialized();
+    return _sdkVersions;
+  }
 
-  AndroidSdkVersion? get latestVersion => _latestVersion;
+  AndroidSdkVersion? get latestVersion {
+    _ensureInitialized();
+    return _latestVersion;
+  }
 
   late final String? adbPath = getPlatformToolsPath(globals.platform.isWindows ? 'adb.exe' : 'adb');
 
@@ -451,7 +464,9 @@ class AndroidSdk {
   ///
   /// This method should be called in a case where the tooling may have updated
   /// SDK artifacts, such as after running a gradle build.
-  void reinitialize({FileSystem? fileSystem}) {
+  void reinitialize() {
+    _reinitialized = true;
+    final FileSystem fs = directory.fileSystem;
     var buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
     final Directory buildToolsDir = directory.childDirectory('build-tools');
@@ -517,7 +532,7 @@ class AndroidSdk {
             sdkLevel: platformVersion,
             platformName: platformName,
             buildToolsVersion: buildToolsVersion,
-            fileSystem: fileSystem ?? globals.fs,
+            fileSystem: fs,
           );
         })
         .whereType<AndroidSdkVersion>()
