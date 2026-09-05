@@ -6,12 +6,14 @@ import 'dart:async';
 
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import 'application_package.dart';
 import 'build_windows.dart';
@@ -20,10 +22,11 @@ import 'windows_workflow.dart';
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends DesktopDevice {
   WindowsDevice({
-    required super.processManager,
-    required super.logger,
     required super.fileSystem,
+    required super.logger,
     required super.operatingSystemUtils,
+    required super.processManager,
+    super.artifacts,
   }) : _operatingSystemUtils = operatingSystemUtils,
        super('windows', platformType: PlatformType.windows, ephemeral: false);
 
@@ -76,16 +79,18 @@ class WindowsDevice extends DesktopDevice {
 
 class WindowsDevices extends PollingDeviceDiscovery {
   WindowsDevices({
-    required ProcessManager processManager,
-    required Logger logger,
     required FileSystem fileSystem,
+    required Logger logger,
     required OperatingSystemUtils operatingSystemUtils,
+    required ProcessManager processManager,
     required WindowsWorkflow windowsWorkflow,
+    Artifacts? artifacts,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
        _windowsWorkflow = windowsWorkflow,
+       _artifacts = artifacts ?? globals.artifacts!,
        super('windows devices');
 
   final FileSystem _fileSystem;
@@ -93,6 +98,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   final ProcessManager _processManager;
   final OperatingSystemUtils _operatingSystemUtils;
   final WindowsWorkflow _windowsWorkflow;
+  final Artifacts _artifacts;
 
   @override
   bool get supportsPlatform => _windowsWorkflow.appliesToHostPlatform;
@@ -114,6 +120,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
         logger: _logger,
         processManager: _processManager,
         operatingSystemUtils: _operatingSystemUtils,
+        artifacts: _artifacts,
       ),
     ];
   }

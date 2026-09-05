@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -12,6 +13,7 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import 'application_package.dart';
 import 'build_macos.dart';
@@ -20,10 +22,11 @@ import 'macos_workflow.dart';
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({
-    required super.processManager,
-    required super.logger,
     required super.fileSystem,
+    required super.logger,
     required super.operatingSystemUtils,
+    required super.processManager,
+    super.artifacts,
   }) : _processManager = processManager,
        _logger = logger,
        _operatingSystemUtils = operatingSystemUtils,
@@ -102,18 +105,20 @@ class MacOSDevice extends DesktopDevice {
 
 class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices({
-    required Platform platform,
-    required MacOSWorkflow macOSWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
     required FileSystem fileSystem,
+    required Logger logger,
+    required MacOSWorkflow macOSWorkflow,
     required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessManager processManager,
+    Artifacts? artifacts,
   }) : _logger = logger,
        _platform = platform,
        _macOSWorkflow = macOSWorkflow,
        _processManager = processManager,
        _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
+       _artifacts = artifacts ?? globals.artifacts!,
        super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
@@ -122,6 +127,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
+  final Artifacts _artifacts;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -143,6 +149,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
         logger: _logger,
         fileSystem: _fileSystem,
         operatingSystemUtils: _operatingSystemUtils,
+        artifacts: _artifacts,
       ),
     ];
   }

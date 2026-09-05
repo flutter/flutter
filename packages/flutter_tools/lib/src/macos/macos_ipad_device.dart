@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -15,6 +16,7 @@ import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../globals.dart' as globals;
 import '../ios/ios_workflow.dart';
 import '../project.dart';
 
@@ -23,10 +25,11 @@ import '../project.dart';
 /// https://developer.apple.com/documentation/apple-silicon/running-your-ios-apps-on-macos
 class MacOSDesignedForIPadDevice extends DesktopDevice {
   MacOSDesignedForIPadDevice({
-    required super.processManager,
-    required super.logger,
     required super.fileSystem,
+    required super.logger,
     required super.operatingSystemUtils,
+    required super.processManager,
+    super.artifacts,
   }) : _operatingSystemUtils = operatingSystemUtils,
        super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
 
@@ -119,18 +122,20 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
 class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   MacOSDesignedForIPadDevices({
-    required Platform platform,
-    required IOSWorkflow iosWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
     required FileSystem fileSystem,
+    required IOSWorkflow iosWorkflow,
+    required Logger logger,
     required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessManager processManager,
+    Artifacts? artifacts,
   }) : _logger = logger,
        _platform = platform,
        _iosWorkflow = iosWorkflow,
        _processManager = processManager,
        _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
+       _artifacts = artifacts ?? globals.artifacts!,
        super('Mac designed for iPad devices');
 
   final IOSWorkflow _iosWorkflow;
@@ -139,6 +144,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
+  final Artifacts _artifacts;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -168,6 +174,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
         logger: _logger,
         fileSystem: _fileSystem,
         operatingSystemUtils: _operatingSystemUtils,
+        artifacts: _artifacts,
       ),
     ];
   }

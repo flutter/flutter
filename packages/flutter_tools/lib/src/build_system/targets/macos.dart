@@ -519,6 +519,17 @@ abstract class MacOSBundleFlutterAssets extends Target {
         environment.fileSystem
             .file(isolateSnapshotData)
             .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
+
+        final String vmserviceDill = environment.artifacts.getArtifactPath(
+          Artifact.vmserviceKernelDill,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.debug,
+        );
+        final File vmserviceDillFile = environment.fileSystem.file(vmserviceDill);
+        // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter.
+        if (vmserviceDillFile.existsSync()) {
+          vmserviceDillFile.copySync(assetDirectory.childFile('vmservice_snapshot.dill').path);
+        }
       } on Exception catch (err) {
         throw Exception('Failed to copy precompiled runtimes: $err');
       }
@@ -592,6 +603,11 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
       platform: TargetPlatform.darwin,
       mode: BuildMode.debug,
     ),
+    const Source.artifact(
+      Artifact.vmserviceKernelDill,
+      platform: TargetPlatform.darwin,
+      mode: BuildMode.debug,
+    ),
   ];
 
   @override
@@ -605,6 +621,9 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     ),
     const Source.pattern(
       '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data',
+    ),
+    const Source.pattern(
+      '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/vmservice_snapshot.dill',
     ),
   ];
 }

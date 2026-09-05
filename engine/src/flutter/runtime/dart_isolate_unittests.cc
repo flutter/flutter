@@ -416,39 +416,19 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
   ASSERT_TRUE(vm_ref);
   auto vm_data = vm_ref.GetVMData();
   ASSERT_TRUE(vm_data);
-  TaskRunners task_runners(GetCurrentTestName(),    //
-                           GetCurrentTaskRunner(),  //
-                           GetCurrentTaskRunner(),  //
-                           GetCurrentTaskRunner(),  //
-                           GetCurrentTaskRunner()   //
+  auto thread_task_runner = CreateNewThread();
+  TaskRunners task_runners(GetCurrentTestName(),  //
+                           thread_task_runner,    //
+                           thread_task_runner,    //
+                           thread_task_runner,    //
+                           thread_task_runner     //
   );
 
-  auto isolate_configuration =
-      IsolateConfiguration::InferFromSettings(settings);
-
-  UIDartState::Context context(task_runners);
-  context.advisory_script_uri = "main.dart";
-  context.advisory_script_entrypoint = "main";
-  auto weak_isolate = DartIsolate::CreateRunningRootIsolate(
-      vm_data->GetSettings(),              // settings
-      vm_data->GetIsolateSnapshot(),       // isolate snapshot
-      nullptr,                             // platform configuration
-      DartIsolate::Flags{},                // flags
-      nullptr,                             // root_isolate_create_callback
-      settings.isolate_create_callback,    // isolate create callback
-      settings.isolate_shutdown_callback,  // isolate shutdown callback
-      "main",                              // dart entrypoint
-      std::nullopt,                        // dart entrypoint library
-      {},                                  // dart entrypoint arguments
-      std::move(isolate_configuration),    // isolate configuration
-      context                              // engine context
-  );
-
-  auto root_isolate = weak_isolate.lock();
-  ASSERT_TRUE(root_isolate);
-  ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
+  auto isolate = RunDartCodeInIsolate(vm_ref, settings, task_runners, "main",
+                                      {}, GetDefaultKernelFilePath());
+  ASSERT_TRUE(isolate);
+  ASSERT_EQ(isolate->get()->GetPhase(), DartIsolate::Phase::Running);
   service_isolate_latch.Wait();
-  ASSERT_TRUE(root_isolate->Shutdown());
 }
 
 TEST_F(DartIsolateTest,

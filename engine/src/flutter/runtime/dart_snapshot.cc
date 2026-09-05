@@ -75,7 +75,25 @@ static std::shared_ptr<const fml::Mapping> SearchMapping(
 
   // Look in application specified native library if specified.
   for (const std::string& path : native_library_paths) {
+    if (path.empty()) {
+      continue;
+    }
     auto native_library = fml::NativeLibrary::Create(path.c_str());
+    if (!native_library) {
+      auto directory = fml::paths::GetExecutableDirectoryPath();
+      if (directory.first) {
+        std::string path_relative_to_executable =
+            fml::paths::JoinPaths({directory.second, path});
+        native_library =
+            fml::NativeLibrary::Create(path_relative_to_executable.c_str());
+        if (!native_library) {
+          std::string path_relative_to_parent =
+              fml::paths::JoinPaths({directory.second, "..", path});
+          native_library =
+              fml::NativeLibrary::Create(path_relative_to_parent.c_str());
+        }
+      }
+    }
     auto symbol_mapping = std::make_unique<const fml::SymbolMapping>(
         native_library, native_library_symbol_name);
     if (symbol_mapping->GetMapping() != nullptr) {
@@ -217,7 +235,8 @@ fml::RefPtr<DartSnapshot> DartSnapshot::VMServiceIsolateSnapshotFromSettings(
 #if DART_SNAPSHOT_STATIC_LINK
   return nullptr;
 #else   // DART_SNAPSHOT_STATIC_LINK
-  if (settings.vmservice_snapshot_library_path.empty()) {
+  if (!Dart_IsPrecompiledRuntime() ||
+      settings.vmservice_snapshot_library_path.empty()) {
     return nullptr;
   }
 

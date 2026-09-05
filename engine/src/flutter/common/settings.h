@@ -136,6 +136,7 @@ struct Settings {
   // Path to a library containing compiled Dart code usable for launching
   // the VM service isolate.
   std::vector<std::string> vmservice_snapshot_library_path;
+  std::string vmservice_kernel_path;
 
   std::string application_kernel_asset;       // deprecated
   std::string application_kernel_list_asset;  // deprecated

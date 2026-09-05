@@ -1015,9 +1015,11 @@ class FakeXcode extends Fake implements Xcode {
 }
 
 class FakeArtifacts extends Fake implements Artifacts {
-  FakeArtifacts({FileSystem? fileSystem, this.sdkPath})
-    : _delegate = Artifacts.test(fileSystem: fileSystem);
+  FakeArtifacts({FileSystem? fileSystem, String? path, this.sdkPath})
+    : _path = path,
+      _delegate = Artifacts.test(fileSystem: fileSystem);
 
+  final String? _path;
   final Artifacts _delegate;
   final String? sdkPath;
 
@@ -1037,6 +1039,9 @@ class FakeArtifacts extends Fake implements Artifacts {
     BuildMode? mode,
     EnvironmentType? environmentType,
   }) {
+    if (_path != null) {
+      return _path;
+    }
     if (artifact == Artifact.engineDartSdkPath && sdkPath != null) {
       return sdkPath!;
     }

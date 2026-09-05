@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -12,6 +13,7 @@ import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import 'application_package.dart';
 import 'build_linux.dart';
@@ -20,10 +22,11 @@ import 'linux_workflow.dart';
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
   LinuxDevice({
-    required super.processManager,
-    required super.logger,
     required super.fileSystem,
+    required super.logger,
     required super.operatingSystemUtils,
+    required super.processManager,
+    super.artifacts,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _logger = logger,
        super('linux', platformType: PlatformType.linux, ephemeral: false);
@@ -81,18 +84,20 @@ class LinuxDevice extends DesktopDevice {
 
 class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
-    required Platform platform,
     required FeatureFlags featureFlags,
-    required OperatingSystemUtils operatingSystemUtils,
     required FileSystem fileSystem,
-    required ProcessManager processManager,
     required Logger logger,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessManager processManager,
+    Artifacts? artifacts,
   }) : _platform = platform,
        _linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags),
        _fileSystem = fileSystem,
        _logger = logger,
        _processManager = processManager,
        _operatingSystemUtils = operatingSystemUtils,
+       _artifacts = artifacts ?? globals.artifacts!,
        super('linux devices');
 
   final Platform _platform;
@@ -101,6 +106,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
+  final Artifacts _artifacts;
 
   @override
   bool get supportsPlatform => _platform.isLinux;
@@ -122,6 +128,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
         processManager: _processManager,
         fileSystem: _fileSystem,
         operatingSystemUtils: _operatingSystemUtils,
+        artifacts: _artifacts,
       ),
     ];
   }

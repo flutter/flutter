@@ -321,6 +321,9 @@ group("windows") {
     ":publish_headers_windows",
     "//flutter/shell/platform/windows/client_wrapper:publish_wrapper_windows",
   ]
+  if (flutter_runtime_mode == "profile") {
+    deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+  }
 
   if (build_glfw_shell) {
     deps += [ ":windows_glfw" ]

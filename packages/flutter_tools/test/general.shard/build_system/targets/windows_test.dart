@@ -291,4 +291,119 @@ flutter:
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
+
+  testWithoutContext(
+    'UnpackWindows copies libvmservice_snapshot.dll in profile mode if present',
+    () async {
+      final artifacts = Artifacts.test();
+      final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        artifacts: artifacts,
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        defines: <String, String>{kBuildMode: 'profile'},
+      );
+      environment.buildDir.createSync(recursive: true);
+
+      final String windowsDesktopPath = artifacts.getArtifactPath(
+        Artifact.windowsDesktopPath,
+        platform: TargetPlatform.windows_x64,
+        mode: BuildMode.profile,
+      );
+      final String windowsCppClientWrapper = artifacts.getArtifactPath(
+        Artifact.windowsCppClientWrapper,
+        platform: TargetPlatform.windows_x64,
+        mode: BuildMode.profile,
+      );
+      final String icuData = artifacts.getArtifactPath(
+        Artifact.icuData,
+        platform: TargetPlatform.windows_x64,
+      );
+      final requiredFiles = <String>[
+        '$windowsDesktopPath\\flutter_export.h',
+        '$windowsDesktopPath\\flutter_messenger.h',
+        '$windowsDesktopPath\\flutter_windows.dll',
+        '$windowsDesktopPath\\flutter_windows.dll.exp',
+        '$windowsDesktopPath\\flutter_windows.dll.lib',
+        '$windowsDesktopPath\\flutter_windows.dll.pdb',
+        '$windowsDesktopPath\\flutter_plugin_registrar.h',
+        '$windowsDesktopPath\\flutter_texture_registrar.h',
+        '$windowsDesktopPath\\flutter_windows.h',
+        '$windowsDesktopPath\\libvmservice_snapshot.dll',
+        icuData,
+        '$windowsCppClientWrapper\\foo',
+        r'C:\packages\flutter_tools\lib\src\build_system\targets\windows.dart',
+      ];
+
+      for (final path in requiredFiles) {
+        fileSystem.file(path).createSync(recursive: true);
+      }
+      fileSystem.directory('windows').createSync();
+
+      await const UnpackWindows(TargetPlatform.windows_x64).build(environment);
+
+      expect(fileSystem.file(r'C:\windows\flutter\ephemeral\libvmservice_snapshot.dll'), exists);
+    },
+  );
+
+  testWithoutContext(
+    'UnpackWindows succeeds in profile mode when libvmservice_snapshot.dll is absent',
+    () async {
+      final artifacts = Artifacts.test();
+      final FileSystem fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        artifacts: artifacts,
+        processManager: FakeProcessManager.any(),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        defines: <String, String>{kBuildMode: 'profile'},
+      );
+      environment.buildDir.createSync(recursive: true);
+
+      final String windowsDesktopPath = artifacts.getArtifactPath(
+        Artifact.windowsDesktopPath,
+        platform: TargetPlatform.windows_x64,
+        mode: BuildMode.profile,
+      );
+      final String windowsCppClientWrapper = artifacts.getArtifactPath(
+        Artifact.windowsCppClientWrapper,
+        platform: TargetPlatform.windows_x64,
+        mode: BuildMode.profile,
+      );
+      final String icuData = artifacts.getArtifactPath(
+        Artifact.icuData,
+        platform: TargetPlatform.windows_x64,
+      );
+      final requiredFiles = <String>[
+        '$windowsDesktopPath\\flutter_export.h',
+        '$windowsDesktopPath\\flutter_messenger.h',
+        '$windowsDesktopPath\\flutter_windows.dll',
+        '$windowsDesktopPath\\flutter_windows.dll.exp',
+        '$windowsDesktopPath\\flutter_windows.dll.lib',
+        '$windowsDesktopPath\\flutter_windows.dll.pdb',
+        '$windowsDesktopPath\\flutter_plugin_registrar.h',
+        '$windowsDesktopPath\\flutter_texture_registrar.h',
+        '$windowsDesktopPath\\flutter_windows.h',
+        icuData,
+        '$windowsCppClientWrapper\\foo',
+        r'C:\packages\flutter_tools\lib\src\build_system\targets\windows.dart',
+      ];
+
+      for (final path in requiredFiles) {
+        fileSystem.file(path).createSync(recursive: true);
+      }
+      fileSystem.directory('windows').createSync();
+
+      await const UnpackWindows(TargetPlatform.windows_x64).build(environment);
+
+      expect(
+        fileSystem.file(r'C:\windows\flutter\ephemeral\libvmservice_snapshot.dll'),
+        isNot(exists),
+      );
+      expect(fileSystem.file(r'C:\windows\flutter\ephemeral\flutter_windows.dll'), exists);
+    },
+  );
 }
