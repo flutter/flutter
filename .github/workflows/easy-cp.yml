@@ -52,10 +52,9 @@ jobs:
   cherrypick_to_release:
     name: cherrypick_to_release
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'pull_request_target' &&
-      (github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':')) &&
-      (github.event.pull_request.merged == true)
+    if: if: |
+  github.event_name == 'pull_request_target' &&
+  (github.event.label.name == format('cp{0} beta', ':') || github.event.label.name == format('cp{0} stable', ':'))
     steps:
       - name: Get Release Channel
         id: get-channel
