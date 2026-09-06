@@ -99,6 +99,23 @@ class WebAssetServer implements AssetReader {
   final Map<String, String> _modules;
   final Map<String, String> _digests;
 
+  final Completer<void> _readyCompleter = Completer<void>();
+
+  /// A future that completes when the server is ready to handle requests.
+  ///
+  /// Requests received before this future completes are paused by middleware.
+  Future<void> get isReady => _readyCompleter.future;
+
+  /// Signal that the server is ready to handle incoming requests.
+  ///
+  /// This unpauses any HTTP requests that were received while the server was
+  /// initializing or waiting for initial compilation to complete.
+  void markReady() {
+    if (!_readyCompleter.isCompleted) {
+      _readyCompleter.complete();
+    }
+  }
+
   int get selectedPort => _httpServer.port;
 
   /// Given a list of [modules] that need to be loaded, compute module names and
@@ -298,6 +315,13 @@ class WebAssetServer implements AssetReader {
       return server;
     }
 
+    shelf.Handler waitMiddleware(shelf.Handler innerHandler) {
+      return (shelf.Request request) async {
+        await server.isReady;
+        return innerHandler(request);
+      };
+    }
+
     // In release builds (or wasm builds) deploy a simpler proxy server.
     if (buildInfo.mode != BuildMode.debug || isWasm) {
       final releaseAssetServer = ReleaseAssetServer(
@@ -309,9 +333,12 @@ class WebAssetServer implements AssetReader {
         basePath: server.basePath,
         needsCoopCoep: crossOriginIsolation,
       );
+      final shelf.Handler releaseHandler = const shelf.Pipeline()
+          .addMiddleware(waitMiddleware)
+          .addHandler(releaseAssetServer.handle);
       runZonedGuarded(
         () {
-          shelf.serveRequests(httpServer!, releaseAssetServer.handle);
+          shelf.serveRequests(httpServer!, releaseHandler);
         },
         (Object e, StackTrace s) {
           logger.printTrace('Release asset server: error serving requests: $e:$s');
@@ -388,9 +415,12 @@ class WebAssetServer implements AssetReader {
     pipeline = pipeline.addMiddleware(proxyMiddleware(proxy, globals.logger));
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
+    final shelf.Handler serverHandler = const shelf.Pipeline()
+        .addMiddleware(waitMiddleware)
+        .addHandler(cascade.handler);
     runZonedGuarded(
       () {
-        shelf.serveRequests(httpServer!, cascade.handler);
+        shelf.serveRequests(httpServer!, serverHandler);
       },
       (Object e, StackTrace s) {
         logger.printTrace('Dwds server: error serving requests: $e:$s');
@@ -574,6 +604,9 @@ class WebAssetServer implements AssetReader {
 
   /// Tear down the http server running.
   Future<void> dispose() async {
+    if (!_readyCompleter.isCompleted) {
+      _readyCompleter.complete();
+    }
     if (_dwdsInit) {
       await dwds.stop();
     }

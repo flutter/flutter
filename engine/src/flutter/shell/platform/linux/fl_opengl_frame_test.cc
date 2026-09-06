@@ -49,6 +49,7 @@ TEST_F(FlOpenGLFrameTest, CompositeRGBA) {
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
+          .type = kFlutterOpenGLTargetTypeFramebuffer,
           .framebuffer = {.target = GL_RGBA8, .user_data = framebuffer}}};
   FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
                         .backing_store = &backing_store,
@@ -78,6 +79,7 @@ TEST_F(FlOpenGLFrameTest, CompositeBGRA) {
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
+          .type = kFlutterOpenGLTargetTypeFramebuffer,
           .framebuffer = {.target = GL_BGRA8_EXT, .user_data = framebuffer}}};
   FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
                         .backing_store = &backing_store,
@@ -107,6 +109,7 @@ TEST_F(FlOpenGLFrameTest, ZeroSizeClearsFrame) {
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
+          .type = kFlutterOpenGLTargetTypeFramebuffer,
           .framebuffer = {.target = GL_RGBA8, .user_data = framebuffer}}};
   FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
                         .backing_store = &backing_store,

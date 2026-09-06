@@ -47,6 +47,53 @@ TEST(TextInputModel, SetTextResetsSelection) {
   EXPECT_EQ(model->selection(), TextRange(0));
 }
 
+TEST(TextInputModel, SetTextRejectingSelectionLeavesModelUnchanged) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetText("ABCDE", TextRange(3), TextRange(0)));
+  // A rejected update must not apply the text either. Applying it alone would
+  // leave the selection pointing past the end of the new text, and every
+  // subsequent edit indexes into the text with that selection.
+  EXPECT_FALSE(model->SetText("AB", TextRange(5), TextRange(0)));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+  EXPECT_EQ(model->selection(), TextRange(3));
+  EXPECT_EQ(model->composing_range(), TextRange(0));
+}
+
+TEST(TextInputModel, SetTextRejectingComposingRangeLeavesModelUnchanged) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetText("ABCDE", TextRange(2), TextRange(1, 3)));
+  EXPECT_FALSE(model->SetText("AB", TextRange(2), TextRange(1, 3)));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+  EXPECT_EQ(model->selection(), TextRange(2));
+  EXPECT_EQ(model->composing_range(), TextRange(1, 3));
+  EXPECT_TRUE(model->composing());
+}
+
+TEST(TextInputModel, UpdateComposingTextWithSelectionPastComposingText) {
+  auto model = std::make_unique<TextInputModel>();
+  EXPECT_TRUE(model->SetText("ABCDE", TextRange(5), TextRange(0)));
+  model->BeginComposing();
+
+  // The selection accompanying composing text is relative to that text, but an
+  // input method is free to report one that does not fit inside it. The offset
+  // must not reach the text buffer, where a later edit would index out of
+  // bounds and abort the process from inside the standard library.
+  model->UpdateComposingText(u"n", TextRange(99));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDEn");
+  EXPECT_EQ(model->selection(), TextRange(6));
+  EXPECT_EQ(model->composing_range(), TextRange(5, 6));
+
+  // Clearing the composing text collapses the composing range, which makes the
+  // next update replace the selection instead. This is the point at which an
+  // unclamped offset becomes an out of bounds index into the text.
+  model->UpdateComposingText(u"", TextRange(99));
+  EXPECT_EQ(model->composing_range(), TextRange(5));
+  EXPECT_EQ(model->selection(), TextRange(5));
+  model->UpdateComposingText(u"m", TextRange(1));
+  EXPECT_STREQ(model->GetText().c_str(), "ABCDEm");
+  EXPECT_EQ(model->selection(), TextRange(6));
+}
+
 TEST(TextInputModel, SetSelectionStart) {
   auto model = std::make_unique<TextInputModel>();
   model->SetText("ABCDE");
@@ -215,6 +262,19 @@ TEST(TextInputModel, SetComposingRangeReverseExtent) {
   EXPECT_EQ(model->selection(), TextRange(4));
   EXPECT_EQ(model->composing_range(), TextRange(4, 1));
   EXPECT_STREQ(model->GetText().c_str(), "ABCDE");
+}
+
+TEST(TextInputModel, SetComposingRangeWithOffsetOutsideString) {
+  auto model = std::make_unique<TextInputModel>();
+  model->SetText("ABCDE");
+  model->BeginComposing();
+  // The offset positions the caret relative to the composing range, and reaches
+  // the text as an index. An offset that runs past the end of the text must be
+  // rejected rather than stored as a selection.
+  EXPECT_FALSE(model->SetComposingRange(TextRange(1, 4), 5));
+  EXPECT_EQ(model->selection(), TextRange(0));
+  EXPECT_TRUE(model->SetComposingRange(TextRange(1, 4), 4));
+  EXPECT_EQ(model->selection(), TextRange(5));
 }
 
 TEST(TextInputModel, SetComposingRangeOutsideString) {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.flutter.gradle
+package com.flutter.gradle.validation
 
 import org.junit.jupiter.api.io.TempDir
 import java.io.File

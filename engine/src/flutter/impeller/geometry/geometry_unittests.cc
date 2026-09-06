@@ -1834,13 +1834,28 @@ TEST(GeometryTest, Gradient) {
   }
 
   {
-    // Gradient with duplicate stops does not create an empty texture.
+    // Gradient with duplicate stops creates a 1024 texture.
     std::vector<Color> colors = {Color::Red(), Color::Yellow(), Color::Black(),
                                  Color::Blue()};
     std::vector<Scalar> stops = {0.0, 0.25, 0.25, 1.0};
 
     auto gradient = CreateGradientBuffer(colors, stops);
-    ASSERT_EQ(gradient.texture_size, 5u);
+    ASSERT_EQ(gradient.texture_size, 1024u);
+
+    std::vector<Color> expected_colors(1024);
+    for (size_t i = 0; i < 1024; i++) {
+      double t = i / 1023.0;
+      if (i < 256) {
+        // Interval 1: texels 0 to 255 (stop interval 0 to 0.25)
+        expected_colors[i] =
+            Color::Lerp(Color::Red(), Color::Yellow(), t / 0.25);
+      } else {
+        // Interval 2: texels 256 to 1023 (stop interval 0.25 to 1.0)
+        expected_colors[i] =
+            Color::Lerp(Color::Black(), Color::Blue(), (t - 0.25) / 0.75);
+      }
+    }
+    ASSERT_COLOR_BUFFER_NEAR(gradient.color_bytes, expected_colors);
   }
 
   {

@@ -224,11 +224,7 @@ void main() {
         expect(buildInfo.flavor, isNull);
         expect(buildInfo.splitDebugInfoPath, isNull);
         expect(buildInfo.dartObfuscation, isFalse);
-        expect(androidBuildInfo.targetArchs, <CpuArch>[
-          CpuArch.armv7,
-          CpuArch.arm64,
-          CpuArch.x64,
-        ]);
+        expect(androidBuildInfo.targetArchs, <CpuArch>[CpuArch.armv7, CpuArch.arm64, CpuArch.x64]);
       }
       expect(buildModes, hasLength(3));
       expect(
@@ -283,24 +279,30 @@ void main() {
       expect(buildInfo.dartDefines.contains('foo=bar'), isTrue);
     }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
 
-    testUsingContext('defaults androidEnableHcpp to false without explicit flag', () async {
-      final String projectPath = await createProject(
-        tempDir,
-        arguments: <String>['--no-pub', '--template=module'],
-      );
-      await runBuildAar(projectPath, arguments: <String>['--no-pub']);
+    testUsingContext(
+      'pipes the enable-hcpp feature flag through, but the plugin ignores it for aars',
+      () async {
+        final String projectPath = await createProject(
+          tempDir,
+          arguments: <String>['--no-pub', '--template=module'],
+        );
+        await runBuildAar(projectPath, arguments: <String>['--no-pub']);
 
-      final Invocation buildAarCall = fakeAndroidBuilder.capturedBuildAarCalls.single;
-      for (final androidBuildInfo
-          in buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>) {
-        // The property is piped to the aar gradle build for consistency (defaulting to
-        // false in this PR), but the Flutter Gradle Plugin only consumes it for application
-        // projects: injecting into a module (aar) manifest would conflict
-        // with an explicit value in the add-to-app host's manifest and fail
-        // the host build in the manifest merger.
-        expect(androidBuildInfo.buildInfo.androidEnableHcpp, isFalse);
-      }
-    }, overrides: <Type, Generator>{AndroidBuilder: () => fakeAndroidBuilder});
+        final Invocation buildAarCall = fakeAndroidBuilder.capturedBuildAarCalls.single;
+        for (final androidBuildInfo
+            in buildAarCall.namedArguments[#androidBuildInfo] as Set<AndroidBuildInfo>) {
+          // The property is piped to the aar gradle build for consistency, but the Flutter
+          // Gradle Plugin only consumes it for application projects: injecting into a module
+          // (aar) manifest would conflict with an explicit value in the add-to-app host's
+          // manifest and fail the host build in the manifest merger.
+          expect(androidBuildInfo.buildInfo.androidEnableHcpp, isTrue);
+        }
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => fakeAndroidBuilder,
+        FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
+      },
+    );
 
     testUsingContext('does not define --enable-hcpp', () async {
       final String projectPath = await createProject(
