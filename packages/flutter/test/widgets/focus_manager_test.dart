@@ -2463,9 +2463,7 @@ void main() {
         nodes[i]!.requestFocus();
         await tester.pump();
       }
-      // ...then traverse back so that the last child stays in the navigation
-      // history and is disabled later in the same build than the currently
-      // focused child (this is what shift-tab does in the repro for the issue).
+      // Then traverse back
       nodes[8]!.requestFocus();
       await tester.pump();
       expect(nodes[8]!.hasPrimaryFocus, isTrue);
@@ -2485,7 +2483,6 @@ void main() {
         );
       }
 
-      // Invariant: whatever holds primary focus must be focusable.
       final FocusNode? primary = FocusManager.instance.primaryFocus;
       if (primary != null) {
         expect(
