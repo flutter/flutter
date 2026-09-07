@@ -44,12 +44,18 @@ class _ReorderableExampleState extends State<ReorderableExample> {
       padding: const .symmetric(horizontal: 40.0),
       itemCount: _items.length,
       itemBuilder: (BuildContext context, int index) {
-        return ListTile(
+        // ListTile.tileColor is painted by the nearest Material ancestor, so
+        // each tile brings its own Material: without it the color would be
+        // painted by the Scaffold's Material and would not move with the tile
+        // during a reorder drag (per the ListTile documentation).
+        return Material(
           // Key each tile by its item rather than by its position, so a tile's
           // identity follows the item it shows when the order changes.
           key: ValueKey<int>(_items[index]),
-          tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
-          title: Text('Item ${_items[index]}'),
+          child: ListTile(
+            tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
+            title: Text('Item ${_items[index]}'),
+          ),
         );
       },
       // The separator index is a boundary index: separator `index` sits between

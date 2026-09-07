@@ -37,6 +37,32 @@ void main() {
     expect(firstSeparatorCenter, lessThan(tester.getTopLeft(secondItem).dy));
   });
 
+  testWidgets(
+    'Example gives each tile its own Material, so its background moves with it during a drag',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const example.ReorderableApp());
+
+      // ListTile.tileColor is painted by the tile's nearest ancestor Material.
+      // Each tile must bring its own (the wrapper carrying the item's key):
+      // with a bare ListTile the nearest Material is the Scaffold's, and the
+      // background would stay put while the tile moves during a reorder drag.
+      final List<Element> tiles = find.byType(ListTile).evaluate().toList();
+      expect(tiles, isNotEmpty);
+      for (final Element tile in tiles) {
+        final Text title = (tile.widget as ListTile).title! as Text;
+        final int item = int.parse(title.data!.split(' ').last);
+        final Material? material = tile
+            .findAncestorWidgetOfExactType<Material>();
+        expect(
+          material?.key,
+          ValueKey<int>(item),
+          reason:
+              'the Material painting "${title.data}" must be its own wrapper',
+        );
+      }
+    },
+  );
+
   testWidgets('Example thickens the separators on even boundaries', (
     WidgetTester tester,
   ) async {
