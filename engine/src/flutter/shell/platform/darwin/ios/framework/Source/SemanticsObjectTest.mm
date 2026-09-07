@@ -41,6 +41,21 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertNotNil(object);
 }
 
+- (void)testFlutterSemanticsScrollViewHidesScrollEdgeEffects {
+#if defined(__IPHONE_26_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_26_0
+  if (@available(iOS 26.0, *)) {
+    fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+        new flutter::testing::MockAccessibilityBridge());
+    fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+    SemanticsObject* object = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+    FlutterSemanticsScrollView* scrollView =
+        [[FlutterSemanticsScrollView alloc] initWithSemanticsObject:object];
+    XCTAssertTrue(scrollView.topEdgeEffect.hidden);
+    XCTAssertTrue(scrollView.bottomEdgeEffect.hidden);
+  }
+#endif
+}
+
 - (void)testUIFocusSystemMethodsDoNotCrashWhenBridgeIsDead {
   fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge;
   SemanticsObject* object;
