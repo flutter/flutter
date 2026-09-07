@@ -146,6 +146,15 @@ void FilterContents::SetEffectTransform(const Matrix& effect_transform) {
   }
 }
 
+void FilterContents::SetLocalToPassTransform(
+    const Matrix& local_to_pass_transform) {
+  local_to_pass_transform_ = local_to_pass_transform;
+
+  for (auto& input : inputs_) {
+    input->SetLocalToPassTransform(local_to_pass_transform);
+  }
+}
+
 bool FilterContents::Render(const ContentContext& renderer,
                             const Entity& entity,
                             RenderPass& pass) const {
