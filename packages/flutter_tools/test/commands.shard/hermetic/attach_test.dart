@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/airreload_device.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -82,6 +83,92 @@ void main() {
       processInfo = FakeProcessInfo();
       testDeviceManager = TestDeviceManager(logger: logger);
     });
+
+    testUsingContext(
+      'airreload attaches through the supplied tunnel without discovered devices',
+      () async {
+        final hotRunner = FakeHotRunner();
+        hotRunner.onAttach =
+            (
+              Completer<DebugConnectionInfo>? connectionInfoCompleter,
+              Completer<void>? appStartedCompleter,
+              bool enableDevTools,
+            ) async => 0;
+        hotRunner.exited = false;
+        hotRunner.isWaitingForVmService = false;
+        final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+        final command = AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        );
+        const url = 'http://127.0.0.1:54321/test-token_123=/';
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['attach', '--airreload', '--debug-url', url]);
+        expect(command.refreshWirelessDevices, isFalse);
+        final FlutterDevice flutterDevice = hotRunnerFactory.devices.single;
+        expect(flutterDevice.device, isA<AirreloadDevice>());
+        expect(await command.findTargetDevice(), same(flutterDevice.device));
+        expect(flutterDevice.device!.portForwarder, isNull);
+        expect(await flutterDevice.vmServiceUris!.first, Uri.parse(url));
+        expect(flutterDevice.buildInfo.mode, BuildMode.debug);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.empty(),
+        Logger: () => logger,
+        DeviceManager: () => testDeviceManager,
+      },
+    );
+
+    for (final args in <List<String>>[
+      <String>[],
+      <String>['--debug-url', 'http://127.0.0.1:54321'],
+      <String>['--debug-url', 'http://127.0.0.1:54321/'],
+      <String>['--debug-url', 'http://127.0.0.1:54321//'],
+      <String>['--debug-url', 'http://127.0.0.1:54321/token/extra/'],
+      <String>['--debug-url', 'http://127.0.0.1:54321/token'],
+      <String>['--debug-url', 'http://192.0.2.1:54321/token/'],
+      <String>['--debug-url', 'https://127.0.0.1:54321/token/'],
+      <String>['--debug-url', 'http://user@127.0.0.1:54321/token/'],
+      <String>['--debug-url', 'http://127.0.0.1:54321/token/?query=1'],
+      <String>['--debug-url', 'http://127.0.0.1:54321/token/#fragment'],
+      <String>['--debug-url', 'http://127.0.0.1:0/token/'],
+      <String>['--debug-url', 'http://127.0.0.1:65536/token/'],
+      <String>['--debug-url', 'http://127.0.0.1:54321/token/', '--profile'],
+      <String>['--debug-url', 'http://127.0.0.1:54321/token/', '--device-user', '10'],
+    ]) {
+      testUsingContext(
+        'airreload rejects unsupported arguments: $args',
+        () async {
+          final command = AttachCommand(
+            stdio: stdio,
+            logger: logger,
+            terminal: terminal,
+            signals: signals,
+            platform: platform,
+            processInfo: processInfo,
+            fileSystem: testFileSystem,
+          );
+          await expectLater(
+            createTestCommandRunner(command).run(<String>['attach', '--airreload', ...args]),
+            throwsToolExit(message: 'Airreload requires debug mode and an authenticated'),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => FakeProcessManager.empty(),
+          Logger: () => logger,
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+    }
 
     group('with one device and no specified target file', () {
       const devicePort = 499;

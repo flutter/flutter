@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../airreload_device.dart';
 import '../android/android_device.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -90,6 +91,11 @@ class AttachCommand extends FlutterCommand {
     addEnableExperimentation(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
     usesNativeAssetsOption(hide: !verboseHelp);
+    argParser.addFlag(
+      'airreload',
+      negatable: false,
+      help: 'Attach to an app-managed tunnel, without device discovery (Android ARM64 debug only).',
+    );
     argParser
       ..addOption(
         'debug-port',
@@ -174,7 +180,19 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   final String category = FlutterCommandCategory.tools;
 
   @override
-  bool get refreshWirelessDevices => true;
+  bool get refreshWirelessDevices => !boolArg('airreload');
+
+  AirreloadDevice? _airreloadDevice;
+
+  @override
+  Future<Device?> findTargetDevice({bool includeDevicesUnsupportedByProject = false}) async {
+    if (boolArg('airreload')) {
+      return _airreloadDevice ??= AirreloadDevice(logger: _logger);
+    }
+    return super.findTargetDevice(
+      includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
+    );
+  }
 
   int? get debugPort {
     if (argResults!['debug-port'] == null) {
@@ -215,6 +233,25 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     await super.validateCommand();
 
+    if (boolArg('airreload')) {
+      final Uri? uri = debugUri;
+      if (uri == null ||
+          uri.scheme != 'http' ||
+          uri.host != '127.0.0.1' ||
+          uri.port <= 0 ||
+          uri.port > 65535 ||
+          uri.userInfo.isNotEmpty ||
+          uri.hasQuery ||
+          uri.hasFragment ||
+          !RegExp(r'^/[A-Za-z0-9_=-]+/$').hasMatch(uri.path) ||
+          userIdentifier != null ||
+          getBuildMode() != BuildMode.debug) {
+        throwToolExit(
+          'Airreload requires debug mode and an authenticated '
+          'http://127.0.0.1:<port>/<auth>/ --debug-url; no --device-user.',
+        );
+      }
+    }
     final Device? targetDevice = await findTargetDevice();
     if (targetDevice == null) {
       throwToolExit(null);
@@ -398,6 +435,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Stream<Uri> _discoverVmService({required Device device}) {
+    if (boolArg('airreload')) {
+      return Stream<Uri>.value(debugUri!);
+    }
     final bool usesIpv6 = ipv6!;
     final String ipv6Loopback = InternetAddress.loopbackIPv6.address;
     final String ipv4Loopback = InternetAddress.loopbackIPv4.address;
