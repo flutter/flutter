@@ -30,6 +30,14 @@ class ImageGenerator {
   const static unsigned int kInfinitePlayCount =
       std::numeric_limits<unsigned int>::max();
 
+  /// The maximum number of bytes a decoded image, animation frame, or frame
+  /// canvas may occupy. Dimensions are taken verbatim from encoded image
+  /// headers, which are untrusted input: without a bound, a tiny encoded
+  /// buffer can drive a multi-gigabyte pixel allocation and terminate the
+  /// process. This bound mirrors the maximum decoded image size used by other
+  /// browser-class engines and the Impeller decoder's max_texture_size clamp.
+  const static size_t kMaxDecodedImageBytes = 1u << 28;  // 256 MiB
+
   /// @brief  Info about a single frame in the context of a multi-frame image,
   ///         useful for animation and blending.
   struct FrameInfo {
