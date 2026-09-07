@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -75,14 +77,44 @@ void testMain() {
     expect(imageSource.debugIsClosed, isTrue);
   });
 
-  test('ImageElementImageSource clears src on closure', () async {
+  test('ImageElementImageSource preserves src on closure', () {
     final DomHTMLImageElement imageElement = createDomHTMLImageElement();
     imageElement.src = 'sample_image1.png';
     final ImageSource imageSource = ImageElementImageSource(imageElement);
 
     expect(imageElement.src, contains('sample_image1.png'));
     imageSource.close();
-    expect(imageElement.src, isNot(contains('sample_image1.png')));
+    expect(imageElement.src, contains('sample_image1.png'));
+    expect(imageSource.debugIsClosed, isTrue);
+  });
+
+  test('A picture retains image element pixels after the image is disposed', () async {
+    final DomHTMLImageElement imageElement = createDomHTMLImageElement();
+    imageElement.src = 'data:image/png;base64,${base64.encode(k4x4PngImage)}';
+    await imageElement.decode();
+    final ui.Image image = await renderer.createImageFromTextureSource(
+      imageElement,
+      width: 4,
+      height: 4,
+      transferOwnership: true,
+    );
+    // Read directly from the DOM source without triggering a GPU texture upload.
+    final ByteData expected = (await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba))!;
+    final recorder = ui.PictureRecorder();
+    ui.Canvas(recorder).drawImage(image, ui.Offset.zero, ui.Paint());
+    final ui.Picture picture = recorder.endRecording();
+    addTearDown(picture.dispose);
+
+    image.dispose();
+
+    // The first texture upload happens only after the last Dart image handle
+    // has been disposed, as can happen when ImageCache evicts an image.
+    final ui.Image rasterized = await picture.toImage(4, 4);
+    addTearDown(rasterized.dispose);
+    final ByteData actual = (await rasterized.toByteData(
+      format: ui.ImageByteFormat.rawStraightRgba,
+    ))!;
+    expect(actual.buffer.asUint8List(), expected.buffer.asUint8List());
   });
 }
 

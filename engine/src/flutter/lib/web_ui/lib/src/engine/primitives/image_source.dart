@@ -106,8 +106,9 @@ class ImageElementImageSource extends ImageSource {
 
   @override
   void _doClose() {
-    // Clear the src attribute of the image element to release associated memory.
-    imageElement.src = '';
+    // A recorded picture can retain the SkImage after all EngineImage handles
+    // have been disposed. CanvasKit may still need the element for a lazy
+    // texture upload, so leave its pixels intact until the browser collects it.
   }
 
   @override
