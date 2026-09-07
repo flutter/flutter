@@ -1375,7 +1375,7 @@ void fl_engine_send_touch_cancel_event(FlEngine* self,
 
   if (self->embedder_api.SendPointerEvent(self->engine, &event, 1) !=
       kSuccess) {
-    g_warning("Failed to send pointer event");
+    g_warning("Failed to send touch cancel event");
   }
 }
 
