@@ -17,4 +17,8 @@ extension SafeArgResults on FlutterCommand {
   /// Checks if this option was explicitly parsed (alias for [wasProvided]).
   bool wasParsed(OptionDescriptor<Object?> descriptor) =>
       descriptor.wasProvided(argResults, globalResults: globalResults);
+
+  /// Returns whether [descriptor] is registered on this command (or globally).
+  bool hasOption(OptionDescriptor<Object?> descriptor) =>
+      descriptor.isRegistered(argResults, globalResults: globalResults);
 }

@@ -91,8 +91,7 @@ void main() {
         );
 
         final runner = FlutterCommandRunner(
-          analytics: FakeAnalytics(),
-          toolContext: FakeToolContext(),
+          toolContext: DelegatingToolContext(),
           verboseHelp: true,
         );
         runner.addCommand(command);
@@ -131,8 +130,7 @@ void main() {
         );
 
         final runner = FlutterCommandRunner(
-          analytics: FakeAnalytics(),
-          toolContext: FakeToolContext(),
+          toolContext: DelegatingToolContext(),
           verboseHelp: true,
         );
         runner.addCommand(command);
@@ -185,8 +183,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
-              analytics: FakeAnalytics(),
-              toolContext: FakeToolContext(),
+              toolContext: DelegatingToolContext(),
               verboseHelp: true,
             );
             runner.addCommand(command);
@@ -245,8 +242,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
-              analytics: FakeAnalytics(),
-              toolContext: FakeToolContext(),
+              toolContext: DelegatingToolContext(),
               verboseHelp: true,
             );
             runner.addCommand(command);
@@ -563,14 +559,7 @@ import PluginB
               xcframeworkOutput.path,
             ],
           ),
-          FakeCommand(
-            command: <String>[
-              'chmod',
-              '-R',
-              'u+w',
-              flutterXCFramework.path,
-            ],
-          ),
+          FakeCommand(command: <String>['chmod', '-R', 'u+w', flutterXCFramework.path]),
           FakeCommand(
             command: ['codesign', '-d', flutterXCFramework.path],
             stderr: '${flutterXCFramework.path}: code object is not signed at all',
@@ -3423,7 +3412,12 @@ BuildSwiftPackageUtils _createTestUtils({
   );
 }
 
-class FakeAnalytics extends Fake implements Analytics {}
+class FakeAnalytics extends Fake implements Analytics {
+  final sentEvents = <Event>[];
+
+  @override
+  void send(Event event) => sentEvents.add(event);
+}
 
 class FakeXcode extends Fake implements Xcode {
   @override
@@ -3693,6 +3687,13 @@ class FakePlugin extends Fake implements Plugin {
 class FakeFeatureFlags extends Fake implements FeatureFlags {
   @override
   bool get isSwiftPackageManagerEnabled => true;
+
+  // Queried by getBuildInfo.
+  @override
+  bool get isHcppEnabled => false;
+
+  @override
+  bool get isToolExtensionsEnabled => false;
 }
 
 class CocoaPodPluginDependenciesSkipPodProcessing extends CocoaPodPluginDependencies {
