@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../android/gradle_utils.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../cache.dart';
@@ -144,12 +145,25 @@ class IdeConfigCommand extends FlutterCommand {
         continue;
       }
 
-      final File finalDestinationFile = globals.fs.file(
-        globals.fs.path.absolute(
-          _templateDirectory.absolute.path,
-          '$relativePath${Template.copyTemplateExtension}',
-        ),
+      final copyPath = '$relativePath${Template.copyTemplateExtension}';
+      final tmplPath = '$relativePath${Template.templateExtension}';
+      final File copyFile = globals.fs.file(
+        globals.fs.path.absolute(_templateDirectory.absolute.path, copyPath),
       );
+      final File tmplFile = globals.fs.file(
+        globals.fs.path.absolute(_templateDirectory.absolute.path, tmplPath),
+      );
+
+      // If a template has been converted to a `.tmpl` file (to support mustache
+      // rendering, e.g. for `androidSdkVersion`), we want to preserve and update
+      // it as a `.tmpl` file rather than creating a duplicate `.copy.tmpl` file.
+      final tmplExists = tmplFile.existsSync();
+      final finalDestinationFile = tmplExists ? tmplFile : copyFile;
+      final extension = tmplExists
+          ? Template.templateExtension
+          : Template.copyTemplateExtension;
+      final manifestPath = '$relativePath$extension';
+
       final String relativeDestination = globals.fs.path.relative(
         finalDestinationFile.path,
         from: _flutterRoot.absolute.path,
@@ -157,7 +171,7 @@ class IdeConfigCommand extends FlutterCommand {
       if (finalDestinationFile.existsSync()) {
         if (_fileIsIdentical(srcFile, finalDestinationFile)) {
           globals.printTrace('  $relativeDestination (identical)');
-          manifest.add('$relativePath${Template.copyTemplateExtension}');
+          manifest.add(manifestPath);
           continue;
         }
         if (boolArg('overwrite')) {
@@ -165,7 +179,7 @@ class IdeConfigCommand extends FlutterCommand {
           globals.printStatus('  $relativeDestination (overwritten)');
         } else {
           globals.printTrace('  $relativeDestination (existing - skipped)');
-          manifest.add('$relativePath${Template.copyTemplateExtension}');
+          manifest.add(manifestPath);
           continue;
         }
       } else {
@@ -177,7 +191,7 @@ class IdeConfigCommand extends FlutterCommand {
         finalDestinationDir.createSync(recursive: true);
       }
       srcFile.copySync(finalDestinationFile.path);
-      manifest.add('$relativePath${Template.copyTemplateExtension}');
+      manifest.add(manifestPath);
     }
 
     // If we're not overwriting, then we're not going to remove missing items either.
@@ -246,6 +260,7 @@ class IdeConfigCommand extends FlutterCommand {
     generatedCount += _renderTemplate(_ideName, dirPath, <String, Object>{
       'withRootModule': boolArg('with-root-module'),
       'android': true,
+      'androidSdkVersion': gradle.minSdkVersion,
     });
 
     globals.printStatus('Wrote $generatedCount files.');
