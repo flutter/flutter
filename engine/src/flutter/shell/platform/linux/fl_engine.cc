@@ -1275,7 +1275,7 @@ void fl_engine_send_touch_up_event(FlEngine* self,
     return;
   }
 
-  FlutterPointerEvent event;
+  FlutterPointerEvent event = {};
   event.timestamp = timestamp;
   event.x = x;
   event.y = y;
@@ -1304,7 +1304,7 @@ void fl_engine_send_touch_down_event(FlEngine* self,
     return;
   }
 
-  FlutterPointerEvent event;
+  FlutterPointerEvent event = {};
   event.timestamp = timestamp;
   event.x = x;
   event.y = y;
@@ -1333,7 +1333,7 @@ void fl_engine_send_touch_move_event(FlEngine* self,
     return;
   }
 
-  FlutterPointerEvent event;
+  FlutterPointerEvent event = {};
   event.timestamp = timestamp;
   event.x = x;
   event.y = y;
@@ -1362,7 +1362,7 @@ void fl_engine_send_touch_cancel_event(FlEngine* self,
     return;
   }
 
-  FlutterPointerEvent event;
+  FlutterPointerEvent event = {};
   event.timestamp = timestamp;
   event.x = x;
   event.y = y;
@@ -1391,7 +1391,7 @@ void fl_engine_send_touch_add_event(FlEngine* self,
     return;
   }
 
-  FlutterPointerEvent event;
+  FlutterPointerEvent event = {};
   event.timestamp = timestamp;
   event.x = x;
   event.y = y;
@@ -1420,7 +1420,7 @@ void fl_engine_send_touch_remove_event(FlEngine* self,
     return;
   }
 
-  FlutterPointerEvent event;
+  FlutterPointerEvent event = {};
   event.timestamp = timestamp;
   event.x = x;
   event.y = y;
