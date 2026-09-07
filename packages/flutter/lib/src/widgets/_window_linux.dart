@@ -423,8 +423,16 @@ abstract mixin class BaseWindowControllerLinux {
     }
   }
 
+  /// Sets whether this window is decorated with a titlebar and border drawn by
+  /// GTK.
+  ///
+  /// An undecorated window is left entirely to Flutter to draw, so an app that
+  /// turns this off has to provide its own titlebar and window borders.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
   @internal
   void setDecorated(bool decorated) {
+    _checkNotDestroyed();
     _window.setDecorated(decorated);
   }
 
