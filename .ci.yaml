@@ -4516,8 +4516,9 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac module_uiscene_test_ios
+  - name: Mac uiscene_plugin_lifecycle_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4526,7 +4527,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: module_uiscene_test_ios
+      task_name: uiscene_plugin_lifecycle_test_ios
     runIf:
       - dev/**
       - packages/flutter_tools/**
