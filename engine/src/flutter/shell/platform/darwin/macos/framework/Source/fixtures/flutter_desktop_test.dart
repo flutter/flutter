@@ -4,11 +4,12 @@
 
 // ignore_for_file: avoid_print
 
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
-@pragma('vm:external-name', 'SignalNativeTest')
+@Native<Void Function()>(symbol: 'SignalNativeTest')
 external void signalNativeTest();
 
 void main() {}
@@ -20,7 +21,7 @@ void empty() {}
 ///
 /// This is used to notify the native side of the test of a string value from
 /// the Dart fixture under test.
-@pragma('vm:external-name', 'NotifyStringValue')
+@Native<Void Function(Handle)>(symbol: 'NotifyStringValue')
 external void notifyStringValue(String s);
 
 @pragma('vm:entry-point')
@@ -86,7 +87,7 @@ void sendFooMessage() {
   PlatformDispatcher.instance.sendPlatformMessage('foo', null, (ByteData? result) {});
 }
 
-@pragma('vm:external-name', 'NotifyEngineId')
+@Native<Void Function(Handle)>(symbol: 'NotifyEngineId')
 external void notifyEngineId(int? engineId);
 
 @pragma('vm:entry-point')

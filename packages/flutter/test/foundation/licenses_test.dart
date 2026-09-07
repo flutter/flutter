@@ -179,6 +179,21 @@ S
     expect(paragraphs, hasLength(1));
   });
 
+  test('LicenseEntryWithLineBreaks - CRLF line endings inside paragraphs', () {
+    final List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(
+      <String>[],
+      'A\r\nB\r\nC\r\n\r\nD\r\nE',
+    ).paragraphs.toList();
+
+    expect(paragraphs[0].text, 'A B C');
+    expect(paragraphs[0].text.contains('\r'), isFalse);
+    expect(paragraphs[0].indent, 0);
+    expect(paragraphs[1].text, 'D E');
+    expect(paragraphs[1].text.contains('\r'), isFalse);
+    expect(paragraphs[1].indent, 0);
+    expect(paragraphs, hasLength(2));
+  });
+
   test('LicenseRegistry', () async {
     expect(await LicenseRegistry.licenses.toList(), isEmpty);
     LicenseRegistry.addLicense(() async* {

@@ -4,6 +4,12 @@
 
 /// Represents an image managed by a specific graphics backend.
 abstract class BackendImage {
+  /// The width of this image in pixels.
+  int get width;
+
+  /// The height of this image in pixels.
+  int get height;
+
   /// Disposes resources held by the backend image.
   void dispose();
 

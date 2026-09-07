@@ -11,7 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_tester.dart';
 import 'states.dart';
-import 'widgets_app_tester.dart';
 
 class ItemWidget extends StatefulWidget {
   const ItemWidget({super.key, required this.value});

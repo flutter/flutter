@@ -12,7 +12,6 @@ dependencies:
 
 
 flutter:
-  uses-material-design: true
   assets:
     - assets/flutter-mark-square-64.png
 

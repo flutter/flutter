@@ -50,7 +50,6 @@ Future<void> flutterPackagesRunner() async {
       // https://github.com/flutter/flutter/issues/129633
       '--downgrade',
       '--base-branch=$packagesCommit',
-      '--custom-analysis=script/configs/custom_analysis.yaml',
     ], workingDirectory: checkout.path);
   }
 

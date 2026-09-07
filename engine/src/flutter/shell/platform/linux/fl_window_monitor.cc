@@ -59,9 +59,28 @@ static void moved_to_rect_cb(FlWindowMonitor* self,
                              GdkRectangle* final_rect,
                              gboolean flipped_x,
                              gboolean flipped_y) {
+  // According to the documentation, the final_rect can be null
+  // if the backend can't obtain it.
+  // Reference: https://docs.gtk.org/gdk3/signal.Window.moved-to-rect.html
+  if (final_rect == nullptr) {
+    return;
+  }
+
   flutter::IsolateScope scope(self->isolate);
   self->on_moved_to_rect(final_rect->x, final_rect->y, final_rect->width,
                          final_rect->height);
+}
+
+// The moved-to-rect signal is on the GdkWindow, which only exists while the
+// widget is realized. Re-connected on each realize, since unrealizing destroys
+// the GdkWindow (and with it this connection).
+static void realize_cb(FlWindowMonitor* self) {
+  GdkWindow* window = gtk_widget_get_window(GTK_WIDGET(self->window));
+  if (window == nullptr) {
+    return;
+  }
+  g_signal_connect_object(window, "moved-to-rect", G_CALLBACK(moved_to_rect_cb),
+                          self, G_CONNECT_SWAPPED);
 }
 
 static gboolean delete_event_cb(FlWindowMonitor* self, GdkEvent* event) {
@@ -104,7 +123,12 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
       FL_WINDOW_MONITOR(g_object_new(fl_window_monitor_get_type(), nullptr));
 
   self->window = GTK_WINDOW(g_object_ref(window));
-  self->isolate = flutter::Isolate::Current();
+  // Callbacks are made in the isolate this was created in. There is not always
+  // an isolate, e.g. in unit tests, and the isolate this object is created with
+  // does nothing when entered.
+  if (Dart_CurrentIsolate() != nullptr) {
+    self->isolate = flutter::Isolate::Current();
+  }
   self->on_configure = on_configure;
   self->on_state_changed = on_state_changed;
   self->on_is_active_notify = on_is_active_notify;
@@ -123,9 +147,11 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
                           G_CONNECT_SWAPPED);
   g_signal_connect_object(window, "notify::title", G_CALLBACK(title_notify_cb),
                           self, G_CONNECT_SWAPPED);
-  g_signal_connect_object(gtk_widget_get_window(GTK_WIDGET(window)),
-                          "moved-to-rect", G_CALLBACK(moved_to_rect_cb), self,
+  g_signal_connect_object(window, "realize", G_CALLBACK(realize_cb), self,
                           G_CONNECT_SWAPPED);
+  if (gtk_widget_get_realized(GTK_WIDGET(window))) {
+    realize_cb(self);
+  }
   g_signal_connect_object(window, "delete-event", G_CALLBACK(delete_event_cb),
                           self, G_CONNECT_SWAPPED);
   g_signal_connect_object(window, "destroy", G_CALLBACK(destroy_cb), self,

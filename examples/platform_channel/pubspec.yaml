@@ -8,7 +8,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-
+  material_ui: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -17,8 +17,7 @@ dev_dependencies:
     sdk: flutter
   test: any
 
-
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: f9g2jl
+# PUBSPEC CHECKSUM: 2rmgtd

@@ -1,0 +1,353 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:convert' as convert;
+
+import 'package:path/path.dart' as p;
+
+// Matches a compile_commands.json `"command"` entry up to the clang executable.
+//
+// Matches up to `clang`/`clang++` so any wrapper prefix (rewrapper, ccache)
+// before it can be stripped.
+//
+// Group 1 is the leading `"command": "`.
+// Group 2 is the ` <path>clang[++]` executable.
+//
+// For example, given the entry:
+//   "command": "../../buildtools/mac-arm64/reclient/rewrapper ../../buildtools/mac-arm64/clang/bin/clang++ -c foo.cc"
+// group 2 is ` ../../buildtools/mac-arm64/clang/bin/clang++`.
+final RegExp _clangRegexp = RegExp(r'("command"\s*:\s*").*(\s(?:\S*/)?clang(\+\+)?)(?=[\s"])');
+final RegExp _swiftEntryRegexp = RegExp(r'\{[^{}]*swiftc\.py[^{}]*\}');
+final RegExp _shellQuoteRegexp = RegExp(r'[\s"\\$`!#&*|?()<>;~]');
+const convert.JsonEncoder _jsonEncoder = convert.JsonEncoder.withIndent('  ');
+
+/// Strips compiler wrapper prefixes from compiler commands in [contents].
+///
+/// Our build toolchain invokes certain `clang` commands from wrappers (such as
+/// rewrapper and ccache) for use with RBE. This can confuse C and C++ language
+/// servers like `clangd` when indexing source files.
+///
+/// See: https://github.com/flutter/flutter/issues/147767
+String stripCompilerWrappers(String contents) {
+  return contents.replaceAllMapped(_clangRegexp, (Match match) {
+    return '${match[1]}${match[2]!.trim()}';
+  });
+}
+
+/// Converts GN `swiftc.py` invocations in [contents] into native `swiftc` commands.
+///
+/// Our build toolchain invokes `swiftc` from a `swiftc.py` wrapper. Language
+/// servers such as SourceKit-LSP expect expanded, per-file `swiftc` invocations
+/// in `compile_commands.json`. This replaces wrapper calls with direct
+/// invocations that language servers understand.
+String expandSwiftcCommands(String contents) {
+  if (!contents.contains('swiftc.py')) {
+    return contents;
+  }
+
+  return contents.replaceAllMapped(_swiftEntryRegexp, (Match match) {
+    final String rawJson = match.group(0)!;
+    try {
+      final entry = convert.jsonDecode(rawJson) as Map<String, Object?>;
+      final List<Map<String, Object?>> expanded = expandSwiftEntry(entry);
+      return expanded.map((Map<String, Object?> map) => _jsonEncoder.convert(map)).join(',\n  ');
+    } catch (_) {
+      // If parsing fails for any reason, leave the block untouched.
+      return rawJson;
+    }
+  });
+}
+
+/// Post-processes the contents of a `compile_commands.json` file.
+///
+/// Strips compiler wrapper prefixes (such as rewrapper and ccache) from clang
+/// commands, and converts GN `swiftc.py` invocations into native `swiftc`
+/// commands expanded per-file for SourceKit-LSP.
+String updateCompilationDatabase(String contents) {
+  contents = stripCompilerWrappers(contents);
+  return expandSwiftcCommands(contents);
+}
+
+/// Expands a single `swiftc.py` [entry] into per-file `swiftc` compilation entries.
+///
+/// If [entry] has a `command` that invokes `swiftc.py`, this parses the
+/// arguments, translates them to `swiftc` arguments, makes paths absolute
+/// against the entry's `directory`, and returns an entry for each `.swift` file
+/// compiled.
+List<Map<String, Object?>> expandSwiftEntry(Map<String, Object?> entry) {
+  final String entryDir = (entry['directory'] as String?) ?? '';
+  final Map<String, Object?> baseEntry = _absolutizeEntryFile(entry, entryDir);
+
+  final origCommand = baseEntry['command'] as String?;
+  if (origCommand == null) {
+    return [baseEntry];
+  }
+
+  final _SwiftcTranslation? translation = _translateSwiftcCommand(origCommand);
+  if (translation == null) {
+    return [baseEntry];
+  }
+
+  final translatedEntry = <String, Object?>{
+    ...baseEntry,
+    'command': _resolveCommandPaths(entryDir, translation.args),
+  };
+
+  if (translation.swiftFiles.isEmpty) {
+    return [translatedEntry];
+  }
+
+  final absSwiftFiles = <String>[
+    for (final String f in translation.swiftFiles) makePathAbsolute(entryDir, f),
+  ];
+  return _duplicateEntryPerSwiftFile(translatedEntry, absSwiftFiles);
+}
+
+/// Returns a copy of [entry] with an absolute `file` path.
+Map<String, Object?> _absolutizeEntryFile(Map<String, Object?> entry, String entryDir) {
+  final file = entry['file'] as String?;
+  return <String, Object?>{
+    ...entry,
+    if (file != null && !p.isAbsolute(file)) 'file': makePathAbsolute(entryDir, file),
+  };
+}
+
+/// Duplicates [entry] once per file in [absSwiftFiles].
+///
+/// This skips [entry]'s own `file`, which is already covered, overriding `file`
+/// on each copy, so the language server indexes every compiled Swift file.
+List<Map<String, Object?>> _duplicateEntryPerSwiftFile(
+  Map<String, Object?> entry,
+  List<String> absSwiftFiles,
+) {
+  final origFileAbs = entry['file'] as String?;
+  final results = <Map<String, Object?>>[entry];
+  for (final absFile in absSwiftFiles) {
+    if (absFile != origFileAbs) {
+      results.add(<String, Object?>{...entry, 'file': absFile});
+    }
+  }
+  return results;
+}
+
+/// Resolves [filePath] against [directory] and returns the normalized absolute path.
+String makePathAbsolute(String directory, String filePath) =>
+    p.normalize(p.isAbsolute(filePath) ? filePath : p.join(directory, filePath));
+
+/// The `swiftc` arguments and Swift source files extracted from a GN `swiftc.py` command.
+typedef _SwiftcTranslation = ({List<String> args, List<String> swiftFiles});
+
+/// Parses [cmdStr] and translates it to `swiftc` arguments.
+///
+/// Returns null if [cmdStr] is not a `swiftc.py` invocation.
+_SwiftcTranslation? _translateSwiftcCommand(String cmdStr) {
+  if (!cmdStr.contains('swiftc.py')) {
+    return null;
+  }
+  final List<String> words = splitShellWords(cmdStr);
+  final int swiftcPyIdx = words.indexWhere((String w) => w.contains('swiftc.py'));
+  if (swiftcPyIdx == -1) {
+    return null;
+  }
+  return _translateSwiftcArgs(words.sublist(swiftcPyIdx + 1));
+}
+
+/// Returns true if the flag [arg] is a boolean flag that does not take a value.
+///
+/// Most of swiftc.py's flags take a value; this returns true for those that
+/// don't.
+bool _isBooleanFlag(String arg) {
+  return arg == '--fix-generated-header';
+}
+
+/// Translates GN `swiftc.py` [args] into native `swiftc` arguments.
+///
+/// Non-path `-Xcc` flag synthesis (such as
+/// preprocessor defines `-D`) is handled here, during syntactic argument
+/// translation.
+///
+/// Path-dependent `-Xcc` flag synthesis (such as `-I` or `-F`) is deferred to
+/// [_resolveCommandPaths], where relative filesystem paths are resolved to
+/// absolute paths.
+_SwiftcTranslation _translateSwiftcArgs(List<String> args) {
+  final newArgs = <String>['swiftc', '-parse-as-library'];
+  final swiftFiles = <String>[];
+
+  var i = 0;
+  while (i < args.length) {
+    final String arg = args[i];
+    switch (arg) {
+      case '-import-objc-header':
+        // Extract header argument.
+        if (i + 1 < args.length) {
+          final String val = args[i + 1];
+          if (val.isNotEmpty && val != '""' && val != "''") {
+            newArgs.addAll(<String>['-import-objc-header', val]);
+          }
+        }
+        i += 2;
+      case '--whole-module-optimization':
+        newArgs.add('-whole-module-optimization');
+        i += 1;
+      case _ when arg.startsWith('--'):
+        i += _isBooleanFlag(arg) ? 1 : 2;
+      case '-D':
+        if (i + 1 < args.length) {
+          final String val = args[i + 1];
+          // Swift's `-D` only supports bare conditional-compilation flags, not
+          // `key=value` defines, so those are only forwarded to clang.
+          if (!val.contains('=')) {
+            newArgs.addAll(<String>['-D', val]);
+          }
+          newArgs.addAll(<String>['-Xcc', '-D$val']);
+        }
+        i += 2;
+      case _ when arg.startsWith('-D'):
+        final String val = arg.substring(2);
+        if (!val.contains('=')) {
+          newArgs.add(arg);
+        }
+        newArgs.addAll(<String>['-Xcc', '-D$val']);
+        i += 1;
+      case _:
+        newArgs.add(arg);
+        if (arg.endsWith('.swift')) {
+          swiftFiles.add(arg);
+        }
+        i += 1;
+    }
+  }
+
+  return (args: newArgs, swiftFiles: swiftFiles);
+}
+
+/// Resolves relative paths in [words] to absolute paths against [directory].
+///
+/// Synthesizes path-dependent `-Xcc` flags for include and framework search
+/// paths (`-I`, `-F`, `-isystem`, `-Fsystem`), and returns the quoted, joined
+/// command string. Non-path `-Xcc` synthesis (`-D`) is handled upstream, in
+/// [_translateSwiftcArgs].
+///
+/// `-isystem` is clang-only: it's forwarded to swift only as `-Xcc -isystem
+/// -Xcc <path>`, never as a bare swift-side flag.
+String _resolveCommandPaths(String directory, List<String> words) {
+  final newArgs = <String>[];
+
+  // `-isystem` is the only one of these forwarded to clang exclusively; see
+  // the doc comment above.
+  bool isClangOnly(String flag) => flag == '-isystem';
+
+  int addSeparatedIncludeFlag(int i) {
+    final String flag = words[i];
+    if (!isClangOnly(flag)) {
+      newArgs.add(flag);
+    }
+    if (i + 1 >= words.length) {
+      return i + 1;
+    }
+    final String absVal = makePathAbsolute(directory, words[i + 1]);
+    if (!isClangOnly(flag)) {
+      newArgs.add(absVal);
+    }
+    if (flag case '-I' || '-isystem' || '-F' || '-Fsystem') {
+      newArgs.addAll(<String>['-Xcc', flag, '-Xcc', absVal]);
+    }
+    return i + 2;
+  }
+
+  void addAttachedIncludeFlag(String arg) {
+    final String prefix = switch (arg) {
+      _ when arg.startsWith('-isystem') => '-isystem',
+      _ when arg.startsWith('-Fsystem') => '-Fsystem',
+      _ when arg.startsWith('-F') => '-F',
+      _ => '-I',
+    };
+
+    // A bare `-I`/`-isystem`/`-F`/`-Fsystem` (no attached value) is caught by
+    // the exact-match branch below instead, so `val` is never empty here.
+    final String val = makePathAbsolute(directory, arg.substring(prefix.length));
+    if (!isClangOnly(prefix)) {
+      newArgs.add('$prefix$val');
+    }
+    newArgs.addAll(<String>['-Xcc', '$prefix$val']);
+  }
+
+  var i = 0;
+  while (i < words.length) {
+    final String arg = words[i];
+    switch (arg) {
+      case _ when arg.endsWith('.swift'):
+        newArgs.add(makePathAbsolute(directory, arg));
+        i += 1;
+      case '-I' || '-isystem' || '-F' || '-Fsystem' || '-import-objc-header' || '-sdk':
+        i = addSeparatedIncludeFlag(i);
+      case _ when arg.startsWith('-I') || arg.startsWith('-F') || arg.startsWith('-isystem'):
+        addAttachedIncludeFlag(arg);
+        i += 1;
+      case _:
+        newArgs.add(arg);
+        i += 1;
+    }
+  }
+  return newArgs.map(quoteShellWord).join(' ');
+}
+
+/// Parses [cmd] into individual shell arguments.
+///
+/// An empty quoted argument (`""` or `''`) is preserved as an empty-string
+/// element rather than disappearing, so callers can distinguish "argument
+/// present but empty" from "argument absent".
+List<String> splitShellWords(String cmd) {
+  final args = <String>[];
+  final buffer = StringBuffer();
+  var inSingleQuote = false;
+  var inDoubleQuote = false;
+  var escape = false;
+  var quoted = false;
+
+  for (var i = 0; i < cmd.length; i += 1) {
+    final String char = cmd[i];
+    switch (char) {
+      case _ when escape:
+        buffer.write(char);
+        escape = false;
+      case r'\' when !inSingleQuote:
+        escape = true;
+      case "'" when !inDoubleQuote:
+        inSingleQuote = !inSingleQuote;
+        quoted = true;
+      case '"' when !inSingleQuote:
+        inDoubleQuote = !inDoubleQuote;
+        quoted = true;
+      case ' ' || '\t' when !inSingleQuote && !inDoubleQuote:
+        if (buffer.isNotEmpty || quoted) {
+          args.add(buffer.toString());
+          buffer.clear();
+          quoted = false;
+        }
+      case _:
+        buffer.write(char);
+    }
+  }
+  if (buffer.isNotEmpty || quoted) {
+    args.add(buffer.toString());
+  }
+  return args;
+}
+
+/// Quotes and escapes [arg] for safe inclusion as a shell argument.
+String quoteShellWord(String arg) {
+  if (arg.isEmpty) {
+    return "''";
+  }
+  if (!arg.contains(_shellQuoteRegexp)) {
+    return arg;
+  }
+  if (!arg.contains("'")) {
+    return "'$arg'";
+  }
+  return r'"'
+      '${arg.replaceAll(r'\', r'\\').replaceAll('"', r'\"')}'
+      r'"';
+}

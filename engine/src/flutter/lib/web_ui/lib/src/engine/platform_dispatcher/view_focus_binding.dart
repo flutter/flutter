@@ -103,7 +103,9 @@ final class ViewFocusBinding {
       event = ui.ViewFocusEvent(
         viewId: viewId,
         state: ui.ViewFocusState.focused,
-        direction: _viewFocusDirection,
+        direction: _isViewRoot(viewId, focusedElement)
+            ? _viewFocusDirection
+            : ui.ViewFocusDirection.undefined,
       );
     }
     _updateViewKeyboardReachability(_lastViewId, reachable: true);
@@ -115,6 +117,11 @@ final class ViewFocusBinding {
   int? _viewId(DomElement? element) {
     final FlutterViewManager viewManager = EnginePlatformDispatcher.instance.viewManager;
     return viewManager.findViewForElement(element)?.viewId;
+  }
+
+  bool _isViewRoot(int viewId, DomElement? element) {
+    final DomElement? rootElement = _viewManager[viewId]?.dom.rootElement;
+    return element != null && element == rootElement;
   }
 
   void _handleViewCreated(int viewId) {

@@ -242,6 +242,11 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
     std::unordered_map<std::string, Shader::UniformBinding> uniform_structs;
     if (backend_shader->uniform_structs() != nullptr) {
       for (const auto& uniform : *backend_shader->uniform_structs()) {
+        if (uniform->ext_res_0() == impeller::kOptimizedOutBinding) {
+          // A dead-code-eliminated uniform block, dropped for the same reason
+          // as the optimized-out samplers below.
+          continue;
+        }
         std::vector<impeller::ShaderStructMemberMetadata> members;
         if (uniform->fields() != nullptr) {
           for (const auto& struct_member : *uniform->fields()) {
@@ -293,6 +298,12 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
     std::unordered_map<std::string, Shader::TextureBinding> uniform_textures;
     if (backend_shader->uniform_textures() != nullptr) {
       for (const auto& uniform : *backend_shader->uniform_textures()) {
+        if (uniform->ext_res_0() == impeller::kOptimizedOutBinding) {
+          // The shader compiler dead-code-eliminated this sampler. Reflection
+          // still lists it but stamps the out-of-range binding sentinel, so
+          // drop it here rather than register a binding that cannot be bound.
+          continue;
+        }
         Shader::TextureBinding texture_binding;
         texture_binding.slot = impeller::SampledImageSlot{
             .name = uniform->name()->c_str(),
@@ -436,6 +447,15 @@ fml::RefPtr<Shader> ShaderLibrary::GetShader(const std::string& shader_name,
     shader->AssociateWithDartWrapper(shader_wrapper);
   }
   return shader;
+}
+
+fml::RefPtr<Shader> ShaderLibrary::FindShaderForTesting(
+    const std::string& shader_name) const {
+  auto it = shaders_.find(shader_name);
+  if (it == shaders_.end()) {
+    return nullptr;
+  }
+  return it->second;
 }
 
 ShaderLibrary::ShaderLibrary(std::shared_ptr<fml::Mapping> payload,

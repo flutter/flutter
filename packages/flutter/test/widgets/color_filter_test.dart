@@ -12,8 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 void main() {
   const debugRed = Color(0xFFFF0000);
   const debugGreen = Color(0xFF00FF00);

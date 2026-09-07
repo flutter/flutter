@@ -20,13 +20,16 @@ void main() {
   late Directory dartUIPath;
   late Directory flutterRoot;
 
+  Directory exampleBase() => examples.parent.parent;
+
   String getRelativePath(File file, [Directory? from]) {
     from ??= flutterRoot;
-    return path.relative(file.absolute.path, from: flutterRoot.absolute.path);
+    return path.relative(file.absolute.path, from: from.absolute.path);
   }
 
   void writeLink({required File source, required File example, String? alternateLink}) {
-    final String link = alternateLink ?? ' ** See code in ${getRelativePath(example)} **';
+    final String relativePath = getRelativePath(example, exampleBase());
+    final String link = alternateLink ?? ' ** See code in $relativePath **';
     source
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -45,8 +48,14 @@ void main() {
     bool missingTests = false,
     bool malformedLinks = false,
   }) {
-    final Directory examplesLib = examples.childDirectory('lib').childDirectory('layer')
-      ..createSync(recursive: true);
+    final Directory examplesLib =
+        packages
+            .childDirectory('flutter')
+            .childDirectory('examples')
+            .childDirectory('api')
+            .childDirectory('lib')
+            .childDirectory('layer')
+          ..createSync(recursive: true);
     final File fooExample = examplesLib.childFile('foo_example.0.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('// Example for foo');
@@ -58,8 +67,14 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('// Example that is not linked');
     }
-    final Directory examplesTests = examples.childDirectory('test').childDirectory('layer')
-      ..createSync(recursive: true);
+    final Directory examplesTests =
+        packages
+            .childDirectory('flutter')
+            .childDirectory('examples')
+            .childDirectory('api')
+            .childDirectory('test')
+            .childDirectory('layer')
+          ..createSync(recursive: true);
     examplesTests.childFile('foo_example.0_test.dart')
       ..createSync(recursive: true)
       ..writeAsStringSync('// test for foo example');
@@ -109,8 +124,13 @@ void main() {
       path.join(path.rootPrefix(fs.currentDirectory.absolute.path), 'flutter sdk'),
     )..createSync(recursive: true);
     fs.currentDirectory = flutterRoot;
-    examples = flutterRoot.childDirectory('examples').childDirectory('api')
-      ..createSync(recursive: true);
+    examples =
+        flutterRoot
+            .childDirectory('packages')
+            .childDirectory('flutter')
+            .childDirectory('examples')
+            .childDirectory('api')
+          ..createSync(recursive: true);
     packages = flutterRoot.childDirectory('packages')..createSync(recursive: true);
     dartUIPath =
         flutterRoot
@@ -194,7 +214,7 @@ void main() {
         <String>[
               '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
               '║ The following example test files are missing:',
-              '║   examples/api/test/layer/bar_example.0_test.dart',
+              '║   packages/flutter/examples/api/test/layer/bar_example.0_test.dart',
               '╚═══════════════════════════════════════════════════════════════════════════════',
             ]
             .map((String line) {

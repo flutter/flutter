@@ -6,6 +6,7 @@
 library;
 
 import 'package:file/file.dart';
+
 import '../integration.shard/test_data/hot_reload_project.dart';
 import '../integration.shard/test_driver.dart';
 import '../integration.shard/test_utils.dart';
@@ -58,12 +59,12 @@ void main() {
         await expectLater(testRunner.hotReload(), completes);
         // Confirm build counter was incremented.
         await expectLater(
-          testRunner.findNextInBrowserLog('((((TICK 2))))', defaultTimeout),
+          testRunner.findNextInBrowserLog('((((TICK 2))))', const Duration(seconds: 30)),
           completes,
         );
         // Confirm the new code ran in the browser.
         await expectLater(
-          testRunner.findNextInBrowserLog('(((((RELOAD WORKED)))))', defaultTimeout),
+          testRunner.findNextInBrowserLog('(((((RELOAD WORKED)))))', const Duration(seconds: 30)),
           completes,
         );
         // Close the browser.

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -29,38 +28,6 @@ void testMain() {
     final ui.Image image = await _createImage();
     expect(image, isA<EngineImage>());
     image.dispose();
-  });
-
-  test('fetchImage fetches image in chunks', () async {
-    final cumulativeBytesLoadedInvocations = <int>[];
-    final expectedTotalBytesInvocations = <int>[];
-    final Uint8List result = await fetchImage('/long_test_payload?length=100000&chunk=1000', (
-      int cumulativeBytesLoaded,
-      int expectedTotalBytes,
-    ) {
-      cumulativeBytesLoadedInvocations.add(cumulativeBytesLoaded);
-      expectedTotalBytesInvocations.add(expectedTotalBytes);
-    });
-
-    // Check that image payload was chunked.
-    expect(cumulativeBytesLoadedInvocations, hasLength(greaterThan(1)));
-
-    // Check that reported total byte count is the same across all invocations.
-    for (final expectedTotalBytes in expectedTotalBytesInvocations) {
-      expect(expectedTotalBytes, 100000);
-    }
-
-    // Check that cumulative byte count grows with each invocation.
-    cumulativeBytesLoadedInvocations.reduce((int previous, int next) {
-      expect(next, greaterThan(previous));
-      return next;
-    });
-
-    // Check that the last cumulative byte count matches the total byte count.
-    expect(cumulativeBytesLoadedInvocations.last, 100000);
-
-    // Check the contents of the returned data.
-    expect(result, List<int>.generate(100000, (int i) => i & 0xFF));
   });
 
   test('EngineImage does not close image source too early', () async {

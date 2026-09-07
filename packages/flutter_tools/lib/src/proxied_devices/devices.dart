@@ -112,6 +112,10 @@ class ProxiedDevices extends PollingDeviceDiscovery {
     final DeviceConnectionInterface? connectionInterface = connectionInterfaceName != null
         ? getDeviceConnectionInterfaceForName(connectionInterfaceName)
         : null;
+    // Casting to `String?` to be backward compatible with old daemon version
+    // which is not sending the cpuArch. It can be changed to `String` when we
+    // no longer need the backward compatibility.
+    final String? cpuArch = _cast<String?>(device['cpuArch']);
     return ProxiedDevice(
       connection,
       _cast<String>(device['id']),
@@ -120,6 +124,7 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       category: Category.fromString(_cast<String>(device['category'])),
       platformType: PlatformType.fromString(_cast<String>(device['platformType'])),
       targetPlatform: TargetPlatform.fromName(_cast<String>(device['platform'])),
+      cpuArch: cpuArch != null ? CpuArch.fromName(cpuArch) : CpuArch.unknown,
       ephemeral: _cast<bool>(device['ephemeral']),
       isConnected: _cast<bool?>(device['isConnected']) ?? true,
       connectionInterface: connectionInterface ?? DeviceConnectionInterface.attached,
@@ -176,6 +181,7 @@ class ProxiedDevice extends Device {
     required super.category,
     required super.platformType,
     required TargetPlatform targetPlatform,
+    required CpuArch cpuArch,
     required super.ephemeral,
     required this.isConnected,
     required this.connectionInterface,
@@ -197,6 +203,7 @@ class ProxiedDevice extends Device {
        _sdkNameAndVersion = sdkNameAndVersion,
        _supportsHardwareRendering = supportsHardwareRendering,
        _targetPlatform = targetPlatform,
+       _cpuArch = cpuArch,
        _logger = logger,
        _fileTransfer = fileTransfer,
        super(id);
@@ -268,6 +275,11 @@ class ProxiedDevice extends Device {
   @override
   Future<TargetPlatform> get targetPlatform async => _targetPlatform;
   TargetPlatform get targetPlatformSync => _targetPlatform;
+
+  final CpuArch _cpuArch;
+  @override
+  Future<CpuArch> get cpuArch async => _cpuArch;
+  CpuArch get cpuArchSync => _cpuArch;
 
   final String _sdkNameAndVersion;
   @override

@@ -70,51 +70,148 @@ void main() {
   });
 
   testWithoutContext('compile expression can compile single expression', () async {
-    final compileResponseCompleter = Completer<List<int>>();
-    final compileExpressionResponseCompleter = Completer<List<int>>();
+    final stdoutController = StreamController<List<int>>();
+    processManager.process.stdout = stdoutController.stream;
+
     fileSystem.file('/path/to/main.dart.dill')
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[1, 2, 3, 4]);
 
-    processManager.process.stdout = Stream<List<int>>.fromFutures(<Future<List<int>>>[
-      compileResponseCompleter.future,
-      compileExpressionResponseCompleter.future,
-    ]);
-    compileResponseCompleter.complete(
-      Future<List<int>>.value(
-        utf8.encode('result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'),
-      ),
+    final Future<CompilerOutput?> compileFuture = generator.recompile(
+      Uri.file('/path/to/main.dart'),
+      null,
+      /* invalidatedFiles */
+      outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
+      projectRootPath: '',
+      fs: fileSystem,
     );
+    stdoutController.add(
+      utf8.encode('result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'),
+    );
+    final CompilerOutput? output = await compileFuture;
+    expect(frontendServerStdIn.getAndClear(), 'compile file:///path/to/main.dart\n');
+    expect(testLogger.errorText, equals('line1\nline2\n'));
+    expect(output!.outputFilename, equals('/path/to/main.dart.dill'));
 
-    await generator
-        .recompile(
-          Uri.file('/path/to/main.dart'),
-          null,
-          /* invalidatedFiles */
-          outputPath: '/build/',
-          packageConfig: PackageConfig.empty,
-          projectRootPath: '',
-          fs: fileSystem,
-        )
-        .then((CompilerOutput? output) {
-          expect(frontendServerStdIn.getAndClear(), 'compile file:///path/to/main.dart\n');
-          expect(testLogger.errorText, equals('line1\nline2\n'));
-          expect(output!.outputFilename, equals('/path/to/main.dart.dill'));
+    fileSystem.file('/path/to/main.dart.dill.incremental')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(<int>[1, 2, 3, 4]);
 
-          compileExpressionResponseCompleter.complete(
-            Future<List<int>>.value(
-              utf8.encode(
-                'result def\nline1\nline2\ndef\ndef /path/to/main.dart.dill.incremental 0\n',
-              ),
-            ),
-          );
-          generator
-              .compileExpression('2+2', null, null, null, null, null, null, null, null, false)
-              .then((CompilerOutput? outputExpression) {
-                expect(outputExpression, isNotNull);
-                expect(outputExpression!.expressionData, <int>[1, 2, 3, 4]);
-              });
-        });
+    final Future<CompilerOutput?> expressionFuture = generator.compileExpression(
+      '2+2',
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      false,
+    );
+    stdoutController.add(
+      utf8.encode('result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'),
+    );
+    final CompilerOutput? outputExpression = await expressionFuture;
+    expect(outputExpression, isNotNull);
+    expect(outputExpression!.expressionData, <int>[1, 2, 3, 4]);
+
+    final List<String> stdinLines = frontendServerStdIn.getAndClear().trim().split('\n');
+    expect(stdinLines, hasLength(2));
+    expect(stdinLines[0], 'JSON_INPUT');
+    expect(
+      json.decode(stdinLines[1]),
+      <String, Object?>{
+        'type': 'COMPILE_EXPRESSION',
+        'data': <String, Object?>{
+          'expression': '2+2',
+          'definitions': <String>[],
+          'definitionTypes': <String>[],
+          'typeDefinitions': <String>[],
+          'typeBounds': <String>[],
+          'typeDefaults': <String>[],
+          'libraryUri': '',
+          'class': null,
+          'method': null,
+          'static': false,
+        },
+      },
+    );
+    await stdoutController.close();
+  });
+
+  testWithoutContext('compile expression sends JSON_INPUT for multiline expressions', () async {
+    final stdoutController = StreamController<List<int>>();
+    processManager.process.stdout = stdoutController.stream;
+
+    fileSystem.file('/path/to/main.dart.dill')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+    fileSystem.file('/path/to/main.dart.dill.incremental')
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(<int>[1, 2, 3, 4]);
+
+    final Future<CompilerOutput?> compileFuture = generator.recompile(
+      Uri.file('/path/to/main.dart'),
+      null,
+      /* invalidatedFiles */
+      outputPath: '/build/',
+      packageConfig: PackageConfig.empty,
+      projectRootPath: '',
+      fs: fileSystem,
+    );
+    stdoutController.add(
+      utf8.encode('result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n'),
+    );
+    final CompilerOutput? output = await compileFuture;
+    expect(frontendServerStdIn.getAndClear(), 'compile file:///path/to/main.dart\n');
+    expect(testLogger.errorText, equals('line1\nline2\n'));
+    expect(output!.outputFilename, equals('/path/to/main.dart.dill'));
+
+    const multilineExpression = 'final a = 1;\nfinal b = 2;\na + b;';
+    final Future<CompilerOutput?> expressionFuture = generator.compileExpression(
+      multilineExpression,
+      <String>['def1'],
+      <String>['int'],
+      <String>['TypeDef1'],
+      <String>['TypeBound1'],
+      <String>['TypeDefault1'],
+      'package:foo/foo.dart',
+      'FooClass',
+      'fooMethod',
+      false,
+    );
+    stdoutController.add(
+      utf8.encode('result def\nline1\nline2\ndef /path/to/main.dart.dill.incremental 0\n'),
+    );
+    final CompilerOutput? outputExpression = await expressionFuture;
+
+    expect(outputExpression, isNotNull);
+    expect(outputExpression!.expressionData, <int>[1, 2, 3, 4]);
+
+    final List<String> stdinLines = frontendServerStdIn.getAndClear().trim().split('\n');
+    expect(stdinLines, hasLength(2));
+    expect(stdinLines[0], 'JSON_INPUT');
+    expect(
+      json.decode(stdinLines[1]),
+      <String, Object?>{
+        'type': 'COMPILE_EXPRESSION',
+        'data': <String, Object?>{
+          'expression': multilineExpression,
+          'definitions': <String>['def1'],
+          'definitionTypes': <String>['int'],
+          'typeDefinitions': <String>['TypeDef1'],
+          'typeBounds': <String>['TypeBound1'],
+          'typeDefaults': <String>['TypeDefault1'],
+          'libraryUri': 'package:foo/foo.dart',
+          'class': 'FooClass',
+          'method': 'fooMethod',
+          'static': false,
+        },
+      },
+    );
+    await stdoutController.close();
   });
 
   testWithoutContext('compile expressions without awaiting', () async {

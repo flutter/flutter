@@ -505,13 +505,21 @@ class BackdropGroup extends InheritedWidget {
 /// {@endtemplate}
 ///
 /// Multiple backdrop filters can be combined into a single rendering operation
-/// by the Flutter engine if these backdrop filters widgets all share a common
-/// [BackdropKey]. The backdrop key uniquely identifies the input for a backdrop
-/// filter, and when shared, indicates the filtering can be performed once. This
-/// can significantly reduce the overhead of using multiple backdrop filters in
-/// a scene. The key can either be provided manually via the `backdropKey`
-/// constructor parameter or looked up from a [BackdropGroup] inherited widget
-/// via the `.grouped` constructor.
+/// by the Flutter engine if these backdrop filter widgets all share a common
+/// [BackdropKey] and have equivalent filter configurations. The backdrop key
+/// uniquely identifies the input for a backdrop filter, and when shared, indicates
+/// that the backdrop capture can be shared and filtering can be performed once
+/// if the filters are identical. This can significantly reduce the overhead of
+/// using multiple backdrop filters in a scene. The key can either be provided
+/// manually via the `backdropKey` constructor parameter or looked up from a
+/// [BackdropGroup] inherited widget via the `.grouped` constructor.
+///
+/// To combine the filter passes into a single operation, the resolved filters
+/// across the group must have identical properties. For example, using a "bounded"
+/// blur ([ImageFilterConfig.blur] with `bounded: true` or [ui.ImageFilter.blur]
+/// with non-null `bounds`) assigns unique layout bounds to each widget, which
+/// prevents the engine from collapsing them into a single blur pass (though the
+/// initial backdrop capture is still shared across the group).
 ///
 /// Backdrop filters that overlap with each other should not use the same
 /// backdrop key, otherwise the results may look as if only one filter is
@@ -1934,10 +1942,15 @@ class Transform extends SingleChildRenderObjectWidget {
 /// The [CompositedTransformTarget] must come earlier in the paint order than
 /// any linked [CompositedTransformFollower]s.
 ///
+/// {@macro flutter.widgets.CompositedTransformFollower.overlayPortal}
+///
 /// See also:
 ///
 ///  * [CompositedTransformFollower], the widget that can target this one.
 ///  * [LeaderLayer], the layer that implements this widget's logic.
+///  * [OverlayPortal.overlayChildLayoutBuilder], which achieves a similar
+///    target-following effect, but also allows the follower to be sized and
+///    positioned dynamically based on the target's size and position.
 class CompositedTransformTarget extends SingleChildRenderObjectWidget {
   /// Creates a composited transform target widget.
   ///
@@ -1985,11 +1998,21 @@ class CompositedTransformTarget extends SingleChildRenderObjectWidget {
 /// this widget is usually used as the root of an [OverlayEntry] in an app-wide
 /// [Overlay] (e.g. as created by the [MaterialApp] widget's [Navigator]).
 ///
+/// {@template flutter.widgets.CompositedTransformFollower.overlayPortal}
+/// [CompositedTransformFollower] and [CompositedTransformTarget] are
+/// incompatible with [OverlayPortal.overlayChildLayoutBuilder] and thus
+/// must not be used together. Consider using
+/// [OverlayPortal.overlayChildLayoutBuilder] instead
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [CompositedTransformTarget], the widget that this widget can target.
 ///  * [FollowerLayer], the layer that implements this widget's logic.
 ///  * [Transform], which applies an arbitrary transform to a child.
+///  * [OverlayPortal.overlayChildLayoutBuilder], which achieves a similar
+///    target-following effect, but also allows the follower to be sized and
+///    positioned dynamically based on the target's size and position.
 class CompositedTransformFollower extends SingleChildRenderObjectWidget {
   /// Creates a composited transform target widget.
   ///
@@ -3940,6 +3963,8 @@ class IgnoreBaseline extends SingleChildRenderObjectWidget {
 
 /// A sliver that contains a single box widget.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=vWec9DrAbHE}
+///
 /// Slivers are special-purpose widgets that can be combined using a
 /// [CustomScrollView] to create custom scroll effects. A [SliverToBoxAdapter]
 /// is a basic sliver that creates a bridge back to one of the usual box-based
@@ -4382,6 +4407,9 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
 ///
 /// {@macro flutter.widgets.SemanticsBase}
 ///  * [Semantics], the widget variant of this sliver.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=lPWrd08swlw}
+///
 @immutable
 class SliverSemantics extends _SemanticsBase {
   /// Creates a semantic annotation.
@@ -5302,10 +5330,9 @@ class Flex extends MultiChildRenderObjectWidget {
     this.spacing = 0.0,
     super.children,
   }) : assert(
-         !identical(crossAxisAlignment, CrossAxisAlignment.baseline) || textBaseline != null,
+         (crossAxisAlignment != CrossAxisAlignment.baseline) || textBaseline != null,
          'textBaseline is required if you specify the crossAxisAlignment with CrossAxisAlignment.baseline',
        );
-  // Cannot use == in the assert above instead of identical because of https://github.com/dart-lang/language/issues/1811.
 
   /// The direction to use as the main axis.
   ///
@@ -6738,6 +6765,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.invertColors = false,
     this.filterQuality = FilterQuality.medium,
     this.isAntiAlias = false,
+    this.blendMode = BlendMode.srcOver,
   });
 
   /// The image to display.
@@ -6872,6 +6900,16 @@ class RawImage extends LeafRenderObjectWidget {
   /// Anti-aliasing alleviates the sawtooth artifact when the image is rotated.
   final bool isAntiAlias;
 
+  /// Used to combine the image with the destination when painting onto the
+  /// canvas. This is forwarded to [paintImage].
+  ///
+  /// Defaults to [BlendMode.srcOver].
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  final BlendMode blendMode;
+
   @override
   RenderImage createRenderObject(BuildContext context) {
     assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
@@ -6900,6 +6938,7 @@ class RawImage extends LeafRenderObjectWidget {
       invertColors: invertColors,
       isAntiAlias: isAntiAlias,
       filterQuality: filterQuality,
+      blendMode: blendMode,
     );
   }
 
@@ -6929,7 +6968,8 @@ class RawImage extends LeafRenderObjectWidget {
           : null
       ..invertColors = invertColors
       ..isAntiAlias = isAntiAlias
-      ..filterQuality = filterQuality;
+      ..filterQuality = filterQuality
+      ..blendMode = blendMode;
   }
 
   @override
@@ -6959,6 +6999,9 @@ class RawImage extends LeafRenderObjectWidget {
     );
     properties.add(DiagnosticsProperty<bool>('invertColors', invertColors));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
+    properties.add(
+      EnumProperty<BlendMode>('blendMode', blendMode, defaultValue: BlendMode.srcOver),
+    );
   }
 }
 
@@ -7569,6 +7612,19 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/ignore_pointer.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// The following sample shows an [IgnorePointer] and an [AbsorbPointer] side
+/// by side, each wrapping a box that partially covers a tappable target
+/// behind it in a stack. Tapping the overlapping region on the
+/// [IgnorePointer] side taps the target behind: the [IgnorePointer] is
+/// invisible to hit testing, so the pointer event goes through to the next
+/// target in the stack. Tapping the same region on the [AbsorbPointer] side
+/// does nothing: the [AbsorbPointer] absorbs the pointer events itself, so
+/// neither its child nor the target behind it receives the tap.
+///
+/// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
+/// {@end-tool}
+///
 /// ## Semantics
 ///
 /// Using this class may also affect how the semantics subtree underneath is
@@ -7579,27 +7635,6 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// the semantics subtree. Otherwise, the subtree remains untouched.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.IgnorePointer.ignoringSemantics}
-/// The usages of [ignoringSemantics] are deprecated and not recommended. This
-/// property was introduced to workaround the semantics behavior of the
-/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
-///
-/// Before that version, entire semantics subtree is dropped if [ignoring] is
-/// true. Developers can only use [ignoringSemantics] to preserver the semantics
-/// subtrees.
-///
-/// After that version, with [ignoring] set to true, it only prevents semantics
-/// user actions in the semantics subtree but leaves the other
-/// [SemanticsProperties] intact. Therefore, the [ignoringSemantics] is no
-/// longer needed.
-///
-/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
-/// the subtree will be invisible to assistive technologies.
-///
-/// If [ignoringSemantics] is false, the semantics subtree is collected as
-/// usual.
-/// {@endtemplate}
-///
 /// See also:
 ///
 ///  * [AbsorbPointer], which also prevents its children from receiving pointer
@@ -7607,16 +7642,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///  * [SliverIgnorePointer], the sliver version of this widget.
 class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that is invisible to hit testing.
-  const IgnorePointer({
-    super.key,
-    this.ignoring = true,
-    @Deprecated(
-      'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    this.ignoringSemantics,
-    super.child,
-  });
+  const IgnorePointer({super.key, this.ignoring = true, super.child});
 
   /// Whether this widget is ignored during hit testing.
   ///
@@ -7628,37 +7654,20 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Defaults to true.
   final bool ignoring;
 
-  /// Whether the semantics of this widget is ignored when compiling the
-  /// semantics subtree.
-  ///
-  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
-  @Deprecated(
-    'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  final bool? ignoringSemantics;
-
   @override
   RenderIgnorePointer createRenderObject(BuildContext context) {
-    return RenderIgnorePointer(ignoring: ignoring, ignoringSemantics: ignoringSemantics);
+    return RenderIgnorePointer(ignoring: ignoring);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderIgnorePointer renderObject) {
-    renderObject
-      ..ignoring = ignoring
-      ..ignoringSemantics = ignoringSemantics;
+    renderObject.ignoring = ignoring;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
-    properties.add(
-      DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null),
-    );
   }
 }
 
@@ -7670,15 +7679,17 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// from being the target of located events, because it returns true from
 /// [RenderBox.hitTest].
 ///
-/// When [ignoringSemantics] is true, the subtree will be invisible to
-/// the semantics layer (and thus e.g. accessibility tools).
-///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
 ///
 /// {@tool dartpad}
-/// The following sample has an [AbsorbPointer] widget wrapping the button on
-/// top of the stack, which absorbs pointer events, preventing its child button
-/// __and__ the button below it in the stack from receiving the pointer events.
+/// The following sample shows an [AbsorbPointer] and an [IgnorePointer] side
+/// by side, each wrapping a box that partially covers a tappable target
+/// behind it in a stack. Tapping the overlapping region on the
+/// [AbsorbPointer] side does nothing: the [AbsorbPointer] absorbs the pointer
+/// events itself, so neither its child nor the target behind it receives the
+/// tap. Tapping the same region on the [IgnorePointer] side taps the target
+/// behind: the [IgnorePointer] is invisible to hit testing, so the pointer
+/// event goes through to the next target in the stack.
 ///
 /// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
 /// {@end-tool}
@@ -7693,43 +7704,13 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// the semantics subtree. Otherwise, the subtree remains untouched.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.AbsorbPointer.ignoringSemantics}
-/// The usages of [ignoringSemantics] are deprecated and not recommended. This
-/// property was introduced to workaround the semantics behavior of the
-/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
-///
-/// Before that version, entire semantics subtree is dropped if [absorbing] is
-/// true. Developers can only use [ignoringSemantics] to preserver the semantics
-/// subtrees.
-///
-/// After that version, with [absorbing] set to true, it only prevents semantics
-/// user actions in the semantics subtree but leaves the other
-/// [SemanticsProperties] intact. Therefore, the [ignoringSemantics] is no
-/// longer needed.
-///
-/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
-/// the subtree will be invisible to assistive technologies.
-///
-/// If [ignoringSemantics] is false, the semantics subtree is collected as
-/// usual.
-/// {@endtemplate}
-///
 /// See also:
 ///
 ///  * [IgnorePointer], which also prevents its children from receiving pointer
 ///    events but is itself invisible to hit testing.
 class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that absorbs pointers during hit testing.
-  const AbsorbPointer({
-    super.key,
-    this.absorbing = true,
-    @Deprecated(
-      'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    this.ignoringSemantics,
-    super.child,
-  });
+  const AbsorbPointer({super.key, this.absorbing = true, super.child});
 
   /// Whether this widget absorbs pointers during hit testing.
   ///
@@ -7742,37 +7723,20 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Defaults to true.
   final bool absorbing;
 
-  /// Whether the semantics of this render object is ignored when compiling the
-  /// semantics tree.
-  ///
-  /// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
-  @Deprecated(
-    'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  final bool? ignoringSemantics;
-
   @override
   RenderAbsorbPointer createRenderObject(BuildContext context) {
-    return RenderAbsorbPointer(absorbing: absorbing, ignoringSemantics: ignoringSemantics);
+    return RenderAbsorbPointer(absorbing: absorbing);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderAbsorbPointer renderObject) {
-    renderObject
-      ..absorbing = absorbing
-      ..ignoringSemantics = ignoringSemantics;
+    renderObject.absorbing = absorbing;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('absorbing', absorbing));
-    properties.add(
-      DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null),
-    );
   }
 }
 

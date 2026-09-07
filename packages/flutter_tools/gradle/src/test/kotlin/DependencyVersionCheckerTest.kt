@@ -30,7 +30,6 @@ import com.flutter.gradle.DependencyVersionChecker.warnAGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnGradleVersion
 import com.flutter.gradle.DependencyVersionChecker.warnKGPVersion
 import com.flutter.gradle.DependencyVersionChecker.warnMinSdkVersion
-import com.flutter.gradle.testing.setAgpKotlinVersionToNull
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -52,8 +51,6 @@ private const val FAKE_PROJECT_ROOT_DIR = "/fake/root/dir"
 
 // The following values will need to be modified when the corresponding "warn$DepName" versions
 // are updated in DependencyVersionChecker.kt
-// These values should also match the flutter create template values.
-// In //packages/flutter_tools/lib/src/android/gradle_utils.dart
 private const val SUPPORTED_GRADLE_VERSION: String = "9.1.0"
 private val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_17
 private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(9, 0, 1)
@@ -82,7 +79,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `AGP version in error range results in DependencyValidationException`() {
-        val exampleErrorAgpVersion = AndroidPluginVersion(8, 5, 0)
+        val exampleErrorAgpVersion = AndroidPluginVersion(8, 11, 0)
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleErrorAgpVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -104,7 +101,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `AGP version in warn range results in warning logs`() {
-        val exampleWarnAgpVersion = AndroidPluginVersion(8, 10, 0)
+        val exampleWarnAgpVersion = AndroidPluginVersion(8, 11, 1)
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleWarnAgpVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -128,7 +125,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `KGP version in error range results in DependencyValidationException`() {
-        val exampleErrorKgpVersion = "1.9.20"
+        val exampleErrorKgpVersion = "2.0.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(kgpVersion = exampleErrorKgpVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -152,7 +149,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `KGP version in warn range results in warning logs`() {
-        val exampleWarnKgpVersion = "2.2.0"
+        val exampleWarnKgpVersion = "2.2.20"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(kgpVersion = exampleWarnKgpVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -203,7 +200,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `Gradle version in error range results in DependencyValidationException`() {
-        val exampleErrorGradleVersion = "8.6.0"
+        val exampleErrorGradleVersion = "8.13.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(gradleVersion = exampleErrorGradleVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -226,7 +223,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `Gradle version in warn range results in warning logs`() {
-        val exampleWarnGradleVersion = "8.12.0"
+        val exampleWarnGradleVersion = "8.14.0"
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(gradleVersion = exampleWarnGradleVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
@@ -501,7 +498,6 @@ private object MockProjectFactory {
             }
             return@answers Unit
         }
-        setAgpKotlinVersionToNull(mockProject)
 
         return mockProject
     }

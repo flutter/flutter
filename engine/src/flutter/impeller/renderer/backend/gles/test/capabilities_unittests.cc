@@ -89,5 +89,43 @@ TEST(CapabilitiesGLES, MaxSamplerAnisotropyWithExtension) {
   EXPECT_GE(capabilities->GetMaxSamplerAnisotropy(), 2u);
 }
 
+TEST(CapabilitiesGLES, SupportsTextureArrayOnES3) {
+  // 2D array textures are core on OpenGL ES 3.0, no extension needed.
+  auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL ES 3.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_TRUE(capabilities->SupportsTextureArray());
+}
+
+TEST(CapabilitiesGLES, DoesNotSupportTextureArrayOnES2WithoutExtension) {
+  auto const extensions = std::vector<const char*>{"GL_KHR_debug"};
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_FALSE(capabilities->SupportsTextureArray());
+}
+
+TEST(CapabilitiesGLES, SupportsTextureArrayViaNVExtensionOnES2) {
+  // OpenGL ES 2.0 has no core array textures, but GL_NV_texture_array exposes
+  // them through *NV-suffixed 3D texture entry points.
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",         //
+      "GL_NV_texture_array",  //
+  };
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_TRUE(capabilities->SupportsTextureArray());
+}
+
+TEST(CapabilitiesGLES, SupportsTextureArrayViaEXTExtension) {
+  // GL_EXT_texture_array exposes the core-named 3D texture entry points below
+  // GL 3.0 (desktop GL 2.x).
+  auto const extensions = std::vector<const char*>{
+      "GL_KHR_debug",          //
+      "GL_EXT_texture_array",  //
+  };
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
+  auto capabilities = mock_gles->GetProcTable().GetCapabilities();
+  EXPECT_TRUE(capabilities->SupportsTextureArray());
+}
+
 }  // namespace testing
 }  // namespace impeller

@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:dds/dap.dart' hide DapServer;
+import 'package:dap_adapters/dap_adapters.dart' hide DapServer;
 
 import '../base/file_system.dart';
 import '../base/platform.dart';

@@ -546,6 +546,51 @@ Uptime: 441088659 Realtime: 521464097
     },
     overrides: <Type, Generator>{Logger: () => BufferLogger.test()},
   );
+
+  testWithoutContext('AdbLogReader filters logs by default (adbLogFiltering = true)', () async {
+    final logger = BufferLogger.test();
+    final logReader = AdbLogReader.test(
+      FakeProcess(
+        stdout: utf8.encode(
+          '05-12 00:00:00.000 I/some_tag( 123): secret log\n'
+          '05-12 00:00:00.000 I/flutter( 123): allowed log\n',
+        ),
+      ),
+      'foo',
+      logger,
+    );
+    final List<String> receivedLines = [];
+    final StreamSubscription<String> subscription = logReader.logLines.listen(receivedLines.add);
+
+    await Future<void>.delayed(Duration.zero);
+    await subscription.cancel();
+
+    expect(receivedLines, isNot(contains('I/some_tag( 123): secret log')));
+    expect(receivedLines, contains('I/flutter( 123): allowed log'));
+  });
+
+  testWithoutContext('AdbLogReader does not filter logs if adbLogFiltering = false', () async {
+    final logger = BufferLogger.test();
+    final logReader = AdbLogReader.test(
+      FakeProcess(
+        stdout: utf8.encode(
+          '05-12 00:00:00.000 I/some_tag( 123): secret log\n'
+          '05-12 00:00:00.000 I/flutter( 123): allowed log\n',
+        ),
+      ),
+      'foo',
+      logger,
+      adbLogFiltering: false,
+    );
+    final List<String> receivedLines = [];
+    final StreamSubscription<String> subscription = logReader.logLines.listen(receivedLines.add);
+
+    await Future<void>.delayed(Duration.zero);
+    await subscription.cancel();
+
+    expect(receivedLines, contains('I/some_tag( 123): secret log'));
+    expect(receivedLines, contains('I/flutter( 123): allowed log'));
+  });
 }
 
 /// A mock VM Service that throws a generic [RPCErrorKind.kServerError] error

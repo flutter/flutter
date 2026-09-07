@@ -213,6 +213,42 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
 
 @end
 
+@interface PlatformViewMutationClipRSuperellipseTests : GoldenPlatformViewTests
+
+@end
+
+@implementation PlatformViewMutationClipRSuperellipseTests
+
+- (instancetype)initWithInvocation:(NSInvocation*)invocation {
+  GoldenTestManager* manager =
+      [[GoldenTestManager alloc] initWithLaunchArg:@"--platform-view-clip-rsuperellipse"];
+  return [super initWithManager:manager invocation:invocation];
+}
+
+- (void)testPlatformView {
+  [self checkPlatformViewGolden];
+}
+
+@end
+
+@interface PlatformViewMutationClipRSuperellipseMultipleClipsTests : GoldenPlatformViewTests
+
+@end
+
+@implementation PlatformViewMutationClipRSuperellipseMultipleClipsTests
+
+- (instancetype)initWithInvocation:(NSInvocation*)invocation {
+  GoldenTestManager* manager = [[GoldenTestManager alloc]
+      initWithLaunchArg:@"--platform-view-clip-rsuperellipse-multiple-clips"];
+  return [super initWithManager:manager invocation:invocation];
+}
+
+- (void)testPlatformView {
+  [self checkPlatformViewGolden];
+}
+
+@end
+
 @interface PlatformViewMutationLargeClipRRectTests : GoldenPlatformViewTests
 
 @end

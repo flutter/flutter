@@ -114,7 +114,13 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
     } else {
       projectDir = fs.currentDirectory;
     }
-    return validateFlutterProjectForPreview(projectDir);
+    final FlutterProject project = validateFlutterProjectForPreview(projectDir);
+    final FlutterProject? workspaceRoot = project.workspaceRoot;
+    if (workspaceRoot != null) {
+      logger.printTrace('Found workspace root at ${workspaceRoot.directory.path}');
+      return workspaceRoot;
+    }
+    return project;
   }
 
   FlutterProject validateFlutterProjectForPreview(Directory directory) {
@@ -257,6 +263,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late final _previewDetector = PreviewDetector(
+    artifacts: artifacts,
     platform: platform,
     previewAnalytics: previewAnalytics,
     project: rootProject,

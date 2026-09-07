@@ -104,6 +104,10 @@ class MockDelegate : public PlatformView::Delegate {
               OnPlatformViewGetSettings,
               (),
               (const, override));
+  MOCK_METHOD(std::shared_ptr<fml::BasicTaskRunner>,
+              OnPlatformViewGetShutdownSafeIOTaskRunner,
+              (),
+              (const, override));
 };
 
 class MockResponse : public PlatformMessageResponse {

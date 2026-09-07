@@ -17,7 +17,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-// CREATE_NATIVE_ENTRY is leaky by design
+// CREATE_FFI_LAMBDA is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 namespace flutter {
@@ -57,14 +57,12 @@ TEST_F(ShellTest, VSyncTargetTime) {
   int64_t target_time;
   fml::AutoResetWaitableEvent on_target_time_latch;
   auto nativeOnBeginFrame = [&on_target_time_latch,
-                             &target_time](Dart_NativeArguments args) {
-    Dart_Handle exception = nullptr;
-    target_time =
-        tonic::DartConverter<int64_t>::FromArguments(args, 0, exception);
+                             &target_time](int64_t microseconds) {
+    target_time = microseconds;
     on_target_time_latch.Signal();
   };
-  AddNativeCallback("NativeOnBeginFrame",
-                    CREATE_NATIVE_ENTRY(nativeOnBeginFrame));
+  AddFfiNativeCallback("NativeOnBeginFrame",
+                       CREATE_FFI_LAMBDA(nativeOnBeginFrame));
 
   // Create all te prerequisites for a shell.
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());

@@ -456,6 +456,15 @@ CapabilitiesVK::GetEnabledDeviceFeatures(
     // `max_anisotropy` greater than 1 may only be created when this feature
     // is enabled.
     required.samplerAnisotropy = supported.samplerAnisotropy;
+
+    // Enable block-compressed texture format support when available.
+    // These core Vulkan 1.0 features must be explicitly requested at device
+    // creation; otherwise the capability read-back in SetPhysicalDevice
+    // (which reads from enabled_features) will always report false.
+    // See: https://github.com/flutter/flutter/issues/189107
+    required.textureCompressionETC2 = supported.textureCompressionETC2;
+    required.textureCompressionASTC_LDR = supported.textureCompressionASTC_LDR;
+    required.textureCompressionBC = supported.textureCompressionBC;
   }
   // VK_KHR_sampler_ycbcr_conversion features.
   if (IsExtensionInList(

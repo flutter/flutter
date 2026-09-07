@@ -809,7 +809,7 @@ class Actions extends StatefulWidget {
   /// returned callback is called. If the return value is needed, consider using
   /// [Actions.invoke] instead.
   static VoidCallback? handler<T extends Intent>(BuildContext context, T intent) {
-    final Action<Intent>? action = Actions.maybeFind(context);
+    final Action<Intent>? action = Actions.maybeFind<T>(context, intent: intent);
     if (action != null && action._isEnabled(intent, context)) {
       return () {
         // Could be that the action was enabled when the closure was created,
@@ -1177,6 +1177,7 @@ class FocusableActionDetector extends StatefulWidget {
     this.autofocus = false,
     this.descendantsAreFocusable = true,
     this.descendantsAreTraversable = true,
+    this.skipTraversal,
     this.shortcuts,
     this.actions,
     this.onShowFocusHighlight,
@@ -1207,6 +1208,9 @@ class FocusableActionDetector extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.descendantsAreTraversable}
   final bool descendantsAreTraversable;
+
+  /// {@macro flutter.widgets.Focus.skipTraversal}
+  final bool? skipTraversal;
 
   /// {@macro flutter.widgets.actions.actions}
   final Map<Type, Action<Intent>>? actions;
@@ -1394,6 +1398,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
         autofocus: widget.autofocus,
         descendantsAreFocusable: widget.descendantsAreFocusable,
         descendantsAreTraversable: widget.descendantsAreTraversable,
+        skipTraversal: widget.skipTraversal,
         canRequestFocus: _canRequestFocus,
         onFocusChange: _handleFocusChange,
         includeSemantics: widget.includeFocusSemantics,
