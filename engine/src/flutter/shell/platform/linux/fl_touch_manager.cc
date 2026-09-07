@@ -243,11 +243,12 @@ void fl_touch_manager_handle_grab_broken(FlTouchManager* self,
     return;
   }
 
-  g_autoptr(GList) touch_ids = g_hash_table_get_keys(self->added_touch_devices);
-  for (GList* link = touch_ids; link != nullptr; link = link->next) {
-    uint32_t touch_id = GPOINTER_TO_UINT(link->data);
-    FlTouchPoint* point = static_cast<FlTouchPoint*>(
-        g_hash_table_lookup(self->added_touch_devices, link->data));
+  GHashTableIter iter;
+  g_hash_table_iter_init(&iter, self->added_touch_devices);
+  gpointer key, value;
+  while (g_hash_table_iter_next(&iter, &key, &value)) {
+    uint32_t touch_id = GPOINTER_TO_UINT(key);
+    FlTouchPoint* point = static_cast<FlTouchPoint*>(value);
     int32_t device_id =
         static_cast<int32_t>(kFlutterPointerDeviceKindTouch) << 28 | touch_id;
 
@@ -259,6 +260,9 @@ void fl_touch_manager_handle_grab_broken(FlTouchManager* self,
                                       event_time * kMicrosecondsPerMillisecond,
                                       point->x, point->y, device_id);
 
-    remove_touch_point(self, point->number, touch_id);
+    release_number(self, point->number);
   }
+
+  // Every touch point has been removed.
+  g_hash_table_remove_all(self->added_touch_devices);
 }
