@@ -515,8 +515,15 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   settings.enable_platform_isolates =
       command_line.HasOption(FlagForSwitch(Switch::EnablePlatformIsolates));
 
-  settings.enable_surface_control = command_line.HasOption(
-      FlagForSwitch(Switch::EnableAndroidHcppAndSurfaceControl));
+  {
+    std::string enable_surface_control_value;
+    if (command_line.GetOptionValue(
+            FlagForSwitch(Switch::EnableAndroidHcppAndSurfaceControl),
+            &enable_surface_control_value)) {
+      settings.enable_surface_control = enable_surface_control_value.empty() ||
+                                        "true" == enable_surface_control_value;
+    }
+  }
 
   constexpr std::string_view kMergedThreadEnabled = "enabled";
   constexpr std::string_view kMergedThreadDisabled = "disabled";

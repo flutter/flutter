@@ -215,7 +215,8 @@ void fl_subsurface_egl_resize(FlSubsurfaceEGL* self,
 void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
                                GLuint texture_id,
                                size_t width,
-                               size_t height) {
+                               size_t height,
+                               FlGLFence* fence) {
   g_return_if_fail(FL_IS_SUBSURFACE_EGL(self));
 
   // Present the composited frame to the subsurface window surface using the
@@ -223,6 +224,14 @@ void fl_subsurface_egl_present(FlSubsurfaceEGL* self,
   EGLDisplay egl_display = get_display(self);
   eglMakeCurrent(egl_display, self->egl_surface, self->egl_surface,
                  self->egl_context);
+
+  // Make this context wait for the frame to have finished rendering in the
+  // engine's context before it reads the texture below. This context is the one
+  // that reads the frame, so the waiting can be left to OpenGL and this thread
+  // doesn't have to block.
+  if (fence != nullptr) {
+    fl_gl_fence_wait(fence);
+  }
 
   EGLint surface_width = 0, surface_height = 0;
   eglQuerySurface(egl_display, self->egl_surface, EGL_WIDTH, &surface_width);
