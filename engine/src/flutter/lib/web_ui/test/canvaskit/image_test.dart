@@ -114,7 +114,10 @@ void testMain() {
     final ByteData actual = (await rasterized.toByteData(
       format: ui.ImageByteFormat.rawStraightRgba,
     ))!;
-    expect(actual.buffer.asUint8List(), expected.buffer.asUint8List());
+    expect(
+      actual.buffer.asUint8List(actual.offsetInBytes, actual.lengthInBytes),
+      expected.buffer.asUint8List(expected.offsetInBytes, expected.lengthInBytes),
+    );
   });
 }
 
