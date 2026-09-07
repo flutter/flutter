@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/services.dart';
@@ -201,6 +202,39 @@ void main() {
     );
     await sendAppExitRequest();
     expect(exitRequested, isTrue);
+  });
+
+  testWidgets('Does not notify listeners disposed while handling an exit request', (
+    WidgetTester tester,
+  ) async {
+    final firstRequestStarted = Completer<void>();
+    final finishFirstRequest = Completer<void>();
+    var disposedListenerCalled = false;
+    final firstListener = TestAppLifecycleListener(
+      binding: WidgetsBinding.instance,
+      onExitRequested: () async {
+        firstRequestStarted.complete();
+        await finishFirstRequest.future;
+        return AppExitResponse.exit;
+      },
+    );
+    addTearDown(firstListener.dispose);
+    listener = TestAppLifecycleListener(
+      binding: WidgetsBinding.instance,
+      onExitRequested: () async {
+        disposedListenerCalled = true;
+        return AppExitResponse.exit;
+      },
+    );
+
+    final Future<void> exitRequest = sendAppExitRequest();
+    await firstRequestStarted.future;
+    listener!.dispose();
+    listener = null;
+    finishFirstRequest.complete();
+    await exitRequest;
+
+    expect(disposedListenerCalled, isFalse);
   });
 
   test('AppLifecycleListener dispatches memory events', () async {

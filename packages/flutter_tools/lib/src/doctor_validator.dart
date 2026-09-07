@@ -176,6 +176,9 @@ extension ValidationMessageFormatting on ValidationMessage {
   }
 }
 
+/// A validator that reports when no supported IDEs are installed.
+///
+/// This class is required by internal google3 tooling (`mobile/flutter/cli/context`).
 class NoIdeValidator extends DoctorValidator {
   NoIdeValidator() : super('Flutter IDE Support');
 
@@ -196,13 +199,4 @@ class NoIdeValidator extends DoctorValidator {
       statusInfo: noIdeStatusInfo,
     );
   }
-}
-
-class ValidatorWithResult extends DoctorValidator {
-  ValidatorWithResult(super.title, this.result);
-
-  final ValidationResult result;
-
-  @override
-  Future<ValidationResult> validateImpl() async => result;
 }

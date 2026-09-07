@@ -48,97 +48,6 @@ const forceLoadModule = function (relativeUrl, root) {
 ''';
 
 // TODO(srujzs): Delete this once it's no longer used internally.
-String generateDDCBootstrapScript({
-  required String entrypoint,
-  required String ddcModuleLoaderUrl,
-  required String mapperUrl,
-  required bool generateLoadingIndicator,
-  String appRootDirectory = '/',
-}) {
-  return '''
-${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
-// TODO(markzipan): This is safe if Flutter app roots are always equal to the
-// host root '/'. Validate if this is true.
-var _currentDirectory = "$appRootDirectory";
-
-$_simpleLoaderScript
-
-// A map containing the URLs for the bootstrap scripts in debug.
-let _scriptUrls = {
-  "mapper": "$mapperUrl",
-  "moduleLoader": "$ddcModuleLoaderUrl"
-};
-
-(function() {
-  let appName = "$entrypoint";
-
-  // A uuid that identifies a subapp.
-  // Stubbed out since subapps aren't supported in Flutter.
-  let uuid = "00000000-0000-0000-0000-000000000000";
-
-  window.postMessage(
-      {type: "DDC_STATE_CHANGE", state: "initial_load", targetUuid: uuid}, "*");
-
-  // Load pre-requisite DDC scripts.
-  // We intentionally use invalid names to avoid namespace clashes.
-  let prerequisiteScripts = [
-    {
-      "src": "$ddcModuleLoaderUrl",
-      "id": "ddc_module_loader \x00"
-    },
-    {
-      "src": "$mapperUrl",
-      "id": "dart_stack_trace_mapper \x00"
-    }
-  ];
-
-  // Load ddc_module_loader.js to access DDC's module loader API.
-  let prerequisiteLoads = [];
-  for (let i = 0; i < prerequisiteScripts.length; i++) {
-    prerequisiteLoads.push(forceLoadModule(prerequisiteScripts[i].src));
-  }
-  Promise.all(prerequisiteLoads).then((_) => afterPrerequisiteLogic());
-
-  // Save the current script so we can access it in a closure.
-  var _currentScript = document.currentScript;
-
-  var afterPrerequisiteLogic = function() {
-    window.\$dartLoader.rootDirectories.push(_currentDirectory);
-    let scripts = [
-      {
-        "src": "dart_sdk.js",
-        "id": "dart_sdk"
-      },
-      {
-        "src": "main_module.bootstrap.js",
-        "id": "data-main"
-      }
-    ];
-    let loadConfig = new window.\$dartLoader.LoadConfiguration();
-    loadConfig.bootstrapScript = scripts[scripts.length - 1];
-
-    loadConfig.loadScriptFn = function(loader) {
-      loader.addScriptsToQueue(scripts, null);
-      loader.loadEnqueuedModules();
-    }
-    loadConfig.ddcEventForLoadStart = /* LOAD_ALL_MODULES_START */ 1;
-    loadConfig.ddcEventForLoadedOk = /* LOAD_ALL_MODULES_END_OK */ 2;
-    loadConfig.ddcEventForLoadedError = /* LOAD_ALL_MODULES_END_ERROR */ 3;
-
-    let loader = new window.\$dartLoader.DDCLoader(loadConfig);
-
-    // Record prerequisite scripts' fully resolved URLs.
-    prerequisiteScripts.forEach(script => loader.registerScript(script));
-
-    // Note: these variables should only be used in non-multi-app scenarios since
-    // they can be arbitrarily overridden based on multi-app load order.
-    window.\$dartLoader.loadConfig = loadConfig;
-    window.\$dartLoader.loader = loader;
-    loader.nextAttempt();
-  }
-})();
-''';
-}
 
 String generateDDCLibraryBundleBootstrapScript({
   required String entrypoint,
@@ -624,35 +533,6 @@ Future<void> main() {
   return runWebTest(webTest);
 }
   ''';
-}
-
-/// Generate the unit test bootstrap file.
-String generateTestBootstrapFileContents(String mainUri, String requireUrl, String mapperUrl) {
-  return '''
-(function() {
-  if (typeof document != 'undefined') {
-    var el = document.createElement("script");
-    el.defer = true;
-    el.async = false;
-    el.src = '$mapperUrl';
-    document.head.appendChild(el);
-
-    el = document.createElement("script");
-    el.defer = true;
-    el.async = false;
-    el.src = '$requireUrl';
-    el.setAttribute("data-main", '$mainUri');
-    document.head.appendChild(el);
-  } else {
-    importScripts('$mapperUrl', '$requireUrl');
-    require.config({
-      baseUrl: baseUrl,
-    });
-    window = self;
-    require(['$mainUri']);
-  }
-})();
-''';
 }
 
 String generateDefaultFlutterBootstrapScript({required bool includeServiceWorkerSettings}) {

@@ -5,6 +5,8 @@
 import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
 import 'package:flutter/material.dart';
 
+import '../data/gallery_options.dart';
+
 /// The maximum width taken up by each item on the home screen.
 const double maxHomeItemWidth = 1400.0;
 
@@ -15,11 +17,19 @@ const double maxHomeItemWidth = 1400.0;
 /// where only part of the display is available to said widgets.
 ///
 /// Used to build adaptive and responsive layouts.
-bool isDisplayDesktop(BuildContext context) => getWindowType(context) >= AdaptiveWindowType.medium;
+bool isDisplayDesktop(BuildContext context) {
+  if (GalleryOptions.maybeOf(context)?.isTestMode ?? false) {
+    return false;
+  }
+  return getWindowType(context) >= AdaptiveWindowType.medium;
+}
 
 /// Returns boolean value whether the window is considered medium size.
 ///
 /// Used to build adaptive and responsive layouts.
 bool isDisplaySmallDesktop(BuildContext context) {
+  if (GalleryOptions.maybeOf(context)?.isTestMode ?? false) {
+    return false;
+  }
   return getWindowType(context) == AdaptiveWindowType.medium;
 }

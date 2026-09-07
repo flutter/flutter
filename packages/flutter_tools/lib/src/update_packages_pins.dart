@@ -26,12 +26,3 @@ const kManuallyPinnedDependencies = <String, String>{
   'material_color_utilities': '0.13.0', // Keep pinned to latest until 1.0.0.
   'data_assets': '0.20.0', //  Keep pinned to latest until 1.0.0. Rolled by @dcharkes.
 };
-
-/// These are packages that are explicitly excluded from appearing in the list
-/// of pinned packages added to each pubspec.yaml.
-const kExplicitlyExcludedPackages = <String>[
-  '_macros', // Synthetic dependency for macros package, which isn't published.
-  // This is effectively pinned via the Dart SDK pin, see
-  // https://github.com/flutter/flutter/issues/148004 for more context.
-  'macros',
-];

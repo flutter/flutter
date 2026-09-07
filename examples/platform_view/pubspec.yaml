@@ -8,8 +8,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
-  material_ui: ^0.0.2
-
+  material_ui: ^1.1.0
 
 flutter:
 
@@ -17,4 +16,4 @@ flutter:
   assets:
     - assets/flutter-mark-square-64.png
 
-# PUBSPEC CHECKSUM: dmrod6
+# PUBSPEC CHECKSUM: 1o8tcm
