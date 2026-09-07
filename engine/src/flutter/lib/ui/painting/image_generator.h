@@ -36,7 +36,7 @@ class ImageGenerator {
   /// buffer can drive a multi-gigabyte pixel allocation and terminate the
   /// process. This bound mirrors the maximum decoded image size used by other
   /// browser-class engines and the Impeller decoder's max_texture_size clamp.
-  const static size_t kMaxDecodedImageBytes = 1u << 28;  // 256 MiB
+  static constexpr size_t kMaxDecodedImageBytes = 1u << 28;  // 256 MiB
 
   /// @brief  Info about a single frame in the context of a multi-frame image,
   ///         useful for animation and blending.
