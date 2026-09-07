@@ -49,6 +49,10 @@ FLUTTER_DARWIN_EXPORT
  * Deleting a FlutterEngineGroup doesn't invalidate existing FlutterEngines, but
  * it eliminates the possibility to create more FlutterEngines in that group.
  *
+ * Engines in a group share task runners, including the platform thread of the first engine
+ * created in the group. All `-makeEngine*` methods must therefore be called on the main thread.
+ * See `FlutterEngine` class documentation.
+ *
  * @warning This class is a work-in-progress and may change.
  * @see https://github.com/flutter/flutter/issues/72009
  */
@@ -70,6 +74,8 @@ FLUTTER_DARWIN_EXPORT
 /**
  * Creates a running `FlutterEngine` that shares components with this group.
  *
+ * This method must be called on the main thread.
+ *
  * @param entrypoint The name of a top-level function from a Dart library.  If this is
  *   FlutterDefaultDartEntrypoint (or nil); this will default to `main()`.  If it is not the app's
  *   main() function, that function must be decorated with `@pragma(vm:entry-point)` to ensure the
@@ -80,10 +86,12 @@ FLUTTER_DARWIN_EXPORT
  * @see FlutterEngineGroup
  */
 - (FlutterEngine*)makeEngineWithEntrypoint:(nullable NSString*)entrypoint
-                                libraryURI:(nullable NSString*)libraryURI;
+                                libraryURI:(nullable NSString*)libraryURI NS_SWIFT_UI_ACTOR;
 
 /**
  * Creates a running `FlutterEngine` that shares components with this group.
+ *
+ * This method must be called on the main thread.
  *
  * @param entrypoint The name of a top-level function from a Dart library.  If this is
  *   FlutterDefaultDartEntrypoint (or nil); this will default to `main()`.  If it is not the app's
@@ -98,16 +106,19 @@ FLUTTER_DARWIN_EXPORT
  */
 - (FlutterEngine*)makeEngineWithEntrypoint:(nullable NSString*)entrypoint
                                 libraryURI:(nullable NSString*)libraryURI
-                              initialRoute:(nullable NSString*)initialRoute;
+                              initialRoute:(nullable NSString*)initialRoute NS_SWIFT_UI_ACTOR;
 
 /**
  * Creates a running `FlutterEngine` that shares components with this group.
+ *
+ * This method must be called on the main thread.
  *
  * @param options Options that control how a FlutterEngine should be created.
  *
  * @see FlutterEngineGroupOptions
  */
-- (FlutterEngine*)makeEngineWithOptions:(nullable FlutterEngineGroupOptions*)options;
+- (FlutterEngine*)makeEngineWithOptions:(nullable FlutterEngineGroupOptions*)options
+    NS_SWIFT_UI_ACTOR;
 @end
 
 NS_ASSUME_NONNULL_END
