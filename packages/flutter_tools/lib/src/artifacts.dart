@@ -359,6 +359,9 @@ abstract class Artifacts {
 /// been parsed, so the artifacts they need to build against are not yet known.
 /// A [DeferredArtifacts] can be used in their place, then [resolve]d once the
 /// required artifacts are known.
+///
+/// Paths read before [resolve] is called are out of date, so must not be
+/// cached.
 class DeferredArtifacts implements Artifacts {
   DeferredArtifacts(this._artifacts);
 
