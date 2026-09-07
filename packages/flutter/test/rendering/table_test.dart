@@ -829,4 +829,111 @@ void main() {
     expect(table.getMinIntrinsicHeight(double.infinity), equals(0.0));
     expect(table.getMaxIntrinsicHeight(double.infinity), equals(0.0));
   });
+
+  group('Intrinsic dimensions with colSpan and rowSpan', () {
+    test('rowSpan does not add its height to the row it starts in', () {
+      // Row 0: | RowSpan 0-1 (300 tall) | Reg (20 tall) |
+      // Row 1: |                        | Reg (20 tall) |
+      //
+      // The spanning cell covers both rows, so the table only needs to be 300
+      // tall. Measuring it as part of row 0 alone would report 320.
+      final table = RenderTable(textDirection: TextDirection.ltr, columns: 2, rows: 2);
+
+      final RenderBox spanningCell = sizedBox(50.0, 300.0);
+      spanningCell.parentData = TableCellParentData()..rowSpan = 2;
+      table.setChild(0, 0, spanningCell);
+      table.setChild(1, 0, sizedBox(50.0, 20.0));
+      table.setChild(1, 1, sizedBox(50.0, 20.0));
+
+      expect(table.getMinIntrinsicHeight(100.0), equals(300.0));
+      expect(table.getMaxIntrinsicHeight(100.0), equals(300.0));
+
+      // The intrinsic height agrees with the height the table lays out to.
+      layout(table, constraints: const BoxConstraints(maxWidth: 100.0));
+      expect(table.size.height, equals(300.0));
+    });
+
+    test('rowSpan still grows the table when the rows it covers are shorter', () {
+      // The rows the span covers only account for 40 of its 300, so the last row
+      // of the span has to absorb the remaining 260.
+      final table = RenderTable(textDirection: TextDirection.ltr, columns: 2, rows: 2);
+
+      final RenderBox spanningCell = sizedBox(50.0, 300.0);
+      spanningCell.parentData = TableCellParentData()..rowSpan = 2;
+      table.setChild(0, 0, spanningCell);
+      table.setChild(1, 0, sizedBox(50.0, 20.0));
+      table.setChild(1, 1, sizedBox(50.0, 20.0));
+
+      // Row 0 is 20 tall, so row 1 has to be 280 tall for the span to fit.
+      expect(table.getMinIntrinsicHeight(100.0), equals(300.0));
+
+      // A taller neighbour in the second row wins over the remainder of the span.
+      table.setChild(1, 1, sizedBox(50.0, 400.0));
+      expect(table.getMinIntrinsicHeight(100.0), equals(420.0));
+    });
+
+    test('placeholder cells do not contribute to the intrinsic height', () {
+      // A placeholder (TableCell.none) sits where a spanning cell already covers
+      // the grid, so whatever it is made of must not be measured.
+      final table = RenderTable(textDirection: TextDirection.ltr, columns: 2, rows: 2);
+
+      final RenderBox spanningCell = sizedBox(50.0, 40.0);
+      spanningCell.parentData = TableCellParentData()..rowSpan = 2;
+      table.setChild(0, 0, spanningCell);
+
+      final RenderBox placeholder = sizedBox(50.0, 500.0);
+      placeholder.parentData = TableCellParentData()
+        ..colSpan = 0
+        ..rowSpan = 0;
+      table.setChild(0, 1, placeholder);
+
+      table.setChild(1, 0, sizedBox(50.0, 20.0));
+      table.setChild(1, 1, sizedBox(50.0, 20.0));
+
+      expect(table.getMinIntrinsicHeight(100.0), equals(40.0));
+    });
+
+    test('colSpan measures the cell against the width of the whole span', () {
+      // The cell is as tall as it is wide, and it covers both 50 wide columns,
+      // so it is 100 tall - not the 50 it would be in a single column.
+      final table = RenderTable(
+        textDirection: TextDirection.ltr,
+        columns: 2,
+        rows: 1,
+        columnWidths: const <int, TableColumnWidth>{
+          0: FixedColumnWidth(50.0),
+          1: FixedColumnWidth(50.0),
+        },
+      );
+
+      final square = RenderAspectRatio(aspectRatio: 1.0);
+      square.parentData = TableCellParentData()..colSpan = 2;
+      table.setChild(0, 0, square);
+
+      expect(table.getMinIntrinsicHeight(100.0), equals(100.0));
+    });
+
+    test('colSpan attributes the cell width to the column it starts in', () {
+      // Documents a known limitation: TableColumnWidth is handed the cells of a
+      // single column at a time, so an IntrinsicColumnWidth column that a
+      // spanning cell starts in is sized to the whole span. The table therefore
+      // reports 350 (300 + 50) where 300 would be enough.
+      // See the TODO on RenderTable.computeMinIntrinsicWidth.
+      final table = RenderTable(
+        textDirection: TextDirection.ltr,
+        columns: 2,
+        rows: 2,
+        defaultColumnWidth: const IntrinsicColumnWidth(),
+      );
+
+      final RenderBox spanningCell = sizedBox(300.0, 20.0);
+      spanningCell.parentData = TableCellParentData()..colSpan = 2;
+      table.setChild(0, 0, spanningCell);
+      table.setChild(1, 0, sizedBox(50.0, 20.0));
+      table.setChild(1, 1, sizedBox(50.0, 20.0));
+
+      expect(table.getMaxIntrinsicWidth(double.infinity), equals(350.0));
+      expect(table.getMinIntrinsicWidth(double.infinity), equals(350.0));
+    });
+  });
 }

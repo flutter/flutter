@@ -1016,6 +1016,17 @@ class RenderTable extends RenderBox {
     visitChildren(redepthChild);
   }
 
+  // Cells that span several columns are measured as part of the column they
+  // start in, because [TableColumnWidth] is handed the cells of a single column
+  // at a time. A spanning cell can therefore make that one column as wide as
+  // the whole span instead of having its width shared between the columns it
+  // covers.
+  //
+  // Sharing it would mean growing only the columns whose width actually depends
+  // on their cells - a [FixedColumnWidth] column has to keep the width it asked
+  // for - and [TableColumnWidth] does not expose whether that is the case.
+  // TODO(hm21): Share the width of a column-spanning cell between the columns
+  // it covers, once TableColumnWidth can report whether it is cell-driven.
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_children.length == rows * columns);
@@ -1055,14 +1066,60 @@ class RenderTable extends RenderBox {
       return 0.0;
     }
     final List<double> widths = _computeColumnWidths(BoxConstraints.tightForFinite(width: width));
+    // A cell that spans several rows is parked on the last row it covers and is
+    // reduced by the height of every row in between, so that it only adds the
+    // height its span still needs. This mirrors the accounting in
+    // [computeDryLayout] and [performLayout], which keeps the intrinsic height
+    // in agreement with the height the table actually lays out to.
+    final pendingRowSpanHeights = Float64List(rows);
     var rowTop = 0.0;
     for (var y = 0; y < rows; y += 1) {
       var rowHeight = 0.0;
       for (var x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
         final RenderBox? child = _children[xy];
-        if (child != null) {
-          rowHeight = math.max(rowHeight, child.getMaxIntrinsicHeight(widths[x]));
+        if (child == null) {
+          continue;
+        }
+        final childParentData = child.parentData! as TableCellParentData;
+        // Placeholder cells (TableCell.none) are covered by a spanning cell and
+        // contribute no size of their own, so there is nothing to measure.
+        if (!childParentData._isVisible) {
+          continue;
+        }
+        final int colSpan = childParentData.colSpan;
+        final int rowSpan = childParentData.rowSpan;
+
+        // Compute the total width covered by this cell's column span.
+        var spanWidth = 0.0;
+        for (var i = 0; i < colSpan && (x + i) < columns; i++) {
+          spanWidth += widths[x + i];
+        }
+
+        final double childHeight = child.getMaxIntrinsicHeight(spanWidth);
+        if (rowSpan == 1) {
+          rowHeight = math.max(rowHeight, childHeight);
+        } else {
+          final int targetY = y + rowSpan - 1;
+          if (targetY < rows) {
+            pendingRowSpanHeights[targetY] = math.max(pendingRowSpanHeights[targetY], childHeight);
+          }
+        }
+      }
+
+      rowHeight = math.max(rowHeight, pendingRowSpanHeights[y]);
+      pendingRowSpanHeights[y] = 0.0; // Reset current row
+
+      // Update pending heights - subtract rowHeight from future rows.
+      for (int futureY = y + 1; futureY < rows; futureY += 1) {
+        if (pendingRowSpanHeights[futureY] > 0) {
+          // For cells spanning multiple rows, reduce the pending height by the
+          // current row's height. Use math.max to ensure non-negative values,
+          // as the pending height may already be satisfied by earlier rows.
+          pendingRowSpanHeights[futureY] = math.max(
+            0.0,
+            pendingRowSpanHeights[futureY] - rowHeight,
+          );
         }
       }
       rowTop += rowHeight;
