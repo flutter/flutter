@@ -20,10 +20,12 @@
 
 // Trace vsync events using os_signpost so that they can be seen in Instruments "Points of
 // Interest".
-#define TRACE_VSYNC(event_type, baton)                                                     \
-  do {                                                                                     \
-    os_log_t log = os_log_create("FlutterVSync", "PointsOfInterest");                      \
-    os_signpost_event_emit(log, OS_SIGNPOST_ID_EXCLUSIVE, event_type, "baton %lx", baton); \
+#define TRACE_VSYNC(event_type, baton)                                                         \
+  do {                                                                                         \
+    static os_log_t log = os_log_create("FlutterVSync", "PointsOfInterest");                   \
+    _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wignored-attributes\"")  \
+        os_signpost_event_emit(log, OS_SIGNPOST_ID_EXCLUSIVE, event_type, "baton %lx", baton); \
+    _Pragma("GCC diagnostic pop")                                                              \
   } while (0)
 #else
 #define TRACE_VSYNC(event_type, baton) \

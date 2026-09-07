@@ -20,6 +20,13 @@ const String dartTargetArchTag = 'dartTargetArch';
 
 enum Branch { beta, stable, master, main }
 
+/// The CPU architecture a Flutter SDK archive is built for.
+///
+/// This is the architecture of the machine the packaged SDK will run on, which
+/// is not necessarily the architecture of the machine building the package: on
+/// CI we cross-package x64 archives on arm64 macOS hosts.
+enum TargetArch { x64, arm64 }
+
 /// Exception class for when a process fails to run, so we can catch
 /// it and provide something more readable than a stack trace.
 final class PreparePackageException implements Exception {

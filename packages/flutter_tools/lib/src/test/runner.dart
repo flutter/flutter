@@ -40,6 +40,7 @@ interface class FlutterTestRunner {
     List<String> plainNames = const <String>[],
     List<String> tags = const <String>[],
     List<String> excludeTags = const <String>[],
+    List<String> presets = const <String>[],
     bool enableVmService = false,
     bool machine = false,
     String? precompiledDillPath,
@@ -84,6 +85,7 @@ interface class FlutterTestRunner {
       if (randomSeed != null) '--test-randomize-ordering-seed=$randomSeed',
       for (final String tag in tags) ...<String>['--tags', tag],
       for (final String excludeTag in excludeTags) ...<String>['--exclude-tags', excludeTag],
+      for (final String preset in presets) ...<String>['--preset', preset],
       if (failFast) '--fail-fast',
       if (runSkipped) '--run-skipped',
       if (totalShards != null) '--total-shards=$totalShards',
@@ -216,7 +218,7 @@ interface class FlutterTestRunner {
     if (packageConfigFile.existsSync()) {
       projectPackageConfig = PackageConfig.parseBytes(
         packageConfigFile.readAsBytesSync(),
-        Uri.file(flutterProject.directory.path),
+        packageConfigFile.absolute.uri,
       );
     } else {
       // We can't use this directly, but need to manually check
@@ -240,7 +242,7 @@ interface class FlutterTestRunner {
         .childFile('package_config.json');
     final PackageConfig flutterToolsPackageConfig = PackageConfig.parseBytes(
       flutterToolsPackageConfigFile.readAsBytesSync(),
-      flutterToolsPackageConfigFile.uri,
+      flutterToolsPackageConfigFile.absolute.uri,
     );
 
     final mergedPackages = <Package>[...projectPackageConfig.packages];
@@ -591,6 +593,7 @@ class SpawnPlugin extends PlatformPlugin {
     List<String> plainNames = const <String>[],
     List<String> tags = const <String>[],
     List<String> excludeTags = const <String>[],
+    List<String> presets = const <String>[],
     bool machine = false,
     bool updateGoldens = false,
     required int? concurrency,
@@ -629,7 +632,7 @@ class SpawnPlugin extends PlatformPlugin {
     );
     final PackageConfig isolateSpawningTesterPackageConfig = PackageConfig.parseBytes(
       isolateSpawningTesterPackageConfigFile.readAsBytesSync(),
-      isolateSpawningTesterPackageConfigFile.uri,
+      isolateSpawningTesterPackageConfigFile.absolute.uri,
     );
 
     final File childTestIsolateSpawnerSourceFile = isolateSpawningTesterDirectory.childFile(
@@ -658,6 +661,7 @@ class SpawnPlugin extends PlatformPlugin {
       if (randomSeed != null) '--test-randomize-ordering-seed=$randomSeed',
       for (final String tag in tags) ...<String>['--tags', tag],
       for (final String excludeTag in excludeTags) ...<String>['--exclude-tags', excludeTag],
+      for (final String preset in presets) ...<String>['--preset', preset],
       if (failFast) '--fail-fast',
       if (runSkipped) '--run-skipped',
       if (totalShards != null) '--total-shards=$totalShards',

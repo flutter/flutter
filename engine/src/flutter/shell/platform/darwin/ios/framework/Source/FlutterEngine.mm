@@ -195,10 +195,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   std::shared_ptr<flutter::ThreadHost> _threadHost;
   std::unique_ptr<flutter::Shell> _shell;
 
-  // Callers to -waitForFirstFrame:callback: that are currently queued/processing.
-  // -destroyContext must wait for this group to drain before it is safe to free _shell.
-  dispatch_group_t _firstFrameWaiters;
-
   std::shared_ptr<flutter::SamplingProfiler> _profiler;
 
   FlutterBinaryMessengerRelay* _binaryMessenger;
@@ -241,6 +237,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   NSAssert(self, @"Super init cannot be nil");
   NSAssert(labelPrefix, @"labelPrefix is required");
 
+  // Reading the UIApplication lifecycle state and registering for UIKit notifications below both
+  // require the main thread, as does running the engine.
+  FML_DCHECK(NSThread.isMainThread) << "FlutterEngine must be created on the main thread.";
+
   _restorationEnabled = restorationEnabled;
   _allowHeadlessExecution = allowHeadlessExecution;
   _labelPrefix = [labelPrefix copy];
@@ -276,6 +276,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
                object:nil];
 
   [self setUpLifecycleNotifications:center];
+  [self updateGpuAvailabilityFromLifecycleState];
 
   [center addObserver:self
              selector:@selector(onLocaleUpdated:)
@@ -288,8 +289,43 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 + (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
-  NSAssert([[NSThread currentThread] isMainThread], @"Must be called on the main thread.");
+  NSAssert(NSThread.isMainThread, @"Must be called on the main thread.");
   return (__bridge FlutterEngine*)reinterpret_cast<void*>(identifier);
+}
+
+// Updates `isGpuDisabled` from the current lifecycle state and propagates to shell if available.
+//
+// This is process-level state that controls whether or not it's safe to submit work to the GPU.
+// Submitting GPU work while the app is backgrounded results in immediate process termination.
+//
+// For apps, we can read the state from `UIApplication.sharedApplication`.
+//
+// In an app extension, the state may be unreadable: there is no `UIApplication`, and the scene is
+// nil until the attached view controller's view is attached to a window's view hierarchy. In these
+// cases, we leave `isGpuDisabled` unmodified. This avoids the possibility of a crash from
+// incorrectly re-enabling the GPU on an engine that was disabled during backgrounding.
+//
+// Aside from on state transitions, the state has to be manually read and updated at the following
+// points:
+//
+// * When the engine is created, to determine if background or foreground.
+// * In app extensions, when a view controller is attached or detached.
+//
+- (void)updateGpuAvailabilityFromLifecycleState {
+  // When UIApplication.sharedApplication is available, it's authoritative for
+  // the process.
+  UIApplication* application = FlutterSharedApplication.application;
+  if (application) {
+    self.isGpuDisabled = application.applicationState == UIApplicationStateBackground;
+    return;
+  }
+
+  // Otherwise, we're in an app extension.
+  // Check if the view is attached to a Window, and query the scene.
+  UIWindowScene* scene = self.viewController.viewIfLoaded.window.windowScene;
+  if (scene) {
+    self.isGpuDisabled = scene.activationState == UISceneActivationStateBackground;
+  }
 }
 
 - (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
@@ -520,6 +556,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 - (void)setViewController:(FlutterViewController*)viewController {
   FML_DCHECK(self.platformView);
   _viewController = viewController;
+
+  // Attaching a view controller makes it possible for app extensions to check GPU availability.
+  [self updateGpuAvailabilityFromLifecycleState];
+
   self.platformView->SetOwnerViewController(_viewController);
   [self maybeSetupPlatformViewChannels];
   [self updateDisplays];
@@ -568,13 +608,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)destroyContext {
-  // Clear any tasks waiting on first frame prior to destroying _shell.
-  if (_shell) {
-    _shell->CancelWaitForFirstFrame();
-  }
-  if (_firstFrameWaiters) {
-    dispatch_group_wait(_firstFrameWaiters, DISPATCH_TIME_FOREVER);
-  }
   [self resetChannels];
   self.isolateId = nil;
   _shell.reset();
@@ -878,6 +911,18 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (BOOL)createShell:(NSString*)entrypoint
          libraryURI:(NSString*)libraryURI
        initialRoute:(NSString*)initialRoute {
+  // MakeThreadHost below adopts the calling thread as this engine's platform/UI thread, which
+  // must be the main thread. The engine relies on UIApplicationMain to pump the platform thread's
+  // run loop, and the platform thread reads UIKit state (UIScreen, CADisplayLink) and runs all
+  // plugin and platform channel callbacks.
+  //
+  // Engines spawned from this one inherit these task runners, so this applies to every engine in a
+  // FlutterEngineGroup.
+  FML_CHECK(NSThread.isMainThread)
+      << "FlutterEngine must be run on the main thread. The engine adopts the calling thread as "
+         "its platform and UI thread, both of which must be the main thread. To start an engine "
+         "from a background queue, dispatch to the main queue first.";
+
   if (_shell != nullptr) {
     [FlutterLogger logWarning:@"This FlutterEngine was already invoked."];
     return NO;
@@ -927,13 +972,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                     platform_runner,                              // ui
                                     _threadHost->io_thread->GetTaskRunner()       // io
   );
-
-  // Disable GPU if the app or scene is running in the background.
-  self.isGpuDisabled = self.viewController
-                           ? self.viewController.stateIsBackground
-                           : FlutterSharedApplication.application &&
-                                 FlutterSharedApplication.application.applicationState ==
-                                     UIApplicationStateBackground;
 
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
@@ -1474,6 +1512,12 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)setIsGpuDisabled:(BOOL)value {
+  // `fml::SyncSwitch::SetSwitch` notifies its observers whether or not the value changed and is a
+  // blocking call. The Metal backend observes it to drain pending image uploads or flush tasks
+  // awaiting the GPU. Bail out early if unchanged so we only propagate state changes.
+  if (value == _isGpuDisabled) {
+    return;
+  }
   if (_shell) {
     _shell->SetGpuAvailability(value ? flutter::GpuAvailability::kUnavailable
                                      : flutter::GpuAvailability::kAvailable);
@@ -1516,56 +1560,45 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (void)waitForFirstFrame:(NSTimeInterval)timeout
                  callback:(void (^_Nonnull)(BOOL didTimeout))callback {
-  dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0);
-  dispatch_group_t group = dispatch_group_create();
+  // Set up a completion handler that will nil itself out when it fires.
+  __block void (^completion)(BOOL) = [callback copy];
+  void (^complete)(BOOL) = ^(BOOL didTimeout) {
+    if (completion) {
+      void (^cb)(BOOL) = completion;
+      completion = nil;
+      cb(didTimeout);
+    }
+  };
 
-  // Increment count of tasks waiting for first frame callback. Decrement below
-  // on completion or timeout. In -destroyContext we block until all pending
-  // first frame waiter tasks are cancelled.
-  if (!_firstFrameWaiters) {
-    _firstFrameWaiters = dispatch_group_create();
+  if (!_shell) {
+    // No shell. Bail out since there'll never be a first frame.
+    dispatch_async(dispatch_get_main_queue(), ^{
+      complete(YES);
+    });
+    return;
   }
-  dispatch_group_t firstFrameWaiters = _firstFrameWaiters;
-  dispatch_group_enter(firstFrameWaiters);
 
-  __weak FlutterEngine* weakSelf = self;
-  __block BOOL didTimeout = NO;
-  dispatch_group_async(group, queue, ^{
-    FlutterEngine* strongSelf = weakSelf;
-    if (!strongSelf || !strongSelf->_shell) {
-      dispatch_group_leave(firstFrameWaiters);
-      return;
-    }
-
-    fml::TimeDelta waitTime = fml::TimeDelta::FromMilliseconds(timeout * 1000);
-    fml::Status status = strongSelf.shell.WaitForFirstFrame(waitTime);
-    didTimeout = status.code() == fml::StatusCode::kDeadlineExceeded;
-    dispatch_group_leave(firstFrameWaiters);
+  // Register the first-frame callback and fire the timeout completion handler.
+  // Both are scheduled on the main thread to guarantee ordering.
+  // The winner nils out the completion handler so the loser is a no-op.
+  _shell->AddFirstFrameCallback([complete] {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      complete(NO);
+    });
   });
 
-  // Only execute the main queue task once the background task has completely finished executing.
-  dispatch_group_notify(group, dispatch_get_main_queue(), ^{
-    // Strongly capture self on the task dispatched to the main thread.
-    //
-    // When we capture weakSelf strongly in the above block on a background thread, we risk the
-    // possibility that all other strong references to FlutterEngine go out of scope while the block
-    // executes and that the engine is dealloc'ed at the end of the above block on a background
-    // thread. FlutterEngine is not safe to release on any thread other than the main thread.
-    //
-    // self is never nil here since it's a strong reference that's verified non-nil above, but we
-    // use a conditional check to avoid an unused expression compiler warning.
-    FlutterEngine* strongSelf = self;
-    if (!strongSelf) {
-      return;
-    }
-    callback(didTimeout);
-  });
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout * NSEC_PER_SEC)),
+                 dispatch_get_main_queue(), ^{
+                   complete(YES);
+                 });
 }
 
 - (FlutterEngine*)spawnWithEntrypoint:(/*nullable*/ NSString*)entrypoint
                            libraryURI:(/*nullable*/ NSString*)libraryURI
                          initialRoute:(/*nullable*/ NSString*)initialRoute
                        entrypointArgs:(/*nullable*/ NSArray<NSString*>*)entrypointArgs {
+  FML_CHECK(NSThread.isMainThread) << "FlutterEngine must be spawned on the iOS main thread.";
+
   NSAssert(_shell, @"Spawning from an engine without a shell (possibly not run).");
   FlutterEngine* result = [[FlutterEngine alloc] initWithName:self.labelPrefix
                                                       project:self.dartProject

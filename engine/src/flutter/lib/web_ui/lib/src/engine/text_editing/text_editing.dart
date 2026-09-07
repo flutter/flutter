@@ -12,7 +12,6 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../browser_detection.dart' show isIosSafari;
 import '../configuration.dart';
 import '../dom.dart';
 import '../mouse/prevent_default.dart';
@@ -50,18 +49,6 @@ bool browserHasAutofillOverlay() =>
 /// `transparentTextEditing` class is configured to make the autofill overlay
 /// transparent.
 const String transparentTextEditingClass = 'transparentTextEditing';
-
-/// How long to wait before treating a blur that named no incoming element as a
-/// real focus loss.
-///
-/// Several browser behaviors blur transiently and restore focus a moment later:
-/// backgrounding a tab fires blur before `visibilitychange`, and on iOS a
-/// native caret or selection drag blurs the input mid-gesture before WebKit
-/// refocuses it. Waiting this long lets those settle before the engine acts.
-///
-/// Shared by [DefaultTextEditingStrategy.handleBlur] and [ViewFocusBinding],
-/// which defer the same gesture and must not disagree about the window.
-const Duration kTransientBlurSettleDelay = Duration(milliseconds: 100);
 
 void _emptyCallback(dynamic _) {}
 
@@ -1875,35 +1862,9 @@ abstract class DefaultTextEditingStrategy
         // When a browser tab is backgrounded, the input blur arrives before
         // visibilitychange. Wait briefly so tab switches can keep the text
         // connection alive, while ordinary window/iframe blurs still close it.
-        _pendingBlurConnectionCloseTimer = Timer(kTransientBlurSettleDelay, () {
+        _pendingBlurConnectionCloseTimer = Timer(const Duration(milliseconds: 100), () {
           _pendingBlurConnectionCloseTimer = null;
           if (_documentVisibilityState == 'hidden' || _documentHasFocus) {
-            return;
-          }
-          textEditing.sendTextConnectionClosedToFrameworkIfAny();
-        });
-        return;
-      }
-      // On iOS WebKit, a native caret or selection drag transiently blurs the
-      // hidden input mid-gesture with `relatedTarget == null` while the document
-      // still has focus, and WebKit refocuses the input a frame later. Closing
-      // the connection on that blink drops the keyboard; a plain <input> keeps
-      // it. Defer the close and skip it if the input has regained focus by the
-      // time the timer fires. A genuine blur, the Done button or tapping away,
-      // does not refocus, so it still closes. [ViewFocusBinding] defers the
-      // matching `focusout` the same way.
-      // https://github.com/flutter/flutter/issues/189744
-      if (isIosSafari) {
-        _pendingBlurConnectionCloseTimer?.cancel();
-        _pendingBlurConnectionCloseTimer = Timer(kTransientBlurSettleDelay, () {
-          _pendingBlurConnectionCloseTimer = null;
-          if (domDocument.activeElement == activeDomElement) {
-            // The input refocused: this was the transient mid-gesture blur.
-            return;
-          }
-          if (_documentVisibilityState == 'hidden') {
-            // The page was backgrounded (e.g. a tab switch) after the blur was
-            // scheduled; keep the connection alive, matching the branch above.
             return;
           }
           textEditing.sendTextConnectionClosedToFrameworkIfAny();
@@ -2792,16 +2753,6 @@ class HybridTextEditing {
   ///
   /// Also used to define if a keyboard is needed.
   bool isEditing = false;
-
-  /// Whether [element] is the DOM element currently receiving text input.
-  ///
-  /// [ViewFocusBinding] uses this to recognize a `focusout` that originated
-  /// from the active text-editing element.
-  ///
-  /// Prefer this over matching on [textEditingClass]. That class is
-  /// not guaranteed to be applied by all strategies.
-  bool isActiveTextEditingElement(DomElement? element) =>
-      isEditing && element != null && element == strategy.domElement;
 
   InputConfiguration? configuration;
 

@@ -72,10 +72,13 @@ void main() {
     expect(disabledResult['needsFrame'], isNull);
 
     // Calling enableSemantics enables semantics without returning the tree.
-    final Map<String, Object?> enableResult = await callExtension(
-      AccessibilityServiceExtensions.enableSemantics.extensionName,
-    );
+    // Ensure the returned map is mutable (required by BindingBase.registerServiceExtension).
+    final Map<String, Object?> enableResult =
+        await accessibilityExtensions[AccessibilityServiceExtensions
+            .enableSemantics
+            .extensionName]!(const <String, String>{});
     expect(enableResult, isEmpty);
+    expect(() => enableResult['type'] = '_extensionType', returnsNormally);
 
     // Calling getSemanticsTree schedules a frame and returns an error map indicating root is null.
     final Map<String, Object?> result1 = await callExtension(
@@ -142,10 +145,13 @@ void main() {
     );
 
     // Calling disposeSemantics succeeds and cleans up semantics handle.
-    final Map<String, Object?> disposeResult = await callExtension(
-      AccessibilityServiceExtensions.disposeSemantics.extensionName,
-    );
+    // Ensure the returned map is mutable.
+    final Map<String, Object?> disposeResult =
+        await accessibilityExtensions[AccessibilityServiceExtensions
+            .disposeSemantics
+            .extensionName]!(const <String, String>{});
     expect(disposeResult, isEmpty);
+    expect(() => disposeResult['type'] = '_extensionType', returnsNormally);
 
     AccessibilityInspector.instance.resetAllState();
   }, semanticsEnabled: false);

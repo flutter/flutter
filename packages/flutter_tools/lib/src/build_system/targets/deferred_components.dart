@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import '../../android/deferred_components_gen_snapshot_validator.dart';
+import '../../android/deferred_components_validator.dart';
 import '../../base/deferred_component.dart';
 import '../../build_info.dart';
 import '../../project.dart';
@@ -67,10 +68,14 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
 
   @override
   Future<void> build(Environment environment) async {
+    final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
     validator = DeferredComponentsGenSnapshotValidator(
       environment,
       title: title,
       exitOnFail: exitOnFail,
+      outputDir: project.buildDirectory.childDirectory(
+        DeferredComponentsValidator.kDeferredComponentsTempDirectory,
+      ),
     );
 
     final List<LoadingUnit> generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
@@ -81,7 +86,7 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
 
     validator!
       ..checkAppAndroidManifestComponentLoadingUnitMapping(
-        FlutterProject.current().manifest.deferredComponents ?? <DeferredComponent>[],
+        project.manifest.deferredComponents ?? <DeferredComponent>[],
         generatedLoadingUnits,
       )
       ..checkAgainstLoadingUnitsCache(generatedLoadingUnits)

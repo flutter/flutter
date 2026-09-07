@@ -11,9 +11,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  hooks: ^2.1.0
+  hooks: ^2.2.0
   data_assets: ^0.20.0
-  record_use: ^1.0.0
+  record_use: ^1.1.1
   meta: any
 
 dev_dependencies:
@@ -23,4 +23,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: 2pvsru
+# PUBSPEC CHECKSUM: 6itk7q
