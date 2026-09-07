@@ -272,6 +272,26 @@ name: my_app
   );
 
   testUsingContext(
+    'ResidentWebRunner marks WebDevFS as ready before starting app',
+    () async {
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+
+      expect(webDevFS.wasMarkedReady, true);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'Does not crash if the application exits during DDS startup',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/178151
@@ -2477,6 +2497,12 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   late UpdateFSReport report;
 
   Uri? mainUri;
+  bool wasMarkedReady = false;
+
+  @override
+  void markReady() {
+    wasMarkedReady = true;
+  }
 
   @override
   List<Uri> sources = <Uri>[];

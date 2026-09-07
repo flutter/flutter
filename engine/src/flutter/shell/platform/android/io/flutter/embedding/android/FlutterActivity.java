@@ -18,7 +18,6 @@ import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_DA
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_DESTROY_ENGINE_WITH_ACTIVITY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_ENABLE_STATE_RESTORATION;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.EXTRA_INITIAL_ROUTE;
-import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.INITIAL_ROUTE_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.NORMAL_THEME_META_DATA_KEY;
 import static io.flutter.embedding.android.FlutterActivityLaunchConfigs.deepLinkEnabled;
 
@@ -1165,39 +1164,36 @@ public class FlutterActivity extends Activity
   /**
    * The initial route that a Flutter app will render upon loading and executing its Dart code.
    *
-   * <p>This preference can be controlled with 2 methods:
+   * <p>This preference can be controlled with 3 methods:
    *
    * <ol>
-   *   <li>Pass a boolean as {@link FlutterActivityLaunchConfigs#EXTRA_INITIAL_ROUTE} with the
+   *   <li>Pass a String as {@link FlutterActivityLaunchConfigs#EXTRA_INITIAL_ROUTE} with the
    *       launching {@code Intent}, or
+   *   <li>Set a {@code --route} command line flag via engine shell arguments in the application
+   *       manifest meta-data (see {@link
+   *       FlutterActivityLaunchConfigs#getInitialRouteFromManifest(Context)}), or
    *   <li>Set a {@code <meta-data>} called {@link
    *       FlutterActivityLaunchConfigs#INITIAL_ROUTE_META_DATA_KEY} for this {@code Activity} in
    *       the Android manifest.
    * </ol>
    *
-   * If both preferences are set, the {@code Intent} preference takes priority.
+   * If multiple preferences are set, the {@code Intent} preference takes highest priority, followed
+   * by the manifest engine arguments, followed by the {@code Activity} {@code <meta-data>}.
    *
-   * <p>The reason that a {@code <meta-data>} preference is supported is because this {@code
+   * <p>The reason that {@code <meta-data>} preferences are supported is because this {@code
    * Activity} might be the very first {@code Activity} launched, which means the developer won't
    * have control over the incoming {@code Intent}.
    *
    * <p>Subclasses may override this method to directly control the initial route.
    *
-   * <p>If this method returns null and the {@code shouldHandleDeeplinking} returns true, the
-   * initial route is derived from the {@code Intent} through the Intent.getData() instead.
+   * <p>If this method returns null and {@link #shouldHandleDeeplinking()} returns true, the initial
+   * route is derived from the {@code Intent} through the Intent.getData() instead.
    */
   public String getInitialRoute() {
-    if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
-      return getIntent().getStringExtra(EXTRA_INITIAL_ROUTE);
-    }
-
     try {
-      Bundle metaData = getMetaData();
-      String desiredInitialRoute =
-          metaData != null ? metaData.getString(INITIAL_ROUTE_META_DATA_KEY) : null;
-      return desiredInitialRoute;
+      return FlutterActivityLaunchConfigs.getInitialRoute(getIntent(), this, getMetaData());
     } catch (PackageManager.NameNotFoundException e) {
-      return null;
+      return FlutterActivityLaunchConfigs.getInitialRoute(getIntent(), this, null);
     }
   }
 
@@ -1313,7 +1309,7 @@ public class FlutterActivity extends Activity
   protected Bundle getMetaData() throws PackageManager.NameNotFoundException {
     ActivityInfo activityInfo =
         getPackageManager().getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
-    return activityInfo.metaData;
+    return activityInfo != null ? activityInfo.metaData : null;
   }
 
   @Nullable

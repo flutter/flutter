@@ -12,7 +12,7 @@ import 'package:test_reflective_loader/test_reflective_loader.dart';
 class AvoidFutureCatchErrorTest extends AnalysisRuleTest {
   @override
   void setUp() {
-    Registry.ruleRegistry.registerWarningRule(AvoidFutureCatchError());
+    Registry.ruleRegistry.registerLintRule(AvoidFutureCatchError());
     super.setUp();
   }
 
