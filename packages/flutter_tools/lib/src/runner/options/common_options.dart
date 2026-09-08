@@ -443,7 +443,7 @@ abstract final class DebuggingOptionDescriptors {
         'not already connected to the target application.',
   );
 
-  static const ddsPort = StringOptionDescriptor(
+  static const ddsPort = IntOptionDescriptor(
     name: 'dds-port',
     help:
         'When this value is provided, the Dart Development Service (DDS) will be '

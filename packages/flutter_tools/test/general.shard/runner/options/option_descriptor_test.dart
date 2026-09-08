@@ -273,6 +273,80 @@ void main() {
     });
   });
 
+  group('IntOptionDescriptor', () {
+    test('returns null when omitted without default', () {
+      const descriptor = IntOptionDescriptor(name: 'port', help: 'Port number');
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>[]);
+      expect(descriptor.wasProvided(results), isFalse);
+      expect(descriptor.getValue(results), isNull);
+    });
+
+    test('parses valid integer string', () {
+      const descriptor = IntOptionDescriptor(name: 'port', help: 'Port number');
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--port=8080']);
+      expect(descriptor.wasProvided(results), isTrue);
+      expect(descriptor.getValue(results), 8080);
+    });
+
+    test('throws FormatException on invalid integer string', () {
+      const descriptor = IntOptionDescriptor(name: 'port', help: 'Port number');
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--port=not-an-int']);
+      expect(() => descriptor.getValue(results), throwsA(isA<FormatException>()));
+    });
+  });
+
+  group('DefaultedIntOptionDescriptor', () {
+    test('returns default value when omitted', () {
+      const descriptor = DefaultedIntOptionDescriptor(
+        name: 'timeout',
+        defaultsTo: 30,
+        help: 'Timeout in seconds',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>[]);
+      expect(descriptor.wasProvided(results), isFalse);
+      expect(descriptor.getValue(results), 30);
+    });
+
+    test('returns parsed integer when provided', () {
+      const descriptor = DefaultedIntOptionDescriptor(
+        name: 'timeout',
+        defaultsTo: 30,
+        help: 'Timeout in seconds',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--timeout=60']);
+      expect(descriptor.wasProvided(results), isTrue);
+      expect(descriptor.getValue(results), 60);
+    });
+
+    test('throws FormatException on invalid integer string', () {
+      const descriptor = DefaultedIntOptionDescriptor(
+        name: 'timeout',
+        defaultsTo: 30,
+        help: 'Timeout in seconds',
+      );
+      final parser = ArgParser();
+      descriptor.addTo(parser);
+
+      final ArgResults results = parser.parse(<String>['--timeout=abc']);
+      expect(() => descriptor.getValue(results), throwsA(isA<FormatException>()));
+    });
+  });
+
   group('EnumOptionDescriptor', () {
     test('derives allowed from enum values and returns null when omitted', () {
       const descriptor = EnumOptionDescriptor<_TestEnum>(

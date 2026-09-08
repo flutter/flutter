@@ -136,7 +136,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     final BuildInfo buildInfo = await getBuildInfo();
     final int? webBrowserDebugPort =
         featureFlags.isWebEnabled && wasParsed(WebOptions.webBrowserDebugPort)
-        ? int.parse(getValue(WebOptions.webBrowserDebugPort)!)
+        ? getValue(WebOptions.webBrowserDebugPort)
         : null;
     final List<String> webBrowserFlags = featureFlags.isWebEnabled
         ? getValue(WebOptions.webBrowserFlags)
@@ -263,8 +263,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       logger: globals.logger,
     );
 
-    final String? webPortArg = getValue(WebOptions.webPort);
-    final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
+    final int? webPort = getValue(WebOptions.webPort);
 
     // Determine HTTPS config with CLI > file precedence
     final HttpsConfig? httpsConfig = HttpsConfig.parse(

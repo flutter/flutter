@@ -549,7 +549,7 @@ abstract class FlutterCommand extends Command<void> {
       return _tryParseHostVmservicePort();
     } else if (wasParsed(DebuggingOptionDescriptors.ddsPort)) {
       // If an explicit DDS port is provided, use dds-port for DDS.
-      return int.tryParse(getValue(DebuggingOptionDescriptors.ddsPort)!) ?? 0;
+      return getValue(DebuggingOptionDescriptors.ddsPort) ?? 0;
     }
     // Otherwise, DDS can bind to a random port.
     return 0;

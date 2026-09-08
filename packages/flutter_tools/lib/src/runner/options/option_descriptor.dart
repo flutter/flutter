@@ -237,6 +237,115 @@ class DefaultedStringOptionDescriptor extends OptionDescriptor<String> {
   }
 }
 
+/// A private base class providing shared integer parsing and registration infrastructure
+/// for [IntOptionDescriptor] and [DefaultedIntOptionDescriptor].
+abstract class _IntOptionDescriptorBase<R> extends OptionDescriptor<R> {
+  const _IntOptionDescriptorBase({
+    required super.name,
+    required super.help,
+    super.abbr,
+    super.valueHelp,
+    super.defaultsTo,
+    this.aliases = const <String>[],
+    super.allowed,
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  /// Alternative names for this option.
+  final List<String> aliases;
+
+  @override
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
+    }
+
+    parser.addOption(
+      name,
+      abbr: abbr,
+      aliases: aliases,
+      help: help,
+      valueHelp: valueHelp,
+      defaultsTo: defaultsTo?.toString(),
+      allowed: allowed,
+      allowedHelp: allowedHelp,
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+    );
+    _recordRegistration(parser);
+  }
+}
+
+/// A descriptor for single-value integer options.
+class IntOptionDescriptor extends _IntOptionDescriptorBase<int?> {
+  const IntOptionDescriptor({
+    required super.name,
+    required super.help,
+    super.abbr,
+    super.valueHelp,
+    super.defaultsTo,
+    super.aliases,
+    super.allowed,
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  @override
+  int? getValue(ArgResults? results, {ArgResults? globalResults}) {
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      final raw = target[name] as String?;
+      if (raw == null) {
+        return defaultsTo;
+      }
+      final int? parsed = int.tryParse(raw);
+      if (parsed == null) {
+        throw FormatException('Invalid integer value "$raw" for "--$name".');
+      }
+      return parsed;
+    }
+    return defaultsTo;
+  }
+}
+
+/// A descriptor for single-value integer options that have a non-null default value.
+class DefaultedIntOptionDescriptor extends _IntOptionDescriptorBase<int> {
+  const DefaultedIntOptionDescriptor({
+    required super.name,
+    required super.help,
+    required int super.defaultsTo,
+    super.abbr,
+    super.valueHelp,
+    super.aliases,
+    super.allowed,
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  @override
+  int getValue(ArgResults? results, {ArgResults? globalResults}) {
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      final raw = target[name] as String?;
+      if (raw == null) {
+        return defaultsTo!;
+      }
+      final int? parsed = int.tryParse(raw);
+      if (parsed == null) {
+        throw FormatException('Invalid integer value "$raw" for "--$name".');
+      }
+      return parsed;
+    }
+    return defaultsTo!;
+  }
+}
+
 /// A descriptor for boolean flags with a concrete default value.
 class FlagOptionDescriptor extends OptionDescriptor<bool> {
   const FlagOptionDescriptor({
