@@ -673,12 +673,13 @@ class IOSSimulator extends Device {
     required bool ipv6,
     required Logger logger,
   }) {
-    // Do not throw on error since DelegateVMServiceDiscoveryForAttach falls back to log-based protocol discovery.
     final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
       device: this,
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
+      // Do not throw on error since DelegateVMServiceDiscoveryForAttach falls
+      // back to log-based protocol discovery.
       throwOnError: false,
       useDeviceIPAsHost: false,
       usesIpv6: ipv6,
