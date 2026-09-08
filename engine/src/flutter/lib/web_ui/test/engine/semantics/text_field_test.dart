@@ -917,6 +917,8 @@ void testMain() {
       expect(textField.editableElement.getAttribute('form'), isNull);
     }, skip: !ui_web.browser.isSafari);
   });
+
+  _testIosMinimumFontSize();
 }
 
 /// Builds the `fields` list of a `TextInputConfiguration` autofill group, the
@@ -993,6 +995,130 @@ SemanticsObject createTextFieldSemantics({
   );
   tester.apply();
   return tester.getSemanticsObject(0);
+}
+
+// Covers both routes the framework style takes to the semantic element: queued
+// before activation, and updated later while editing is enabled. The two behave
+// differently, and `_applyIosMinimumFontSize` documents why.
+// See: https://github.com/flutter/flutter/issues/192327
+void _testIosMinimumFontSize() {
+  group('$SemanticTextField iOS minimum font size', () {
+    late HybridTextEditing testTextEditing;
+    late SemanticsTextEditingStrategy strategy;
+
+    setUp(() {
+      // Must be set before the element is created, because the floor is seeded
+      // at creation time.
+      debugEmulateIosSafari = true;
+      testTextEditing = HybridTextEditing();
+      SemanticsTextEditingStrategy.ensureInitialized(testTextEditing);
+      strategy = SemanticsTextEditingStrategy.instance;
+      testTextEditing.debugTextEditingStrategyOverride = strategy;
+      testTextEditing.configuration = singlelineConfig;
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+    });
+
+    tearDown(() {
+      debugEmulateIosSafari = false;
+      semantics().semanticsEnabled = false;
+      domDocument.activeElement?.blur();
+    });
+
+    EditableTextStyle styleWithFontSize(double fontSize) => EditableTextStyle(
+      textDirection: ui.TextDirection.ltr,
+      fontSize: fontSize,
+      textAlign: ui.TextAlign.left,
+      fontFamily: 'Arial',
+      fontWeight: 'normal',
+      letterSpacing: null,
+      wordSpacing: null,
+      lineHeight: null,
+    );
+
+    test('seeds a newly created input with the minimum', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello');
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.style.fontSize, '16px');
+    });
+
+    test('seeds a newly created textarea with the minimum', () {
+      testTextEditing.configuration = multilineConfig;
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isMultiline: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.tagName.toLowerCase(), 'textarea');
+      expect(textField.editableElement.style.fontSize, '16px');
+    });
+
+    test('raises a framework font below the minimum', () {
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      strategy.updateElementStyle(styleWithFontSize(12));
+
+      // This is the enabled path, where the shorthand really is written. The
+      // value persists past blur, so without the floor a later refocus would
+      // zoom.
+      expect(textField.editableElement.style.fontSize, '16px');
+    });
+
+    // Production order: the framework sends the style before `show`, so it is
+    // queued while the element is still detached and applied at activation,
+    // when the strategy is not yet enabled.
+    test('raises a queued framework font below the minimum', () {
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
+      strategy.updateElementStyle(styleWithFontSize(12));
+
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.style.fontSize, '16px');
+    });
+
+    test('preserves a queued framework font above the minimum', () {
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
+      strategy.updateElementStyle(styleWithFontSize(24));
+
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.style.fontSize, '24px');
+    });
+
+    test('keeps a framework font above the minimum', () {
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello', isFocused: true);
+      final textField = node.semanticRole! as SemanticTextField;
+
+      strategy.updateElementStyle(styleWithFontSize(24));
+
+      expect(textField.editableElement.style.fontSize, '24px');
+    });
+  });
+
+  group('$SemanticTextField non-iOS font size', () {
+    setUp(() {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+    });
+
+    tearDown(() {
+      semantics().semanticsEnabled = false;
+      domDocument.activeElement?.blur();
+    });
+
+    test('does not set a font size', () {
+      final SemanticsObject node = createTextFieldSemantics(value: 'hello');
+      final textField = node.semanticRole! as SemanticTextField;
+
+      expect(textField.editableElement.style.fontSize, isEmpty);
+    });
+  }, skip: isIosSafari);
 }
 
 /// Emulates sending of a message by the framework to the engine.

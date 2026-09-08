@@ -5,11 +5,52 @@
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../browser_detection.dart';
 import '../dom.dart';
 import '../platform_dispatcher.dart';
 import '../text_editing/input_type.dart';
 import '../text_editing/text_editing.dart';
 import 'semantics.dart';
+
+/// The smallest font size that does not make iOS zoom the page.
+///
+/// iOS zooms when it focuses an editable element whose font size is below this,
+/// and leaves the page zoomed afterwards.
+///
+/// See: https://github.com/flutter/flutter/issues/192327
+const double _iosMinimumEditableFontSize = 16.0;
+
+/// Gives [element] a font size on iOS. Without this it has none of its own and
+/// falls back to the browser default, which on iOS is 11px.
+///
+/// That matters because iOS zooms the whole page when it focuses an editable
+/// element smaller than [_iosMinimumEditableFontSize], and leaves it zoomed. So
+/// the size used is [frameworkFontSize], or the minimum when the framework asks
+/// for less. The element is invisible, so enlarging a small size changes nothing
+/// the user sees, and a larger size is kept as it is.
+///
+/// The size is assigned on every call, not only raised when it is too small.
+/// That looks redundant but is not: on the usual path nothing else ever sets a
+/// font size here, so raising alone would leave a 24px field stuck at 16px. The
+/// framework does send its size, but it arrives before the field is shown and is
+/// only stored. [SemanticsTextEditingStrategy.activate] hands it over before
+/// enabling the strategy, and [DefaultTextEditingStrategy.updateElementStyle]
+/// writes it to the element only once enabled.
+///
+/// This also has to live on the element rather than in the global stylesheet. A
+/// style change arriving later, while editing is enabled, writes the framework
+/// size onto the element as an inline style, and inline styles beat stylesheet
+/// rules.
+void _applyIosMinimumFontSize(DomHTMLElement element, double? frameworkFontSize) {
+  if (!isIosSafari) {
+    return;
+  }
+  final double effectiveFontSize =
+      frameworkFontSize == null || frameworkFontSize < _iosMinimumEditableFontSize
+      ? _iosMinimumEditableFontSize
+      : frameworkFontSize;
+  element.style.fontSize = '${effectiveFontSize}px';
+}
 
 /// Text editing used by accesibility mode.
 ///
@@ -253,6 +294,7 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
       return;
     }
     super.updateElementStyle(_queuedStyle!);
+    _applyIosMinimumFontSize(activeDomElement, _queuedStyle!.fontSize);
   }
 }
 
@@ -345,6 +387,12 @@ class SemanticTextField extends SemanticRole {
       ..left = '0'
       ..width = '${semanticsObject.rect!.width}px'
       ..height = '${semanticsObject.rect!.height}px';
+
+    // No framework style has arrived yet, so the element falls back to the
+    // browser default, which is under the threshold. Seed the floor so a focus
+    // landing before the first style cannot zoom the page.
+    _applyIosMinimumFontSize(editableElement, null);
+
     append(editableElement);
 
     editableElement.addEventListener(
