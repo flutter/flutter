@@ -339,33 +339,19 @@ class Shell final : public PlatformView::Delegate,
                                     bool base64_encode);
 
   //----------------------------------------------------------------------------
-  /// @brief      Pauses the calling thread until the first frame is presented.
+  /// @brief      Invokes a callback when the first frame has been presented.
   ///
-  /// @param[in]  timeout  The duration to wait before timing out. If this
-  ///                      duration would cause an overflow when added to
-  ///                      std::chrono::steady_clock::now(), this method will
-  ///                      wait indefinitely for the first frame.
+  /// @param[in]  callback  A callback that will be invoked on an arbitrary
+  ///                       thread when the first frame is presented.  The
+  ///                       callback may be run the raster thread, so it should
+  ///                       not do anything expensive.
   ///
-  /// @return     'kOk' when the first frame has been presented before the
-  ///             timeout successfully, 'kFailedPrecondition' if called from the
-  ///             GPU or UI thread, 'kDeadlineExceeded' if there is a timeout.
+  ///                       If the first frame has already been presented,
+  ///                       then the callback will be invoked immediately.
+  ///                       If the first frame is never drawn, then the
+  ///                       callback will not be invoked.
   ///
-  fml::Status WaitForFirstFrame(fml::TimeDelta timeout);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Unblocks any call to WaitForFirstFrame(), causing it to
-  ///             immediately return 'kAborted' instead of blocking for the
-  ///             full timeout.
-  ///
-  ///             Embedders that pass a reference to the Shell to a thread they
-  ///             do not otherwise synchronize with the shell's destruction
-  ///             must call this, and wait for that thread to finish with the
-  ///             shell, before destroying it. This method only prevents
-  ///             WaitForFirstFrame() from blocking; it does not by itself
-  ///             make it safe to destroy the Shell out from under a caller
-  ///             that has not yet returned from WaitForFirstFrame().
-  ///
-  void CancelWaitForFirstFrame();
+  void AddFirstFrameCallback(std::function<void()> callback);
 
   //----------------------------------------------------------------------------
   /// @brief      Used by embedders to reload the system fonts in
@@ -526,17 +512,12 @@ class Shell final : public PlatformView::Delegate,
   // True if a first frame has not yet been rendered.
   //
   // This is read and written lock-free on the raster thread, and read under
-  // waiting_for_first_frame_mutex_ in WaitForFirstFrame.
+  // waiting_for_first_frame_mutex_ in AddFirstFrameCallback.
   std::atomic<bool> waiting_for_first_frame_ = true;
 
-  // True when WaitForFirstFrame has been cancelled because the shell is
-  // shutting down and waiting threads should be unblocked.
-  //
-  // Guarded by waiting_for_first_frame_mutex_.
-  bool wait_for_first_frame_cancelled_ = false;
-
   std::mutex waiting_for_first_frame_mutex_;
-  std::condition_variable waiting_for_first_frame_condition_;
+  // Guarded by waiting_for_first_frame_mutex_.
+  std::vector<std::function<void()>> waiting_for_first_frame_callbacks_;
 
   // Written in the UI thread and read from the raster thread. Hence make it
   // atomic.

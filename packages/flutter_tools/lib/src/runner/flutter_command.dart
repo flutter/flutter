@@ -195,8 +195,7 @@ abstract class FlutterCommand extends Command<void> {
   final OutputPreferences? _outputPreferences;
 
   /// The [ToolContext] providing explicit dependency injection for this command.
-  ToolContext? get toolContext =>
-      _explicitToolContext ?? (super.runner as FlutterCommandRunner?)?.toolContext;
+  ToolContext? get toolContext => _explicitToolContext ?? runner?.toolContext;
 
   SystemClock get _clock => _explicitToolContext?.systemClock ?? globals.systemClock;
   Logger get _logger => _explicitToolContext?.logger ?? globals.logger;
@@ -211,8 +210,7 @@ abstract class FlutterCommand extends Command<void> {
   FileSystem get _fs => _explicitToolContext?.fs ?? globals.fs;
   FlutterProjectFactory get _projectFactory =>
       _explicitToolContext?.projectFactory ?? globals.projectFactory;
-  Analytics get _analytics =>
-      (super.runner as FlutterCommandRunner?)?.analytics ?? globals.analytics;
+  Analytics get _analytics => runner?.analytics ?? globals.analytics;
   Cache get _cache => _explicitToolContext?.cache ?? globals.cache;
   FlutterVersion get _flutterVersion =>
       _explicitToolContext?.flutterVersion ?? globals.flutterVersion;
@@ -1248,7 +1246,7 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  FlutterProject get project => FlutterProject.current();
+  FlutterProject get project => _projectFactory.fromDirectory(_fs.currentDirectory);
 
   /// The path to the package config for the current project.
   ///
@@ -2093,7 +2091,10 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     final artifacts = <DevelopmentArtifact>{DevelopmentArtifact.universal};
     for (final device in devices) {
       final TargetPlatform targetPlatform = await device.targetPlatform;
-      final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(targetPlatform);
+      final DevelopmentArtifact? developmentArtifact = artifactFromTargetPlatform(
+        targetPlatform,
+        featureFlags,
+      );
       if (developmentArtifact != null) {
         artifacts.add(developmentArtifact);
       }
@@ -2105,7 +2106,10 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
 // Returns the development artifact for the target platform, or null
 // if none is supported
 @protected
-DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
+DevelopmentArtifact? artifactFromTargetPlatform(
+  TargetPlatform targetPlatform,
+  FeatureFlags featureFlags,
+) {
   switch (targetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
@@ -2114,6 +2118,9 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
       return DevelopmentArtifact.androidGenSnapshot;
     case TargetPlatform.web_javascript:
       return DevelopmentArtifact.web;
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+      return null;
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin:
@@ -2134,8 +2141,6 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
         return DevelopmentArtifact.linux;
       }
       return null;
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
     case TargetPlatform.unsupported:
       return null;
