@@ -27,6 +27,83 @@ void main() {
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
 
+  test('BottomSheet.bottomInset defaults to zero and rejects invalid extents', () {
+    expect(BottomSheet(onClosing: () {}, builder: (_) => const SizedBox()).bottomInset, 0.0);
+    for (final inset in <double>[-1.0, double.infinity, double.nan]) {
+      expect(
+        () => BottomSheet(bottomInset: inset, onClosing: () {}, builder: (_) => const SizedBox()),
+        throwsAssertionError,
+      );
+    }
+  });
+
+  for (final themed in <bool>[false, true]) {
+    testWidgets(
+      'explicit bottomInset preserves content constraints with themed=$themed constraints',
+      (WidgetTester tester) async {
+        const contentKey = ValueKey<String>('inset content');
+        const constraints = BoxConstraints.tightFor(width: 240.0, height: 150.0);
+        for (final inset in <double>[0.0, 200.0, 60.0, 0.0]) {
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: ThemeData(
+                bottomSheetTheme: BottomSheetThemeData(constraints: themed ? constraints : null),
+              ),
+              home: MediaQuery(
+                // Standalone sheets must use their explicit inset, not the ambient
+                // keyboard geometry or a Scaffold's private inherited value.
+                data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 400.0)),
+                child: Align(
+                  child: BottomSheet(
+                    bottomInset: inset,
+                    constraints: themed ? null : constraints,
+                    enableDrag: false,
+                    onClosing: () {},
+                    builder: (_) => const SizedBox.expand(key: contentKey),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          final Finder material = find.descendant(
+            of: find.byType(BottomSheet),
+            matching: find.byType(Material),
+          );
+          expect(tester.getSize(find.byKey(contentKey)), const Size(240.0, 150.0));
+          expect(tester.getSize(material), Size(240.0, 150.0 + inset));
+          expect(
+            tester.getBottomLeft(material).dy - tester.getBottomLeft(find.byKey(contentKey)).dy,
+            inset,
+          );
+        }
+      },
+    );
+  }
+
+  testWidgets('bottomInset remains subject to parent constraints', (WidgetTester tester) async {
+    const contentKey = ValueKey<String>('constrained inset content');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox(
+            width: 240.0,
+            height: 250.0,
+            child: BottomSheet(
+              bottomInset: 200.0,
+              constraints: const BoxConstraints.tightFor(height: 150.0),
+              enableDrag: false,
+              onClosing: () {},
+              builder: (_) => const SizedBox.expand(key: contentKey),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byKey(contentKey)), const Size(240.0, 50.0));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Throw if enable drag without an animation controller', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/89168
     await tester.pumpWidget(

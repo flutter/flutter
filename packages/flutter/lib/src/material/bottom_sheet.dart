@@ -31,26 +31,6 @@ const double _kMinFlingVelocity = 700.0;
 const double _kCloseProgressThreshold = 0.5;
 const double _kDefaultScrollControlDisabledMaxHeightRatio = 9.0 / 16.0;
 
-/// Internal coordination between [Scaffold] and [BottomSheet].
-///
-/// Only persistent sheets receive an extension. Modal sheets and standalone
-/// [BottomSheet]s retain their existing layout policy.
-@internal
-class BottomSheetKeyboardInset extends InheritedWidget {
-  /// Supplies the extra surface extent computed by [Scaffold].
-  const BottomSheetKeyboardInset({super.key, required this.bottom, required super.child});
-
-  /// The distance below the usable sheet area, in logical pixels.
-  final double bottom;
-
-  /// Returns zero outside a persistent sheet or below its content boundary.
-  static double of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<BottomSheetKeyboardInset>()?.bottom ?? 0.0;
-
-  @override
-  bool updateShouldNotify(BottomSheetKeyboardInset oldWidget) => bottom != oldWidget.bottom;
-}
-
 /// A callback for when the user begins dragging the bottom sheet.
 ///
 /// Used by [BottomSheet.onDragStart].
@@ -113,9 +93,11 @@ class BottomSheet extends StatefulWidget {
     this.shape,
     this.clipBehavior,
     this.constraints,
+    this.bottomInset = 0.0,
     required this.onClosing,
     required this.builder,
-  }) : assert(elevation == null || elevation >= 0.0);
+  }) : assert(elevation == null || elevation >= 0.0),
+       assert(bottomInset >= 0.0 && bottomInset < double.infinity);
 
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
@@ -256,6 +238,21 @@ class BottomSheet extends StatefulWidget {
   /// the available space. Otherwise, no alignment is applied.
   final BoxConstraints? constraints;
 
+  /// Additional space below the content and drag handle, painted by the sheet's
+  /// [Material] background.
+  ///
+  /// This space is added to the height [constraints], preserving the space
+  /// available to the content, subject to the parent's constraints. It does not
+  /// add any width or read the ambient [MediaQuery].
+  ///
+  /// [Scaffold] sets this when a persistent sheet avoids the keyboard. Custom
+  /// presentations can also use it to extend the surface while keeping content
+  /// above an inset. The presentation is responsible for positioning the sheet
+  /// and keeping the inset area out of hit testing and accessibility bounds.
+  ///
+  /// Defaults to zero. Must be finite and non-negative.
+  final double bottomInset;
+
   @override
   State<BottomSheet> createState() => _BottomSheetState();
 
@@ -375,7 +372,7 @@ class _BottomSheetState extends State<BottomSheet> {
     // Scaffold reserves this space for the persistent sheet's surface. Inflate
     // height constraints before adding padding so the builder retains its
     // original constraints, including explicit or themed min/max heights.
-    final double keyboardInset = BottomSheetKeyboardInset.of(context);
+    final double keyboardInset = widget.bottomInset;
     final BoxConstraints? contentConstraints =
         widget.constraints ?? bottomSheetTheme.constraints ?? defaults.constraints;
     final BoxConstraints? constraints = contentConstraints?.copyWith(
@@ -426,23 +423,20 @@ class _BottomSheetState extends State<BottomSheet> {
       clipBehavior: clipBehavior,
       child: Padding(
         padding: EdgeInsets.only(bottom: keyboardInset),
-        child: BottomSheetKeyboardInset(
-          bottom: 0.0,
-          child: NotificationListener<DraggableScrollableNotification>(
-            onNotification: extentChanged,
-            child: !showDragHandle
-                ? widget.builder(context)
-                : Stack(
-                    alignment: Alignment.topCenter,
-                    children: <Widget>[
-                      dragHandle!,
-                      Padding(
-                        padding: const EdgeInsets.only(top: kMinInteractiveDimension),
-                        child: widget.builder(context),
-                      ),
-                    ],
-                  ),
-          ),
+        child: NotificationListener<DraggableScrollableNotification>(
+          onNotification: extentChanged,
+          child: !showDragHandle
+              ? widget.builder(context)
+              : Stack(
+                  alignment: Alignment.topCenter,
+                  children: <Widget>[
+                    dragHandle!,
+                    Padding(
+                      padding: const EdgeInsets.only(top: kMinInteractiveDimension),
+                      child: widget.builder(context),
+                    ),
+                  ],
+                ),
         ),
       ),
     );

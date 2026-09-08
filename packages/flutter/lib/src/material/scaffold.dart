@@ -22,8 +22,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, HitTestEntry, HitTestResult;
-import 'package:flutter/rendering.dart'
-    show BoxHitTestResult, RenderBox, RenderMetaData, RenderProxyBox;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
@@ -3102,7 +3101,7 @@ class ScaffoldState extends State<Scaffold>
       final Widget stack = LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           final double keyboardInset = (constraints as _BottomSheetConstraints).keyboardInset;
-          return BottomSheetKeyboardInset(
+          return _BottomSheetKeyboardInset(
             bottom: keyboardInset,
             child: ClipRect(
               clipBehavior: keyboardInset > 0.0 ? Clip.hardEdge : Clip.none,
@@ -3350,6 +3349,20 @@ class ScaffoldFeatureController<T extends Widget, U> {
   final StateSetter? setState;
 }
 
+// Carries Scaffold's layout result to its persistent sheet. BottomSheet receives
+// the value explicitly; standalone and nested sheets do not inherit it.
+class _BottomSheetKeyboardInset extends InheritedWidget {
+  const _BottomSheetKeyboardInset({required this.bottom, required super.child});
+
+  final double bottom;
+
+  static double of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_BottomSheetKeyboardInset>()!.bottom;
+
+  @override
+  bool updateShouldNotify(_BottomSheetKeyboardInset oldWidget) => bottom != oldWidget.bottom;
+}
+
 // Passed directly to the bottom-sheet LayoutBuilder so inset-only changes also
 // trigger layout when the total surface constraints remain unchanged.
 class _BottomSheetConstraints extends BoxConstraints {
@@ -3554,6 +3567,7 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
         child: NotificationListener<DraggableScrollableNotification>(
           onNotification: extentChanged,
           child: BottomSheet(
+            bottomInset: _BottomSheetKeyboardInset.of(context),
             animationController: widget.animationController,
             enableDrag: widget.enableDrag,
             showDragHandle: widget.showDragHandle,
