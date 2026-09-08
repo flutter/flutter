@@ -1131,7 +1131,7 @@ class DebuggingOptions {
 
   final bool debuggingEnabled;
 
-  final BuildInfo buildInfo;
+  BuildInfo buildInfo;
   final bool startPaused;
   final String dartFlags;
   final List<String> dartEntrypointArgs;
