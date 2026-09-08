@@ -105,7 +105,7 @@ void testUsingContext(
               AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
               Config: () => buildConfig(globals.fs),
               DeviceManager: () => FakeDeviceManager(),
-              Doctor: () => FakeDoctor(globals.logger),
+              Doctor: () => _ContextFakeDoctor(globals.logger),
               FlutterVersion: () => FakeFlutterVersion(),
               HttpClient: () => FakeHttpClient.any(),
               IOSSimulatorUtils: () => const NoopIOSSimulatorUtils(),
@@ -314,8 +314,8 @@ class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidato
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
 
-class FakeDoctor extends Doctor {
-  FakeDoctor(Logger logger, {super.clock = const SystemClock()}) : super(logger: logger);
+class _ContextFakeDoctor extends Doctor {
+  _ContextFakeDoctor(Logger logger, {super.clock = const SystemClock()}) : super(logger: logger);
 
   // True for testing.
   @override
