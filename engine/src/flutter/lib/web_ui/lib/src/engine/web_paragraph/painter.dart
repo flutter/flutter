@@ -50,22 +50,22 @@ void _resizePaintCanvas(double scaleX, double scaleY, ui.Rect rect) {
 (ui.Rect sourceRect, ui.Rect targetRect) _calculateParagraph(
   WebParagraph paragraph,
   ui.Offset offset,
-  double scaleX,
-  double scaleY,
+  double totalScaleX,
+  double totalScaleY,
 ) {
   final sourceRect = ui.Rect.fromLTWH(
     0,
     0,
-    ((paragraph.paintBounds.width) * scaleX).ceilToDouble(),
-    ((paragraph.paintBounds.height) * scaleY).ceilToDouble(),
+    ((paragraph.paintBounds.width) * totalScaleX).ceilToDouble(),
+    ((paragraph.paintBounds.height) * totalScaleY).ceilToDouble(),
   );
 
   // Target rect will be scaled by the canvas transform, so we don't scale it here
   final targetRect = ui.Rect.fromLTWH(
     offset.dx + paragraph.paintBounds.left,
     offset.dy + paragraph.paintBounds.top,
-    sourceRect.width / scaleX,
-    sourceRect.height / scaleY,
+    sourceRect.width / totalScaleX,
+    sourceRect.height / totalScaleY,
   );
 
   return (sourceRect, targetRect);
@@ -147,9 +147,7 @@ abstract class WebParagraphPainter {
 
     final Float64List canvasTransform = canvas.getTransform();
     final double dpr = ui.window.devicePixelRatio;
-    final (double scaleX, double scaleY) = canvasTransform != null
-        ? canvasTransform.getScale()
-        : (1.0, 1.0);
+    final (double scaleX, double scaleY) = canvasTransform.getScale();
 
     final double totalScaleX = scaleX * dpr;
     final double totalScaleY = scaleY * dpr;
