@@ -43,7 +43,7 @@ class MDnsVmServiceDiscovery {
   }) : _analytics = analytics,
        _client = mdnsClient ?? MDnsClient(),
        _logger = logger,
-       _platform = platform,
+       _platform = platform ?? globals.platform,
        _preliminaryClient = preliminaryMDnsClient;
 
   final MDnsClient _client;
@@ -52,11 +52,9 @@ class MDnsVmServiceDiscovery {
   // check for already running services so that results are not cached in _client.
   final MDnsClient? _preliminaryClient;
 
-  final Platform? _platform;
+  final Platform _platform;
   final Logger _logger;
   final Analytics _analytics;
-
-  Platform get _effectivePlatform => _platform ?? globals.platform;
 
   @visibleForTesting
   static const dartVmServiceName = '_dartVmService._tcp.local';
@@ -236,7 +234,7 @@ class MDnsVmServiceDiscovery {
     bool throwOnError = true,
     bool useDeviceIPAsHost = false,
   }) async {
-    if (!_effectivePlatform.isMacOS) {
+    if (!_platform.isMacOS) {
       throw UnsupportedError('mDNS discovery is only supported on macOS.');
     }
 
