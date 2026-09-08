@@ -183,6 +183,69 @@ void main() {
       },
     );
 
+    // The artifacts commands are built with are chosen before the command line
+    // is parsed, so they have to be rebuilt once a local engine is found.
+    testUsingContext(
+      'builds commands with the local engine the command line asks for',
+      () async {
+        fileSystem
+            .directory('engine')
+            .childDirectory('src')
+            .childDirectory('out')
+            .childDirectory('host_debug')
+            .createSync(recursive: true);
+        final ranCommands = <ArtifactsRecordingFlutterCommand>[];
+
+        // Exiting is faked out to throw, so catch that rather than the runner
+        // being able to return.
+        final completer = Completer<void>();
+        unawaited(
+          runZonedGuarded<Future<void>?>(
+            () {
+              unawaited(
+                runner.run(
+                  <String>[
+                    '--local-engine=host_debug',
+                    '--local-engine-host=host_debug',
+                    '--local-engine-src-path=./engine/src',
+                    'record',
+                  ],
+                  (ToolDependencies toolDependencies) {
+                    final command = ArtifactsRecordingFlutterCommand();
+                    ranCommands.add(command);
+                    return <FlutterCommand>[command];
+                  },
+                  flutterVersion: '[user-branch]/',
+                  shutdownHooks: ShutdownHooks(),
+                ),
+              );
+              return null;
+            },
+            (Object error, StackTrace stack) {
+              if (!completer.isCompleted) {
+                completer.complete();
+              }
+            },
+          ),
+        );
+        await completer.future;
+
+        final Artifacts? artifacts = ranCommands.singleWhere((command) => command.ran).artifacts;
+        expect(artifacts?.localEngineInfo?.targetOutPath, endsWith('engine/src/out/host_debug'));
+      },
+      overrides: <Type, Generator>{
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
+        Analytics: () => fakeAnalytics,
+      },
+    );
+
     testUsingContext(
       'error handling crash report (bot)',
       () async {
@@ -855,6 +918,24 @@ void main() {
       },
     );
   });
+}
+
+class ArtifactsRecordingFlutterCommand extends FlutterCommand {
+  Artifacts? artifacts;
+  bool ran = false;
+
+  @override
+  String get description => '';
+
+  @override
+  String get name => 'record';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    ran = true;
+    artifacts = toolContext?.artifacts;
+    return FlutterCommandResult.success();
+  }
 }
 
 class CrashingFlutterCommand extends FlutterCommand {
