@@ -2630,27 +2630,18 @@ void main() {
 
   Future<void> testRotatedImage(WidgetTester tester, bool isAntiAlias) async {
     final Key key = UniqueKey();
+    final imageProvider = MemoryImage(Uint8List.fromList(kBlueRectPng));
+    await precacheTestImage(imageProvider);
+
     await tester.pumpWidget(
       RepaintBoundary(
         key: key,
         child: Transform.rotate(
           angle: math.pi / 180,
-          child: Image.memory(Uint8List.fromList(kBlueRectPng), isAntiAlias: isAntiAlias),
+          child: Image(image: imageProvider, isAntiAlias: isAntiAlias),
         ),
       ),
     );
-
-    // precacheImage is needed, or the image in the golden file will be empty.
-    if (!kIsWeb) {
-      final Finder allImages = find.byType(Image);
-      for (final Element e in allImages.evaluate()) {
-        await tester.runAsync(() async {
-          final image = e.widget as Image;
-          await precacheImage(image.image, e);
-        });
-      }
-      await tester.pumpAndSettle();
-    }
 
     await expectLater(
       find.byKey(key),
@@ -2658,63 +2649,34 @@ void main() {
     );
   }
 
-  testWidgets(
-    'Rotated images',
-    (WidgetTester tester) async {
-      await testRotatedImage(tester, true);
-      await testRotatedImage(tester, false);
-    },
-    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
-  );
+  testWidgets('Rotated images', (WidgetTester tester) async {
+    await testRotatedImage(tester, true);
+    await testRotatedImage(tester, false);
+  });
 
-  testWidgets(
-    'Image opacity',
-    (WidgetTester tester) async {
-      final Key key = UniqueKey();
-      await tester.pumpWidget(
-        RepaintBoundary(
-          key: key,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            textDirection: TextDirection.ltr,
-            children: <Widget>[
-              Image.memory(
-                Uint8List.fromList(kBlueRectPng),
-                opacity: const AlwaysStoppedAnimation<double>(0.25),
-              ),
-              Image.memory(
-                Uint8List.fromList(kBlueRectPng),
-                opacity: const AlwaysStoppedAnimation<double>(0.5),
-              ),
-              Image.memory(
-                Uint8List.fromList(kBlueRectPng),
-                opacity: const AlwaysStoppedAnimation<double>(0.75),
-              ),
-              Image.memory(
-                Uint8List.fromList(kBlueRectPng),
-                opacity: const AlwaysStoppedAnimation<double>(1.0),
-              ),
-            ],
-          ),
+  testWidgets('Image opacity', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    final imageProvider = MemoryImage(Uint8List.fromList(kBlueRectPng));
+    await precacheTestImage(imageProvider);
+
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: key,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          textDirection: TextDirection.ltr,
+          children: <Widget>[
+            Image(image: imageProvider, opacity: const AlwaysStoppedAnimation<double>(0.25)),
+            Image(image: imageProvider, opacity: const AlwaysStoppedAnimation<double>(0.5)),
+            Image(image: imageProvider, opacity: const AlwaysStoppedAnimation<double>(0.75)),
+            Image(image: imageProvider, opacity: const AlwaysStoppedAnimation<double>(1.0)),
+          ],
         ),
-      );
+      ),
+    );
 
-      // precacheImage is needed, or the image in the golden file will be empty.
-      if (!kIsWeb) {
-        final Finder allImages = find.byType(Image);
-        for (final Element e in allImages.evaluate()) {
-          await tester.runAsync(() async {
-            final image = e.widget as Image;
-            await precacheImage(image.image, e);
-          });
-        }
-        await tester.pumpAndSettle();
-      }
-
-      await expectLater(find.byKey(key), matchesGoldenFile('transparent_image.png'));
-    },
-    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
-  );
+    await expectLater(find.byKey(key), matchesGoldenFile('transparent_image.png'));
+  });
 
   testWidgets(
     'Reports image size when painted',
