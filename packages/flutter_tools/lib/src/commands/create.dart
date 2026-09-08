@@ -918,30 +918,11 @@ Your $application code is in $relativeAppMain.
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
 
-    final organization =
-        templateContext['organization']! as String; // Required to make the context.
-    final projectName = templateContext['projectName'] as String?;
-    final exampleProjectName = '${projectName}_example';
-    final exampleTemplateContext = <String, Object?>{
-      ...templateContext,
-      'projectName': exampleProjectName,
-      'androidIdentifier': CreateBase.createAndroidIdentifier(organization, exampleProjectName),
-      'iosIdentifier': CreateBase.createUTIIdentifier(organization, exampleProjectName),
-      'macosIdentifier': CreateBase.createUTIIdentifier(organization, exampleProjectName),
-      'windowsIdentifier': CreateBase.createWindowsIdentifier(organization, exampleProjectName),
-      'description': 'Demonstrates how to use the $projectName package.',
-      'pluginProjectName': projectName,
-      'android': featureFlags.isAndroidEnabled && platforms.contains('android'),
-      'ios': featureFlags.isIOSEnabled && platforms.contains('ios'),
-      'web': featureFlags.isWebEnabled && platforms.contains('web'),
-      'linux': featureFlags.isLinuxEnabled && platforms.contains('linux'),
-      'macos': featureFlags.isMacOSEnabled && platforms.contains('macos'),
-      'windows': featureFlags.isWindowsEnabled && platforms.contains('windows'),
-      'darwin':
-          featureFlags.isIOSEnabled && featureFlags.isMacOSEnabled && platforms.contains('darwin'),
-      'withPluginHook': true,
-      'withPackage': true,
-    };
+    final Map<String, Object?> exampleTemplateContext = _createExampleTemplateContext(
+      platforms: platforms,
+      templateContext: templateContext,
+      withPackage: true,
+    );
 
     generatedCount += await generateApp(
       <String>['app'],
@@ -1159,11 +1140,37 @@ Your $application code is in $relativeAppMain.
 
     final FlutterProject project = FlutterProject.fromDirectory(directory);
 
+    final Map<String, Object?> exampleTemplateContext = _createExampleTemplateContext(
+      platforms: platforms,
+      templateContext: templateContext,
+      withFfi: true,
+      withFfiPackage: true,
+    );
+
+    generatedCount += await generateApp(
+      <String>['app'],
+      project.example.directory,
+      exampleTemplateContext,
+      overwrite: overwrite,
+      pluginExampleApp: true,
+      printStatusWhenWriting: printStatusWhenWriting,
+      projectType: projectType,
+    );
+    return generatedCount;
+  }
+
+  Map<String, Object?> _createExampleTemplateContext({
+    required List<String> platforms,
+    required Map<String, Object?> templateContext,
+    bool withFfi = false,
+    bool withFfiPackage = false,
+    bool withPackage = false,
+  }) {
     final organization =
         templateContext['organization']! as String; // Required to make the context.
     final projectName = templateContext['projectName'] as String?;
     final exampleProjectName = '${projectName}_example';
-    final exampleTemplateContext = <String, Object?>{
+    return <String, Object?>{
       ...templateContext,
       'projectName': exampleProjectName,
       'androidIdentifier': CreateBase.createAndroidIdentifier(organization, exampleProjectName),
@@ -1181,20 +1188,10 @@ Your $application code is in $relativeAppMain.
       'darwin':
           featureFlags.isIOSEnabled && featureFlags.isMacOSEnabled && platforms.contains('darwin'),
       'withPluginHook': true,
-      'withFfi': true,
-      'withFfiPackage': true,
+      if (withPackage) 'withPackage': true,
+      if (withFfi) 'withFfi': true,
+      if (withFfiPackage) 'withFfiPackage': true,
     };
-
-    generatedCount += await generateApp(
-      <String>['app'],
-      project.example.directory,
-      exampleTemplateContext,
-      overwrite: overwrite,
-      pluginExampleApp: true,
-      printStatusWhenWriting: printStatusWhenWriting,
-      projectType: projectType,
-    );
-    return generatedCount;
   }
 
   // Takes an application template and replaces the main.dart with one from the
