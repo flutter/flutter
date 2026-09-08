@@ -31,6 +31,26 @@ const double _kMinFlingVelocity = 700.0;
 const double _kCloseProgressThreshold = 0.5;
 const double _kDefaultScrollControlDisabledMaxHeightRatio = 9.0 / 16.0;
 
+/// Internal coordination between [Scaffold] and [BottomSheet].
+///
+/// Only persistent sheets receive an extension. Modal sheets and standalone
+/// [BottomSheet]s retain their existing layout policy.
+@internal
+class BottomSheetKeyboardInset extends InheritedWidget {
+  /// Supplies the extra surface extent computed by [Scaffold].
+  const BottomSheetKeyboardInset({super.key, required this.bottom, required super.child});
+
+  /// The distance below the usable sheet area, in logical pixels.
+  final double bottom;
+
+  /// Returns zero outside a persistent sheet or below its content boundary.
+  static double of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<BottomSheetKeyboardInset>()?.bottom ?? 0.0;
+
+  @override
+  bool updateShouldNotify(BottomSheetKeyboardInset oldWidget) => bottom != oldWidget.bottom;
+}
+
 /// A callback for when the user begins dragging the bottom sheet.
 ///
 /// Used by [BottomSheet.onDragStart].
@@ -219,6 +239,10 @@ class BottomSheet extends StatefulWidget {
 
   /// Defines minimum and maximum sizes for a [BottomSheet].
   ///
+  /// When a persistent sheet avoids the keyboard, height constraints apply to
+  /// its content and drag handle. Its [Material] background can extend farther
+  /// to cover the keyboard region without reducing the space for that content.
+  ///
   /// If null, then the ambient [ThemeData.bottomSheetTheme]'s
   /// [BottomSheetThemeData.constraints] will be used. If that
   /// is null and [ThemeData.useMaterial3] is true, then the bottom sheet
@@ -348,8 +372,16 @@ class _BottomSheetState extends State<BottomSheet> {
     final BottomSheetThemeData defaults = useMaterial3
         ? _BottomSheetDefaultsM3(context)
         : const BottomSheetThemeData();
-    final BoxConstraints? constraints =
+    // Scaffold reserves this space for the persistent sheet's surface. Inflate
+    // height constraints before adding padding so the builder retains its
+    // original constraints, including explicit or themed min/max heights.
+    final double keyboardInset = BottomSheetKeyboardInset.of(context);
+    final BoxConstraints? contentConstraints =
         widget.constraints ?? bottomSheetTheme.constraints ?? defaults.constraints;
+    final BoxConstraints? constraints = contentConstraints?.copyWith(
+      minHeight: contentConstraints.minHeight + keyboardInset,
+      maxHeight: contentConstraints.maxHeight + keyboardInset,
+    );
     final Color? color =
         widget.backgroundColor ?? bottomSheetTheme.backgroundColor ?? defaults.backgroundColor;
     final Color? surfaceTintColor = bottomSheetTheme.surfaceTintColor ?? defaults.surfaceTintColor;
@@ -392,20 +424,26 @@ class _BottomSheetState extends State<BottomSheet> {
       shadowColor: shadowColor,
       shape: shape,
       clipBehavior: clipBehavior,
-      child: NotificationListener<DraggableScrollableNotification>(
-        onNotification: extentChanged,
-        child: !showDragHandle
-            ? widget.builder(context)
-            : Stack(
-                alignment: Alignment.topCenter,
-                children: <Widget>[
-                  dragHandle!,
-                  Padding(
-                    padding: const EdgeInsets.only(top: kMinInteractiveDimension),
-                    child: widget.builder(context),
+      child: Padding(
+        padding: EdgeInsets.only(bottom: keyboardInset),
+        child: BottomSheetKeyboardInset(
+          bottom: 0.0,
+          child: NotificationListener<DraggableScrollableNotification>(
+            onNotification: extentChanged,
+            child: !showDragHandle
+                ? widget.builder(context)
+                : Stack(
+                    alignment: Alignment.topCenter,
+                    children: <Widget>[
+                      dragHandle!,
+                      Padding(
+                        padding: const EdgeInsets.only(top: kMinInteractiveDimension),
+                        child: widget.builder(context),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+          ),
+        ),
       ),
     );
 

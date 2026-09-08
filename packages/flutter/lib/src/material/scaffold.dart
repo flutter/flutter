@@ -22,14 +22,14 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, HitTestEntry, HitTestResult;
-import 'package:flutter/rendering.dart' show RenderMetaData;
+import 'package:flutter/rendering.dart'
+    show BoxHitTestResult, RenderBox, RenderMetaData, RenderProxyBox;
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
 import 'banner.dart';
 import 'banner_theme.dart';
 import 'bottom_sheet.dart';
-import 'bottom_sheet_theme.dart';
 import 'colors.dart';
 import 'curves.dart';
 import 'debug.dart';
@@ -67,7 +67,6 @@ enum _ScaffoldSlot {
   appBar,
   bodyScrim,
   bottomSheet,
-  bottomSheetKeyboardBackdrop,
   snackBar,
   materialBanner,
   persistentFooter,
@@ -1006,7 +1005,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     required this.extendBody,
     required this.extendBodyBehindAppBar,
     required this.extendBodyBehindMaterialBanner,
-    required this.bottomSheetKeyboardBackdropMaxWidth,
   }) : super(relayout: floatingActionButtonMoveAnimation);
 
   final bool extendBody;
@@ -1025,13 +1023,6 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final double? snackBarWidth;
 
   final bool extendBodyBehindMaterialBanner;
-
-  // The effective `maxWidth` of the persistent bottom sheet's constraints,
-  // used to size and center the `_ScaffoldSlot.bottomSheetKeyboardBackdrop`
-  // so it does not over-extend past the visible sheet on wide layouts.
-  //
-  // Infinite when the sheet is unconstrained (full screen width).
-  final double bottomSheetKeyboardBackdropMaxWidth;
 
   @override
   void performLayout(Size size) {
@@ -1100,6 +1091,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       bottom - math.max(minInsets.bottom, bottomWidgetsHeight),
     );
 
+    // A taller bottom bar still owns the area below the sheet. Only extend the
+    // sheet when keyboard avoidance determines its bottom edge.
+    final double bottomSheetKeyboardInset = minInsets.bottom > bottomWidgetsHeight
+        ? size.height - contentBottom
+        : 0.0;
+
     if (hasChild(_ScaffoldSlot.body)) {
       double bodyMaxHeight = math.max(0.0, contentBottom - contentTop);
 
@@ -1154,41 +1151,25 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
-      final bottomSheetConstraints = BoxConstraints(
+      // Keep the sheet's contents above the keyboard, but let its own Material
+      // continue to the bottom of the Scaffold. The extent is local to this
+      // layout, rather than an unbounded keyboard height from MediaQuery.
+      final keyboardInset = bottomSheetKeyboardInset;
+      final bottomSheetConstraints = _BottomSheetConstraints(
+        keyboardInset: keyboardInset,
+        scaffoldSize: size,
         maxWidth: fullWidthConstraints.maxWidth,
-        maxHeight: math.max(0.0, contentBottom - contentTop),
+        maxHeight: math.max(0.0, contentBottom - contentTop) + keyboardInset,
       );
-      bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, bottomSheetConstraints);
+      final Size surfaceSize = layoutChild(_ScaffoldSlot.bottomSheet, bottomSheetConstraints);
+      bottomSheetSize = Size(surfaceSize.width, math.max(0.0, surfaceSize.height - keyboardInset));
       positionChild(
         _ScaffoldSlot.bottomSheet,
-        Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height),
+        Offset(
+          (size.width - surfaceSize.width) / 2.0,
+          contentBottom + keyboardInset - surfaceSize.height,
+        ),
       );
-    }
-
-    // The bottom-sheet keyboard backdrop spans the keyboard region and is
-    // horizontally aligned with the sheet so it covers the gap between the
-    // sheet's bottom and the screen bottom that would otherwise expose the
-    // Scaffold's backgroundColor. Its width matches the sheet's effective
-    // maxWidth, so on wide layouts where the sheet is centered, the backdrop
-    // does not over-extend past the sheet horizontally.
-    if (hasChild(_ScaffoldSlot.bottomSheetKeyboardBackdrop)) {
-      final double backdropHeight = minInsets.bottom;
-      if (backdropHeight > 0.0) {
-        final double backdropWidth = math.min(size.width, bottomSheetKeyboardBackdropMaxWidth);
-        layoutChild(
-          _ScaffoldSlot.bottomSheetKeyboardBackdrop,
-          BoxConstraints.tightFor(width: backdropWidth, height: backdropHeight),
-        );
-        positionChild(
-          _ScaffoldSlot.bottomSheetKeyboardBackdrop,
-          Offset((size.width - backdropWidth) / 2.0, size.height - backdropHeight),
-        );
-      } else {
-        // If the keyboard isn't visible, lay out at zero size to keep the slot
-        // valid.
-        layoutChild(_ScaffoldSlot.bottomSheetKeyboardBackdrop, BoxConstraints.tight(Size.zero));
-        positionChild(_ScaffoldSlot.bottomSheetKeyboardBackdrop, Offset.zero);
-      }
     }
 
     late Rect floatingActionButtonRect;
@@ -1339,8 +1320,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation ||
         oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation ||
         oldDelegate.extendBody != extendBody ||
-        oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar ||
-        oldDelegate.bottomSheetKeyboardBackdropMaxWidth != bottomSheetKeyboardBackdropMaxWidth;
+        oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar;
   }
 }
 
@@ -1965,6 +1945,11 @@ class Scaffold extends StatefulWidget {
   /// actually be a [BottomSheet], which is used by the implementations of
   /// [showBottomSheet] and [showModalBottomSheet]. Typically it's a widget
   /// that includes [Material].
+  ///
+  /// When [resizeToAvoidBottomInset] is true, the sheet's content avoids the
+  /// keyboard while its [Material] background extends behind it. Configure that
+  /// background with [ThemeData.bottomSheetTheme]; decorations painted by the
+  /// child do not extend into the keyboard region.
   ///
   /// See also:
   ///
@@ -2679,6 +2664,12 @@ class ScaffoldState extends State<Scaffold>
   ///
   /// ** See code in examples/api/lib/material/scaffold/scaffold_state.show_bottom_sheet.1.dart **
   /// {@end-tool}
+  ///
+  /// When [Scaffold.resizeToAvoidBottomInset] is true, keyboard avoidance keeps
+  /// the content above the keyboard and extends the sheet's [Material]
+  /// background behind it. Set [backgroundColor] or [ThemeData.bottomSheetTheme]
+  /// to configure that surface; child decorations are not extended.
+  ///
   /// See also:
   ///
   ///  * [BottomSheet], which becomes the parent of the widget returned by the
@@ -3106,74 +3097,26 @@ class ScaffoldState extends State<Scaffold>
 
     var isSnackBarFloating = false;
     double? snackBarWidth;
-    // Resolved when a persistent bottom sheet is present and a backdrop
-    // slot is added; ignored otherwise.
-    double bottomSheetKeyboardBackdropMaxWidth = double.infinity;
 
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
-      // On platforms with a translucent soft keyboard (e.g. iOS 26+), the
-      // Scaffold's `backgroundColor` would otherwise tint through the
-      // keyboard in the gap between the persistent bottom sheet's bottom
-      // edge and the screen bottom. Paint a backdrop in that region using
-      // the sheet's effective `backgroundColor` so the keyboard tints the
-      // sheet's chrome rather than the Scaffold's. Skipped when:
-      //   * `resizeToAvoidBottomInset` is false — the sheet stays put and
-      //     the keyboard simply covers it; there is no gap to bleed.
-      //   * the resolved color is null or fully transparent — the caller
-      //     has fully opted out via theme.
-      if (_resizeToAvoidBottomInset) {
-        final BottomSheetThemeData sheetTheme = themeData.bottomSheetTheme;
-        // The "active" sheet for backdrop purposes is the current sheet if
-        // present, otherwise the most recent dismissing sheet. During the
-        // close animation `removeCurrentBottomSheet` nulls
-        // `_currentBottomSheet` before the reverse animation finishes, but
-        // the outgoing sheet is still rendering as it slides off; the
-        // backdrop must continue to honor its color and constraints so the
-        // dismissal looks visually consistent.
-        final _StandardBottomSheet? activeSheet =
-            _currentBottomSheet?._widget ??
-            (_dismissedBottomSheets.isNotEmpty ? _dismissedBottomSheets.last : null);
-        // For non-M3, the empty `BottomSheetThemeData` default returns null, so
-        // the sheet's `Material` falls through to `Theme.canvasColor`. Match
-        // that here so the backdrop matches the sheet's actual painted color.
-        final Color defaultBackgroundColor = themeData.useMaterial3
-            ? themeData.colorScheme.surfaceContainerLow
-            : themeData.canvasColor;
-        Color? backdropColor;
-        for (final candidate in <Color?>[
-          activeSheet?.backgroundColor,
-          sheetTheme.backgroundColor,
-          defaultBackgroundColor,
-        ]) {
-          // Zero-alpha candidates are skipped so an explicit
-          // `backgroundColor: Colors.transparent` falls through to theme
-          // and defaults instead of suppressing the backdrop.
-          if (candidate != null && candidate.a != 0) {
-            backdropColor = candidate;
-            break;
-          }
-        }
-        if (backdropColor != null) {
-          final BoxConstraints? effectiveSheetConstraints =
-              activeSheet?.constraints ?? sheetTheme.constraints;
-          bottomSheetKeyboardBackdropMaxWidth =
-              effectiveSheetConstraints?.maxWidth ?? double.infinity;
-          _addIfNonNull(
-            children,
-            // The backdrop is decorative and should not receive pointer events.
-            IgnorePointer(child: ColoredBox(color: backdropColor)),
-            _ScaffoldSlot.bottomSheetKeyboardBackdrop,
-            removeLeftPadding: true,
-            removeTopPadding: true,
-            removeRightPadding: true,
-            removeBottomPadding: true,
+      final Widget stack = LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          final double keyboardInset = (constraints as _BottomSheetConstraints).keyboardInset;
+          return BottomSheetKeyboardInset(
+            bottom: keyboardInset,
+            child: ClipRect(
+              clipBehavior: keyboardInset > 0.0 ? Clip.hardEdge : Clip.none,
+              clipper: _BottomSheetClipper(constraints.scaffoldSize),
+              child: _BottomSheetKeyboardHitTest(
+                bottom: keyboardInset,
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: <Widget>[..._dismissedBottomSheets, ?_currentBottomSheet?._widget],
+                ),
+              ),
+            ),
           );
-        }
-      }
-
-      final Widget stack = Stack(
-        alignment: Alignment.bottomCenter,
-        children: <Widget>[..._dismissedBottomSheets, ?_currentBottomSheet?._widget],
+        },
       );
       _addIfNonNull(
         children,
@@ -3354,7 +3297,6 @@ class ScaffoldState extends State<Scaffold>
                     isSnackBarFloating: isSnackBarFloating,
                     extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
                     snackBarWidth: snackBarWidth,
-                    bottomSheetKeyboardBackdropMaxWidth: bottomSheetKeyboardBackdropMaxWidth,
                   ),
                   children: children,
                 ),
@@ -3406,6 +3348,90 @@ class ScaffoldFeatureController<T extends Widget, U> {
 
   /// Mark the feature (e.g., bottom sheet or snack bar) as needing to rebuild.
   final StateSetter? setState;
+}
+
+// Passed directly to the bottom-sheet LayoutBuilder so inset-only changes also
+// trigger layout when the total surface constraints remain unchanged.
+class _BottomSheetConstraints extends BoxConstraints {
+  const _BottomSheetConstraints({
+    required this.keyboardInset,
+    required this.scaffoldSize,
+    required super.maxWidth,
+    required super.maxHeight,
+  });
+
+  final double keyboardInset;
+  final Size scaffoldSize;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _BottomSheetConstraints &&
+      super == other &&
+      other.keyboardInset == keyboardInset &&
+      other.scaffoldSize == scaffoldSize;
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, keyboardInset, scaffoldSize);
+}
+
+// The sheet is bottom-centered in its Scaffold. Clip at that boundary during
+// entrance and dismissal, but retain shadows outside the sheet's own bounds.
+class _BottomSheetClipper extends CustomClipper<Rect> {
+  const _BottomSheetClipper(this.scaffoldSize);
+
+  final Size scaffoldSize;
+
+  @override
+  Rect getClip(Size size) => Rect.fromLTWH(
+    (size.width - scaffoldSize.width) / 2.0,
+    size.height - scaffoldSize.height,
+    scaffoldSize.width,
+    scaffoldSize.height,
+  );
+
+  @override
+  bool shouldReclip(_BottomSheetClipper oldClipper) => scaffoldSize != oldClipper.scaffoldSize;
+}
+
+// Only the surface extends into the keyboard region. Keep this decorative area
+// out of Flutter hit testing and clip accessibility to the usable sheet area.
+class _BottomSheetKeyboardHitTest extends SingleChildRenderObjectWidget {
+  const _BottomSheetKeyboardHitTest({required this.bottom, required super.child});
+
+  final double bottom;
+
+  @override
+  _RenderBottomSheetKeyboardHitTest createRenderObject(BuildContext context) =>
+      _RenderBottomSheetKeyboardHitTest(bottom);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderBottomSheetKeyboardHitTest renderObject) {
+    renderObject.bottom = bottom;
+  }
+}
+
+class _RenderBottomSheetKeyboardHitTest extends RenderProxyBox {
+  _RenderBottomSheetKeyboardHitTest(this._bottom);
+
+  double get bottom => _bottom;
+  double _bottom;
+  set bottom(double value) {
+    if (_bottom == value) {
+      return;
+    }
+    _bottom = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  Rect get _visibleRect =>
+      Rect.fromLTWH(0.0, 0.0, size.width, math.max(0.0, size.height - _bottom));
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) =>
+      _visibleRect.contains(position) && super.hitTest(result, position: position);
+
+  @override
+  Rect? describeSemanticsClip(RenderBox? child) => _visibleRect;
 }
 
 class _StandardBottomSheet extends StatefulWidget {
