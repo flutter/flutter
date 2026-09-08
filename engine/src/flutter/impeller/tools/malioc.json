@@ -5819,9 +5819,9 @@
               "arith_cvt"
             ],
             "longest_path_cycles": [
-              0.375,
+              0.34375,
               0.296875,
-              0.375,
+              0.34375,
               0.1875,
               0.0,
               0.25,
@@ -5837,16 +5837,15 @@
               "texture"
             ],
             "shortest_path_bound_pipelines": [
-              "arith_total",
-              "arith_cvt"
+              "varying"
             ],
             "shortest_path_cycles": [
-              0.234375,
-              0.109375,
-              0.234375,
-              0.125,
+              0.21875,
+              0.203125,
+              0.21875,
+              0.1875,
               0.0,
-              0.0,
+              0.25,
               0.0
             ],
             "total_bound_pipelines": [
@@ -5854,9 +5853,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.5,
+              0.46875,
               0.328125,
-              0.5,
+              0.46875,
               0.1875,
               0.0,
               0.25,
@@ -5883,7 +5882,7 @@
               "arithmetic"
             ],
             "longest_path_cycles": [
-              7.260000228881836,
+              6.599999904632568,
               1.0,
               1.0
             ],
@@ -5896,15 +5895,15 @@
               "arithmetic"
             ],
             "shortest_path_cycles": [
-              1.649999976158142,
-              0.0,
+              2.309999942779541,
+              1.0,
               0.0
             ],
             "total_bound_pipelines": [
               "arithmetic"
             ],
             "total_cycles": [
-              8.0,
+              7.333333492279053,
               1.0,
               1.0
             ]
@@ -8610,7 +8609,7 @@
             "longest_path_cycles": [
               4.1875,
               4.125,
-              2.125,
+              2.112499952316284,
               4.1875,
               0.0,
               0.25,
@@ -8645,7 +8644,7 @@
             "total_cycles": [
               13.375,
               13.375,
-              5.050000190734863,
+              5.03125,
               12.625,
               0.0,
               0.25,
@@ -9916,7 +9915,7 @@
             "longest_path_cycles": [
               0.265625,
               0.265625,
-              0.25,
+              0.234375,
               0.125,
               0.0,
               0.25,
@@ -9935,9 +9934,9 @@
               "varying"
             ],
             "shortest_path_cycles": [
-              0.1875,
               0.171875,
-              0.1875,
+              0.171875,
+              0.171875,
               0.125,
               0.0,
               0.25,
@@ -9948,9 +9947,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.34375,
+              0.328125,
               0.296875,
-              0.34375,
+              0.328125,
               0.125,
               0.0,
               0.25,
@@ -9959,7 +9958,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 16,
+          "uniform_registers_used": 14,
           "work_registers_used": 7
         }
       }
@@ -11827,7 +11826,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 35,
+          "fp16_arithmetic": 36,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -11837,7 +11836,7 @@
             "longest_path_cycles": [
               4.125,
               3.65625,
-              2.34375,
+              2.325000047683716,
               4.125,
               0.0,
               0.25,
@@ -11873,7 +11872,7 @@
             "total_cycles": [
               12.5625,
               12.375,
-              5.5,
+              5.487500190734863,
               12.5625,
               0.0,
               0.25,
@@ -11882,7 +11881,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 64,
+          "uniform_registers_used": 62,
           "work_registers_used": 32
         }
       }
