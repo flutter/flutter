@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -17,10 +20,61 @@ import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/memory_fs.dart';
 import 'package:flutter_tools/src/web/module_metadata.dart';
 import 'package:shelf/shelf.dart' as shelf;
+import 'package:stream_channel/stream_channel.dart';
+import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+
+/// A [WebSocketSink] that forwards to a plain [StreamSink].
+class FakeWebSocketSink implements WebSocketSink {
+  FakeWebSocketSink(this._sink);
+
+  final StreamSink<dynamic> _sink;
+
+  @override
+  void add(dynamic data) => _sink.add(data);
+
+  @override
+  void addError(Object error, [StackTrace? stackTrace]) => _sink.addError(error, stackTrace);
+
+  @override
+  Future<void> addStream(Stream<dynamic> stream) => _sink.addStream(stream);
+
+  @override
+  Future<void> close([int? closeCode, String? closeReason]) => _sink.close();
+
+  @override
+  Future<void> get done => _sink.done;
+}
+
+/// A [WebSocketChannel] whose incoming stream is driven by the test.
+class FakeWebSocketChannel extends StreamChannelMixin<dynamic> implements WebSocketChannel {
+  FakeWebSocketChannel(this.controller);
+
+  final StreamChannelController<dynamic> controller;
+
+  @override
+  Stream<dynamic> get stream => controller.foreign.stream;
+
+  @override
+  WebSocketSink get sink => FakeWebSocketSink(controller.foreign.sink);
+
+  @override
+  int? get closeCode => null;
+
+  @override
+  String? get closeReason => null;
+
+  @override
+  String? get protocol => null;
+
+  @override
+  Future<void> get ready async {}
+}
 
 class FakeServer implements shelf.Server {
   shelf.Handler? mountedHandler;
@@ -210,4 +264,57 @@ void main() {
       Logger: () => logger,
     },
   );
+  BrowserManager createBrowserManager(
+    StreamChannelController<dynamic> controller,
+    Process process,
+  ) {
+    final chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: operatingSystemUtils,
+      browserFinder: (Platform platform, FileSystem fileSystem) => 'chrome',
+      logger: logger,
+    );
+    final chromium = Chromium(
+      0,
+      ChromeConnection('localhost', 1234),
+      chromiumLauncher: chromiumLauncher,
+      process: process,
+      logger: logger,
+    );
+    return BrowserManager.test(chromium, Runtime.chrome, FakeWebSocketChannel(controller), logger);
+  }
+
+  testWithoutContext('BrowserManager reports a browser that closed its connection', () {
+    // Regression test for https://github.com/flutter/flutter/issues/191920.
+    FakeAsync().run((FakeAsync time) {
+      final controller = StreamChannelController<dynamic>();
+      createBrowserManager(controller, FakeProcess(exitCode: Completer<int>().future));
+
+      controller.local.sink.close();
+      time.elapse(const Duration(seconds: 2));
+
+      expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+    });
+  });
+
+  testWithoutContext('BrowserManager reports the exit code of a browser process that died', () {
+    // Regression test for https://github.com/flutter/flutter/issues/191920.
+    FakeAsync().run((FakeAsync time) {
+      final exitCode = Completer<int>();
+      final controller = StreamChannelController<dynamic>();
+      createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
+
+      // A dying process takes its connection with it, and the connection is
+      // seen to close before the exit code arrives.
+      controller.local.sink.close();
+      time.flushMicrotasks();
+      exitCode.complete(-9);
+      time.elapse(const Duration(seconds: 2));
+
+      expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
+      expect(logger.errorText, contains('exited unexpectedly with code -9'));
+    });
+  });
 }
