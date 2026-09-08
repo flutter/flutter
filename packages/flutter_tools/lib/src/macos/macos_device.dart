@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -32,6 +34,41 @@ class MacOSDevice extends DesktopDevice {
   final ProcessManager _processManager;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
+
+  /// The [MacOSLogReader] instance used by this device.
+  late final MacOSLogReader macosLogReader = MacOSLogReader(logger: _logger);
+
+  @override
+  DesktopLogReader createLogReader() => macosLogReader;
+
+  @override
+  Future<LaunchResult> startApp(
+    ApplicationPackage package, {
+    required DebuggingOptions debuggingOptions,
+    String? mainPath,
+    Map<String, dynamic> platformArgs = const <String, dynamic>{},
+    bool prebuiltApplication = false,
+    String? route,
+    String? userIdentifier,
+  }) async {
+    macosLogReader.bundlePath = null;
+    if (package is MacOSApp) {
+      try {
+        macosLogReader.bundlePath = package.applicationBundle(debuggingOptions.buildInfo);
+      } on UnimplementedError {
+        // Can be thrown by test fakes that do not implement applicationBundle.
+      }
+    }
+    return super.startApp(
+      package,
+      mainPath: mainPath,
+      route: route,
+      debuggingOptions: debuggingOptions,
+      platformArgs: platformArgs,
+      prebuiltApplication: prebuiltApplication,
+      userIdentifier: userIdentifier,
+    );
+  }
 
   @override
   Future<bool> isSupported() async => true;
@@ -152,4 +189,110 @@ class MacOSDevices extends PollingDeviceDiscovery {
 
   @override
   List<String> get wellKnownIds => const <String>['macos'];
+}
+
+/// A [DesktopLogReader] for macOS devices that inspects stderr for
+/// platform-specific crash signatures such as TCC privacy violations.
+class MacOSLogReader extends DesktopLogReader {
+  MacOSLogReader({required this.logger});
+
+  final Logger logger;
+
+  /// The path to the application bundle, if known.
+  String? bundlePath;
+
+  bool _detectedPrivacyCrash = false;
+
+  /// The message printed to stderr by macOS when an application crashes due to a
+  /// missing privacy usage description in its Info.plist.
+  @visibleForTesting
+  static const String kMacOSPrivacyCrashPattern =
+      'This app has crashed because it attempted to access privacy-sensitive '
+      'data without a usage description';
+
+  /// A pattern matching the missing usage description key name in the macOS crash log.
+  @visibleForTesting
+  static final RegExp privacyKeyPattern = RegExp(
+    r'must (?:supply|contain) an?\s+([A-Za-z0-9_]+)\s+key',
+  );
+
+  @override
+  void listenToProcessOutput(Process process) {
+    _detectedPrivacyCrash = false;
+    super.listenToProcessOutput(process);
+  }
+
+  @override
+  @visibleForTesting
+  void handleStderrLine(String line) {
+    if (_detectedPrivacyCrash) {
+      return;
+    }
+    checkPrivacyCrash(line);
+  }
+
+  /// Checks if [line] contains the macOS privacy crash signature and, if so,
+  /// prints an actionable diagnostic message.
+  @visibleForTesting
+  bool checkPrivacyCrash(String line) {
+    if (!line.contains(kMacOSPrivacyCrashPattern)) {
+      return false;
+    }
+    _detectedPrivacyCrash = true;
+    _printPrivacyDiagnostic(line);
+    return true;
+  }
+
+  void _printPrivacyDiagnostic(String line) {
+    final RegExpMatch? match = privacyKeyPattern.firstMatch(line);
+    final String? key = match?.group(1);
+    final keyNotice = key != null ? ' (requiring $key)' : '';
+    final keyDetail = key != null
+        ? 'Even if $key is already present in macos/Runner/Info.plist, '
+        : 'Even if the usage description key is already present in '
+              'macos/Runner/Info.plist, ';
+    final runCommand = bundlePath != null ? 'open "$bundlePath"' : 'open <path-to-app-bundle>';
+
+    final message = StringBuffer()
+      ..writeln()
+      ..writeln('═' * 80)
+      ..writeln('macOS Privacy Permission Crash Detected')
+      ..writeln('═' * 80)
+      ..write('The application crashed while requesting access to ')
+      ..writeln('privacy-sensitive data$keyNotice.')
+      ..writeln()
+      ..writeln(
+        'When launched from an IDE (such as VS Code or Android Studio) or '
+        'terminal via',
+      )
+      ..writeln(
+        '"flutter run", macOS Transparency, Consent, and Control (TCC) '
+        'attributes',
+      )
+      ..writeln(
+        'permission requests to the parent IDE or terminal process rather than '
+        'the',
+      )
+      ..writeln('application bundle.')
+      ..writeln()
+      ..write(keyDetail)
+      ..writeln('macOS terminates the process if the parent process lacks the usage')
+      ..writeln('description.')
+      ..writeln()
+      ..writeln('Workaround:')
+      ..writeln('1. Open the application bundle directly once from Terminal or Finder:')
+      ..writeln('   $runCommand')
+      ..writeln('   (or run the project directly from Xcode)')
+      ..writeln('2. Accept the permission prompt when shown.')
+      ..writeln(
+        '3. Once granted for your bundle identifier, subsequent "flutter run" '
+        'sessions',
+      )
+      ..writeln('   from your IDE will work.')
+      ..writeln()
+      ..writeln('See https://github.com/flutter/flutter/issues/70374 for more details.')
+      ..writeln('═' * 80);
+
+    logger.printError(message.toString());
+  }
 }
