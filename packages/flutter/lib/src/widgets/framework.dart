@@ -3167,7 +3167,7 @@ class BuildOwner {
   // In Profile/Release mode this field is initialized to `null`. The Dart compiler can
   // eliminate unused fields, but not their initializers.
   @_debugOnly
-  final Set<Element>? _debugIllFatedElements = kDebugMode ? HashSet<Element>() : null;
+  late final Set<Element> _debugIllFatedElements = HashSet<Element>();
 
   // This map keeps track which child reserves the global key with the parent.
   // Parent, child -> global key.
@@ -3197,7 +3197,7 @@ class BuildOwner {
       if (_globalKeyRegistry.containsKey(key)) {
         final Element oldElement = _globalKeyRegistry[key]!;
         assert(element.widget.runtimeType != oldElement.widget.runtimeType);
-        _debugIllFatedElements?.add(oldElement);
+        _debugIllFatedElements.add(oldElement);
       }
       return true;
     }());
@@ -3304,7 +3304,7 @@ class BuildOwner {
   void _debugVerifyIllFatedPopulation() {
     assert(() {
       Map<GlobalKey, Set<Element>>? duplicates;
-      for (final Element element in _debugIllFatedElements ?? const <Element>{}) {
+      for (final Element element in _debugIllFatedElements) {
         if (element._lifecycleState != _ElementLifecycle.defunct) {
           assert(element.widget.key != null);
           final key = element.widget.key! as GlobalKey;
@@ -3316,7 +3316,7 @@ class BuildOwner {
           elements.add(_globalKeyRegistry[key]!);
         }
       }
-      _debugIllFatedElements?.clear();
+      _debugIllFatedElements.clear();
       if (duplicates != null) {
         final information = <DiagnosticsNode>[];
         information.add(ErrorSummary('Multiple widgets used the same GlobalKey.'));
