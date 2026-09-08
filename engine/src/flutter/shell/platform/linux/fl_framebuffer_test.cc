@@ -135,6 +135,7 @@ TEST_F(FlFramebufferTest, ImpellerImplicitMSAA) {
 
   FlFramebuffer* framebuffer =
       fl_framebuffer_new_multisample(GL_RGBA, 100, 100, /*use_msaa=*/TRUE);
+  EXPECT_NE(fl_framebuffer_get_texture_id(framebuffer), 0u);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);
@@ -156,6 +157,7 @@ TEST_F(FlFramebufferTest, ImpellerNoMSAA) {
 
   FlFramebuffer* framebuffer =
       fl_framebuffer_new_multisample(GL_RGBA, 100, 100, /*use_msaa=*/TRUE);
+  EXPECT_NE(fl_framebuffer_get_texture_id(framebuffer), 0u);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);
@@ -177,6 +179,7 @@ TEST_F(FlFramebufferTest, SkiaNoMSAA) {
 
   FlFramebuffer* framebuffer =
       fl_framebuffer_new_multisample(GL_RGBA, 100, 100, /*use_msaa=*/FALSE);
+  EXPECT_NE(fl_framebuffer_get_texture_id(framebuffer), 0u);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);
@@ -232,6 +235,7 @@ TEST_F(FlFramebufferTest, ImpellerImplicitMSAABgra) {
 
   FlFramebuffer* framebuffer =
       fl_framebuffer_new_multisample(GL_BGRA_EXT, 100, 100, /*use_msaa=*/TRUE);
+  EXPECT_NE(fl_framebuffer_get_texture_id(framebuffer), 0u);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);
