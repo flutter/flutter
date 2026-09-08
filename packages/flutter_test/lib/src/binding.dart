@@ -1342,10 +1342,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       binding.setupHttpOverrides();
     }
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable);
+  }
 
+  @override
+  WindowingOwner createWindowingOwner() {
     if (isWindowingEnabled && registerTestWindowingOwner) {
-      windowingOwner = _TestWindowingOwner(platformDispatcher: platformDispatcher);
+      return _TestWindowingOwner(platformDispatcher: platformDispatcher);
     }
+    return super.createWindowingOwner();
   }
 
   @override

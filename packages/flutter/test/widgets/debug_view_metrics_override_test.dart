@@ -191,6 +191,20 @@ class _NegativeTextScaler extends TextScaler {
 }
 
 void main() {
+  // Construct this before testWidgets initializes the binding. Keeping the
+  // fixture here lets the bootstrap regression share this test file.
+  assert(BindingBase.debugBindingType() == null);
+  final ui.FlutterView rawBeforeBinding = ui.PlatformDispatcher.instance.implicitView!;
+  late ui.FlutterView inheritedBeforeBinding;
+  final viewBeforeBinding = View(
+    view: rawBeforeBinding,
+    child: Builder(
+      builder: (BuildContext context) {
+        inheritedBeforeBinding = View.of(context);
+        return const SizedBox.expand();
+      },
+    ),
+  );
   isWindowingEnabled = true;
   // Overrides have to be cleared inside the test body rather than in a tear
   // down: debugAssertAllFoundationVarsUnset runs from the test binding's
@@ -633,9 +647,12 @@ void main() {
       debugApplyViewMetricsOverrides(dispatcher);
       final ui.FlutterView raw = dispatcher.rawView;
       final renderView = RenderView(view: raw);
+      addTearDown(renderView.dispose);
+      final pipelineOwner = PipelineOwner();
+      addTearDown(pipelineOwner.dispose);
       final widget = View(
         view: raw,
-        deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: PipelineOwner(),
+        deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner: pipelineOwner,
         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView: renderView,
         child: const SizedBox.expand(),
       );
@@ -1696,30 +1713,19 @@ void main() {
   testWidgets('a View constructed before the binding keeps one normalized identity', (
     WidgetTester tester,
   ) async {
-    final ui.FlutterView raw = ui.PlatformDispatcher.instance.implicitView!;
-    late ui.FlutterView inherited;
-    final widget = View(
-      view: raw,
-      child: Builder(
-        builder: (BuildContext context) {
-          inherited = View.of(context);
-          return const SizedBox.expand();
-        },
-      ),
-    );
-    expect(widget.view, isNot(same(raw)));
-    await tester.pumpWidget(widget, wrapWithView: false);
-    expect(inherited, same(widget.view));
-    expect(tester.binding.renderViews.single.flutterView, same(widget.view));
+    expect(viewBeforeBinding.view, isNot(same(rawBeforeBinding)));
+    await tester.pumpWidget(viewBeforeBinding, wrapWithView: false);
+    expect(inheritedBeforeBinding, same(viewBeforeBinding.view));
+    expect(tester.binding.renderViews.single.flutterView, same(viewBeforeBinding.view));
     debugSetViewMetricsOverride(
-      raw.viewId,
+      rawBeforeBinding.viewId,
       const DebugViewMetricsOverride(physicalSize: Size(800, 400), devicePixelRatio: 4),
     );
     await tester.pump();
     final Size size = tester.binding.renderViews.single.size;
     debugClearViewMetricsOverrides();
     await tester.pump();
-    expect(inherited, same(widget.view));
+    expect(inheritedBeforeBinding, same(viewBeforeBinding.view));
     expect(size, const Size(200, 100));
   });
 
