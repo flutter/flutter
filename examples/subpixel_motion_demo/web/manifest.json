@@ -1,9 +1,0 @@
-{
-  "name": "subpixel_motion_demo",
-  "short_name": "subpixel_motion_demo",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#121212",
-  "description": "Subpixel Motion Demo for WebParagraph"
-}
