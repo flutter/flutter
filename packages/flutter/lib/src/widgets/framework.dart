@@ -1599,8 +1599,6 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   ParentDataElement<T> createElement() => ParentDataElement<T>(this);
 
   bool _isValidRenderObject(RenderObject renderObject) {
-    assert(T != dynamic);
-    assert(T != ParentData);
     return renderObject.parentData is T;
   }
 
