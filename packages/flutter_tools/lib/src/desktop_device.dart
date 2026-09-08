@@ -377,10 +377,7 @@ class DesktopLogReader extends DeviceLogReader {
         _inputController.add(data);
         stderrController.add(data);
       },
-      onError: (Object error, StackTrace stackTrace) {
-        _inputController.addError(error, stackTrace);
-        stderrController.addError(error, stackTrace);
-      },
+      onError: _inputController.addError,
       onDone: () => unawaited(stderrController.close()),
     );
   }
