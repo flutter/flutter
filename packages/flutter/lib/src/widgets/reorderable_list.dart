@@ -616,7 +616,8 @@ class SliverReorderableList extends StatefulWidget {
   /// support. Only the items participate in reordering; the separators are
   /// position-based and are rebuilt for their visual boundary. Callers that
   /// need a separated reorderable list outside a hand-built [CustomScrollView]
-  /// can use [ReorderableListView.separated], which wraps this sliver.
+  /// can use `ReorderableListView.separated` from the `material_ui` package,
+  /// which wraps this sliver.
   ///
   /// The [itemCount] must be greater than or equal to zero. When [itemCount] is
   /// `n`, there are `n` items and `n - 1` separators.
