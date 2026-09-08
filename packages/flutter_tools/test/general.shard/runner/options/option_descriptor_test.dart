@@ -508,6 +508,24 @@ void main() {
       expect(command.wasProvided(stringOpt), isTrue);
     });
 
+    testUsingContext('converts FormatException from IntOptionDescriptor into ToolExit', () async {
+      const intOpt = IntOptionDescriptor(name: 'port', help: 'Server port');
+      const bundle = _SimpleBundle(descriptors: <OptionDescriptor<Object?>>[intOpt]);
+      final command = _FakeCommand(
+        name: 'serve',
+        description: 'Serve command',
+        bundles: const <OptionBundle>[bundle],
+      );
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['serve', '--port=not-a-number']);
+
+      expect(
+        () => command.getValue(intOpt),
+        throwsToolExit(message: 'Invalid integer value "not-a-number" for "--port".'),
+      );
+    });
+
     testUsingContext('renders section separator titles in command usage', () {
       const bundle = _TitledBundle();
       final command = _FakeCommand(

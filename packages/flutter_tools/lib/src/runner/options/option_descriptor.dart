@@ -276,6 +276,24 @@ abstract class _IntOptionDescriptorBase<R> extends OptionDescriptor<R> {
     );
     _recordRegistration(parser);
   }
+
+  /// Resolves and parses the integer option value from [results] or [globalResults],
+  /// throwing a [FormatException] if the provided string is not a valid integer.
+  int? _parseValue(ArgResults? results, {ArgResults? globalResults}) {
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      final raw = target[name] as String?;
+      if (raw == null) {
+        return defaultsTo as int?;
+      }
+      final int? parsed = int.tryParse(raw);
+      if (parsed == null) {
+        throw FormatException('Invalid integer value "$raw" for "--$name".');
+      }
+      return parsed;
+    }
+    return defaultsTo as int?;
+  }
 }
 
 /// A descriptor for single-value integer options.
@@ -295,21 +313,8 @@ class IntOptionDescriptor extends _IntOptionDescriptorBase<int?> {
   });
 
   @override
-  int? getValue(ArgResults? results, {ArgResults? globalResults}) {
-    final ArgResults? target = _resolveTargetResults(results, globalResults);
-    if (target != null && target.options.contains(name)) {
-      final raw = target[name] as String?;
-      if (raw == null) {
-        return defaultsTo;
-      }
-      final int? parsed = int.tryParse(raw);
-      if (parsed == null) {
-        throw FormatException('Invalid integer value "$raw" for "--$name".');
-      }
-      return parsed;
-    }
-    return defaultsTo;
-  }
+  int? getValue(ArgResults? results, {ArgResults? globalResults}) =>
+      _parseValue(results, globalResults: globalResults);
 }
 
 /// A descriptor for single-value integer options that have a non-null default value.
@@ -329,21 +334,8 @@ class DefaultedIntOptionDescriptor extends _IntOptionDescriptorBase<int> {
   });
 
   @override
-  int getValue(ArgResults? results, {ArgResults? globalResults}) {
-    final ArgResults? target = _resolveTargetResults(results, globalResults);
-    if (target != null && target.options.contains(name)) {
-      final raw = target[name] as String?;
-      if (raw == null) {
-        return defaultsTo!;
-      }
-      final int? parsed = int.tryParse(raw);
-      if (parsed == null) {
-        throw FormatException('Invalid integer value "$raw" for "--$name".');
-      }
-      return parsed;
-    }
-    return defaultsTo!;
-  }
+  int getValue(ArgResults? results, {ArgResults? globalResults}) =>
+      _parseValue(results, globalResults: globalResults)!;
 }
 
 /// A descriptor for boolean flags with a concrete default value.

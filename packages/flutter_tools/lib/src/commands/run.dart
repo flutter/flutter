@@ -134,8 +134,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   @protected
   Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final int? webBrowserDebugPort =
-        featureFlags.isWebEnabled && wasParsed(WebOptions.webBrowserDebugPort)
+    final int? webBrowserDebugPort = featureFlags.isWebEnabled
         ? getValue(WebOptions.webBrowserDebugPort)
         : null;
     final List<String> webBrowserFlags = featureFlags.isWebEnabled
