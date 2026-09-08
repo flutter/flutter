@@ -53,11 +53,11 @@ extension type CSSStyleSheet._(JSObject _) implements JSObject {
   external int insertRule(String rule, [int index]);
 }
 
-extension type Document._(JSObject _) implements JSObject {
+extension type Document._(JSObject _) implements EventTarget, JSObject {
   external Element createElement(String localName, [JSAny options]);
   external Range createRange();
   external HTMLHeadElement? get head;
-  external HTMLElement? get body;
+  external Element? querySelector(String selectors);
 }
 
 extension type DOMTokenList._(JSObject _) implements JSObject {
