@@ -56,6 +56,8 @@ class MDnsVmServiceDiscovery {
   final MDnsClient? _client;
   final MDnsClientFactory? _clientFactory;
 
+  MDnsClient get _effectiveClient => _clientFactory?.call() ?? _client!;
+
   // Used when discovering VM services with `queryForAttach` to do a preliminary
   // check for already running services so that results are not cached in _client.
   final MDnsClient? _preliminaryClient;
@@ -122,9 +124,8 @@ class MDnsVmServiceDiscovery {
       throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
     );
     if (results.isEmpty) {
-      final MDnsClient client = _clientFactory?.call() ?? _client!;
       return firstMatchingVmService(
-        client,
+        _effectiveClient,
         applicationId: applicationId,
         deviceVmservicePort: deviceVmservicePort,
         ipv6: ipv6,
@@ -186,10 +187,9 @@ class MDnsVmServiceDiscovery {
     // Either the device port or the device name must be provided.
     assert(deviceVmservicePort != null || deviceName != null);
 
-    final MDnsClient client = _clientFactory?.call() ?? _client!;
     // Query for a specific application matching on either device port or device name.
     return firstMatchingVmService(
-      client,
+      _effectiveClient,
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       deviceName: deviceName,
