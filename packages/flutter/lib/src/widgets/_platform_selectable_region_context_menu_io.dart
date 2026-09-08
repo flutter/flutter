@@ -31,8 +31,6 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   PlatformSelectableRegionContextMenu({
     // ignore: avoid_unused_constructor_parameters
     required Widget child,
-    // ignore: avoid_unused_constructor_parameters
-    required SelectionContainerDelegate client,
     super.key,
   });
 
@@ -47,6 +45,10 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   /// This should only be used for testing.
   @visibleForTesting
   static SelectionContainerDelegate? get debugActiveClient => throw UnimplementedError();
+
+  /// Whether the document copy listener is attached.
+  @visibleForTesting
+  static bool get debugIsCopyEventListenerAttached => false;
 
   /// Override this to provide a custom implementation of `ui_web.platformViewRegistry.registerViewFactory`.
   ///
