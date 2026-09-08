@@ -208,17 +208,19 @@ static uint64_t snap_to_next_tick(uint64_t value,
 // used so any view is rendered smoothly.
 static void update_frame_interval(FlEngine* self) {
   double refresh_rate = 0.0;
-  GHashTableIter iter;
-  g_hash_table_iter_init(&iter, self->display_ids_by_view_id);
-  gpointer value;
-  while (g_hash_table_iter_next(&iter, nullptr, &value)) {
-    FlutterEngineDisplayId display_id = GPOINTER_TO_INT(value);
-    refresh_rate = MAX(refresh_rate, fl_display_monitor_get_refresh_rate(
-                                         self->display_monitor, display_id));
-  }
-  if (refresh_rate <= 0.0) {
-    refresh_rate =
-        fl_display_monitor_get_max_refresh_rate(self->display_monitor);
+  if (self->display_monitor != nullptr) {
+    GHashTableIter iter;
+    g_hash_table_iter_init(&iter, self->display_ids_by_view_id);
+    gpointer value;
+    while (g_hash_table_iter_next(&iter, nullptr, &value)) {
+      FlutterEngineDisplayId display_id = GPOINTER_TO_INT(value);
+      refresh_rate = MAX(refresh_rate, fl_display_monitor_get_refresh_rate(
+                                           self->display_monitor, display_id));
+    }
+    if (refresh_rate <= 0.0) {
+      refresh_rate =
+          fl_display_monitor_get_max_refresh_rate(self->display_monitor);
+    }
   }
   if (refresh_rate <= 0.0) {
     refresh_rate = kDefaultRefreshRate;
