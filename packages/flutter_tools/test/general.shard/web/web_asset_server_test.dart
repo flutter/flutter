@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
@@ -769,6 +770,59 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
         },
       );
+    });
+
+    testWithoutContext('updateModulesAndDigests prunes stale modules and digests', () async {
+      const dummyModuleFile = 'packages/app/dummy.dart.lib.js';
+      const dummyModuleName = 'packages/app/dummy.dart';
+      const dummyModulePath = 'packages/app/dummy.dart.lib';
+
+      const mainModuleFile = 'packages/app/main.dart.lib.js';
+      const mainModuleName = 'packages/app/main.dart';
+      const mainModulePath = 'packages/app/main.dart.lib';
+
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        crossOriginIsolation: false,
+        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: platform,
+      );
+
+      // 1. Initial compilation: dummy.dart.lib.js exists in WebMemoryFS and is
+      // registered with WebAssetServer.
+      server.webMemoryFS.files[dummyModuleFile] = Uint8List.fromList(<int>[1, 2, 3]);
+      server.updateModulesAndDigests(<String>[dummyModuleFile]);
+
+      expect(server.modules[dummyModuleName], dummyModulePath);
+      expect(server.digests.containsKey(dummyModuleName), isTrue);
+
+      // 2. Recompilation: dummy.dart.lib.js is evicted from WebMemoryFS and
+      // replaced by main.dart.lib.js.
+      server.webMemoryFS.files.remove(dummyModuleFile);
+      server.webMemoryFS.files[mainModuleFile] = Uint8List.fromList(<int>[4, 5, 6]);
+      server.updateModulesAndDigests(<String>[mainModuleFile]);
+
+      // 3. Verify that the evicted module is pruned from both modules and
+      // digests, and that the new module is tracked.
+      expect(server.modules.containsKey(dummyModuleName), isFalse);
+      expect(server.digests.containsKey(dummyModuleName), isFalse);
+      expect(server.modules[mainModuleName], mainModulePath);
+      expect(server.digests.containsKey(mainModuleName), isTrue);
     });
   });
 }
