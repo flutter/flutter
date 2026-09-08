@@ -1877,8 +1877,9 @@ targets:
         ]
 
   - name: Linux_android_emu_vulkan_stable android_hardware_smoke_vulkan_instrumented_tests
-    bringup: true
     recipe: flutter/flutter_drone
+    # Post-submit only: Instrumented tests are more resource-intensive; driver shards catch most regressions in presubmit.
+    presubmit: false
     timeout: 60
     properties:
       shard: android_hardware_smoke_vulkan_instrumented_tests
@@ -1890,8 +1891,9 @@ targets:
         ]
 
   - name: Linux_android_emu android_hardware_smoke_opengles_instrumented_tests
-    bringup: true
     recipe: flutter/flutter_drone
+    # Post-submit only: Instrumented tests are more resource-intensive; driver shards catch most regressions in presubmit.
+    presubmit: false
     timeout: 60
     properties:
       shard: android_hardware_smoke_opengles_instrumented_tests
@@ -5349,7 +5351,6 @@ targets:
 
   - name: Mac channels_integration_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5423,7 +5424,6 @@ targets:
 
   - name: Mac route_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -5795,7 +5795,6 @@ targets:
 
   - name: Mac platform_interaction_test_ios
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
@@ -7152,7 +7151,6 @@ targets:
   - name: Windows tool_tests_commands_2_2
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
