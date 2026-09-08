@@ -93,6 +93,12 @@ static gboolean get_button(FlutterPointerDeviceKind device_kind,
   return get_mouse_button(gdk_button, button);
 }
 
+// Returns TRUE if any pointer button is pressed in a GDK modifier state.
+static gboolean has_buttons_pressed(guint gdk_state) {
+  return (gdk_state & (GDK_BUTTON1_MASK | GDK_BUTTON2_MASK | GDK_BUTTON3_MASK |
+                       GDK_BUTTON4_MASK | GDK_BUTTON5_MASK)) != 0;
+}
+
 // Records the most recent pointer state so that events can be synthesized
 // from it later.
 static void record_pointer_state(FlPointerManager* self,
@@ -276,6 +282,7 @@ gboolean fl_pointer_manager_handle_enter(FlPointerManager* self,
                                          FlutterPointerDeviceKind device_kind,
                                          gdouble x,
                                          gdouble y,
+                                         guint gdk_state,
                                          gdouble rotation,
                                          gdouble pressure) {
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
@@ -286,6 +293,13 @@ gboolean fl_pointer_manager_handle_enter(FlPointerManager* self,
   }
 
   ensure_pointer_added(self, event_time, device_kind, x, y, rotation, pressure);
+
+  // The window system takes the pointer for interactive moves and resizes, and
+  // gives it back without saying the button was released. Cancel the press if
+  // the pointer has come back with nothing pressed.
+  if (self->button_state != 0 && !has_buttons_pressed(gdk_state)) {
+    fl_pointer_manager_handle_grab_broken(self, event_time);
+  }
 
   return TRUE;
 }

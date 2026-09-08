@@ -441,13 +441,15 @@ static gboolean enter_notify_event_cb(FlView* self,
   GdkEvent* event = reinterpret_cast<GdkEvent*>(crossing_event);
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
+  GdkModifierType state = static_cast<GdkModifierType>(0);
+  gdk_event_get_state(event, &state);
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   gdouble rotation = 0.0;
   gdouble pressure = 0.0;
   get_pointer_device_state(event, &rotation, &pressure);
   return fl_pointer_manager_handle_enter(
       self->pointer_manager, gdk_event_get_time(event),
-      get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
+      get_pointer_device_kind(event), x * scale_factor, y * scale_factor, state,
       rotation, pressure);
 }
 

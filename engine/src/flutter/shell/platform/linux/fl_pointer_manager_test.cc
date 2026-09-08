@@ -28,7 +28,7 @@ TEST_F(FlPointerManagerTest, EnterLeave) {
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_enter(manager, 1234, kFlutterPointerDeviceKindMouse,
-                                  1.0, 2.0, 0, 0);
+                                  1.0, 2.0, 0, 0, 0);
   fl_pointer_manager_handle_leave(manager, 1235, kFlutterPointerDeviceKindMouse,
                                   3.0, 4.0, 0, 0);
 
@@ -66,10 +66,10 @@ TEST_F(FlPointerManagerTest, EnterEnter) {
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_enter(manager, 1234, kFlutterPointerDeviceKindMouse,
-                                  1.0, 2.0, 0, 0);
+                                  1.0, 2.0, 0, 0, 0);
   // Duplicate enter is ignored
   fl_pointer_manager_handle_enter(manager, 1235, kFlutterPointerDeviceKindMouse,
-                                  3.0, 4.0, 0, 0);
+                                  3.0, 4.0, 0, 0, 0);
 
   EXPECT_EQ(pointer_events.size(), 1u);
 
@@ -98,7 +98,7 @@ TEST_F(FlPointerManagerTest, EnterLeaveLeave) {
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_enter(manager, 1234, kFlutterPointerDeviceKindMouse,
-                                  1.0, 2.0, 0, 0);
+                                  1.0, 2.0, 0, 0, 0);
   fl_pointer_manager_handle_leave(manager, 1235, kFlutterPointerDeviceKindMouse,
                                   3.0, 4.0, 0, 0);
   // Duplicate leave is ignored
@@ -139,7 +139,7 @@ TEST_F(FlPointerManagerTest, EnterButtonPress) {
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_enter(manager, 1234, kFlutterPointerDeviceKindMouse,
-                                  1.0, 2.0, 0, 0);
+                                  1.0, 2.0, 0, 0, 0);
   fl_pointer_manager_handle_button_press(manager, 1235,
                                          kFlutterPointerDeviceKindMouse, 4.0,
                                          8.0, GDK_BUTTON_PRIMARY, 0, 0);
@@ -757,7 +757,7 @@ TEST_F(FlPointerManagerTest, GrabBrokenAfterLeave) {
 
   // The pointer is added again when it returns.
   fl_pointer_manager_handle_enter(manager, 1237, kFlutterPointerDeviceKindMouse,
-                                  6.0, 10.0, 0, 0);
+                                  6.0, 10.0, 0, 0, 0);
   EXPECT_EQ(pointer_events.size(), 5u);
   EXPECT_EQ(pointer_events[4].phase, kAdd);
 }
@@ -779,11 +779,91 @@ TEST_F(FlPointerManagerTest, GrabBrokenNoButtons) {
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_enter(manager, 1234, kFlutterPointerDeviceKindMouse,
-                                  1.0, 2.0, 0, 0);
+                                  1.0, 2.0, 0, 0, 0);
   // Nothing to cancel if no buttons are pressed.
   EXPECT_FALSE(fl_pointer_manager_handle_grab_broken(manager, 1235));
 
   EXPECT_EQ(pointer_events.size(), 1u);
+}
+
+TEST_F(FlPointerManagerTest, PointerReturnsWithoutButtonPressed) {
+  StartEngine();
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  fl_pointer_manager_handle_button_press(manager, 1234,
+                                         kFlutterPointerDeviceKindMouse, 4.0,
+                                         8.0, GDK_BUTTON_PRIMARY, 0, 0);
+  // The window system took the pointer for an interactive move or resize and
+  // gave it back without saying the button was released, e.g. Wayland, where
+  // the compositor runs the drag and no grab is broken.
+  fl_pointer_manager_handle_enter(manager, 1235, kFlutterPointerDeviceKindMouse,
+                                  5.0, 9.0, 0, 0, 0);
+
+  EXPECT_EQ(pointer_events.size(), 3u);
+
+  // Ignore first synthetic enter event
+  EXPECT_EQ(pointer_events[1].phase, kDown);
+  EXPECT_EQ(pointer_events[2].phase, kCancel);
+  EXPECT_EQ(pointer_events[2].timestamp, 1235000u);
+  EXPECT_EQ(pointer_events[2].x, 5.0);
+  EXPECT_EQ(pointer_events[2].y, 9.0);
+  EXPECT_EQ(pointer_events[2].buttons, 0);
+  EXPECT_EQ(pointer_events[2].view_id, 42);
+
+  // Motion is reported as hover again, i.e. with no buttons pressed.
+  fl_pointer_manager_handle_motion(
+      manager, 1236, kFlutterPointerDeviceKindMouse, 6.0, 10.0, 0, 0);
+
+  EXPECT_EQ(pointer_events.size(), 4u);
+  EXPECT_EQ(pointer_events[3].phase, kHover);
+  EXPECT_EQ(pointer_events[3].buttons, 0);
+}
+
+TEST_F(FlPointerManagerTest, PointerReturnsWithButtonStillPressed) {
+  StartEngine();
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  fl_pointer_manager_handle_button_press(manager, 1234,
+                                         kFlutterPointerDeviceKindMouse, 4.0,
+                                         8.0, GDK_BUTTON_PRIMARY, 0, 0);
+  // The pointer was dragged back into the view with the button still held, so
+  // the press continues.
+  fl_pointer_manager_handle_enter(manager, 1235, kFlutterPointerDeviceKindMouse,
+                                  5.0, 9.0, GDK_BUTTON1_MASK, 0, 0);
+
+  EXPECT_EQ(pointer_events.size(), 2u);
+  EXPECT_EQ(pointer_events[1].phase, kDown);
+
+  fl_pointer_manager_handle_button_release(manager, 1236,
+                                           kFlutterPointerDeviceKindMouse, 6.0,
+                                           10.0, GDK_BUTTON_PRIMARY, 0, 0);
+
+  EXPECT_EQ(pointer_events.size(), 3u);
+  EXPECT_EQ(pointer_events[2].phase, kUp);
 }
 
 TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseButtonRelease) {
@@ -976,7 +1056,7 @@ TEST_F(FlPointerManagerTest, DeviceKind) {
 
   g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
   fl_pointer_manager_handle_enter(
-      manager, 1234, kFlutterPointerDeviceKindTrackpad, 1.0, 2.0, 0, 0);
+      manager, 1234, kFlutterPointerDeviceKindTrackpad, 1.0, 2.0, 0, 0, 0);
   fl_pointer_manager_handle_button_press(manager, 1235,
                                          kFlutterPointerDeviceKindTrackpad, 1.0,
                                          2.0, GDK_BUTTON_PRIMARY, 0, 0);

@@ -101,6 +101,7 @@ gboolean fl_pointer_manager_handle_motion(FlPointerManager* manager,
  * @device_kind: kind of device generating the event.
  * @x: x co-ordinate of event.
  * @y: y co-ordinate of event.
+ * @gdk_state: GDK state of buttons and modifiers when the event occurred.
  * @rotation: rotation of the pointer device in degrees.
  * @pressure: pressure of the pointer device.
  *
@@ -111,6 +112,7 @@ gboolean fl_pointer_manager_handle_enter(FlPointerManager* manager,
                                          FlutterPointerDeviceKind device_kind,
                                          gdouble x,
                                          gdouble y,
+                                         guint gdk_state,
                                          gdouble rotation,
                                          gdouble pressure);
 
