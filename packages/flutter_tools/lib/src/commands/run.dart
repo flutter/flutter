@@ -27,7 +27,7 @@ import '../runner/flutter_command_runner.dart';
 import '../tracing.dart';
 import '../web/compile.dart';
 import '../web/devfs_config.dart';
-import '../web/web_constants.dart';
+import '../web/web_options.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
 
@@ -41,204 +41,33 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
     usesApplicationBinaryOption();
-    argParser
-      ..addFlag(
-        'trace-startup',
-        negatable: false,
-        help:
-            'Trace application startup, then exit, saving the trace to a file. '
-            'By default, this will be saved in the "build" directory. If the '
-            'FLUTTER_TEST_OUTPUTS_DIR environment variable is set, the file '
-            'will be written there instead.',
-      )
-      ..addFlag(
-        'cache-startup-profile',
-        help:
-            'Caches the CPU profile collected before the first frame for startup '
-            'analysis.',
-      )
-      ..addFlag(
-        'verbose-system-logs',
-        negatable: false,
-        help: 'Include verbose logging from the Flutter engine.',
-      )
-      ..addFlag(
-        'purge-persistent-cache',
-        negatable: false,
-        help:
-            'Removes all existing persistent caches. This allows reproducing '
-            'shader compilation jank that normally only happens the first time '
-            'an app is run, or for reliable testing of compilation jank fixes '
-            '(e.g. shader warm-up).',
-      )
-      ..addOption('route', help: 'Which route to load when running the app.')
-      ..addOption(
-        'vmservice-out-file',
-        help:
-            'A file to write the attached vmservice URL to after an '
-            'application is started.',
-        valueHelp: 'project/example/out.txt',
-        hide: !verboseHelp,
-      )
-      ..addFlag(
-        'disable-service-auth-codes',
-        negatable: false,
-        hide: !verboseHelp,
-        help:
-            '(deprecated) Allow connections to the VM service without using authentication codes. '
-            '(Not recommended! This can open your device to remote code execution attacks!)',
-      )
-      ..addFlag(
-        'disable-service-origin-check',
-        negatable: false,
-        hide: !verboseHelp,
-        help:
-            'Allow connections to the VM service from any origin. '
-            '(Not recommended. This can open your device to remote code execution attacks.)',
-      )
-      ..addFlag(
-        'start-paused',
-        defaultsTo: startPausedDefault,
-        help: 'Start in a paused mode and wait for a debugger to connect.',
-      )
-      ..addOption(
-        'dart-flags',
-        hide: !verboseHelp,
-        help:
-            'Pass a list of comma separated flags to the Dart instance at '
-            'application startup. Flags passed through this option must be '
-            'present on the allowlist defined within the Flutter engine. If '
-            'a disallowed flag is encountered, the process will be '
-            'terminated immediately.\n\n'
-            'This flag is not available on the stable channel and is only '
-            'applied in debug and profile modes. This option should only '
-            'be used for experiments and should not be used by typical users.',
-      )
-      ..addFlag(
-        'endless-trace-buffer',
-        negatable: false,
-        help:
-            'Enable tracing to an infinite buffer, instead of a ring buffer. '
-            'This is useful when recording large traces. To use an endless buffer to '
-            'record startup traces, combine this with "--trace-startup".',
-      )
-      ..addFlag(
-        'trace-systrace',
-        negatable: false,
-        help:
-            'Enable tracing to the system tracer. This is only useful on '
-            'platforms where such a tracer is available (Android, iOS, '
-            'macOS and Fuchsia).',
-      )
-      ..addOption(
-        'trace-to-file',
-        help:
-            'Write the timeline trace to a file at the specified path. The '
-            "file will be in Perfetto's proto format; it will be possible to "
-            "load the file into Perfetto's trace viewer.",
-        valueHelp: 'path/to/trace.binpb',
-      )
-      ..addFlag(
-        'profile-microtasks',
-        negatable: false,
-        help:
-            'Enable collection of information about each microtask. '
-            'Information about completed microtasks will be written to the '
-            '"Microtask" timeline stream. Information about queued microtasks '
-            'will be accessible from Dart / Flutter DevTools.',
-        hide: !verboseHelp,
-      )
-      ..addFlag(
-        'trace-skia',
-        negatable: false,
-        help:
-            'Enable tracing of Skia code. This is useful when debugging '
-            'the raster thread (formerly known as the GPU thread). '
-            'By default, Flutter will not log Skia code, as it introduces significant '
-            'overhead that may affect recorded performance metrics in a misleading way.',
-      )
-      ..addOption(
-        'trace-allowlist',
-        hide: !verboseHelp,
-        help:
-            'Filters out all trace events except those that are specified in '
-            'this comma separated list of allowed prefixes.',
-        valueHelp: 'foo,bar',
-      )
-      ..addOption(
-        'trace-skia-allowlist',
-        hide: !verboseHelp,
-        help:
-            'Filters out all Skia trace events except those that are specified in '
-            'this comma separated list of allowed prefixes.',
-        valueHelp: 'skia.gpu,skia.shaders',
-      )
-      ..addFlag(
-        'enable-dart-profiling',
-        defaultsTo: true,
-        help:
-            'Whether the Dart VM sampling CPU profiler is enabled. This flag '
-            'is only meaningful in debug and profile builds.',
-      )
-      ..addFlag(
-        'profile-startup',
-        negatable: false,
-        help:
-            'Make the profiler discard new samples once the profiler sample '
-            'buffer is full. When this flag is not set, the profiler sample '
-            'buffer is used as a ring buffer, meaning that once it is full, '
-            'new samples start overwriting the oldest ones.',
-        hide: !verboseHelp,
-      )
-      ..addFlag(
-        'enable-software-rendering',
-        negatable: false,
-        help:
-            '(deprecated) Enable rendering using the Skia software backend. '
-            'This is useful when testing Flutter on emulators. By default, '
-            'Flutter will attempt to either use OpenGL or Vulkan and fall back '
-            'to software when neither is available. This option is not supported '
-            'when using the Impeller rendering engine.',
-        hide: !verboseHelp,
-      )
-      ..addFlag(
-        'skia-deterministic-rendering',
-        negatable: false,
-        help:
-            '(deprecated) When combined with "--enable-software-rendering", this should provide completely '
-            'deterministic (i.e. reproducible) Skia rendering. This is useful for testing purposes '
-            '(e.g. when comparing screenshots). This option is not supported '
-            'when using the Impeller rendering engine.',
-        hide: !verboseHelp,
-      )
-      ..addMultiOption(
-        'dart-entrypoint-args',
-        abbr: 'a',
-        help:
-            'Pass a list of arguments to the Dart entrypoint at application '
-            'startup. By default this is main(List<String> args). Specify '
-            'this option multiple times each with one argument to pass '
-            'multiple arguments to the Dart entrypoint. Currently this is '
-            'only supported on desktop platforms.',
-      )
-      ..addFlag(
-        'uninstall-first',
-        hide: !verboseHelp,
-        help:
-            'Uninstall previous versions of the app on the device '
-            'before reinstalling. Currently only supported on iOS.',
-      )
-      ..addFlag(
-        FlutterOptions.kWebWasmFlag,
-        help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
-        negatable: false,
-      )
-      ..addFlag(
-        'ios-profile-debugger',
-        negatable: false,
-        help:
-            'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
-      );
+    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+      DebuggingOptionDescriptors.traceStartup,
+      DebuggingOptionDescriptors.cacheStartupProfile,
+      DebuggingOptionDescriptors.verboseSystemLogs,
+      DebuggingOptionDescriptors.purgePersistentCache,
+      DebuggingOptionDescriptors.route,
+      DebuggingOptionDescriptors.vmserviceOutFile,
+      DebuggingOptionDescriptors.disableServiceAuthCodes,
+      DebuggingOptionDescriptors.disableServiceOriginCheck,
+      DebuggingOptionDescriptors.startPaused(defaultsTo: startPausedDefault),
+      DebuggingOptionDescriptors.dartFlags,
+      DebuggingOptionDescriptors.endlessTraceBuffer,
+      DebuggingOptionDescriptors.traceSystrace,
+      DebuggingOptionDescriptors.traceToFile,
+      DebuggingOptionDescriptors.profileMicrotasks,
+      DebuggingOptionDescriptors.traceSkia,
+      DebuggingOptionDescriptors.traceAllowlist,
+      DebuggingOptionDescriptors.traceSkiaAllowlist,
+      DebuggingOptionDescriptors.enableDartProfiling,
+      DebuggingOptionDescriptors.profileStartup,
+      DebuggingOptionDescriptors.enableSoftwareRendering,
+      DebuggingOptionDescriptors.skiaDeterministicRendering,
+      DebuggingOptionDescriptors.dartEntrypointArgs,
+      DebuggingOptionDescriptors.uninstallFirst,
+      WebOptions.wasm,
+      DebuggingOptionDescriptors.iosProfileDebugger,
+    ], verboseHelp: verboseHelp);
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -261,23 +90,24 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesAdbLogFilteringOption(hide: !verboseHelp);
   }
 
-  bool get traceStartup => boolArg('trace-startup');
-  bool get traceSystrace => boolArg('trace-systrace');
-  bool get enableDartProfiling => boolArg('enable-dart-profiling');
-  bool get purgePersistentCache => boolArg('purge-persistent-cache');
-  bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
-  bool get disableServiceOriginCheck => boolArg('disable-service-origin-check');
-  bool get cacheStartupProfile => boolArg('cache-startup-profile');
+  bool get traceStartup => getValue(DebuggingOptionDescriptors.traceStartup);
+  bool get traceSystrace => getValue(DebuggingOptionDescriptors.traceSystrace);
+  bool get enableDartProfiling => getValue(DebuggingOptionDescriptors.enableDartProfiling);
+  bool get purgePersistentCache => getValue(DebuggingOptionDescriptors.purgePersistentCache);
+  bool get disableServiceAuthCodes => getValue(DebuggingOptionDescriptors.disableServiceAuthCodes);
+  bool get disableServiceOriginCheck =>
+      getValue(DebuggingOptionDescriptors.disableServiceOriginCheck);
+  bool get cacheStartupProfile => getValue(DebuggingOptionDescriptors.cacheStartupProfile);
   bool get runningWithPrebuiltApplication => prebuiltApplicationBinaryPath != null;
   String? get prebuiltApplicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   ImpellerStatus get enableImpeller =>
-      ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
-  bool get enableFlutterGpu => (argResults!['enable-flutter-gpu'] as bool?) ?? false;
-  bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
-  bool get uninstallFirst => boolArg('uninstall-first');
-  bool get enableEmbedderApi => boolArg('enable-embedder-api');
-  bool get testFlag => boolArg('test-flag');
+      ImpellerStatus.fromBool(getValue(DebuggingOptionDescriptors.enableImpeller));
+  bool get enableFlutterGpu => getValue(DebuggingOptionDescriptors.enableFlutterGpu) ?? false;
+  bool get enableVulkanValidation => getValue(DebuggingOptionDescriptors.enableVulkanValidation);
+  bool get uninstallFirst => getValue(DebuggingOptionDescriptors.uninstallFirst);
+  bool get enableEmbedderApi => getValue(DebuggingOptionDescriptors.enableEmbedderApi);
+  bool get testFlag => getValue(DebuggingOptionDescriptors.testFlag);
 
   @override
   bool get refreshWirelessDevices => true;
@@ -285,11 +115,11 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   /// Whether to start the application paused by default.
   bool get startPausedDefault;
 
-  String? get route => stringArg('route');
+  String? get route => getValue(DebuggingOptionDescriptors.route);
 
-  String? get traceAllowlist => stringArg('trace-allowlist');
+  String? get traceAllowlist => getValue(DebuggingOptionDescriptors.traceAllowlist);
 
-  bool get useWasm => boolArg(FlutterOptions.kWebWasmFlag);
+  bool get useWasm => getValue(WebOptions.wasm);
 
   // Keep in sync with the [TestCommand.webRenderer] getter.
   WebRendererMode get webRenderer {
@@ -305,32 +135,33 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async {
     final BuildInfo buildInfo = await getBuildInfo();
     final int? webBrowserDebugPort =
-        featureFlags.isWebEnabled && argResults!.wasParsed('web-browser-debug-port')
-        ? int.parse(stringArg('web-browser-debug-port')!)
+        featureFlags.isWebEnabled && wasParsed(WebOptions.webBrowserDebugPort)
+        ? int.parse(getValue(WebOptions.webBrowserDebugPort)!)
         : null;
     final List<String> webBrowserFlags = featureFlags.isWebEnabled
-        ? stringsArg(FlutterOptions.kWebBrowserFlag)
+        ? getValue(WebOptions.webBrowserFlags)
         : const <String>[];
 
-    final bool? webCrossOriginIsolation = argResults!.wasParsed('cross-origin-isolation')
-        ? boolArg('cross-origin-isolation')
+    final bool? webCrossOriginIsolation = wasParsed(WebOptions.crossOriginIsolation)
+        ? getValue(WebOptions.crossOriginIsolation)
         : null;
-    final bool? iosProfileDebugger = argResults!.wasParsed('ios-profile-debugger')
-        ? boolArg('ios-profile-debugger')
+    final bool? iosProfileDebugger = wasParsed(DebuggingOptionDescriptors.iosProfileDebugger)
+        ? getValue(DebuggingOptionDescriptors.iosProfileDebugger)
         : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
-        dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
+        dartEntrypointArgs: getValue(DebuggingOptionDescriptors.dartEntrypointArgs),
         webUseSseForDebugProxy:
-            featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
+            featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugProtocol) == 'sse',
         webUseSseForDebugBackend:
-            featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
+            featureFlags.isWebEnabled &&
+            getValue(WebOptions.webServerDebugBackendProtocol) == 'sse',
         webUseSseForInjectedClient:
             featureFlags.isWebEnabled &&
-            stringArg('web-server-debug-injected-client-protocol') == 'sse',
-        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
-        webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
+            getValue(WebOptions.webServerDebugInjectedClientProtocol) == 'sse',
+        webEnableExposeUrl: featureFlags.isWebEnabled && getValue(WebOptions.webAllowExposeUrl),
+        webRunHeadless: featureFlags.isWebEnabled && getValue(WebOptions.webRunHeadless),
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
         webCrossOriginIsolation: webCrossOriginIsolation,
@@ -353,66 +184,70 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     } else {
       return DebuggingOptions.enabled(
         buildInfo,
-        startPaused: boolArg('start-paused'),
-        disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
-        disableServiceOriginCheck: boolArg('disable-service-origin-check'),
+        startPaused: getValue(DebuggingOptionDescriptors.startPausedOption),
+        disableServiceAuthCodes: disableServiceAuthCodes,
+        disableServiceOriginCheck: disableServiceOriginCheck,
         cacheStartupProfile: cacheStartupProfile,
         enableDds: enableDds,
         adbLogFiltering:
-            argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering'),
-        dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
-        dartFlags: stringArg('dart-flags') ?? '',
-        useTestFonts: argParser.options.containsKey('use-test-fonts') && boolArg('use-test-fonts'),
+            hasOption(DebuggingOptionDescriptors.adbLogFiltering) &&
+            getValue(DebuggingOptionDescriptors.adbLogFiltering),
+        dartEntrypointArgs: getValue(DebuggingOptionDescriptors.dartEntrypointArgs),
+        dartFlags: getValue(DebuggingOptionDescriptors.dartFlags) ?? '',
+        useTestFonts:
+            hasOption(DebuggingOptionDescriptors.useTestFonts) &&
+            getValue(DebuggingOptionDescriptors.useTestFonts),
         enableSoftwareRendering:
-            argParser.options.containsKey('enable-software-rendering') &&
-            boolArg('enable-software-rendering'),
+            hasOption(DebuggingOptionDescriptors.enableSoftwareRendering) &&
+            getValue(DebuggingOptionDescriptors.enableSoftwareRendering),
         skiaDeterministicRendering:
-            argParser.options.containsKey('skia-deterministic-rendering') &&
-            boolArg('skia-deterministic-rendering'),
-        traceSkia: boolArg('trace-skia'),
+            hasOption(DebuggingOptionDescriptors.skiaDeterministicRendering) &&
+            getValue(DebuggingOptionDescriptors.skiaDeterministicRendering),
+        traceSkia: getValue(DebuggingOptionDescriptors.traceSkia),
         traceAllowlist: traceAllowlist,
-        traceSkiaAllowlist: stringArg('trace-skia-allowlist'),
-        traceSystrace: boolArg('trace-systrace'),
-        traceToFile: stringArg('trace-to-file'),
-        endlessTraceBuffer: boolArg('endless-trace-buffer'),
-        profileMicrotasks: boolArg('profile-microtasks'),
+        traceSkiaAllowlist: getValue(DebuggingOptionDescriptors.traceSkiaAllowlist),
+        traceSystrace: traceSystrace,
+        traceToFile: getValue(DebuggingOptionDescriptors.traceToFile),
+        endlessTraceBuffer: getValue(DebuggingOptionDescriptors.endlessTraceBuffer),
+        profileMicrotasks: getValue(DebuggingOptionDescriptors.profileMicrotasks),
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
         disablePortPublication: await disablePortPublication,
         ddsPort: ddsPort,
         devToolsServerAddress: devToolsServerAddress,
-        verboseSystemLogs: boolArg('verbose-system-logs'),
+        verboseSystemLogs: getValue(DebuggingOptionDescriptors.verboseSystemLogs),
         webUseSseForDebugProxy:
-            featureFlags.isWebEnabled && stringArg('web-server-debug-protocol') == 'sse',
+            featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugProtocol) == 'sse',
         webUseSseForDebugBackend:
-            featureFlags.isWebEnabled && stringArg('web-server-debug-backend-protocol') == 'sse',
+            featureFlags.isWebEnabled &&
+            getValue(WebOptions.webServerDebugBackendProtocol) == 'sse',
         webUseSseForInjectedClient:
             featureFlags.isWebEnabled &&
-            stringArg('web-server-debug-injected-client-protocol') == 'sse',
-        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
-        webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
+            getValue(WebOptions.webServerDebugInjectedClientProtocol) == 'sse',
+        webEnableExposeUrl: featureFlags.isWebEnabled && getValue(WebOptions.webAllowExposeUrl),
+        webRunHeadless: featureFlags.isWebEnabled && getValue(WebOptions.webRunHeadless),
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
         webEnableExpressionEvaluation:
-            featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
-        webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
+            featureFlags.isWebEnabled && getValue(WebOptions.webEnableExpressionEvaluation),
+        webLaunchUrl: featureFlags.isWebEnabled ? getValue(WebOptions.webLaunchUrl) : null,
         webCrossOriginIsolation: webCrossOriginIsolation,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
-        vmserviceOutFile: stringArg('vmservice-out-file'),
-        nativeNullAssertions: boolArg('native-null-assertions'),
+        vmserviceOutFile: getValue(DebuggingOptionDescriptors.vmserviceOutFile),
+        nativeNullAssertions: getValue(CommonOptions.nativeNullAssertions),
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
-        profileStartup: boolArg('profile-startup'),
+        profileStartup: getValue(DebuggingOptionDescriptors.profileStartup),
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
-        enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
-        ipv6: boolArg(FlutterCommand.ipv6Flag),
+        enableDevTools: getValue(DebuggingOptionDescriptors.enableDevTools),
+        ipv6: getValue(DebuggingOptionDescriptors.ipv6),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
         enableHcpp: explicitEnableHcpp,
         webDevServerConfig: webDevServerConfig,
@@ -428,16 +263,16 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       logger: globals.logger,
     );
 
-    final String? webPortArg = stringArg('web-port');
+    final String? webPortArg = getValue(WebOptions.webPort);
     final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
 
     // Determine HTTPS config with CLI > file precedence
     final HttpsConfig? httpsConfig = HttpsConfig.parse(
-      stringArg('web-tls-cert-path') ?? fileConfig.https?.certPath,
-      stringArg('web-tls-cert-key-path') ?? fileConfig.https?.certKeyPath,
+      getValue(WebOptions.webTlsCertPath) ?? fileConfig.https?.certPath,
+      getValue(WebOptions.webTlsCertKeyPath) ?? fileConfig.https?.certKeyPath,
     );
 
-    final String? baseHref = stringArg('base-href') ?? fileConfig.baseHref;
+    final String? baseHref = getValue(WebOptions.baseHref) ?? fileConfig.baseHref;
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
       throwToolExit(
         'Received a --base-href value of "$baseHref"\n'
@@ -446,7 +281,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     }
 
     final WebDevServerConfig webDevServerConfig = fileConfig.copyWith(
-      host: stringArg('web-hostname'),
+      host: getValue(WebOptions.webHostname),
       port: webPort,
       https: httpsConfig,
       headers: extractWebHeaders(),
@@ -472,6 +307,7 @@ class RunCommand extends RunCommandBase {
     addPublishPort(verboseHelp: verboseHelp);
     addIgnoreDeprecationOption();
     addMachineOutputFlag(verboseHelp: verboseHelp);
+    argParser.addDescriptor(DebuggingOptionDescriptors.useTestFonts);
     argParser
       ..addFlag(
         'await-first-frame-when-tracing',
@@ -482,15 +318,6 @@ class RunCommand extends RunCommandBase {
             'is detected by looking for a Timeline event with the name '
             '"${Tracing.firstUsefulFrameEventName}". '
             "By default, the widgets library's binding takes care of sending this event.",
-      )
-      ..addFlag(
-        'use-test-fonts',
-        help:
-            'Enable (and default to) the "Ahem" font. This is a special font '
-            'used in tests to remove any dependencies on the font metrics. It '
-            'is enabled when you use "flutter test". Set this flag when running '
-            'a test using "flutter run" for debugging purposes. This flag is '
-            'only available when running in debug mode.',
       )
       ..addFlag(
         'build',

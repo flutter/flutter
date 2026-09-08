@@ -18,6 +18,17 @@ enum OptionScope {
   any,
 }
 
+/// Registry mapping option names to their registered [OptionDescriptor] instances.
+typedef ArgParserRegistry = Map<String, OptionDescriptor<Object?>>;
+
+// Uses an Expando (weak keys) rather than a top-level Map<ArgParser, ...> so that
+// short-lived ArgParser instances created across tests and commands can be
+// garbage-collected without leaking memory for the lifetime of the isolate.
+final _parserRegistry = Expando<ArgParserRegistry>('OptionDescriptorRegistry');
+
+ArgParserRegistry _registryFor(ArgParser parser) =>
+    _parserRegistry[parser] ??= <String, OptionDescriptor<Object?>>{};
+
 /// A metadata-rich, type-safe descriptor for a command-line option or flag.
 abstract class OptionDescriptor<T> {
   const OptionDescriptor({
@@ -66,13 +77,8 @@ abstract class OptionDescriptor<T> {
   /// The CLI flag representation (e.g., `--target`).
   String get flag => '--$name';
 
-  /// Registers this option with [parser], maintaining descriptor identity in [registry].
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  });
+  /// Registers this option with [parser], maintaining descriptor identity per parser.
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride});
 
   /// Checks if this option was explicitly provided on the command line.
   bool wasProvided(ArgResults? results, {ArgResults? globalResults}) {
@@ -104,6 +110,22 @@ abstract class OptionDescriptor<T> {
 
   bool _computeEffectiveHide({required bool verboseHelp, bool? hideOverride}) =>
       hideOverride ?? (hide || (verboseOnly && !verboseHelp));
+
+  bool _isAlreadyRegistered(ArgParser parser) {
+    final ArgParserRegistry registry = _registryFor(parser);
+    if (parser.options.containsKey(name)) {
+      final OptionDescriptor<Object?>? existing = registry[name];
+      if (existing != null && identical(existing, this)) {
+        return true;
+      }
+      _throwConflictError(name, existing);
+    }
+    return false;
+  }
+
+  void _recordRegistration(ArgParser parser) {
+    _registryFor(parser)[name] = this;
+  }
 
   void _throwConflictError(String name, OptionDescriptor<Object?>? existing) {
     final existingInfo = existing != null
@@ -137,18 +159,9 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
   final List<String> aliases;
 
   @override
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  }) {
-    if (parser.options.containsKey(name)) {
-      final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && identical(existing, this)) {
-        return;
-      }
-      _throwConflictError(name, existing);
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
     }
 
     parser.addOption(
@@ -162,7 +175,7 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
       allowedHelp: allowedHelp,
       hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
-    registry?[name] = this;
+    _recordRegistration(parser);
   }
 
   @override
@@ -195,18 +208,9 @@ class DefaultedStringOptionDescriptor extends OptionDescriptor<String> {
   final List<String> aliases;
 
   @override
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  }) {
-    if (parser.options.containsKey(name)) {
-      final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && identical(existing, this)) {
-        return;
-      }
-      _throwConflictError(name, existing);
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
     }
 
     parser.addOption(
@@ -220,7 +224,7 @@ class DefaultedStringOptionDescriptor extends OptionDescriptor<String> {
       allowedHelp: allowedHelp,
       hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
-    registry?[name] = this;
+    _recordRegistration(parser);
   }
 
   @override
@@ -250,18 +254,9 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
   final bool negatable;
 
   @override
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  }) {
-    if (parser.options.containsKey(name)) {
-      final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && identical(existing, this)) {
-        return;
-      }
-      _throwConflictError(name, existing);
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
     }
     parser.addFlag(
       name,
@@ -271,7 +266,7 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
       negatable: negatable,
       hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
-    registry?[name] = this;
+    _recordRegistration(parser);
   }
 
   @override
@@ -302,18 +297,9 @@ class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
   final bool negatable;
 
   @override
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  }) {
-    if (parser.options.containsKey(name)) {
-      final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && identical(existing, this)) {
-        return;
-      }
-      _throwConflictError(name, existing);
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
     }
     parser.addFlag(
       name,
@@ -323,7 +309,7 @@ class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
       negatable: negatable,
       hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
-    registry?[name] = this;
+    _recordRegistration(parser);
   }
 
   @override
@@ -360,18 +346,9 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
   final List<String> aliases;
 
   @override
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  }) {
-    if (parser.options.containsKey(name)) {
-      final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && identical(existing, this)) {
-        return;
-      }
-      _throwConflictError(name, existing);
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
     }
     parser.addMultiOption(
       name,
@@ -385,7 +362,7 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
       allowedHelp: allowedHelp,
       hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
-    registry?[name] = this;
+    _recordRegistration(parser);
   }
 
   @override
@@ -447,18 +424,9 @@ abstract class _EnumOptionDescriptorBase<T extends Enum, R> extends OptionDescri
   List<String> get allowed => values.map(_formatName).toList();
 
   @override
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  }) {
-    if (parser.options.containsKey(name)) {
-      final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && identical(existing, this)) {
-        return;
-      }
-      _throwConflictError(name, existing);
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
     }
 
     final String? defaultString = defaultsTo != null ? _formatName(defaultsTo! as T) : null;
@@ -481,7 +449,7 @@ abstract class _EnumOptionDescriptorBase<T extends Enum, R> extends OptionDescri
       allowedHelp: effectiveAllowedHelp,
       hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
-    registry?[name] = this;
+    _recordRegistration(parser);
   }
 }
 
@@ -561,5 +529,28 @@ class DefaultedEnumOptionDescriptor<T extends Enum> extends _EnumOptionDescripto
       }
     }
     return defaultsTo!;
+  }
+}
+
+/// Extension on [ArgParser] for registering [OptionDescriptor] instances directly.
+extension ArgParserDescriptorExtension on ArgParser {
+  /// Registers [descriptor] with this parser.
+  void addDescriptor(
+    OptionDescriptor<Object?> descriptor, {
+    bool verboseHelp = false,
+    bool? hideOverride,
+  }) {
+    descriptor.addTo(this, verboseHelp: verboseHelp, hideOverride: hideOverride);
+  }
+
+  /// Registers multiple [descriptors] with this parser.
+  void addDescriptors(
+    Iterable<OptionDescriptor<Object?>> descriptors, {
+    bool verboseHelp = false,
+    bool? hideOverride,
+  }) {
+    for (final descriptor in descriptors) {
+      descriptor.addTo(this, verboseHelp: verboseHelp, hideOverride: hideOverride);
+    }
   }
 }
