@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:dwds/dwds.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -10,6 +12,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/isolated/release_asset_server.dart';
 import 'package:flutter_tools/src/isolated/web_asset_server.dart';
 import 'package:flutter_tools/src/web/compile.dart';
@@ -511,6 +514,126 @@ void main() {
 
       expect(server.basePath, isEmpty);
     });
+
+    testWithoutContext('isReady is completed by markReady() or dispose()', () async {
+      final WebAssetServer server = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        crossOriginIsolation: false,
+        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: platform,
+      );
+
+      var serverReady = false;
+      unawaited(server.isReady.then((_) => serverReady = true));
+      expect(serverReady, false);
+
+      server.markReady();
+      await pumpEventQueue();
+      expect(serverReady, true);
+
+      final WebAssetServer server2 = await WebAssetServer.start(
+        null,
+        null,
+        false,
+        false,
+        false,
+        BuildInfo.debug,
+        false,
+        const DartDevelopmentServiceConfiguration(enable: false),
+        Uri.base,
+        null,
+        crossOriginIsolation: false,
+        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        testMode: true,
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        platform: platform,
+      );
+
+      var server2Ready = false;
+      unawaited(server2.isReady.then((_) => server2Ready = true));
+      expect(server2Ready, false);
+
+      await server2.dispose();
+      await pumpEventQueue();
+      expect(server2Ready, true);
+    });
+
+    testUsingContext(
+      'pauses requests until markReady() is called',
+      () async {
+        fileSystem.file('build/web/index.html')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('hello');
+
+        final WebAssetServer server = await WebAssetServer.start(
+          null,
+          null,
+          false,
+          false,
+          false,
+          BuildInfo.release,
+          false,
+          const DartDevelopmentServiceConfiguration(enable: false),
+          Uri.base,
+          null,
+          crossOriginIsolation: false,
+          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webRenderer: WebRendererMode.canvaskit,
+          isWasm: true,
+          useLocalCanvasKit: false,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        );
+
+        final client = HttpClient();
+        try {
+          final Future<HttpClientResponse> responseFuture = client
+              .getUrl(Uri.parse('http://localhost:${server.selectedPort}/'))
+              .then((HttpClientRequest request) => request.close());
+
+          var responseReceived = false;
+          unawaited(responseFuture.then((_) => responseReceived = true));
+
+          // Pump events to ensure request is in flight.
+          await pumpEventQueue();
+          expect(responseReceived, false);
+
+          server.markReady();
+
+          final HttpClientResponse response = await responseFuture;
+          expect(response.statusCode, HttpStatus.ok);
+          expect(await utf8.decoder.bind(response).join(), 'hello');
+        } finally {
+          client.close();
+          await server.dispose();
+        }
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        Platform: () => platform,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
 
     testUsingContext(
       'serves assets with exact key and does not serve non-source project files as assets',

@@ -28,6 +28,10 @@ import Foundation
 /// For new application code, application developers should consider conforming to
 /// `FlutterImplicitEngineDelegate` and implementing `didInitializeImplicitFlutterEngine` instead of
 /// relying on `FlutterAppDelegate`'s automatic registration.
+///
+/// This class is main-actor isolated. It creates and runs a `FlutterEngine`, both of which must
+/// happen on the main thread.
+@MainActor
 @objc(FlutterLaunchEngine)
 final class LaunchEngine: NSObject {
 

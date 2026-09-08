@@ -148,6 +148,7 @@ const Set<String> _iconsMirroredWhenRTL = <String>{
   'note',
   'open_in',
   'playlist_add',
+  'prompt_suggestion',
   'queue_music',
   'redo',
   'reply',
