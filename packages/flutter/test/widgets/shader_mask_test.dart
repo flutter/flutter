@@ -98,4 +98,22 @@ void main() {
       matchesGoldenFile('shader_mask.bounds.matches_top_left.png'),
     );
   });
+
+  testWidgets('ShaderMask does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: ShaderMask(
+            shaderCallback: (Rect bounds) => const RadialGradient(
+              colors: <Color>[Color(0x00000000), Color(0x00001111)],
+            ).createShader(bounds),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(ShaderMask)), Size.zero);
+  });
 }

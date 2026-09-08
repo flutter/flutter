@@ -228,6 +228,17 @@ void main() {
     debugDisableShadows = true;
   });
 
+  testWidgets('MergeableMaterial does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(body: SingleChildScrollView(child: MergeableMaterial())),
+      ),
+    );
+    expect(tester.getSize(find.byType(MergeableMaterial)), Size.zero);
+  });
+
   testWidgets('MergeableMaterial merge gap', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
