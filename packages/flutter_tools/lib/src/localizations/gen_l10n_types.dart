@@ -219,7 +219,7 @@ class OptionalParameter {
 class Placeholder {
   Placeholder(this.resourceId, this.name, Map<String, Object?> attributes)
     : example = _stringAttribute(resourceId, name, attributes, 'example'),
-      type = _stringAttribute(resourceId, name, attributes, 'type'),
+      type = _typeAttribute(resourceId, name, attributes),
       format = _stringAttribute(resourceId, name, attributes, 'format'),
       optionalParameters = _optionalParameters(resourceId, name, attributes),
       isCustomDateFormat = _boolAttribute(resourceId, name, attributes, 'isCustomDateFormat');
@@ -245,6 +245,31 @@ class Placeholder {
   // 'format' can contain a number of date time formats separated by `dateFormatPartsDelimiter`.
   List<String> get dateFormatParts => format?.split(_dateFormatPartsDelimiter) ?? <String>[];
   bool get hasValidDateFormat => dateFormatParts.every(validDateFormats.contains);
+
+  static final RegExp _validTypeRegExp = RegExp(
+    r'^([a-zA-Z_$][a-zA-Z0-9_$]*\.)*[a-zA-Z_$][a-zA-Z0-9_$]*(\s*<.*>)?\??$',
+  );
+
+  static bool _isValidType(String type) {
+    if (type.isEmpty) {
+      return false;
+    }
+    return _validTypeRegExp.hasMatch(type);
+  }
+
+  static String? _typeAttribute(String resourceId, String name, Map<String, Object?> attributes) {
+    final String? type = _stringAttribute(resourceId, name, attributes, 'type');
+    if (type == null) {
+      return null;
+    }
+    if (!_isValidType(type)) {
+      throw L10nException(
+        'Invalid placeholder type "$type" for placeholder "$name" in message "$resourceId". '
+        'Placeholder types must be valid Dart type names.',
+      );
+    }
+    return type;
+  }
 
   static String? _stringAttribute(
     String resourceId,
