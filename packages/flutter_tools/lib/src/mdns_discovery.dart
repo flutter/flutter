@@ -12,6 +12,7 @@ import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
@@ -28,27 +29,22 @@ You can grant this permission in System Settings > Privacy & Security > Local Ne
 $err
 ''';
 
-String _missingNetworkInstructions(String err) =>
-    '''
-Flutter could not access the network.
-
-$err
-''';
-
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
   /// Creates a new [MDnsVmServiceDiscovery] object.
   ///
   /// The [_client] parameter will be defaulted to a new [MDnsClient] if null.
   MDnsVmServiceDiscovery({
-    MDnsClient? mdnsClient,
-    MDnsClient? preliminaryMDnsClient,
-    required Logger logger,
     required Analytics analytics,
-  }) : _client = mdnsClient ?? MDnsClient(),
-       _preliminaryClient = preliminaryMDnsClient,
+    required Logger logger,
+    MDnsClient? mdnsClient,
+    Platform? platform,
+    MDnsClient? preliminaryMDnsClient,
+  }) : _analytics = analytics,
+       _client = mdnsClient ?? MDnsClient(),
        _logger = logger,
-       _analytics = analytics;
+       _platform = platform,
+       _preliminaryClient = preliminaryMDnsClient;
 
   final MDnsClient _client;
 
@@ -56,8 +52,20 @@ class MDnsVmServiceDiscovery {
   // check for already running services so that results are not cached in _client.
   final MDnsClient? _preliminaryClient;
 
+  final Platform? _platform;
   final Logger _logger;
   final Analytics _analytics;
+
+  Platform get _effectivePlatform {
+    if (_platform != null) {
+      return _platform;
+    }
+    try {
+      return globals.platform;
+    } on UnsupportedError {
+      return FakePlatform(operatingSystem: 'macos');
+    }
+  }
 
   @visibleForTesting
   static const dartVmServiceName = '_dartVmService._tcp.local';
@@ -237,6 +245,10 @@ class MDnsVmServiceDiscovery {
     bool quitOnFind = false,
     bool throwOnMissingLocalNetworkPermissionsError = true,
   }) async {
+    if (!_effectivePlatform.isMacOS) {
+      throw UnsupportedError('mDNS discovery is only supported on macOS.');
+    }
+
     // macOS blocks mDNS unless the app has Local Network permissions.
     // Since the mDNS client does not handle errors from the socket's stream,
     // socket exceptions are routed to the current zone. Create an error zone to
@@ -272,15 +284,10 @@ class MDnsVmServiceDiscovery {
     try {
       return await completer.future;
     } on SocketException catch (e, stackTrace) {
-      _logger.printTrace(stackTrace.toString());
-      final String errorMessage = globals.platform.isMacOS
-          ? _missingLocalNetworkPermissionsInstructions(e.toString())
-          : _missingNetworkInstructions(e.toString());
-
+      _logger.printTrace('mDNS discovery failed: $e\n$stackTrace');
       if (throwOnMissingLocalNetworkPermissionsError) {
-        throwToolExit(errorMessage);
+        throwToolExit(_missingLocalNetworkPermissionsInstructions(e.toString()));
       } else {
-        _logger.printError(errorMessage);
         return <MDnsVmServiceDiscoveryResult>[];
       }
     }

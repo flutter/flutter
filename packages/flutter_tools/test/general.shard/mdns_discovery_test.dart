@@ -355,31 +355,23 @@ void main() {
         overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')},
       );
 
-      testUsingContext(
-        'On non-macOS, throws ToolExit when client throws SocketException on start',
-        () async {
-          final MDnsClient client = FakeMDnsClient(
-            <PtrResourceRecord>[],
-            <String, List<SrvResourceRecord>>{},
-            socketExceptionOnStart: true,
-          );
+      testUsingContext('Throws UnsupportedError on non-macOS platforms', () async {
+        final MDnsClient client = FakeMDnsClient(
+          <PtrResourceRecord>[],
+          <String, List<SrvResourceRecord>>{},
+        );
 
-          final portDiscovery = MDnsVmServiceDiscovery(
-            mdnsClient: client,
-            preliminaryMDnsClient: emptyClient,
-            logger: BufferLogger.test(),
-            analytics: const NoOpAnalytics(),
-          );
-          expect(
-            () async => portDiscovery.queryForAttach(),
-            throwsToolExit(message: 'Flutter could not access the network.'),
-          );
-        },
-        overrides: <Type, Generator>{Platform: () => FakePlatform()},
-      );
+        final portDiscovery = MDnsVmServiceDiscovery(
+          mdnsClient: client,
+          preliminaryMDnsClient: emptyClient,
+          logger: BufferLogger.test(),
+          analytics: const NoOpAnalytics(),
+        );
+        expect(() async => portDiscovery.queryForAttach(), throwsA(isA<UnsupportedError>()));
+      }, overrides: <Type, Generator>{Platform: () => FakePlatform()});
 
       testUsingContext(
-        'On non-macOS, prints error and returns null when client throws SocketException on start with throwOnMissingLocalNetworkPermissionsError: false',
+        'On macOS, traces error and returns null when client throws SocketException on start with throwOnMissingLocalNetworkPermissionsError: false',
         () async {
           final MDnsClient client = FakeMDnsClient(
             <PtrResourceRecord>[],
@@ -400,9 +392,9 @@ void main() {
           );
 
           expect(result, isNull);
-          expect(logger.errorText, contains('Flutter could not access the network.'));
+          expect(logger.traceText, contains('mDNS discovery failed:'));
         },
-        overrides: <Type, Generator>{Platform: () => FakePlatform()},
+        overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')},
       );
 
       testWithoutContext('Correctly builds VM Service URI with hostVmservicePort == 0', () async {
@@ -747,7 +739,7 @@ void main() {
       );
 
       testUsingContext(
-        'On macOS, tool prints a helpful message when mDNS lookup throws an uncaught SocketException',
+        'On macOS, tool traces an error and returns null when mDNS lookup throws an uncaught SocketException and throwOnMissingLocalNetworkPermissionsError is false',
         () async {
           final MDnsClient client = FakeMDnsClient(
             <PtrResourceRecord>[],
@@ -769,30 +761,17 @@ void main() {
           );
 
           expect(result, isNull);
-          expect(
-            logger.errorText,
-            contains(
-              'Flutter could not access the local network.\n'
-              '\n'
-              'Please ensure your IDE or terminal app has permission to access '
-              'devices on the local network. This allows Flutter to connect to '
-              'the Dart VM.\n'
-              '\n'
-              'You can grant this permission in System Settings > Privacy & '
-              'Security > Local Network.\n',
-            ),
-          );
+          expect(logger.traceText, contains('mDNS discovery failed:'));
         },
         overrides: <Type, Generator>{Platform: () => FakePlatform(operatingSystem: 'macos')},
       );
 
       testUsingContext(
-        'On non-macOS, tool exits with an error message when mDNS lookup throws a SocketException',
+        'Throws UnsupportedError on non-macOS platforms for firstMatchingVmService',
         () async {
           final MDnsClient client = FakeMDnsClient(
             <PtrResourceRecord>[],
             <String, List<SrvResourceRecord>>{},
-            socketExceptionOnLookup: true,
           );
 
           final portDiscovery = MDnsVmServiceDiscovery(
@@ -803,36 +782,8 @@ void main() {
 
           expect(
             () async => portDiscovery.firstMatchingVmService(client),
-            throwsToolExit(message: 'Flutter could not access the network.'),
+            throwsA(isA<UnsupportedError>()),
           );
-        },
-        overrides: <Type, Generator>{Platform: () => FakePlatform()},
-      );
-
-      testUsingContext(
-        'On non-macOS, tool prints an error message and returns null when mDNS lookup throws an uncaught SocketException and throwOnMissingLocalNetworkPermissionsError is false',
-        () async {
-          final MDnsClient client = FakeMDnsClient(
-            <PtrResourceRecord>[],
-            <String, List<SrvResourceRecord>>{},
-            uncaughtSocketExceptionOnLookup: true,
-          );
-
-          final logger = BufferLogger.test();
-
-          final portDiscovery = MDnsVmServiceDiscovery(
-            mdnsClient: client,
-            logger: logger,
-            analytics: const NoOpAnalytics(),
-          );
-
-          final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
-            client,
-            throwOnMissingLocalNetworkPermissionsError: false,
-          );
-
-          expect(result, isNull);
-          expect(logger.errorText, contains('Flutter could not access the network.'));
         },
         overrides: <Type, Generator>{Platform: () => FakePlatform()},
       );

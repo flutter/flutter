@@ -178,6 +178,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(operatingSystem: 'macos'),
           ),
         },
       );
@@ -253,6 +254,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(operatingSystem: 'macos'),
           ),
           Signals: () => FakeSignals(),
         },
@@ -342,6 +344,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(operatingSystem: 'macos'),
           ),
           ProcessManager: () => FakeProcessManager.empty(),
         },
@@ -429,6 +432,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(operatingSystem: 'macos'),
           ),
         },
       );
@@ -514,6 +518,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(operatingSystem: 'macos'),
           ),
         },
       );
@@ -612,6 +617,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(operatingSystem: 'macos'),
           ),
         },
       );
@@ -710,6 +716,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(operatingSystem: 'macos'),
           ),
         },
       );
@@ -971,6 +978,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(operatingSystem: 'macos'),
           ),
         },
       );
@@ -1588,6 +1596,7 @@ void main() {
           ProcessManager: () => FakeProcessManager.any(),
           Logger: () => logger,
           DeviceManager: () => testDeviceManager,
+          Platform: () => FakePlatform(operatingSystem: 'macos'),
         },
       );
     });
