@@ -315,10 +315,10 @@ abstract mixin class BaseWindowControllerLinux {
   /// every window rather than when one is made transparent.
   void _useRgbaVisual() {
     final _GdkScreen screen = _window.getScreen();
-    if (!screen.isComposited()) {
+    if (!screen.isComposited) {
       return;
     }
-    final _GdkVisual? visual = screen.getRgbaVisual();
+    final _GdkVisual? visual = screen.rgbaVisual;
     if (visual == null) {
       return;
     }
@@ -1238,7 +1238,7 @@ class _GdkScreen extends _GObject {
 
   /// Gets the visual that supports translucent windows, or null if this screen
   /// does not have one.
-  _GdkVisual? getRgbaVisual() {
+  _GdkVisual? get rgbaVisual {
     final ffi.Pointer<ffi.NativeType> visual = _gdkScreenGetRgbaVisual(instance);
     if (visual == ffi.nullptr) {
       return null;
@@ -1247,7 +1247,7 @@ class _GdkScreen extends _GObject {
   }
 
   /// Checks if windows on this screen can be made translucent.
-  bool isComposited() {
+  bool get isComposited {
     return _gdkScreenIsComposited(instance);
   }
 
