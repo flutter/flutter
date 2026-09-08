@@ -165,8 +165,8 @@ abstract class WebParagraphPainter {
       return;
     }
 
-    // Draw background blocks directly on the output canvas
-    // so it will be cached together with the text blocks on Canvas2D canvas
+    // Draw background blocks directly on the output canvas. It's not cached with the text blocks on
+    // the 2d canvas.
     _paintAllBlocks(StyleElements.background, canvas, offset);
 
     paintParagraphText(

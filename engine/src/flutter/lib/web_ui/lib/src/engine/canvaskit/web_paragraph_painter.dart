@@ -14,15 +14,15 @@ import 'image.dart';
 class CanvasKitPainter extends WebParagraphPainter {
   CanvasKitPainter(super.paragraph);
 
-  EngineImage? _singleImageCache;
+  EngineImage? _cachedImage;
 
   @override
-  bool get hasCache => _singleImageCache != null;
+  bool get hasCache => _cachedImage != null;
 
   @override
   void clearCache() {
-    _singleImageCache?.dispose();
-    _singleImageCache = null;
+    _cachedImage?.dispose();
+    _cachedImage = null;
   }
 
   double? _lastDevicePixelRatio;
@@ -35,9 +35,10 @@ class CanvasKitPainter extends WebParagraphPainter {
     required ParagraphImageGenerator generateParagraphImage,
   }) {
     final double dpr = ui.window.devicePixelRatio;
-    if (_lastDevicePixelRatio != dpr ||
-        _singleImageCache?.width != sourceRect.width.toInt() ||
-        _singleImageCache?.height != sourceRect.height.toInt()) {
+    if (hasCache &&
+        (_lastDevicePixelRatio != dpr ||
+            _cachedImage?.width != sourceRect.width.toInt() ||
+            _cachedImage?.height != sourceRect.height.toInt())) {
       clearCache();
     }
     _lastDevicePixelRatio = dpr;
@@ -60,7 +61,7 @@ class CanvasKitPainter extends WebParagraphPainter {
       if (skImage == null) {
         throw Exception('Failed to convert text image bitmap to an SkImage.');
       }
-      _singleImageCache = EngineImage(
+      _cachedImage = EngineImage(
         CkImageDelegate(skImage),
         skImage.width().toInt(),
         skImage.height().toInt(),
@@ -68,7 +69,7 @@ class CanvasKitPainter extends WebParagraphPainter {
     }
 
     canvas.drawImageRect(
-      _singleImageCache!,
+      _cachedImage!,
       sourceRect,
       targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
