@@ -203,7 +203,7 @@ abstract class FlutterCommand extends Command<void> {
   UserMessages get _userMessages => _explicitToolContext?.userMessages ?? globals.userMessages;
   PreRunValidator get _preRunValidator =>
       _explicitToolContext?.preRunValidator ?? globals.preRunValidator;
-  OperatingSystemUtils get _os => _explicitToolContext?.os ?? globals.os;
+  OperatingSystemUtils get _os => toolContext?.os ?? globals.os;
   PersistentToolState? get _persistentToolState =>
       _explicitToolContext?.persistentToolState ?? globals.persistentToolState;
   Platform get _platform => _explicitToolContext?.platform ?? globals.platform;
@@ -1785,7 +1785,7 @@ abstract class FlutterCommand extends Command<void> {
         commandPath: commandPath,
         result: commandResult.toString(),
         commandHasTerminal: hasTerminal,
-        hostArch: globals.os.hostPlatform.cliName,
+        hostArch: _os.hostPlatform.cliName,
         maxRss: maxRss,
       ),
     );
