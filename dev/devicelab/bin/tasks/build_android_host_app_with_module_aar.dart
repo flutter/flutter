@@ -452,7 +452,7 @@ Future<void> main() async {
       // Pre AGP 8.3
       ModuleTest(gradleVersion: '8.4', agpVersion: Version.parse('8.2.1')).call,
       // Post AGP 8.3 + rc candidates can work
-      ModuleTest(gradleVersion: '9.3.1', agpVersion: Version.parse('9.1.0')).call,
+      ModuleTest(gradleVersion: '8.13-rc-1', agpVersion: Version.parse('8.8.1')).call,
     ]),
   );
 }
