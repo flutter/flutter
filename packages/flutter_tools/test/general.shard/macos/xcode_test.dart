@@ -2007,6 +2007,10 @@ void main() {
           );
           expect(errors[1], 'Error: iPhone is not paired with your computer.');
           expect(errors[2], 'Error: Xcode pairing error. (code -13)');
+          expect(
+            errors[3],
+            'Error: iPhone is busy: Preparing debugger support for iPhone. Xcode will continue when iPhone is finished. (code -10)',
+          );
           expect(errors, isNot(contains('Xcode will continue')));
           expect(fakeProcessManager, hasNoRemainingExpectations);
         }, overrides: <Type, Generator>{Platform: () => macPlatform});
