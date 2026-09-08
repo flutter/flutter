@@ -62,14 +62,14 @@ class _DebugOnly {
   const _DebugOnly();
 }
 
-/// An annotation used by test_analysis package to verify patterns are followed
+/// An annotation used by analyzer plugins to verify patterns are followed
 /// that allow for tree-shaking of both fields and their initializers. This
 /// annotation has no impact on code by itself, but indicates the following pattern
 /// should be followed for a given field:
 ///
 /// ```dart
 /// class Bar {
-///   final Object? bar = kDebugMode ? Object() : null;
+///   late final Object debugOnlyField = ExpensiveToConstructClass();
 /// }
 /// ```
 const _DebugOnly _debugOnly = _DebugOnly();
@@ -3164,8 +3164,8 @@ class BuildOwner {
 
   final Map<GlobalKey, Element> _globalKeyRegistry = <GlobalKey, Element>{};
 
-  // In Profile/Release mode this field is initialized to `null`. The Dart compiler can
-  // eliminate unused fields, but not their initializers.
+  // In Profile/Release mode this field must never be accessed, to allow the
+  // Dart compiler to eliminate the field along with its initializer.
   @_debugOnly
   late final Set<Element> _debugIllFatedElements = HashSet<Element>();
 
@@ -3174,12 +3174,10 @@ class BuildOwner {
   // This provides us a way to remove old reservation while parent rebuilds the
   // child in the same slot.
   //
-  // In Profile/Release mode this field is initialized to `null`. The Dart compiler can
-  // eliminate unused fields, but not their initializers.
+  // In Profile/Release mode this field must never be accessed, to allow the
+  // Dart compiler to eliminate the field along with its initializer.
   @_debugOnly
-  final Map<Element, Map<Element, GlobalKey>>? _debugGlobalKeyReservations = kDebugMode
-      ? <Element, Map<Element, GlobalKey>>{}
-      : null;
+  late final Map<Element, Map<Element, GlobalKey>> _debugGlobalKeyReservations = <Element, Map<Element, GlobalKey>>{}
 
   /// The number of [GlobalKey] instances that are currently associated with
   /// [Element]s that have been built by this build owner.
@@ -3187,7 +3185,7 @@ class BuildOwner {
 
   void _debugRemoveGlobalKeyReservationFor(Element parent, Element child) {
     assert(() {
-      _debugGlobalKeyReservations?[parent]?.remove(child);
+      _debugGlobalKeyReservations[parent]?.remove(child);
       return true;
     }());
   }
@@ -3219,8 +3217,8 @@ class BuildOwner {
 
   void _debugReserveGlobalKeyFor(Element parent, Element child, GlobalKey key) {
     assert(() {
-      _debugGlobalKeyReservations?[parent] ??= <Element, GlobalKey>{};
-      _debugGlobalKeyReservations?[parent]![child] = key;
+      final Map<Element, GlobalKey> childToKey = _debugGlobalKeyReservations[parent] ??= <Element, GlobalKey>{};
+      childToKey[child] = key;
       return true;
     }());
   }
@@ -3228,7 +3226,7 @@ class BuildOwner {
   void _debugVerifyGlobalKeyReservation() {
     assert(() {
       final keyToParent = <GlobalKey, Element>{};
-      _debugGlobalKeyReservations?.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
+      _debugGlobalKeyReservations.forEach((Element parent, Map<Element, GlobalKey> childToKey) {
         // We ignore parent that are unmounted or detached.
         if (parent._lifecycleState == _ElementLifecycle.defunct ||
             parent.renderObject?.attached == false) {
@@ -3296,7 +3294,7 @@ class BuildOwner {
           }
         });
       });
-      _debugGlobalKeyReservations?.clear();
+      _debugGlobalKeyReservations.clear();
       return true;
     }());
   }
@@ -4696,10 +4694,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   // The children that have been forgotten by forgetChild. This will be used in
   // [update] to remove the global key reservations of forgotten children.
   //
-  // In Profile/Release mode this field is initialized to `null`. The Dart compiler can
-  // eliminate unused fields, but not their initializers.
+  // In Profile/Release mode this field must never be accessed, to allow the
+  // Dart compiler to eliminate the field along with its initializer.
   @_debugOnly
-  final Set<Element>? _debugForgottenChildrenWithGlobalKey = kDebugMode ? HashSet<Element>() : null;
+  late final Set<Element> _debugForgottenChildrenWithGlobalKey = HashSet<Element>();
 
   /// Remove the given child from the element's child list, in preparation for
   /// the child being reused elsewhere in the element tree.
