@@ -348,11 +348,14 @@ class ToolDependencies {
     final CocoaPodsValidator finalCocoapodsValidator =
         cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
 
-    final finalArtifacts = CachedArtifacts(
-      fileSystem: finalFS,
-      cache: finalCache,
-      platform: finalPlatform,
-      operatingSystemUtils: finalOS,
+    // Artifacts will be updated later if a local engine is used.
+    final finalArtifacts = DeferredArtifacts(
+      CachedArtifacts(
+        fileSystem: finalFS,
+        cache: finalCache,
+        platform: finalPlatform,
+        operatingSystemUtils: finalOS,
+      ),
     );
 
     final XCDevice finalXCDevice =
