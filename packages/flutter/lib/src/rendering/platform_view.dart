@@ -13,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -250,6 +251,27 @@ class RenderAndroidView extends PlatformViewRenderBox {
     }
     _clipRectLayer.layer = null;
     _paintTexture(context, offset);
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    RendererBinding.instance.addTextureFrameAvailableCallback(_handleTextureFrameAvailable);
+  }
+
+  @override
+  void detach() {
+    RendererBinding.instance.removeTextureFrameAvailableCallback(_handleTextureFrameAvailable);
+    super.detach();
+  }
+
+  void _handleTextureFrameAvailable(int textureId) {
+    if (_viewController.requiresViewComposition) {
+      return;
+    }
+    if (textureId == _viewController.textureId) {
+      markNeedsPaint();
+    }
   }
 
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();

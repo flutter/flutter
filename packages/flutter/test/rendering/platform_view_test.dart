@@ -301,6 +301,61 @@ void main() {
     });
   });
 
+  test('RenderAndroidView marks needs paint when a frame is available for its texture', () async {
+    final renderBox = RenderAndroidView(
+      viewController: FakeAndroidViewController(0),
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    await _layoutAndPaintRenderAndroidView(renderBox);
+
+    binding.handleTextureFrameAvailable(0);
+
+    expect(renderBox.debugNeedsPaint, isTrue);
+  });
+
+  test('RenderAndroidView ignores frames for other textures', () async {
+    final renderBox = RenderAndroidView(
+      viewController: FakeAndroidViewController(0),
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    await _layoutAndPaintRenderAndroidView(renderBox);
+
+    binding.handleTextureFrameAvailable(1);
+
+    expect(renderBox.debugNeedsPaint, isFalse);
+  });
+
+  test('RenderAndroidView unregisters texture frame callback on detach', () async {
+    final renderBox = RenderAndroidView(
+      viewController: FakeAndroidViewController(0),
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    await _layoutAndPaintRenderAndroidView(renderBox);
+
+    layout(RenderCustomPaint(painter: _EmptyPainter()));
+    expect(renderBox.attached, isFalse);
+
+    binding.handleTextureFrameAvailable(0);
+
+    expect(renderBox.debugNeedsPaint, isFalse);
+  });
+
+  test('RenderAndroidView ignores texture frames when view composition is required', () async {
+    final renderBox = RenderAndroidView(
+      viewController: FakeAndroidViewController(0, requiresViewComposition: true, textureId: null),
+      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+      gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{},
+    );
+    await _layoutAndPaintRenderAndroidView(renderBox);
+
+    binding.handleTextureFrameAvailable(0);
+
+    expect(renderBox.debugNeedsPaint, isFalse);
+  });
+
   test('markNeedsPaint does not get called on a disposed RO', () async {
     FakeAsync().run((FakeAsync async) {
       final AndroidViewController viewController = PlatformViewsService.initAndroidView(
@@ -651,6 +706,13 @@ ui.PointerData _pointerData(
     kind: kind,
     device: device,
   );
+}
+
+Future<void> _layoutAndPaintRenderAndroidView(RenderAndroidView renderBox) async {
+  layout(renderBox, phase: EnginePhase.paint);
+  await null;
+  pumpFrame(phase: EnginePhase.paint);
+  expect(renderBox.debugNeedsPaint, isFalse);
 }
 
 class _EmptyPainter extends CustomPainter {
