@@ -38,6 +38,9 @@ export '_view_metrics.dart'
     show
         debugApplyViewMetricsOverrides,
         debugApplyViewMetricsOverridesForView,
+        debugApplyViewMetricsOverridesToView,
+        debugMarkViewAppliesItsOwnMetricsOverride,
+        debugViewMetricsOverrideApplied,
         debugViewWithMetricsOverrides;
 export 'print.dart' show DebugPrintCallback;
 
@@ -286,8 +289,11 @@ class DebugViewPadding implements ui.ViewPadding {
 /// All values are in the units `dart:ui` uses, which for sizes and insets means
 /// physical pixels rather than the logical pixels [MediaQueryData] reports.
 ///
-/// The one framework accessor these do not reach is the deprecated
-/// [BindingBase.window], which reports the platform's own metrics, and with it
+/// Direct reads from [ui.PlatformDispatcher.instance] still report the real
+/// platform metrics. Engine views passed to [View], [RenderView], or
+/// [MediaQueryData.fromView] are normalized to apply overrides.
+///
+/// The deprecated [BindingBase.window] reports the platform's own metrics, and with it
 /// the deprecated `ScrollPhysics.tolerance` that reads it. The deprecated
 /// [MediaQuery.fromWindow] does apply them: it builds its data with
 /// [MediaQueryData.fromView], which resolves the override registered for the

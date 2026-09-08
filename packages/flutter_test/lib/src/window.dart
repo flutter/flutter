@@ -1078,7 +1078,10 @@ class TestFlutterView implements FlutterView {
   final TestPlatformDispatcher _ownerPlatformDispatcher;
 
   @override
-  TestPlatformDispatcher get platformDispatcher => _platformDispatcher;
+  TestPlatformDispatcher get platformDispatcher {
+    debugMarkViewAppliesItsOwnMetricsOverride(this, _platformDispatcher);
+    return _platformDispatcher;
+  }
 
   // Bound to this view's own [viewId] rather than to whatever the dispatcher
   // passed to the constructor resolves, so that a subclass which reports a
@@ -1335,7 +1338,10 @@ class TestFlutterView implements FlutterView {
 
   @override
   void render(Scene scene, {Size? size}) {
-    _view.render(scene, size: size);
+    // An omitted size uses this view's physical size. Keep explicit test
+    // geometry above any debug override, and preserve an omission when neither
+    // layer supplies a size (which avoids unnecessary web resizes).
+    _view.render(scene, size: size ?? _physicalSize);
   }
 
   @override

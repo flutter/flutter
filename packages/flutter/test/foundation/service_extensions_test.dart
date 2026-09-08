@@ -1528,6 +1528,28 @@ void main() {
     );
     expect(extensionChangedEvents.length, 4);
 
+    // Notifications are synchronous and may reinstall an override. Report the
+    // state after those callbacks, just as the state-change event does.
+    debugSetViewMetricsOverride(viewId, const DebugViewMetricsOverride(devicePixelRatio: 4));
+    final VoidCallback? previousMetricsChanged = binding.platformDispatcher.onMetricsChanged;
+    binding.platformDispatcher.onMetricsChanged = () {
+      previousMetricsChanged?.call();
+      debugSetViewMetricsOverride(viewId + 1, const DebugViewMetricsOverride(boldText: true));
+    };
+    try {
+      result = await binding.testExtension(
+        FoundationServiceExtensions.viewMetricsOverride.name,
+        <String, String>{'clearAll': 'true'},
+      );
+    } finally {
+      binding.platformDispatcher.onMetricsChanged = previousMetricsChanged;
+      debugClearViewMetricsOverrides();
+    }
+    expect(result['overriddenViewIds'], <int>[viewId + 1]);
+    expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{
+      '${viewId + 1}': <String, Object?>{'boldText': true},
+    });
+
     // Changing the override replays the corresponding platform notifications.
     // In particular, the accessibility-features change above schedules a frame.
     // Consume it so that randomized tests do not inherit this test's work.

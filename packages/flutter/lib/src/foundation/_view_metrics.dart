@@ -40,6 +40,12 @@ import 'debug.dart';
 /// dispatcher its [TestPlatformDispatcher] wraps, so that overrides also apply
 /// in widget tests.
 ///
+/// Synthetic notifications preserve the zones of callbacks registered through
+/// this wrapper or its per-view dispatchers. Direct writes to the underlying
+/// dispatcher bypass that tracking. In particular, re-registering the same
+/// callback directly in a different zone cannot be detected through dart:ui's
+/// public API; register through the wrapper to preserve its error-zone policy.
+///
 /// Installing the wrapper is behavior neutral while
 /// [debugViewMetricsOverrides] is empty: every member forwards to the wrapped
 /// object. It is therefore installed unconditionally rather than only while an
@@ -110,8 +116,9 @@ ui.PlatformDispatcher debugApplyViewMetricsOverridesForView(
 /// on when it lets an override supersede the platform data an ancestor
 /// [MediaQuery] supplies.
 ///
+/// Engine views are normalized even before the binding wraps their dispatcher.
 /// A view this library produced already applies its own override and is
-/// returned unchanged, as is one whose dispatcher this library has not wrapped:
+/// returned unchanged, as is a custom view whose dispatcher has not been wrapped:
 /// that is either a view that wraps one of ours, such as a `TestFlutterView`,
 /// which resolves its own override through the dispatcher
 /// [debugApplyViewMetricsOverridesForView] gave it, or a view this library can
@@ -125,19 +132,124 @@ ui.PlatformDispatcher debugApplyViewMetricsOverridesForView(
 ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
   var result = view;
   assert(() {
-    if (view is! _DebugViewMetricsFlutterView) {
-      // Whether that dispatcher is one an override change is reported to does
-      // not come into it: a view that is credited with an override — see
-      // [MediaQueryData.fromView] — has to be one that applies it, or it
-      // reports neither the override nor what an ancestor supplied. Announcing
-      // the change is the caller's part, and [BindingBase.platformDispatcher]
-      // says how.
-      result = _wrappers[view.platformDispatcher]?._wrapView(view) ?? view;
+    try {
+      if (!_debugViewAppliesMetricsOverrides(view)) {
+        // Whether that dispatcher is one an override change is reported to does
+        // not come into it: a view that is credited with an override — see
+        // [MediaQueryData.fromView] — has to be one that applies it, or it
+        // reports neither the override nor what an ancestor supplied. Announcing
+        // the change is the caller's part, and [BindingBase.platformDispatcher]
+        // says how.
+        final ui.PlatformDispatcher dispatcher = view.platformDispatcher;
+        // View can be constructed before runWidget initializes the binding.
+        // Normalize engine views immediately, without registering notifications
+        // until the binding actually wraps its dispatcher.
+        final _DebugViewMetricsPlatformDispatcher? wrapper =
+            identical(dispatcher, ui.PlatformDispatcher.instance)
+            ? _wrapperFor(dispatcher, notify: false)
+            : _wrappers[dispatcher];
+        result = wrapper?._wrapView(view) ?? view;
+      }
+    } on UnimplementedError {
+      // Low-level rendering tests can provide a view without a dispatcher.
+      // Such a view cannot opt in to overrides; leave its existing contract
+      // intact until a consumer actually needs the missing platform data.
     }
     return true;
   }());
   return result;
 }
+
+/// Wraps a custom view to apply its own [debugViewMetricsOverrides] entry.
+///
+/// Unlike [debugViewWithMetricsOverrides], this explicitly opts in a view whose
+/// dispatcher need not have been wrapped by the binding. It does not register
+/// that dispatcher for synthetic notifications. Test adapters can wrap this
+/// result to retain precedence for their explicit test values.
+///
+/// Returns the same wrapper on repeated calls, or [view] itself if it already
+/// applies overrides. Returns [view] unchanged outside debug mode.
+ui.FlutterView debugApplyViewMetricsOverridesToView(ui.FlutterView view) {
+  var result = view;
+  assert(() {
+    if (!_debugViewAppliesMetricsOverrides(view)) {
+      result = _wrapperFor(view.platformDispatcher, notify: false)._wrapView(view);
+    }
+    return true;
+  }());
+  return result;
+}
+
+/// The [debugViewMetricsOverrides] entry `view` applies, or null.
+///
+/// Null for a view that applies none, which includes a view an entry is
+/// registered for that does not resolve it. [MediaQueryData.fromView] lets an
+/// override supersede the platform data an ancestor [MediaQuery] supplies, so
+/// crediting a view with one it does not apply would leave the data reporting
+/// neither the override nor what the ancestor supplied.
+///
+/// A view this library built applies its own entry. Any other view has to say
+/// so through [debugMarkViewAppliesItsOwnMetricsOverride]: a view that resolves
+/// an entry some other way is not otherwise distinguishable from one that
+/// resolves none, and guessing is what produced the state above.
+///
+/// Always null in release mode, where there are no overrides.
+DebugViewMetricsOverride? debugViewMetricsOverrideApplied(ui.FlutterView view) {
+  DebugViewMetricsOverride? result;
+  assert(() {
+    if (debugViewMetricsOverrides.isEmpty) {
+      return true;
+    }
+    try {
+      final DebugViewMetricsOverride? override = debugViewMetricsOverrides[view.viewId];
+      if (override != null && _debugViewAppliesMetricsOverrides(view)) {
+        result = override;
+      }
+    } on UnimplementedError {
+      // A geometry-only fake cannot apply platform overrides. Inherited
+      // platform data must remain usable without its missing dispatcher.
+    }
+    return true;
+  }());
+  return result;
+}
+
+/// Records that [view] applies its own platform metric overrides through
+/// [dispatcher].
+///
+/// Custom adapters such as `TestFlutterView` call this from their dispatcher
+/// getter. The association is checked by identity so a subclass that reports a
+/// different dispatcher is not credited with overrides it does not apply.
+/// Geometry is always read from the view itself.
+///
+/// Does nothing outside debug mode. The record does not keep the view alive.
+void debugMarkViewAppliesItsOwnMetricsOverride(
+  ui.FlutterView view,
+  ui.PlatformDispatcher dispatcher,
+) {
+  assert(() {
+    _viewsApplyingTheirOwnOverride[view] = dispatcher;
+    return true;
+  }());
+}
+
+bool _debugViewAppliesMetricsOverrides(ui.FlutterView view) {
+  var result = false;
+  assert(() {
+    if (view is _DebugViewMetricsFlutterView) {
+      result = true;
+    } else {
+      // The getter may register the association, so read it before the record.
+      final ui.PlatformDispatcher dispatcher = view.platformDispatcher;
+      result = identical(_viewsApplyingTheirOwnOverride[view], dispatcher);
+    }
+    return true;
+  }());
+  return result;
+}
+
+final Expando<ui.PlatformDispatcher> _viewsApplyingTheirOwnOverride =
+    Expando<ui.PlatformDispatcher>('debugViewMetricsOverrides aware views');
 
 /// Tells every [ui.PlatformDispatcher] that has been wrapped by
 /// [debugApplyViewMetricsOverrides] that the metric groups named here changed,
@@ -297,11 +409,11 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   // Kept on the root, because that is the wrapper that replays, and a per-view
   // one registers on the very same dispatcher: there is one callback slot, so
   // there is one zone to remember for it.
-  Zone? _onMetricsChangedZone;
-  Zone? _onTextScaleFactorChangedZone;
-  Zone? _onPlatformBrightnessChangedZone;
-  Zone? _onAccessibilityFeaturesChangedZone;
-  Zone? _onPlatformConfigurationChangedZone;
+  (WeakReference<ui.VoidCallback>, Zone)? _onMetricsChangedRegistration;
+  (WeakReference<ui.VoidCallback>, Zone)? _onTextScaleFactorChangedRegistration;
+  (WeakReference<ui.VoidCallback>, Zone)? _onPlatformBrightnessChangedRegistration;
+  (WeakReference<ui.VoidCallback>, Zone)? _onAccessibilityFeaturesChangedRegistration;
+  (WeakReference<ui.VoidCallback>, Zone)? _onPlatformConfigurationChangedRegistration;
 
   /// The dispatcher that owns the view wrappers, or null if this is that
   /// dispatcher.
@@ -336,23 +448,26 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
     if (platformConfiguration) {
       _notify(
         () => _dispatcher.onPlatformConfigurationChanged,
-        _onPlatformConfigurationChangedZone,
+        _onPlatformConfigurationChangedRegistration,
       );
     }
     if (textScaleFactor) {
-      _notify(() => _dispatcher.onTextScaleFactorChanged, _onTextScaleFactorChangedZone);
+      _notify(() => _dispatcher.onTextScaleFactorChanged, _onTextScaleFactorChangedRegistration);
     }
     if (platformBrightness) {
-      _notify(() => _dispatcher.onPlatformBrightnessChanged, _onPlatformBrightnessChangedZone);
+      _notify(
+        () => _dispatcher.onPlatformBrightnessChanged,
+        _onPlatformBrightnessChangedRegistration,
+      );
     }
     if (accessibilityFeatures) {
       _notify(
         () => _dispatcher.onAccessibilityFeaturesChanged,
-        _onAccessibilityFeaturesChangedZone,
+        _onAccessibilityFeaturesChangedRegistration,
       );
     }
     if (viewMetrics) {
-      _notify(() => _dispatcher.onMetricsChanged, _onMetricsChangedZone);
+      _notify(() => _dispatcher.onMetricsChanged, _onMetricsChangedRegistration);
     }
   }
 
@@ -362,28 +477,27 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   // the framework reading a value nothing told it to re-read, which is the
   // state this whole replay exists to prevent.
   //
-  // The zone dispatch is `dart:ui`'s own, from the private `_invoke` in
-  // `lib/ui/hooks.dart`, which there is no public API to delegate to; a change
-  // to it on an engine roll has to be mirrored here by hand. It differs from
-  // `_invoke` in running the callback rather than guarding it, so that a
-  // failure is reported the same way whichever zone changed the override —
-  // through the guard below, which names this replay as what was going on.
-  // `Zone.runGuarded` would hand it to the registration zone instead, and a
-  // notification the framework synthesized would be reported as one the
-  // platform sent. Reading the callback is inside the guard too: on a
-  // dispatcher that implements `dart:ui` through noSuchMethod, that read is
-  // itself what throws.
+  // Like dart:ui's _invoke, cross-zone delivery uses runGuarded. Same-zone
+  // delivery is guarded too: this replay must continue after a failure, so it
+  // cannot rely on an exception unwinding to the platform entry point.
+  // A different callback installed directly on the underlying dispatcher has
+  // an unknown zone. Never associate it with the previous callback's zone.
+  // Reading a callback from an incomplete test double can itself throw; those
+  // failures, and callbacks with unknown zones, use FlutterError reporting.
   @pragma('vm:notify-debugger-on-exception')
-  void _notify(ui.VoidCallback? Function() read, Zone? zone) {
+  void _notify(
+    ui.VoidCallback? Function() read,
+    (WeakReference<ui.VoidCallback>, Zone)? registration,
+  ) {
     try {
       final ui.VoidCallback? callback = read();
       if (callback == null) {
         return;
       }
-      if (zone == null || identical(zone, Zone.current)) {
-        callback();
+      if (registration != null && identical(registration.$1.target, callback)) {
+        registration.$2.runGuarded(callback);
       } else {
-        zone.run(callback);
+        callback();
       }
     } catch (exception, stack) {
       FlutterError.reportError(
@@ -549,8 +663,10 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   ui.VoidCallback? get onAccessibilityFeaturesChanged => _dispatcher.onAccessibilityFeaturesChanged;
   @override
   set onAccessibilityFeaturesChanged(ui.VoidCallback? callback) {
-    _rootWrapper._onAccessibilityFeaturesChangedZone = Zone.current;
     _dispatcher.onAccessibilityFeaturesChanged = callback;
+    _rootWrapper._onAccessibilityFeaturesChangedRegistration = callback == null
+        ? null
+        : (WeakReference<ui.VoidCallback>(callback), Zone.current);
   }
 
   @override
@@ -606,24 +722,30 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   ui.VoidCallback? get onMetricsChanged => _dispatcher.onMetricsChanged;
   @override
   set onMetricsChanged(ui.VoidCallback? callback) {
-    _rootWrapper._onMetricsChangedZone = Zone.current;
     _dispatcher.onMetricsChanged = callback;
+    _rootWrapper._onMetricsChangedRegistration = callback == null
+        ? null
+        : (WeakReference<ui.VoidCallback>(callback), Zone.current);
   }
 
   @override
   ui.VoidCallback? get onPlatformBrightnessChanged => _dispatcher.onPlatformBrightnessChanged;
   @override
   set onPlatformBrightnessChanged(ui.VoidCallback? callback) {
-    _rootWrapper._onPlatformBrightnessChangedZone = Zone.current;
     _dispatcher.onPlatformBrightnessChanged = callback;
+    _rootWrapper._onPlatformBrightnessChangedRegistration = callback == null
+        ? null
+        : (WeakReference<ui.VoidCallback>(callback), Zone.current);
   }
 
   @override
   ui.VoidCallback? get onPlatformConfigurationChanged => _dispatcher.onPlatformConfigurationChanged;
   @override
   set onPlatformConfigurationChanged(ui.VoidCallback? callback) {
-    _rootWrapper._onPlatformConfigurationChangedZone = Zone.current;
     _dispatcher.onPlatformConfigurationChanged = callback;
+    _rootWrapper._onPlatformConfigurationChangedRegistration = callback == null
+        ? null
+        : (WeakReference<ui.VoidCallback>(callback), Zone.current);
   }
 
   @override
@@ -672,8 +794,10 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   ui.VoidCallback? get onTextScaleFactorChanged => _dispatcher.onTextScaleFactorChanged;
   @override
   set onTextScaleFactorChanged(ui.VoidCallback? callback) {
-    _rootWrapper._onTextScaleFactorChangedZone = Zone.current;
     _dispatcher.onTextScaleFactorChanged = callback;
+    _rootWrapper._onTextScaleFactorChangedRegistration = callback == null
+        ? null
+        : (WeakReference<ui.VoidCallback>(callback), Zone.current);
   }
 
   @override

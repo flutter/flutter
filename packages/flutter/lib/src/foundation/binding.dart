@@ -717,7 +717,11 @@ abstract class BindingBase {
       if (debugClearViewMetricsOverrides()) {
         _postViewMetricsOverrideStateChangedEvent();
       }
-      return <String, Object?>{'overrides': <String, Object?>{}, 'overriddenViewIds': <int>[]};
+      return <String, Object?>{
+        'overrides': <String, Object?>{},
+        // A synchronous notification may have installed another override.
+        'overriddenViewIds': debugViewMetricsOverrides.keys.toList(),
+      };
     }
 
     final String? rawViewId = parameters['viewId'];

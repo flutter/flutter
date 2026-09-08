@@ -173,6 +173,28 @@ class _TestFlutterView implements FlutterView {
     platformDispatcher.addTestView(this);
   }
 
+  // Keep the explicit test adapter outside the debug wrapper so its values
+  // retain precedence. Every controller exposes this same override-aware view
+  // to View, MediaQuery, and callers inspecting rootView directly.
+  static TestFlutterView create({
+    required BaseWindowController controller,
+    required TestPlatformDispatcher platformDispatcher,
+    BoxConstraints? constraints,
+    void Function(Size? size)? onRender,
+  }) {
+    final view = _TestFlutterView(
+      controller: controller,
+      platformDispatcher: platformDispatcher,
+      constraints: constraints,
+      onRender: onRender,
+    );
+    return TestFlutterView(
+      view: debugApplyViewMetricsOverridesToView(view),
+      platformDispatcher: platformDispatcher,
+      display: platformDispatcher.displays.first,
+    );
+  }
+
   static int _nextViewId = 1;
   final BaseWindowController controller;
   final TestPlatformDispatcher _platformDispatcher;
@@ -319,7 +341,7 @@ class _TestWindowController extends WindowController with _ChildWindowHierarchyM
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.create(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
@@ -480,7 +502,7 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.create(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
@@ -588,7 +610,7 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
        _positioner = positioner,
        _parent = parent,
        super.empty() {
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.create(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
@@ -659,7 +681,7 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
        _positioner = positioner,
        _parent = parent,
        super.empty() {
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.create(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
@@ -741,7 +763,7 @@ class _TestSatelliteWindowController extends SatelliteWindowController
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.create(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,

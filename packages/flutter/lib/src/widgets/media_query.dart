@@ -245,16 +245,9 @@ class MediaQueryData {
     this.displayCornerRadii,
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
-       // False, because a const constructor cannot ask [textScaler] what it is.
-       // Data built here holding a scaler an override supplied therefore
-       // compares equal to data holding the platform's own whenever the two
-       // report the same factor — the case where only the scaling curve
-       // differs, so nothing else tells them apart and text scaled through such
-       // a scaler does not rebuild when that override comes and goes. An
-       // override that changes the factor is still seen. Data
-       // [MediaQueryData.fromView] builds — which is what a [MediaQuery] holds
-       // unless an application replaced it — does not have this limit.
-       _debugTextScalerIsOverridden = false,
+       // The getter also inspects known system and clamped scalers, so a
+       // public const constructor need not inspect its argument here.
+       _debugTextScalerOverrideFallback = false,
        assert(
          identical(textScaler, _kUnspecifiedTextScaler) || textScaleFactor == 1.0,
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
@@ -294,7 +287,7 @@ class MediaQueryData {
     required bool debugTextScalerIsOverridden,
   }) : _textScaleFactor = textScaleFactor,
        _textScaler = textScaler,
-       _debugTextScalerIsOverridden = debugTextScalerIsOverridden,
+       _debugTextScalerOverrideFallback = debugTextScalerIsOverridden,
        assert(
          identical(textScaler, _kUnspecifiedTextScaler) || textScaleFactor == 1.0,
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
@@ -378,7 +371,7 @@ class MediaQueryData {
   }) : this._fromView(
          view,
          platformData: platformData,
-         accessibilityFeatures: view.platformDispatcher.accessibilityFeatures,
+         accessibilityFeatures: _accessibilityFeaturesReader(view),
          debugViewMetricsOverride: _debugViewMetricsOverrideFor(view),
        );
 
@@ -392,28 +385,22 @@ class MediaQueryData {
   MediaQueryData._fromView(
     ui.FlutterView view, {
     required MediaQueryData? platformData,
-    required ui.AccessibilityFeatures accessibilityFeatures,
+    required ui.AccessibilityFeatures Function() accessibilityFeatures,
     required DebugViewMetricsOverride? debugViewMetricsOverride,
   }) : size = view.physicalSize / view.devicePixelRatio,
        devicePixelRatio = view.devicePixelRatio,
        _textScaleFactor = 1.0, // _textScaler is the source of truth.
        _textScaler = _textScalerFromView(view, platformData, debugViewMetricsOverride),
-       // Whichever data the scaler above came from: when this view overrides
-       // the factor the scaler is this view's, and otherwise it is the one the
-       // ancestor supplied, along with whatever that one was built from. Which
-       // is what [_textScalerFromView] resolves too, so the two agree; there is
-       // no assert pinning that, because the scaler an ancestor supplied can
-       // come from the public constructor, which has no flag to set.
-       //
-       // kDebugMode folds it away in release, where an override cannot exist.
-       _debugTextScalerIsOverridden =
+       // Preserve provenance for custom scalers inherited from parent data.
+       // Known system and clamped scalers also expose it through the getter.
+       _debugTextScalerOverrideFallback =
            kDebugMode &&
            (debugViewMetricsOverride?.textScaleFactor != null ||
                (platformData?._debugTextScalerIsOverridden ?? false)),
        platformBrightness = _resolve(
          debugViewMetricsOverride?.platformBrightness,
          platformData?.platformBrightness,
-         view.platformDispatcher.platformBrightness,
+         () => view.platformDispatcher.platformBrightness,
        ),
        padding = EdgeInsets.fromViewPadding(view.padding, view.devicePixelRatio),
        viewPadding = EdgeInsets.fromViewPadding(view.viewPadding, view.devicePixelRatio),
@@ -425,47 +412,47 @@ class MediaQueryData {
        accessibleNavigation = _resolve(
          debugViewMetricsOverride?.accessibleNavigation,
          platformData?.accessibleNavigation,
-         accessibilityFeatures.accessibleNavigation,
+         () => accessibilityFeatures().accessibleNavigation,
        ),
        invertColors = _resolve(
          debugViewMetricsOverride?.invertColors,
          platformData?.invertColors,
-         accessibilityFeatures.invertColors,
+         () => accessibilityFeatures().invertColors,
        ),
        disableAnimations = _resolve(
          debugViewMetricsOverride?.disableAnimations,
          platformData?.disableAnimations,
-         accessibilityFeatures.disableAnimations,
+         () => accessibilityFeatures().disableAnimations,
        ),
        reduceMotion = _resolve(
          debugViewMetricsOverride?.reduceMotion,
          platformData?.reduceMotion,
-         accessibilityFeatures.reduceMotion,
+         () => accessibilityFeatures().reduceMotion,
        ),
        boldText = _resolve(
          debugViewMetricsOverride?.boldText,
          platformData?.boldText,
-         accessibilityFeatures.boldText,
+         () => accessibilityFeatures().boldText,
        ),
        supportsAnnounce = _resolve(
          debugViewMetricsOverride?.supportsAnnounce,
          platformData?.supportsAnnounce,
-         accessibilityFeatures.supportsAnnounce,
+         () => accessibilityFeatures().supportsAnnounce,
        ),
        highContrast = _resolve(
          debugViewMetricsOverride?.highContrast,
          platformData?.highContrast,
-         accessibilityFeatures.highContrast,
+         () => accessibilityFeatures().highContrast,
        ),
        onOffSwitchLabels = _resolve(
          debugViewMetricsOverride?.onOffSwitchLabels,
          platformData?.onOffSwitchLabels,
-         accessibilityFeatures.onOffSwitchLabels,
+         () => accessibilityFeatures().onOffSwitchLabels,
        ),
        alwaysUse24HourFormat = _resolve(
          debugViewMetricsOverride?.alwaysUse24HourFormat,
          platformData?.alwaysUse24HourFormat,
-         view.platformDispatcher.alwaysUse24HourFormat,
+         () => view.platformDispatcher.alwaysUse24HourFormat,
        ),
        navigationMode = platformData?.navigationMode ?? NavigationMode.traditional,
        gestureSettings = DeviceGestureSettings.fromView(view),
@@ -498,35 +485,23 @@ class MediaQueryData {
   ///
   /// [inherited] is what an ancestor [MediaQuery] supplies, which an override
   /// supersedes so that a per-view override reaches a nested [MediaQuery].
-  static T _resolve<T>(T? overridden, T? inherited, T reported) =>
-      overridden != null ? reported : inherited ?? reported;
+  static T _resolve<T>(T? overridden, T? inherited, T Function() reported) =>
+      overridden != null ? reported() : inherited ?? reported();
+
+  // Keep platform reads lazy when inherited data supplies the value, while
+  // reading the accessibility snapshot at most once when it is needed.
+  static ui.AccessibilityFeatures Function() _accessibilityFeaturesReader(ui.FlutterView view) {
+    ui.AccessibilityFeatures? features;
+    return () => features ??= view.platformDispatcher.accessibilityFeatures;
+  }
 
   /// The [debugViewMetricsOverrides] entry `view` applies, or null.
   ///
-  /// `view` is override-aware by the time this runs:
-  /// [debugViewWithMetricsOverrides] has replaced a view that merely reports
-  /// the metrics of a wrapped [ui.PlatformDispatcher] with the wrapper's own
-  /// view, so an entry found here is one that the values read from this view
-  /// and its dispatcher already have applied. A view this library has never
-  /// seen is taken at its word: a view that wraps one of ours, which resolves
-  /// the entry through the dispatcher it was given, cannot be told apart from
-  /// one that resolves nothing. `TestFlutterView` is the first kind; a
-  /// hand-written [ui.FlutterView], and the view a `flutter_test` window
-  /// controller vends, are the second, and an entry registered for the id one
-  /// of those reports supersedes `platformData` without reaching the values
-  /// read below. A view of the second kind that reports a dispatcher belonging
-  /// to no view of its own resolves the implicit view's entry for the metrics
-  /// that are not per-view, which is the dispatcher's documented behavior for a
-  /// consumer that has no view to resolve against, and is why such a view is
-  /// worth giving a dispatcher bound to its own id.
-  static DebugViewMetricsOverride? _debugViewMetricsOverrideFor(ui.FlutterView view) {
-    DebugViewMetricsOverride? result;
-    assert(() {
-      result = debugViewMetricsOverrides[view.viewId];
-      return true;
-    }());
-    return result;
-  }
+  /// A registry entry alone does not prove that a custom view and its
+  /// dispatcher apply that view's override. Built-in wrappers are recognized;
+  /// other adapters opt in with [debugMarkViewAppliesItsOwnMetricsOverride].
+  static DebugViewMetricsOverride? _debugViewMetricsOverrideFor(ui.FlutterView view) =>
+      debugViewMetricsOverrideApplied(view);
 
   static TextScaler _textScalerFromView(
     ui.FlutterView view,
@@ -537,11 +512,10 @@ class MediaQueryData {
     // factor while the metric is a [TextScaler]: what the override sets is the
     // factor the view's dispatcher already scales font sizes by.
     final overridden = debugViewMetricsOverride?.textScaleFactor != null;
-    final TextScaler reported = SystemTextScaler._(
-      view.platformDispatcher,
-      debugScalesLinearly: overridden,
-    );
-    return overridden ? reported : platformData?.textScaler ?? reported;
+    if (!overridden && platformData != null) {
+      return platformData.textScaler;
+    }
+    return SystemTextScaler._(view.platformDispatcher, debugScalesLinearly: overridden);
   }
 
   static BorderRadius? _displayCornerRadiiFromView(ui.FlutterView view) {
@@ -647,28 +621,13 @@ class MediaQueryData {
     return factor >= 0 && TextScaler.linear(factor) == scaler;
   }
 
-  /// Whether `scaler`, which is replacing the one some data held, scales by a
-  /// factor a [debugViewMetricsOverrides] entry supplied, given that
-  /// `inherited` says so of that data.
-  ///
-  /// A [SystemTextScaler] answers for itself: an override supplying the factor
-  /// is exactly what makes it multiply by that factor instead of applying the
-  /// platform's curve. Any other scaler is one a caller built, and carries the
-  /// answer of the data it is replacing a scaler on — unless it is one
-  /// [TextScaler.linear] produced, which is all an override leaves behind, so
-  /// there is nothing left for it to have changed. A scaler of someone's own
-  /// that multiplies by its factor is not recognized as one of those and keeps
-  /// the answer, which costs a rebuild rather than missing one.
-  ///
-  /// One a caller built out of an overridden scaler — a clamp of one, say — is
-  /// therefore answered by where it is going rather than by what it wraps,
-  /// because what a [TextScaler] wraps is private to it. Such a scaler carried
-  /// to data built over no override is recorded as scaling the way that data
-  /// does, and text scaled through it does not rebuild when the override that
-  /// built it comes and goes.
+  // Known scalers carry their strategy through public constructors and copies.
+  // A custom scaler may wrap one without exposing it, so copies conservatively
+  // retain the source data's flag for unknown scaling strategies.
   static bool _debugScalerIsOverridden(TextScaler scaler, {required bool inherited}) =>
       switch (scaler) {
         final SystemTextScaler scaler => scaler._debugScalesLinearly,
+        final _DebugClampedTextScaler scaler => scaler.overridden,
         _ => inherited && !_debugIsLinearTextScaler(scaler),
       };
 
@@ -691,7 +650,11 @@ class MediaQueryData {
   /// different types another would not be.
   ///
   /// Always false in release mode, where there are no overrides.
-  final bool _debugTextScalerIsOverridden;
+  final bool _debugTextScalerOverrideFallback;
+
+  bool get _debugTextScalerIsOverridden =>
+      kDebugMode &&
+      _debugScalerIsOverridden(textScaler, inherited: _debugTextScalerOverrideFallback);
 
   /// The font scaling strategy to use for laying out textual contents.
   ///
@@ -1476,11 +1439,9 @@ class MediaQueryData {
         // instead is what made this intransitive, because a scaler can be equal
         // to one of another type without that being mutual.
         //
-        // The flag is asked first because it is two field reads, where
-        // [textScaleFactor] walks the scaler again. At a factor of 1.0 there is
-        // no difference to find anyway: dart:ui returns the font size unchanged
-        // there rather than applying its curve, which is the exemption
-        // [SystemTextScaler.operator ==] makes as well.
+        // At a factor of 1.0 there is no difference to find anyway: dart:ui
+        // returns the font size unchanged there rather than applying its curve,
+        // which is the exemption [SystemTextScaler.operator ==] makes as well.
         (!kDebugMode ||
             other._debugTextScalerIsOverridden == _debugTextScalerIsOverridden ||
             textScaleFactor == 1.0) &&
@@ -2746,11 +2707,36 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
     _data = null; // _updateData must be called again after changing parent data.
   }
 
+  // Whether a debug view metrics override is what supplied the brightness,
+  // which [build] needs and [MediaQueryData] does not carry.
+  //
+  // Kept here rather than worked out in [build], because two override states
+  // can produce the same data — an override that reports the brightness the
+  // platform already reports does — and a change that leaves the data alone
+  // would then never reach [build] to be acted on. Always false in release,
+  // where there are no overrides.
+  bool _debugBrightnessIsOverridden = false;
+
   void _updateData() {
     final newData = MediaQueryData.fromView(widget.view, platformData: _parentData);
-    if (newData != _data) {
+    var newBrightnessIsOverridden = false;
+    assert(() {
+      // Asked of the view that applies the entry, and only when it applies one,
+      // for the reason [MediaQueryData.fromView] asks that way: an entry
+      // registered for a view that resolves nothing did not supersede
+      // [_parentData], so replacing the brightness below would drop what the
+      // parent supplied in favour of a value nothing asked for.
+      newBrightnessIsOverridden =
+          debugViewMetricsOverrideApplied(
+            debugViewWithMetricsOverrides(widget.view),
+          )?.platformBrightness !=
+          null;
+      return true;
+    }());
+    if (newData != _data || newBrightnessIsOverridden != _debugBrightnessIsOverridden) {
       setState(() {
         _data = newData;
+        _debugBrightnessIsOverridden = newBrightnessIsOverridden;
       });
     }
   }
@@ -2801,14 +2787,8 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
     // If we get our platformBrightness from the PlatformDispatcher, either
     // because there is no parent data or because a per-view override supersedes
     // it, replace it with debugBrightnessOverride in non-release mode.
-    var overridesBrightness = false;
-    assert(() {
-      overridesBrightness =
-          debugViewMetricsOverrides[widget.view.viewId]?.platformBrightness != null;
-      return true;
-    }());
     if (!kReleaseMode &&
-        (_parentData == null || overridesBrightness) &&
+        (_parentData == null || _debugBrightnessIsOverridden) &&
         effectiveData.platformBrightness != debugBrightnessOverride) {
       effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
     }
@@ -2841,7 +2821,23 @@ final class SystemTextScaler extends TextScaler {
 
   final ui.PlatformDispatcher _platformDispatcher;
   @override
-  double scale(double fontSize) => _platformDispatcher.scaleFontSize(fontSize);
+  double scale(double fontSize) {
+    if (kDebugMode && _debugScalesLinearly) {
+      return TextScaler.linear(textScaleFactor).scale(fontSize);
+    }
+    return _platformDispatcher.scaleFontSize(fontSize);
+  }
+
+  @override
+  TextScaler clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) {
+    final TextScaler result = super.clamp(
+      minScaleFactor: minScaleFactor,
+      maxScaleFactor: maxScaleFactor,
+    );
+    return !kDebugMode || identical(result, this) || minScaleFactor == maxScaleFactor
+        ? result
+        : _DebugClampedTextScaler(result, _debugScalesLinearly);
+  }
 
   /// Whether [scale] multiplies by [textScaleFactor] instead of applying the
   /// platform's own curve, because a [debugViewMetricsOverrides] entry supplies
@@ -2908,4 +2904,44 @@ final class SystemTextScaler extends TextScaler {
   @override
   String toString() =>
       'SystemTextScaler (${textScaleFactor == 1.0 ? "no scaling" : "${textScaleFactor}x"})';
+}
+
+// Carries the origin of a system scaler through clamps without depending on
+// private implementation types in painting. This also works when a caller
+// transfers the scaler to a new MediaQueryData instead of using copyWith.
+final class _DebugClampedTextScaler extends TextScaler {
+  const _DebugClampedTextScaler(this.scaler, this.overridden);
+
+  final TextScaler scaler;
+  final bool overridden;
+
+  @override
+  double get textScaleFactor => scaler.textScaleFactor;
+
+  @override
+  double scale(double fontSize) => scaler.scale(fontSize);
+
+  @override
+  TextScaler clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) {
+    final TextScaler result = scaler.clamp(
+      minScaleFactor: minScaleFactor,
+      maxScaleFactor: maxScaleFactor,
+    );
+    if (identical(result, scaler)) {
+      return this;
+    }
+    return MediaQueryData._debugIsLinearTextScaler(result)
+        ? result
+        : _DebugClampedTextScaler(result, overridden);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is _DebugClampedTextScaler && overridden == other.overridden && scaler == other.scaler;
+
+  @override
+  int get hashCode => Object.hash(scaler, overridden);
+
+  @override
+  String toString() => scaler.toString();
 }

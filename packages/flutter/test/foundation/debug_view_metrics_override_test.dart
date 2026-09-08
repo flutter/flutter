@@ -1125,6 +1125,31 @@ void main() {
       expect(fake.viewFor(1).renderedSize, const ui.Size(10, 20));
     });
 
+    test('an explicit test size also wins when render omits its size', () {
+      final fake = _TwoViewPlatformDispatcher();
+      final dispatcher = TestPlatformDispatcher(
+        platformDispatcher: debugApplyViewMetricsOverrides(fake),
+      );
+      final TestFlutterView view = dispatcher.implicitView!;
+      view.physicalSize = const ui.Size(900, 600);
+      debugSetViewMetricsOverride(
+        1,
+        const DebugViewMetricsOverride(physicalSize: ui.Size(400, 800)),
+      );
+      final ui.Scene scene = ui.SceneBuilder().build();
+      addTearDown(scene.dispose);
+      view.render(scene);
+      expect(fake.viewFor(1).renderedSize, const ui.Size(900, 600));
+      view.render(scene, size: const ui.Size(10, 20));
+      expect(fake.viewFor(1).renderedSize, const ui.Size(10, 20));
+      view.resetPhysicalSize();
+      view.render(scene);
+      expect(fake.viewFor(1).renderedSize, const ui.Size(400, 800));
+      debugClearViewMetricsOverrides();
+      view.render(scene);
+      expect(fake.viewFor(1).renderedSize, isNull);
+    });
+
     test('and forwards a scene with no size to a view with no size override', () {
       // Only an override supplies a size that was not asked for. Resolving the
       // omission against the size the platform already reports would answer the
@@ -1385,22 +1410,22 @@ void main() {
       ]);
     });
 
-    test('as this replay when a callback fails, not into the zone it belongs to', () {
-      // Running the callback rather than guarding it is what keeps a failure
-      // reportable: dart:ui's own dispatch would hand it to the registration
-      // zone, and a notification the framework synthesized would surface as one
-      // the platform sent, in a zone that has nothing to do with the override
-      // that was changed.
+    test('into the error zone a failing callback was registered in', () {
+      // dart:ui hands a notification that throws to the handler of the zone its
+      // callback was registered in, and a replayed one has to as well: a
+      // callback an application registered inside runZonedGuarded follows that
+      // zone's error policy when the platform reports a metric, so a debug
+      // override must not take it out from under that handler.
       final fake = _TwoViewPlatformDispatcher();
       final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(fake);
-      final reported = <String>[];
-      final libraries = <String?>[];
-      final stacks = <StackTrace?>[];
+      final caught = <Object>[];
       var brightnessChanged = 0;
-      runZoned(() {
+      late Zone registrationZone;
+      runZonedGuarded(() {
+        registrationZone = Zone.current;
         wrapped.onTextScaleFactorChanged = () => throw StateError('boom');
         wrapped.onPlatformBrightnessChanged = () => brightnessChanged += 1;
-      }, zoneValues: <Object?, Object?>{#viewMetricsTestZone: 'registration'});
+      }, (Object error, StackTrace stack) => caught.add(error));
       // A wrapped dispatcher is told about every later override change too, for
       // as long as it is alive, so a callback that throws has to stop throwing
       // before the tear-down that clears this test's override runs.
@@ -1409,9 +1434,140 @@ void main() {
         wrapped.onPlatformBrightnessChanged = null;
       });
 
+      final reported = <Object>[];
+      final FlutterExceptionHandler? previousOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) => reported.add(details.exception);
+      addTearDown(() => FlutterError.onError = previousOnError);
+
+      debugSetViewMetricsOverride(
+        1,
+        const DebugViewMetricsOverride(
+          textScaleFactor: 2.0,
+          platformBrightness: ui.Brightness.dark,
+        ),
+      );
+
+      expect(caught, hasLength(1));
+      expect(caught.single, isStateError);
+      // That zone handled it, so the framework does not report it as well.
+      expect(reported, isEmpty);
+      // And the notification after the failing one still happened.
+      expect(brightnessChanged, 1);
+
+      // Same-zone synthetic delivery must also reach that zone's error
+      // handler while allowing subsequent notifications to continue.
+      debugClearViewMetricsOverrides();
+      caught.clear();
+      reported.clear();
+      registrationZone.run(() {
+        debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(textScaleFactor: 3.0));
+      });
+      expect(caught, <Object>[isStateError]);
+      expect(reported, isEmpty);
+    });
+
+    test(
+      'replacement through root and per-view wrappers keeps each callback and error zone paired',
+      () {
+        final fake = _TwoViewPlatformDispatcher();
+        final ui.PlatformDispatcher root = debugApplyViewMetricsOverrides(fake);
+        final ui.PlatformDispatcher view = root.view(id: 1)!.platformDispatcher;
+        final setters = <void Function(ui.PlatformDispatcher, ui.VoidCallback?)>[
+          (dispatcher, callback) => dispatcher.onPlatformConfigurationChanged = callback,
+          (dispatcher, callback) => dispatcher.onTextScaleFactorChanged = callback,
+          (dispatcher, callback) => dispatcher.onPlatformBrightnessChanged = callback,
+          (dispatcher, callback) => dispatcher.onAccessibilityFeaturesChanged = callback,
+          (dispatcher, callback) => dispatcher.onMetricsChanged = callback,
+        ];
+        final ranIn = <Object?>[];
+        final caught = <Object>[];
+        for (var i = 0; i < setters.length; i++) {
+          final index = i;
+          runZoned(() => setters[i](root, () => fail('replaced callback')));
+          runZonedGuarded(
+            () {
+              setters[index](view, () {
+                ranIn.add(Zone.current[#registration]);
+                throw StateError('callback $index');
+              });
+            },
+            (Object error, StackTrace stack) => caught.add(error),
+            zoneValues: <Object?, Object?>{#registration: index},
+          );
+        }
+        addTearDown(() {
+          for (final setter in setters) {
+            setter(root, null);
+          }
+        });
+        debugSetViewMetricsOverride(
+          1,
+          const DebugViewMetricsOverride(
+            devicePixelRatio: 4,
+            textScaleFactor: 3,
+            platformBrightness: ui.Brightness.dark,
+            boldText: true,
+          ),
+        );
+        expect(ranIn, <int>[0, 1, 2, 3, 4]);
+        expect(caught, hasLength(5));
+        ranIn.clear();
+        for (var i = 0; i < setters.length; i++) {
+          final index = i;
+          runZoned(() {
+            setters[index](root, () => ranIn.add(Zone.current[#registration]));
+          }, zoneValues: <Object?, Object?>{#registration: 'root $index'});
+        }
+        debugClearViewMetricsOverrides();
+        expect(ranIn, <String>['root 0', 'root 1', 'root 2', 'root 3', 'root 4']);
+        expect(caught, hasLength(5));
+      },
+    );
+
+    test('does not pair a directly replaced callback with a stale registration zone', () {
+      final fake = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(fake);
+      final ranIn = <Object?>[];
+      runZoned(() {
+        wrapped.onTextScaleFactorChanged = () {};
+      }, zoneValues: <Object?, Object?>{#registration: 'old'});
+      fake.onTextScaleFactorChanged = () => ranIn.add(Zone.current[#registration]);
+      runZoned(() {
+        debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(textScaleFactor: 3));
+      }, zoneValues: <Object?, Object?>{#registration: 'delivery'});
+      expect(ranIn, <Object?>['delivery']);
+      fake.onTextScaleFactorChanged = null;
+    });
+
+    test('as this replay when the failing callback belongs to no zone of ours', () {
+      // A callback set on the dispatcher underneath, which the wrapper never
+      // saw registered, has no zone to hand a failure to. Reporting it is what
+      // keeps one failing notification from cancelling the rest.
+      final fake = _TwoViewPlatformDispatcher();
+      // Wrapped inside a guarded zone that must never hear about any of this:
+      // the wrapper records a zone in its setters and nowhere else, so a
+      // callback set on the dispatcher underneath belongs to no zone of ours
+      // however this dispatcher came to be wrapped.
+      final wrappedIn = <Object>[];
+      runZonedGuarded(
+        () => debugApplyViewMetricsOverrides(fake),
+        (Object error, StackTrace stack) => wrappedIn.add(error),
+      );
+      addTearDown(() => expect(wrappedIn, isEmpty));
+      var brightnessChanged = 0;
+      fake.onTextScaleFactorChanged = () => throw StateError('boom');
+      fake.onPlatformBrightnessChanged = () => brightnessChanged += 1;
+      addTearDown(() {
+        fake.onTextScaleFactorChanged = null;
+        fake.onPlatformBrightnessChanged = null;
+      });
+
+      final contexts = <String>[];
+      final libraries = <String?>[];
+      final stacks = <StackTrace?>[];
       final FlutterExceptionHandler? previousOnError = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails details) {
-        reported.add(details.context.toString());
+        contexts.add(details.context.toString());
         libraries.add(details.library);
         stacks.add(details.stack);
       };
@@ -1425,12 +1581,11 @@ void main() {
         ),
       );
 
-      expect(reported, <String>[
+      expect(contexts, <String>[
         'while telling a PlatformDispatcher that a debug view metrics override changed',
       ]);
       expect(libraries, <String>['foundation library']);
       expect(stacks.single, isNotNull, reason: 'a report without a stack cannot be traced');
-      // And the notification after the failing one still happened.
       expect(brightnessChanged, 1);
     });
 
@@ -1533,7 +1688,7 @@ void main() {
       final failing = _TwoViewPlatformDispatcher();
       final reached = _TwoViewPlatformDispatcher();
       final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(failing);
-      wrapped.onPlatformConfigurationChanged = () =>
+      failing.onPlatformConfigurationChanged = () =>
           throw StateError('this dispatcher cannot be notified');
       // Unregistered here rather than at the end of the body: the tear down
       // replays this override once more, and an expectation that fails below
