@@ -193,7 +193,7 @@ gboolean fl_pointer_manager_handle_button_press(
   // interactive move or resize. Cancel the stale press so this one is not
   // dropped.
   if ((self->button_state & button) != 0) {
-    fl_pointer_manager_handle_grab_broken(self, event_time);
+    fl_pointer_manager_cancel_input(self, event_time);
   }
 
   int old_button_state = self->button_state;
@@ -298,7 +298,7 @@ gboolean fl_pointer_manager_handle_enter(FlPointerManager* self,
   // gives it back without saying the button was released. Cancel the press if
   // the pointer has come back with nothing pressed.
   if (self->button_state != 0 && !has_buttons_pressed(gdk_state)) {
-    fl_pointer_manager_handle_grab_broken(self, event_time);
+    fl_pointer_manager_cancel_input(self, event_time);
   }
 
   return TRUE;
@@ -325,7 +325,8 @@ gboolean fl_pointer_manager_handle_leave(FlPointerManager* self,
   // Don't remove pointer while button is down; In case of dragging outside of
   // window with mouse grab active Gtk will send another leave notify on
   // release. Remember the leave so the pointer can still be removed if that
-  // release is never delivered, e.g. because the grab was broken.
+  // release is never delivered, e.g. because the window system took the
+  // pointer.
   if (self->button_state != 0) {
     record_pointer_state(self, device_kind, x, y, rotation, pressure);
     self->leave_pending = TRUE;
@@ -341,8 +342,8 @@ gboolean fl_pointer_manager_handle_leave(FlPointerManager* self,
   return TRUE;
 }
 
-gboolean fl_pointer_manager_handle_grab_broken(FlPointerManager* self,
-                                               guint event_time) {
+gboolean fl_pointer_manager_cancel_input(FlPointerManager* self,
+                                         guint event_time) {
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
 
   // Nothing to do if no buttons are pressed.

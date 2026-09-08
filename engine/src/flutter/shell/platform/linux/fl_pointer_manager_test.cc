@@ -665,7 +665,7 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonPressButtonRelease) {
   EXPECT_EQ(pointer_events[4].view_id, 42);
 }
 
-TEST_F(FlPointerManagerTest, GrabBroken) {
+TEST_F(FlPointerManagerTest, CancelInput) {
   StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
@@ -688,7 +688,7 @@ TEST_F(FlPointerManagerTest, GrabBroken) {
       manager, 1235, kFlutterPointerDeviceKindMouse, 5.0, 9.0, 0, 0);
   // The grab was taken by the window manager, e.g. an interactive move
   // started. The press is cancelled at the last known position.
-  EXPECT_TRUE(fl_pointer_manager_handle_grab_broken(manager, 1236));
+  EXPECT_TRUE(fl_pointer_manager_cancel_input(manager, 1236));
   // A later press is not dropped.
   fl_pointer_manager_handle_button_press(manager, 1237,
                                          kFlutterPointerDeviceKindMouse, 6.0,
@@ -714,7 +714,7 @@ TEST_F(FlPointerManagerTest, GrabBroken) {
   EXPECT_EQ(pointer_events[4].view_id, 42);
 }
 
-TEST_F(FlPointerManagerTest, GrabBrokenAfterLeave) {
+TEST_F(FlPointerManagerTest, CancelInputAfterLeave) {
   StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
@@ -739,7 +739,7 @@ TEST_F(FlPointerManagerTest, GrabBrokenAfterLeave) {
                                   5.0, 9.0, 0, 0);
   // The release never arrives as the grab was broken, so the pointer is
   // cancelled and removed.
-  EXPECT_TRUE(fl_pointer_manager_handle_grab_broken(manager, 1236));
+  EXPECT_TRUE(fl_pointer_manager_cancel_input(manager, 1236));
 
   EXPECT_EQ(pointer_events.size(), 4u);
 
@@ -762,7 +762,7 @@ TEST_F(FlPointerManagerTest, GrabBrokenAfterLeave) {
   EXPECT_EQ(pointer_events[4].phase, kAdd);
 }
 
-TEST_F(FlPointerManagerTest, GrabBrokenNoButtons) {
+TEST_F(FlPointerManagerTest, CancelInputNoButtons) {
   StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
@@ -781,7 +781,7 @@ TEST_F(FlPointerManagerTest, GrabBrokenNoButtons) {
   fl_pointer_manager_handle_enter(manager, 1234, kFlutterPointerDeviceKindMouse,
                                   1.0, 2.0, 0, 0, 0);
   // Nothing to cancel if no buttons are pressed.
-  EXPECT_FALSE(fl_pointer_manager_handle_grab_broken(manager, 1235));
+  EXPECT_FALSE(fl_pointer_manager_cancel_input(manager, 1235));
 
   EXPECT_EQ(pointer_events.size(), 1u);
 }

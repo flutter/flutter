@@ -132,7 +132,7 @@ TEST_F(FlTouchManagerTest, TouchCancel) {
   EXPECT_EQ(pointer_events[5].phase, kDown);
 }
 
-TEST_F(FlTouchManagerTest, GrabBroken) {
+TEST_F(FlTouchManagerTest, CancelInput) {
   StartEngine();
 
   std::vector<FlutterPointerEvent> pointer_events;
@@ -150,7 +150,7 @@ TEST_F(FlTouchManagerTest, GrabBroken) {
   g_autoptr(FlTouchManager) manager = fl_touch_manager_new(engine, 0);
 
   // Nothing to do if no touches are in contact.
-  fl_touch_manager_handle_grab_broken(manager, 1);
+  fl_touch_manager_cancel_input(manager, 1);
   EXPECT_EQ(pointer_events.size(), 0u);
 
   GdkDevice* touchscreen =
@@ -171,7 +171,7 @@ TEST_F(FlTouchManagerTest, GrabBroken) {
 
   // Events are no longer delivered to this view, so the touch is cancelled at
   // its last known location.
-  fl_touch_manager_handle_grab_broken(manager, 2);
+  fl_touch_manager_cancel_input(manager, 2);
   EXPECT_EQ(pointer_events.size(), 5u);
   EXPECT_EQ(pointer_events[3].x, 6.0);
   EXPECT_EQ(pointer_events[3].y, 10.0);
@@ -182,6 +182,6 @@ TEST_F(FlTouchManagerTest, GrabBroken) {
   EXPECT_EQ(pointer_events[4].phase, kRemove);
 
   // The touch is not cancelled twice.
-  fl_touch_manager_handle_grab_broken(manager, 3);
+  fl_touch_manager_cancel_input(manager, 3);
   EXPECT_EQ(pointer_events.size(), 5u);
 }

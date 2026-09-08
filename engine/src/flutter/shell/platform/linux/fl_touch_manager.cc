@@ -230,8 +230,7 @@ void fl_touch_manager_handle_touch_event(FlTouchManager* self,
   }
 }
 
-void fl_touch_manager_handle_grab_broken(FlTouchManager* self,
-                                         guint event_time) {
+void fl_touch_manager_cancel_input(FlTouchManager* self, guint event_time) {
   g_return_if_fail(FL_IS_TOUCH_MANAGER(self));
 
   if (g_hash_table_size(self->added_touch_devices) == 0) {

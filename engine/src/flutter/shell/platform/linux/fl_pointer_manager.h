@@ -137,19 +137,18 @@ gboolean fl_pointer_manager_handle_leave(FlPointerManager* manager,
                                          gdouble pressure);
 
 /**
- * fl_pointer_manager_handle_grab_broken:
+ * fl_pointer_manager_cancel_input:
  * @manager: an #FlPointerManager.
  * @event_time: time event occurred in milliseconds.
  *
- * Handle the pointer grab being taken by something else, e.g. when a window
- * starts an interactive move or resize. The button release that ends the grab
- * is delivered to the window manager instead of the application, so any
- * buttons Flutter believes are pressed are cancelled.
+ * Handle the release of any buttons Flutter believes are pressed never being
+ * delivered, e.g. because the window system took the pointer to move or resize
+ * the window. Those buttons are cancelled.
  *
  * Returns: %TRUE if the event was handled.
  */
-gboolean fl_pointer_manager_handle_grab_broken(FlPointerManager* manager,
-                                               guint event_time);
+gboolean fl_pointer_manager_cancel_input(FlPointerManager* manager,
+                                         guint event_time);
 
 G_END_DECLS
 

@@ -356,14 +356,13 @@ static gboolean button_release_event_cb(FlView* self,
 // their events are no longer being delivered to it.
 static gboolean cancel_input(FlView* self, guint event_time) {
   if (self->touch_manager != nullptr) {
-    fl_touch_manager_handle_grab_broken(self->touch_manager, event_time);
+    fl_touch_manager_cancel_input(self->touch_manager, event_time);
   }
 
   if (self->pointer_manager == nullptr) {
     return FALSE;
   }
-  return fl_pointer_manager_handle_grab_broken(self->pointer_manager,
-                                               event_time);
+  return fl_pointer_manager_cancel_input(self->pointer_manager, event_time);
 }
 
 // Signal handler for GtkWidget::grab-broken-event
