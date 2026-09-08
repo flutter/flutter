@@ -386,7 +386,7 @@ void main() {
       }, overrides: <Type, Generator>{Platform: () => FakePlatform()});
 
       testUsingContext(
-        'On macOS, traces error and returns null when client throws SocketException on start with throwOnMissingLocalNetworkPermissionsError: false',
+        'On macOS, traces error and returns null when client throws SocketException on start with throwOnError: false',
         () async {
           final MDnsClient client = FakeMDnsClient(
             <PtrResourceRecord>[],
@@ -403,7 +403,7 @@ void main() {
           );
 
           final MDnsVmServiceDiscoveryResult? result = await portDiscovery.queryForAttach(
-            throwOnMissingLocalNetworkPermissionsError: false,
+            throwOnError: false,
           );
 
           expect(result, isNull);
@@ -754,7 +754,7 @@ void main() {
       );
 
       testUsingContext(
-        'On macOS, tool traces an error and returns null when mDNS lookup throws an uncaught SocketException and throwOnMissingLocalNetworkPermissionsError is false',
+        'On macOS, tool traces an error and returns null when mDNS lookup throws an uncaught SocketException and throwOnError is false',
         () async {
           final MDnsClient client = FakeMDnsClient(
             <PtrResourceRecord>[],
@@ -772,7 +772,7 @@ void main() {
 
           final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
             client,
-            throwOnMissingLocalNetworkPermissionsError: false,
+            throwOnError: false,
           );
 
           expect(result, isNull);

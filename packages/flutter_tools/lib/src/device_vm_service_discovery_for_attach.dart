@@ -69,7 +69,7 @@ class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
     this.appId,
     this.deviceVmservicePort,
     this.hostVmservicePort,
-    this.throwOnMissingLocalNetworkPermissionsError = true,
+    this.throwOnError = true,
   });
 
   final Device device;
@@ -78,7 +78,7 @@ class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
   final bool useDeviceIPAsHost;
   final int? deviceVmservicePort;
   final int? hostVmservicePort;
-  final bool throwOnMissingLocalNetworkPermissionsError;
+  final bool throwOnError;
 
   @override
   Stream<Uri> get uris {
@@ -88,7 +88,7 @@ class MdnsVMServiceDiscoveryForAttach extends VMServiceDiscoveryForAttach {
           device,
           deviceVmservicePort: deviceVmservicePort,
           hostVmservicePort: hostVmservicePort,
-          throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
+          throwOnError: throwOnError,
           useDeviceIPAsHost: useDeviceIPAsHost,
           usesIpv6: usesIpv6,
         );

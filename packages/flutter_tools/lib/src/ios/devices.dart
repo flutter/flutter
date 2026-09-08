@@ -970,13 +970,13 @@ class IOSDevice extends Device {
   }) async {
     final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
 
-    // If mDNS fails, don't throw since url may still be findable through vmServiceDiscovery.
+    // If mDNS fails, don't throw if the URL may still be findable through log-based discovery (vmServiceDiscovery).
     final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
       packageId,
       this,
-      usesIpv6: debuggingOptions.ipv6,
+      throwOnError: !discoverVMUrlFromLogs,
       useDeviceIPAsHost: isWirelesslyConnected,
-      throwOnMissingLocalNetworkPermissionsError: !discoverVMUrlFromLogs,
+      usesIpv6: debuggingOptions.ipv6,
     );
 
     final discoveryOptions = <Future<Uri?>>[
@@ -1354,12 +1354,13 @@ class IOSDevice extends Device {
     final bool compatibleWithProtocolDiscovery =
         majorSdkVersion < IOSDeviceLogReader.minimumUniversalLoggingSdkVersion &&
         !isWirelesslyConnected;
+    // If compatible with protocol discovery via logs, do not throw on mDNS error so DelegateVMServiceDiscoveryForAttach can fall back to log-based discovery.
     final mdnsVMServiceDiscoveryForAttach = MdnsVMServiceDiscoveryForAttach(
       device: this,
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
-      throwOnMissingLocalNetworkPermissionsError: !compatibleWithProtocolDiscovery,
+      throwOnError: !compatibleWithProtocolDiscovery,
       useDeviceIPAsHost: isWirelesslyConnected,
       usesIpv6: ipv6,
     );

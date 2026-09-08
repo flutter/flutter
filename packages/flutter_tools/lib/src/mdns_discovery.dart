@@ -98,9 +98,9 @@ class MDnsVmServiceDiscovery {
     String? applicationId,
     int? deviceVmservicePort,
     bool ipv6 = false,
-    bool useDeviceIPAsHost = false,
+    bool throwOnError = true,
     Duration timeout = const Duration(minutes: 10),
-    bool throwOnMissingLocalNetworkPermissionsError = true,
+    bool useDeviceIPAsHost = false,
   }) async {
     // Poll for 5 seconds to see if there are already services running.
     // Use a new instance of MDnsClient so results don't get cached in _client.
@@ -112,9 +112,9 @@ class MDnsVmServiceDiscovery {
       applicationId: applicationId,
       deviceVmServicePort: deviceVmservicePort,
       ipv6: ipv6,
-      useDeviceIPAsHost: useDeviceIPAsHost,
+      throwOnError: throwOnError,
       timeout: const Duration(seconds: 5),
-      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
+      useDeviceIPAsHost: useDeviceIPAsHost,
     );
     if (results.isEmpty) {
       return firstMatchingVmService(
@@ -122,7 +122,7 @@ class MDnsVmServiceDiscovery {
         applicationId: applicationId,
         deviceVmservicePort: deviceVmservicePort,
         ipv6: ipv6,
-        throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
+        throwOnError: throwOnError,
         timeout: timeout,
         useDeviceIPAsHost: useDeviceIPAsHost,
       );
@@ -171,12 +171,12 @@ class MDnsVmServiceDiscovery {
   @visibleForTesting
   Future<MDnsVmServiceDiscoveryResult?> queryForLaunch({
     required String applicationId,
-    int? deviceVmservicePort,
     String? deviceName,
+    int? deviceVmservicePort,
     bool ipv6 = false,
-    bool useDeviceIPAsHost = false,
+    bool throwOnError = true,
     Duration timeout = const Duration(minutes: 10),
-    bool throwOnMissingLocalNetworkPermissionsError = true,
+    bool useDeviceIPAsHost = false,
   }) async {
     // Either the device port or the device name must be provided.
     assert(deviceVmservicePort != null || deviceName != null);
@@ -185,12 +185,12 @@ class MDnsVmServiceDiscovery {
     return firstMatchingVmService(
       _client,
       applicationId: applicationId,
-      deviceVmservicePort: deviceVmservicePort,
       deviceName: deviceName,
+      deviceVmservicePort: deviceVmservicePort,
       ipv6: ipv6,
-      useDeviceIPAsHost: useDeviceIPAsHost,
+      throwOnError: throwOnError,
       timeout: timeout,
-      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
+      useDeviceIPAsHost: useDeviceIPAsHost,
     );
   }
 
@@ -201,23 +201,23 @@ class MDnsVmServiceDiscovery {
   Future<MDnsVmServiceDiscoveryResult?> firstMatchingVmService(
     MDnsClient client, {
     String? applicationId,
-    int? deviceVmservicePort,
     String? deviceName,
+    int? deviceVmservicePort,
     bool ipv6 = false,
-    bool useDeviceIPAsHost = false,
+    bool throwOnError = true,
     Duration timeout = const Duration(minutes: 10),
-    bool throwOnMissingLocalNetworkPermissionsError = true,
+    bool useDeviceIPAsHost = false,
   }) async {
     final List<MDnsVmServiceDiscoveryResult> results = await _pollingVmService(
       client,
       applicationId: applicationId,
-      deviceVmServicePort: deviceVmservicePort,
       deviceName: deviceName,
+      deviceVmServicePort: deviceVmservicePort,
       ipv6: ipv6,
-      useDeviceIPAsHost: useDeviceIPAsHost,
-      timeout: timeout,
       quitOnFind: true,
-      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
+      throwOnError: throwOnError,
+      timeout: timeout,
+      useDeviceIPAsHost: useDeviceIPAsHost,
     );
     if (results.isEmpty) {
       return null;
@@ -227,14 +227,14 @@ class MDnsVmServiceDiscovery {
 
   Future<List<MDnsVmServiceDiscoveryResult>> _pollingVmService(
     MDnsClient client, {
-    String? applicationId,
-    int? deviceVmServicePort,
-    String? deviceName,
-    bool ipv6 = false,
-    bool useDeviceIPAsHost = false,
     required Duration timeout,
+    String? applicationId,
+    String? deviceName,
+    int? deviceVmServicePort,
+    bool ipv6 = false,
     bool quitOnFind = false,
-    bool throwOnMissingLocalNetworkPermissionsError = true,
+    bool throwOnError = true,
+    bool useDeviceIPAsHost = false,
   }) async {
     if (!_effectivePlatform.isMacOS) {
       throw UnsupportedError('mDNS discovery is only supported on macOS.');
@@ -276,7 +276,7 @@ class MDnsVmServiceDiscovery {
       return await completer.future;
     } on SocketException catch (e, stackTrace) {
       _logger.printTrace('mDNS discovery failed: $e\n$stackTrace');
-      if (throwOnMissingLocalNetworkPermissionsError) {
+      if (throwOnError) {
         throwToolExit(_missingLocalNetworkPermissionsInstructions(e.toString()));
       } else {
         return <MDnsVmServiceDiscoveryResult>[];
@@ -471,7 +471,7 @@ class MDnsVmServiceDiscovery {
     Device device, {
     int? deviceVmservicePort,
     int? hostVmservicePort,
-    bool throwOnMissingLocalNetworkPermissionsError = true,
+    bool throwOnError = true,
     Duration timeout = const Duration(minutes: 10),
     bool useDeviceIPAsHost = false,
     bool usesIpv6 = false,
@@ -480,7 +480,7 @@ class MDnsVmServiceDiscovery {
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       ipv6: usesIpv6,
-      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
+      throwOnError: throwOnError,
       timeout: timeout,
       useDeviceIPAsHost: useDeviceIPAsHost,
     );
@@ -507,21 +507,21 @@ class MDnsVmServiceDiscovery {
   Future<Uri?> getVMServiceUriForLaunch(
     String applicationId,
     Device device, {
-    bool usesIpv6 = false,
-    int? hostVmservicePort,
     int? deviceVmservicePort,
-    bool useDeviceIPAsHost = false,
+    int? hostVmservicePort,
+    bool throwOnError = true,
     Duration timeout = const Duration(minutes: 10),
-    bool throwOnMissingLocalNetworkPermissionsError = true,
+    bool useDeviceIPAsHost = false,
+    bool usesIpv6 = false,
   }) async {
     final MDnsVmServiceDiscoveryResult? result = await queryForLaunch(
       applicationId: applicationId,
-      deviceVmservicePort: deviceVmservicePort,
       deviceName: deviceVmservicePort == null ? device.name : null,
+      deviceVmservicePort: deviceVmservicePort,
       ipv6: usesIpv6,
-      useDeviceIPAsHost: useDeviceIPAsHost,
+      throwOnError: throwOnError,
       timeout: timeout,
-      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
+      useDeviceIPAsHost: useDeviceIPAsHost,
     );
     return _handleResult(
       result,
