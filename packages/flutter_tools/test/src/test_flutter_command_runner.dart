@@ -88,7 +88,7 @@ class TestFlutterCommandRunner extends FlutterCommandRunner {
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Logger topLevelLogger = toolContext.logger;
     final contextOverrides = <Type, Object?>{
-      if (topLevelResults['verbose'] as bool) Logger: VerboseLogger(topLevelLogger),
+      Logger: (topLevelResults['verbose'] as bool) ? VerboseLogger(topLevelLogger) : topLevelLogger,
       ProcessInfo: toolContext.processInfo,
     };
     return context.run<void>(
