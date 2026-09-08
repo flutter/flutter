@@ -67,10 +67,26 @@ TEST_F(FlFramebufferTest, MultisampleHasDepthStencil) {
 TEST_F(FlFramebufferTest, ResourcesRemoved) {
   EXPECT_CALL(epoxy, glGenFramebuffers);
   EXPECT_CALL(epoxy, glGenTextures);
+  EXPECT_CALL(epoxy, glGenRenderbuffers);
+  FlFramebuffer* framebuffer = fl_framebuffer_new(GL_RGB, 100, 100, TRUE);
+
+  EXPECT_CALL(epoxy, glDeleteFramebuffers);
+  EXPECT_CALL(epoxy, glDeleteTextures);
+  EXPECT_CALL(epoxy, glDeleteRenderbuffers);
+  g_object_unref(framebuffer);
+}
+
+TEST_F(FlFramebufferTest, NoDepthStencilResourcesRemoved) {
+  // A framebuffer without a depth/stencil buffer has no renderbuffer to
+  // remove.
+  EXPECT_CALL(epoxy, glGenFramebuffers);
+  EXPECT_CALL(epoxy, glGenTextures);
+  EXPECT_CALL(epoxy, glGenRenderbuffers).Times(0);
   FlFramebuffer* framebuffer = fl_framebuffer_new(GL_RGB, 100, 100, FALSE);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);
+  EXPECT_CALL(epoxy, glDeleteRenderbuffers).Times(0);
   g_object_unref(framebuffer);
 }
 
