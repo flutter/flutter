@@ -92,6 +92,9 @@ class BuildBundleCommand extends BuildSubCommand {
   BundleBuilder get bundleBuilder => _bundleBuilder;
 
   @override
+  FeatureFlags get featureFlags => _featureFlags;
+
+  @override
   ToolContext get toolContext => super.toolContext!;
 
   @override

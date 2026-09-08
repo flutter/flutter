@@ -342,13 +342,18 @@ class ResidentWebRunner extends ResidentRunner {
           flutterDevice!.generator!.accept();
           cacheInitialDillCompilation();
         } else {
-          final webBuilder = WebBuilder(
-            logger: _logger,
-            processManager: globals.processManager,
+          final webBuilder = WebBuilder.fromParameters(
+            analytics: globals.analytics,
+            artifacts: globals.artifacts!,
             buildSystem: globals.buildSystem,
+            cache: globals.cache,
+            config: globals.config,
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
-            analytics: globals.analytics,
+            logger: _logger,
+            platform: globals.platform,
+            processManager: globals.processManager,
+            terminal: globals.terminal,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -503,13 +508,18 @@ class ResidentWebRunner extends ResidentRunner {
     } else {
       report = null;
       try {
-        final webBuilder = WebBuilder(
-          logger: _logger,
-          processManager: globals.processManager,
+        final webBuilder = WebBuilder.fromParameters(
+          analytics: globals.analytics,
+          artifacts: globals.artifacts!,
           buildSystem: globals.buildSystem,
+          cache: globals.cache,
+          config: globals.config,
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
-          analytics: globals.analytics,
+          logger: _logger,
+          platform: globals.platform,
+          processManager: globals.processManager,
+          terminal: globals.terminal,
         );
         await webBuilder.buildWeb(
           flutterProject,

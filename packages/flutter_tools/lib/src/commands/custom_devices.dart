@@ -86,6 +86,7 @@ abstract class CustomDevicesCommandBase extends FlutterCommand {
 
   @protected
   CustomDevicesConfig get customDevicesConfig => toolContext.customDevicesConfig;
+  @override
   @protected
   final FeatureFlags featureFlags;
 

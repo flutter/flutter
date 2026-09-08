@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_web.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -50,7 +49,7 @@ void main() {
     processManager = FakeProcessManager.any();
   });
 
-  BuildCommand createBuildCommand({
+  TestWebBuildCommand createBuildCommand({
     required FileSystem fileSystem,
     required BuildSystem buildSystem,
     FeatureFlags? featureFlags,
@@ -59,24 +58,13 @@ void main() {
     ProcessManager? processManager,
     bool verboseHelp = false,
   }) {
-    final BufferLogger effectiveLogger = logger ?? BufferLogger.test();
-    final Platform effectivePlatform = platform ?? fakePlatform;
-    final ProcessManager effectiveProcessManager = processManager ?? FakeProcessManager.any();
-    final ToolContext toolContext = FakeToolContext(
-      cache: FakeCache(),
-      fs: fileSystem,
-      logger: effectiveLogger,
-      platform: effectivePlatform,
-      processManager: effectiveProcessManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
-    );
-    return BuildCommand(
-      androidContext: FakeAndroidContext(),
-      appleContext: FakeAppleContext(),
+    return TestWebBuildCommand(
       buildSystem: buildSystem,
       featureFlags: featureFlags ?? TestFeatureFlags(isWebEnabled: true),
-      templateRenderer: FakeTemplateRenderer(),
-      toolContext: toolContext,
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
       verboseHelp: verboseHelp,
     );
   }
@@ -126,7 +114,7 @@ void main() {
   });
 
   testWithoutContext('Setup for a web build with default output directory', () async {
-    final BuildCommand buildCommand = createBuildCommand(
+    final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
@@ -168,7 +156,7 @@ void main() {
   });
 
   testWithoutContext('Passes --web-define values to environment defines with prefix', () async {
-    final BuildCommand buildCommand = createBuildCommand(
+    final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
@@ -200,7 +188,7 @@ void main() {
   });
 
   testWithoutContext('Builds successfully without --web-define', () async {
-    final BuildCommand buildCommand = createBuildCommand(
+    final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
@@ -228,7 +216,7 @@ void main() {
 
   testWithoutContext('Infers target entrypoint correctly from --target', () async {
     // Regression test for https://github.com/flutter/flutter/issues/136830.
-    final BuildCommand buildCommand = createBuildCommand(
+    final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
@@ -270,7 +258,7 @@ void main() {
 
   testWithoutContext('Infers target entrypoint correctly from positional argument list', () async {
     // Regression test for https://github.com/flutter/flutter/issues/136830.
-    final BuildCommand buildCommand = createBuildCommand(
+    final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
@@ -306,7 +294,7 @@ void main() {
 
   testWithoutContext('Does not allow -O0 optimization level', () async {
     final bufferLogger = BufferLogger.test();
-    final BuildCommand buildCommand = createBuildCommand(
+    final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       logger: bufferLogger,
@@ -336,7 +324,7 @@ void main() {
   });
 
   testWithoutContext('Setup for a web build with a user specified output directory', () async {
-    final BuildCommand buildCommand = createBuildCommand(
+    final TestWebBuildCommand buildCommand = createBuildCommand(
       fileSystem: fileSystem,
       buildSystem: TestBuildSystem.all(BuildResult(success: true), (
         Target target,
@@ -833,16 +821,13 @@ void main() {
 
   testWithoutContext('Refuses to build for web when folder is missing', () async {
     fileSystem.file(fileSystem.path.join('web')).deleteSync(recursive: true);
-    final CommandRunner<void> runner = createTestCommandRunner(
-      createBuildCommand(
-        fileSystem: fileSystem,
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        logger: logger,
-        platform: fakePlatform,
-        processManager: processManager,
-        featureFlags: TestFeatureFlags(isWebEnabled: true),
-      ),
+    final TestWebBuildCommand buildCommand = createBuildCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: fileSystem,
+      platform: fakePlatform,
+      processManager: processManager,
     );
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
 
     expect(
       () => runner.run(<String>['build', 'web', '--no-pub']),
@@ -919,8 +904,8 @@ class TestWebBuildCommand extends FlutterCommand {
     BufferLogger? logger,
     Platform? platform,
     ProcessManager? processManager,
-    bool verboseHelp = false,
     ToolContext? toolContext,
+    bool verboseHelp = false,
   }) : this._(
          buildSystem: buildSystem,
          featureFlags: featureFlags ?? TestFeatureFlags(isWebEnabled: true),
@@ -957,6 +942,9 @@ class TestWebBuildCommand extends FlutterCommand {
   }
 
   final BuildWebCommand webCommand;
+
+  @override
+  FeatureFlags get featureFlags => webCommand.featureFlags;
 
   @override
   final name = 'build';

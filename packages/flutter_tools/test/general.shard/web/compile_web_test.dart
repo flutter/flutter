@@ -26,6 +26,7 @@ void main() {
   late BufferLogger logger;
   late FakeFlutterVersion flutterVersion;
   late FlutterProject flutterProject;
+  late FakeToolContext toolContext;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
@@ -35,6 +36,7 @@ void main() {
       fs: fileSystem,
       fakeFlutterVersion: flutterVersion,
     );
+    toolContext = FakeToolContext(flutterVersion: flutterVersion, fs: fileSystem, logger: logger);
     fileSystem.currentDirectory.childFile('pubspec.yaml')
       ..createSync(recursive: true)
       ..writeAsStringSync('''
@@ -70,12 +72,9 @@ environement:
       });
 
       final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
         analytics: fakeAnalytics,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -138,12 +137,9 @@ environement:
       });
 
       final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
         analytics: fakeAnalytics,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -183,12 +179,9 @@ environement:
       });
 
       final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
         analytics: fakeAnalytics,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -225,12 +218,9 @@ environement:
       );
 
       final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
         analytics: fakeAnalytics,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
       );
       await expectLater(
         () async => webBuilder.buildWeb(

@@ -520,8 +520,7 @@ abstract class FlutterCommand extends Command<void> {
     if (rest != null && rest.isNotEmpty) {
       return rest.first;
     }
-    final ToolContext? context = toolContext;
-    return context != null ? context.fs.path.join('lib', 'main.dart') : bundle.defaultMainPath;
+    return toolContext?.fs.path.join('lib', 'main.dart') ?? bundle.defaultMainPath;
   }
 
   /// Indicates if the current command running has a terminal attached.
@@ -1228,6 +1227,9 @@ abstract class FlutterCommand extends Command<void> {
     return boolArg('enable-hcpp');
   }
 
+  /// The [FeatureFlags] instance, or null if none is available.
+  FeatureFlags? get featureFlags => runner?.featureFlags;
+
   /// The HCPP value for an Android artifact when the developer did not pass
   /// `--[no-]enable-hcpp`: the `enable-hcpp` feature flag, which is on by
   /// default on master and beta.
@@ -1235,20 +1237,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp {
-    if (explicitEnableHcpp case final bool explicit) {
-      return explicit;
-    }
-    FeatureFlags? flags = runner?.featureFlags;
-    if (flags == null) {
-      try {
-        flags = context.get<FeatureFlags>();
-      } on UnsupportedError {
-        flags = null;
-      }
-    }
-    return flags?.isHcppEnabled ?? false;
-  }
+  bool get enableHcpp => explicitEnableHcpp ?? (featureFlags?.isHcppEnabled ?? false);
 
   void addTestFlag({required bool verboseHelp}) {
     argParser.addFlag(
@@ -1481,21 +1470,13 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    FeatureFlags? flags = runner?.featureFlags;
-    if (flags == null) {
-      try {
-        flags = context.get<FeatureFlags>();
-      } on UnsupportedError {
-        return;
-      }
-    }
+    final FeatureFlags? flags = featureFlags;
     if (flags == null) {
       return;
     }
-    final FeatureFlags effectiveFeatureFlags = flags;
 
-    final String enabledFeatureFlags = effectiveFeatureFlags.allFeatures
-        .where((Feature feature) => effectiveFeatureFlags.isEnabled(feature))
+    final String enabledFeatureFlags = flags.allFeatures
+        .where((Feature feature) => flags.isEnabled(feature))
         .where((Feature feature) => feature.runtimeId != null)
         .map((Feature feature) => feature.runtimeId!)
         .join(',');

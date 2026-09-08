@@ -54,6 +54,9 @@ class BuildWebCommand extends BuildSubCommand {
   BuildSystem get buildSystem => _buildSystem;
 
   @override
+  FeatureFlags get featureFlags => _featureFlags;
+
+  @override
   ToolContext get toolContext => super.toolContext!;
 
   @override
@@ -199,12 +202,8 @@ class BuildWebCommand extends BuildSubCommand {
         WebBuilder(
           analytics: analytics,
           buildSystem: _buildSystem,
-          buildTargets: _buildTargets ?? const BuildTargetsImpl(),
-          fileSystem: fs,
-          flutterVersion: toolContext.flutterVersion,
-          logger: toolContext.logger,
-          processManager: toolContext.processManager,
           toolContext: toolContext,
+          buildTargets: _buildTargets ?? const BuildTargetsImpl(),
         );
     await webBuilder.buildWeb(
       project,

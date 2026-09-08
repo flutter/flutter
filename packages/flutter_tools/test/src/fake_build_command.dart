@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -27,6 +28,7 @@ import 'fakes.dart';
 BuildCommand createFakeBuildCommand({
   AndroidSdk? androidSdk,
   BuildSystem? buildSystem,
+  FeatureFlags? featureFlags,
   FileSystem? fileSystem,
   Logger? logger,
   OperatingSystemUtils? osUtils,
@@ -55,6 +57,7 @@ BuildCommand createFakeBuildCommand({
       xcodeProjectInterpreter: xcodeProjectInterpreter,
     ),
     buildSystem: buildSystem ?? FakeBuildSystem(),
+    featureFlags: featureFlags ?? TestFeatureFlags(),
     templateRenderer: templateRenderer ?? FakeTemplateRenderer(),
     toolContext: FakeToolContext(
       artifacts: artifacts ?? FakeArtifacts(),

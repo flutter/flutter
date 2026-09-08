@@ -926,26 +926,12 @@ String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
   // TODO(andrewkolos): Prefer required parameters instead of falling back to globals.
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  var localConfig = config;
-  if (localConfig == null) {
-    try {
-      localConfig = globals.config;
-    } on UnsupportedError {
-      // In testWithoutContext, context.get is not supported.
-    }
-  }
-  var localFilesystem = fileSystem;
-  if (localFilesystem == null) {
-    try {
-      localFilesystem = globals.fs;
-    } on UnsupportedError {
-      // In testWithoutContext, context.get is not supported.
-    }
-  }
+  final Config localConfig = config ?? globals.config;
+  final FileSystem localFilesystem = fileSystem ?? globals.fs;
 
-  final String buildDir = localConfig?.getValue('build-dir') as String? ?? 'build';
-  if (localFilesystem != null && localFilesystem.path.isAbsolute(buildDir)) {
-    throw Exception('build-dir config setting in ${localConfig?.configPath} must be relative');
+  final String buildDir = localConfig.getValue('build-dir') as String? ?? 'build';
+  if (localFilesystem.path.isAbsolute(buildDir)) {
+    throw Exception('build-dir config setting in ${localConfig.configPath} must be relative');
   }
   return buildDir;
 }
@@ -986,16 +972,8 @@ String getMacOSBuildDirectory({Config? config, FileSystem? fileSystem}) {
 
 /// Returns the web build output directory.
 String getWebBuildDirectory({Config? config, FileSystem? fileSystem}) {
-  var localFilesystem = fileSystem;
-  if (localFilesystem == null) {
-    try {
-      localFilesystem = globals.fs;
-    } on UnsupportedError {
-      // In testWithoutContext, context.get is not supported.
-    }
-  }
-  final String buildDir = getBuildDirectory(config, localFilesystem);
-  return localFilesystem != null ? localFilesystem.path.join(buildDir, 'web') : '$buildDir/web';
+  final FileSystem fs = fileSystem ?? globals.fs;
+  return fs.path.join(getBuildDirectory(config, fs), 'web');
 }
 
 /// Returns the Linux build output directory.

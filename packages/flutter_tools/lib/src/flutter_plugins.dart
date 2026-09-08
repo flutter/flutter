@@ -109,12 +109,7 @@ Future<Plugin?> _pluginFromPackage(
   PubspecCache? pubspecCache,
   Logger? logger,
 }) async {
-  FileSystem fs;
-  try {
-    fs = fileSystem ?? globals.fs;
-  } on UnsupportedError {
-    fs = globals.localFileSystem;
-  }
+  final FileSystem fs = fileSystem ?? globals.fs;
   final Logger effectiveLogger = logger ?? globals.logger;
   YamlMap? pubspec;
   // Use containsKey rather than a null check so that a cached null (meaning
@@ -1469,6 +1464,7 @@ Future<void> injectPlugins(
             templateRenderer: globals.templateRenderer,
             processUtils: globals.processUtils,
             config: globals.config,
+            logger: globals.logger,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,
