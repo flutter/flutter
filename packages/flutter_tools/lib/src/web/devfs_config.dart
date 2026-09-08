@@ -15,9 +15,18 @@ import 'devfs_proxy.dart';
 
 const webDevServerConfigFilePath = 'web_dev_config.yaml';
 
-/// Represents the default value for the web dev server.
+/// The default host the web development server binds to.
 ///
-/// Maps to `localhost` and/or `127.0.0.1`.
+/// The loopback address keeps the development server unreachable from other
+/// devices on the network unless a developer explicitly opts in by passing
+/// `--web-hostname` (for example `--web-hostname 0.0.0.0` or
+/// `--web-hostname any`) or by setting `host` in `web_dev_config.yaml`.
+const webDevDefaultHost = 'localhost';
+
+/// Sentinel host value that binds the web development server to all IPv4
+/// interfaces (`0.0.0.0`).
+///
+/// This is an explicit opt-in, not a default; see [webDevDefaultHost].
 const webDevAnyHostDefault = 'any';
 const _kLogEntryPrefix = '[WebDevServer]';
 const _kServer = 'server';
@@ -47,7 +56,7 @@ T? _validateType<T>({required Object? value, required String fieldName}) {
 class WebDevServerConfig {
   const WebDevServerConfig({
     this.headers = const <String, String>{},
-    this.host = webDevAnyHostDefault,
+    this.host = webDevDefaultHost,
     this.port = 0,
     this.https,
     this.proxy = const <ProxyRule>[],
@@ -106,7 +115,7 @@ class WebDevServerConfig {
 
     return WebDevServerConfig(
       headers: headers,
-      host: host ?? webDevAnyHostDefault,
+      host: host ?? webDevDefaultHost,
       port: port ?? 0,
       https: https == null ? null : HttpsConfig.fromYaml(https),
       proxy: proxyRules,
