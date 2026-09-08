@@ -926,6 +926,63 @@ void main() {
           );
         },
       );
+
+      testWithoutContext(
+        'Consecutive queryForLaunch calls use fresh client instances without stale cache',
+        () async {
+          final client1 = FakeMDnsClient(
+            <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'srv-bar')],
+            <String, List<SrvResourceRecord>>{
+              'srv-bar': <SrvResourceRecord>[
+                SrvResourceRecord(
+                  'srv-bar',
+                  future,
+                  port: 111,
+                  weight: 1,
+                  priority: 1,
+                  target: 'appId',
+                ),
+              ],
+            },
+          );
+          final client2 = FakeMDnsClient(
+            <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'srv-bar')],
+            <String, List<SrvResourceRecord>>{
+              'srv-bar': <SrvResourceRecord>[
+                SrvResourceRecord(
+                  'srv-bar',
+                  future,
+                  port: 222,
+                  weight: 1,
+                  priority: 1,
+                  target: 'appId',
+                ),
+              ],
+            },
+          );
+
+          final clients = <MDnsClient>[client1, client2];
+          var clientIndex = 0;
+
+          final portDiscovery = MDnsVmServiceDiscovery(
+            mdnsClientFactory: () => clients[clientIndex++],
+            logger: BufferLogger.test(),
+            analytics: const NoOpAnalytics(),
+          );
+
+          final MDnsVmServiceDiscoveryResult? result1 = await portDiscovery.queryForLaunch(
+            applicationId: 'srv-bar',
+            deviceVmservicePort: 111,
+          );
+          expect(result1?.port, 111);
+
+          final MDnsVmServiceDiscoveryResult? result2 = await portDiscovery.queryForLaunch(
+            applicationId: 'srv-bar',
+            deviceVmservicePort: 222,
+          );
+          expect(result2?.port, 222);
+        },
+      );
     });
 
     group('deviceNameMatchesTargetName', () {

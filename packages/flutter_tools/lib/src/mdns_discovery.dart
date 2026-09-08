@@ -28,22 +28,33 @@ You can grant this permission in System Settings > Privacy & Security > Local Ne
 $err
 ''';
 
+/// Callback type to create an [MDnsClient].
+typedef MDnsClientFactory = MDnsClient Function();
+
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
   /// Creates a new [MDnsVmServiceDiscovery] object.
   ///
-  /// The [_client] parameter will be defaulted to a new [MDnsClient] if null.
+  /// The [mdnsClient] parameter can be used to provide a specific [MDnsClient]
+  /// instance (typically for testing).
+  ///
+  /// If [mdnsClientFactory] is provided, it is invoked to produce a fresh
+  /// [MDnsClient] for launch queries so that cached mDNS records do not persist
+  /// across separate launches.
   MDnsVmServiceDiscovery({
     MDnsClient? mdnsClient,
+    MDnsClientFactory? mdnsClientFactory,
     MDnsClient? preliminaryMDnsClient,
     required Logger logger,
     required Analytics analytics,
-  }) : _client = mdnsClient ?? MDnsClient(),
+  }) : _client = mdnsClient,
+       _clientFactory = mdnsClientFactory ?? (mdnsClient == null ? MDnsClient.new : null),
        _preliminaryClient = preliminaryMDnsClient,
        _logger = logger,
        _analytics = analytics;
 
-  final MDnsClient _client;
+  final MDnsClient? _client;
+  final MDnsClientFactory? _clientFactory;
 
   // Used when discovering VM services with `queryForAttach` to do a preliminary
   // check for already running services so that results are not cached in _client.
@@ -111,8 +122,9 @@ class MDnsVmServiceDiscovery {
       throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
     );
     if (results.isEmpty) {
+      final MDnsClient client = _clientFactory?.call() ?? _client!;
       return firstMatchingVmService(
-        _client,
+        client,
         applicationId: applicationId,
         deviceVmservicePort: deviceVmservicePort,
         ipv6: ipv6,
@@ -174,9 +186,10 @@ class MDnsVmServiceDiscovery {
     // Either the device port or the device name must be provided.
     assert(deviceVmservicePort != null || deviceName != null);
 
+    final MDnsClient client = _clientFactory?.call() ?? _client!;
     // Query for a specific application matching on either device port or device name.
     return firstMatchingVmService(
-      _client,
+      client,
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       deviceName: deviceName,
