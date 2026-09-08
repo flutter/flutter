@@ -80,7 +80,6 @@ TEST_F(FlSubsurfaceTest, SetPosition) {
   fl_subsurface_set_position(subsurface, 3, 4);
 }
 
-// The Wayland objects are released when the subsurface is destroyed.
 TEST_F(FlSubsurfaceTest, CommitParent) {
   g_autoptr(FlSubsurface) subsurface = CreateSubsurface();
   ASSERT_NE(subsurface, nullptr);
@@ -91,6 +90,7 @@ TEST_F(FlSubsurfaceTest, CommitParent) {
   fl_subsurface_commit_parent(subsurface);
 }
 
+// The Wayland objects are released when the subsurface is destroyed.
 TEST_F(FlSubsurfaceTest, Destroy) {
   FlSubsurface* subsurface = CreateSubsurface();
   ASSERT_NE(subsurface, nullptr);

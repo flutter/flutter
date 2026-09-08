@@ -68,5 +68,7 @@ void fl_subsurface_set_position(FlSubsurface* self, gint x, gint y) {
 
 void fl_subsurface_commit_parent(FlSubsurface* self) {
   g_return_if_fail(FL_IS_SUBSURFACE(self));
-  wl_surface_commit(self->parent_surface);
+  if (self->parent_surface != nullptr) {
+    wl_surface_commit(self->parent_surface);
+  }
 }
