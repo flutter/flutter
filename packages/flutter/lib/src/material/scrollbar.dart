@@ -151,15 +151,32 @@ class Scrollbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
+    final ThemeData theme = Theme.of(context);
+    if (theme.platform == TargetPlatform.iOS) {
+      final ScrollbarThemeData scrollbarTheme = ScrollbarTheme.of(context);
+      const states = <WidgetState>{};
+      const draggedStates = <WidgetState>{WidgetState.dragged};
+      final double? resolvedThickness = thickness ?? scrollbarTheme.thickness?.resolve(states);
+      final double? resolvedThicknessWhileDragging =
+          thickness ?? scrollbarTheme.thickness?.resolve(draggedStates);
+      final Radius? resolvedRadius = radius ?? scrollbarTheme.radius;
+      // CupertinoScrollbar paints a single thumb color, so only the resting
+      // state is resolved here; there is no dragged-color counterpart to
+      // thicknessWhileDragging. CupertinoScrollbar resolves any
+      // CupertinoDynamicColor against its own context.
+      final Color? resolvedThumbColor = scrollbarTheme.thumbColor?.resolve(states);
       return CupertinoScrollbar(
-        thumbVisibility: thumbVisibility ?? false,
-        thickness: thickness ?? CupertinoScrollbar.defaultThickness,
-        thicknessWhileDragging: thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
-        radius: radius ?? CupertinoScrollbar.defaultRadius,
-        radiusWhileDragging: radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
+        thumbVisibility:
+            thumbVisibility ?? scrollbarTheme.thumbVisibility?.resolve(states) ?? false,
+        thickness: resolvedThickness ?? CupertinoScrollbar.defaultThickness,
+        thicknessWhileDragging:
+            resolvedThicknessWhileDragging ?? CupertinoScrollbar.defaultThicknessWhileDragging,
+        thumbColor: resolvedThumbColor,
+        radius: resolvedRadius ?? CupertinoScrollbar.defaultRadius,
+        radiusWhileDragging: resolvedRadius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
         controller: controller,
         notificationPredicate: notificationPredicate,
+        interactive: interactive ?? scrollbarTheme.interactive,
         scrollbarOrientation: scrollbarOrientation,
         child: child,
       );
