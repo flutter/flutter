@@ -1,3 +1,4 @@
 analyzer:
   exclude:
     - '**'
+    - build/**
