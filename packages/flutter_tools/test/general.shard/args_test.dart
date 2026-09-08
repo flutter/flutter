@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
@@ -493,6 +494,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
     CrashReporter? crashReporter,
+    FeatureFlags? featureFlags,
     ToolContext? toolContext,
   }) : analytics = analytics ?? FakeAnalytics(),
        androidContext = androidContext ?? FakeAndroidContext(),
@@ -500,6 +502,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        buildSystem = buildSystem ?? FakeBuildSystem(),
        buildTargets = buildTargets ?? FakeBuildTargets(),
        crashReporter = crashReporter ?? FakeCrashReporter(),
+       featureFlags = featureFlags ?? TestFeatureFlags(),
        toolContext = toolContext ?? FakeToolContext();
 
   @override
@@ -519,6 +522,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   final CrashReporter crashReporter;
+
+  @override
+  final FeatureFlags featureFlags;
 
   @override
   final ToolContext toolContext;
