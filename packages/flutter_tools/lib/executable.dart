@@ -268,6 +268,7 @@ List<FlutterCommand> generateCommands({
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
     buildSystem: toolDependencies.buildSystem,
+    featureFlags: toolDependencies.featureFlags,
     templateRenderer: const MustacheTemplateRenderer(),
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,

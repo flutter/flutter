@@ -77,23 +77,10 @@ void main() {
 
   BuildCommand makeBuildCommand() {
     return createFakeBuildCommand(
-      androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
       fileSystem: fileSystem,
       logger: logger,
-      osUtils: FakeOperatingSystemUtils(),
-      config: FakeConfig(),
-      platform: FakePlatform(),
-      fileSystemUtils: FakeFileSystemUtils(),
-      terminal: FakeTerminal(),
-      plistParser: FakePlistParser(),
-      processUtils: FakeProcessUtils(),
-      processManager: FakeProcessManager.any(),
-      templateRenderer: FakeTemplateRenderer(),
-      xcode: FakeXcode(),
-      artifacts: FakeArtifacts(),
-      cache: FakeCache(),
-      flutterVersion: FakeFlutterVersion(),
     );
   }
 
