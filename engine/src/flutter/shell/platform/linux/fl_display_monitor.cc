@@ -25,6 +25,9 @@ G_DEFINE_TYPE(FlDisplayMonitor, fl_display_monitor, G_TYPE_OBJECT)
 
 // Get the refresh rate of a GDK monitor in Hz, or 0 if unknown.
 static gdouble get_monitor_refresh_rate(GdkMonitor* monitor) {
+  if (monitor == nullptr) {
+    return 0.0;
+  }
   // GDK reports the refresh rate in millihertz.
   return gdk_monitor_get_refresh_rate(monitor) / 1000.0;
 }
