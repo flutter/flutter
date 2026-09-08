@@ -1390,6 +1390,8 @@ class _RenderTheater extends RenderBox
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
+    final stopwatch = Stopwatch();
+    stopwatch.start();
     final Size size = !alwaysSizeToContent && constraints.biggest.isFinite
         ? constraints.biggest
         : _findSizeDeterminingChild().getDryLayout(constraints);
@@ -1410,6 +1412,7 @@ class _RenderTheater extends RenderBox
         ),
       );
     }
+    stopwatch.stop();
     return baselineOffset.offset;
   }
 
