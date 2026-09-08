@@ -15,7 +15,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
-import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -307,6 +307,112 @@ Review licenses that have not been accepted (y/N)?
     expect(result, LicensesAccepted.none);
   });
 
+  testWithoutContext(
+    'licensesAccepted falls back to the licenses directory when sdkmanager output is unparseable (new Android CLI, licenses present)',
+    () async {
+      sdk.sdkManagerPath = '/foo/bar/sdkmanager';
+      sdk.licensesAvailable = true;
+      sdk.directory = fileSystem.directory('/sdk')..createSync(recursive: true);
+      fileSystem.directory('/sdk/licenses').createSync(recursive: true);
+      fileSystem
+          .file('/sdk/licenses/android-sdk-license')
+          .writeAsStringSync('24333f8a63b6825ea9c5514f83c2829b004d1fee\n');
+
+      // Real output from Android cmdline-tools 23.0's `sdkmanager --licenses`.
+      // See https://github.com/flutter/flutter/issues/191487.
+      const output = '''
+WARNING: The SDK Manager CLI tool (sdkmanager) is deprecated. Android CLI will be used instead.
+The 'android' binary can also be found in the cmdline-tools directory, and 'android sdk' is the replacement for 'sdkmanager'.
+To learn more about the Android CLI and how to use it, see the documentation (https://d.android.com/tools/agents/android-cli)
+Warning: The --licenses option is no longer needed.
+''';
+      processManager.addCommand(
+        const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--licenses'], stdout: output),
+      );
+
+      final licenseValidator = AndroidLicenseValidator(
+        java: FakeJava(),
+        androidSdk: sdk,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+        stdio: stdio,
+        logger: BufferLogger.test(),
+        userMessages: UserMessages(),
+      );
+      final LicensesAccepted result = await licenseValidator.licensesAccepted;
+
+      expect(result, LicensesAccepted.all);
+    },
+  );
+
+  testWithoutContext(
+    'licensesAccepted falls back to none when sdkmanager output is unparseable and no licenses are present (new Android CLI, licenses missing)',
+    () async {
+      sdk.sdkManagerPath = '/foo/bar/sdkmanager';
+      sdk.licensesAvailable = false;
+      sdk.directory = fileSystem.directory('/sdk')..createSync(recursive: true);
+
+      const output = '''
+WARNING: The SDK Manager CLI tool (sdkmanager) is deprecated. Android CLI will be used instead.
+The 'android' binary can also be found in the cmdline-tools directory, and 'android sdk' is the replacement for 'sdkmanager'.
+To learn more about the Android CLI and how to use it, see the documentation (https://d.android.com/tools/agents/android-cli)
+Warning: The --licenses option is no longer needed.
+''';
+      processManager.addCommand(
+        const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--licenses'], stdout: output),
+      );
+
+      final licenseValidator = AndroidLicenseValidator(
+        java: FakeJava(),
+        androidSdk: sdk,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+        stdio: stdio,
+        logger: BufferLogger.test(),
+        userMessages: UserMessages(),
+      );
+      final LicensesAccepted result = await licenseValidator.licensesAccepted;
+
+      expect(result, LicensesAccepted.none);
+    },
+  );
+
+  testWithoutContext(
+    'licensesAccepted returns unknown when the licenses directory cannot be listed (new Android CLI)',
+    () async {
+      sdk.sdkManagerPath = '/foo/bar/sdkmanager';
+      // `licensesAvailable` reports true, but the licenses directory does
+      // not actually exist on disk (e.g. a race where it was deleted
+      // between the check and use), so `listSync()` throws a
+      // FileSystemException rather than returning results.
+      sdk.licensesAvailable = true;
+      sdk.directory = fileSystem.directory('/sdk')..createSync(recursive: true);
+
+      const output = '''
+WARNING: The SDK Manager CLI tool (sdkmanager) is deprecated. Android CLI will be used instead.
+The 'android' binary can also be found in the cmdline-tools directory, and 'android sdk' is the replacement for 'sdkmanager'.
+To learn more about the Android CLI and how to use it, see the documentation (https://d.android.com/tools/agents/android-cli)
+Warning: The --licenses option is no longer needed.
+''';
+      processManager.addCommand(
+        const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--licenses'], stdout: output),
+      );
+
+      final licenseValidator = AndroidLicenseValidator(
+        java: FakeJava(),
+        androidSdk: sdk,
+        processManager: processManager,
+        platform: FakePlatform(environment: <String, String>{'HOME': '/home/me'}),
+        stdio: stdio,
+        logger: BufferLogger.test(),
+        userMessages: UserMessages(),
+      );
+      final LicensesAccepted result = await licenseValidator.licensesAccepted;
+
+      expect(result, LicensesAccepted.unknown);
+    },
+  );
+
   testWithoutContext('runLicenseManager succeeds for version >= 26', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     sdk.sdkManagerVersion = '26.0.0';
@@ -449,6 +555,7 @@ Review licenses that have not been accepted (y/N)?
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(validationResult.type, ValidationType.partial);
@@ -472,6 +579,7 @@ Review licenses that have not been accepted (y/N)?
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(validationResult.type, ValidationType.partial);
@@ -495,6 +603,7 @@ Review licenses that have not been accepted (y/N)?
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(validationResult.type, ValidationType.partial);
@@ -536,6 +645,7 @@ Review licenses that have not been accepted (y/N)?
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     );
 
     // Invalid sdk and tools.
@@ -579,6 +689,7 @@ Review licenses that have not been accepted (y/N)?
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     );
 
     final ValidationResult validationResult = await androidValidator.validate();
@@ -632,6 +743,7 @@ Review licenses that have not been accepted (y/N)?
       platform: platform,
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
     expect(validationResult.type, ValidationType.partial);
     expect(validationResult.messages.last.message, errorMessage);
@@ -655,6 +767,7 @@ Review licenses that have not been accepted (y/N)?
         },
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(
@@ -724,6 +837,7 @@ Android sdkmanager tool was found, but failed to run
       platform: FakePlatform(),
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(
@@ -763,6 +877,7 @@ Android sdkmanager tool was found, but failed to run
         platform: FakePlatform(),
         userMessages: UserMessages(),
         processManager: processManager,
+        osUtils: FakeOperatingSystemUtils(),
       ).validate();
 
       expect(
@@ -801,6 +916,7 @@ Android sdkmanager tool was found, but failed to run
       platform: FakePlatform(),
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(
@@ -837,6 +953,7 @@ Android sdkmanager tool was found, but failed to run
       platform: FakePlatform(),
       userMessages: UserMessages(),
       processManager: processManager,
+      osUtils: FakeOperatingSystemUtils(),
     ).validate();
 
     expect(
@@ -855,6 +972,89 @@ Android sdkmanager tool was found, but failed to run
       true,
     );
   });
+
+  testUsingContext('AndroidValidator warns when multiple adb binaries are found', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = 'path/to/emulator'
+      ..latestVersion = (FakeAndroidSdkVersion()
+        ..sdkLevel = gradle_utils.compileSdkVersionInt
+        ..buildToolsVersion = gradle_utils.minBuildToolsVersion)
+      ..adbPath = '/foo/bar/platform-tools/adb';
+
+    final File adb1 = fileSystem.file('/foo/bar/platform-tools/adb')..createSync(recursive: true);
+    final File adb2 = fileSystem.file('/usr/bin/adb')..createSync(recursive: true);
+
+    final osUtils = ConflictFakeOperatingSystemUtils(<File>[adb1, adb2]);
+
+    final ValidationResult validationResult = await AndroidValidator(
+      java: FakeJava(),
+      androidSdk: sdk,
+      logger: logger,
+      platform: FakePlatform(),
+      userMessages: UserMessages(),
+      processManager: processManager,
+      osUtils: osUtils,
+    ).validate();
+
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) =>
+            message.type == ValidationMessageType.hint &&
+            message.message.contains('Multiple adb binaries found') &&
+            message.message.contains('/foo/bar/platform-tools/adb') &&
+            message.message.contains('/usr/bin/adb'),
+      ),
+      true,
+    );
+  });
+
+  testUsingContext('AndroidValidator does not warn when only one adb binary is found', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = 'path/to/emulator'
+      ..latestVersion = (FakeAndroidSdkVersion()
+        ..sdkLevel = gradle_utils.compileSdkVersionInt
+        ..buildToolsVersion = gradle_utils.minBuildToolsVersion)
+      ..adbPath = '/foo/bar/platform-tools/adb';
+
+    final File adb1 = fileSystem.file('/foo/bar/platform-tools/adb')..createSync(recursive: true);
+
+    final osUtils = ConflictFakeOperatingSystemUtils(<File>[adb1]);
+
+    final ValidationResult validationResult = await AndroidValidator(
+      java: FakeJava(),
+      androidSdk: sdk,
+      logger: logger,
+      platform: FakePlatform(),
+      userMessages: UserMessages(),
+      processManager: processManager,
+      osUtils: osUtils,
+    ).validate();
+
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) =>
+            message.type == ValidationMessageType.hint &&
+            message.message.contains('Multiple adb binaries found'),
+      ),
+      false,
+    );
+  });
+}
+
+class ConflictFakeOperatingSystemUtils extends FakeOperatingSystemUtils {
+  ConflictFakeOperatingSystemUtils(this.adbPaths);
+  final List<File> adbPaths;
+
+  @override
+  List<File> whichAll(String execName) => execName == 'adb' ? adbPaths : <File>[];
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {

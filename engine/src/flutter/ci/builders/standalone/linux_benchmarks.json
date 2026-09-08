@@ -23,7 +23,7 @@
     "ninja": {
         "config": "ci/host_release_benchmarks",
         "targets": [
-            "flutter/build/dart:copy_dart_sdk",
+            "flutter/build/dart:dart_sdk",
             "flutter/display_list:display_list_benchmarks",
             "flutter/display_list:display_list_builder_benchmarks",
             "flutter/display_list:display_list_region_benchmarks",

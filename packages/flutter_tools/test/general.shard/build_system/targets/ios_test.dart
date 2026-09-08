@@ -17,7 +17,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -34,7 +34,7 @@ final Platform macPlatform = FakePlatform(
 
 const _kSharedConfig = <String>[
   '-dynamiclib',
-  '-miphoneos-version-min=13.0',
+  '-miphoneos-version-min=15.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -52,7 +52,7 @@ const _kSharedConfig = <String>[
 
 FakeCommand createPlutilFakeCommand(File infoPlist) {
   return FakeCommand(
-    command: <String>['plutil', '-replace', 'MinimumOSVersion', '-string', '13.0', infoPlist.path],
+    command: <String>['plutil', '-replace', 'MinimumOSVersion', '-string', '15.0', infoPlist.path],
   );
 }
 
@@ -62,7 +62,6 @@ void main() {
   late FakeProcessManager processManager;
   late Artifacts artifacts;
   late BufferLogger logger;
-  late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
 
   setUp(() {
@@ -70,7 +69,6 @@ void main() {
     processManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
-    usage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -115,7 +113,7 @@ void main() {
               fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc'),
             ),
             '-dynamiclib',
-            '-miphonesimulator-version-min=13.0',
+            '-miphonesimulator-version-min=15.0',
             '-Xlinker',
             '-rpath',
             '-Xlinker',
@@ -254,7 +252,7 @@ void main() {
             '-replace',
             'MinimumOSVersion',
             '-string',
-            '13.0',
+            '15.0',
             infoPlist.path,
           ],
           exitCode: 1,
@@ -676,7 +674,6 @@ void main() {
       expect(assetDirectory.childFile('kernel_blob.bin'), isNot(exists));
       expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
       expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
-      expect(usage.events, isEmpty);
       expect(fakeAnalytics.sentEvents, isEmpty);
     },
     overrides: <Type, Generator>{
@@ -845,6 +842,8 @@ void main() {
     late Directory outputDir;
     late File binary;
     late FakeCommand copyPhysicalFrameworkCommand;
+    late FakeCommand chmodPhysicalFrameworkCommand;
+    late FakeCommand chmodSimulatorFrameworkCommand;
     late FakeCommand copyPhysicalFrameworkDsymCommand;
     late FakeCommand copyPhysicalFrameworkDsymCommandFailure;
     late FakeCommand lipoCommandNonFatResult;
@@ -867,6 +866,19 @@ void main() {
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
           'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
           outputDir.path,
+        ],
+      );
+
+      chmodPhysicalFrameworkCommand = FakeCommand(
+        command: <String>[
+          'chmod',
+          '-R',
+          'u+w',
+          outputDir
+              .childDirectory(
+                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+              )
+              .path,
         ],
       );
 
@@ -913,6 +925,19 @@ void main() {
       adHocCodesignCommand = FakeCommand(
         command: <String>['codesign', '--force', '--sign', '-', '--timestamp=none', binary.path],
       );
+
+      chmodSimulatorFrameworkCommand = FakeCommand(
+        command: <String>[
+          'chmod',
+          '-R',
+          'u+w',
+          outputDir
+              .childDirectory(
+                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+              )
+              .path,
+        ],
+      );
     });
 
     testWithoutContext('iphonesimulator', () async {
@@ -940,6 +965,7 @@ void main() {
           ],
           onRun: (_) => binary.createSync(recursive: true),
         ),
+        chmodSimulatorFrameworkCommand,
         lipoCommandNonFatResult,
         FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'x86_64']),
         xattrCommand,
@@ -965,6 +991,7 @@ void main() {
         defines: <String, String>{kIosArchs: 'arm64', kSdkRoot: 'path/to/iPhoneOS.sdk'},
       );
       processManager.addCommand(copyPhysicalFrameworkCommand);
+      processManager.addCommand(chmodPhysicalFrameworkCommand);
       await expectLater(
         const DebugUnpackIOS().build(environment),
         throwsA(
@@ -1000,6 +1027,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         copyPhysicalFrameworkDsymCommandFailure,
       ]);
       await expectLater(
@@ -1029,14 +1057,12 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
         ),
-        FakeCommand(
-          command: <String>['lipo', binary.path, '-verify_arch', 'arm64', 'x86_64'],
-          exitCode: 1,
-        ),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64'], exitCode: 1),
       ]);
 
       await expectLater(
@@ -1046,7 +1072,7 @@ void main() {
             (Exception exception) => exception.toString(),
             'description',
             contains(
-              'does not contain architectures "arm64 x86_64".\n\n'
+              'does not contain architecture "arm64" (expected "arm64 x86_64").\n\n'
               'lipo -info:\nArchitectures in the fat file:',
             ),
           ),
@@ -1069,11 +1095,13 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
         ),
-        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64', 'x86_64']),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64']),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'x86_64']),
         FakeCommand(
           command: <String>[
             'lipo',
@@ -1203,6 +1231,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1233,11 +1262,13 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
         ),
-        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64', 'x86_64']),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'arm64']),
+        FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'x86_64']),
         FakeCommand(
           command: <String>[
             'lipo',
@@ -1273,6 +1304,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1302,6 +1334,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1364,6 +1397,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         copyPhysicalFrameworkDsymCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
@@ -1622,7 +1656,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<XcodeProjectInfo?> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
     String? projectFilename,
   }) async {

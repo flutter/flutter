@@ -91,22 +91,22 @@ object DependencyVersionChecker {
     // Advice for maintainers for other areas of code that are impacted are documented
     // in packages/flutter_tools/lib/src/android/README.md.
 
-    @VisibleForTesting internal val warnGradleVersion: Version = Version(8, 14, 0)
+    @VisibleForTesting internal val warnGradleVersion: Version = Version(9, 1, 0)
 
-    @VisibleForTesting internal val errorGradleVersion: Version = Version(8, 7, 0)
+    @VisibleForTesting internal val errorGradleVersion: Version = Version(8, 14, 0)
 
     // Java error and warn should align with packages/flutter_tools/lib/src/android/gradle_utils.dart.
     @VisibleForTesting internal val warnJavaVersion: JavaVersion = JavaVersion.VERSION_17
 
     @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_17
 
-    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 11, 1)
+    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(9, 0, 1)
 
-    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 6, 0)
+    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 11, 1)
 
-    @VisibleForTesting internal val warnKGPVersion: Version = Version(2, 2, 20)
+    @VisibleForTesting internal val warnKGPVersion: Version = Version(2, 3, 20)
 
-    @VisibleForTesting internal val errorKGPVersion: Version = Version(2, 0, 0)
+    @VisibleForTesting internal val errorKGPVersion: Version = Version(2, 2, 20)
 
     // If this value is changed, then make sure to change the documentation on https://docs.flutter.dev/reference/supported-platforms
     // Non inclusive.
@@ -140,10 +140,16 @@ object DependencyVersionChecker {
         }
 
         val kgpVersion: Version? = VersionFetcher.getKGPVersion(project)
-        if (kgpVersion != null) {
+        val usesBuiltInKotlin = FlutterPluginUtils.isBuiltInKotlinEnabled(project, agpVersion)
+
+        if (kgpVersion != null && !usesBuiltInKotlin) {
             checkKGPVersion(kgpVersion, project)
+        } else {
+            project.logger.debug(
+                "Skipping Kotlin min-version enforcement because the project uses " +
+                    "AGP built-in Kotlin or does not apply KGP."
+            )
         }
-        // KGP is not required, so don't log any warning if we can't find the version.
     }
 
     private fun configureMinSdkCheck(project: Project) {

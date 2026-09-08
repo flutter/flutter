@@ -102,8 +102,7 @@ class EmbedderExternalView {
 
   DlISize GetRenderSurfaceSize() const;
 
-  bool Render(const EmbedderRenderTarget& render_target,
-              bool clear_surface = true);
+  void Render(DlCanvas& dl_canvas, bool clear_surface);
 
   const DlRegion& GetDlRegion() const;
 

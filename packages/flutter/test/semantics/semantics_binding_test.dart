@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/semantics.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -97,5 +98,74 @@ void main() {
       ),
       areCreateAndDispose,
     );
+  });
+
+  testWidgets('getRectOfSemanticsNodeInViewCoordinates asserts for unknown views and nodes', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    try {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(label: 'target', child: const SizedBox(width: 100.0, height: 50.0)),
+        ),
+      );
+
+      final SemanticsNode node = tester.semantics.find(find.bySemanticsLabel('target'));
+      final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
+
+      expect(owner.getSemanticsNode(node.id), same(node));
+      expect(
+        () => SemanticsBinding.instance.getRectOfSemanticsNodeInViewCoordinates(999, node.id),
+        throwsAssertionError,
+      );
+      expect(
+        () => SemanticsBinding.instance.getRectOfSemanticsNodeInViewCoordinates(
+          tester.view.viewId,
+          -1,
+        ),
+        throwsAssertionError,
+      );
+    } finally {
+      handle.dispose();
+    }
+  });
+
+  testWidgets('getRectOfSemanticsNodeInViewCoordinates returns transformed logical rect', (
+    WidgetTester tester,
+  ) async {
+    tester.view.devicePixelRatio = 2.0;
+    tester.view.physicalSize = const Size(800.0, 600.0);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final SemanticsHandle handle = tester.ensureSemantics();
+    try {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Transform.translate(
+              offset: const Offset(40.0, 20.0),
+              child: Semantics(label: 'target', child: const SizedBox(width: 100.0, height: 50.0)),
+            ),
+          ),
+        ),
+      );
+
+      final SemanticsNode node = tester.semantics.find(find.bySemanticsLabel('target'));
+
+      expect(
+        SemanticsBinding.instance.getRectOfSemanticsNodeInViewCoordinates(
+          tester.view.viewId,
+          node.id,
+        ),
+        rectMoreOrLessEquals(const Rect.fromLTWH(40.0, 20.0, 100.0, 50.0)),
+      );
+    } finally {
+      handle.dispose();
+    }
   });
 }

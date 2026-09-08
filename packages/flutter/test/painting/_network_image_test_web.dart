@@ -7,12 +7,12 @@ import 'dart:ui' as ui;
 import 'dart:ui_web' as ui_web;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide NetworkImage;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/painting/_network_image_web.dart' hide NetworkImage;
 import 'package:flutter/src/painting/_web_image_info_web.dart';
 import 'package:flutter/src/web.dart' as web_shim;
 import 'package:flutter/src/widgets/_web_image_web.dart';
+import 'package:flutter/widgets.dart' hide NetworkImage;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 

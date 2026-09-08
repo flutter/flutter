@@ -31,39 +31,35 @@ void main() {
 }
 
 void testMain() {
-  test(
-    'bootstrapEngine calls _flutter.loader.didCreateEngineInitializer callback',
-    () async {
-      JSAny? engineInitializer;
+  test('bootstrapEngine calls _flutter.loader.didCreateEngineInitializer callback', () async {
+    JSAny? engineInitializer;
 
-      void didCreateEngineInitializerMock(JSAny? obj) {
-        engineInitializer = obj;
-      }
+    void didCreateEngineInitializerMock(JSAny? obj) {
+      engineInitializer = obj;
+    }
 
-      // Prepare the DOM for: _flutter.loader.didCreateEngineInitializer
-      didCreateEngineInitializer = didCreateEngineInitializerMock.toJS;
+    // Prepare the DOM for: _flutter.loader.didCreateEngineInitializer
+    didCreateEngineInitializer = didCreateEngineInitializerMock.toJS;
 
-      // Reset the engine
-      engine.debugResetEngineInitializationState();
+    // Reset the engine
+    engine.debugResetEngineInitializationState();
 
-      await ui_web.bootstrapEngine(registerPlugins: () {}, runApp: () {});
+    await ui_web.bootstrapEngine(registerPlugins: () {}, runApp: () {});
 
-      // Check that the object we captured is actually a loader
-      expect(engineInitializer, isNotNull);
-      expect(
-        (engineInitializer! as JSObject).has('initializeEngine'),
-        isTrue,
-        reason: 'Missing FlutterEngineInitializer method: initializeEngine.',
-      );
-      expect(
-        (engineInitializer! as JSObject).has('autoStart'),
-        isTrue,
-        reason: 'Missing FlutterEngineInitializer method: autoStart.',
-      );
-      // https://github.com/flutter/flutter/issues/160096
-    },
-    skip: ui_web.browser.isFirefox,
-  );
+    // Check that the object we captured is actually a loader
+    expect(engineInitializer, isNotNull);
+    expect(
+      (engineInitializer! as JSObject).has('initializeEngine'),
+      isTrue,
+      reason: 'Missing FlutterEngineInitializer method: initializeEngine.',
+    );
+    expect(
+      (engineInitializer! as JSObject).has('autoStart'),
+      isTrue,
+      reason: 'Missing FlutterEngineInitializer method: autoStart.',
+    );
+    // https://github.com/flutter/flutter/issues/160096
+  }, skip: ui_web.browser.isFirefox);
 
   test(
     'bootstrapEngine does auto-start when _flutter.loader.didCreateEngineInitializer does not exist',

@@ -69,7 +69,7 @@ struct Paint {
 
     std::shared_ptr<Contents> CreateMaskBlur(
         const Paint& paint,
-        const ContentContext& renderer,
+        ContentContext& renderer,
         const Geometry* geometry,
         std::shared_ptr<ColorSourceContents> contents,
         bool needs_color_filter,
@@ -101,7 +101,7 @@ struct Paint {
   /// @return     The filter-wrapped contents. If there are no filters that need
   ///             to be wrapped for the current paint configuration, the
   ///             original contents is returned.
-  std::shared_ptr<Contents> WithFilters(const ContentContext& renderer,
+  std::shared_ptr<Contents> WithFilters(ContentContext& renderer,
                                         std::shared_ptr<Contents> input) const;
 
   /// @brief      Wrap this paint's configured filters to the given contents of
@@ -113,23 +113,36 @@ struct Paint {
   ///             to be wrapped for the current paint configuration, the
   ///             original contents is returned.
   std::shared_ptr<Contents> WithFiltersForSubpassTarget(
-      const ContentContext& renderer,
+      ContentContext& renderer,
       std::shared_ptr<Contents> input,
       const Matrix& effect_transform = Matrix()) const;
 
   /// @brief   Whether this paint has a color filter that can apply opacity
   bool HasColorFilter() const;
 
+  /// @brief      Create a `ColorSourceContents` representing this paint's
+  ///             shader/colors.
+  /// @param[in]  renderer            The content context renderer.
+  /// @param[in]  geometry            The geometry the color source is drawn
+  ///                                 onto.
+  /// @param[in]  geometry_transform  An optional transform representing a
+  ///                                 layout/positioning transform applied to
+  ///                                 the geometry. If provided, this is used to
+  ///                                 adjust the color source's effect transform
+  ///                                 to align it with the geometry's coordinate
+  ///                                 space.
+  /// @return     The generated color source contents.
   std::shared_ptr<ColorSourceContents> CreateContents(
-      const ContentContext& renderer,
-      const Geometry* geometry) const;
+      ContentContext& renderer,
+      const Geometry* geometry,
+      const std::optional<Matrix>& geometry_transform = std::nullopt) const;
 
   std::shared_ptr<Contents> WithMaskBlur(std::shared_ptr<Contents> input,
                                          bool is_solid_color,
                                          const Matrix& ctm) const;
 
   std::shared_ptr<FilterContents> WithImageFilter(
-      const ContentContext& renderer,
+      ContentContext& renderer,
       const FilterInput::Variant& input,
       const Matrix& effect_transform,
       Entity::RenderingMode rendering_mode) const;

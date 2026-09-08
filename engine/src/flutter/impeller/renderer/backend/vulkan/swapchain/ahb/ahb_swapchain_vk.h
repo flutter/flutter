@@ -14,9 +14,10 @@
 namespace impeller {
 
 namespace android::testing {
+FML_TEST_CLASS(AndroidAHBSwapchainTest, AHBSwapchainDtorCallsWaitIdle);
 FML_TEST_CLASS(AndroidAHBSwapchainTest,
                AHBSwapchainNoFenceWaitAfterAcquireNextImageFailure);
-}
+}  // namespace android::testing
 
 using CreateTransactionCB = std::function<android::SurfaceTransaction()>;
 
@@ -60,6 +61,8 @@ class AHBSwapchainVK final : public SwapchainVK {
 
  private:
   friend class SwapchainVK;
+  FML_FRIEND_TEST(android::testing::AndroidAHBSwapchainTest,
+                  AHBSwapchainDtorCallsWaitIdle);
   FML_FRIEND_TEST(android::testing::AndroidAHBSwapchainTest,
                   AHBSwapchainNoFenceWaitAfterAcquireNextImageFailure);
 

@@ -88,6 +88,15 @@ class CircleBorder extends OutlinedBorder {
   }
 
   @override
+  bool hitTest(Rect rect, Offset position, {TextDirection? textDirection}) {
+    final Rect adjustedRect = _adjustRect(rect);
+    return RRect.fromRectAndRadius(
+      adjustedRect,
+      Radius.elliptical(adjustedRect.width / 2.0, adjustedRect.height / 2.0),
+    ).contains(position);
+  }
+
+  @override
   void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
     if (eccentricity == 0.0) {
       canvas.drawCircle(rect.center, rect.shortestSide / 2.0, paint);

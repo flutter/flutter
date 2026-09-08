@@ -97,8 +97,8 @@ id<MTLDevice> ShaderLibraryMTL::GetDevice() const {
 }
 
 // |ShaderLibrary|
-void ShaderLibraryMTL::RegisterFunction(std::string name,   // unused
-                                        ShaderStage stage,  // unused
+void ShaderLibraryMTL::RegisterFunction(std::string name,
+                                        ShaderStage stage,
                                         std::shared_ptr<fml::Mapping> code,
                                         RegistrationCallback callback) {
   if (!callback) {
@@ -137,7 +137,7 @@ void ShaderLibraryMTL::RegisterFunction(std::string name,   // unused
                  return;
                }
                reinterpret_cast<ShaderLibraryMTL*>(strong_this.get())
-                   ->RegisterLibrary(library);
+                   ->RegisterLibraryAndCacheFunction(library, name, stage);
                failure_callback->Release();
                callback(true);
              }];
@@ -145,10 +145,28 @@ void ShaderLibraryMTL::RegisterFunction(std::string name,   // unused
 
 // |ShaderLibrary|
 void ShaderLibraryMTL::UnregisterFunction(std::string name, ShaderStage stage) {
-  ReaderLock lock(libraries_mutex_);
+  WriterLock lock(libraries_mutex_);
 
-  // Find the shader library containing this function name and remove it.
+  ShaderKey key(name, stage);
 
+  // Cache-first path: the cache, populated at RegisterFunction time, holds
+  // the mapping from registration name to MTLLibrary. Scoped registration
+  // names (e.g. `re:<library_id>:<entry>`) don't match any MSL function name,
+  // so the library-iteration fallback below cannot find them.
+  if (auto found = functions_.find(key); found != functions_.end()) {
+    id<MTLLibrary> target_library =
+        ShaderFunctionMTL::Cast(*found->second).library_;
+    if (target_library) {
+      [libraries_ removeObject:target_library];
+    }
+    functions_.erase(found);
+    return;
+  }
+
+  // Fallback: look the function up in the libraries by its MSL name. Used
+  // when the cache was not populated (e.g. for engine-bundled libraries that
+  // were registered via the multi-library constructor rather than through
+  // RegisterFunction).
   bool found_library = false;
   for (size_t i = [libraries_ count] - 1; i >= 0; i--) {
     id<MTLFunction> function =
@@ -163,24 +181,30 @@ void ShaderLibraryMTL::UnregisterFunction(std::string name, ShaderStage stage) {
     VALIDATION_LOG << "Library containing function " << name
                    << " was not found, so it couldn't be unregistered.";
   }
-
-  // Remove the shader from the function cache.
-
-  ShaderKey key(name, stage);
-
-  auto found = functions_.find(key);
-  if (found == functions_.end()) {
-    VALIDATION_LOG << "Library function named " << name
-                   << " was not found, so it couldn't be unregistered.";
-    return;
-  }
-
-  functions_.erase(found);
 }
 
-void ShaderLibraryMTL::RegisterLibrary(id<MTLLibrary> library) {
+void ShaderLibraryMTL::RegisterLibraryAndCacheFunction(id<MTLLibrary> library,
+                                                       const std::string& name,
+                                                       ShaderStage stage) {
   WriterLock lock(libraries_mutex_);
   [libraries_ addObject:library];
+
+  // Find the function in the newly compiled library matching the requested
+  // stage and cache it under the registration name. Subsequent
+  // `GetFunction(name, stage)` calls then resolve via the cache, which lets
+  // namespaced registration names (e.g. `re:<library_id>:<entry>`) that don't
+  // match any MSL function name still resolve to the right function.
+  const MTLFunctionType expected = ToMTLFunctionType(stage);
+  for (NSString* function_name in [library functionNames]) {
+    id<MTLFunction> mtl_function = [library newFunctionWithName:function_name];
+    if (mtl_function && mtl_function.functionType == expected) {
+      ShaderKey key(name, stage);
+      functions_[key] =
+          std::shared_ptr<ShaderFunctionMTL>(new ShaderFunctionMTL(
+              library_id_, mtl_function, library, name, stage));
+      break;
+    }
+  }
 }
 
 }  // namespace impeller

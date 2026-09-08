@@ -74,7 +74,7 @@ class CopyArtifactsStep implements PipelineStep {
   @override
   Future<void> run() async {
     final String flutterJsSourceDirectory;
-    final String canvaskitExperimentalWebParagraphSourceDirectory;
+    final String canvaskitWebParagraphSourceDirectory;
     final String canvaskitSourceDirectory;
     final String canvaskitChromiumSourceDirectory;
     final String skwasmSourceDirectory;
@@ -83,9 +83,9 @@ class CopyArtifactsStep implements PipelineStep {
       case LocalArtifactSource(:final RuntimeMode mode):
         final String buildDirectory = getBuildDirectoryForRuntimeMode(mode).path;
         flutterJsSourceDirectory = pathlib.join(buildDirectory, 'flutter_web_sdk', 'flutter_js');
-        canvaskitExperimentalWebParagraphSourceDirectory = pathlib.join(
+        canvaskitWebParagraphSourceDirectory = pathlib.join(
           buildDirectory,
-          'canvaskit_experimental_webparagraph',
+          'canvaskit_webparagraph',
         );
         canvaskitSourceDirectory = pathlib.join(buildDirectory, 'canvaskit');
         canvaskitChromiumSourceDirectory = pathlib.join(buildDirectory, 'canvaskit_chromium');
@@ -95,10 +95,10 @@ class CopyArtifactsStep implements PipelineStep {
       case GcsArtifactSource(:final LuciRealm realm):
         final String artifactsDirectory = (await _downloadArtifacts(realm)).path;
         flutterJsSourceDirectory = pathlib.join(artifactsDirectory, 'flutter_js');
-        canvaskitExperimentalWebParagraphSourceDirectory = pathlib.join(
+        canvaskitWebParagraphSourceDirectory = pathlib.join(
           artifactsDirectory,
           'canvaskit',
-          'experimental_webparagraph',
+          'webparagraph',
         );
         canvaskitSourceDirectory = pathlib.join(artifactsDirectory, 'canvaskit');
         canvaskitChromiumSourceDirectory = pathlib.join(
@@ -116,12 +116,12 @@ class CopyArtifactsStep implements PipelineStep {
     await copySkiaTestImages();
     await copyFlutterJsFiles(flutterJsSourceDirectory);
     final copied = <String>[];
-    if (artifactDeps.canvasKitExperimentalWebParagraph) {
-      copied.add('CanvasKit (Experimental Web Paragraph)');
+    if (artifactDeps.canvasKitWebParagraph) {
+      copied.add('CanvasKit (Web Paragraph)');
       await copyWasmLibrary(
         'canvaskit',
-        canvaskitExperimentalWebParagraphSourceDirectory,
-        'canvaskit/experimental_webparagraph',
+        canvaskitWebParagraphSourceDirectory,
+        'canvaskit/webparagraph',
       );
     }
     if (artifactDeps.canvasKit) {

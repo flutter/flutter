@@ -499,7 +499,12 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String outputArgument =
         stringArg('output') ??
-        globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'ios', 'framework');
+        globals.fs.path.join(
+          globals.fs.currentDirectory.path,
+          getBuildDirectory(globals.config, globals.fs),
+          'ios',
+          'framework',
+        );
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');
@@ -798,11 +803,11 @@ end
           flutterRootDir: globals.fs.directory(Cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
-            kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
+            kTargetPlatform: TargetPlatform.ios.getName(),
             kIosArchs: defaultIOSArchsForEnvironment(
               sdkType,
               globals.artifacts!,
-            ).map((DarwinArch e) => e.name).join(' '),
+            ).map((CpuArch e) => e.darwinArchName).join(' '),
             kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
             ...buildInfo.toBuildSystemEnvironment(),
           },

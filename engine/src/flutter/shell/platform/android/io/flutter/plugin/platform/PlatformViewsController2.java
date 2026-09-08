@@ -12,6 +12,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.SparseArray;
+import android.view.AttachedSurfaceControl;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
@@ -672,8 +673,21 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       tx = tx.merge(activeTransactions.get(i));
     }
     activeTransactions.clear();
+
+    // This runs on the platform thread but is posted from the raster thread, so by the time it
+    // runs the FlutterView may have been detached from the controller, or detached from its
+    // window (in which case getRootSurfaceControl() returns null). Throwing here is fatal rather
+    // than merely wrong: the JNI caller, onEndFrame2(), turns a pending Java exception into an
+    // abort() via FML_CHECK(fml::jni::CheckException(env)).
+    final AttachedSurfaceControl rootSurfaceControl =
+        flutterView == null ? null : flutterView.getRootSurfaceControl();
+    if (rootSurfaceControl == null) {
+      tx.close();
+      return;
+    }
+
     flutterView.invalidate();
-    flutterView.getRootSurfaceControl().applyTransactionOnDraw(tx);
+    rootSurfaceControl.applyTransactionOnDraw(tx);
   }
 
   // NOT called from UI thread.

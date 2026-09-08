@@ -9,9 +9,5 @@ out vec4 frag_color;
 uniform sampler2D texture_contents;
 
 void main() {
-  vec2 tex_coords = interpolated_texture_coordinates;
-#ifdef IMPELLER_TARGET_OPENGLES
-  tex_coords.y = 1.0 - tex_coords.y;
-#endif
-  frag_color = texture(texture_contents, tex_coords);
+  frag_color = texture(texture_contents, interpolated_texture_coordinates);
 }

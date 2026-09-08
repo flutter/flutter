@@ -8,6 +8,8 @@
 #include "flutter/fml/safe_math.h"
 #include "flutter/impeller/display_list/dl_dispatcher.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
+#include "flutter/impeller/testing/screenshot.h"
+#include "flutter/impeller/testing/screenshotter.h"
 #include "flutter/impeller/typographer/backends/skia/typographer_context_skia.h"
 
 namespace {
@@ -123,9 +125,10 @@ void DlSurfaceInstanceImpeller::DoRenderDisplayList(
 
 std::unique_ptr<DlPixelData> DlSurfaceInstanceImpeller::SnapshotToPixelData()
     const {
+  std::shared_ptr<impeller::Context> context = aiks_context_.GetContext();
   std::unique_ptr<impeller::testing::Screenshot> snapshot =
-      snapshotter_.MakeScreenshot(aiks_context_,
-                                  GetRenderTarget().GetRenderTargetTexture());
+      impeller::testing::Screenshotter::MakeScreenshot(
+          context, GetRenderTarget().GetRenderTargetTexture());
   return snapshot ? std::make_unique<DlImpellerPixelData>(std::move(snapshot))
                   : nullptr;
 }
@@ -168,9 +171,6 @@ int DlSurfaceInstanceImpeller::height() const {
 std::shared_ptr<impeller::TypographerContext>
     DlSurfaceInstanceImpeller::typographer_context_ =
         impeller::TypographerContextSkia::Make();
-
-impeller::testing::MetalScreenshotter DlSurfaceInstanceImpeller::snapshotter_ =
-    impeller::testing::MetalScreenshotter(impeller::PlaygroundSwitches());
 
 }  // namespace testing
 }  // namespace flutter

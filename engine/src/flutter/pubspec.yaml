@@ -76,7 +76,7 @@ name: _engine_workspace
 
 # Required for workspace support.
 environment:
-  sdk: ^3.10.0-0
+  sdk: ^3.11.0-0
 
 # Declare all packages that are part of the workspace.
 workspace:
@@ -96,7 +96,6 @@ workspace:
   - tools/clang_tidy
   - tools/clangd_check
   - tools/compare_goldens
-  - tools/const_finder
   - tools/engine_tool
   - tools/header_guard_check
   - tools/gen_web_locale_keymap
@@ -189,7 +188,7 @@ dependency_overrides:
   crypto:
     path: ./third_party/dart/third_party/pkg/core/pkgs/crypto
   dart_mcp:
-    path: ./third_party/dart/third_party/pkg/ai/pkgs/dart_mcp
+    path: ./third_party/ai/pkgs/dart_mcp
   equatable:
     path: ./third_party/pkg/equatable
   expect:
@@ -201,7 +200,7 @@ dependency_overrides:
   fixnum:
     path: ./third_party/dart/third_party/pkg/core/pkgs/fixnum
   frontend_server_client:
-    path: ./third_party/dart/third_party/pkg/webdev/frontend_server_client
+    path: ./third_party/dart/pkg/frontend_server_client
   gcloud:
     path: ./third_party/pkg/gcloud
   glob:
@@ -222,8 +221,6 @@ dependency_overrides:
     path: ./third_party/dart/pkg/js
   json_rpc_2:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/json_rpc_2
-  kernel:
-    path: ./third_party/dart/pkg/kernel
   logging:
     path: ./third_party/dart/third_party/pkg/core/pkgs/logging
   matcher:

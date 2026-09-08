@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-class CkContourMeasureIter implements DisposablePathMetricIterator {
+class CkContourMeasureIter implements BackendPathMetricIterator {
   CkContourMeasureIter(this._path, bool forceClosed)
     : skiaObject = SkContourMeasureIter(_path.skiaObject, forceClosed, 1.0);
 
@@ -48,7 +48,7 @@ class CkContourMeasureIter implements DisposablePathMetricIterator {
   }
 }
 
-class CkContourMeasure implements DisposablePathMetric {
+class CkContourMeasure implements BackendPathMetric {
   CkContourMeasure(this._fillType, SkContourMeasure skiaObject) {
     _ref = CkUniqueRef<SkContourMeasure>(this, skiaObject, 'PathMetric');
   }
@@ -87,7 +87,7 @@ class CkContourMeasure implements DisposablePathMetric {
   }
 }
 
-class CkPathMetricIteratorEmpty implements DisposablePathMetricIterator {
+class CkPathMetricIteratorEmpty implements BackendPathMetricIterator {
   const CkPathMetricIteratorEmpty();
 
   @override

@@ -49,4 +49,16 @@ void main() {
     expect(log, equals(<String>['right']));
     log.clear();
   });
+
+  testWidgets('RotatedBox does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: RotatedBox(quarterTurns: 1)),
+      ),
+    );
+    expect(tester.getSize(find.byType(RotatedBox)), Size.zero);
+  });
 }

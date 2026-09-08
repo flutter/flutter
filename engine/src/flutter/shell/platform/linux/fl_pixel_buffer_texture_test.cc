@@ -8,6 +8,7 @@
 #include "flutter/shell/platform/linux/fl_texture_registrar_private.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_texture_registrar.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include <epoxy/gl.h>
@@ -66,17 +67,25 @@ static FlTestPixelBufferTexture* fl_test_pixel_buffer_texture_new() {
       g_object_new(fl_test_pixel_buffer_texture_get_type(), nullptr));
 }
 
+class FlPixelBufferTextureTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    texture = FL_PIXEL_BUFFER_TEXTURE(fl_test_pixel_buffer_texture_new());
+  }
+
+  ~FlPixelBufferTextureTest() { g_clear_object(&texture); }
+
+  FlPixelBufferTexture* texture = nullptr;
+};
+
 // Test that getting the texture ID works.
-TEST(FlPixelBufferTextureTest, TextureID) {
-  g_autoptr(FlTexture) texture = FL_TEXTURE(fl_test_pixel_buffer_texture_new());
-  fl_texture_set_id(texture, 42);
-  EXPECT_EQ(fl_texture_get_id(texture), static_cast<int64_t>(42));
+TEST_F(FlPixelBufferTextureTest, TextureID) {
+  fl_texture_set_id(FL_TEXTURE(texture), 42);
+  EXPECT_EQ(fl_texture_get_id(FL_TEXTURE(texture)), static_cast<int64_t>(42));
 }
 
 // Test that populating an OpenGL texture works.
-TEST(FlPixelBufferTextureTest, PopulateTexture) {
-  g_autoptr(FlPixelBufferTexture) texture =
-      FL_PIXEL_BUFFER_TEXTURE(fl_test_pixel_buffer_texture_new());
+TEST_F(FlPixelBufferTextureTest, PopulateTexture) {
   FlutterOpenGLTexture opengl_texture = {0};
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_pixel_buffer_texture_populate(

@@ -3,6 +3,12 @@
 // found in the LICENSE file.
 
 #include "impeller/compiler/shader_bundle.h"
+
+#include <filesystem>
+#include <sstream>
+
+#include "flutter/fml/file.h"
+#include "flutter/fml/mapping.h"
 #include "impeller/compiler/compiler.h"
 #include "impeller/compiler/reflector.h"
 #include "impeller/compiler/source_options.h"
@@ -81,11 +87,36 @@ std::optional<ShaderBundleConfig> ParseShaderBundleConfig(
   return bundle;
 }
 
+std::vector<std::string_view> GetShaderBundleTargetPlatformDefines(
+    TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform::kMetalIOS:
+      return {"IMPELLER_TARGET_METAL", "IMPELLER_TARGET_METAL_IOS"};
+    case TargetPlatform::kMetalDesktop:
+      return {"IMPELLER_TARGET_METAL", "IMPELLER_TARGET_METAL_DESKTOP"};
+    case TargetPlatform::kOpenGLES:
+      return {"IMPELLER_TARGET_OPENGLES"};
+    case TargetPlatform::kOpenGLDesktop:
+      return {"IMPELLER_TARGET_OPENGL"};
+    case TargetPlatform::kVulkan:
+      return {"IMPELLER_TARGET_VULKAN"};
+    case TargetPlatform::kSkSL:
+    case TargetPlatform::kRuntimeStageMetal:
+    case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
+    case TargetPlatform::kRuntimeStageVulkan:
+    case TargetPlatform::kUnknown:
+      return {};
+  }
+  return {};
+}
+
 static std::unique_ptr<fb::shaderbundle::BackendShaderT>
 GenerateShaderBackendFB(TargetPlatform target_platform,
                         SourceOptions& options,
                         const std::string& shader_name,
-                        const ShaderConfig& shader_config) {
+                        const ShaderConfig& shader_config,
+                        std::set<std::string>* out_dependencies) {
   auto result = std::make_unique<fb::shaderbundle::BackendShaderT>();
 
   std::shared_ptr<fml::FileMapping> source_file_mapping =
@@ -105,17 +136,40 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
       shader_config.source_file_name, options.type, options.source_language,
       shader_config.entry_point);
 
+  // Inject the platform-discriminating defines (e.g. IMPELLER_TARGET_METAL) so
+  // bundled shaders can specialize per backend. These are added to a local copy
+  // because `options` is shared across every backend compiled here; pushing
+  // onto it directly would accumulate defines from previously compiled
+  // backends.
+  SourceOptions backend_options = options;
+  backend_options.target_platform = target_platform;
+  for (const auto& define :
+       GetShaderBundleTargetPlatformDefines(target_platform)) {
+    backend_options.defines.emplace_back(define);
+  }
+
   Reflector::Options reflector_options;
-  reflector_options.target_platform = options.target_platform;
+  reflector_options.target_platform = target_platform;
   reflector_options.entry_point_name = options.entry_point_name;
   reflector_options.shader_name = shader_name;
 
-  Compiler compiler(source_file_mapping, options, reflector_options);
+  Compiler compiler(source_file_mapping, backend_options, reflector_options);
   if (!compiler.IsValid()) {
     std::cerr << "Compilation failed for bundled shader \"" << shader_name
               << "\"." << std::endl;
     std::cerr << compiler.GetErrorMessages() << std::endl;
     return nullptr;
+  }
+
+  // Record dependencies so the caller can emit a depfile. The shader's
+  // source file plus every transitive `#include` that contributed to
+  // the compilation. The same source is compiled across multiple
+  // target platforms; the std::set dedupes naturally.
+  if (out_dependencies) {
+    out_dependencies->insert(shader_config.source_file_name);
+    for (const auto& included : compiler.GetIncludedFileNames()) {
+      out_dependencies->insert(included);
+    }
   }
 
   auto reflector = compiler.GetReflector();
@@ -145,31 +199,37 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
 static std::unique_ptr<fb::shaderbundle::ShaderT> GenerateShaderFB(
     SourceOptions options,
     const std::string& shader_name,
-    const ShaderConfig& shader_config) {
+    const ShaderConfig& shader_config,
+    std::set<std::string>* out_dependencies) {
   auto result = std::make_unique<fb::shaderbundle::ShaderT>();
   result->name = shader_name;
-  result->metal_ios = GenerateShaderBackendFB(
-      TargetPlatform::kMetalIOS, options, shader_name, shader_config);
+  result->metal_ios =
+      GenerateShaderBackendFB(TargetPlatform::kMetalIOS, options, shader_name,
+                              shader_config, out_dependencies);
   if (!result->metal_ios) {
     return nullptr;
   }
-  result->metal_desktop = GenerateShaderBackendFB(
-      TargetPlatform::kMetalDesktop, options, shader_name, shader_config);
+  result->metal_desktop =
+      GenerateShaderBackendFB(TargetPlatform::kMetalDesktop, options,
+                              shader_name, shader_config, out_dependencies);
   if (!result->metal_desktop) {
     return nullptr;
   }
-  result->opengl_es = GenerateShaderBackendFB(
-      TargetPlatform::kOpenGLES, options, shader_name, shader_config);
+  result->opengl_es =
+      GenerateShaderBackendFB(TargetPlatform::kOpenGLES, options, shader_name,
+                              shader_config, out_dependencies);
   if (!result->opengl_es) {
     return nullptr;
   }
-  result->opengl_desktop = GenerateShaderBackendFB(
-      TargetPlatform::kOpenGLDesktop, options, shader_name, shader_config);
+  result->opengl_desktop =
+      GenerateShaderBackendFB(TargetPlatform::kOpenGLDesktop, options,
+                              shader_name, shader_config, out_dependencies);
   if (!result->opengl_desktop) {
     return nullptr;
   }
-  result->vulkan = GenerateShaderBackendFB(TargetPlatform::kVulkan, options,
-                                           shader_name, shader_config);
+  result->vulkan =
+      GenerateShaderBackendFB(TargetPlatform::kVulkan, options, shader_name,
+                              shader_config, out_dependencies);
   if (!result->vulkan) {
     return nullptr;
   }
@@ -178,7 +238,8 @@ static std::unique_ptr<fb::shaderbundle::ShaderT> GenerateShaderFB(
 
 std::optional<fb::shaderbundle::ShaderBundleT> GenerateShaderBundleFlatbuffer(
     const std::string& bundle_config_json,
-    const SourceOptions& options) {
+    const SourceOptions& options,
+    std::set<std::string>* out_dependencies) {
   // --------------------------------------------------------------------------
   /// 1. Parse the bundle configuration.
   ///
@@ -199,7 +260,7 @@ std::optional<fb::shaderbundle::ShaderBundleT> GenerateShaderBundleFlatbuffer(
 
   for (const auto& [shader_name, shader_config] : bundle_config.value()) {
     std::unique_ptr<fb::shaderbundle::ShaderT> shader =
-        GenerateShaderFB(options, shader_name, shader_config);
+        GenerateShaderFB(options, shader_name, shader_config, out_dependencies);
     if (!shader) {
       return std::nullopt;
     }
@@ -209,13 +270,56 @@ std::optional<fb::shaderbundle::ShaderBundleT> GenerateShaderBundleFlatbuffer(
   return shader_bundle;
 }
 
+/// Write a Ninja-style depfile listing every source file (including
+/// `#include`d headers) that contributed to the shader bundle at
+/// `target`.
+///
+/// Format mirrors `Compiler::CreateDepfileContents` for single-shader
+/// compiles: `<target>: <dep1> <dep2> ... <depN>\n`.
+/// See
+/// https://github.com/ninja-build/ninja/blob/master/src/depfile_parser.cc#L28
+static bool OutputBundleDepfile(const Switches& switches,
+                                const std::string& target,
+                                const std::set<std::string>& dependencies) {
+  std::stringstream stream;
+  stream << target << ":";
+  for (const auto& dep : dependencies) {
+    stream << " " << dep;
+  }
+  stream << "\n";
+  const auto contents = std::make_shared<std::string>(stream.str());
+  const fml::NonOwnedMapping mapping(
+      reinterpret_cast<const uint8_t*>(contents->data()), contents->size(),
+      [contents](auto, auto) {});
+
+  // Pass the relative path straight through; fml::WriteAtomically
+  // resolves it against switches.working_directory (a directory fd
+  // representing the build system's intended working dir, which may
+  // differ from std::filesystem::current_path()).
+  if (!fml::WriteAtomically(*switches.working_directory,
+                            Utf8FromPath(switches.depfile_path).c_str(),
+                            mapping)) {
+    std::cerr << "Could not write depfile to " << switches.depfile_path
+              << std::endl;
+    return false;
+  }
+  return true;
+}
+
 bool GenerateShaderBundle(Switches& switches) {
   // --------------------------------------------------------------------------
   /// 1. Parse the shader bundle and generate the flatbuffer result.
   ///
+  /// Collect dependencies along the way so a depfile can be emitted
+  /// after the bundle is written. The same source file is compiled
+  /// across multiple target platforms; the std::set dedupes naturally.
+  ///
 
+  std::set<std::string> dependencies;
+  const bool want_depfile = !switches.depfile_path.empty();
   auto shader_bundle = GenerateShaderBundleFlatbuffer(
-      switches.shader_bundle, switches.CreateSourceOptions());
+      switches.shader_bundle, switches.CreateSourceOptions(),
+      want_depfile ? &dependencies : nullptr);
   if (!shader_bundle.has_value()) {
     // Specific error messages are already handled by
     // GenerateShaderBundleFlatbuffer.
@@ -249,6 +353,21 @@ bool GenerateShaderBundle(Switches& switches) {
   // be 0644.
   if (!SetPermissiveAccess(sl_file_name)) {
     return false;
+  }
+
+  // --------------------------------------------------------------------------
+  /// 3. Output a depfile if one was requested.
+  ///
+  /// Lets build systems (notably Dart's `hooks` framework, which
+  /// `flutter_gpu_shaders`' `buildShaderBundleJson` consumer goes
+  /// through) rerun the bundle build when any contributing source file
+  /// or `#include`d header changes.
+
+  if (want_depfile) {
+    if (!OutputBundleDepfile(switches, Utf8FromPath(sl_file_name),
+                             dependencies)) {
+      return false;
+    }
   }
 
   return true;

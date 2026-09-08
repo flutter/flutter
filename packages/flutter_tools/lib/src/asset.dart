@@ -128,8 +128,6 @@ const kMaterialFonts = <Map<String, Object>>[
   },
 ];
 
-const kMaterialShaders = <String>['shaders/ink_sparkle.frag', 'shaders/stretch_effect.frag'];
-
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
@@ -460,12 +458,39 @@ class ManifestAssetBundle implements AssetBundle {
           continue;
         }
         // Collect any additional licenses from each package.
+        final isAppItself = packageFlutterManifest.appName == flutterManifest.appName;
         final licenseFiles = <File>[];
-        for (final String relativeLicensePath in packageFlutterManifest.additionalLicenses) {
-          final String absoluteLicensePath = _fileSystem.path.fromUri(
-            package.root.resolve(relativeLicensePath),
-          );
-          licenseFiles.add(_fileSystem.file(absoluteLicensePath).absolute);
+        // Most packages declare no additional licenses, so skip all of the work
+        // below (including canonicalization) when there is nothing to collect.
+        if (packageFlutterManifest.additionalLicenses.isNotEmpty) {
+          // The package root is constant for this package, so canonicalize it
+          // once instead of per license path. The app itself is exempt from the
+          // containment check, in which case this stays null.
+          final String? packageRoot = isAppItself
+              ? null
+              : _fileSystem.path.canonicalize(_fileSystem.path.fromUri(package.root));
+          for (final String relativeLicensePath in packageFlutterManifest.additionalLicenses) {
+            final String absoluteLicensePath = _fileSystem.path.fromUri(
+              package.root.resolve(relativeLicensePath),
+            );
+            // A dependency must not declare a license path that escapes its own
+            // package directory (e.g. '../secret'). Otherwise the build would read
+            // an arbitrary file outside the package and bundle its contents into
+            // the app's NOTICES. This mirrors the containment check applied to
+            // dependency-declared asset paths in `_ensureAssetPathIsValid`.
+            if (packageRoot != null) {
+              final String resolvedLicense = _fileSystem.path.canonicalize(absoluteLicensePath);
+              if (packageRoot != resolvedLicense &&
+                  !_fileSystem.path.isWithin(packageRoot, resolvedLicense)) {
+                throwToolExit(
+                  'Package "${packageFlutterManifest.appName}" specified a license path '
+                  '"$relativeLicensePath" that escapes its package directory. License paths '
+                  'declared by a package must stay within that package.',
+                );
+              }
+            }
+            licenseFiles.add(_fileSystem.file(absoluteLicensePath).absolute);
+          }
         }
         additionalLicenseFiles[packageFlutterManifest.appName] = licenseFiles;
 
@@ -606,14 +631,14 @@ class ManifestAssetBundle implements AssetBundle {
         }
       }
     }
-    final materialAssets = <_Asset>[
+    final materialAndFrameworkAssets = <_Asset>[
       if (flutterManifest.usesMaterialDesign) ..._getMaterialFonts(),
       // For all platforms, include the shaders unconditionally. They are
       // small, and whether they're used is determined only by the app source
       // code and not by the Flutter manifest.
-      ..._getMaterialShaders(),
+      ..._getFrameworkShaders(),
     ];
-    for (final asset in materialAssets) {
+    for (final asset in materialAndFrameworkAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
       assert(assetFile.existsSync(), 'Missing ${assetFile.path}');
       entries[asset.entryUri.path] ??= AssetBundleEntry(
@@ -783,8 +808,10 @@ class ManifestAssetBundle implements AssetBundle {
     return result;
   }
 
-  List<_Asset> _getMaterialShaders() {
-    final String shaderPath = _fileSystem.path.join(
+  List<_Asset> _getFrameworkShaders() {
+    final result = <_Asset>[];
+
+    final String materialShaderPath = _fileSystem.path.join(
       _flutterRoot,
       'packages',
       'flutter',
@@ -793,21 +820,35 @@ class ManifestAssetBundle implements AssetBundle {
       'material',
       'shaders',
     );
-    // This file will exist in a real invocation unless the git checkout is
-    // corrupted somehow, but unit tests generally don't create this file
-    // in their mock file systems. Leaving it out in those cases is harmless.
-    if (!_fileSystem.directory(shaderPath).existsSync()) {
-      return <_Asset>[];
-    }
-
-    final result = <_Asset>[];
-    for (final String shader in kMaterialShaders) {
-      final Uri entryUri = _fileSystem.path.toUri(shader);
+    if (_fileSystem.directory(materialShaderPath).existsSync()) {
+      // TODO(chunhtai): remove ink_sparkle.frag sideloading.
+      // https://github.com/flutter/flutter/issues/188545.
       result.add(
         _Asset(
-          baseDir: shaderPath,
-          relativeUri: Uri(path: entryUri.pathSegments.last),
-          entryUri: entryUri,
+          baseDir: materialShaderPath,
+          relativeUri: Uri(path: 'ink_sparkle.frag'),
+          entryUri: _fileSystem.path.toUri('shaders/ink_sparkle.frag'),
+          package: null,
+          kind: AssetKind.shader,
+        ),
+      );
+    }
+
+    final String widgetsShaderPath = _fileSystem.path.join(
+      _flutterRoot,
+      'packages',
+      'flutter',
+      'lib',
+      'src',
+      'widgets',
+      'shaders',
+    );
+    if (_fileSystem.directory(widgetsShaderPath).existsSync()) {
+      result.add(
+        _Asset(
+          baseDir: widgetsShaderPath,
+          relativeUri: Uri(path: 'stretch_effect.frag'),
+          entryUri: _fileSystem.path.toUri('shaders/stretch_effect.frag'),
           package: null,
           kind: AssetKind.shader,
         ),
@@ -1104,7 +1145,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     result.removeWhere((_Asset asset, List<_Asset> variants) {
       if (!asset.matchesFlavor(flavor)) {
-        _logger.printWarning(
+        _logger.printTrace(
           'Skipping assets entry "${asset.entryUri.path}" since '
           'its configured flavor(s) did not match the provided flavor (if any).\n'
           'Configured flavors: ${asset.flavors.join(', ')}\n',
@@ -1112,7 +1153,7 @@ class ManifestAssetBundle implements AssetBundle {
         return true;
       }
       if (!asset.matchesPlatform(targetPlatform)) {
-        _logger.printWarning(
+        _logger.printTrace(
           'Skipping assets entry "${asset.entryUri.path}" since '
           'its configured platform(s) did not match the target platform.\n'
           'Configured platforms: ${asset.platforms.join(', ')}\n'
@@ -1165,11 +1206,43 @@ class ManifestAssetBundle implements AssetBundle {
     required List<AssetTransformerEntry> transformers,
   }) {
     final String directoryPath;
-    _ensureAssetPathIsValid(assetsBaseDir: assetBase, assetUri: assetUri);
-    directoryPath = _fileSystem.path.join(
+    _ensureAssetPathIsValid(assetsBaseDir: assetBase, assetUri: assetUri, packageName: packageName);
+
+    final String localDirectoryPath = _fileSystem.path.join(
       assetBase,
       assetUri.toFilePath(windows: _platform.isWindows),
     );
+
+    final bool isPackageAsset =
+        assetUri.pathSegments.length >= 2 &&
+        assetUri.pathSegments[1].isNotEmpty &&
+        assetUri.pathSegments.first == 'packages' &&
+        !_fileSystem.directory(localDirectoryPath).existsSync();
+
+    String? packageLibPath;
+    String? resolvedPackageName;
+
+    if (isPackageAsset) {
+      final _Asset? packageAsset = _resolvePackageAsset(
+        assetUri,
+        packageConfig,
+        attributedPackage,
+        flavors: flavors,
+        platforms: platforms,
+        transformers: transformers,
+      );
+      if (packageAsset == null) {
+        return;
+      }
+      directoryPath = _fileSystem.path.join(
+        packageAsset.baseDir,
+        packageAsset.relativeUri.toFilePath(windows: _platform.isWindows),
+      );
+      packageLibPath = packageAsset.baseDir;
+      resolvedPackageName = assetUri.pathSegments[1];
+    } else {
+      directoryPath = localDirectoryPath;
+    }
 
     if (!_fileSystem.directory(directoryPath).existsSync()) {
       _logger.printError('Error: unable to find directory entry in pubspec.yaml: $directoryPath');
@@ -1180,8 +1253,15 @@ class ManifestAssetBundle implements AssetBundle {
 
     final Iterable<File> files = entities.whereType<File>();
     for (final file in files) {
-      final String relativePath = _fileSystem.path.relative(file.path, from: assetBase);
-      final uri = Uri.file(relativePath, windows: _platform.isWindows);
+      final Uri uri;
+      if (isPackageAsset) {
+        final String relativePathToLib = _fileSystem.path.relative(file.path, from: packageLibPath);
+        final List<String> parts = _fileSystem.path.split(relativePathToLib);
+        uri = Uri(pathSegments: <String>['packages', resolvedPackageName!, ...parts]);
+      } else {
+        final String relativePath = _fileSystem.path.relative(file.path, from: assetBase);
+        uri = Uri.file(relativePath, windows: _platform.isWindows);
+      }
 
       _parseAssetFromFile(
         packageConfig,
@@ -1329,7 +1409,11 @@ class ManifestAssetBundle implements AssetBundle {
     throwToolExit(errorMessage.toString());
   }
 
-  void _ensureAssetPathIsValid({required String assetsBaseDir, required Uri assetUri}) {
+  void _ensureAssetPathIsValid({
+    required String assetsBaseDir,
+    required Uri assetUri,
+    String? packageName,
+  }) {
     if (!assetUri.isScheme('file') && assetUri.scheme.isNotEmpty) {
       throwToolExit(
         'Asset path "$assetUri" has scheme "${assetUri.scheme}" and is not a valid file or '
@@ -1348,6 +1432,24 @@ class ManifestAssetBundle implements AssetBundle {
         'in the pubspec.yaml to use a relative path.',
       );
     }
+    // An asset declared by a dependency must stay within that package's own directory. A relative
+    // path that escapes the package (e.g. '../secret') would otherwise make the build read and
+    // bundle files from outside the package on the build machine, which the consuming app never
+    // declared. (The absolute-path check above is preserved for all assets.)
+    if (packageName != null) {
+      final String assetPath = assetUri.toFilePath(windows: _platform.isWindows);
+      final String base = _fileSystem.path.canonicalize(assetsBaseDir);
+      final String resolved = _fileSystem.path.canonicalize(
+        _fileSystem.path.join(assetsBaseDir, assetPath),
+      );
+      if (base != resolved && !_fileSystem.path.isWithin(base, resolved)) {
+        throwToolExit(
+          'Asset path "$assetPath" of package '
+          '"$packageName" resolves to a location outside the package directory. Package asset '
+          'paths must stay within the package.',
+        );
+      }
+    }
   }
 
   _Asset _resolveAsset(
@@ -1362,7 +1464,11 @@ class ManifestAssetBundle implements AssetBundle {
     required Set<String> platforms,
     required List<AssetTransformerEntry> transformers,
   }) {
-    _ensureAssetPathIsValid(assetsBaseDir: assetsBaseDir, assetUri: assetUri);
+    _ensureAssetPathIsValid(
+      assetsBaseDir: assetsBaseDir,
+      assetUri: assetUri,
+      packageName: packageName,
+    );
     if (assetUri.pathSegments.first == 'packages' &&
         !_fileSystem.isFileSync(
           _fileSystem.path.join(assetsBaseDir, _fileSystem.path.fromUri(assetUri)),

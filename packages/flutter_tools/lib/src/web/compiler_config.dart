@@ -150,6 +150,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
     this.minify,
     this.dryRun = false,
     super.sourceMaps = true,
+    this.enableWasmDeferredLoading = false,
     super.renderer = WebRendererMode.defaultForWasm,
   });
 
@@ -162,6 +163,8 @@ class WasmCompilerConfig extends WebCompilerConfig {
   final bool? minify;
 
   final bool dryRun;
+
+  final bool enableWasmDeferredLoading;
 
   @override
   CompileTarget get compileTarget => CompileTarget.wasm;
@@ -189,6 +192,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
       if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
       if (buildMode == BuildMode.debug) '--extra-compiler-option=--enable-asserts',
       if (dryRun) '--extra-compiler-option=--dry-run',
+      if (enableWasmDeferredLoading) '--enable-deferred-loading',
     ];
   }
 
@@ -200,6 +204,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
       'minify': minify,
       'dryRun': dryRun,
       WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
+      'enableWasmDeferredLoading': enableWasmDeferredLoading,
     };
     return jsonEncode(settings);
   }

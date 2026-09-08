@@ -177,13 +177,13 @@ class AndroidAot extends AotElfBase {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
+    return getCpuArchForName(targetPlatform.getName()).androidArchName;
   }
 
   @override
   String get name =>
       'android_aot_${buildMode.cliName}_'
-      '${getNameForTargetPlatform(targetPlatform)}';
+      '${targetPlatform.getName()}';
 
   /// The specific Android ABI we are building for.
   final TargetPlatform targetPlatform;
@@ -304,13 +304,13 @@ class AndroidAotBundle extends Target {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)).archName;
+    return getCpuArchForName(dependency.targetPlatform.getName()).androidArchName;
   }
 
   @override
   String get name =>
       'android_aot_bundle_${dependency.buildMode.cliName}_'
-      '${getNameForTargetPlatform(dependency.targetPlatform)}';
+      '${dependency.targetPlatform.getName()}';
 
   TargetPlatform get targetPlatform => dependency.targetPlatform;
 
@@ -382,13 +382,13 @@ class AndroidAotDeferredComponentsBundle extends Target {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)).archName;
+    return getCpuArchForName(dependency.targetPlatform.getName()).androidArchName;
   }
 
   @override
   String get name =>
       'android_aot_deferred_components_bundle_${dependency.buildMode.cliName}_'
-      '${getNameForTargetPlatform(dependency.targetPlatform)}';
+      '${dependency.targetPlatform.getName()}';
 
   TargetPlatform get targetPlatform => dependency.targetPlatform;
 
@@ -413,7 +413,9 @@ class AndroidAotDeferredComponentsBundle extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    _components ??= FlutterProject.current().manifest.deferredComponents ?? <DeferredComponent>[];
+    _components ??=
+        FlutterProject.fromDirectory(environment.projectDir).manifest.deferredComponents ??
+        <DeferredComponent>[];
     final abis = <String>[_androidAbiName];
     final List<LoadingUnit> generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
       environment.outputDir,
@@ -427,7 +429,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
       environment,
       _components!,
       generatedLoadingUnits,
-      environment.projectDir.childDirectory('build'),
+      FlutterProject.fromDirectory(environment.projectDir).buildDirectory,
       abis,
       dependency.buildMode,
     );

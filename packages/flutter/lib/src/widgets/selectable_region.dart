@@ -54,12 +54,14 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// A widget that introduces an area for user selections.
 ///
 /// Flutter widgets are not selectable by default. Wrapping a widget subtree
-/// with a [SelectableRegion] widget enables selection within that subtree (for
-/// example, [Text] widgets automatically look for selectable regions to enable
-/// selection). The wrapped subtree can be selected by users using mouse or
-/// touch gestures, e.g. users can select widgets by holding the mouse
-/// left-click and dragging across widgets, or they can use long press gestures
-/// to select words on touch devices.
+/// with a [SelectableRegion] widget enables selection for widgets in the
+/// subtree that participate in selection. For example, [Text] widgets
+/// automatically look for selectable regions to enable selection, while widgets
+/// such as [RichText] must be configured with a [SelectionRegistrar] and
+/// [RichText.selectionColor]. The wrapped subtree can be selected by users
+/// using mouse or touch gestures, e.g. users can select widgets by holding the
+/// mouse left-click and dragging across widgets, or they can use long press
+/// gestures to select words on touch devices.
 ///
 /// A [SelectableRegion] widget requires configuration; in particular specific
 /// [selectionControls] must be provided.
@@ -94,8 +96,10 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 ///
 /// Both [SelectionContainer]s and the leaf [Selectable]s need to register
 /// themselves to the [SelectionRegistrar] from the
-/// [SelectionContainer.maybeOf] if they want to participate in the
-/// selection.
+/// [SelectionContainer.maybeOf] if they want to participate in the selection.
+/// The [BuildContext] used with [SelectionContainer.maybeOf] must be below the
+/// [SelectionContainer], [SelectableRegion], or [SelectionArea] that provides
+/// the registrar in the widget tree.
 ///
 /// An example selection tree will look like:
 ///
@@ -156,7 +160,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// This sample demonstrates how to create an adapter widget that makes any
 /// child widget selectable.
 ///
-/// ** See code in examples/api/lib/material/selectable_region/selectable_region.0.dart **
+/// ** See code in examples/api/lib/widgets/selectable_region/selectable_region.0.dart **
 /// {@end-tool}
 ///
 /// ## Complex layout
@@ -169,7 +173,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// This sample demonstrates how to create a [SelectionContainer] that only
 /// allows selecting everything or nothing with no partial selection.
 ///
-/// ** See code in examples/api/lib/material/selection_container/selection_container.0.dart **
+/// ** See code in examples/api/lib/widgets/selection_container/selection_container.0.dart **
 /// {@end-tool}
 ///
 /// In the case where a group of widgets should be excluded from selection under
@@ -179,7 +183,7 @@ const double _kSelectableVerticalComparingThreshold = 3.0;
 /// {@tool dartpad}
 /// This sample demonstrates how to disable selection for a Text in a Column.
 ///
-/// ** See code in examples/api/lib/material/selection_container/selection_container_disabled.0.dart **
+/// ** See code in examples/api/lib/widgets/selection_container/selection_container_disabled.0.dart **
 /// {@end-tool}
 ///
 /// To create a separate selection system from its parent selection area,
@@ -444,6 +448,10 @@ class SelectableRegionState extends State<SelectableRegion>
   final _SelectableRegionSelectionStatusNotifier _selectionStatusNotifier =
       _SelectableRegionSelectionStatusNotifier._();
 
+  /// Preserves the selection status scope and root selection container when the
+  /// desktop web context menu wrapper is added or removed.
+  final GlobalKey _selectionStatusScopeKey = GlobalKey(debugLabel: 'selectionStatusScopeKey');
+
   @protected
   @override
   void initState() {
@@ -521,7 +529,11 @@ class SelectableRegionState extends State<SelectableRegion>
 
   void _handleFocusChanged() {
     if (!_focusNode.hasFocus) {
-      if (_webContextMenuEnabled) {
+      if (kIsWeb) {
+        // Detach regardless of the current (dynamic) _webContextMenuEnabled
+        // value: the browser context menu may have been disabled after this
+        // delegate attached, and detach is a no-op for a client that was
+        // never the active one.
         PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
       }
       if (SchedulerBinding.instance.lifecycleState == AppLifecycleState.resumed) {
@@ -536,8 +548,7 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         _finalizeSelectableRegionStatus();
       }
-    }
-    if (_webContextMenuEnabled) {
+    } else if (_webContextMenuEnabled) {
       PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
     }
   }
@@ -1931,6 +1942,9 @@ class SelectableRegionState extends State<SelectableRegion>
   void dispose() {
     _selectable?.removeListener(_updateSelectionStatus);
     _selectable?.pushHandleLayers(null, null);
+    if (kIsWeb) {
+      PlatformSelectableRegionContextMenu.detach(_selectionDelegate);
+    }
     _selectionDelegate.dispose();
     _selectionStatusNotifier.dispose();
     // In case dispose was triggered before gesture end, remove the magnifier
@@ -1949,6 +1963,7 @@ class SelectableRegionState extends State<SelectableRegion>
   Widget build(BuildContext context) {
     assert(debugCheckHasOverlay(context));
     Widget result = SelectableRegionSelectionStatusScope._(
+      key: _selectionStatusScopeKey,
       selectionStatusNotifier: _selectionStatusNotifier,
       child: SelectionContainer(registrar: this, delegate: _selectionDelegate, child: widget.child),
     );
@@ -1998,8 +2013,8 @@ abstract class _NonOverrideAction<T extends Intent> extends ContextAction<T> {
 
   @override
   Object? invoke(T intent, [BuildContext? context]) {
-    if (callingAction != null) {
-      return callingAction!.invoke(intent);
+    if (callingAction case final callingAction?) {
+      return callingAction.invoke(intent);
     }
     return invokeAction(intent, context);
   }
@@ -3506,6 +3521,7 @@ final class _SelectableRegionSelectionStatusNotifier extends ChangeNotifier
 /// does not change.
 final class SelectableRegionSelectionStatusScope extends InheritedWidget {
   const SelectableRegionSelectionStatusScope._({
+    super.key,
     required this.selectionStatusNotifier,
     required super.child,
   });

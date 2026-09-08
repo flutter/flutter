@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'common.dart';
 /// @docImport 'terminal.dart';
 library;
 
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:file/file.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:stack_trace/stack_trace.dart';
@@ -64,16 +66,7 @@ abstract interface class CliEnum implements Enum {
 }
 
 /// Converts `fooBar` to `FooBar`.
-///
-/// This uses [toBeginningOfSentenceCase](https://pub.dev/documentation/intl/latest/intl/toBeginningOfSentenceCase.html),
-/// with the input and return value of non-nullable.
-String sentenceCase(String str, [String? locale]) {
-  if (str.isEmpty) {
-    return str;
-  }
-  // TODO(christopherfujino): Remove this check after the next release of intl
-  return ArgumentError.checkNotNull(toBeginningOfSentenceCase(str, locale));
-}
+String sentenceCase(String str) => str.isEmpty ? str : '${str[0].toUpperCase()}${str.substring(1)}';
 
 /// Converts `foo_bar` to `Foo Bar`.
 String snakeCaseToTitleCase(String snakeCaseString) {
@@ -88,8 +81,8 @@ String toPrettyJson(Object jsonable) {
   return '$value\n';
 }
 
-final _singleDigitPrecision = NumberFormat('0.0');
-final _decimalPattern = NumberFormat.decimalPattern();
+final _singleDigitPrecision = intl.NumberFormat('0.0');
+final _decimalPattern = intl.NumberFormat.decimalPattern();
 
 String getElapsedAsMinutesOrSeconds(Duration duration) {
   if (duration.inMinutes < 1) {
@@ -655,4 +648,58 @@ List<String> formatTable(List<List<String>> table, {String separator = ' • ', 
         .join(separator);
     return '$indentString$formatted';
   }).toList();
+}
+
+/// Decodes a list of bytes into a string, supporting UTF-8 (with or without
+/// BOM) and UTF-16 LE/BE (with BOM).
+///
+/// Inspects leading Byte Order Mark (BOM) signatures in [bytes] to determine
+/// the encoding:
+///
+/// * **UTF-16 LE** (`0xFF, 0xFE`): Strips the 2-byte BOM and decodes the
+///   remaining payload as 16-bit little-endian code units.
+/// * **UTF-16 BE** (`0xFE, 0xFF`): Strips the 2-byte BOM and decodes the
+///   remaining payload as 16-bit big-endian code units.
+/// * **UTF-8 with BOM** (`0xEF, 0xBB, 0xBF`): Strips the 3-byte BOM and decodes
+///   the remaining payload as strict UTF-8.
+/// * **Default UTF-8** (no BOM): Decodes the entire byte list as strict UTF-8.
+///
+/// Throws a [FormatException] if a UTF-16 byte payload has an odd length after
+/// stripping the BOM, or a [ToolExit] if strict UTF-8 decoding fails.
+String decodeUtf8OrUtf16(List<int> bytes) {
+  // Avoid using list pattern matching here (e.g., `[0xFF, 0xFE, ...final payload]`)
+  // as the rest pattern allocates a copied sublist for the payload.
+  if (bytes.length >= 2 && bytes[0] == 0xFF && bytes[1] == 0xFE) {
+    return _decodeUtf16(bytes, 2, Endian.little);
+  }
+  if (bytes.length >= 2 && bytes[0] == 0xFE && bytes[1] == 0xFF) {
+    return _decodeUtf16(bytes, 2, Endian.big);
+  }
+  if (bytes.length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF) {
+    return utf8.decode(bytes.sublist(3));
+  }
+  return utf8.decode(bytes);
+}
+
+/// Decodes a UTF-16 byte list [bytes] starting from [offset] after its BOM has
+/// been stripped.
+///
+/// Reads 16-bit integers according to the specified byte [endian] (either
+/// [Endian.little] or [Endian.big]).
+///
+/// Throws a [FormatException] if the payload length has an odd number of bytes,
+/// as each UTF-16 code unit requires exactly 2 bytes.
+String _decodeUtf16(List<int> bytes, int offset, Endian endian) {
+  final int length = bytes.length - offset;
+  if (length.isOdd) {
+    throw const FormatException('UTF-16 data length must be even after BOM');
+  }
+  final Uint8List uint8List = bytes is Uint8List ? bytes : Uint8List.fromList(bytes);
+  final byteData = ByteData.sublistView(uint8List, offset);
+  final int count = length ~/ 2;
+  final codeUnits = Uint16List(count);
+  for (var i = 0; i < count; i++) {
+    codeUnits[i] = byteData.getUint16(i * 2, endian);
+  }
+  return String.fromCharCodes(codeUnits);
 }

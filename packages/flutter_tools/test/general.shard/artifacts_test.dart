@@ -6,7 +6,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -165,55 +164,6 @@ void main() {
         ),
       );
     });
-
-    testWithoutContext('getArtifactPath resolves gen_snapshot to linux-x64 on x64 Linux host', () {
-      expect(
-        artifacts.getArtifactPath(
-          Artifact.genSnapshot,
-          platform: TargetPlatform.android_arm64,
-          mode: BuildMode.release,
-        ),
-        fileSystem.path.join(
-          'root',
-          'bin',
-          'cache',
-          'artifacts',
-          'engine',
-          'android-arm64-release',
-          'linux-x64',
-          'gen_snapshot',
-        ),
-      );
-    });
-
-    testWithoutContext(
-      'getArtifactPath resolves gen_snapshot to linux-arm64 on arm64 Linux host',
-      () {
-        final arm64Artifacts = CachedArtifacts(
-          fileSystem: fileSystem,
-          cache: cache,
-          platform: platform,
-          operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
-        );
-        expect(
-          arm64Artifacts.getArtifactPath(
-            Artifact.genSnapshot,
-            platform: TargetPlatform.android_arm64,
-            mode: BuildMode.release,
-          ),
-          fileSystem.path.join(
-            'root',
-            'bin',
-            'cache',
-            'artifacts',
-            'engine',
-            'android-arm64-release',
-            'linux-arm64',
-            'gen_snapshot',
-          ),
-        );
-      },
-    );
 
     testWithoutContext(
       'getArtifactPath for FlutterMacOS.framework and FlutterMacOS.xcframework',
@@ -914,5 +864,51 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+  });
+
+  group('DeferredArtifacts', () {
+    late Artifacts cached;
+    late Artifacts localEngine;
+
+    setUp(() {
+      final fileSystem = MemoryFileSystem.test();
+      cached = Artifacts.test(fileSystem: fileSystem);
+      localEngine = Artifacts.testLocalEngine(
+        localEngine: '/out/host_debug',
+        localEngineHost: '/out/host_debug',
+        fileSystem: fileSystem,
+      );
+    });
+
+    testWithoutContext('builds against the artifacts it was given', () {
+      final artifacts = DeferredArtifacts(cached);
+
+      expect(artifacts.usesLocalArtifacts, isFalse);
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester),
+        cached.getArtifactPath(Artifact.flutterTester),
+      );
+    });
+
+    testWithoutContext('builds against the artifacts it is resolved to', () {
+      final artifacts = DeferredArtifacts(cached);
+
+      artifacts.resolve(localEngine);
+
+      expect(artifacts.usesLocalArtifacts, isTrue);
+      expect(artifacts.localEngineInfo?.targetOutPath, '/out/host_debug');
+      expect(
+        artifacts.getArtifactPath(Artifact.flutterTester),
+        localEngine.getArtifactPath(Artifact.flutterTester),
+      );
+    });
+
+    testWithoutContext('cannot be resolved twice', () {
+      final artifacts = DeferredArtifacts(cached);
+
+      artifacts.resolve(localEngine);
+
+      expect(() => artifacts.resolve(localEngine), throwsAssertionError);
+    });
   });
 }

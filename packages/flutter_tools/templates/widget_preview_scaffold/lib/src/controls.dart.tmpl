@@ -84,62 +84,101 @@ class _ContainingPackageSearchFilter extends _SearchFilterConfig {
 /// Provides controls to change the zoom level of a [WidgetPreview].
 class ZoomControls extends StatelessWidget {
   /// Provides controls to change the zoom level of a [WidgetPreview].
-  const ZoomControls({
-    super.key,
-    required TransformationController transformationController,
-    // ignore: prefer_initializing_formals
-  }) : _transformationController = transformationController;
+  const ZoomControls({super.key, required this._transformationController});
+
+  static const double _minScale = 1.0;
+  static const double _maxScale = 4.0;
 
   final TransformationController _transformationController;
 
   @override
   Widget build(BuildContext context) {
-    const iconColor = Colors.black;
+    final theme = Theme.of(context);
     return _ControlDecorator(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            tooltip: 'Zoom in',
-            onPressed: _zoomIn,
-            icon: Icon(Icons.zoom_in_sharp),
-            color: iconColor,
-          ),
-          IconButton(
-            tooltip: 'Zoom out',
-            onPressed: _zoomOut,
-            icon: Icon(Icons.zoom_out),
-            color: iconColor,
-          ),
-          IconButton(
-            tooltip: 'Reset zoom',
-            onPressed: _reset,
-            icon: Icon(Icons.zoom_out_map),
-            color: iconColor,
-          ),
-        ],
+      child: ValueListenableBuilder<Matrix4>(
+        valueListenable: _transformationController,
+        builder: (context, matrix, _) {
+          final double scale = matrix.entry(0, 0);
+          final String scalePercentage = '${(scale * 100).toStringAsFixed(0)}%';
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                tooltip: 'Zoom out',
+                style: theme.iconButtonTheme.style,
+                onPressed: scale > _minScale ? _zoomOut : null,
+                icon: const Icon(Icons.zoom_out),
+                color: theme.colorScheme.onSurface,
+                disabledColor: theme.colorScheme.onSurface.withValues(
+                  alpha: 0.38,
+                ),
+              ),
+              SizedBox(
+                width: 100,
+                height: defaultButtonHeight,
+                child: Slider(
+                  min: _minScale,
+                  max: _maxScale,
+                  value: scale.clamp(_minScale, _maxScale),
+                  onChanged: _setScale,
+                ),
+              ),
+              IconButton(
+                tooltip: 'Zoom in',
+                style: theme.iconButtonTheme.style,
+                onPressed: scale < _maxScale ? _zoomIn : null,
+                icon: const Icon(Icons.zoom_in_sharp),
+                color: theme.colorScheme.onSurface,
+                disabledColor: theme.colorScheme.onSurface.withValues(
+                  alpha: 0.38,
+                ),
+              ),
+              IconButton(
+                tooltip: 'Reset zoom',
+                style: theme.iconButtonTheme.style,
+                onPressed: scale != _minScale ? _reset : null,
+                icon: const Icon(Icons.zoom_out_map),
+                color: theme.colorScheme.onSurface,
+                disabledColor: theme.colorScheme.onSurface.withValues(
+                  alpha: 0.38,
+                ),
+              ),
+              SizedBox(
+                width: 36,
+                child: Text(
+                  scalePercentage,
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   void _zoomIn() {
-    _transformationController.value = Matrix4.copy(
-      _transformationController.value,
-    ).scaledByDouble(1.1, 1.1, 1.1, 1);
+    final double currentScale = _transformationController.value.entry(0, 0);
+    _setScale(currentScale + 0.25);
   }
 
   void _zoomOut() {
-    final Matrix4 updated = Matrix4.copy(
-      _transformationController.value,
-    ).scaledByDouble(0.9, 0.9, 0.9, 1);
+    final double currentScale = _transformationController.value.entry(0, 0);
+    _setScale(currentScale - 0.25);
+  }
 
-    // Don't allow for zooming out past the original size of the widget.
-    // Assumes scaling is evenly applied to the entire matrix.
-    if (updated.entry(0, 0) < 1.0) {
-      updated.setIdentity();
-    }
-
-    _transformationController.value = updated;
+  void _setScale(double scale) {
+    final double clampedScale = scale.clamp(_minScale, _maxScale);
+    _transformationController.value = Matrix4.diagonal3Values(
+      clampedScale,
+      clampedScale,
+      1.0,
+    );
   }
 
   void _reset() {

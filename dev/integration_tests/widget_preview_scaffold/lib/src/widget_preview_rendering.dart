@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +59,7 @@ class WidgetPreviewErrorWidget extends StatelessWidget {
       height: size.height,
       child: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text.rich(
               TextSpan(
@@ -218,7 +217,7 @@ class PreviewWidgetElement extends StatelessElement {
   PreviewWidgetElement(super.widget);
 }
 
-class WidgetPreviewGroupWidget extends StatelessWidget {
+class WidgetPreviewGroupWidget extends StatefulWidget {
   const WidgetPreviewGroupWidget({
     super.key,
     required this.controller,
@@ -236,6 +235,14 @@ class WidgetPreviewGroupWidget extends StatelessWidget {
   // TODO(bkonyi): inherit this from the theme.
   static const _kCardRadius = Radius.circular(12);
 
+  @override
+  State<WidgetPreviewGroupWidget> createState() =>
+      _WidgetPreviewGroupWidgetState();
+}
+
+class _WidgetPreviewGroupWidgetState extends State<WidgetPreviewGroupWidget> {
+  final _bucket = PageStorageBucket();
+
   Widget _buildGridViewFlex(List<WidgetPreview> previews) {
     return Wrap(
       spacing: WidgetPreviewGroupWidget._gridSpacing,
@@ -243,7 +250,7 @@ class WidgetPreviewGroupWidget extends StatelessWidget {
       alignment: WrapAlignment.start,
       children: [
         for (final WidgetPreview preview in previews)
-          WidgetPreviewWidget(controller: controller, preview: preview),
+          WidgetPreviewWidget(controller: widget.controller, preview: preview),
       ],
     );
   }
@@ -254,7 +261,7 @@ class WidgetPreviewGroupWidget extends StatelessWidget {
         for (final preview in previews)
           Center(
             child: WidgetPreviewWidget(
-              controller: controller,
+              controller: widget.controller,
               preview: preview,
             ),
           ),
@@ -270,7 +277,9 @@ class WidgetPreviewGroupWidget extends StatelessWidget {
         data: ListTileTheme.of(context).copyWith(
           dense: true,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(_kCardRadius),
+            borderRadius: BorderRadius.all(
+              WidgetPreviewGroupWidget._kCardRadius,
+            ),
           ),
         ),
         child: Theme(
@@ -278,20 +287,31 @@ class WidgetPreviewGroupWidget extends StatelessWidget {
           // expanded ExpansionTile.
           data: theme.copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
-            key: PageStorageKey(group.name),
-            title: Text(group.name),
+            key: PageStorageKey(widget.group.name),
+            title: Text(widget.group.name),
             initiallyExpanded: true,
             children: [
-              ValueListenableBuilder<LayoutType>(
-                valueListenable: controller.layoutTypeListenable,
-                builder: (context, selectedLayout, _) {
-                  return switch (selectedLayout) {
-                    LayoutType.gridView => _buildGridViewFlex(group.previews),
-                    LayoutType.listView => _buildVerticalListView(
-                      group.previews,
-                    ),
-                  };
-                },
+              // Wrap children in a PageStorage to create a storage boundary.
+              // Without this, descendant scrollables (which search ancestor
+              // elements for a PageStorageKey when restoring scroll offset)
+              // inherit the PageStorageKey from the ExpansionTile and attempt
+              // to read the ExpansionTile's boolean expansion state as a double,
+              // throwing a TypeError (see https://github.com/flutter/flutter/issues/191242).
+              PageStorage(
+                bucket: _bucket,
+                child: ValueListenableBuilder<LayoutType>(
+                  valueListenable: widget.controller.layoutTypeListenable,
+                  builder: (context, selectedLayout, _) {
+                    return switch (selectedLayout) {
+                      LayoutType.gridView => _buildGridViewFlex(
+                        widget.group.previews,
+                      ),
+                      LayoutType.listView => _buildVerticalListView(
+                        widget.group.previews,
+                      ),
+                    };
+                  },
+                ),
               ),
             ],
           ),
@@ -505,8 +525,10 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
               : null,
           child: Column(
             children: [
-              InteractiveViewerWrapper(
+              ZoomablePreviewArea(
                 transformationController: transformationController,
+                errorThrownDuringTreeConstruction:
+                    errorThrownDuringTreeConstruction,
                 child: preview,
               ),
               const VerticalSpacer(),
@@ -593,17 +615,7 @@ class WidgetPreviewTheming extends StatelessWidget {
     if (themeData == null) {
       return child;
     }
-    final (materialTheme, cupertinoTheme) = themeData.themeForBrightness(
-      MediaQuery.platformBrightnessOf(context),
-    );
-    Widget result = child;
-    if (materialTheme != null) {
-      result = Theme(data: materialTheme, child: result);
-    }
-    if (cupertinoTheme != null) {
-      result = CupertinoTheme(data: cupertinoTheme, child: result);
-    }
-    return result;
+    return themeData.apply(context, child);
   }
 }
 
@@ -766,22 +778,159 @@ class WidgetPreviewerWindowConstraints extends InheritedWidget {
   }
 }
 
-class InteractiveViewerWrapper extends StatelessWidget {
-  const InteractiveViewerWrapper({
+class ZoomablePreviewArea extends StatelessWidget {
+  const ZoomablePreviewArea({
     super.key,
     required this.child,
     required this.transformationController,
+    required this.errorThrownDuringTreeConstruction,
   });
 
   final Widget child;
   final TransformationController transformationController;
+  final bool errorThrownDuringTreeConstruction;
 
   @override
   Widget build(BuildContext context) {
-    return InteractiveViewer(
-      transformationController: transformationController,
-      scaleEnabled: false,
-      child: child,
+    if (errorThrownDuringTreeConstruction) {
+      return child;
+    }
+    return ListenableBuilder(
+      listenable: transformationController,
+      builder: (context, _) {
+        final double scale = transformationController.value.entry(0, 0);
+        return SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: _ScaledLayoutWrapper(scale: scale, child: child),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ScaledLayoutWrapper extends SingleChildRenderObjectWidget {
+  const _ScaledLayoutWrapper({super.child, required this.scale});
+
+  final double scale;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _ScaledLayoutRenderObject(scale: scale);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _ScaledLayoutRenderObject renderObject,
+  ) {
+    renderObject.scale = scale;
+  }
+}
+
+class _ScaledLayoutRenderObject extends RenderShiftedBox {
+  _ScaledLayoutRenderObject({required this._scale, RenderBox? child})
+    : super(child);
+
+  double _scale;
+  double get scale => _scale;
+  set scale(double value) {
+    if (_scale == value) {
+      return;
+    }
+    _scale = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    if (child == null) {
+      return 0.0;
+    }
+    return child!.getMinIntrinsicWidth(height / scale) * scale;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    if (child == null) {
+      return 0.0;
+    }
+    return child!.getMaxIntrinsicWidth(height / scale) * scale;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    if (child == null) {
+      return 0.0;
+    }
+    return child!.getMinIntrinsicHeight(width / scale) * scale;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    if (child == null) {
+      return 0.0;
+    }
+    return child!.getMaxIntrinsicHeight(width / scale) * scale;
+  }
+
+  @override
+  void performLayout() {
+    final child = this.child;
+    if (child == null) {
+      size = Size.zero;
+      return;
+    }
+    child.layout(constraints, parentUsesSize: true);
+    size = constraints.constrain(child.size * scale);
+
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    childParentData.offset = Offset.zero;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null) {
+      layer = null;
+      return;
+    }
+    if (scale == 1.0) {
+      super.paint(context, offset);
+      layer = null;
+      return;
+    }
+    final Matrix4 transform = Matrix4.diagonal3Values(scale, scale, 1.0);
+    layer = context.pushTransform(
+      needsCompositing,
+      offset,
+      transform,
+      super.paint,
+      oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
+    );
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    if (scale != 1.0) {
+      transform.scaleByDouble(scale, scale, 1.0, 1.0);
+    }
+    super.applyPaintTransform(child, transform);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    if (child == null) {
+      return false;
+    }
+    final Matrix4 transform = Matrix4.diagonal3Values(scale, scale, 1.0);
+    return result.addWithPaintTransform(
+      transform: transform,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
+      },
     );
   }
 }
@@ -820,10 +969,8 @@ class _WidgetPreviewWrapper extends SingleChildRenderObjectWidget {
 class _WidgetPreviewWrapperBox extends RenderShiftedBox {
   _WidgetPreviewWrapperBox({
     required RenderBox? child,
-    required BoxConstraints previewerConstraints,
-    // ignore: prefer_initializing_formals
-  }) : _previewerConstraints = previewerConstraints,
-       super(child);
+    required this._previewerConstraints,
+  }) : super(child);
 
   BoxConstraints _constraintOverride = const BoxConstraints();
   BoxConstraints _previewerConstraints;

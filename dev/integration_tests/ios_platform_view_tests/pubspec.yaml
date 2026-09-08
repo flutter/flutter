@@ -3,21 +3,18 @@ name: ios_platform_view_tests
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.10.0-0
+  sdk: ^3.11.0-0
 
 resolution: workspace
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_driver:
-    sdk: flutter
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  test: any
 
 
 flutter:
@@ -27,4 +24,4 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: dgjojg
+# PUBSPEC CHECKSUM: 60tfp7

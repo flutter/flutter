@@ -38,7 +38,7 @@
 #include <pthread.h>
 #endif
 
-// CREATE_NATIVE_ENTRY is leaky by design
+// CREATE_FFI_LAMBDA is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
 
 namespace {
@@ -92,10 +92,9 @@ TEST_F(EmbedderTest, DISABLED_CanLaunchAndShutdownMultipleTimes) {
 TEST_F(EmbedderTest, CanInvokeCustomEntrypoint) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   static fml::AutoResetWaitableEvent latch;
-  Dart_NativeFunction entrypoint = [](Dart_NativeArguments args) {
-    latch.Signal();
-  };
-  context.AddNativeCallback("SayHiFromCustomEntrypoint", entrypoint);
+  auto entrypoint = []() { latch.Signal(); };
+  context.AddFfiNativeCallback("SayHiFromCustomEntrypoint",
+                               reinterpret_cast<void*>(+entrypoint));
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(DlISize(1, 1));
   builder.SetDartEntrypoint("customEntrypoint");
@@ -112,28 +111,27 @@ TEST_F(EmbedderTest, CanInvokeCustomEntrypointMacro) {
   fml::AutoResetWaitableEvent latch3;
 
   // Can be defined separately.
-  auto entry1 = [&latch1](Dart_NativeArguments args) {
+  auto entry1 = [&latch1]() {
     FML_LOG(INFO) << "In Callback 1";
     latch1.Signal();
   };
-  auto native_entry1 = CREATE_NATIVE_ENTRY(entry1);
-  context.AddNativeCallback("SayHiFromCustomEntrypoint1", native_entry1);
+  auto native_entry1 = CREATE_FFI_LAMBDA(entry1);
+  context.AddFfiNativeCallback("SayHiFromCustomEntrypoint1", native_entry1);
 
   // Can be wrapped in the args.
-  auto entry2 = [&latch2](Dart_NativeArguments args) {
+  auto entry2 = [&latch2]() {
     FML_LOG(INFO) << "In Callback 2";
     latch2.Signal();
   };
-  context.AddNativeCallback("SayHiFromCustomEntrypoint2",
-                            CREATE_NATIVE_ENTRY(entry2));
+  context.AddFfiNativeCallback("SayHiFromCustomEntrypoint2",
+                               CREATE_FFI_LAMBDA(entry2));
 
   // Everything can be inline.
-  context.AddNativeCallback(
-      "SayHiFromCustomEntrypoint3",
-      CREATE_NATIVE_ENTRY([&latch3](Dart_NativeArguments args) {
-        FML_LOG(INFO) << "In Callback 3";
-        latch3.Signal();
-      }));
+  context.AddFfiNativeCallback("SayHiFromCustomEntrypoint3",
+                               CREATE_FFI_LAMBDA([&latch3]() {
+                                 FML_LOG(INFO) << "In Callback 3";
+                                 latch3.Signal();
+                               }));
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(DlISize(1, 1));
@@ -160,10 +158,10 @@ TEST_F(EmbedderTest, ExecutableNameNotNull) {
   // Supply a callback to Dart for the test fixture to pass Platform.executable
   // back to us.
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "NotifyStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        const auto dart_string = tonic::DartConverter<std::string>::FromDart(
-            Dart_GetNativeArgument(args, 0));
+  context.AddFfiNativeCallback(
+      "NotifyStringValue", CREATE_FFI_LAMBDA([&](Dart_Handle value) {
+        const auto dart_string =
+            tonic::DartConverter<std::string>::FromDart(value);
         EXPECT_EQ("/path/to/binary", dart_string);
         latch.Signal();
       }));
@@ -184,12 +182,11 @@ TEST_F(EmbedderTest, ImplicitViewNotNull) {
 
   bool implicitViewNotNull = false;
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "NotifyBoolValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        implicitViewNotNull = tonic::DartConverter<bool>::FromDart(
-            Dart_GetNativeArgument(args, 0));
-        latch.Signal();
-      }));
+  context.AddFfiNativeCallback("NotifyBoolValue",
+                               CREATE_FFI_LAMBDA([&](bool value) {
+                                 implicitViewNotNull = value;
+                                 latch.Signal();
+                               }));
 
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(DlISize(1, 1));
@@ -245,8 +242,8 @@ TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
   fml::AutoResetWaitableEvent signal_latch_ui;
   fml::AutoResetWaitableEvent signal_latch_platform;
 
-  context.AddNativeCallback(
-      "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
         // Assert that the UI isolate is running on platform thread.
         ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
         signal_latch_ui.Signal();
@@ -370,8 +367,8 @@ TEST_F(EmbedderTest, MergedPlatformUIThread) {
   fml::AutoResetWaitableEvent signal_latch_ui;
   fml::AutoResetWaitableEvent signal_latch_platform;
 
-  context.AddNativeCallback(
-      "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
         // Assert that the UI isolate is running on platform thread.
         ASSERT_TRUE(task_runner->RunsTasksOnCurrentThread());
         signal_latch_ui.Signal();
@@ -420,8 +417,8 @@ TEST_F(EmbedderTest, UITaskRunnerFlushesMicrotasks) {
 
   fml::AutoResetWaitableEvent signal_latch;
 
-  context.AddNativeCallback(
-      "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
         ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
         signal_latch.Signal();
       }));
@@ -586,9 +583,7 @@ TEST_F(EmbedderTest, CanCreateAndCollectCallbacks) {
   EmbedderConfigBuilder builder(context);
   builder.SetSurface(DlISize(1, 1));
   builder.SetDartEntrypoint("platform_messages_response");
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([](Dart_NativeArguments args) {}));
+  context.AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([]() {}));
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -626,10 +621,8 @@ TEST_F(EmbedderTest, PlatformMessagesCanReceiveResponse) {
     builder.SetDartEntrypoint("platform_messages_response");
 
     fml::AutoResetWaitableEvent ready;
-    context.AddNativeCallback(
-        "SignalNativeTest",
-        CREATE_NATIVE_ENTRY(
-            [&ready](Dart_NativeArguments args) { ready.Signal(); }));
+    context.AddFfiNativeCallback(
+        "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
 
     auto engine = builder.LaunchEngine();
     ASSERT_TRUE(engine.is_valid());
@@ -684,19 +677,16 @@ TEST_F(EmbedderTest, PlatformMessagesCanBeSentWithoutResponseHandles) {
   const std::string message_data = "Hello but don't call me back.";
 
   fml::AutoResetWaitableEvent ready, message;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready](Dart_NativeArguments args) { ready.Signal(); }));
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
+  context.AddFfiNativeCallback(
       "SignalNativeMessage",
-      CREATE_NATIVE_ENTRY(
-          ([&message, &message_data](Dart_NativeArguments args) {
-            auto received_message = tonic::DartConverter<std::string>::FromDart(
-                Dart_GetNativeArgument(args, 0));
-            ASSERT_EQ(received_message, message_data);
-            message.Signal();
-          })));
+      CREATE_FFI_LAMBDA(([&message, &message_data](Dart_Handle message_handle) {
+        auto received_message =
+            tonic::DartConverter<std::string>::FromDart(message_handle);
+        ASSERT_EQ(received_message, message_data);
+        message.Signal();
+      })));
 
   auto engine = builder.LaunchEngine();
 
@@ -727,15 +717,13 @@ TEST_F(EmbedderTest, NullPlatformMessagesCanBeSent) {
   builder.SetDartEntrypoint("null_platform_messages");
 
   fml::AutoResetWaitableEvent ready, message;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready](Dart_NativeArguments args) { ready.Signal(); }));
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
+  context.AddFfiNativeCallback(
       "SignalNativeMessage",
-      CREATE_NATIVE_ENTRY(([&message](Dart_NativeArguments args) {
-        auto received_message = tonic::DartConverter<std::string>::FromDart(
-            Dart_GetNativeArgument(args, 0));
+      CREATE_FFI_LAMBDA(([&message](Dart_Handle message_handle) {
+        auto received_message =
+            tonic::DartConverter<std::string>::FromDart(message_handle);
         ASSERT_EQ("true", received_message);
         message.Signal();
       })));
@@ -855,15 +843,13 @@ TEST_F(EmbedderTest, DartEntrypointArgs) {
   fml::AutoResetWaitableEvent callback_latch;
   std::vector<std::string> callback_args;
   auto nativeArgumentsCallback = [&callback_args,
-                                  &callback_latch](Dart_NativeArguments args) {
-    Dart_Handle exception = nullptr;
+                                  &callback_latch](Dart_Handle args) {
     callback_args =
-        tonic::DartConverter<std::vector<std::string>>::FromArguments(
-            args, 0, exception);
+        tonic::DartConverter<std::vector<std::string>>::FromDart(args);
     callback_latch.Signal();
   };
-  context.AddNativeCallback("NativeArgumentsCallback",
-                            CREATE_NATIVE_ENTRY(nativeArgumentsCallback));
+  context.AddFfiNativeCallback("NativeArgumentsCallback",
+                               CREATE_FFI_LAMBDA(nativeArgumentsCallback));
   auto engine = builder.LaunchEngine();
   callback_latch.Wait();
   ASSERT_EQ(callback_args[0], "foo");
@@ -1157,10 +1143,8 @@ TEST_F(EmbedderTest,
         return surface->makeImageSnapshot();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -1288,10 +1272,8 @@ TEST_F(EmbedderTest, NoLayerCreatedForTransparentOverlayOnTopOfPlatformLayer) {
         return surface->makeImageSnapshot();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -1425,10 +1407,8 @@ TEST_F(EmbedderTest, NoLayerCreatedForNoOverlayOnTopOfPlatformLayer) {
         return surface->makeImageSnapshot();
       });
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.CountDown(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.CountDown(); }));
 
   auto engine = builder.LaunchEngine();
 
@@ -1528,19 +1508,16 @@ TEST_F(EmbedderTest, CanAddView) {
   builder.SetDartEntrypoint("window_metrics_event_all_view_ids");
 
   fml::AutoResetWaitableEvent ready_latch, message_latch;
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
 
   std::string message;
-  context.AddNativeCallback("SignalNativeMessage",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              message =
-                                  tonic::DartConverter<std::string>::FromDart(
-                                      Dart_GetNativeArgument(args, 0));
-                              message_latch.Signal();
-                            }));
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage", CREATE_FFI_LAMBDA([&](Dart_Handle message_handle) {
+        message = tonic::DartConverter<std::string>::FromDart(message_handle);
+        message_latch.Signal();
+      }));
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1575,16 +1552,13 @@ TEST_F(EmbedderTest, AddViewSchedulesFrame) {
   builder.SetSurface(DlISize(1, 1));
   builder.SetDartEntrypoint("add_view_schedules_frame");
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.Signal(); }));
 
   fml::AutoResetWaitableEvent check_latch;
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeCount",
-      CREATE_NATIVE_ENTRY(
-          [&check_latch](Dart_NativeArguments args) { check_latch.Signal(); }));
+      CREATE_FFI_LAMBDA([&check_latch](int count) { check_latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1621,19 +1595,16 @@ TEST_F(EmbedderTest, CanRemoveView) {
   builder.SetDartEntrypoint("window_metrics_event_all_view_ids");
 
   fml::AutoResetWaitableEvent ready_latch, message_latch;
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
 
   std::string message;
-  context.AddNativeCallback("SignalNativeMessage",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              message =
-                                  tonic::DartConverter<std::string>::FromDart(
-                                      Dart_GetNativeArgument(args, 0));
-                              message_latch.Signal();
-                            }));
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage", CREATE_FFI_LAMBDA([&](Dart_Handle message_handle) {
+        message = tonic::DartConverter<std::string>::FromDart(message_handle);
+        message_latch.Signal();
+      }));
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1693,10 +1664,9 @@ TEST_F(EmbedderTest, RemoveViewCallbackIsInvokedAfterRasterThreadIsDone) {
       &render_task_runner.GetFlutterTaskRunnerDescription());
 
   fml::AutoResetWaitableEvent ready_latch;
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
 
   {
     std::scoped_lock lock(engine_mutex);
@@ -1798,19 +1768,16 @@ TEST_F(EmbedderTest, CannotAddDuplicateViews) {
   builder.SetDartEntrypoint("window_metrics_event_all_view_ids");
 
   fml::AutoResetWaitableEvent ready_latch, message_latch;
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
 
   std::string message;
-  context.AddNativeCallback("SignalNativeMessage",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              message =
-                                  tonic::DartConverter<std::string>::FromDart(
-                                      Dart_GetNativeArgument(args, 0));
-                              message_latch.Signal();
-                            }));
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage", CREATE_FFI_LAMBDA([&](Dart_Handle message_handle) {
+        message = tonic::DartConverter<std::string>::FromDart(message_handle);
+        message_latch.Signal();
+      }));
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1870,19 +1837,16 @@ TEST_F(EmbedderTest, CanReuseViewIds) {
   builder.SetDartEntrypoint("window_metrics_event_all_view_ids");
 
   fml::AutoResetWaitableEvent ready_latch, message_latch;
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
 
   std::string message;
-  context.AddNativeCallback("SignalNativeMessage",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              message =
-                                  tonic::DartConverter<std::string>::FromDart(
-                                      Dart_GetNativeArgument(args, 0));
-                              message_latch.Signal();
-                            }));
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage", CREATE_FFI_LAMBDA([&](Dart_Handle message_handle) {
+        message = tonic::DartConverter<std::string>::FromDart(message_handle);
+        message_latch.Signal();
+      }));
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -1961,16 +1925,15 @@ TEST_F(EmbedderTest, ViewOperationsOrdered) {
   builder.SetDartEntrypoint("window_metrics_event_all_view_ids");
 
   fml::AutoResetWaitableEvent ready_latch;
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
 
   std::atomic<int> message_count = 0;
-  context.AddNativeCallback("SignalNativeMessage",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              message_count.fetch_add(1);
-                            }));
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage", CREATE_FFI_LAMBDA([&](Dart_Handle message_handle) {
+        message_count.fetch_add(1);
+      }));
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -2235,18 +2198,15 @@ TEST_F(EmbedderTest, CanSendViewFocusEvent) {
   fml::AutoResetWaitableEvent latch;
   std::string last_event;
 
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
-  context.AddNativeCallback("NotifyStringValue",
-                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                              const auto message_from_dart =
-                                  tonic::DartConverter<std::string>::FromDart(
-                                      Dart_GetNativeArgument(args, 0));
-                              last_event = message_from_dart;
-                              latch.Signal();
-                            }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.Signal(); }));
+  context.AddFfiNativeCallback(
+      "NotifyStringValue", CREATE_FFI_LAMBDA([&](Dart_Handle value) {
+        const auto message_from_dart =
+            tonic::DartConverter<std::string>::FromDart(value);
+        last_event = message_from_dart;
+        latch.Signal();
+      }));
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -2458,20 +2418,15 @@ TEST_F(EmbedderTest, CanUpdateLocales) {
   builder.SetSurface(DlISize(1, 1));
   builder.SetDartEntrypoint("can_receive_locale_updates");
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.Signal(); }));
 
   fml::AutoResetWaitableEvent check_latch;
-  context.AddNativeCallback(
-      "SignalNativeCount",
-      CREATE_NATIVE_ENTRY([&check_latch](Dart_NativeArguments args) {
-        ASSERT_EQ(tonic::DartConverter<int>::FromDart(
-                      Dart_GetNativeArgument(args, 0)),
-                  2);
-        check_latch.Signal();
-      }));
+  context.AddFfiNativeCallback("SignalNativeCount",
+                               CREATE_FFI_LAMBDA([&check_latch](int count) {
+                                 ASSERT_EQ(count, 2);
+                                 check_latch.Signal();
+                               }));
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -3466,24 +3421,17 @@ TEST_F(EmbedderTest, KeyDataIsCorrectlySerialized) {
   FlutterKeyEvent echoed_event;
   echoed_event.struct_size = sizeof(FlutterKeyEvent);
 
-  auto native_echo_event = [&](Dart_NativeArguments args) {
-    echoed_event.type =
-        UnserializeKeyEventType(tonic::DartConverter<uint64_t>::FromDart(
-            Dart_GetNativeArgument(args, 0)));
-    echoed_event.timestamp =
-        static_cast<double>(tonic::DartConverter<uint64_t>::FromDart(
-            Dart_GetNativeArgument(args, 1)));
-    echoed_event.physical = tonic::DartConverter<uint64_t>::FromDart(
-        Dart_GetNativeArgument(args, 2));
-    echoed_event.logical = tonic::DartConverter<uint64_t>::FromDart(
-        Dart_GetNativeArgument(args, 3));
-    echoed_char = tonic::DartConverter<uint64_t>::FromDart(
-        Dart_GetNativeArgument(args, 4));
-    echoed_event.synthesized =
-        tonic::DartConverter<bool>::FromDart(Dart_GetNativeArgument(args, 5));
-    echoed_event.device_type =
-        UnserializeKeyEventDeviceType(tonic::DartConverter<uint64_t>::FromDart(
-            Dart_GetNativeArgument(args, 6)));
+  auto native_echo_event = [&](uint64_t change, uint64_t timestamp,
+                               uint64_t physical, uint64_t logical,
+                               uint64_t char_code, bool synthesized,
+                               uint64_t device_type) {
+    echoed_event.type = UnserializeKeyEventType(change);
+    echoed_event.timestamp = static_cast<double>(timestamp);
+    echoed_event.physical = physical;
+    echoed_event.logical = logical;
+    echoed_char = char_code;
+    echoed_event.synthesized = synthesized;
+    echoed_event.device_type = UnserializeKeyEventDeviceType(device_type);
 
     message_latch->Signal();
   };
@@ -3502,13 +3450,11 @@ TEST_F(EmbedderTest, KeyDataIsCorrectlySerialized) {
           FlutterEngineSendPlatformMessageResponse(
               engine.get(), message->response_handle, nullptr, 0);
         });
-    context.AddNativeCallback(
-        "SignalNativeTest",
-        CREATE_NATIVE_ENTRY(
-            [&ready](Dart_NativeArguments args) { ready.Signal(); }));
+    context.AddFfiNativeCallback(
+        "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
 
-    context.AddNativeCallback("EchoKeyEvent",
-                              CREATE_NATIVE_ENTRY(native_echo_event));
+    context.AddFfiNativeCallback("EchoKeyEvent",
+                                 CREATE_FFI_LAMBDA(native_echo_event));
 
     engine = builder.LaunchEngine();
     ASSERT_TRUE(engine.is_valid());
@@ -3587,23 +3533,17 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
   auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
   std::vector<FlutterKeyEvent> echoed_events;
 
-  auto native_echo_event = [&](Dart_NativeArguments args) {
+  auto native_echo_event = [&](uint64_t change, uint64_t timestamp,
+                               uint64_t physical, uint64_t logical,
+                               uint64_t char_code, bool synthesized,
+                               uint64_t device_type) {
     echoed_events.push_back(FlutterKeyEvent{
-        .timestamp =
-            static_cast<double>(tonic::DartConverter<uint64_t>::FromDart(
-                Dart_GetNativeArgument(args, 1))),
-        .type =
-            UnserializeKeyEventType(tonic::DartConverter<uint64_t>::FromDart(
-                Dart_GetNativeArgument(args, 0))),
-        .physical = tonic::DartConverter<uint64_t>::FromDart(
-            Dart_GetNativeArgument(args, 2)),
-        .logical = tonic::DartConverter<uint64_t>::FromDart(
-            Dart_GetNativeArgument(args, 3)),
-        .synthesized = tonic::DartConverter<bool>::FromDart(
-            Dart_GetNativeArgument(args, 5)),
-        .device_type = UnserializeKeyEventDeviceType(
-            tonic::DartConverter<uint64_t>::FromDart(
-                Dart_GetNativeArgument(args, 6))),
+        .timestamp = static_cast<double>(timestamp),
+        .type = UnserializeKeyEventType(change),
+        .physical = physical,
+        .logical = logical,
+        .synthesized = synthesized,
+        .device_type = UnserializeKeyEventDeviceType(device_type),
     });
 
     message_latch->Signal();
@@ -3623,13 +3563,11 @@ TEST_F(EmbedderTest, KeyDataAreBuffered) {
           FlutterEngineSendPlatformMessageResponse(
               engine.get(), message->response_handle, nullptr, 0);
         });
-    context.AddNativeCallback(
-        "SignalNativeTest",
-        CREATE_NATIVE_ENTRY(
-            [&ready](Dart_NativeArguments args) { ready.Signal(); }));
+    context.AddFfiNativeCallback(
+        "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
 
-    context.AddNativeCallback("EchoKeyEvent",
-                              CREATE_NATIVE_ENTRY(native_echo_event));
+    context.AddFfiNativeCallback("EchoKeyEvent",
+                                 CREATE_FFI_LAMBDA(native_echo_event));
 
     engine = builder.LaunchEngine();
     ASSERT_TRUE(engine.is_valid());
@@ -3718,12 +3656,14 @@ TEST_F(EmbedderTest, KeyDataResponseIsCorrectlyInvoked) {
     EmbedderConfigBuilder builder(context);
     builder.SetSurface(DlISize(1, 1));
     builder.SetDartEntrypoint("key_data_echo");
-    context.AddNativeCallback(
-        "SignalNativeTest",
-        CREATE_NATIVE_ENTRY(
-            [&ready](Dart_NativeArguments args) { ready.Signal(); }));
-    context.AddNativeCallback(
-        "EchoKeyEvent", CREATE_NATIVE_ENTRY([](Dart_NativeArguments args) {}));
+    context.AddFfiNativeCallback(
+        "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
+    context.AddFfiNativeCallback(
+        "EchoKeyEvent",
+        CREATE_FFI_LAMBDA([](uint64_t change, uint64_t timestamp,
+                             uint64_t physical, uint64_t logical,
+                             uint64_t char_code, bool synthesized,
+                             uint64_t device_type) {}));
 
     engine = builder.LaunchEngine();
     ASSERT_TRUE(engine.is_valid());
@@ -3791,13 +3731,15 @@ TEST_F(EmbedderTest, BackToBackKeyEventResponsesCorrectlyInvoked) {
     EmbedderConfigBuilder builder(context);
     builder.SetSurface(DlISize(1, 1));
     builder.SetDartEntrypoint("key_data_echo");
-    context.AddNativeCallback(
-        "SignalNativeTest",
-        CREATE_NATIVE_ENTRY(
-            [&ready](Dart_NativeArguments args) { ready.Signal(); }));
+    context.AddFfiNativeCallback(
+        "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
 
-    context.AddNativeCallback(
-        "EchoKeyEvent", CREATE_NATIVE_ENTRY([](Dart_NativeArguments args) {}));
+    context.AddFfiNativeCallback(
+        "EchoKeyEvent",
+        CREATE_FFI_LAMBDA([](uint64_t change, uint64_t timestamp,
+                             uint64_t physical, uint64_t logical,
+                             uint64_t char_code, bool synthesized,
+                             uint64_t device_type) {}));
 
     engine = builder.LaunchEngine();
     ASSERT_TRUE(engine.is_valid());
@@ -3880,10 +3822,9 @@ TEST_F(EmbedderTest, VsyncCallbackPostedIntoFuture) {
         vsync_latch.Signal();
       });
     });
-    context.AddNativeCallback(
-        "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-          present_latch.Signal();
-        }));
+    context.AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                                   present_latch.Signal();
+                                 }));
 
     EmbedderConfigBuilder builder(context);
     builder.SetSurface(DlISize(1, 1));
@@ -3920,16 +3861,13 @@ TEST_F(EmbedderTest, CanScheduleFrame) {
   builder.SetSurface(DlISize(1, 1));
   builder.SetDartEntrypoint("can_schedule_frame");
   fml::AutoResetWaitableEvent latch;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddFfiNativeCallback(
+      "SignalNativeTest", CREATE_FFI_LAMBDA([&latch]() { latch.Signal(); }));
 
   fml::AutoResetWaitableEvent check_latch;
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeCount",
-      CREATE_NATIVE_ENTRY(
-          [&check_latch](Dart_NativeArguments args) { check_latch.Signal(); }));
+      CREATE_FFI_LAMBDA([&check_latch](int count) { check_latch.Signal(); }));
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -4036,23 +3974,19 @@ TEST_F(EmbedderTest, CanSendPointer) {
   builder.SetDartEntrypoint("pointer_data_packet");
 
   fml::AutoResetWaitableEvent ready_latch, count_latch, message_latch;
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
-  context.AddNativeCallback(
-      "SignalNativeCount",
-      CREATE_NATIVE_ENTRY([&count_latch](Dart_NativeArguments args) {
-        int count = tonic::DartConverter<int>::FromDart(
-            Dart_GetNativeArgument(args, 0));
-        ASSERT_EQ(count, 1);
-        count_latch.Signal();
-      }));
-  context.AddNativeCallback(
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeCount",
+                               CREATE_FFI_LAMBDA([&count_latch](int count) {
+                                 ASSERT_EQ(count, 1);
+                                 count_latch.Signal();
+                               }));
+  context.AddFfiNativeCallback(
       "SignalNativeMessage",
-      CREATE_NATIVE_ENTRY([&message_latch](Dart_NativeArguments args) {
-        auto message = tonic::DartConverter<std::string>::FromDart(
-            Dart_GetNativeArgument(args, 0));
+      CREATE_FFI_LAMBDA([&message_latch](Dart_Handle message_handle) {
+        auto message =
+            tonic::DartConverter<std::string>::FromDart(message_handle);
         ASSERT_EQ("PointerData(viewId: 0, x: 123.0, y: 456.0)", message);
         message_latch.Signal();
       }));
@@ -4078,6 +4012,55 @@ TEST_F(EmbedderTest, CanSendPointer) {
   message_latch.Wait();
 }
 
+/// Send a stylus pointer event to Dart and verify the buttons mask.
+TEST_F(EmbedderTest, CanSendStylusPointerButtons) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("pointer_data_packet_stylus_buttons");
+
+  fml::AutoResetWaitableEvent ready_latch, count_latch, message_latch;
+  context.AddFfiNativeCallback(
+      "SignalNativeTest",
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeCount",
+                               CREATE_FFI_LAMBDA([&count_latch](int count) {
+                                 EXPECT_EQ(count, 1);
+                                 count_latch.Signal();
+                               }));
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage",
+      CREATE_FFI_LAMBDA([&message_latch](Dart_Handle message_handle) {
+        auto message =
+            tonic::DartConverter<std::string>::FromDart(message_handle);
+        EXPECT_EQ("buttons: 3", message);
+        message_latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  FlutterPointerEvent pointer_event = {};
+  pointer_event.struct_size = sizeof(FlutterPointerEvent);
+  pointer_event.phase = FlutterPointerPhase::kAdd;
+  pointer_event.device_kind = kFlutterPointerDeviceKindStylus;
+  pointer_event.buttons =
+      kFlutterPointerButtonStylusContact | kFlutterPointerButtonStylusPrimary;
+  pointer_event.x = 123;
+  pointer_event.y = 456;
+  pointer_event.timestamp = static_cast<size_t>(1234567890);
+  pointer_event.view_id = 0;
+
+  FlutterEngineResult result =
+      FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1);
+  ASSERT_EQ(result, kSuccess);
+
+  count_latch.Wait();
+  message_latch.Wait();
+}
+
 /// Send a pointer event to Dart and wait until the Dart code echos with the
 /// view ID.
 TEST_F(EmbedderTest, CanSendPointerEventWithViewId) {
@@ -4087,15 +4070,14 @@ TEST_F(EmbedderTest, CanSendPointerEventWithViewId) {
   builder.SetDartEntrypoint("pointer_data_packet_view_id");
 
   fml::AutoResetWaitableEvent ready_latch, add_view_latch, message_latch;
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
-  context.AddNativeCallback(
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
+  context.AddFfiNativeCallback(
       "SignalNativeMessage",
-      CREATE_NATIVE_ENTRY([&message_latch](Dart_NativeArguments args) {
-        auto message = tonic::DartConverter<std::string>::FromDart(
-            Dart_GetNativeArgument(args, 0));
+      CREATE_FFI_LAMBDA([&message_latch](Dart_Handle message_handle) {
+        auto message =
+            tonic::DartConverter<std::string>::FromDart(message_handle);
         ASSERT_EQ("ViewID: 2", message);
         message_latch.Signal();
       }));
@@ -4149,15 +4131,14 @@ TEST_F(EmbedderTest, WindowMetricsEventDefaultsToImplicitView) {
   builder.SetDartEntrypoint("window_metrics_event_view_id");
 
   fml::AutoResetWaitableEvent ready_latch, message_latch;
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
-  context.AddNativeCallback(
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
+  context.AddFfiNativeCallback(
       "SignalNativeMessage",
-      CREATE_NATIVE_ENTRY([&message_latch](Dart_NativeArguments args) {
-        auto message = tonic::DartConverter<std::string>::FromDart(
-            Dart_GetNativeArgument(args, 0));
+      CREATE_FFI_LAMBDA([&message_latch](Dart_Handle message_handle) {
+        auto message =
+            tonic::DartConverter<std::string>::FromDart(message_handle);
         ASSERT_EQ("Changed: [0]", message);
         message_latch.Signal();
       }));
@@ -4190,16 +4171,15 @@ TEST_F(EmbedderTest, IgnoresWindowMetricsEventForUnknownView) {
   builder.SetDartEntrypoint("window_metrics_event_view_id");
 
   fml::AutoResetWaitableEvent ready_latch, message_latch;
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeTest",
-      CREATE_NATIVE_ENTRY(
-          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
 
-  context.AddNativeCallback(
+  context.AddFfiNativeCallback(
       "SignalNativeMessage",
-      CREATE_NATIVE_ENTRY([&message_latch](Dart_NativeArguments args) {
-        auto message = tonic::DartConverter<std::string>::FromDart(
-            Dart_GetNativeArgument(args, 0));
+      CREATE_FFI_LAMBDA([&message_latch](Dart_Handle message_handle) {
+        auto message =
+            tonic::DartConverter<std::string>::FromDart(message_handle);
         // Message latch should only be signaled once as the bad
         // view metric should be dropped by the engine.
         ASSERT_FALSE(message_latch.IsSignaledForTest());
@@ -4245,9 +4225,8 @@ TEST_F(EmbedderTest, RegisterChannelListener) {
   fml::AutoResetWaitableEvent latch;
   fml::AutoResetWaitableEvent latch2;
   bool listening = false;
-  context.AddNativeCallback(
-      "SignalNativeTest",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments) { latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeTest",
+                               CREATE_FFI_LAMBDA([&]() { latch.Signal(); }));
   context.SetChannelUpdateCallback([&](const FlutterChannelUpdate* update) {
     EXPECT_STREQ(update->channel, "test/listen");
     EXPECT_TRUE(update->listening);
@@ -4291,10 +4270,10 @@ TEST_F(EmbedderTest, PlatformThreadIsolatesWithCustomPlatformTaskRunner) {
   // The test's Dart code will call this native function which overrides the
   // FFI resolver.  After that, the Dart code will invoke the FFI function
   // using runOnPlatformThread.
-  context.AddNativeCallback(
-      "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        Dart_SetFfiNativeResolver(Dart_RootLibrary(), ffi_resolver);
-      }));
+  context.AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                                 Dart_SetFfiNativeResolver(Dart_RootLibrary(),
+                                                           ffi_resolver);
+                               }));
 
   auto platform_task_runner = CreateNewThread("test_platform_thread");
 

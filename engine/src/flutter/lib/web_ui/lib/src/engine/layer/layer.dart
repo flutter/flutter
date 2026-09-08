@@ -85,7 +85,7 @@ class ClipPathEngineLayer extends ContainerLayer implements ui.ClipPathEngineLay
   ClipPathEngineLayer(this.clipPath, this.clipBehavior) : assert(clipBehavior != ui.Clip.none);
 
   /// The path used to clip child layers.
-  final LazyPath clipPath;
+  final EnginePath clipPath;
   final ui.Clip clipBehavior;
 
   @override
@@ -183,7 +183,7 @@ class ImageFilterEngineLayer extends ContainerLayer implements ui.ImageFilterEng
   ImageFilterEngineLayer(this.filter, this.offset);
 
   final ui.Offset offset;
-  final LayerImageFilter filter;
+  final ui.ImageFilter filter;
 
   @override
   R accept<R>(LayerVisitor<R> visitor) {
@@ -241,7 +241,9 @@ class PictureLayer extends Layer {
 
   @override
   void dispose() {
-    picture.dispose();
+    if (!picture.isDisposed) {
+      picture.dispose();
+    }
     super.dispose();
   }
 }

@@ -13,6 +13,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
@@ -57,7 +58,7 @@ flutter:
         null
 ''');
 
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,
@@ -114,7 +115,7 @@ flutter:
               '-I=/flutter/packages/flutter_tools/gradle/aar_init_script.gradle',
               ...List<RegExp>.filled(4, RegExp(r'-P[a-zA-Z-]+=.*')),
               '-q',
-              ...List<RegExp>.filled(6, RegExp(r'-P[a-zA-Z-]+=.*')),
+              ...List<RegExp>.filled(7, RegExp(r'-P[a-zA-Z-]+=.*')),
               'assembleAar$buildMode',
             ],
             onRun: (_) => fs.directory('/build/host/outputs/repo').createSync(recursive: true),
@@ -124,7 +125,7 @@ flutter:
 
       cache.getArtifactDirectory('gradle_wrapper').createSync(recursive: true);
 
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fs,

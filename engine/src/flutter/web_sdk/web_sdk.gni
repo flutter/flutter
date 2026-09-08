@@ -32,16 +32,16 @@ template("sdk_rewriter") {
       invoker.output_dir,
     ]
 
-    build_dir = rebase_path(root_out_dir)
-    input_dir = rebase_path(invoker.input_dir)
-    output_dir = rebase_path(invoker.output_dir)
+    build_dir = rebase_path(root_out_dir, root_build_dir)
+    input_dir = rebase_path(invoker.input_dir, root_build_dir)
+    output_dir = rebase_path(invoker.output_dir, root_build_dir)
 
     args = [
       "--build-dir=$build_dir",
       "--output-dir=$output_dir",
       "--input-dir=$input_dir",
       "--depfile",
-      rebase_path(depfile),
+      rebase_path(depfile, root_build_dir),
       "--stamp",
       rebase_path(stamp_location, root_build_dir),
     ]
@@ -61,7 +61,7 @@ template("sdk_rewriter") {
       args += [ "--ui" ]
     } else {
       library_name = invoker.library_name
-      api_file = rebase_path(invoker.api_file)
+      api_file = rebase_path(invoker.api_file, root_build_dir)
       args += [
         "--library-name=$library_name",
         "--api-file=$api_file",

@@ -42,4 +42,20 @@ Sometimes changing a test name and then running it will cause an IDE error. To g
 to a good state on Mac, run `Help > "Repair IDE"`, and then in the popup window `"Rescan project indexes > Everything works now."`
 
 To add a new test, add a class under `src/test/kotlin`, with methods annotated with `@Test`.
-These tests will get automatically run on CI by `packages/flutter_tools/test/integration.shard/android_run_flutter_gradle_plugin_tests_test.dart`.
+These tests will get automatically run on CI by [`packages/flutter_tools/test/integration.shard/android_run_flutter_gradle_plugin_tests_test.dart`](../test/integration.shard/android_run_flutter_gradle_plugin_tests_test.dart).
+
+### Kotlin Formatting
+
+We use `ktlint` to enforce Kotlin style rules. The project uses specific configurations for editorconfig and baseline files located in the repo.
+
+To check formatting, run:
+```bash
+ktlint --editorconfig=../../../dev/bots/test/analyze-test-input/.editorconfig --baseline=../../../dev/bots/test/analyze-test-input/ktlint-baseline.xml "src/**/*.kt"
+```
+
+To automatically fix formatting issues, run:
+```bash
+ktlint -F --editorconfig=../../../dev/bots/test/analyze-test-input/.editorconfig --baseline=../../../dev/bots/test/analyze-test-input/ktlint-baseline.xml "src/**/*.kt"
+```
+
+Note: Ensure you are using `ktlint` version 1.5.0. If `ktlint` is not in your PATH, replace `ktlint` with the path to your executable.

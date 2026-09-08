@@ -119,6 +119,17 @@ void main() {
           globals.fs.currentDirectory.absolute.path,
         );
       });
+
+      _testInMemory('buildDirectory uses configured build-dir', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        globals.config.setValue('build-dir', 'custom_build');
+        final FlutterProject project = FlutterProject.fromDirectory(directory);
+        expect(project.buildDirectory.path, globals.fs.path.join(directory.path, 'custom_build'));
+        expect(
+          project.ephemeralDirectories.map((Directory d) => d.path),
+          contains(project.buildDirectory.path),
+        );
+      });
     });
 
     group('ensure ready for platform-specific tooling', () {
@@ -144,6 +155,37 @@ void main() {
           project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'),
         );
         expectNotExists(project.android.hostAppGradleRoot.childFile('local.properties'));
+      });
+      _testInMemory('does nothing in a project with no platform directories', () async {
+        // A project (e.g. a pure-Dart package or the flutter framework's own
+        // packages) with no android/ios/linux/macos/windows/web directories
+        // has nothing for refreshPluginsList or injectPlugins to do — every
+        // consumer of `.flutter-plugins-dependencies` and the plugin symlinks
+        // gates on the matching platform directory existing. The plugin
+        // dependency below ensures the file would be written without the
+        // early-return.
+        await aPluginProject(legacy: false);
+        final Directory directory = globals.fs.directory('some_project');
+        writePackageConfigFiles(
+          directory: directory,
+          mainLibName: 'app_name',
+          packages: <String, String>{'my_plugin': '/plugin_project'},
+        );
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: app_name
+flutter:
+
+dependencies:
+  my_plugin:
+    sdk: flutter
+''');
+        final FlutterProject project = FlutterProject.fromDirectory(directory);
+
+        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+
+        expectNotExists(project.flutterPluginsDependenciesFile);
       });
       _testInMemory('works if there is an "example" folder', () async {
         final FlutterProject project = await someProject();
@@ -1982,6 +2024,272 @@ resolution: workspace
           <String>['child1', 'child2', 'child2_example'],
         );
       });
+
+      _testInMemory('supports glob patterns in workspace entries', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- packages/*
+''');
+        directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+        directory.childDirectory('packages').childDirectory('child2').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child2
+flutter:
+resolution: workspace
+''');
+
+        expect(
+          FlutterProject.fromDirectory(directory).workspaceProjects
+              .map((FlutterProject subproject) => subproject.manifest.appName)
+              .toList(),
+          <String>['child1', 'child2'],
+        );
+      });
+
+      _testInMemory('supports recursive glob pattern ** in workspace entries', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- packages/**
+''');
+        directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+        directory
+            .childDirectory('packages')
+            .childDirectory('sub')
+            .childDirectory('child2')
+            .childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child2
+flutter:
+resolution: workspace
+''');
+
+        expect(
+          FlutterProject.fromDirectory(directory).workspaceProjects
+              .map((FlutterProject subproject) => subproject.manifest.appName)
+              .toSet(),
+          <String>{'child1', 'child2'},
+        );
+      });
+
+      _testInMemory('handles empty workspace entries gracefully', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- ''
+''');
+        expect(FlutterProject.fromDirectory(directory).workspaceProjects, isEmpty);
+      });
+
+      _testInMemory('handles Windows backslash separators in workspace entries', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(r'''
+name: parent
+flutter:
+workspace:
+- packages\child1
+- packages\*
+''');
+        directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+        directory.childDirectory('packages').childDirectory('child2').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child2
+flutter:
+resolution: workspace
+''');
+
+        expect(
+          FlutterProject.fromDirectory(directory).workspaceProjects
+              .map((FlutterProject subproject) => subproject.manifest.appName)
+              .toSet(),
+          <String>{'child1', 'child2'},
+        );
+      });
+
+      _testInMemory(
+        'ignores build and .dart_tool directories during workspace discovery',
+        () async {
+          final Directory directory = globals.fs.directory('myproject');
+          directory.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- '*'
+''');
+          directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+          directory.childDirectory('other').childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: other
+flutter:
+resolution: workspace
+''');
+          // A nested pubspec inside build/ or .dart_tool/ should be ignored when wildcard matching
+          directory.childDirectory('build').childDirectory('nested').childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: build_child
+flutter:
+resolution: workspace
+''');
+          directory.childDirectory('.dart_tool').childDirectory('nested').childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: dart_tool_child
+flutter:
+resolution: workspace
+''');
+
+          expect(
+            FlutterProject.fromDirectory(directory).workspaceProjects
+                .map((FlutterProject subproject) => subproject.manifest.appName)
+                .toSet(),
+            <String>{'other'},
+          );
+        },
+      );
+
+      _testInMemory('workspaceRoot returns root project for member projects', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- pkgs/*
+''');
+        final Directory child1Dir = directory.childDirectory('pkgs').childDirectory('child1');
+        child1Dir.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+
+        final FlutterProject parentProject = FlutterProject.fromDirectory(directory);
+        final FlutterProject childProject = FlutterProject.fromDirectory(child1Dir);
+
+        expect(
+          globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+          globals.fs.path.canonicalize(parentProject.directory.path),
+        );
+        expect(parentProject.workspaceRoot, null);
+      });
+
+      _testInMemory('workspaceRoot works with relative paths', () async {
+        final Directory directory = globals.fs.directory('myproject')..createSync(recursive: true);
+        directory.childFile('pubspec.yaml').writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- child1
+''');
+        final Directory child1Dir = directory.childDirectory('child1')..createSync(recursive: true);
+        child1Dir.childFile('pubspec.yaml').writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+
+        final Directory originalCwd = globals.fs.currentDirectory;
+        try {
+          globals.fs.currentDirectory = directory;
+          final FlutterProject childProject = FlutterProject.fromDirectory(
+            globals.fs.directory('child1'),
+          );
+          expect(
+            globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+            globals.fs.path.canonicalize(globals.fs.currentDirectory.path),
+          );
+        } finally {
+          globals.fs.currentDirectory = originalCwd;
+        }
+      });
+
+      _testInMemory(
+        'workspaceRoot is resilient to malformed sibling packages in workspace',
+        () async {
+          final Directory directory = globals.fs.directory('myproject');
+          directory.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- pkgs/*
+''');
+          final Directory validChildDir = directory
+              .childDirectory('pkgs')
+              .childDirectory('valid_child');
+          validChildDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('''
+name: valid_child
+flutter:
+resolution: workspace
+''');
+          final Directory brokenChildDir = directory
+              .childDirectory('pkgs')
+              .childDirectory('broken_child');
+          brokenChildDir.childFile('pubspec.yaml')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('invalid: yaml: [broken');
+
+          final FlutterProject parentProject = FlutterProject.fromDirectory(directory);
+          final FlutterProject childProject = FlutterProject.fromDirectory(validChildDir);
+
+          expect(
+            globals.fs.path.canonicalize(childProject.workspaceRoot!.directory.path),
+            globals.fs.path.canonicalize(parentProject.directory.path),
+          );
+        },
+      );
     });
   });
 
@@ -2639,7 +2947,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -2651,7 +2959,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<XcodeProjectInfo> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {

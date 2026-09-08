@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
 import '../layer/layer_painting.dart';
+import '../primitives/image.dart';
 import '../util.dart';
 import 'canvas.dart';
 import 'canvaskit_api.dart';
@@ -107,7 +108,7 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
   }
 
   @override
-  CkImage toImageSync(
+  EngineImage toImageSync(
     int width,
     int height, {
     ui.TargetPixelFormat targetFormat = ui.TargetPixelFormat.dontCare,
@@ -138,11 +139,15 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
     if (pixels == null) {
       throw StateError('Unable to convert read pixels from SkImage.');
     }
-    final SkImage? rasterImage = canvasKit.MakeImage(imageInfo, pixels, (4 * width).toDouble());
+    final SkImage? rasterImage = canvasKit.MakeImage(imageInfo, pixels, 4 * width);
     if (rasterImage == null) {
       throw StateError('Unable to convert image pixels into SkImage.');
     }
-    return CkImage(rasterImage);
+    return EngineImage(
+      CkImageDelegate(rasterImage),
+      rasterImage.width().toInt(),
+      rasterImage.height().toInt(),
+    );
   }
 
   @override

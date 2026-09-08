@@ -7,6 +7,7 @@ library;
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -17,8 +18,12 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart' show utf8;
 import 'plist_parser.dart';
+
+typedef _CertificateTeamInfo = ({String teamId, String teamName});
 
 const _developmentTeamBuildSettingName = 'DEVELOPMENT_TEAM';
 const _codeSignStyleBuildSettingName = 'CODE_SIGN_STYLE';
@@ -133,6 +138,17 @@ final _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(([a-zA-
 /// extracts `ABCDE1F2DH`
 final _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-zA-Z0-9]+)');
 
+/// Pattern to extract O (Organization) from certificate subject.
+///
+/// Requires a separator character (comma, slash, or space) or start-of-string
+/// immediately before `O=` to avoid false positives on fields like `CO=`.
+///
+/// Example:
+///
+/// `subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US`
+/// extracts `Company LLC`
+final _certificateOrganizationExtractionPattern = RegExp(r'(?:^|[,/ ])O=([^,/\n]+)');
+
 /// Pattern to extract CN (Common Name) from certificate subject.
 ///
 /// Example:
@@ -184,15 +200,15 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
     return null;
   }
 
-  final settings = XcodeCodeSigningSettings(
+  final settings = XcodeCodeSigningSettings.fromParameters(
     config: config,
-    logger: logger,
-    platform: platform,
-    processUtils: ProcessUtils(processManager: processManager, logger: logger),
     fileSystem: fileSystem,
     fileSystemUtils: fileSystemUtils,
-    terminal: terminal,
+    logger: logger,
+    platform: platform,
     plistParser: plistParser,
+    processUtils: ProcessUtils(processManager: processManager, logger: logger),
+    terminal: terminal,
   );
 
   return settings._getCodeSigningBuildSettings();
@@ -217,15 +233,15 @@ Future<String?> getCodeSigningIdentityDevelopmentTeam({
   required FileSystemUtils fileSystemUtils,
   required PlistParser plistParser,
 }) async {
-  final settings = XcodeCodeSigningSettings(
+  final settings = XcodeCodeSigningSettings.fromParameters(
     config: config,
-    logger: logger,
-    platform: platform,
-    processUtils: ProcessUtils(processManager: processManager, logger: logger),
     fileSystem: fileSystem,
     fileSystemUtils: fileSystemUtils,
-    terminal: terminal,
+    logger: logger,
+    platform: platform,
     plistParser: plistParser,
+    processUtils: ProcessUtils(processManager: processManager, logger: logger),
+    terminal: terminal,
   );
 
   final Map<String, String>? buildSettings = await settings._getCodeSigningBuildSettings(
@@ -263,23 +279,52 @@ Directory? getProvisioningProfileDirectory({
 }
 
 class XcodeCodeSigningSettings {
-  XcodeCodeSigningSettings({
+  XcodeCodeSigningSettings({required PlistParser plistParser, required ToolContext toolContext})
+    : this.fromParameters(
+        config: toolContext.config,
+        fileSystem: toolContext.fs,
+        fileSystemUtils: toolContext.fileSystemUtils,
+        logger: toolContext.logger,
+        platform: toolContext.platform,
+        plistParser: plistParser,
+        processUtils: toolContext.processUtils,
+        terminal: toolContext.terminal,
+      );
+
+  XcodeCodeSigningSettings.fromContexts({
+    required AppleContext appleContext,
+    required ToolContext toolContext,
+  }) : this(plistParser: appleContext.plistParser, toolContext: toolContext);
+
+  XcodeCodeSigningSettings.fromParameters({
     required Config config,
-    required Logger logger,
-    required Platform platform,
-    required ProcessUtils processUtils,
     required FileSystem fileSystem,
     required FileSystemUtils fileSystemUtils,
-    required Terminal terminal,
+    required Logger logger,
+    required Platform platform,
     required PlistParser plistParser,
+    required ProcessUtils processUtils,
+    required Terminal terminal,
   }) : _config = config,
-       _logger = logger,
-       _platform = platform,
-       _processUtils = processUtils,
        _fileSystem = fileSystem,
        _fileSystemUtils = fileSystemUtils,
+       _logger = logger,
+       _platform = platform,
        _plistParser = plistParser,
+       _processUtils = processUtils,
        _terminal = terminal;
+
+  @visibleForTesting
+  factory XcodeCodeSigningSettings.test({
+    required Config config,
+    required FileSystem fileSystem,
+    required FileSystemUtils fileSystemUtils,
+    required Logger logger,
+    required Platform platform,
+    required PlistParser plistParser,
+    required ProcessUtils processUtils,
+    required Terminal terminal,
+  }) = XcodeCodeSigningSettings.fromParameters;
 
   final Config _config;
   final Logger _logger;
@@ -632,6 +677,15 @@ class XcodeCodeSigningSettings {
   /// Find the certificate for the [identity] and extract the development team /
   /// organizational unit from the certificate.
   Future<String?> getDevelopmentTeamFromIdentity(String identity) async {
+    final _CertificateTeamInfo? info = await _getCertificateTeamInfo(identity);
+    return info?.teamId;
+  }
+
+  /// Looks up [_CertificateTeamInfo] (team ID and team name) for the given
+  /// [identity] by running `security find-certificate` and `openssl x509 -subject`.
+  ///
+  /// Returns null if the certificate cannot be found or parsed.
+  Future<_CertificateTeamInfo?> _getCertificateTeamInfo(String identity) async {
     final String? signingCertificateId = _securityFindIdentityCertificateCnExtractionPattern
         .firstMatch(identity)
         ?.group(1);
@@ -680,16 +734,21 @@ class XcodeCodeSigningSettings {
       return null;
     }
 
-    final String? developmentTeam = _certificateOrganizationalUnitExtractionPattern
+    final String? teamId = _certificateOrganizationalUnitExtractionPattern
         .firstMatch(opensslOutput)
         ?.group(1);
-    if (developmentTeam == null) {
+    if (teamId == null) {
       _logger.printError(
         'Unable to parse development team from code-signing certificate $identity',
       );
       return null;
     }
-    return developmentTeam;
+
+    final String? teamName = _certificateOrganizationExtractionPattern
+        .firstMatch(opensslOutput)
+        ?.group(1);
+
+    return (teamId: teamId, teamName: teamName ?? '');
   }
 
   /// Select code-signinging settings and save to config.
@@ -824,8 +883,22 @@ class XcodeCodeSigningSettings {
       emphasis: true,
     );
     final int count = validCodeSigningIdentities.length;
+
+    // Fetch team info for all identities so we can display it alongside
+    // the identity name.
+    final teamInfoMap = <String, _CertificateTeamInfo?>{};
+    for (final identity in validCodeSigningIdentities) {
+      teamInfoMap[identity] = await _getCertificateTeamInfo(identity);
+    }
+
     for (var i = 0; i < count; i++) {
-      _logger.printStatus('[${i + 1}] ${validCodeSigningIdentities[i]}');
+      final String identity = validCodeSigningIdentities[i];
+      final _CertificateTeamInfo? info = teamInfoMap[identity];
+      if (info != null) {
+        _logger.printStatus('[${i + 1}] $identity | Team: ${info.teamId} ${info.teamName}');
+      } else {
+        _logger.printStatus('[${i + 1}] $identity');
+      }
     }
     final String choice = await _terminal.promptForCharInput(
       List<String>.generate(count, (int number) => '${number + 1}')..add('q'),

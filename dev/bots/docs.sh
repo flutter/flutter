@@ -96,7 +96,7 @@ function parse_args() {
     esac
     shift
   done
-  if [[ -z $STAGING_DIR ]]; then
+  if [[ -z "$STAGING_DIR" ]]; then
     STAGING_DIR=$(mktemp -d /tmp/dartdoc.XXXXX)
   fi
   DOC_DIR="$STAGING_DIR/doc"
@@ -121,7 +121,7 @@ function generate_docs() {
     # Install and activate dartdoc.
     # When updating to a new dartdoc version, please also update
     # `dartdoc_options.yaml` to include newly introduced error and warning types.
-    "$DART" pub global activate dartdoc 9.0.0
+    "$DART" pub global activate dartdoc 9.0.8
 
     # Build and install the snippets tool, which resides in
     # the dev/docs/snippets directory.

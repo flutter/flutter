@@ -125,6 +125,9 @@ Future<Plugin?> _pluginFromPackage(
     } on YamlException catch (err) {
       globals.printTrace('Failed to parse plugin manifest for $name: $err');
       // Do nothing, potentially not a plugin.
+    } on FileSystemException catch (err) {
+      globals.printTrace('Failed to read plugin manifest for $name: $err');
+      // Do nothing, potentially not a plugin.
     }
   }
   if (pubspec == null) {
@@ -396,27 +399,6 @@ bool _writeFlutterPluginsList(
   } on FormatException catch (_) {
     return (pluginsChanged: true, contentsChanged: true);
   }
-}
-
-/// Checks if the .flutter-plugins-dependencies file has any plugin
-/// dev dependencies with platform-specific implementations.
-bool flutterPluginsListHasDevDependencies(File pluginsFile) {
-  final String pluginsString = pluginsFile.readAsStringSync();
-  final pluginsJson = json.decode(pluginsString) as Map<String, dynamic>;
-  final plugins = pluginsJson[_kFlutterPluginsPluginListKey] as Map<String, dynamic>;
-
-  for (final MapEntry<String, dynamic> pluginEntries in plugins.entries) {
-    final platformPlugins = pluginEntries.value as List<dynamic>;
-    final bool hasDevDependencies = platformPlugins.cast<Map<String, dynamic>>().any(
-      (Map<String, dynamic> plugin) => plugin[_kFlutterPluginsDevDependencyKey] == true,
-    );
-
-    if (hasDevDependencies) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 /// Creates a map representation of the [plugins] for those supported by [platformKey].
@@ -1266,8 +1248,26 @@ void _createPlatformPluginSymlinks(
     final name = pluginInfo[_kFlutterPluginsNameKey]! as String;
     final path = pluginInfo[_kFlutterPluginsPathKey]! as String;
     final Link link = symlinkDirectory.childLink(name);
-    if (link.existsSync()) {
-      continue;
+    // Inspect the entity on disk without following links. Link.existsSync()
+    // only returns true if the entity is specifically a link; if a conflicting
+    // non-link file or directory occupies link.path, or if an existing link
+    // points to an outdated target, it must be cleaned up before creating the
+    // new link to avoid FileSystemException collisions (such as
+    // ERROR_ALREADY_EXISTS on Windows or EEXIST on POSIX).
+    final FileSystemEntityType entityType = link.fileSystem.typeSync(link.path, followLinks: false);
+    if (entityType == FileSystemEntityType.link) {
+      try {
+        final String target = link.targetSync();
+        if (link.fileSystem.path.canonicalize(target) == link.fileSystem.path.canonicalize(path) &&
+            link.existsSync()) {
+          continue;
+        }
+      } on FileSystemException {
+        // Fall through to delete and recreate if resolving target throws.
+      }
+      ErrorHandlingFileSystem.deleteIfExists(link);
+    } else if (entityType != FileSystemEntityType.notFound) {
+      ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
     }
     try {
       link.createSync(path);
@@ -1296,6 +1296,7 @@ Future<void> refreshPluginsList(
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
+  bool forceSwiftPM = false,
   PubspecCache? pubspecCache,
   PackageGraph? packageGraph,
   PackageConfig? packageConfig,
@@ -1311,7 +1312,10 @@ Future<void> refreshPluginsList(
 
   var swiftPackageManagerEnabledIos = false;
   var swiftPackageManagerEnabledMacos = false;
-  if (!forceCocoaPodsOnly) {
+  if (forceSwiftPM) {
+    swiftPackageManagerEnabledIos = true;
+    swiftPackageManagerEnabledMacos = true;
+  } else if (!forceCocoaPodsOnly) {
     if (iosPlatform) {
       swiftPackageManagerEnabledIos = project.ios.usesSwiftPackageManager;
     }
@@ -1448,25 +1452,29 @@ Future<void> injectPlugins(
         darwinDependencyManagement ??
         DarwinDependencyManagement(
           project: project,
-          plugins: plugins,
           cocoapods: globals.cocoaPods,
           swiftPackageManager: SwiftPackageManager(
             fileSystem: globals.fs,
             templateRenderer: globals.templateRenderer,
             processUtils: globals.processUtils,
             config: globals.config,
+            logger: globals.logger,
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,
           analytics: globals.analytics,
-          xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
-          config: globals.config,
         );
     if (iosPlatform) {
-      await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.ios);
+      await darwinDependencyManagerSetup.setUp(
+        platform: FlutterDarwinPlatform.ios,
+        plugins: pluginsByPlatform[IOSPlugin.kConfigKey]!,
+      );
     }
     if (macOSPlatform) {
-      await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.macos);
+      await darwinDependencyManagerSetup.setUp(
+        platform: FlutterDarwinPlatform.macos,
+        plugins: pluginsByPlatform[MacOSPlugin.kConfigKey]!,
+      );
     }
   }
 }
@@ -1476,6 +1484,26 @@ Future<void> injectPlugins(
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 bool hasPlugins(FlutterProject project) {
   return _readFileContent(project.flutterPluginsDependenciesFile) != null;
+}
+
+/// Resolves the plugin implementations for the platform specified by [platformKey].
+///
+/// Uses [_resolvePluginImplementations] with [_PluginResolutionType.nativeOrDart]
+/// to find which plugins are resolved for the given platform.
+///
+/// If [quiet] is true, validation and resolution errors or warnings will not
+/// be printed.
+List<Plugin> resolvePluginImplementationsForPlatform(
+  List<Plugin> plugins,
+  String platformKey, {
+  bool quiet = false,
+}) {
+  final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
+    plugins,
+    pluginResolutionType: _PluginResolutionType.nativeOrDart,
+    quiet: quiet,
+  );
+  return pluginsByPlatform[platformKey] ?? [];
 }
 
 /// Resolves the plugin implementations for all platforms.
@@ -1514,9 +1542,13 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 /// see [resolvePlatformImplementation].
 ///
 /// Only plugins which provide the according platform implementation are returned.
+///
+/// If [quiet] is true, validation and resolution errors or warnings will not
+/// be printed.
 Map<String, List<Plugin>> _resolvePluginImplementations(
   List<Plugin> plugins, {
   required _PluginResolutionType pluginResolutionType,
+  bool quiet = false,
 }) {
   final pluginsByPlatform = <String, List<Plugin>>{
     AndroidPlugin.kConfigKey: <Plugin>[],
@@ -1539,6 +1571,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
       plugins,
       platformKey,
       pluginResolutionType: pluginResolutionType,
+      quiet: quiet,
     );
 
     if (hasPlatformPluginPubspecError) {
@@ -1560,11 +1593,15 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
 
 /// Resolves the plugins for the given [platformKey] (Dart-only or native
 /// implementations).
+///
+/// If [quiet] is true, validation and resolution errors or warnings will not
+/// be printed.
 (List<Plugin> pluginImplementations, bool hasPluginPubspecError, bool hasResolutionError)
 _resolvePluginImplementationsByPlatform(
   Iterable<Plugin> plugins,
   String platformKey, {
   _PluginResolutionType pluginResolutionType = _PluginResolutionType.nativeOrDart,
+  bool quiet = false,
 }) {
   var hasPluginPubspecError = false;
   var hasResolutionError = false;
@@ -1582,7 +1619,9 @@ _resolvePluginImplementationsByPlatform(
       pluginResolutionType: pluginResolutionType,
     );
     if (error != null) {
-      globals.printError(error);
+      if (!quiet) {
+        globals.printError(error);
+      }
       hasPluginPubspecError = true;
       continue;
     }
@@ -1621,18 +1660,22 @@ _resolvePluginImplementationsByPlatform(
           }
         } else {
           // Only warn, if neither an implementation for native nor for Dart is given.
-          globals.printWarning(
-            'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but it does not provide an inline implementation.\n'
-            'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
-            'or add an inline implementation to $defaultImplPluginName via `platforms: $platformKey:` `pluginClass` or `dartPluginClass`.\n',
-          );
+          if (!quiet) {
+            globals.printWarning(
+              'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but it does not provide an inline implementation.\n'
+              'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
+              'or add an inline implementation to $defaultImplPluginName via `platforms: $platformKey:` `pluginClass` or `dartPluginClass`.\n',
+            );
+          }
         }
       } else {
-        globals.printWarning(
-          'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but the package does not exist, or is not a plugin package.\n'
-          'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
-          'or create a plugin named $defaultImplPluginName.\n',
-        );
+        if (!quiet) {
+          globals.printWarning(
+            'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but the package does not exist, or is not a plugin package.\n'
+            'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
+            'or create a plugin named $defaultImplPluginName.\n',
+          );
+        }
       }
     }
     if (implementsPluginName != null) {
@@ -1654,7 +1697,9 @@ _resolvePluginImplementationsByPlatform(
       defaultPackage: defaultImplementations[implCandidatesEntry.key],
     );
     if (error != null) {
-      globals.printError(error);
+      if (!quiet) {
+        globals.printError(error);
+      }
       hasResolutionError = true;
     } else if (resolution != null) {
       pluginResolution[implCandidatesEntry.key] = resolution;

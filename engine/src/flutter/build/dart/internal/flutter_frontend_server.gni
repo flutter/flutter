@@ -52,7 +52,8 @@ template("flutter_frontend_server") {
     # As we move towards a single pub workspace for the engine, this will be
     # the correct package config to use, as we will no longer have a per-package
     # .dart_tool/package_config.json.
-    package_config = rebase_path("//flutter/.dart_tool/package_config.json")
+    package_config =
+        rebase_path("//flutter/.dart_tool/package_config.json", root_build_dir)
   }
   packages_args += [
     "--packages",
@@ -97,7 +98,8 @@ template("flutter_frontend_server") {
       dart = rebase_path("$host_prebuilt_dart_sdk/bin/dartaotruntime$ext",
                          root_out_dir)
       frontend_server =
-          rebase_path("$root_gen_dir/frontend_server_aot.dart.snapshot")
+          rebase_path("$root_gen_dir/frontend_server_aot.dart.snapshot",
+                      root_build_dir)
 
       args = [ dart ] + [ frontend_server ] + common_args
     }

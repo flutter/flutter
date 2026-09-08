@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('PinnedHeaderSliver basics', (WidgetTester tester) async {

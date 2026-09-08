@@ -236,6 +236,7 @@ external void canvasDrawPoints(
     Int,
     RawRect,
     PaintHandle,
+    Int,
   )
 >(symbol: 'canvas_drawAtlas', isLeaf: true)
 external void canvasDrawAtlas(
@@ -248,6 +249,7 @@ external void canvasDrawAtlas(
   int blendMode,
   RawRect cullRect,
   PaintHandle paint,
+  int filterQuality,
 );
 
 @Native<Void Function(CanvasHandle, RawMatrix44)>(symbol: 'canvas_getTransform', isLeaf: true)

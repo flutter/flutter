@@ -14,7 +14,7 @@ class PlaygroundImplVK final : public PlaygroundImpl {
  public:
   static bool IsVulkanDriverPresent();
 
-  explicit PlaygroundImplVK(PlaygroundSwitches switches);
+  explicit PlaygroundImplVK(const PlaygroundSwitches& switches);
 
   ~PlaygroundImplVK();
 

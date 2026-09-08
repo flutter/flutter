@@ -8,6 +8,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
+#import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -191,8 +192,7 @@ static void PrintWideGamutWarningOnce() {
 }
 
 + (Class)layerClass {
-  return flutter::GetCoreAnimationLayerClassForRenderingAPI(
-      flutter::GetRenderingAPIForProcess(/*force_software=*/false));
+  return flutter::GetCoreAnimationLayerClass();
 }
 
 - (void)drawLayer:(CALayer*)layer inContext:(CGContextRef)context {

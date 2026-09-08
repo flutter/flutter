@@ -386,6 +386,16 @@ class PlatformView {
     /// @return     The settings.
     ///
     virtual const Settings& OnPlatformViewGetSettings() const = 0;
+
+    //--------------------------------------------------------------------------
+    /// @brief      Returns a task runner that executes tasks on the IO thread
+    ///             and stops running tasks after the shell shuts down the IO
+    ///             thread.
+    ///
+    /// @return     The task runner.
+    ///
+    virtual std::shared_ptr<fml::BasicTaskRunner>
+    OnPlatformViewGetShutdownSafeIOTaskRunner() const = 0;
   };
 
   //----------------------------------------------------------------------------

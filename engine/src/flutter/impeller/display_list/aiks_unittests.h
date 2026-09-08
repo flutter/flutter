@@ -14,7 +14,7 @@ namespace testing {
 #ifdef IMPELLER_GOLDEN_TESTS
 using AiksTest = GoldenPlaygroundTest;
 #else
-using AiksTest = AiksPlayground;
+using AiksTest = AiksPlaygroundWithGoldens;
 #endif
 
 }  // namespace testing

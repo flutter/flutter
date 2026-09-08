@@ -31,6 +31,7 @@ def GetDiaDll():
       '2017': 'msdia140.dll',
       '2019': 'msdia140.dll',
       '2022': 'msdia140.dll',
+      '2026': 'msdia140.dll',
       '18': 'msdia140.dll',
   }
 

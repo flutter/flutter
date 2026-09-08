@@ -62,7 +62,8 @@ ScopedObject<Context> PlaygroundTest::CreateContext() const {
     case PlaygroundBackend::kMetalSDF:
       return Adopt<Context>(
           ImpellerContextCreateMetalNew(ImpellerGetVersion()));
-    case PlaygroundBackend::kOpenGLES: {
+    case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF: {
       Playground::GLProcAddressResolver playground_gl_proc_address_callback =
           CreateGLProcAddressResolver();
       ImpellerProcAddressCallback gl_proc_address_callback =
@@ -76,12 +77,10 @@ ScopedObject<Context> PlaygroundTest::CreateContext() const {
     }
     case PlaygroundBackend::kVulkan:
       ImpellerContextVulkanSettings settings = {};
-      struct UserData {
-        Playground::VKProcAddressResolver resolver;
-      } user_data;
-      user_data.resolver = CreateVKProcAddressResolver();
-      settings.user_data = &user_data;
-      settings.enable_vulkan_validation = switches_.enable_vulkan_validation;
+      user_data_ = std::make_unique<UserData>();
+      user_data_->resolver = CreateVKProcAddressResolver();
+      settings.user_data = user_data_.get();
+      settings.enable_vulkan_validation = true;
       settings.proc_address_callback = [](void* instance,         //
                                           const char* proc_name,  //
                                           void* user_data         //
@@ -112,6 +111,7 @@ static ScopedObject<Surface> CreateSharedSurface(
 
 #if IMPELLER_ENABLE_OPENGLES
     case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
       return Adopt<Surface>(
           new SurfaceGLES(context, std::move(shared_surface)));
 #endif
@@ -156,6 +156,7 @@ static ScopedObject<Context> CreateSharedContext(
 #endif
 #if IMPELLER_ENABLE_OPENGLES
     case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
       return ContextGLES::Create(std::move(shared_context));
 #endif
 #if IMPELLER_ENABLE_VULKAN

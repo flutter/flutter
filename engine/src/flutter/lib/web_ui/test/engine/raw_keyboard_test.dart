@@ -153,37 +153,33 @@ void testMain() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/125672.
-    test(
-      'updates meta state for Meta key and wrong DOM event metaKey value (Linux)',
-      () {
-        RawKeyboard.initialize();
+    test('updates meta state for Meta key and wrong DOM event metaKey value (Linux)', () {
+      RawKeyboard.initialize();
 
-        Map<String, dynamic>? dataReceived;
-        ui.PlatformDispatcher.instance.onPlatformMessage =
-            (String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback) {
-              dataReceived = const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>?;
-            };
+      Map<String, dynamic>? dataReceived;
+      ui.PlatformDispatcher.instance.onPlatformMessage =
+          (String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback) {
+            dataReceived = const JSONMessageCodec().decodeMessage(data) as Map<String, dynamic>?;
+          };
 
-        // Purposely send an incoherent DOM event where Meta key is pressed but event.metaKey is not set to true.
-        final DomKeyboardEvent event = dispatchKeyboardEvent(
-          'keydown',
-          key: 'Meta',
-          code: 'MetaLeft',
-        );
-        expect(event.defaultPrevented, isFalse);
-        expect(dataReceived, <String, dynamic>{
-          'type': 'keydown',
-          'keymap': 'web',
-          'code': 'MetaLeft',
-          'key': 'Meta',
-          'location': 0,
-          'metaState': 0x8,
-          'keyCode': 0,
-        });
-        RawKeyboard.instance!.dispose();
-      },
-      skip: ui_web.browser.operatingSystem != ui_web.OperatingSystem.linux,
-    );
+      // Purposely send an incoherent DOM event where Meta key is pressed but event.metaKey is not set to true.
+      final DomKeyboardEvent event = dispatchKeyboardEvent(
+        'keydown',
+        key: 'Meta',
+        code: 'MetaLeft',
+      );
+      expect(event.defaultPrevented, isFalse);
+      expect(dataReceived, <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'web',
+        'code': 'MetaLeft',
+        'key': 'Meta',
+        'location': 0,
+        'metaState': 0x8,
+        'keyCode': 0,
+      });
+      RawKeyboard.instance!.dispose();
+    }, skip: ui_web.browser.operatingSystem != ui_web.OperatingSystem.linux);
 
     // Regression test for https://github.com/flutter/flutter/issues/141186.
     test('updates meta state for Meta key seen as "Process" key', () {

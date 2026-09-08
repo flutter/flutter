@@ -397,6 +397,27 @@ void main() {
       );
     },
   );
+
+  testWidgets('CompositedTransformTarget & CompositedTransformFollower do not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    final link = LayerLink();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CompositedTransformTarget(
+            link: link,
+            child: CompositedTransformFollower(link: link),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(CompositedTransformTarget)), Size.zero);
+    expect(tester.getSize(find.byType(CompositedTransformFollower)), Size.zero);
+  });
 }
 
 class _CustomWidget extends SingleChildRenderObjectWidget {

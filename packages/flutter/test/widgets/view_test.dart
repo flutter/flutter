@@ -559,6 +559,116 @@ void main() {
     expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
   });
 
+  // A screen reader can move focus straight to a control instead of tabbing
+  // into the view. On web that arrives as a SemanticsAction.focus for the
+  // control, followed by a focus event for the view with an undefined
+  // direction, and the already focused control must survive it.
+  // See https://github.com/flutter/flutter/issues/168458
+  testWidgets('ViewFocusEvent with an undefined direction keeps the focused child', (
+    WidgetTester tester,
+  ) async {
+    final nodeA = FocusNode(debugLabel: 'a');
+    addTearDown(nodeA.dispose);
+    final nodeB = FocusNode(debugLabel: 'b');
+    addTearDown(nodeB.dispose);
+
+    late FlutterView view;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeA, child: const Text('a')),
+            Focus(focusNode: nodeB, child: const Text('b')),
+            Builder(
+              builder: (BuildContext context) {
+                view = View.of(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Focus leaves the view entirely, which parks the focus on the root scope.
+    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(
+      ViewFocusEvent(
+        viewId: view.viewId,
+        state: ViewFocusState.unfocused,
+        direction: ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+
+    expect(FocusManager.instance.rootScope.hasPrimaryFocus, isTrue);
+
+    // The screen reader picks the second control. Both the semantics driven
+    // focus request and the view focus event land in the same frame.
+    nodeB.requestFocus();
+    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(
+      ViewFocusEvent(
+        viewId: view.viewId,
+        state: ViewFocusState.focused,
+        direction: ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+
+    expect(nodeB.hasPrimaryFocus, isTrue);
+    expect(nodeA.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('ViewFocusEvent with a forward direction moves focus to the first child', (
+    WidgetTester tester,
+  ) async {
+    final nodeA = FocusNode(debugLabel: 'a');
+    addTearDown(nodeA.dispose);
+    final nodeB = FocusNode(debugLabel: 'b');
+    addTearDown(nodeB.dispose);
+
+    late FlutterView view;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeA, child: const Text('a')),
+            Focus(focusNode: nodeB, child: const Text('b')),
+            Builder(
+              builder: (BuildContext context) {
+                view = View.of(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(
+      ViewFocusEvent(
+        viewId: view.viewId,
+        state: ViewFocusState.unfocused,
+        direction: ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+
+    nodeB.requestFocus();
+    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(
+      ViewFocusEvent(
+        viewId: view.viewId,
+        state: ViewFocusState.focused,
+        direction: ViewFocusDirection.forward,
+      ),
+    );
+    await tester.pump();
+
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    expect(nodeB.hasPrimaryFocus, isFalse);
+  });
+
   testWidgets(
     'View notifies engine that a view should have focus when a widget focus change occurs.',
     (WidgetTester tester) async {
@@ -695,6 +805,96 @@ void main() {
     notifyCount = 0;
     tester.binding.platformDispatcher.resetFocusedViewTestValues();
   });
+
+  testWidgets('A view does not request focus when a nested child view is focused', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/187436.
+    // The child view's focus scope is nested under the surrounding view's scope
+    // (e.g. a child window rendered through a ViewAnchor). Focusing a node in
+    // the child view must not make the surrounding view request native focus,
+    // which on Win32 would pull the surrounding window back to the front.
+    final childNode = FocusNode(debugLabel: 'child');
+    addTearDown(childNode.dispose);
+
+    final childFlutterView = FakeView(tester.view);
+
+    FlutterView? parentView;
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          parentView = View.of(context);
+          return ViewAnchor(
+            view: View(
+              view: childFlutterView,
+              child: Focus(focusNode: childNode, child: const SizedBox()),
+            ),
+            child: const SizedBox(),
+          );
+        },
+      ),
+    );
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+    childNode.requestFocus();
+    await tester.pump();
+
+    expect(childNode.hasPrimaryFocus, isTrue);
+    final List<ViewFocusEvent> events = tester.binding.platformDispatcher.testFocusEvents;
+    // Only the child view is asked to take focus; the surrounding view must not
+    // request focus.
+    expect(
+      events.map((ViewFocusEvent event) => event.viewId),
+      everyElement(equals(childFlutterView.viewId)),
+    );
+    expect(events.map((ViewFocusEvent event) => event.viewId), isNot(contains(parentView!.viewId)));
+    tester.binding.platformDispatcher.resetFocusedViewTestValues();
+  });
+
+  testWidgets(
+    'Moving focus from a nested child view to the parent view requests focus for the parent view',
+    (WidgetTester tester) async {
+      final parentNode = FocusNode(debugLabel: 'parent');
+      final childNode = FocusNode(debugLabel: 'child');
+      addTearDown(parentNode.dispose);
+      addTearDown(childNode.dispose);
+
+      final childFlutterView = FakeView(tester.view);
+      final FlutterView parentFlutterView = tester.view;
+
+      await tester.pumpWidget(
+        ViewAnchor(
+          view: View(
+            view: childFlutterView,
+            child: Focus(focusNode: childNode, child: const SizedBox()),
+          ),
+          child: Focus(focusNode: parentNode, child: const SizedBox()),
+        ),
+      );
+
+      // Focus a node in the nested child view first.
+      childNode.requestFocus();
+      await tester.pump();
+      expect(childNode.hasPrimaryFocus, isTrue);
+      tester.binding.platformDispatcher.resetFocusedViewTestValues();
+
+      // Move focus to a node in the parent view: the parent view must be asked to
+      // take focus.
+      parentNode.requestFocus();
+      await tester.pump();
+      expect(parentNode.hasPrimaryFocus, isTrue);
+      final List<ViewFocusEvent> events = tester.binding.platformDispatcher.testFocusEvents;
+      expect(
+        events.map((ViewFocusEvent event) => event.viewId),
+        contains(parentFlutterView.viewId),
+      );
+      expect(
+        events.map((ViewFocusEvent event) => event.viewId),
+        isNot(contains(childFlutterView.viewId)),
+      );
+      tester.binding.platformDispatcher.resetFocusedViewTestValues();
+    },
+  );
 }
 
 class SpyRenderWidget extends SizedBox {
