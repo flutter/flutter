@@ -53,11 +53,7 @@ class MacOSDevice extends DesktopDevice {
   }) async {
     macosLogReader.bundlePath = null;
     if (package is MacOSApp) {
-      try {
-        macosLogReader.bundlePath = package.applicationBundle(debuggingOptions.buildInfo);
-      } on UnimplementedError {
-        // Can be thrown by test fakes that do not implement applicationBundle.
-      }
+      macosLogReader.bundlePath = package.applicationBundle(debuggingOptions.buildInfo);
     }
     return super.startApp(
       package,
