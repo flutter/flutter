@@ -12,7 +12,7 @@ import 'package:analyzer/error/error.dart';
 import '../flutter_analysis_rule.dart';
 
 /// An analysis rule that verifies that debug expensive fields annotated with @_debugOnly
-/// are lazily initialized (declared as a late field).
+/// are lazily initialized (declared as a late or static field).
 class LazyInitializedDebugExpensiveFields extends FlutterAnalysisRule {
   LazyInitializedDebugExpensiveFields()
     : super(
