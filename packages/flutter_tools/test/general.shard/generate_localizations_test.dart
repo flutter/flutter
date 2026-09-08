@@ -3562,5 +3562,27 @@ String helloNameAndAge({required String name, required int age}) {
         ),
       ),
     );
+
+    const genericInjectionArb = r'''
+{
+  "greeting": "Hello {user}",
+  "@greeting": {
+    "placeholders": {
+      "user": {
+        "type": "dynamic> foo) { print('bad'); } void bar<dynamic>"
+      }
+    }
+  }
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': genericInjectionArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid placeholder type'),
+        ),
+      ),
+    );
   });
 }

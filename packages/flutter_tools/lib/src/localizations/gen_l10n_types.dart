@@ -249,13 +249,13 @@ class Placeholder {
   // Matches valid Dart type syntax:
   // - Optional library or namespace prefixes, e.g. `prefix.`, `package.prefix.`
   // - Leading Dart identifier for the type name (letters, numbers, underscores, $)
-  // - Optional generic type arguments enclosed in angle brackets, e.g. `<String, int>`
+  // - Optional generic type arguments enclosed in angle brackets, restricted to valid type characters (letters, numbers, underscores, $, commas, spaces, nested angle brackets, and ?)
   // - Optional trailing nullability operator `?`
   //
-  // Enforcing full-string anchoring prevents code injection from crafted ARB placeholder types
-  // attempting to break out of generated method parameter declarations.
+  // Enforcing full-string anchoring and disallowing wildcard characters prevents code injection
+  // from crafted ARB placeholder types attempting to break out of generated method parameter declarations.
   static final RegExp _validTypeRegExp = RegExp(
-    r'^([a-zA-Z_$][a-zA-Z0-9_$]*\.)*[a-zA-Z_$][a-zA-Z0-9_$]*(\s*<.*>)?\??$',
+    r'^([a-zA-Z_$][a-zA-Z0-9_$]*\.)*[a-zA-Z_$][a-zA-Z0-9_$]*(\s*<[a-zA-Z0-9_$,\s<>?]+>)?\??$',
   );
 
   /// Validates that [type] represents a syntactically valid Dart type identifier.
