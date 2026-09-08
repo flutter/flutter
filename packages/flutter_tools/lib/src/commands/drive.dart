@@ -271,6 +271,7 @@ class DriveCommand extends RunCommandBase {
 
   @override
   Future<void> validateCommand() async {
+    validatePrebuiltAndroidApplicationFlags();
     if (userIdentifier != null) {
       final Device? device = await findTargetDevice();
       if (device is! AndroidDevice) {

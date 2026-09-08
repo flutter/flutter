@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter_tools/src/android/android_engine_cli_flags.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
@@ -1216,6 +1217,61 @@ void main() {
       expect(launchArguments.contains('test-flag'), isFalse);
       expect(launchArguments.contains('enable-hcpp-and-surface-control'), isFalse);
     });
+
+    testWithoutContext(
+      'all Android engine config keys are tracked in AndroidEngineCliFlags.allFlags',
+      () {
+        final original = DebuggingOptions.enabled(
+          BuildInfo.debug,
+          profileStartup: true,
+          enableSoftwareRendering: true,
+          skiaDeterministicRendering: true,
+          traceSkia: true,
+          traceAllowlist: 'foo',
+          traceSkiaAllowlist: 'bar',
+          traceSystrace: true,
+          traceToFile: 'path',
+          endlessTraceBuffer: true,
+          profileMicrotasks: true,
+          purgePersistentCache: true,
+          enableImpeller: ImpellerStatus.enabled,
+          enableFlutterGpu: true,
+          enableVulkanValidation: true,
+          enableHcpp: true,
+          startPaused: true,
+          disableServiceAuthCodes: true,
+          disableServiceOriginCheck: true,
+          dartFlags: 'baz',
+          useTestFonts: true,
+          verboseSystemLogs: true,
+          testFlag: true,
+        );
+
+        const knownExceptions = <String>{'enable-checked-mode', 'verify-entry-points'};
+        const switchAliases = <String, String>{
+          AndroidEngineCliFlags.enableHcppAndSurfaceControl: AndroidEngineCliFlags.enableHcpp,
+          AndroidEngineCliFlags.verboseLogging: AndroidEngineCliFlags.verboseSystemLogs,
+        };
+
+        final Set<String> launchKeys = original
+            .getAndroidLaunchArguments()
+            .map((String arg) => arg.replaceFirst(RegExp(r'^--'), '').split('=').first)
+            .toSet();
+
+        for (final key in launchKeys) {
+          if (knownExceptions.contains(key)) {
+            continue;
+          }
+          final String cliFlag = switchAliases[key] ?? key;
+          expect(
+            AndroidEngineCliFlags.allFlags,
+            contains(cliFlag),
+            reason:
+                'Flag "$key" in DebuggingOptions is missing from AndroidEngineCliFlags.allFlags',
+          );
+        }
+      },
+    );
   });
 
   group('PollingDeviceDiscovery', () {
