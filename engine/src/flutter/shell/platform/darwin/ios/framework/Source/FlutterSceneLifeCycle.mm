@@ -58,10 +58,9 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 @implementation FlutterPluginSceneLifeCycleDelegate
 
 + (void)registerEngineForSingleScene:(FlutterEngine*)engine {
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
+  if (!gEnginesForSingleScene) {
     gEnginesForSingleScene = [NSPointerArray weakObjectsPointerArray];
-  });
+  }
   [gEnginesForSingleScene addPointer:(__bridge void*)engine];
   if (IsPowerOfTwo(gEnginesForSingleScene.count)) {
     CompactNSPointerArray(gEnginesForSingleScene);
@@ -206,6 +205,10 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 
 + (void)resetSceneWillConnectFallbackCalledForTesting {
   gSceneWillConnectFallbackCalled = NO;
+}
+
++ (void)resetEnginesForSingleSceneForTesting {
+  gEnginesForSingleScene = nil;
 }
 
 - (BOOL)sceneWillConnectEventHandledByPluginForScene:(UIScene*)scene {
