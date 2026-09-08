@@ -479,9 +479,8 @@ void main() {
 
       const writeMessage =
           'Flutter failed to write to a file at "dir/file".\n'
-          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
-          'Try running:\n'
-          r'  sudo chown -R $(whoami) /dir/file';
+          'The file system is read-only. Please ensure that the SDK and/or project '
+          'is installed in a location with write permissions.';
       expect(() async => file.writeAsBytes(<int>[0]), throwsToolExit(message: writeMessage));
       expect(() async => file.writeAsString(''), throwsToolExit(message: writeMessage));
       expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: writeMessage));
@@ -489,20 +488,10 @@ void main() {
 
       const createMessage =
           'Flutter failed to create file at "dir/file".\n'
-          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
-          'Try running:\n'
-          r'  sudo chown -R $(whoami) /dir';
+          'The file system is read-only. Please ensure that the SDK and/or project '
+          'is installed in a location with write permissions.';
       expect(() => file.createSync(), throwsToolExit(message: createMessage));
-      expect(
-        () async => file.createSync(recursive: true),
-        throwsA(
-          isA<ToolExit>().having(
-            (ToolExit e) => e.message,
-            'message',
-            isNot(contains('sudo chown')),
-          ),
-        ),
-      );
+      expect(() async => file.createSync(recursive: true), throwsToolExit(message: createMessage));
 
       final Directory parent = fileSystem.directory('parent')..createSync();
       final Directory childDir = parent.childDirectory('childDir');
@@ -520,20 +509,13 @@ void main() {
 
       const dirCreateMessage =
           'Flutter failed to create a directory at "parent/childDir".\n'
-          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
-          'Try running:\n'
-          r'  sudo chown -R $(whoami) /parent';
+          'The file system is read-only. Please ensure that the SDK and/or project '
+          'is installed in a location with write permissions.';
       expect(() async => childDir.create(), throwsToolExit(message: dirCreateMessage));
       expect(() => childDir.createSync(), throwsToolExit(message: dirCreateMessage));
       expect(
         () async => childDir.createSync(recursive: true),
-        throwsA(
-          isA<ToolExit>().having(
-            (ToolExit e) => e.message,
-            'message',
-            isNot(contains('sudo chown')),
-          ),
-        ),
+        throwsToolExit(message: dirCreateMessage),
       );
     });
 
@@ -786,9 +768,8 @@ void main() {
 
       const writeMessage =
           'Flutter failed to write to a file at "dir/file".\n'
-          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
-          'Try running:\n'
-          r'  sudo chown -R $(whoami) /dir/file';
+          'The file system is read-only. Please ensure that the SDK and/or project '
+          'is installed in a location with write permissions.';
       expect(() async => file.writeAsBytes(<int>[0]), throwsToolExit(message: writeMessage));
       expect(() async => file.writeAsString(''), throwsToolExit(message: writeMessage));
       expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: writeMessage));
@@ -796,20 +777,10 @@ void main() {
 
       const createMessage =
           'Flutter failed to create file at "dir/file".\n'
-          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
-          'Try running:\n'
-          r'  sudo chown -R $(whoami) /dir';
+          'The file system is read-only. Please ensure that the SDK and/or project '
+          'is installed in a location with write permissions.';
       expect(() => file.createSync(), throwsToolExit(message: createMessage));
-      expect(
-        () async => file.createSync(recursive: true),
-        throwsA(
-          isA<ToolExit>().having(
-            (ToolExit e) => e.message,
-            'message',
-            isNot(contains('sudo chown')),
-          ),
-        ),
-      );
+      expect(() async => file.createSync(recursive: true), throwsToolExit(message: createMessage));
 
       final Directory parent = fileSystem.directory('parent')..createSync();
       final Directory childDir = parent.childDirectory('childDir');
@@ -827,20 +798,13 @@ void main() {
 
       const dirCreateMessage =
           'Flutter failed to create a directory at "parent/childDir".\n'
-          'Please ensure that the SDK and/or project is installed in a location that has read/write permissions for the current user.\n'
-          'Try running:\n'
-          r'  sudo chown -R $(whoami) /parent';
+          'The file system is read-only. Please ensure that the SDK and/or project '
+          'is installed in a location with write permissions.';
       expect(() async => childDir.create(), throwsToolExit(message: dirCreateMessage));
       expect(() => childDir.createSync(), throwsToolExit(message: dirCreateMessage));
       expect(
         () async => childDir.createSync(recursive: true),
-        throwsA(
-          isA<ToolExit>().having(
-            (ToolExit e) => e.message,
-            'message',
-            isNot(contains('sudo chown')),
-          ),
-        ),
+        throwsToolExit(message: dirCreateMessage),
       );
     });
 

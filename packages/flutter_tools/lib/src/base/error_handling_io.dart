@@ -1382,7 +1382,18 @@ void _handlePosixException(
       '$message. The target device is full.'
           '\n$e\n'
           'Free up space and try again.',
-    eperm || eacces || erofs => () {
+    erofs => () {
+      final errorBuffer = StringBuffer();
+      if (message != null && message.isNotEmpty) {
+        errorBuffer.writeln('$message.');
+      }
+      errorBuffer.writeln(
+        'The file system is read-only. Please ensure that the SDK and/or project '
+        'is installed in a location with write permissions.',
+      );
+      return errorBuffer.toString().trim();
+    }(),
+    eperm || eacces => () {
       final errorBuffer = StringBuffer();
       if (message != null && message.isNotEmpty) {
         errorBuffer.writeln('$message.');
