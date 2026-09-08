@@ -458,7 +458,6 @@ class ToolDependencies {
         xcodeProjectInterpreter: finalXcodeProjectInterpreter,
       ),
       buildSystem: finalBuildSystem,
-      buildTargets: finalBuildTargets,
       crashReporter: finalCrashReporter,
       featureFlags: finalFeatureFlags,
       toolContext: ToolContext(
@@ -489,6 +488,7 @@ class ToolDependencies {
         terminal: finalTerminal,
         userMessages: finalUserMessages,
       ),
+      buildTargets: finalBuildTargets,
     );
   }
 }
