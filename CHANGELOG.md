@@ -30,6 +30,43 @@ More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 
+## Flutter 3.47 Changes
+
+### [3.47.2](https://github.com/flutter/flutter/releases/tag/3.47.2)
+- [flutter/191179](https://github.com/flutter/flutter/issues/191179) When WebSocket upgrade fails during DDS startup on web, handle the `DartDevelopmentServiceException` gracefully instead of crashing.
+- [flutter/190518](https://github.com/flutter/flutter/pull/190518) Fix memory leak caused by processing touch events on Linux.
+- [flutter/188265](https://github.com/flutter/flutter/issues/188265) iOS or macOS builds may fail when Swift Package Manager is enabled.
+- [flutter/190846](https://github.com/flutter/flutter/issues/190846) When building an existing native iOS app that's integrated with Flutter using SwiftPM on Xcode 27, it may fail to build Flutter's Swift packages.
+- [flutter/187925](https://github.com/flutter/flutter/issues/187925) On Linux, fix header elements not being announced by screen reader.
+- [flutter/190774](https://github.com/flutter/flutter/issues/190774) When using external textures on Windows, a crash could occur when the engine paints them.
+- [flutter/191177](https://github.com/flutter/flutter/issues/191177) The Flutter tool crashes if a configured custom device ping times out.
+- [flutter/190987](https://github.com/flutter/flutter/issues/190987) Updates `libpng` to fix security vulnerability.
+- [flutter/191060](https://github.com/flutter/flutter/issues/191060) When `analysis_options.yaml` contains flow-style `exclude:` sequences, `AnalysisOptionsMigration` converts the node to block style before appending to avoid `YamlEditor` assertion crashes.
+- [flutter/191131](https://github.com/flutter/flutter/issues/191131) Only exclude platform directories that actually exist from analysis, so web/** sources in Dart web packages are no longer silently dropped.
+- [flutter/191198](https://github.com/flutter/flutter/issues/191198) On Windows, truncate `lastCompiled` timestamp to whole seconds in `ProjectFileInvalidator` so rapid consecutive file modifications within the same second are not silently ignored by hot reload.
+- [flutter/152236](https://github.com/flutter/flutter/issues/152236) On desktop platforms, forward `--build-name` and `--build-number` flags to the desktop build pipeline so generated `version.json` reflects command-line build version parameters.
+- [flutter/191205](https://github.com/flutter/flutter/issues/191205) Prevent `StateError: Bad state: Future already completed in Symbolizer` during stack symbolization.
+- [flutter/191178](https://github.com/flutter/flutter/issues/191178) Handle `HttpException` during VM service connection retries and ensure typed exceptions are passed to error completers.
+
+### [3.47.1](https://github.com/flutter/flutter/releases/tag/3.47.1)
+- [flutter/190871](https://github.com/flutter/flutter/issues/190871) Flutter GPU could not be enabled in release builds on Linux and Windows, since those embedders had no project-level opt-in and release builds ignore engine switches from the environment.
+- [flutter/188446](https://github.com/flutter/flutter/issues/188446) When building multi-target applications in parallel on iOS and macOS, a race condition in SwiftPM integration causes `FileSystemException`.
+- [flutter/189550](https://github.com/flutter/flutter/issues/189550) When running `flutter pub get` in a Dart workspace, platform tooling regeneration and analysis options migration are skipped for packages that do not depend on Flutter.
+- [flutter/190234](https://github.com/flutter/flutter/issues/190234) Avoid crashing with `PathNotFoundException` when cleaning up native assets if files are removed concurrently.
+- [flutter/189128](https://github.com/flutter/flutter/issues/189128) Invalidate `WebEntrypointTarget` and regenerate `web_plugin_registrant.dart` when web plugins are added or removed.
+- [flutter/186445](https://github.com/flutter/flutter/issues/186445) Fix hot restart for WASM web builds.
+- [flutter/190284](https://github.com/flutter/flutter/issues/190284) Fix hot reload failing to reload edits in nested Pub workspace member packages located under root `lib/`.
+- [flutter/191056](https://github.com/flutter/flutter/issues/191056) Recursively resolve includes in `AnalysisOptionsMigration` to prevent redundant rewrites of `analysis_options.yaml`.
+- [flutter/189156](https://github.com/flutter/flutter/issues/189156) Validate plugin class and package identifiers to prevent arbitrary code injection into `GeneratedPluginRegistrant`.
+- [flutter/190721](https://github.com/flutter/flutter/issues/190721) Fix deadlock in debug adapters when the target process exits early during startup before VM service connection.
+- [flutter/189972](https://github.com/flutter/flutter/issues/189972) Fix ADB device list parsing for long wireless mDNS serials separated from state by a single space.
+- [flutter/190233](https://github.com/flutter/flutter/issues/190233) Fix `impellerc` crash on Windows when paths contain Unicode characters, and improve shader compiler error diagnostics.
+
+### [3.47.0](https://github.com/flutter/flutter/releases/tag/3.47.0)
+
+Learn about what's new in this release in [the blog post](https://flutter.dev/blog/whats-new-in-flutter-3-47), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.47.0) for a detailed list of all the new changes.
+
+
 ## Flutter 3.44 Changes
 
 ### [3.44.7](https://github.com/flutter/flutter/releases/tag/3.44.7)

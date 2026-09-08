@@ -117,6 +117,52 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
+  testUsingContext('AnalysisServer handles non-ASCII project path', () async {
+    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
+      'flutter_analysis_test_’_dir.',
+    );
+    createSampleProject(tempDir);
+
+    final process = MockLspServerProcess();
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          fileSystem.path.join('Artifact.engineDartSdkPath', 'bin', 'dart'),
+          'language-server',
+          '--dart-sdk',
+          'Artifact.engineDartSdkPath',
+          '--disable-server-feature-completion',
+          '--disable-server-feature-search',
+          '--suppress-analytics',
+        ],
+        process: process,
+      ),
+    ]);
+
+    final server = AnalysisServer(
+      'Artifact.engineDartSdkPath',
+      <String>[tempDir.path],
+      fileSystem: fileSystem,
+      platform: FakePlatform(),
+      processManager: processManager,
+      logger: logger,
+      terminal: terminal,
+      suppressAnalytics: true,
+    );
+
+    var errorCount = 0;
+    server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
+
+    await server.start();
+    process.triggerSimulatedAnalysis();
+    await server.waitForAnalysis();
+
+    expect(errorCount, 0);
+
+    await server.dispose();
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   testUsingContext('AnalysisServer errors', () async {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',

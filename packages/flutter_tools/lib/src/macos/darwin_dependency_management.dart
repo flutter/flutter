@@ -164,6 +164,7 @@ class DarwinDependencyManagement {
   /// Validate that plugins are compatible with the project dependency management set up.
   ///
   /// This includes the following checks:
+  ///   - Warns when SwiftPM feature flag has been disabled
   ///   - Throws when using a SwiftPM-only plugin but SwiftPM is not enabled
   ///   - Warns when using CocoaPod-only plugins
   ///   - Warns when CocoaPods integration is removable
@@ -175,10 +176,18 @@ class DarwinDependencyManagement {
     required FileSystem fileSystem,
     required Logger logger,
     required CocoaPods? cocoapods,
+    required Analytics analytics,
+    required FeatureFlags featureFlags,
   }) async {
     final bool projectUsesSwiftPM =
         xcodeProject.usesSwiftPackageManager &&
         xcodeProject.flutterPluginSwiftPackageInProjectSettings;
+    if (!featureFlags.isSwiftPackageManagerEnabled) {
+      logger.printWarning(
+        'Swift Package Manager is currently disabled. $kSwiftPackageManagerDisabledWarning '
+        'To re-enable it, run "flutter config --enable-swift-package-manager"',
+      );
+    }
 
     final swiftPackageOnlyPlugins = <String>[];
     final cocoapodOnlyPlugins = <String>[];
@@ -222,6 +231,7 @@ class DarwinDependencyManagement {
       cocoapodOnlyPlugins: cocoapodOnlyPlugins,
       logger: logger,
       platform: platform,
+      analytics: analytics,
     );
 
     await _printRemoveCocoapodIntegrationMessage(
@@ -279,6 +289,7 @@ class DarwinDependencyManagement {
     required List<String> cocoapodOnlyPlugins,
     required Logger logger,
     required FlutterDarwinPlatform platform,
+    required Analytics analytics,
   }) {
     if (cocoapodOnlyPlugins.isEmpty) {
       return;
@@ -289,6 +300,11 @@ class DarwinDependencyManagement {
       'This will become an error in a future version of Flutter. Please contact the plugin '
       'maintainers to request Swift Package Manager adoption.',
     );
+    for (final plugin in cocoapodOnlyPlugins) {
+      analytics.send(
+        Event.appleUsageEvent(workflow: 'cocoapod-only-plugin-warning', parameter: plugin),
+      );
+    }
   }
 
   /// Print a message recommending removing CocoaPod integration when all plugins support SwiftPM.

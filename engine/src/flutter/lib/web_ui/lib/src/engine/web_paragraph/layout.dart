@@ -606,9 +606,14 @@ class TextLayout {
         );
       }
 
+      if (result.isEmpty) {
+        // We didn't find any intersections between the range and the line's visual blocks
+        continue;
+      }
+
       if (boxWidthStyle == ui.BoxWidthStyle.max && lineIndex < lines.length - 1) {
         // Add whitespaces box left/right for all the lines except the last one
-        if ((result.first.left - 0).abs() > epsilon) {
+        if (result.first.left > epsilon) {
           result.insert(
             0,
             ui.TextBox.fromLTRBD(
@@ -620,13 +625,13 @@ class TextLayout {
             ),
           );
         }
-        if ((result.last.right - paragraph.maxLineWidthWithTrailingSpaces).abs() > epsilon) {
+        if (paragraph.maxLineWidthWithTrailingSpaces - result.last.right > epsilon) {
           result.add(
             ui.TextBox.fromLTRBD(
               result.last.right,
-              result.first.top,
+              result.last.top,
               paragraph.maxLineWidthWithTrailingSpaces,
-              result.first.bottom,
+              result.last.bottom,
               paragraph.paragraphStyle.textDirection,
             ),
           );

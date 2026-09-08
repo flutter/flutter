@@ -4,7 +4,9 @@ package com.example.android_hardware_smoke_test
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -26,6 +28,21 @@ class MainActivity : FlutterActivity() {
 
         // Tracks the active activity to prevent transition race conditions on the cached engine.
         private var activeActivity: WeakReference<MainActivity>? = null
+
+        // Destroys and removes the cached FlutterEngine and resets lastConfiguredEngine.
+        fun evictEngineCache() {
+            val engine = FlutterEngineCache.getInstance().get(CACHED_ENGINE_KEY)
+            engine?.destroy()
+            FlutterEngineCache.getInstance().remove(CACHED_ENGINE_KEY)
+            lastConfiguredEngine = null
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // Lock window pixel format to 8-bit sRGB before FlutterActivity initialization
+        // to prevent HWUI 10-bit format negotiation errors on SwiftShader drivers.
+        window.setFormat(PixelFormat.RGBA_8888)
+        super.onCreate(savedInstanceState)
     }
 
     // Accessed by FlutterActivityTest to send orchestration messages.

@@ -276,4 +276,22 @@ void main() {
     expect(result, const ProcessResultMatcher());
     expect(result.stderr, isEmpty);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/75876.
+  testWithoutContext('flutter create daemon produces output', () async {
+    final Directory directory = createResolvedTempDirectorySync('create_daemon_test.');
+
+    try {
+      final ProcessResult result = await processManager.run(<String>[
+        flutterBin,
+        'create',
+        '--no-pub',
+        'daemon',
+      ], workingDirectory: directory.path);
+      expect(result.exitCode, 0);
+      expect(result.stdout, contains('Creating project daemon...'));
+    } finally {
+      tryToDelete(directory);
+    }
+  });
 }

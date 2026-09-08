@@ -93,10 +93,7 @@ void main() {
     );
   }
 
-  FakeCommand buildCommand(
-    String buildMode, {
-    String? flavor,
-  }) {
+  FakeCommand buildCommand(String buildMode, {String? flavor}) {
     final String buildDir = flavor != null && flavor.isNotEmpty
         ? r'C:\build\windows\x64\' + flavor
         : r'C:\build\windows\x64';

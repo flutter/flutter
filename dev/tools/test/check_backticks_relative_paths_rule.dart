@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:dart_skills_lint/dart_skills_lint.dart';
 import 'package:path/path.dart' as path;
+import 'package:skills_lint/skills_lint.dart';
 
 /// A rule that checks that paths inside backticks are relative to the skill file,
 /// not relative to the repository root.
