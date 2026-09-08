@@ -249,46 +249,31 @@ class MacOSLogReader extends DesktopLogReader {
               'macos/Runner/Info.plist, ';
     final runCommand = bundlePath != null ? 'open "$bundlePath"' : 'open <path-to-app-bundle>';
 
-    final message = StringBuffer()
-      ..writeln()
-      ..writeln('═' * 80)
-      ..writeln('macOS Privacy Permission Crash Detected')
-      ..writeln('═' * 80)
-      ..write('The application crashed while requesting access to ')
-      ..writeln('privacy-sensitive data$keyNotice.')
-      ..writeln()
-      ..writeln(
-        'When launched from an IDE (such as VS Code or Android Studio) or '
-        'terminal via',
-      )
-      ..writeln(
-        '"flutter run", macOS Transparency, Consent, and Control (TCC) '
-        'attributes',
-      )
-      ..writeln(
-        'permission requests to the parent IDE or terminal process rather than '
-        'the',
-      )
-      ..writeln('application bundle.')
-      ..writeln()
-      ..write(keyDetail)
-      ..writeln('macOS terminates the process if the parent process lacks the usage')
-      ..writeln('description.')
-      ..writeln()
-      ..writeln('Workaround:')
-      ..writeln('1. Open the application bundle directly once from Terminal or Finder:')
-      ..writeln('   $runCommand')
-      ..writeln('   (or run the project directly from Xcode)')
-      ..writeln('2. Accept the permission prompt when shown.')
-      ..writeln(
-        '3. Once granted for your bundle identifier, subsequent "flutter run" '
-        'sessions',
-      )
-      ..writeln('   from your IDE will work.')
-      ..writeln()
-      ..writeln('See https://github.com/flutter/flutter/issues/70374 for more details.')
-      ..writeln('═' * 80);
+    logger.printError('''
 
-    logger.printError(message.toString());
+════════════════════════════════════════════════════════════════════════════════
+macOS Privacy Permission Crash Detected
+════════════════════════════════════════════════════════════════════════════════
+The application crashed while requesting access to privacy-sensitive data$keyNotice.
+
+When launched from an IDE (such as VS Code or Android Studio) or terminal via
+"flutter run", macOS Transparency, Consent, and Control (TCC) attributes
+permission requests to the parent IDE or terminal process rather than the
+application bundle.
+
+${keyDetail}macOS terminates the process if the parent process lacks the usage
+description.
+
+Workaround:
+1. Open the application bundle directly once from Terminal or Finder:
+   $runCommand
+   (or run the project directly from Xcode)
+2. Accept the permission prompt when shown.
+3. Once granted for your bundle identifier, subsequent "flutter run" sessions
+   from your IDE will work.
+
+See https://github.com/flutter/flutter/issues/70374 for more details.
+════════════════════════════════════════════════════════════════════════════════
+''');
   }
 }
