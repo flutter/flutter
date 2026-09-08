@@ -28,7 +28,7 @@ TEST_F(FlFramebufferTest, NoDepthStencil) {
       .Times(0);
 
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGB, 100, 100, FALSE, FALSE);
+      fl_framebuffer_new(GL_RGB, 100, 100, FALSE);
 }
 
 TEST_F(FlFramebufferTest, HasDepthStencil) {
@@ -42,7 +42,7 @@ TEST_F(FlFramebufferTest, HasDepthStencil) {
                                         GL_RENDERBUFFER, ::testing::_));
 
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGB, 100, 100, FALSE, TRUE);
+      fl_framebuffer_new(GL_RGB, 100, 100, TRUE);
 }
 
 TEST_F(FlFramebufferTest, MultisampleHasDepthStencil) {
@@ -67,19 +67,11 @@ TEST_F(FlFramebufferTest, MultisampleHasDepthStencil) {
 TEST_F(FlFramebufferTest, ResourcesRemoved) {
   EXPECT_CALL(epoxy, glGenFramebuffers);
   EXPECT_CALL(epoxy, glGenTextures);
-  FlFramebuffer* framebuffer =
-      fl_framebuffer_new(GL_RGB, 100, 100, FALSE, FALSE);
+  FlFramebuffer* framebuffer = fl_framebuffer_new(GL_RGB, 100, 100, FALSE);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);
   g_object_unref(framebuffer);
-}
-
-TEST_F(FlFramebufferTest, Sibling) {
-  EXPECT_CALL(epoxy, eglCreateImageKHR);
-  g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGB, 100, 100, TRUE, FALSE);
-  g_autoptr(FlFramebuffer) sibling = fl_framebuffer_create_sibling(framebuffer);
 }
 
 TEST_F(FlFramebufferTest, ImpellerOffscreenMSAA) {
