@@ -228,7 +228,10 @@ class _TestFlutterView implements FlutterView {
 
   @override
   void render(ui.Scene scene, {ui.Size? size}) {
+    final stopwatch = Stopwatch();
+    stopwatch.start();
     onRender?.call(size);
+    stopwatch.stop();
   }
 
   @override

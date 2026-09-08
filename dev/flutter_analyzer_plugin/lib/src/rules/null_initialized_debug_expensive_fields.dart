@@ -58,7 +58,7 @@ class _Visitor extends SimpleAstVisitor<void> {
     }
   }
 
-  bool _isCorrectInitializer(Expression? initializer) {
+  static bool _isCorrectInitializer(Expression? initializer) {
     if (initializer case ConditionalExpression(
       :final Expression condition,
       elseExpression: NullLiteral(),
