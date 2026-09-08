@@ -128,13 +128,18 @@ final class Label {
   }
 
   static FormatException? _checkTarget(String target) {
-    if (!_identifier.hasMatch(target)) {
+    if (!_targetName.hasMatch(target)) {
       return FormatException('Target name must be a valid identifier.', target);
     }
     return null;
   }
 
   static final RegExp _identifier = RegExp(r'^[a-zA-Z_][a-zA-Z0-9_-]*$');
+
+  /// Target names additionally allow a dot, which GN permits and which the
+  /// engine's own build files rely on: `testing/dart/BUILD.gn` derives a
+  /// target per test file, giving names like `compile_gpu_test.dart`.
+  static final RegExp _targetName = RegExp(r'^[a-zA-Z_][a-zA-Z0-9_.-]*$');
 }
 
 /// A generic target pattern that can be used to match multiple targets.
