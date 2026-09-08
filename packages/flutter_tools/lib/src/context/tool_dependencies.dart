@@ -29,6 +29,7 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../custom_devices/custom_devices_config.dart';
+import '../features.dart';
 import '../flutter_cache.dart';
 import '../flutter_features.dart';
 import '../flutter_features_config.dart';
@@ -62,9 +63,10 @@ class ToolDependencies {
     required this.androidContext,
     required this.appleContext,
     required this.buildSystem,
-    this.buildTargets,
     required this.crashReporter,
+    required this.featureFlags,
     required this.toolContext,
+    this.buildTargets,
   });
 
   /// Telemetry and analytics reporter for command and feature usage.
@@ -85,6 +87,9 @@ class ToolDependencies {
   /// Captures and submits unhandled tool crash reports and stack traces.
   final CrashReporter crashReporter;
 
+  /// Feature flags that govern tool capabilities and rollouts.
+  final FeatureFlags featureFlags;
+
   /// Core container holding host environment and SDK configuration dependencies.
   final ToolContext toolContext;
 
@@ -102,6 +107,7 @@ class ToolDependencies {
     Config? config,
     CrashReporter? crashReporter,
     CustomDevicesConfig? customDevicesConfig,
+    FeatureFlags? featureFlags,
     FileSystem? fs,
     Git? git,
     GradleUtils? gradleUtils,
@@ -116,6 +122,7 @@ class ToolDependencies {
     Platform? platform,
     PlistParser? plistParser,
     PreRunValidator? preRunValidator,
+    ProcessInfo? processInfo,
     ProcessManager? processManager,
     FlutterVersion? flutterVersion,
     FlutterProjectFactory? projectFactory,
@@ -291,6 +298,8 @@ class ToolDependencies {
     final PreRunValidator finalPreRunValidator =
         preRunValidator ?? PreRunValidator(fileSystem: finalFS);
 
+    final ProcessInfo finalProcessInfo = processInfo ?? ProcessInfo(finalFS);
+
     final LocalEngineLocator finalLocalEngineLocator =
         localEngineLocator ??
         LocalEngineLocator(
@@ -339,11 +348,14 @@ class ToolDependencies {
     final CocoaPodsValidator finalCocoapodsValidator =
         cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
 
-    final finalArtifacts = CachedArtifacts(
-      fileSystem: finalFS,
-      cache: finalCache,
-      platform: finalPlatform,
-      operatingSystemUtils: finalOS,
+    // Artifacts will be updated later if a local engine is used.
+    final finalArtifacts = DeferredArtifacts(
+      CachedArtifacts(
+        fileSystem: finalFS,
+        cache: finalCache,
+        platform: finalPlatform,
+        operatingSystemUtils: finalOS,
+      ),
     );
 
     final XCDevice finalXCDevice =
@@ -373,19 +385,21 @@ class ToolDependencies {
       logger: finalLogger,
     );
 
-    final featureFlags = FlutterFeatureFlags(
-      flutterVersion: finalFlutterVersion,
-      featuresConfig: FlutterFeaturesConfig(
-        globalConfig: finalConfig,
-        platform: finalPlatform,
-        projectManifest: projectManifest,
-      ),
-      platform: finalPlatform,
-    );
+    final FeatureFlags finalFeatureFlags =
+        featureFlags ??
+        FlutterFeatureFlags(
+          flutterVersion: finalFlutterVersion,
+          featuresConfig: FlutterFeaturesConfig(
+            globalConfig: finalConfig,
+            platform: finalPlatform,
+            projectManifest: projectManifest,
+          ),
+          platform: finalPlatform,
+        );
 
     final IOSWorkflow finalIOSWorkflow =
         iosWorkflow ??
-        IOSWorkflow(featureFlags: featureFlags, xcode: finalXcode, platform: finalPlatform);
+        IOSWorkflow(featureFlags: finalFeatureFlags, xcode: finalXcode, platform: finalPlatform);
 
     final IOSSimulatorUtils finalIOSSimulatorUtils =
         iosSimulatorUtils ??
@@ -446,6 +460,7 @@ class ToolDependencies {
       buildSystem: finalBuildSystem,
       buildTargets: finalBuildTargets,
       crashReporter: finalCrashReporter,
+      featureFlags: finalFeatureFlags,
       toolContext: ToolContext(
         artifacts: finalArtifacts,
         botDetector: finalBotDetector,
@@ -460,8 +475,10 @@ class ToolDependencies {
         nativeAssetsBuilder: finalNativeAssetsBuilder,
         os: finalOS,
         outputPreferences: finalOutputPreferences,
+        persistentToolState: finalPersistentToolState,
         platform: finalPlatform,
         preRunValidator: finalPreRunValidator,
+        processInfo: finalProcessInfo,
         processManager: finalProcessManager,
         processUtils: finalProcessUtils,
         projectFactory: finalProjectFactory,

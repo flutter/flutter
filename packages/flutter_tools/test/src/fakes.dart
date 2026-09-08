@@ -48,6 +48,7 @@ import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
 import 'package:flutter_tools/src/macos/xcdevice.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/native_assets.dart';
+import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
@@ -581,6 +582,7 @@ class TestFeatureFlags implements FeatureFlags {
     this.isUISceneMigrationEnabled = false,
     this.isRiscv64SupportEnabled = false,
     this.isMacOSArm64OnlyEnabled = false,
+    this.isHcppEnabled = false,
     this.isToolExtensionsEnabled = false,
   });
 
@@ -645,6 +647,9 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isMacOSArm64OnlyEnabled;
 
   @override
+  final bool isHcppEnabled;
+
+  @override
   final bool isToolExtensionsEnabled;
 
   @override
@@ -669,6 +674,7 @@ class TestFeatureFlags implements FeatureFlags {
       riscv64 => isRiscv64SupportEnabled,
       macOSArm64Only => isMacOSArm64OnlyEnabled,
       recordUse => isRecordUseEnabled,
+      hcpp => isHcppEnabled,
       toolExtensionsFeature => isToolExtensionsEnabled,
       _ => false,
     };
@@ -696,6 +702,7 @@ class TestFeatureFlags implements FeatureFlags {
     uiSceneMigration,
     riscv64,
     macOSArm64Only,
+    hcpp,
     toolExtensionsFeature,
   ];
 
@@ -982,7 +989,10 @@ class FakeConfig extends Fake implements Config {
 
 class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
 
-class FakeTerminal extends Fake implements Terminal {}
+class FakeTerminal extends Fake implements AnsiTerminal {
+  @override
+  String get successMark => '✓';
+}
 
 class FakeProcessUtils extends Fake implements ProcessUtils {}
 
@@ -1107,6 +1117,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
     CrashReporter? crashReporter,
+    FeatureFlags? featureFlags,
     ToolContext? toolContext,
   }) : _analytics = analytics,
        _androidContext = androidContext,
@@ -1114,6 +1125,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        _buildSystem = buildSystem,
        _buildTargets = buildTargets,
        _crashReporter = crashReporter,
+       _featureFlags = featureFlags,
        _toolContext = toolContext;
 
   final Analytics? _analytics;
@@ -1122,6 +1134,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final BuildSystem? _buildSystem;
   final BuildTargets? _buildTargets;
   final CrashReporter? _crashReporter;
+  final FeatureFlags? _featureFlags;
   final ToolContext? _toolContext;
 
   @override
@@ -1143,6 +1156,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   CrashReporter get crashReporter => _crashReporter ?? FakeCrashReporter();
 
   @override
+  FeatureFlags get featureFlags => _featureFlags ?? TestFeatureFlags();
+
+  @override
   ToolContext get toolContext => _toolContext ?? FakeToolContext();
 }
 
@@ -1161,8 +1177,10 @@ class FakeToolContext extends Fake implements ToolContext {
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
     OperatingSystemUtils? os,
     OutputPreferences? outputPreferences,
+    PersistentToolState? persistentToolState,
     Platform? platform,
     PreRunValidator? preRunValidator,
+    ProcessInfo? processInfo,
     ProcessManager? processManager,
     ProcessUtils? processUtils,
     FlutterProjectFactory? projectFactory,
@@ -1185,8 +1203,10 @@ class FakeToolContext extends Fake implements ToolContext {
        _nativeAssetsBuilder = nativeAssetsBuilder,
        _os = os,
        _outputPreferences = outputPreferences,
+       _persistentToolState = persistentToolState,
        _platform = platform,
        _preRunValidator = preRunValidator,
+       _processInfo = processInfo,
        _processManager = processManager,
        _processUtils = processUtils,
        _projectFactory = projectFactory,
@@ -1210,8 +1230,10 @@ class FakeToolContext extends Fake implements ToolContext {
   final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
   final OperatingSystemUtils? _os;
   final OutputPreferences? _outputPreferences;
+  final PersistentToolState? _persistentToolState;
   final Platform? _platform;
   final PreRunValidator? _preRunValidator;
+  final ProcessInfo? _processInfo;
   final ProcessManager? _processManager;
   final ProcessUtils? _processUtils;
   final FlutterProjectFactory? _projectFactory;
@@ -1272,10 +1294,21 @@ class FakeToolContext extends Fake implements ToolContext {
   late final OutputPreferences outputPreferences = _outputPreferences ?? OutputPreferences.test();
 
   @override
+  late final PersistentToolState persistentToolState =
+      _persistentToolState ??
+      PersistentToolState.test(
+        directory: fs.systemTempDirectory.createTempSync('persistent_tool_state'),
+        logger: logger,
+      );
+
+  @override
   late final Platform platform = _platform ?? FakePlatform();
 
   @override
   late final PreRunValidator preRunValidator = _preRunValidator ?? const NoOpPreRunValidator();
+
+  @override
+  late final ProcessInfo processInfo = _processInfo ?? ProcessInfo.test(fs);
 
   @override
   late final ProcessManager processManager = _processManager ?? FakeProcessManager.any();
@@ -1325,8 +1358,10 @@ class DelegatingToolContext extends Fake implements ToolContext {
     Logger? logger,
     OperatingSystemUtils? os,
     OutputPreferences? outputPreferences,
+    PersistentToolState? persistentToolState,
     Platform? platform,
     PreRunValidator? preRunValidator,
+    ProcessInfo? processInfo,
     ProcessManager? processManager,
     ProcessUtils? processUtils,
     FlutterProjectFactory? projectFactory,
@@ -1348,8 +1383,10 @@ class DelegatingToolContext extends Fake implements ToolContext {
        _logger = logger,
        _os = os,
        _outputPreferences = outputPreferences,
+       _persistentToolState = persistentToolState,
        _platform = platform,
        _preRunValidator = preRunValidator,
+       _processInfo = processInfo,
        _processManager = processManager,
        _processUtils = processUtils,
        _projectFactory = projectFactory,
@@ -1372,8 +1409,10 @@ class DelegatingToolContext extends Fake implements ToolContext {
   final Logger? _logger;
   final OperatingSystemUtils? _os;
   final OutputPreferences? _outputPreferences;
+  final PersistentToolState? _persistentToolState;
   final Platform? _platform;
   final PreRunValidator? _preRunValidator;
+  final ProcessInfo? _processInfo;
   final ProcessManager? _processManager;
   final ProcessUtils? _processUtils;
   final FlutterProjectFactory? _projectFactory;
@@ -1431,10 +1470,22 @@ class DelegatingToolContext extends Fake implements ToolContext {
   OutputPreferences get outputPreferences => _outputPreferences ?? globals.outputPreferences;
 
   @override
+  PersistentToolState get persistentToolState =>
+      _persistentToolState ??
+      globals.persistentToolState ??
+      PersistentToolState.test(
+        directory: fs.systemTempDirectory.createTempSync('persistent_tool_state'),
+        logger: logger,
+      );
+
+  @override
   Platform get platform => _platform ?? globals.platform;
 
   @override
   PreRunValidator get preRunValidator => _preRunValidator ?? const NoOpPreRunValidator();
+
+  @override
+  ProcessInfo get processInfo => _processInfo ?? globals.processInfo;
 
   @override
   ProcessManager get processManager => _processManager ?? globals.processManager;

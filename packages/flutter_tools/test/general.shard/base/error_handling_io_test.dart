@@ -986,6 +986,9 @@ Please ensure that the SDK and/or project is installed in a location that has re
     const kDeviceFull = 112;
     const kUserMappedSectionOpened = 1224;
     const kUserPermissionDenied = 5;
+    const kApplicationControlPolicyBlocked = 4551;
+    const kAccessDisabledByPolicy = 1260;
+    const kSystemIntegrityPolicyViolation = 454;
 
     testWithoutContext(
       'when PackageProcess throws an exception containing non-executable bits',
@@ -1180,6 +1183,49 @@ Please ensure that the SDK and/or project is installed in a location that has re
         throwsToolExit(message: expectedMessage),
       );
     });
+
+    for (final (name, errorCode) in const <(String, int)>[
+      ('Windows Application Control policy', kApplicationControlPolicyBlocked),
+      ('Windows group policy', kAccessDisabledByPolicy),
+      ('Windows system integrity policy violation', kSystemIntegrityPolicyViolation),
+    ]) {
+      testWithoutContext('when blocked by $name', () {
+        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>['foo'],
+            exception: ProcessException('foo', const <String>[], 'Blocked', errorCode),
+          ),
+          FakeCommand(
+            command: const <String>['foo'],
+            exception: ProcessException('foo', const <String>[], 'Blocked', errorCode),
+          ),
+          FakeCommand(
+            command: const <String>['foo'],
+            exception: ProcessException('foo', const <String>[], 'Blocked', errorCode),
+          ),
+        ]);
+
+        final ProcessManager processManager = createProcessManager(
+          delegate: fakeProcessManager,
+          platform: windowsPlatform,
+        );
+
+        const expectedMessage =
+            'An Application Control policy or security policy has blocked execution.';
+        expect(
+          () async => processManager.start(<String>['foo']),
+          throwsToolExit(message: expectedMessage),
+        );
+        expect(
+          () async => processManager.run(<String>['foo']),
+          throwsToolExit(message: expectedMessage),
+        );
+        expect(
+          () => processManager.runSync(<String>['foo']),
+          throwsToolExit(message: expectedMessage),
+        );
+      });
+    }
   });
 
   group('ProcessManager on linux throws tool exit', () {
