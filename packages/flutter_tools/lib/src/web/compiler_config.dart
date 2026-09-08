@@ -48,7 +48,6 @@ sealed class WebCompilerConfig {
 
   Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
     'optimizationLevel': ?optimizationLevel,
-    'webContentHash': webContentHash,
   };
 
   Map<String, dynamic> get _buildKeyMap => <String, dynamic>{
