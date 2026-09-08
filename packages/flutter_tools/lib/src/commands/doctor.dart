@@ -21,7 +21,7 @@ class DoctorCommand extends FlutterCommand {
     android_workflow.AndroidLicenseValidator? androidLicenseValidator,
     Doctor? doctor,
     this.extensionManager,
-    super.toolContext,
+    required super.toolContext,
     this.verbose = false,
   }) : _androidLicenseValidator = androidLicenseValidator,
        _explicitDoctor = doctor {
