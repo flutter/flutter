@@ -76,7 +76,8 @@ TEST_F(FlEngineTest, NotifyDisplayUpdate) {
 }
 
 // Starts the engine, capturing the vsync callback it registers, and mocks the
-// clock so vsync times are deterministic. The engine is started at time zero.
+// clock so vsync times are deterministic. The engine is started at the time
+// currently in *current_time_nanos, which becomes the vsync phase.
 static VsyncCallback start_engine_with_vsync(
     FlEngine* engine,
     uint64_t* current_time_nanos,
@@ -103,7 +104,6 @@ static VsyncCallback start_engine_with_vsync(
         return kSuccess;
       }));
 
-  *current_time_nanos = 0;
   EXPECT_TRUE(fl_engine_start(engine, nullptr));
   EXPECT_NE(callback, nullptr);
   return callback;
@@ -136,6 +136,39 @@ TEST_F(FlEngineTest, Vsync) {
   EXPECT_EQ(vsync_count, 2);
   EXPECT_EQ(frame_start_time, 3 * kFrameInterval);
   EXPECT_EQ(frame_target_time, 4 * kFrameInterval);
+}
+
+// Checks a vsync request from before the first tick snaps to that tick rather
+// than skipping past it.
+TEST_F(FlEngineTest, VsyncBeforePhase) {
+  constexpr uint64_t kFrameInterval = 1000000000 / 60;
+  constexpr uint64_t kStartTime = 5000000;
+
+  uint64_t current_time = kStartTime;
+  uint64_t frame_start_time = 0, frame_target_time = 0;
+  VsyncCallback vsync_callback = start_engine_with_vsync(
+      engine, &current_time, [&](uint64_t start_time, uint64_t target_time) {
+        frame_start_time = start_time;
+        frame_target_time = target_time;
+      });
+
+  // The clock reads earlier than the phase - the first tick is the phase.
+  current_time = 1000000;
+  vsync_callback(engine, 42);
+  EXPECT_EQ(frame_start_time, kStartTime);
+  EXPECT_EQ(frame_target_time, kStartTime + kFrameInterval);
+
+  // Exactly on the phase - the frame can start now.
+  current_time = kStartTime;
+  vsync_callback(engine, 42);
+  EXPECT_EQ(frame_start_time, kStartTime);
+  EXPECT_EQ(frame_target_time, kStartTime + kFrameInterval);
+
+  // Just after the phase - snaps to the next tick after it.
+  current_time = kStartTime + 1;
+  vsync_callback(engine, 42);
+  EXPECT_EQ(frame_start_time, kStartTime + kFrameInterval);
+  EXPECT_EQ(frame_target_time, kStartTime + 2 * kFrameInterval);
 }
 
 // Checks vsync events follow the refresh rate of a high refresh rate display.

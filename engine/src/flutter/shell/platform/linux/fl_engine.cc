@@ -195,12 +195,14 @@ static void parse_locale(const gchar* locale,
 static uint64_t snap_to_next_tick(uint64_t value,
                                   uint64_t phase,
                                   uint64_t interval) {
-  int64_t offset = (static_cast<int64_t>(phase) - static_cast<int64_t>(value)) %
-                   static_cast<int64_t>(interval);
-  if (offset != 0) {
-    offset = offset + interval;
+  if (value <= phase) {
+    return phase;
   }
-  return value + offset;
+  uint64_t remainder = (value - phase) % interval;
+  if (remainder == 0) {
+    return value;
+  }
+  return value + (interval - remainder);
 }
 
 // Update the interval the engine produces frames at from the displays views are
