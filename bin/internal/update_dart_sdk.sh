@@ -210,7 +210,11 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; 
     if [ -e "$item" ]; then
       dest="$FLUTTER_ROOT/bin/cache/$(basename "$item")"
       rm -rf "$dest"
-      mv -f "$item" "$dest"
+      mv -f "$item" "$dest" || {
+        >&2 echo "Failed to move $item to $dest"
+        rm -rf -- "$DART_SDK_PATH_TEMP"
+        exit 1
+      }
     fi
   done
 

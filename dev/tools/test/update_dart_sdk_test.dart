@@ -34,7 +34,7 @@ void main() {
 
   void printIfNotEmpty(String prefix, String string) {
     if (string.isNotEmpty) {
-      for (final String s in string.split(io.Platform.lineTerminator)) {
+      for (final String s in LineSplitter.split(string)) {
         print('$prefix:>$s<');
       }
     }
