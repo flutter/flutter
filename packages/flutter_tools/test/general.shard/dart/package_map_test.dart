@@ -193,43 +193,22 @@ void main() {
       expect(logger.errorText, isEmpty);
     });
 
-    testWithoutContext(
-      'throws ToolExit with pub get suggestion when file is invalid and pubspec exists',
-      () async {
-        fileSystem.file('.dart_tool/pubspec.yaml').createSync(recursive: true);
-        final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{invalid json}');
+    testWithoutContext('throws ToolExit with pub get suggestion when file is invalid', () async {
+      final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{invalid json}');
 
-        await expectLater(
-          () => loadPackageConfigWithLogging(packageConfigFile, logger: logger),
-          throwsToolExit(message: ''),
-        );
+      await expectLater(
+        () => loadPackageConfigWithLogging(packageConfigFile, logger: logger),
+        throwsToolExit(message: ''),
+      );
 
-        expect(logger.errorText, contains('.dart_tool/package_config.json does not exist.'));
-        expect(logger.errorText, contains('Did you run "flutter pub get" in this directory?'));
-      },
-    );
-
-    testWithoutContext(
-      'throws ToolExit with directory suggestion when file is invalid and pubspec does not exist',
-      () async {
-        final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('{invalid json}');
-
-        await expectLater(
-          () => loadPackageConfigWithLogging(packageConfigFile, logger: logger),
-          throwsToolExit(message: ''),
-        );
-
-        expect(logger.errorText, contains('.dart_tool/package_config.json does not exist.'));
-        expect(
-          logger.errorText,
-          contains('Did you run this command from the same directory as your pubspec.yaml file?'),
-        );
-      },
-    );
+      expect(
+        logger.errorText,
+        contains('The package configuration file .dart_tool/package_config.json is invalid'),
+      );
+      expect(logger.errorText, contains('Try running "flutter pub get" to regenerate it.'));
+    });
 
     testWithoutContext(
       'returns empty PackageConfig when file missing and throwOnError is false',
