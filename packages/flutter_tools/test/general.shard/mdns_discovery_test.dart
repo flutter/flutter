@@ -21,6 +21,22 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fakes.dart';
 
+MDnsVmServiceDiscovery _createDiscovery({
+  Analytics? analytics,
+  Logger? logger,
+  MDnsClient? mdnsClient,
+  Platform? platform,
+  MDnsClient? preliminaryMDnsClient,
+}) {
+  return MDnsVmServiceDiscovery(
+    analytics: analytics ?? const NoOpAnalytics(),
+    logger: logger ?? BufferLogger.test(),
+    mdnsClient: mdnsClient,
+    platform: platform ?? FakePlatform(operatingSystem: 'macos'),
+    preliminaryMDnsClient: preliminaryMDnsClient,
+  );
+}
+
 void main() {
   group('mDNS Discovery', () {
     final int future = DateTime.now().add(const Duration(days: 1)).millisecondsSinceEpoch;
@@ -53,7 +69,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: emptyClient,
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
@@ -83,7 +99,7 @@ void main() {
             },
           );
 
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             preliminaryMDnsClient: emptyClient,
             logger: BufferLogger.test(),
@@ -111,7 +127,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: emptyClient,
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
@@ -134,7 +150,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: emptyClient,
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
@@ -161,7 +177,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: emptyClient,
           preliminaryMDnsClient: client,
           logger: BufferLogger.test(),
@@ -172,7 +188,7 @@ void main() {
       });
 
       testWithoutContext('No ports available', () async {
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: emptyClient,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -192,7 +208,7 @@ void main() {
             fs: fs,
             fakeFlutterVersion: FakeFlutterVersion(),
           );
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: emptyClient,
             preliminaryMDnsClient: emptyClient,
             logger: logger,
@@ -218,7 +234,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -241,7 +257,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -268,7 +284,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -296,7 +312,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -313,7 +329,7 @@ void main() {
           osErrorOnStart: true,
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -331,7 +347,7 @@ void main() {
             socketExceptionOnStart: true,
           );
 
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             preliminaryMDnsClient: emptyClient,
             logger: BufferLogger.test(),
@@ -361,11 +377,10 @@ void main() {
           <String, List<SrvResourceRecord>>{},
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
+          platform: FakePlatform(),
           preliminaryMDnsClient: emptyClient,
-          logger: BufferLogger.test(),
-          analytics: const NoOpAnalytics(),
         );
         expect(() async => portDiscovery.queryForAttach(), throwsA(isA<UnsupportedError>()));
       }, overrides: <Type, Generator>{Platform: () => FakePlatform()});
@@ -380,7 +395,7 @@ void main() {
           );
 
           final logger = BufferLogger.test();
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             preliminaryMDnsClient: emptyClient,
             logger: logger,
@@ -408,7 +423,7 @@ void main() {
         );
 
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -445,7 +460,7 @@ void main() {
         );
 
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -482,7 +497,7 @@ void main() {
         );
 
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -539,7 +554,7 @@ void main() {
             },
           );
           final device = FakeIOSDevice();
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             preliminaryMDnsClient: emptyClient,
             logger: BufferLogger.test(),
@@ -571,7 +586,7 @@ void main() {
           },
         );
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           preliminaryMDnsClient: emptyClient,
           logger: BufferLogger.test(),
@@ -591,7 +606,7 @@ void main() {
           <String, List<SrvResourceRecord>>{},
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -609,7 +624,7 @@ void main() {
           <String, List<SrvResourceRecord>>{},
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -631,7 +646,7 @@ void main() {
             <String, List<SrvResourceRecord>>{},
           );
           final logger = BufferLogger.test();
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             logger: logger,
             analytics: const NoOpAnalytics(),
@@ -654,7 +669,7 @@ void main() {
           osErrorOnStart: true,
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -678,7 +693,7 @@ void main() {
             socketExceptionOnLookup: true,
           );
 
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
@@ -714,7 +729,7 @@ void main() {
             uncaughtSocketExceptionOnLookup: true,
           );
 
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
@@ -749,7 +764,7 @@ void main() {
 
           final logger = BufferLogger.test();
 
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             logger: logger,
             analytics: const NoOpAnalytics(),
@@ -774,10 +789,9 @@ void main() {
             <String, List<SrvResourceRecord>>{},
           );
 
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
-            logger: BufferLogger.test(),
-            analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           );
 
           expect(
@@ -799,7 +813,7 @@ void main() {
         );
 
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -836,7 +850,7 @@ void main() {
         );
 
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -873,7 +887,7 @@ void main() {
         );
 
         final device = FakeIOSDevice();
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -930,7 +944,7 @@ void main() {
             },
           );
           final device = FakeIOSDevice();
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
@@ -965,7 +979,7 @@ void main() {
           },
         );
         final device = FakeIOSDevice(name: 'My Phone');
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -998,7 +1012,7 @@ void main() {
             },
           );
           final device = FakeIOSDevice(name: 'My Phone');
-          final portDiscovery = MDnsVmServiceDiscovery(
+          final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
             mdnsClient: client,
             logger: BufferLogger.test(),
             analytics: const NoOpAnalytics(),
@@ -1013,7 +1027,7 @@ void main() {
 
     group('deviceNameMatchesTargetName', () {
       testWithoutContext('compares case insensitive and without spaces, hyphens, .local', () {
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -1023,7 +1037,7 @@ void main() {
       });
 
       testWithoutContext('includes numbers in comparison', () {
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: FakeMDnsClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{}),
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -1075,7 +1089,7 @@ void main() {
           },
         );
 
-        final portDiscovery = MDnsVmServiceDiscovery(
+        final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
           mdnsClient: client,
           logger: BufferLogger.test(),
           analytics: const NoOpAnalytics(),
@@ -1136,7 +1150,7 @@ void main() {
         },
       );
 
-      final portDiscovery = MDnsVmServiceDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         analytics: const NoOpAnalytics(),
@@ -1174,7 +1188,7 @@ void main() {
         },
       );
 
-      final portDiscovery = MDnsVmServiceDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         analytics: const NoOpAnalytics(),
@@ -1218,7 +1232,7 @@ void main() {
         },
       );
 
-      final portDiscovery = MDnsVmServiceDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         analytics: const NoOpAnalytics(),
@@ -1264,7 +1278,7 @@ void main() {
         },
       );
 
-      final portDiscovery = MDnsVmServiceDiscovery(
+      final MDnsVmServiceDiscovery portDiscovery = _createDiscovery(
         mdnsClient: client,
         logger: BufferLogger.test(),
         analytics: const NoOpAnalytics(),

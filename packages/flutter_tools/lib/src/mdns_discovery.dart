@@ -56,16 +56,7 @@ class MDnsVmServiceDiscovery {
   final Logger _logger;
   final Analytics _analytics;
 
-  Platform get _effectivePlatform {
-    if (_platform != null) {
-      return _platform;
-    }
-    try {
-      return globals.platform;
-    } on UnsupportedError {
-      return FakePlatform(operatingSystem: 'macos');
-    }
-  }
+  Platform get _effectivePlatform => _platform ?? globals.platform;
 
   @visibleForTesting
   static const dartVmServiceName = '_dartVmService._tcp.local';
