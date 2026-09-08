@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/commands/build.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 
@@ -18,7 +19,7 @@ void main() {
   testUsingContext('Include only supported sub commands', () {
     final logger = BufferLogger.test();
     final fs = MemoryFileSystem.test();
-    final command = BuildCommand(
+    final BuildCommand command = createFakeBuildCommand(
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fs,

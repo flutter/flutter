@@ -825,6 +825,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     }
   }
 
+  @protected
   @override
   void dispose() {
     _errorText.dispose();

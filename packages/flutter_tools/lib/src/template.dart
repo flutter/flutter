@@ -140,9 +140,31 @@ class Template {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // a candidate for rendering. This catches cases where the folder
         // itself is a template.
+        // When multiple template sources are provided, later directories take
+        // precedence and overwrite matching relative destination paths from
+        // base dependencies.
         _templateFilePaths[relativePath] = fileSystem.path.absolute(entity.path);
       }
     }
+  }
+
+  /// Creates a [Template] by resolving one or more source directories.
+  static Future<Template> fromDirectories(
+    List<Directory> templateSources, {
+    List<Directory> imageSourceDirectories = const <Directory>[],
+    required FileSystem fileSystem,
+    required Logger logger,
+    required TemplateRenderer templateRenderer,
+    Set<Uri>? templateManifest,
+  }) async {
+    return Template._(
+      templateSources,
+      imageSourceDirectories,
+      fileSystem: fileSystem,
+      logger: logger,
+      templateRenderer: templateRenderer,
+      templateManifest: templateManifest,
+    );
   }
 
   static Future<Template> fromName(
