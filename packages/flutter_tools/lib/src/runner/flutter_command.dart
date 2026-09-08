@@ -164,6 +164,7 @@ abstract final class FlutterOptions {
   static const kFatalWarnings = 'fatal-warnings';
   static const kUseApplicationBinary = 'use-application-binary';
   static const kWebBrowserFlag = 'web-browser-flag';
+  static const kWebBrowserDefaultFlags = 'web-browser-default-flags';
   static const kWebResourcesCdnFlag = 'web-resources-cdn';
   static const kWebWasmFlag = 'wasm';
   static const kWebExperimentalHotReload = 'web-experimental-hot-reload';
@@ -470,6 +471,18 @@ abstract class FlutterCommand extends Command<void> {
           'Firefox: https://wiki.mozilla.org/Firefox/CommandLineOptions\n'
           'Multiple flags can be passed by repeating "--${FlutterOptions.kWebBrowserFlag}" multiple times.',
       valueHelp: '--foo=bar',
+      hide: !verboseHelp,
+    );
+    // Positive flag (defaults on); pass --no-web-browser-default-flags to opt out.
+    argParser.addFlag(
+      FlutterOptions.kWebBrowserDefaultFlags,
+      defaultsTo: true,
+      help:
+          'Whether to pass Flutter\'s default browser launch flags (for example "--bwsi" and '
+          '"--disable-extensions"). Essential flags such as "--user-data-dir" and '
+          '"--remote-debugging-port" are always applied. Use "--no-${FlutterOptions.kWebBrowserDefaultFlags}" '
+          'with "--${FlutterOptions.kWebBrowserFlag}" to supply your own flags without Flutter defaults.\n'
+          'Currently only Chrome supports this option.',
       hide: !verboseHelp,
     );
     argParser.addFlag(

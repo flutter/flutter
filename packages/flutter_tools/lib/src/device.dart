@@ -975,6 +975,7 @@ class DebuggingOptions {
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
+    this.webBrowserDefaultFlags = true,
     this.webEnableExpressionEvaluation = false,
     this.webLaunchUrl,
     bool? webCrossOriginIsolation,
@@ -1015,6 +1016,7 @@ class DebuggingOptions {
     this.webRunHeadless = false,
     this.webBrowserDebugPort,
     this.webBrowserFlags = const <String>[],
+    this.webBrowserDefaultFlags = true,
     this.webLaunchUrl,
     bool? webCrossOriginIsolation,
     WebRendererMode? webRenderer,
@@ -1102,6 +1104,7 @@ class DebuggingOptions {
     required this.webRunHeadless,
     required this.webBrowserDebugPort,
     required this.webBrowserFlags,
+    required this.webBrowserDefaultFlags,
     required this.webEnableExpressionEvaluation,
     required this.webLaunchUrl,
     required this.webCrossOriginIsolation,
@@ -1210,6 +1213,13 @@ class DebuggingOptions {
 
   /// Arbitrary browser flags.
   final List<String> webBrowserFlags;
+
+  /// Whether to pass Flutter's default browser launch flags.
+  ///
+  /// Essential flags such as `--user-data-dir` and `--remote-debugging-port`
+  /// are always applied. When false, convenience defaults (for example `--bwsi`)
+  /// are omitted.
+  final bool webBrowserDefaultFlags;
 
   /// Enable expression evaluation for web target.
   final bool webEnableExpressionEvaluation;
@@ -1323,6 +1333,7 @@ class DebuggingOptions {
     'webRunHeadless': webRunHeadless,
     'webBrowserDebugPort': webBrowserDebugPort,
     'webBrowserFlags': webBrowserFlags,
+    'webBrowserDefaultFlags': webBrowserDefaultFlags,
     'webEnableExpressionEvaluation': webEnableExpressionEvaluation,
     'webLaunchUrl': webLaunchUrl,
     'webCrossOriginIsolation': webCrossOriginIsolation,
@@ -1396,6 +1407,8 @@ class DebuggingOptions {
         webRunHeadless: json['webRunHeadless']! as bool,
         webBrowserDebugPort: json['webBrowserDebugPort'] as int?,
         webBrowserFlags: (json['webBrowserFlags']! as List<dynamic>).cast<String>(),
+        // Backwards compatible when older tools omit this key.
+        webBrowserDefaultFlags: (json['webBrowserDefaultFlags'] as bool?) ?? true,
         webEnableExpressionEvaluation: json['webEnableExpressionEvaluation']! as bool,
         webLaunchUrl: json['webLaunchUrl'] as String?,
         webCrossOriginIsolation: json['webCrossOriginIsolation']! as bool,
