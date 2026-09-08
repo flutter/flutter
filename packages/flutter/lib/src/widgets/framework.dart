@@ -3177,7 +3177,7 @@ class BuildOwner {
   // In Profile/Release mode this field must never be accessed, to allow the
   // Dart compiler to eliminate the field along with its initializer.
   @_debugOnly
-  late final Map<Element, Map<Element, GlobalKey>> _debugGlobalKeyReservations = <Element, Map<Element, GlobalKey>>{}
+  late final Map<Element, Map<Element, GlobalKey>> _debugGlobalKeyReservations = <Element, Map<Element, GlobalKey>>{};
 
   /// The number of [GlobalKey] instances that are currently associated with
   /// [Element]s that have been built by this build owner.
@@ -4401,8 +4401,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // never updates (the forgotten children are not removed from the tree
     // until the call to update happens)
     assert(() {
-      _debugForgottenChildrenWithGlobalKey?.forEach(_debugRemoveGlobalKeyReservation);
-      _debugForgottenChildrenWithGlobalKey?.clear();
+      _debugForgottenChildrenWithGlobalKey.forEach(_debugRemoveGlobalKeyReservation);
+      _debugForgottenChildrenWithGlobalKey.clear();
       return true;
     }());
     _widget = newWidget;
@@ -4723,7 +4723,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // key duplication that we need to catch.
     assert(() {
       if (child.widget.key is GlobalKey) {
-        _debugForgottenChildrenWithGlobalKey?.add(child);
+        _debugForgottenChildrenWithGlobalKey.add(child);
       }
       return true;
     }());
