@@ -109,6 +109,18 @@ class BuildAppBundleCommand extends BuildSubCommand {
   List<String> get aliases => const <String>['aab'];
 
   @override
+  String get targetFile {
+    if (argResults?.wasParsed('target') ?? false) {
+      return stringArg('target')!;
+    }
+    final List<String>? rest = argResults?.rest;
+    if (rest != null && rest.isNotEmpty) {
+      return rest.first;
+    }
+    return toolContext.fs.path.join('lib', 'main.dart');
+  }
+
+  @override
   DeprecationBehavior get deprecationBehavior =>
       boolArg('ignore-deprecation') ? DeprecationBehavior.ignore : DeprecationBehavior.exit;
 

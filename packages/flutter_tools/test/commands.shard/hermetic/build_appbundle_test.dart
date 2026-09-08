@@ -69,7 +69,7 @@ environment:
 flutter:
   uses-material-design: true
 ''');
-    fs.file('lib/main.dart').createSync(recursive: true);
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     final Directory androidDir = fs.directory('android')..createSync(recursive: true);
     androidDir.childFile('build.gradle').createSync();
     final File manifestFile = androidDir.childFile('app/src/main/AndroidManifest.xml');
