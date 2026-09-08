@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Pilih semua",
   "searchResultsFound": "Hasil penelusuran ditemukan",
   "noResultsFound": "Tidak ditemukan hasil",
-  "radioButtonUnselectedLabel": "Tidak dipilih"
+  "radioButtonUnselectedLabel": "Tidak dipilih",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

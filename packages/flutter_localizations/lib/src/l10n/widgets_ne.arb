@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "सबै बटनहरू चयन गर्नुहोस्",
   "searchResultsFound": "खोज परिणाम भेटिएका छन्",
   "noResultsFound": "कुनै पनि परिणाम भेटिएन",
-  "radioButtonUnselectedLabel": "चयन गरिएको छैन"
+  "radioButtonUnselectedLabel": "चयन गरिएको छैन",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

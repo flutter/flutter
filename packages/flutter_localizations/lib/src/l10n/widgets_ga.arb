@@ -14,5 +14,11 @@
   "shareButtonLabel": "Comhroinn",
   "pasteButtonLabel": "Greamaigh",
   "selectAllButtonLabel": "Roghnaigh gach rud",
-  "radioButtonUnselectedLabel": "Níor roghnaíodh é"
+  "radioButtonUnselectedLabel": "Níor roghnaíodh é",
+  "expansibleExpandedHint": "tapáil faoi dhó chun laghdú",
+  "expansibleCollapsedHint": "tapáil faoi dhó chun leathnú",
+  "expansibleExpandedTapHint": "Laghdaigh",
+  "expansibleCollapsedTapHint": "Leathnaigh chun tuilleadh sonraí a fháil",
+  "expandedHint": "Laghdaithe",
+  "collapsedHint": "Leathnaithe"
 }

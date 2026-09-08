@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "ਸਭ ਚੁਣੋ",
   "searchResultsFound": "ਖੋਜ ਨਤੀਜੇ ਮਿਲੇ",
   "noResultsFound": "ਕੋਈ ਨਤੀਜਾ ਨਹੀਂ ਮਿਲਿਆ",
-  "radioButtonUnselectedLabel": "ਚੁਣਿਆ ਨਹੀਂ ਗਿਆ"
+  "radioButtonUnselectedLabel": "ਚੁਣਿਆ ਨਹੀਂ ਗਿਆ",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

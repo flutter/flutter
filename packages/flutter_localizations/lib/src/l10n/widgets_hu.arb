@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Összes kijelölése",
   "searchResultsFound": "Rendelkezésre állnak keresési találatok",
   "noResultsFound": "Nincs találat",
-  "radioButtonUnselectedLabel": "Nincs kiválasztva"
+  "radioButtonUnselectedLabel": "Nincs kiválasztva",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

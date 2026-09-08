@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "Выбрать все",
   "searchResultsFound": "Поиск дал результаты",
   "noResultsFound": "Ничего не найдено",
-  "radioButtonUnselectedLabel": "Не выбрано"
+  "radioButtonUnselectedLabel": "Не выбрано",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

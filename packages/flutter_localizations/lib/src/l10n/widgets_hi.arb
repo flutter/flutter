@@ -14,5 +14,11 @@
   "selectAllButtonLabel": "सभी को चुनें",
   "searchResultsFound": "खोज के नतीजे मिले",
   "noResultsFound": "कोई नतीजा नहीं मिला",
-  "radioButtonUnselectedLabel": "नहीं चुना गया"
+  "radioButtonUnselectedLabel": "नहीं चुना गया",
+  "expansibleExpandedHint": "double tap to collapse",
+  "expansibleCollapsedHint": "double tap to expand",
+  "expansibleExpandedTapHint": "Collapse",
+  "expansibleCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

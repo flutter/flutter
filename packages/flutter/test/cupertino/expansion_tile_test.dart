@@ -239,23 +239,24 @@ void main() {
     controller.expand();
     await tester.pumpAndSettle();
 
-    expect(
-      tester.getSemantics(find.byType(CupertinoListTile).first),
-      matchesSemantics(
-        hasTapAction: true,
-        label: 'First Expansion Tile',
-        textDirection: TextDirection.ltr,
-      ),
-    );
+    // The first CupertinoListTile is collapsed.
+    final SemanticsData data = tester
+        .getSemantics(find.byType(CupertinoListTile).first)
+        .getSemanticsData();
+    expect(data.hasFlag(SemanticsFlag.hasExpandedState), isTrue);
+    expect(data.label, 'First Expansion Tile');
+    expect(data.hasAction(SemanticsAction.tap), isTrue);
+    expect(data.hasAction(SemanticsAction.expand), isTrue);
 
-    expect(
-      tester.getSemantics(find.byType(CupertinoListTile).last),
-      matchesSemantics(
-        hasTapAction: true,
-        label: 'Second Expansion Tile',
-        textDirection: TextDirection.ltr,
-      ),
-    );
+    // The second CupertinoListTile is expanded.
+    final SemanticsData data2 = tester
+        .getSemantics(find.byType(CupertinoListTile).last)
+        .getSemanticsData();
+    expect(data2.hasFlag(SemanticsFlag.hasExpandedState), isTrue);
+    expect(data2.hasFlag(SemanticsFlag.isExpanded), isTrue);
+    expect(data2.label, 'Second Expansion Tile');
+    expect(data2.hasAction(SemanticsAction.tap), isTrue);
+    expect(data2.hasAction(SemanticsAction.collapse), isTrue);
     handle.dispose();
   });
 
