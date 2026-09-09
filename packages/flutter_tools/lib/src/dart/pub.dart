@@ -292,7 +292,7 @@ class _DefaultPub implements Pub {
       Object? decoded;
       try {
         decoded = jsonDecode(workspaceRefFile.readAsStringSync());
-      } on FormatException {
+      } on Exception {
         // Fall through to default.
       }
       switch (decoded) {
@@ -320,8 +320,7 @@ class _DefaultPub implements Pub {
     }
 
     if (packageConfigFile.existsSync()) {
-      final Directory workspaceRoot = packageConfigFile.parent.parent;
-      final File lastVersion = workspaceRoot.childDirectory('.dart_tool').childFile('version');
+      final File lastVersion = packageConfigFile.parent.childFile('version');
       final versionFromFile = FlutterVersion(
         flutterRoot: Cache.flutterRoot!,
         fs: _fileSystem,
