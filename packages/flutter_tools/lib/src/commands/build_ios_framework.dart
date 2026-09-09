@@ -281,8 +281,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Directory hostAppRoot,
     PlistParser plistParser,
   ) async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
 
     final File projectFile = hostAppRoot
         .childDirectory('Pods')
