@@ -377,24 +377,24 @@ void main() {
   });
 
   group('OptionDescriptor conflicts and identity', () {
-    test('re-registering identical descriptor succeeds', () {
+    test('re-registering identical descriptor succeeds automatically via Expando', () {
       const descriptor = FlagOptionDescriptor(name: 'shared-flag', help: 'Shared flag');
       final parser = ArgParser();
-      final registry = <String, OptionDescriptor<Object?>>{};
 
-      descriptor.addTo(parser, registry: registry);
-      expect(() => descriptor.addTo(parser, registry: registry), returnsNormally);
+      descriptor.addTo(parser);
+      expect(() => descriptor.addTo(parser), returnsNormally);
+      expect(() => parser.addDescriptor(descriptor), returnsNormally);
+      expect(() => parser.addDescriptors(<OptionDescriptor<Object?>>[descriptor]), returnsNormally);
     });
 
     test('registering conflicting descriptor throws detailed ArgumentError', () {
       const first = FlagOptionDescriptor(name: 'conflict-flag', help: 'First flag');
       const second = FlagOptionDescriptor(name: 'conflict-flag', help: 'Second flag');
       final parser = ArgParser();
-      final registry = <String, OptionDescriptor<Object?>>{};
 
-      first.addTo(parser, registry: registry);
+      first.addTo(parser);
       expect(
-        () => second.addTo(parser, registry: registry),
+        () => second.addTo(parser),
         throwsA(
           isA<ArgumentError>().having(
             (ArgumentError e) => e.message,
