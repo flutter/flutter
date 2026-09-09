@@ -357,7 +357,6 @@ class CanvasDlDispatcher : public DlDispatcherBase {
 /// that will be useful in a second pass by the CanvasDlDispatcher.
 /// This class collects things like text frames and backdrop filters.
 class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
-                            public flutter::IgnoreClipDispatchHelper,
                             public flutter::IgnoreDrawDispatchHelper {
  public:
   FirstPassDispatcher(const ContentContext& renderer,
@@ -374,6 +373,31 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
                  std::optional<int64_t> backdrop_id) override;
 
   void restore() override;
+
+  // |flutter::DlOpReceiver|
+  void clipRect(const DlRect& rect,
+                flutter::DlClipOp clip_op,
+                bool is_aa) override;
+
+  // |flutter::DlOpReceiver|
+  void clipOval(const DlRect& bounds,
+                flutter::DlClipOp clip_op,
+                bool is_aa) override;
+
+  // |flutter::DlOpReceiver|
+  void clipRoundRect(const DlRoundRect& rrect,
+                     flutter::DlClipOp clip_op,
+                     bool is_aa) override;
+
+  // |flutter::DlOpReceiver|
+  void clipPath(const DlPath& path,
+                flutter::DlClipOp clip_op,
+                bool is_aa) override;
+
+  // |flutter::DlOpReceiver|
+  void clipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                             flutter::DlClipOp clip_op,
+                             bool is_aa) override;
 
   void translate(DlScalar tx, DlScalar ty) override;
 
