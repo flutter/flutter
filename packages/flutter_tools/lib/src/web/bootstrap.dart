@@ -438,10 +438,14 @@ const indeterminate = document.createElement('div');
 indeterminate.className = "indeterminate";
 loader.appendChild(indeterminate);
 
-document.addEventListener('dart-app-ready', function (e) {
-   loader.parentNode.removeChild(loader);
-   styleSheet.parentNode.removeChild(styleSheet);
-});
+window._removeFlutterLoader = function() {
+  if (loader.parentNode) {
+    loader.parentNode.removeChild(loader);
+  }
+  if (styleSheet.parentNode) {
+    styleSheet.parentNode.removeChild(styleSheet);
+  }
+};
 ''';
 }
 
@@ -483,6 +487,9 @@ String generateDDCLibraryBundleMainModule({
       const sdkOptions = {
         nativeNonNullAsserts: $nativeNullAssertions,
       };
+      if (window._removeFlutterLoader) {
+        window._removeFlutterLoader();
+      }
       dartDevEmbedder.runMain(appName, sdkOptions);
     }
     /* MAIN_EXTENSION_MARKER */
@@ -528,7 +535,12 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
 
   // See the generateMainModule doc comment.
   var child = {};
-  child.main = app[Object.keys(app)[0]].main;
+  child.main = function() {
+    if (window._removeFlutterLoader) {
+      window._removeFlutterLoader();
+    }
+    return app[Object.keys(app)[0]].main.apply(this, arguments);
+  };
 
   /* MAIN_EXTENSION_MARKER */
   child.main();
