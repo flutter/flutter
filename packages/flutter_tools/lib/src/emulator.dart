@@ -30,7 +30,11 @@ class EmulatorManager {
     required ProcessManager processManager,
     required AndroidWorkflow androidWorkflow,
     required FileSystem fileSystem,
-  }) : _javaBuilder = javaBuilder ?? (() => java),
+  }) : assert(
+         java == null || javaBuilder == null,
+         'Cannot provide both java and javaBuilder to EmulatorManager.',
+       ),
+       _javaBuilder = javaBuilder ?? (() => java),
        _androidSdk = androidSdk,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _androidEmulators = AndroidEmulators(
@@ -44,7 +48,7 @@ class EmulatorManager {
   }
 
   final Java? Function() _javaBuilder;
-  Java? get _java => _javaBuilder();
+  late final Java? _java = _javaBuilder();
   final AndroidSdk? _androidSdk;
   final AndroidEmulators _androidEmulators;
   final ProcessUtils _processUtils;

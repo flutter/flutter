@@ -150,6 +150,15 @@ class ToolDependencies {
     Xcode? xcode,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
   }) async {
+    assert(
+      androidStudio == null || androidStudioBuilder == null,
+      'Cannot provide both androidStudio and androidStudioBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      java == null || javaBuilder == null,
+      'Cannot provide both java and javaBuilder to ToolDependencies.bootstrap.',
+    );
+
     // 1. Core Platform Inputs
     final Platform finalPlatform = platform ?? const LocalPlatform();
     final SystemClock finalSystemClock = systemClock ?? const SystemClock();
@@ -438,12 +447,14 @@ class ToolDependencies {
         androidStudioBuilder ??
         (androidStudio != null ? () => androidStudio : AndroidStudio.latestValid);
 
+    late final AndroidContext finalAndroidContext;
+
     final Java? Function() finalJavaBuilder =
         javaBuilder ??
         (java != null
             ? () => java
             : () => Java.find(
-                androidStudioBuilder: finalAndroidStudioBuilder,
+                androidStudioBuilder: () => finalAndroidContext.androidStudio,
                 config: finalConfig,
                 fileSystem: finalFS,
                 logger: finalLogger,
@@ -460,7 +471,7 @@ class ToolDependencies {
             operatingSystemUtils: finalOS,
           );
 
-    final finalAndroidContext = AndroidContext(
+    finalAndroidContext = AndroidContext(
       androidSdkBuilder: finalAndroidSdkBuilder,
       androidStudioBuilder: finalAndroidStudioBuilder,
       gradleUtilsBuilder: gradleUtilsBuilder,

@@ -158,7 +158,7 @@ void main() {
     });
 
     testUsingContext(
-      'lazily evaluates androidStudio and shares instance between AndroidContext and Java',
+      'lazily evaluates androidStudio and java upon access in AndroidContext',
       () async {
         // Mock Android SDK directory to allow SDK detection.
         fs.directory('/home/user/Android/Sdk/licenses').createSync(recursive: true);
@@ -187,8 +187,8 @@ void main() {
         expect(studioEvaluations, 0);
         expect(javaEvaluations, 0);
 
-        // Accessing emulatorManager does not trigger evaluation.
-        expect(dependencies.emulatorManager, isNotNull);
+        // Querying emulator discoverers does not trigger Java or AndroidStudio evaluation.
+        await dependencies.emulatorManager.getAllAvailableEmulators();
         expect(studioEvaluations, 0);
         expect(javaEvaluations, 0);
 
@@ -201,6 +201,40 @@ void main() {
         final AndroidStudio? studio = dependencies.androidContext.androidStudio;
         expect(studioEvaluations, 1);
         expect(studio, same(mockStudio));
+      },
+    );
+
+    testUsingContext(
+      'shares AndroidStudio instance between AndroidContext and default Java.find',
+      () async {
+        // Mock Android SDK directory to allow SDK detection.
+        fs.directory('/home/user/Android/Sdk/licenses').createSync(recursive: true);
+
+        var studioEvaluations = 0;
+        final mockStudio = FakeAndroidStudio();
+
+        final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+          androidStudioBuilder: () {
+            studioEvaluations++;
+            return mockStudio;
+          },
+          fs: fs,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        );
+
+        expect(studioEvaluations, 0);
+
+        final Java? java = dependencies.androidContext.java;
+        final AndroidStudio? studio = dependencies.androidContext.androidStudio;
+
+        // Verify AndroidStudio was only evaluated once despite Java.find referencing it.
+        expect(studioEvaluations, 1);
+        expect(studio, same(mockStudio));
+        if (java != null && java.javaSource == JavaSource.androidStudio) {
+          expect(java.javaHome, studio?.javaPath);
+        }
       },
     );
 
