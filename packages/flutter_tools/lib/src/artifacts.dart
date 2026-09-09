@@ -297,22 +297,29 @@ abstract class Artifacts {
     return _TestLocalEngine(localEngine, localEngineHost, fileSystem ?? MemoryFileSystem.test());
   }
 
-  static Artifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
+  static Artifacts getLocalEngine(
+    EngineBuildPaths engineBuildPaths, {
+    required Cache cache,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessManager processManager,
+  }) {
     Artifacts artifacts = CachedArtifacts(
-      fileSystem: globals.fs,
-      platform: globals.platform,
-      cache: globals.cache,
-      operatingSystemUtils: globals.os,
+      fileSystem: fileSystem,
+      platform: platform,
+      cache: cache,
+      operatingSystemUtils: operatingSystemUtils,
     );
     if (engineBuildPaths.hostEngine != null && engineBuildPaths.targetEngine != null) {
       artifacts = CachedLocalEngineArtifacts(
         engineBuildPaths.hostEngine!,
         engineOutPath: engineBuildPaths.targetEngine!,
-        cache: globals.cache,
-        fileSystem: globals.fs,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        operatingSystemUtils: globals.os,
+        cache: cache,
+        fileSystem: fileSystem,
+        processManager: processManager,
+        platform: platform,
+        operatingSystemUtils: operatingSystemUtils,
         parent: artifacts,
       );
     }
@@ -320,9 +327,9 @@ abstract class Artifacts {
       artifacts = CachedLocalWebSdkArtifacts(
         parent: artifacts,
         webSdkPath: engineBuildPaths.webSdk!,
-        fileSystem: globals.fs,
-        platform: globals.platform,
-        operatingSystemUtils: globals.os,
+        fileSystem: fileSystem,
+        platform: platform,
+        operatingSystemUtils: operatingSystemUtils,
       );
     }
     return artifacts;

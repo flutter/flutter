@@ -646,6 +646,55 @@ STDERR STUFF
   );
 
   testUsingContext(
+    'macOS build config-only writes Flutter-Generated.xcconfig with local engine options',
+    () async {
+      fileSystem
+          .directory('engine')
+          .childDirectory('src')
+          .childDirectory('out')
+          .childDirectory('host_debug_arm64')
+          .createSync(recursive: true);
+      createMinimalMockProjectFiles();
+
+      final BuildCommand command = createFakeBuildCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+        platform: macosPlatform,
+        featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreterWithBuildSettings(),
+      );
+
+      await createTestCommandRunner(command).run(const <String>[
+        '--local-engine=host_debug_arm64',
+        '--local-engine-host=host_debug_arm64',
+        '--local-engine-src-path=engine/src',
+        'build',
+        'macos',
+        '--config-only',
+        '--no-pub',
+      ]);
+
+      final File configFile = fileSystem.file('macos/Flutter/ephemeral/Flutter-Generated.xcconfig');
+      expect(configFile, exists);
+      final String configContent = configFile.readAsStringSync();
+      expect(configContent, contains('LOCAL_ENGINE=host_debug_arm64'));
+      expect(configContent, contains('LOCAL_ENGINE_HOST=host_debug_arm64'));
+      expect(configContent, contains('FLUTTER_ENGINE=engine/src'));
+      expect(configContent, contains('ARCHS=arm64'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Platform: () => macosPlatform,
+      Pub: ThrowingPub.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
+    },
+  );
+
+  testUsingContext(
     'macOS build invokes xcode build (profile)',
     () async {
       final BuildCommand command = createFakeBuildCommand(

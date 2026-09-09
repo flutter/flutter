@@ -684,6 +684,56 @@ void main() {
     },
   );
 
+  var buildInvoked = false;
+  testUsingContext(
+    'Web build propagates local engine options to build system Environment',
+    () async {
+      buildInvoked = false;
+      fileSystem
+          .directory('engine')
+          .childDirectory('src')
+          .childDirectory('out')
+          .childDirectory('wasm_release')
+          .createSync(recursive: true);
+      fileSystem
+          .directory('engine')
+          .childDirectory('src')
+          .childDirectory('out')
+          .childDirectory('host_release')
+          .createSync(recursive: true);
+
+      final buildCommand = TestWebBuildCommand(fileSystem: fileSystem);
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+      setupFileSystemForEndToEndTest(fileSystem);
+
+      await runner.run(<String>[
+        '--local-engine=wasm_release',
+        '--local-engine-host=host_release',
+        '--local-engine-src-path=engine/src',
+        'build',
+        'web',
+        '--no-pub',
+      ]);
+
+      expect(buildInvoked, isTrue);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      ProcessManager: () => processManager,
+      BuildSystem: () =>
+          TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+            buildInvoked = true;
+            expect(environment.artifacts.usesLocalArtifacts, isTrue);
+            expect(environment.artifacts.localEngineInfo, isNotNull);
+            expect(environment.artifacts.localEngineInfo?.localTargetName, 'wasm_release');
+            expect(environment.artifacts.localEngineInfo?.localHostName, 'host_release');
+            expect(environment.engineVersion, isNull);
+          }),
+    },
+  );
+
   testUsingContext(
     'Passes minify to only wasm when minify-wasm specified',
     () async {
