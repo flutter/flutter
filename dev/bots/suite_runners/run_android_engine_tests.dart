@@ -57,7 +57,11 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
     // TODO(matanlurey): Enable once `flutter drive` retains error logs.
     // final RegExp impellerStdoutPattern = RegExp('Using the Imepller rendering backend (.*)');
 
-    Future<void> runTest(FileSystemEntity file, {bool useHCPPFlag = false}) async {
+    Future<void> runTest(
+      FileSystemEntity file, {
+      bool? useHCPPFlag,
+      Map<String, String>? additionalEnvironment,
+    }) async {
       final CommandResult result = await runCommand(
         'flutter',
         <String>[
@@ -68,12 +72,16 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
           // make less things start up unnecessarily.
           '--no-dds',
           '--no-enable-dart-profiling',
-          if (useHCPPFlag) '--enable-hcpp',
+          if (useHCPPFlag == true) '--enable-hcpp',
+          if (useHCPPFlag == false) '--no-enable-hcpp',
           '--test-arguments=test',
           '--test-arguments=--reporter=expanded',
         ],
         workingDirectory: androidEngineTestPath,
-        environment: <String, String>{'ANDROID_ENGINE_TEST_GOLDEN_VARIANT': impellerBackend.name},
+        environment: <String, String>{
+          'ANDROID_ENGINE_TEST_GOLDEN_VARIANT': impellerBackend.name,
+          ...?additionalEnvironment,
+        },
       );
       final String? stdout = result.flattenedStdout;
       if (stdout == null) {
@@ -126,6 +134,15 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
           kHcppMetadataEnabled,
         ),
       );
+
+      // Verify that --no-enable-hcpp disables HCPP even when the manifest enables it.
+      for (final testName in runFirstTests) {
+        await runTest(
+          mains.firstWhere((FileSystemEntity file) => file.path.contains(testName)),
+          useHCPPFlag: false,
+          additionalEnvironment: const <String, String>{'EXPECT_HCPP': 'false'},
+        );
+      }
       for (final file in mains) {
         // This statement is attempting to catch all tests inside of the
         // dev/integration_tests/android_engine_test/lib/hcpp
