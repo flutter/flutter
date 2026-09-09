@@ -195,10 +195,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   std::shared_ptr<flutter::ThreadHost> _threadHost;
   std::unique_ptr<flutter::Shell> _shell;
 
-  // Callers to -waitForFirstFrame:callback: that are currently queued/processing.
-  // -destroyContext must wait for this group to drain before it is safe to free _shell.
-  dispatch_group_t _firstFrameWaiters;
-
   std::shared_ptr<flutter::SamplingProfiler> _profiler;
 
   FlutterBinaryMessengerRelay* _binaryMessenger;
@@ -612,13 +608,6 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (void)destroyContext {
-  // Clear any tasks waiting on first frame prior to destroying _shell.
-  if (_shell) {
-    _shell->CancelWaitForFirstFrame();
-  }
-  if (_firstFrameWaiters) {
-    dispatch_group_wait(_firstFrameWaiters, DISPATCH_TIME_FOREVER);
-  }
   [self resetChannels];
   self.isolateId = nil;
   _shell.reset();
@@ -1571,50 +1560,37 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (void)waitForFirstFrame:(NSTimeInterval)timeout
                  callback:(void (^_Nonnull)(BOOL didTimeout))callback {
-  dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0);
-  dispatch_group_t group = dispatch_group_create();
+  // Set up a completion handler that will nil itself out when it fires.
+  __block void (^completion)(BOOL) = [callback copy];
+  void (^complete)(BOOL) = ^(BOOL didTimeout) {
+    if (completion) {
+      void (^cb)(BOOL) = completion;
+      completion = nil;
+      cb(didTimeout);
+    }
+  };
 
-  // Increment count of tasks waiting for first frame callback. Decrement below
-  // on completion or timeout. In -destroyContext we block until all pending
-  // first frame waiter tasks are cancelled.
-  if (!_firstFrameWaiters) {
-    _firstFrameWaiters = dispatch_group_create();
+  if (!_shell) {
+    // No shell. Bail out since there'll never be a first frame.
+    dispatch_async(dispatch_get_main_queue(), ^{
+      complete(YES);
+    });
+    return;
   }
-  dispatch_group_t firstFrameWaiters = _firstFrameWaiters;
-  dispatch_group_enter(firstFrameWaiters);
 
-  __weak FlutterEngine* weakSelf = self;
-  __block BOOL didTimeout = NO;
-  dispatch_group_async(group, queue, ^{
-    FlutterEngine* strongSelf = weakSelf;
-    if (!strongSelf || !strongSelf->_shell) {
-      dispatch_group_leave(firstFrameWaiters);
-      return;
-    }
-
-    fml::TimeDelta waitTime = fml::TimeDelta::FromMilliseconds(timeout * 1000);
-    fml::Status status = strongSelf.shell.WaitForFirstFrame(waitTime);
-    didTimeout = status.code() == fml::StatusCode::kDeadlineExceeded;
-    dispatch_group_leave(firstFrameWaiters);
+  // Register the first-frame callback and fire the timeout completion handler.
+  // Both are scheduled on the main thread to guarantee ordering.
+  // The winner nils out the completion handler so the loser is a no-op.
+  _shell->AddFirstFrameCallback([complete] {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      complete(NO);
+    });
   });
 
-  // Only execute the main queue task once the background task has completely finished executing.
-  dispatch_group_notify(group, dispatch_get_main_queue(), ^{
-    // Strongly capture self on the task dispatched to the main thread.
-    //
-    // When we capture weakSelf strongly in the above block on a background thread, we risk the
-    // possibility that all other strong references to FlutterEngine go out of scope while the block
-    // executes and that the engine is dealloc'ed at the end of the above block on a background
-    // thread. FlutterEngine is not safe to release on any thread other than the main thread.
-    //
-    // self is never nil here since it's a strong reference that's verified non-nil above, but we
-    // use a conditional check to avoid an unused expression compiler warning.
-    FlutterEngine* strongSelf = self;
-    if (!strongSelf) {
-      return;
-    }
-    callback(didTimeout);
-  });
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout * NSEC_PER_SEC)),
+                 dispatch_get_main_queue(), ^{
+                   complete(YES);
+                 });
 }
 
 - (FlutterEngine*)spawnWithEntrypoint:(/*nullable*/ NSString*)entrypoint

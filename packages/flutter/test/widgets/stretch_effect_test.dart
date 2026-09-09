@@ -50,7 +50,7 @@ void main() {
         matchesGoldenFile('stretch_effect_covers_full_viewport.png'),
       );
     },
-    // Skips this test when fragment shaders are not used.
+    // [intended] Skips this test when fragment shaders are not used.
     skip: !shaderSupported,
   );
 }

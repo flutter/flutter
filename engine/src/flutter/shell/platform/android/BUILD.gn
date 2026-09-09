@@ -702,11 +702,6 @@ action("pom_content_hash_embedding") {
   ]
 }
 
-# TODO(jsimmons): remove this placeholder when it is no longer used by the LUCI recipes
-group("robolectric_tests") {
-  deps = [ ":android_jar" ]
-}
-
 zip_bundle("android_symbols") {
   output = "$android_zip_archive_dir/symbols.zip"
   files = [
