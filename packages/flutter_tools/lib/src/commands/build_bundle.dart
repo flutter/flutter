@@ -92,6 +92,7 @@ class BuildBundleCommand extends BuildSubCommand {
   BundleBuilder get bundleBuilder => _bundleBuilder;
 
   @visibleForTesting
+  @override
   FeatureFlags get featureFlags => _featureFlags;
 
   @override
