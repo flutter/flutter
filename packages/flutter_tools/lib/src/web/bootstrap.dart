@@ -445,6 +445,7 @@ window._removeFlutterLoader = function() {
   if (styleSheet.parentNode) {
     styleSheet.parentNode.removeChild(styleSheet);
   }
+  window._removeFlutterLoader = null;
 };
 ''';
 }
