@@ -13,6 +13,7 @@ import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/template.dart';
@@ -161,10 +162,11 @@ Future<Plugin?> _pluginFromPackage(
 /// If [throwOnError] is `true`, an empty package configuration is an error.
 Future<List<Plugin>> findPlugins(
   FlutterProject project, {
-  bool throwOnError = true,
-  PubspecCache? pubspecCache,
-  PackageGraph? packageGraph,
+  Logger? logger,
   PackageConfig? packageConfig,
+  PackageGraph? packageGraph,
+  PubspecCache? pubspecCache,
+  bool throwOnError = true,
 }) async {
   final plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
@@ -183,7 +185,7 @@ Future<List<Plugin>> findPlugins(
     final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
     resolvedPackageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
-      logger: globals.logger,
+      logger: logger ?? globals.logger,
       throwOnError: throwOnError,
     );
   }
@@ -199,7 +201,7 @@ Future<List<Plugin>> findPlugins(
       if (throwOnError) {
         throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`');
       } else {
-        globals.logger.printTrace('Could not locate package:$packageName');
+        (logger ?? globals.logger).printTrace('Could not locate package:$packageName');
         continue;
       }
     }
