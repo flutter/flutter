@@ -487,9 +487,11 @@ class NestedScrollViewState extends State<NestedScrollView> {
   @override
   Widget build(BuildContext context) {
     final ScrollPhysics scrollPhysics =
-        widget.physics?.applyTo(const ClampingScrollPhysics()) ??
-        widget.scrollBehavior?.getScrollPhysics(context).applyTo(const ClampingScrollPhysics()) ??
-        const ClampingScrollPhysics();
+        widget.physics?.applyTo(const _NestedScrollViewPhysics()) ??
+        widget.scrollBehavior
+            ?.getScrollPhysics(context)
+            .applyTo(const _NestedScrollViewPhysics()) ??
+        const _NestedScrollViewPhysics();
 
     return _InheritedNestedScrollView(
       state: this,
@@ -518,6 +520,23 @@ class NestedScrollViewState extends State<NestedScrollView> {
         },
       ),
     );
+  }
+}
+
+// The outer position must stay within its scroll extents, but its ballistic
+// simulation should follow the inherited physics so that it stays in sync with
+// the inner position when scrolling across the header boundary.
+class _NestedScrollViewPhysics extends ScrollPhysics {
+  const _NestedScrollViewPhysics({super.parent});
+
+  @override
+  _NestedScrollViewPhysics applyTo(ScrollPhysics? ancestor) {
+    return _NestedScrollViewPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
+    return const ClampingScrollPhysics().applyBoundaryConditions(position, value);
   }
 }
 
