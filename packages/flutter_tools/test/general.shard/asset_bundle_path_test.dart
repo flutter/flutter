@@ -129,6 +129,20 @@ void main() {
     },
   );
 
+  testWithoutContext('removes a mapped base image when only resolution variants remain', () async {
+    writeManifest('    - path: source/logo.png\n      bundle_path: images/brand.png');
+    writeFile('source/logo.png');
+    writeFile('source/2.0x/logo.png');
+    expect(await build(), 0);
+    expect(bundle.entries, contains('images/brand.png'));
+
+    fileSystem.file('source/logo.png').deleteSync();
+    expect(await build(), 0);
+    expect(bundle.entries, isNot(contains('images/brand.png')));
+    expect(bundle.entries, contains('images/2.0x/brand.png'));
+    expect((await manifest()).keys, contains('images/brand.png'));
+  });
+
   testWithoutContext('removes mapped entries when their flavor is no longer selected', () async {
     writeManifest('    - path: dev.json\n      flavors: [dev]\n      bundle_path: config.json');
     writeFile('dev.json');

@@ -557,6 +557,13 @@ class ManifestAssetBundle implements AssetBundle {
       assetVariants[asset] = <_Asset>[asset];
     }
 
+    final materialAndFrameworkAssets = <_Asset>[
+      if (flutterManifest.usesMaterialDesign) ..._getMaterialFonts(),
+      // For all platforms, include the shaders unconditionally. They are
+      // small, and whether they're used is determined only by the app source
+      // code and not by the Flutter manifest.
+      ..._getFrameworkShaders(),
+    ];
     final selectedAssets = <_Asset>[
       for (final Map<_Asset, List<_Asset>> assets in <Map<_Asset, List<_Asset>>>[
         assetVariants,
@@ -566,8 +573,7 @@ class ManifestAssetBundle implements AssetBundle {
           entry.key,
           ...entry.value,
         ],
-      if (flutterManifest.usesMaterialDesign) ..._getMaterialFonts(),
-      ..._getFrameworkShaders(),
+      ...materialAndFrameworkAssets,
     ];
     _checkForBundlePathConflicts(selectedAssets);
 
@@ -647,13 +653,6 @@ class ManifestAssetBundle implements AssetBundle {
         }
       }
     }
-    final materialAndFrameworkAssets = <_Asset>[
-      if (flutterManifest.usesMaterialDesign) ..._getMaterialFonts(),
-      // For all platforms, include the shaders unconditionally. They are
-      // small, and whether they're used is determined only by the app source
-      // code and not by the Flutter manifest.
-      ..._getFrameworkShaders(),
-    ];
     for (final asset in materialAndFrameworkAssets) {
       final File assetFile = asset.lookupAssetFile(_fileSystem);
       assert(assetFile.existsSync(), 'Missing ${assetFile.path}');
@@ -711,11 +710,17 @@ class ManifestAssetBundle implements AssetBundle {
     }
     _setIfChanged(kFontManifestJson, fontManifest, AssetKind.regular);
     _setLicenseIfChanged(licenseResult.combinedLicenses, targetPlatform);
-    final Set<String> selectedKeys = selectedAssets
-        .map((_Asset asset) => asset.entryUri.path)
-        .toSet();
+    // A manifest key can remain even when its base image is absent. Only the
+    // selected files belong in the bundle; the manifest still lists variants.
+    final Iterable<_Asset> bundledAssets = assetVariants.values.expand(
+      (List<_Asset> variants) => variants,
+    );
+    final selectedKeys = <String>{
+      for (final asset in bundledAssets) asset.entryUri.path,
+      for (final asset in materialAndFrameworkAssets) asset.entryUri.path,
+    };
     _bundlePathKeys.difference(selectedKeys).forEach(entries.remove);
-    _bundlePathKeys = selectedAssets
+    _bundlePathKeys = bundledAssets
         .where((_Asset asset) => asset.hasBundlePath)
         .map((_Asset asset) => asset.entryUri.path)
         .toSet();
