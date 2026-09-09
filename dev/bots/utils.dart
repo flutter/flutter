@@ -18,6 +18,7 @@ import 'package:file/local.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+import 'luci_resultdb.dart';
 import 'run_command.dart';
 import 'tool_subsharding.dart';
 
@@ -509,6 +510,9 @@ Future<void> runDartTest(
     }
   }
 
+  // Report the individual test cases to LUCI ResultDB (no-op when not on LUCI).
+  await reportTestResultsToResultDb(test, workingDirectory: workingDirectory);
+
   // metriciFile is a transitional file that needs to be deleted once it is parsed.
   // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
   // https://github.com/flutter/flutter/issues/146003
@@ -586,6 +590,17 @@ Future<void> runFlutterTest(
   // TODO(godofredoc): Ensure metricFile is parsed and aggregated before deleting.
   // https://github.com/flutter/flutter/issues/146003
   if (!dryRun) {
+    // Parse the test results and report the individual test cases to LUCI
+    // ResultDB (no-op off LUCI) so `flutter test`-based shards populate the
+    // "Test Results" tab.
+    if (metricFile.existsSync()) {
+      final test = TestFileReporterResults.fromFile(metricFile);
+      await reportTestResultsToResultDb(
+        test,
+        workingDirectory: workingDirectory,
+        expectFailure: expectFailure,
+      );
+    }
     metricFile.deleteSync();
   }
 
@@ -594,6 +609,53 @@ Future<void> runFlutterTest(
     if (message != null) {
       foundError(<String>[message]);
     }
+  }
+}
+
+/// Reports the individual test cases in [test] to LUCI ResultDB so that they
+/// show up in the "Test Results" tab of the LUCI build.
+///
+/// Uses the ResultDB Recorder API, which is available whenever the build has a
+/// ResultDB invocation (the case for Flutter builds with ResultDB enabled).
+///
+/// This is a no-op when not running inside a LUCI build with ResultDB enabled
+/// (for example, local runs), and any failure to report is logged but does not
+/// fail the test run.
+///
+/// [workingDirectory] is the directory the shard ran the tests in; it is used to
+/// resolve relative suite paths into repo-relative module names.
+///
+/// When [expectFailure] is true, the whole `flutter test` invocation was
+/// expected to fail, so the reported results are marked as expected failures
+/// (rather than red regressions) in ResultDB.
+Future<void> reportTestResultsToResultDb(
+  TestFileReporterResults test, {
+  String? workingDirectory,
+  bool expectFailure = false,
+}) async {
+  final List<LuciTestResult> results = convertToLuciTestResultsFormat(
+    test,
+    expectFailure: expectFailure,
+    workingDirectory: workingDirectory,
+    rootDirectory: flutterRoot,
+  );
+  if (results.isEmpty) {
+    return;
+  }
+
+  ResultDbRecorder? recorder;
+  try {
+    recorder = ResultDbRecorder.fromEnvironment();
+    if (recorder == null) {
+      print('ResultDB is not available; skipping test result reporting.');
+      return;
+    }
+    await recorder.reportTestResults(results);
+    print('Reported ${results.length} test result(s) to ResultDB.');
+  } catch (e) {
+    print('Failed to report test results to ResultDB: $e');
+  } finally {
+    recorder?.close();
   }
 }
 

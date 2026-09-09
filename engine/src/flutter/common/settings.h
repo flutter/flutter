@@ -160,7 +160,6 @@ struct Settings {
   bool enable_dart_profiling = false;
   bool profile_startup = false;
   bool disable_dart_asserts = false;
-  bool enable_serial_gc = false;
   bool profile_microtasks = false;
 
   // Whether embedder only allows secure connections.
@@ -240,9 +239,6 @@ struct Settings {
 
   // Whether to lazily initialize impeller PSO state.
   bool impeller_enable_lazy_shader_mode = false;
-
-  // An experimental mode that antialiases lines.
-  bool impeller_antialiased_lines = false;
 
   // Whether to use SDFs for rendering in Impeller.
   bool impeller_use_sdfs = false;

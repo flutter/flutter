@@ -8,6 +8,7 @@
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/testing/screenshotter.h"
 #include "impeller/typographer/backends/skia/typographer_context_skia.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkData.h"
@@ -30,10 +31,6 @@ bool DlPlayground::OpenPlaygroundHere(sk_sp<flutter::DisplayList> list) {
 }
 
 bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
-  if (!IsPlaygroundEnabled()) {
-    return true;
-  }
-
   AiksContext context(GetContext(), TypographerContextSkia::Make());
   if (!context.IsValid()) {
     return false;
@@ -54,7 +51,15 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
 
 std::unique_ptr<testing::Screenshot> DlPlayground::MakeScreenshot(
     const sk_sp<flutter::DisplayList>& list) {
-  return nullptr;
+  std::shared_ptr<Context> context = GetContext();
+  AiksContext renderer(context, GetTypographerContext());
+  Point content_scale = GetContentScale();
+
+  ISize physical_window_size(
+      std::round(GetWindowSize().width * content_scale.x),
+      std::round(GetWindowSize().height * content_scale.y));
+  return testing::Screenshotter::MakeScreenshot(
+      context, DisplayListToTexture(list, physical_window_size, renderer));
 }
 
 SkFont DlPlayground::CreateTestFontOfSize(Scalar scalar) {

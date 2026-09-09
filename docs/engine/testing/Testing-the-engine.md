@@ -295,7 +295,7 @@ than using the real Flutter framework at `flutter/flutter`.
 The end-to-end test can be executed by running:
 
 ```sh
-testing/ios_scenario_app/run_ios_tests.sh
+engine/src/flutter/testing/ios_scenario_app/run_ios_tests.sh
 ```
 
 Additional end-to-end instrumented tests can be added to [`testing/ios_scenario_app/ios/Scenarios/ScenariosTests`](/engine/src/flutter/testing/ios_scenario_app/ios/Scenarios/ScenariosTests/).

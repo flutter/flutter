@@ -181,6 +181,12 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
       texture_type = GL_TEXTURE_CUBE_MAP;
       texture_target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice;
       break;
+    case TextureType::kTexture2DArray:
+      // TODO(bdero): Upload into 2D array layers via glTexSubImage3D from the
+      // blit path. Direct uploads via Texture::SetContents are supported.
+      VALIDATION_LOG << "Blitting into a 2D array texture is not yet supported "
+                        "on the OpenGLES backend.";
+      return false;
     case TextureType::kTextureExternalOES:
       texture_type = GL_TEXTURE_EXTERNAL_OES;
       texture_target = GL_TEXTURE_EXTERNAL_OES;

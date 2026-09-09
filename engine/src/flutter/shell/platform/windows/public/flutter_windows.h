@@ -128,6 +128,11 @@ typedef struct {
 
   // Policy for enabling the Impeller renderer.
   FlutterDesktopImpellerSwitch impeller_switch;
+
+  // Whether to enable the Flutter GPU API (package:flutter_gpu).
+  // Flutter GPU requires the Impeller renderer.
+  // If not set defaults to false.
+  bool enable_flutter_gpu;
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========

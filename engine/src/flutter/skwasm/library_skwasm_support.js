@@ -7,10 +7,7 @@
 
 mergeInto(LibraryManager.library, {
   $skwasm_support_setup__postset: 'skwasm_support_setup();',
-  $skwasm_support_setup: function() {
-    var _skwasm_dispatchDisposeDlImage;
-    var _skwasm_disposeDlImageOnWorker;
-
+  $skwasm_support_setup: function () {
     if (Module["skwasmSingleThreaded"]) {
       _skwasm_isSingleThreaded = function() {
         return true;
@@ -140,9 +137,13 @@ mergeInto(LibraryManager.library, {
             }
             associatedObjectsMap.delete(pointer);
             return;
+#if EXPORT_NAME === 'wimp'
+          // Impeller (wimp) caches textures on the worker's ContentContext, which
+          // must be explicitly notified to evict them upon DlImage disposal.
           case 'disposeDlImage':
             _skwasm_disposeDlImageOnWorker(data.image);
             return;
+#endif
           case 'disposeSurface':
             _surface_dispose(data.surface);
             return;
@@ -160,6 +161,9 @@ mergeInto(LibraryManager.library, {
               data.data,
               data.callbackId,
             );
+            return;
+          case 'setResourceCacheLimit':
+            _surface_setResourceCacheLimitOnWorker(data.surface, data.bytes);
             return;
           default:
             console.warn(`unrecognized skwasm message: ${skwasmMessage}`);
@@ -194,12 +198,16 @@ mergeInto(LibraryManager.library, {
       }, [], threadId);
     };
 
+#if EXPORT_NAME === 'wimp'
+    // Dispatches DlImage disposal to the raster worker thread. Only used by
+    // Impeller (wimp) to evict cached textures from ContentContext.
     _skwasm_dispatchDisposeDlImage = function(threadId, image) {
       skwasm_postMessage({
         skwasmMessage: 'disposeDlImage',
         image,
       }, [], threadId);
     };
+#endif
 
     // Surface Setup
     _skwasm_dispatchTransferCanvas = function (threadId, surfaceHandle, canvas, callbackId) {
@@ -210,11 +218,10 @@ mergeInto(LibraryManager.library, {
         callbackId,
       }, [canvas], threadId);
     };
-    _skwasm_reportInitialized = function (surfaceHandle, contextLostCallbackId, callbackId) {
+    _skwasm_reportInitialized = function (surfaceHandle, callbackId) {
       skwasm_postMessage({
         skwasmMessage: 'onInitialized',
         surface: surfaceHandle,
-        contextLostCallbackId,
         callbackId,
       }, []);
     };
@@ -290,6 +297,15 @@ mergeInto(LibraryManager.library, {
       });
     }
 
+    // Resource Cache
+    _skwasm_dispatchSetResourceCacheLimit = function(threadId, surface, bytes) {
+      skwasm_postMessage({
+        skwasmMessage: 'setResourceCacheLimit',
+        surface,
+        bytes,
+      }, [], threadId);
+    };
+
     // Context Loss
     _skwasm_dispatchTriggerContextLoss = function (threadId, surfaceHandle, callbackId) {
       skwasm_postMessage({
@@ -359,11 +375,28 @@ mergeInto(LibraryManager.library, {
     // Texture Sources
     _skwasm_createGlTextureFromTextureSource = function(textureSource, width, height) {
       const glCtx = GL.currentContext.GLctx;
+#if GL_ASSERTIONS
+      const initialError = glCtx.getError();
+      if (initialError !== glCtx.NO_ERROR) {
+        console.error('skwasm_createGlTextureFromTextureSource: Pre-existing GL error:', initialError);
+      }
+#endif
+
       const newTexture = glCtx.createTexture();
       glCtx.bindTexture(glCtx.TEXTURE_2D, newTexture);
       glCtx.pixelStorei(glCtx.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
 
       glCtx.texImage2D(glCtx.TEXTURE_2D, 0, glCtx.RGBA, width, height, 0, glCtx.RGBA, glCtx.UNSIGNED_BYTE, textureSource);
+#if GL_ASSERTIONS
+      const texImageError = glCtx.getError();
+      if (texImageError !== glCtx.NO_ERROR) {
+        console.error('skwasm_createGlTextureFromTextureSource: Error after texImage2D:', texImageError, {
+          width,
+          height,
+          source: textureSource,
+        });
+      }
+#endif
 
       glCtx.pixelStorei(glCtx.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
       glCtx.bindTexture(glCtx.TEXTURE_2D, null);
@@ -421,12 +454,17 @@ mergeInto(LibraryManager.library, {
   skwasm_createGlTextureFromTextureSource__deps: ['$skwasm_support_setup'],
   skwasm_dispatchDisposeSurface: function() {},
   skwasm_dispatchDisposeSurface__deps: ['$skwasm_support_setup'],
+  skwasm_dispatchSetResourceCacheLimit: function() {},
+  skwasm_dispatchSetResourceCacheLimit__deps: ['$skwasm_support_setup'],
   skwasm_dispatchRasterizeImage: function() {},
   skwasm_dispatchRasterizeImage__deps: ['$skwasm_support_setup'],
   skwasm_postRasterizeResult: function() {},
   skwasm_postRasterizeResult__deps: ['$skwasm_support_setup'],
+#if EXPORT_NAME === 'wimp'
+  // DlImage disposal messaging is only used by Impeller (wimp) for texture cache eviction.
   skwasm_dispatchDisposeDlImage: function() {},
   skwasm_dispatchDisposeDlImage__deps: ['$skwasm_support_setup'],
   skwasm_disposeDlImageOnWorker: function() {},
   skwasm_disposeDlImageOnWorker__deps: ['$skwasm_support_setup'],
+#endif
 });

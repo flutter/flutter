@@ -73,15 +73,17 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           '--web-browser-flag=--disable-background-timer-throttling',
           '--web-browser-flag=--disable-backgrounding-occluded-windows',
           '--web-browser-flag=--disable-renderer-backgrounding',
+          '--web-browser-flag=--disable-background-networking',
+          '--web-browser-flag=--disable-sync',
+          '--web-browser-flag=--disable-client-side-phishing-detection',
+          '--web-browser-flag=--disable-notifications',
+          ...kGcmDisabledFlags.map((String flag) => '--web-browser-flag=$flag'),
           '--web-browser-flag=--headless=new',
           '--web-browser-flag=--no-sandbox',
           '--web-browser-flag=--password-store=basic',
           if (io.Platform.isMacOS) '--web-browser-flag=--use-mock-keychain',
           '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-          if (benchmarkOptions.withHotReload)
-            '--web-experimental-hot-reload'
-          else
-            '--no-web-experimental-hot-reload',
+          if (!benchmarkOptions.withHotReload) '--no-web-experimental-hot-reload',
           '--no-web-resources-cdn',
           'lib/web_benchmarks_ddc.dart',
         ],

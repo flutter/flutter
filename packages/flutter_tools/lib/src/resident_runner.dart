@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
+import 'android/android_device.dart';
 import 'application_package.dart';
 import 'asset.dart';
 import 'base/command_help.dart';
@@ -48,7 +49,10 @@ class FlutterDevice {
     required this.generator,
     required this.developmentShaderCompiler,
     this.userIdentifier,
+    @visibleForTesting this.logFlushDelay = const Duration(milliseconds: 500),
   });
+
+  final Duration logFlushDelay;
 
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
@@ -102,15 +106,14 @@ class FlutterDevice {
   final DevelopmentShaderCompiler developmentShaderCompiler;
 
   DevFSWriter? devFSWriter;
-  Stream<Uri?>? vmServiceUris;
+  Future<Uri>? vmServiceUri;
   FlutterVmService? vmService;
   DevFS? devFS;
   ApplicationPackage? package;
   StreamSubscription<String>? _loggingSubscription;
-  bool? _isListeningForVmServiceUri;
 
-  /// Whether the stream [vmServiceUris] is still open.
-  bool get isWaitingForVmService => _isListeningForVmServiceUri ?? false;
+  /// Whether this device is waiting for a VM Service URI.
+  bool get isWaitingForVmService => vmService == null && vmServiceUri != null;
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
@@ -122,202 +125,157 @@ class FlutterDevice {
   /// This ensures that the reload process follows the normal orchestration of
   /// the Flutter Tools and not just the VM internal service.
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
-  }) {
-    final completer = Completer<void>();
-    late StreamSubscription<void> subscription;
-    var isWaitingForVm = false;
-
-    subscription = vmServiceUris!.listen(
-      (Uri? vmServiceUri) async {
-        // FYI, this message is used as a sentinel in tests.
-        globals.printTrace('Connecting to service protocol: $vmServiceUri');
-        isWaitingForVm = true;
-        var existingDds = false;
-        FlutterVmService? service;
-        if (debuggingOptions.enableDds) {
-          void handleError(Exception e, StackTrace st) {
-            globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
-            if (!completer.isCompleted) {
-              completer.completeError('failed to connect to $vmServiceUri $e', st);
-            }
-          }
-
-          const kMaxAttempts = 3;
-          for (var attempts = 1; attempts <= kMaxAttempts; ++attempts) {
-            void handleVmServiceCheckException(Exception e) {
-              globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
-              if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
-                completer.completeError('failed to connect to $vmServiceUri $e');
-              }
-            }
-
-            // First check if the VM service is actually listening on vmServiceUri as
-            // this may not be the case when scraping logcat for URIs. If this URI is
-            // from an old application instance, we shouldn't try and start DDS.
-            try {
-              service = await connectToVmService(vmServiceUri!, logger: globals.logger);
-              await service.dispose();
-              break;
-            } on vm_service.RPCError catch (e, st) {
-              if (!e.isConnectionDisposedException) {
-                handleVmServiceCheckException(e);
-                return;
-              }
-              // It's possible (but unlikely) that two DDS instances can try and start at the same
-              // time (e.g., a "flutter run" is initiated while an existing "flutter attach" is
-              // waiting for a target to attach to). This can lead to the initial VM service connection
-              // failing for one of the processes when the VM service disconnects it after the other
-              // instance successfully invoked the "_yieldControlToDDS" RPC.
-              //
-              // To handle this, we retry connecting to the VM service, which should successfully
-              // be redirected to the DDS instance.
-              //
-              // See https://github.com/flutter/flutter/issues/169265 for details.
-              if (attempts == kMaxAttempts) {
-                globals.printTrace(
-                  'Failed to make initial connection to VM Service (attempt $attempts of $kMaxAttempts).',
-                );
-                handleError(e, st);
-                return;
-              }
-              // Exponential backoff.
-              final int backoffPeriod = (1 << (attempts - 1)) * 100;
-              globals.printTrace(
-                'Failed to make initial connection to VM Service (attempt $attempts of $kMaxAttempts). '
-                'Retrying in ${backoffPeriod}ms...',
-              );
-              await Future<void>.delayed(Duration(milliseconds: backoffPeriod));
-            } on Exception catch (e) {
-              handleVmServiceCheckException(e);
-              return;
-            }
-          }
-
-          for (var attempts = 1; attempts <= kMaxAttempts; ++attempts) {
-            // This try block is meant to catch errors that occur during DDS startup
-            // (e.g., failure to bind to a port, failure to connect to the VM service,
-            // attaching to a VM service with existing clients, etc.).
-            try {
-              await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
-                vmServiceUri!,
-                debuggingOptions: debuggingOptions,
-                appName:
-                    'Kind: Flutter - Device: ${device!.displayName} - '
-                    'Package: ${FlutterProject.current().manifest.appName}',
-              );
-              break;
-            } on DartDevelopmentServiceException catch (e, st) {
-              if (e.errorCode == DartDevelopmentServiceException.existingDdsInstanceError) {
-                existingDds = true;
-                break;
-              }
-              // It's possible (but unlikely) that two DDS instances can try and start at the same
-              // time (e.g., a "flutter run" is initiated while an existing "flutter attach" is
-              // waiting for a target to attach to). This leads to DDS failing to initialize for
-              // one of the processes when the VM service disconnects it after the other instance
-              // successfully invoked the "_yieldControlToDDS" RPC.
-              //
-              // To handle this, we retry to start DDS after a short delay, which should result in
-              // an existingDdsInstanceError if the failure to start was due to a startup race.
-              //
-              // See https://github.com/flutter/flutter/issues/169265 for details.
-              if (attempts == kMaxAttempts) {
-                globals.printTrace('Failed to start DDS (attempt $attempts of $kMaxAttempts).');
-                handleError(e, st);
-                return;
-              }
-              // Exponential backoff.
-              final int backoffPeriod = (1 << (attempts - 1)) * 100;
-              globals.printTrace(
-                'Failed to start DDS (attempt $attempts of $kMaxAttempts). '
-                'Retrying in ${backoffPeriod}ms...',
-              );
-              await Future<void>.delayed(Duration(milliseconds: backoffPeriod));
-            } on ToolExit {
-              rethrow;
-            } on Exception catch (e, st) {
-              handleError(e, st);
-              return;
-            }
-          }
-        }
-        // This second try block handles cases where the VM service connection goes down
-        // before flutter_tools connects to DDS. The DDS `done` future completes when DDS
-        // shuts down, including after an error. If `done` completes before `connectToVmService`,
-        // something went wrong that caused DDS to shutdown early.
+  }) async {
+    this.vmServiceUri ??= Future<Uri>.value(vmServiceUri);
+    // FYI, this message is used as a sentinel in tests.
+    globals.printTrace('Connecting to service protocol: $vmServiceUri');
+    var existingDds = false;
+    FlutterVmService? service;
+    if (debuggingOptions.enableDds) {
+      const kMaxAttempts = 3;
+      for (var attempts = 1; attempts <= kMaxAttempts; ++attempts) {
+        // First check if the VM service is actually listening on vmServiceUri as
+        // this may not be the case when scraping logcat for URIs. If this URI is
+        // from an old application instance, we shouldn't try and start DDS.
         try {
-          service =
-              await Future.any<dynamic>(<Future<dynamic>>[
-                    connectToVmService(
-                      debuggingOptions.enableDds
-                          ? (device!.dds.uri ?? vmServiceUri!)
-                          : vmServiceUri!,
-                      reloadSources: reloadSources,
-                      restart: restart,
-                      compileExpression: compileExpression,
-                      flutterProject: FlutterProject.current(),
-                      printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-                      device: device,
-                      logger: globals.logger,
-                    ),
-                    if (!existingDds)
-                      device!.dds.done.whenComplete(
-                        () => throw Exception('DDS shut down too early'),
-                      ),
-                  ])
-                  as FlutterVmService?;
-        } on Exception catch (exception) {
-          globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
-          if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
-            completer.completeError('failed to connect to $vmServiceUri $exception');
+          service = await connectToVmService(vmServiceUri, logger: globals.logger);
+          await service.dispose();
+          break;
+        } on vm_service.RPCError catch (e) {
+          if (!e.isConnectionDisposedException) {
+            globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
+            rethrow;
           }
-          return;
-        }
-        if (completer.isCompleted) {
-          return;
-        }
-        globals.printTrace('Successfully connected to service protocol: $vmServiceUri');
-
-        vmService = service;
-        if (debuggingOptions.enableDds && !existingDds) {
-          // Don't await this as service extensions won't return if the target
-          // isolate is paused on start.
-          unawaited(device!.dds.invokeServiceExtensions(this));
-        }
-        if ((existingDds || !debuggingOptions.enableDds) &&
-            debuggingOptions.devToolsServerAddress != null) {
-          // Don't await this as service extensions won't return if the target
-          // isolate is paused on start.
-          unawaited(
-            device!.dds.maybeCallDevToolsUriServiceExtension(
-              device: this,
-              uri: debuggingOptions.devToolsServerAddress,
-            ),
+          // It's possible (but unlikely) that two DDS instances can try and start at the same
+          // time (e.g., a "flutter run" is initiated while an existing "flutter attach" is
+          // waiting for a target to attach to). This can lead to the initial VM service connection
+          // failing for one of the processes when the VM service disconnects it after the other
+          // instance successfully invoked the "_yieldControlToDDS" RPC.
+          //
+          // To handle this, we retry connecting to the VM service, which should successfully
+          // be redirected to the DDS instance.
+          //
+          // See https://github.com/flutter/flutter/issues/169265 for details.
+          if (attempts == kMaxAttempts) {
+            globals.printTrace(
+              'Failed to make initial connection to VM Service (attempt $attempts of $kMaxAttempts).',
+            );
+            globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
+            throw Exception('failed to connect to $vmServiceUri $e');
+          }
+          // Exponential backoff.
+          final int backoffPeriod = (1 << (attempts - 1)) * 100;
+          globals.printTrace(
+            'Failed to make initial connection to VM Service (attempt $attempts of $kMaxAttempts). '
+            'Retrying in ${backoffPeriod}ms...',
           );
+          await Future<void>.delayed(Duration(milliseconds: backoffPeriod));
+        } on Exception catch (e) {
+          globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
+          rethrow;
         }
+      }
 
-        await (await device!.getLogReader(app: package)).provideVmService(vmService!);
-        completer.complete();
-        await subscription.cancel();
-      },
-      onError: (dynamic error) {
-        globals.printTrace('Fail to handle VM Service URI: $error');
-      },
-      onDone: () {
-        _isListeningForVmServiceUri = false;
-        if (!completer.isCompleted && !isWaitingForVm) {
-          completer.completeError(Exception('connection to device ended too early'));
+      for (var attempts = 1; attempts <= kMaxAttempts; ++attempts) {
+        // This try block is meant to catch errors that occur during DDS startup
+        // (e.g., failure to bind to a port, failure to connect to the VM service,
+        // attaching to a VM service with existing clients, etc.).
+        try {
+          await device!.dds.startDartDevelopmentServiceFromDebuggingOptions(
+            vmServiceUri,
+            debuggingOptions: debuggingOptions,
+            appName:
+                'Kind: Flutter - Device: ${device!.displayName} - '
+                'Package: ${FlutterProject.current().manifest.appName}',
+          );
+          break;
+        } on DartDevelopmentServiceException catch (e) {
+          if (e.errorCode == DartDevelopmentServiceException.existingDdsInstanceError) {
+            existingDds = true;
+            break;
+          }
+          // It's possible (but unlikely) that two DDS instances can try and start at the same
+          // time (e.g., a "flutter run" is initiated while an existing "flutter attach" is
+          // waiting for a target to attach to). This leads to DDS failing to initialize for
+          // one of the processes when the VM service disconnects it after the other instance
+          // successfully invoked the "_yieldControlToDDS" RPC.
+          //
+          // To handle this, we retry to start DDS after a short delay, which should result in
+          // an existingDdsInstanceError if the failure to start was due to a startup race.
+          //
+          // See https://github.com/flutter/flutter/issues/169265 for details.
+          if (attempts == kMaxAttempts) {
+            globals.printTrace('Failed to start DDS (attempt $attempts of $kMaxAttempts).');
+            globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
+            throw Exception('failed to connect to $vmServiceUri $e');
+          }
+          // Exponential backoff.
+          final int backoffPeriod = (1 << (attempts - 1)) * 100;
+          globals.printTrace(
+            'Failed to start DDS (attempt $attempts of $kMaxAttempts). '
+            'Retrying in ${backoffPeriod}ms...',
+          );
+          await Future<void>.delayed(Duration(milliseconds: backoffPeriod));
+        } on ToolExit {
+          rethrow;
+        } on Exception catch (e) {
+          globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
+          throw Exception('failed to connect to $vmServiceUri $e');
         }
-      },
-    );
-    _isListeningForVmServiceUri = true;
-    return completer.future;
+      }
+    }
+    // This second try block handles cases where the VM service connection goes down
+    // before flutter_tools connects to DDS. The DDS `done` future completes when DDS
+    // shuts down, including after an error. If `done` completes before `connectToVmService`,
+    // something went wrong that caused DDS to shutdown early.
+    try {
+      service =
+          await Future.any<dynamic>(<Future<dynamic>>[
+                connectToVmService(
+                  debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri) : vmServiceUri,
+                  reloadSources: reloadSources,
+                  restart: restart,
+                  compileExpression: compileExpression,
+                  flutterProject: FlutterProject.current(),
+                  printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+                  device: device,
+                  logger: globals.logger,
+                ),
+                if (!existingDds)
+                  device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
+              ])
+              as FlutterVmService?;
+    } on Exception catch (exception) {
+      globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
+      rethrow;
+    }
+    globals.printTrace('Successfully connected to service protocol: $vmServiceUri');
+
+    vmService = service;
+    if (debuggingOptions.enableDds && !existingDds) {
+      // Don't await this as service extensions won't return if the target
+      // isolate is paused on start.
+      unawaited(device!.dds.invokeServiceExtensions(this));
+    }
+    if ((existingDds || !debuggingOptions.enableDds) &&
+        debuggingOptions.devToolsServerAddress != null) {
+      // Don't await this as service extensions won't return if the target
+      // isolate is paused on start.
+      unawaited(
+        device!.dds.maybeCallDevToolsUriServiceExtension(
+          device: this,
+          uri: debuggingOptions.devToolsServerAddress,
+        ),
+      );
+    }
+
+    await (await device!.getLogReader(app: package)).provideVmService(vmService!);
   }
 
   Future<void> exitApps({
@@ -354,6 +312,11 @@ class FlutterDevice {
       logStream = (device! as IOSDevice)
           .getLogReader(app: package as IOSApp?, usingCISystem: debuggingOptions.usingCISystem)
           .logLines;
+    } else if (device is AndroidDevice) {
+      logStream = (await (device! as AndroidDevice).getLogReader(
+        app: package,
+        adbLogFiltering: debuggingOptions.adbLogFiltering,
+      )).logLines;
     } else {
       logStream = (await device!.getLogReader(app: package)).logLines;
     }
@@ -422,9 +385,7 @@ class FlutterDevice {
       return 2;
     }
     if (result.hasVmService) {
-      vmServiceUris = Stream<Uri?>.value(result.vmServiceUri).asBroadcastStream();
-    } else {
-      vmServiceUris = const Stream<Uri>.empty().asBroadcastStream();
+      vmServiceUri = Future<Uri>.value(result.vmServiceUri!);
     }
     return 0;
   }
@@ -478,9 +439,7 @@ class FlutterDevice {
       return 2;
     }
     if (result.hasVmService) {
-      vmServiceUris = Stream<Uri?>.value(result.vmServiceUri).asBroadcastStream();
-    } else {
-      vmServiceUris = const Stream<Uri>.empty().asBroadcastStream();
+      vmServiceUri = Future<Uri>.value(result.vmServiceUri!);
     }
     return 0;
   }
@@ -1046,7 +1005,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   bool hotMode;
 
-  /// Returns true if every device is streaming vmService URIs.
+  /// Returns true if every device is waiting on a VM Service URI.
   bool get isWaitingForVmService {
     return flutterDevices.every((FlutterDevice? device) {
       return device!.isWaitingForVmService;
@@ -1287,14 +1246,27 @@ abstract class ResidentRunner extends ResidentHandlers {
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
     for (final FlutterDevice? device in flutterDevices) {
-      await device!.connect(
-        debuggingOptions: debuggingOptions,
-        reloadSources: reloadSources,
-        restart: restart,
-        compileExpression: compileExpression,
-        hostVmServicePort: debuggingOptions.hostVmServicePort,
-        printStructuredErrorLogMethod: printStructuredErrorLog,
-      );
+      if (device == null) {
+        continue;
+      }
+      try {
+        if (device.vmServiceUri == null) {
+          throw Exception('VM Service URI info not available.');
+        }
+        final Uri vmServiceUri = await device.vmServiceUri!;
+        await device.connect(
+          vmServiceUri: vmServiceUri,
+          debuggingOptions: debuggingOptions,
+          reloadSources: reloadSources,
+          restart: restart,
+          compileExpression: compileExpression,
+          printStructuredErrorLogMethod: printStructuredErrorLog,
+        );
+      } catch (error) {
+        // Allow time for buffered/async log messages (e.g. engine crash logs) to arrive and flush.
+        await Future<void>.delayed(device.logFlushDelay);
+        rethrow;
+      }
       await device.vmService!.getFlutterViews();
 
       // This hooks up callbacks for when the connection stops in the future.

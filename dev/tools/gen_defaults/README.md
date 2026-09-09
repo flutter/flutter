@@ -1,14 +1,23 @@
-## Token Defaults Generator
+## Legacy Token Defaults Generator
 
-Script that generates component theme data defaults based on token data.
+> [!WARNING]
+> This legacy tool is deprecated. It only targets the frozen SDK Material library
+> under `packages/flutter/lib/src/material`, and should not be used for new
+> Material defaults work.
 
-## Usage
+Active Material defaults generation has moved to the standalone `material_ui`
+package in the `flutter/packages` repository. Use
+[`packages/material_ui/tool/gen_defaults`](https://github.com/flutter/packages/tree/main/packages/material_ui/tool/gen_defaults)
+there instead.
+
+## Legacy Usage
 Run this program from the root of the git repository:
 ```sh
 dart dev/tools/gen_defaults/bin/gen_defaults.dart [-v]
 ```
 
-This updates `generated/used_tokens.csv` and the various component theme files.
+This updates `generated/used_tokens.csv` and the frozen SDK Material component
+theme files.
 
 ## Templates
 

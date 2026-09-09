@@ -40,6 +40,7 @@ void main() {
       '.git',
       '.gemini',
       '.github',
+      '.sourcekit-lsp',
       '.vscode',
       'build_overrides',
       'buildtools',

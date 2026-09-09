@@ -43,10 +43,13 @@ impeller_component("core") {
     "vertex_buffer.h",
   ]
 
+  public_deps = [ "//third_party/abseil-cpp/absl/status" ]
+
   deps = [
     "../base",
     "../geometry",
     "//flutter/fml",
+    "//third_party/abseil-cpp/absl/strings",
   ]
 }
 
@@ -65,5 +68,6 @@ impeller_component("allocator_unittests") {
     "../geometry",
     "//flutter/impeller/renderer/testing:mocks",
     "//flutter/testing:testing_lib",
+    "//third_party/abseil-cpp/absl/strings",
   ]
 }

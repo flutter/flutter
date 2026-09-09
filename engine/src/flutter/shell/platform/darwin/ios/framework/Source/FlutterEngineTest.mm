@@ -10,6 +10,9 @@
 
 #import "flutter/common/settings.h"
 #include "flutter/fml/synchronization/sync_switch.h"
+#include "flutter/lib/ui/window/platform_message.h"
+#include "flutter/lib/ui/window/platform_message_response.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
 #import "flutter/shell/platform/darwin/common/test_utils_swift/test_utils_swift.h"
@@ -23,6 +26,24 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 FLUTTER_ASSERT_ARC
+
+namespace {
+// A `PlatformMessageResponse` that records completion.
+//
+// This allows tests to inject an inbound platform message the way the engine's platform view would
+// and observe that it was answered.
+class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
+ public:
+  static fml::RefPtr<TestPlatformMessageResponse> Create() {
+    return fml::AdoptRef(new TestPlatformMessageResponse());
+  }
+  void Complete(std::unique_ptr<fml::Mapping> data) override { is_complete_ = true; }
+  void CompleteEmpty() override { is_complete_ = true; }
+
+ private:
+  TestPlatformMessageResponse() = default;
+};
+}  // namespace
 
 @protocol TestFlutterPluginWithSceneEvents <NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate>
 @end
@@ -284,14 +305,6 @@ FLUTTER_ASSERT_ARC
                                        message:encodedSetInitialRouteMethod]);
 }
 
-- (void)testPlatformViewsControllerRenderingMetalBackend {
-  FlutterEngine* engine = [[FlutterEngine alloc] init];
-  [engine run];
-  flutter::IOSRenderingAPI renderingApi = [engine platformViewsRenderingAPI];
-
-  XCTAssertEqual(renderingApi, flutter::IOSRenderingAPI::kMetal);
-}
-
 - (void)testWaitForFirstFrameTimeout {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
   [engine run];
@@ -382,7 +395,6 @@ FLUTTER_ASSERT_ARC
   {
     // Not enable embedder API by default
     auto settings = FLTDefaultSettingsForBundle();
-    settings.enable_software_rendering = true;
     FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
     XCTAssertFalse(engine.enableEmbedderAPI);
@@ -393,7 +405,6 @@ FLUTTER_ASSERT_ARC
     OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableIOSEmbedderAPI"])
         .andReturn(@"YES");
     auto settings = FLTDefaultSettingsForBundle();
-    settings.enable_software_rendering = true;
     FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
     FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
     XCTAssertTrue(engine.enableEmbedderAPI);
@@ -533,6 +544,244 @@ FLUTTER_ASSERT_ARC
   [mockBundle stopMocking];
 }
 
+// Verifies a value assigned to `isGpuDisabled` before the engine runs is set on the shell.
+//
+// The property is public and readwrite, so an embedder that knows it is starting an engine into the
+// background can set it before `run`. Reading the lifecycle state anywhere on the creation path
+// would overwrite that assignment, and the caller has no way to observe it happening.
+//
+// See: https://github.com/flutter/flutter/issues/190835
+- (void)testGpuStateSetBeforeRunIsAppliedToShell {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+
+  engine.isGpuDisabled = YES;
+  XCTAssertTrue(engine.isGpuDisabled);
+
+  [engine run];
+
+  XCTAssertTrue(engine.isGpuDisabled);
+
+  BOOL gpuDisabled = NO;
+  [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
+      }));
+  XCTAssertTrue(gpuDisabled);
+}
+
+// Verifies an engine created while the application is backgrounded starts with the GPU disabled.
+//
+// Lifecycle notifications only report transitions. Verify that we explicitly check GPU state on
+// creation.
+//
+// See: https://github.com/flutter/flutter/issues/190835
+- (void)testGpuIsDisabledWhenCreatedWhileBackgrounded {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication applicationState]).andReturn(UIApplicationStateBackground);
+  [self addTeardownBlock:^{
+    [mockApplication stopMocking];
+  }];
+
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+
+  // Read at init. No notification could have arrived yet.
+  XCTAssertTrue(engine.isGpuDisabled);
+
+  [engine run];
+
+  BOOL gpuDisabled = NO;
+  [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
+      }));
+  XCTAssertTrue(gpuDisabled);
+}
+
+// Verifies an engine created while the app is foregrounded starts with the GPU available, and that
+// detaching a view controller re-enables the GPU on an engine that currently has it disabled.
+//
+// Attaching or detaching a view controller must re-read the lifecycle state and update the current
+// engine GPU state. An engine disabled by an earlier background transition must come back up with
+// the GPU available once the application reads as foregrounded.
+//
+// This is specifically testing *app* scenarios, where `UIApplication.sharedApplication` is
+// available.
+//
+// See: https://github.com/flutter/flutter/issues/190835
+- (void)testGpuIsEnabledWhenCreatedWhileForegrounded {
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMStub([mockApplication applicationState]).andReturn(UIApplicationStateActive);
+  [self addTeardownBlock:^{
+    [mockApplication stopMocking];
+  }];
+
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+
+  XCTAssertFalse(engine.isGpuDisabled);
+
+  BOOL gpuDisabled = YES;
+  [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
+      }));
+  XCTAssertFalse(gpuDisabled);
+
+  // Detaching re-reads the lifecycle state. The application is readable, so the read must overwrite
+  // this rather than preserve it.
+  engine.isGpuDisabled = YES;
+  engine.viewController = nil;
+
+  XCTAssertFalse(engine.isGpuDisabled);
+
+  gpuDisabled = YES;
+  [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
+      }));
+  XCTAssertFalse(gpuDisabled);
+}
+
+// Verifies that detaching a view controller leaves the GPU disabled when the lifecycle state cannot
+// be read.
+//
+// Attaching or detaching a view controller re-reads the lifecycle state. In an app extension, there
+// is no `UIApplication`, and no scene without a view controller whose view is attached to a
+// window's view hierarchy, so we have no source to check. The value determined by the last scene
+// notification is the only information available, so we preserve that.
+//
+// In particular, an engine disabled while its scene is backgrounded must stay disabled, since
+// rendering in the background will result in app termination.
+//
+// See: https://github.com/flutter/flutter/issues/190835
+- (void)testGpuStateIsPreservedWhenLifecycleStateIsUnknown {
+  // Declaring `NSExtension` puts `FlutterSharedApplication` into its app extension configuration
+  // rather than stubbing its result.
+  //
+  // `isAvailable` is NO, `application` returns nil without touching `UIApplication`, and the engine
+  // registers the scene observers rather than the application ones.
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  [self addTeardownBlock:^{
+    [mockBundle stopMocking];
+  }];
+  XCTAssertNil(FlutterSharedApplication.application);
+
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+
+  // The scene notification is the only signal available in this configuration, and the engine is
+  // observing for it because the bundle declares an extension.
+  [[NSNotificationCenter defaultCenter]
+      postNotification:[NSNotification notificationWithName:UISceneDidEnterBackgroundNotification
+                                                     object:nil
+                                                   userInfo:nil]];
+  XCTAssertTrue(engine.isGpuDisabled);
+
+  // Detaching re-reads the lifecycle state, and must find no source to overwrite the above with.
+  engine.viewController = nil;
+
+  XCTAssertTrue(engine.isGpuDisabled);
+
+  BOOL gpuDisabled = NO;
+  [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
+      }));
+  XCTAssertTrue(gpuDisabled);
+}
+
+// Verifies a handler registered against a background FlutterTaskQueue runs off the platform thread.
+//
+// Using the `FlutterTaskQueue` public API, a plugin may register a channel handler against a
+// background queue and expect to be called off the platform thread. `PlatformMessageHandlerIosTest`
+// tests the handler in isolation, but doesn't cover the full path an actual plugin takes:
+//
+// `-[FlutterEngine makeBackgroundTaskQueue]` and
+// `-[FlutterEngine setMessageHandlerOnChannel:binaryMessageHandler:taskQueue:]`.
+//
+// The embedder API has no equivalent concept: `EmbedderPlatformMessageHandler` always trampolines
+// to the platform thread, so this contract has to be reproduced explicitly during embedder API
+// migration.
+//
+// `testNilTaskQueueDeliversOnThePlatformThread`, tests the other direction.
+- (void)testBackgroundTaskQueueDeliversOffThePlatformThread {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+
+  NSObject<FlutterTaskQueue>* taskQueue = [engine makeBackgroundTaskQueue];
+  XCTAssertNotNil(taskQueue);
+
+  NSString* channel = @"com.example.background";
+  XCTestExpectation* didCallHandler = [self expectationWithDescription:@"didCallHandler"];
+  FlutterBinaryMessengerConnection connection =
+      [engine setMessageHandlerOnChannel:channel
+                    binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply reply) {
+                      XCTAssertFalse([NSThread isMainThread]);
+                      reply(nil);
+                      [didCallHandler fulfill];
+                    }
+                               taskQueue:taskQueue];
+  XCTAssertTrue(connection > 0);
+
+  // Deliver a message the way the platform view would on receiving one from the engine.
+  auto response = TestPlatformMessageResponse::Create();
+  engine.platformView->GetPlatformMessageHandlerIos()->HandlePlatformMessage(
+      std::make_unique<flutter::PlatformMessage>(channel.UTF8String, response));
+
+  [self waitForExpectationsWithTimeout:5.0 handler:nil];
+  XCTAssertTrue(response->is_complete());
+
+  [engine cleanUpConnection:connection];
+}
+
+// Verifies a handler registered without a task queue runs on the platform thread.
+//
+// Together with `testBackgroundTaskQueueDeliversOffThePlatformThread` locks in the invariant that
+// the task queue argument, and nothing else, decides the thread. The default is the platform
+// thread, which needs to be preserved throughout embedder API migration: this is what allows
+// plugins interact with UIKit directly from their channel handlers.
+//
+// This is the half the embedder API migration is most likely to cause to pass by accident.
+// `EmbedderPlatformMessageHandler` trampolines everything to the platform thread, so an
+// implementation that never leaves it goes green here and fails only in
+// `testBackgroundTaskQueueDeliversOffThePlatformThread`.
+- (void)testNilTaskQueueDeliversOnThePlatformThread {
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+
+  NSString* channel = @"com.example.platform";
+  XCTestExpectation* didCallHandler = [self expectationWithDescription:@"didCallHandler"];
+  FlutterBinaryMessengerConnection connection =
+      [engine setMessageHandlerOnChannel:channel
+                    binaryMessageHandler:^(NSData* _Nullable message, FlutterBinaryReply reply) {
+                      XCTAssertTrue([NSThread isMainThread]);
+                      reply(nil);
+                      [didCallHandler fulfill];
+                    }
+                               taskQueue:nil];
+  XCTAssertTrue(connection > 0);
+
+  auto response = TestPlatformMessageResponse::Create();
+  engine.platformView->GetPlatformMessageHandlerIos()->HandlePlatformMessage(
+      std::make_unique<flutter::PlatformMessage>(channel.UTF8String, response));
+
+  [self waitForExpectationsWithTimeout:5.0 handler:nil];
+  XCTAssertTrue(response->is_complete());
+
+  [engine cleanUpConnection:connection];
+}
+
 - (void)testLifeCycleNotificationSceneWillConnect {
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
@@ -584,19 +833,6 @@ FLUTTER_ASSERT_ARC
 
   XCTAssertEqual(engine.shell.GetTaskRunners().GetUITaskRunner(),
                  engine.shell.GetTaskRunners().GetPlatformTaskRunner());
-#endif  // defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
-}
-
-- (void)testCanUnMergePlatformAndUIThread {
-#if defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
-  auto settings = FLTDefaultSettingsForBundle();
-  settings.merged_platform_ui_thread = flutter::Settings::MergedPlatformUIThread::kDisabled;
-  FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
-  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
-  [engine run];
-
-  XCTAssertNotEqual(engine.shell.GetTaskRunners().GetUITaskRunner(),
-                    engine.shell.GetTaskRunners().GetPlatformTaskRunner());
 #endif  // defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
 }
 

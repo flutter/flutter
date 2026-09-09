@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -173,19 +172,15 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 }
 
 class TestFlutterDevice extends FlutterDevice {
-  TestFlutterDevice(super.device, {Stream<Uri>? vmServiceUris})
-    : _vmServiceUris = vmServiceUris,
-      super(
+  TestFlutterDevice(super.device, {Future<Uri>? vmServiceUri})
+    : super(
         generator: FakeResidentCompiler(),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
         developmentShaderCompiler: const FakeShaderCompiler(),
-      );
-
-  final Stream<Uri>? _vmServiceUris;
-
-  @override
-  Stream<Uri> get vmServiceUris => _vmServiceUris!;
+      ) {
+    this.vmServiceUri = vmServiceUri;
+  }
 }
 
 class ThrowingForwardingFileSystem extends ForwardingFileSystem {
@@ -206,8 +201,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   UpdateFSReport report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
   Exception? reportError;
   Exception? runColdError;
+  Exception? connectError;
   int runHotCode = 0;
   int runColdCode = 0;
+
+  @override
+  Duration logFlushDelay = Duration.zero;
 
   @override
   ResidentCompiler? generator;
@@ -219,7 +218,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   TargetPlatform targetPlatform = TargetPlatform.android;
 
   @override
-  Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
+  Future<Uri>? get vmServiceUri => testUri != null ? Future<Uri>.value(testUri!) : null;
 
   @override
   FlutterVmService? get vmService => vmServiceHost?.call()?.vmService;
@@ -258,15 +257,17 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
-    bool? ipv6 = false,
-  }) async {}
+  }) async {
+    if (connectError != null) {
+      throw connectError!;
+    }
+  }
 
   @override
   Future<UpdateFSReport> updateDevFS({
@@ -300,24 +301,25 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     super.device,
     BuildInfo buildInfo,
     ResidentCompiler residentCompiler,
-    this.fakeDevFS,
-  ) : super(
-        targetPlatform: .unsupported,
-        buildInfo: buildInfo,
-        generator: residentCompiler,
-        developmentShaderCompiler: const FakeShaderCompiler(),
-      );
+    this.fakeDevFS, {
+    Future<Uri>? vmServiceUri,
+  }) : super(
+         targetPlatform: .unsupported,
+         buildInfo: buildInfo,
+         generator: residentCompiler,
+         developmentShaderCompiler: const FakeShaderCompiler(),
+       ) {
+    this.vmServiceUri = vmServiceUri ?? Future<Uri>.value(testUri);
+  }
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
-    bool? ipv6 = false,
   }) async {}
 
   final DevFS fakeDevFS;

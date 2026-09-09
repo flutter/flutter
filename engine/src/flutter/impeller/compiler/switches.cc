@@ -239,7 +239,7 @@ Switches::Switches(const fml::CommandLine& command_line)
     }
 
     auto dir = std::make_shared<fml::UniqueFD>(fml::OpenDirectoryReadOnly(
-        *working_directory, include_dir_absolute.string().c_str()));
+        *working_directory, Utf8FromPath(include_dir_absolute).c_str()));
     if (!dir || !dir->is_valid()) {
       continue;
     }

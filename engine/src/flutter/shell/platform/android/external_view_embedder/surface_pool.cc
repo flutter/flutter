@@ -28,9 +28,18 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
     const std::shared_ptr<AndroidSurfaceFactory>& surface_factory) {
   std::lock_guard lock(mutex_);
-  // Destroy current layers in the pool if the frame size has changed.
   if (requested_frame_size_ != current_frame_size_) {
-    DestroyLayersLocked(jni_facade);
+    if (use_new_surface_methods_) {
+      // The overlay surface is persistent, so resize it in place. Nothing else
+      // resizes the swapchain: |Surface::AcquireFrame| ignores the size it is
+      // handed.
+      for (const std::shared_ptr<OverlayLayer>& layer : layers_) {
+        layer->android_surface->OnScreenSurfaceResize(requested_frame_size_);
+      }
+    } else {
+      // Destroy current layers in the pool if the frame size has changed.
+      DestroyLayersLocked(jni_facade);
+    }
   }
   intptr_t gr_context_key = reinterpret_cast<intptr_t>(gr_context);
   // Allocate a new surface if there isn't one available.

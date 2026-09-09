@@ -9,6 +9,8 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../ios/code_signing.dart';
@@ -26,6 +28,17 @@ class DarwinAddToAppCodesigning {
     required Logger logger,
   }) : _logger = logger,
        _xcodeCodeSigningSettings = xcodeCodeSigningSettings;
+
+  DarwinAddToAppCodesigning.fromContexts({
+    required AppleContext appleContext,
+    required ToolContext toolContext,
+  }) : this(
+         logger: toolContext.logger,
+         xcodeCodeSigningSettings: XcodeCodeSigningSettings.fromContexts(
+           appleContext: appleContext,
+           toolContext: toolContext,
+         ),
+       );
 
   final XcodeCodeSigningSettings _xcodeCodeSigningSettings;
   final Logger _logger;
@@ -348,7 +361,13 @@ class DarwinAddToAppNativeAssets {
         // [KernelAssetAbsolutePath]), and the second string is the actual path.
         if (pathInfo is List<Object?> && pathInfo.length >= 2) {
           final path = pathInfo[1]! as String;
-          result[assetId] = path;
+          // A code asset is recorded under the name it is loaded with, which for
+          // a framework is its `@rpath`-relative install name. Drop the prefix
+          // to get back to where it sits in the bundle.
+          const rpathPrefix = '@rpath/';
+          result[assetId] = path.startsWith(rpathPrefix)
+              ? path.substring(rpathPrefix.length)
+              : path;
         }
       }
     }

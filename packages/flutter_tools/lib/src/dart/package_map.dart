@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -105,22 +104,31 @@ Future<PackageConfig> loadPackageConfigWithLogging(
       if (!configFile.existsSync()) {
         return null;
       }
-      return Future<Uint8List>.value(configFile.readAsBytesSync());
+      return configFile.readAsBytes();
     },
-    onError: (dynamic error) {
+    onError: (Object? error) {
       if (!throwOnError) {
         return;
       }
       logger.printTrace(error.toString());
-      var message = '${file.path} does not exist.';
-      final String pubspecPath = fileSystem.path.absolute(
-        fileSystem.path.dirname(file.path),
-        'pubspec.yaml',
-      );
-      if (fileSystem.isFileSync(pubspecPath)) {
-        message += '\nDid you run "flutter pub get" in this directory?';
+      final String message;
+      if (file.existsSync()) {
+        message =
+            'The package configuration file ${file.path} is invalid: $error\n'
+            'Try running "flutter pub get" to regenerate it.';
       } else {
-        message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
+        var notFoundMessage = '${file.path} does not exist.';
+        final String pubspecPath = fileSystem.path.absolute(
+          fileSystem.path.dirname(file.path),
+          'pubspec.yaml',
+        );
+        if (fileSystem.isFileSync(pubspecPath)) {
+          notFoundMessage += '\nDid you run "flutter pub get" in this directory?';
+        } else {
+          notFoundMessage +=
+              '\nDid you run this command from the same directory as your pubspec.yaml file?';
+        }
+        message = notFoundMessage;
       }
       logger.printError(message);
       didError = true;
@@ -130,4 +138,39 @@ Future<PackageConfig> loadPackageConfigWithLogging(
     throwToolExit('');
   }
   return result;
+}
+
+extension PackageConfigWorkspaceExtension on PackageConfig {
+  /// Converts a [fileUri] to a `package:` URI, finding the most specific
+  /// package whose [Package.packageUriRoot] is a prefix of [fileUri].
+  ///
+  /// The default [PackageConfig.toPackageUri] may match an outer package first
+  /// when pub workspace member packages are located under the workspace root
+  /// package's `lib/` directory.
+  Uri? toPackageUriForWorkspace(Uri fileUri) {
+    if (fileUri.isScheme('package')) {
+      return fileUri;
+    }
+    final path = fileUri.toString();
+    Package? bestMatch;
+    String? bestMatchRoot;
+
+    for (final Package package in packages) {
+      final rootPath = package.packageUriRoot.toString();
+      final rootPathWithSlash = rootPath.endsWith('/') ? rootPath : '$rootPath/';
+      if (path.startsWith(rootPathWithSlash)) {
+        if (bestMatchRoot == null || rootPathWithSlash.length > bestMatchRoot.length) {
+          bestMatch = package;
+          bestMatchRoot = rootPathWithSlash;
+        }
+      }
+    }
+
+    if (bestMatch == null || bestMatchRoot == null) {
+      return null;
+    }
+
+    final String rest = path.substring(bestMatchRoot.length);
+    return Uri(scheme: 'package', path: '${bestMatch.name}/$rest');
+  }
 }

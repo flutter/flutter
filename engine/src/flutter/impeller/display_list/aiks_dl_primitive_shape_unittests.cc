@@ -145,9 +145,13 @@ namespace testing {
 // estimate the pixel size can get complicated in a shader that is performing
 // some of its operations on local space values and some in device space.
 TEST_P(AiksTest, PrimitiveShapePlayground) {
-  if (IsGoldenTest()) {
-    GTEST_SKIP() << "PrimitiveShapePlayground does not produce a golden image";
+  if (!IsPlaygroundEnabled()) {
+    GTEST_SKIP() << "PrimitiveShapePlayground is only for on-screen use";
   }
+  // In the odd case that we are being run with a playground and the
+  // golden flag set, we don't want to write out the golden either.
+  // Just do the playground part...
+  SetEnableWriteGolden(false);
 
   RenderParameters params{
       .render_type = RenderType::kRectangle,
@@ -159,36 +163,35 @@ TEST_P(AiksTest, PrimitiveShapePlayground) {
   int render_type_index = static_cast<int>(RenderType::kRectangle);
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
-      ImGui::SliderFloat("Stroke", &params.stroke_width, 0.0f, 30.0f);
-      ImGui::SliderFloat("X Scale", &params.scale_x, 1.0f, 3.0f);
-      ImGui::SliderFloat("Y Scale", &params.scale_y, 1.0f, 3.0f);
-      ImGui::SliderFloat("X Skew", &params.skew_x, 0.0f, 1.0f);
-      ImGui::SliderFloat("Y Skew", &params.skew_y, 0.0f, 1.0f);
-      ImGui::SliderFloat("Rotation", &params.degrees, 0.0f, 360.0f);
-      ImGui::ListBox(
-          "Shape Type", &render_type_index,
-          [](void* data, int index) {
-            switch (static_cast<RenderType>(index)) {
-              case RenderType::kSquare:
-                return "Square";
-              case RenderType::kRectangle:
-                return "Rectangle";
-              case RenderType::kCircle:
-                return "Circle";
-              case RenderType::kOval:
-                return "Oval";
-              case RenderType::kLine:
-                return "Line";
-              case RenderType::kValidCount:
-              case RenderType::kInvalid:
-                FML_UNREACHABLE();
-            }
-          },
-          nullptr, static_cast<int>(RenderType::kValidCount), -1);
-      ImGui::End();
-    }
+    FML_CHECK(IsPlaygroundEnabled());
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::SliderFloat("Stroke", &params.stroke_width, 0.0f, 30.0f);
+    ImGui::SliderFloat("X Scale", &params.scale_x, 1.0f, 3.0f);
+    ImGui::SliderFloat("Y Scale", &params.scale_y, 1.0f, 3.0f);
+    ImGui::SliderFloat("X Skew", &params.skew_x, 0.0f, 1.0f);
+    ImGui::SliderFloat("Y Skew", &params.skew_y, 0.0f, 1.0f);
+    ImGui::SliderFloat("Rotation", &params.degrees, 0.0f, 360.0f);
+    ImGui::ListBox(
+        "Shape Type", &render_type_index,
+        [](void* data, int index) {
+          switch (static_cast<RenderType>(index)) {
+            case RenderType::kSquare:
+              return "Square";
+            case RenderType::kRectangle:
+              return "Rectangle";
+            case RenderType::kCircle:
+              return "Circle";
+            case RenderType::kOval:
+              return "Oval";
+            case RenderType::kLine:
+              return "Line";
+            case RenderType::kValidCount:
+            case RenderType::kInvalid:
+              FML_UNREACHABLE();
+          }
+        },
+        nullptr, static_cast<int>(RenderType::kValidCount), -1);
+    ImGui::End();
 
     // Translate our "Gui int variable" to the appropriate enum field value.
     params.render_type = static_cast<RenderType>(render_type_index);

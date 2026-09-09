@@ -331,16 +331,11 @@ String? parseGradleVersionFromDistributionUrl(String? distributionUrl) {
   return zipParts[1];
 }
 
-/// Returns either the gradle-wrapper.properties value from the passed in
-/// [directory] or if not present the version available in local path.
+/// Returns the gradle-wrapper.properties value from the passed in [directory].
 ///
-/// If gradle version is not found null is returned.
-/// [directory] should be an android directory with a build.gradle file.
-Future<String?> getGradleVersion(
-  Directory directory,
-  Logger logger,
-  ProcessManager processManager,
-) async {
+/// If gradle version is not found in the file, null is returned.
+/// [directory] should be an android directory.
+Future<String?> getGradleVersionFromFile(Directory directory, Logger logger) async {
   final File propertiesFile = getGradleWrapperFile(directory);
 
   if (propertiesFile.existsSync()) {
@@ -357,14 +352,30 @@ Future<String?> getGradleVersion(
       }
     } else {
       // If no distributionUrl log then treat as if there was no propertiesFile.
-      logger.printTrace(
-        '$propertiesFile does not provide a Gradle version falling back to system gradle.',
-      );
+      logger.printTrace('$propertiesFile does not provide a Gradle version.');
     }
   } else {
     // Could not find properties file.
-    logger.printTrace('$propertiesFile does not exist falling back to system gradle');
+    logger.printTrace('$propertiesFile does not exist.');
   }
+  return null;
+}
+
+/// Returns either the gradle-wrapper.properties value from the passed in
+/// [directory] or if not present the version available in local path.
+///
+/// If gradle version is not found null is returned.
+/// [directory] should be an android directory with a build.gradle file.
+Future<String?> getGradleVersion(
+  Directory directory,
+  Logger logger,
+  ProcessManager processManager,
+) async {
+  final String? gradleVersion = await getGradleVersionFromFile(directory, logger);
+  if (gradleVersion != null) {
+    return gradleVersion;
+  }
+  logger.printTrace('Falling back to system gradle');
   // System installed Gradle version.
   // TODO(reidbaker): Modify this gradle execution to use gradlew.
   if (processManager.canRun('gradle')) {
@@ -1207,18 +1218,6 @@ void updateLocalProperties({
   if (changed) {
     settings.writeContents(localProperties);
   }
-}
-
-/// Writes standard Android local properties to the specified [properties] file.
-///
-/// Writes the path to the Android SDK, if known.
-void writeLocalProperties(File properties) {
-  final settings = SettingsFile();
-  final AndroidSdk? androidSdk = globals.androidSdk;
-  if (androidSdk != null) {
-    settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory.path);
-  }
-  settings.writeContents(properties);
 }
 
 void exitWithNoSdkMessage() {

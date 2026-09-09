@@ -78,11 +78,9 @@ class IMobileDevice {
     required Cache cache,
     required ProcessManager processManager,
     required Logger logger,
-  }) : _idevicesyslogPath = artifacts.getHostArtifact(HostArtifact.idevicesyslog).path,
-       _idevicescreenshotPath = artifacts.getHostArtifact(HostArtifact.idevicescreenshot).path,
+  }) : _artifacts = artifacts,
        _dyLdLibEntry = cache.dyLdLibEntry,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _processManager = processManager;
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   /// Create an [IMobileDevice] for testing.
   factory IMobileDevice.test({required ProcessManager processManager}) {
@@ -95,13 +93,11 @@ class IMobileDevice {
     );
   }
 
-  final String _idevicesyslogPath;
-  final String _idevicescreenshotPath;
+  final Artifacts _artifacts;
   final MapEntry<String, String> _dyLdLibEntry;
-  final ProcessManager _processManager;
   final ProcessUtils _processUtils;
 
-  late final bool isInstalled = _processManager.canRun(_idevicescreenshotPath);
+  String get _idevicesyslogPath => _artifacts.getHostArtifact(HostArtifact.idevicesyslog).path;
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID, bool isWirelesslyConnected) {
@@ -112,25 +108,6 @@ class IMobileDevice {
       if (isWirelesslyConnected) '--network',
     ], environment: Map<String, String>.fromEntries(<MapEntry<String, String>>[_dyLdLibEntry]));
   }
-
-  /// Captures a screenshot to the specified outputFile.
-  Future<void> takeScreenshot(
-    File outputFile,
-    String deviceID,
-    DeviceConnectionInterface interfaceType,
-  ) {
-    return _processUtils.run(
-      <String>[
-        _idevicescreenshotPath,
-        outputFile.path,
-        '--udid',
-        deviceID,
-        if (interfaceType == DeviceConnectionInterface.wireless) '--network',
-      ],
-      throwOnError: true,
-      environment: Map<String, String>.fromEntries(<MapEntry<String, String>>[_dyLdLibEntry]),
-    );
-  }
 }
 
 Future<XcodeBuildResult> buildXcodeProject({
@@ -138,7 +115,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   required BuildInfo buildInfo,
   String? targetOverride,
   EnvironmentType environmentType = EnvironmentType.physical,
-  DarwinArch? activeArch,
+  CpuArch? activeArch,
   bool codesign = true,
   String? deviceID,
   bool configOnly = false,
@@ -172,6 +149,11 @@ Future<XcodeBuildResult> buildXcodeProject({
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
       config: globals.config,
+      analytics: globals.analytics,
+      hostPlatform: globals.platform,
+      operatingSystemUtils: globals.os,
+      flutterVersion: globals.flutterVersion,
+      reportCrashes: !await globals.isRunningOnBot
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
@@ -205,6 +187,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     fileSystem: globals.fs,
     logger: globals.logger,
     cocoapods: globals.cocoaPods,
+    analytics: globals.analytics,
+    featureFlags: featureFlags,
   );
 
   await removeExtendedAttributesForProject(
@@ -328,7 +312,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       .fetchDependenciesAndGenerateXcodebuildArgs(
         app.project,
         globals.fs.directory(buildDirectoryPath),
-        skipPackageUpdatesAndValidation: false,
+        skipPackageValidation: false,
       );
   final buildCommands = <String>[...xcodebuildCommandArgs, '-configuration', configuration];
 
@@ -411,16 +395,17 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final Directory? workspacePath = app.project.xcodeWorkspace;
   if (workspacePath != null) {
-    buildCommands.addAll(<String>[
-      '-workspace',
-      workspacePath.basename,
-      '-scheme',
-      scheme,
-      if (buildAction !=
-          XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
-        'BUILD_DIR=${globals.fs.path.absolute(buildDirectoryPath)}',
-    ]);
+    buildCommands.addAll(<String>['-workspace', workspacePath.basename]);
+  } else {
+    buildCommands.addAll(<String>['-project', app.project.xcodeProject.basename]);
   }
+  buildCommands.addAll(<String>[
+    '-scheme',
+    scheme,
+    if (buildAction !=
+        XcodeBuildAction.archive) // dSYM files aren't copied to the archive if BUILD_DIR is set.
+      'BUILD_DIR=${globals.fs.path.absolute(buildDirectoryPath)}',
+  ]);
 
   // Check if the project contains a watchOS companion app.
   final bool hasWatchCompanion = await app.project.containsWatchCompanion(
@@ -462,10 +447,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (!hasWatchCompanion) {
       // ONLY_ACTIVE_ARCH specifies whether the product includes only code for
       // the native architecture.
-      final onlyActiveArch = activeArch == getCurrentDarwinArch();
+      final onlyActiveArch = activeArch == CpuArch.fromHostPlatform(getCurrentHostPlatform());
 
       buildCommands.add('ONLY_ACTIVE_ARCH=${onlyActiveArch ? 'YES' : 'NO'}');
-      buildCommands.add('ARCHS=${activeArch.name}');
+      buildCommands.add('ARCHS=${activeArch.darwinArchName}');
     }
   }
 
@@ -933,6 +918,7 @@ Future<void> diagnoseXcodeBuildFailure(
     platform: platform,
     logger: logger,
     fileSystem: fileSystem,
+    analytics: analytics,
     device: device,
   );
 
@@ -1108,16 +1094,15 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
       hasProvisioningProfileIssue: false,
       duplicateModule: duplicateModule,
     );
-  } else if (message.toLowerCase().contains('not found')) {
-    final String? missingModule = _parseMissingModule(message);
-    if (missingModule != null) {
-      return _XCResultIssueHandlingResult(
-        requiresProvisioningProfile: false,
-        hasProvisioningProfileIssue: false,
-        missingModule: missingModule,
-      );
-    }
-  } else if (message.toLowerCase().contains('has been modified since')) {
+  } else if (message.toLowerCase().contains('not found') && _parseMissingModule(message) != null) {
+    return _XCResultIssueHandlingResult(
+      requiresProvisioningProfile: false,
+      hasProvisioningProfileIssue: false,
+      missingModule: _parseMissingModule(message),
+    );
+  } else if (message.toLowerCase().contains('has been modified since') ||
+      (message.toLowerCase().contains('module map file') &&
+          message.toLowerCase().contains('not found'))) {
     return _XCResultIssueHandlingResult(
       requiresProvisioningProfile: false,
       hasProvisioningProfileIssue: false,
@@ -1160,6 +1145,7 @@ Future<bool> _handleIssues(
   required FlutterDarwinPlatform platform,
   required Logger logger,
   required FileSystem fileSystem,
+  required Analytics analytics,
   Device? device,
 }) async {
   var requiresProvisioningProfile = false;
@@ -1250,6 +1236,11 @@ Future<bool> _handleIssues(
     final bool usesCocoapods = xcodeProject.podfile.existsSync();
     final bool usesSwiftPackageManager = xcodeProject.usesSwiftPackageManager;
     if (usesCocoapods && usesSwiftPackageManager) {
+      for (final module in duplicateModules) {
+        analytics.send(
+          Event.appleUsageEvent(workflow: 'duplicate-modules-build-failure', parameter: module),
+        );
+      }
       logger.printError(
         'Your project uses both CocoaPods and Swift Package Manager, which can '
         'cause the above error. It may be caused by there being both a CocoaPod '
@@ -1288,7 +1279,7 @@ Future<bool> _handleIssues(
   } else if (modifiedPrecompiledSource) {
     logger.printError(
       '════════════════════════════════════════════════════════════════════════════════\n'
-      'A precompiled file has been changed since last built. Please run "flutter clean" to clear '
+      'A precompiled file has been changed since last built. Please run "flutter clean --include-xcode-workspace" to clear '
       'the cache.\n'
       '════════════════════════════════════════════════════════════════════════════════',
     );
@@ -1556,7 +1547,7 @@ class _XCResultIssueHandlingResult {
   final String? missingModule;
 
   /// An issue indicates that a source file, such as a header in the Flutter framework, has
-  /// changed since last built. This requires "flutter clean" to resolve.
+  /// changed since last built. This requires "flutter clean --include-xcode-workspace" to resolve.
   final bool modifiedPrecompiledSource;
 
   final bool unableToFindArmDestination;

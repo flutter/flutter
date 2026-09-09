@@ -41,6 +41,7 @@ class TestTextField extends StatefulWidget {
     this.controller,
     this.onSubmitted,
     this.showSelectionHandles = false,
+    this.selectAllOnFocus,
   });
 
   final Iterable<String>? autofillHints;
@@ -59,6 +60,11 @@ class TestTextField extends StatefulWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onSubmitted;
   final bool showSelectionHandles;
+
+  /// Controls whether all text is selected when the field receives focus.
+  ///
+  /// When null, [EditableText] platform defaults apply.
+  final bool? selectAllOnFocus;
 
   @override
   State<TestTextField> createState() => _TestTextFieldState();
@@ -127,6 +133,7 @@ class _TestTextFieldState extends State<TestTextField>
           style: widget.style ?? const TextStyle(), // required by editable text.
           controller: _effectiveController, // required by editable text.
           showSelectionHandles: widget.showSelectionHandles,
+          selectAllOnFocus: widget.selectAllOnFocus,
         ),
       ),
     );

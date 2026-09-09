@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 class TestState extends StatefulWidget {
   const TestState({super.key, required this.child, required this.log});

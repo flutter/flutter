@@ -32,17 +32,19 @@ class IOSDeploy {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-  }) : _platform = platform,
+  }) : _artifacts = artifacts,
+       _platform = platform,
        _cache = cache,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-       _logger = logger,
-       _binaryPath = artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
+       _logger = logger;
 
+  final Artifacts _artifacts;
   final Cache _cache;
-  final String _binaryPath;
   final Logger _logger;
   final Platform _platform;
   final ProcessUtils _processUtils;
+
+  String get _binaryPath => _artifacts.getHostArtifact(HostArtifact.iosDeploy).path;
 
   Map<String, String> get iosDeployEnv {
     // Push /usr/bin to the front of PATH to pick up default system python, package 'six'.

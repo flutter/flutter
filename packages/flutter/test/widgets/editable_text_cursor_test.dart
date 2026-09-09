@@ -18,7 +18,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
-import 'widgets_app_tester.dart';
 
 const TextStyle textStyle = TextStyle();
 const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);

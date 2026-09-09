@@ -311,9 +311,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   settings.trace_startup =
       command_line.HasOption(FlagForSwitch(Switch::TraceStartup));
 
-  settings.enable_serial_gc =
-      command_line.HasOption(FlagForSwitch(Switch::EnableSerialGC));
-
 #if !FLUTTER_RELEASE
   settings.trace_skia = true;
 
@@ -518,8 +515,15 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
   settings.enable_platform_isolates =
       command_line.HasOption(FlagForSwitch(Switch::EnablePlatformIsolates));
 
-  settings.enable_surface_control = command_line.HasOption(
-      FlagForSwitch(Switch::EnableAndroidHcppAndSurfaceControl));
+  {
+    std::string enable_surface_control_value;
+    if (command_line.GetOptionValue(
+            FlagForSwitch(Switch::EnableAndroidHcppAndSurfaceControl),
+            &enable_surface_control_value)) {
+      settings.enable_surface_control = enable_surface_control_value.empty() ||
+                                        "true" == enable_surface_control_value;
+    }
+  }
 
   constexpr std::string_view kMergedThreadEnabled = "enabled";
   constexpr std::string_view kMergedThreadDisabled = "disabled";
@@ -558,8 +562,6 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
       command_line.HasOption(FlagForSwitch(Switch::EnableFlutterGPU));
   settings.impeller_enable_lazy_shader_mode =
       command_line.HasOption(FlagForSwitch(Switch::ImpellerLazyShaderMode));
-  settings.impeller_antialiased_lines =
-      command_line.HasOption(FlagForSwitch(Switch::ImpellerAntialiasLines));
   settings.impeller_use_sdfs =
       command_line.HasOption(FlagForSwitch(Switch::ImpellerUseSDFs));
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <vector>
+
 #include "flutter/impeller/playground/playground_test.h"
 #include "flutter/impeller/renderer/backend/gles/context_gles.h"
 #include "flutter/impeller/renderer/backend/gles/texture_gles.h"
@@ -146,6 +148,39 @@ TEST_P(TextureGLESTest, Leak) {
   ScopedValidationDisable disable_validation;
   handle = TextureGLES::Cast(*texture).GetGLHandle();
   EXPECT_FALSE(handle.has_value());
+}
+
+TEST_P(TextureGLESTest, CanCreateAndUpload2DArrayTexture) {
+  ContextGLES& context_gles = ContextGLES::Cast(*GetContext());
+  if (!context_gles.GetReactor()
+           ->GetProcTable()
+           .GetCapabilities()
+           ->SupportsTextureArray()) {
+    GTEST_SKIP() << "2D array textures are not supported on this context.";
+  }
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kHostVisible;
+  desc.size = {2, 2};
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.type = TextureType::kTexture2DArray;
+  desc.array_layer_count = 3;
+  desc.mip_count = 1;
+
+  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+  EXPECT_EQ(static_cast<int>(texture->GetTextureDescriptor().array_layer_count),
+            3);
+  EXPECT_TRUE(texture->IsSliceValid(2));
+  EXPECT_FALSE(texture->IsSliceValid(3));
+
+  // Every layer can be uploaded.
+  std::vector<uint8_t> layer(2u * 2u * 4u, 0xFF);
+  for (size_t slice = 0; slice < static_cast<size_t>(desc.array_layer_count);
+       ++slice) {
+    EXPECT_TRUE(texture->SetContents(layer.data(), layer.size(), slice));
+  }
+  EXPECT_TRUE(context_gles.GetReactor()->React());
 }
 
 TEST_P(TextureGLESTest, CreatingAndBindingEmptyTexturesDoesNotCrash) {

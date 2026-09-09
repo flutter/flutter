@@ -2,24 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
-import '../foundation/_features.dart' show isWindowingEnabled;
-
-import '_window.dart'
-    show
-        BaseWindowController,
-        DialogWindowController,
-        DialogWindowControllerDelegate,
-        WindowEntry,
-        WindowRegistry,
-        WindowScope;
-
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'navigator.dart';
-import 'overlay.dart';
 import 'routes.dart';
 
 /// A builder for a route that takes the build context and the widget intended
@@ -78,27 +64,6 @@ Future<T?> showRawDialog<T>({
 
   final NavigatorState navigator = Navigator.of(context, rootNavigator: useRootNavigator);
 
-  final WindowRegistry? windowRegistry = WindowRegistry.maybeOf(context);
-  if (windowRegistry != null && isWindowingEnabled) {
-    try {
-      final Size? parentSize = WindowScope.maybeContentSizeOf(context);
-      return navigator.push<T>(
-        _DialogWindowRoute<T>(
-          builder: builder,
-          parentController: WindowScope.maybeOf(context),
-          context: context,
-          settings: routeSettings,
-          size: fullscreenDialog ? parentSize : null,
-        ),
-      );
-    } on UnsupportedError catch (error, stacktrace) {
-      // Fallback to normal dialog route if windowing is not supported.
-      FlutterError.reportError(
-        FlutterErrorDetails(exception: error, library: 'widgets library', stack: stacktrace),
-      );
-    }
-  }
-
   final Route<T> route =
       routeBuilder?.call(context, builder) ??
       RawDialogRoute<T>(
@@ -113,87 +78,4 @@ Future<T?> showRawDialog<T>({
       );
 
   return navigator.push<T>(route);
-}
-
-class _DialogWindowDelegate extends DialogWindowControllerDelegate {
-  _DialogWindowDelegate(this.route);
-
-  final _DialogWindowRoute<dynamic> route;
-
-  @override
-  void onWindowCloseRequested(DialogWindowController controller) {
-    route.navigator?.pop();
-  }
-}
-
-class _DialogWindowRoute<T> extends Route<T> {
-  _DialogWindowRoute({
-    required this.builder,
-    required this.parentController,
-    required BuildContext context,
-    super.settings,
-    Size? size,
-  }) : _registry = WindowRegistry.maybeOf(context) {
-    _controller = size != null
-        ? DialogWindowController(
-            parent: parentController,
-            title: 'Dialog',
-            delegate: _DialogWindowDelegate(this),
-            size: size,
-          )
-        : DialogWindowController.sizedToContent(
-            parent: parentController,
-            title: 'Dialog',
-            delegate: _DialogWindowDelegate(this),
-          );
-  }
-
-  final WidgetBuilder builder;
-  final BaseWindowController? parentController;
-  final WindowRegistry? _registry;
-  DialogWindowController? _controller;
-  WindowEntry? _entry;
-  late final List<OverlayEntry> _overlayEntries;
-
-  @override
-  List<OverlayEntry> get overlayEntries => _overlayEntries;
-
-  @override
-  void install() {
-    super.install();
-
-    // Create a minimal transparent overlay entry to satisfy Navigator requirements.
-    // The actual dialog content is rendered through ViewAnchor, not through this overlay.
-    _overlayEntries = <OverlayEntry>[
-      OverlayEntry(builder: (BuildContext context) => const SizedBox.shrink()),
-    ];
-
-    final NavigatorState? nav = navigator;
-    final BuildContext? routeContext = nav?.context;
-    if (routeContext != null && nav != null) {
-      _entry = WindowEntry(controller: _controller!, builder: builder);
-      _registry?.register(_entry!);
-    }
-  }
-
-  @override
-  TickerFuture didPush() {
-    return super.didPush();
-  }
-
-  @override
-  bool didPop(T? result) {
-    if (_entry != null) {
-      _registry?.unregister(_entry!);
-    }
-    _controller?.destroy();
-    return super.didPop(result);
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    _controller = null;
-    super.dispose();
-  }
 }

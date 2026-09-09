@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -12,106 +12,95 @@ void main() {
     final observer = TransitionDurationObserver();
 
     await tester.pumpWidget(
-      MaterialApp(
+      WidgetsApp(
+        color: const Color(0xFFFFFFFF),
         navigatorObservers: <NavigatorObserver>[observer],
         onGenerateRoute: (RouteSettings settings) {
           return switch (settings.name) {
-            // A route that uses FadeForwardsPageTransitionsBuilder.
             '/' => _TestTransitionRoute<void>(
-              pageTransitionsBuilder: const FadeForwardsPageTransitionsBuilder(),
+              pageTransitionsBuilder: const _TestSlideUpPageTransitionsBuilder(),
               builder: (BuildContext context) {
-                return Scaffold(
-                  body: Center(
-                    child: Column(
-                      children: <Widget>[
-                        const Text('Page 1'),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/2');
-                          },
-                          child: const Text('Next'),
-                        ),
-                      ],
-                    ),
+                return Center(
+                  child: Column(
+                    children: <Widget>[
+                      const Text('Page 1'),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/2');
+                        },
+                        child: const Text('Next'),
+                      ),
+                    ],
                   ),
                 );
               },
             ),
-            // A route that uses ZoomPageTransitionsBuilder with custom durations.
             '/2' => _TestTransitionRoute<void>(
-              pageTransitionsBuilder: const ZoomPageTransitionsBuilder(),
+              pageTransitionsBuilder: const _TestSlightRightPageTransitionsBuilder(),
               transitionDurationOverride: const Duration(milliseconds: 456),
               reverseTransitionDurationOverride: const Duration(milliseconds: 567),
               builder: (BuildContext context) {
-                return Scaffold(
-                  body: Center(
-                    child: Column(
-                      children: <Widget>[
-                        const Text('Page 2'),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/3');
-                          },
-                          child: const Text('Next'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Back'),
-                        ),
-                      ],
-                    ),
+                return Center(
+                  child: Column(
+                    children: <Widget>[
+                      const Text('Page 2'),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/3');
+                        },
+                        child: const Text('Next'),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Back'),
+                      ),
+                    ],
                   ),
                 );
               },
             ),
-            // A route that uses FadeForwardsPageTransitionsBuilder with custom durations.
             '/3' => _TestTransitionRoute<void>(
-              pageTransitionsBuilder: const FadeForwardsPageTransitionsBuilder(),
+              pageTransitionsBuilder: const _TestSlideUpPageTransitionsBuilder(),
               transitionDurationOverride: const Duration(milliseconds: 678),
               reverseTransitionDurationOverride: const Duration(milliseconds: 789),
               builder: (BuildContext context) {
-                return Scaffold(
-                  body: Center(
-                    child: Column(
-                      children: <Widget>[
-                        const Text('Page 3'),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/4');
-                          },
-                          child: const Text('Next'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Back'),
-                        ),
-                      ],
-                    ),
+                return Center(
+                  child: Column(
+                    children: <Widget>[
+                      const Text('Page 3'),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/4');
+                        },
+                        child: const Text('Next'),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Back'),
+                      ),
+                    ],
                   ),
                 );
               },
             ),
-            // A route that uses ZoomPageTransitionsBuilder.
             '/4' => _TestTransitionRoute<void>(
-              pageTransitionsBuilder: const ZoomPageTransitionsBuilder(),
+              pageTransitionsBuilder: const _TestSlightRightPageTransitionsBuilder(),
               builder: (BuildContext context) {
-                return Scaffold(
-                  body: Center(
-                    child: Column(
-                      children: <Widget>[
-                        const Text('Page 4'),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Back'),
-                        ),
-                      ],
-                    ),
+                return Center(
+                  child: Column(
+                    children: <Widget>[
+                      const Text('Page 4'),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Back'),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -129,7 +118,7 @@ void main() {
 
     expect(
       observer.transitionDuration,
-      const FadeForwardsPageTransitionsBuilder().transitionDuration,
+      const _TestSlideUpPageTransitionsBuilder().transitionDuration,
     );
 
     await tester.tap(find.text('Next'));
@@ -153,7 +142,10 @@ void main() {
     expect(find.text('Page 4'), findsNothing);
 
     await tester.tap(find.text('Next'));
-    expect(observer.transitionDuration, const ZoomPageTransitionsBuilder().transitionDuration);
+    expect(
+      observer.transitionDuration,
+      const _TestSlightRightPageTransitionsBuilder().transitionDuration,
+    );
 
     await observer.pumpPastTransition(tester);
 
@@ -165,7 +157,7 @@ void main() {
     await tester.tap(find.text('Back'));
     expect(
       observer.transitionDuration,
-      const ZoomPageTransitionsBuilder().reverseTransitionDuration,
+      const _TestSlightRightPageTransitionsBuilder().reverseTransitionDuration,
     );
 
     await observer.pumpPastTransition(tester);
@@ -202,16 +194,15 @@ void main() {
     final observer = TransitionDurationObserver();
 
     await tester.pumpWidget(
-      MaterialApp(
+      WidgetsApp(
+        color: const Color(0xFFFFFFFF),
         navigatorObservers: <NavigatorObserver>[observer],
         onGenerateRoute: (RouteSettings settings) {
           return switch (settings.name) {
             // A route with no transition.
             '/' => _TestOverlayRoute<void>(
               builder: (BuildContext context) {
-                return const Scaffold(
-                  body: Center(child: Column(children: <Widget>[Text('Page 1')])),
-                );
+                return const Center(child: Column(children: <Widget>[Text('Page 1')]));
               },
             ),
             _ => throw Exception('Invalid route.'),
@@ -225,17 +216,77 @@ void main() {
   });
 }
 
-class _TestTransitionRoute<T> extends MaterialPageRoute<T> {
+class _TestSlightRightPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _TestSlightRightPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    const begin = Offset(1.0, 0.0);
+    const Offset end = .zero;
+    final Animatable<Offset> tween = Tween<Offset>(
+      begin: begin,
+      end: end,
+    ).chain(CurveTween(curve: Curves.ease));
+
+    return SlideTransition(
+      position: animation.drive(tween),
+      child: FadeTransition(opacity: animation, child: child),
+    );
+  }
+}
+
+class _TestSlideUpPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _TestSlideUpPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    const begin = Offset(0.0, 1.0);
+    const Offset end = .zero;
+    final Animatable<Offset> tween = Tween<Offset>(
+      begin: begin,
+      end: end,
+    ).chain(CurveTween(curve: Curves.ease));
+
+    return SlideTransition(
+      position: animation.drive(tween),
+      child: FadeTransition(opacity: animation, child: child),
+    );
+  }
+}
+
+class _TestTransitionRoute<T> extends PageRoute<T> {
   _TestTransitionRoute({
-    required super.builder,
+    required this.builder,
     required this.pageTransitionsBuilder,
     this.transitionDurationOverride,
     this.reverseTransitionDurationOverride,
   });
 
+  final WidgetBuilder builder;
   final PageTransitionsBuilder pageTransitionsBuilder;
   final Duration? transitionDurationOverride;
   final Duration? reverseTransitionDurationOverride;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return builder(context);
+  }
 
   @override
   Widget buildTransitions(
@@ -252,6 +303,15 @@ class _TestTransitionRoute<T> extends MaterialPageRoute<T> {
       child,
     );
   }
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  bool get maintainState => true;
 
   @override
   Duration get transitionDuration =>

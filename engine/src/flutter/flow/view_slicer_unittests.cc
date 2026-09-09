@@ -12,15 +12,6 @@ namespace flutter {
 namespace testing {
 
 namespace {
-bool ContainsClipDifferenceRect(const sk_sp<DisplayList>& display_list) {
-  for (DlIndex i = 0; i < display_list->op_count(); i++) {
-    if (display_list->GetOpType(i) == DisplayListOpType::kClipDifferenceRect) {
-      return true;
-    }
-  }
-  return false;
-}
-
 void AddSliceOfSize(
     std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>>& slices,
     int64_t id,
@@ -43,7 +34,7 @@ TEST(ViewSlicerTest, CanSlicerNonOverlappingViews) {
       {1, DlRect::MakeLTRB(50, 50, 60, 60)}};
 
   auto computed_overlays =
-      SliceViews(&builder, composition_order, slices, view_rects, {});
+      SliceViews(&builder, composition_order, slices, view_rects);
 
   EXPECT_TRUE(computed_overlays.empty());
 }
@@ -59,7 +50,7 @@ TEST(ViewSlicerTest, IgnoresFractionalOverlaps) {
       {1, DlRect::MakeLTRB(50.5, 50.5, 100, 100)}};
 
   auto computed_overlays =
-      SliceViews(&builder, composition_order, slices, view_rects, {});
+      SliceViews(&builder, composition_order, slices, view_rects);
 
   EXPECT_TRUE(computed_overlays.empty());
 }
@@ -75,7 +66,7 @@ TEST(ViewSlicerTest, ComputesOverlapWith1PV) {
       {1, DlRect::MakeLTRB(0, 0, 100, 100)}};
 
   auto computed_overlays =
-      SliceViews(&builder, composition_order, slices, view_rects, {});
+      SliceViews(&builder, composition_order, slices, view_rects);
 
   EXPECT_EQ(computed_overlays.size(), 1u);
   auto overlay = computed_overlays.find(1);
@@ -98,7 +89,7 @@ TEST(ViewSlicerTest, ComputesOverlapWith2PV) {
   };
 
   auto computed_overlays =
-      SliceViews(&builder, composition_order, slices, view_rects, {});
+      SliceViews(&builder, composition_order, slices, view_rects);
 
   EXPECT_EQ(computed_overlays.size(), 2u);
 
@@ -132,7 +123,7 @@ TEST(ViewSlicerTest, OverlappingTwoPVs) {
   };
 
   auto computed_overlays =
-      SliceViews(&builder, composition_order, slices, view_rects, {});
+      SliceViews(&builder, composition_order, slices, view_rects);
 
   EXPECT_EQ(computed_overlays.size(), 1u);
 
@@ -141,34 +132,6 @@ TEST(ViewSlicerTest, OverlappingTwoPVs) {
 
   // We create a single overlay for both overlapping sections.
   EXPECT_EQ(overlay->second, DlRect::MakeLTRB(0, 0, 100, 100));
-}
-
-TEST(ViewSlicerTest, PreservesUnderlayForSelectedViews) {
-  std::vector<int64_t> composition_order = {1};
-  std::unordered_map<int64_t, DlRect> view_rects = {
-      {1, DlRect::MakeLTRB(0, 0, 100, 100)}};
-
-  std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>>
-      baseline_slices;
-  AddSliceOfSize(baseline_slices, 1, DlRect::MakeLTRB(0, 0, 50, 50));
-  DisplayListBuilder baseline_builder(DlRect::MakeLTRB(0, 0, 100, 100));
-  auto baseline_overlays = SliceViews(&baseline_builder, composition_order,
-                                      baseline_slices, view_rects, {});
-  EXPECT_EQ(baseline_overlays.size(), 1u);
-  auto baseline_dl = baseline_builder.Build();
-  EXPECT_TRUE(ContainsClipDifferenceRect(baseline_dl));
-
-  std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>>
-      preserve_slices;
-  AddSliceOfSize(preserve_slices, 1, DlRect::MakeLTRB(0, 0, 50, 50));
-  std::unordered_set<int64_t> views_with_underlay_preserved = {1};
-  DisplayListBuilder preserve_builder(DlRect::MakeLTRB(0, 0, 100, 100));
-  auto preserve_overlays =
-      SliceViews(&preserve_builder, composition_order, preserve_slices,
-                 view_rects, views_with_underlay_preserved);
-  EXPECT_EQ(preserve_overlays.size(), 1u);
-  auto preserve_dl = preserve_builder.Build();
-  EXPECT_FALSE(ContainsClipDifferenceRect(preserve_dl));
 }
 
 }  // namespace testing

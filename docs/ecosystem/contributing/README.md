@@ -25,6 +25,7 @@ For consistency, all CHANGELOG entries should follow a common style:
 - Entries should end with a `.`.
 - Breaking changes should be introduced with `**BREAKING CHANGE**:`, or `**BREAKING CHANGES**:` if there is a sub-list of changes.
   - Breaking change notifications should include information about how to migrate. If extensive migration is required, this can be a reference to a longer description elsewhere (usually README.md) rather than inline instructions.
+- Code references should be enclosed in backticks.
 
 Example:
 ```

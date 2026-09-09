@@ -177,16 +177,6 @@ void main() {
     expect(result, contains(r'window._removeFlutterLoader();'));
   });
 
-  test('generateTestBootstrapFileContents embeds urls correctly', () {
-    final String result = generateTestBootstrapFileContents(
-      'foo.dart.js',
-      'require.js',
-      'mapper.js',
-    );
-
-    expect(result, contains('el.setAttribute("data-main", \'foo.dart.js\');'));
-  });
-
   test('generateTestEntrypoint generates proper imports and mappings for tests', () {
     final String result = generateTestEntrypoint(
       testInfos: <WebTestInfo>[
@@ -357,16 +347,6 @@ void main() {
       );
 
       expect(result, isNot(contains('maxRequestPoolSize =')));
-    });
-
-    test('generateTestBootstrapFileContents embeds urls correctly', () {
-      final String result = generateTestBootstrapFileContents(
-        'foo.dart.js',
-        'require.js',
-        'mapper.js',
-      );
-
-      expect(result, contains('el.setAttribute("data-main", \'foo.dart.js\');'));
     });
   });
 }

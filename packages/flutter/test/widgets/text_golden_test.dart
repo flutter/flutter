@@ -13,7 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'checkbox_tester.dart';
 import 'editable_text_tester.dart';
-import 'widgets_app_tester.dart';
 
 const Color _debugRed = Color(0xFFFF0000);
 const Color _debugBlue = Color(0xFF0000FF);
