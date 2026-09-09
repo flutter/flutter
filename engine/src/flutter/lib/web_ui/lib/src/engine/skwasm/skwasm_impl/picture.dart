@@ -136,7 +136,7 @@ class SkwasmPictureRecorder extends SkwasmObjectWrapper<RawPictureRecorder>
       );
 
   @visibleForTesting
-  static Finalizer finalizer = NativeMemoryFinalizer((Object tracker) {
+  static NativeMemoryFinalizer finalizer = NativeMemoryFinalizer((Object tracker) {
     (tracker as PictureImageTracker).releaseAll();
   });
 
