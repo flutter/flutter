@@ -85,16 +85,8 @@ void main() {
   });
 
   test('MaterialColor swatch comparison', () {
-    final sampleMap = <int, MaterialColor>{
-      0: Colors.lightBlue,
-      1: Colors.deepOrange,
-      2: Colors.blueGrey,
-    };
-    final anotherMap = <int, MaterialColor>{
-      0: Colors.lightBlue,
-      1: Colors.deepOrange,
-      2: Colors.blueGrey,
-    };
+    final sampleMap = <int, Color>{50: const Color(0xFFE1F5FE), 100: const Color(0xFFB3E5FC)};
+    final anotherMap = <int, Color>{50: const Color(0xFFE1F5FE), 100: const Color(0xFFB3E5FC)};
     final first = MaterialColor(0, sampleMap);
     final second = MaterialColor(0, sampleMap);
     final third = MaterialColor(0, anotherMap);
