@@ -61,18 +61,16 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = toolContext.logger;
-    final ProcessManager processManager = toolContext.processManager;
+    final ToolContext(
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+    ) = toolContext;
 
     final String outputArgument =
         stringArg('output') ??
-        fs.path.join(
-          fs.currentDirectory.path,
-          getBuildDirectory(toolContext.config, fs),
-          'macos',
-          'framework',
-        );
+        fs.path.join(fs.currentDirectory.path, getBuildDirectory(config, fs), 'macos', 'framework');
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');
@@ -132,7 +130,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       if (boolArg('plugins')) {
         await processPodsIfNeeded(
           project.macos,
-          getMacOSBuildDirectory(config: toolContext.config, fileSystem: toolContext.fs),
+          getMacOSBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
           forceCocoaPodsOnly: true,
         );
