@@ -1012,19 +1012,19 @@ public class FlutterRendererTest {
   @Test
   public void ImageReaderSurfaceProducerDoesNotScheduleFrameWhenDetached() throws Exception {
     // Regression test for https://github.com/flutter/flutter/issues/188300.
-    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
     TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
     FlutterRenderer.ImageReaderSurfaceProducer texture =
         (FlutterRenderer.ImageReaderSurfaceProducer) producer;
     texture.disableFenceForTest();
     texture.setSize(1, 1);
+    long textureId = texture.id();
 
     // The engine detaches, e.g. because the Activity was destroyed, while this producer still has
     // a frame in flight.
     engineRule.setJniIsAttached(false);
 
-    // Render a frame. The ImageReader callback is delivered on the platform thread and reaches
-    // scheduleEngineFrame after the detach.
+    // Render a frame. The ImageReader callback is delivered on the platform thread after detach.
     Surface surface = texture.getSurface();
     assertNotNull(surface);
     Canvas canvas = surface.lockHardwareCanvas();
@@ -1032,9 +1032,8 @@ public class FlutterRendererTest {
     surface.unlockCanvasAndPost(canvas);
     shadowOf(Looper.getMainLooper()).idle();
 
-    // The image still reaches scheduleEngineFrame, ...
-    verify(flutterRenderer, times(1)).scheduleEngineFrame();
-    // ... but it must not be forwarded to the detached FlutterJNI, which would throw.
+    // The late image must not be forwarded to the detached FlutterJNI, which would throw.
+    verify(fakeFlutterJNI, never()).markTextureFrameAvailable(eq(textureId));
     verify(fakeFlutterJNI, never()).scheduleFrame();
   }
 
