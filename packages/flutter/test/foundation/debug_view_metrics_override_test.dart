@@ -597,6 +597,20 @@ void main() {
       );
       expect(padding, isNot(const DebugViewPadding(left: 1, top: 2, right: 3, bottom: 5)));
     });
+
+    test('rejects negative or non-finite distances', () {
+      expect(() => DebugViewPadding(left: -1), throwsAssertionError);
+      expect(() => DebugViewPadding(left: double.nan), throwsAssertionError);
+      expect(() => DebugViewPadding(top: -1), throwsAssertionError);
+      expect(() => DebugViewPadding(top: double.nan), throwsAssertionError);
+      expect(() => DebugViewPadding(right: -1), throwsAssertionError);
+      expect(() => DebugViewPadding(right: double.infinity), throwsAssertionError);
+      expect(() => DebugViewPadding(bottom: -1), throwsAssertionError);
+      expect(() => DebugViewPadding(bottom: double.infinity), throwsAssertionError);
+      expect(() => DebugViewPadding.all(-1), throwsAssertionError);
+      expect(() => DebugViewPadding.all(double.nan), throwsAssertionError);
+      expect(() => DebugViewPadding.all(double.infinity), throwsAssertionError);
+    });
   });
 
   group('debugViewMetricsOverrides', () {
@@ -661,18 +675,14 @@ void main() {
     });
 
     test('rejects geometry that cannot be laid out, built directly', () {
-      // The const constructor cannot check these, and tooling payloads go
-      // through fromJson, so debugSetViewMetricsOverride is the only gate a
-      // directly built override passes through.
+      // physicalSize cannot assert in a const constructor, and tooling payloads
+      // go through fromJson, so debugSetViewMetricsOverride is the only gate a
+      // directly built override with an invalid physicalSize passes through.
       const invalid = <DebugViewMetricsOverride>[
         DebugViewMetricsOverride(physicalSize: ui.Size(double.nan, 100)),
         DebugViewMetricsOverride(physicalSize: ui.Size(100, double.infinity)),
         DebugViewMetricsOverride(physicalSize: ui.Size(-1, 100)),
         DebugViewMetricsOverride(physicalSize: ui.Size(100, -1)),
-        DebugViewMetricsOverride(padding: DebugViewPadding(left: -1)),
-        DebugViewMetricsOverride(padding: DebugViewPadding(top: double.nan)),
-        DebugViewMetricsOverride(viewPadding: DebugViewPadding(right: double.infinity)),
-        DebugViewMetricsOverride(viewInsets: DebugViewPadding(bottom: -1)),
       ];
       for (final override in invalid) {
         expect(
@@ -693,7 +703,7 @@ void main() {
       expect(
         () => debugSetViewMetricsOverride(
           1,
-          const DebugViewMetricsOverride(viewInsets: DebugViewPadding(bottom: -1)),
+          const DebugViewMetricsOverride(physicalSize: ui.Size(-1, -1)),
         ),
         throwsFlutterError,
       );

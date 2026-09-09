@@ -212,11 +212,16 @@ class DebugViewPadding implements ui.ViewPadding {
   /// Creates a view padding.
   ///
   /// All four distances default to zero.
-  const DebugViewPadding({this.left = 0.0, this.top = 0.0, this.right = 0.0, this.bottom = 0.0});
+  const DebugViewPadding({this.left = 0.0, this.top = 0.0, this.right = 0.0, this.bottom = 0.0})
+    : assert(left >= 0.0 && left < double.infinity, 'left must be non-negative and finite.'),
+      assert(top >= 0.0 && top < double.infinity, 'top must be non-negative and finite.'),
+      assert(right >= 0.0 && right < double.infinity, 'right must be non-negative and finite.'),
+      assert(bottom >= 0.0 && bottom < double.infinity, 'bottom must be non-negative and finite.');
 
   /// Creates a view padding with the same distance on all four edges.
   const DebugViewPadding.all(double value)
-    : left = value,
+    : assert(value >= 0.0 && value < double.infinity, 'value must be non-negative and finite.'),
+      left = value,
       top = value,
       right = value,
       bottom = value;
@@ -295,7 +300,7 @@ class DebugViewPadding implements ui.ViewPadding {
 /// [MediaQueryData.fromView] are normalized to apply overrides.
 ///
 /// The deprecated [BindingBase.window] reports the platform's own metrics, and with it
-/// the deprecated `ScrollPhysics.tolerance` that reads it. The deprecated
+/// the deprecated [ScrollPhysics.tolerance] that reads it. The deprecated
 /// [MediaQuery.fromWindow] does apply them: it builds its data with
 /// [MediaQueryData.fromView], which resolves the override registered for the
 /// view the window stands for.
@@ -827,10 +832,10 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// Throws a [FlutterError] describing the first geometry this override sets
   /// that cannot be used as layout input.
   ///
-  /// The constructor checks [devicePixelRatio] and [textScaleFactor], but
-  /// cannot check the rest: reading a field off a [ui.Size] or a
-  /// [DebugViewPadding] is not a constant expression, and asserting on one
-  /// would make the constructor unusable in a `const` expression.
+  /// The constructor checks [devicePixelRatio] and [textScaleFactor], and
+  /// [DebugViewPadding] asserts on its own edges, but [physicalSize] cannot be
+  /// asserted in a `const` constructor because reading a field off a [ui.Size]
+  /// is not a constant expression.
   /// [DebugViewMetricsOverride.fromJson] rejects them for values arriving from
   /// tooling, and [debugSetViewMetricsOverride] calls this for values built
   /// directly, so that a negative or non-finite size cannot reach layout as a

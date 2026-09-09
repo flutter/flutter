@@ -111,11 +111,6 @@ class View extends StatefulWidget {
        assert(
          (deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner == null) ==
              (deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null),
-       ),
-       assert(
-         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null ||
-             deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView.flutterView ==
-                 debugViewWithMetricsOverrides(view),
        );
 
   /// The [FlutterView] into which [child] is drawn.
@@ -370,11 +365,6 @@ class RawView extends StatelessWidget {
        assert(
          (deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner == null) ==
              (deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null),
-       ),
-       assert(
-         deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView == null ||
-             deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView.flutterView ==
-                 debugViewWithMetricsOverrides(view),
        );
 
   /// The [FlutterView] into which [child] is drawn.

@@ -2751,6 +2751,10 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
 
   @override
   void didChangeAccessibilityFeatures() {
+    // If we have a parent, it dictates our accessibility features in release
+    // mode. If we don't have a parent, or in debug mode where an override
+    // supersedes it, update our data in response to the PlatformDispatcher
+    // changing its accessibility features setting.
     if (_parentData == null || kDebugMode) {
       _updateData();
     }
@@ -2763,6 +2767,10 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
 
   @override
   void didChangeTextScaleFactor() {
+    // If we have a parent, it dictates our text scale factor in release mode.
+    // If we don't have a parent, or in debug mode where an override supersedes
+    // it, update our data in response to the PlatformDispatcher changing its
+    // text scale factor setting.
     if (_parentData == null || kDebugMode) {
       _updateData();
     }
@@ -2770,6 +2778,10 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
 
   @override
   void didChangePlatformBrightness() {
+    // If we have a parent, it dictates our platform brightness in release mode.
+    // If we don't have a parent, or in debug mode where an override supersedes
+    // it, update our data in response to the PlatformDispatcher changing its
+    // platform brightness setting.
     if (_parentData == null || kDebugMode) {
       _updateData();
     }
