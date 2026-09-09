@@ -133,7 +133,10 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
   var result = view;
   assert(() {
     try {
-      if (!_debugViewAppliesMetricsOverrides(view)) {
+      if (!_debugViewAppliesMetricsOverrides(view) &&
+          _viewsApplyingTheirOwnOverride[view] == null) {
+        // An adapter that registered a different dispatcher retains its own
+        // behavior, even if its reported dispatcher has a cached wrapper.
         // Whether that dispatcher is one an override change is reported to does
         // not come into it: a view that is credited with an override — see
         // [MediaQueryData.fromView] — has to be one that applies it, or it
@@ -166,18 +169,89 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
 /// dispatcher need not have been wrapped by the binding. It does not register
 /// that dispatcher for synthetic notifications. Test adapters can wrap this
 /// result to retain precedence for their explicit test values.
+/// [platformDispatcher] supplies the owner for a test double that does not
+/// implement its own dispatcher getter.
 ///
 /// Returns the same wrapper on repeated calls, or [view] itself if it already
 /// applies overrides. Returns [view] unchanged outside debug mode.
-ui.FlutterView debugApplyViewMetricsOverridesToView(ui.FlutterView view) {
+ui.FlutterView debugApplyViewMetricsOverridesToView(
+  ui.FlutterView view, {
+  ui.PlatformDispatcher? platformDispatcher,
+}) {
   var result = view;
   assert(() {
-    if (!_debugViewAppliesMetricsOverrides(view)) {
-      result = _wrapperFor(view.platformDispatcher, notify: false)._wrapView(view);
+    var appliesOverrides = false;
+    try {
+      appliesOverrides = _debugViewAppliesMetricsOverrides(view);
+    } on UnimplementedError {
+      if (platformDispatcher == null) {
+        rethrow;
+      }
+    }
+    if (!appliesOverrides) {
+      result = _wrapperFor(
+        platformDispatcher ?? view.platformDispatcher,
+        notify: false,
+      )._wrapView(view);
     }
     return true;
   }());
   return result;
+}
+
+// Only the named backing view can inherit the context. A custom getter that
+// consults another view must not redirect that unrelated view's overrides.
+(ui.FlutterView, int, bool)? _viewMetricsRead;
+
+/// Reads geometry from [backingView] on behalf of [view].
+///
+/// Test adapters use this to retain their explicit values and custom getters
+/// while the debug wrapper underneath resolves the outermost adapter's view id.
+/// Nested adapters propagate this context only along the backing-view chain.
+/// [devicePixelRatioIsOverridden] prevents a shadowed debug ratio from
+/// rescaling display features when an adapter supplies an explicit test ratio.
+///
+/// The context is synchronous and does not change the override registry or
+/// platform-wide metrics. Outside debug mode, invokes [read] directly.
+T debugReadViewMetrics<T>(
+  ui.FlutterView view,
+  ui.FlutterView backingView,
+  T Function(ui.FlutterView) read, {
+  bool devicePixelRatioIsOverridden = false,
+}) {
+  var readInDebug = false;
+  late T result;
+  assert(() {
+    final (int, bool)? inherited = _viewMetricsReadContext(view);
+    if (debugViewMetricsOverrides.isNotEmpty || inherited != null) {
+      final int viewId;
+      try {
+        viewId = inherited?.$1 ?? view.viewId;
+      } on UnimplementedError {
+        // A render-only fake without an id cannot resolve an override.
+        return true;
+      }
+      final (ui.FlutterView, int, bool)? previous = _viewMetricsRead;
+      try {
+        _viewMetricsRead = (
+          backingView,
+          viewId,
+          devicePixelRatioIsOverridden || (inherited?.$2 ?? false),
+        );
+        result = read(backingView);
+        readInDebug = true;
+      } finally {
+        _viewMetricsRead = previous;
+      }
+    }
+    return true;
+  }());
+  return readInDebug ? result : read(backingView);
+}
+
+(int, bool)? _viewMetricsReadContext(ui.FlutterView view) {
+  final (ui.FlutterView, int, bool)? context = _viewMetricsRead;
+  return context != null && identical(context.$1, view) ? (context.$2, context.$3) : null;
 }
 
 /// The [debugViewMetricsOverrides] entry `view` applies, or null.
@@ -906,7 +980,8 @@ class _DebugViewMetricsFlutterView implements ui.FlutterView {
   ui.PlatformDispatcher get platformDispatcher => _platformDispatcher;
   final _DebugViewMetricsPlatformDispatcher _platformDispatcher;
 
-  DebugViewMetricsOverride? get _override => debugViewMetricsOverrides[_view.viewId];
+  DebugViewMetricsOverride? get _override =>
+      debugViewMetricsOverrides[_viewMetricsReadContext(this)?.$1 ?? _view.viewId];
 
   // Overridden metrics.
 
@@ -942,7 +1017,9 @@ class _DebugViewMetricsFlutterView implements ui.FlutterView {
 
   @override
   List<ui.DisplayFeature> get displayFeatures {
-    final double? devicePixelRatio = _override?.devicePixelRatio;
+    final double? devicePixelRatio = (_viewMetricsReadContext(this)?.$2 ?? false)
+        ? null
+        : _override?.devicePixelRatio;
     final List<ui.DisplayFeature> displayFeatures = _view.displayFeatures;
     if (devicePixelRatio == null || displayFeatures.isEmpty) {
       return displayFeatures;

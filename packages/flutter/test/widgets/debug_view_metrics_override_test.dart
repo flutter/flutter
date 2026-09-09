@@ -195,6 +195,22 @@ class _NegativeTextScaler extends TextScaler {
   double scale(double fontSize) => fontSize;
 }
 
+class _UnusedTestDisplay extends Fake implements TestDisplay {}
+
+class _DerivedGeometryView extends FakeView {
+  _DerivedGeometryView(super.view, this.other) : super(viewId: 203);
+  final ui.FlutterView other;
+  bool throwOnRead = false;
+  @override
+  Size get physicalSize {
+    if (throwOnRead) {
+      throw StateError('geometry getter failed');
+    }
+    final Size base = super.physicalSize;
+    return Size(base.width + other.physicalSize.width, base.height);
+  }
+}
+
 void main() {
   // Construct this before testWidgets initializes the binding. Keeping the
   // fixture here lets the bootstrap regression share this test file.
@@ -216,6 +232,130 @@ void main() {
   // invariant check, which happens before tear downs.
 
   group('MediaQuery', () {
+    testWidgets('a test adapter supplies missing dispatcher metadata for geometry', (
+      WidgetTester tester,
+    ) async {
+      final raw = _DispatcherlessView();
+      final featureOnlyView = TestFlutterView(
+        view: raw,
+        platformDispatcher: tester.platformDispatcher,
+        display: _UnusedTestDisplay(),
+      );
+      expect(featureOnlyView.displayFeatures, raw.displayFeatures);
+      final view = TestFlutterView(
+        view: raw,
+        platformDispatcher: tester.platformDispatcher,
+        display: tester.view.display,
+      );
+      expect(view.physicalSize, raw.physicalSize);
+      debugSetViewMetricsOverride(
+        view.viewId,
+        const DebugViewMetricsOverride(physicalSize: Size(300, 600), devicePixelRatio: 3),
+      );
+      final Size size = view.physicalSize;
+      final double ratio = view.devicePixelRatio;
+      debugClearViewMetricsOverrides();
+      expect(size, const Size(300, 600));
+      expect(ratio, 3);
+      expect(view.physicalSize, raw.physicalSize);
+    });
+
+    testWidgets('nested views isolate geometry overrides and retain test values', (tester) async {
+      final TestFlutterView parent = tester.view;
+      final middle = FakeView(parent, viewId: 101);
+      final nested = FakeView(middle, viewId: 102);
+      final Size originalSize = parent.physicalSize;
+      try {
+        debugSetViewMetricsOverride(
+          parent.viewId,
+          const DebugViewMetricsOverride(
+            physicalSize: Size(111, 222),
+            devicePixelRatio: 11,
+            padding: DebugViewPadding.all(99),
+          ),
+        );
+        expect(nested.physicalSize, originalSize);
+        expect(nested.padding.top, 0);
+        debugSetViewMetricsOverride(
+          nested.viewId,
+          const DebugViewMetricsOverride(
+            physicalSize: Size(840, 420),
+            devicePixelRatio: 7,
+            padding: DebugViewPadding.all(28),
+            viewPadding: DebugViewPadding.all(35),
+            viewInsets: DebugViewPadding.all(14),
+            systemGestureInsets: DebugViewPadding.all(21),
+          ),
+        );
+        late MediaQueryData data;
+        await tester.pumpWidget(
+          View(view: nested, child: _capture((MediaQueryData value) => data = value)),
+          wrapWithView: false,
+        );
+        expect(data.size, const Size(120, 60));
+        expect(data.devicePixelRatio, 7);
+        expect(data.padding, const EdgeInsets.all(4));
+        expect(data.viewPadding, const EdgeInsets.all(5));
+        expect(data.viewInsets, const EdgeInsets.all(2));
+        expect(data.systemGestureInsets, const EdgeInsets.all(3));
+        expect(tester.binding.renderViews.single.size, data.size);
+        expect(nested.physicalConstraints, ui.ViewConstraints.tight(const Size(840, 420)));
+        expect(middle.physicalSize, originalSize);
+        expect(parent.physicalSize, const Size(111, 222));
+        parent.physicalSize = const Size(350, 210);
+        parent.padding = const FakeViewPadding(top: 7);
+        expect(nested.physicalSize, const Size(350, 210));
+        expect(nested.padding.top, 7);
+        nested.physicalSize = const Size(140, 70);
+        expect(nested.physicalSize, const Size(140, 70));
+        nested.resetPhysicalSize();
+        expect(nested.physicalSize, const Size(350, 210));
+        parent.resetPhysicalSize();
+        parent.resetPadding();
+        expect(nested.physicalSize, const Size(840, 420));
+        debugSetViewMetricsOverride(nested.viewId, null);
+        await tester.pump();
+        expect(nested.physicalSize, originalSize);
+        expect(data.padding, EdgeInsets.zero);
+        expect(tester.binding.renderViews.single.size, data.size);
+      } finally {
+        debugClearViewMetricsOverrides();
+        nested.reset();
+        parent.reset();
+      }
+    });
+
+    testWidgets('nested geometry preserves custom getters and unrelated view reads', (
+      tester,
+    ) async {
+      final other = FakeView(tester.view, viewId: 201);
+      final custom = _DerivedGeometryView(tester.view, other);
+      final nested = FakeView(custom, viewId: 202);
+      try {
+        debugSetViewMetricsOverride(
+          tester.view.viewId,
+          const DebugViewMetricsOverride(physicalSize: Size(111, 222)),
+        );
+        debugSetViewMetricsOverride(
+          other.viewId,
+          const DebugViewMetricsOverride(physicalSize: Size(30, 40)),
+        );
+        debugSetViewMetricsOverride(
+          nested.viewId,
+          const DebugViewMetricsOverride(physicalSize: Size(840, 420)),
+        );
+        expect(nested.physicalSize, const Size(870, 420));
+        custom.throwOnRead = true;
+        expect(() => nested.physicalSize, throwsStateError);
+        expect(tester.view.physicalSize, const Size(111, 222));
+        expect(other.physicalSize, const Size(30, 40));
+        custom.throwOnRead = false;
+        expect(nested.physicalSize, const Size(870, 420));
+      } finally {
+        debugClearViewMetricsOverrides();
+      }
+    });
+
     testWidgets('reports overridden accessibility features', (WidgetTester tester) async {
       late MediaQueryData data;
       await tester.pumpWidget(_capture((MediaQueryData value) => data = value));
@@ -834,6 +974,13 @@ void main() {
       WidgetTester tester,
     ) async {
       final view = _DifferentDispatcherTestView(tester.view, tester.platformDispatcher);
+      // Explicitly wrapping another view must not change this adapter's
+      // applicability through the shared dispatcher cache.
+      debugApplyViewMetricsOverridesToView(
+        _DispatcherlessView(),
+        platformDispatcher: tester.platformDispatcher,
+      );
+      expect(debugViewWithMetricsOverrides(view), same(view));
       const inherited = MediaQueryData(textScaler: TextScaler.linear(4), highContrast: true);
       debugSetViewMetricsOverride(
         view.viewId,

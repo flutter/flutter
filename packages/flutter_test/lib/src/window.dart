@@ -1073,6 +1073,28 @@ class TestFlutterView implements FlutterView {
   /// The [FlutterView] backing this [TestFlutterView].
   final FlutterView _view;
 
+  // A raw custom backing view needs the same geometry wrapper as engine views.
+  // Keep it lazy because subclasses may initialize their view id after super.
+  late final FlutterView _metricsView = () {
+    try {
+      return debugApplyViewMetricsOverridesToView(
+        _view,
+        platformDispatcher: _ownerPlatformDispatcher,
+      );
+    } on UnimplementedError {
+      // Render-only test doubles may omit their view id as well as dispatcher.
+      return _view;
+    }
+  }();
+
+  T _readMetric<T>(T Function(FlutterView) read, {bool devicePixelRatioIsOverridden = false}) =>
+      debugReadViewMetrics(
+        this,
+        _metricsView,
+        read,
+        devicePixelRatioIsOverridden: devicePixelRatioIsOverridden,
+      );
+
   /// The [TestPlatformDispatcher] this view was constructed with, which owns
   /// the test values [platformDispatcher] shares.
   final TestPlatformDispatcher _ownerPlatformDispatcher;
@@ -1112,7 +1134,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetDevicePixelRatio] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  double get devicePixelRatio => _display._devicePixelRatio ?? _view.devicePixelRatio;
+  double get devicePixelRatio =>
+      _display._devicePixelRatio ?? _readMetric((FlutterView view) => view.devicePixelRatio);
   set devicePixelRatio(double value) {
     _display.devicePixelRatio = value;
   }
@@ -1137,7 +1160,13 @@ class TestFlutterView implements FlutterView {
   ///   * [resetDisplayFeatures] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  List<DisplayFeature> get displayFeatures => _displayFeatures ?? _view.displayFeatures;
+  List<DisplayFeature> get displayFeatures =>
+      _displayFeatures ??
+      _readMetric(
+        (FlutterView view) => view.displayFeatures,
+        devicePixelRatioIsOverridden:
+            debugViewMetricsOverrides.isNotEmpty && _display._devicePixelRatio != null,
+      );
   List<DisplayFeature>? _displayFeatures;
   set displayFeatures(List<DisplayFeature> value) {
     _displayFeatures = value;
@@ -1163,7 +1192,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetPadding] to reset this value specifically.
   ///   * [reset] to reset all test values for this view.
   @override
-  FakeViewPadding get padding => _padding ?? FakeViewPadding._wrap(_view.padding);
+  FakeViewPadding get padding =>
+      _padding ?? FakeViewPadding._wrap(_readMetric((FlutterView view) => view.padding));
   FakeViewPadding? _padding;
   set padding(FakeViewPadding value) {
     _padding = value;
@@ -1191,7 +1221,7 @@ class TestFlutterView implements FlutterView {
   ///   * [resetPhysicalSize] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  Size get physicalSize => _physicalSize ?? _view.physicalSize;
+  Size get physicalSize => _physicalSize ?? _readMetric((FlutterView view) => view.physicalSize);
   Size? _physicalSize;
   set physicalSize(Size value) {
     _physicalSize = value;
@@ -1218,7 +1248,8 @@ class TestFlutterView implements FlutterView {
   ///   * [physicalConstraints] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  ViewConstraints get physicalConstraints => _physicalConstraints ?? _view.physicalConstraints;
+  ViewConstraints get physicalConstraints =>
+      _physicalConstraints ?? _readMetric((FlutterView view) => view.physicalConstraints);
   ViewConstraints? _physicalConstraints;
   set physicalConstraints(ViewConstraints value) {
     _physicalConstraints = value;
@@ -1245,7 +1276,8 @@ class TestFlutterView implements FlutterView {
   ///   * [reset] to reset all test values for this view
   @override
   FakeViewPadding get systemGestureInsets =>
-      _systemGestureInsets ?? FakeViewPadding._wrap(_view.systemGestureInsets);
+      _systemGestureInsets ??
+      FakeViewPadding._wrap(_readMetric((FlutterView view) => view.systemGestureInsets));
   FakeViewPadding? _systemGestureInsets;
   set systemGestureInsets(FakeViewPadding value) {
     _systemGestureInsets = value;
@@ -1271,7 +1303,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetViewInsets] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  FakeViewPadding get viewInsets => _viewInsets ?? FakeViewPadding._wrap(_view.viewInsets);
+  FakeViewPadding get viewInsets =>
+      _viewInsets ?? FakeViewPadding._wrap(_readMetric((FlutterView view) => view.viewInsets));
   FakeViewPadding? _viewInsets;
   set viewInsets(FakeViewPadding value) {
     _viewInsets = value;
@@ -1297,7 +1330,8 @@ class TestFlutterView implements FlutterView {
   ///   * [resetViewPadding] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  FakeViewPadding get viewPadding => _viewPadding ?? FakeViewPadding._wrap(_view.viewPadding);
+  FakeViewPadding get viewPadding =>
+      _viewPadding ?? FakeViewPadding._wrap(_readMetric((FlutterView view) => view.viewPadding));
   FakeViewPadding? _viewPadding;
   set viewPadding(FakeViewPadding value) {
     _viewPadding = value;
@@ -1340,7 +1374,7 @@ class TestFlutterView implements FlutterView {
     // An omitted size uses this view's physical size. Keep explicit test
     // geometry above any debug override, and preserve an omission when neither
     // layer supplies a size (which avoids unnecessary web resizes).
-    _view.render(scene, size: size ?? _physicalSize);
+    _readMetric((FlutterView view) => view.render(scene, size: size ?? _physicalSize));
   }
 
   @override

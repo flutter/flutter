@@ -40,6 +40,7 @@ export '_view_metrics.dart'
         debugApplyViewMetricsOverridesForView,
         debugApplyViewMetricsOverridesToView,
         debugMarkViewAppliesItsOwnMetricsOverride,
+        debugReadViewMetrics,
         debugViewMetricsOverrideApplied,
         debugViewWithMetricsOverrides;
 export 'print.dart' show DebugPrintCallback;

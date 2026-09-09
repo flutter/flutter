@@ -243,6 +243,13 @@ class _NoAccessibilityFeatures implements ui.AccessibilityFeatures {
       throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
 }
 
+class _ReidentifiedTestView extends TestFlutterView {
+  _ReidentifiedTestView(TestFlutterView view, this.viewId)
+    : super(view: view, platformDispatcher: view.platformDispatcher, display: view.display);
+  @override
+  final int viewId;
+}
+
 void main() {
   group('DebugViewMetricsOverride', () {
     test('an empty override overrides nothing', () {
@@ -994,6 +1001,59 @@ void main() {
       expect(first.displayFeatures.single.bounds, const ui.Rect.fromLTRB(20, 0, 30, 100));
     });
 
+    test('a shadowed debug DPR does not move hinges through nested adapters', () {
+      final fake = _TwoViewPlatformDispatcher();
+      final dispatcher = TestPlatformDispatcher(
+        platformDispatcher: debugApplyViewMetricsOverrides(fake),
+      );
+      final TestFlutterView first = dispatcher.implicitView!;
+      final nested = _ReidentifiedTestView(_ReidentifiedTestView(first, 3), 4);
+      first.devicePixelRatio = 8;
+      expect(nested.displayFeatures.single.bounds, const ui.Rect.fromLTRB(20, 0, 30, 100));
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(devicePixelRatio: 10));
+      debugSetViewMetricsOverride(4, const DebugViewMetricsOverride(devicePixelRatio: 4));
+      expect(nested.devicePixelRatio, 8);
+      expect(nested.displayFeatures.single.bounds, const ui.Rect.fromLTRB(20, 0, 30, 100));
+      first.resetDevicePixelRatio();
+      expect(nested.devicePixelRatio, 4);
+      expect(nested.displayFeatures.single.bounds, const ui.Rect.fromLTRB(10, 0, 15, 50));
+      const features = <ui.DisplayFeature>[
+        ui.DisplayFeature(
+          bounds: ui.Rect.fromLTRB(7, 8, 9, 10),
+          type: ui.DisplayFeatureType.hinge,
+          state: ui.DisplayFeatureState.postureFlat,
+        ),
+      ];
+      first.displayFeatures = features;
+      expect(nested.displayFeatures, same(features));
+      first.resetDisplayFeatures();
+      debugSetViewMetricsOverride(4, null);
+      expect(nested.displayFeatures.single.bounds, const ui.Rect.fromLTRB(20, 0, 30, 100));
+    });
+
+    test('nested geometry reads preserve the caller zone', () {
+      final fake = _TwoViewPlatformDispatcher();
+      final dispatcher = TestPlatformDispatcher(
+        platformDispatcher: debugApplyViewMetricsOverrides(fake),
+      );
+      final TestFlutterView view = dispatcher.implicitView!;
+      final nested = _ReidentifiedTestView(view, 3);
+      debugSetViewMetricsOverride(
+        3,
+        const DebugViewMetricsOverride(physicalSize: ui.Size(200, 300)),
+      );
+      runZoned(() {
+        final Zone caller = Zone.current;
+        final ui.Size result = debugReadViewMetrics(nested, view, (ui.FlutterView backing) {
+          expect(Zone.current, same(caller));
+          return backing.physicalSize;
+        });
+        expect(result, const ui.Size(200, 300));
+        expect(Zone.current, same(caller));
+      });
+      expect(view.physicalSize, const ui.Size(100, 200));
+    });
+
     test('an override on a non implicit view leaves the implicit one alone', () {
       final dispatcher = _TwoViewPlatformDispatcher();
       final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(dispatcher);
@@ -1171,6 +1231,35 @@ void main() {
       expect(fake.viewFor(1).renderedSize, const ui.Size(400, 800));
       debugClearViewMetricsOverrides();
       view.render(scene);
+      expect(fake.viewFor(1).renderedSize, isNull);
+    });
+
+    test('nested rendering resolves its own id and inherited explicit test sizes', () {
+      final fake = _TwoViewPlatformDispatcher();
+      final dispatcher = TestPlatformDispatcher(
+        platformDispatcher: debugApplyViewMetricsOverrides(fake),
+      );
+      final TestFlutterView first = dispatcher.implicitView!;
+      final nested = _ReidentifiedTestView(_ReidentifiedTestView(first, 3), 4);
+      final ui.Scene scene = ui.SceneBuilder().build();
+      addTearDown(scene.dispose);
+      debugSetViewMetricsOverride(1, const DebugViewMetricsOverride(physicalSize: ui.Size(11, 22)));
+      nested.render(scene);
+      expect(fake.viewFor(1).renderedSize, isNull);
+      debugSetViewMetricsOverride(
+        4,
+        const DebugViewMetricsOverride(physicalSize: ui.Size(200, 300)),
+      );
+      nested.render(scene);
+      expect(fake.viewFor(1).renderedSize, const ui.Size(200, 300));
+      first.physicalSize = const ui.Size(400, 500);
+      nested.render(scene);
+      expect(fake.viewFor(1).renderedSize, const ui.Size(400, 500));
+      nested.render(scene, size: const ui.Size(50, 60));
+      expect(fake.viewFor(1).renderedSize, const ui.Size(50, 60));
+      first.resetPhysicalSize();
+      debugClearViewMetricsOverrides();
+      nested.render(scene);
       expect(fake.viewFor(1).renderedSize, isNull);
     });
 
