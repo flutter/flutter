@@ -766,11 +766,12 @@ class ManifestAssetBundle implements AssetBundle {
     AssetBundleEntry entry,
   ) {
     final AssetBundleEntry? existingEntry = entryMap[key];
+    final DevFSContent content = entry.content;
+    final DevFSContent? existingContent = existingEntry?.content;
     if (existingEntry == null ||
-        (entry.content is DevFSFileContent &&
-            existingEntry.content is DevFSFileContent &&
-            (entry.content as DevFSFileContent).file.path !=
-                (existingEntry.content as DevFSFileContent).file.path) ||
+        (content is DevFSFileContent &&
+            existingContent is DevFSFileContent &&
+            content.file.path != existingContent.file.path) ||
         !entry.hasEquivalentConfigurationWith(existingEntry)) {
       entryMap[key] = entry;
     }
