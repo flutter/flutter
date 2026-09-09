@@ -21,7 +21,6 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
@@ -48,7 +47,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
        _injectedCache = cache,
        _injectedFlutterVersion = flutterVersion,
        _injectedPlatform = platform,
-       super(logger: toolContext?.logger ?? logger ?? globals.logger, verboseHelp: verboseHelp) {
+       super(logger: toolContext?.logger ?? logger!, verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     usesPubOption();
@@ -127,14 +126,13 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   BuildSystem get buildSystem => _buildSystem;
 
   @protected
-  Cache get cache => toolContext?.cache ?? _injectedCache ?? globals.cache;
+  Cache get cache => (toolContext?.cache ?? _injectedCache)!;
 
   @protected
-  Platform get platform => toolContext?.platform ?? _injectedPlatform ?? globals.platform;
+  Platform get platform => toolContext?.platform ?? _injectedPlatform ?? const LocalPlatform();
 
   @protected
-  FlutterVersion get flutterVersion =>
-      toolContext?.flutterVersion ?? _injectedFlutterVersion ?? globals.flutterVersion;
+  FlutterVersion get flutterVersion => (toolContext?.flutterVersion ?? _injectedFlutterVersion)!;
 
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
@@ -287,8 +285,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Directory hostAppRoot,
     PlistParser plistParser,
   ) async {
-    final FileSystem fs = toolContext?.fs ?? globals.fs;
-    final Logger logger = toolContext?.logger ?? globals.logger;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext!;
 
     final File projectFile = hostAppRoot
         .childDirectory('Pods')
