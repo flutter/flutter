@@ -58,6 +58,22 @@ void main() {
     expect(result, matches(regex), reason: '.flutter-loader must have overflow: hidden');
   });
 
+  // https://github.com/flutter/flutter/issues/192226
+  test('generateBootstrapScript loading indicator listener is removed after first event and safely removes elements', () {
+    final String result = generateBootstrapScript(
+      requireUrl: 'require.js',
+      mapperUrl: 'mapper.js',
+      generateLoadingIndicator: true,
+    );
+
+    expect(result, contains("document.addEventListener('dart-app-ready', function (e) {"));
+    expect(result, contains('loader.remove();'));
+    expect(result, contains('styleSheet.remove();'));
+    expect(result, contains('}, { once: true });'));
+    expect(result, isNot(contains('loader.parentNode.removeChild')));
+    expect(result, isNot(contains('styleSheet.parentNode.removeChild')));
+  });
+
   // https://github.com/flutter/flutter/issues/82524
   test('generateMainModule removes timeout from requireJS', () {
     final String result = generateMainModule(
@@ -247,6 +263,24 @@ void main() {
       final regex = RegExp(r'(?:\.flutter-loader\s*\{)[^}]+(?:overflow\:\s*hidden;)[^}]+}');
 
       expect(result, matches(regex), reason: '.flutter-loader must have overflow: hidden');
+    });
+
+    // https://github.com/flutter/flutter/issues/192226
+    test('bootstrap script loading indicator listener is removed after first event and safely removes elements', () {
+      final String result = generateDDCLibraryBundleBootstrapScript(
+        entrypoint: 'foo/bar/main.js',
+        ddcModuleLoaderUrl: 'ddc_module_loader.js',
+        mapperUrl: 'mapper.js',
+        generateLoadingIndicator: true,
+        isWindows: false,
+      );
+
+      expect(result, contains("document.addEventListener('dart-app-ready', function (e) {"));
+      expect(result, contains('loader.remove();'));
+      expect(result, contains('styleSheet.remove();'));
+      expect(result, contains('}, { once: true });'));
+      expect(result, isNot(contains('loader.parentNode.removeChild')));
+      expect(result, isNot(contains('styleSheet.parentNode.removeChild')));
     });
 
     test('generateDDCLibraryBundleMainModule embeds the entrypoint correctly', () {
