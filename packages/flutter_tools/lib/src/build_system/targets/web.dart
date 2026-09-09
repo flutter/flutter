@@ -198,10 +198,7 @@ class Dart2JSTarget extends Dart2WebTarget {
       else if (buildMode == BuildMode.release)
         '-Ddart.vm.product=true',
       for (final String dartDefine in computeDartDefines(environment)) '-D$dartDefine',
-      if (featureFlags.isRecordUseEnabled) ...<String>[
-        '--write-resources',
-        '--enable-experiment=record-use',
-      ],
+      if (featureFlags.isRecordUseEnabled) '--write-resources',
     ];
 
     // NOTE: most args should be populated in [toSharedCommandOptions].
@@ -373,10 +370,8 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
-      if (featureFlags.isRecordUseEnabled) ...<String>[
+      if (featureFlags.isRecordUseEnabled)
         '--recorded-uses=${environment.buildDir.childFile(LinkHooks.recordedUsesWasmFileName).path}',
-        '--enable-experiment=record-use',
-      ],
       ...compilerConfig.toCommandOptions(buildMode),
       '-o',
       outputWasmFile.path,
