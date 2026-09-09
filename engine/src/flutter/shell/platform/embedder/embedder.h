@@ -1406,6 +1406,39 @@ typedef struct {
   /// The maximum bound of the pressure of the current pointer, where 0.0 is the
   /// default maximum bound.
   double pressure_max;
+  /// The distance of the detected object from the input surface, where 0.0 is
+  /// the default value.
+  double distance;
+  /// The maximum value of a distance for the current pointer, where 0.0 is the
+  /// default maximum bound.
+  double distance_max;
+  /// The area of the screen being pressed, normalized between 0.0 and 1.0,
+  /// where 0.0 is the default value.
+  double size;
+  /// The radius of the contact area along the major axis of the ellipse in
+  /// physical pixels, where 0.0 is the default value.
+  double radius_major;
+  /// The radius of the contact area along the minor axis of the ellipse in
+  /// physical pixels, where 0.0 is the default value.
+  double radius_minor;
+  /// The minimum radius of the contact area for the current pointer in physical
+  /// pixels, where 0.0 is the default value.
+  double radius_min;
+  /// The maximum radius of the contact area for the current pointer in physical
+  /// pixels, where 0.0 is the default value.
+  double radius_max;
+  /// The orientation of the current pointer in radians in the range -pi/2 <
+  /// orientation <= pi/2 for touch, and -pi < orientation <= pi for stylus,
+  /// where 0.0 is the default value.
+  double orientation;
+  /// The tilt of the current pointer in radians in the range 0 <= tilt <= pi/2,
+  /// where 0.0 is the default value.
+  double tilt;
+  /// An arbitrary int64 payload provided by the platform / embedder.
+  int64_t platform_data;
+  /// Identifier provided by the embedder to identify this event (e.g. Android
+  /// MotionEvent ID). Defaults to 0 if unassigned or unsupported.
+  int64_t embedder_id;
 } FlutterPointerEvent;
 
 typedef enum {
