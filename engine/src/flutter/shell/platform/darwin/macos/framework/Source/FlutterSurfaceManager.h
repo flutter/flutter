@@ -92,7 +92,9 @@
 @interface FlutterBackBufferCache : NSObject
 
 /**
- * Removes surface with given size from cache (if available) and returns it.
+ * Removes a surface with the given size from the cache and returns it, or nil
+ * if no idle surface of that exact size is cached. Cached surfaces of any
+ * other size are evicted. The returned surface is guaranteed to have `size`.
  */
 - (nullable FlutterSurface*)removeSurfaceForSize:(CGSize)size;
 
