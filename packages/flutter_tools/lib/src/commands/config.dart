@@ -28,15 +28,14 @@ import '../runner/flutter_command_runner.dart';
 class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   ConfigCommand({
     required AndroidContext androidContext,
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     required this.featureFlags,
     bool verboseHelp = false,
     ExtensionManager? extensionManager,
   }) : _androidContext = androidContext,
        _toolContext = toolContext,
        _extensionManager = extensionManager,
-       _verboseHelp = verboseHelp,
-       super(toolContext: toolContext);
+       _verboseHelp = verboseHelp;
 
   final AndroidContext _androidContext;
   final ToolContext _toolContext;

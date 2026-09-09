@@ -24,7 +24,7 @@ import 'build.dart';
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand({
     required this.buildSystem,
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     required bool verboseHelp,
     required FeatureFlags featureFlags,
     required VisualStudio visualStudio,
@@ -33,7 +33,6 @@ class BuildWindowsCommand extends BuildSubCommand {
        super(
          logger: toolContext.logger,
          outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
          verboseHelp: verboseHelp,
        ) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);

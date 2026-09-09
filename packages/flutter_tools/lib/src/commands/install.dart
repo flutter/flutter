@@ -13,8 +13,7 @@ import '../device.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  InstallCommand({required ToolContext toolContext, required super.verboseHelp})
-    : super(toolContext: toolContext) {
+  InstallCommand({required ToolContext super.toolContext, required super.verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp);
     requiresPubspecYaml();
     usesApplicationBinaryOption();

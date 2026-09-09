@@ -906,12 +906,12 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({
     required AppleContext appleContext,
     required BuildSystem buildSystem,
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     required bool verboseHelp,
   }) : _appleContext = appleContext,
        _buildSystem = buildSystem,
        _toolContext = toolContext,
-       super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
+       super(logger: toolContext.logger, verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
     addBuildModeFlags(verboseHelp: verboseHelp);

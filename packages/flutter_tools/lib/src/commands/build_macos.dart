@@ -23,12 +23,11 @@ class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({
     required this.buildSystem,
     required this.featureFlags,
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     required bool verboseHelp,
   }) : super(
          logger: toolContext.logger,
          outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
          verboseHelp: verboseHelp,
        ) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);

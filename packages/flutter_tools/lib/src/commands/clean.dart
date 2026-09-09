@@ -19,15 +19,14 @@ import '../runner/flutter_command.dart';
 
 class CleanCommand extends FlutterCommand {
   CleanCommand({
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     required Xcode xcode,
     required XcodeProjectInterpreter xcodeProjectInterpreter,
     bool verbose = false,
   }) : _toolContext = toolContext,
        _xcode = xcode,
        _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _verbose = verbose,
-       super(toolContext: toolContext) {
+       _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
       'scheme',
