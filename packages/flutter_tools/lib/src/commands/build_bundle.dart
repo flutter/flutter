@@ -91,7 +91,7 @@ class BuildBundleCommand extends BuildSubCommand {
   @visibleForTesting
   BundleBuilder get bundleBuilder => _bundleBuilder;
 
-  @override
+  @visibleForTesting
   FeatureFlags get featureFlags => _featureFlags;
 
   @override
@@ -171,12 +171,12 @@ class BuildBundleCommand extends BuildSubCommand {
     final BuildInfo buildInfo = await getBuildInfo();
 
     await _bundleBuilder.build(
-      platform: platform,
       buildInfo: buildInfo,
-      mainPath: targetFile,
-      depfilePath: stringArg('depfile'),
+      platform: platform,
       assetDirPath: stringArg('asset-dir'),
       buildSystem: _buildSystem,
+      depfilePath: stringArg('depfile'),
+      mainPath: targetFile,
     );
     return FlutterCommandResult.success();
   }
