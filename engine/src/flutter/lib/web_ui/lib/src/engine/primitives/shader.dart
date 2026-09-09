@@ -332,10 +332,10 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
 
   late final BackendFragmentShader _backendShader;
   final Map<int, BackendImageShader> _imageSamplers = <int, BackendImageShader>{};
-  final Map<int, EngineImage> _samplerImages = <int, EngineImage>{};
+  final Map<int, ui.Image> _samplerImages = <int, ui.Image>{};
 
   /// The images currently assigned to samplers in this shader.
-  Iterable<EngineImage> get samplerImages => _samplerImages.values;
+  Iterable<ui.Image> get samplerImages => _samplerImages.values;
 
   @visibleForTesting
   Map<int, BackendImageShader> get debugImageSamplers => _imageSamplers;
