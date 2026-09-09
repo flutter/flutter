@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -17,7 +18,585 @@ import '../widgets/semantics_tester.dart';
 // From bottom_sheet.dart.
 const Duration _bottomSheetExitDuration = Duration(milliseconds: 200);
 
+final GlobalKey _keyboardPaintKey = GlobalKey();
+const Key _keyboardSheetContentKey = ValueKey<String>('keyboard sheet content');
+const Key _keyboardBodyKey = ValueKey<String>('keyboard body');
+
+Finder get _keyboardSheetMaterial =>
+    find.descendant(of: find.byType(BottomSheet), matching: find.byType(Material)).first;
+
+Future<void> _pumpKeyboardSheetScaffold(
+  WidgetTester tester, {
+  GlobalKey<ScaffoldState>? scaffoldKey,
+  double inset = 200.0,
+  bool resize = true,
+  ThemeData? theme,
+  Widget? sheet,
+  Widget? bottomNavigationBar,
+  Widget? floatingActionButton,
+  Size? size,
+}) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: theme,
+      themeAnimationDuration: Duration.zero,
+      home: RepaintBoundary(
+        key: _keyboardPaintKey,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: size?.width,
+            height: size?.height,
+            child: MediaQuery(
+              data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: inset)),
+              child: Scaffold(
+                key: scaffoldKey,
+                resizeToAvoidBottomInset: resize,
+                backgroundColor: Colors.blue,
+                body: const SizedBox.expand(key: _keyboardBodyKey),
+                bottomSheet: sheet,
+                bottomNavigationBar: bottomNavigationBar,
+                floatingActionButton: floatingActionButton,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Future<Color> _keyboardPixel(WidgetTester tester, int x, int y) async {
+  final RenderRepaintBoundary boundary = tester.renderObject(find.byKey(_keyboardPaintKey));
+  return (await tester.runAsync(() async {
+    final ui.Image image = await boundary.toImage();
+    try {
+      final ByteData bytes = (await image.toByteData())!;
+      final int offset = (y * image.width + x) * 4;
+      return Color.fromARGB(
+        bytes.getUint8(offset + 3),
+        bytes.getUint8(offset),
+        bytes.getUint8(offset + 1),
+        bytes.getUint8(offset + 2),
+      );
+    } finally {
+      image.dispose();
+    }
+  }))!;
+}
+
 void main() {
+  group('persistent bottom sheet keyboard extension', () {
+    for (final material3 in <bool>[false, true]) {
+      for (final imperative in <bool>[false, true]) {
+        testWidgets(
+          'M3=$material3 imperative=$imperative extends Material without resizing content',
+          (WidgetTester tester) async {
+            final key = GlobalKey<ScaffoldState>();
+            const Widget content = SizedBox(
+              key: _keyboardSheetContentKey,
+              width: double.infinity,
+              height: 100.0,
+            );
+            await _pumpKeyboardSheetScaffold(
+              tester,
+              scaffoldKey: key,
+              theme: ThemeData(useMaterial3: material3),
+              sheet: imperative ? null : content,
+            );
+            if (imperative) {
+              showBottomSheet(
+                context: tester.element(find.byKey(_keyboardBodyKey)),
+                builder: (_) => content,
+              );
+            }
+            await tester.pumpAndSettle();
+            expect(
+              tester.getSize(find.byKey(_keyboardSheetContentKey)),
+              Size(material3 ? 640.0 : 800.0, 100.0),
+            );
+            expect(tester.getBottomLeft(find.byKey(_keyboardSheetContentKey)).dy, 400.0);
+            expect(tester.getBottomLeft(_keyboardSheetMaterial).dy, 600.0);
+            expect(tester.getSize(find.byKey(_keyboardBodyKey)).height, 400.0);
+            expect(await _keyboardPixel(tester, 400, 350), await _keyboardPixel(tester, 400, 500));
+          },
+          variant: const TargetPlatformVariant(<TargetPlatform>{
+            TargetPlatform.android,
+            TargetPlatform.iOS,
+          }),
+        );
+      }
+    }
+
+    testWidgets('height constraints still bound the logical sheet as keyboard changes', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      const theme = BottomSheetThemeData(
+        constraints: BoxConstraints.tightFor(width: 250.0, height: 150.0),
+      );
+      for (final inset in <double>[0.0, 80.0, 200.0, 0.0]) {
+        await _pumpKeyboardSheetScaffold(
+          tester,
+          scaffoldKey: key,
+          inset: inset,
+          theme: ThemeData(bottomSheetTheme: theme),
+          sheet: const SizedBox.expand(key: _keyboardSheetContentKey),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.getSize(find.byKey(_keyboardSheetContentKey)), const Size(250.0, 150.0));
+        expect(tester.getSize(find.byType(BottomSheet)).height, 150.0);
+        expect(tester.getBottomLeft(find.byKey(_keyboardSheetContentKey)).dy, 600.0 - inset);
+        expect(tester.getSize(_keyboardSheetMaterial), Size(250.0, 150.0 + inset));
+      }
+    });
+
+    testWidgets('logical bounds and intrinsic dimensions exclude the decoration', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      for (final inset in <double>[0.0, 200.0, 0.0]) {
+        await _pumpKeyboardSheetScaffold(
+          tester,
+          scaffoldKey: key,
+          inset: inset,
+          theme: ThemeData(useMaterial3: false),
+          sheet: const SizedBox(width: 240.0, height: 100.0, child: Text('Baseline')),
+        );
+        await tester.pumpAndSettle();
+        final RenderBox sheet = tester.renderObject(find.byType(BottomSheet));
+        expect(sheet.size, const Size(240.0, 100.0));
+        expect(sheet.getMinIntrinsicHeight(240.0), 100.0);
+        expect(sheet.getMaxIntrinsicHeight(240.0), 100.0);
+        expect(sheet.getMinIntrinsicWidth(100.0), 240.0);
+        expect(sheet.getMaxIntrinsicWidth(100.0), 240.0);
+        expect(sheet.getDryLayout(sheet.constraints), sheet.size);
+        expect(
+          sheet.getDryBaseline(sheet.constraints, TextBaseline.alphabetic),
+          tester
+              .renderObject<RenderBox>(find.text('Baseline'))
+              .getDryBaseline(
+                tester.renderObject<RenderBox>(find.text('Baseline')).constraints,
+                TextBaseline.alphabetic,
+              ),
+        );
+      }
+    });
+
+    for (final inset in <double>[0.0, 200.0]) {
+      testWidgets('drag thresholds use the logical sheet height with inset $inset', (
+        WidgetTester tester,
+      ) async {
+        final key = GlobalKey<ScaffoldState>();
+        final AnimationController controller = BottomSheet.createAnimationController(tester);
+        addTearDown(controller.dispose);
+        await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key, inset: inset);
+        key.currentState!.showBottomSheet(
+          (_) => const SizedBox(width: double.infinity, height: 100.0),
+          transitionAnimationController: controller,
+        );
+        await tester.pumpAndSettle();
+        final TestGesture gesture = await tester.startGesture(
+          tester.getCenter(find.byType(BottomSheet)),
+        );
+        await gesture.moveBy(const Offset(0.0, 20.0));
+        await gesture.moveBy(const Offset(0.0, 60.0));
+        expect(controller.value, closeTo(0.4, 0.001));
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(find.byType(BottomSheet), findsNothing);
+      });
+    }
+
+    testWidgets('dismissal clips content at the keyboard without enlarging animation travel', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      try {
+        final key = GlobalKey<ScaffoldState>();
+        final AnimationController controller = BottomSheet.createAnimationController(tester);
+        addTearDown(controller.dispose);
+        await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key);
+        key.currentState!.showBottomSheet(
+          (_) => Ink(color: Colors.green, width: double.infinity, height: 100.0),
+          backgroundColor: Colors.red,
+          transitionAnimationController: controller,
+        );
+        await tester.pumpAndSettle();
+        for (final value in <double>[0.9, 0.5, 0.1]) {
+          controller.value = value;
+          await tester.pump();
+          final double visibleHeight = Curves.fastOutSlowIn.transform(value) * 100.0;
+          expect(
+            tester.getTopLeft(find.byType(BottomSheet)).dy,
+            closeTo(400.0 - visibleHeight, 0.001),
+          );
+          expect(
+            tester.getSemantics(find.byType(BottomSheet)).rect.height,
+            lessThanOrEqualTo(visibleHeight + precisionErrorTolerance),
+          );
+          expect(await _keyboardPixel(tester, 400, 401), isSameColorAs(Colors.red));
+          expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(Colors.red));
+        }
+      } finally {
+        semantics.dispose();
+      }
+    });
+
+    testWidgets('dismissal excludes hidden content from accessibility', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      try {
+        final key = GlobalKey<ScaffoldState>();
+        final AnimationController controller = BottomSheet.createAnimationController(tester);
+        addTearDown(controller.dispose);
+        const target = ValueKey<String>('lower semantics');
+        await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key);
+        key.currentState!.showBottomSheet(
+          (_) => SizedBox(
+            height: 100.0,
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const SizedBox(height: 60.0),
+                Semantics(
+                  key: target,
+                  container: true,
+                  label: 'Lower content',
+                  child: const SizedBox(height: 40.0),
+                ),
+              ],
+            ),
+          ),
+          transitionAnimationController: controller,
+        );
+        await tester.pumpAndSettle();
+        final SemanticsNode node = tester.getSemantics(find.byKey(target));
+        expect(node, matchesSemantics(label: 'Lower content', textDirection: TextDirection.ltr));
+        controller.value = 0.3;
+        await tester.pump();
+        expect(node.attached && !node.hasFlag(ui.SemanticsFlag.isHidden), isFalse);
+        controller.value = 1.0;
+        await tester.pump();
+        expect(
+          tester.getSemantics(find.byKey(target)),
+          matchesSemantics(label: 'Lower content', textDirection: TextDirection.ltr),
+        );
+      } finally {
+        semantics.dispose();
+      }
+    });
+
+    testWidgets('constrained Scaffold bounds excessive insets and clips the surface', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      const theme = BottomSheetThemeData(
+        backgroundColor: Colors.red,
+        constraints: BoxConstraints.tightFor(height: 150.0),
+      );
+      for (final inset in <double>[0.0, 200.0, 400.0, 0.0]) {
+        await _pumpKeyboardSheetScaffold(
+          tester,
+          scaffoldKey: key,
+          size: const Size(320.0, 250.0),
+          inset: inset,
+          theme: ThemeData(bottomSheetTheme: theme),
+          sheet: const SizedBox.expand(key: _keyboardSheetContentKey),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          tester.getSize(find.byKey(_keyboardSheetContentKey)).height,
+          math.min(150.0, math.max(0.0, 250.0 - inset)),
+        );
+        expect(
+          tester.getSize(find.byType(BottomSheet)).height,
+          math.min(150.0, math.max(0.0, 250.0 - inset)),
+        );
+        expect(tester.getBottomLeft(_keyboardSheetMaterial).dy, 250.0);
+        expect(await _keyboardPixel(tester, 160, 249), isSameColorAs(Colors.red));
+        expect(await _keyboardPixel(tester, 160, 260), isNot(isSameColorAs(Colors.red)));
+        expect(tester.takeException(), isNull);
+      }
+    });
+
+    testWidgets('surface tint and shape remain owned by the extending Material', (
+      WidgetTester tester,
+    ) async {
+      const shape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(24.0),
+          bottom: Radius.circular(40.0),
+        ),
+      );
+      await _pumpKeyboardSheetScaffold(
+        tester,
+        theme: ThemeData(
+          bottomSheetTheme: const BottomSheetThemeData(
+            backgroundColor: Colors.red,
+            surfaceTintColor: Colors.green,
+            elevation: 12.0,
+            shape: shape,
+            constraints: BoxConstraints.tightFor(width: 240.0),
+          ),
+        ),
+        sheet: const SizedBox(height: 100.0),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.widget<Material>(_keyboardSheetMaterial).shape, shape);
+      expect(tester.getSize(_keyboardSheetMaterial), const Size(240.0, 300.0));
+      final Color surface = await _keyboardPixel(tester, 400, 350);
+      expect(surface, isNot(isSameColorAs(Colors.red)));
+      expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(surface));
+      expect(await _keyboardPixel(tester, 270, 500), isSameColorAs(Colors.blue));
+    });
+
+    testWidgets('surface updates when logical constraints stay unchanged', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      for (final height in <double>[600.0, 500.0, 600.0]) {
+        await _pumpKeyboardSheetScaffold(
+          tester,
+          scaffoldKey: key,
+          size: Size(320.0, height),
+          inset: height - 400.0,
+          sheet: const SizedBox(height: 100.0, width: double.infinity),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.getSize(find.byType(BottomSheet)).height, 100.0);
+        expect(tester.getTopLeft(find.byType(BottomSheet)).dy, 300.0);
+        expect(tester.getBottomLeft(_keyboardSheetMaterial).dy, height);
+      }
+    });
+
+    testWidgets('explicit transparency remains transparent under the keyboard', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      await _pumpKeyboardSheetScaffold(
+        tester,
+        scaffoldKey: key,
+        theme: ThemeData(bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.red)),
+      );
+      key.currentState!.showBottomSheet(
+        (_) => const SizedBox(width: 240.0, height: 100.0),
+        backgroundColor: Colors.transparent,
+        elevation: 0.0,
+      );
+      await tester.pumpAndSettle();
+      expect(await _keyboardPixel(tester, 400, 350), isSameColorAs(Colors.blue));
+      expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(Colors.blue));
+    });
+
+    testWidgets('replacement retains each surface width and color until dismissal', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      await _pumpKeyboardSheetScaffold(
+        tester,
+        scaffoldKey: key,
+        theme: ThemeData(useMaterial3: false),
+      );
+      final PersistentBottomSheetController firstSheet = key.currentState!.showBottomSheet(
+        (_) => const SizedBox(width: 400.0, height: 100.0),
+        backgroundColor: Colors.red,
+        constraints: const BoxConstraints.tightFor(width: 400.0),
+      );
+      await tester.pumpAndSettle();
+      firstSheet.close();
+      key.currentState!.showBottomSheet(
+        (_) => const SizedBox(width: 200.0, height: 150.0),
+        backgroundColor: Colors.green,
+        constraints: const BoxConstraints.tightFor(width: 200.0),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(await _keyboardPixel(tester, 250, 500), isSameColorAs(Colors.red));
+      expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(Colors.green));
+      await tester.pumpAndSettle();
+      expect(await _keyboardPixel(tester, 250, 500), isSameColorAs(Colors.blue));
+      expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(Colors.green));
+    });
+
+    testWidgets('nested Navigators keep each Scaffold surface within its own bounds', (
+      WidgetTester tester,
+    ) async {
+      Widget pane(double inset, Color color) {
+        return Expanded(
+          child: Navigator(
+            onGenerateRoute: (_) => MaterialPageRoute<void>(
+              builder: (_) => MediaQuery(
+                data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: inset)),
+                child: Theme(
+                  data: ThemeData(bottomSheetTheme: BottomSheetThemeData(backgroundColor: color)),
+                  child: const Scaffold(
+                    backgroundColor: Colors.blue,
+                    bottomSheet: SizedBox(height: 100.0, width: double.infinity),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RepaintBoundary(
+            key: _keyboardPaintKey,
+            child: Row(children: <Widget>[pane(200.0, Colors.red), pane(0.0, Colors.green)]),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(await _keyboardPixel(tester, 200, 450), isSameColorAs(Colors.red));
+      expect(await _keyboardPixel(tester, 600, 450), isSameColorAs(Colors.blue));
+      expect(await _keyboardPixel(tester, 600, 550), isSameColorAs(Colors.green));
+    });
+
+    testWidgets('keyboard changes preserve focused field state and scroll visibility', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(tester.view.resetViewInsets);
+      final key = GlobalKey<ScaffoldState>();
+      final focus = FocusNode();
+      final controller = TextEditingController(text: 'Focused content');
+      addTearDown(focus.dispose);
+      addTearDown(controller.dispose);
+      final Widget content = SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            const SizedBox(height: 700.0),
+            TextField(focusNode: focus, controller: controller),
+          ],
+        ),
+      );
+      await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key, inset: 0.0, sheet: content);
+      focus.requestFocus();
+      await tester.pumpAndSettle();
+      final EditableTextState state = tester.state(find.byType(EditableText));
+      for (final inset in <double>[200.0, 0.0]) {
+        tester.view.viewInsets = FakeViewPadding(bottom: inset * tester.view.devicePixelRatio);
+        await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key, inset: inset, sheet: content);
+        await tester.pumpAndSettle();
+        expect(tester.state(find.byType(EditableText)), same(state));
+        expect(focus.hasFocus, isTrue);
+        expect(
+          tester.getBottomLeft(find.byType(EditableText)).dy,
+          lessThanOrEqualTo(600.0 - inset),
+        );
+      }
+    });
+
+    testWidgets('resize opt-out keeps the original sheet layout', (WidgetTester tester) async {
+      await _pumpKeyboardSheetScaffold(
+        tester,
+        resize: false,
+        sheet: const SizedBox(key: _keyboardSheetContentKey, height: 100.0),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.getBottomLeft(find.byKey(_keyboardSheetContentKey)).dy, 600.0);
+      expect(tester.getSize(_keyboardSheetMaterial).height, 100.0);
+      expect(await _keyboardPixel(tester, 400, 450), isSameColorAs(Colors.blue));
+    });
+
+    testWidgets('keeps bottom navigation, content and FAB geometry', (WidgetTester tester) async {
+      var taps = 0;
+      await _pumpKeyboardSheetScaffold(
+        tester,
+        sheet: const SizedBox(key: _keyboardSheetContentKey, width: double.infinity, height: 100.0),
+        bottomNavigationBar: GestureDetector(
+          onTap: () => taps++,
+          child: const ColoredBox(color: Colors.yellow, child: SizedBox(height: 250.0)),
+        ),
+        floatingActionButton: FloatingActionButton(onPressed: () {}, child: const Icon(Icons.add)),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.getBottomLeft(find.byKey(_keyboardSheetContentKey)).dy, 350.0);
+      expect(tester.getCenter(find.byType(FloatingActionButton)).dy, 250.0);
+      expect(await _keyboardPixel(tester, 400, 450), isSameColorAs(Colors.yellow));
+      await tester.tapAt(const Offset(400.0, 450.0));
+      expect(taps, 1);
+    });
+
+    testWidgets('keyboard continuation does not intercept pointers or add semantic targets', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      var taps = 0;
+      final key = GlobalKey<ScaffoldState>();
+      await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key);
+      key.currentState!.showBottomSheet(
+        (_) => SizedBox(
+          height: 100.0,
+          width: double.infinity,
+          child: TextButton(
+            key: _keyboardSheetContentKey,
+            onPressed: () => taps++,
+            child: const Text('Sheet action'),
+          ),
+        ),
+        backgroundColor: Colors.red,
+      );
+      await tester.pumpAndSettle();
+      final Rect contentRect = tester.getRect(find.byKey(_keyboardSheetContentKey));
+      expect(tester.getSemantics(find.byType(BottomSheet)).rect.height, contentRect.height);
+      final HitTestResult result = tester.hitTestOnBinding(const Offset(400.0, 500.0));
+      final RenderObject material = tester.renderObject(_keyboardSheetMaterial);
+      expect(result.path.any((HitTestEntry entry) => entry.target == material), isFalse);
+      await tester.tapAt(const Offset(400.0, 500.0));
+      expect(taps, 0);
+      await tester.tapAt(contentRect.center);
+      expect(taps, 1);
+      semantics.dispose();
+    });
+
+    testWidgets('nested BottomSheet does not consume the surface extension again', (
+      WidgetTester tester,
+    ) async {
+      await _pumpKeyboardSheetScaffold(
+        tester,
+        sheet: SizedBox(
+          height: 100.0,
+          child: BottomSheet(
+            enableDrag: false,
+            onClosing: () {},
+            builder: (_) => const SizedBox(
+              key: _keyboardSheetContentKey,
+              height: 100.0,
+              width: double.infinity,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final Finder innerMaterial = find
+          .descendant(of: find.byType(BottomSheet).last, matching: find.byType(Material))
+          .first;
+      expect(tester.getSize(innerMaterial).height, 100.0);
+      expect(tester.getSize(_keyboardSheetMaterial).height, 300.0);
+    });
+
+    testWidgets('modal sheets retain caller-controlled keyboard avoidance', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key);
+      showModalBottomSheet<void>(
+        context: key.currentContext!,
+        backgroundColor: Colors.red,
+        builder: (_) =>
+            const SizedBox(key: _keyboardSheetContentKey, width: double.infinity, height: 100.0),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.getSize(_keyboardSheetMaterial).height, 100.0);
+      expect(tester.getBottomLeft(find.byKey(_keyboardSheetContentKey)).dy, 600.0);
+    });
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/103741
   testWidgets('extendBodyBehindAppBar change should not cause the body widget lose state', (
     WidgetTester tester,
@@ -757,73 +1336,69 @@ void main() {
     }),
   );
 
-  testWidgets(
-    'Tapping the status bar scrolls to top with ease out curve animation',
-    (WidgetTester tester) async {
-      const duration = 1000;
-      final stops = <double>[0.842, 0.959, 0.993, 1.0];
-      const double scrollOffset = 1000;
+  testWidgets('Tapping the status bar scrolls to top with ease out curve animation', (
+    WidgetTester tester,
+  ) async {
+    const duration = 1000;
+    final stops = <double>[0.842, 0.959, 0.993, 1.0];
+    const double scrollOffset = 1000;
 
-      await tester.pumpWidget(buildStatusBarTestApp());
-      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-      scrollable.position.jumpTo(scrollOffset);
+    await tester.pumpWidget(buildStatusBarTestApp());
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    scrollable.position.jumpTo(scrollOffset);
 
-      tester.simulateStatusBarTap();
-      await tester.pump(Duration.zero);
-      expect(scrollable.position.pixels, equals(scrollOffset));
+    tester.simulateStatusBarTap();
+    await tester.pump(Duration.zero);
+    expect(scrollable.position.pixels, equals(scrollOffset));
 
-      for (var i = 0; i < stops.length; i++) {
-        await tester.pump(Duration(milliseconds: duration ~/ stops.length));
-        // Scroll pixel position is very long double, compare with floored int
-        // pixel position
-        expect(
-          scrollable.position.pixels.toInt(),
-          equals((scrollOffset * (1 - stops[i])).toInt()),
-          reason: 'stop $i',
-        );
-      }
-
-      // Finally stops at the top.
-      expect(scrollable.position.pixels, equals(0.0));
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
-
-  testWidgets(
-    'status bar tap only scrolls the foregrounded primary controller',
-    (WidgetTester tester) async {
-      final app = MaterialApp(
-        initialRoute: 'a',
-        onGenerateInitialRoutes: (initialRoute) {
-          return [
-            MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
-            MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
-          ];
-        },
-        onGenerateRoute: (_) => throw UnimplementedError(),
+    for (var i = 0; i < stops.length; i++) {
+      await tester.pump(Duration(milliseconds: duration ~/ stops.length));
+      // Scroll pixel position is very long double, compare with floored int
+      // pixel position
+      expect(
+        scrollable.position.pixels.toInt(),
+        equals((scrollOffset * (1 - stops[i])).toInt()),
+        reason: 'stop $i',
       );
-      await tester.pumpWidget(app);
+    }
 
-      final Iterable<ScrollableState> scrollables = tester.stateList<ScrollableState>(
-        find.descendant(
-          of: find.byType(_ScaffoldWithPrimaryScrollView, skipOffstage: false),
-          matching: find.byType(Scrollable, skipOffstage: false),
-          skipOffstage: false,
-        ),
-      );
+    // Finally stops at the top.
+    expect(scrollable.position.pixels, equals(0.0));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-      final [ScrollableState scrollable1, ScrollableState scrollable2] = scrollables.toList();
-      expect(scrollable1.position.pixels, 1000);
-      expect(scrollable2.position.pixels, 1000);
+  testWidgets('status bar tap only scrolls the foregrounded primary controller', (
+    WidgetTester tester,
+  ) async {
+    final app = MaterialApp(
+      initialRoute: 'a',
+      onGenerateInitialRoutes: (initialRoute) {
+        return [
+          MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
+          MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
+        ];
+      },
+      onGenerateRoute: (_) => throw UnimplementedError(),
+    );
+    await tester.pumpWidget(app);
 
-      tester.simulateStatusBarTap();
-      await tester.pumpAndSettle();
+    final Iterable<ScrollableState> scrollables = tester.stateList<ScrollableState>(
+      find.descendant(
+        of: find.byType(_ScaffoldWithPrimaryScrollView, skipOffstage: false),
+        matching: find.byType(Scrollable, skipOffstage: false),
+        skipOffstage: false,
+      ),
+    );
 
-      expect(scrollable1.position.pixels, 1000);
-      expect(scrollable2.position.pixels, 0);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    final [ScrollableState scrollable1, ScrollableState scrollable2] = scrollables.toList();
+    expect(scrollable1.position.pixels, 1000);
+    expect(scrollable2.position.pixels, 1000);
+
+    tester.simulateStatusBarTap();
+    await tester.pumpAndSettle();
+
+    expect(scrollable1.position.pixels, 1000);
+    expect(scrollable2.position.pixels, 0);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
     final Key sheetKey = UniqueKey();
@@ -2189,63 +2764,61 @@ void main() {
     expect(scaffoldState.isDrawerOpen, true);
   });
 
-  testWidgets(
-    'Drawer does not open with a drag gesture when it is disabled on mobile',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            drawer: const Drawer(child: Text('Drawer')),
-            body: const Text('Scaffold Body'),
-            appBar: AppBar(centerTitle: true, title: const Text('Title')),
-          ),
+  testWidgets('Drawer does not open with a drag gesture when it is disabled on mobile', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(child: Text('Drawer')),
+          body: const Text('Scaffold Body'),
+          appBar: AppBar(centerTitle: true, title: const Text('Title')),
         ),
-      );
-      ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
-      expect(scaffoldState.isDrawerOpen, false);
+      ),
+    );
+    ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
 
-      // Test that we can open the drawer with a drag gesture when
-      // `Scaffold.drawerEnableDragGesture` is true.
-      await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, true);
+    // Test that we can open the drawer with a drag gesture when
+    // `Scaffold.drawerEnableDragGesture` is true.
+    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
 
-      await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, false);
+    await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            drawer: const Drawer(child: Text('Drawer')),
-            drawerEnableOpenDragGesture: false,
-            body: const Text('Scaffold body'),
-            appBar: AppBar(centerTitle: true, title: const Text('Title')),
-          ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(child: Text('Drawer')),
+          drawerEnableOpenDragGesture: false,
+          body: const Text('Scaffold body'),
+          appBar: AppBar(centerTitle: true, title: const Text('Title')),
         ),
-      );
-      scaffoldState = tester.state(find.byType(Scaffold));
-      expect(scaffoldState.isDrawerOpen, false);
+      ),
+    );
+    scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
 
-      // Test that we cannot open the drawer with a drag gesture when
-      // `Scaffold.drawerEnableDragGesture` is false.
-      await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, false);
+    // Test that we cannot open the drawer with a drag gesture when
+    // `Scaffold.drawerEnableDragGesture` is false.
+    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
 
-      // Test that we can close drawer with a drag gesture when
-      // `Scaffold.drawerEnableDragGesture` is false.
-      final Finder drawerOpenButton = find.byType(IconButton).first;
-      await tester.tap(drawerOpenButton);
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, true);
+    // Test that we can close drawer with a drag gesture when
+    // `Scaffold.drawerEnableDragGesture` is false.
+    final Finder drawerOpenButton = find.byType(IconButton).first;
+    await tester.tap(drawerOpenButton);
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
 
-      await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, false);
-    },
-    variant: TargetPlatformVariant.mobile(),
-  );
+    await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
+  }, variant: TargetPlatformVariant.mobile());
 
   testWidgets('Drawer does not open with a drag gesture on desktop', (WidgetTester tester) async {
     await tester.pumpWidget(

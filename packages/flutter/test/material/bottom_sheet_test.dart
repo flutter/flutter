@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/src/material/bottom_sheet.dart' as bottom_sheet;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -26,6 +27,38 @@ void main() {
     // If the animation were linear, these two values would be the same.
     expect(dyDelta1, isNot(moreOrLessEquals(dyDelta2, epsilon: 0.1)));
   }
+
+  testWidgets('standalone sheet retains its constraints despite ambient keyboard insets', (
+    WidgetTester tester,
+  ) async {
+    for (final inset in <double>[0.0, 200.0, 0.0]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: inset)),
+            child: Center(
+              // Preserve compatibility with the original source library as well
+              // as the material.dart export.
+              child: bottom_sheet.BottomSheet(
+                enableDrag: false,
+                constraints: const BoxConstraints.tightFor(width: 240.0, height: 150.0),
+                onClosing: () {},
+                builder: (_) => const SizedBox.expand(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.getSize(find.byType(BottomSheet)), const Size(800.0, 150.0));
+      expect(
+        tester.getSize(
+          find.descendant(of: find.byType(BottomSheet), matching: find.byType(Material)),
+        ),
+        const Size(240.0, 150.0),
+      );
+    }
+  });
 
   testWidgets('Throw if enable drag without an animation controller', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/89168

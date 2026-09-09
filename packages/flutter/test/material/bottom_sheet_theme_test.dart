@@ -249,7 +249,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final Material material = tester.widget<Material>(
-        find.descendant(of: find.byType(BottomSheet), matching: find.byType(Material)),
+        find.descendant(of: find.byType(BottomSheet), matching: find.byType(Material)).first,
       );
       expect(material.elevation, persistentElevation);
       expect(material.color, persistentBackgroundColor);
@@ -271,7 +271,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final Material material = tester.widget<Material>(
-        find.descendant(of: find.byType(BottomSheet), matching: find.byType(Material)),
+        find.descendant(of: find.byType(BottomSheet), matching: find.byType(Material)).first,
       );
       expect(material.elevation, 1.0);
       final ThemeData theme = Theme.of(tester.element(find.byType(Scaffold)));
@@ -294,7 +294,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final Material material = tester.widget<Material>(
-        find.descendant(of: find.byType(BottomSheet), matching: find.byType(Material)),
+        find.descendant(of: find.byType(BottomSheet), matching: find.byType(Material)).first,
       );
       expect(material.elevation, 0);
       expect(material.color, null);

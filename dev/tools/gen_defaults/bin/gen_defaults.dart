@@ -101,7 +101,7 @@ Future<void> main(List<String> args) async {
   BadgeTemplate('Badge', '$materialLib/badge.dart', tokens).updateFile();
   BannerTemplate('Banner', '$materialLib/banner.dart', tokens).updateFile();
   BottomAppBarTemplate('BottomAppBar', '$materialLib/bottom_app_bar.dart', tokens).updateFile();
-  BottomSheetTemplate('BottomSheet', '$materialLib/bottom_sheet.dart', tokens).updateFile();
+  BottomSheetTemplate('BottomSheet', '$materialLib/scaffold.dart', tokens).updateFile();
   ButtonTemplate('md.comp.elevated-button', 'ElevatedButton', '$materialLib/elevated_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.filled-button', 'FilledButton', '$materialLib/filled_button.dart', tokens).updateFile();
   ButtonTemplate('md.comp.filled-tonal-button', 'FilledTonalButton', '$materialLib/filled_button.dart', tokens).updateFile();
