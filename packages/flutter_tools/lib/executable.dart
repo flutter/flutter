@@ -7,6 +7,7 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
+import 'src/android/android_workflow.dart' as android_workflow;
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -185,7 +186,7 @@ Future<void> main(List<String> args) async {
   );
 }
 
-/// The name of the command in [args], or null if there isn't one.
+/// The name of the command in `args`, or null if there isn't one.
 ///
 /// Global options can come before the command, so it can't be found by
 /// position. A throwaway parser walks past them instead: trailing options are
@@ -290,8 +291,14 @@ List<FlutterCommand> generateCommands({
   ),
   CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
-  DaemonCommand(hidden: !verboseHelp),
-  DebugAdapterCommand(verboseHelp: verboseHelp),
+  DaemonCommand(
+    androidContext: toolDependencies.androidContext,
+    androidWorkflow: android_workflow.androidWorkflow,
+    deviceManager: globals.deviceManager,
+    hidden: !verboseHelp,
+    toolContext: toolDependencies.toolContext,
+  ),
+  DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(
     deviceManager: globals.deviceManager!,
     doctor: globals.doctor!,

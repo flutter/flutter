@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -69,7 +70,10 @@ void main() {
         }
       }
     }),
-    overrides: <Type, Generator>{AndroidSdk: () => FakeAndroidSdk()},
+    overrides: <Type, Generator>{
+      AndroidSdk: () => FakeAndroidSdk(),
+      AndroidStudio: () => FakeAndroidStudio(),
+    },
   );
 
   testUsingContext('Global arg results are available in FlutterCommands', () async {

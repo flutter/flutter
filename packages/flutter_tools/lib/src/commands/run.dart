@@ -9,6 +9,7 @@ import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
+import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -671,7 +672,22 @@ class RunCommand extends RunCommandBase {
 
   @visibleForTesting
   Daemon createMachineDaemon() {
-    return Daemon.createMachineDaemon();
+    return Daemon.createMachineDaemon(
+      analytics: globals.analytics,
+      androidSdk: globals.androidSdk,
+      androidWorkflow: android_workflow.androidWorkflow,
+      deviceManager: globals.deviceManager,
+      featureFlags: featureFlags,
+      fileSystem: globals.fs,
+      java: globals.java,
+      logger: globals.logger,
+      outputPreferences: globals.outputPreferences,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      stdio: globals.stdio,
+      systemClock: globals.systemClock,
+      terminal: globals.terminal,
+    );
   }
 
   @override
