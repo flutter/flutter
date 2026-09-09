@@ -93,10 +93,9 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildMacOSFrameworkCommand(
-        appleContext: appleContext,
         buildSystem: buildSystem,
         codesign: codesign,
-        toolContext: toolContext,
+        logger: logger,
         verboseHelp: verboseHelp,
       ),
     );
