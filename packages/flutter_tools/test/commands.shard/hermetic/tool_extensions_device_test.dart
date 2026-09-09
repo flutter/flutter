@@ -54,7 +54,13 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final devicesCommand = DevicesCommand(extensionManager: manager);
+        final testDeviceManager = TestDeviceManager();
+        final devicesCommand = DevicesCommand(
+          deviceManager: testDeviceManager,
+          doctor: FakeDoctor(),
+          extensionManager: manager,
+          toolContext: FakeToolContext(logger: testLogger),
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(devicesCommand);
 
         await commandRunner.run(<String>['devices']);
@@ -109,7 +115,13 @@ void main() {
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
-        final devicesCommand = DevicesCommand(extensionManager: manager);
+        final testDeviceManager = TestDeviceManager();
+        final devicesCommand = DevicesCommand(
+          deviceManager: testDeviceManager,
+          doctor: FakeDoctor(),
+          extensionManager: manager,
+          toolContext: FakeToolContext(logger: testLogger),
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(devicesCommand);
 
         await commandRunner.run(<String>['devices']);
