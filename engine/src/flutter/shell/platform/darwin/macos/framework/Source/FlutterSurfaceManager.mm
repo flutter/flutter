@@ -318,10 +318,16 @@ static const int kSurfaceEvictionAge = 30;
 
 - (nullable FlutterSurface*)removeSurfaceForSize:(CGSize)size {
   @synchronized(self) {
-    // Purge all cached surfaces if the size has changed.
-    if (_surfaces.firstObject != nil && !CGSizeEqualToSize(_surfaces.firstObject.size, size)) {
-      [_surfaces removeAllObjects];
-    }
+    // Surfaces of a different size can never be reused. Drop them so a later
+    // request cannot receive a surface whose Metal texture disagrees with the
+    // backing store size it was asked for (flutter/flutter#185394). This is
+    // checked per surface: the cache can hold mixed sizes when the front
+    // surfaces of a frame with a different size are returned while a surface
+    // of the current size is still held by the window server.
+    [_surfaces filterUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(FlutterSurface* surface,
+                                                                          NSDictionary* bindings) {
+                 return CGSizeEqualToSize(surface.size, size);
+               }]];
 
     FlutterSurface* res;
 
@@ -337,6 +343,7 @@ static const int kSurfaceEvictionAge = 30;
     if (res != nil) {
       [_surfaces removeObject:res];
     }
+    FML_DCHECK(res == nil || CGSizeEqualToSize(res.size, size));
     return res;
   }
 }
