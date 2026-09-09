@@ -23,7 +23,7 @@ Future<dynamic> _callScreenshotServer(dynamic requestData) async {
 
 /// How to compare pixels within the image.
 ///
-/// Keep this enum in sync with the one defined in `goldens.dart`.
+/// Keep this enum in sync with the one defined in `image_compare.dart`.
 enum PixelComparison {
   /// Allows minor blur and anti-aliasing differences by comparing a 3x3 grid
   /// surrounding the pixel rather than direct 1:1 comparison.
@@ -46,12 +46,18 @@ enum PixelComparison {
 ///
 /// [pixelComparison] determines the algorithm used to compare pixels. Uses
 /// fuzzy comparison by default.
-Future<void> matchGoldenFile(String filename, {Rect? region}) async {
+Future<void> matchGoldenFile(
+  String filename, {
+  Rect? region,
+  PixelComparison pixelComparison = PixelComparison.fuzzy,
+  double? maxDiffRate,
+  int? pixelColorDeltaPerChannel,
+}) async {
   // It is difficult to deterministically tell when rendered content is actually
-  // visible to the user, so we pump 15 frames to make sure that the content is
+  // visible to the user, so we pump 15 frames to make sure that the content
   // has reached the screen. This is at the recommendation of the Chrome team,
   // and they use this same thing in their screenshot unit tests.
-  for (var i = 0; i < 15; i++) {
+  for (var i = 0; i < 15; i += 1) {
     await awaitNextFrame();
   }
 
@@ -73,6 +79,9 @@ Future<void> matchGoldenFile(String filename, {Rect? region}) async {
     // sdk where the internal classes like `CanvasKitRenderer` are no longer
     // visible.
     'isCanvaskitTest': renderer.rendererTag == 'canvaskit',
+    'pixelComparison': pixelComparison.name,
+    'maxDiffRate': maxDiffRate,
+    'pixelColorDeltaPerChannel': pixelColorDeltaPerChannel,
   };
 
   final response = await _callScreenshotServer(serverParams) as String;
@@ -83,7 +92,7 @@ Future<void> matchGoldenFile(String filename, {Rect? region}) async {
   fail(response);
 }
 
-/// Waits for one frame to complete rendering
+/// Waits for one frame to complete rendering.
 Future<void> awaitNextFrame() {
   final completer = Completer<void>();
   domWindow.requestAnimationFrame((JSNumber time) => completer.complete());
