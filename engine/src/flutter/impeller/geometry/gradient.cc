@@ -2,24 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "impeller/geometry/gradient.h"
+
 #include <algorithm>
 
 #include "flutter/fml/logging.h"
-#include "impeller/geometry/gradient.h"
 
 namespace impeller {
 
 // TODO(b-luk): this should use a platform specific max texture size.
 // https://github.com/flutter/flutter/issues/191820
 static constexpr uint32_t kMaxGradientTextureSize = 1024;
-
-static void AppendColor(const Color& color, GradientData* data) {
-  auto converted = color.ToR8G8B8A8();
-  data->color_bytes.push_back(converted[0]);
-  data->color_bytes.push_back(converted[1]);
-  data->color_bytes.push_back(converted[2]);
-  data->color_bytes.push_back(converted[3]);
-}
 
 GradientData CreateGradientBuffer(const std::vector<Color>& colors,
                                   const std::vector<Scalar>& stops) {
@@ -45,24 +38,18 @@ GradientData CreateGradientBuffer(const std::vector<Color>& colors,
     }
     texture_size = static_cast<uint32_t>(std::round(1.0 / minimum_delta)) + 1;
   }
-  GradientData data = {
-      .color_bytes = {},
-      .texture_size = texture_size,
-  };
-  data.color_bytes.reserve(texture_size * 4);
-
+  GradientData result;
   if (texture_size == colors.size() &&
       colors.size() <= kMaxGradientTextureSize) {
-    for (auto i = 0u; i < colors.size(); i++) {
-      AppendColor(colors[i], &data);
-    }
+    result.colors = colors;
   } else {
+    result.colors.reserve(texture_size);
     Color previous_color = colors[0];
     auto previous_stop = 0.0;
     auto previous_color_index = 0;
 
     // The first index is always equal to the first color, exactly.
-    AppendColor(previous_color, &data);
+    result.colors.push_back(previous_color);
 
     for (auto i = 1u; i < texture_size - 1; i++) {
       auto scaled_i = i / (texture_size - 1.0);
@@ -70,7 +57,7 @@ GradientData CreateGradientBuffer(const std::vector<Color>& colors,
       auto next_stop = stops[previous_color_index + 1];
       // We're almost exactly equal to the next stop.
       if (ScalarNearlyEqual(scaled_i, next_stop)) {
-        AppendColor(next_color, &data);
+        result.colors.push_back(next_color);
 
         previous_color = next_color;
         previous_stop = next_stop;
@@ -80,7 +67,7 @@ GradientData CreateGradientBuffer(const std::vector<Color>& colors,
         auto t = (scaled_i - previous_stop) / (next_stop - previous_stop);
         auto mixed_color = Color::Lerp(previous_color, next_color, t);
 
-        AppendColor(mixed_color, &data);
+        result.colors.push_back(mixed_color);
       } else {
         // We've passed the next stop. Advance to the next stop interval.
         // Decrement `i` to re-evaluate the current texel against the new
@@ -93,9 +80,9 @@ GradientData CreateGradientBuffer(const std::vector<Color>& colors,
       }
     }
     // The last index is always equal to the last color, exactly.
-    AppendColor(colors.back(), &data);
+    result.colors.push_back(colors.back());
   }
-  return data;
+  return result;
 }
 
 }  // namespace impeller

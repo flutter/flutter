@@ -105,12 +105,12 @@ void testUsingContext(
               AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
               Config: () => buildConfig(globals.fs),
               DeviceManager: () => FakeDeviceManager(),
-              Doctor: () => FakeDoctor(globals.logger),
+              Doctor: () => _ContextFakeDoctor(globals.logger),
               FlutterVersion: () => FakeFlutterVersion(),
               HttpClient: () => FakeHttpClient.any(),
               IOSSimulatorUtils: () => const NoopIOSSimulatorUtils(),
               OutputPreferences: () => OutputPreferences.test(),
-              Logger: () => BufferLogger.test(),
+              Logger: () => BufferLogger.test(outputPreferences: context.get<OutputPreferences>()),
               OperatingSystemUtils: () => FakeOperatingSystemUtils(),
               PersistentToolState: () => buildPersistentToolState(globals.fs),
               XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
@@ -314,8 +314,8 @@ class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidato
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
 
-class FakeDoctor extends Doctor {
-  FakeDoctor(Logger logger, {super.clock = const SystemClock()}) : super(logger: logger);
+class _ContextFakeDoctor extends Doctor {
+  _ContextFakeDoctor(Logger logger, {super.clock = const SystemClock()}) : super(logger: logger);
 
   // True for testing.
   @override
@@ -381,7 +381,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   Future<Map<String, String>> getBuildSettings(
     XcodeBasedProject xcodeProject, {
-    XcodeProjectBuildContext? buildContext,
+    required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
@@ -405,7 +405,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }) async {}
 
   @override
-  Future<XcodeProjectInfo> getInfo(
+  Future<XcodeProjectInfo?> getInfo(
     XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
