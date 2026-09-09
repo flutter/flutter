@@ -119,7 +119,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (globals.androidSdk == null) {
-      exitWithNoSdkMessage(analytics: analytics, logger: globals.logger);
+      exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final androidBuildInfo = AndroidBuildInfo(
       await getBuildInfo(),
