@@ -7,6 +7,7 @@ import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -513,16 +514,16 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ProcessManager processManager = toolContext.processManager;
+    final ToolContext(
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+    ) = toolContext;
 
     final String outputArgument =
         stringArg('output') ??
-        toolContext.fs.path.join(
-          toolContext.fs.currentDirectory.path,
-          getBuildDirectory(toolContext.config, toolContext.fs),
-          'ios',
-          'framework',
-        );
+        fs.path.join(fs.currentDirectory.path, getBuildDirectory(config, fs), 'ios', 'framework');
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');
@@ -532,8 +533,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       throwToolExit('Project does not support iOS');
     }
 
-    final Directory outputDirectory = toolContext.fs.directory(
-      toolContext.fs.path.absolute(toolContext.fs.path.normalize(outputArgument)),
+    final Directory outputDirectory = fs.directory(
+      fs.path.absolute(fs.path.normalize(outputArgument)),
     );
     final List<BuildInfo> buildInfos = await getBuildInfos();
 
@@ -558,7 +559,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         releaseMode: buildInfo.mode.isRelease,
       );
 
-      toolContext.logger.printStatus('Building frameworks in ${buildInfo.mode.cliName} mode...');
+      logger.printStatus('Building frameworks in ${buildInfo.mode.cliName} mode...');
 
       final String xcodeBuildConfiguration = buildInfo.mode.uppercaseName;
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
@@ -593,7 +594,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       if (boolArg('plugins')) {
         await processPodsIfNeeded(
           project.ios,
-          getIosBuildDirectory(config: toolContext.config, fileSystem: toolContext.fs),
+          getIosBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
           forceCocoaPodsOnly: true,
         );
@@ -609,8 +610,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         }
       }
 
-      final Status status = toolContext.logger.startProgress(
-        ' └─Moving to ${toolContext.fs.path.relative(modeDirectory.path)}',
+      final Status status = logger.startProgress(
+        ' └─Moving to ${fs.path.relative(modeDirectory.path)}',
       );
 
       // Package native assets.
@@ -655,7 +656,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       }
     }
 
-    toolContext.logger.printStatus('Frameworks written to ${outputDirectory.path}.');
+    logger.printStatus('Frameworks written to ${outputDirectory.path}.');
 
     if (!project.isModule && hasPlugins(project)) {
       // Apps do not generate a FlutterPluginRegistrant.framework. Users will need
@@ -668,8 +669,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       pluginRegistrantImplementation.copySync(
         outputDirectory.childFile(pluginRegistrantImplementation.basename).path,
       );
-      toolContext.logger.printStatus(
-        '\nCopy the ${toolContext.fs.path.basenameWithoutExtension(pluginRegistrantHeader.path)} class into your project.\n'
+      logger.printStatus(
+        '\nCopy the ${fs.path.basenameWithoutExtension(pluginRegistrantHeader.path)} class into your project.\n'
         'See https://flutter.dev/to/ios-create-flutter-engine for more information.',
       );
     }
@@ -701,7 +702,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   /// vendored framework caching.
   @visibleForTesting
   void produceFlutterPodspec(BuildMode mode, Directory modeDirectory, {bool force = false}) {
-    final Status status = toolContext.logger.startProgress(' ├─Creating Flutter.podspec...');
+    final Status status = logger.startProgress(' ├─Creating Flutter.podspec...');
     try {
       final GitTagVersion gitTagVersion = flutterVersion.gitTagVersion;
       if (!force &&
