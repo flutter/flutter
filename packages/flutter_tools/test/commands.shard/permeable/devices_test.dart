@@ -5,12 +5,9 @@
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
-import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -35,7 +32,11 @@ void main() {
   });
 
   testUsingContext('devices can display no connected devices with the --machine flag', () async {
-    final DevicesCommand command = createDevicesCommand();
+    final command = DevicesCommand(
+      deviceManager: deviceManager,
+      doctor: globals.doctor!,
+      toolContext: FakeToolContext(logger: logger),
+    );
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['devices', '--machine']);
 
@@ -46,7 +47,11 @@ void main() {
     'devices can display via the --machine flag',
     () async {
       deviceManager.devices = <Device>[WebServerDevice(logger: logger)];
-      final DevicesCommand command = createDevicesCommand();
+      final command = DevicesCommand(
+        deviceManager: deviceManager,
+        doctor: globals.doctor!,
+        toolContext: FakeToolContext(logger: logger),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['devices', '--machine']);
 
@@ -96,34 +101,4 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   Future<List<Device>> refreshAllDevices({Duration? timeout, DeviceDiscoveryFilter? filter}) async {
     return devices;
   }
-}
-
-DevicesCommand createDevicesCommand({bool verboseHelp = false}) {
-  return DevicesCommand(
-    deviceManager: globals.deviceManager!,
-    doctor: globals.doctor!,
-    toolContext: FakeToolContext(
-      fs: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
-    ),
-    verboseHelp: verboseHelp,
-  );
-}
-
-class FakeToolContext extends Fake implements ToolContext {
-  FakeToolContext({
-    required this.fs,
-    required this.logger,
-    required this.platform,
-  });
-
-  @override
-  final FileSystem fs;
-
-  @override
-  final Logger logger;
-
-  @override
-  final Platform platform;
 }

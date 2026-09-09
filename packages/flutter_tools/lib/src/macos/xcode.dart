@@ -200,7 +200,7 @@ class Xcode {
   /// to run it. `devicectl` is made available in Xcode 15.
   bool get isDevicectlInstalled {
     if (_isDevicectlInstalled == null) {
-      if (currentVersion == null || currentVersion!.major < 15) {
+      if (currentVersion == null) {
         _isDevicectlInstalled = false;
         return _isDevicectlInstalled!;
       }
@@ -235,11 +235,11 @@ class Xcode {
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) async => _xcodeProjectInterpreter.fetchDependenciesAndGenerateXcodebuildArgs(
     xcodeProject,
     buildDirectory,
-    skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
+    skipPackageValidation: skipPackageValidation,
   );
 
   Future<RunResult> cc(List<String> args) => _run('cc', args);

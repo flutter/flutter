@@ -23,6 +23,7 @@ import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
+import '../web/chrome_constants.dart';
 import '../web/web_runner.dart';
 import 'drive_service.dart';
 
@@ -72,6 +73,7 @@ class WebDriverService extends DriverService {
     String? userIdentifier,
     String? mainPath,
     Map<String, Object> platformArgs = const <String, Object>{},
+    Map<String, String> webDefines = const <String, String>{},
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
@@ -98,6 +100,7 @@ class WebDriverService extends DriverService {
             ),
       platformArgs: platformArgs,
       stayResident: true,
+      webDefines: webDefines,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,
       analytics: globals.analytics,
@@ -340,6 +343,11 @@ Map<String, dynamic> getDesiredCapabilities(
         '--bwsi',
         '--disable-background-timer-throttling',
         '--disable-renderer-backgrounding',
+        '--disable-background-networking',
+        '--disable-sync',
+        '--disable-client-side-phishing-detection',
+        '--disable-notifications',
+        ...kGcmDisabledFlags,
         '--disable-default-apps',
         '--disable-extensions',
         '--disable-popup-blocking',

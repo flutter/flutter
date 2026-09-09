@@ -122,6 +122,7 @@ void main() {
           fakeProcessManager.addCommand(
             const FakeCommand(command: <String>['xcrun', 'devicectl', '--version']),
           );
+          xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(15, 0, 0);
           final xcode = Xcode.test(
             processManager: fakeProcessManager,
@@ -136,6 +137,7 @@ void main() {
           fakeProcessManager.addCommand(
             const FakeCommand(command: <String>['xcrun', 'devicectl', '--version'], exitCode: 1),
           );
+          xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(15, 0, 0);
           final xcode = Xcode.test(
             processManager: fakeProcessManager,
@@ -157,6 +159,7 @@ void main() {
               exception: ProcessException('xcrun', <String>['devicectl']),
             ),
           );
+          xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(15, 0, 0);
           final xcode = Xcode.test(
             processManager: fakeProcessManager,
@@ -169,17 +172,6 @@ void main() {
           expect(logger.statusText, isEmpty);
           expect(logger.errorText, isEmpty);
           expect(logger.traceText, contains('ProcessException'));
-        });
-
-        testWithoutContext('is false when Xcode is less than 15', () {
-          xcodeProjectInterpreter.version = Version(14, 0, 0);
-          final xcode = Xcode.test(
-            processManager: fakeProcessManager,
-            xcodeProjectInterpreter: xcodeProjectInterpreter,
-          );
-
-          expect(xcode.isDevicectlInstalled, isFalse);
-          expect(fakeProcessManager, hasNoRemainingExpectations);
         });
       });
 

@@ -14,17 +14,12 @@ import 'package:flutter_tools/src/context/android_context.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
-import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/emulator.dart';
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/macos/macos_workflow.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
-import 'package:flutter_tools/src/version.dart';
-import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -55,8 +50,7 @@ void main() {
         toolContext: fakeToolContext,
       );
       final runner = FlutterCommandRunner(
-        androidContext: fakeAndroidContext,
-        appleContext: fakeAppleContext,
+        analytics: fakeToolDependencies.analytics,
         toolContext: fakeToolContext,
         verboseHelp: true,
       );
@@ -85,7 +79,11 @@ void main() {
       },
     );
 
-    final runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
+    );
 
     runner.addCommand(command);
     await runner.run(<String>['dummy', '--${FlutterGlobalOptions.kContinuousIntegrationFlag}']);
@@ -110,7 +108,11 @@ void main() {
 
     command.addSubcommand(subcommand);
 
-    final runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
+    );
 
     runner.addCommand(command);
     runner.addCommand(subcommand);
@@ -130,7 +132,11 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
+    );
     command.argParser.addFlag('key');
     command.argParser.addFlag('key-false');
     // argResults will be null at this point, if attempt to read them is made,
@@ -156,7 +162,11 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
+    );
     command.argParser.addOption('key');
     // argResults will be null at this point, if attempt to read them is made,
     // exception `Null check operator used on a null value` would be thrown
@@ -178,7 +188,11 @@ void main() {
         return const FlutterCommandResult(ExitStatus.success);
       },
     );
-    final runner = FlutterCommandRunner(verboseHelp: true);
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
+    );
     command.argParser.addMultiOption('key', allowed: <String>['a', 'b', 'c']);
     // argResults will be null at this point, if attempt to read them is made,
     // exception `Null check operator used on a null value` would be thrown.
@@ -197,6 +211,24 @@ void main() {
 
     await runner.run(<String>['dummy']);
     expect(command.stringsArg('key'), <String>[]);
+  });
+
+  testUsingContext('wrap-column option updates argParser usageLineLength', () async {
+    final command = DummyFlutterCommand(
+      commandFunction: () async {
+        return const FlutterCommandResult(ExitStatus.success);
+      },
+    );
+    final runner = FlutterCommandRunner(
+      analytics: FakeAnalytics(),
+      toolContext: FakeToolContext(),
+      verboseHelp: true,
+    );
+    runner.addCommand(command);
+
+    await runner.run(<String>['--wrap', '--wrap-column=50', 'dummy']);
+
+    expect(runner.argParser.usageLineLength, 50);
   });
 }
 
@@ -437,38 +469,12 @@ void verifyOptions(String? command, Iterable<Option> options) {
   }
 }
 
-class FakeFlutterVersion extends Fake implements FlutterVersion {
-  @override
-  String get channel => 'master';
-}
-
-class FakeToolContext extends Fake implements ToolContext {
-  FakeToolContext({FlutterVersion? flutterVersion})
-    : flutterVersion = flutterVersion ?? FakeFlutterVersion();
-
-  @override
-  final FlutterVersion flutterVersion;
-}
-
-class FakeXcode extends Fake implements Xcode {}
-
-class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {}
-
-class FakeAppleContext extends Fake implements AppleContext {
-  FakeAppleContext({Xcode? xcode, XcodeProjectInterpreter? xcodeProjectInterpreter})
-    : xcode = xcode ?? FakeXcode(),
-      xcodeProjectInterpreter = xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter();
-
-  @override
-  final Xcode xcode;
-
-  @override
-  final XcodeProjectInterpreter xcodeProjectInterpreter;
-}
-
-class FakeAndroidContext extends Fake implements AndroidContext {}
-
 class FakeAnalytics extends Fake implements Analytics {
+  final sentEvents = <Event>[];
+
+  @override
+  void send(Event event) => sentEvents.add(event);
+
   @override
   bool get telemetryEnabled => false;
 
@@ -482,16 +488,6 @@ class FakeBuildTargets extends Fake implements BuildTargets {}
 
 class FakeCrashReporter extends Fake implements CrashReporter {}
 
-class FakeDeviceManager extends Fake implements DeviceManager {}
-
-class FakeDoctor extends Fake implements Doctor {}
-
-class FakeEmulatorManager extends Fake implements EmulatorManager {}
-
-class FakeMacOSWorkflow extends Fake implements MacOSWorkflow {}
-
-class FakeWindowsWorkflow extends Fake implements WindowsWorkflow {}
-
 class FakeToolDependencies extends Fake implements ToolDependencies {
   FakeToolDependencies({
     Analytics? analytics,
@@ -500,11 +496,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
     CrashReporter? crashReporter,
-    DeviceManager? deviceManager,
     Doctor? doctor,
     EmulatorManager? emulatorManager,
-    MacOSWorkflow? macOSWorkflow,
-    WindowsWorkflow? windowsWorkflow,
+    FeatureFlags? featureFlags,
     ToolContext? toolContext,
   }) : analytics = analytics ?? FakeAnalytics(),
        androidContext = androidContext ?? FakeAndroidContext(),
@@ -512,11 +506,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
        buildSystem = buildSystem ?? FakeBuildSystem(),
        buildTargets = buildTargets ?? FakeBuildTargets(),
        crashReporter = crashReporter ?? FakeCrashReporter(),
-       deviceManager = deviceManager ?? FakeDeviceManager(),
        doctor = doctor ?? FakeDoctor(),
        emulatorManager = emulatorManager ?? FakeEmulatorManager(),
-       macOSWorkflow = macOSWorkflow ?? FakeMacOSWorkflow(),
-       windowsWorkflow = windowsWorkflow ?? FakeWindowsWorkflow(),
+       featureFlags = featureFlags ?? TestFeatureFlags(),
        toolContext = toolContext ?? FakeToolContext();
 
   @override
@@ -538,20 +530,14 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
   final CrashReporter crashReporter;
 
   @override
-  final DeviceManager deviceManager;
-
-  @override
   final Doctor doctor;
 
   @override
   final EmulatorManager emulatorManager;
 
   @override
-  final MacOSWorkflow macOSWorkflow;
+  final FeatureFlags featureFlags;
 
   @override
   final ToolContext toolContext;
-
-  @override
-  final WindowsWorkflow windowsWorkflow;
 }

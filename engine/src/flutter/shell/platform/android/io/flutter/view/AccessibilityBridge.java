@@ -709,8 +709,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (rootAccessibilityView.getResources() == null) {
       return;
     }
-    boolean shouldBold =
-        Api31Impl.isBoldText(rootAccessibilityView.getResources().getConfiguration());
+    boolean shouldBold = false;
+    try {
+      shouldBold = Api31Impl.isBoldText(rootAccessibilityView.getResources().getConfiguration());
+    } catch (NoSuchFieldError exception) {
+      // Some vendor-modified runtimes report API 31+ but omit this API-31 field.
+      // Treat bold-text detection as unavailable rather than crashing at startup.
+    }
 
     updateAccessibilityFeature(AccessibilityFeature.BOLD_TEXT, shouldBold);
   }

@@ -1,4 +1,3 @@
-// ignore_for_file: unreachable_from_main
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -18,7 +17,6 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -75,7 +73,7 @@ void main() {
               xcodeProjectInterpreter: xcodeProjectInterpreter,
             ),
           );
-          await runner.run(<String>['clean']);
+          await runner.run(<String>['clean', '--include-xcode-workspace']);
 
           expect(buildDirectory, isNot(exists));
           expect(projectUnderTest.dartTool, isNot(exists));
@@ -112,6 +110,29 @@ void main() {
         },
       );
 
+      testWithoutContext('$CleanCommand does not clean Xcode by default', () async {
+        final FlutterProject projectUnderTest = setupProjectUnderTest(fs.currentDirectory, true);
+        xcodeProjectInterpreter.isInstalled = true;
+        xcodeProjectInterpreter.version = Version(1000, 0, 0);
+        final CommandRunner<void> runner = createTestCommandRunner(
+          createCleanCommand(
+            fs: fs,
+            logger: logger,
+            xcode: xcode,
+            xcodeProjectInterpreter: xcodeProjectInterpreter,
+          ),
+        );
+        await runner.run(<String>['clean']);
+
+        expect(buildDirectory, isNot(exists));
+        expect(projectUnderTest.dartTool, isNot(exists));
+        expect(projectUnderTest.android.ephemeralDirectory, isNot(exists));
+        expect(projectUnderTest.ios.ephemeralDirectory, isNot(exists));
+
+        // The workspaces should be empty since we didn't pass --include-xcode-workspace.
+        expect(xcodeProjectInterpreter.workspaces, isEmpty);
+      });
+
       testWithoutContext('$CleanCommand does not clean the example directory by default', () async {
         setupProjectUnderTest(fs.currentDirectory, true);
         final FlutterProject exampleProject = setupProjectUnderTest(
@@ -131,7 +152,7 @@ void main() {
             xcodeProjectInterpreter: xcodeProjectInterpreter,
           ),
         );
-        await runner.run(<String>['clean']);
+        await runner.run(<String>['clean', '--include-xcode-workspace']);
 
         expect(buildDirectory, isNot(exists));
 
@@ -174,7 +195,7 @@ void main() {
               xcodeProjectInterpreter: xcodeProjectInterpreter,
             ),
           );
-          await runner.run(<String>['clean', '--include-example']);
+          await runner.run(<String>['clean', '--include-example', '--include-xcode-workspace']);
 
           expect(buildDirectory, isNot(exists));
           expect(projectUnderTest.dartTool, isNot(exists));
@@ -225,7 +246,7 @@ void main() {
               xcodeProjectInterpreter: xcodeProjectInterpreter,
             ),
           );
-          await runner.run(<String>['clean', '--include-example']);
+          await runner.run(<String>['clean', '--include-example', '--include-xcode-workspace']);
 
           expect(logger.statusText, contains('No example app found'));
         },
@@ -306,7 +327,7 @@ void main() {
           verbose: true,
         );
         final CommandRunner<void> runner = createTestCommandRunner(command);
-        await runner.run(<String>['clean']);
+        await runner.run(<String>['clean', '--include-xcode-workspace']);
 
         expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[
           CleanWorkspaceCall('/ios/Runner.xcworkspace', 'Runner', true),
@@ -681,46 +702,10 @@ CleanCommand createCleanCommand({
       terminal: terminal ?? AnsiTerminal(stdio: FakeStdio(), platform: resolvedPlatform),
       userMessages: userMessages ?? UserMessages(),
       config: config ?? Config.test(directory: resolvedFs.directory('/')),
+      stdio: FakeStdio(),
     ),
     verbose: verbose,
     xcode: xcode ?? Xcode.test(processManager: resolvedProcessManager),
     xcodeProjectInterpreter: xcodeProjectInterpreter ?? FakeXcodeProjectInterpreter(),
   );
-}
-
-class FakeToolContext extends Fake implements ToolContext {
-  FakeToolContext({
-    required this.fs,
-    required this.logger,
-    required this.platform,
-    required this.processManager,
-    required this.processUtils,
-    required this.systemClock,
-    required this.terminal,
-    required this.userMessages,
-    Config? config,
-    FlutterProjectFactory? projectFactory,
-  }) : config = config ?? Config.test(directory: fs.directory('/')),
-       projectFactory = projectFactory ?? FlutterProjectFactory(fileSystem: fs, logger: logger);
-
-  @override
-  final FileSystem fs;
-  @override
-  final Logger logger;
-  @override
-  final Platform platform;
-  @override
-  final ProcessManager processManager;
-  @override
-  final ProcessUtils processUtils;
-  @override
-  final SystemClock systemClock;
-  @override
-  final AnsiTerminal terminal;
-  @override
-  final UserMessages userMessages;
-  @override
-  final Config config;
-  @override
-  final FlutterProjectFactory projectFactory;
 }

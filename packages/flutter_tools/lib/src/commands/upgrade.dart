@@ -238,9 +238,10 @@ class UpgradeCommandRunner {
     }
     recordState(flutterVersion);
     await ChannelCommand.upgradeChannel(
-      currentVersion: flutterVersion,
-      git: globals.git,
+      flutterVersion,
       logger: globals.logger,
+      git: globals.git,
+      cache: globals.cache,
     );
     globals.printStatus(
       'Upgrading Flutter to ${upstreamVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in $workingDirectory...',
@@ -477,16 +478,16 @@ Future<void> precacheArtifacts({
   FileSystem? fileSystem,
   Platform? platform,
 }) async {
-  final Logger effectiveLogger = logger ?? globals.logger;
-  final ProcessUtils effectiveProcessUtils = processUtils ?? globals.processUtils;
-  final FileSystem effectiveFs = fileSystem ?? globals.fs;
-  final Platform effectivePlatform = platform ?? globals.platform;
-  effectiveLogger.printStatus('');
-  effectiveLogger.printStatus('Upgrading engine...');
-  final int code = await effectiveProcessUtils.stream(
-    [effectiveFs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache'],
+  final Logger lgr = logger ?? globals.logger;
+  final ProcessUtils procUtils = processUtils ?? globals.processUtils;
+  final FileSystem fs = fileSystem ?? globals.fs;
+  final Platform plt = platform ?? globals.platform;
+  lgr.printStatus('');
+  lgr.printStatus('Upgrading engine...');
+  final int code = await procUtils.stream(
+    <String>[fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache'],
     allowReentrantFlutter: true,
-    environment: Map<String, String>.of(effectivePlatform.environment),
+    environment: Map<String, String>.of(plt.environment),
     workingDirectory: workingDirectory,
   );
   if (code != 0) {

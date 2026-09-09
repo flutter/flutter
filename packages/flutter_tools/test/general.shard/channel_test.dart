@@ -10,14 +10,12 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/channel.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/version.dart';
-import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/fake_process_manager.dart';
-import '../src/fakes.dart' show FakeFlutterVersion;
+import '../src/fakes.dart';
 import '../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -326,6 +324,63 @@ void main() {
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
+    testWithoutContext('can switch channels with --force', () async {
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['git', 'fetch']),
+        FakeCommand(command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta']),
+        FakeCommand(command: <String>['git', 'checkout', '-f', 'beta', '--']),
+        FakeCommand(
+          command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
+        ),
+      ]);
+
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['channel', '--force', 'beta']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(
+        logger.statusText,
+        containsIgnoringWhitespace("Switching to flutter channel 'beta'..."),
+      );
+      expect(logger.errorText, hasLength(0));
+    });
+
+    testWithoutContext('can switch channels with -f when branch does not exist locally', () async {
+      fakeProcessManager.addCommands(const <FakeCommand>[
+        FakeCommand(command: <String>['git', 'fetch']),
+        FakeCommand(
+          command: <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/beta'],
+          exitCode: 1,
+        ),
+        FakeCommand(
+          command: <String>['git', 'checkout', '-f', '--track', '-b', 'beta', 'origin/beta'],
+        ),
+        FakeCommand(
+          command: <String>['bin/flutter', '--no-color', '--no-version-check', 'precache'],
+        ),
+      ]);
+
+      final ChannelCommand command = createChannelCommand(
+        logger: logger,
+        fs: fileSystem,
+        processManager: fakeProcessManager,
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['channel', '-f', 'beta']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+      expect(
+        logger.statusText,
+        containsIgnoringWhitespace("Switching to flutter channel 'beta'..."),
+      );
+      expect(logger.errorText, hasLength(0));
+    });
+
     testWithoutContext('switching channels prompts to run flutter upgrade', () async {
       fakeProcessManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>['git', 'fetch']),
@@ -419,12 +474,13 @@ void main() {
           processManager: localFakeProcessManager,
           logger: contextLogger,
         );
-        final git = Git(currentPlatform: const LocalPlatform(), runProcessWith: processUtils);
+        final fakePlatform = FakePlatform();
+        final git = Git(currentPlatform: fakePlatform, runProcessWith: processUtils);
 
         final toolContext = FakeToolContext(
           fs: localFs,
           logger: contextLogger,
-          platform: const LocalPlatform(),
+          platform: fakePlatform,
           processManager: localFakeProcessManager,
           processUtils: processUtils,
           git: git,
@@ -432,6 +488,7 @@ void main() {
         );
 
         final command = ChannelCommand(toolContext: toolContext);
+        expect(command.toolContext, same(toolContext));
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['channel']);
@@ -474,34 +531,4 @@ ChannelCommand createChannelCommand({
     ),
     verboseHelp: verboseHelp,
   );
-}
-
-class FakeToolContext extends Fake implements ToolContext {
-  FakeToolContext({
-    required this.fs,
-    required this.logger,
-    required this.platform,
-    required this.processManager,
-    required this.processUtils,
-    required this.git,
-    required this.flutterVersion,
-    Cache? cache,
-  }) : cache = cache ?? Cache.test(fileSystem: fs, processManager: processManager);
-
-  @override
-  final FileSystem fs;
-  @override
-  final Logger logger;
-  @override
-  final Platform platform;
-  @override
-  final ProcessManager processManager;
-  @override
-  final ProcessUtils processUtils;
-  @override
-  final Git git;
-  @override
-  final FlutterVersion flutterVersion;
-  @override
-  final Cache cache;
 }

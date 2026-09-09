@@ -1192,31 +1192,32 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     Rect targetRect = MatrixUtils.transformRect(transform, rect);
     final double extentOfPinnedSlivers = maxScrollObstructionExtentBefore(sliver);
 
-    switch (sliver.constraints.growthDirection) {
-      case GrowthDirection.forward:
-        if (isPinned && alignment <= 0) {
-          return RevealedOffset(offset: double.infinity, rect: targetRect);
-        }
-        leadingScrollOffset -= extentOfPinnedSlivers;
-      case GrowthDirection.reverse:
-        if (isPinned && alignment >= 1) {
-          return RevealedOffset(offset: double.negativeInfinity, rect: targetRect);
-        }
-        // If child's growth direction is reverse, when viewport.offset is
-        // `leadingScrollOffset`, it is positioned just outside of the leading
-        // edge of the viewport.
-        leadingScrollOffset -= switch (axis) {
-          Axis.vertical => targetRect.height,
-          Axis.horizontal => targetRect.width,
-        };
-    }
-
     final double mainAxisExtentDifference = switch (axis) {
       Axis.horizontal => size.width - extentOfPinnedSlivers - rectLocal.width,
       Axis.vertical => size.height - extentOfPinnedSlivers - rectLocal.height,
     };
+    final double targetOffset;
+    switch (sliver.constraints.growthDirection) {
+      case GrowthDirection.forward:
+        leadingScrollOffset -= extentOfPinnedSlivers;
+        targetOffset = isPinned && alignment <= 0
+            ? math.max(offset.pixels, leadingScrollOffset)
+            : leadingScrollOffset - mainAxisExtentDifference * alignment;
+      case GrowthDirection.reverse:
+        if (isPinned && alignment >= 1) {
+          targetOffset = math.min(offset.pixels, leadingScrollOffset);
+        } else {
+          // If child's growth direction is reverse, when viewport.offset is
+          // `leadingScrollOffset`, it is positioned just outside of the leading
+          // edge of the viewport.
+          leadingScrollOffset -= switch (axis) {
+            Axis.vertical => targetRect.height,
+            Axis.horizontal => targetRect.width,
+          };
+          targetOffset = leadingScrollOffset - mainAxisExtentDifference * alignment;
+        }
+    }
 
-    final double targetOffset = leadingScrollOffset - mainAxisExtentDifference * alignment;
     final double offsetDifference = offset.pixels - targetOffset;
 
     targetRect = switch (axisDirection) {

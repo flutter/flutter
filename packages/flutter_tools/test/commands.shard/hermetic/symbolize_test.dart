@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/symbolize.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:test/fake.dart';
 
@@ -50,6 +49,33 @@ void main() {
     await expectLater(
       output.stream.transform(utf8.decoder).transform(const LineSplitter()),
       emits('Hello, World'),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/191205.
+  testWithoutContext('DwarfSymbolizationService handles stream errors without crashing', () async {
+    final symbolizationService = DwarfSymbolizationService(
+      symbolsTransformer: (Uint8List symbols) {
+        return StreamTransformer<String, String>.fromHandlers(
+          handleData: (String data, EventSink<String> sink) {
+            sink.addError('Test error');
+          },
+        );
+      },
+    );
+    final output = StreamController<List<int>>();
+
+    final Future<void> decodeFuture = symbolizationService.decode(
+      input: Stream<Uint8List>.fromIterable(<Uint8List>[
+        const Utf8Encoder().convert('Hello, World\n'),
+      ]),
+      symbols: Uint8List(0),
+      output: IOSink(output.sink),
+    );
+
+    expect(
+      decodeFuture,
+      throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', contains('Test error'))),
     );
   });
 
@@ -543,7 +569,7 @@ void main() {
       dwarfSymbolizationService: DwarfSymbolizationService.test(),
     );
 
-    expect(command.name, 'symbolize');
+    expect(command.toolContext, toolContext);
   });
 }
 
@@ -556,14 +582,4 @@ class ThrowingDwarfSymbolizationService extends Fake implements DwarfSymbolizati
   }) async {
     throwToolExit('test');
   }
-}
-
-class FakeToolContext extends Fake implements ToolContext {
-  FakeToolContext({required this.fs, required this.stdio});
-
-  @override
-  final FileSystem fs;
-
-  @override
-  final Stdio stdio;
 }

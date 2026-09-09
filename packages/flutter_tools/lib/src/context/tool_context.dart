@@ -2,17 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/file.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/bot_detector.dart';
 import '../base/config.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
@@ -20,6 +21,7 @@ import '../cache.dart';
 import '../custom_devices/custom_devices_config.dart';
 import '../git.dart';
 import '../native_assets.dart';
+import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
 import '../runner/local_engine.dart';
@@ -41,19 +43,22 @@ class ToolContext {
     this.nativeAssetsBuilder,
     required this.os,
     required this.outputPreferences,
+    required this.persistentToolState,
     required this.platform,
     required this.preRunValidator,
+    required this.processInfo,
     required this.processManager,
     required this.processUtils,
     required this.projectFactory,
     required this.shutdownHooks,
+    required this.signals,
     required this.stdio,
     required this.systemClock,
     required this.terminal,
     required this.userMessages,
   });
 
-  /// Resolves cached platform artifacts, engine binaries, and framework tools.
+  /// Cached and host-specific binary artifacts.
   final Artifacts artifacts;
 
   /// Detects whether the tool is running in a CI or automated bot environment.
@@ -68,7 +73,7 @@ class ToolContext {
   /// Manages user-configured custom device definitions stored on disk.
   final CustomDevicesConfig customDevicesConfig;
 
-  /// Provides current Flutter SDK version, channel, and git revision info.
+  /// Provides version and git channel info for the current Flutter SDK.
   final FlutterVersion flutterVersion;
 
   /// Provides mockable file system operations across host and virtual environments.
@@ -86,17 +91,23 @@ class ToolContext {
   /// Builds and packages native C/C++ or Rust assets for compilation and tests.
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
-  /// Utility helpers for operating system queries, executable discovery, and path lookups.
+  /// Operating system utilities and environment queries.
   final OperatingSystemUtils os;
 
   /// Manages formatting preferences for console output, such as line wrapping width.
   final OutputPreferences outputPreferences;
+
+  /// Global tool internal state that persists across tool invocations.
+  final PersistentToolState persistentToolState;
 
   /// Provides host operating system details and environment variables.
   final Platform platform;
 
   /// Validates environment prerequisites and file permissions before command execution.
   final PreRunValidator preRunValidator;
+
+  /// Process resource and memory usage reporting.
+  final ProcessInfo processInfo;
 
   /// Spawns and manages external host processes.
   final ProcessManager processManager;
@@ -110,6 +121,9 @@ class ToolContext {
   /// Manages lifecycle callbacks executed upon tool termination or interrupt signals.
   final ShutdownHooks shutdownHooks;
 
+  /// Intercepts and dispatches process signals.
+  final Signals signals;
+
   /// Provides standard I/O streams (`stdin`, `stdout`, `stderr`).
   final Stdio stdio;
 
@@ -121,4 +135,7 @@ class ToolContext {
 
   /// Centralized templates for user-facing status strings and error messages.
   final UserMessages userMessages;
+
+  /// Common file system utilities.
+  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
 }

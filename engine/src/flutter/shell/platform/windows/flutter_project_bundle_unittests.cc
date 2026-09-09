@@ -34,6 +34,19 @@ TEST(FlutterProjectBundle, BasicPropertiesRelativePaths) {
   EXPECT_EQ(project.icu_path().filename().string(), "icudtl.dat");
 }
 
+TEST(FlutterProjectBundle, EnableFlutterGpu) {
+  FlutterDesktopEngineProperties properties = {};
+  properties.assets_path = L"foo\\flutter_assets";
+  properties.icu_data_path = L"foo\\icudtl.dat";
+
+  FlutterProjectBundle default_project(properties);
+  EXPECT_FALSE(default_project.enable_flutter_gpu());
+
+  properties.enable_flutter_gpu = true;
+  FlutterProjectBundle project(properties);
+  EXPECT_TRUE(project.enable_flutter_gpu());
+}
+
 TEST(FlutterProjectBundle, SwitchesEmpty) {
   FlutterDesktopEngineProperties properties = {};
   properties.assets_path = L"foo\\flutter_assets";

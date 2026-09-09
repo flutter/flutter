@@ -2,14 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/emulators.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
@@ -17,313 +13,373 @@ import 'package:flutter_tools/src/emulator.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
   group('EmulatorsCommand', () {
-    late MemoryFileSystem fileSystem;
     late BufferLogger logger;
     late FakePlatform platform;
-    late FakeDoctor doctor;
-    late FakeEmulatorManager emulatorManager;
-    late FakeToolContext toolContext;
-
-    EmulatorsCommand createEmulatorsCommand() {
-      return EmulatorsCommand(
-        doctor: doctor,
-        emulatorManager: emulatorManager,
-        toolContext: toolContext,
-      );
-    }
+    late _FakeDoctor doctor;
 
     setUp(() {
-      fileSystem = MemoryFileSystem.test();
       logger = BufferLogger.test();
       platform = FakePlatform();
-      doctor = FakeDoctor(workflows: <Workflow>[FakeWorkflow(canListEmulators: true)]);
-      emulatorManager = FakeEmulatorManager();
-      toolContext = FakeToolContext(fs: fileSystem, logger: logger, platform: platform);
+      doctor = _FakeDoctor();
     });
 
-    testUsingContext('listing emulators - none available', () async {
-      emulatorManager.emulators = <Emulator>[];
-      final EmulatorsCommand command = createEmulatorsCommand();
+    group('doctor validation', () {
+      testWithoutContext(
+        'throws ToolExit if no emulator sources are available on non-macOS',
+        () async {
+          final toolContext = FakeToolContext(logger: logger, platform: platform);
+          final doctor = _FakeDoctor(canListEmulators: false);
+          final command = EmulatorsCommand(
+            doctor: doctor,
+            emulatorManager: _FakeEmulatorManager(),
+            toolContext: toolContext,
+          );
 
-      await createTestCommandRunner(command).run(<String>['emulators']);
-
-      expect(logger.statusText, contains('No emulators available.'));
-      expect(logger.statusText, contains('To create a new emulator, run'));
-    });
-
-    testUsingContext('listing emulators - some available', () async {
-      final emulator = FakeEmulator('emu1', 'Nexus 5', 'Google', PlatformType.android);
-      emulatorManager.emulators = <Emulator>[emulator];
-      final EmulatorsCommand command = createEmulatorsCommand();
-
-      await createTestCommandRunner(command).run(<String>['emulators']);
-
-      expect(logger.statusText, contains('1 available emulator:'));
-      expect(logger.statusText, matches(RegExp(r'emu1\s+•\s+Nexus 5\s+•\s+Google\s+•\s+android')));
-    });
-
-    testUsingContext('listing emulators - with search text filtering', () async {
-      final emu1 = FakeEmulator('emu1', 'Nexus 5', 'Google', PlatformType.android);
-      final emu2 = FakeEmulator('ios_emu', 'iOS Simulator', 'Apple', PlatformType.ios);
-      emulatorManager.emulators = <Emulator>[emu1, emu2];
-      final EmulatorsCommand command = createEmulatorsCommand();
-
-      await createTestCommandRunner(command).run(<String>['emulators', 'nexus']);
-
-      expect(logger.statusText, contains('1 available emulator:'));
-      expect(logger.statusText, matches(RegExp(r'emu1\s+•\s+Nexus 5\s+•\s+Google\s+•\s+android')));
-      expect(logger.statusText, isNot(contains('ios_emu')));
-    });
-
-    testUsingContext('launching emulators - warning when none match', () async {
-      emulatorManager.emulators = <Emulator>[];
-      final EmulatorsCommand command = createEmulatorsCommand();
-
-      await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'non_existent']);
-
-      expect(logger.statusText, contains("No emulator found that matches 'non_existent'."));
-    });
-
-    testUsingContext('launching emulators - unique match launches successfully', () async {
-      final emulator = FakeEmulator('emu1', 'Nexus 5', 'Google', PlatformType.android);
-      emulatorManager.emulators = <Emulator>[emulator];
-      final EmulatorsCommand command = createEmulatorsCommand();
-
-      await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'emu1']);
-
-      expect(emulator.launched, isTrue);
-      expect(emulator.coldBootUsed, isFalse);
-    });
-
-    testUsingContext('launching emulators - cold boot flag passed through', () async {
-      final emulator = FakeEmulator('emu1', 'Nexus 5', 'Google', PlatformType.android);
-      emulatorManager.emulators = <Emulator>[emulator];
-      final EmulatorsCommand command = createEmulatorsCommand();
-
-      await createTestCommandRunner(
-        command,
-      ).run(<String>['emulators', '--launch', 'emu1', '--cold']);
-
-      expect(emulator.launched, isTrue);
-      expect(emulator.coldBootUsed, isTrue);
-    });
-
-    testUsingContext('launching emulators - list choices when multiple match', () async {
-      final emu1 = FakeEmulator('emu1', 'Nexus 5', 'Google', PlatformType.android);
-      final emu2 = FakeEmulator('emu2', 'Nexus 6', 'Google', PlatformType.android);
-      emulatorManager.emulators = <Emulator>[emu1, emu2];
-      final EmulatorsCommand command = createEmulatorsCommand();
-
-      await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'emu']);
-
-      expect(emu1.launched, isFalse);
-      expect(emu2.launched, isFalse);
-      expect(logger.statusText, contains("More than one emulator matches 'emu':"));
-      expect(logger.statusText, matches(RegExp(r'emu1\s+•\s+Nexus 5\s+•\s+Google\s+•\s+android')));
-      expect(logger.statusText, matches(RegExp(r'emu2\s+•\s+Nexus 6\s+•\s+Google\s+•\s+android')));
-    });
-
-    testUsingContext('creating emulators - success prints emulator name', () async {
-      emulatorManager.createResult = CreateEmulatorResult('new_emu', success: true);
-      final EmulatorsCommand command = createEmulatorsCommand();
-
-      await createTestCommandRunner(
-        command,
-      ).run(<String>['emulators', '--create', '--name', 'new_emu']);
-
-      expect(emulatorManager.createdEmulators, <String?>['new_emu']);
-      expect(logger.statusText, contains("Emulator 'new_emu' created successfully."));
-    });
-
-    testUsingContext('creating emulators - failure prints error and info', () async {
-      emulatorManager.createResult = CreateEmulatorResult(
-        'failed_emu',
-        success: false,
-        error: 'Android SDK is missing system images',
+          await expectLater(
+            () => createTestCommandRunner(command).run(<String>['emulators']),
+            throwsToolExit(
+              message:
+                  'Unable to find any emulator sources. Please ensure you have some\n'
+                  'Android AVD images available.',
+            ),
+          );
+        },
       );
-      final EmulatorsCommand command = createEmulatorsCommand();
 
-      await createTestCommandRunner(
-        command,
-      ).run(<String>['emulators', '--create', '--name', 'failed_emu']);
-
-      expect(emulatorManager.createdEmulators, <String?>['failed_emu']);
-      expect(logger.statusText, contains("Failed to create emulator 'failed_emu'."));
-      expect(logger.statusText, contains('Android SDK is missing system images'));
-      expect(logger.statusText, contains('managing emulators at the links below'));
-    });
-
-    testUsingContext(
-      'Dependency Injection Validation - resolves from injected ToolContext rather than Zone',
-      () async {
-        // Construct a completely different ToolContext
-        final injectedFs = MemoryFileSystem.test();
-        final injectedLogger = BufferLogger.test();
-        final injectedPlatform = FakePlatform(operatingSystem: 'macos');
-        final injectedDoctor = FakeDoctor(
-          workflows: <Workflow>[FakeWorkflow(canListEmulators: true)],
-        );
-        final injectedEmulatorManager = FakeEmulatorManager();
-        final injectedToolContext = FakeToolContext(
-          fs: injectedFs,
-          logger: injectedLogger,
-          platform: injectedPlatform,
-        );
-
-        // Populate emulators ONLY in the injected EmulatorManager
-        final emulator = FakeEmulator(
-          'injected_emu',
-          'Injected AVD',
-          'Google',
-          PlatformType.android,
-        );
-        injectedEmulatorManager.emulators = <Emulator>[emulator];
-
-        // The Zone context will have a throwing EmulatorManager and a different logger/platform
+      testWithoutContext('throws ToolExit if no emulator sources are available on macOS', () async {
+        final macOSPlatform = FakePlatform(operatingSystem: 'macos');
+        final toolContext = FakeToolContext(logger: logger, platform: macOSPlatform);
+        final doctor = _FakeDoctor(canListEmulators: false);
         final command = EmulatorsCommand(
-          doctor: injectedDoctor,
-          emulatorManager: injectedEmulatorManager,
-          toolContext: injectedToolContext,
+          doctor: doctor,
+          emulatorManager: _FakeEmulatorManager(),
+          toolContext: toolContext,
         );
 
-        // Run the command. If it uses the Zone's EmulatorManager or Doctor, it will throw/fail.
-        // If it uses the Zone's Logger, the output won't be in injectedLogger.
-        await createTestCommandRunner(command).run(<String>['emulators']);
-
-        // Verify that the output went to the injected logger and resolved the injected emulator
-        expect(injectedLogger.statusText, contains('1 available emulator:'));
-        expect(
-          injectedLogger.statusText,
-          matches(RegExp(r'injected_emu\s+•\s+Injected AVD\s+•\s+Google\s+•\s+android')),
-        );
-
-        // Verify the Zone's logger remains empty
-        expect(testLogger.statusText, isEmpty);
-      },
-      overrides: <Type, Generator>{
-        EmulatorManager: () =>
-            throw UnimplementedError('Zone EmulatorManager should not be called'),
-        Doctor: () => throw UnimplementedError('Zone Doctor should not be called'),
-      },
-    );
-    group('doctor workflows check', () {
-      testUsingContext('throws error when no doctor workflows can list emulators', () async {
-        final emptyDoctor = FakeDoctor(
-          workflows: <Workflow>[FakeWorkflow(canListEmulators: false)],
-        );
-        final emptyToolContext = FakeToolContext(
-          fs: fileSystem,
-          logger: logger,
-          platform: platform,
-        );
-
-        final command = EmulatorsCommand(
-          doctor: emptyDoctor,
-          emulatorManager: emulatorManager,
-          toolContext: emptyToolContext,
-        );
-
-        expect(
+        await expectLater(
           () => createTestCommandRunner(command).run(<String>['emulators']),
           throwsToolExit(
             message:
                 'Unable to find any emulator sources. Please ensure you have some\n'
-                'Android AVD images available.',
+                'Android AVD images or an iOS Simulator available.',
           ),
+        );
+      });
+
+      testWithoutContext('proceeds when doctor reports canListEmulators is true', () async {
+        final toolContext = FakeToolContext(logger: logger, platform: platform);
+        final doctor = _FakeDoctor();
+        final emulatorManager = _FakeEmulatorManager();
+        final command = EmulatorsCommand(
+          doctor: doctor,
+          emulatorManager: emulatorManager,
+          toolContext: toolContext,
+        );
+
+        await createTestCommandRunner(command).run(<String>['emulators']);
+        expect(logger.statusText, contains('No emulators available.'));
+      });
+    });
+
+    group('list emulators', () {
+      testWithoutContext('shows message when no emulators available', () async {
+        final toolContext = FakeToolContext(logger: logger, platform: platform);
+        final emulatorManager = _FakeEmulatorManager();
+        final command = EmulatorsCommand(
+          doctor: doctor,
+          emulatorManager: emulatorManager,
+          toolContext: toolContext,
+        );
+
+        await createTestCommandRunner(command).run(<String>['emulators']);
+
+        expect(logger.statusText, contains('No emulators available.'));
+        expect(
+          logger.statusText,
+          contains("To create a new emulator, run 'flutter emulators --create [--name xyz]'."),
+        );
+        expect(
+          logger.statusText,
+          contains('https://developer.android.com/studio/run/managing-avds'),
+        );
+      });
+
+      testWithoutContext('lists available emulators with header', () async {
+        final toolContext = FakeToolContext(logger: logger, platform: platform);
+        const emulators = <_FakeEmulator>[
+          _FakeEmulator('nexus_5', 'Nexus 5', 'Google'),
+          _FakeEmulator('pixel_6', 'Pixel 6', 'Google'),
+        ];
+        final emulatorManager = _FakeEmulatorManager(emulators: emulators);
+        final command = EmulatorsCommand(
+          doctor: doctor,
+          emulatorManager: emulatorManager,
+          toolContext: toolContext,
+        );
+
+        await createTestCommandRunner(command).run(<String>['emulators']);
+
+        expect(logger.statusText, contains('2 available emulators:'));
+        expect(logger.statusText, contains('Nexus 5'));
+        expect(logger.statusText, contains('Pixel 6'));
+        expect(
+          logger.statusText,
+          contains("To run an emulator, run 'flutter emulators --launch <emulator id>'."),
+        );
+        expect(
+          logger.statusText,
+          contains("To create a new emulator, run 'flutter emulators --create [--name xyz]'."),
+        );
+      });
+
+      testWithoutContext('filters emulators by search query', () async {
+        final toolContext = FakeToolContext(logger: logger, platform: platform);
+        const emulators = <_FakeEmulator>[
+          _FakeEmulator('nexus_5', 'Nexus 5', 'Google'),
+          _FakeEmulator('pixel_6', 'Pixel 6', 'Google'),
+        ];
+        final emulatorManager = _FakeEmulatorManager(emulators: emulators);
+        final command = EmulatorsCommand(
+          doctor: doctor,
+          emulatorManager: emulatorManager,
+          toolContext: toolContext,
+        );
+
+        await createTestCommandRunner(command).run(<String>['emulators', 'pixel']);
+
+        expect(logger.statusText, contains('1 available emulator:'));
+        expect(logger.statusText, contains('Pixel 6'));
+        expect(logger.statusText, isNot(contains('Nexus 5')));
+      });
+    });
+
+    group('launch emulator', () {
+      testWithoutContext('prints error when no matching emulator is found', () async {
+        final toolContext = FakeToolContext(logger: logger, platform: platform);
+        final emulatorManager = _FakeEmulatorManager();
+        final command = EmulatorsCommand(
+          doctor: doctor,
+          emulatorManager: emulatorManager,
+          toolContext: toolContext,
+        );
+
+        await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel']);
+
+        expect(logger.statusText, contains("No emulator found that matches 'pixel'."));
+      });
+
+      testWithoutContext('prints list when multiple emulators match', () async {
+        final toolContext = FakeToolContext(logger: logger, platform: platform);
+        const emulators = <_FakeEmulator>[
+          _FakeEmulator('pixel_6', 'Pixel 6', 'Google'),
+          _FakeEmulator('pixel_7', 'Pixel 7', 'Google'),
+        ];
+        final emulatorManager = _FakeEmulatorManager(emulators: emulators);
+        final command = EmulatorsCommand(
+          doctor: doctor,
+          emulatorManager: emulatorManager,
+          toolContext: toolContext,
+        );
+
+        await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel']);
+
+        expect(logger.statusText, contains("More than one emulator matches 'pixel':"));
+        expect(logger.statusText, contains('Pixel 6'));
+        expect(logger.statusText, contains('Pixel 7'));
+      });
+
+      testWithoutContext('launches emulator when exactly one match found (warm boot)', () async {
+        final toolContext = FakeToolContext(logger: logger, platform: platform);
+        var launchCount = 0;
+        bool? lastColdBoot;
+        final emulator = _FakeEmulator(
+          'pixel_6',
+          'Pixel 6',
+          'Google',
+          onLaunch: (bool coldBoot) {
+            launchCount++;
+            lastColdBoot = coldBoot;
+          },
+        );
+        final emulatorManager = _FakeEmulatorManager(emulators: <_FakeEmulator>[emulator]);
+        final command = EmulatorsCommand(
+          doctor: doctor,
+          emulatorManager: emulatorManager,
+          toolContext: toolContext,
+        );
+
+        await createTestCommandRunner(command).run(<String>['emulators', '--launch', 'pixel_6']);
+
+        expect(launchCount, 1);
+        expect(lastColdBoot, isFalse);
+      });
+
+      testWithoutContext('launches emulator with cold boot when --cold is specified', () async {
+        final toolContext = FakeToolContext(logger: logger, platform: platform);
+        var launchCount = 0;
+        bool? lastColdBoot;
+        final emulator = _FakeEmulator(
+          'pixel_6',
+          'Pixel 6',
+          'Google',
+          onLaunch: (bool coldBoot) {
+            launchCount++;
+            lastColdBoot = coldBoot;
+          },
+        );
+        final emulatorManager = _FakeEmulatorManager(emulators: <_FakeEmulator>[emulator]);
+        final command = EmulatorsCommand(
+          doctor: doctor,
+          emulatorManager: emulatorManager,
+          toolContext: toolContext,
+        );
+
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['emulators', '--launch', 'pixel_6', '--cold']);
+
+        expect(launchCount, 1);
+        expect(lastColdBoot, isTrue);
+      });
+    });
+
+    group('create emulator', () {
+      testWithoutContext('creates emulator successfully without name', () async {
+        final toolContext = FakeToolContext(logger: logger, platform: platform);
+        final emulatorManager = _FakeEmulatorManager(
+          createResult: CreateEmulatorResult('flutter_emulator', success: true),
+        );
+        final command = EmulatorsCommand(
+          doctor: doctor,
+          emulatorManager: emulatorManager,
+          toolContext: toolContext,
+        );
+
+        await createTestCommandRunner(command).run(<String>['emulators', '--create']);
+
+        expect(logger.statusText, contains("Emulator 'flutter_emulator' created successfully."));
+        expect(emulatorManager.lastCreatedName, isNull);
+      });
+
+      testWithoutContext('creates emulator successfully with custom name', () async {
+        final toolContext = FakeToolContext(logger: logger, platform: platform);
+        final emulatorManager = _FakeEmulatorManager(
+          createResult: CreateEmulatorResult('my_custom_emulator', success: true),
+        );
+        final command = EmulatorsCommand(
+          doctor: doctor,
+          emulatorManager: emulatorManager,
+          toolContext: toolContext,
+        );
+
+        await createTestCommandRunner(
+          command,
+        ).run(<String>['emulators', '--create', '--name', 'my_custom_emulator']);
+
+        expect(logger.statusText, contains("Emulator 'my_custom_emulator' created successfully."));
+        expect(emulatorManager.lastCreatedName, 'my_custom_emulator');
+      });
+
+      testWithoutContext('prints error and additional info when creation fails', () async {
+        final toolContext = FakeToolContext(logger: logger, platform: platform);
+        final emulatorManager = _FakeEmulatorManager(
+          createResult: CreateEmulatorResult(
+            'existing_emulator',
+            success: false,
+            error: 'AVD already exists',
+          ),
+        );
+        final command = EmulatorsCommand(
+          doctor: doctor,
+          emulatorManager: emulatorManager,
+          toolContext: toolContext,
+        );
+
+        await createTestCommandRunner(command).run(<String>['emulators', '--create']);
+
+        expect(logger.statusText, contains("Failed to create emulator 'existing_emulator'."));
+        expect(logger.statusText, contains('AVD already exists'));
+        expect(
+          logger.statusText,
+          contains('https://developer.android.com/studio/run/managing-avds'),
         );
       });
     });
   });
 }
 
-class FakeWorkflow extends Fake implements Workflow {
-  FakeWorkflow({required this.canListEmulators});
+class _FakeDoctor extends Fake implements Doctor {
+  _FakeDoctor({this.canListEmulators = true});
+
+  final bool canListEmulators;
+
+  @override
+  List<Workflow> get workflows => <Workflow>[_FakeWorkflow(canListEmulators: canListEmulators)];
+}
+
+class _FakeWorkflow extends Fake implements Workflow {
+  _FakeWorkflow({this.canListEmulators = true});
 
   @override
   final bool canListEmulators;
 }
 
-class FakeDoctor extends Fake implements Doctor {
-  FakeDoctor({required this.workflows});
+class _FakeEmulatorManager extends Fake implements EmulatorManager {
+  _FakeEmulatorManager({this.createResult, this.emulators = const <Emulator>[]});
 
-  @override
-  final List<Workflow> workflows;
-}
-
-class FakeEmulatorManager extends Fake implements EmulatorManager {
-  List<Emulator> emulators = <Emulator>[];
-  CreateEmulatorResult? createResult;
-  final List<String?> createdEmulators = <String?>[];
+  final List<Emulator> emulators;
+  final CreateEmulatorResult? createResult;
+  String? lastCreatedName;
 
   @override
   Future<List<Emulator>> getAllAvailableEmulators() async => emulators;
 
   @override
-  Future<List<Emulator>> getEmulatorsMatching(String searchText) async {
-    searchText = searchText.toLowerCase();
+  Future<List<Emulator>> getEmulatorsMatching(String id) async {
     return emulators
         .where(
           (Emulator e) =>
-              e.id.toLowerCase().contains(searchText) || e.name.toLowerCase().contains(searchText),
+              e.id.toLowerCase().contains(id.toLowerCase()) ||
+              e.name.toLowerCase().contains(id.toLowerCase()),
         )
         .toList();
   }
 
   @override
   Future<CreateEmulatorResult> createEmulator({String? name}) async {
-    createdEmulators.add(name);
-    return createResult ?? CreateEmulatorResult(name ?? 'fake_emu', success: true);
+    lastCreatedName = name;
+    return createResult ?? CreateEmulatorResult('flutter_emulator', success: true);
   }
 }
 
-class FakeEmulator extends Fake implements Emulator {
-  FakeEmulator(this.id, this.name, this.manufacturer, this.platformType);
-
-  @override
-  final String id;
+class _FakeEmulator extends Emulator {
+  const _FakeEmulator(String id, this.name, this.manufacturer, {this.onLaunch}) : super(id, true);
 
   @override
   final String name;
 
   @override
-  final String? manufacturer;
-
-  @override
-  final PlatformType platformType;
+  final String manufacturer;
 
   @override
   Category get category => Category.mobile;
 
   @override
-  bool get hasConfig => true;
+  PlatformType get platformType => PlatformType.android;
 
-  final List<bool> _launched = <bool>[false];
-  final List<bool> _coldBootUsed = <bool>[false];
-
-  bool get launched => _launched[0];
-  bool get coldBootUsed => _coldBootUsed[0];
+  final void Function(bool coldBoot)? onLaunch;
 
   @override
   Future<void> launch({bool coldBoot = false}) async {
-    _launched[0] = true;
-    _coldBootUsed[0] = coldBoot;
+    onLaunch?.call(coldBoot);
   }
-}
-
-class FakeToolContext extends Fake implements ToolContext {
-  FakeToolContext({required this.fs, required this.logger, required this.platform});
-
-  @override
-  final FileSystem fs;
-
-  @override
-  final Logger logger;
-
-  @override
-  final Platform platform;
 }

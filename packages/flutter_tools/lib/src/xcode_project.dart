@@ -7,7 +7,6 @@ library;
 
 import 'dart:async';
 
-import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart' as yaml;
 
 import 'base/common.dart';
@@ -65,10 +64,9 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 
   Directory? _xcodeDirectoryWithExtension(String extension) {
     final List<FileSystemEntity> contents = hostAppRoot.listSync();
-    final p.Context pathContext = hostAppRoot.fileSystem.path;
     for (final entity in contents) {
-      if (pathContext.extension(entity.path) == extension &&
-          !pathContext.basename(entity.path).startsWith('.')) {
+      if (hostAppRoot.fileSystem.path.extension(entity.path) == extension &&
+          !hostAppRoot.fileSystem.path.basename(entity.path).startsWith('.')) {
         return hostAppRoot.childDirectory(entity.basename);
       }
     }
@@ -224,10 +222,8 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       return false;
     }
 
-    // Swift Package Manager requires Xcode 15 or greater.
     final Xcode? xcode = globals.xcode;
-    final Version? xcodeVersion = xcode?.currentVersion;
-    if (xcodeVersion == null || xcodeVersion.major < 15) {
+    if (xcode == null || !xcode.isInstalled) {
       return false;
     }
 

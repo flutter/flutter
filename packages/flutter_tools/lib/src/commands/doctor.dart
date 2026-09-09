@@ -2,13 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../android/android_workflow.dart';
+import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
 import '../doctor.dart';
+import '../experimental/extension_manager.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
+/// The `flutter doctor` command, which displays diagnostic information about the
+/// installed developer environment and tooling.
 class DoctorCommand extends FlutterCommand {
-  DoctorCommand({required Doctor doctor, this.verbose = false}) : _doctor = doctor {
+  /// Creates a new [DoctorCommand].
+  ///
+  /// If [doctor] is omitted, it defaults to [globals.doctor]. If
+  /// [androidLicenseValidator] is omitted, it is lazily resolved from the
+  /// active context when `--android-licenses` is supplied.
+  DoctorCommand({
+    android_workflow.AndroidLicenseValidator? androidLicenseValidator,
+    Doctor? doctor,
+    this.extensionManager,
+    required super.toolContext,
+    this.verbose = false,
+  }) : _androidLicenseValidator = androidLicenseValidator,
+       _explicitDoctor = doctor {
     argParser.addFlag(
       'android-licenses',
       negatable: false,
@@ -24,10 +40,12 @@ class DoctorCommand extends FlutterCommand {
     );
   }
 
-  final Doctor _doctor;
+  final Doctor? _explicitDoctor;
+  final android_workflow.AndroidLicenseValidator? _androidLicenseValidator;
   final bool verbose;
+  final ExtensionManager? extensionManager;
 
-  Doctor get doctor => _doctor;
+  Doctor get _doctor => _explicitDoctor ?? globals.doctor!;
 
   @override
   final name = 'doctor';
@@ -58,11 +76,21 @@ class DoctorCommand extends FlutterCommand {
         );
       }
     }
-    final bool androidLicenses = boolArg('android-licenses');
+    android_workflow.AndroidLicenseValidator? androidLicenseValidator = _androidLicenseValidator;
+    if (androidLicenseValidator == null && boolArg('android-licenses')) {
+      try {
+        androidLicenseValidator = android_workflow.androidLicenseValidator;
+      } on Exception {
+        // Fallback when running in hermetic test environments without AppContext.
+      } on Error {
+        // Catches UnsupportedError in testWithoutContext and StateError if AppContext is missing.
+      }
+    }
     final bool success = await _doctor.diagnose(
-      androidLicenses: androidLicenses,
+      androidLicenses: boolArg('android-licenses'),
       verbose: verbose,
-      androidLicenseValidator: androidLicenses ? androidLicenseValidator : null,
+      androidLicenseValidator: androidLicenseValidator,
+      extensionManager: extensionManager,
     );
     return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }

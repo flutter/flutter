@@ -68,6 +68,8 @@ class TestWidgetsApp extends StatelessWidget {
     this.home,
     this.initialRoute,
     this.onGenerateRoute,
+    this.onGenerateInitialRoutes,
+    this.onUnknownRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.routes = const <String, WidgetBuilder>{},
     this.color = const Color(0xFFFFFFFF),
@@ -77,6 +79,8 @@ class TestWidgetsApp extends StatelessWidget {
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
+    this.localizationsDelegates,
+    this.localeListResolutionCallback,
   });
 
   /// A key to use when building the [Navigator].
@@ -139,6 +143,26 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   ///  * [WidgetsApp.onGenerateRoute], the equivalent property in [WidgetsApp].
   final RouteFactory? onGenerateRoute;
+
+  /// The routes generator callback used for generating initial routes if
+  /// [initialRoute] is provided.
+  ///
+  /// If this property is not set, the underlying
+  /// [Navigator.onGenerateInitialRoutes] will default to
+  /// [Navigator.defaultGenerateInitialRoutes].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.onGenerateInitialRoutes], the equivalent property in [WidgetsApp].
+  final InitialRouteListFactory? onGenerateInitialRoutes;
+
+  /// Called when [onGenerateRoute] fails to generate a route, except for the
+  /// [initialRoute].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.onUnknownRoute], the equivalent property in [WidgetsApp].
+  final RouteFactory? onUnknownRoute;
 
   /// A list of [NavigatorObserver] for the app's [Navigator].
   ///
@@ -250,6 +274,23 @@ class TestWidgetsApp extends StatelessWidget {
   ///  * [WidgetsApp.restorationScopeId], the equivalent property in [WidgetsApp].
   final String? restorationScopeId;
 
+  /// The delegates for this app's [Localizations] widget.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.localizationsDelegates], the equivalent property in [WidgetsApp].
+  final Iterable<LocalizationsDelegate<Object?>>? localizationsDelegates;
+
+  /// The callback responsible for choosing the app's locale
+  /// when the app is started, and when the user changes the
+  /// device's locale.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.localeListResolutionCallback], the equivalent property in [WidgetsApp].
+  ///  * [basicLocaleListResolution], the default locale resolution algorithm.
+  final LocaleListResolutionCallback? localeListResolutionCallback;
+
   static PageRoute<T> _defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
     return PageRouteBuilder<T>(
       settings: settings,
@@ -279,12 +320,16 @@ class TestWidgetsApp extends StatelessWidget {
       home: home,
       initialRoute: initialRoute,
       onGenerateRoute: onGenerateRoute,
+      onGenerateInitialRoutes: onGenerateInitialRoutes,
+      onUnknownRoute: onUnknownRoute,
       routes: routes,
       pageRouteBuilder: pageRouteBuilder,
       builder: builder,
       shortcuts: shortcuts,
       actions: actions,
       restorationScopeId: restorationScopeId,
+      localizationsDelegates: localizationsDelegates,
+      localeListResolutionCallback: localeListResolutionCallback,
     );
   }
 }

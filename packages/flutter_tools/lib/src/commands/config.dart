@@ -1,63 +1,86 @@
-import 'package:unified_analytics/unified_analytics.dart';
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:args/args.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../android/java.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../experimental/config.dart';
+import '../experimental/extension_arg_parser.dart';
+import '../experimental/extension_manager.dart';
 import '../features.dart';
 import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 
-class ConfigCommand extends FlutterCommand {
+class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   ConfigCommand({
     required AndroidContext androidContext,
     required ToolContext toolContext,
-    FeatureFlags? featureFlags,
-    Analytics? analytics,
+    required this.featureFlags,
     bool verboseHelp = false,
+    ExtensionManager? extensionManager,
   }) : _androidContext = androidContext,
        _toolContext = toolContext,
-       _featureFlags = featureFlags,
-       _analytics = analytics {
-    argParser.addFlag(
-      'list',
-      help: 'List all settings and their current values.',
-      negatable: false,
-    );
-    argParser.addFlag(
+       _extensionManager = extensionManager,
+       _verboseHelp = verboseHelp,
+       super(toolContext: toolContext);
+
+  final AndroidContext _androidContext;
+  final ToolContext _toolContext;
+  final FeatureFlags featureFlags;
+  final ExtensionManager? _extensionManager;
+  final bool _verboseHelp;
+
+  @override
+  ToolContext get toolContext => _toolContext;
+
+  var _extensionSettingsGroups = const <ExtensionSettingsGroup>[];
+
+  @override
+  ArgParser createBaseArgParser() {
+    final ArgParser parser = super.createBaseArgParser();
+    parser.addFlag('list', help: 'List all settings and their current values.', negatable: false);
+    parser.addFlag(
       'analytics',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
       help:
           'Enable or disable reporting anonymously tool usage statistics and crash reports.\n'
           '(An alias for "--${FlutterGlobalOptions.kEnableAnalyticsFlag}" '
           'and "--${FlutterGlobalOptions.kDisableAnalyticsFlag}" top level flags.)',
     );
-    argParser.addFlag(
+    parser.addFlag(
       'clear-ios-signing-settings',
       negatable: false,
       aliases: <String>['clear-ios-signing-cert'],
       help:
           'Clear the saved development certificate or provisioning profile choice used to sign apps for iOS device deployment.',
     );
-    argParser.addFlag(
+    parser.addFlag(
       'select-ios-signing-settings',
       negatable: false,
       help:
           'Complete prompt to select and save code signing settings used to sign apps for iOS device deployment.',
     );
-    argParser.addOption('android-sdk', help: 'The Android SDK directory.');
-    argParser.addOption(
+    parser.addOption('android-sdk', help: 'The Android SDK directory.');
+    parser.addOption(
       'android-studio-dir',
       help:
           'The Android Studio installation directory. If unset, flutter will search for valid installations at well-known locations.',
     );
-    argParser.addOption(
+    parser.addOption(
       'jdk-dir',
       help:
           'The Java Development Kit (JDK) installation directory. '
@@ -66,48 +89,82 @@ class ConfigCommand extends FlutterCommand {
           '    2) the JDK found at the directory found in the JAVA_HOME environment variable, and\n'
           "    3) the directory containing the java binary found in the user's path.",
     );
-    argParser.addOption(
+    parser.addOption(
       'build-dir',
       help: 'The relative path to override a projects build directory.',
       valueHelp: 'out/',
     );
-    addMachineOutputFlag(verboseHelp: verboseHelp);
-    for (final Feature feature in _effectiveFeatureFlags.allFeatures) {
+    parser.addFlag(
+      FlutterGlobalOptions.kMachineFlag,
+      negatable: false,
+      help: 'Outputs in a machine readable structured JSON format.',
+      hide: !_verboseHelp,
+    );
+    for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
       }
       final String channel = _toolContext.flutterVersion.channel;
-      argParser.addFlag(
+      parser.addFlag(
         configSetting,
         help: feature.generateHelpMessage(),
         defaultsTo: feature.getSettingForChannel(channel).enabledByDefault,
       );
     }
-    argParser.addFlag(
+    parser.addFlag(
       'clear-features',
       help: 'Remove all configured features and restore them to the default values.',
       negatable: false,
     );
+    return parser;
   }
 
-  final AndroidContext _androidContext;
-  final ToolContext _toolContext;
-  final FeatureFlags? _featureFlags;
-  final Analytics? _analytics;
-
-  FeatureFlags get _effectiveFeatureFlags {
-    if (_featureFlags != null) {
-      return _featureFlags;
+  Future<ExtensionConfiguration?> get _activeExtensionConfig async {
+    if (_extensionManager case final extensionManager?) {
+      await extensionManager.ensureInitialized();
+      final List<ConfigurationExtension> extensions = extensionManager.configurationExtensions;
+      if (extensions.isNotEmpty) {
+        return ExtensionConfiguration(extensions: extensions, logger: _toolContext.logger);
+      }
     }
-    try {
-      return featureFlags;
-    } on UnsupportedError {
-      return const _DefaultFeatureFlags();
+    return null;
+  }
+
+  @override
+  Future<void> initializeDynamicOptions() async {
+    if (await _activeExtensionConfig case final activeConfig?) {
+      _extensionSettingsGroups = await activeConfig.fetchExtensionSettings();
+      if (_extensionSettingsGroups.isNotEmpty) {
+        rebuildDynamicArgParser();
+      }
     }
   }
 
-  Analytics get _effectiveAnalytics => _analytics ?? analytics;
+  @override
+  ArgParser buildDynamicArgParser(ArgParser dynamicParser) {
+    for (final ExtensionSettingsGroup(:featureFlags, :configOptions) in _extensionSettingsGroups) {
+      for (final FeatureFlag(:name, :help, :enabledByDefault) in featureFlags) {
+        if (!dynamicParser.options.containsKey(name)) {
+          dynamicParser.addFlag(name, help: help, defaultsTo: enabledByDefault);
+        } else {
+          _toolContext.logger.printTrace(
+            'Extension feature flag "$name" conflicts with an existing option and was skipped.',
+          );
+        }
+      }
+      for (final ConfigOption(:name, :help, :value) in configOptions) {
+        if (!dynamicParser.options.containsKey(name)) {
+          dynamicParser.addOption(name, help: help, defaultsTo: value);
+        } else {
+          _toolContext.logger.printTrace(
+            'Extension config option "$name" conflicts with an existing option and was skipped.',
+          );
+        }
+      }
+    }
+    return dynamicParser;
+  }
 
   @override
   final name = 'config';
@@ -116,10 +173,8 @@ class ConfigCommand extends FlutterCommand {
   final description =
       'Configure Flutter settings.\n\n'
       'To remove a setting, configure it to an empty string.\n\n'
-      'The Flutter tool logs metric data on some Flutter executions for internal usage analysis. '
-      'The data is anonymized before being sent to Google and no personal information is '
-      'collected. To prevent reporting of the data to Google, disable telemetry with '
-      '"flutter config --no-analytics".';
+      'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve '
+      "Flutter tools over time. See Google's privacy policy: https://www.google.com/intl/en/policies/privacy/";
 
   @override
   final category = FlutterCommandCategory.sdk;
@@ -138,12 +193,11 @@ class ConfigCommand extends FlutterCommand {
   Future<String?> get usagePath async => null;
 
   @override
-  void printUsage() {
-    _toolContext.logger.printStatus(usage);
-  }
-
-  @override
   Future<FlutterCommandResult> runCommand() async {
+    final Logger logger = _toolContext.logger;
+    final Config config = _toolContext.config;
+    final FileSystem fs = _toolContext.fs;
+
     final List<String> rest = argResults!.rest;
     if (rest.isNotEmpty) {
       throwToolExit(
@@ -157,7 +211,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (boolArg('list')) {
-      _toolContext.logger.printStatus(settingsText);
+      logger.printStatus(await settingsText);
       return FlutterCommandResult.success();
     }
 
@@ -167,56 +221,56 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (boolArg('clear-features')) {
-      for (final Feature feature in _effectiveFeatureFlags.allFeatures) {
+      for (final Feature feature in featureFlags.allFeatures) {
         final String? configSetting = feature.configSetting;
         if (configSetting != null) {
-          _toolContext.config.removeValue(configSetting);
+          config.removeValue(configSetting);
         }
       }
-      _toolContext.logger.printStatus(requireReloadTipText);
+      final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
+      final List<ExtensionSettingsGroup> groups = _extensionSettingsGroups.isNotEmpty
+          ? _extensionSettingsGroups
+          : await activeConfig?.fetchExtensionSettings() ?? const <ExtensionSettingsGroup>[];
+      for (final ExtensionSettingsGroup(:featureFlags) in groups) {
+        for (final FeatureFlag(:name) in featureFlags) {
+          config.removeValue(name);
+        }
+      }
+      logger.printStatus(requireReloadTipText);
       return FlutterCommandResult.success();
     }
 
     if (argResults!.wasParsed('analytics')) {
       final bool value = boolArg('analytics');
-      _toolContext.logger.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
+      logger.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
 
-      await _effectiveAnalytics.setTelemetry(value);
+      await analytics.setTelemetry(value);
     }
 
     if (argResults!.wasParsed('android-sdk')) {
-      _updateConfig('android-sdk', stringArg('android-sdk')!);
+      _updateConfig('android-sdk', stringArg('android-sdk'));
     }
 
     if (argResults!.wasParsed('android-studio-dir')) {
-      _updateConfig('android-studio-dir', stringArg('android-studio-dir')!);
+      _updateConfig('android-studio-dir', stringArg('android-studio-dir'));
     }
 
     if (argResults!.wasParsed('jdk-dir')) {
-      _updateConfig('jdk-dir', stringArg('jdk-dir')!);
+      _updateConfig('jdk-dir', stringArg('jdk-dir'));
     }
 
     if (argResults!.wasParsed('clear-ios-signing-settings')) {
-      XcodeCodeSigningSettings.resetSettings(_toolContext.config, _toolContext.logger);
+      XcodeCodeSigningSettings.resetSettings(config, logger);
     }
 
     if (argResults!.wasParsed('select-ios-signing-settings')) {
       final settings = XcodeCodeSigningSettings(
-        config: _toolContext.config,
-        logger: _toolContext.logger,
-        platform: _toolContext.platform,
-        processUtils: _toolContext.processUtils,
-        fileSystem: _toolContext.fs,
-        fileSystemUtils: FileSystemUtils(
-          fileSystem: _toolContext.fs,
-          platform: _toolContext.platform,
-        ),
-        terminal: _toolContext.terminal,
         plistParser: PlistParser(
-          fileSystem: _toolContext.fs,
-          logger: _toolContext.logger,
+          fileSystem: fs,
+          logger: logger,
           processManager: _toolContext.processManager,
         ),
+        toolContext: _toolContext,
       );
 
       await settings.selectSettings();
@@ -224,39 +278,58 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults!.wasParsed('build-dir')) {
       final String buildDir = stringArg('build-dir')!;
-      if (_toolContext.fs.path.isAbsolute(buildDir)) {
+      if (fs.path.isAbsolute(buildDir)) {
         throwToolExit('build-dir should be a relative path');
       }
       _updateConfig('build-dir', buildDir);
     }
 
-    for (final Feature feature in _effectiveFeatureFlags.allFeatures) {
+    for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
       if (configSetting == null) {
         continue;
       }
       if (argResults!.wasParsed(configSetting)) {
         final bool keyValue = boolArg(configSetting);
-        _toolContext.config.setValue(configSetting, keyValue);
-        _toolContext.logger.printStatus('Setting "$configSetting" value to "$keyValue".');
+        config.setValue(configSetting, keyValue);
+        logger.printStatus('Setting "$configSetting" value to "$keyValue".');
+        if (!keyValue && feature.warningMessageOnDisable != null) {
+          logger.printWarning(feature.warningMessageOnDisable!);
+        }
+      }
+    }
+
+    for (final ExtensionSettingsGroup(:featureFlags, :configOptions) in _extensionSettingsGroups) {
+      for (final FeatureFlag(:name) in featureFlags) {
+        if (argResults!.wasParsed(name)) {
+          final bool keyValue = boolArg(name);
+          config.setValue(name, keyValue);
+          logger.printStatus('Setting "$name" value to "$keyValue".');
+        }
+      }
+      for (final ConfigOption(:name) in configOptions) {
+        if (argResults!.wasParsed(name)) {
+          _updateConfig(name, stringArg(name));
+        }
       }
     }
 
     if (argResults == null || argResults!.arguments.isEmpty) {
-      _toolContext.logger.printStatus(usage);
+      logger.printStatus(usage);
     } else {
-      _toolContext.logger.printStatus('\n$requireReloadTipText');
+      logger.printStatus('\n$requireReloadTipText');
     }
 
     return FlutterCommandResult.success();
   }
 
   Future<void> handleMachine() async {
+    final Config config = _toolContext.config;
+    final Logger logger = _toolContext.logger;
     // Get all the current values.
-    final results = <String, Object?>{};
-    for (final String key in _toolContext.config.keys) {
-      results[key] = _toolContext.config.getValue(key);
-    }
+    final results = <String, Object?>{
+      for (final String key in config.keys) key: config.getValue(key),
+    };
 
     // Ensure we send any calculated ones, if overrides don't exist.
     final AndroidStudio? androidStudio = _androidContext.androidStudio;
@@ -272,39 +345,39 @@ class ConfigCommand extends FlutterCommand {
       results['jdk-dir'] = java.javaHome;
     }
 
-    _toolContext.logger.printStatus(const JsonEncoder.withIndent('  ').convert(results));
+    logger.printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
-  void _updateConfig(String keyName, String keyValue) {
-    if (keyValue.isEmpty) {
-      _toolContext.config.removeValue(keyName);
-      _toolContext.logger.printStatus('Removing "$keyName" value.');
+  void _updateConfig(String keyName, String? keyValue) {
+    final Config config = _toolContext.config;
+    final Logger logger = _toolContext.logger;
+    if (keyValue == null || keyValue.isEmpty) {
+      config.removeValue(keyName);
+      logger.printStatus('Removing "$keyName" value.');
     } else {
-      _toolContext.config.setValue(keyName, keyValue);
-      _toolContext.logger.printStatus('Setting "$keyName" value to "$keyValue".');
+      config.setValue(keyName, keyValue);
+      logger.printStatus('Setting "$keyName" value to "$keyValue".');
     }
   }
 
   /// List all config settings. for feature flags, include whether they are available.
-  String get settingsText {
-    final featuresByName = <String, Feature>{};
+  Future<String> get settingsText async {
+    final Config config = _toolContext.config;
+    final featuresByName = <String, Feature>{
+      for (final feature in featureFlags.allFeatures)
+        if (feature.configSetting case final configSetting?) configSetting: feature,
+    };
     final String channel = _toolContext.flutterVersion.channel;
-    for (final Feature feature in _effectiveFeatureFlags.allFeatures) {
-      final String? configSetting = feature.configSetting;
-      if (configSetting != null) {
-        featuresByName[configSetting] = feature;
-      }
-    }
     final keys = <String>{
-      ..._effectiveFeatureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
-      ..._toolContext.config.keys,
+      ...featureFlags.allFeatures.map((Feature e) => e.configSetting).whereType<String>(),
+      ...config.keys,
     };
     final Iterable<String> settings = keys.map<String>((String key) {
-      Object? value = _toolContext.config.getValue(key);
+      Object? value = config.getValue(key);
       value ??= '(Not set)';
       final buffer = StringBuffer('  $key: $value');
-      if (featuresByName.containsKey(key)) {
-        final FeatureChannelSetting setting = featuresByName[key]!.getSettingForChannel(channel);
+      if (featuresByName[key] case final feature?) {
+        final FeatureChannelSetting setting = feature.getSettingForChannel(channel);
         if (!setting.available) {
           buffer.write(' (Unavailable)');
         }
@@ -318,62 +391,39 @@ class ConfigCommand extends FlutterCommand {
     } else {
       buffer.writeln(settings.join('\n'));
     }
+
+    final ExtensionConfiguration? activeConfig = await _activeExtensionConfig;
+    final List<ExtensionSettingsGroup> groups = _extensionSettingsGroups.isNotEmpty
+        ? _extensionSettingsGroups
+        : (await activeConfig?.fetchExtensionSettings()) ?? const <ExtensionSettingsGroup>[];
+    if (groups.any((ExtensionSettingsGroup g) => g.isNotEmpty)) {
+      buffer.writeln('\nExtension Settings:');
+      for (final ExtensionSettingsGroup(:title, :featureFlags, :configOptions, :isEmpty)
+          in groups) {
+        if (isEmpty) {
+          continue;
+        }
+        buffer.writeln('  $title:');
+        for (final FeatureFlag(:name, :enabledByDefault) in featureFlags) {
+          final Object val = config.getValue(name) ?? enabledByDefault;
+          buffer.writeln('    $name: $val');
+        }
+        for (final ConfigOption(:name, :value) in configOptions) {
+          final Object val = config.getValue(name) ?? value ?? '(Not set)';
+          buffer.writeln('    $name: $val');
+        }
+      }
+    }
+
     return buffer.toString();
   }
 
   /// List the status of the analytics reporting.
   String get analyticsUsage {
-    return 'Analytics reporting is currently ${_effectiveAnalytics.telemetryEnabled ? 'enabled' : 'disabled'}.';
+    return 'Analytics reporting is currently ${analytics.telemetryEnabled ? 'enabled' : 'disabled'}.';
   }
 
   /// Raising the reload tip for setting changes.
   final requireReloadTipText =
       'You may need to restart any open editors for them to read new settings.';
-}
-
-class _DefaultFeatureFlags extends FeatureFlags {
-  const _DefaultFeatureFlags();
-
-  @override
-  bool isEnabled(Feature feature) => false;
-  @override
-  bool get isLinuxEnabled => false;
-  @override
-  bool get isMacOSEnabled => false;
-  @override
-  bool get isWindowsEnabled => false;
-  @override
-  bool get isWebEnabled => false;
-  @override
-  bool get isAndroidEnabled => false;
-  @override
-  bool get isIOSEnabled => false;
-  @override
-  bool get isFuchsiaEnabled => false;
-  @override
-  bool get areCustomDevicesEnabled => false;
-  @override
-  bool get isCliAnimationEnabled => false;
-  @override
-  bool get isNativeAssetsEnabled => false;
-  @override
-  bool get isDartDataAssetsEnabled => false;
-  @override
-  bool get isRecordUseEnabled => false;
-  @override
-  bool get isSwiftPackageManagerEnabled => false;
-  @override
-  bool get isOmitLegacyVersionFileEnabled => false;
-  @override
-  bool get isWindowingEnabled => false;
-  @override
-  bool get isAccessibilityEvaluationsEnabled => false;
-  @override
-  bool get isLLDBDebuggingEnabled => false;
-  @override
-  bool get isUISceneMigrationEnabled => false;
-  @override
-  bool get isRiscv64SupportEnabled => false;
-  @override
-  bool get isMacOSArm64OnlyEnabled => false;
 }

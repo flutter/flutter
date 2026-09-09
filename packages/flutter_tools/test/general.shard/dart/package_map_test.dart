@@ -135,4 +135,36 @@ void main() {
       },
     );
   });
+
+  group('PackageConfigWorkspaceExtension', () {
+    testWithoutContext('toPackageUriForWorkspace finds most specific package in pub workspace', () {
+      final packageConfig = PackageConfig(<Package>[
+        Package(
+          'root',
+          Uri.parse('file:///workspace/'),
+          packageUriRoot: Uri.parse('file:///workspace/lib/'),
+        ),
+        Package(
+          'member',
+          Uri.parse('file:///workspace/lib/member/'),
+          packageUriRoot: Uri.parse('file:///workspace/lib/member/lib/'),
+        ),
+      ]);
+
+      expect(
+        packageConfig.toPackageUriForWorkspace(Uri.parse('file:///workspace/lib/foo.dart')),
+        Uri.parse('package:root/foo.dart'),
+      );
+      expect(
+        packageConfig.toPackageUriForWorkspace(
+          Uri.parse('file:///workspace/lib/member/lib/bar.dart'),
+        ),
+        Uri.parse('package:member/bar.dart'),
+      );
+      expect(
+        packageConfig.toPackageUriForWorkspace(Uri.parse('package:member/bar.dart')),
+        Uri.parse('package:member/bar.dart'),
+      );
+    });
+  });
 }
