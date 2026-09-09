@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -27,7 +28,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart'
-    show FakeAndroidContext, FakeFlutterVersion, FakeToolContext, TestFeatureFlags;
+    show DelegatingToolContext, FakeAndroidContext, FakeFlutterVersion, TestFeatureFlags;
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
@@ -1100,16 +1101,14 @@ Future<BuildApkCommand> runBuildApkCommand(
   final command = BuildApkCommand(
     androidBuilder: androidBuilder ?? context.get<AndroidBuilder>()!,
     androidContext: FakeAndroidContext(
-      androidSdk: globals.androidSdk ?? FakeAndroidSdk(globals.fs.directory('android-sdk')),
+      androidSdk:
+          context.get<AndroidSdk>() ??
+          FakeAndroidSdk(
+            (context.get<FileSystem>() ?? MemoryFileSystem.test()).directory('android-sdk'),
+          ),
     ),
-    buildSystem: globals.buildSystem,
-    toolContext: FakeToolContext(
-      fs: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
-      processManager: globals.processManager,
-      projectFactory: globals.projectFactory,
-    ),
+    buildSystem: context.get<BuildSystem>() ?? TestBuildSystem.all(BuildResult(success: true)),
+    toolContext: DelegatingToolContext(),
   );
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>[
