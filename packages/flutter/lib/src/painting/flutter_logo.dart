@@ -45,9 +45,9 @@ class FlutterLogoDecoration extends Decoration {
     this.textColor = const Color(0xFF757575),
     this.style = FlutterLogoStyle.markOnly,
     this.margin = EdgeInsets.zero,
-  }) : _position = identical(style, FlutterLogoStyle.markOnly)
+  }) : _position = style == FlutterLogoStyle.markOnly
            ? 0.0
-           : identical(style, FlutterLogoStyle.horizontal)
+           : style == FlutterLogoStyle.horizontal
            ? 1.0
            : -1.0,
        _opacity = 1.0;
