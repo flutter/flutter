@@ -543,7 +543,14 @@ To fix this, you can either:
 
     // The default Gradle script reads the version name and number
     // from the local.properties file.
-    updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
+    updateLocalProperties(
+      project: project,
+      analytics: _analytics,
+      androidSdk: _androidSdk,
+      buildInfo: androidBuildInfo.buildInfo,
+      fileSystemUtils: _fileSystemUtils,
+      logger: _logger,
+    );
 
     final options = <String>[];
 

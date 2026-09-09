@@ -102,7 +102,7 @@ void main() {
             FakeToolContext(
               logger: logger,
               processManager: processManager,
-              fs: fileSystem,
+              fs: fileSystem ?? globals.fs,
               artifacts: artifacts,
               platform: platform,
             ),
@@ -112,7 +112,13 @@ void main() {
               java: java,
               gradleUtils: gradleUtils,
               androidStudio: androidStudio,
-              androidSdk: androidSdk,
+              androidSdk:
+                  androidSdk ??
+                  AndroidSdk(
+                    (fileSystem ?? globals.fs).directory(missingSdkPath()),
+                    java: FakeJava(),
+                    fileSystem: fileSystem ?? globals.fs,
+                  ),
             ),
         analytics: analytics ?? fakeAnalytics,
       );
