@@ -8,7 +8,6 @@ import 'package:yaml/yaml.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
@@ -535,6 +534,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
 LocalizationOptions parseLocalizationsOptionsFromCommand({
   required FlutterCommand command,
   required String defaultArbDir,
+  required Logger logger,
 }) {
   const kSyntheticPackage = 'synthetic-package';
   const kFlutterGenNotice = 'http://flutter.dev/to/flutter-gen-deprecation';
@@ -545,7 +545,7 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
         'See $kFlutterGenNotice.',
       );
     } else {
-      globals.logger.printWarning(
+      logger.printWarning(
         'The argument "$kSyntheticPackage" no longer has any effect and should '
         'be removed. See $kFlutterGenNotice',
       );
