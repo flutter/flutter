@@ -27,6 +27,7 @@ void main() {
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       cache: FakeCache(),
       config: FakeConfig(),
+      featureFlags: TestFeatureFlags(),
       fileSystem: fs,
       fileSystemUtils: FakeFileSystemUtils(),
       flutterVersion: FakeFlutterVersion(),

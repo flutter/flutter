@@ -7,6 +7,7 @@ import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
 import '../android/android_sdk.dart';
+import '../android/gradle.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -22,6 +23,7 @@ import '../features.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
+import '../windows/visual_studio.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
 import 'build_appbundle.dart';
@@ -38,12 +40,13 @@ import 'darwin_add_to_app.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({
-    required AndroidBuilder androidBuilder,
     required AndroidContext androidContext,
     required AppleContext appleContext,
     required BuildSystem buildSystem,
+    required FeatureFlags featureFlags,
     required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
+    AndroidBuilder? androidBuilder,
     bool verboseHelp = false,
   }) : super(toolContext: toolContext, verboseHelp: verboseHelp) {
     final ToolContext(
@@ -63,7 +66,13 @@ class BuildCommand extends FlutterCommand {
       appleContext: appleContext,
       toolContext: toolContext,
     );
-
+    final AndroidBuilder effectiveAndroidBuilder =
+        androidBuilder ??
+        AndroidGradleBuilder.fromContexts(
+          analytics: analytics,
+          androidContext: androidContext,
+          toolContext: toolContext,
+        );
     _addSubcommand(
       BuildAarCommand(
         androidSdk: androidSdk,
@@ -74,7 +83,7 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(
       BuildApkCommand(
-        androidBuilder: androidBuilder,
+        androidBuilder: effectiveAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
         toolContext: toolContext,
@@ -123,12 +132,36 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
     );
-    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
-      BuildLinuxCommand(logger: logger, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
+      BuildMacosCommand(
+        buildSystem: buildSystem,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
     );
     _addSubcommand(
-      BuildWindowsCommand(logger: logger, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
+      BuildLinuxCommand(
+        buildSystem: buildSystem,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
+    _addSubcommand(
+      BuildWindowsCommand(
+        buildSystem: buildSystem,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+        visualStudio: VisualStudio(
+          fileSystem: fileSystem,
+          platform: platform,
+          logger: logger,
+          processManager: processManager,
+          osUtils: osUtils,
+        ),
+      ),
     );
   }
 
@@ -137,6 +170,9 @@ class BuildCommand extends FlutterCommand {
       addSubcommand(command);
     }
   }
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final String name = 'build';
@@ -152,7 +188,12 @@ class BuildCommand extends FlutterCommand {
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  BuildSubCommand({required this.logger, required super.verboseHelp, super.toolContext}) {
+  BuildSubCommand({
+    required this.logger,
+    required super.verboseHelp,
+    super.outputPreferences,
+    super.toolContext,
+  }) {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
