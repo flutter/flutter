@@ -5,6 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'drag.dart';
+import 'reorderable_list_semantics.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -98,6 +101,28 @@ class _MyHomePageState extends State<MyHomePage> {
                 context,
                 MaterialPageRoute<AdMobBannerInScrollableListTestPage>(
                   builder: (BuildContext context) => const AdMobBannerInScrollableListTestPage(),
+                ),
+              );
+            },
+          ),
+          TextButton(
+            child: const Text('reorderable list semantics test'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<ReorderableListSemanticsScreen>(
+                  builder: (BuildContext context) => const ReorderableListSemanticsScreen(),
+                ),
+              );
+            },
+          ),
+          TextButton(
+            child: const Text('drag test'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<DragScreen>(
+                  builder: (BuildContext context) => const DragScreen(),
                 ),
               );
             },

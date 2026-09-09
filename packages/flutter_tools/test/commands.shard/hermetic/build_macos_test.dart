@@ -27,6 +27,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
@@ -219,14 +220,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build fails when there is no macos project',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -261,14 +261,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build fails when Xcode is not installed',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -301,14 +300,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build successfully with renamed .xcodeproj/.xcworkspace files',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -354,14 +352,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build invokes xcodebuild with -project when there is no .xcworkspace',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -399,14 +396,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build fails on non-macOS platform',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -438,14 +434,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build fails when feature is disabled',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -480,14 +475,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build forwards error stdout to status logger error',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -537,14 +531,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build outputs path and size when successful',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: MemoryFileSystem.test(),
+        fileSystem: fileSystem,
         logger: BufferLogger.test(),
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -578,14 +571,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build invokes xcode build (debug)',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -617,14 +609,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build invokes xcode build (debug) with verbosity',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -657,14 +648,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build invokes xcode build (profile)',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -697,14 +687,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build invokes xcode build (release)',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -736,14 +725,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build supports standard desktop build options',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -855,14 +843,13 @@ STDERR STUFF
         ),
       ]);
 
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -895,14 +882,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build supports build-name and build-number',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -944,14 +930,13 @@ STDERR STUFF
 
   testUsingContext('Refuses to build for macOS when feature is disabled', () {
     final CommandRunner<void> runner = createTestCommandRunner(
-      BuildCommand(
+      createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -966,7 +951,9 @@ STDERR STUFF
     );
 
     final bool supported = BuildMacosCommand(
-      logger: BufferLogger.test(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      featureFlags: TestFeatureFlags(),
+      toolContext: FakeToolContext(),
       verboseHelp: false,
     ).supported;
     expect(
@@ -978,7 +965,15 @@ STDERR STUFF
   testUsingContext(
     'hidden when not enabled on macOS host',
     () {
-      expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, true);
+      expect(
+        BuildMacosCommand(
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          featureFlags: TestFeatureFlags(),
+          toolContext: FakeToolContext(platform: macosPlatform),
+          verboseHelp: false,
+        ).hidden,
+        true,
+      );
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(),
@@ -989,7 +984,15 @@ STDERR STUFF
   testUsingContext(
     'Not hidden when enabled and on macOS host',
     () {
-      expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, false);
+      expect(
+        BuildMacosCommand(
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          featureFlags: TestFeatureFlags(isMacOSEnabled: true),
+          toolContext: FakeToolContext(platform: macosPlatform),
+          verboseHelp: false,
+        ).hidden,
+        false,
+      );
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -1000,14 +1003,13 @@ STDERR STUFF
   testUsingContext(
     'code size analysis throws StateError if no code size snapshot generated by gen_snapshot',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1057,14 +1059,13 @@ STDERR STUFF
   testUsingContext(
     'Performs code size analysis and sends analytics from arm64 host',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1130,14 +1131,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build overrides CODE_SIGN_ENTITLEMENTS when in CI if entitlement file exists (debug)',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1210,14 +1210,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build overrides CODE_SIGN_ENTITLEMENTS when in CI if entitlement file exists (release)',
     () async {
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1292,14 +1291,13 @@ STDERR STUFF
     () async {
       createMinimalMockProjectFiles();
 
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1333,14 +1331,13 @@ STDERR STUFF
     () async {
       createMinimalMockProjectFiles();
 
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1375,14 +1372,13 @@ STDERR STUFF
     () async {
       createMinimalMockProjectFiles();
 
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1414,14 +1410,13 @@ STDERR STUFF
     () async {
       createMinimalMockProjectFiles();
 
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1472,14 +1467,13 @@ STDERR STUFF
         ),
       ]);
 
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1516,14 +1510,13 @@ STDERR STUFF
     () async {
       createMinimalMockProjectFiles();
 
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1577,14 +1570,13 @@ STDERR STUFF
         ),
       ]);
 
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1621,14 +1613,13 @@ STDERR STUFF
     () async {
       createMinimalMockProjectFiles();
 
-      final command = BuildCommand(
+      final BuildCommand command = createFakeBuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         fileSystem: fileSystem,
         logger: testLogger,
         osUtils: FakeOperatingSystemUtils(),
         config: FakeConfig(),
-        platform: FakePlatform(),
         fileSystemUtils: FakeFileSystemUtils(),
         terminal: FakeTerminal(),
         plistParser: FakePlistParser(),
@@ -1683,14 +1674,14 @@ STDERR STUFF
     testUsingContext(
       'Sends an analytics event when Impeller is enabled',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = createFakeBuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
-          platform: FakePlatform(),
+          platform: macosPlatform,
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
@@ -1727,14 +1718,13 @@ STDERR STUFF
     testUsingContext(
       'Sends an analytics event when Impeller is disabled',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = createFakeBuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
-          platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
@@ -1780,14 +1770,13 @@ STDERR STUFF
     testUsingContext(
       'Reads built app bundle Contents/Info.plist when present',
       () async {
-        final command = BuildCommand(
+        final BuildCommand command = createFakeBuildCommand(
           androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           osUtils: FakeOperatingSystemUtils(),
           config: FakeConfig(),
-          platform: FakePlatform(),
           fileSystemUtils: FakeFileSystemUtils(),
           terminal: FakeTerminal(),
           plistParser: FakePlistParser(),
