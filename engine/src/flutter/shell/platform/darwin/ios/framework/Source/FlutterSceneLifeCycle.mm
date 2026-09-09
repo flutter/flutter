@@ -271,10 +271,9 @@ static void CompactNSPointerArray(NSPointerArray* array) {
     [self.connectingScenes setObject:connectionOptions forKey:scene];
   }
 
-  // Connection event for developer managed engine is triggered during the notification, so this won't actually include developer managed engines since it's not added to the list yet.
-  NSArray<FlutterEngine*>* attachedEngines =
+  NSArray<FlutterEngine*>* engines =
       [self searchFlutterEnginesWithScene:scene];
-  for (FlutterEngine* engine in attachedEngines) {
+  for (FlutterEngine* engine in engines) {
     [self connectEngineIfNeeded:engine scene:scene];
   }
 
