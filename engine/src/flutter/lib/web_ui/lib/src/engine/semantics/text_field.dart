@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
@@ -20,35 +22,28 @@ import 'semantics.dart';
 /// See: https://github.com/flutter/flutter/issues/192327
 const double _iosMinimumEditableFontSize = 16.0;
 
-/// Gives [element] a font size on iOS. Without this it has none of its own and
-/// falls back to the browser default, which on iOS is 11px.
+/// Raises [element]'s font size to [_iosMinimumEditableFontSize] on iOS when
+/// [frameworkFontSize] is smaller than that, or absent.
 ///
-/// That matters because iOS zooms the whole page when it focuses an editable
-/// element smaller than [_iosMinimumEditableFontSize], and leaves it zoomed. So
-/// the size used is [frameworkFontSize], or the minimum when the framework asks
-/// for less. The element is invisible, so enlarging a small size changes nothing
-/// the user sees, and a larger size is kept as it is.
+/// iOS zooms the whole page when it focuses an editable element below the
+/// threshold, and leaves it zoomed. The element is invisible, so enlarging a
+/// small size changes nothing the user sees, and a larger framework size is kept
+/// as it is.
 ///
-/// The size is assigned on every call, not only raised when it is too small.
-/// That looks redundant but is not: on the usual path nothing else ever sets a
-/// font size here, so raising alone would leave a 24px field stuck at 16px. The
-/// framework does send its size, but it arrives before the field is shown and is
-/// only stored. [SemanticsTextEditingStrategy.activate] hands it over before
-/// enabling the strategy, and [DefaultTextEditingStrategy.updateElementStyle]
-/// writes it to the element only once enabled.
+/// Called from two places. At element creation there is no framework style yet
+/// and the element would fall back to the browser default, 11px on iOS. After
+/// each style sync the framework size has just been written by
+/// [EditableTextStyle.applyToDomElement] and may be below the threshold again.
 ///
-/// This also has to live on the element rather than in the global stylesheet. A
-/// style change arriving later, while editing is enabled, writes the framework
-/// size onto the element as an inline style, and inline styles beat stylesheet
-/// rules.
+/// Assigning `font-size` as a longhand after that inline `font` shorthand
+/// overrides only the size and leaves the rest of the shorthand alone. It also
+/// has to be set on the element rather than in the global stylesheet, because an
+/// inline declaration outranks any stylesheet rule.
 void _applyIosMinimumFontSize(DomHTMLElement element, double? frameworkFontSize) {
   if (!isIosSafari) {
     return;
   }
-  final double effectiveFontSize =
-      frameworkFontSize == null || frameworkFontSize < _iosMinimumEditableFontSize
-      ? _iosMinimumEditableFontSize
-      : frameworkFontSize;
+  final double effectiveFontSize = math.max(_iosMinimumEditableFontSize, frameworkFontSize ?? 0.0);
   element.style.fontSize = '${effectiveFontSize}px';
 }
 
@@ -131,8 +126,11 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 
     activeTextField = textField;
     domElement = textField.editableElement;
-    _syncStyle();
+    // Enable before syncing the style.
+    // [DefaultTextEditingStrategy.updateElementStyle] only writes to the element
+    // once editing is enabled, so syncing first drops the style silently.
     super.enable(inputConfig!, onChange: onChange!, onAction: onAction!);
+    _syncStyle();
   }
 
   /// Detaches the DOM element owned by [textField] from this text editing

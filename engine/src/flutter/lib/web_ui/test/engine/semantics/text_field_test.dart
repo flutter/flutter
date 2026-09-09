@@ -997,9 +997,9 @@ SemanticsObject createTextFieldSemantics({
   return tester.getSemanticsObject(0);
 }
 
-// Covers both routes the framework style takes to the semantic element: queued
-// before activation, and updated later while editing is enabled. The two behave
-// differently, and `_applyIosMinimumFontSize` documents why.
+// Covers both orders in which the framework style and the semantic element can
+// arrive: the style queued before the element is activated, and the style
+// updated after it is already active.
 // See: https://github.com/flutter/flutter/issues/192327
 void _testIosMinimumFontSize() {
   group('$SemanticTextField iOS minimum font size', () {
@@ -1021,6 +1021,10 @@ void _testIosMinimumFontSize() {
     });
 
     tearDown(() {
+      if (strategy.isEnabled) {
+        strategy.disable();
+      }
+      cleanForms();
       debugEmulateIosSafari = false;
       semantics().semanticsEnabled = false;
       domDocument.activeElement?.blur();
@@ -1060,15 +1064,13 @@ void _testIosMinimumFontSize() {
 
       strategy.updateElementStyle(styleWithFontSize(12));
 
-      // This is the enabled path, where the shorthand really is written. The
-      // value persists past blur, so without the floor a later refocus would
-      // zoom.
+      // The framework shorthand has just written 12px onto the element. Without
+      // the floor that value persists past blur and a later refocus would zoom.
       expect(textField.editableElement.style.fontSize, '16px');
     });
 
     // Production order: the framework sends the style before `show`, so it is
-    // queued while the element is still detached and applied at activation,
-    // when the strategy is not yet enabled.
+    // queued while the element is still detached and replayed at activation.
     test('raises a queued framework font below the minimum', () {
       strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
       strategy.updateElementStyle(styleWithFontSize(12));
@@ -1087,6 +1089,11 @@ void _testIosMinimumFontSize() {
       final textField = node.semanticRole! as SemanticTextField;
 
       expect(textField.editableElement.style.fontSize, '24px');
+      // The floor sets `font-size` as a longhand after the framework's `font`
+      // shorthand. Assert a sibling property to catch a regression that reached
+      // for the shorthand instead and wiped the rest of the style.
+      expect(textField.editableElement.style.fontFamily, contains('Arial'));
+      expect(textField.editableElement.style.fontWeight, 'normal');
     });
 
     test('keeps a framework font above the minimum', () {
@@ -1112,7 +1119,9 @@ void _testIosMinimumFontSize() {
       domDocument.activeElement?.blur();
     });
 
-    test('does not set a font size', () {
+    // Only the iOS minimum is platform-gated. A framework style still reaches
+    // the element everywhere; this field is never given one.
+    test('does not apply the minimum', () {
       final SemanticsObject node = createTextFieldSemantics(value: 'hello');
       final textField = node.semanticRole! as SemanticTextField;
 
