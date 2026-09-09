@@ -1820,6 +1820,19 @@ TEST(GeometryTest, ToIColor) {
   ASSERT_EQ(Color::ToIColor(Color(0.5, 0.5, 1.0, 1.0)), 0xFF8080FF);
 }
 
+TEST(GeometryTest, ColorIsWideGamut) {
+  EXPECT_FALSE(Color::Red().IsWideGamut());
+  EXPECT_FALSE(Color::White().IsWideGamut());
+  EXPECT_FALSE(Color::BlackTransparent().IsWideGamut());
+  EXPECT_FALSE(Color(0.5f, 0.5f, 0.5f, 1.0f).IsWideGamut());
+
+  // Wide gamut Display P3 values in extended linear sRGB
+  EXPECT_TRUE(Color(1.0931f, -0.2268f, -0.1501f, 1.0f).IsWideGamut());
+  EXPECT_TRUE(Color(-0.5116f, 1.0183f, -0.3107f, 1.0f).IsWideGamut());
+  EXPECT_TRUE(Color(1.5f, 0.5f, 0.5f, 1.0f).IsWideGamut());
+  EXPECT_TRUE(Color(-0.1f, 0.5f, 0.5f, 1.0f).IsWideGamut());
+}
+
 TEST(GeometryTest, Gradient) {
   {
     // Simple 2 color gradient produces color buffer containing exactly those
@@ -1829,8 +1842,8 @@ TEST(GeometryTest, Gradient) {
 
     auto gradient = CreateGradientBuffer(colors, stops);
 
-    ASSERT_COLOR_BUFFER_NEAR(gradient.color_bytes, colors);
-    ASSERT_EQ(gradient.texture_size, 2u);
+    EXPECT_COLORS_NEAR(gradient.colors, colors);
+    EXPECT_EQ(gradient.colors.size(), 2u);
   }
 
   {
@@ -1840,7 +1853,7 @@ TEST(GeometryTest, Gradient) {
     std::vector<Scalar> stops = {0.0, 0.25, 0.25, 1.0};
 
     auto gradient = CreateGradientBuffer(colors, stops);
-    ASSERT_EQ(gradient.texture_size, 1024u);
+    EXPECT_EQ(gradient.colors.size(), 1024u);
 
     std::vector<Color> expected_colors(1024);
     for (size_t i = 0; i < 1024; i++) {
@@ -1855,7 +1868,7 @@ TEST(GeometryTest, Gradient) {
             Color::Lerp(Color::Black(), Color::Blue(), (t - 0.25) / 0.75);
       }
     }
-    ASSERT_COLOR_BUFFER_NEAR(gradient.color_bytes, expected_colors);
+    EXPECT_COLORS_NEAR(gradient.colors, expected_colors);
   }
 
   {
@@ -1867,8 +1880,8 @@ TEST(GeometryTest, Gradient) {
 
     auto gradient = CreateGradientBuffer(colors, stops);
 
-    ASSERT_COLOR_BUFFER_NEAR(gradient.color_bytes, colors);
-    ASSERT_EQ(gradient.texture_size, 4u);
+    EXPECT_COLORS_NEAR(gradient.colors, colors);
+    EXPECT_EQ(gradient.colors.size(), 4u);
   }
 
   {
@@ -1885,8 +1898,8 @@ TEST(GeometryTest, Gradient) {
         Color::Lerp(Color::Blue(), Color::Green(), 0.6666),
         Color::Green(),
     };
-    ASSERT_COLOR_BUFFER_NEAR(gradient.color_bytes, lerped_colors);
-    ASSERT_EQ(gradient.texture_size, 5u);
+    EXPECT_COLORS_NEAR(gradient.colors, lerped_colors);
+    EXPECT_EQ(gradient.colors.size(), 5u);
   }
 
   {
@@ -1900,8 +1913,34 @@ TEST(GeometryTest, Gradient) {
 
     auto gradient = CreateGradientBuffer(colors, stops);
 
-    ASSERT_EQ(gradient.texture_size, 1024u);
-    ASSERT_EQ(gradient.color_bytes.size(), 1024u * 4);
+    EXPECT_EQ(gradient.colors.size(), 1024u);
+  }
+
+  {
+    // Gradient with wide-gamut (out of [0, 1]) colors produces wide-gamut
+    // values.
+    Color p3_red = Color(1.0931f, -0.2268f, -0.1501f, 1.0f);
+    Color p3_green = Color(-0.5116f, 1.0183f, -0.3107f, 1.0f);
+    std::vector<Color> colors = {p3_red, p3_green};
+    std::vector<Scalar> stops = {0.0f, 1.0f};
+
+    auto gradient = CreateGradientBuffer(colors, stops);
+
+    EXPECT_EQ(gradient.colors.size(), 2u);
+    EXPECT_COLORS_NEAR(gradient.colors, colors);
+  }
+
+  {
+    // Multi-stop wide-gamut gradient interpolates floats accurately.
+    Color p3_red = Color(1.0931f, -0.2268f, -0.1501f, 1.0f);
+    Color p3_green = Color(-0.5116f, 1.0183f, -0.3107f, 1.0f);
+    std::vector<Color> colors = {p3_red, Color::White(), p3_green};
+    std::vector<Scalar> stops = {0.0f, 0.5f, 1.0f};
+
+    auto gradient = CreateGradientBuffer(colors, stops);
+
+    EXPECT_EQ(gradient.colors.size(), 3u);
+    EXPECT_COLORS_NEAR(gradient.colors, colors);
   }
 }
 
