@@ -113,8 +113,12 @@ class MacOSDevice extends DesktopDevice {
     ];
     final Process process = await _processManager.start(args);
     final stderrBuf = StringBuffer();
-    process.stderr.transform(utf8.decoder).listen(stderrBuf.write);
-    final int exitCode = await process.exitCode;
+
+    final (int exitCode, _) = await (
+      process.exitCode,
+      process.stderr.transform(utf8.decoder).forEach(stderrBuf.write),
+    ).wait;
+
     if (exitCode != 0) {
       throwToolExit('screencapture failed (exit $exitCode): $stderrBuf');
     }

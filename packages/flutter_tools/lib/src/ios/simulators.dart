@@ -745,10 +745,11 @@ class IOSSimulator extends Device {
     ]);
 
     if (duration != null) {
-      await Future.any(<Future<void>>[
-        process.exitCode,
-        Future<void>.delayed(duration).then((_) => ProcessSignal.sigint.kill(process)),
-      ]);
+      try {
+        await process.exitCode.timeout(duration);
+      } on TimeoutException {
+        ProcessSignal.sigint.kill(process);
+      }
     }
     final int exitCode = await process.exitCode;
     if (exitCode != 0) {

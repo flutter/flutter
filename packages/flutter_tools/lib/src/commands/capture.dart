@@ -23,6 +23,7 @@ const String _kType = 'type';
 const String _kVmServiceUrl = 'vm-service-url';
 const String _kDeviceType = 'device';
 const String _kSkiaType = 'skia';
+const String _kDuration = 'duration';
 
 /// Shared screenshot logic used by [ScreenshotCommand], [CaptureCommand] (bare
 /// invocation), and [CaptureScreenshotCommand].
@@ -115,15 +116,9 @@ mixin ScreenshotMixin on FlutterCommand {
   Future<void> _runDeviceScreenshot(File? outputFile) async {
     outputFile ??= fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'png');
 
-    try {
-      await screenshotDevice!.takeScreenshot(outputFile);
-    } on ToolExit {
-      rethrow;
-    } on Exception catch (error) {
-      throwToolExit('Error taking screenshot: $error');
-    }
+    await screenshotDevice!.takeScreenshot(outputFile);
 
-    checkOutput(outputFile, fs);
+    _checkOutput(outputFile, fs);
 
     try {
       _showOutputFileInfo(outputFile);
@@ -164,7 +159,7 @@ mixin ScreenshotMixin on FlutterCommand {
     );
   }
 
-  static void checkOutput(File outputFile, FileSystem fs) {
+  static void _checkOutput(File outputFile, FileSystem fs) {
     if (!outputFile.existsSync()) {
       throwToolExit(
         'File was not created, ensure path is valid\n'
@@ -214,6 +209,9 @@ class ScreenshotCommand extends FlutterCommand with ScreenshotMixin {
 
   @override
   bool get refreshWirelessDevices => true;
+
+  @override
+  bool get hidden => true;
 
   @override
   final List<String> aliases = const <String>['pic'];
@@ -292,7 +290,7 @@ class CaptureRecordingCommand extends FlutterCommand {
       help: 'Location to write the recording.',
     );
     argParser.addOption(
-      'duration',
+      _kDuration,
       abbr: 'd',
       valueHelp: 'seconds',
       help:
@@ -343,7 +341,7 @@ class CaptureRecordingCommand extends FlutterCommand {
         : fsUtils.getUniqueFile(fs.currentDirectory, 'flutter', 'mp4');
 
     Duration? duration;
-    final String? durationStr = stringArg('duration');
+    final String? durationStr = stringArg(_kDuration);
     if (durationStr != null) {
       final int? seconds = int.tryParse(durationStr);
       if (seconds == null || seconds <= 0) {

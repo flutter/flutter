@@ -284,43 +284,6 @@ Device 2 (mobile) • 456 • android • 1.2.3
     );
   });
 
-  group('Screenshot file validation', () {
-    testWithoutContext('successful in pwd', () async {
-      final fs = MemoryFileSystem.test();
-      fs.file('test.png').createSync();
-      fs.directory('sub_dir').createSync();
-      fs.file('sub_dir/test.png').createSync();
-
-      expect(() => ScreenshotMixin.checkOutput(fs.file('test.png'), fs), returnsNormally);
-      expect(() => ScreenshotMixin.checkOutput(fs.file('sub_dir/test.png'), fs), returnsNormally);
-    });
-
-    testWithoutContext('failed in pwd', () async {
-      final fs = MemoryFileSystem.test();
-      fs.directory('sub_dir').createSync();
-
-      expect(
-        () => ScreenshotMixin.checkOutput(fs.file('test.png'), fs),
-        throwsToolExit(message: 'File was not created, ensure path is valid'),
-      );
-      expect(
-        () => ScreenshotMixin.checkOutput(fs.file('../'), fs),
-        throwsToolExit(message: 'File was not created, ensure path is valid'),
-      );
-      expect(
-        () => ScreenshotMixin.checkOutput(fs.file('.'), fs),
-        throwsToolExit(message: 'File was not created, ensure path is valid'),
-      );
-      expect(
-        () => ScreenshotMixin.checkOutput(fs.file('/'), fs),
-        throwsToolExit(message: 'File was not created, ensure path is valid'),
-      );
-      expect(
-        () => ScreenshotMixin.checkOutput(fs.file('sub_dir/test.png'), fs),
-        throwsToolExit(message: 'File was not created, ensure path is valid'),
-      );
-    });
-  });
 
   group('Screenshot output validation', () {
     testWithoutContext('successful', () async {

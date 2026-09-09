@@ -1403,10 +1403,9 @@ class IOSDevice extends Device {
     } on Exception catch (error) {
       _handleDevicectlError(error, 'take screenshot');
     }
-    if (success) {
-      return;
+    if (!success) {
+      throwToolExit('Failed to take screenshot with devicectl.');
     }
-    throwToolExit('Failed to take screenshot with devicectl.');
   }
 
   @override

@@ -271,7 +271,6 @@ List<FlutterCommand> generateCommands({
     processInfo: ProcessInfo(toolDependencies.toolContext.fs),
     fileSystem: toolDependencies.toolContext.fs,
   ),
-  CaptureCommand(toolContext: toolDependencies.toolContext),
   BuildCommand(
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
@@ -280,6 +279,7 @@ List<FlutterCommand> generateCommands({
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),
+  CaptureCommand(toolContext: toolDependencies.toolContext),
   ChannelCommand(verboseHelp: verboseHelp, toolContext: toolDependencies.toolContext),
   CleanCommand(
     verbose: verbose,
