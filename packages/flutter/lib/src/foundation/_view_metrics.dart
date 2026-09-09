@@ -375,9 +375,6 @@ void _remember(_DebugViewMetricsPlatformDispatcher wrapper, {required bool notif
 /// are; [DebugViewMetricsOverride.disableAnimations] describes what that means
 /// for the one whose behavior an application is most likely to notice.
 ///
-/// This class deliberately does not implement `noSuchMethod`: when `dart:ui`
-/// grows a member, this library must fail to compile so that whoever adds the
-/// member decides whether it is an overridable view metric or plain forwarding.
 class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   _DebugViewMetricsPlatformDispatcher(this._dispatcher) : _viewId = null, _root = null;
 
@@ -869,6 +866,14 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   @override
   void updateSemantics(ui.SemanticsUpdate update) => _dispatcher.updateSemantics(update);
 
+  /// This gives us some grace time when the dart:ui side adds something to
+  /// [ui.PlatformDispatcher], and makes things easier when we do rolls to give
+  /// us time to catch up.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return null;
+  }
+
   @override
   String toString() =>
       'DebugViewMetricsPlatformDispatcher(${_viewId == null ? 'implicit view' : 'view $_viewId'})';
@@ -881,10 +886,6 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
 /// Members that do not carry an overridable view metric forward to [_view]
 /// unchanged. In particular [display] reports the real [ui.Display], because it
 /// describes hardware rather than the view.
-///
-/// Like [_DebugViewMetricsPlatformDispatcher], this class deliberately does not
-/// implement `noSuchMethod`, so that a new `dart:ui` member has to be
-/// classified rather than silently reporting null.
 class _DebugViewMetricsFlutterView implements ui.FlutterView {
   _DebugViewMetricsFlutterView(this._view, this._platformDispatcher)
     : assert(
@@ -936,6 +937,10 @@ class _DebugViewMetricsFlutterView implements ui.FlutterView {
   ui.ViewPadding get viewPadding => _override?.viewPadding ?? _view.viewPadding;
 
   @override
+  ui.ViewPadding get systemGestureInsets =>
+      _override?.systemGestureInsets ?? _view.systemGestureInsets;
+
+  @override
   List<ui.DisplayFeature> get displayFeatures {
     final double? devicePixelRatio = _override?.devicePixelRatio;
     final List<ui.DisplayFeature> displayFeatures = _view.displayFeatures;
@@ -980,9 +985,6 @@ class _DebugViewMetricsFlutterView implements ui.FlutterView {
   ui.GestureSettings get gestureSettings => _view.gestureSettings;
 
   @override
-  ui.ViewPadding get systemGestureInsets => _view.systemGestureInsets;
-
-  @override
   int get viewId => _view.viewId;
 
   // An omitted size means "this view's physical size", which for this view is
@@ -1002,6 +1004,14 @@ class _DebugViewMetricsFlutterView implements ui.FlutterView {
 
   @override
   void updateSemantics(ui.SemanticsUpdate update) => _view.updateSemantics(update);
+
+  /// This gives us some grace time when the dart:ui side adds something to
+  /// [ui.FlutterView], and makes things easier when we do rolls to give
+  /// us time to catch up.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return null;
+  }
 
   @override
   String toString() => 'DebugViewMetricsFlutterView(id: $viewId)';
@@ -1086,6 +1096,14 @@ class _DebugAccessibilityFeatures implements ui.AccessibilityFeatures {
     reduceMotion,
     supportsAnnounce,
   );
+
+  /// This gives us some grace time when the dart:ui side adds something to
+  /// [ui.AccessibilityFeatures], and makes things easier when we do rolls to give
+  /// us time to catch up.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return null;
+  }
 
   @override
   String toString() {

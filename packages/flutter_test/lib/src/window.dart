@@ -1078,10 +1078,7 @@ class TestFlutterView implements FlutterView {
   final TestPlatformDispatcher _ownerPlatformDispatcher;
 
   @override
-  TestPlatformDispatcher get platformDispatcher {
-    debugMarkViewAppliesItsOwnMetricsOverride(this, _platformDispatcher);
-    return _platformDispatcher;
-  }
+  TestPlatformDispatcher get platformDispatcher => _platformDispatcher;
 
   // Bound to this view's own [viewId] rather than to whatever the dispatcher
   // passed to the constructor resolves, so that a subclass which reports a
@@ -1089,9 +1086,11 @@ class TestFlutterView implements FlutterView {
   // reports 100 — resolves the overrides registered for the id it reports
   // instead of the wrapped view's. Resolved lazily because `viewId` may be
   // overridden by such a subclass and is not readable during construction.
-  late final TestPlatformDispatcher _platformDispatcher = _ownerPlatformDispatcher._forViewId(
-    viewId,
-  );
+  late final TestPlatformDispatcher _platformDispatcher = () {
+    final TestPlatformDispatcher dispatcher = _ownerPlatformDispatcher._forViewId(viewId);
+    debugMarkViewAppliesItsOwnMetricsOverride(this, dispatcher);
+    return dispatcher;
+  }();
 
   @override
   TestDisplay get display => _display;

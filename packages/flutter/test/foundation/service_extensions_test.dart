@@ -1489,6 +1489,39 @@ void main() {
     expect(result['overrides'], <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true});
     expect(extensionChangedEvents.length, 3);
 
+    // Setting partial padding and systemGestureInsets works and defaults omitted edges to 0.
+    result = await binding
+        .testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
+          'viewId': '$viewId',
+          'overrides': '{"padding": {"top": 48}, "systemGestureInsets": {"left": 20, "right": 20}}',
+        });
+    expect(result['overrides'], <String, Object?>{
+      'padding': <String, Object?>{'left': 0.0, 'top': 48.0, 'right': 0.0, 'bottom': 0.0},
+      'systemGestureInsets': <String, Object?>{
+        'left': 20.0,
+        'top': 0.0,
+        'right': 20.0,
+        'bottom': 0.0,
+      },
+    });
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(
+        padding: DebugViewPadding(top: 48),
+        systemGestureInsets: DebugViewPadding(left: 20, right: 20),
+      ),
+    );
+    expect(extensionChangedEvents.length, 4);
+
+    // Restore for subsequent checks.
+    result = await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"devicePixelRatio": 3.5, "boldText": true}',
+      },
+    );
+
     // A malformed payload is rejected and leaves the installed override alone.
     await expectLater(
       binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
@@ -1518,7 +1551,7 @@ void main() {
     expect(result['overrides'], <String, Object?>{});
     expect(result['overriddenViewIds'], <int>[]);
     expect(debugViewMetricsOverrides, isEmpty);
-    expect(extensionChangedEvents.length, 4);
+    expect(extensionChangedEvents.length, 6);
     expect(json.decode(extensionChangedEvents.last['value'] as String), <String, Object?>{});
 
     // Clearing again removes nothing, and says nothing.
@@ -1526,7 +1559,7 @@ void main() {
       FoundationServiceExtensions.viewMetricsOverride.name,
       <String, String>{'clearAll': 'true'},
     );
-    expect(extensionChangedEvents.length, 4);
+    expect(extensionChangedEvents.length, 6);
 
     // Notifications are synchronous and may reinstall an override. Report the
     // state after those callbacks, just as the state-change event does.

@@ -2789,6 +2789,7 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
     // it, replace it with debugBrightnessOverride in non-release mode.
     if (!kReleaseMode &&
         (_parentData == null || _debugBrightnessIsOverridden) &&
+        debugBrightnessOverride != null &&
         effectiveData.platformBrightness != debugBrightnessOverride) {
       effectiveData = effectiveData.copyWith(platformBrightness: debugBrightnessOverride);
     }

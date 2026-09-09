@@ -20,6 +20,7 @@ const DebugViewMetricsOverride _fullyPopulated = DebugViewMetricsOverride(
   padding: DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4),
   viewPadding: DebugViewPadding(left: 5, top: 6, right: 7, bottom: 8),
   viewInsets: DebugViewPadding(left: 9, top: 10, right: 11, bottom: 12),
+  systemGestureInsets: DebugViewPadding(left: 13, top: 14, right: 15, bottom: 16),
   alwaysUse24HourFormat: true,
   accessibleNavigation: true,
   invertColors: true,
@@ -54,6 +55,8 @@ final Map<String, DebugViewMetricsOverride Function(DebugViewMetricsOverride)> _
           o.copyWith(viewPadding: const DebugViewPadding.all(99)),
       'viewInsets': (DebugViewMetricsOverride o) =>
           o.copyWith(viewInsets: const DebugViewPadding.all(99)),
+      'systemGestureInsets': (DebugViewMetricsOverride o) =>
+          o.copyWith(systemGestureInsets: const DebugViewPadding.all(99)),
       'alwaysUse24HourFormat': (DebugViewMetricsOverride o) =>
           o.copyWith(alwaysUse24HourFormat: false),
       'accessibleNavigation': (DebugViewMetricsOverride o) =>
@@ -263,6 +266,7 @@ void main() {
         padding: DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4),
         viewPadding: DebugViewPadding(left: 5, top: 6, right: 7, bottom: 8),
         viewInsets: DebugViewPadding(left: 9, top: 10, right: 11, bottom: 12),
+        systemGestureInsets: DebugViewPadding(left: 13, top: 14, right: 15, bottom: 16),
         alwaysUse24HourFormat: true,
         accessibleNavigation: true,
         invertColors: true,
@@ -421,9 +425,22 @@ void main() {
       );
       expect(
         () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
-          'padding': <String, Object?>{'left': 1, 'top': 2, 'right': 3},
+          'padding': <String, Object?>{'left': 'not-a-number'},
         }),
         throwsFormatException,
+      );
+      // Partial padding maps are accepted and default missing edges to 0.
+      expect(
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'padding': <String, Object?>{'left': 1, 'top': 2, 'right': 3},
+        }).padding,
+        const DebugViewPadding(left: 1, top: 2, right: 3),
+      );
+      expect(
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'systemGestureInsets': <String, Object?>{'top': 48},
+        }).systemGestureInsets,
+        const DebugViewPadding(top: 48),
       );
       expect(
         () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
@@ -484,7 +501,7 @@ void main() {
         const DebugViewPadding(bottom: 4),
       );
 
-      for (final key in <String>['padding', 'viewPadding', 'viewInsets']) {
+      for (final key in <String>['padding', 'viewPadding', 'viewInsets', 'systemGestureInsets']) {
         expect(
           () => DebugViewMetricsOverride.fromJson(<String, Object?>{
             key: const <String, Object?>{'left': 0, 'top': 0, 'right': 0, 'bottom': 0, 'extra': 0},
@@ -1029,6 +1046,13 @@ void main() {
       // Metrics that were not overridden still come from the platform.
       expect(wrappedView.systemGestureInsets, same(real.implicitView!.systemGestureInsets));
       expect(wrappedView.displayFeatures, real.implicitView!.displayFeatures);
+
+      debugSetViewMetricsOverride(
+        viewId,
+        const DebugViewMetricsOverride(systemGestureInsets: DebugViewPadding(left: 50, right: 60)),
+      );
+      expect(wrappedView.systemGestureInsets.left, 50);
+      expect(wrappedView.systemGestureInsets.right, 60);
     });
 
     test('to the platform metrics', () {
@@ -1286,6 +1310,7 @@ void main() {
         'padding',
         'viewPadding',
         'viewInsets',
+        'systemGestureInsets',
       };
       expect(
         _perMetricChange.keys.toSet(),
@@ -1717,6 +1742,23 @@ void main() {
       // The failing dispatcher still heard about the factor and the metrics.
       expect(stillTold, 2);
       expect(notified, 1);
+    });
+  });
+
+  group('engine roll tolerance', () {
+    test('wrappers implement noSuchMethod returning null', () {
+      final fake = _TwoViewPlatformDispatcher();
+      final ui.PlatformDispatcher dispatcher = debugApplyViewMetricsOverrides(fake);
+      final ui.FlutterView view = dispatcher.implicitView!;
+
+      debugSetViewMetricsOverride(view.viewId, const DebugViewMetricsOverride(boldText: true));
+      addTearDown(debugClearViewMetricsOverrides);
+
+      final ui.AccessibilityFeatures features = dispatcher.accessibilityFeatures;
+
+      expect((dispatcher as dynamic).unimplementedMember, isNull);
+      expect((view as dynamic).unimplementedMember, isNull);
+      expect((features as dynamic).unimplementedMember, isNull);
     });
   });
 }

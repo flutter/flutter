@@ -51,6 +51,11 @@ _surfacedMetrics = <String, (DebugViewMetricsOverride, Object? Function(MediaQue
     (MediaQueryData data) => data.viewInsets,
     const EdgeInsets.only(bottom: 10),
   ),
+  'systemGestureInsets': (
+    const DebugViewMetricsOverride(systemGestureInsets: DebugViewPadding(bottom: 30)),
+    (MediaQueryData data) => data.systemGestureInsets,
+    const EdgeInsets.only(bottom: 10),
+  ),
   'textScaleFactor': (
     const DebugViewMetricsOverride(textScaleFactor: 3.0),
     (MediaQueryData data) => data.textScaler.scale(10),
@@ -312,6 +317,7 @@ void main() {
       expect(data.devicePixelRatio, 3.0);
       expect(data.padding, EdgeInsets.zero);
       expect(data.viewInsets, EdgeInsets.zero);
+      expect(data.systemGestureInsets, EdgeInsets.zero);
 
       // The override is in physical pixels; MediaQuery reports logical ones.
       debugSetViewMetricsOverride(
@@ -320,6 +326,7 @@ void main() {
           padding: DebugViewPadding(top: 141),
           viewPadding: DebugViewPadding(top: 141, bottom: 102),
           viewInsets: DebugViewPadding(bottom: 900),
+          systemGestureInsets: DebugViewPadding(left: 60, right: 60),
         ),
       );
       await tester.pump();
@@ -327,10 +334,12 @@ void main() {
       expect(data.padding, const EdgeInsets.only(top: 47));
       expect(data.viewPadding, const EdgeInsets.only(top: 47, bottom: 34));
       expect(data.viewInsets, const EdgeInsets.only(bottom: 300));
+      expect(data.systemGestureInsets, const EdgeInsets.symmetric(horizontal: 20));
 
       debugClearViewMetricsOverrides();
       await tester.pump();
       expect(data.padding, EdgeInsets.zero);
+      expect(data.systemGestureInsets, EdgeInsets.zero);
     });
 
     testWidgets('yields platformBrightness to debugBrightnessOverride', (
@@ -1728,6 +1737,23 @@ void main() {
     expect(inheritedBeforeBinding, same(viewBeforeBinding.view));
     expect(size, const Size(200, 100));
   });
+
+  testWidgets(
+    'TestFlutterView.platformDispatcher getter returns identical instance and is idempotent',
+    (WidgetTester tester) async {
+      final TestFlutterView view = tester.view;
+      final TestPlatformDispatcher first = view.platformDispatcher;
+      final TestPlatformDispatcher second = view.platformDispatcher;
+      expect(identical(first, second), isTrue);
+      expect(debugViewMetricsOverrideApplied(view), isNull);
+      debugSetViewMetricsOverride(
+        view.viewId,
+        const DebugViewMetricsOverride(textScaleFactor: 2.0),
+      );
+      expect(debugViewMetricsOverrideApplied(view), isNotNull);
+      debugClearViewMetricsOverrides();
+    },
+  );
 
   group('windowing', () {
     testWidgets('secondary windows apply their own geometry and platform overrides', (

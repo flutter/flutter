@@ -337,6 +337,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     this.padding,
     this.viewPadding,
     this.viewInsets,
+    this.systemGestureInsets,
     this.alwaysUse24HourFormat,
     this.accessibleNavigation,
     this.invertColors,
@@ -401,6 +402,7 @@ class DebugViewMetricsOverride with Diagnosticable {
       padding: _viewPaddingFromJson(json, 'padding'),
       viewPadding: _viewPaddingFromJson(json, 'viewPadding'),
       viewInsets: _viewPaddingFromJson(json, 'viewInsets'),
+      systemGestureInsets: _viewPaddingFromJson(json, 'systemGestureInsets'),
       alwaysUse24HourFormat: _boolFromJson(json, 'alwaysUse24HourFormat'),
       accessibleNavigation: _boolFromJson(json, 'accessibleNavigation'),
       invertColors: _boolFromJson(json, 'invertColors'),
@@ -459,6 +461,9 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// the layout an application adopts while the keyboard is up without a
   /// keyboard being up.
   final DebugViewPadding? viewInsets;
+
+  /// Overrides [ui.FlutterView.systemGestureInsets], in physical pixels.
+  final DebugViewPadding? systemGestureInsets;
 
   /// Overrides [ui.PlatformDispatcher.alwaysUse24HourFormat].
   final bool? alwaysUse24HourFormat;
@@ -535,6 +540,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     DebugViewPadding? padding,
     DebugViewPadding? viewPadding,
     DebugViewPadding? viewInsets,
+    DebugViewPadding? systemGestureInsets,
     bool? alwaysUse24HourFormat,
     bool? accessibleNavigation,
     bool? invertColors,
@@ -556,6 +562,7 @@ class DebugViewMetricsOverride with Diagnosticable {
       padding: padding ?? this.padding,
       viewPadding: viewPadding ?? this.viewPadding,
       viewInsets: viewInsets ?? this.viewInsets,
+      systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       invertColors: invertColors ?? this.invertColors,
@@ -588,6 +595,8 @@ class DebugViewMetricsOverride with Diagnosticable {
       if (padding != null) 'padding': _viewPaddingToJson(padding!),
       if (viewPadding != null) 'viewPadding': _viewPaddingToJson(viewPadding!),
       if (viewInsets != null) 'viewInsets': _viewPaddingToJson(viewInsets!),
+      if (systemGestureInsets != null)
+        'systemGestureInsets': _viewPaddingToJson(systemGestureInsets!),
       if (alwaysUse24HourFormat != null) 'alwaysUse24HourFormat': alwaysUse24HourFormat,
       if (accessibleNavigation != null) 'accessibleNavigation': accessibleNavigation,
       if (invertColors != null) 'invertColors': invertColors,
@@ -611,9 +620,24 @@ class DebugViewMetricsOverride with Diagnosticable {
   // reaches none of them is neither compared nor propagated. A record is used
   // so that adding a field without adding it here shows up as a completeness
   // guard failure rather than as a metric that only sometimes takes effect.
-  (double?, ui.Size?, DebugViewPadding?, DebugViewPadding?, DebugViewPadding?, bool?)
-  get _viewMetrics =>
-      (devicePixelRatio, physicalSize, padding, viewPadding, viewInsets, alwaysUse24HourFormat);
+  (
+    double?,
+    ui.Size?,
+    DebugViewPadding?,
+    DebugViewPadding?,
+    DebugViewPadding?,
+    DebugViewPadding?,
+    bool?,
+  )
+  get _viewMetrics => (
+    devicePixelRatio,
+    physicalSize,
+    padding,
+    viewPadding,
+    viewInsets,
+    systemGestureInsets,
+    alwaysUse24HourFormat,
+  );
 
   // Everything dart:ui keeps in its platform configuration — the metrics that
   // belong to the application rather than to one view, which it reports through
@@ -676,6 +700,13 @@ class DebugViewMetricsOverride with Diagnosticable {
     properties.add(
       DiagnosticsProperty<DebugViewPadding>('viewInsets', viewInsets, defaultValue: null),
     );
+    properties.add(
+      DiagnosticsProperty<DebugViewPadding>(
+        'systemGestureInsets',
+        systemGestureInsets,
+        defaultValue: null,
+      ),
+    );
     _addFlag(properties, 'alwaysUse24HourFormat', alwaysUse24HourFormat);
     _addFlag(properties, 'accessibleNavigation', accessibleNavigation);
     _addFlag(properties, 'invertColors', invertColors);
@@ -706,6 +737,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     'padding',
     'viewPadding',
     'viewInsets',
+    'systemGestureInsets',
     'alwaysUse24HourFormat',
     'accessibleNavigation',
     'invertColors',
@@ -760,24 +792,35 @@ class DebugViewMetricsOverride with Diagnosticable {
   static DebugViewPadding? _viewPaddingFromJson(Map<String, Object?> json, String key) {
     const members = <String>{'left', 'top', 'right', 'bottom'};
     final Object? value = _checkedMembers(json[key], key, members);
-    return switch (value) {
-      null => null,
-      {
-        'left': final num left,
-        'top': final num top,
-        'right': final num right,
-        'bottom': final num bottom,
-      } =>
-        DebugViewPadding(
-          left: _checkedExtent(left, key, 'left'),
-          top: _checkedExtent(top, key, 'top'),
-          right: _checkedExtent(right, key, 'right'),
-          bottom: _checkedExtent(bottom, key, 'bottom'),
-        ),
-      _ => throw FormatException(
+    if (value == null) {
+      return null;
+    }
+    if (value is! Map<String, Object?>) {
+      throw FormatException(
         'Expected {"left": num, "top": num, "right": num, "bottom": num} for $key, got $value.',
-      ),
-    };
+      );
+    }
+    num? checkEdge(String edge) {
+      final Object? edgeValue = value[edge];
+      if (edgeValue == null) {
+        return null;
+      }
+      if (edgeValue is! num) {
+        throw FormatException('$key.$edge must be a number, got $edgeValue.');
+      }
+      return edgeValue;
+    }
+
+    final num? left = checkEdge('left');
+    final num? top = checkEdge('top');
+    final num? right = checkEdge('right');
+    final num? bottom = checkEdge('bottom');
+    return DebugViewPadding(
+      left: left != null ? _checkedExtent(left, key, 'left') : 0.0,
+      top: top != null ? _checkedExtent(top, key, 'top') : 0.0,
+      right: right != null ? _checkedExtent(right, key, 'right') : 0.0,
+      bottom: bottom != null ? _checkedExtent(bottom, key, 'bottom') : 0.0,
+    );
   }
 
   /// Throws a [FlutterError] describing the first geometry this override sets
@@ -820,6 +863,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     checkPadding(padding, 'padding');
     checkPadding(viewPadding, 'viewPadding');
     checkPadding(viewInsets, 'viewInsets');
+    checkPadding(systemGestureInsets, 'systemGestureInsets');
     return true;
   }
 
