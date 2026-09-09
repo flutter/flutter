@@ -481,18 +481,18 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentResizable) {
       .notify_listeners = [] {},
   };
 
+  std::optional<Isolate> isolate;
+
+  bool signaled = false;
+  AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&](Dart_NativeArguments args) {
+                         signaled = true;
+                         isolate = Isolate::Current();
+                       }));
+
   auto engine = GetFlutterEngine();
   [engine runWithEntrypoint:@"testRenderSizedToContentResizable"];
 
   auto engineId = reinterpret_cast<int64_t>(GetFlutterEngine());
-
-  std::optional<Isolate> isolate;
-
-  bool signaled = false;
-  AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      signaled = true;
-                      isolate = Isolate::Current();
-                    }));
 
   while (!signaled) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
@@ -538,18 +538,18 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentNotResizable) {
       .notify_listeners = [] {},
   };
 
+  std::optional<Isolate> isolate;
+
+  bool signaled = false;
+  AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&](Dart_NativeArguments args) {
+                         signaled = true;
+                         isolate = Isolate::Current();
+                       }));
+
   auto engine = GetFlutterEngine();
   [engine runWithEntrypoint:@"testRenderSizedToContent"];
 
   auto engineId = reinterpret_cast<int64_t>(GetFlutterEngine());
-
-  std::optional<Isolate> isolate;
-
-  bool signaled = false;
-  AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      signaled = true;
-                      isolate = Isolate::Current();
-                    }));
 
   while (!signaled) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
