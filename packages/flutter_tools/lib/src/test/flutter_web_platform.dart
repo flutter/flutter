@@ -133,6 +133,8 @@ class FlutterWebPlatform extends PlatformPlugin {
         // Chrome is the only supported browser currently.
         'FLUTTER_TEST_BROWSER': 'chrome',
         'FLUTTER_WEB_RENDERER': webRenderer.name,
+        // Pass FLUTTER_ROOT so flutter_goldens can locate the cache directory and resolve repo paths.
+        'FLUTTER_ROOT': globals.cache.flutterRoot,
       },
     );
   }
@@ -713,6 +715,12 @@ window.\$dartLoader.loader.nextAttempt();
       completer.future,
       headless: !_config.pauseAfterLoad,
       logger: _logger,
+      webBrowserFlags: const <String>[
+        // Enforce high-DPI (3x) device scale factor and standard window size
+        // to standardize rendering across platforms and match CI golden baselines.
+        '--force-device-scale-factor=3',
+        '--window-size=800,600',
+      ],
     );
   }
 
