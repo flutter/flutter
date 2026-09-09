@@ -2,6 +2,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+"""Executes a command and its arguments directly via subprocess.
+
+In GN build actions (particularly on Windows), invoking binaries with complex
+command-line flags or paths through standard GN actions can be subject to shell
+interpretation and escaping quirks. This script provides a minimal, shell-agnostic
+entry point to execute commands directly.
+"""
+
 import sys
 import subprocess
 

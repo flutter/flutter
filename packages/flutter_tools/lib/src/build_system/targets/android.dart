@@ -357,6 +357,9 @@ class AndroidAotBundle extends Target {
     final inputs = <File>[];
     final outputs = <File>[];
 
+    // Debug mode runs in JIT mode from Kernel (vmservice_snapshot.dill) and is
+    // packaged as an asset in DebugAndroidApplication. Profile mode compiles to
+    // AOT native code and requires the compiled libvmservice_snapshot.so library.
     if (buildMode == BuildMode.profile) {
       final String vmserviceSharedLib = environment.artifacts.getArtifactPath(
         Artifact.vmserviceSharedLibrary,

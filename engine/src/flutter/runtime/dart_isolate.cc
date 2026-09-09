@@ -970,6 +970,51 @@ bool DartIsolate::Shutdown() {
   return true;
 }
 
+std::unique_ptr<fml::Mapping> DartIsolate::ResolveVMServiceKernel(
+    const Settings& settings) {
+  std::string kernel_path = settings.vmservice_kernel_path;
+  if (kernel_path.empty()) {
+    kernel_path = "vmservice_snapshot.dill";
+  }
+  std::unique_ptr<fml::Mapping> kernel;
+  if (fml::IsFile(kernel_path)) {
+    kernel = fml::FileMapping::CreateReadOnly(kernel_path);
+  }
+  if (!kernel && !settings.assets_path.empty()) {
+    std::string assets_kernel_path =
+        fml::paths::JoinPaths({settings.assets_path, kernel_path});
+    if (fml::IsFile(assets_kernel_path)) {
+      kernel = fml::FileMapping::CreateReadOnly(assets_kernel_path);
+    }
+  }
+  if (!kernel) {
+    auto directory = fml::paths::GetExecutableDirectoryPath();
+    if (directory.first) {
+      std::string path_relative_to_executable =
+          fml::paths::JoinPaths({directory.second, kernel_path});
+      if (fml::IsFile(path_relative_to_executable)) {
+        kernel = fml::FileMapping::CreateReadOnly(path_relative_to_executable);
+      } else {
+        std::string path_relative_to_parent =
+            fml::paths::JoinPaths({directory.second, "..", kernel_path});
+        if (fml::IsFile(path_relative_to_parent)) {
+          kernel = fml::FileMapping::CreateReadOnly(path_relative_to_parent);
+        }
+      }
+    }
+  }
+#if defined(OS_FUCHSIA)
+  if (!kernel) {
+    std::string fuchsia_path =
+        fml::paths::JoinPaths({"/pkg/data/assets", kernel_path});
+    if (fml::IsFile(fuchsia_path)) {
+      kernel = fml::FileMapping::CreateReadOnly(fuchsia_path);
+    }
+  }
+#endif
+  return kernel;
+}
+
 Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
     const char* package_root,
     const char* package_config,
@@ -1023,47 +1068,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
   }
 
   if (!Dart_IsPrecompiledRuntime()) {
-    std::string kernel_path = settings.vmservice_kernel_path;
-    if (kernel_path.empty()) {
-      kernel_path = "vmservice_snapshot.dill";
-    }
-    std::unique_ptr<fml::Mapping> kernel;
-    if (fml::IsFile(kernel_path)) {
-      kernel = fml::FileMapping::CreateReadOnly(kernel_path);
-    }
-    if (!kernel && !settings.assets_path.empty()) {
-      std::string assets_kernel_path =
-          fml::paths::JoinPaths({settings.assets_path, kernel_path});
-      if (fml::IsFile(assets_kernel_path)) {
-        kernel = fml::FileMapping::CreateReadOnly(assets_kernel_path);
-      }
-    }
-    if (!kernel) {
-      auto directory = fml::paths::GetExecutableDirectoryPath();
-      if (directory.first) {
-        std::string path_relative_to_executable =
-            fml::paths::JoinPaths({directory.second, kernel_path});
-        if (fml::IsFile(path_relative_to_executable)) {
-          kernel =
-              fml::FileMapping::CreateReadOnly(path_relative_to_executable);
-        } else {
-          std::string path_relative_to_parent =
-              fml::paths::JoinPaths({directory.second, "..", kernel_path});
-          if (fml::IsFile(path_relative_to_parent)) {
-            kernel = fml::FileMapping::CreateReadOnly(path_relative_to_parent);
-          }
-        }
-      }
-    }
-#if defined(OS_FUCHSIA)
-    if (!kernel) {
-      std::string fuchsia_path =
-          fml::paths::JoinPaths({"/pkg/data/assets", kernel_path});
-      if (fml::IsFile(fuchsia_path)) {
-        kernel = fml::FileMapping::CreateReadOnly(fuchsia_path);
-      }
-    }
-#endif
+    std::unique_ptr<fml::Mapping> kernel = ResolveVMServiceKernel(settings);
     if (!kernel) {
       *error = fml::strdup("Could not load VM service kernel.");
       if (!service_isolate->Shutdown()) {
