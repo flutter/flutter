@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:isolate';
-import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
@@ -105,22 +104,31 @@ Future<PackageConfig> loadPackageConfigWithLogging(
       if (!configFile.existsSync()) {
         return null;
       }
-      return Future<Uint8List>.value(configFile.readAsBytesSync());
+      return configFile.readAsBytes();
     },
-    onError: (dynamic error) {
+    onError: (Object? error) {
       if (!throwOnError) {
         return;
       }
       logger.printTrace(error.toString());
-      var message = '${file.path} does not exist.';
-      final String pubspecPath = fileSystem.path.absolute(
-        fileSystem.path.dirname(file.path),
-        'pubspec.yaml',
-      );
-      if (fileSystem.isFileSync(pubspecPath)) {
-        message += '\nDid you run "flutter pub get" in this directory?';
+      final String message;
+      if (file.existsSync()) {
+        message =
+            'The package configuration file ${file.path} is invalid: $error\n'
+            'Try running "flutter pub get" to regenerate it.';
       } else {
-        message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
+        var notFoundMessage = '${file.path} does not exist.';
+        final String pubspecPath = fileSystem.path.absolute(
+          fileSystem.path.dirname(file.path),
+          'pubspec.yaml',
+        );
+        if (fileSystem.isFileSync(pubspecPath)) {
+          notFoundMessage += '\nDid you run "flutter pub get" in this directory?';
+        } else {
+          notFoundMessage +=
+              '\nDid you run this command from the same directory as your pubspec.yaml file?';
+        }
+        message = notFoundMessage;
       }
       logger.printError(message);
       didError = true;
