@@ -109,6 +109,7 @@ class ToolDependencies {
     Analytics? analytics,
     AndroidSdk? androidSdk,
     AndroidStudio? androidStudio,
+    AndroidStudio? Function()? androidStudioBuilder,
     BotDetector? botDetector,
     BuildSystem? buildSystem,
     BuildTargets? buildTargets,
@@ -127,6 +128,7 @@ class ToolDependencies {
     IOSSimulatorUtils? iosSimulatorUtils,
     IOSWorkflow? iosWorkflow,
     Java? java,
+    Java? Function()? javaBuilder,
     LocalEngineLocator? localEngineLocator,
     Logger? logger,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
@@ -428,24 +430,26 @@ class ToolDependencies {
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
     // 12. AndroidContext Dependencies
-    final AndroidSdk? Function() androidSdkBuilder = androidSdk != null
+    final AndroidSdk? Function() finalAndroidSdkBuilder = androidSdk != null
         ? () => androidSdk
         : AndroidSdk.locateAndroidSdk;
 
-    final AndroidStudio? Function() androidStudioBuilder = androidStudio != null
-        ? () => androidStudio
-        : AndroidStudio.latestValid;
+    final AndroidStudio? Function() finalAndroidStudioBuilder =
+        androidStudioBuilder ??
+        (androidStudio != null ? () => androidStudio : AndroidStudio.latestValid);
 
-    final Java? Function() javaBuilder = java != null
-        ? () => java
-        : () => Java.find(
-            androidStudioBuilder: androidStudioBuilder,
-            config: finalConfig,
-            fileSystem: finalFS,
-            logger: finalLogger,
-            platform: finalPlatform,
-            processManager: finalProcessManager,
-          );
+    final Java? Function() finalJavaBuilder =
+        javaBuilder ??
+        (java != null
+            ? () => java
+            : () => Java.find(
+                androidStudioBuilder: finalAndroidStudioBuilder,
+                config: finalConfig,
+                fileSystem: finalFS,
+                logger: finalLogger,
+                platform: finalPlatform,
+                processManager: finalProcessManager,
+              ));
 
     final GradleUtils Function() gradleUtilsBuilder = gradleUtils != null
         ? () => gradleUtils
@@ -457,10 +461,10 @@ class ToolDependencies {
           );
 
     final finalAndroidContext = AndroidContext(
-      androidSdkBuilder: androidSdkBuilder,
-      androidStudioBuilder: androidStudioBuilder,
+      androidSdkBuilder: finalAndroidSdkBuilder,
+      androidStudioBuilder: finalAndroidStudioBuilder,
       gradleUtilsBuilder: gradleUtilsBuilder,
-      javaBuilder: javaBuilder,
+      javaBuilder: finalJavaBuilder,
     );
 
     // 13. Doctor and EmulatorManager Dependencies
@@ -475,7 +479,7 @@ class ToolDependencies {
             featureFlags: finalFeatureFlags,
           ),
           fileSystem: finalFS,
-          java: finalAndroidContext.java,
+          javaBuilder: () => finalAndroidContext.java,
           logger: finalLogger,
           processManager: finalProcessManager,
           androidSdk: finalAndroidContext.androidSdk,

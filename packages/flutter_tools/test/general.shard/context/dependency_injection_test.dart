@@ -163,21 +163,44 @@ void main() {
         // Mock Android SDK directory to allow SDK detection.
         fs.directory('/home/user/Android/Sdk/licenses').createSync(recursive: true);
 
+        var studioEvaluations = 0;
+        var javaEvaluations = 0;
+        final mockStudio = FakeAndroidStudio();
+        final mockJava = FakeJava();
+
         final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+          androidStudioBuilder: () {
+            studioEvaluations++;
+            return mockStudio;
+          },
+          javaBuilder: () {
+            javaEvaluations++;
+            return mockJava;
+          },
           fs: fs,
           logger: logger,
           platform: platform,
           processManager: processManager,
         );
 
+        // Neither AndroidStudio nor Java is evaluated during bootstrap or EmulatorManager initialization.
+        expect(studioEvaluations, 0);
+        expect(javaEvaluations, 0);
+
+        // Accessing emulatorManager does not trigger evaluation.
+        expect(dependencies.emulatorManager, isNotNull);
+        expect(studioEvaluations, 0);
+        expect(javaEvaluations, 0);
+
         // Java and AndroidStudio are not evaluated until accessed.
         final Java? java = dependencies.androidContext.java;
-        final AndroidStudio? studio = dependencies.androidContext.androidStudio;
+        expect(javaEvaluations, 1);
+        expect(studioEvaluations, 0);
+        expect(java, same(mockJava));
 
-        // If Java home was resolved from AndroidStudio, verify same instance was used.
-        if (java != null && java.javaSource == JavaSource.androidStudio) {
-          expect(java.javaHome, studio?.javaPath);
-        }
+        final AndroidStudio? studio = dependencies.androidContext.androidStudio;
+        expect(studioEvaluations, 1);
+        expect(studio, same(mockStudio));
       },
     );
 
