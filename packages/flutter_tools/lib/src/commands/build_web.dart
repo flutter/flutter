@@ -75,8 +75,7 @@ class BuildWebCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = this.logger;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
 
     if (!_featureFlags.isWebEnabled) {
       throwToolExit(
