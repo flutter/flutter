@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/project_validator.dart';
@@ -20,10 +21,15 @@ import 'package:flutter_tools/src/project_validator.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 import 'analysis_server_mock.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
   late Directory tempDir;
   late FileSystem fileSystem;
   late Platform platform;
@@ -267,14 +273,15 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: MemoryFileSystem.test(),
-      processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
       suppressAnalytics: false,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     final commandRunner = TestFlutterCommandRunner();
@@ -304,14 +311,15 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: MemoryFileSystem.test(),
-      processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     final commandRunner = TestFlutterCommandRunner();
@@ -341,14 +349,15 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: fileSystem,
-      processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     final commandRunner = TestFlutterCommandRunner();
@@ -391,14 +400,15 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: MemoryFileSystem.test(),
-      processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: MemoryFileSystem.test(),
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     final commandRunner = TestFlutterCommandRunner();
@@ -445,14 +455,15 @@ void main() {
 
       final artifacts = Artifacts.test();
       final command = AnalyzeCommand(
-        terminal: Terminal.test(),
-        artifacts: artifacts,
-        logger: logger,
-        platform: FakePlatform(),
-        fileSystem: MemoryFileSystem.test(),
-        processManager: processManager,
         allProjectValidators: <ProjectValidator>[],
         suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          fs: MemoryFileSystem.test(),
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: processManager,
+        ),
       );
 
       final commandRunner = TestFlutterCommandRunner();
@@ -492,14 +503,15 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-      terminal: Terminal.test(),
-      artifacts: artifacts,
-      logger: logger,
-      platform: FakePlatform(),
-      fileSystem: fileSystem,
-      processManager: processManager,
       allProjectValidators: <ProjectValidator>[],
       suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     final commandRunner = TestFlutterCommandRunner();
