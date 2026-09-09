@@ -303,11 +303,11 @@ abstract class Artifacts {
     required ToolContext toolContext,
   }) {
     final ToolContext(
-      cache: targetCache,
-      fs: targetFileSystem,
-      os: targetOs,
-      platform: targetPlatform,
-      processManager: targetProcessManager,
+      cache: Cache targetCache,
+      fs: FileSystem targetFileSystem,
+      os: OperatingSystemUtils targetOs,
+      platform: Platform targetPlatform,
+      processManager: ProcessManager targetProcessManager,
     ) = toolContext;
 
     Artifacts artifacts = CachedArtifacts(
