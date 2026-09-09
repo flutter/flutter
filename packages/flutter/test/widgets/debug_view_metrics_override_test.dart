@@ -227,9 +227,12 @@ void main() {
     ),
   );
   isWindowingEnabled = true;
-  // Overrides have to be cleared inside the test body rather than in a tear
-  // down: debugAssertAllFoundationVarsUnset runs from the test binding's
-  // invariant check, which happens before tear downs.
+  // Overrides must be cleared inside the test body before the test ends because
+  // debugAssertAllFoundationVarsUnset runs from the test binding's invariant
+  // check, which happens before tear downs. A top-level tearDown is also
+  // installed so that if any expectation throws before reaching the explicit
+  // cleanup, leftover overrides do not leak into subsequent tests.
+  tearDown(debugClearViewMetricsOverrides);
 
   group('MediaQuery', () {
     testWidgets('a test adapter supplies missing dispatcher metadata for geometry', (

@@ -247,6 +247,8 @@ abstract class BindingBase {
   /// [TestWidgetsFlutterBinding], can override this accessor to return a
   /// different [ui.PlatformDispatcher] implementation.
   ///
+  ui.PlatformDispatcher? _debugPlatformDispatcher;
+
   /// In debug builds this is [ui.PlatformDispatcher.instance] wrapped so that
   /// the entries of [debugViewMetricsOverrides] apply to the view metrics it
   /// reports; see [debugApplyViewMetricsOverrides]. The wrapper is transparent
@@ -257,7 +259,7 @@ abstract class BindingBase {
   ui.PlatformDispatcher get platformDispatcher {
     ui.PlatformDispatcher dispatcher = ui.PlatformDispatcher.instance;
     assert(() {
-      dispatcher = debugApplyViewMetricsOverrides(dispatcher);
+      dispatcher = _debugPlatformDispatcher ??= debugApplyViewMetricsOverrides(dispatcher);
       return true;
     }());
     return dispatcher;
@@ -687,9 +689,9 @@ abstract class BindingBase {
   ///  * `viewId`: the [FlutterView.viewId] to act on. Required unless
   ///    `clearAll` is `'true'`.
   ///  * `overrides`: a JSON object in the format
-  ///    [DebugViewMetricsOverride.fromJson] accepts. When present, it replaces
-  ///    the override currently registered for `viewId`. An empty object removes
-  ///    it.
+  ///    [DebugViewMetricsOverride.fromJson] accepts, or `null`. When present,
+  ///    it replaces the override currently registered for `viewId`. An empty
+  ///    object or `null` removes it.
   ///  * `clearAll`: when `'true'`, removes every override and ignores `viewId`.
   ///
   /// With neither `overrides` nor `clearAll`, the call is a read.
@@ -736,14 +738,19 @@ abstract class BindingBase {
     final String? rawOverrides = parameters['overrides'];
     if (rawOverrides != null) {
       final Object? decoded = json.decode(rawOverrides);
-      if (decoded is! Map<String, Object?>) {
-        throw Exception('The overrides parameter must be a JSON object.');
-      }
-      // DebugViewMetricsOverride.fromJson throws a FormatException on a
-      // malformed payload, which the service extension machinery reports back
-      // to the caller as an error rather than silently applying part of it.
-      if (debugSetViewMetricsOverride(viewId, DebugViewMetricsOverride.fromJson(decoded))) {
-        _postViewMetricsOverrideStateChangedEvent();
+      if (decoded == null) {
+        if (debugSetViewMetricsOverride(viewId, null)) {
+          _postViewMetricsOverrideStateChangedEvent();
+        }
+      } else if (decoded is Map<String, Object?>) {
+        // DebugViewMetricsOverride.fromJson throws a FormatException on a
+        // malformed payload, which the service extension machinery reports back
+        // to the caller as an error rather than silently applying part of it.
+        if (debugSetViewMetricsOverride(viewId, DebugViewMetricsOverride.fromJson(decoded))) {
+          _postViewMetricsOverrideStateChangedEvent();
+        }
+      } else {
+        throw Exception('The overrides parameter must be a JSON object or null.');
       }
     }
 

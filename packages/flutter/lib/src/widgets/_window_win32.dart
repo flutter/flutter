@@ -832,6 +832,9 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
 
     final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
+      orElse: () => throw StateError(
+        'No FlutterView with viewId $viewId was found on the platform dispatcher.',
+      ),
     );
     rootView = flutterView;
   }
@@ -1028,6 +1031,9 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
 
     final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
       (FlutterView view) => view.viewId == viewId,
+      orElse: () => throw StateError(
+        'No FlutterView with viewId $viewId was found on the platform dispatcher.',
+      ),
     );
     rootView = flutterView;
   }
