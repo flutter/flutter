@@ -88,10 +88,12 @@ void main(List<String> args) {
       // This now looks like "../../flutter/buildtools/{platform}/{...}"
       final String commandPath = p.dirname(command.split(' ').first);
 
-      // Find the canonical path to the command (i.e. resolve "../" and ".")
+      // Find the canonical path to the command (i.e. resolve "../" and ".").
+      // Relative paths in `command` are relative to the entry's `directory`,
+      // not necessarily the directory the database was read from.
       //
       // This now looks like "/path/to/engine/src/flutter/buildtools/{platform}/{...}"
-      final String path = p.canonicalize(p.join(compileCommandsDir, commandPath));
+      final String path = p.canonicalize(p.join(directory, commandPath));
 
       // Extract which platform we're building for (e.g. linux-x64, mac-arm64, mac-x64).
       final String platform = RegExp(r'buildtools/([^/]+)/').firstMatch(path)!.group(1)!;
