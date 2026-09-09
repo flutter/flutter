@@ -63,12 +63,6 @@ enum CanvasKitVariant {
   /// WARNING: In most cases, you should use [auto] instead of this variant. Using
   /// this variant in a non-Chromium browser will result in a broken app.
   chromium,
-
-  /// The variant that contains the new WebParagraph implementation on top of Chrome's Text Clusters
-  /// API: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
-  ///
-  /// WARNING: This is an experimental variant that's not yet ready for production use.
-  experimentalWebParagraph,
 }
 
 /// The Web Engine configuration for the current application.
@@ -146,11 +140,13 @@ class FlutterConfiguration {
   }
 
   FlutterConfiguration withOverrides(JsFlutterConfiguration? overrides) {
-    final newJsConfig = objectConstructor.assign(
-      <String, Object>{}.jsify(),
-      _configuration.jsify(),
-      overrides.jsify(),
-    ) as JsFlutterConfiguration;
+    final newJsConfig =
+        objectConstructor.assign(
+              <String, Object>{}.jsify(),
+              _configuration.jsify(),
+              overrides.jsify(),
+            )
+            as JsFlutterConfiguration;
     final newConfig = FlutterConfiguration();
     newConfig._configuration = newJsConfig;
     return newConfig;
@@ -310,6 +306,14 @@ class FlutterConfiguration {
     return maxSurfaces;
   }
 
+  /// Enables the new WebParagraph implementation built on top of Chrome's Text Clusters
+  /// API: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
+  ///
+  /// If the browser doesn't support WebParagraph, this flag will have no effect.
+  ///
+  /// WARNING: This is an experimental feature.
+  bool get preferWebParagraph => _configuration?.preferWebParagraph ?? false;
+
   /// Set this flag to `true` to cause the engine to visualize the semantics tree
   /// on the screen for debugging.
   ///
@@ -400,6 +404,7 @@ extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
   external bool? get canvasKitForceCpuOnly;
   external bool? get canvasKitForceMultiSurfaceRasterizer;
   external double? get canvasKitMaximumSurfaces;
+  external bool? get preferWebParagraph;
   external bool? get debugShowSemanticsNodes;
   external DomElement? get hostElement;
   external bool? get multiViewEnabled;

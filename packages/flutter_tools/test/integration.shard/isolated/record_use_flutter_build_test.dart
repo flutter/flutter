@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Timeout(Duration(minutes: 10))
+library;
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -38,6 +41,21 @@ void main() {
           throw Exception(
             'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
           );
+        }
+        final String stdout = result.stdout.join('\n');
+        if (target.first == hostOs) {
+          // Verify that IconTreeShaker detects dummyIcon with null fontFamily.
+          // Icon tree shaking for this icon fails with a trace message, but the overall build succeeds.
+          expect(
+            stdout,
+            contains('Expected to find fontFamily for constant IconData with codepoint: 4660'),
+          );
+        }
+        if (target case ['web', '--wasm']) {
+          // Verify that both wasm (Icons.fastfood: 57946) and js (Icons.favorite: 57947)
+          // codepoints are retained when merging recorded uses.
+          expect(stdout, contains('57946'));
+          expect(stdout, contains('57947'));
         }
         final Directory buildTargetDir = appRoot
             .childDirectory('build')

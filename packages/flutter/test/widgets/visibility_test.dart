@@ -621,6 +621,17 @@ void main() {
     expect(didChangeDependencies, isTrue);
     expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
   });
+
+  testWidgets('Visibility does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(child: Visibility(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(Visibility)), Size.zero);
+  });
 }
 
 class _ShowVisibility extends StatefulWidget {

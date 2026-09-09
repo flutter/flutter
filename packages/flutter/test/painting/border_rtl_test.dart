@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show DiagnosticLevel, FlutterError;
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -180,7 +179,7 @@ void main() {
       BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, -1.0),
       directionalWithYellowTop10,
     );
-    expect(() => BoxBorder.lerp(const SillyBorder(), const Border(), -1.0), throwsFlutterError);
+    expect(BoxBorder.lerp(const SillyBorder(), const Border(), -1.0), const SillyBorder());
 
     expect(BoxBorder.lerp(null, null, 0.0), null);
     expect(BoxBorder.lerp(Border.all(width: 10.0), null, 0.0), Border.all(width: 10.0));
@@ -201,7 +200,7 @@ void main() {
       BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 0.0),
       directionalWithYellowTop5,
     );
-    expect(() => BoxBorder.lerp(const SillyBorder(), const Border(), 0.0), throwsFlutterError);
+    expect(BoxBorder.lerp(const SillyBorder(), const Border(), 0.0), const SillyBorder());
 
     expect(BoxBorder.lerp(null, null, 0.25), null);
     expect(BoxBorder.lerp(Border.all(width: 10.0), null, 0.25), Border.all(width: 7.5));
@@ -239,7 +238,7 @@ void main() {
       BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 0.25),
       _matchesBorderDirectional(visualWithYellowTop5At75 + directionalWithSides10At25),
     );
-    expect(() => BoxBorder.lerp(const SillyBorder(), const Border(), 0.25), throwsFlutterError);
+    expect(BoxBorder.lerp(const SillyBorder(), const Border(), 0.25), const SillyBorder());
 
     expect(BoxBorder.lerp(null, null, 0.75), null);
     expect(BoxBorder.lerp(Border.all(width: 10.0), null, 0.75), Border.all(width: 2.5));
@@ -277,7 +276,10 @@ void main() {
       BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 0.75),
       _matchesBorderDirectional(visualWithYellowTop5At25 + directionalWithSides10At75),
     );
-    expect(() => BoxBorder.lerp(const SillyBorder(), const Border(), 0.75), throwsFlutterError);
+    expect(
+      BoxBorder.lerp(const SillyBorder(), const Border(), 0.75),
+      Border.all(width: 0.0, style: BorderStyle.none),
+    );
 
     expect(BoxBorder.lerp(null, null, 1.0), null);
     expect(
@@ -304,7 +306,10 @@ void main() {
       BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 1.0),
       directionalWithSides10,
     );
-    expect(() => BoxBorder.lerp(const SillyBorder(), const Border(), 1.0), throwsFlutterError);
+    expect(
+      BoxBorder.lerp(const SillyBorder(), const Border(), 1.0),
+      Border.all(width: 0.0, style: BorderStyle.none),
+    );
 
     expect(BoxBorder.lerp(null, null, 2.0), null);
     expect(
@@ -331,41 +336,9 @@ void main() {
       BoxBorder.lerp(visualWithYellowTop5, directionalWithSides10, 2.0),
       directionalWithSides20,
     );
-    expect(() => BoxBorder.lerp(const SillyBorder(), const Border(), 2.0), throwsFlutterError);
-  });
-
-  test('BoxBorder.lerp throws correct FlutterError message', () {
-    late FlutterError error;
-    try {
-      BoxBorder.lerp(const SillyBorder(), const Border(), 2.0);
-    } on FlutterError catch (e) {
-      error = e;
-    }
-    expect(error, isNotNull);
-    expect(error.diagnostics.length, 3);
-    expect(error.diagnostics[2].level, DiagnosticLevel.hint);
     expect(
-      error.diagnostics[2].toStringDeep(),
-      equalsIgnoringHashCodes(
-        'For a more general interpolation method, consider using\n'
-        'ShapeBorder.lerp instead.\n',
-      ),
-    );
-    expect(
-      error.toStringDeep(),
-      equalsIgnoringHashCodes(
-        'FlutterError\n'
-        '   BoxBorder.lerp can only interpolate Border and BorderDirectional\n'
-        '   classes.\n'
-        '   BoxBorder.lerp() was called with two objects of type SillyBorder\n'
-        '   and Border:\n'
-        '     SillyBorder()\n'
-        '     Border.all(BorderSide(width: 0.0, style: none))\n'
-        '   However, only Border and BorderDirectional classes are supported\n'
-        '   by this method.\n'
-        '   For a more general interpolation method, consider using\n'
-        '   ShapeBorder.lerp instead.\n',
-      ),
+      BoxBorder.lerp(const SillyBorder(), const Border(), 2.0),
+      Border.all(width: 0.0, style: BorderStyle.none),
     );
   });
 

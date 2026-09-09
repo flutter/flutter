@@ -41,7 +41,9 @@ public class Build {
     public static final int API_34 = 34;
     /** Android 15 (Vanilla Ice Cream) */
     public static final int API_35 = 35;
-    /** Android 16 */
+    /** Android 16 (Baklava) */
     public static final int API_36 = 36;
+    /** Android 17 (Cinnamon Bun) */
+    public static final int API_37 = 37;
   }
 }

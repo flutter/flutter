@@ -27,7 +27,7 @@ FlutterPlatformNodeDelegateMac::FlutterPlatformNodeDelegateMac(
 
 void FlutterPlatformNodeDelegateMac::Init(std::weak_ptr<OwnerBridge> bridge, ui::AXNode* node) {
   FlutterPlatformNodeDelegate::Init(bridge, node);
-  if (GetData().IsTextField()) {
+  if (GetData().IsTextField() && !GetData().IsReadOnlyOrDisabled()) {
     ax_platform_node_ = new FlutterTextPlatformNode(this, view_controller_);
   } else {
     ax_platform_node_ = ui::AXPlatformNode::Create(this);
@@ -37,13 +37,27 @@ void FlutterPlatformNodeDelegateMac::Init(std::weak_ptr<OwnerBridge> bridge, ui:
 
 void FlutterPlatformNodeDelegateMac::NodeDataChanged(const ui::AXNodeData& old_node_data,
                                                      const ui::AXNodeData& new_node_data) {
-  if (old_node_data.IsTextField() && !new_node_data.IsTextField()) {
+  bool old_is_editable_textfield =
+      old_node_data.IsTextField() && !old_node_data.IsReadOnlyOrDisabled();
+  bool new_is_editable_textfield =
+      new_node_data.IsTextField() && !new_node_data.IsReadOnlyOrDisabled();
+  if (old_is_editable_textfield && !new_is_editable_textfield) {
     ax_platform_node_->Destroy();
     ax_platform_node_ = ui::AXPlatformNode::Create(this);
-  } else if (!old_node_data.IsTextField() && new_node_data.IsTextField()) {
+  } else if (!old_is_editable_textfield && new_is_editable_textfield) {
     ax_platform_node_->Destroy();
     ax_platform_node_ = new FlutterTextPlatformNode(this, view_controller_);
   }
+}
+
+const ui::AXNodeData& FlutterPlatformNodeDelegateMac::GetData() const {
+  const ui::AXNodeData& data = FlutterPlatformNodeDelegate::GetData();
+  if (data.IsTextField() && data.IsReadOnlyOrDisabled()) {
+    cached_data_ = data;
+    cached_data_.role = ax::mojom::Role::kStaticText;
+    return cached_data_;
+  }
+  return data;
 }
 
 FlutterPlatformNodeDelegateMac::~FlutterPlatformNodeDelegateMac() {

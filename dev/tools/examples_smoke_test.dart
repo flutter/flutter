@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 // This test builds an integration test from the list of samples in the
-// examples/api/lib directory, and then runs it. The tests are just smoke tests,
-// designed to start up each example and run it for a couple of frames to make
-// sure it doesn't throw an exception or fail to compile.
+// packages/flutter/examples/api/lib directory, and then runs it. The tests are
+// just smoke tests, designed to start up each example and run it for a couple
+// of frames to make sure it doesn't throw an exception or fail to compile.
 
 import 'dart:async';
 import 'dart:convert';
@@ -30,7 +30,11 @@ FutureOr<dynamic> main() async {
   final Directory flutterDir = _kFilesystem.directory(
     path.absolute(path.dirname(path.dirname(path.dirname(_kPlatform.script.toFilePath())))),
   );
-  final Directory apiDir = flutterDir.childDirectory('examples').childDirectory('api');
+  final Directory apiDir = flutterDir
+    .childDirectory('packages')
+    .childDirectory('flutter')
+    .childDirectory('examples')
+    .childDirectory('api');
   final File integrationTest = await generateTest(apiDir);
   try {
     await runSmokeTests(flutterDir: flutterDir, integrationTest: integrationTest, apiDir: apiDir);
@@ -131,7 +135,7 @@ Future<File> generateTest(Directory apiDir) async {
   buffer.writeln(r'''
 
 
-import '../../../dev/manual_tests/test/mock_image_http.dart';
+import '../../../../../dev/manual_tests/test/mock_image_http.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding? binding;

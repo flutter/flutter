@@ -138,7 +138,6 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
 
   frame_info.mvp = Entity::GetShaderTransform(entity.GetShaderClipDepth(), pass,
                                               src_snapshot->transform);
-  frame_info.src_y_coord_scale = src_snapshot->texture->GetYCoordScale();
   VS::BindFrameInfo(pass, data_host_buffer.EmplaceUniform(frame_info));
 
   frag_info.src_input_alpha = src_snapshot->opacity;

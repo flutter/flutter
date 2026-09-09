@@ -60,6 +60,11 @@ class NativeDriverSupportPlugin :
             "ping" -> {
                 result.success(null)
             }
+            "get_system_ui_visibility" -> {
+                @Suppress("DEPRECATION")
+                val flags = activity.window.decorView.systemUiVisibility
+                result.success(mapOf("system_ui_visibility" to flags))
+            }
             "tap_view" -> {
                 // Decode the selector.
                 val kind = call.argument<String>("kind")

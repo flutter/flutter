@@ -685,5 +685,5 @@ abstract class ParagraphBuilder {
 
 Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) async {
   await engine.renderer.fontCollection.loadFontFromBytes(list, fontFamily: fontFamily);
-  engine.sendFontChangeMessage();
+  await engine.sendFontChangeMessage();
 }

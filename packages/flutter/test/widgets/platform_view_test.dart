@@ -3904,6 +3904,54 @@ void main() {
       expect(() => creationParams.onPlatformViewCreated(creationParams.id), returnsNormally);
     });
 
+    testWidgets('PlatformViewLink placeholder does not crash when detached during fast scroll', (
+      WidgetTester tester,
+    ) async {
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView.builder(
+            controller: scrollController,
+            // Do not use itemExtent. That would use RenderSliverFixedExtentList,
+            // which garbage-collects before layout. RenderSliverList lays out
+            // children first, then garbage-collects them, which reproduces this
+            // bug.
+            itemCount: 200,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                height: 100,
+                child: PlatformViewLink(
+                  viewType: 'webview',
+                  onCreatePlatformView: (PlatformViewCreationParams params) {
+                    final controller = FakeAndroidViewController(params.id, requiresSize: true);
+                    controller.create();
+                    // Leave the platform view in the placeholder state so the
+                    // placeholder render object remains active during layout.
+                    return controller;
+                  },
+                  surfaceFactory: (BuildContext context, PlatformViewController controller) {
+                    return PlatformViewSurface(
+                      gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+                      controller: controller,
+                      hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      scrollController.jumpTo(5000);
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('PlatformViewLink widget survives widget tree change', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();

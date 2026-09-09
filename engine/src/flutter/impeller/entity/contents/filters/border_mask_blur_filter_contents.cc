@@ -82,7 +82,8 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
   /// Create AnonymousContents for rendering.
   ///
 
-  auto sigma = effect_transform * Vector2(sigma_x_.sigma, sigma_y_.sigma);
+  auto sigma = effect_transform.TransformDirection(
+      Vector2(sigma_x_.sigma, sigma_y_.sigma));
   RenderProc render_proc = [coverage, input_snapshot, input_uvs = input_uvs,
                             src_color_factor = src_color_factor_,
                             inner_blur_factor = inner_blur_factor_,
@@ -106,8 +107,6 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
 
     VS::FrameInfo frame_info;
     frame_info.mvp = entity.GetShaderTransform(pass);
-    frame_info.texture_sampler_y_coord_scale =
-        input_snapshot->texture->GetYCoordScale();
 
     FS::FragInfo frag_info;
     frag_info.sigma_uv = sigma.Abs() / input_snapshot->texture->GetSize();

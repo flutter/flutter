@@ -36,6 +36,9 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
 #if IMPELLER_ENABLE_OPENGLES
     case PlaygroundBackend::kOpenGLES:
       return std::make_unique<PlaygroundImplGLES>(switches);
+    case PlaygroundBackend::kOpenGLESSDF:
+      switches.flags.use_sdfs = true;
+      return std::make_unique<PlaygroundImplGLES>(switches);
 #endif  // IMPELLER_ENABLE_OPENGLES
 #if IMPELLER_ENABLE_VULKAN
     case PlaygroundBackend::kVulkan:
@@ -55,7 +58,13 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
   FML_UNREACHABLE();
 }
 
-PlaygroundImpl::PlaygroundImpl(PlaygroundSwitches switches)
+void PlaygroundImpl::OnTearDownTestEnvironment() {
+#if IMPELLER_ENABLE_OPENGLES
+  PlaygroundImplGLES::OnTearDownTestEnvironment();
+#endif  // IMPELLER_ENABLE_OPENGLES
+}
+
+PlaygroundImpl::PlaygroundImpl(const PlaygroundSwitches& switches)
     : switches_(switches) {}
 
 PlaygroundImpl::~PlaygroundImpl() = default;

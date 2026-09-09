@@ -134,6 +134,14 @@ struct RenderPassData {
   std::shared_ptr<Texture> depth_attachment;
   std::shared_ptr<Texture> stencil_attachment;
 
+  // The subresource of each attachment to render into.
+  uint32_t color_mip_level = 0u;
+  uint32_t color_slice = 0u;
+  uint32_t depth_mip_level = 0u;
+  uint32_t depth_slice = 0u;
+  uint32_t stencil_mip_level = 0u;
+  uint32_t stencil_slice = 0u;
+
   bool clear_color_attachment = true;
   bool clear_depth_attachment = true;
   bool clear_stencil_attachment = true;
@@ -148,7 +156,8 @@ struct RenderPassData {
 static bool BindVertexBuffer(const ProcTableGLES& gl,
                              BufferBindingsGLES* vertex_desc_gles,
                              const BufferView& vertex_buffer_view,
-                             size_t buffer_index) {
+                             size_t buffer_index,
+                             size_t instance = 0) {
   if (!vertex_buffer_view) {
     return false;
   }
@@ -169,7 +178,7 @@ static bool BindVertexBuffer(const ProcTableGLES& gl,
   /// Bind the vertex attributes associated with vertex buffer.
   ///
   if (!vertex_desc_gles->BindVertexAttributes(
-          gl, buffer_index, vertex_buffer_view.GetRange().offset)) {
+          gl, buffer_index, vertex_buffer_view.GetRange().offset, instance)) {
     return false;
   }
 
@@ -259,38 +268,43 @@ static void EncodeViewport(const ProcTableGLES& gl,
       gl.BindFramebuffer(GL_FRAMEBUFFER, *color_gles.GetFBO());
     }
   } else {
-    // Create and bind an offscreen FBO.
-    if (!color_gles.GetCachedFBO().IsDead()) {
-      fbo = reactor.GetGLHandle(color_gles.GetCachedFBO());
-      if (!fbo.has_value()) {
-        return false;
-      }
-      gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
-    } else {
-      HandleGLES cached_fbo =
-          reactor.CreateUntrackedHandle(HandleType::kFrameBuffer);
-      color_gles.SetCachedFBO(cached_fbo);
-      fbo = reactor.GetGLHandle(cached_fbo);
-      if (!fbo.has_value()) {
-        return false;
-      }
-      gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
+    // Create (once) and bind an offscreen FBO. The cached FBO remembers which
+    // subresource it is bound to, so it is re-attached only when freshly
+    // created or when rendering into a different mip level or slice of the
+    // same texture.
+    bool needs_attachment = false;
+    if (color_gles.GetCachedFBO().IsDead()) {
+      color_gles.SetCachedFBO(
+          reactor.CreateUntrackedHandle(HandleType::kFrameBuffer));
+      needs_attachment = true;
+    }
+    fbo = reactor.GetGLHandle(color_gles.GetCachedFBO());
+    if (!fbo.has_value()) {
+      return false;
+    }
+    gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
 
+    if (needs_attachment ||
+        !color_gles.CachedFBOMatchesSubresource(pass_data.color_mip_level,
+                                                pass_data.color_slice)) {
       if (!color_gles.SetAsFramebufferAttachment(
-              GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0)) {
+              GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0,
+              pass_data.color_mip_level, pass_data.color_slice)) {
         return false;
       }
 
       if (auto depth = TextureGLES::Cast(pass_data.depth_attachment.get())) {
         if (!depth->SetAsFramebufferAttachment(
-                GL_FRAMEBUFFER, TextureGLES::AttachmentType::kDepth)) {
+                GL_FRAMEBUFFER, TextureGLES::AttachmentType::kDepth,
+                pass_data.depth_mip_level, pass_data.depth_slice)) {
           return false;
         }
       }
       if (auto stencil =
               TextureGLES::Cast(pass_data.stencil_attachment.get())) {
         if (!stencil->SetAsFramebufferAttachment(
-                GL_FRAMEBUFFER, TextureGLES::AttachmentType::kStencil)) {
+                GL_FRAMEBUFFER, TextureGLES::AttachmentType::kStencil,
+                pass_data.stencil_mip_level, pass_data.stencil_slice)) {
           return false;
         }
       }
@@ -301,6 +315,8 @@ static void EncodeViewport(const ProcTableGLES& gl,
                        << DebugToFramebufferError(status);
         return false;
       }
+      color_gles.SetCachedFBOSubresource(pass_data.color_mip_level,
+                                         pass_data.color_slice);
     }
   }
 
@@ -520,10 +536,34 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Finally! Invoke the draw call.
     ///
-    if (command.index_type == IndexType::kNone) {
-      gl.DrawArrays(mode, command.base_vertex, command.element_count);
-    } else {
-      // Bind the index buffer if necessary.
+    /// An instanced draw uses the hardware instanced entry points when the
+    /// driver exposes them (ES 3.0 core, or GL_EXT_instanced_arrays on ES
+    /// 2.0). When it does not, the draw is emulated by repeating it once per
+    /// instance, re-pointing the instance-rate vertex attributes at each
+    /// instance in between.
+    ///
+    const bool instanced = command.instance_count > 1u;
+    const bool hardware_instanced =
+        instanced &&
+        (gl.DrawArraysInstanced.IsAvailable() ||
+         gl.DrawArraysInstancedEXT.IsAvailable()) &&
+        (gl.DrawElementsInstanced.IsAvailable() ||
+         gl.DrawElementsInstancedEXT.IsAvailable()) &&
+        (gl.VertexAttribDivisor.IsAvailable() ||
+         gl.VertexAttribDivisorEXT.IsAvailable());
+    const bool emulate_instanced = instanced && !hardware_instanced;
+    const GLsizei instance_count = static_cast<GLsizei>(command.instance_count);
+
+    // A draw is indexed only when a real index type was set. A command that
+    // never bound an index buffer leaves `index_type` at its `kUnknown`
+    // default, which must be treated as non-indexed (matching the Metal and
+    // Vulkan backends, which key off the presence of the index buffer).
+    const bool is_indexed = command.index_type != IndexType::kNone &&
+                            command.index_type != IndexType::kUnknown;
+
+    // Bind the index buffer once, before any (possibly repeated) draw.
+    const GLvoid* index_offset = nullptr;
+    if (is_indexed) {
       auto index_buffer_view = command.index_buffer;
       const DeviceBuffer* index_buffer = index_buffer_view.GetBuffer();
       const auto& index_buffer_gles = DeviceBufferGLES::Cast(*index_buffer);
@@ -531,12 +571,60 @@ static void EncodeViewport(const ProcTableGLES& gl,
               DeviceBufferGLES::BindingType::kElementArrayBuffer)) {
         return false;
       }
-      gl.DrawElements(mode,                             // mode
-                      command.element_count,            // count
-                      ToIndexType(command.index_type),  // type
-                      reinterpret_cast<const GLvoid*>(static_cast<GLsizei>(
-                          index_buffer_view.GetRange().offset))  // indices
-      );
+      index_offset = reinterpret_cast<const GLvoid*>(
+          static_cast<uintptr_t>(index_buffer_view.GetRange().offset));
+    }
+
+    // A non-instanced draw of the bound geometry. Used directly for ordinary
+    // draws and once per instance when emulating instancing.
+    const auto draw_geometry = [&]() {
+      if (!is_indexed) {
+        gl.DrawArrays(mode, command.base_vertex, command.element_count);
+      } else {
+        gl.DrawElements(mode, command.element_count,
+                        ToIndexType(command.index_type), index_offset);
+      }
+    };
+
+    if (command.instance_count == 0u) {
+      // A zero instance count draws nothing, matching the Metal and Vulkan
+      // backends.
+    } else if (emulate_instanced) {
+      // Repeat the draw once per instance, re-pointing the instance-rate
+      // vertex attributes at each instance in between. The vertex buffers
+      // were already bound above for instance 0.
+      for (size_t instance = 0; instance < command.instance_count; instance++) {
+        if (instance > 0u) {
+          for (size_t i = 0; i < command.vertex_buffers.length; i++) {
+            if (!BindVertexBuffer(
+                    gl, vertex_desc_gles,
+                    vertex_buffers[i + command.vertex_buffers.offset], i,
+                    instance)) {
+              return false;
+            }
+          }
+        }
+        draw_geometry();
+      }
+    } else if (hardware_instanced) {
+      // A single instanced call covers every instance.
+      if (!is_indexed) {
+        const auto& gl_draw_arrays_instanced =
+            gl.DrawArraysInstanced.IsAvailable() ? gl.DrawArraysInstanced
+                                                 : gl.DrawArraysInstancedEXT;
+        gl_draw_arrays_instanced(mode, command.base_vertex,
+                                 command.element_count, instance_count);
+      } else {
+        const auto& gl_draw_elements_instanced =
+            gl.DrawElementsInstanced.IsAvailable()
+                ? gl.DrawElementsInstanced
+                : gl.DrawElementsInstancedEXT;
+        gl_draw_elements_instanced(mode, command.element_count,
+                                   ToIndexType(command.index_type),
+                                   index_offset, instance_count);
+      }
+    } else {
+      draw_geometry();
     }
 
     //--------------------------------------------------------------------------
@@ -695,6 +783,8 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
   ///
   pass_data->color_attachment = color0.texture;
   pass_data->resolve_attachment = color0.resolve_texture;
+  pass_data->color_mip_level = color0.mip_level;
+  pass_data->color_slice = color0.slice;
   pass_data->clear_color = color0.clear_color;
   pass_data->clear_color_attachment = CanClearAttachment(color0.load_action);
   pass_data->discard_color_attachment =
@@ -716,6 +806,8 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
   ///
   if (depth0.has_value()) {
     pass_data->depth_attachment = depth0->texture;
+    pass_data->depth_mip_level = depth0->mip_level;
+    pass_data->depth_slice = depth0->slice;
     pass_data->clear_depth = depth0->clear_depth;
     pass_data->clear_depth_attachment = CanClearAttachment(depth0->load_action);
     pass_data->discard_depth_attachment =
@@ -727,6 +819,8 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
   ///
   if (stencil0.has_value()) {
     pass_data->stencil_attachment = stencil0->texture;
+    pass_data->stencil_mip_level = stencil0->mip_level;
+    pass_data->stencil_slice = stencil0->slice;
     pass_data->clear_stencil = stencil0->clear_stencil;
     pass_data->clear_stencil_attachment =
         CanClearAttachment(stencil0->load_action);

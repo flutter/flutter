@@ -302,5 +302,178 @@ void testMain() {
       await FallbackFontService.instance.waitForIdle();
       expect(callCount, greaterThan(0));
     });
+
+    test('standard CJK characters only download split slices', () async {
+      final requestedUrls = <String>[];
+      mockHttpFetchResponseFactory = (String url) async {
+        requestedUrls.add(url);
+        return MockHttpFetchResponse(
+          url: url,
+          status: 200,
+          payload: MockHttpFetchPayload(byteBuffer: Uint8List(0).buffer),
+        );
+      };
+
+      FallbackFontService.instance.addMissingCodePoints(<int>[0x4E00]);
+      await FallbackFontService.instance.waitForIdle();
+
+      expect(requestedUrls.isNotEmpty, isTrue);
+      final List<String> loadedFamilies = mockRegistry.loadedFonts.keys.toList();
+      expect(loadedFamilies, isNotEmpty);
+      var checkedAtLeastOnce = false;
+      for (final family in loadedFamilies) {
+        if (family.startsWith('Noto Sans KR') ||
+            family.startsWith('Noto Sans JP') ||
+            family.startsWith('Noto Sans SC') ||
+            family.startsWith('Noto Sans TC') ||
+            family.startsWith('Noto Sans HK')) {
+          expect(RegExp(r'Noto Sans (KR|JP|SC|TC|HK) \d+').hasMatch(family), isTrue);
+          checkedAtLeastOnce = true;
+        }
+      }
+      expect(loadedFamilies, isNot(contains('Noto Sans KR')));
+      expect(loadedFamilies, isNot(contains('Noto Sans SC')));
+      expect(loadedFamilies, isNot(contains('Noto Sans TC')));
+      expect(loadedFamilies, isNot(contains('Noto Sans JP')));
+      expect(loadedFamilies, isNot(contains('Noto Sans HK')));
+      expect(checkedAtLeastOnce, isTrue);
+    });
+
+    test('combining Jamo characters trigger monolithic font download', () async {
+      final requestedUrls = <String>[];
+      mockHttpFetchResponseFactory = (String url) async {
+        requestedUrls.add(url);
+        return MockHttpFetchResponse(
+          url: url,
+          status: 200,
+          payload: MockHttpFetchPayload(byteBuffer: Uint8List(0).buffer),
+        );
+      };
+
+      FallbackFontService.instance.addMissingCodePoints(<int>[0x1100]);
+      await FallbackFontService.instance.waitForIdle();
+
+      final List<String> loadedFamilies = mockRegistry.loadedFonts.keys.toList();
+      expect(loadedFamilies, contains('Noto Sans KR'));
+    });
+
+    test('monolithic font pending download suppresses split slice downloads', () async {
+      final requestedUrls = <String>[];
+      final completer = Completer<void>();
+
+      mockHttpFetchResponseFactory = (String url) async {
+        requestedUrls.add(url);
+        if (url.contains('notosanskr') && !RegExp(r'\.\d+\.woff2$').hasMatch(url)) {
+          await completer.future;
+        }
+        return MockHttpFetchResponse(
+          url: url,
+          status: 200,
+          payload: MockHttpFetchPayload(byteBuffer: Uint8List(0).buffer),
+        );
+      };
+
+      FallbackFontService.instance.addMissingCodePoints(<int>[0x1100]);
+      await Future<void>.delayed(Duration.zero);
+
+      FallbackFontService.instance.addMissingCodePoints(<int>[0x4E00]);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(requestedUrls, hasLength(1));
+      expect(requestedUrls.single, isNot(contains('.0.woff2')));
+
+      completer.complete();
+      await FallbackFontService.instance.waitForIdle();
+    });
+
+    test('registration of split slices is ignored after monolithic parent is active', () async {
+      fontFallbackManager.registerFallbackFont('Noto Sans KR');
+      expect(fontFallbackManager.globalFontFallbacks, contains('Noto Sans KR'));
+
+      fontFallbackManager.registerFallbackFont('Noto Sans KR 0');
+      expect(fontFallbackManager.globalFontFallbacks, isNot(contains('Noto Sans KR 0')));
+    });
+
+    test('monolithic font is inserted at the earliest index of the removed split slices', () async {
+      fontFallbackManager.globalFontFallbacks.clear();
+      fontFallbackManager.globalFontFallbacks.addAll(<String>[
+        'Roboto',
+        'Noto Sans KR 10',
+        'Noto Sans JP 2',
+        'Noto Sans KR 12',
+      ]);
+
+      fontFallbackManager.registerFallbackFont('Noto Sans KR');
+
+      expect(fontFallbackManager.globalFontFallbacks, <String>[
+        'Roboto',
+        'Noto Sans KR',
+        'Noto Sans JP 2',
+      ]);
+    });
+
+    test(
+      'monolithic font and split slice requested in the same batch only download monolithic font',
+      () async {
+        final requestedUrls = <String>[];
+        mockHttpFetchResponseFactory = (String url) async {
+          requestedUrls.add(url);
+          return MockHttpFetchResponse(
+            url: url,
+            status: 200,
+            payload: MockHttpFetchPayload(byteBuffer: Uint8List(0).buffer),
+          );
+        };
+
+        // 0x1100 is combining Jamo (triggers monolithic Noto Sans KR)
+        // 0x4E00 is standard CJK (triggers Noto Sans KR split slice, e.g., Noto Sans KR 0)
+        FallbackFontService.instance.addMissingCodePoints(<int>[0x1100, 0x4E00]);
+        await FallbackFontService.instance.waitForIdle();
+
+        // Only the monolithic font should have been requested. No split slices should be requested.
+        expect(requestedUrls, hasLength(1));
+        expect(
+          requestedUrls.where((String url) => RegExp(r'\.\d+\.woff2$').hasMatch(url)),
+          isEmpty,
+        );
+
+        final List<String> loadedFamilies = mockRegistry.loadedFonts.keys.toList();
+        expect(loadedFamilies, contains('Noto Sans KR'));
+        expect(
+          loadedFamilies.where((String f) => RegExp(r'Noto Sans KR \d+').hasMatch(f)),
+          isEmpty,
+        );
+      },
+    );
+
+    test(
+      'monolithic font and split slice requested in the same batch in reverse order only download monolithic font',
+      () async {
+        fontFallbackManager.debugUserPreferredLanguage = 'ko';
+        final requestedUrls = <String>[];
+        mockHttpFetchResponseFactory = (String url) async {
+          requestedUrls.add(url);
+          return MockHttpFetchResponse(
+            url: url,
+            status: 200,
+            payload: MockHttpFetchPayload(byteBuffer: Uint8List(0).buffer),
+          );
+        };
+
+        // 0x4E00 is standard CJK (triggers Noto Sans KR split slice, e.g., Noto Sans KR 0)
+        // 0x1100 is combining Jamo (triggers monolithic Noto Sans KR)
+        FallbackFontService.instance.addMissingCodePoints(<int>[0x4E00, 0x1100]);
+        await FallbackFontService.instance.waitForIdle();
+
+        // Only the monolithic font should have been requested. No split slices should be requested.
+        expect(requestedUrls, hasLength(1));
+        expect(requestedUrls.single, isNot(contains('.0.woff2')));
+        expect(requestedUrls.single, isNot(contains('.1.woff2')));
+
+        final List<String> loadedFamilies = mockRegistry.loadedFonts.keys.toList();
+        expect(loadedFamilies, contains('Noto Sans KR'));
+        expect(loadedFamilies, isNot(contains('Noto Sans KR 0')));
+      },
+    );
   });
 }

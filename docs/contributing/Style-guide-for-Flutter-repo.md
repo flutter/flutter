@@ -596,13 +596,13 @@ By definition, if they are looking at the documentation, they are not finding it
 
 Sample code helps developers learn your API quickly. Writing sample code also helps you think through how your API is going to be used by app developers.
 
-Sample code should go in a documentation comment that typically begins with `/// {@tool dartpad}`, and ends with `/// {@end-tool}`, with the example source and corresponding tests placed in a file under [the API examples directory](https://github.com/flutter/flutter/blob/main/examples/api). This will then be checked by automated tools, and formatted for display on the API documentation web site [api.flutter.dev](https://api.flutter.dev). For details on how to write sample code, see [the API example documentation](https://github.com/flutter/flutter/blob/main/examples/api/README.md#authoring).
+Sample code should go in a documentation comment that typically begins with `/// {@tool dartpad}`, and ends with `/// {@end-tool}`, with the example source and corresponding tests placed in a file under [the API examples directory](https://github.com/flutter/flutter/blob/main/packages/flutter/examples/api). This will then be checked by automated tools, and formatted for display on the API documentation web site [api.flutter.dev](https://api.flutter.dev). For details on how to write sample code, see [the API example documentation](https://github.com/flutter/flutter/blob/main/packages/flutter/examples/api/README.md#authoring).
 
 #### Provide full application samples.
 
 Our UX research has shown that developers prefer to see examples that are in the context of an entire app. So, whenever it makes sense, provide an example that can be presented as part of an entire application instead of just a snippet that uses the `{@tool snippet}` or &#96;&#96;&#96;dart ... &#96;&#96;&#96; indicators.
 
-An application sample can be created using the `{@tool dartpad}` ... `{@end-tool}` or `{@tool sample}` ... `{@end-tool}` dartdoc indicators. See [here](https://github.com/flutter/flutter/blob/main/examples/api/README.md#authoring) for more details about writing these kinds of examples.
+An application sample can be created using the `{@tool dartpad}` ... `{@end-tool}` or `{@tool sample}` ... `{@end-tool}` dartdoc indicators. See [here](https://github.com/flutter/flutter/blob/main/packages/flutter/examples/api/README.md#authoring) for more details about writing these kinds of examples.
 
 Dartpad examples (those using the dartdoc `{@tool dartpad}` indicator) will be presented on the [API documentation website](https://api.flutter.dev) as an in-page executable and editable example. This allows developers to interact with the example right there on the page, and is the preferred form of example. Here is [one such example](https://api.flutter.dev/flutter/widgets/AnimatedSwitcher-class.html#widgets.AnimatedSwitcher.1).
 

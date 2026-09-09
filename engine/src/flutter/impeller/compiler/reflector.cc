@@ -155,6 +155,36 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
     root["header_file_name"] = options_.header_file_name;
   }
 
+  // Compute shader workgroup (threadgroup) size. A value of 0 in any dimension
+  // means that dimension is sized by a specialization constant and is resolved
+  // by the backend at pipeline creation (for example, to the device maximum).
+  // Only meaningful for compute shaders.
+  {
+    uint32_t workgroup_size_x = 0u;
+    uint32_t workgroup_size_y = 0u;
+    uint32_t workgroup_size_z = 0u;
+    if (execution_model == spv::ExecutionModel::ExecutionModelGLCompute) {
+      spirv_cross::SpecializationConstant spec_x, spec_y, spec_z;
+      compiler_->get_work_group_size_specialization_constants(spec_x, spec_y,
+                                                              spec_z);
+      const auto local_size = [&](spirv_cross::SpecializationConstant& spec,
+                                  uint32_t index) -> uint32_t {
+        // A non-zero id means this dimension is driven by a specialization
+        // constant; leave it as the runtime-resolved sentinel of 0.
+        return spec.id != 0
+                   ? 0u
+                   : compiler_->get_execution_mode_argument(
+                         spv::ExecutionMode::ExecutionModeLocalSize, index);
+      };
+      workgroup_size_x = local_size(spec_x, 0u);
+      workgroup_size_y = local_size(spec_y, 1u);
+      workgroup_size_z = local_size(spec_z, 2u);
+    }
+    root["workgroup_size_x"] = workgroup_size_x;
+    root["workgroup_size_y"] = workgroup_size_y;
+    root["workgroup_size_z"] = workgroup_size_z;
+  }
+
   const auto shader_resources = compiler_->get_shader_resources();
 
   // Subpass Inputs.

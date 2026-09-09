@@ -1406,6 +1406,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     } else if (_semanticsOwner != null) {
       _semanticsOwner?.dispose();
       _semanticsOwner = null;
+      // Deferred updates would otherwise retain their render objects until
+      // this owner is disposed; re-enabling semantics rebuilds from scratch.
+      _deferredNodesNeedingSemanticsGeometryUpdate.clear();
       onSemanticsOwnerDisposed?.call();
     }
   }
@@ -1434,6 +1437,15 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// Compare to [_nodesNeedingSemanticsUpdate], which tracks semantics boundaries of dirty nodes,
   /// this set only tracks the dirty nodes that need their semantics geometry updated directly.
   final Set<RenderObject> _nodesNeedingSemanticsGeometryUpdate = <RenderObject>{};
+
+  /// Nodes whose geometry update was skipped by [flushSemantics] because they
+  /// were not part of the semantics tree at the time, e.g. their branch was
+  /// blocked by [BlockSemantics].
+  ///
+  /// A blocked node can still move, so the update is retried on every flush
+  /// instead of dropped; otherwise the node would rejoin the tree with stale
+  /// geometry.
+  final Set<RenderObject> _deferredNodesNeedingSemanticsGeometryUpdate = <RenderObject>{};
 
   /// Update the semantics for render objects marked as needing a semantics
   /// update.
@@ -1506,12 +1518,30 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       // It is possible the updateChildren above caused some nodes to be added
       // to _nodesNeedingSemanticsGeometryUpdate. Therefore, we need to
       // process them here.
-      final List<RenderObject> nodesToProcessGeometry = _nodesNeedingSemanticsGeometryUpdate
-          .where(
-            (RenderObject object) =>
-                !object._needsLayout && object.owner == this && !object._semantics.parentDataDirty,
-          )
-          .toList();
+      //
+      // Deferred geometry updates are retried as well; if their branch
+      // rejoined the tree in the updateChildren phase above, they can now be
+      // applied.
+      if (_deferredNodesNeedingSemanticsGeometryUpdate.isNotEmpty) {
+        _nodesNeedingSemanticsGeometryUpdate.addAll(_deferredNodesNeedingSemanticsGeometryUpdate);
+        _deferredNodesNeedingSemanticsGeometryUpdate.clear();
+      }
+      final nodesToProcessGeometry = <RenderObject>[];
+      for (final RenderObject object in _nodesNeedingSemanticsGeometryUpdate) {
+        if (object._needsLayout || object.owner != this) {
+          // A node that still needs layout marks itself again after its next
+          // layout; a node that left this owner no longer needs the update.
+          continue;
+        }
+        if (object._semantics.parentDataDirty) {
+          // Not part of the semantics tree right now (e.g. blocked by
+          // BlockSemantics), but the node may still move. Defer the update
+          // until the branch rejoins instead of dropping it.
+          _deferredNodesNeedingSemanticsGeometryUpdate.add(object);
+          continue;
+        }
+        nodesToProcessGeometry.add(object);
+      }
       _nodesNeedingSemanticsGeometryUpdate.clear();
 
       // For every node in this list, needs to clear geometry immediate _RenderObjectSemantics
@@ -1818,6 +1848,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
     _nodesNeedingCompositingBitsUpdate.clear();
     _nodesNeedingPaint.clear();
     _nodesNeedingSemanticsUpdate.clear();
+    _deferredNodesNeedingSemanticsGeometryUpdate.clear();
   }
 }
 
@@ -2178,7 +2209,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     markNeedsSemanticsUpdate();
     child._parent = this;
     if (attached) {
-      child.attach(_owner!);
+      child.attach(owner!);
     }
     redepthChild(child);
   }
@@ -2299,6 +2330,32 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   bool _debugMutationsLocked = false;
 
+  // Returns the closest ancestor that determines whether this RenderObject is
+  // currently allowed to mutate, and a boolean indicating whether this
+  // RenderObject is allowed to mutate.
+  //
+  // This method must only be called during layout, as mutations are always
+  // allowed before layout. A null return value indicates another render subtree
+  // is actively performing layout and, in the process, illegally mutating this
+  // RenderObject's subtree.
+  (RenderObject, bool)? get _debugClosestMutationRoot {
+    return switch (this) {
+      // This subtree is being mutated in a layout callback.
+      RenderObject(_doingThisLayoutWithCallback: true) => (this, true),
+      // A different part of the render tree is doing a layout callback,
+      // and this subtree is being reparented there, due to global key
+      // reparenting.
+      RenderObject(
+        owner: PipelineOwner(_debugAllowMutationsToDirtySubtrees: true),
+        _needsLayout: true,
+      ) =>
+        (this, true),
+      // This is the node currently doing layout.
+      RenderObject(_debugMutationsLocked: true) => (this, false),
+      RenderObject() => debugLayoutParent?._debugClosestMutationRoot,
+    };
+  }
+
   /// Whether tree mutations are currently permitted.
   ///
   /// This is only useful during layout. One should also not mutate the tree at
@@ -2307,7 +2364,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   ///
   /// Only valid when asserts are enabled. This will throw in release builds.
   bool get _debugCanPerformMutations {
-    late bool result;
+    late bool isMutationAllowed;
     assert(() {
       if (_debugDisposed) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -2325,40 +2382,22 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       // check will be performed when they re-attach. This assert is only useful
       // during layout.
       if (owner == null || !owner.debugDoingLayout) {
-        result = true;
+        isMutationAllowed = true;
         return true;
       }
 
-      RenderObject? activeLayoutRoot = this;
-      while (activeLayoutRoot != null) {
-        final bool mutationsToDirtySubtreesAllowed =
-            activeLayoutRoot.owner?._debugAllowMutationsToDirtySubtrees ?? false;
-        final bool doingLayoutWithCallback = activeLayoutRoot._doingThisLayoutWithCallback;
-        // Mutations on this subtree is allowed when:
-        // - the "activeLayoutRoot" subtree is being mutated in a layout callback.
-        // - a different part of the render tree is doing a layout callback,
-        //   and this subtree is being reparented to that subtree, as a result
-        //   of global key reparenting.
-        if (doingLayoutWithCallback ||
-            mutationsToDirtySubtreesAllowed && activeLayoutRoot._needsLayout) {
-          result = true;
-          return true;
-        }
-
-        if (!activeLayoutRoot._debugMutationsLocked) {
-          activeLayoutRoot = activeLayoutRoot.debugLayoutParent;
-        } else {
-          // activeLayoutRoot found.
-          break;
-        }
+      final RenderObject? activeLayoutRoot;
+      // If there is no mutation root, this subtree is likely being mutated by a different subtree
+      // which is not allowed.
+      (activeLayoutRoot, isMutationAllowed) = _debugClosestMutationRoot ?? (null, false);
+      if (isMutationAllowed) {
+        return true;
       }
-
       final RenderObject debugActiveLayout = RenderObject.debugActiveLayout!;
       final culpritMethodName = debugActiveLayout.debugDoingThisLayout
           ? 'performLayout'
           : 'performResize';
       final culpritFullMethodName = '${debugActiveLayout.runtimeType}.$culpritMethodName';
-      result = false;
 
       if (activeLayoutRoot == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -2426,7 +2465,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         ),
       ]);
     }());
-    return result;
+    return isMutationAllowed;
   }
 
   /// The [RenderObject] that's expected to call [layout] on this [RenderObject]
@@ -2460,10 +2499,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   /// Whether the render tree this render object belongs to is attached to a [PipelineOwner].
   ///
-  /// This becomes true during the call to [attach].
-  ///
-  /// This becomes false during the call to [detach].
-  bool get attached => _owner != null;
+  /// This becomes true during the call to [attach], and becomes false during the call to [detach].
+  @nonVirtual
+  bool get attached => owner != null;
 
   /// Mark this render object as attached to the given owner.
   ///
@@ -2565,6 +2603,16 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   bool? _isRelayoutBoundary;
 
   /// Whether [invokeLayoutCallback] for this render object is currently running.
+  ///
+  /// Layout callbacks are a special part of this render object's layout phase:
+  /// they are allowed to mutate child lists and dirty render subtrees while the
+  /// callback is executing. This flag lets debug-only assertions distinguish
+  /// that special callback phase from the regular [performLayout] body.
+  ///
+  /// This does not imply that a widget rebuild is currently in progress. A
+  /// layout callback can trigger rebuild work by mutating the render or element
+  /// tree, but this flag only describes the synchronous callback passed to
+  /// [invokeLayoutCallback].
   bool get debugDoingThisLayoutWithCallback => _doingThisLayoutWithCallback;
   bool _doingThisLayoutWithCallback = false;
 
@@ -5310,6 +5358,7 @@ final class _SemanticsParentData {
         other.blocksUserActions == blocksUserActions &&
         other.explicitChildNodes == explicitChildNodes &&
         other.localeForChildren == localeForChildren &&
+        other.accessibilityFocusBlockType == accessibilityFocusBlockType &&
         setEquals<SemanticsTag>(other.tagsForChildren, tagsForChildren);
   }
 
@@ -5320,6 +5369,7 @@ final class _SemanticsParentData {
       blocksUserActions,
       explicitChildNodes,
       localeForChildren,
+      accessibilityFocusBlockType,
       Object.hashAllUnordered(tagsForChildren ?? const <SemanticsTag>{}),
     );
   }
@@ -5870,6 +5920,10 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         // Frame 2: B is marked dirty again and decide C should be included
         // in the semantics tree. We will run into this situation where C's geometry
         // is dirty but it is not in the _nodesNeedingSemanticsGeometryUpdate.
+        //
+        // A node that moved while its branch was blocked has stale, not
+        // dirty, geometry, so this check misses it. That case is covered by
+        // PipelineOwner._deferredNodesNeedingSemanticsGeometryUpdate.
         if (childSemantics.geometryDirty) {
           renderObject.owner!._nodesNeedingSemanticsGeometryUpdate.add(childSemantics.renderObject);
         }
@@ -6069,9 +6123,13 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     if (parentData == newParentData) {
       return;
     }
+    final bool wasParentDataDirty = parentDataDirty;
     // Parent data changes may result in node formation changes.
     markNeedsBuild();
     parentData = newParentData;
+    if (wasParentDataDirty) {
+      geometry = null;
+    }
     updateChildren();
   }
 
@@ -6381,7 +6439,9 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
             node.tags!.addAll(tags);
           }
         }
-        node.isMergedIntoParent = parentData?.mergeIntoParent ?? false;
+        node.isMergedIntoParent =
+            configProvider.effective.isMergingSemanticsOfDescendants ||
+            (parentData?.mergeIntoParent ?? false);
       }
     }
     _updateSiblingNodesGeometries();

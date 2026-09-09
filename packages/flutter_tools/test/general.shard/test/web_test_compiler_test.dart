@@ -60,7 +60,7 @@ void main() {
           '--filesystem-scheme',
           'org-dartlang-app',
           '--initialize-from-dill',
-          'build/cache.dill',
+          'build/471e67e273aac2e3e05542afef95ef7f.cache.dill',
           '--platform',
           'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
           '--verbosity=error',

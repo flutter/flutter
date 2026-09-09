@@ -33,16 +33,10 @@ class BotDetector {
         // When set, GA logs to a local file (normally for tests) so we don't need to filter.
         ||
         _platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')) {
-      _persistentToolState.setIsRunningOnBot(false);
       return false;
     }
 
-    if (_persistentToolState.isRunningOnBot != null) {
-      return _persistentToolState.isRunningOnBot!;
-    }
-
-    final bool result =
-        _platform.environment['BOT'] == 'true'
+    if (_platform.environment['BOT'] == 'true'
         // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
         ||
         _platform.environment['TRAVIS'] == 'true' ||
@@ -72,10 +66,17 @@ class BotDetector {
         // Property when running on borg.
         ||
         _platform.environment.containsKey('BORG_ALLOC_DIR')
-        // Property when running on Azure.
+        // https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
         ||
-        await _azureDetector.isRunningOnAzure;
+        _platform.environment.containsKey('TF_BUILD')) {
+      return true;
+    }
 
+    if (_persistentToolState.isRunningOnBot != null) {
+      return _persistentToolState.isRunningOnBot!;
+    }
+
+    final bool result = await _azureDetector.isRunningOnAzure;
     _persistentToolState.setIsRunningOnBot(result);
     return result;
   }
@@ -107,22 +108,17 @@ class AzureDetector {
           .timeout(requestTimeout);
       request.headers.add('Metadata', true);
       await request.close();
-    } on SocketException {
-      // If there is an error on the socket, it probably means that we are not
-      // running on Azure.
-      return _isRunningOnAzure = false;
     } on HttpException {
-      // If the connection gets set up, but encounters an error condition, it
-      // still means we're on Azure.
+      // The connection was established but an HTTP error occurred.
+      // This still indicates we're running on Azure.
       return _isRunningOnAzure = true;
-    } on TimeoutException {
-      // The HttpClient connected to a host, but it did not respond in a timely
-      // fashion. Assume we are not on a bot.
-      return _isRunningOnAzure = false;
-    } on OSError {
-      // The HttpClient might be running in a WSL1 environment.
+    } on Object {
+      // Metadata detection is best-effort. Any other failure (socket errors,
+      // timeouts, malformed redirect URIs, WSL1 networking issues, etc.)
+      // should not prevent Flutter from starting.
       return _isRunningOnAzure = false;
     }
+
     // We got a response. We're running on Azure.
     return _isRunningOnAzure = true;
   }

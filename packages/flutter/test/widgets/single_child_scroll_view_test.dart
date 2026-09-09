@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 import 'editable_text_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 class TestScrollPosition extends ScrollPositionWithSingleContext {
   TestScrollPosition({
@@ -1085,5 +1084,16 @@ void main() {
     await tester.drag(finder, const Offset(0.0, -40.0));
     await tester.pumpAndSettle();
     expect(textField.focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('SingleChildScrollView does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(child: SingleChildScrollView(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(SingleChildScrollView)), Size.zero);
   });
 }

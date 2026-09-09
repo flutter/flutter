@@ -203,7 +203,6 @@ static std::optional<Entity> AdvancedBlend(
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
             dst_snapshot->sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
-    frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
     blend_info.dst_input_alpha =
         absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
             ? dst_snapshot->opacity
@@ -223,7 +222,6 @@ static std::optional<Entity> AdvancedBlend(
       blend_info.color_factor = 0;
       blend_info.src_input_alpha = src_snapshot->opacity;
       FS::BindTextureSamplerSrc(pass, src_snapshot->texture, src_sampler);
-      frame_info.src_y_coord_scale = src_snapshot->texture->GetYCoordScale();
     }
     auto blend_uniform = data_host_buffer.EmplaceUniform(blend_info);
     FS::BindBlendInfo(pass, blend_uniform);
@@ -370,7 +368,6 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
             dst_snapshot->sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
-    frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
 
     frame_info.mvp = Entity::GetShaderTransform(
         entity.GetShaderClipDepth(), pass,
@@ -472,8 +469,6 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
             dst_snapshot->sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
-    frame_info.texture_sampler_y_coord_scale =
-        dst_snapshot->texture->GetYCoordScale();
 
     frag_info.input_alpha_output_alpha_tmx_tmy =
         Vector4(absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
@@ -573,8 +568,6 @@ static std::optional<Entity> PipelineBlend(
       frame_info.mvp = pass.GetOrthographicTransform() *
                        Matrix::MakeTranslation(-subpass_coverage.GetOrigin()) *
                        input->transform;
-      frame_info.texture_sampler_y_coord_scale =
-          input->texture->GetYCoordScale();
 
       FS::FragInfo frag_info;
       frag_info.alpha =
@@ -704,8 +697,6 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
 
       VS::FrameInfo frame_info;
       frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-      frame_info.texture_sampler_y_coord_scale =
-          dst_snapshot->texture->GetYCoordScale();
 
       FS::FragInfo frag_info;
       frag_info.alpha = 1.0;
@@ -838,7 +829,6 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       FS::BindTextureSamplerSrc(pass, src_texture, src_sampler);
 
       frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-      frame_info.src_y_coord_scale = src_texture->GetYCoordScale();
       VS::BindFrameInfo(pass, data_host_buffer.EmplaceUniform(frame_info));
 
       frag_info.src_input_alpha = 1.0;

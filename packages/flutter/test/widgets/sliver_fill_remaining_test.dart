@@ -5,11 +5,11 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
-import 'widgets_app_tester.dart';
 
 const Color _debugRed = Color(0xFFFF0000);
 
@@ -587,6 +587,199 @@ void main() {
               find.byKey(const ValueKey<String>('fill')),
             );
             expect(box3.size.height, equals(450));
+          },
+          variant: const TargetPlatformVariant(<TargetPlatform>{
+            TargetPlatform.iOS,
+            TargetPlatform.macOS,
+          }),
+        );
+
+        testWidgets(
+          'child stretches into overscroll that exceeds precedingScrollExtent',
+          (WidgetTester tester) async {
+            // Regression test for https://github.com/flutter/flutter/issues/141077.
+            final controller = ScrollController();
+            addTearDown(controller.dispose);
+            final slivers = <Widget>[
+              sliverBox,
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                fillOverscroll: true,
+                child: SizedBox.expand(
+                  child: ColoredBox(key: ValueKey<String>('fill'), color: _debugRed),
+                ),
+              ),
+            ];
+            await tester.pumpWidget(boilerplate(slivers, controller: controller));
+            expect(
+              tester.getRect(find.byKey(const ValueKey<String>('fill'))),
+              const Rect.fromLTRB(0.0, 150.0, 800.0, 600.0),
+            );
+
+            // Overscroll by 200: the preceding box frees up 150 of paint room
+            // and the remaining 50 become this sliver's scrollOffset.
+            controller.jumpTo(200.0);
+            await tester.pump();
+
+            final Rect rect = tester.getRect(find.byKey(const ValueKey<String>('fill')));
+            expect(rect.bottom, 600.0);
+            expect(rect.height, 650.0);
+
+            controller.jumpTo(0.0);
+            await tester.pump();
+            expect(
+              tester.getRect(find.byKey(const ValueKey<String>('fill'))),
+              const Rect.fromLTRB(0.0, 150.0, 800.0, 600.0),
+            );
+          },
+          variant: const TargetPlatformVariant(<TargetPlatform>{
+            TargetPlatform.iOS,
+            TargetPlatform.macOS,
+          }),
+        );
+
+        testWidgets(
+          'lone child stretches to cover the whole overscroll',
+          (WidgetTester tester) async {
+            // Regression test for https://github.com/flutter/flutter/issues/141077.
+            final controller = ScrollController();
+            addTearDown(controller.dispose);
+            final slivers = <Widget>[
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                fillOverscroll: true,
+                child: SizedBox.expand(
+                  child: ColoredBox(key: ValueKey<String>('fill'), color: _debugRed),
+                ),
+              ),
+            ];
+            await tester.pumpWidget(boilerplate(slivers, controller: controller));
+            expect(
+              tester.getRect(find.byKey(const ValueKey<String>('fill'))),
+              const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            );
+
+            controller.jumpTo(50.0);
+            await tester.pump();
+
+            final Rect rect = tester.getRect(find.byKey(const ValueKey<String>('fill')));
+            expect(rect.bottom, 600.0);
+            expect(rect.height, 650.0);
+
+            controller.jumpTo(0.0);
+            await tester.pump();
+            expect(
+              tester.getRect(find.byKey(const ValueKey<String>('fill'))),
+              const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            );
+          },
+          variant: const TargetPlatformVariant(<TargetPlatform>{
+            TargetPlatform.iOS,
+            TargetPlatform.macOS,
+          }),
+        );
+
+        testWidgets(
+          'child in a reversed scroll view stretches towards the leading edge',
+          (WidgetTester tester) async {
+            // Regression test for https://github.com/flutter/flutter/issues/141077.
+            final controller = ScrollController();
+            addTearDown(controller.dispose);
+            await tester.pumpWidget(
+              TestWidgetsApp(
+                home: CustomScrollView(
+                  reverse: true,
+                  controller: controller,
+                  slivers: const <Widget>[
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      fillOverscroll: true,
+                      child: SizedBox.expand(
+                        child: ColoredBox(key: ValueKey<String>('fill'), color: _debugRed),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+            expect(
+              tester.getRect(find.byKey(const ValueKey<String>('fill'))),
+              const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            );
+
+            controller.jumpTo(50.0);
+            await tester.pump();
+
+            final Rect rect = tester.getRect(find.byKey(const ValueKey<String>('fill')));
+            expect(rect.top, 0.0);
+            expect(rect.height, 650.0);
+
+            // The stretched region hit tests to the child, matching where it
+            // is painted.
+            final HitTestResult hitTestResult = tester.hitTestOnBinding(const Offset(400.0, 25.0));
+            expect(
+              hitTestResult.path.any(
+                (HitTestEntry entry) =>
+                    entry.target == tester.renderObject(find.byKey(const ValueKey<String>('fill'))),
+              ),
+              isTrue,
+            );
+
+            controller.jumpTo(0.0);
+            await tester.pump();
+            expect(
+              tester.getRect(find.byKey(const ValueKey<String>('fill'))),
+              const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            );
+          },
+          variant: const TargetPlatformVariant(<TargetPlatform>{
+            TargetPlatform.iOS,
+            TargetPlatform.macOS,
+          }),
+        );
+
+        testWidgets(
+          'child in a reversed horizontal scroll view stretches towards the leading edge',
+          (WidgetTester tester) async {
+            // Regression test for https://github.com/flutter/flutter/issues/141077.
+            final controller = ScrollController();
+            addTearDown(controller.dispose);
+            await tester.pumpWidget(
+              TestWidgetsApp(
+                home: CustomScrollView(
+                  scrollDirection: Axis.horizontal,
+                  reverse: true,
+                  controller: controller,
+                  slivers: const <Widget>[
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      fillOverscroll: true,
+                      child: SizedBox.expand(
+                        child: ColoredBox(key: ValueKey<String>('fill'), color: _debugRed),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+            expect(
+              tester.getRect(find.byKey(const ValueKey<String>('fill'))),
+              const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            );
+
+            controller.jumpTo(50.0);
+            await tester.pump();
+
+            final Rect rect = tester.getRect(find.byKey(const ValueKey<String>('fill')));
+            expect(rect.left, 0.0);
+            expect(rect.width, 850.0);
+
+            controller.jumpTo(0.0);
+            await tester.pump();
+            expect(
+              tester.getRect(find.byKey(const ValueKey<String>('fill'))),
+              const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            );
           },
           variant: const TargetPlatformVariant(<TargetPlatform>{
             TargetPlatform.iOS,

@@ -45,7 +45,13 @@ void main() {
     final ProcessResult result = await Process.run(
       _kMacosAssemblePath,
       <String>[],
-      environment: <String, String>{'CONFIGURATION': 'Custom'},
+      environment: <String, String>{
+        'CONFIGURATION': 'Custom',
+        'FLUTTER_ROOT': '../..',
+        'FLUTTER_BUILD_DIR': 'build',
+        'FLUTTER_BUILD_NAME': '1.0.0',
+        'FLUTTER_BUILD_NUMBER': '1',
+      },
     );
     expect(result.stderr, contains('ERROR: Unknown FLUTTER_BUILD_MODE: custom.'));
     expect(

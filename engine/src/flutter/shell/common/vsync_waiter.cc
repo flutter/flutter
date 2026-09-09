@@ -94,7 +94,7 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
 
   {
     std::scoped_lock lock(callback_mutex_);
-    callback = std::move(callback_);
+    callback_.swap(callback);
     for (auto& pair : secondary_callbacks_) {
       secondary_callbacks.push_back(std::move(pair.second));
     }

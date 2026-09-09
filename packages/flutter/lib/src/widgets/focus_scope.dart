@@ -16,9 +16,12 @@ library;
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
+import 'container.dart';
+import 'debug.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
+import 'transitions.dart';
 
 /// A widget that manages a [FocusNode] to allow keyboard focus to be given
 /// to this widget and its descendants.
@@ -286,6 +289,7 @@ class Focus extends StatefulWidget {
   bool get canRequestFocus => _canRequestFocus ?? focusNode?.canRequestFocus ?? true;
   final bool? _canRequestFocus;
 
+  /// {@template flutter.widgets.Focus.skipTraversal}
   /// Sets the [FocusNode.skipTraversal] flag on the focus node so that it won't
   /// be visited by the [FocusTraversalPolicy].
   ///
@@ -295,6 +299,7 @@ class Focus extends StatefulWidget {
   /// This is different from [FocusNode.canRequestFocus] because it only implies
   /// that the widget can't be reached via traversal, not that it can't be
   /// focused. It may still be focused explicitly.
+  /// {@endtemplate}
   bool get skipTraversal => _skipTraversal ?? focusNode?.skipTraversal ?? false;
   final bool? _skipTraversal;
 
@@ -728,6 +733,12 @@ class _FocusState extends State<Focus> {
         child: widget.child,
       );
     }
+    assert(() {
+      if (debugPaintFocusBoxes) {
+        child = _DebugFocusBorder(node: focusNode, child: child);
+      }
+      return true;
+    }());
     return _FocusInheritedScope(node: focusNode, child: child);
   }
 }
@@ -893,6 +904,43 @@ class _FocusScopeState extends _FocusState {
       result = Semantics(explicitChildNodes: true, child: result);
     }
     return result;
+  }
+}
+
+/// Wraps a child with a colored border indicating the focus state of the node.
+/// Only used when [debugPaintFocusBoxes] is true.
+class _DebugFocusBorder extends StatelessWidget {
+  const _DebugFocusBorder({required this.node, required this.child});
+
+  final FocusNode node;
+  final Widget child;
+
+  Color get _borderColor {
+    if (node.hasPrimaryFocus) {
+      return const Color(0xF000FF00);
+    } else if (node.hasFocus) {
+      return const Color(0xF00000FF);
+    } else if (!node.canRequestFocus) {
+      return const Color(0xF0FF0000);
+    } else if (node.skipTraversal) {
+      return const Color(0xF0FFFF00);
+    } else {
+      return const Color(0xF000FFFF);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: node,
+      builder: (BuildContext context, _) {
+        return DecoratedBox(
+          decoration: BoxDecoration(border: Border.all(color: _borderColor, width: 3.0)),
+          position: DecorationPosition.foreground,
+          child: child,
+        );
+      },
+    );
   }
 }
 

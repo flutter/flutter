@@ -1,11 +1,11 @@
 name: record_use_test_app
-description: A new Flutter application project.
+description: An integration test app for testing Record Use in both link hooks and icon tree shaking.
 version: 0.0.1
 publish_to: none
 
 resolution: workspace
 environment:
-  sdk: ^3.13.0-0
+  sdk: '>=3.5.0-0 <4.0.0'
 
 dependencies:
   flutter:

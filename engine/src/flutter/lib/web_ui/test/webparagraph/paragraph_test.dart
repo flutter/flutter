@@ -1046,37 +1046,41 @@ Future<void> testMain() async {
 
   test('Paragraph with different locales for the same language', () async {
     final recorder = PictureRecorder();
-    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    const region = Rect.fromLTWH(0, 0, 1000, 400);
     final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
 
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Noto Sans', fontSize: 20);
-    final styleCN = WebTextStyle(locale: const Locale('zh', 'CN'));
-    final styleTW = WebTextStyle(locale: const Locale('zh', 'TW'));
-    final styleHK = WebTextStyle(locale: const Locale('zh', 'HK'));
-    final styleJP = WebTextStyle(locale: const Locale('ja', 'JP'));
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 40);
+    final noLocaleStyle = WebTextStyle();
+    final localeStyles = [
+      WebTextStyle(locale: const Locale('zh', 'CN')),
+      WebTextStyle(locale: const Locale('zh', 'TW')),
+      WebTextStyle(locale: const Locale('zh', 'HK')),
+      WebTextStyle(locale: const Locale('ja', 'JP')),
+    ];
     const text = 'Command 刃';
 
     final builder = WebParagraphBuilder(paragraphStyle);
-    builder.pushStyle(styleCN);
-    builder.addText('$text in ${styleCN.locale?.languageCode}-${styleCN.locale?.countryCode}.\n');
+    builder.pushStyle(noLocaleStyle);
+    builder.addText('$text with no specified locale.\n');
     builder.pop();
-    builder.pushStyle(styleTW);
-    builder.addText('$text in ${styleTW.locale?.languageCode}-${styleTW.locale?.countryCode}.\n');
-    builder.pop();
-    builder.pushStyle(styleJP);
-    builder.addText('$text in ${styleJP.locale?.languageCode}-${styleJP.locale?.countryCode}.\n');
-    builder.pop();
-
-    builder.pushStyle(styleHK);
-    builder.addText('$text in ${styleHK.locale?.languageCode}-${styleHK.locale?.countryCode}.');
-    builder.pop();
+    for (final style in localeStyles) {
+      builder.pushStyle(style);
+      builder.addText('$text in ${style.locale?.languageCode}-${style.locale?.countryCode}.\n');
+      builder.pop();
+    }
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 500));
-    paragraph.paint(canvas, const Offset(100, 100));
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    final double fullWidth = paragraph.maxIntrinsicWidth;
+    paragraph.layout(ParagraphConstraints(width: fullWidth));
+    const offset = Offset(20, 20);
+    paragraph.paint(canvas, offset);
 
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph.locales.png', region: region);
+    await matchGoldenFile(
+      'web_paragraph.locales.png',
+      region: Rect.fromLTWH(offset.dx, offset.dy, fullWidth, paragraph.height).inflate(20.0),
+    );
   });
 
   test('NoHeightMultiplier', () async {
@@ -1264,4 +1268,99 @@ Future<void> testMain() async {
       ),
     );
   });
+
+  test('fallback fonts', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 800, 200);
+    final canvas = Canvas(recorder, region);
+
+    const colorText = 'Arial | Γειά σου Κόσμε';
+    const monoText = 'Times New Roman | Γειά σου Κόσμε';
+
+    final colorBuilder = ParagraphBuilder(ParagraphStyle(fontSize: 30));
+    colorBuilder.pushStyle(
+      TextStyle(
+        fontFamily: 'Non-existing Font',
+        fontFamilyFallback: const ['Arial', 'sans-serif'],
+        color: const Color(0xFF000000),
+      ),
+    );
+    colorBuilder.addText(colorText);
+    final Paragraph colorParagraph = colorBuilder.build();
+    colorParagraph.layout(const ParagraphConstraints(width: 800));
+    canvas.drawParagraph(colorParagraph, const Offset(20, 50));
+
+    final monoBuilder = ParagraphBuilder(ParagraphStyle(fontSize: 30));
+    monoBuilder.pushStyle(
+      TextStyle(
+        fontFamily: 'Non-existing Font',
+        fontFamilyFallback: const ['Times New Roman', 'serif'],
+        color: const Color(0xFF000000),
+      ),
+    );
+    monoBuilder.addText(monoText);
+    final Paragraph monoParagraph = monoBuilder.build();
+    monoParagraph.layout(const ParagraphConstraints(width: 800));
+    canvas.drawParagraph(monoParagraph, const Offset(20, 100));
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph.fallback_fonts.png', region: region);
+  });
+
+  test('WebParagraph correctly handles fractional devicePixelRatio', () {
+    final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
+    try {
+      for (final dpr in <double>[1.5, 2.0, 2.5]) {
+        EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
+
+        final arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+        final builder = WebParagraphBuilder(arialStyle);
+        builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
+        builder.addText('Fractional DPR text');
+        final WebParagraph paragraph = builder.build();
+        paragraph.layout(const ParagraphConstraints(width: double.infinity));
+
+        final mockCanvas = _MockCanvas();
+        const offset = Offset(10.25, 20.75); // Subpixel offset
+        paragraph.paint(mockCanvas, offset);
+
+        final Rect? sourceRect = mockCanvas.lastSourceRect;
+        final Rect? targetRect = mockCanvas.lastTargetRect;
+
+        expect(sourceRect, isNotNull);
+        expect(targetRect, isNotNull);
+
+        // Verify sourceRect dimensions are exact integers (physical pixels rounded up via ceilToDouble)
+        expect(sourceRect!.width % 1.0, 0.0);
+        expect(sourceRect.height % 1.0, 0.0);
+
+        // Verify targetRect dimensions perfectly map to sourceRect without being forced to integer values
+        expect(targetRect!.width, closeTo(sourceRect.width / dpr, 0.0001));
+        expect(targetRect.height, closeTo(sourceRect.height / dpr, 0.0001));
+
+        // Verify subpixel position precision
+        expect(targetRect.left, closeTo(offset.dx + paragraph.paintBounds.left, 0.0001));
+        expect(targetRect.top, closeTo(offset.dy + paragraph.paintBounds.top, 0.0001));
+      }
+    } finally {
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
+    }
+  });
+}
+
+class _MockCanvas implements Canvas {
+  Rect? lastSourceRect;
+  Rect? lastTargetRect;
+
+  @override
+  void drawImageRect(Image image, Rect src, Rect dst, Paint paint) {
+    lastSourceRect = src;
+    lastTargetRect = dst;
+  }
+
+  @override
+  void drawRect(Rect rect, Paint paint) {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }

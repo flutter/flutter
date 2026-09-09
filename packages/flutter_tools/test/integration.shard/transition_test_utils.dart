@@ -185,7 +185,10 @@ Future<ProcessTestResult> runFlutter(
   final clock = Stopwatch()..start();
   final Process process = await processManager.start(<String>[
     // In a container with no X display, use the virtual framebuffer.
-    if (platform.isLinux && (platform.environment['DISPLAY'] ?? '').isEmpty) '/usr/bin/xvfb-run',
+    if (platform.isLinux && (platform.environment['DISPLAY'] ?? '').isEmpty) ...<String>[
+      '/usr/bin/xvfb-run',
+      '-a',
+    ],
     flutterBin,
     ...arguments,
   ], workingDirectory: workingDirectory);
@@ -322,6 +325,12 @@ Future<ProcessTestResult> runFlutter(
               inLog.printClearly();
             }
             process.stdin.write('q');
+            // Start a timer to kill the process if it still hasn't exited after 5 seconds.
+            final timer = Timer(const Duration(seconds: 5), () {
+              debugPrint('${stamp()} (process still did not quit, killing forcefully)');
+              process.kill(ProcessSignal.sigkill);
+            });
+            process.exitCode.whenComplete(timer.cancel);
             return -1; // discarded
           },
         )

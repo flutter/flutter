@@ -2,9 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#import <OCMock/OCMock.h>
 #import <XCTest/XCTest.h>
 
+#include <memory>
+
+#include "flutter/common/task_runners.h"
+#include "flutter/fml/message_loop.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
+
+namespace {
+
+flutter::TaskRunners CreateTestTaskRunners() {
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  fml::RefPtr<fml::TaskRunner> task_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  return flutter::TaskRunners("VsyncWaiterIOSTest", task_runner, task_runner, task_runner,
+                              task_runner);
+}
+
+}  // namespace
 
 @interface VsyncWaiterIOSTest : XCTestCase
 @end
@@ -40,6 +57,45 @@
 
   snapped = flutter::VsyncWaiterIOS::SnapDuration(-1.0, -10.0);
   XCTAssertEqualWithAccuracy(snapped, 1.0 / 60.0, 0.0001);
+}
+
+- (void)testConstructorUsesInjectedDisplayLinkManagerRefreshRate {
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
+  double maxFrameRate = 120;
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+
+  flutter::TaskRunners taskRunners = CreateTestTaskRunners();
+  auto waiter = std::make_unique<flutter::VsyncWaiterIOS>(taskRunners, mockDisplayLinkManager);
+
+  XCTAssertEqual(waiter->GetMaxRefreshRateForTesting(), maxFrameRate);
+}
+
+- (void)testAwaitVSyncPicksUpRefreshRateChangesFromInjectedDisplayLinkManager {
+  id mockDisplayLinkManager = OCMPartialMock([FlutterDisplayLinkManager shared]);
+  [self addTeardownBlock:^{
+    [mockDisplayLinkManager stopMocking];
+  }];
+  // A single stub whose return value is re-read on every invocation via the __block variable.
+  // OCMock stubs aren't replaced by re-stubbing the same selector — the first-registered stub
+  // keeps answering — so a fixed andReturnValue: can't model a value that changes over time.
+  double initialFrameRate = 60;
+  __block double refreshRate = initialFrameRate;
+  OCMStub([mockDisplayLinkManager displayRefreshRate]).andDo(^(NSInvocation* invocation) {
+    [invocation setReturnValue:&refreshRate];
+  });
+
+  flutter::TaskRunners taskRunners = CreateTestTaskRunners();
+  auto waiter = std::make_unique<flutter::VsyncWaiterIOS>(taskRunners, mockDisplayLinkManager);
+  XCTAssertEqual(waiter->GetMaxRefreshRateForTesting(), initialFrameRate);
+
+  double updatedFrameRate = 120;
+  refreshRate = updatedFrameRate;
+  waiter->AwaitVSync();
+
+  XCTAssertEqual(waiter->GetMaxRefreshRateForTesting(), updatedFrameRate);
 }
 
 @end

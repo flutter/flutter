@@ -7,8 +7,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'widgets_app_tester.dart';
-
 const TextStyle testFont = TextStyle(color: Color(0xFF00FF00));
 
 Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {

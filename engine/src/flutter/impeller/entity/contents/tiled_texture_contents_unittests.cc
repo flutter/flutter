@@ -31,17 +31,17 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipeline) {
   TiledTextureContents contents(geom.get());
   contents.SetTexture(texture);
 
-  auto content_context = GetContentContext();
-  auto buffer = content_context->GetContext()->CreateCommandBuffer();
+  ContentContext& content_context = GetContentContext();
+  auto buffer = content_context.GetContext()->CreateCommandBuffer();
   auto render_target =
-      GetContentContext()->GetRenderTargetCache()->CreateOffscreenMSAA(
-          *content_context->GetContext(), {100, 100},
+      GetContentContext().GetRenderTargetCache()->CreateOffscreenMSAA(
+          *content_context.GetContext(), {100, 100},
           /*mip_count=*/1);
   auto render_pass = buffer->CreateRenderPass(render_target);
   auto recording_pass = std::make_shared<RecordingRenderPass>(
       render_pass, GetContext(), render_target);
 
-  ASSERT_TRUE(contents.Render(*GetContentContext(), {}, *recording_pass));
+  ASSERT_TRUE(contents.Render(GetContentContext(), {}, *recording_pass));
   const std::vector<Command>& commands = recording_pass->GetCommands();
 
   ASSERT_EQ(commands.size(), 1u);
@@ -52,7 +52,7 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipeline) {
   auto options = OptionsFromPassAndEntity(*recording_pass, {});
   options.primitive_type = PrimitiveType::kTriangleStrip;
   EXPECT_EQ(commands[0].pipeline,
-            GetContentContext()->GetTiledTexturePipeline(options));
+            GetContentContext().GetTiledTexturePipeline(options));
 
   if (GetParam() == PlaygroundBackend::kMetal) {
     recording_pass->EncodeCommands();
@@ -62,7 +62,8 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipeline) {
 // GL_OES_EGL_image_external isn't supported on MacOS hosts.
 #if !defined(FML_OS_MACOSX)
 TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipelineExternalOES) {
-  if (GetParam() != PlaygroundBackend::kOpenGLES) {
+  if (GetParam() != PlaygroundBackend::kOpenGLES &&
+      GetParam() != PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP()
         << "External OES textures are only valid for the OpenGLES backend.";
   }
@@ -79,15 +80,15 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipelineExternalOES) {
   contents->SetSourceRect(Rect::MakeSize(texture->GetSize()));
   contents->SetStrictSourceRect(false);
 
-  auto content_context = GetContentContext();
-  auto buffer = content_context->GetContext()->CreateCommandBuffer();
+  ContentContext& content_context = GetContentContext();
+  auto buffer = content_context.GetContext()->CreateCommandBuffer();
   auto render_target =
-      GetContentContext()->GetRenderTargetCache()->CreateOffscreenMSAA(
-          *content_context->GetContext(), {100, 100},
+      GetContentContext().GetRenderTargetCache()->CreateOffscreenMSAA(
+          *content_context.GetContext(), {100, 100},
           /*mip_count=*/1);
   auto render_pass = buffer->CreateRenderPass(render_target);
 
-  ASSERT_TRUE(contents->Render(*GetContentContext(), {}, *render_pass));
+  ASSERT_TRUE(contents->Render(GetContentContext(), {}, *render_pass));
   const std::vector<Command>& commands = render_pass->GetCommands();
 
   ASSERT_EQ(commands.size(), 1u);
@@ -95,7 +96,7 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipelineExternalOES) {
   auto options = OptionsFromPassAndEntity(*render_pass, {});
   options.primitive_type = PrimitiveType::kTriangleStrip;
   EXPECT_EQ(commands[0].pipeline,
-            GetContentContext()->GetTiledTextureExternalPipeline(options));
+            GetContentContext().GetTiledTextureExternalPipeline(options));
 }
 #endif
 

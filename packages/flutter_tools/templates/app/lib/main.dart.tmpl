@@ -11,23 +11,21 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+      home: Scaffold(body: Center(child: Text('Hello World!'))),
     );
   }
 }
 {{/withEmptyMain}}
 {{^withEmptyMain}}
 {{#withPlatformChannelPluginHook}}
+
 import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
 {{/withPlatformChannelPluginHook}}
 {{#withFfi}}
+
 import 'dart:async';
 
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart' as {{pluginProjectName}};
@@ -180,7 +178,8 @@ class _MyAppState extends State<MyApp> {
     // We also handle the message potentially returning null.
     try {
       platformVersion =
-          await _{{pluginClassLowerCamelCase}}.getPlatformVersion() ?? 'Unknown platform version';
+          await _{{pluginClassLowerCamelCase}}.getPlatformVersion() ??
+          'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
