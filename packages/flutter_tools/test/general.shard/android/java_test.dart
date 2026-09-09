@@ -333,7 +333,87 @@ OpenJDK 64-Bit Server VM (build 21+35, mixed mode, sharing)
         expect(version, equals(Version(21, 0, 0)));
       });
     });
+
+    group('javacExists', () {
+      testWithoutContext('returns true if javaHome is set and javac exists', () {
+        final os = FakeOperatingSystemUtils();
+        final java = Java(
+          fileSystem: fs,
+          logger: logger,
+          os: os,
+          platform: platform,
+          processManager: processManager,
+          binaryPath: '/java/home/bin/java',
+          javaHome: '/java/home',
+          javaSource: JavaSource.javaHome,
+        );
+        fs.file('/java/home/bin/javac').createSync(recursive: true);
+
+        expect(java.javacExists, true);
+      });
+
+      testWithoutContext('returns false if javaHome is set and javac does not exist', () {
+        final os = FakeOperatingSystemUtils();
+        final java = Java(
+          fileSystem: fs,
+          logger: logger,
+          os: os,
+          platform: platform,
+          processManager: processManager,
+          binaryPath: '/java/home/bin/java',
+          javaHome: '/java/home',
+          javaSource: JavaSource.javaHome,
+        );
+
+        expect(java.javacExists, false);
+      });
+
+      testWithoutContext('returns true if javaHome is null and javac is on PATH', () {
+        final os = _FakeOperatingSystemUtilsWithJavac(fs);
+        final java = Java(
+          fileSystem: fs,
+          logger: logger,
+          os: os,
+          platform: platform,
+          processManager: processManager,
+          binaryPath: '/fake/which/java/path',
+          javaHome: null,
+          javaSource: JavaSource.path,
+        );
+
+        expect(java.javacExists, true);
+      });
+
+      testWithoutContext('returns false if javaHome is null and javac is not on PATH', () {
+        final os = FakeOperatingSystemUtils();
+        final java = Java(
+          fileSystem: fs,
+          logger: logger,
+          os: os,
+          platform: platform,
+          processManager: processManager,
+          binaryPath: '/fake/which/java/path',
+          javaHome: null,
+          javaSource: JavaSource.path,
+        );
+
+        expect(java.javacExists, false);
+      });
+    });
   });
+}
+
+class _FakeOperatingSystemUtilsWithJavac extends FakeOperatingSystemUtils {
+  _FakeOperatingSystemUtilsWithJavac(this._fileSystem);
+
+  final FileSystem _fileSystem;
+  @override
+  File? which(String execName) {
+    if (execName == 'javac' || execName == 'javac.exe') {
+      return _fileSystem.file('/fake/which/javac/path');
+    }
+    throw const InvalidArgumentException(null, null);
+  }
 }
 
 class _FakeAndroidStudioWithJdk extends Fake implements AndroidStudio {
