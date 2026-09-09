@@ -48,7 +48,8 @@ class BuildCommand extends FlutterCommand {
     required ToolContext toolContext,
     AndroidBuilder? androidBuilder,
     bool verboseHelp = false,
-  }) : super(toolContext: toolContext, verboseHelp: verboseHelp) {
+  }) : _appleContext = appleContext,
+       super(toolContext: toolContext, verboseHelp: verboseHelp) {
     final ToolContext(
       :Artifacts artifacts,
       :Cache cache,
@@ -99,7 +100,14 @@ class BuildCommand extends FlutterCommand {
         verboseHelp: verboseHelp,
       ),
     );
-    _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(
+      BuildIOSCommand(
+        appleContext: appleContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
     _addSubcommand(
       BuildIOSFrameworkCommand(
         buildSystem: buildSystem,
@@ -135,7 +143,14 @@ class BuildCommand extends FlutterCommand {
       ),
     );
 
-    _addSubcommand(BuildIOSArchiveCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(
+      BuildIOSArchiveCommand(
+        appleContext: appleContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
+        verboseHelp: verboseHelp,
+      ),
+    );
     _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(
       BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
@@ -193,6 +208,12 @@ class BuildCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.fail();
+
+  final AppleContext _appleContext;
+
+  /// The Apple-specific context dependencies, exposed for hermetic testing.
+  @visibleForTesting
+  AppleContext get appleContext => _appleContext;
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
