@@ -1225,7 +1225,11 @@ void exitWithNoSdkMessage({Analytics? analytics, Logger? logger}) {
   final Analytics effectiveAnalytics = analytics ?? globals.analytics;
   final Logger effectiveLogger = logger ?? globals.logger;
   effectiveAnalytics.send(
-    Event.flutterBuildInfo(label: 'unsupported-project', buildType: 'gradle'),
+    Event.flutterBuildInfo(
+      label: 'unsupported-project',
+      buildType: 'gradle',
+      error: 'android-sdk-not-found',
+    ),
   );
   throwToolExit(
     '${effectiveLogger.terminal.warningMark} No Android SDK found. '
