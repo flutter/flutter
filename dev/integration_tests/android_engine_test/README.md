@@ -21,6 +21,7 @@ See [`dev/bots/suite_runners/run_android_engine_tests.dart`](../../bots/suite_ru
 # TIP: If golden-files do not exist locally, this command will fail locally.
 SHARD=android_engine_vulkan_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 SHARD=android_engine_opengles_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
+SHARD=android_engine_hcpp_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 ```
 
 ## Running the apps and tests

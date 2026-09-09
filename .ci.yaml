@@ -1836,6 +1836,19 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
         ]
 
+  - name: Linux_android_emu_vulkan_stable android_engine_hcpp_tests
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      shard: android_engine_hcpp_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
+        ]
+
   - name: Linux_android_emu android_engine_opengles_tests
     recipe: flutter/flutter_drone
     timeout: 60

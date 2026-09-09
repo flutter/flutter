@@ -20,12 +20,16 @@ import '../utils.dart';
 /// ```sh
 /// # Generate a baseline of local golden files.
 /// SHARD=android_engine_vulkan_tests UPDATE_GOLDENS=1 bin/cache/dart-sdk/bin/dart dev/bots/test.dart
+/// # Or for HCPP tests:
+/// SHARD=android_engine_hcpp_tests UPDATE_GOLDENS=1 bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// ```
 ///
 /// 4. Then, re-run the command against the baseline images:
 ///
 /// ```sh
 /// SHARD=android_engine_vulkan_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
+/// # Or for HCPP tests:
+/// SHARD=android_engine_hcpp_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// ```
 ///
 /// If you are trying to debug a commit, you will want to run step (3) first,
@@ -53,110 +57,127 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
       ),
     );
 
-    // Stdout will produce: "Using the Impeller rendering backend (.*)"
-    // TODO(matanlurey): Enable once `flutter drive` retains error logs.
-    // final RegExp impellerStdoutPattern = RegExp('Using the Imepller rendering backend (.*)');
-
-    Future<void> runTest(
-      FileSystemEntity file, {
-      bool? useHCPPFlag,
-      Map<String, String>? additionalEnvironment,
-    }) async {
-      final CommandResult result = await runCommand(
-        'flutter',
-        <String>[
-          'drive',
-          path.relative(file.path, from: androidEngineTestPath),
-          // There are no reason to enable development flags for this test.
-          // Disable them to work around flakiness issues, and in general just
-          // make less things start up unnecessarily.
-          '--no-dds',
-          '--no-enable-dart-profiling',
-          if (useHCPPFlag == true) '--enable-hcpp',
-          if (useHCPPFlag == false) '--no-enable-hcpp',
-          '--test-arguments=test',
-          '--test-arguments=--reporter=expanded',
-        ],
-        workingDirectory: androidEngineTestPath,
-        environment: <String, String>{
-          'ANDROID_ENGINE_TEST_GOLDEN_VARIANT': impellerBackend.name,
-          ...?additionalEnvironment,
-        },
-      );
-      final String? stdout = result.flattenedStdout;
-      if (stdout == null) {
-        foundError(<String>['No stdout produced.']);
-        return;
-      }
-
-      // TODO(matanlurey): Enable once `flutter drive` retains error logs.
-      // https://github.com/flutter/flutter/issues/162087.
-      //
-      // final Match? stdoutMatch = impellerStdoutPattern.firstMatch(stdout);
-      // if (stdoutMatch == null) {
-      //   foundError(<String>['Could not find pattern ${impellerStdoutPattern.pattern}.', stdout]);
-      //   return;
-      // }
-
-      // final String reportedBackend = stdoutMatch.group(1)!.toLowerCase();
-      // if (reportedBackend != impellerBackend.name) {
-      //   foundError(<String>[
-      //     'Reported Imepller backend was $reportedBackend, expected ${impellerBackend.name}',
-      //   ]);
-      //   return;
-      // }
-    }
-
     for (final file in mains) {
       if (file.path.contains('hcpp')) {
         continue;
       }
-      await runTest(file);
-    }
-
-    // Test HCPP Platform Views on Vulkan.
-    if (impellerBackend == ImpellerBackend.vulkan) {
-      final runFirstTests = <String>[
-        // Run upgrade_legacy_pv_types first, as it is testing the flag and not the manifest
-        'upgrade_legacy_pv_types',
-      ];
-
-      for (final testName in runFirstTests) {
-        await runTest(
-          mains.firstWhere((FileSystemEntity file) => file.path.contains(testName)),
-          useHCPPFlag: true,
-        );
-      }
-
-      androidManifestXml.writeAsStringSync(
-        androidManifestXml.readAsStringSync().replaceFirst(
-          kHcppMetadataDisabled,
-          kHcppMetadataEnabled,
-        ),
+      await _runTest(
+        file,
+        androidEngineTestPath: androidEngineTestPath,
+        impellerBackend: impellerBackend,
       );
-
-      // Verify that --no-enable-hcpp disables HCPP even when the manifest enables it.
-      for (final testName in runFirstTests) {
-        await runTest(
-          mains.firstWhere((FileSystemEntity file) => file.path.contains(testName)),
-          useHCPPFlag: false,
-          additionalEnvironment: const <String, String>{'EXPECT_HCPP': 'false'},
-        );
-      }
-      for (final file in mains) {
-        // This statement is attempting to catch all tests inside of the
-        // dev/integration_tests/android_engine_test/lib/hcpp
-        // directory, except for upgrade_legacy_pv_types which we already ran.
-        if (!file.path.contains('hcpp') ||
-            runFirstTests.any((String name) => file.path.contains(name))) {
-          continue;
-        }
-        await runTest(file);
-      }
     }
   } finally {
     // Restore original contents.
     androidManifestXml.writeAsStringSync(androidManifestContents);
+  }
+}
+
+Future<void> runAndroidEngineHcppTests() async {
+  const ImpellerBackend impellerBackend = ImpellerBackend.vulkan;
+  print('Running Flutter Driver Android HCPP tests (backend=$impellerBackend)');
+
+  final String androidEngineTestPath = path.join('dev', 'integration_tests', 'android_engine_test');
+  final List<FileSystemEntity> mains = Glob('$androidEngineTestPath/lib/**_main.dart').listSync();
+
+  final File androidManifestXml = const LocalFileSystem().file(
+    path.join(androidEngineTestPath, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'),
+  );
+  final String androidManifestContents = androidManifestXml.readAsStringSync();
+
+  try {
+    // Replace whatever the current backend is with the specified backend (Vulkan).
+    final impellerBackendMetadata = RegExp(_impellerBackendMetadata(value: '.*'));
+    androidManifestXml.writeAsStringSync(
+      androidManifestContents.replaceFirst(
+        impellerBackendMetadata,
+        _impellerBackendMetadata(value: impellerBackend.name),
+      ),
+    );
+
+    final runFirstTests = <String>[
+      // Run upgrade_legacy_pv_types first, as it is testing the flag and not the manifest
+      'upgrade_legacy_pv_types',
+    ];
+
+    for (final testName in runFirstTests) {
+      await _runTest(
+        mains.firstWhere((FileSystemEntity file) => file.path.contains(testName)),
+        androidEngineTestPath: androidEngineTestPath,
+        impellerBackend: impellerBackend,
+        useHCPPFlag: true,
+      );
+    }
+
+    androidManifestXml.writeAsStringSync(
+      androidManifestXml.readAsStringSync().replaceFirst(
+        kHcppMetadataDisabled,
+        kHcppMetadataEnabled,
+      ),
+    );
+
+    // Verify that --no-enable-hcpp disables HCPP even when the manifest enables it.
+    for (final testName in runFirstTests) {
+      await _runTest(
+        mains.firstWhere((FileSystemEntity file) => file.path.contains(testName)),
+        androidEngineTestPath: androidEngineTestPath,
+        impellerBackend: impellerBackend,
+        useHCPPFlag: false,
+        additionalEnvironment: const <String, String>{'EXPECT_HCPP': 'false'},
+      );
+    }
+    for (final file in mains) {
+      // This statement catches all tests inside of the
+      // dev/integration_tests/android_engine_test/lib/hcpp
+      // directory, except for upgrade_legacy_pv_types which we already ran.
+      if (!file.path.contains('hcpp') ||
+          runFirstTests.any((String name) => file.path.contains(name))) {
+        continue;
+      }
+      await _runTest(
+        file,
+        androidEngineTestPath: androidEngineTestPath,
+        impellerBackend: impellerBackend,
+      );
+    }
+  } finally {
+    // Restore original contents.
+    androidManifestXml.writeAsStringSync(androidManifestContents);
+  }
+}
+
+Future<void> _runTest(
+  FileSystemEntity file, {
+  required String androidEngineTestPath,
+  required ImpellerBackend impellerBackend,
+  bool? useHCPPFlag,
+  Map<String, String>? additionalEnvironment,
+}) async {
+  final CommandResult result = await runCommand(
+    'flutter',
+    <String>[
+      'drive',
+      path.relative(file.path, from: androidEngineTestPath),
+      // There are no reason to enable development flags for this test.
+      // Disable them to work around flakiness issues, and in general just
+      // make less things start up unnecessarily.
+      '--no-dds',
+      '--no-enable-dart-profiling',
+      if (useHCPPFlag == true) '--enable-hcpp',
+      if (useHCPPFlag == false) '--no-enable-hcpp',
+      '--test-arguments=test',
+      '--test-arguments=--reporter=expanded',
+    ],
+    workingDirectory: androidEngineTestPath,
+    environment: <String, String>{
+      'ANDROID_ENGINE_TEST_GOLDEN_VARIANT': impellerBackend.name,
+      ...?additionalEnvironment,
+    },
+  );
+  final String? stdout = result.flattenedStdout;
+  if (stdout == null) {
+    foundError(<String>['No stdout produced.']);
+    return;
   }
 }
 

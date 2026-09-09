@@ -15,12 +15,12 @@ import '../_luci_skia_gold_prelude.dart';
 ///
 /// ```sh
 /// # Checkout HEAD, i.e. *before* changes you want to test.
-/// UPDATE_GOLDENS=1 flutter drive lib/hcpp/platform_view_overlay_layer_cleared.dart
+/// UPDATE_GOLDENS=1 flutter drive lib/hcpp/platform_view_overlay_layer_cleared_main.dart
 ///
 /// # Make your changes.
 ///
 /// # Run the test against baseline.
-/// flutter drive lib/hcpp/platform_view_overlay_layer_cleared.dart
+/// flutter drive lib/hcpp/platform_view_overlay_layer_cleared_main.dart
 /// ```
 ///
 /// For a convenient way to deflake a test, see `tool/deflake.dart`.

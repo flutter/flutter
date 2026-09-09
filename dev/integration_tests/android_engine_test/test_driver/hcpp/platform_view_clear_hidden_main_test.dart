@@ -11,7 +11,22 @@ import 'package:test/test.dart';
 
 import '../_luci_skia_gold_prelude.dart';
 
+/// For local debugging, a (local) golden-file is required as a baseline:
+///
+/// ```sh
+/// # Checkout HEAD, i.e. *before* changes you want to test.
+/// UPDATE_GOLDENS=1 flutter drive lib/hcpp/platform_view_clear_hidden_main.dart
+///
+/// # Make your changes.
+///
+/// # Run the test against baseline.
+/// flutter drive lib/hcpp/platform_view_clear_hidden_main.dart
+/// ```
+///
+/// For a convenient way to deflake a test, see `tool/deflake.dart`.
 void main() async {
+  const goldenPrefix = 'hybrid_composition_pp_platform_view';
+
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
 
@@ -36,14 +51,12 @@ void main() async {
     expect(response['supported'], true);
   }, timeout: Timeout.none);
 
-  test(
-    'should get a PlatformException when TLHC pv falls back to HC with HCPP enabled',
-    () async {
-      await flutterDriver.tap(find.byValueKey('LoadPlatformView'));
-      final response = json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
-
-      expect(response['checkErrorText'], contains('HC++'));
-    },
-    timeout: Timeout.none,
-  );
+  test('should start with texture, and toggle to no texture', () async {
+    await expectLater(nativeDriver.screenshot(), matchesGoldenFile('$goldenPrefix.two_boxes.png'));
+    await flutterDriver.tap(find.byValueKey('ToggleRightView'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.only_one_box.png'),
+    );
+  }, timeout: Timeout.none);
 }
