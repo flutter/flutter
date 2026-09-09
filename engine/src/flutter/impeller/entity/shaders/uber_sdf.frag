@@ -358,6 +358,7 @@ void main() {
   vec4 color = getColor();
 
   vec2 p = v_position - frag_info.center;
+
   vec2 sdf_and_pixel_size =
       (frag_info.stroked < 0.5) ? filledSDF(p) : strokedSDF(p);
   float sdf = sdf_and_pixel_size.x;
@@ -367,7 +368,9 @@ void main() {
   // Clamp alpha in case floating point precision errors cause it to be outside
   // [0.0, 1.0].
   alpha = clamp(alpha, 0.0, 1.0);
-  alpha = gammaCorrectedAlpha(alpha, color.rgb);
+  if (alpha < 1.0) {
+    alpha = gammaCorrectedAlpha(alpha, color.rgb);
+  }
 
   frag_color = vec4(color.rgb, color.a * alpha);
   frag_color = IPPremultiply(frag_color);

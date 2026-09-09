@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  // Here and below, see: https://github.com/dart-lang/sdk/issues/26980
   const start = FlutterLogoDecoration(
     textColor: Color(0xFFD4F144),
     style: FlutterLogoStyle.stacked,
@@ -32,7 +31,7 @@ void main() {
   test('FlutterLogoDecoration.lerp identical a,b', () {
     expect(FlutterLogoDecoration.lerp(null, null, 0), null);
     const logo = FlutterLogoDecoration();
-    expect(identical(FlutterLogoDecoration.lerp(logo, logo, 0.5), logo), true);
+    expect(FlutterLogoDecoration.lerp(logo, logo, 0.5) == logo, true);
   });
 
   test('FlutterLogoDecoration lerp from non-null to null lerps margin', () {

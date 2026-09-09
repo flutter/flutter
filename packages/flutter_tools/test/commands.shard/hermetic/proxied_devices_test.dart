@@ -68,7 +68,12 @@ void main() {
     });
 
     testUsingContext('can list devices', () async {
-      daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        serverDaemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: TestFeatureFlags(),
+        fileSystem: MemoryFileSystem.test(),
+      );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -86,7 +91,12 @@ void main() {
     });
 
     testUsingContext('calls supportsRuntimeMode', () async {
-      daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        serverDaemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: TestFeatureFlags(),
+        fileSystem: MemoryFileSystem.test(),
+      );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -103,7 +113,12 @@ void main() {
     }, overrides: <Type, Generator>{Java: () => FakeJava()});
 
     testUsingContext('redirects logs', () async {
-      daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+      daemon = Daemon(
+        serverDaemonConnection,
+        notifyingLogger: notifyingLogger,
+        featureFlags: TestFeatureFlags(),
+        fileSystem: MemoryFileSystem.test(),
+      );
       fakeDevice = FakeAndroidDevice();
       final discoverer = FakePollingDeviceDiscovery();
       daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -132,7 +147,12 @@ void main() {
     testUsingContext(
       'starts and stops app',
       () async {
-        daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          serverDaemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: TestFeatureFlags(),
+          fileSystem: MemoryFileSystem.test(),
+        );
         fakeDevice = FakeAndroidDevice();
         final discoverer = FakePollingDeviceDiscovery();
         daemon!.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -189,7 +209,12 @@ void main() {
     testUsingContext(
       'takes screenshot',
       () async {
-        daemon = Daemon(serverDaemonConnection, notifyingLogger: notifyingLogger);
+        daemon = Daemon(
+          serverDaemonConnection,
+          notifyingLogger: notifyingLogger,
+          featureFlags: TestFeatureFlags(),
+          fileSystem: MemoryFileSystem.test(),
+        );
         fakeDevice = FakeAndroidDevice();
         final discoverer = FakePollingDeviceDiscovery();
         daemon!.deviceDomain.addDeviceDiscoverer(discoverer);

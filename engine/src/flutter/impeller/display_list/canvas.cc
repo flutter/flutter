@@ -165,7 +165,7 @@ static void ApplyFramebufferBlend(Entity& entity) {
 /// @brief Create the subpass restore contents, appling any filters or opacity
 ///        from the provided paint object.
 static std::shared_ptr<Contents> CreateContentsForSubpassTarget(
-    const ContentContext& renderer,
+    ContentContext& renderer,
     const Paint& paint,
     const std::shared_ptr<Texture>& target,
     const Matrix& effect_transform) {
@@ -1977,9 +1977,12 @@ void Canvas::SaveLayer(const Paint& paint,
       // layer once.
       if (backdrop_data->all_filters_equal &&
           !backdrop_data->shared_filter_snapshot.has_value()) {
-        // TODO(157110): compute minimum input hint.
+        Contents::SnapshotOptions snapshot_options = {
+            .coverage_limit = backdrop_data->coverage_union,
+        };
         backdrop_data->shared_filter_snapshot =
-            backdrop_filter_contents->RenderToSnapshot(renderer_, {}, {});
+            backdrop_filter_contents->RenderToSnapshot(renderer_, {},
+                                                       snapshot_options);
       }
 
       std::optional<Snapshot> maybe_snapshot =

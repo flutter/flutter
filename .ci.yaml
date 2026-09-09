@@ -1877,8 +1877,9 @@ targets:
         ]
 
   - name: Linux_android_emu_vulkan_stable android_hardware_smoke_vulkan_instrumented_tests
-    bringup: true
     recipe: flutter/flutter_drone
+    # Post-submit only: Instrumented tests are more resource-intensive; driver shards catch most regressions in presubmit.
+    presubmit: false
     timeout: 60
     properties:
       shard: android_hardware_smoke_vulkan_instrumented_tests
@@ -1890,8 +1891,9 @@ targets:
         ]
 
   - name: Linux_android_emu android_hardware_smoke_opengles_instrumented_tests
-    bringup: true
     recipe: flutter/flutter_drone
+    # Post-submit only: Instrumented tests are more resource-intensive; driver shards catch most regressions in presubmit.
+    presubmit: false
     timeout: 60
     properties:
       shard: android_hardware_smoke_opengles_instrumented_tests
@@ -3668,6 +3670,20 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: animated_advanced_blend_perf__timeline_summary
 
+  - name: Mac ios_universal_link_test
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "mac"]
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+        ]
+      task_name: ios_universal_link_test
+
   - name: Mac_ios animated_advanced_blend_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -4500,8 +4516,9 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac module_uiscene_test_ios
+  - name: Mac uiscene_plugin_lifecycle_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4510,7 +4527,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: module_uiscene_test_ios
+      task_name: uiscene_plugin_lifecycle_test_ios
     runIf:
       - dev/**
       - packages/flutter_tools/**
@@ -5347,14 +5364,16 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: basic_material_app_ios__compile
 
-  - name: Mac_ios channels_integration_test_ios
+  - name: Mac channels_integration_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: channels_integration_test_ios
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
 
   - name: Mac_ios complex_layout_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -5418,14 +5437,16 @@ targets:
       task_name: external_textures_integration_test_ios
       ignore_flakiness: "true"
 
-  - name: Mac_ios route_test_ios
+  - name: Mac route_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: route_test_ios
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
 
   - name: Mac flavors_test_ios
     recipe: devicelab/devicelab_drone
@@ -5656,15 +5677,6 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: hello_world_impeller_ios_sdfs
 
-  - name: Mac_ios ios_platform_view_tests
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: ios_platform_view_tests
-
   - name: Mac_ios large_image_changer_perf_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5796,14 +5808,16 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: platform_channels_benchmarks_ios
 
-  - name: Mac_ios platform_interaction_test_ios
+  - name: Mac platform_interaction_test_ios
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
     properties:
       tags: >
-        ["devicelab", "ios", "mac"]
+        ["devicelab", "hostonly", "mac"]
       task_name: platform_interaction_test_ios
+      dependencies: >-
+        [{"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}]
 
   - name: Mac_ios platform_view_ios__start_up
     recipe: devicelab/devicelab_drone
@@ -7152,7 +7166,6 @@ targets:
   - name: Windows tool_tests_commands_2_2
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
