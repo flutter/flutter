@@ -672,9 +672,8 @@ class Scenarios {
 
     // When using an implicit FlutterEngine, created by the FlutterViewController in another
     // ViewController, we expect plugins to be registered after the FlutterViewController is
-    // created, which results in the `application:didFinishLaunchingWithOptions:` and
-    // `scene:willConnectToSession:options:` events being missed. This is not a expected use case
-    // but it could be utilized.
+    // created, which results in the `application:didFinishLaunchingWithOptions:`. This is not
+    // ideal, but it is the existing behavior. See: https://github.com/flutter/flutter/issues/186547.
     'FlutterImplicitEngineDelegate-AppMigrated-ImplicitFlutterEngine': <String, String>{
       ...sharedAppLifecycleFiles,
       ...sharedPluginLifecycleFiles,
