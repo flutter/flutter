@@ -910,7 +910,7 @@ void main() {
     });
   }, overrides: <Type, Generator>{Artifacts: Artifacts.test});
 
-  runInTestbed('Can start web server with hostname any', () async {
+  runInTestbed('Can start web server with default hostname', () async {
     final String path = globals.fs.path.join('lib', 'main.dart');
     final File outputFile = globals.fs.file(path)..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
@@ -932,6 +932,34 @@ void main() {
     final Uri uri = await webDevFS.create();
 
     expect(uri.host, 'localhost');
+    expect(webDevFS.webAssetServer.internetAddress.isLoopback, true);
+    await webDevFS.destroy();
+  });
+
+  runInTestbed('Can start web server with hostname any', () async {
+    final String path = globals.fs.path.join('lib', 'main.dart');
+    final File outputFile = globals.fs.file(path)..createSync(recursive: true);
+    outputFile.parent.childFile('a.sources').writeAsStringSync('');
+    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+
+    final WebDevFS webDevFS = createWebDevFS(
+      useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
+      ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
+      entrypoint: Uri.base,
+      ddcModuleSystem: usesDdcModuleSystem,
+      canaryFeatures: canaryFeatures,
+      webDevServerConfig: const WebDevServerConfig(host: webDevAnyHostDefault),
+    );
+    webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
+    webDevFS.stackTraceMapper.createSync(recursive: true);
+
+    final Uri uri = await webDevFS.create();
+
+    expect(uri.host, 'localhost');
+    expect(webDevFS.webAssetServer.internetAddress, InternetAddress.anyIPv4);
     await webDevFS.destroy();
   });
 
