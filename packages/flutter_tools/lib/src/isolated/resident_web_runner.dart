@@ -24,7 +24,6 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
 import '../devfs.dart';
@@ -78,7 +77,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       machine: machine,
       analytics: analytics,
       systemClock: systemClock,
-      fileSystem: globals.fs,
+      fileSystem: fileSystem,
       logger: logger,
       terminal: terminal,
       platform: platform,
@@ -124,12 +123,6 @@ class ResidentWebRunner extends ResidentRunner {
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
-         fileSystem: globals.fs,
-         logger: logger,
-         platform: platform,
-         analytics: analytics,
-         outputPreferences: outputPreferences,
-         terminal: terminal,
          commandHelp: CommandHelp(
            logger: logger,
            terminal: terminal,
@@ -328,7 +321,7 @@ class ResidentWebRunner extends ResidentRunner {
           rootDirectory: fileSystem.directory(projectRootPath),
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
           webCrossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
-          fileSystem: globals.fs,
+          fileSystem: fileSystem,
           logger: logger,
           platform: _platform,
           webDefines: _webDefines,
@@ -346,7 +339,7 @@ class ResidentWebRunner extends ResidentRunner {
             return 1;
           }
           flutterDevice!.generator!.accept();
-          cacheInitialDillCompilation();
+          unawaited(cacheInitialDillCompilation());
         } else {
           final webBuilder = WebBuilder(
             logger: _logger,

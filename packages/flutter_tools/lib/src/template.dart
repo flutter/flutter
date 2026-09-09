@@ -70,11 +70,7 @@ class TemplatePathProvider {
 }
 
 TemplatePathProvider get templatePathProvider =>
-    context.get<TemplatePathProvider>() ??
-    TemplatePathProvider(
-      cache: context.get<Cache>(),
-      flutterRoot: context.get<Cache>()?.flutterRoot,
-    );
+    context.get<TemplatePathProvider>() ?? const TemplatePathProvider();
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the `.tmpl` extension. All files

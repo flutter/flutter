@@ -67,7 +67,6 @@ import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
-@Deprecated('Use ToolDependencies.bootstrap instead.')
 Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? overrides}) async {
   // Wrap runner with any asynchronous initialization that should run with the
   // overrides and callbacks.

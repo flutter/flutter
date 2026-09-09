@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/project_validator.dart';
@@ -25,7 +26,9 @@ import '../../src/test_flutter_command_runner.dart';
 import 'analysis_server_mock.dart';
 
 void main() {
-  setUpAll(() {});
+  setUpAll(() {
+    Cache.disableLocking();
+  });
 
   late Directory tempDir;
   late FileSystem fileSystem;
@@ -500,10 +503,16 @@ void main() {
 
     final artifacts = Artifacts.test();
     final command = AnalyzeCommand(
-allProjectValidators: <ProjectValidator>[],
-suppressAnalytics: true,
-toolContext: FakeToolContext(terminal: Terminal.test(), artifacts: artifacts, logger: logger, platform: FakePlatform(), fs: fileSystem, processManager: processManager)
-);
+      allProjectValidators: <ProjectValidator>[],
+      suppressAnalytics: true,
+      toolContext: FakeToolContext(
+        artifacts: artifacts,
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
+    );
 
     final commandRunner = TestFlutterCommandRunner();
     commandRunner.addCommand(command);

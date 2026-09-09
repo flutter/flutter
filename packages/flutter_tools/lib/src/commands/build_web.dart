@@ -9,7 +9,6 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../web/compile.dart';
-import '../web/file_generators/flutter_service_worker_js.dart';
 import '../web/web_constants.dart';
 import '../web/web_options.dart';
 import '../web_template.dart';
@@ -173,13 +172,12 @@ class BuildWebCommand extends BuildSubCommand {
       fileSystem: globals.fs,
       flutterVersion: globals.flutterVersion,
       analytics: globals.analytics,
-      buildTargets: globals.buildTargets,
     );
     await webBuilder.buildWeb(
       project,
       targetFile,
       buildInfo,
-      ServiceWorkerStrategy.fromCliName(getValue(WebOptions.pwaStrategy)),
+      getValue(WebOptions.pwaStrategy),
       compilerConfigs: compilerConfigs,
       baseHref: baseHref,
       staticAssetsUrl: staticAssetsUrl,

@@ -23,18 +23,16 @@ import 'build.dart';
 /// A command to build a windows desktop target through a build shell script.
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand({
-    required BuildSystem buildSystem,
+    required this.buildSystem,
     required ToolContext toolContext,
     required bool verboseHelp,
-    FeatureFlags? featureFlags,
-    OperatingSystemUtils? operatingSystemUtils,
-    this.visualStudioOverride,
-  }) : _buildSystem = buildSystem,
-       _featureFlags = featureFlags ?? const _DefaultFeatureFlags(),
-       _operatingSystemUtils = operatingSystemUtils,
-       _toolContext = toolContext,
+    required FeatureFlags featureFlags,
+    required VisualStudio visualStudio,
+  }) : _featureFlags = featureFlags,
+       _visualStudio = visualStudio,
        super(
          logger: toolContext.logger,
+         outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,
          verboseHelp: verboseHelp,
        ) {
@@ -46,26 +44,20 @@ class BuildWindowsCommand extends BuildSubCommand {
     );
   }
 
-  final BuildSystem _buildSystem;
+  final BuildSystem buildSystem;
   final FeatureFlags _featureFlags;
-  final OperatingSystemUtils? _operatingSystemUtils;
-  final ToolContext _toolContext;
-
-  @visibleForTesting
-  BuildSystem get buildSystem => _buildSystem;
 
   @visibleForTesting
   FeatureFlags get featureFlags => _featureFlags;
 
-  @visibleForTesting
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'windows';
 
   @override
-  bool get hidden => !_featureFlags.isWindowsEnabled || !_toolContext.platform.isWindows;
+  bool get hidden => !_featureFlags.isWindowsEnabled || !toolContext.platform.isWindows;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -75,17 +67,16 @@ class BuildWindowsCommand extends BuildSubCommand {
   @override
   String get description => 'Build a Windows desktop application.';
 
-  @visibleForTesting
-  VisualStudio? visualStudioOverride;
+  final VisualStudio _visualStudio;
 
   bool get configOnly => boolArg('config-only');
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     final Logger logger = this.logger;
-    final OperatingSystemUtils os = _operatingSystemUtils ?? _toolContext.os;
-    final Platform platform = _toolContext.platform;
+    final OperatingSystemUtils os = toolContext.os;
+    final Platform platform = toolContext.platform;
 
     final BuildInfo buildInfo = await getBuildInfo();
     if (!_featureFlags.isWindowsEnabled) {
@@ -107,63 +98,15 @@ class BuildWindowsCommand extends BuildSubCommand {
       buildInfo,
       targetPlatform,
       target: targetFile,
-      visualStudioOverride: visualStudioOverride,
+      visualStudioOverride: _visualStudio,
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: fs,
         logger: logger,
         appFilenamePattern: 'app.so',
         analytics: analytics,
       ),
-      cache: _toolContext.cache,
       configOnly: configOnly,
     );
     return FlutterCommandResult.success();
   }
-}
-
-class _DefaultFeatureFlags extends FeatureFlags {
-  const _DefaultFeatureFlags();
-
-  @override
-  bool isEnabled(Feature feature) => false;
-  @override
-  bool get isLinuxEnabled => false;
-  @override
-  bool get isMacOSEnabled => false;
-  @override
-  bool get isWindowsEnabled => false;
-  @override
-  bool get isWebEnabled => false;
-  @override
-  bool get isAndroidEnabled => false;
-  @override
-  bool get isIOSEnabled => false;
-  @override
-  bool get isFuchsiaEnabled => false;
-  @override
-  bool get areCustomDevicesEnabled => false;
-  @override
-  bool get isCliAnimationEnabled => false;
-  @override
-  bool get isNativeAssetsEnabled => false;
-  @override
-  bool get isDartDataAssetsEnabled => false;
-  @override
-  bool get isRecordUseEnabled => false;
-  @override
-  bool get isSwiftPackageManagerEnabled => false;
-  @override
-  bool get isOmitLegacyVersionFileEnabled => false;
-  @override
-  bool get isWindowingEnabled => false;
-  @override
-  bool get isAccessibilityEvaluationsEnabled => false;
-  @override
-  bool get isLLDBDebuggingEnabled => false;
-  @override
-  bool get isUISceneMigrationEnabled => false;
-  @override
-  bool get isRiscv64SupportEnabled => false;
-  @override
-  bool get isMacOSArm64OnlyEnabled => false;
 }

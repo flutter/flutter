@@ -22,24 +22,20 @@ import 'build.dart';
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
-    required BuildSystem buildSystem,
+    required this.buildSystem,
     required ToolContext toolContext,
     required bool verboseHelp,
-
-    FeatureFlags? featureFlags,
-    OperatingSystemUtils? operatingSystemUtils,
-  }) : _buildSystem = buildSystem,
-       _featureFlags = featureFlags ?? const _DefaultFeatureFlags(),
-       _operatingSystemUtils = operatingSystemUtils,
-       _toolContext = toolContext,
+    required FeatureFlags featureFlags,
+  }) : _featureFlags = featureFlags,
        super(
          logger: toolContext.logger,
+         outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,
          verboseHelp: verboseHelp,
        ) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesFlavorOption();
-    final OperatingSystemUtils os = _operatingSystemUtils ?? toolContext.os;
+    final OperatingSystemUtils os = toolContext.os;
     final String defaultTargetPlatform = switch (os.hostPlatform) {
       HostPlatform.linux_arm64 => 'linux-arm64',
       HostPlatform.linux_riscv64 => 'linux-riscv64',
@@ -65,26 +61,20 @@ class BuildLinuxCommand extends BuildSubCommand {
     );
   }
 
-  final BuildSystem _buildSystem;
+  final BuildSystem buildSystem;
   final FeatureFlags _featureFlags;
-  final OperatingSystemUtils? _operatingSystemUtils;
-  final ToolContext _toolContext;
-
-  @visibleForTesting
-  BuildSystem get buildSystem => _buildSystem;
 
   @visibleForTesting
   FeatureFlags get featureFlags => _featureFlags;
 
-  @visibleForTesting
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'linux';
 
   @override
-  bool get hidden => !_featureFlags.isLinuxEnabled || !_toolContext.platform.isLinux;
+  bool get hidden => !_featureFlags.isLinuxEnabled || !toolContext.platform.isLinux;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -98,10 +88,10 @@ class BuildLinuxCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     final Logger logger = this.logger;
-    final OperatingSystemUtils os = _operatingSystemUtils ?? _toolContext.os;
-    final Platform platform = _toolContext.platform;
+    final OperatingSystemUtils os = toolContext.os;
+    final Platform platform = toolContext.platform;
 
     final BuildInfo buildInfo = await getBuildInfo();
     final targetPlatform = TargetPlatform.fromName(stringArg('target-platform')!);
@@ -142,56 +132,8 @@ class BuildLinuxCommand extends BuildSubCommand {
       targetPlatform: targetPlatform,
       targetSysroot: stringArg('target-sysroot')!,
       logger: logger,
-      cache: _toolContext.cache,
       configOnly: configOnly,
     );
     return FlutterCommandResult.success();
   }
-}
-
-class _DefaultFeatureFlags extends FeatureFlags {
-  const _DefaultFeatureFlags();
-
-  @override
-  bool isEnabled(Feature feature) => false;
-  @override
-  bool get isLinuxEnabled => false;
-  @override
-  bool get isMacOSEnabled => false;
-  @override
-  bool get isWindowsEnabled => false;
-  @override
-  bool get isWebEnabled => false;
-  @override
-  bool get isAndroidEnabled => false;
-  @override
-  bool get isIOSEnabled => false;
-  @override
-  bool get isFuchsiaEnabled => false;
-  @override
-  bool get areCustomDevicesEnabled => false;
-  @override
-  bool get isCliAnimationEnabled => false;
-  @override
-  bool get isNativeAssetsEnabled => false;
-  @override
-  bool get isDartDataAssetsEnabled => false;
-  @override
-  bool get isRecordUseEnabled => false;
-  @override
-  bool get isSwiftPackageManagerEnabled => false;
-  @override
-  bool get isOmitLegacyVersionFileEnabled => false;
-  @override
-  bool get isWindowingEnabled => false;
-  @override
-  bool get isAccessibilityEvaluationsEnabled => false;
-  @override
-  bool get isLLDBDebuggingEnabled => false;
-  @override
-  bool get isUISceneMigrationEnabled => false;
-  @override
-  bool get isRiscv64SupportEnabled => false;
-  @override
-  bool get isMacOSArm64OnlyEnabled => false;
 }

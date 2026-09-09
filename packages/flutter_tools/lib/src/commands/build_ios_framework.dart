@@ -800,7 +800,7 @@ end
           outputDir: outputBuildDirectory,
           buildDir: project.dartTool.childDirectory('flutter_build'),
           cacheDir: globals.cache.getRoot(),
-          flutterRootDir: globals.fs.directory(Cache.flutterRoot),
+          flutterRootDir: globals.fs.directory(globals.cache.flutterRoot),
           defines: <String, String>{
             kTargetFile: targetFile,
             kTargetPlatform: TargetPlatform.ios.getName(),

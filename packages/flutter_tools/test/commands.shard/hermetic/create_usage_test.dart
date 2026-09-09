@@ -55,18 +55,20 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
+      globals.cache.flutterRoot = 'flutter';
     });
 
     setUp(() {
       testbed = TestBed(
         setup: () {
           fakePub = FakePub();
+          globals.cache.flutterRoot = 'flutter';
           final filePaths = <String>[
-            globals.fs.path.join('/flutter', 'packages', 'flutter', 'pubspec.yaml'),
-            globals.fs.path.join('/flutter', 'packages', 'flutter_driver', 'pubspec.yaml'),
-            globals.fs.path.join('/flutter', 'packages', 'flutter_test', 'pubspec.yaml'),
+            globals.fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
+            globals.fs.path.join('flutter', 'packages', 'flutter_driver', 'pubspec.yaml'),
+            globals.fs.path.join('flutter', 'packages', 'flutter_test', 'pubspec.yaml'),
             globals.fs.path.join(
-              '/flutter',
+              'flutter',
               'bin',
               'cache',
               'artifacts',
@@ -75,8 +77,8 @@ void main() {
             ),
             globals.fs.path.join('usr', 'local', 'bin', 'adb'),
             globals.fs.path.join('Android', 'platform-tools', 'adb.exe'),
-            globals.fs.path.join('/flutter', 'pubspec.lock'),
-            globals.fs.path.join('/flutter', 'version'),
+            globals.fs.path.join('flutter', 'pubspec.lock'),
+            globals.fs.path.join('flutter', 'version'),
           ];
           for (final filePath in filePaths) {
             final File file = globals.fs.file(filePath);
@@ -88,7 +90,7 @@ void main() {
             }
           }
           final templatePaths = <String>[
-            globals.fs.path.join('/flutter', 'packages', 'flutter_tools', 'templates', 'app'),
+            globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'app'),
             globals.fs.path.join(
               'flutter',
               'packages',
@@ -103,7 +105,7 @@ void main() {
               'templates',
               'app_test_widget',
             ),
-            globals.fs.path.join('/flutter', 'packages', 'flutter_tools', 'templates', 'cocoapods'),
+            globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'cocoapods'),
             globals.fs.path.join(
               'flutter',
               'packages',
@@ -112,7 +114,7 @@ void main() {
               'module',
               'common',
             ),
-            globals.fs.path.join('/flutter', 'packages', 'flutter_tools', 'templates', 'package'),
+            globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'package'),
             globals.fs.path.join(
               'flutter',
               'packages',
@@ -120,44 +122,38 @@ void main() {
               'templates',
               'package_ffi',
             ),
-            globals.fs.path.join('/flutter', 'packages', 'flutter_tools', 'templates', 'plugin'),
+            globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin'),
+            globals.fs.path.join('flutter', 'packages', 'flutter_tools', 'templates', 'plugin_ffi'),
             globals.fs.path.join(
-              '/flutter',
-              'packages',
-              'flutter_tools',
-              'templates',
-              'plugin_ffi',
-            ),
-            globals.fs.path.join(
-              '/flutter',
+              'flutter',
               'packages',
               'flutter_tools',
               'templates',
               'plugin_shared',
             ),
             globals.fs.path.join(
-              '/flutter',
+              'flutter',
               'packages',
               'flutter_tools',
               'templates',
               'plugin_cocoapods',
             ),
             globals.fs.path.join(
-              '/flutter',
+              'flutter',
               'packages',
               'flutter_tools',
               'templates',
               'plugin_swift_package_manager',
             ),
             globals.fs.path.join(
-              '/flutter',
+              'flutter',
               'packages',
               'flutter_tools',
               'templates',
               'plugin_darwin_cocoapods',
             ),
             globals.fs.path.join(
-              '/flutter',
+              'flutter',
               'packages',
               'flutter_tools',
               'templates',
@@ -174,7 +170,7 @@ void main() {
           // Set up enough of the packages to satisfy the templating code.
           final File packagesFile = globals.fs.file(
             globals.fs.path.join(
-              '/flutter',
+              'flutter',
               'packages',
               'flutter_tools',
               '.dart_tool',
@@ -183,17 +179,15 @@ void main() {
           );
           final File flutterManifest = globals.fs.file(
             globals.fs.path.join(
-              '/flutter',
+              'flutter',
               'packages',
               'flutter_tools',
               'templates',
               'template_manifest.json',
             ),
           )..createSync(recursive: true);
-          final Directory templateImagesDirectory = globals.fs.directory(
-            '/flutter_template_images',
-          );
-          templateImagesDirectory.childDirectory('templates').createSync(recursive: true);
+          final Directory templateImagesDirectory = globals.fs.directory('flutter_template_images');
+          templateImagesDirectory.createSync(recursive: true);
           packagesFile.createSync(recursive: true);
           packagesFile.writeAsStringSync(
             json.encode(<String, Object>{
@@ -211,40 +205,15 @@ void main() {
           flutterManifest.writeAsStringSync('{"files":[]}');
         },
         overrides: <Type, Generator>{
-          Cache: () => Cache.test(
-            fileSystem: globals.fs,
-            flutterRoot: '/flutter',
-            processManager: globals.processManager,
-          ),
           DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
         },
       );
     });
 
-    CreateCommand createCreateCommand({Pub? pub, Java? java}) {
-      return CreateCommand(
-toolContext: FakeToolContext(
-          fs: globals.fs,
-          logger: globals.logger,
-          platform: globals.platform,
-          processManager: globals.processManager,
-          cache: Cache.test(
-            fileSystem: globals.fs,
-            flutterRoot: '/flutter',
-            processManager: globals.processManager,
-          ),
-          flutterVersion: FakeFlutterVersion(),
-          projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
-        ),
-pub: pub,
-androidContext: FakeAndroidContext(java: java)
-);
-    }
-
     testUsingContext(
       'set template type as usage value',
       () => testbed.run(() async {
-        final CreateCommand command = createCreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=module', 'testy']);
@@ -284,7 +253,7 @@ androidContext: FakeAndroidContext(java: java)
     testUsingContext(
       'set Android host language type as usage value',
       () => testbed.run(() async {
-        final CreateCommand command = createCreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         await runner.run(<String>['create', '--no-pub', '--template=app', 'testy']);
@@ -311,7 +280,7 @@ androidContext: FakeAndroidContext(java: java)
     testUsingContext(
       'create --offline',
       () => testbed.run(() async {
-        final CreateCommand command = createCreateCommand(pub: fakePub);
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['create', 'testy', '--offline']);
         expect(fakePub.calledOnline, 0);
@@ -324,7 +293,7 @@ androidContext: FakeAndroidContext(java: java)
     testUsingContext(
       'package_ffi template not enabled',
       () async {
-        final CreateCommand command = createCreateCommand();
+        final command = CreateCommand();
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         expect(
@@ -343,7 +312,7 @@ androidContext: FakeAndroidContext(java: java)
     );
 
     testUsingContext('plugin_ffi template is marked as deprecated in help', () {
-      final CreateCommand command = createCreateCommand();
+      final command = CreateCommand();
       final String? templateHelp =
           command.argParser.options['template']?.allowedHelp?['plugin_ffi'];
       expect(templateHelp, contains('(deprecated)'));

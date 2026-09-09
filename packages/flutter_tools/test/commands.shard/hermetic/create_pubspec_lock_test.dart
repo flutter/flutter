@@ -11,10 +11,14 @@ import '../../src/common.dart';
 
 void main() {
   late FileSystem fileSystem;
+  const flutterRoot = '/flutter';
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
   });
+
+  List<String> getDependencies(Directory projectDir) =>
+      gatherSdkPackageDependencies(projectDir, flutterRoot: flutterRoot);
 
   // Writes a minimal SDK package pubspec with a single hosted dependency.
   void writeSdkPackagePubspec(String path, String name) {
@@ -44,14 +48,8 @@ void main() {
       '    sdk: flutter\n',
     );
 
-    expect(
-      () => gatherSdkPackageDependencies(projectDir, flutterRoot: '/flutter'),
-      returnsNormally,
-    );
-    expect(
-      gatherSdkPackageDependencies(projectDir, flutterRoot: '/flutter'),
-      contains('vector_math'),
-    );
+    expect(() => getDependencies(projectDir), returnsNormally);
+    expect(getDependencies(projectDir), contains('vector_math'));
   });
 
   testWithoutContext('skips an SDK package whose pubspec cannot be found', () {
@@ -66,14 +64,8 @@ void main() {
       '    sdk: flutter\n',
     );
 
-    expect(
-      () => gatherSdkPackageDependencies(projectDir, flutterRoot: '/flutter'),
-      returnsNormally,
-    );
-    expect(
-      gatherSdkPackageDependencies(projectDir, flutterRoot: '/flutter'),
-      contains('vector_math'),
-    );
+    expect(() => getDependencies(projectDir), returnsNormally);
+    expect(getDependencies(projectDir), contains('vector_math'));
   });
 
   testWithoutContext('skips an SDK package whose directory exists but has no pubspec', () {
@@ -90,29 +82,23 @@ void main() {
       '    sdk: flutter\n',
     );
 
-    expect(
-      () => gatherSdkPackageDependencies(projectDir, flutterRoot: '/flutter'),
-      returnsNormally,
-    );
-    expect(
-      gatherSdkPackageDependencies(projectDir, flutterRoot: '/flutter'),
-      contains('vector_math'),
-    );
+    expect(() => getDependencies(projectDir), returnsNormally);
+    expect(getDependencies(projectDir), contains('vector_math'));
   });
 
   testWithoutContext('throws ToolExit if project pubspec.yaml is empty', () {
     final Directory projectDir = writeProject('');
-    expect(() => gatherSdkPackageDependencies(projectDir), throwsA(isA<ToolExit>()));
+    expect(() => getDependencies(projectDir), throwsA(isA<ToolExit>()));
   });
 
   testWithoutContext('does not throw if project pubspec.yaml has no dependencies', () {
     final Directory projectDir = writeProject('name: my_app\n');
-    expect(() => gatherSdkPackageDependencies(projectDir), returnsNormally);
-    expect(gatherSdkPackageDependencies(projectDir), isEmpty);
+    expect(() => getDependencies(projectDir), returnsNormally);
+    expect(getDependencies(projectDir), isEmpty);
   });
 
   testWithoutContext('throws ToolExit if project pubspec.yaml is malformed', () {
     final Directory projectDir = writeProject('malformed: yaml: check');
-    expect(() => gatherSdkPackageDependencies(projectDir), throwsA(isA<ToolExit>()));
+    expect(() => getDependencies(projectDir), throwsA(isA<ToolExit>()));
   });
 }

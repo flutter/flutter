@@ -2,21 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as path;
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/template.dart';
 import '../context/tool_context.dart';
+import '../isolated/mustache_template.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
 class IdeConfigCommand extends FlutterCommand {
-  IdeConfigCommand({required ToolContext toolContext, TemplateRenderer? templateRenderer})
-    : _toolContext = toolContext,
-      _templateRenderer = templateRenderer ?? toolContext.templateRenderer,
-      super(toolContext: toolContext) {
+  IdeConfigCommand({
+    required super.toolContext,
+    TemplateRenderer templateRenderer = const MustacheTemplateRenderer(),
+  }) : _templateRenderer = templateRenderer {
     argParser.addFlag('overwrite', help: 'When performing operations, overwrite existing files.');
     argParser.addFlag(
       'update-templates',
@@ -39,8 +38,10 @@ class IdeConfigCommand extends FlutterCommand {
     );
   }
 
-  final ToolContext _toolContext;
   final TemplateRenderer _templateRenderer;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'ide-config';
@@ -68,10 +69,10 @@ class IdeConfigCommand extends FlutterCommand {
 
   static const _ideName = 'intellij';
   Directory get _templateDirectory {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     return fs.directory(
       fs.path.join(
-        _toolContext.cache.flutterRoot,
+        toolContext.cache.flutterRoot,
         'packages',
         'flutter_tools',
         'ide_templates',
@@ -81,26 +82,25 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   Directory get _createTemplatesDirectory {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     return fs.directory(
-      fs.path.join(_toolContext.cache.flutterRoot, 'packages', 'flutter_tools', 'templates'),
+      fs.path.join(toolContext.cache.flutterRoot, 'packages', 'flutter_tools', 'templates'),
     );
   }
 
   Directory get _flutterRoot {
-    final FileSystem fs = _toolContext.fs;
-    return fs.directory(fs.path.absolute(_toolContext.cache.flutterRoot));
+    final FileSystem fs = toolContext.fs;
+    return fs.directory(fs.path.absolute(toolContext.cache.flutterRoot));
   }
 
   // Returns true if any entire path element is equal to dir.
   bool _hasDirectoryInPath(FileSystemEntity entity, String dir) {
-    final path.Context pathContext = _toolContext.fs.path;
     String pathStr = entity.absolute.path;
-    while (pathStr.isNotEmpty && pathContext.dirname(pathStr) != pathStr) {
-      if (pathContext.basename(pathStr) == dir) {
+    while (pathStr.isNotEmpty && toolContext.fs.path.dirname(pathStr) != pathStr) {
+      if (toolContext.fs.path.basename(pathStr) == dir) {
         return true;
       }
-      pathStr = pathContext.dirname(pathStr);
+      pathStr = toolContext.fs.path.dirname(pathStr);
     }
     return false;
   }
@@ -129,29 +129,22 @@ class IdeConfigCommand extends FlutterCommand {
 
   // Discovers and syncs with existing configuration files in the Flutter tree.
   void _handleTemplateUpdate() {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final path.Context pathContext = fs.path;
-    final Directory flutterRoot = _flutterRoot;
-    final Directory templateDirectory = _templateDirectory;
-    final Directory createTemplatesDirectory = _createTemplatesDirectory;
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = toolContext.logger;
 
-    if (!flutterRoot.existsSync()) {
+    if (!_flutterRoot.existsSync()) {
       return;
     }
 
     final manifest = <String>{};
-    final Iterable<File> flutterFiles = flutterRoot.listSync(recursive: true).whereType<File>();
+    final Iterable<File> flutterFiles = _flutterRoot.listSync(recursive: true).whereType<File>();
     for (final srcFile in flutterFiles) {
-      final String relativePath = pathContext.relative(
-        srcFile.path,
-        from: flutterRoot.absolute.path,
-      );
+      final String relativePath = fs.path.relative(srcFile.path, from: _flutterRoot.absolute.path);
 
       // Skip template files in both the ide_templates and templates
       // directories to avoid copying onto themselves.
-      if (_isChildDirectoryOf(templateDirectory, srcFile) ||
-          _isChildDirectoryOf(createTemplatesDirectory, srcFile)) {
+      if (_isChildDirectoryOf(_templateDirectory, srcFile) ||
+          _isChildDirectoryOf(_createTemplatesDirectory, srcFile)) {
         continue;
       }
 
@@ -167,14 +160,14 @@ class IdeConfigCommand extends FlutterCommand {
       }
 
       final File finalDestinationFile = fs.file(
-        pathContext.absolute(
-          templateDirectory.absolute.path,
+        fs.path.join(
+          _templateDirectory.absolute.path,
           '$relativePath${Template.copyTemplateExtension}',
         ),
       );
-      final String relativeDestination = pathContext.relative(
+      final String relativeDestination = fs.path.relative(
         finalDestinationFile.path,
-        from: flutterRoot.absolute.path,
+        from: _flutterRoot.absolute.path,
       );
       if (finalDestinationFile.existsSync()) {
         if (_fileIsIdentical(srcFile, finalDestinationFile)) {
@@ -209,19 +202,19 @@ class IdeConfigCommand extends FlutterCommand {
 
     // Look for any files under the template dir that don't exist in the manifest and remove
     // them.
-    final Iterable<File> templateFiles = templateDirectory
+    final Iterable<File> templateFiles = _templateDirectory
         .listSync(recursive: true)
         .whereType<File>();
     for (final templateFile in templateFiles) {
-      final String relativePath = pathContext.relative(
+      final String relativePath = fs.path.relative(
         templateFile.absolute.path,
-        from: templateDirectory.absolute.path,
+        from: _templateDirectory.absolute.path,
       );
       if (!manifest.contains(relativePath)) {
         templateFile.deleteSync();
-        final String relativeDestination = pathContext.relative(
+        final String relativeDestination = fs.path.relative(
           templateFile.path,
-          from: flutterRoot.absolute.path,
+          from: _flutterRoot.absolute.path,
         );
         logger.printStatus('  $relativeDestination (removed)');
       }
@@ -231,10 +224,10 @@ class IdeConfigCommand extends FlutterCommand {
       while (parentDir.listSync().isEmpty) {
         parentDir.deleteSync();
         logger.printTrace(
-          '  ${pathContext.relative(parentDir.absolute.path)} (empty directory - removed)',
+          '  ${fs.path.relative(parentDir.absolute.path)} (empty directory - removed)',
         );
         parentDir = fs.directory(parentDir.dirname);
-        if (pathContext.isWithin(templateDirectory.absolute.path, parentDir.absolute.path)) {
+        if (!fs.path.isWithin(_templateDirectory.absolute.path, parentDir.absolute.path)) {
           break;
         }
       }
@@ -243,8 +236,8 @@ class IdeConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = toolContext.logger;
 
     final List<String> rest = argResults?.rest ?? <String>[];
     if (rest.isNotEmpty) {
@@ -256,10 +249,8 @@ class IdeConfigCommand extends FlutterCommand {
       return FlutterCommandResult.success();
     }
 
-    final String flutterRoot = fs.path.absolute(_toolContext.cache.flutterRoot);
-    final String dirPath = fs.path.normalize(
-      fs.directory(fs.path.absolute(_toolContext.cache.flutterRoot)).absolute.path,
-    );
+    final String flutterRoot = fs.path.absolute(toolContext.cache.flutterRoot);
+    final String dirPath = fs.path.normalize(fs.directory(flutterRoot).absolute.path);
 
     final String? error = _validateFlutterDir(dirPath, fileSystem: fs, flutterRoot: flutterRoot);
     if (error != null) {
@@ -268,7 +259,7 @@ class IdeConfigCommand extends FlutterCommand {
 
     logger.printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     var generatedCount = 0;
-    generatedCount += _renderTemplate(_ideName, dirPath, <String, Object>{
+    generatedCount += _renderTemplate(dirPath, <String, Object>{
       'withRootModule': boolArg('with-root-module'),
       'android': true,
     });
@@ -283,9 +274,9 @@ class IdeConfigCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  int _renderTemplate(String templateName, String dirPath, Map<String, Object> context) {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
+  int _renderTemplate(String dirPath, Map<String, Object> context) {
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = toolContext.logger;
     final template = Template(
       _templateDirectory,
       null,

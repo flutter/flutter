@@ -14,7 +14,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/net.dart';
-import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -299,9 +298,9 @@ class UpdatePackagesCommand extends FlutterCommand {
       if (workspaceNode is YamlList) {
         for (final Object? member in workspaceNode) {
           if (member is String) {
-            String memberName = fs.path.basename(member);
-            final File memberPubspec = fs.file(
-              fs.path.join(project.directory.path, member, _pubspecName),
+            String memberName = globals.fs.path.basename(member);
+            final File memberPubspec = globals.fs.file(
+              globals.fs.path.join(project.directory.path, member, _pubspecName),
             );
             if (memberPubspec.existsSync()) {
               try {

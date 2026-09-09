@@ -21,7 +21,6 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'project.dart';
-import 'globals.dart' as globals;
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
@@ -70,22 +69,36 @@ class HotRunner extends ResidentRunner {
     super.flutterDevices, {
     required super.debuggingOptions,
     required super.target,
-    required this.analytics,
-
+    super.analytics,
     this.applicationBinary,
-    
+    super.artifacts,
     this.benchmarkMode = false,
+    super.buildSystem,
+    super.buildTargets,
+    super.cache,
+    super.commandHelp,
+    super.config,
+    super.dartBuilder,
     super.dillOutputPath,
+    super.fileSystem,
+    super.flutterVersion,
     this.hostIsIde = false,
     HotRunnerConfig? hotRunnerConfig,
+    super.logger,
     super.machine,
     String? nativeAssetsYamlFile,
+    super.osUtils,
+    super.outputPreferences,
+    super.platform,
+    super.processManager,
     ProjectFileInvalidator? projectFileInvalidator,
     super.projectRootPath,
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
     ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
     super.stayResident,
     StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+    super.terminal,
+    super.xcode,
   }) : _hotRunnerConfig = hotRunnerConfig,
        _nativeAssetsYamlFile = nativeAssetsYamlFile,
        _projectFileInvalidator = projectFileInvalidator,
@@ -97,7 +110,6 @@ class HotRunner extends ResidentRunner {
   final StopwatchFactory _stopwatchFactory;
   final ReloadSourcesHelper _reloadSourcesHelper;
   final ReassembleHelper _reassembleHelper;
-  final Analytics analytics;
   final String? _nativeAssetsYamlFile;
   final ProjectFileInvalidator? _projectFileInvalidator;
   final HotRunnerConfig? _hotRunnerConfig;
@@ -105,7 +117,7 @@ class HotRunner extends ResidentRunner {
   @override
   ProjectFileInvalidator get projectFileInvalidator =>
       _projectFileInvalidator ??
-      ProjectFileInvalidator(fileSystem: globals.fs, platform: globals.platform, logger: globals.logger);
+      ProjectFileInvalidator(fileSystem: fileSystem, platform: platform, logger: logger);
 
   HotRunnerConfig get hotRunnerConfig => _hotRunnerConfig ?? HotRunnerConfig();
 
@@ -455,7 +467,7 @@ class HotRunner extends ResidentRunner {
         appFailedToStart();
         return 1;
       }
-      
+      await cacheInitialDillCompilation();
     } on Exception catch (err) {
       logger.printError(err.toString());
       appFailedToStart();
@@ -1034,7 +1046,6 @@ class HotRunner extends ResidentRunner {
       viewCache,
       onSlow,
       reloadMessage,
-      logger,
     );
     shouldReportReloadTime = reassembleResult.shouldReportReloadTime;
     if (reassembleResult.reassembleViews.isEmpty) {
@@ -1121,7 +1132,7 @@ class HotRunner extends ResidentRunner {
             uiIsolateId: view.uiIsolate!.id,
             viewId: view.id,
             windows:
-                (device.targetPlatform == TargetPlatform.tester && globals.platform.isWindows) ||
+                (device.targetPlatform == TargetPlatform.tester && platform.isWindows) ||
                 device.targetPlatform == TargetPlatform.windows_x64 ||
                 device.targetPlatform == TargetPlatform.windows_arm64,
           ),
@@ -1294,15 +1305,16 @@ typedef ReassembleHelper =
       List<FlutterDevice?> flutterDevices,
       Map<FlutterDevice?, List<FlutterView>> viewCache,
       void Function(String message)? onSlow,
-      String reloadMessage, Logger logger,
+      String reloadMessage,
     );
 
 Future<ReassembleResult> _defaultReassembleHelper(
   List<FlutterDevice?> flutterDevices,
   Map<FlutterDevice?, List<FlutterView>> viewCache,
   void Function(String message)? onSlow,
-  String reloadMessage, Logger logger,
+  String reloadMessage,
 ) async {
+  final Logger logger = flutterDevices.firstOrNull?.logger ?? BufferLogger.test();
   // Check if any isolates are paused and reassemble those that aren't.
   final reassembleViews = <FlutterView, FlutterVmService?>{};
   final reassembleFutures = <Future<void>>[];

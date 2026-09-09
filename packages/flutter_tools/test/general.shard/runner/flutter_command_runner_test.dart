@@ -273,7 +273,11 @@ void main() {
       );
 
       group('getRepoPackages', () {
+        late String? oldFlutterRoot;
+
         setUp(() {
+          oldFlutterRoot = globals.cache.flutterRoot;
+          globals.cache.flutterRoot = _kFlutterRoot;
           fileSystem
               .directory(fileSystem.path.join(_kFlutterRoot, 'examples'))
               .createSync(recursive: true);
@@ -290,6 +294,10 @@ void main() {
           fileSystem
               .file(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool', 'pubspec.yaml'))
               .createSync();
+        });
+
+        tearDown(() {
+          globals.cache.flutterRoot = oldFlutterRoot;
         });
 
         testUsingContext(
@@ -313,10 +321,6 @@ void main() {
             Platform: () => platform,
             FlutterVersion: () => FakeFlutterVersion(),
             OutputPreferences: () => OutputPreferences.test(),
-            Cache: () => Cache.test(
-              rootOverride: fileSystem.directory(_kFlutterRoot),
-              fileSystem: fileSystem,
-            ),
           },
         );
       });

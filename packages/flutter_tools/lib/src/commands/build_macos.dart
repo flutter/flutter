@@ -15,19 +15,19 @@ import '../context/tool_context.dart';
 import '../features.dart';
 import '../macos/build_macos.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
-import '../runner/flutter_command_runner.dart';
+import '../runner/flutter_command_runner.dart' show FlutterGlobalOptions;
 import 'build.dart';
 
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({
-    required BuildSystem buildSystem,
+    required this.buildSystem,
+    required this.featureFlags,
     required ToolContext toolContext,
     required bool verboseHelp,
-  }) : _buildSystem = buildSystem,
-       _toolContext = toolContext,
-       super(
+  }) : super(
          logger: toolContext.logger,
+         outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,
          verboseHelp: verboseHelp,
        ) {
@@ -42,21 +42,21 @@ class BuildMacosCommand extends BuildSubCommand {
     );
   }
 
-  final BuildSystem _buildSystem;
-  final ToolContext _toolContext;
+  /// The build system used to execute targets.
+  final BuildSystem buildSystem;
 
+  /// Feature flags governing macOS desktop builds.
   @visibleForTesting
-  BuildSystem get buildSystem => _buildSystem;
+  final FeatureFlags featureFlags;
 
-  @visibleForTesting
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'macos';
 
   @override
-  bool get hidden => !featureFlags.isMacOSEnabled || !_toolContext.platform.isMacOS;
+  bool get hidden => !featureFlags.isMacOSEnabled || !toolContext.platform.isMacOS;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -67,14 +67,14 @@ class BuildMacosCommand extends BuildSubCommand {
   String get description => 'Build a macOS desktop application.';
 
   @override
-  bool get supported => _toolContext.platform.isMacOS;
+  bool get supported => toolContext.platform.isMacOS;
 
   bool get configOnly => boolArg('config-only');
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = this.logger;
+    final FileSystem fs = toolContext.fs;
+    final Logger logger = toolContext.logger;
 
     final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isMacOSEnabled) {
@@ -86,14 +86,11 @@ class BuildMacosCommand extends BuildSubCommand {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }
 
-    final bool verbose =
-        (globalResults?[FlutterGlobalOptions.kVerboseFlag] as bool? ?? false) || logger.isVerbose;
-
     await buildMacOS(
       flutterProject: project,
       buildInfo: buildInfo,
       targetOverride: targetFile,
-      verboseLogging: verbose,
+      verboseLogging: logger.isVerbose || globalResults?[FlutterGlobalOptions.kVerboseFlag] == true,
       configOnly: configOnly,
       sizeAnalyzer: SizeAnalyzer(
         fileSystem: fs,

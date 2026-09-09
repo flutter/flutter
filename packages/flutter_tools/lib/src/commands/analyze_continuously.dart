@@ -14,6 +14,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     super.argResults,
     List<Directory> repoPackages, {
     required super.artifacts,
+    required super.cache,
     required super.fileSystem,
     required super.logger,
     required super.platform,
@@ -21,7 +22,6 @@ class AnalyzeContinuously extends AnalyzeBase {
     required this.shutdownHooks,
     required super.suppressAnalytics,
     required super.terminal,
-    super.cache,
   }) : super(repoPackages: repoPackages);
 
   final ShutdownHooks shutdownHooks;
@@ -42,8 +42,8 @@ class AnalyzeContinuously extends AnalyzeBase {
       final dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(
         repoPackages,
-        dependencies,
         fileSystem: fileSystem,
+        flutterRoot: flutterRoot,
       );
 
       directories = <String>[flutterRoot];

@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/widget_preview/preview_manifest.dart';
 import 'package:flutter_tools/src/widget_preview/preview_pubspec_builder.dart';
 import 'package:process/process.dart';
 import 'package:test/fake.dart';
+import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../../src/common.dart';
@@ -92,8 +93,8 @@ dependencies:
             loadYaml(rootProject.widgetPreviewScaffoldProject.pubspecFile.readAsStringSync())
                 as YamlMap;
         final expectedDependencies = <String, Object?>{
-          'abcd': {'path': packageProject.projectRoot.path},
-          'example': {'path': exampleProject.projectRoot.path},
+          'abcd': {'path': packageProject.projectRoot.path.replaceAll(r'\', '/')},
+          'example': {'path': exampleProject.projectRoot.path.replaceAll(r'\', '/')},
         };
 
         // The generated pubspec.yaml should have path dependencies on both the package and example
@@ -127,7 +128,6 @@ $yaml
           botDetector: const FakeBotDetector(true),
           platform: const LocalPlatform(),
           stdio: Stdio.test(stdout: stdout, stderr: stderr),
-          flutterRoot: getFlutterRoot(),
         ),
       },
     );

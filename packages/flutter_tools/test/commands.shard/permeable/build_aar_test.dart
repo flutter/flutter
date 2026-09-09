@@ -8,8 +8,8 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
@@ -46,18 +46,12 @@ void main() {
     List<String>? arguments,
   }) async {
     final command = BuildAarCommand(
-androidBuilder: context.get<AndroidBuilder>() ?? FakeAndroidBuilder(),
-androidContext: FakeAndroidContext(androidSdk: androidSdk),
-buildSystem: globals.buildSystem,
-toolContext: FakeToolContext(
-        fs: globals.fs,
-        logger: globals.logger,
-        platform: globals.platform,
-        processManager: globals.processManager,
-        projectFactory: globals.projectFactory,
-      )
-);
-    final CommandRunner<void> runner = createTestCommandRunner(command, context.get<Analytics>());
+      androidSdk: androidSdk,
+      fileSystem: globals.fs,
+      logger: BufferLogger.test(),
+      verboseHelp: false,
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>['aar', ...?arguments, target]);
     return command;
   }
@@ -396,36 +390,30 @@ toolContext: FakeToolContext(
       });
     });
 
-    late AndroidSdk androidSdk;
     testUsingContext(
       'support ExtraDartFlagOptions',
       () async {
-        final Directory sdkDir = tempDir.childDirectory('android-sdk');
-        sdkDir
-            .childDirectory('ndk')
-            .childDirectory('21.1.6352462')
-            .childFile('source.properties')
-            .createSync(recursive: true);
-        androidSdk = FakeAndroidSdk(sdkDir);
         final String projectPath = await createProject(
           tempDir,
           arguments: <String>['--no-pub', '--template=module'],
         );
-        final List<String> installedNdkVersions =
-            androidSdk.directory
-                .childDirectory('ndk')
-                .listSync()
-                .whereType<Directory>()
-                .map((Directory dir) => dir.basename)
-                .where(
-                  (String version) => androidSdk.directory
-                      .childDirectory('ndk')
-                      .childDirectory(version)
-                      .childFile('source.properties')
-                      .existsSync(),
-                )
-                .toList()
-              ..sort();
+        final AndroidSdk? androidSdk = globals.androidSdk;
+        if (androidSdk == null) {
+          return;
+        }
+        final Directory ndkDir = androidSdk.directory.childDirectory('ndk');
+        final List<String> installedNdkVersions = ndkDir.existsSync()
+            ? ndkDir
+                  .listSync()
+                  .whereType<Directory>()
+                  .map((Directory dir) => dir.basename)
+                  .where(
+                    (String version) =>
+                        ndkDir.childDirectory(version).childFile('source.properties').existsSync(),
+                  )
+                  .toList()
+            : <String>[];
+        installedNdkVersions.sort();
         final ndkProvisioningProperties = <String>[
           '-Pflutter.androidSdkRoot=${androidSdk.directory.path}',
           '-Pflutter.installedNdkVersions=${installedNdkVersions.join(',')}',
@@ -472,7 +460,6 @@ toolContext: FakeToolContext(
         await expectLater(
           () => runBuildAar(
             projectPath,
-            androidSdk: androidSdk,
             arguments: <String>[
               '--no-pub',
               '--no-debug',
@@ -491,7 +478,6 @@ toolContext: FakeToolContext(
         ProcessManager: () => processManager,
         FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false),
         AndroidStudio: () => _FakeAndroidStudio(),
-        AndroidSdk: () => androidSdk,
       },
     );
 
@@ -636,22 +622,6 @@ final class _CapturingFakeAndroidBuilder extends Fake implements AndroidBuilder 
     capturedBuildAarCalls.add(invocation);
     return Future<void>.value();
   }
-}
-
-class FakeAndroidSdk extends Fake implements AndroidSdk {
-  FakeAndroidSdk(this.directory, {this.sdkManagerPath});
-
-  @override
-  final Directory directory;
-
-  @override
-  final String? sdkManagerPath;
-
-  @override
-  bool get cmdlineToolsAvailable => true;
-
-  @override
-  bool get licensesAvailable => true;
 }
 
 final class _FakeAndroidSdk with Fake implements AndroidSdk {

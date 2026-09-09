@@ -26,7 +26,7 @@ void main() {
   });
 
   testUsingContext('tool_backend.dart tree shakes icons successfully', () async {
-    final String flutterRoot = getFlutterRoot();
+    final String flutterRoot = globals.cache.flutterRoot;
     final String flutterBin = globals.fs.path.join(
       flutterRoot,
       'bin',

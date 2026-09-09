@@ -184,9 +184,8 @@ class Cache {
     FileSystem? fileSystem,
     Platform? platform,
     Stdio? stdio,
-    ProcessManager? processManager,
+    required ProcessManager processManager,
     Abi? currentAbi,
-    OperatingSystemUtils? osUtils,
   }) {
     if (rootOverride?.fileSystem != null &&
         fileSystem != null &&
@@ -200,31 +199,27 @@ class Cache {
     fileSystem ??= rootOverride?.fileSystem ?? MemoryFileSystem.test();
     platform ??= FakePlatform(environment: <String, String>{});
     logger ??= BufferLogger.test();
-    processManager ??= const LocalProcessManager();
     return Cache(
-      rootOverride: rootOverride,
+      rootOverride: rootOverride ?? fileSystem.currentDirectory,
       artifacts: artifacts ?? <ArtifactSet>[],
       flutterRoot: flutterRoot,
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
       stdio: stdio,
-      osUtils:
-          osUtils ??
-          OperatingSystemUtils(
-            fileSystem: fileSystem,
-            logger: logger,
-            platform: platform,
-            processManager: processManager,
-            currentAbi: currentAbi,
-          ),
+      osUtils: OperatingSystemUtils(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        currentAbi: currentAbi,
+      ),
     );
   }
 
   final Logger _logger;
   final Platform _platform;
   final FileSystem _fileSystem;
-  FileSystem get fileSystem => _fileSystem;
   final OperatingSystemUtils _osUtils;
   OperatingSystemUtils get osUtils => _osUtils;
   final Directory? _rootOverride;
@@ -274,6 +269,9 @@ class Cache {
       userMessages: UserMessages(),
     );
   }
+
+  @visibleForTesting
+  set flutterRoot(String? value) => _flutterRoot = value;
 
   String? _flutterRoot;
 
@@ -512,18 +510,11 @@ class Cache {
     if (_dartSdkBuild == null) {
       // Make the version string more customer-friendly.
       // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
-      final String version = _platform.version.trim();
-      if (version.isEmpty) {
-        return '3.7.0';
-      }
-      final String justVersion = version.split(' ')[0];
+      final String justVersion = _platform.version.split(' ')[0];
       _dartSdkBuild = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
         final String noFlutter = match[2]!.replaceAll('.flutter-', ' ');
         return '${match[1]}$noFlutter';
       });
-      if (_dartSdkBuild!.isEmpty) {
-        _dartSdkBuild = '3.7.0';
-      }
     }
     return _dartSdkBuild!;
   }
@@ -793,12 +784,7 @@ class Cache {
     Set<DevelopmentArtifact> requiredArtifacts,
   ) async {
     final artifactsToUpdate = <ArtifactSet>[];
-    var isLocalEngine = false;
-    try {
-      isLocalEngine = context.get<Artifacts>()?.localEngineInfo != null;
-    } on UnsupportedError {
-      isLocalEngine = false;
-    }
+    final isLocalEngine = context.get<Artifacts>()?.localEngineInfo != null;
 
     for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
@@ -821,6 +807,10 @@ class Cache {
 
   /// Update the cache to contain all `requiredArtifacts`.
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
+    if (!_lockEnabled) {
+      return;
+    }
+
     final List<ArtifactSet> artifactsToUpdate = await _collectArtifactsToUpdate(requiredArtifacts);
 
     if (artifactsToUpdate.isEmpty) {

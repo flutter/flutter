@@ -19,7 +19,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../compile.dart';
 import '../convert.dart';
 import '../dart/language_version.dart';
@@ -721,7 +720,7 @@ class FlutterPlatform extends PlatformPlugin {
             'test $ourTestCount: connected to test device, now awaiting test result',
           );
 
-          await _pipeHarnessToRemote(
+          await pipeHarnessToRemote(
             id: ourTestCount,
             harnessChannel: testHarnessChannel,
             remoteChannel: remoteChannel,
@@ -889,9 +888,10 @@ class _AsyncError {
 ///
 /// The returned future completes when either side is closed, which also
 /// indicates when the tests have finished.
-Future<void> _pipeHarnessToRemote({
+@visibleForTesting
+Future<void> pipeHarnessToRemote({
   required int id,
-  required StreamChannel<dynamic> harnessChannel,
+  required StreamChannel<Object?> harnessChannel,
   required StreamChannel<String> remoteChannel,
 }) async {
   globals.printTrace('test $id: Waiting for test harness or tests to finish');
@@ -902,10 +902,18 @@ Future<void> _pipeHarnessToRemote({
     ) {
       globals.printTrace('test $id: Test process is no longer needed by test harness');
     }),
-    remoteChannel.stream.map<dynamic>(json.decode).pipe(harnessChannel.sink).then<void>((
-      void value,
-    ) {
-      globals.printTrace('test $id: Test harness is no longer needed by test process');
-    }),
+    remoteChannel.stream
+        .map<Object?>(json.decode)
+        .handleError((Object error) {
+          final formatException = error as FormatException;
+          globals.printWarning(
+            'Received unexpected non-JSON output from test runner: ${formatException.source}',
+          );
+          globals.printTrace('test $id: JSON decoding failed: $formatException');
+        }, test: (error) => error is FormatException)
+        .pipe(harnessChannel.sink)
+        .then<void>((void value) {
+          globals.printTrace('test $id: Test harness is no longer needed by test process');
+        }),
   ]);
 }

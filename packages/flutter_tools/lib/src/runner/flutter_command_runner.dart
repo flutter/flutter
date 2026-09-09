@@ -562,9 +562,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
       packagePath: topLevelResults[FlutterGlobalOptions.kPackagesOption] as String?,
     );
     if (engineBuildPaths != null) {
-      contextOverrides.addAll(<Type, Object?>{
-        Artifacts: Artifacts.getLocalEngine(engineBuildPaths),
-      });
+      final Artifacts localArtifacts = Artifacts.getLocalEngine(engineBuildPaths);
+      contextOverrides.addAll(<Type, Object?>{Artifacts: localArtifacts});
+      // Update the artifacts the commands were created with.
+      if (_toolContext.artifacts case final DeferredArtifacts artifacts) {
+        artifacts.resolve(localArtifacts);
+      }
     }
 
     await context.run<void>(
@@ -610,7 +613,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           final String status;
           if (topLevelMachineFlag) {
             final Map<String, Object> jsonOut = version.toJson();
-            jsonOut['flutterRoot'] = globals.cache.flutterRoot!;
+            jsonOut['flutterRoot'] = _toolContext.cache.flutterRoot;
             status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
             status = version.toString();
@@ -640,7 +643,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// Get the root directories of the repo - the directories containing Dart packages.
   List<String> getRepoRoots() {
     final FileSystem fs = _toolContext.fs;
-    final String root = fs.path.absolute(globals.cache.flutterRoot!);
+    final String root = fs.path.absolute(_toolContext.cache.flutterRoot);
     // not bin, and not the root
     return <String>['dev', 'examples', 'packages'].map<String>((String item) {
       return fs.path.join(root, item);

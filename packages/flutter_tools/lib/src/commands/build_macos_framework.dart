@@ -12,7 +12,6 @@ import '../base/process.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/macos.dart';
-import '../cache.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;

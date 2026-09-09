@@ -1,4 +1,3 @@
-import 'package:flutter_tools/src/globals.dart' as globals;
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -246,6 +245,7 @@ void main() {
     var fs = LocalFileSystem.test(signals: Signals.test());
 
     setUp(() async {
+      final String flutterRoot = getFlutterRoot();
       // Note: we don't use a MemoryFileSystem since we don't have a way to
       // provide it to package:analyzer APIs without writing a significant amount
       // of wrapper logic.
@@ -265,9 +265,7 @@ void main() {
         ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary)
         ..childFile('lib/src/custom_previews.dart').writeAsStringSync(kCustomPreviews);
       project = FlutterProject.fromDirectoryTest(projectDir);
-      final String? sdkPath = globals.cache.flutterRoot != null
-          ? fs.path.join(globals.cache.flutterRoot, 'bin', 'cache', 'dart-sdk')
-          : null;
+      final String sdkPath = fs.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk');
       final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
       previewDetector = PreviewDetector(
         artifacts: artifacts,
@@ -299,7 +297,6 @@ void main() {
         platform: const LocalPlatform(),
         botDetector: const FakeBotDetector(true),
         stdio: FakeStdio(),
-        flutterRoot: getFlutterRoot(),
       );
       await pub.get(context: PubContext.flutterTests, project: project);
     });
@@ -380,8 +377,8 @@ List<_i1.WidgetPreview> previews() => [
           size: _i7.Size(123.0, 456.0),
           textScaleFactor: 50.0,
           wrapper: _i8.wrapper,
-          theme: _i9.myThemeData,
           brightness: _i7.Brightness.dark,
+          theme: _i9.myThemeData,
           localizations: _i10.myLocalizations,
         ).transform(),
   ),

@@ -171,11 +171,16 @@ void main() {
     await ensureFlutterToolsSnapshot();
     loggingProcessManager = LoggingProcessManager();
     shutdownHooks = ShutdownHooks();
-    logger = WidgetPreviewMachineAwareLogger(BufferLogger.test(), machine: false, verbose: false);
+    mockStdio = FakeStdio();
+    logger = WidgetPreviewMachineAwareLogger(
+      BufferLogger.test(),
+      machine: false,
+      stdio: mockStdio,
+      verbose: false,
+    );
     fs = LocalFileSystem.test(signals: Signals.test());
     botDetector = const FakeBotDetector(false);
     tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
-    mockStdio = FakeStdio();
     platform = FakePlatform.fromPlatform(const LocalPlatform());
 
     fakeGoogleChromeDevice = FakeGoogleChromeDevice();
@@ -198,6 +203,7 @@ void main() {
     // which in turn will check for the presence of the Flutter SDK root. Without
     // this field set consistently, the order of the tests becomes important *or*
     // you need to remember to set it everywhere.
+    globals.cache.flutterRoot = fs.path.absolute('..', '..');
   });
 
   tearDown(() async {
@@ -283,7 +289,21 @@ void main() {
   }
 
   Future<void> cleanWidgetPreview({required Directory rootProject}) async {
-    await runWidgetPreviewCommand(<String>['clean', rootProject.path]);
+    var retries = 5;
+    var delay = const Duration(milliseconds: 100);
+    while (true) {
+      try {
+        await runWidgetPreviewCommand(<String>['clean', rootProject.path]);
+        break;
+      } on Exception catch (_) {
+        retries--;
+        if (retries <= 0) {
+          rethrow;
+        }
+        await Future<void>.delayed(delay);
+        delay *= 2;
+      }
+    }
     expect(fs.directory(rootProject).childDirectory('.widget_preview'), isNot(exists));
   }
 

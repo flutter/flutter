@@ -23,8 +23,6 @@ void main() {
   late DapTestSession dap;
   final relativeMainPath = 'lib${fileSystem.path.separator}main.dart';
 
-  setUpAll(() {});
-
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('flutter_adapter_test.');
     dap = await DapTestSession.setUp();

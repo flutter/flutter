@@ -125,8 +125,7 @@ void main() {
     final ProcessManager effectiveProcessManager = context.get<ProcessManager>() ?? processManager;
     final toolContext = FakeToolContext(
       cache: Cache.test(
-        fileSystem: fileSystem,
-        flutterRoot: _kTestFlutterRoot,
+        rootOverride: fileSystem.directory(_kTestFlutterRoot),
         logger: effectiveLogger,
         processManager: effectiveProcessManager,
       ),
@@ -138,27 +137,13 @@ void main() {
       projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
     );
     return BuildCommand(
-      analytics: fakeAnalytics,
-      androidSdk: FakeAndroidSdk(),
-      artifacts: FakeArtifacts(),
+      androidContext: FakeAndroidContext(),
+      appleContext: FakeAppleContext(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      cache: FakeCache(),
-      config: FakeConfig(),
       featureFlags: effectiveFeatureFlags,
-      fileSystem: fileSystem,
-      fileSystemUtils: FakeFileSystemUtils(),
-      flutterVersion: FakeFlutterVersion(),
-      logger: effectiveLogger,
-      osUtils: effectiveOsUtils,
-      platform: effectivePlatform,
-      plistParser: FakePlistParser(),
-      processManager: effectiveProcessManager,
-      processUtils: FakeProcessUtils(),
       templateRenderer: FakeTemplateRenderer(),
-      terminal: FakeTerminal(),
       toolContext: toolContext,
       verboseHelp: verboseHelp,
-      xcode: FakeXcode(),
     );
   }
 
@@ -190,11 +175,11 @@ void main() {
       projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
     );
     return BuildLinuxCommand(
-buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-featureFlags: effectiveFeatureFlags,
-toolContext: toolContext,
-verboseHelp: verboseHelp
-);
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      featureFlags: effectiveFeatureFlags,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    );
   }
 
   testUsingContext(

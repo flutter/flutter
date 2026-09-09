@@ -23,6 +23,7 @@ import '../build_system/targets/macos.dart';
 import '../build_system/targets/windows.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
@@ -96,10 +97,11 @@ var _kDefaultTargets = <Target>[
 class AssembleCommand extends FlutterCommand {
   AssembleCommand({
     required BuildSystem buildSystem,
+    required FeatureFlags featureFlags,
     required ToolContext toolContext,
-
     bool verboseHelp = false,
   }) : _buildSystem = buildSystem,
+       _featureFlags = featureFlags,
        _toolContext = toolContext,
        _verboseHelp = verboseHelp,
        super(toolContext: toolContext) {
@@ -169,16 +171,14 @@ class AssembleCommand extends FlutterCommand {
 
   final bool _verboseHelp;
   final BuildSystem _buildSystem;
+  final FeatureFlags _featureFlags;
   final ToolContext _toolContext;
 
-  Analytics get _effectiveAnalytics => analytics;
+  @override
+  ToolContext get toolContext => _toolContext;
 
   @override
   bool get hidden => !_verboseHelp;
-
-  late final FlutterProject _flutterProject = _toolContext.projectFactory.fromDirectory(
-    _toolContext.fs.currentDirectory,
-  );
 
   @override
   String get description => 'Assemble and build Flutter resources.';
@@ -194,7 +194,7 @@ class AssembleCommand extends FlutterCommand {
     workflow: commandPath,
     commandHasTerminal: hasTerminal,
     buildBundleTargetPlatform: _environment.defines[kTargetPlatform],
-    buildBundleIsModule: _flutterProject.isModule,
+    buildBundleIsModule: project.isModule,
   );
 
   @override
@@ -205,7 +205,7 @@ class AssembleCommand extends FlutterCommand {
     }
 
     final targetPlatform = TargetPlatform.fromName(platform);
-    final DevelopmentArtifact? artifact = artifactFromTargetPlatform(targetPlatform);
+    final DevelopmentArtifact? artifact = artifactFromTargetPlatform(targetPlatform, _featureFlags);
     if (artifact != null) {
       return <DevelopmentArtifact>{artifact};
     }
@@ -255,13 +255,14 @@ class AssembleCommand extends FlutterCommand {
   /// The environmental configuration for a build invocation.
   Environment _createEnvironment() {
     final FileSystem fs = _toolContext.fs;
+    final FlutterProject project = this.project;
     String? output = stringArg('output');
     if (output == null) {
       throwToolExit('--output directory is required for assemble.');
     }
     // If path is relative, make it absolute from flutter project.
     if (fs.path.isRelative(output)) {
-      output = fs.path.join(_flutterProject.directory.path, output);
+      output = fs.path.join(project.directory.path, output);
     }
     final Artifacts artifacts = _toolContext.artifacts;
 
@@ -279,10 +280,8 @@ class AssembleCommand extends FlutterCommand {
 
     return Environment(
       outputDir: fs.directory(output),
-      buildDir: _flutterProject.directory
-          .childDirectory('.dart_tool')
-          .childDirectory('flutter_build'),
-      projectDir: _flutterProject.directory,
+      buildDir: project.directory.childDirectory('.dart_tool').childDirectory('flutter_build'),
+      projectDir: project.directory,
       packageConfigPath: packageConfigPath(),
       defines: _parseDefines([...stringsArg('define'), ...decodedDefines]),
       inputs: _parseDefines(stringsArg('input')),
@@ -292,7 +291,7 @@ class AssembleCommand extends FlutterCommand {
       fileSystem: fs,
       logger: _toolContext.logger,
       processManager: _toolContext.processManager,
-      analytics: _effectiveAnalytics,
+      analytics: analytics,
       platform: _toolContext.platform,
       engineVersion: artifacts.usesLocalArtifacts
           ? null
@@ -328,7 +327,7 @@ class AssembleCommand extends FlutterCommand {
     }
 
     results[kDeferredComponents] = 'false';
-    if (_flutterProject.manifest.deferredComponents != null &&
+    if (project.manifest.deferredComponents != null &&
         isDeferredComponentsTargets() &&
         !isDebug()) {
       results[kDeferredComponents] = 'true';
@@ -357,7 +356,7 @@ class AssembleCommand extends FlutterCommand {
     Target? target;
     if (deferredTargets.isNotEmpty) {
       // Record to analytics that DeferredComponents is being used.
-      _effectiveAnalytics.send(
+      analytics.send(
         Event.flutterBuildInfo(
           label: 'assemble-deferred-components',
           buildType: 'android',
@@ -365,7 +364,7 @@ class AssembleCommand extends FlutterCommand {
         ),
       );
     }
-    if (_flutterProject.manifest.deferredComponents != null &&
+    if (project.manifest.deferredComponents != null &&
         _environment.defines['validate-deferred-components'] == 'true' &&
         deferredTargets.isNotEmpty &&
         !isDebug()) {

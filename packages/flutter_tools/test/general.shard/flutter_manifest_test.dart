@@ -15,8 +15,6 @@ import '../src/common.dart';
 void main() {
   late BufferLogger logger;
 
-  setUpAll(() {});
-
   setUp(() {
     logger = BufferLogger.test();
   });

@@ -54,9 +54,9 @@ void main() {
 
   Future<BuildBundleCommand> runCommandIn(String projectPath, {List<String>? arguments}) async {
     final command = BuildBundleCommand(
-bundleBuilder: fakeBundleBuilder,
-toolContext: FakeToolContext(logger: BufferLogger.test())
-);
+      logger: BufferLogger.test(),
+      bundleBuilder: fakeBundleBuilder,
+    );
     final CommandRunner<void> runner = createTestCommandRunner(command);
     await runner.run(<String>[
       'bundle',
@@ -129,9 +129,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync(recursive: true);
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       expect(
@@ -153,9 +151,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       expect(
@@ -177,9 +173,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       expect(
@@ -201,9 +195,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       expect(
@@ -223,9 +215,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       await runner.run(<String>['bundle', '--no-pub', '--target-platform=windows-x64']);
@@ -244,9 +234,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       await runner.run(<String>['bundle', '--no-pub', '--target-platform=linux-x64']);
@@ -265,9 +253,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       await runner.run(<String>['bundle', '--no-pub', '--target-platform=darwin']);
@@ -287,9 +273,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file('pubspec.yaml').createSync();
 
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       await runner.run(<String>[
@@ -329,9 +313,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       await runner.run(<String>[
@@ -371,9 +353,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       await runner.run(<String>[
@@ -413,9 +393,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       await runner.run(<String>[
@@ -456,9 +434,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       await runner.run(<String>[
@@ -498,9 +474,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       await runner.run(<String>[
@@ -541,9 +515,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       await runner.run(<String>[
@@ -590,9 +562,7 @@ toolContext: FakeToolContext(logger: BufferLogger.test())
       globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       globals.fs.file('pubspec.yaml').createSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildBundleCommand(
-toolContext: FakeToolContext(logger: BufferLogger.test())
-),
+        BuildBundleCommand(logger: BufferLogger.test()),
       );
 
       await runner.run(<String>[

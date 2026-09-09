@@ -25,7 +25,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart' as globals;
@@ -803,16 +802,24 @@ class BrowserManager {
     // the browser is still running code which means the user isn't debugging.
     _channel = MultiChannel<dynamic>(
       webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object?> stream) {
-        return stream.map((Object? message) {
-          if (!_closed) {
-            _timer.reset();
-          }
-          for (final RunnerSuiteController controller in _controllers) {
-            controller.setDebugging(false);
-          }
+        return stream
+            .handleError((Object error) {
+              final formatException = error as FormatException;
+              _logger.printWarning(
+                'Received unexpected non-JSON message from browser WebSocket: ${formatException.source}',
+              );
+              _logger.printTrace('JSON decode error: $formatException');
+            }, test: (error) => error is FormatException)
+            .map((Object? message) {
+              if (!_closed) {
+                _timer.reset();
+              }
+              for (final RunnerSuiteController controller in _controllers) {
+                controller.setDebugging(false);
+              }
 
-          return message;
-        });
+              return message;
+            });
       }),
     );
 

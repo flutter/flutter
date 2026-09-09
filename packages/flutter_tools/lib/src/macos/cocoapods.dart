@@ -8,7 +8,6 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -133,8 +132,7 @@ class CocoaPods {
   final Cache? _cache;
   final String? _flutterRoot;
 
-  String get _flutterRootPath =>
-      _flutterRoot ?? _cache?.flutterRoot ?? context.get<Cache>()?.flutterRoot ?? '';
+  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? '';
 
   Future<String?>? _versionText;
 
@@ -550,6 +548,13 @@ class CocoaPods {
               ),
         );
         if (missingPluginSupportsSwiftPM) {
+          _analytics.send(
+            Event.appleUsageEvent(
+              workflow: 'cocoapod-swiftpm-interdependency-failure',
+              parameter: requiringPlugin,
+              result: missingPlugin,
+            ),
+          );
           return 'Error: A dependency conflict has occurred because $requiringPlugin uses CocoaPods while '
               '$missingPlugin uses Swift Package Manager. Please contact the $requiringPlugin '
               'maintainers to request Swift Package Manager adoption.\n\n'

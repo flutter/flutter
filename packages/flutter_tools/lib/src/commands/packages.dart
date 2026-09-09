@@ -15,7 +15,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';
-import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';

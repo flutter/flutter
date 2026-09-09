@@ -9,12 +9,3 @@ abstract class TemplateRenderer {
 
   String renderString(String template, dynamic context, {bool htmlEscapeValues = false});
 }
-
-/// A [TemplateRenderer] that returns the template unaltered.
-class NoOpTemplateRenderer extends TemplateRenderer {
-  const NoOpTemplateRenderer();
-
-  @override
-  String renderString(String template, dynamic context, {bool htmlEscapeValues = false}) =>
-      template;
-}

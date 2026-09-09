@@ -41,15 +41,16 @@ void main() {
       Process? process;
       try {
         final cache = Cache.test(
+          rootOverride: tempDir,
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
           logger: logger,
         );
         final File cacheFile = fileSystem.file(
-          fileSystem.path.join(getFlutterRoot(), 'bin', 'cache', 'lockfile'),
+          fileSystem.path.join(tempDir.path, 'bin', 'cache', 'lockfile'),
         )..createSync(recursive: true);
         final File script = fileSystem.file(
-          fileSystem.path.join(getFlutterRoot(), 'bin', 'cache', 'test_lock.dart'),
+          fileSystem.path.join(tempDir.path, 'bin', 'cache', 'test_lock.dart'),
         );
         script.writeAsStringSync(r'''
 import 'dart:async';
@@ -122,6 +123,7 @@ Future<void> main(List<String> args) async {
       logger.fatalWarnings = true;
       try {
         final cache = Cache.test(
+          rootOverride: tempDir,
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
           logger: logger,

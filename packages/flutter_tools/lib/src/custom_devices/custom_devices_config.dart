@@ -89,10 +89,9 @@ class CustomDevicesConfig {
   }
 
   String get _defaultSchema {
-    final String flutterRoot =
-        _flutterRoot ?? _cache?.flutterRoot ?? _fileSystem.currentDirectory.path;
+    final String flutterRoot = _flutterRoot ?? _cache?.flutterRoot ?? '';
     final Uri uri = _fileSystem
-        .directory(_fileSystem.path.normalize(_fileSystem.path.absolute(flutterRoot)))
+        .directory(flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools')
         .childDirectory('static')

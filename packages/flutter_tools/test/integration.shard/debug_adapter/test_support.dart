@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
-
 import 'test_client.dart';
 import 'test_server.dart';
 
@@ -99,8 +98,9 @@ class SimpleFlutterRunner {
   Future<Uri> get vmServiceUri => _vmServiceUriCompleter.future;
 
   static Future<SimpleFlutterRunner> start(Directory projectDirectory) async {
+    final String flutterRoot = getFlutterRoot();
     final String flutterToolPath = globals.fs.path.join(
-      getFlutterRoot(),
+      flutterRoot,
       'bin',
       globals.platform.isWindows ? 'flutter.bat' : 'flutter',
     );

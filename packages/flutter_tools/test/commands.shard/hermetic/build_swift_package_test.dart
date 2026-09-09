@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/swift_packages.dart';
@@ -3523,6 +3524,7 @@ class FakeCache extends Fake implements Cache {
   FakeCache(this._fileSystem, this.flutterRoot);
 
   final FileSystem _fileSystem;
+  @override
   final String flutterRoot;
 
   @override

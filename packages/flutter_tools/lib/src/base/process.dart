@@ -6,11 +6,10 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:unified_analytics/unified_analytics.dart';
 
 import '../convert.dart';
+import '../globals.dart' as globals;
 import 'async_guard.dart';
-import 'context.dart';
 import 'exit.dart';
 import 'io.dart';
 import 'logger.dart';
@@ -49,7 +48,7 @@ abstract class ShutdownHooks {
   ///
   /// This class is constructed before the [Logger], so it cannot be direct
   /// injected in the constructor.
-  Future<void> runShutdownHooks([Logger? logger]);
+  Future<void> runShutdownHooks(Logger logger);
 }
 
 class _DefaultShutdownHooks implements ShutdownHooks {
@@ -71,13 +70,12 @@ class _DefaultShutdownHooks implements ShutdownHooks {
   }
 
   @override
-  Future<void> runShutdownHooks([Logger? logger]) async {
+  Future<void> runShutdownHooks(Logger logger) async {
     if (_isShuttingDown) {
       return;
     }
     _isShuttingDown = true;
-    final Logger? effectiveLogger = logger ?? context.get<Logger>();
-    effectiveLogger?.printTrace(
+    logger.printTrace(
       'Running ${registeredHooks.length} shutdown hook${registeredHooks.length == 1 ? '' : 's'}',
     );
     _shutdownHooksRunning = true;
@@ -102,13 +100,13 @@ class _DefaultShutdownHooks implements ShutdownHooks {
       _shutdownHooksRunning = false;
     }
     if (uncaught.isNotEmpty) {
-      effectiveLogger?.printWarning('One or more uncaught errors occurred shutting down:');
+      logger.printWarning('One or more uncaught errors occurred shutting down:');
       for (final (Object e, StackTrace s) in uncaught) {
-        effectiveLogger?.printWarning('$e', indent: 2);
-        effectiveLogger?.printTrace('$s');
+        logger.printWarning('$e', indent: 2);
+        logger.printTrace('$s');
       }
     }
-    effectiveLogger?.printTrace('Shutdown hooks complete');
+    logger.printTrace('Shutdown hooks complete');
   }
 }
 
@@ -670,33 +668,26 @@ class _DefaultProcessUtils implements ProcessUtils {
   }
 }
 
-Future<int> exitWithHooks(
-  int code, {
-  required ShutdownHooks shutdownHooks,
-  Analytics? analytics,
-  Logger? logger,
-}) async {
-  final Logger? effectiveLogger = logger ?? context.get<Logger>();
-  final Analytics? effectiveAnalytics = analytics ?? context.get<Analytics>();
-  if (effectiveAnalytics != null && effectiveAnalytics.shouldShowMessage) {
-    effectiveLogger?.printStatus(effectiveAnalytics.getConsentMessage);
-    effectiveAnalytics.clientShowedMessage();
+Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) async {
+  if (globals.analytics.shouldShowMessage) {
+    globals.logger.printStatus(globals.analytics.getConsentMessage);
+    globals.analytics.clientShowedMessage();
 
     // This trace is searched for in tests.
-    effectiveLogger?.printTrace('Showed analytics consent message.');
+    globals.logger.printTrace('Showed analytics consent message.');
   }
 
   // Run shutdown hooks before flushing logs
-  await shutdownHooks.runShutdownHooks(effectiveLogger);
+  await shutdownHooks.runShutdownHooks(globals.logger);
 
   final completer = Completer<void>();
 
-  await effectiveAnalytics?.close();
+  await globals.analytics.close();
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {
     try {
-      effectiveLogger?.printTrace('exiting with code $code');
+      globals.printTrace('exiting with code $code');
       exit(code);
       completer.complete();
       // This catches all exceptions because the error is propagated on the

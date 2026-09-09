@@ -16,10 +16,12 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
   factory FakeFlutterDebugAdapter({
     required FileSystem fileSystem,
     required Platform platform,
+    Future<void>? customDebuggerInitialized,
+    String? flutterSdkRoot,
+    FutureOr<void> Function(FakeFlutterDebugAdapter adapter)? preAppStart,
     bool simulateAppStarted = true,
     bool simulateAppStopError = false,
     bool supportsRestart = true,
-    FutureOr<void> Function(FakeFlutterDebugAdapter adapter)? preAppStart,
   }) {
     final stdinController = StreamController<List<int>>();
     final stdoutController = StreamController<List<int>>();
@@ -33,13 +35,14 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
     return FakeFlutterDebugAdapter._(
       channel,
       clientChannel: clientChannel,
+      customDebuggerInitialized: customDebuggerInitialized,
       fileSystem: fileSystem,
+      flutterSdkRoot: flutterSdkRoot ?? (platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter'),
       platform: platform,
-      flutterSdkRoot: platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter',
+      preAppStart: preAppStart,
       simulateAppStarted: simulateAppStarted,
       simulateAppStopError: simulateAppStopError,
       supportsRestart: supportsRestart,
-      preAppStart: preAppStart,
     );
   }
 
@@ -48,11 +51,12 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
     required this.clientChannel,
     required super.fileSystem,
     required super.platform,
+    this.customDebuggerInitialized,
     super.flutterSdkRoot,
+    this.preAppStart,
     this.simulateAppStarted = true,
     this.simulateAppStopError = false,
     this.supportsRestart = true,
-    this.preAppStart,
   }) {
     clientChannel.listen((ProtocolMessage message) {
       _handleDapToClientMessage(message);
@@ -61,6 +65,7 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
 
   var _seq = 1;
   final ByteStreamServerChannel clientChannel;
+  final Future<void>? customDebuggerInitialized;
   final bool simulateAppStarted;
   final bool simulateAppStopError;
   final bool supportsRestart;
@@ -208,6 +213,9 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
 
   @override
   Future<void> get debuggerInitialized {
+    if (customDebuggerInitialized != null) {
+      return customDebuggerInitialized!;
+    }
     // If we were mocking debug mode, then simulate the debugger initializing.
     return enableDebugger
         ? Future<void>.value()
@@ -220,6 +228,8 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
   factory FakeFlutterTestDebugAdapter({
     required FileSystem fileSystem,
     required Platform platform,
+    Future<void>? customDebuggerInitialized,
+    String? flutterSdkRoot,
   }) {
     final stdinController = StreamController<List<int>>();
     final stdoutController = StreamController<List<int>>();
@@ -229,9 +239,10 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
       stdinController.sink,
       stdoutController.stream,
       channel,
+      customDebuggerInitialized: customDebuggerInitialized,
       fileSystem: fileSystem,
+      flutterSdkRoot: flutterSdkRoot ?? (platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter'),
       platform: platform,
-      flutterSdkRoot: platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter',
     );
   }
 
@@ -241,11 +252,13 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
     ByteStreamServerChannel channel, {
     required super.fileSystem,
     required super.platform,
+    this.customDebuggerInitialized,
     super.flutterSdkRoot,
   }) : super(channel);
 
   final StreamSink<List<int>> stdin;
   final Stream<List<int>> stdout;
+  final Future<void>? customDebuggerInitialized;
 
   late String executable;
   late List<String> processArgs;
@@ -264,6 +277,9 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
 
   @override
   Future<void> get debuggerInitialized {
+    if (customDebuggerInitialized != null) {
+      return customDebuggerInitialized!;
+    }
     // If we were mocking debug mode, then simulate the debugger initializing.
     return enableDebugger
         ? Future<void>.value()

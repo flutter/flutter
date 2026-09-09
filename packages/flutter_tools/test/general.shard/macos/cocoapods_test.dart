@@ -87,6 +87,7 @@ environement:
   }
 
   setUp(() async {
+    const flutterRoot = 'flutter';
     fileSystem = MemoryFileSystem.test();
     fakeProcessManager = FakeProcessManager.empty();
     logger = BufferLogger.test();
@@ -101,11 +102,11 @@ environement:
       platform: FakePlatform(operatingSystem: 'macos'),
       xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       analytics: fakeAnalytics,
-      flutterRoot: getFlutterRoot(),
+      flutterRoot: flutterRoot,
     );
     fileSystem.file(
         fileSystem.path.join(
-          getFlutterRoot(),
+          flutterRoot,
           'packages',
           'flutter_tools',
           'templates',
@@ -117,7 +118,7 @@ environement:
       ..writeAsStringSync('iOS podfile template');
     fileSystem.file(
         fileSystem.path.join(
-          getFlutterRoot(),
+          flutterRoot,
           'packages',
           'flutter_tools',
           'templates',
@@ -1621,6 +1622,16 @@ end''');
           throwsToolExit(),
         );
         expect(logger.errorText, contains('Error: A dependency conflict has occurred because'));
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.appleUsageEvent(
+              workflow: 'cocoapod-swiftpm-interdependency-failure',
+              parameter: 'plugin_2_name',
+              result: 'plugin_1_name',
+            ),
+          ),
+        );
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,

@@ -95,8 +95,7 @@ void main() {
         context.get<ProcessManager>() ?? FakeProcessManager.any();
     final toolContext = FakeToolContext(
       cache: Cache.test(
-        fileSystem: fileSystem,
-        flutterRoot: flutterRoot,
+        rootOverride: fileSystem.directory(flutterRoot),
         logger: effectiveLogger,
         processManager: effectiveProcessManager,
       ),
@@ -108,12 +107,12 @@ void main() {
       projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
     );
     return BuildWindowsCommand(
-buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-featureFlags: effectiveFeatureFlags,
-toolContext: toolContext,
-verboseHelp: verboseHelp,
-visualStudioOverride: visualStudio
-);
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      featureFlags: effectiveFeatureFlags,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+      visualStudio: visualStudio ?? FakeVisualStudio(),
+    );
   }
 
   // Returns the command matching the build_windows call to generate CMake

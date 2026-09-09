@@ -1,4 +1,3 @@
-import '../../src/fakes.dart';
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -9,7 +8,6 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -17,7 +15,8 @@ import 'package:flutter_tools/src/project_validator.dart';
 import 'package:flutter_tools/src/project_validator_result.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 class ProjectValidatorDummy extends ProjectValidator {
@@ -107,7 +106,6 @@ class ProjectValidatorCrash extends ProjectValidator {
 
 void main() {
   late FileSystem fileSystem;
-  late Terminal terminal;
   late ProcessManager processManager;
   late Platform platform;
 
@@ -123,7 +121,6 @@ name: foo_project
 environment:
   sdk: ^3.7.0-0
 ''');
-      terminal = Terminal.test();
       processManager = FakeProcessManager.empty();
       platform = FakePlatform();
     });
@@ -132,50 +129,54 @@ environment:
       Cache.enableLocking();
     });
 
-    testUsingContext(
-      'success, error and warning',
-      () async {
-        final loggerTest = BufferLogger.test();
-        final command = AnalyzeCommand(
-allProjectValidators: <ProjectValidator>[
-            ProjectValidatorDummy(),
-            ProjectValidatorSecondDummy(),
-          ],
-suppressAnalytics: true,
-toolContext: FakeToolContext(artifacts: Artifacts.test(), fs: fileSystem, logger: loggerTest, platform: platform, terminal: terminal, processManager: processManager)
-);
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-
-        await runner.run(<String>['analyze', '--suggestions', '--no-pub', './']);
-
-        const expected =
-            '\n'
-            '┌──────────────────────────────────────────┐\n'
-            '│ First Dummy                              │\n'
-            '│ [✓] pass: value                          │\n'
-            '│ [✗] fail: my error                       │\n'
-            '│ [!] pass two: pass (warning: my warning) │\n'
-            '│ Second Dummy                             │\n'
-            '│ [✓] second: pass                         │\n'
-            '│ [✗] other fail: second fail              │\n'
-            '└──────────────────────────────────────────┘\n';
-
-        expect(loggerTest.statusText, contains(expected));
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        Cache: () => Cache.test(processManager: processManager, fileSystem: fileSystem),
-      },
-    );
-
-    testUsingContext('crash', () async {
+    testWithoutContext('success, error and warning', () async {
       final loggerTest = BufferLogger.test();
       final command = AnalyzeCommand(
-allProjectValidators: <ProjectValidator>[ProjectValidatorCrash()],
-suppressAnalytics: true,
-toolContext: FakeToolContext(artifacts: Artifacts.test(), fs: fileSystem, logger: loggerTest, platform: platform, terminal: terminal, processManager: processManager)
-);
+        allProjectValidators: <ProjectValidator>[
+          ProjectValidatorDummy(),
+          ProjectValidatorSecondDummy(),
+        ],
+        suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: loggerTest,
+          platform: platform,
+          processManager: processManager,
+        ),
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['analyze', '--suggestions', '--no-pub', './']);
+
+      const expected =
+          '\n'
+          '┌──────────────────────────────────────────┐\n'
+          '│ First Dummy                              │\n'
+          '│ [✓] pass: value                          │\n'
+          '│ [✗] fail: my error                       │\n'
+          '│ [!] pass two: pass (warning: my warning) │\n'
+          '│ Second Dummy                             │\n'
+          '│ [✓] second: pass                         │\n'
+          '│ [✗] other fail: second fail              │\n'
+          '└──────────────────────────────────────────┘\n';
+
+      expect(loggerTest.statusText, contains(expected));
+    });
+
+    testWithoutContext('crash', () async {
+      final loggerTest = BufferLogger.test();
+      final command = AnalyzeCommand(
+        allProjectValidators: <ProjectValidator>[ProjectValidatorCrash()],
+        suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: loggerTest,
+          platform: platform,
+          processManager: processManager,
+        ),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['analyze', '--suggestions', '--no-pub', './']);
@@ -185,13 +186,19 @@ toolContext: FakeToolContext(artifacts: Artifacts.test(), fs: fileSystem, logger
       expect(loggerTest.statusText, contains(expected));
     });
 
-    testUsingContext('--watch and --suggestions not compatible together', () async {
+    testWithoutContext('--watch and --suggestions not compatible together', () async {
       final loggerTest = BufferLogger.test();
       final command = AnalyzeCommand(
-allProjectValidators: <ProjectValidator>[],
-suppressAnalytics: true,
-toolContext: FakeToolContext(artifacts: Artifacts.test(), fs: fileSystem, logger: loggerTest, platform: platform, terminal: terminal, processManager: processManager)
-);
+        allProjectValidators: <ProjectValidator>[],
+        suppressAnalytics: true,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: loggerTest,
+          platform: platform,
+          processManager: processManager,
+        ),
+      );
       final CommandRunner<void> runner = createTestCommandRunner(command);
       Future<void> result() =>
           runner.run(<String>['analyze', '--suggestions', '--watch', '--no-pub']);

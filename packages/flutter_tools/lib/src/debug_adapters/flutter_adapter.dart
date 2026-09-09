@@ -21,10 +21,11 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     super.channel, {
     required super.fileSystem,
     required super.platform,
+    super.cache,
+    super.enableAuthCodes,
+    super.enableFlutterDds = true,
     super.flutterSdkRoot,
     super.ipv6,
-    super.enableFlutterDds = true,
-    super.enableAuthCodes,
     super.logger,
     super.onError,
   });
@@ -461,9 +462,12 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
       waitingForDebugger = true;
       try {
         await Future.any<void>([debuggerInitialized, debuggerInitializationFailedCompleter.future]);
-      } catch (e) {
+      } on DebugAdapterException catch (e) {
+        sendConsoleOutput(e.message);
+        return;
+      } on Object catch (e) {
         if (!isTerminating) {
-          rethrow;
+          sendConsoleOutput('Failed to initialize debugger: $e');
         }
         return;
       } finally {

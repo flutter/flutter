@@ -14,14 +14,14 @@ class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
     super.argResults,
     List<Directory> repoPackages, {
+    required super.artifacts,
+    required super.cache,
     required super.fileSystem,
     required super.logger,
     required super.platform,
     required super.processManager,
-    required super.terminal,
-    required super.artifacts,
     required super.suppressAnalytics,
-    super.cache,
+    required super.terminal,
     this.workingDirectory,
   }) : super(repoPackages: repoPackages);
 
@@ -36,7 +36,11 @@ class AnalyzeOnce extends AnalyzeBase {
     if (isFlutterRepo) {
       // check for conflicting dependencies
       final dependencies = PackageDependencyTracker();
-      dependencies.checkForConflictingDependencies(repoPackages, dependencies);
+      dependencies.checkForConflictingDependencies(
+        repoPackages,
+        fileSystem: fileSystem,
+        flutterRoot: flutterRoot,
+      );
       items.add(flutterRoot);
       if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
         items.add(currentDirectory);
@@ -63,6 +67,7 @@ class AnalyzeOnce extends AnalyzeBase {
       terminal: terminal,
       protocolTrafficLog: protocolTrafficLog,
       suppressAnalytics: suppressAnalytics,
+      withFineDependencies: false,
       usePlugins: usePlugins,
     );
 

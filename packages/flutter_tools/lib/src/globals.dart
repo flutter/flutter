@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:file/memory.dart';
-@Deprecated('Use ToolContext and constructor injection instead.')
 library;
 
 import 'package:process/process.dart';
@@ -255,8 +254,7 @@ PlistParser get plistParser =>
 PlistParser? _plistInstance;
 
 /// The global template renderer.
-TemplateRenderer get templateRenderer =>
-    context.get<TemplateRenderer>() ?? const NoOpTemplateRenderer();
+TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
 
 /// Global [ShutdownHooks] that should be run before the tool process exits.
 ///

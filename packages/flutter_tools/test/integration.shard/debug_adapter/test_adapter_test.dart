@@ -18,8 +18,6 @@ void main() {
   late DapTestClient client;
   late TestsProject project;
 
-  setUpAll(() {});
-
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('flutter_test_adapter_test.');
     dap = await DapTestSession.setUp(additionalArgs: <String>['--test']);

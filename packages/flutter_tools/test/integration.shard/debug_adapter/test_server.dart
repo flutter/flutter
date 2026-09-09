@@ -35,6 +35,7 @@ class InProcessDapTestServer extends DapTestServer {
       stdoutController.sink,
       fileSystem: globals.fs,
       platform: globals.platform,
+      cache: globals.cache,
       // Simulate flags based on the args to aid testing.
       enableDds: !args.contains('--no-dds'),
       ipv6: args.contains('--ipv6'),
@@ -129,13 +130,14 @@ class OutOfProcessDapTestServer extends DapTestServer {
     // having to rebuild the flutter_tools snapshot.
     // runFromSource=false will run "flutter ..."
 
+    final String flutterRoot = getFlutterRoot();
     final String flutterToolPath = globals.fs.path.join(
-      getFlutterRoot(),
+      flutterRoot,
       'bin',
       Platform.isWindows ? 'flutter.bat' : 'flutter',
     );
     final String flutterToolsEntryScript = globals.fs.path.join(
-      getFlutterRoot(),
+      flutterRoot,
       'packages',
       'flutter_tools',
       'bin',

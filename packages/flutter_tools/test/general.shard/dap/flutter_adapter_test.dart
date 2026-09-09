@@ -34,8 +34,6 @@ void main() {
         ? r'C:\fake\flutter\bin\flutter.bat'
         : '/fake/flutter/bin/flutter';
 
-    setUpAll(() {});
-
     group('launchRequest', () {
       test('runs "flutter run" with --machine', () async {
         final adapter = FakeFlutterDebugAdapter(
@@ -352,6 +350,47 @@ void main() {
         // Also ensure we got console output with the error.
         expect(consoleOutputMessages, contains('App stopped due to an error\n'));
       });
+
+      test(
+        'does not throw unhandled exception if process exits before debugger initialized',
+        () async {
+          final debuggerCompleter = Completer<void>();
+          final adapter = FakeFlutterDebugAdapter(
+            fileSystem: MemoryFileSystem.test(style: fsStyle),
+            platform: platform,
+            customDebuggerInitialized: debuggerCompleter.future,
+          );
+          final responseCompleter = Completer<void>();
+          final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart');
+
+          final consoleOutputMessages = <String>[];
+          final StreamSubscription<String> consoleOutputMessagesSubscription = adapter
+              .dapToClientMessages
+              .where((Map<String, Object?> message) => message['event'] == 'output')
+              .map((Map<String, Object?> message) => message['body']! as Map<String, Object?>)
+              .where(
+                (Map<String, Object?> body) =>
+                    body['category'] == 'console' || body['category'] == null,
+              )
+              .map((Map<String, Object?> body) => body['output']! as String)
+              .listen(consoleOutputMessages.add);
+
+          await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+          await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
+          await responseCompleter.future;
+
+          expect(adapter.waitingForDebugger, isTrue);
+
+          adapter.handleExitCode(255);
+          await pumpEventQueue();
+          await consoleOutputMessagesSubscription.cancel();
+
+          expect(
+            consoleOutputMessages,
+            contains('Session terminated before debugger initialized: (255)\n'),
+          );
+        },
+      );
     });
 
     group('attachRequest', () {
@@ -421,6 +460,8 @@ void main() {
       });
 
       test('runs "flutter attach" with --debug-uri if vmServiceInfoFile exists', () async {
+        // LocalFileSystem is required here because dap_adapters' waitForVmServiceInfoFile uses .watch(),
+        // which is unsupported in MemoryFileSystem.
         final fs = LocalFileSystem(
           LocalSignals.instance,
           Signals.defaultExitSignals,
@@ -428,9 +469,11 @@ void main() {
         );
         final adapter = FakeFlutterDebugAdapter(fileSystem: fs, platform: platform);
         final responseCompleter = Completer<void>();
-        final File serviceInfoFile = fs.systemTempDirectory
-            .createTempSync('dap_flutter_attach_vmServiceInfoFile')
-            .childFile('vmServiceInfo.json');
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'dap_flutter_attach_vmServiceInfoFile',
+        );
+        addTearDown(() => tempDir.deleteSync(recursive: true));
+        final File serviceInfoFile = tempDir.childFile('vmServiceInfo.json');
 
         final args = FlutterAttachRequestArguments(
           cwd: '.',
@@ -458,51 +501,52 @@ void main() {
         );
       });
 
-      test(
-        'runs "flutter attach" with --debug-uri if vmServiceInfoFile is created later',
-        () async {
-          final fs = LocalFileSystem(
-            LocalSignals.instance,
-            Signals.defaultExitSignals,
-            ShutdownHooks(),
-          );
-          final adapter = FakeFlutterDebugAdapter(fileSystem: fs, platform: platform);
-          final responseCompleter = Completer<void>();
-          final File serviceInfoFile = fs.systemTempDirectory
-              .createTempSync('dap_flutter_attach_vmServiceInfoFile')
-              .childFile('vmServiceInfo.json');
+      test('runs "flutter attach" with --debug-uri if vmServiceInfoFile is created later', () async {
+        // LocalFileSystem is required here because dap_adapters' waitForVmServiceInfoFile uses .watch(),
+        // which is unsupported in MemoryFileSystem.
+        final fs = LocalFileSystem(
+          LocalSignals.instance,
+          Signals.defaultExitSignals,
+          ShutdownHooks(),
+        );
+        final adapter = FakeFlutterDebugAdapter(fileSystem: fs, platform: platform);
+        final responseCompleter = Completer<void>();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
+          'dap_flutter_attach_vmServiceInfoFile',
+        );
+        addTearDown(() => tempDir.deleteSync(recursive: true));
+        final File serviceInfoFile = tempDir.childFile('vmServiceInfo.json');
 
-          final args = FlutterAttachRequestArguments(
-            cwd: '.',
-            program: 'program/main.dart',
-            vmServiceInfoFile: serviceInfoFile.path,
-          );
+        final args = FlutterAttachRequestArguments(
+          cwd: '.',
+          program: 'program/main.dart',
+          vmServiceInfoFile: serviceInfoFile.path,
+        );
 
-          await adapter.configurationDoneRequest(FakeRequest(), null, () {});
-          final Future<void> attachResponseFuture = adapter.attachRequest(
-            FakeRequest(),
-            args,
-            responseCompleter.complete,
-          );
-          // Write the service info file a little later to ensure we detect it:
-          await pumpEventQueue(times: 5000);
-          serviceInfoFile.writeAsStringSync('{ "uri": "ws://1.2.3.4/ws" }');
-          await attachResponseFuture;
-          await responseCompleter.future;
+        await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+        final Future<void> attachResponseFuture = adapter.attachRequest(
+          FakeRequest(),
+          args,
+          responseCompleter.complete,
+        );
+        // Write the service info file a little later to ensure we detect it:
+        await pumpEventQueue(times: 5000);
+        serviceInfoFile.writeAsStringSync('{ "uri": "ws://1.2.3.4/ws" }');
+        await attachResponseFuture;
+        await responseCompleter.future;
 
-          expect(
-            adapter.processArgs,
-            containsAllInOrder(<String>[
-              'attach',
-              '--machine',
-              '--debug-uri',
-              'ws://1.2.3.4/ws',
-              '--target',
-              'program/main.dart',
-            ]),
-          );
-        },
-      );
+        expect(
+          adapter.processArgs,
+          containsAllInOrder(<String>[
+            'attach',
+            '--machine',
+            '--debug-uri',
+            'ws://1.2.3.4/ws',
+            '--target',
+            'program/main.dart',
+          ]),
+        );
+      });
 
       test('does not record the VMs PID for terminating', () async {
         final adapter = FakeFlutterDebugAdapter(
@@ -548,6 +592,47 @@ void main() {
 
         expect(adapter.dapToFlutterRequests, contains('app.detach'));
       });
+
+      test(
+        'does not throw unhandled exception if process exits before debugger initialized',
+        () async {
+          final debuggerCompleter = Completer<void>();
+          final adapter = FakeFlutterDebugAdapter(
+            fileSystem: MemoryFileSystem.test(style: fsStyle),
+            platform: platform,
+            customDebuggerInitialized: debuggerCompleter.future,
+          );
+          final responseCompleter = Completer<void>();
+          final args = FlutterAttachRequestArguments(cwd: '.');
+
+          final consoleOutputMessages = <String>[];
+          final StreamSubscription<String> consoleOutputMessagesSubscription = adapter
+              .dapToClientMessages
+              .where((Map<String, Object?> message) => message['event'] == 'output')
+              .map((Map<String, Object?> message) => message['body']! as Map<String, Object?>)
+              .where(
+                (Map<String, Object?> body) =>
+                    body['category'] == 'console' || body['category'] == null,
+              )
+              .map((Map<String, Object?> body) => body['output']! as String)
+              .listen(consoleOutputMessages.add);
+
+          await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+          await adapter.attachRequest(FakeRequest(), args, responseCompleter.complete);
+          await responseCompleter.future;
+
+          expect(adapter.waitingForDebugger, isTrue);
+
+          adapter.handleExitCode(255);
+          await pumpEventQueue();
+          await consoleOutputMessagesSubscription.cancel();
+
+          expect(
+            consoleOutputMessages,
+            contains('Session terminated before debugger initialized: (255)\n'),
+          );
+        },
+      );
     });
 
     group('forwards events', () {
