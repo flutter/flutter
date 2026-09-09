@@ -71,8 +71,6 @@ FLUTTER_ASSERT_ARC
   XCTAssertEqual(view.layer.rasterizationScale, screen.scale);
 }
 
-
-
 // Helper: add FlutterView to a real UIWindow so that layoutSubviews can access screen.
 - (FlutterView*)createViewInWindowWithWideGamut:(BOOL)enableWideGamut {
   FakeDelegate* delegate = [[FakeDelegate alloc] init];

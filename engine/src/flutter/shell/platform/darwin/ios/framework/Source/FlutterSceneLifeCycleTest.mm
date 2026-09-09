@@ -133,8 +133,7 @@ FLUTTER_ASSERT_ARC
   OCMStub([mockScene windows]).andReturn(@[ mockWindow ]);
   OCMStub([mockWindow rootViewController]).andReturn(mockViewController);
 
-  NSArray<FlutterViewController*>* vcs =
-      [delegate searchFlutterViewControllersWithScene:mockScene];
+  NSArray<FlutterViewController*>* vcs = [delegate searchFlutterViewControllersWithScene:mockScene];
   XCTAssertEqual(vcs.count, 1.0);
   XCTAssertEqualObjects(vcs.firstObject, mockViewController);
 }
@@ -155,8 +154,7 @@ FLUTTER_ASSERT_ARC
   OCMStub([childNormalVC childViewControllers]).andReturn(@[]);
   OCMStub([childFlutterVC childViewControllers]).andReturn(@[]);
 
-  NSArray<FlutterViewController*>* vcs =
-      [delegate searchFlutterViewControllersWithScene:mockScene];
+  NSArray<FlutterViewController*>* vcs = [delegate searchFlutterViewControllersWithScene:mockScene];
   XCTAssertEqual(vcs.count, 1.0);
   XCTAssertEqualObjects(vcs.firstObject, childFlutterVC);
 }
@@ -176,8 +174,7 @@ FLUTTER_ASSERT_ARC
   OCMStub([rootVC presentedViewController]).andReturn(presentedFlutterVC);
   OCMStub([presentedFlutterVC childViewControllers]).andReturn(@[]);
 
-  NSArray<FlutterViewController*>* vcs =
-      [delegate searchFlutterViewControllersWithScene:mockScene];
+  NSArray<FlutterViewController*>* vcs = [delegate searchFlutterViewControllersWithScene:mockScene];
   XCTAssertEqual(vcs.count, 1.0);
   XCTAssertEqualObjects(vcs.firstObject, presentedFlutterVC);
 }
@@ -196,8 +193,7 @@ FLUTTER_ASSERT_ARC
   OCMStub([mockWindow1 rootViewController]).andReturn(mockFlutterVC1);
   OCMStub([mockWindow2 rootViewController]).andReturn(mockFlutterVC2);
 
-  NSArray<FlutterViewController*>* vcs =
-      [delegate searchFlutterViewControllersWithScene:mockScene];
+  NSArray<FlutterViewController*>* vcs = [delegate searchFlutterViewControllersWithScene:mockScene];
   XCTAssertEqual(vcs.count, 2.0);
   XCTAssertTrue([vcs containsObject:mockFlutterVC1]);
   XCTAssertTrue([vcs containsObject:mockFlutterVC2]);
@@ -220,8 +216,7 @@ FLUTTER_ASSERT_ARC
   OCMStub([vc2 childViewControllers]).andReturn(@[ vc1 ]);
   OCMStub([flutterVC childViewControllers]).andReturn(@[]);
 
-  NSArray<FlutterViewController*>* vcs =
-      [delegate searchFlutterViewControllersWithScene:mockScene];
+  NSArray<FlutterViewController*>* vcs = [delegate searchFlutterViewControllersWithScene:mockScene];
   XCTAssertEqual(vcs.count, 1.0);
   XCTAssertEqualObjects(vcs.firstObject, flutterVC);
 }
@@ -231,8 +226,7 @@ FLUTTER_ASSERT_ARC
       [[FlutterPluginSceneLifeCycleDelegate alloc] init];
 
   id mockScene = OCMClassMock([UIScene class]);
-  NSArray<FlutterViewController*>* vcs =
-      [delegate searchFlutterViewControllersWithScene:mockScene];
+  NSArray<FlutterViewController*>* vcs = [delegate searchFlutterViewControllersWithScene:mockScene];
   XCTAssertEqual(vcs.count, 0.0);
 }
 
@@ -289,8 +283,8 @@ FLUTTER_ASSERT_ARC
   id mockEngine = OCMClassMock([FlutterEngine class]);
 
   [delegate registerSceneLifeCycleWithFlutterEngine:mockEngine scene:mockScene];
-  BOOL unregistered =
-      [delegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine scene:mockScene];
+  BOOL unregistered = [delegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine
+                                                                    scene:mockScene];
   XCTAssertTrue(unregistered);
 
   NSPointerArray* engines = [delegate.developerManagedEngines objectForKey:mockScene];
@@ -304,8 +298,8 @@ FLUTTER_ASSERT_ARC
   id mockScene = OCMClassMock([UIScene class]);
   id mockEngine = OCMClassMock([FlutterEngine class]);
 
-  BOOL unregistered =
-      [delegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine scene:mockScene];
+  BOOL unregistered = [delegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine
+                                                                    scene:mockScene];
   XCTAssertFalse(unregistered);
 }
 
@@ -319,8 +313,8 @@ FLUTTER_ASSERT_ARC
 
   [delegate registerSceneLifeCycleWithFlutterEngine:mockEngine scene:mockScene1];
 
-  BOOL unregistered =
-      [delegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine scene:mockScene2];
+  BOOL unregistered = [delegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine
+                                                                    scene:mockScene2];
   XCTAssertFalse(unregistered);
 
   NSPointerArray* engines1 = [delegate.developerManagedEngines objectForKey:mockScene1];

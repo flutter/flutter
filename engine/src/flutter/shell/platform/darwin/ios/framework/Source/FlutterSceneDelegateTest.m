@@ -285,9 +285,8 @@
 
   [mockSceneDelegate registerSceneLifeCycleWithFlutterEngine:mockEngine scene:mockScene];
 
-  OCMVerify(times(1),
-            [mockLifecycleDelegate registerSceneLifeCycleWithFlutterEngine:mockEngine
-                                                                     scene:mockScene]);
+  OCMVerify(times(1), [mockLifecycleDelegate registerSceneLifeCycleWithFlutterEngine:mockEngine
+                                                                               scene:mockScene]);
 }
 
 - (void)testUnregisterSceneLifeCycleWithFlutterEngine {
@@ -303,9 +302,8 @@
 
   [mockSceneDelegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine scene:mockScene];
 
-  OCMVerify(times(1),
-            [mockLifecycleDelegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine
-                                                                       scene:mockScene]);
+  OCMVerify(times(1), [mockLifecycleDelegate unregisterSceneLifeCycleWithFlutterEngine:mockEngine
+                                                                                 scene:mockScene]);
 }
 
 - (NSDictionary*)setupMockApplication {
