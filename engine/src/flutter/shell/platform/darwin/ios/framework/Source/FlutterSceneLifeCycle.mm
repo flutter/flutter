@@ -44,14 +44,12 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 // Once the connection window ends on the next runloop, entries are removed.
 // This is to ensure engines attached after sceneWillConnect (but still in the same runloop)
 // still receive their sceneWillConnect event (e.g. viewDidLoad of the root view controller).
-@property(nonatomic, strong)
-    NSMapTable<UIScene*, UISceneConnectionOptions*>* connectingScenes;
+@property(nonatomic, strong) NSMapTable<UIScene*, UISceneConnectionOptions*>* connectingScenes;
 // To avoid duplicate sceneWillConnect events being sent to the same engine.
 @property(nonatomic, strong) NSMapTable<UIScene*, NSPointerArray*>* enginesSentConnectionEvent;
 
 // Tracks whether any plugin handled the sceneWillConnect event for a scene.
-@property(nonatomic, strong)
-    NSMapTable<UIScene*, NSNumber*>* sceneWillConnectEventHandledByPlugin;
+@property(nonatomic, strong) NSMapTable<UIScene*, NSNumber*>* sceneWillConnectEventHandledByPlugin;
 
 @end
 
@@ -68,9 +66,8 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 }
 
 - (void)searchFlutterViewControllersWithResult:(NSMutableArray<FlutterViewController*>*)result
-  visited:(NSMutableSet<UIViewController*>*)visited
-  viewController:(UIViewController*)viewController
-{
+                                       visited:(NSMutableSet<UIViewController*>*)visited
+                                viewController:(UIViewController*)viewController {
   if (!viewController) {
     return;
   }
@@ -84,21 +81,27 @@ static void CompactNSPointerArray(NSPointerArray* array) {
   }
 
   for (UIViewController* childViewController in viewController.childViewControllers) {
-    [self searchFlutterViewControllersWithResult:result visited:visited viewController:childViewController];
+    [self searchFlutterViewControllersWithResult:result
+                                         visited:visited
+                                  viewController:childViewController];
   }
 
   if (viewController.presentedViewController) {
-    [self searchFlutterViewControllersWithResult:result visited:visited viewController:viewController.presentedViewController];
+    [self searchFlutterViewControllersWithResult:result
+                                         visited:visited
+                                  viewController:viewController.presentedViewController];
   }
 }
 
 - (NSArray<FlutterViewController*>*)searchFlutterViewControllersWithScene:(UIScene*)scene {
   NSMutableArray<FlutterViewController*>* result = [NSMutableArray array];
   NSMutableSet<UIViewController*>* visited = [NSMutableSet set];
-  if ([scene isKindOfClass: [UIWindowScene class]]) {
+  if ([scene isKindOfClass:[UIWindowScene class]]) {
     UIWindowScene* windowScene = (UIWindowScene*)scene;
     for (UIWindow* window in windowScene.windows) {
-      [self searchFlutterViewControllersWithResult:result visited:visited viewController:window.rootViewController];
+      [self searchFlutterViewControllersWithResult:result
+                                           visited:visited
+                                    viewController:window.rootViewController];
     }
   }
   return [result copy];
@@ -110,7 +113,8 @@ static void CompactNSPointerArray(NSPointerArray* array) {
   }
 
   NSMutableSet<FlutterEngine*>* result = [NSMutableSet set];
-  NSArray<FlutterViewController*>* flutterViewControllers = [self searchFlutterViewControllersWithScene:scene];
+  NSArray<FlutterViewController*>* flutterViewControllers =
+      [self searchFlutterViewControllersWithScene:scene];
   for (FlutterViewController* flutterViewController in flutterViewControllers) {
     FlutterEngine* engine = flutterViewController.engine;
     if (engine) {
@@ -184,7 +188,8 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 }
 
 - (BOOL)alreadySentSceneConnectionForScene:(UIScene*)scene engine:(FlutterEngine*)engine {
-  NSArray<FlutterEngine*>* engines = [self.enginesSentConnectionEvent objectForKey:scene].allObjects ?: @[];
+  NSArray<FlutterEngine*>* engines =
+      [self.enginesSentConnectionEvent objectForKey:scene].allObjects ?: @[];
   return [engines containsObject:engine];
 }
 
@@ -193,7 +198,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
   if (connectionOptions == nil) {
     return;
   }
-  if ([self alreadySentSceneConnectionForScene:scene engine: engine]) {
+  if ([self alreadySentSceneConnectionForScene:scene engine:engine]) {
     return;
   }
   [self markConnectionEventSentForEngine:engine scene:scene];
@@ -271,8 +276,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
     [self.connectingScenes setObject:connectionOptions forKey:scene];
   }
 
-  NSArray<FlutterEngine*>* engines =
-      [self searchFlutterEnginesWithScene:scene];
+  NSArray<FlutterEngine*>* engines = [self searchFlutterEnginesWithScene:scene];
   for (FlutterEngine* engine in engines) {
     [self connectEngineIfNeeded:engine scene:scene];
   }

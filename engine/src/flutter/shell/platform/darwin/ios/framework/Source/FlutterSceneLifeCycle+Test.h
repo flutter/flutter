@@ -13,11 +13,9 @@
 // Category to add test-only visibility.
 @interface FlutterPluginSceneLifeCycleDelegate (Test)
 @property(nonatomic, strong) NSMapTable<UIScene*, NSPointerArray*>* developerManagedEngines;
-@property(nonatomic, strong)
-    NSMapTable<UIScene*, UISceneConnectionOptions*>* connectingScenes;
+@property(nonatomic, strong) NSMapTable<UIScene*, UISceneConnectionOptions*>* connectingScenes;
 @property(nonatomic, strong) NSMapTable<UIScene*, NSPointerArray*>* enginesSentConnectionEvent;
-@property(nonatomic, strong)
-    NSMapTable<UIScene*, NSNumber*>* sceneWillConnectEventHandledByPlugin;
+@property(nonatomic, strong) NSMapTable<UIScene*, NSNumber*>* sceneWillConnectEventHandledByPlugin;
 
 - (NSArray<FlutterViewController*>*)searchFlutterViewControllersWithScene:(UIScene*)scene;
 - (NSArray<FlutterEngine*>*)searchFlutterEnginesWithScene:(UIScene*)scene;
