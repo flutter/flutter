@@ -4124,6 +4124,166 @@ TEST_F(EmbedderTest, CanSendPointerEventWithViewId) {
   message_latch.Wait();
 }
 
+TEST_F(EmbedderTest, CanSendPointerTouchGeometry) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("pointer_data_packet");
+
+  fml::AutoResetWaitableEvent ready_latch, count_latch, message_latch;
+  context.AddFfiNativeCallback(
+      "SignalNativeTest",
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeCount",
+                               CREATE_FFI_LAMBDA([&count_latch](int count) {
+                                 ASSERT_EQ(count, 1);
+                                 count_latch.Signal();
+                               }));
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage",
+      CREATE_FFI_LAMBDA([&message_latch](Dart_Handle message_handle) {
+        auto message =
+            tonic::DartConverter<std::string>::FromDart(message_handle);
+        ASSERT_EQ("PointerData(viewId: 0, x: 123.0, y: 456.0)", message);
+        message_latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  FlutterPointerEvent pointer_event = {};
+  pointer_event.struct_size = sizeof(FlutterPointerEvent);
+  pointer_event.phase = FlutterPointerPhase::kAdd;
+  pointer_event.x = 123;
+  pointer_event.y = 456;
+  pointer_event.timestamp = static_cast<size_t>(1234567890);
+  pointer_event.view_id = 0;
+  pointer_event.distance = 1.5;
+  pointer_event.distance_max = 10.0;
+  pointer_event.size = 0.5;
+  pointer_event.radius_major = 10.0;
+  pointer_event.radius_minor = 5.0;
+  pointer_event.radius_min = 1.0;
+  pointer_event.radius_max = 20.0;
+  pointer_event.orientation = 0.78;
+  pointer_event.tilt = 0.39;
+  pointer_event.platform_data = 987654321;
+
+  FlutterEngineResult result =
+      FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1);
+  ASSERT_EQ(result, kSuccess);
+
+  count_latch.Wait();
+  message_latch.Wait();
+}
+
+TEST_F(EmbedderTest, CanSendLegacyPointerEventStructSize) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("pointer_data_packet");
+
+  fml::AutoResetWaitableEvent ready_latch, count_latch, message_latch;
+  context.AddFfiNativeCallback(
+      "SignalNativeTest",
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeCount",
+                               CREATE_FFI_LAMBDA([&count_latch](int count) {
+                                 ASSERT_EQ(count, 1);
+                                 count_latch.Signal();
+                               }));
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage",
+      CREATE_FFI_LAMBDA([&message_latch](Dart_Handle message_handle) {
+        auto message =
+            tonic::DartConverter<std::string>::FromDart(message_handle);
+        ASSERT_EQ("PointerData(viewId: 0, x: 123.0, y: 456.0)", message);
+        message_latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  // 144 bytes is the legacy FlutterPointerEvent struct size on 64-bit platforms
+  // before touch geometry extensions were appended.
+  constexpr size_t kLegacyPointerEventStructSize = 144;
+  FlutterPointerEvent pointer_event = {};
+  pointer_event.struct_size = kLegacyPointerEventStructSize;
+  pointer_event.phase = FlutterPointerPhase::kAdd;
+  pointer_event.x = 123;
+  pointer_event.y = 456;
+  pointer_event.timestamp = static_cast<size_t>(1234567890);
+  pointer_event.view_id = 0;
+
+  FlutterEngineResult result =
+      FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1);
+  ASSERT_EQ(result, kSuccess);
+
+  count_latch.Wait();
+  message_latch.Wait();
+}
+
+TEST_F(EmbedderTest, RejectZeroStructSizePointerEvent) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterPointerEvent pointer_event = {};
+  pointer_event.struct_size = 0;
+  pointer_event.phase = FlutterPointerPhase::kAdd;
+
+  FlutterEngineResult result =
+      FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1);
+  ASSERT_EQ(result, kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, PointerEventStructLayoutVerification) {
+  EXPECT_EQ(offsetof(FlutterPointerEvent, struct_size), 0u);
+  EXPECT_EQ(offsetof(FlutterPointerEvent, embedder_id),
+            offsetof(FlutterPointerEvent, platform_data) + sizeof(int64_t));
+  EXPECT_EQ(sizeof(FlutterPointerEvent),
+            offsetof(FlutterPointerEvent, embedder_id) + sizeof(int64_t));
+}
+
+TEST_F(EmbedderTest, CanSendPointerWithEmbedderIdAndLegacyTruncation) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // 1. Full struct size with embedder_id populated
+  FlutterPointerEvent pointer_event = {};
+  pointer_event.struct_size = sizeof(FlutterPointerEvent);
+  pointer_event.phase = FlutterPointerPhase::kAdd;
+  pointer_event.x = 100;
+  pointer_event.y = 200;
+  pointer_event.timestamp = 1000;
+  pointer_event.platform_data = 555;
+  pointer_event.embedder_id = 987654321LL;
+  EXPECT_EQ(FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1),
+            kSuccess);
+
+  // 2. Truncated legacy struct size omitting embedder_id
+  FlutterPointerEvent legacy_event = {};
+  legacy_event.struct_size = offsetof(FlutterPointerEvent, embedder_id);
+  legacy_event.phase = FlutterPointerPhase::kHover;
+  legacy_event.x = 105;
+  legacy_event.y = 205;
+  legacy_event.timestamp = 2000;
+  legacy_event.platform_data = 555;
+  EXPECT_EQ(FlutterEngineSendPointerEvent(engine.get(), &legacy_event, 1),
+            kSuccess);
+}
+
 TEST_F(EmbedderTest, WindowMetricsEventDefaultsToImplicitView) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   EmbedderConfigBuilder builder(context);
