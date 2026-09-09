@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/commands/build_bundle.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -533,6 +532,6 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? depfilePath,
     String? assetDirPath,
     bool buildNativeAssets = true,
-    @visibleForTesting BuildSystem? buildSystem,
+    BuildSystem? buildSystem,
   }) async {}
 }
