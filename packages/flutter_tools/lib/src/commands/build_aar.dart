@@ -10,6 +10,7 @@ import '../android/android_sdk.dart';
 import '../android/gradle_utils.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
