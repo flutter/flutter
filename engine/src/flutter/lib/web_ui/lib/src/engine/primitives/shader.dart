@@ -332,6 +332,10 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
 
   late final BackendFragmentShader _backendShader;
   final Map<int, BackendImageShader> _imageSamplers = <int, BackendImageShader>{};
+  final Map<int, EngineImage> _samplerImages = <int, EngineImage>{};
+
+  /// The images currently assigned to samplers in this shader.
+  Iterable<EngineImage> get samplerImages => _samplerImages.values;
 
   @visibleForTesting
   Map<int, BackendImageShader> get debugImageSamplers => _imageSamplers;
@@ -368,6 +372,7 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
       oldSampler.dispose();
     }
     _imageSamplers[index] = sampler;
+    _samplerImages[index] = image;
     _shaderFinalizer.attach(this, sampler, detach: sampler);
     _backendShader.setImageSampler(index, sampler, image.width.toDouble(), image.height.toDouble());
   }
@@ -383,6 +388,7 @@ class EngineFragmentShader extends EngineShader implements ui.FragmentShader {
         sampler.dispose();
       }
       _imageSamplers.clear();
+      _samplerImages.clear();
     }
   }
 
