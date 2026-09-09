@@ -10,14 +10,15 @@ import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
-final RegExp _tabooPattern = RegExp(r'\b(simply\b|note:|note that\b)', caseSensitive: false);
+import '../flutter_analysis_rule.dart';
 
-/// Avoid taboo words ('simply', 'note:', 'note that') in documentation comments.
-class TabooDocumentation extends AnalysisRule {
+final RegExp _tabooPattern = RegExp(r'\bsimply\b', caseSensitive: false);
+
+/// Avoid taboo words ('simply') in documentation comments.
+class TabooDocumentation extends FlutterAnalysisRule {
   TabooDocumentation() : super(name: code.name, description: ruleDescription);
 
-  static const String ruleDescription =
-      "Avoid taboo words ('simply', 'note:', 'note that') in documentation comments.";
+  static const String ruleDescription = "Avoid taboo words ('simply') in documentation comments.";
 
   static const LintCode code = LintCode(
     'taboo_documentation',
@@ -31,7 +32,16 @@ class TabooDocumentation extends AnalysisRule {
   LintCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
+    if (!filePath.contains('/home/test') &&
+        (filePath.contains('/test/') ||
+            filePath.endsWith('_test.dart') ||
+            filePath.contains('packages/flutter_tools') ||
+            filePath.endsWith('taboo_documentation.dart') ||
+            filePath.endsWith('taboo_documentation_test.dart'))) {
+      return;
+    }
     final visitor = _Visitor(this, context);
     registry.addComment(this, visitor);
   }

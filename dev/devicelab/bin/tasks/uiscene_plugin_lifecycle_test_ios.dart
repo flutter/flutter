@@ -23,7 +23,7 @@ import 'package:path/path.dart' as path;
 /// `--task-args destination=[/path/to/copy/destination]` can be used to override the destination
 /// of the generated apps/plugins.
 ///
-/// e.g. `../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t module_uiscene_test_ios --local-engine ios_debug_sim_unopt_arm64 --local-engine-host host_debug --task-args destination=/path/to/copy/destination`
+/// e.g. `../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test -t uiscene_plugin_lifecycle_test_ios --local-engine ios_debug_sim_unopt_arm64 --local-engine-host host_debug --task-args destination=/path/to/copy/destination`
 Future<void> main(List<String> args) async {
   const kDestination = 'destination';
   const kTestName = 'name';
@@ -343,7 +343,7 @@ Future<void> _uploadTestResults({
   if (dumpDirectory != null) {
     // Zip the test results to the artifacts directory for upload.
     final zipName =
-        'module_uiscene_test_ios-$scenarioName-${DateTime.now().toLocal().toIso8601String()}.zip';
+        'uiscene_plugin_lifecycle_test_ios-$scenarioName-${DateTime.now().toLocal().toIso8601String()}.zip';
     await inDirectory(resultBundlePath, () {
       final String zipPath = path.join(dumpDirectory.path, zipName);
       return exec(
@@ -359,6 +359,27 @@ enum XcodeProjectType { UIKitSwift, SwiftUI }
 
 class Scenarios {
   Scenarios();
+
+  late Map<String, Map<String, String>> deepLinkScenarios = <String, Map<String, String>>{
+    'AppMigrated-FlutterSceneDelegate-PluginMigrated-DeepLink': <String, String>{
+      ...sharedLifecycleFiles,
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-DeepLinks-SceneEvents.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+    },
+    'AppMigrated-FlutterSceneDelegate-PluginNotMigrated-DeepLink': <String, String>{
+      ...sharedLifecycleFiles,
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-unmigrated.swift':
+          r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-DeepLinks-ApplicationEvents.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+    },
+  };
 
   Map<String, Map<String, String>> scenarios(XcodeProjectType projectType) {
     switch (projectType) {
@@ -379,6 +400,7 @@ class Scenarios {
     ...stateRestorationScenarios,
     ...implicitEngineDelegateScenarios,
     ...multiSceneScenarios,
+    ...deepLinkScenarios,
   };
 
   late Map<String, Map<String, String>> swiftUIScenarios = <String, Map<String, String>>{
