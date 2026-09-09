@@ -164,6 +164,11 @@ void main() {
       sdk.sdkManagerPath = '/foo/bar/sdkmanager';
       processManager.addCommand(
         FakeCommand(
+          command: <String>[sdk.sdkManagerPath!, '--version'],
+        ),
+      );
+      processManager.addCommand(
+        FakeCommand(
           command: <String>[sdk.sdkManagerPath!, '--licenses'],
           stdin: IOSink(ClosedStdinController()),
         ),
@@ -186,6 +191,11 @@ void main() {
 
   testWithoutContext('licensesAccepted handles garbage/no output', () async {
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['/foo/bar/sdkmanager', '--version'],
+      ),
+    );
     processManager.addCommand(
       const FakeCommand(
         command: <String>['/foo/bar/sdkmanager', '--licenses'],
@@ -213,6 +223,9 @@ void main() {
 All SDK package licenses accepted.
 ''';
     processManager.addCommand(
+      const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--version']),
+    );
+    processManager.addCommand(
       const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--licenses'], stdout: output),
     );
 
@@ -233,6 +246,15 @@ All SDK package licenses accepted.
   testWithoutContext('licensesAccepted sets environment for finding java', () async {
     final Java java = FakeJava();
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
+    processManager.addCommand(
+      FakeCommand(
+        command: <String>[sdk.sdkManagerPath!, '--version'],
+        environment: <String, String>{
+          'JAVA_HOME': java.javaHome!,
+          'PATH': fileSystem.path.join(java.javaHome!, 'bin'),
+        },
+      ),
+    );
     processManager.addCommand(
       FakeCommand(
         command: <String>[sdk.sdkManagerPath!, '--licenses'],
@@ -265,6 +287,9 @@ All SDK package licenses accepted.
 Review licenses that have not been accepted (y/N)?
 ''';
     processManager.addCommand(
+      const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--version']),
+    );
+    processManager.addCommand(
       const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--licenses'], stdout: output),
     );
 
@@ -289,6 +314,9 @@ Review licenses that have not been accepted (y/N)?
 5 of 5 SDK package licenses not accepted.
 Review licenses that have not been accepted (y/N)?
 ''';
+    processManager.addCommand(
+      const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--version']),
+    );
     processManager.addCommand(
       const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--licenses'], stdout: output),
     );
@@ -417,6 +445,9 @@ Warning: The --licenses option is no longer needed.
     sdk.sdkManagerPath = '/foo/bar/sdkmanager';
     sdk.sdkManagerVersion = '26.0.0';
     processManager.addCommand(
+      const FakeCommand(command: <String>['/foo/bar/sdkmanager', '--version']),
+    );
+    processManager.addCommand(
       FakeCommand(
         command: const <String>['/foo/bar/sdkmanager', '--licenses'],
         stdin: IgnoringStdin(),
@@ -460,6 +491,9 @@ Warning: The --licenses option is no longer needed.
     // By using a `Socket` generic parameter, the stdin.addStream will return a `Future<Socket>`
     // We are testing that our error handling properly handles futures of this type
     final fakeStdin = ThrowingStdin<Socket>(exception);
+    processManager.addCommand(
+      FakeCommand(command: <String>[sdk.sdkManagerPath!, '--version']),
+    );
     final licenseCommand = FakeCommand(
       command: <String>[sdk.sdkManagerPath!, '--licenses'],
       stdin: fakeStdin,
@@ -503,6 +537,13 @@ Warning: The --licenses option is no longer needed.
     const sdkManagerPath = '/foo/bar/sdkmanager';
     sdk.sdkManagerPath = sdkManagerPath;
     final logger = BufferLogger.test();
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[sdkManagerPath, '--version'],
+        exitCode: 1,
+        stderr: 'sdkmanager --version crash',
+      ),
+    );
     processManager.addCommand(
       FakeCommand(
         command: const <String>[sdkManagerPath, '--licenses'],
