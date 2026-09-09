@@ -198,6 +198,58 @@ TEST(FlutterSurfaceManager, BackingStoreCacheSurfaceStuckInUse) {
   EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/185394.
+//
+// The cache purged itself only when the *first* cached surface had a different
+// size than the request, then returned the youngest idle surface without
+// checking *that* surface's size. A size flip-flop (A -> B -> A) while the
+// previous A surface is still held by the window server leaves a mixed-size
+// cache, and the next request for A gets the B surface. Impeller then wraps a
+// Metal texture whose real size disagrees with the descriptor, the texture
+// invalidates itself, the color attachment is dropped, and the raster thread
+// crashes in impeller::Canvas::SetupRenderPass.
+TEST(FlutterSurfaceManager, BackBufferCacheNeverReturnsSurfaceOfDifferentSize) {
+  TestView* testView = [[TestView alloc] init];
+  FlutterSurfaceManager* surfaceManager = CreateSurfaceManager(testView);
+
+  const CGSize sizeA = CGSizeMake(100, 100);
+  const CGSize sizeB = CGSizeMake(50, 50);
+
+  // Frame 1 at A.
+  auto surfaceA1 = [surfaceManager surfaceForSize:sizeA];
+  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surfaceA1) ] atTime:0 notify:nil];
+
+  // Frame 2 at B: A1 returns to the cache.
+  auto surfaceB1 = [surfaceManager surfaceForSize:sizeB];
+  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surfaceB1) ] atTime:0 notify:nil];
+  EXPECT_EQ(surfaceManager.backBufferCache.count, 1ul);
+
+  // The window server is still displaying A1, so it cannot be recycled yet.
+  surfaceA1.isInUseOverride = YES;
+
+  // Frame 3 at A: cache head is A1 (size matches, no purge), A1 is busy, so a
+  // fresh A surface is created and A1 stays cached.
+  auto surfaceA2 = [surfaceManager surfaceForSize:sizeA];
+  EXPECT_NE(surfaceA2, surfaceA1);
+  EXPECT_TRUE(CGSizeEqualToSize(surfaceA2.size, sizeA));
+  // Presenting returns B1 into a cache whose head is A1 -> mixed sizes.
+  [surfaceManager presentSurfaces:@[ CreatePresentInfo(surfaceA2) ] atTime:0 notify:nil];
+  EXPECT_EQ(surfaceManager.backBufferCache.count, 2ul);
+
+  surfaceA1.isInUseOverride = NO;
+
+  // Frame 4 at A must never receive the B surface.
+  auto surfaceA3 = [surfaceManager surfaceForSize:sizeA];
+  EXPECT_TRUE(CGSizeEqualToSize(surfaceA3.size, sizeA))
+      << "cache returned " << surfaceA3.size.width << "x" << surfaceA3.size.height << " for a "
+      << sizeA.width << "x" << sizeA.height << " request";
+  EXPECT_NE(surfaceA3, surfaceB1);
+
+  // Every surface the cache hands out must match the request, whatever is cached.
+  auto surfaceB2 = [surfaceManager surfaceForSize:sizeB];
+  EXPECT_TRUE(CGSizeEqualToSize(surfaceB2.size, sizeB));
+}
+
 inline bool operator==(const CGRect& lhs, const CGRect& rhs) {
   return CGRectEqualToRect(lhs, rhs);
 }
