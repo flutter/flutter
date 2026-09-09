@@ -289,7 +289,7 @@ class DlDispatcherBase : public flutter::DlOpReceiver {
 
   virtual Canvas& GetCanvas() = 0;
 
-  virtual const ContentContext& GetContentContext() const = 0;
+  virtual ContentContext& GetContentContext() const = 0;
 
   std::shared_ptr<Texture> GetTexture(const sk_sp<flutter::DlImage>& image);
 
@@ -347,17 +347,16 @@ class CanvasDlDispatcher : public DlDispatcherBase {
 
  private:
   Canvas canvas_;
-  const ContentContext& renderer_;
+  ContentContext& renderer_;
 
   Canvas& GetCanvas() override;
-  const ContentContext& GetContentContext() const override;
+  ContentContext& GetContentContext() const override;
 };
 
 /// Performs a first pass over the display list to collect information
 /// that will be useful in a second pass by the CanvasDlDispatcher.
 /// This class collects things like text frames and backdrop filters.
 class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
-                            public flutter::IgnoreClipDispatchHelper,
                             public flutter::IgnoreDrawDispatchHelper {
  public:
   FirstPassDispatcher(const ContentContext& renderer,
@@ -374,6 +373,31 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
                  std::optional<int64_t> backdrop_id) override;
 
   void restore() override;
+
+  // |flutter::DlOpReceiver|
+  void clipRect(const DlRect& rect,
+                flutter::DlClipOp clip_op,
+                bool is_aa) override;
+
+  // |flutter::DlOpReceiver|
+  void clipOval(const DlRect& bounds,
+                flutter::DlClipOp clip_op,
+                bool is_aa) override;
+
+  // |flutter::DlOpReceiver|
+  void clipRoundRect(const DlRoundRect& rrect,
+                     flutter::DlClipOp clip_op,
+                     bool is_aa) override;
+
+  // |flutter::DlOpReceiver|
+  void clipPath(const DlPath& path,
+                flutter::DlClipOp clip_op,
+                bool is_aa) override;
+
+  // |flutter::DlOpReceiver|
+  void clipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                             flutter::DlClipOp clip_op,
+                             bool is_aa) override;
 
   void translate(DlScalar tx, DlScalar ty) override;
 
@@ -444,6 +468,15 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   size_t backdrop_count_ = 0;
   Paint paint_;
 };
+
+/// Render the provided display list to a texture with the given size.
+std::shared_ptr<Texture> DisplayListToTexture(
+    const sk_sp<flutter::DisplayList>& display_list,
+    ISize size,
+    ContentContext& context,
+    bool reset_host_buffer = true,
+    bool generate_mips = false,
+    std::optional<PixelFormat> target_pixel_format = std::nullopt);
 
 /// Render the provided display list to a texture with the given size.
 std::shared_ptr<Texture> DisplayListToTexture(
