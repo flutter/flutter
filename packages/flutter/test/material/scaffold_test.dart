@@ -128,7 +128,7 @@ void main() {
       }
     }
 
-    testWidgets('height constraints apply to content as keyboard changes', (
+    testWidgets('height constraints still bound the logical sheet as keyboard changes', (
       WidgetTester tester,
     ) async {
       final key = GlobalKey<ScaffoldState>();
@@ -145,8 +145,349 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.getSize(find.byKey(_keyboardSheetContentKey)), const Size(250.0, 150.0));
+        expect(tester.getSize(find.byType(BottomSheet)).height, 150.0);
         expect(tester.getBottomLeft(find.byKey(_keyboardSheetContentKey)).dy, 600.0 - inset);
         expect(tester.getSize(_keyboardSheetMaterial), Size(250.0, 150.0 + inset));
+      }
+    });
+
+    testWidgets('logical bounds and intrinsic dimensions exclude the decoration', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      for (final inset in <double>[0.0, 200.0, 0.0]) {
+        await _pumpKeyboardSheetScaffold(
+          tester,
+          scaffoldKey: key,
+          inset: inset,
+          theme: ThemeData(useMaterial3: false),
+          sheet: const SizedBox(width: 240.0, height: 100.0, child: Text('Baseline')),
+        );
+        await tester.pumpAndSettle();
+        final RenderBox sheet = tester.renderObject(find.byType(BottomSheet));
+        expect(sheet.size, const Size(240.0, 100.0));
+        expect(sheet.getMinIntrinsicHeight(240.0), 100.0);
+        expect(sheet.getMaxIntrinsicHeight(240.0), 100.0);
+        expect(sheet.getMinIntrinsicWidth(100.0), 240.0);
+        expect(sheet.getMaxIntrinsicWidth(100.0), 240.0);
+        expect(sheet.getDryLayout(sheet.constraints), sheet.size);
+        expect(
+          sheet.getDryBaseline(sheet.constraints, TextBaseline.alphabetic),
+          tester
+              .renderObject<RenderBox>(find.text('Baseline'))
+              .getDryBaseline(
+                tester.renderObject<RenderBox>(find.text('Baseline')).constraints,
+                TextBaseline.alphabetic,
+              ),
+        );
+      }
+    });
+
+    for (final inset in <double>[0.0, 200.0]) {
+      testWidgets('drag thresholds use the logical sheet height with inset $inset', (
+        WidgetTester tester,
+      ) async {
+        final key = GlobalKey<ScaffoldState>();
+        final AnimationController controller = BottomSheet.createAnimationController(tester);
+        addTearDown(controller.dispose);
+        await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key, inset: inset);
+        key.currentState!.showBottomSheet(
+          (_) => const SizedBox(width: double.infinity, height: 100.0),
+          transitionAnimationController: controller,
+        );
+        await tester.pumpAndSettle();
+        final TestGesture gesture = await tester.startGesture(
+          tester.getCenter(find.byType(BottomSheet)),
+        );
+        await gesture.moveBy(const Offset(0.0, 20.0));
+        await gesture.moveBy(const Offset(0.0, 60.0));
+        expect(controller.value, closeTo(0.4, 0.001));
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(find.byType(BottomSheet), findsNothing);
+      });
+    }
+
+    testWidgets('dismissal clips content at the keyboard without enlarging animation travel', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      try {
+        final key = GlobalKey<ScaffoldState>();
+        final AnimationController controller = BottomSheet.createAnimationController(tester);
+        addTearDown(controller.dispose);
+        await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key);
+        key.currentState!.showBottomSheet(
+          (_) => Ink(color: Colors.green, width: double.infinity, height: 100.0),
+          backgroundColor: Colors.red,
+          transitionAnimationController: controller,
+        );
+        await tester.pumpAndSettle();
+        for (final value in <double>[0.9, 0.5, 0.1]) {
+          controller.value = value;
+          await tester.pump();
+          final double visibleHeight = Curves.fastOutSlowIn.transform(value) * 100.0;
+          expect(
+            tester.getTopLeft(find.byType(BottomSheet)).dy,
+            closeTo(400.0 - visibleHeight, 0.001),
+          );
+          expect(
+            tester.getSemantics(find.byType(BottomSheet)).rect.height,
+            lessThanOrEqualTo(visibleHeight + precisionErrorTolerance),
+          );
+          expect(await _keyboardPixel(tester, 400, 401), isSameColorAs(Colors.red));
+          expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(Colors.red));
+        }
+      } finally {
+        semantics.dispose();
+      }
+    });
+
+    testWidgets('dismissal excludes hidden content from accessibility', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+      try {
+        final key = GlobalKey<ScaffoldState>();
+        final AnimationController controller = BottomSheet.createAnimationController(tester);
+        addTearDown(controller.dispose);
+        const target = ValueKey<String>('lower semantics');
+        await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key);
+        key.currentState!.showBottomSheet(
+          (_) => SizedBox(
+            height: 100.0,
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const SizedBox(height: 60.0),
+                Semantics(
+                  key: target,
+                  container: true,
+                  label: 'Lower content',
+                  child: const SizedBox(height: 40.0),
+                ),
+              ],
+            ),
+          ),
+          transitionAnimationController: controller,
+        );
+        await tester.pumpAndSettle();
+        final SemanticsNode node = tester.getSemantics(find.byKey(target));
+        expect(node, matchesSemantics(label: 'Lower content', textDirection: TextDirection.ltr));
+        controller.value = 0.3;
+        await tester.pump();
+        expect(node.attached && !node.hasFlag(ui.SemanticsFlag.isHidden), isFalse);
+        controller.value = 1.0;
+        await tester.pump();
+        expect(
+          tester.getSemantics(find.byKey(target)),
+          matchesSemantics(label: 'Lower content', textDirection: TextDirection.ltr),
+        );
+      } finally {
+        semantics.dispose();
+      }
+    });
+
+    testWidgets('constrained Scaffold bounds excessive insets and clips the surface', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      const theme = BottomSheetThemeData(
+        backgroundColor: Colors.red,
+        constraints: BoxConstraints.tightFor(height: 150.0),
+      );
+      for (final inset in <double>[0.0, 200.0, 400.0, 0.0]) {
+        await _pumpKeyboardSheetScaffold(
+          tester,
+          scaffoldKey: key,
+          size: const Size(320.0, 250.0),
+          inset: inset,
+          theme: ThemeData(bottomSheetTheme: theme),
+          sheet: const SizedBox.expand(key: _keyboardSheetContentKey),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          tester.getSize(find.byKey(_keyboardSheetContentKey)).height,
+          math.min(150.0, math.max(0.0, 250.0 - inset)),
+        );
+        expect(
+          tester.getSize(find.byType(BottomSheet)).height,
+          math.min(150.0, math.max(0.0, 250.0 - inset)),
+        );
+        expect(tester.getBottomLeft(_keyboardSheetMaterial).dy, 250.0);
+        expect(await _keyboardPixel(tester, 160, 249), isSameColorAs(Colors.red));
+        expect(await _keyboardPixel(tester, 160, 260), isNot(isSameColorAs(Colors.red)));
+        expect(tester.takeException(), isNull);
+      }
+    });
+
+    testWidgets('surface tint and shape remain owned by the extending Material', (
+      WidgetTester tester,
+    ) async {
+      const shape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(24.0),
+          bottom: Radius.circular(40.0),
+        ),
+      );
+      await _pumpKeyboardSheetScaffold(
+        tester,
+        theme: ThemeData(
+          bottomSheetTheme: const BottomSheetThemeData(
+            backgroundColor: Colors.red,
+            surfaceTintColor: Colors.green,
+            elevation: 12.0,
+            shape: shape,
+            constraints: BoxConstraints.tightFor(width: 240.0),
+          ),
+        ),
+        sheet: const SizedBox(height: 100.0),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.widget<Material>(_keyboardSheetMaterial).shape, shape);
+      expect(tester.getSize(_keyboardSheetMaterial), const Size(240.0, 300.0));
+      final Color surface = await _keyboardPixel(tester, 400, 350);
+      expect(surface, isNot(isSameColorAs(Colors.red)));
+      expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(surface));
+      expect(await _keyboardPixel(tester, 270, 500), isSameColorAs(Colors.blue));
+    });
+
+    testWidgets('surface updates when logical constraints stay unchanged', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      for (final height in <double>[600.0, 500.0, 600.0]) {
+        await _pumpKeyboardSheetScaffold(
+          tester,
+          scaffoldKey: key,
+          size: Size(320.0, height),
+          inset: height - 400.0,
+          sheet: const SizedBox(height: 100.0, width: double.infinity),
+        );
+        await tester.pumpAndSettle();
+        expect(tester.getSize(find.byType(BottomSheet)).height, 100.0);
+        expect(tester.getTopLeft(find.byType(BottomSheet)).dy, 300.0);
+        expect(tester.getBottomLeft(_keyboardSheetMaterial).dy, height);
+      }
+    });
+
+    testWidgets('explicit transparency remains transparent under the keyboard', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      await _pumpKeyboardSheetScaffold(
+        tester,
+        scaffoldKey: key,
+        theme: ThemeData(bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.red)),
+      );
+      key.currentState!.showBottomSheet(
+        (_) => const SizedBox(width: 240.0, height: 100.0),
+        backgroundColor: Colors.transparent,
+        elevation: 0.0,
+      );
+      await tester.pumpAndSettle();
+      expect(await _keyboardPixel(tester, 400, 350), isSameColorAs(Colors.blue));
+      expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(Colors.blue));
+    });
+
+    testWidgets('replacement retains each surface width and color until dismissal', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<ScaffoldState>();
+      await _pumpKeyboardSheetScaffold(
+        tester,
+        scaffoldKey: key,
+        theme: ThemeData(useMaterial3: false),
+      );
+      final PersistentBottomSheetController firstSheet = key.currentState!.showBottomSheet(
+        (_) => const SizedBox(width: 400.0, height: 100.0),
+        backgroundColor: Colors.red,
+        constraints: const BoxConstraints.tightFor(width: 400.0),
+      );
+      await tester.pumpAndSettle();
+      firstSheet.close();
+      key.currentState!.showBottomSheet(
+        (_) => const SizedBox(width: 200.0, height: 150.0),
+        backgroundColor: Colors.green,
+        constraints: const BoxConstraints.tightFor(width: 200.0),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(await _keyboardPixel(tester, 250, 500), isSameColorAs(Colors.red));
+      expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(Colors.green));
+      await tester.pumpAndSettle();
+      expect(await _keyboardPixel(tester, 250, 500), isSameColorAs(Colors.blue));
+      expect(await _keyboardPixel(tester, 400, 500), isSameColorAs(Colors.green));
+    });
+
+    testWidgets('nested Navigators keep each Scaffold surface within its own bounds', (
+      WidgetTester tester,
+    ) async {
+      Widget pane(double inset, Color color) {
+        return Expanded(
+          child: Navigator(
+            onGenerateRoute: (_) => MaterialPageRoute<void>(
+              builder: (_) => MediaQuery(
+                data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: inset)),
+                child: Theme(
+                  data: ThemeData(bottomSheetTheme: BottomSheetThemeData(backgroundColor: color)),
+                  child: const Scaffold(
+                    backgroundColor: Colors.blue,
+                    bottomSheet: SizedBox(height: 100.0, width: double.infinity),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RepaintBoundary(
+            key: _keyboardPaintKey,
+            child: Row(children: <Widget>[pane(200.0, Colors.red), pane(0.0, Colors.green)]),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(await _keyboardPixel(tester, 200, 450), isSameColorAs(Colors.red));
+      expect(await _keyboardPixel(tester, 600, 450), isSameColorAs(Colors.blue));
+      expect(await _keyboardPixel(tester, 600, 550), isSameColorAs(Colors.green));
+    });
+
+    testWidgets('keyboard changes preserve focused field state and scroll visibility', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(tester.view.resetViewInsets);
+      final key = GlobalKey<ScaffoldState>();
+      final focus = FocusNode();
+      final controller = TextEditingController(text: 'Focused content');
+      addTearDown(focus.dispose);
+      addTearDown(controller.dispose);
+      final Widget content = SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            const SizedBox(height: 700.0),
+            TextField(focusNode: focus, controller: controller),
+          ],
+        ),
+      );
+      await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key, inset: 0.0, sheet: content);
+      focus.requestFocus();
+      await tester.pumpAndSettle();
+      final EditableTextState state = tester.state(find.byType(EditableText));
+      for (final inset in <double>[200.0, 0.0]) {
+        tester.view.viewInsets = FakeViewPadding(bottom: inset * tester.view.devicePixelRatio);
+        await _pumpKeyboardSheetScaffold(tester, scaffoldKey: key, inset: inset, sheet: content);
+        await tester.pumpAndSettle();
+        expect(tester.state(find.byType(EditableText)), same(state));
+        expect(focus.hasFocus, isTrue);
+        expect(
+          tester.getBottomLeft(find.byType(EditableText)).dy,
+          lessThanOrEqualTo(600.0 - inset),
+        );
       }
     });
 
@@ -202,6 +543,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       final Rect contentRect = tester.getRect(find.byKey(_keyboardSheetContentKey));
+      expect(tester.getSemantics(find.byType(BottomSheet)).rect.height, contentRect.height);
       final HitTestResult result = tester.hitTestOnBinding(const Offset(400.0, 500.0));
       final RenderObject material = tester.renderObject(_keyboardSheetMaterial);
       expect(result.path.any((HitTestEntry entry) => entry.target == material), isFalse);
