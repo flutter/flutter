@@ -22,7 +22,6 @@ import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
@@ -512,113 +511,92 @@ void main() {
           ..writeAsStringSync(engineRevision);
       });
 
-      testUsingContext(
-        'version unknown',
-        () async {
-          const frameworkVersion = '0.0.0-unknown';
-          final fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
+      testWithoutContext('version unknown', () async {
+        const frameworkVersion = '0.0.0-unknown';
+        final fakeFlutterVersion = FakeFlutterVersion(frameworkVersion: frameworkVersion);
 
-          final command = BuildMacOSFrameworkCommand(
-            logger: BufferLogger.test(),
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            platform: fakePlatform,
-            flutterVersion: fakeFlutterVersion,
-            cache: cache,
-            verboseHelp: false,
-            codesign: FakeDarwinAddToAppCodesigning(),
-          );
+        final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          flutterVersion: fakeFlutterVersion,
+          cache: cache,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
 
-          expect(
-            () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(
-              message:
-                  '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion',
-            ),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => memoryFileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
+        expect(
+          () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
+          throwsToolExit(
+            message:
+                '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion',
+          ),
+        );
+      });
 
-      testUsingContext(
-        'throws when not on a released version',
-        () async {
-          const frameworkVersion = 'v1.13.10+hotfix.14.pre.2';
-          const gitTagVersion = GitTagVersion(
+      testWithoutContext('throws when not on a released version', () async {
+        const frameworkVersion = 'v1.13.10+hotfix.14.pre.2';
+        const gitTagVersion = GitTagVersion(
+          x: 1,
+          y: 13,
+          z: 10,
+          hotfix: 13,
+          commits: 2,
+          hash: '',
+          gitTag: frameworkVersion,
+        );
+        final fakeFlutterVersion = FakeFlutterVersion(
+          gitTagVersion: gitTagVersion,
+          frameworkVersion: frameworkVersion,
+        );
+
+        final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          flutterVersion: fakeFlutterVersion,
+          cache: cache,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
+
+        expect(
+          () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
+          throwsToolExit(
+            message:
+                '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion',
+          ),
+        );
+      });
+
+      testWithoutContext('throws when license not found', () async {
+        final fakeFlutterVersion = FakeFlutterVersion(
+          gitTagVersion: const GitTagVersion(
             x: 1,
             y: 13,
             z: 10,
             hotfix: 13,
-            commits: 2,
+            commits: 0,
             hash: '',
-            gitTag: frameworkVersion,
-          );
-          final fakeFlutterVersion = FakeFlutterVersion(
-            gitTagVersion: gitTagVersion,
-            frameworkVersion: frameworkVersion,
-          );
+            gitTag: '1.13.10+hotfix.14.pre.0',
+          ),
+        );
 
-          final command = BuildMacOSFrameworkCommand(
-            logger: BufferLogger.test(),
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            platform: fakePlatform,
-            flutterVersion: fakeFlutterVersion,
-            cache: cache,
-            verboseHelp: false,
-            codesign: FakeDarwinAddToAppCodesigning(),
-          );
+        final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+          fileSystem: memoryFileSystem,
+          logger: BufferLogger.test(),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          platform: fakePlatform,
+          flutterVersion: fakeFlutterVersion,
+          cache: cache,
+          codesign: FakeDarwinAddToAppCodesigning(),
+        );
 
-          expect(
-            () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(
-              message:
-                  '--cocoapods is only supported on the beta or stable channel. Detected version is $frameworkVersion',
-            ),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => memoryFileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
-
-      testUsingContext(
-        'throws when license not found',
-        () async {
-          final fakeFlutterVersion = FakeFlutterVersion(
-            gitTagVersion: const GitTagVersion(
-              x: 1,
-              y: 13,
-              z: 10,
-              hotfix: 13,
-              commits: 0,
-              hash: '',
-              gitTag: '1.13.10+hotfix.14.pre.0',
-            ),
-          );
-
-          final command = BuildMacOSFrameworkCommand(
-            logger: BufferLogger.test(),
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-            platform: fakePlatform,
-            flutterVersion: fakeFlutterVersion,
-            cache: cache,
-            verboseHelp: false,
-            codesign: FakeDarwinAddToAppCodesigning(),
-          );
-
-          expect(
-            () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
-            throwsToolExit(message: 'Could not find license'),
-          );
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => memoryFileSystem,
-          ProcessManager: () => FakeProcessManager.any(),
-        },
-      );
+        expect(
+          () => command.produceFlutterPodspec(BuildMode.debug, outputDirectory),
+          throwsToolExit(message: 'Could not find license'),
+        );
+      });
 
       group('is created', () {
         const frameworkVersion = 'v1.13.11+hotfix.13';
@@ -633,42 +611,35 @@ void main() {
         });
 
         group('on master channel', () {
-          testUsingContext(
-            'created when forced',
-            () async {
-              const gitTagVersion = GitTagVersion(
-                x: 1,
-                y: 13,
-                z: 11,
-                hotfix: 13,
-                commits: 100,
-                hash: '',
-                gitTag: '$frameworkVersion.pre.100',
-              );
-              final fakeFlutterVersion = FakeFlutterVersion(
-                gitTagVersion: gitTagVersion,
-                frameworkVersion: frameworkVersion,
-              );
+          testWithoutContext('created when forced', () async {
+            const gitTagVersion = GitTagVersion(
+              x: 1,
+              y: 13,
+              z: 11,
+              hotfix: 13,
+              commits: 100,
+              hash: '',
+              gitTag: '$frameworkVersion.pre.100',
+            );
+            final fakeFlutterVersion = FakeFlutterVersion(
+              gitTagVersion: gitTagVersion,
+              frameworkVersion: frameworkVersion,
+            );
 
-              final command = BuildMacOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
+            final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.debug, outputDirectory, force: true);
 
-              final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
-              expect(expectedPodspec.existsSync(), isTrue);
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
+            expect(expectedPodspec.existsSync(), isTrue);
+          });
         });
 
         group('not on master channel', () {
@@ -689,118 +660,90 @@ void main() {
             );
           });
 
-          testUsingContext(
-            'contains license and version',
-            () async {
-              final command = BuildMacOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
+          testWithoutContext('contains license and version', () async {
+            final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
-              final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
-              final String podspecContents = expectedPodspec.readAsStringSync();
-              expect(podspecContents, contains("'1.13.1113'"));
-              expect(podspecContents, contains('# $frameworkVersion'));
-              expect(podspecContents, contains(licenseText));
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
+            final String podspecContents = expectedPodspec.readAsStringSync();
+            expect(podspecContents, contains("'1.13.1113'"));
+            expect(podspecContents, contains('# $frameworkVersion'));
+            expect(podspecContents, contains(licenseText));
+          });
 
-          testUsingContext(
-            'debug URL',
-            () async {
-              final command = BuildMacOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
+          testWithoutContext('debug URL', () async {
+            final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.debug, outputDirectory);
 
-              final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
-              final String podspecContents = expectedPodspec.readAsStringSync();
-              expect(
-                podspecContents,
-                contains(
-                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64/FlutterMacOS.framework.zip'",
-                ),
-              );
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
+            final String podspecContents = expectedPodspec.readAsStringSync();
+            expect(
+              podspecContents,
+              contains(
+                "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64/FlutterMacOS.framework.zip'",
+              ),
+            );
+          });
 
-          testUsingContext(
-            'profile URL',
-            () async {
-              final command = BuildMacOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
+          testWithoutContext('profile URL', () async {
+            final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.profile, outputDirectory);
 
-              final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
-              final String podspecContents = expectedPodspec.readAsStringSync();
-              expect(
-                podspecContents,
-                contains(
-                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-profile/FlutterMacOS.framework.zip'",
-                ),
-              );
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
+            final String podspecContents = expectedPodspec.readAsStringSync();
+            expect(
+              podspecContents,
+              contains(
+                "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-profile/FlutterMacOS.framework.zip'",
+              ),
+            );
+          });
 
-          testUsingContext(
-            'release URL',
-            () async {
-              final command = BuildMacOSFrameworkCommand(
-                logger: BufferLogger.test(),
-                buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-                platform: fakePlatform,
-                flutterVersion: fakeFlutterVersion,
-                cache: cache,
-                verboseHelp: false,
-                codesign: FakeDarwinAddToAppCodesigning(),
-              );
-              command.produceFlutterPodspec(BuildMode.release, outputDirectory);
+          testWithoutContext('release URL', () async {
+            final BuildMacOSFrameworkCommand command = createBuildMacOSFrameworkCommand(
+              fileSystem: memoryFileSystem,
+              logger: BufferLogger.test(),
+              buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+              platform: fakePlatform,
+              flutterVersion: fakeFlutterVersion,
+              cache: cache,
+              codesign: FakeDarwinAddToAppCodesigning(),
+            );
+            command.produceFlutterPodspec(BuildMode.release, outputDirectory);
 
-              final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
-              final String podspecContents = expectedPodspec.readAsStringSync();
-              expect(
-                podspecContents,
-                contains(
-                  "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-release/FlutterMacOS.framework.zip'",
-                ),
-              );
-            },
-            overrides: <Type, Generator>{
-              FileSystem: () => memoryFileSystem,
-              ProcessManager: () => FakeProcessManager.any(),
-            },
-          );
+            final File expectedPodspec = outputDirectory.childFile('FlutterMacOS.podspec');
+            final String podspecContents = expectedPodspec.readAsStringSync();
+            expect(
+              podspecContents,
+              contains(
+                "'$storageBaseUrl/flutter_infra_release/flutter/$engineRevision/darwin-x64-release/FlutterMacOS.framework.zip'",
+              ),
+            );
+          });
         });
       });
     });
@@ -1802,12 +1745,12 @@ BuildIOSFrameworkCommand createBuildIOSFrameworkCommand({
   AppleContext? appleContext,
   Artifacts? artifacts,
   BuildSystem? buildSystem,
-  DarwinAddToAppCodesigning? codesign,
-  FlutterVersion? flutterVersion,
   Cache? cache,
+  DarwinAddToAppCodesigning? codesign,
+  FileSystem? fileSystem,
+  FlutterVersion? flutterVersion,
   Logger? logger,
   Platform? platform,
-  FileSystem? fileSystem,
   ProcessManager? processManager,
   bool verboseHelp = false,
 }) {
@@ -1830,6 +1773,54 @@ BuildIOSFrameworkCommand createBuildIOSFrameworkCommand({
         platform: effectivePlatform,
       );
   return BuildIOSFrameworkCommand(
+    appleContext: appleContext ?? FakeAppleContext(),
+    buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
+    codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
+    toolContext: FakeToolContext(
+      artifacts: artifacts,
+      flutterVersion: flutterVersion,
+      cache: effectiveCache,
+      fs: effectiveFileSystem,
+      logger: effectiveLogger,
+      platform: effectivePlatform,
+      processManager: effectiveProcessManager,
+    ),
+    verboseHelp: verboseHelp,
+  );
+}
+
+BuildMacOSFrameworkCommand createBuildMacOSFrameworkCommand({
+  AppleContext? appleContext,
+  Artifacts? artifacts,
+  BuildSystem? buildSystem,
+  Cache? cache,
+  DarwinAddToAppCodesigning? codesign,
+  FileSystem? fileSystem,
+  FlutterVersion? flutterVersion,
+  Logger? logger,
+  Platform? platform,
+  ProcessManager? processManager,
+  bool verboseHelp = false,
+}) {
+  final Platform effectivePlatform =
+      platform ??
+      FakePlatform(
+        operatingSystem: 'macos',
+        environment: const <String, String>{
+          'FLUTTER_STORAGE_BASE_URL': 'https://fake.googleapis.com',
+        },
+      );
+  final FileSystem effectiveFileSystem = fileSystem ?? MemoryFileSystem.test();
+  final Logger effectiveLogger = logger ?? BufferLogger.test();
+  final ProcessManager effectiveProcessManager = processManager ?? FakeProcessManager.any();
+  final Cache effectiveCache =
+      cache ??
+      Cache.test(
+        processManager: effectiveProcessManager,
+        fileSystem: effectiveFileSystem,
+        platform: effectivePlatform,
+      );
+  return BuildMacOSFrameworkCommand(
     appleContext: appleContext ?? FakeAppleContext(),
     buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
     codesign: codesign ?? FakeDarwinAddToAppCodesigning(),

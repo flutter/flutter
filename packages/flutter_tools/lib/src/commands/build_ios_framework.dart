@@ -21,7 +21,6 @@ import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
@@ -34,21 +33,15 @@ import 'darwin_add_to_app.dart';
 
 abstract class BuildFrameworkCommand extends BuildSubCommand {
   BuildFrameworkCommand({
+    required AppleContext appleContext,
     required BuildSystem buildSystem,
     required this.codesign,
+    required ToolContext toolContext,
     required bool verboseHelp,
-    AppleContext? appleContext,
-    Cache? cache,
-    FlutterVersion? flutterVersion,
-    Logger? logger,
-    Platform? platform,
-    super.toolContext,
   }) : _appleContext = appleContext,
        _buildSystem = buildSystem,
-       _injectedCache = cache,
-       _injectedFlutterVersion = flutterVersion,
-       _injectedPlatform = platform,
-       super(logger: toolContext?.logger ?? logger ?? globals.logger, verboseHelp: verboseHelp) {
+       _toolContext = toolContext,
+       super(logger: toolContext.logger, toolContext: toolContext, verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     usesPubOption();
@@ -115,26 +108,27 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
   final DarwinAddToAppCodesigning codesign;
 
-  final AppleContext? _appleContext;
+  final AppleContext _appleContext;
   final BuildSystem _buildSystem;
-  final Cache? _injectedCache;
-  final FlutterVersion? _injectedFlutterVersion;
-  final Platform? _injectedPlatform;
+  final ToolContext _toolContext;
 
-  AppleContext get appleContext => _appleContext!;
+  AppleContext get appleContext => _appleContext;
 
   @protected
   BuildSystem get buildSystem => _buildSystem;
 
   @protected
-  Cache get cache => toolContext?.cache ?? _injectedCache ?? globals.cache;
+  @override
+  ToolContext get toolContext => _toolContext;
 
   @protected
-  Platform get platform => toolContext?.platform ?? _injectedPlatform ?? globals.platform;
+  Cache get cache => _toolContext.cache;
 
   @protected
-  FlutterVersion get flutterVersion =>
-      toolContext?.flutterVersion ?? _injectedFlutterVersion ?? globals.flutterVersion;
+  Platform get platform => _toolContext.platform;
+
+  @protected
+  FlutterVersion get flutterVersion => _toolContext.flutterVersion;
 
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
@@ -287,8 +281,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Directory hostAppRoot,
     PlistParser plistParser,
   ) async {
-    final FileSystem fs = toolContext?.fs ?? globals.fs;
-    final Logger logger = toolContext?.logger ?? globals.logger;
+    final FileSystem fs = _toolContext.fs;
+    final Logger logger = _toolContext.logger;
 
     final File projectFile = hostAppRoot
         .childDirectory('Pods')
@@ -479,9 +473,6 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
         hide: !verboseHelp,
       );
   }
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'ios-framework';
