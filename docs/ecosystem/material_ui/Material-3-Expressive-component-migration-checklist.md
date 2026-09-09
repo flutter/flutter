@@ -97,10 +97,11 @@ import '../templates/icon_button_template.dart';
 const IconButtonTemplateM3E().generateFile(verbose: verbose);
 ```
 
-Run the generator from the repository root:
+Run the generator from the `material_ui` package directory:
 
 ```shell
-dart packages/material_ui/tool/gen_defaults/bin/gen_defaults.dart
+cd packages/material_ui
+dart run tool/gen_defaults/bin/gen_defaults.dart
 ```
 
 Confirm that the generated defaults are written under `packages/material_ui/lib/src/generated/` and use the filename pattern `<component>_defaults_m3e.g.dart`.
