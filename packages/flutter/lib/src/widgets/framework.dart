@@ -43,6 +43,7 @@ export 'package:flutter/rendering.dart'
 // Examples can assume:
 // late BuildContext context;
 // void setState(VoidCallback fn) { }
+// class ExpensiveToConstructClass { }
 // abstract class RenderFrogJar extends RenderObject { }
 // abstract class FrogJar extends RenderObjectWidget { const FrogJar({super.key}); }
 // abstract class FrogJarParentData extends ParentData { late Size size; }
