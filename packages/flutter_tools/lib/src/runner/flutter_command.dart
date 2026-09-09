@@ -1030,20 +1030,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp {
-    if (explicitEnableHcpp case final bool explicit) {
-      return explicit;
-    }
-    FeatureFlags? flags = runner?.featureFlags;
-    if (flags == null) {
-      try {
-        flags = context.get<FeatureFlags>();
-      } on UnsupportedError {
-        flags = null;
-      }
-    }
-    return flags?.isHcppEnabled ?? false;
-  }
+  bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags?.isHcppEnabled ?? false;
 
   void addTestFlag({required bool verboseHelp}) {
     argParser.addDescriptor(DebuggingOptionDescriptors.testFlag, verboseHelp: verboseHelp);
@@ -1272,21 +1259,13 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    FeatureFlags? flags = runner?.featureFlags;
-    if (flags == null) {
-      try {
-        flags = context.get<FeatureFlags>();
-      } on UnsupportedError {
-        return;
-      }
-    }
+    final FeatureFlags? flags = runner?.featureFlags;
     if (flags == null) {
       return;
     }
-    final FeatureFlags effectiveFeatureFlags = flags;
 
-    final String enabledFeatureFlags = effectiveFeatureFlags.allFeatures
-        .where((Feature feature) => effectiveFeatureFlags.isEnabled(feature))
+    final String enabledFeatureFlags = flags.allFeatures
+        .where((Feature feature) => flags.isEnabled(feature))
         .where((Feature feature) => feature.runtimeId != null)
         .map((Feature feature) => feature.runtimeId!)
         .join(',');

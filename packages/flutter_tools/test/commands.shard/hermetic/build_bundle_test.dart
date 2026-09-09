@@ -101,7 +101,12 @@ flutter:
     BuildBundleCommand? command,
   }) async {
     final BuildBundleCommand effectiveCommand = command ?? createBuildBundleCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(effectiveCommand, fakeAnalytics);
+    final CommandRunner<void> runner = createTestCommandRunner(
+      effectiveCommand,
+      fakeAnalytics,
+      effectiveCommand.toolContext,
+      effectiveCommand.featureFlags,
+    );
     await runner.run(<String>[
       'bundle',
       ...?arguments,
