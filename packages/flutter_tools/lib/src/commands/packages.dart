@@ -234,7 +234,7 @@ class PackagesForwardCommand extends FlutterCommand {
     await _pub.interactively(
       <String>[_commandName, ...subArgs],
       command: _commandName,
-      context: PubContext.pubForward,
+      context: context,
     );
     return FlutterCommandResult.success();
   }
@@ -256,7 +256,9 @@ class PackagesPassthroughCommand extends FlutterCommand {
   String get name => 'pub';
 
   @override
-  final description = 'Pass remaining arguments to Pub.';
+  final String description =
+      'Pass the remaining arguments to Dart\'s "pub" tool.\n'
+      'This runs the "pub" tool in a Flutter context.';
 
   @override
   String get invocation {
@@ -267,7 +269,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await _pub.interactively(command: 'pub', argResults!.rest, context: _context);
+    await _pub.interactively(argResults!.rest, command: 'pub', context: _context);
     return FlutterCommandResult.success();
   }
 }
