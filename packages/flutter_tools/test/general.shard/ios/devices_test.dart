@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -13,6 +12,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -46,15 +46,19 @@ void main() {
     late IOSDeploy iosDeploy;
     late IMobileDevice iMobileDevice;
     late FileSystem fileSystem;
+    late FileSystemUtils fileSystemUtils;
     late IOSCoreDeviceControl coreDeviceControl;
     late IOSCoreDeviceLauncher coreDeviceLauncher;
     late XcodeDebug xcodeDebug;
+    late ProcessUtils processUtils;
 
     setUp(() {
       final artifacts = Artifacts.test();
       cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
+      processUtils = ProcessUtils(processManager: FakeProcessManager.any(), logger: logger);
       fileSystem = MemoryFileSystem.test();
+      fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: macPlatform);
       iosDeploy = IOSDeploy(
         artifacts: artifacts,
         cache: cache,
@@ -78,6 +82,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         platform: macPlatform,
         iosDeploy: iosDeploy,
@@ -94,8 +99,61 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       );
       expect(await device.isSupported(), isTrue);
+    });
+
+    group('shouldAttachLLDBDebugger', () {
+      testWithoutContext('returns expected values for different BuildInfo and options', () {
+        final device = IOSDevice(
+          'device-123',
+          iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
+          fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
+          logger: logger,
+          platform: macPlatform,
+          iosDeploy: iosDeploy,
+          analytics: FakeAnalytics(),
+          iMobileDevice: iMobileDevice,
+          coreDeviceControl: coreDeviceControl,
+          coreDeviceLauncher: coreDeviceLauncher,
+          xcodeDebug: xcodeDebug,
+          name: 'iPhone 1',
+          sdkVersion: '13.3',
+          cpuArchitecture: DarwinArch.arm64,
+          connectionInterface: DeviceConnectionInterface.attached,
+          isConnected: true,
+          isPaired: true,
+          devModeEnabled: true,
+          isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
+        );
+
+        expect(device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.debug)), isTrue);
+        expect(
+          device.shouldAttachLLDBDebugger(
+            DebuggingOptions.enabled(BuildInfo.profile, iosProfileDebugger: true),
+          ),
+          isTrue,
+        );
+        expect(
+          device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.profile)),
+          isFalse,
+        );
+        expect(
+          device.shouldAttachLLDBDebugger(
+            DebuggingOptions.enabled(BuildInfo.profile, iosProfileDebugger: false),
+          ),
+          isFalse,
+        );
+        expect(
+          device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.release)),
+          isFalse,
+        );
+      });
     });
 
     testWithoutContext('32-bit devices are unsupported', () async {
@@ -103,6 +161,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -118,6 +177,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       );
       expect(await device.isSupported(), isFalse);
     });
@@ -128,6 +189,7 @@ void main() {
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           logger: logger,
           analytics: FakeAnalytics(),
           platform: macPlatform,
@@ -144,6 +206,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
         ).majorSdkVersion,
         1,
       );
@@ -152,6 +216,7 @@ void main() {
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           logger: logger,
           analytics: FakeAnalytics(),
           platform: macPlatform,
@@ -168,6 +233,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
         ).majorSdkVersion,
         13,
       );
@@ -176,6 +243,7 @@ void main() {
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           logger: logger,
           analytics: FakeAnalytics(),
           platform: macPlatform,
@@ -192,6 +260,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
         ).majorSdkVersion,
         10,
       );
@@ -200,6 +270,7 @@ void main() {
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           logger: logger,
           analytics: FakeAnalytics(),
           platform: macPlatform,
@@ -216,6 +287,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
         ).majorSdkVersion,
         0,
       );
@@ -224,6 +297,7 @@ void main() {
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           logger: logger,
           analytics: FakeAnalytics(),
           platform: macPlatform,
@@ -240,6 +314,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
         ).majorSdkVersion,
         0,
       );
@@ -250,6 +326,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -266,6 +343,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       ).sdkVersion;
       var expectedVersion = Version(13, 3, 1, text: '13.3.1');
       expect(sdkVersion, isNotNull);
@@ -276,6 +355,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -292,6 +372,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       ).sdkVersion;
       expectedVersion = Version(13, 3, 1, text: '13.3.1 (20ADBC)');
       expect(sdkVersion, isNotNull);
@@ -302,6 +384,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -318,6 +401,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       ).sdkVersion;
       expectedVersion = Version(16, 4, 1, text: '16.4.1(a) (20ADBC)');
       expect(sdkVersion, isNotNull);
@@ -328,6 +413,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -344,6 +430,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       ).sdkVersion;
       expectedVersion = Version(0, 0, 0, text: '0');
       expect(sdkVersion, isNotNull);
@@ -354,6 +442,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -369,6 +458,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       ).sdkVersion;
       expect(sdkVersion, isNull);
 
@@ -376,6 +467,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -392,6 +484,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       ).sdkVersion;
       expect(sdkVersion, isNull);
     });
@@ -401,6 +495,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -417,6 +512,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       );
 
       expect(await device.sdkNameAndVersion, 'iOS 13.3 17C54');
@@ -427,6 +524,7 @@ void main() {
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
         logger: logger,
         analytics: FakeAnalytics(),
         platform: macPlatform,
@@ -443,6 +541,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: processUtils,
+        xcode: null,
       );
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -460,6 +560,7 @@ void main() {
               'device-123',
               iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
               fileSystem: fileSystem,
+              fileSystemUtils: fileSystemUtils,
               logger: logger,
               analytics: FakeAnalytics(),
               platform: platform,
@@ -476,6 +577,8 @@ void main() {
               isPaired: true,
               devModeEnabled: true,
               isCoreDevice: false,
+              processUtils: processUtils,
+              xcode: null,
             );
           }, throwsAssertionError);
         },
@@ -551,6 +654,7 @@ void main() {
           '123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           logger: logger,
           analytics: FakeAnalytics(),
           platform: macPlatform,
@@ -567,6 +671,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
+          processUtils: processUtils,
+          xcode: null,
         );
         logReader1 = createLogReader(device, appPackage1, process1);
         logReader2 = createLogReader(device, appPackage2, process2);
@@ -622,6 +728,12 @@ void main() {
       coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
       xcodeDebug = FakeXcodeDebug();
 
+      final testFileSystem = MemoryFileSystem.test();
+      final testFileSystemUtils = FileSystemUtils(
+        fileSystem: testFileSystem,
+        platform: macPlatform,
+      );
+
       device1 = IOSDevice(
         'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
         name: 'Paired iPhone',
@@ -636,12 +748,15 @@ void main() {
         xcodeDebug: xcodeDebug,
         logger: logger,
         platform: macPlatform,
-        fileSystem: MemoryFileSystem.test(),
+        fileSystem: testFileSystem,
+        fileSystemUtils: testFileSystemUtils,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        xcode: null,
       );
 
       device2 = IOSDevice(
@@ -658,12 +773,15 @@ void main() {
         xcodeDebug: xcodeDebug,
         logger: logger,
         platform: macPlatform,
-        fileSystem: MemoryFileSystem.test(),
+        fileSystem: testFileSystem,
+        fileSystemUtils: testFileSystemUtils,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        xcode: null,
       );
     });
 
@@ -974,6 +1092,11 @@ void main() {
       coreDeviceControl = FakeIOSCoreDeviceControl();
       coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
       xcodeDebug = FakeXcodeDebug();
+      final testFileSystem = MemoryFileSystem.test();
+      final testFileSystemUtils = FileSystemUtils(
+        fileSystem: testFileSystem,
+        platform: macPlatform,
+      );
       notConnected1 = IOSDevice(
         '00000001-0000000000000000',
         name: 'iPad',
@@ -988,12 +1111,15 @@ void main() {
         xcodeDebug: xcodeDebug,
         logger: logger,
         platform: macPlatform,
-        fileSystem: MemoryFileSystem.test(),
+        fileSystem: testFileSystem,
+        fileSystemUtils: testFileSystemUtils,
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: false,
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
+        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        xcode: null,
       );
     });
 
