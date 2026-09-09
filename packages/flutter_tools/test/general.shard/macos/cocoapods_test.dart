@@ -1625,6 +1625,16 @@ end''');
           throwsToolExit(),
         );
         expect(logger.errorText, contains('Error: A dependency conflict has occurred because'));
+        expect(
+          fakeAnalytics.sentEvents,
+          contains(
+            Event.appleUsageEvent(
+              workflow: 'cocoapod-swiftpm-interdependency-failure',
+              parameter: 'plugin_2_name',
+              result: 'plugin_1_name',
+            ),
+          ),
+        );
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
