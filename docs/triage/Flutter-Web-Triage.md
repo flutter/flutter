@@ -20,4 +20,4 @@ When triaging web issues follow the following process:
 
 ## Additional resources
 
-* [flutter-zl/web-triage](https://github.com/flutter-zl/web-triage): one triager's longer-form notes on routing, priority, and labeling, with logs from past sessions.
+* [flutter-zl/web-triage](https://github.com/flutter-zl/web-triage): One triager's longer-form notes on routing, priority, and labeling, with logs from past sessions.
