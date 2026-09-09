@@ -14,8 +14,7 @@ class FlFramebufferTest : public flutter::testing::LinuxTest {
 };
 
 TEST_F(FlFramebufferTest, HasDepthStencil) {
-  g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGB, 100, 100, FALSE);
+  g_autoptr(FlFramebuffer) framebuffer = fl_framebuffer_new(GL_RGB, 100, 100);
 
   GLint depth_type = GL_NONE;
   glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
@@ -34,19 +33,12 @@ TEST_F(FlFramebufferTest, ResourcesRemoved) {
   EXPECT_CALL(epoxy, glGenFramebuffers);
   EXPECT_CALL(epoxy, glGenTextures);
   EXPECT_CALL(epoxy, glGenRenderbuffers);
-  FlFramebuffer* framebuffer = fl_framebuffer_new(GL_RGB, 100, 100, FALSE);
+  FlFramebuffer* framebuffer = fl_framebuffer_new(GL_RGB, 100, 100);
 
   EXPECT_CALL(epoxy, glDeleteFramebuffers);
   EXPECT_CALL(epoxy, glDeleteTextures);
   EXPECT_CALL(epoxy, glDeleteRenderbuffers);
   g_object_unref(framebuffer);
-}
-
-TEST_F(FlFramebufferTest, Sibling) {
-  EXPECT_CALL(epoxy, eglCreateImageKHR);
-  g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGB, 100, 100, TRUE);
-  g_autoptr(FlFramebuffer) sibling = fl_framebuffer_create_sibling(framebuffer);
 }
 
 TEST_F(FlFramebufferTest, ImpellerOffscreenMSAA) {
