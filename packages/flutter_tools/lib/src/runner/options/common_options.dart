@@ -366,3 +366,372 @@ class CommonBuildOptionsBundle extends OptionBundle {
     CommonOptions.buildName,
   ];
 }
+
+/// Typed option descriptors specific to `DebuggingOptions` and resident runners (`run`, `drive`, `test`).
+abstract final class DebuggingOptionDescriptors {
+  static const enableImpeller = NullableFlagOptionDescriptor(
+    name: FlutterOptions.kEnableImpeller,
+    verboseOnly: true,
+    help:
+        'Whether to enable the Impeller rendering engine. '
+        'Impeller is the default renderer on iOS. On Android, Impeller '
+        'is available but not the default. This flag will cause Impeller '
+        'to be used on Android. On other platforms, this flag will be '
+        'ignored.',
+  );
+
+  static const enableFlutterGpu = NullableFlagOptionDescriptor(
+    name: 'enable-flutter-gpu',
+    verboseOnly: true,
+    help:
+        'Whether to enable the Flutter GPU API (https://api.flutter.dev/flutter/flutter_gpu/). '
+        'This feature is only supported with the Impeller rendering engine, '
+        'which can be enabled via the "--${FlutterOptions.kEnableImpeller}" '
+        'option.',
+  );
+
+  static const enableVulkanValidation = FlagOptionDescriptor(
+    name: 'enable-vulkan-validation',
+    verboseOnly: true,
+    help:
+        'Enable vulkan validation on the Impeller rendering backend if '
+        'Vulkan is in use and the validation layers are available to the '
+        'application.',
+  );
+
+  static const enableEmbedderApi = FlagOptionDescriptor(
+    name: 'enable-embedder-api',
+    verboseOnly: true,
+    help: 'Whether to enable the experimental embedder API on iOS.',
+  );
+
+  static const enableHcpp = NullableFlagOptionDescriptor(
+    name: 'enable-hcpp',
+    verboseOnly: true,
+    help:
+        'Enable the use of the HCPP platform view rendering mode on the Impeller rendering '
+        'backend. An explicit value takes priority over the EnableHcpp metadata in '
+        'AndroidManifest.xml: build commands write it into the manifest of the artifact they '
+        'produce, and "run", "test", and "drive" additionally apply it at launch. Without the '
+        'flag, the manifest decides, and if the manifest does not set it either, the '
+        'enable-hcpp feature flag does.',
+  );
+
+  static const testFlag = FlagOptionDescriptor(
+    name: 'test-flag',
+    verboseOnly: true,
+    help: 'No-op flag for testing purposes; use for testing flag priorities only.',
+  );
+
+  static const adbLogFiltering = FlagOptionDescriptor(
+    name: 'adb-log-filtering',
+    defaultsTo: true,
+    help:
+        'Filter adb logs so that logs not emitted by the current flutter application are not '
+        'displayed.',
+  );
+
+  static const dds = FlagOptionDescriptor(
+    name: 'dds',
+    defaultsTo: true,
+    help:
+        'Enable the Dart Developer Service (DDS).\n'
+        'It may be necessary to disable this when attaching to an application with '
+        'an existing DDS instance (e.g., attaching to an application currently '
+        'connected to by "flutter run"), or when running certain tests.\n'
+        'Disabling this feature may degrade IDE functionality if a DDS instance is '
+        'not already connected to the target application.',
+  );
+
+  static const ddsPort = StringOptionDescriptor(
+    name: 'dds-port',
+    help:
+        'When this value is provided, the Dart Development Service (DDS) will be '
+        'bound to the provided port.\n'
+        'Specifying port 0 (the default) will find a random free port.',
+  );
+
+  static const disableDds = FlagOptionDescriptor(
+    name: 'disable-dds',
+    verboseOnly: true,
+    help:
+        '(deprecated; use "--no-dds" instead) '
+        'Disable the Dart Developer Service (DDS).',
+  );
+
+  static const enableDevTools = FlagOptionDescriptor(
+    name: FlutterCommand.kEnableDevTools,
+    defaultsTo: true,
+    verboseOnly: true,
+    help:
+        'Enable (or disable, with "--no-${FlutterCommand.kEnableDevTools}") the launching of the '
+        'Flutter DevTools debugger and profiler. '
+        'If "--no-${FlutterCommand.kEnableDevTools}" is specified, "--${FlutterCommand.kDevToolsServerAddress}" is ignored.',
+  );
+
+  static StringOptionDescriptor devToolsServerAddress({bool includeEnableDevTools = true}) {
+    final ignoredMessage = includeEnableDevTools
+        ? ' Ignored if "--no-${FlutterCommand.kEnableDevTools}" is specified.'
+        : '';
+    return StringOptionDescriptor(
+      name: FlutterCommand.kDevToolsServerAddress,
+      verboseOnly: true,
+      help:
+          'When this value is provided, the Flutter tool will not spin up a '
+          'new DevTools server instance, and will instead use the one provided '
+          'at the given address.$ignoredMessage',
+    );
+  }
+
+  static const devToolsServerAddressOption = StringOptionDescriptor(
+    name: FlutterCommand.kDevToolsServerAddress,
+    verboseOnly: true,
+    help:
+        'When this value is provided, the Flutter tool will not spin up a '
+        'new DevTools server instance, and will instead use the one provided '
+        'at the given address.',
+  );
+
+  static const ipv6 = FlagOptionDescriptor(
+    name: FlutterCommand.ipv6Flag,
+    negatable: false,
+    verboseOnly: true,
+    help:
+        'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
+        'forwards the host port to a device port.',
+  );
+
+  static const traceStartup = FlagOptionDescriptor(
+    name: 'trace-startup',
+    negatable: false,
+    help:
+        'Trace application startup, then exit, saving the trace to a file. '
+        'By default, this will be saved in the "build" directory. If the '
+        'FLUTTER_TEST_OUTPUTS_DIR environment variable is set, the file '
+        'will be written there instead.',
+  );
+
+  static const cacheStartupProfile = FlagOptionDescriptor(
+    name: 'cache-startup-profile',
+    help:
+        'Caches the CPU profile collected before the first frame for startup '
+        'analysis.',
+  );
+
+  static const verboseSystemLogs = FlagOptionDescriptor(
+    name: 'verbose-system-logs',
+    negatable: false,
+    help: 'Include verbose logging from the Flutter engine.',
+  );
+
+  static const purgePersistentCache = FlagOptionDescriptor(
+    name: 'purge-persistent-cache',
+    negatable: false,
+    help:
+        'Removes all existing persistent caches. This allows reproducing '
+        'shader compilation jank that normally only happens the first time '
+        'an app is run, or for reliable testing of compilation jank fixes '
+        '(e.g. shader warm-up).',
+  );
+
+  static const route = StringOptionDescriptor(
+    name: 'route',
+    help: 'Which route to load when running the app.',
+  );
+
+  static const vmserviceOutFile = StringOptionDescriptor(
+    name: 'vmservice-out-file',
+    valueHelp: 'project/example/out.txt',
+    verboseOnly: true,
+    help:
+        'A file to write the attached vmservice URL to after an '
+        'application is started.',
+  );
+
+  static const disableServiceAuthCodes = FlagOptionDescriptor(
+    name: 'disable-service-auth-codes',
+    negatable: false,
+    verboseOnly: true,
+    help:
+        '(deprecated) Allow connections to the VM service without using authentication codes. '
+        '(Not recommended! This can open your device to remote code execution attacks!)',
+  );
+
+  static const disableServiceOriginCheck = FlagOptionDescriptor(
+    name: 'disable-service-origin-check',
+    negatable: false,
+    verboseOnly: true,
+    help:
+        'Allow connections to the VM service from any origin. '
+        '(Not recommended. This can open your device to remote code execution attacks.)',
+  );
+
+  static FlagOptionDescriptor startPaused({bool defaultsTo = false}) => FlagOptionDescriptor(
+    name: 'start-paused',
+    defaultsTo: defaultsTo,
+    help: 'Start in a paused mode and wait for a debugger to connect.',
+  );
+
+  static const startPausedOption = FlagOptionDescriptor(
+    name: 'start-paused',
+    help: 'Start in a paused mode and wait for a debugger to connect.',
+  );
+
+  static const dartFlags = StringOptionDescriptor(
+    name: 'dart-flags',
+    verboseOnly: true,
+    help:
+        'Pass a list of comma separated flags to the Dart instance at '
+        'application startup. Flags passed through this option must be '
+        'present on the allowlist defined within the Flutter engine. If '
+        'a disallowed flag is encountered, the process will be '
+        'terminated immediately.\n\n'
+        'This flag is not available on the stable channel and is only '
+        'applied in debug and profile modes. This option should only '
+        'be used for experiments and should not be used by typical users.',
+  );
+
+  static const endlessTraceBuffer = FlagOptionDescriptor(
+    name: 'endless-trace-buffer',
+    negatable: false,
+    help:
+        'Enable tracing to an infinite buffer, instead of a ring buffer. '
+        'This is useful when recording large traces. To use an endless buffer to '
+        'record startup traces, combine this with "--trace-startup".',
+  );
+
+  static const traceSystrace = FlagOptionDescriptor(
+    name: 'trace-systrace',
+    negatable: false,
+    help:
+        'Enable tracing to the system tracer. This is only useful on '
+        'platforms where such a tracer is available (Android, iOS, '
+        'macOS and Fuchsia).',
+  );
+
+  static const traceToFile = StringOptionDescriptor(
+    name: 'trace-to-file',
+    valueHelp: 'path/to/trace.binpb',
+    help:
+        'Write the timeline trace to a file at the specified path. The '
+        "file will be in Perfetto's proto format; it will be possible to "
+        "load the file into Perfetto's trace viewer.",
+  );
+
+  static const profileMicrotasks = FlagOptionDescriptor(
+    name: 'profile-microtasks',
+    negatable: false,
+    verboseOnly: true,
+    help:
+        'Enable collection of information about each microtask. '
+        'Information about completed microtasks will be written to the '
+        '"Microtask" timeline stream. Information about queued microtasks '
+        'will be accessible from Dart / Flutter DevTools.',
+  );
+
+  static const traceSkia = FlagOptionDescriptor(
+    name: 'trace-skia',
+    negatable: false,
+    help:
+        'Enable tracing of Skia code. This is useful when debugging '
+        'the raster thread (formerly known as the GPU thread). '
+        'By default, Flutter will not log Skia code, as it introduces significant '
+        'overhead that may affect recorded performance metrics in a misleading way.',
+  );
+
+  static const traceAllowlist = StringOptionDescriptor(
+    name: 'trace-allowlist',
+    valueHelp: 'foo,bar',
+    verboseOnly: true,
+    help:
+        'Filters out all trace events except those that are specified in '
+        'this comma separated list of allowed prefixes.',
+  );
+
+  static const traceSkiaAllowlist = StringOptionDescriptor(
+    name: 'trace-skia-allowlist',
+    valueHelp: 'skia.gpu,skia.shaders',
+    verboseOnly: true,
+    help:
+        'Filters out all Skia trace events except those that are specified in '
+        'this comma separated list of allowed prefixes.',
+  );
+
+  static const enableDartProfiling = FlagOptionDescriptor(
+    name: 'enable-dart-profiling',
+    defaultsTo: true,
+    help:
+        'Whether the Dart VM sampling CPU profiler is enabled. This flag '
+        'is only meaningful in debug and profile builds.',
+  );
+
+  static const profileStartup = FlagOptionDescriptor(
+    name: 'profile-startup',
+    negatable: false,
+    verboseOnly: true,
+    help:
+        'Make the profiler discard new samples once the profiler sample '
+        'buffer is full. When this flag is not set, the profiler sample '
+        'buffer is used as a ring buffer, meaning that once it is full, '
+        'new samples start overwriting the oldest ones.',
+  );
+
+  static const enableSoftwareRendering = FlagOptionDescriptor(
+    name: 'enable-software-rendering',
+    negatable: false,
+    verboseOnly: true,
+    help:
+        '(deprecated) Enable rendering using the Skia software backend. '
+        'This is useful when testing Flutter on emulators. By default, '
+        'Flutter will attempt to either use OpenGL or Vulkan and fall back '
+        'to software when neither is available. This option is not supported '
+        'when using the Impeller rendering engine.',
+  );
+
+  static const skiaDeterministicRendering = FlagOptionDescriptor(
+    name: 'skia-deterministic-rendering',
+    negatable: false,
+    verboseOnly: true,
+    help:
+        '(deprecated) When combined with "--enable-software-rendering", this should provide completely '
+        'deterministic (i.e. reproducible) Skia rendering. This is useful for testing purposes '
+        '(e.g. when comparing screenshots). This option is not supported '
+        'when using the Impeller rendering engine.',
+  );
+
+  static const dartEntrypointArgs = MultiOptionDescriptor(
+    name: 'dart-entrypoint-args',
+    abbr: 'a',
+    help:
+        'Pass a list of arguments to the Dart entrypoint at application '
+        'startup. By default this is main(List<String> args). Specify '
+        'this option multiple times each with one argument to pass '
+        'multiple arguments to the Dart entrypoint. Currently this is '
+        'only supported on desktop platforms.',
+  );
+
+  static const uninstallFirst = FlagOptionDescriptor(
+    name: 'uninstall-first',
+    verboseOnly: true,
+    help:
+        'Uninstall previous versions of the app on the device '
+        'before reinstalling. Currently only supported on iOS.',
+  );
+
+  static const iosProfileDebugger = NullableFlagOptionDescriptor(
+    name: 'ios-profile-debugger',
+    negatable: false,
+    help:
+        'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
+  );
+
+  static const useTestFonts = FlagOptionDescriptor(
+    name: 'use-test-fonts',
+    help:
+        'Enable (and default to) the "Ahem" font. This is a special font '
+        'used in tests to remove any dependencies on the font metrics. It '
+        'is enabled when you use "flutter test". Set this flag when running '
+        'a test using "flutter run" for debugging purposes. This flag is '
+        'only available when running in debug mode.',
+  );
+}
