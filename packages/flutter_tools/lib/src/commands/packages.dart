@@ -32,16 +32,14 @@ class PackagesCommand extends FlutterCommand {
     required BuildSystem buildSystem,
     required ToolContext toolContext,
     super.verboseHelp,
-  }) : _buildSystem = buildSystem,
-       _toolContext = toolContext,
-       super(toolContext: toolContext) {
+  }) : super(toolContext: toolContext) {
     addSubcommand(
       PackagesGetCommand(
         'get',
         "Get the current package's dependencies.",
         PubContext.pubGet,
-        buildSystem: _buildSystem,
-        toolContext: _toolContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
       ),
     );
     addSubcommand(
@@ -49,8 +47,8 @@ class PackagesCommand extends FlutterCommand {
         'upgrade',
         "Upgrade the current package's dependencies to latest versions.",
         PubContext.pubUpgrade,
-        buildSystem: _buildSystem,
-        toolContext: _toolContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
       ),
     );
     addSubcommand(
@@ -58,8 +56,8 @@ class PackagesCommand extends FlutterCommand {
         'add',
         'Add a dependency to pubspec.yaml.',
         PubContext.pubAdd,
-        buildSystem: _buildSystem,
-        toolContext: _toolContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
       ),
     );
     addSubcommand(
@@ -67,16 +65,16 @@ class PackagesCommand extends FlutterCommand {
         'remove',
         'Removes a dependency from the current package.',
         PubContext.pubRemove,
-        buildSystem: _buildSystem,
-        toolContext: _toolContext,
+        buildSystem: buildSystem,
+        toolContext: toolContext,
       ),
     );
-    addSubcommand(PackagesTestCommand(toolContext: _toolContext));
+    addSubcommand(PackagesTestCommand(toolContext: toolContext));
     addSubcommand(
       PackagesForwardCommand(
         'publish',
         'Publish the current package to pub.dartlang.org.',
-        toolContext: _toolContext,
+        toolContext: toolContext,
         requiresPubspec: true,
       ),
     );
@@ -84,46 +82,46 @@ class PackagesCommand extends FlutterCommand {
       PackagesForwardCommand(
         'downgrade',
         'Downgrade packages in a Flutter project.',
-        toolContext: _toolContext,
+        toolContext: toolContext,
         requiresPubspec: true,
       ),
     );
     addSubcommand(
-      PackagesForwardCommand('deps', 'Print package dependencies.', toolContext: _toolContext),
+      PackagesForwardCommand('deps', 'Print package dependencies.', toolContext: toolContext),
     ); // path to package can be specified with --directory argument
     addSubcommand(
       PackagesForwardCommand(
         'run',
         'Run an executable from a package.',
-        toolContext: _toolContext,
+        toolContext: toolContext,
         requiresPubspec: true,
       ),
     );
     addSubcommand(
-      PackagesForwardCommand('cache', 'Work with the Pub system cache.', toolContext: _toolContext),
+      PackagesForwardCommand('cache', 'Work with the Pub system cache.', toolContext: toolContext),
     );
     addSubcommand(
-      PackagesForwardCommand('version', 'Print Pub version.', toolContext: _toolContext),
+      PackagesForwardCommand('version', 'Print Pub version.', toolContext: toolContext),
     );
     addSubcommand(
       PackagesForwardCommand(
         'uploader',
         'Manage uploaders for a package on pub.dev.',
-        toolContext: _toolContext,
+        toolContext: toolContext,
       ),
     );
-    addSubcommand(PackagesForwardCommand('login', 'Log into pub.dev.', toolContext: _toolContext));
+    addSubcommand(PackagesForwardCommand('login', 'Log into pub.dev.', toolContext: toolContext));
     addSubcommand(
-      PackagesForwardCommand('logout', 'Log out of pub.dev.', toolContext: _toolContext),
+      PackagesForwardCommand('logout', 'Log out of pub.dev.', toolContext: toolContext),
     );
     addSubcommand(
-      PackagesForwardCommand('global', 'Work with Pub global packages.', toolContext: _toolContext),
+      PackagesForwardCommand('global', 'Work with Pub global packages.', toolContext: toolContext),
     );
     addSubcommand(
       PackagesForwardCommand(
         'outdated',
         'Analyze dependencies to find which ones can be upgraded.',
-        toolContext: _toolContext,
+        toolContext: toolContext,
         requiresPubspec: true,
       ),
     );
@@ -131,14 +129,11 @@ class PackagesCommand extends FlutterCommand {
       PackagesForwardCommand(
         'token',
         'Manage authentication tokens for hosted pub repositories.',
-        toolContext: _toolContext,
+        toolContext: toolContext,
       ),
     );
-    addSubcommand(PackagesPassthroughCommand(toolContext: _toolContext));
+    addSubcommand(PackagesPassthroughCommand(toolContext: toolContext));
   }
-
-  final ToolContext _toolContext;
-  final BuildSystem _buildSystem;
 
   @override
   final name = 'pub';
@@ -171,14 +166,18 @@ class PackagesTestCommand extends FlutterCommand {
   String get name => 'test';
 
   @override
-  final description = 'Run the test runner for the current package.';
-
-  @override
-  ArgParser argParser = ArgParser.allowAnything();
+  String get description {
+    return 'Run the "test" package.\n'
+        'This is similar to "flutter test", but instead of hosting the tests in the '
+        'flutter environment it hosts the tests in a pure Dart environment. The main '
+        'differences are that the "dart:ui" library is not available and that tests '
+        'run faster. This is helpful for testing libraries that do not depend on any '
+        'packages from the Flutter SDK. It is equivalent to "dart test".';
+  }
 
   @override
   String get invocation {
-    return '${runner!.executableName} pub test [<arguments...>]';
+    return '${runner!.executableName} pub test [<tests...>]';
   }
 
   @override
@@ -362,9 +361,8 @@ class PackagesGetCommand extends FlutterCommand {
     } on ArgParserException {
       // Let pub give the error message.
     }
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
-    final FlutterProjectFactory projectFactory = _toolContext.projectFactory;
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        _toolContext;
 
     String? target;
     FlutterProject? rootProject;
