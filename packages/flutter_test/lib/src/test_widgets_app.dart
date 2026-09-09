@@ -299,14 +299,18 @@ class TestWidgetsApp extends StatelessWidget {
             BuildContext context,
             Animation<double> animation,
             Animation<double> secondaryAnimation,
-          ) => builder(context),
+          ) {
+            return builder(context);
+          },
       transitionsBuilder:
           (
             BuildContext context,
             Animation<double> animation,
             Animation<double> secondaryAnimation,
             Widget child,
-          ) => child,
+          ) {
+            return child;
+          },
     );
   }
 
