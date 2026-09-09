@@ -122,7 +122,6 @@ Future<Stream<String>> runWidgetPreview({
     dtdUri: dtdUri,
     useWebServer: useWebServer,
     devToolsServerAddress: devToolsServerAddress,
-    legacyPreviewDetection: legacyPreviewDetection,
     processManager: processManager,
   );
 

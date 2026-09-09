@@ -81,8 +81,7 @@ class LspPreviewDetector {
   var _disposed = false;
   bool _initialized = false;
 
-  /// Starts listening for changes to Dart sources under [projectRoot] and returns
-  /// the initial [PreviewDependencyGraph] for the project.
+  /// Starts listening for changes to Dart sources under [projectRoot].
   Future<void> initialize() async {
     return mutex.runGuarded(() async {
       if (_initialized) {

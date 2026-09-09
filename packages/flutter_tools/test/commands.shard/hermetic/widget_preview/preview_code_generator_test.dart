@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_builder/code_builder.dart' as cb;
 import 'package:dart_style/dart_style.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -153,6 +154,7 @@ List<_i1.WidgetPreview> previews() => [
           'package:foo_project/preview.dart': '_i3',
           'preview.dart': '_i4',
           'package:flutter/src/widget_previews/widget_previews.dart': '_i5',
+          'dart:ui': '_i6',
         },
         previews: <FlutterWidgetPreviewDetails>[
           FlutterWidgetPreviewDetails(
@@ -194,8 +196,8 @@ List<_i1.WidgetPreview> previews() => [
 import 'widget_preview.dart' as _i1;
 import 'utils.dart' as _i2;
 import 'package:foo_project/preview.dart' as _i3;
-import 'preview.dart' as _i4;
 import 'package:flutter/src/widget_previews/widget_previews.dart' as _i5;
+import 'dart:ui' as _i6;
 
 List<_i1.WidgetPreview> previews() => [
   _i2.buildWidgetPreview(
@@ -240,5 +242,41 @@ const String kProjectRootPath = r'${project.directory.absolute.path}';
         expect(generatedDtdConnectionInfoFile.readAsStringSync(), expectedDtdConnectionInfo);
       },
     );
+  });
+
+  group('PreviewPrefixedAllocator', () {
+    test('filters out non-package/non-SDK imports and allocates non-colliding prefixes', () {
+      final allocator = PreviewPrefixedAllocator();
+      allocator.populateKnownImportPrefixes(<String, String>{
+        'widget_preview.dart': '_i1',
+        'utils.dart': '_i2',
+        'package:foo/foo.dart': '_i3',
+        'preview.dart': '_i4',
+        'package:flutter/widgets.dart': '_i5',
+        'dart:ui': '_i6',
+        'root.dart': '_i7',
+      });
+
+      expect(allocator.imports.map((cb.Directive d) => d.url).toList(), <String>[
+        'widget_preview.dart',
+        'utils.dart',
+        'package:foo/foo.dart',
+        'package:flutter/widgets.dart',
+        'dart:ui',
+      ]);
+
+      // Allocating a new reference must not collide with existing or skipped prefixes.
+      // Maximum prefix from the populate call was _i7, so the next allocated key must be >= _i8.
+      expect(allocator.allocate(cb.refer('Bar', 'package:bar/bar.dart')), '_i8.Bar');
+    });
+
+    test('throws StateError when prefixes have already been allocated', () {
+      final allocator = PreviewPrefixedAllocator();
+      allocator.allocate(cb.refer('Foo', 'package:foo/foo.dart'));
+      expect(
+        () => allocator.populateKnownImportPrefixes(<String, String>{'dart:ui': '_i1'}),
+        throwsStateError,
+      );
+    });
   });
 }

@@ -10,7 +10,6 @@ import 'package:pub_semver/pub_semver.dart';
 import '../base/file_system.dart';
 import '../project.dart';
 import 'dtd_types.dart';
-import 'preview_details.dart';
 
 /// Generates the Dart source responsible for importing widget previews from the developer's project
 /// into the widget preview scaffold.
@@ -103,10 +102,10 @@ class PreviewCodeGenerator {
 
   // TODO(bkonyi): update generated example now that we're computing constants
   /// Generates code used by the widget preview scaffold based on the preview instances listed in
-  /// [previews].
+  /// [update].
   ///
   /// The generated file will contain a single top level function named `previews()` which returns
-  /// a `List<WidgetPreview>` that contains each widget preview defined in [previews].
+  /// a `List<WidgetPreview>` that contains each widget preview defined in [update].
   ///
   /// An example of a formatted generated file containing previews from two files could be:
   ///
@@ -189,6 +188,7 @@ class PreviewCodeGenerator {
     builder
       ..body = cb.literalList([
         for (final preview in sortedPreviews)
+          // Previews can only be defined under the lib/ directory.
           if (preview.packageName != null)
             _buildPreviewsLsp(preview: preview, uri: preview.libraryUri),
       ]).code
@@ -239,15 +239,23 @@ class PreviewCodeGenerator {
 
     return cb.refer(_kBuildWidgetPreview, _kUtilsUri).call([], {
       ...args,
-      _kTransformedPreview: cb.CodeExpression(cb.Code(preview.previewAnnotation))
-          .property(_kTransform)
-          .call([]),
+      _kTransformedPreview: cb.CodeExpression(
+        cb.Code(preview.previewAnnotation),
+      ).property(_kTransform).call([]),
     });
   }
 }
 
 class PreviewPrefixedAllocator implements cb.Allocator {
   static const _doNotPrefix = ['dart:core'];
+  static const _kImportPrefix = '_i';
+  static const _kPackageSchemePrefix = 'package:';
+  static const _kDartSchemePrefix = 'dart:';
+
+  static const _internalHelperUris = <String>{
+    PreviewCodeGenerator._kWidgetPreviewLibraryUri,
+    PreviewCodeGenerator._kUtilsUri,
+  };
 
   final _imports = <String, int>{};
   static const _kInitialKey = 1;
@@ -261,7 +269,7 @@ class PreviewPrefixedAllocator implements cb.Allocator {
       return symbol!;
     }
     url = _fixUrl(url);
-    return '_i${_imports.putIfAbsent(url, _nextKey)}.$symbol';
+    return '$_kImportPrefix${_imports.putIfAbsent(url, _nextKey)}.$symbol';
   }
 
   void populateKnownImportPrefixes(Map<String, String> imports) {
@@ -270,17 +278,31 @@ class PreviewPrefixedAllocator implements cb.Allocator {
         'Attempted to populated known import prefixes when prefixes have been allocated',
       );
     }
-    _imports.addAll({
-      for (final MapEntry(:key, :value) in imports.entries) key: int.parse(value.substring(2)),
-    });
-    _keys += _imports.length;
+    for (final MapEntry(:key, :value) in imports.entries) {
+      final int prefixKey = int.parse(value.substring(_kImportPrefix.length));
+      if (prefixKey >= _keys) {
+        _keys = prefixKey + 1;
+      }
+      final String url = _fixUrl(key);
+      if (_isValidImport(url)) {
+        _imports[url] = prefixKey;
+      }
+    }
   }
+
+  /// Only packages, Dart SDK libraries, and the internal helper files are
+  /// valid imports for the generated preview scaffold. Previews and libraries
+  /// outside of `lib/` cannot be imported into the preview scaffold.
+  static bool _isValidImport(String uri) =>
+      uri.startsWith(_kPackageSchemePrefix) ||
+      uri.startsWith(_kDartSchemePrefix) ||
+      _internalHelperUris.contains(uri);
 
   int _nextKey() => _keys++;
 
   @override
   Iterable<cb.Directive> get imports =>
-      _imports.keys.map((u) => cb.Directive.import(u, as: '_i${_imports[u]}'));
+      _imports.keys.map((u) => cb.Directive.import(u, as: '$_kImportPrefix${_imports[u]}'));
 }
 
 /// Applies hardcoded fixes to [url].
