@@ -243,7 +243,7 @@ Example:
 /// This sample shows creation of [IconButton] widgets for standard, filled,
 /// filled tonal and outlined types, as described in: https://m3.material.io/components/icon-buttons/overview
 ///
-/// ** See code in examples/api/lib/material/icon_button/icon_button.2.dart **
+/// ** See code in packages/material_ui/example/lib/icon_button/icon_button.2.dart **
 /// {@end-tool}
 ```
 
@@ -284,10 +284,11 @@ Run the relevant component tests:
 flutter test packages/material_ui/test/<component>_test.dart
 ```
 
-Run generator tests if generator code changed:
+Run generator tests from the `material_ui` package directory if generator code changed:
 
 ```shell
-dart test packages/material_ui/tool/gen_defaults/test
+cd packages/material_ui
+dart run test tool/gen_defaults/test
 ```
 
 ## 13. PR Description Checklist
