@@ -414,8 +414,10 @@ struct Matrix {
   ///          pixel_size.y = ||\nabla y|| = ||Basis X 2D|| / |det 2D|
   inline Vector2 GetTransformedPixelSize() const {
     if (m[1] == 0.0f && m[4] == 0.0f) {
-      return Vector2(m[0] != 0.0f ? 1.0f / std::abs(m[0]) : 0.0f,
-                     m[5] != 0.0f ? 1.0f / std::abs(m[5]) : 0.0f);
+      if (m[0] == 0.0f || m[5] == 0.0f) {
+        return Vector2();
+      }
+      return Vector2(1.0f / std::abs(m[0]), 1.0f / std::abs(m[5]));
     }
     Scalar det = m[0] * m[5] - m[1] * m[4];
     if (ScalarNearlyZero(det)) {
