@@ -48,8 +48,9 @@ void _resizePaintCanvas(ui.Rect rect, double effectiveScaleX, double effectiveSc
 
 /// Represents the combined geometry of the canvas transformation matrix and device pixel ratio,
 /// providing physical-to-local coordinate snapping and projection for WebParagraph painting.
-class _ParagraphTransform {
-  _ParagraphTransform({
+@visibleForTesting
+class ParagraphTransform {
+  ParagraphTransform({
     required this.effectiveScaleX,
     required this.effectiveScaleY,
     required this.transformX,
@@ -57,9 +58,9 @@ class _ParagraphTransform {
     required this.devicePixelRatio,
   });
 
-  factory _ParagraphTransform.from(Float64List? transform, double devicePixelRatio) {
+  factory ParagraphTransform.from(Float64List? transform, double devicePixelRatio) {
     if (transform == null) {
-      return _ParagraphTransform(
+      return ParagraphTransform(
         effectiveScaleX: devicePixelRatio,
         effectiveScaleY: devicePixelRatio,
         transformX: 0.0,
@@ -75,7 +76,7 @@ class _ParagraphTransform {
       transform[4] * transform[4] + transform[5] * transform[5],
     );
 
-    return _ParagraphTransform(
+    return ParagraphTransform(
       effectiveScaleX: devicePixelRatio * (matrixScaleX > 0 ? matrixScaleX : 1.0),
       effectiveScaleY: devicePixelRatio * (matrixScaleY > 0 ? matrixScaleY : 1.0),
       transformX: transform[12],
@@ -134,56 +135,13 @@ class _ParagraphTransform {
   }
 }
 
-/// Exposed for testing the computation of effective scale factors.
-@visibleForTesting
-(double effectiveScaleX, double effectiveScaleY) computeEffectiveScaleForTest(
-  Float64List? transform,
-  double devicePixelRatio,
-) {
-  final paragraphTransform = _ParagraphTransform.from(transform, devicePixelRatio);
-  return (paragraphTransform.effectiveScaleX, paragraphTransform.effectiveScaleY);
-}
-
-/// Exposed for testing the physical snapping of background rects.
-@visibleForTesting
-ui.Rect snapRectToPhysicalPixelsForTest(
-  ui.Rect rect,
-  double effectiveScaleX,
-  double effectiveScaleY, [
-  double transformX = 0.0,
-  double transformY = 0.0,
-  double dpr = 1.0,
-]) {
-  final transform = _ParagraphTransform(
-    effectiveScaleX: effectiveScaleX,
-    effectiveScaleY: effectiveScaleY,
-    transformX: transformX,
-    transformY: transformY,
-    devicePixelRatio: dpr,
-  );
-  return transform.snapRect(rect);
-}
-
-/// Calculates the source and target rectangles, and the 2D canvas shift
-/// for a paragraph, combining the device pixel ratio and canvas transform.
-/// This is used for testing the pixel alignment and caching logic.
-@visibleForTesting
-(ui.Rect sourceRect, ui.Rect targetRect, ui.Offset canvas2dShift) calculateParagraphForTest(
-  WebParagraph paragraph,
-  ui.Offset offset,
-  double devicePixelRatio, [
-  Float64List? canvasTransform,
-]) {
-  final transform = _ParagraphTransform.from(canvasTransform, devicePixelRatio);
-  return _calculateParagraph(paragraph, offset, transform);
-}
-
 /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for the entire paragraph,
 /// as well as the translation shift on Canvas2D.
-(ui.Rect sourceRect, ui.Rect targetRect, ui.Offset canvas2dShift) _calculateParagraph(
+@visibleForTesting
+(ui.Rect sourceRect, ui.Rect targetRect, ui.Offset canvas2dShift) calculateParagraph(
   WebParagraph paragraph,
   ui.Offset offset,
-  _ParagraphTransform transform,
+  ParagraphTransform transform,
 ) {
   final (double physicalOffsetX, double physicalOffsetY) = transform.snapOffset(offset);
 
@@ -198,7 +156,7 @@ ui.Rect snapRectToPhysicalPixelsForTest(
   final double shiftPhysicalX = (-physicalPaintBounds.left).ceilToDouble();
   final double shiftPhysicalY = (-physicalPaintBounds.top).ceilToDouble();
 
-  // Add 2 physical pixels of safety padding so font antialiasing bleeding at the bottom/right edges is not clipped
+  // Add 2 physical pixels of safety padding so font antialiasing bleeding at the edges is not clipped
   const kAntialiasingPadding = 2.0;
   final double physicalWidth = (shiftPhysicalX + physicalPaintBounds.right + kAntialiasingPadding)
       .ceilToDouble();
@@ -247,7 +205,7 @@ abstract class WebParagraphPainter {
     StyleElements styleElement,
     ui.Canvas canvas,
     ui.Offset offset,
-    _ParagraphTransform transform,
+    ParagraphTransform transform,
   ) {
     for (final TextLine line in _paragraph.getLayout().lines) {
       for (final LineBlock block in line.visualBlocks) {
@@ -291,7 +249,7 @@ abstract class WebParagraphPainter {
     ui.Canvas canvas,
     ui.Rect rect,
     ui.Paint paint,
-    _ParagraphTransform transform,
+    ParagraphTransform transform,
   ) {
     // We snap the block edges to whole physical screen pixels to prevent
     // subpixel rendering overlaps (which causes artifacts when colors have
@@ -309,9 +267,9 @@ abstract class WebParagraphPainter {
     final TextLayout layout = _paragraph.getLayout();
     final Float64List canvasTransform = canvas.getTransform();
     final double dpr = ui.window.devicePixelRatio;
-    final transform = _ParagraphTransform.from(canvasTransform, dpr);
+    final transform = ParagraphTransform.from(canvasTransform, dpr);
 
-    final (ui.Rect sourceRect, ui.Rect targetRect, ui.Offset canvas2dShift) = _calculateParagraph(
+    final (ui.Rect sourceRect, ui.Rect targetRect, ui.Offset canvas2dShift) = calculateParagraph(
       _paragraph,
       offset,
       transform,
@@ -332,8 +290,6 @@ abstract class WebParagraphPainter {
       targetRect,
       effectiveScaleX: transform.effectiveScaleX,
       effectiveScaleY: transform.effectiveScaleY,
-      canvas2dShift: canvas2dShift,
-      offset: offset,
       generateParagraphImage: () {
         _resizePaintCanvas(sourceRect, transform.effectiveScaleX, transform.effectiveScaleY);
 
@@ -366,8 +322,6 @@ abstract class WebParagraphPainter {
     required ParagraphImageGenerator generateParagraphImage,
     required double effectiveScaleX,
     required double effectiveScaleY,
-    required ui.Offset canvas2dShift,
-    required ui.Offset offset,
   });
 }
 

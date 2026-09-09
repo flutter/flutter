@@ -36,10 +36,10 @@ Future<void> testMain() async {
 
         // Test positive fractional offset
         const positiveOffset = Offset(10.25, 20.75);
-        final (Rect sourceRect, Rect targetRect, Offset canvas2dShift) = calculateParagraphForTest(
+        final (Rect sourceRect, Rect targetRect, Offset canvas2dShift) = calculateParagraph(
           paragraph,
           positiveOffset,
-          dpr,
+          ParagraphTransform.from(null, dpr),
         );
 
         // Verify sourceRect dimensions are exact integers in physical pixels
@@ -66,7 +66,7 @@ Future<void> testMain() async {
         // Test negative fractional offset (e.g. text scrolling partially off screen)
         const negativeOffset = Offset(-5.65, -10.25);
         final (Rect negSourceRect, Rect negTargetRect, Offset negCanvas2dShift) =
-            calculateParagraphForTest(paragraph, negativeOffset, dpr);
+            calculateParagraph(paragraph, negativeOffset, ParagraphTransform.from(null, dpr));
 
         expect(negSourceRect.width % 1.0, closeTo(0.0, epsilon));
         expect(negSourceRect.height % 1.0, closeTo(0.0, epsilon));
@@ -116,11 +116,10 @@ Future<void> testMain() async {
         1.0,
       ]);
 
-      final (Rect sourceRect, Rect targetRect, Offset canvas2dShift) = calculateParagraphForTest(
+      final (Rect sourceRect, Rect targetRect, Offset canvas2dShift) = calculateParagraph(
         paragraph,
         offset,
-        dpr,
-        transform,
+        ParagraphTransform.from(transform, dpr),
       );
 
       const double effectiveScaleX = dpr * 1.5;
@@ -258,10 +257,10 @@ Future<void> testMain() async {
         final WebParagraph paragraph = builder.build();
         paragraph.layout(const ParagraphConstraints(width: 200));
 
-        final (Rect sourceRect, Rect targetRect, Offset canvas2dShift) = calculateParagraphForTest(
+        final (Rect sourceRect, Rect targetRect, Offset canvas2dShift) = calculateParagraph(
           paragraph,
           Offset.zero,
-          1.0,
+          ParagraphTransform.from(null, 1.0),
         );
 
         final double shiftPhysicalX = (-paragraph.paintBounds.left).ceilToDouble();
@@ -500,22 +499,15 @@ Future<void> testMain() async {
       const block1Rect = Rect.fromLTRB(10.25, 20.35, 35.65, 45.85);
       const block2Rect = Rect.fromLTRB(35.65, 20.35, 70.15, 45.85);
 
-      final Rect snapped1 = snapRectToPhysicalPixelsForTest(
-        block1Rect,
-        effectiveScaleX,
-        effectiveScaleY,
-        transformX,
-        transformY,
-        dpr,
+      final transform = ParagraphTransform(
+        effectiveScaleX: effectiveScaleX,
+        effectiveScaleY: effectiveScaleY,
+        transformX: transformX,
+        transformY: transformY,
+        devicePixelRatio: dpr,
       );
-      final Rect snapped2 = snapRectToPhysicalPixelsForTest(
-        block2Rect,
-        effectiveScaleX,
-        effectiveScaleY,
-        transformX,
-        transformY,
-        dpr,
-      );
+      final Rect snapped1 = transform.snapRect(block1Rect);
+      final Rect snapped2 = transform.snapRect(block2Rect);
 
       // Verify physical screen coordinates are exact integers
       final double physLeft1 = snapped1.left * effectiveScaleX + transformX * dpr;
@@ -545,14 +537,14 @@ Future<void> testMain() async {
   });
 
   test(
-    'computeEffectiveScaleForTest correctly extracts scale from matrix and handles rotations and nulls',
+    'ParagraphTransform correctly extracts scale from matrix and handles rotations and nulls',
     () {
       const dpr = 2.0;
 
       // Null transform: returns (dpr, dpr)
-      final (double nullScaleX, double nullScaleY) = computeEffectiveScaleForTest(null, dpr);
-      expect(nullScaleX, closeTo(2.0, epsilon));
-      expect(nullScaleY, closeTo(2.0, epsilon));
+      final nullTransform = ParagraphTransform.from(null, dpr);
+      expect(nullTransform.effectiveScaleX, closeTo(2.0, epsilon));
+      expect(nullTransform.effectiveScaleY, closeTo(2.0, epsilon));
 
       // Identity transform
       final identity = Float64List.fromList(<double>[
@@ -573,9 +565,9 @@ Future<void> testMain() async {
         0.0,
         1.0,
       ]);
-      final (double idScaleX, double idScaleY) = computeEffectiveScaleForTest(identity, dpr);
-      expect(idScaleX, closeTo(2.0, epsilon));
-      expect(idScaleY, closeTo(2.0, epsilon));
+      final idTransform = ParagraphTransform.from(identity, dpr);
+      expect(idTransform.effectiveScaleX, closeTo(2.0, epsilon));
+      expect(idTransform.effectiveScaleY, closeTo(2.0, epsilon));
 
       // Uniform scale 1.5x
       final uniform = Float64List.fromList(<double>[
@@ -596,9 +588,9 @@ Future<void> testMain() async {
         0.0,
         1.0,
       ]);
-      final (double uniScaleX, double uniScaleY) = computeEffectiveScaleForTest(uniform, dpr);
-      expect(uniScaleX, closeTo(3.0, epsilon));
-      expect(uniScaleY, closeTo(3.0, epsilon));
+      final uniTransform = ParagraphTransform.from(uniform, dpr);
+      expect(uniTransform.effectiveScaleX, closeTo(3.0, epsilon));
+      expect(uniTransform.effectiveScaleY, closeTo(3.0, epsilon));
 
       // 45 degree rotation: cos(pi/4) = sin(pi/4) = 1/sqrt(2)
       final double cos45 = math.cos(math.pi / 4);
@@ -621,9 +613,9 @@ Future<void> testMain() async {
         0.0,
         1.0,
       ]);
-      final (double rotScaleX, double rotScaleY) = computeEffectiveScaleForTest(rot45, dpr);
-      expect(rotScaleX, closeTo(2.0, epsilon));
-      expect(rotScaleY, closeTo(2.0, epsilon));
+      final rotTransform = ParagraphTransform.from(rot45, dpr);
+      expect(rotTransform.effectiveScaleX, closeTo(2.0, epsilon));
+      expect(rotTransform.effectiveScaleY, closeTo(2.0, epsilon));
 
       // Non-uniform scale with zero fallback
       final nonUniformZero = Float64List.fromList(<double>[
@@ -644,9 +636,9 @@ Future<void> testMain() async {
         0.0,
         1.0,
       ]);
-      final (double nzScaleX, double nzScaleY) = computeEffectiveScaleForTest(nonUniformZero, dpr);
-      expect(nzScaleX, closeTo(2.0, epsilon)); // fallback to 1.0 * dpr
-      expect(nzScaleY, closeTo(5.0, epsilon));
+      final nzTransform = ParagraphTransform.from(nonUniformZero, dpr);
+      expect(nzTransform.effectiveScaleX, closeTo(2.0, epsilon)); // fallback to 1.0 * dpr
+      expect(nzTransform.effectiveScaleY, closeTo(5.0, epsilon));
     },
   );
 

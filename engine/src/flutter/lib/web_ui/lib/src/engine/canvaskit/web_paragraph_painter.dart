@@ -65,8 +65,6 @@ class CanvasKitPainter extends WebParagraphPainter {
     required ParagraphImageGenerator generateParagraphImage,
     required double effectiveScaleX,
     required double effectiveScaleY,
-    required ui.Offset canvas2dShift,
-    required ui.Offset offset,
   }) {
     final _ParagraphCacheEntry? cacheEntry = _cacheEntry;
     if (cacheEntry != null &&
@@ -78,8 +76,11 @@ class CanvasKitPainter extends WebParagraphPainter {
     }
 
     if (!hasCache) {
-      debugRasterizeCount++;
-      debugTotalRasterizeCount++;
+      assert(() {
+        debugRasterizeCount++;
+        debugTotalRasterizeCount++;
+        return true;
+      }());
       final imageInfo = SkImageInfo(
         alphaType: canvasKit.AlphaType.Unpremul,
         colorType: canvasKit.ColorType.RGBA_8888,
