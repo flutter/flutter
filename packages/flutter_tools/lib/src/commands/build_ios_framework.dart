@@ -139,6 +139,18 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   }
 
   @override
+  String get targetFile {
+    if (argResults?.wasParsed('target') ?? false) {
+      return stringArg('target')!;
+    }
+    final List<String>? rest = argResults?.rest;
+    if (rest != null && rest.isNotEmpty) {
+      return rest.first;
+    }
+    return _toolContext.fs.path.join('lib', 'main.dart');
+  }
+
+  @override
   bool get supported => platform.isMacOS;
 
   @override
@@ -148,7 +160,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
-    if ((await getBuildInfos()).isEmpty) {
+    if (!boolArg('debug') && !boolArg('profile') && !boolArg('release')) {
       throwToolExit('At least one of "--debug" or "--profile", or "--release" is required.');
     }
 
