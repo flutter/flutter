@@ -424,6 +424,12 @@ class TextField extends StatefulWidget {
   /// By default, draws a horizontal line under the text field but can be
   /// configured to show an icon, label, hint text, and error text.
   ///
+  /// Any [InputDecoration] provided here is merged with the ambient
+  /// [ThemeData.inputDecorationTheme]: properties left unset on this decoration
+  /// fall back to the values from the theme. As a result, decorations defined by
+  /// the theme (such as a border) still apply unless they are explicitly
+  /// overridden here.
+  ///
   /// Specify null to remove the decoration entirely (including the
   /// extra padding introduced by the decoration to save space for the labels).
   final InputDecoration? decoration;
