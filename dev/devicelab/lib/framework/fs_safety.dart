@@ -37,11 +37,44 @@ bool _isDangerousDirectory(String dirPath) {
   return false;
 }
 
+/// Canonicalizes [p] and normalizes standard root symlink aliases on macOS.
+///
+/// On macOS (Darwin), system root directories `/var`, `/tmp`, and `/etc` are
+/// symlinks to `/private/var`, `/private/tmp`, and `/private/etc` respectively
+/// (with Darwin per-user `$TMPDIR` located under `/var/folders/...`).
+///
+/// Normalizing these prefixes at the string level ensures consistent prefix
+/// matching against the resolved temporary directory without performing costly
+/// filesystem syscalls (`resolveSymbolicLinksSync`) or failing when validating
+/// paths to files/directories that do not exist yet.
+String _canonicalize(String p) {
+  final String canonical = path.canonicalize(p);
+  if (io.Platform.isMacOS) {
+    if (canonical.startsWith('/var/') || canonical == '/var') {
+      return '/private$canonical';
+    }
+    if (canonical.startsWith('/tmp/') || canonical == '/tmp') {
+      return '/private$canonical';
+    }
+    if (canonical.startsWith('/etc/') || canonical == '/etc') {
+      return '/private$canonical';
+    }
+  }
+  return canonical;
+}
+
 bool _isAllowedPath(String entityPath) {
-  final String canonicalEntity = path.canonicalize(entityPath);
+  final String canonicalEntity = _canonicalize(entityPath);
 
   // Allow system temp
-  final String canonicalTemp = path.canonicalize(io.Directory.systemTemp.path);
+  String canonicalTemp;
+  final io.IOOverrides? currentOverrides = io.IOOverrides.current;
+  if (currentOverrides is FSGuardIOOverrides) {
+    canonicalTemp = currentOverrides._canonicalSystemTemp;
+  } else {
+    canonicalTemp = _canonicalize(io.Directory.systemTemp.path);
+  }
+
   if (path.isWithin(canonicalTemp, canonicalEntity) || canonicalEntity == canonicalTemp) {
     return true;
   }
@@ -565,6 +598,17 @@ final class FSGuardIOOverrides extends io.IOOverrides {
   FSGuardIOOverrides() : _parent = io.IOOverrides.current;
 
   final io.IOOverrides? _parent;
+
+  late final String _canonicalSystemTemp = () {
+    final io.Directory rawTemp = _parent != null
+        ? _parent.getSystemTempDirectory()
+        : super.getSystemTempDirectory();
+    try {
+      return _canonicalize(rawTemp.resolveSymbolicLinksSync());
+    } on Object catch (_) {
+      return _canonicalize(rawTemp.path);
+    }
+  }();
 
   @override
   io.File createFile(String path) {

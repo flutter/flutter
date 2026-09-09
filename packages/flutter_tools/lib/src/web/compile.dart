@@ -143,7 +143,9 @@ class WebBuilder {
         for (final ExceptionMeasurement measurement in result.exceptions.values) {
           _logger.printError(
             'Target ${measurement.target} failed: ${measurement.exception}',
-            stackTrace: measurement.fatal ? measurement.stackTrace : null,
+            stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
+                ? measurement.stackTrace
+                : null,
           );
         }
         throwToolExit('Failed to compile application for the Web.');

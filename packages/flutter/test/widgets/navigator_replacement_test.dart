@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'observer_tester.dart';
@@ -10,11 +10,11 @@ import 'observer_tester.dart';
 void main() {
   testWidgets('Back during pushReplacement', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: const Material(child: Text('home')),
+      _buildApp(
+        home: const Text('home'),
         routes: <String, WidgetBuilder>{
-          '/a': (BuildContext context) => const Material(child: Text('a')),
-          '/b': (BuildContext context) => const Material(child: Text('b')),
+          '/a': (BuildContext context) => const Text('a'),
+          '/b': (BuildContext context) => const Text('b'),
         },
       ),
     );
@@ -46,11 +46,11 @@ void main() {
   group('pushAndRemoveUntil', () {
     testWidgets('notifies appropriately', (WidgetTester tester) async {
       final observer = TestObserver();
-      final Widget myApp = MaterialApp(
-        home: const Material(child: Text('home')),
+      final Widget myApp = _buildApp(
+        home: const Text('home'),
         routes: <String, WidgetBuilder>{
-          '/a': (BuildContext context) => const Material(child: Text('a')),
-          '/b': (BuildContext context) => const Material(child: Text('b')),
+          '/a': (BuildContext context) => const Text('a'),
+          '/b': (BuildContext context) => const Text('b'),
         },
         navigatorObservers: <NavigatorObserver>[observer],
       );
@@ -122,11 +122,11 @@ void main() {
     });
 
     testWidgets('triggers page transition animation for pushed route', (WidgetTester tester) async {
-      final Widget myApp = MaterialApp(
-        home: const Material(child: Text('home')),
+      final Widget myApp = _buildApp(
+        home: const Text('home'),
         routes: <String, WidgetBuilder>{
-          '/a': (BuildContext context) => const Material(child: Text('a')),
-          '/b': (BuildContext context) => const Material(child: Text('b')),
+          '/a': (BuildContext context) => const Text('a'),
+          '/b': (BuildContext context) => const Text('b'),
         },
       );
 
@@ -154,18 +154,14 @@ void main() {
       'Hero transition triggers when preceding route contains hero, and predicate route does not',
       (WidgetTester tester) async {
         const kHeroTag = 'hero';
-        final Widget myApp = MaterialApp(
+        final Widget myApp = _buildApp(
           initialRoute: '/',
           routes: <String, WidgetBuilder>{
-            '/': (BuildContext context) => const Material(child: Text('home')),
-            '/a': (BuildContext context) => const Material(
-              child: Hero(tag: kHeroTag, child: Text('a')),
-            ),
-            '/b': (BuildContext context) => const Material(
-              child: Padding(
-                padding: EdgeInsets.all(100.0),
-                child: Hero(tag: kHeroTag, child: Text('b')),
-              ),
+            '/': (BuildContext context) => const Text('home'),
+            '/a': (BuildContext context) => const Hero(tag: kHeroTag, child: Text('a')),
+            '/b': (BuildContext context) => const Padding(
+              padding: EdgeInsets.all(100.0),
+              child: Hero(tag: kHeroTag, child: Text('b')),
             ),
           },
         );
@@ -200,25 +196,14 @@ void main() {
       'Hero transition does not trigger when preceding route does not contain hero, but predicate route does',
       (WidgetTester tester) async {
         const kHeroTag = 'hero';
-        final Widget myApp = MaterialApp(
-          theme: ThemeData(
-            pageTransitionsTheme: const PageTransitionsTheme(
-              builders: <TargetPlatform, PageTransitionsBuilder>{
-                TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-              },
-            ),
-          ),
+        final Widget myApp = _buildApp(
           initialRoute: '/',
           routes: <String, WidgetBuilder>{
-            '/': (BuildContext context) => const Material(
-              child: Hero(tag: kHeroTag, child: Text('home')),
-            ),
-            '/a': (BuildContext context) => const Material(child: Text('a')),
-            '/b': (BuildContext context) => const Material(
-              child: Padding(
-                padding: EdgeInsets.all(100.0),
-                child: Hero(tag: kHeroTag, child: Text('b')),
-              ),
+            '/': (BuildContext context) => const Hero(tag: kHeroTag, child: Text('home')),
+            '/a': (BuildContext context) => const Text('a'),
+            '/b': (BuildContext context) => const Padding(
+              padding: EdgeInsets.all(100.0),
+              child: Hero(tag: kHeroTag, child: Text('b')),
             ),
           },
         );
@@ -242,4 +227,45 @@ void main() {
       },
     );
   });
+}
+
+/// Builds a [TestWidgetsApp] for navigator replacement tests.
+Widget _buildApp({
+  Widget? home,
+  String? initialRoute,
+  Map<String, WidgetBuilder> routes = const <String, WidgetBuilder>{},
+  List<NavigatorObserver> navigatorObservers = const <NavigatorObserver>[],
+}) {
+  return TestWidgetsApp(
+    home: home,
+    initialRoute: initialRoute,
+    routes: routes,
+    pageRouteBuilder: _pageRouteBuilder,
+    navigatorObservers: <NavigatorObserver>[HeroController(), ...navigatorObservers],
+    textStyle: const TextStyle(color: Color(0xFF000000), fontSize: 14.0),
+  );
+}
+
+/// Creates a page route with the transition used by the replacement tests.
+PageRoute<T> _pageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
+  return PageRouteBuilder<T>(
+    settings: settings,
+    pageBuilder:
+        (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
+            builder(context),
+    transitionsBuilder:
+        (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) {
+          return SlideTransition(
+            position: animation.drive(
+              Tween<Offset>(begin: const Offset(0.0, 0.25), end: Offset.zero),
+            ),
+            child: child,
+          );
+        },
+  );
 }

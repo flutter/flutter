@@ -165,15 +165,17 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   bool is_swapchain = false;
   SampleCount sample_count =
       color_image_vk_->GetTextureDescriptor().sample_count;
-  if (resolve_image_vk_) {
-    frame_data =
-        TextureVK::Cast(*resolve_image_vk_).GetCachedFrameData(sample_count);
-    is_swapchain = TextureVK::Cast(*resolve_image_vk_).IsSwapchainImage();
-  } else {
-    frame_data =
-        TextureVK::Cast(*color_image_vk_).GetCachedFrameData(sample_count);
-    is_swapchain = TextureVK::Cast(*color_image_vk_).IsSwapchainImage();
-  }
+  // The framebuffer references attachment views bound to a specific
+  // subresource, so the cache is keyed on color0's (mip_level, slice) as
+  // well as sample count. Caller-side invariants on the rest of the
+  // attachment set are the same as before.
+  const uint32_t cache_mip_level = color0.mip_level;
+  const uint32_t cache_slice = color0.slice;
+  TextureVK& frame_data_texture = TextureVK::Cast(
+      resolve_image_vk_ ? *resolve_image_vk_ : *color_image_vk_);
+  is_swapchain = frame_data_texture.IsSwapchainImage();
+  frame_data = frame_data_texture.GetCachedFrameData(
+      sample_count, cache_mip_level, cache_slice);
 
   const auto& target_size = render_target_.GetRenderTargetSize();
 
@@ -203,13 +205,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   frame_data.framebuffer = framebuffer;
   frame_data.render_pass = render_pass_;
 
-  if (resolve_image_vk_) {
-    TextureVK::Cast(*resolve_image_vk_)
-        .SetCachedFrameData(frame_data, sample_count);
-  } else {
-    TextureVK::Cast(*color_image_vk_)
-        .SetCachedFrameData(frame_data, sample_count);
-  }
+  frame_data_texture.SetCachedFrameData(frame_data, sample_count,
+                                        cache_mip_level, cache_slice);
 
   // If the resolve image exists and has mipmaps, transition mip levels besides
   // the base to shader read only in preparation for mipmap generation.
@@ -320,8 +317,10 @@ SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
         // The bind point doesn't matter here since that information is present
         // in the render pass.
         attachments[count++] =
-            TextureVK::Cast(*attachment.texture).GetRenderTargetView();
+            TextureVK::Cast(*attachment.texture)
+                .GetRenderTargetView(attachment.mip_level, attachment.slice);
         if (attachment.resolve_texture) {
+          // The resolve texture resolves into its own base level/layer.
           attachments[count++] = TextureVK::Cast(*attachment.resolve_texture)
                                      .GetRenderTargetView();
         }
@@ -330,11 +329,13 @@ SharedHandleVK<vk::Framebuffer> RenderPassVK::CreateVKFramebuffer(
 
   if (auto depth = render_target_.GetDepthAttachment(); depth.has_value()) {
     attachments[count++] =
-        TextureVK::Cast(*depth->texture).GetRenderTargetView();
+        TextureVK::Cast(*depth->texture)
+            .GetRenderTargetView(depth->mip_level, depth->slice);
   } else if (auto stencil = render_target_.GetStencilAttachment();
              stencil.has_value()) {
     attachments[count++] =
-        TextureVK::Cast(*stencil->texture).GetRenderTargetView();
+        TextureVK::Cast(*stencil->texture)
+            .GetRenderTargetView(stencil->mip_level, stencil->slice);
   }
 
   fb_info.setPAttachments(attachments.data());

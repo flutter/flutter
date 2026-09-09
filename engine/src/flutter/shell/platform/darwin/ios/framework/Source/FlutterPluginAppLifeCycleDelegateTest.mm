@@ -197,6 +197,8 @@ FLUTTER_ASSERT_ARC
   XCTNSNotificationExpectation* expectation = [[XCTNSNotificationExpectation alloc]
       initWithName:UIApplicationDidEnterBackgroundNotification];
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id mockApplication = OCMClassMock([FlutterSharedApplication class]);
+  OCMStub([mockApplication hasSceneDelegate]).andReturn(NO);
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   [delegate addDelegate:plugin];
   [[NSNotificationCenter defaultCenter]
@@ -246,6 +248,8 @@ FLUTTER_ASSERT_ARC
       initWithName:UIApplicationWillEnterForegroundNotification];
 
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id mockApplication = OCMClassMock([FlutterSharedApplication class]);
+  OCMStub([mockApplication hasSceneDelegate]).andReturn(NO);
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   [delegate addDelegate:plugin];
   [[NSNotificationCenter defaultCenter]
@@ -294,6 +298,8 @@ FLUTTER_ASSERT_ARC
       [[XCTNSNotificationExpectation alloc] initWithName:UIApplicationWillResignActiveNotification];
 
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id mockApplication = OCMClassMock([FlutterSharedApplication class]);
+  OCMStub([mockApplication hasSceneDelegate]).andReturn(NO);
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   [delegate addDelegate:plugin];
   [[NSNotificationCenter defaultCenter]
@@ -342,6 +348,8 @@ FLUTTER_ASSERT_ARC
       [[XCTNSNotificationExpectation alloc] initWithName:UIApplicationDidBecomeActiveNotification];
 
   FlutterPluginAppLifeCycleDelegate* delegate = [[FlutterPluginAppLifeCycleDelegate alloc] init];
+  id mockApplication = OCMClassMock([FlutterSharedApplication class]);
+  OCMStub([mockApplication hasSceneDelegate]).andReturn(NO);
   id plugin = OCMProtocolMock(@protocol(FlutterPlugin));
   [delegate addDelegate:plugin];
   [[NSNotificationCenter defaultCenter]

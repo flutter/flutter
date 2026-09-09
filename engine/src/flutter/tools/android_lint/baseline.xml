@@ -1,26 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <issues format="6" by="lint 8.3.0 [11479570] " type="baseline" client="" dependencies="true" name="" variant="all" version="8.3.0 [11479570] ">
 
-    <issue
-        id="HardcodedDebugMode"
-        message="Avoid hardcoding the debug mode; leaving it out allows debug and release builds to automatically assign one"
-        errorLine1="    &lt;application android:label=&quot;Flutter Shell&quot; android:name=&quot;FlutterApplication&quot; android:debuggable=&quot;true&quot;>"
-        errorLine2="                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/AndroidManifest.xml"
-            line="13"
-            column="82"/>
-    </issue>
+
 
     <issue
-        id="ClickableViewAccessibility"
-        message="Custom view `FlutterView` overrides `onTouchEvent` but not `performClick`"
-        errorLine1="  public boolean onTouchEvent(MotionEvent event) {"
-        errorLine2="                 ~~~~~~~~~~~~">
+        id="OldTargetApi"
+        message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details."
+        errorLine1="    &lt;uses-sdk android:minSdkVersion=&quot;24&quot; android:targetSdkVersion=&quot;36&quot; />"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterView.java"
-            line="474"
-            column="18"/>
+            file="../../../flutter/shell/platform/android/AndroidManifest.xml"
+            line="8"
+            column="42"/>
     </issue>
 
     <issue
@@ -30,7 +21,7 @@
         errorLine2="                 ~~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java"
-            line="896"
+            line="966"
             column="18"/>
     </issue>
 

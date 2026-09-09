@@ -7,7 +7,6 @@
 #include "impeller/geometry/rounding_radii.h"
 
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
-#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
@@ -91,74 +90,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                     clipDlRect.GetHeight());
 }
 
-static bool HasNonRectClipForUnderlayCutout(const flutter::EmbeddedViewParams& params) {
-  auto iter = params.mutatorsStack().Begin();
-  while (iter != params.mutatorsStack().End()) {
-    switch ((*iter)->GetType()) {
-      case flutter::MutatorType::kClipRRect:
-      case flutter::MutatorType::kClipRSE:
-      case flutter::MutatorType::kClipPath:
-        return true;
-      default:
-        break;
-    }
-    ++iter;
-  }
-  return false;
-}
-
-// Overlay canvas needs to be clipped to the shape of platform view to ensure
-// underlay shows up correctly, so that when there's backdrop filter, the region outside of platform
-// view's shape is blurred. See: https://github.com/flutter/flutter/issues/150660
-static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
-                                            const flutter::EmbeddedViewParams& params) {
-  flutter::DlMatrix transform;
-  auto iter = params.mutatorsStack().Begin();
-  while (iter != params.mutatorsStack().End()) {
-    switch ((*iter)->GetType()) {
-      case flutter::MutatorType::kTransform:
-        transform = transform * (*iter)->GetMatrix();
-        break;
-      case flutter::MutatorType::kClipRRect: {
-        if (transform.IsIdentity()) {
-          overlay_canvas->ClipRoundRect((*iter)->GetRRect(), flutter::DlClipOp::kIntersect, true);
-        } else {
-          auto path = flutter::DlPath::MakeRoundRect((*iter)->GetRRect());
-          auto transformed_path =
-              flutter::DlPath(path.GetSkPath().makeTransform(flutter::ToSkMatrix(transform)));
-          overlay_canvas->ClipPath(transformed_path, flutter::DlClipOp::kIntersect, true);
-        }
-        break;
-      }
-      case flutter::MutatorType::kClipRSE: {
-        if (transform.IsIdentity()) {
-          overlay_canvas->ClipRoundSuperellipse((*iter)->GetRSE(), flutter::DlClipOp::kIntersect,
-                                                true);
-        } else {
-          auto path = flutter::DlPath::MakeRoundSuperellipse((*iter)->GetRSE());
-          auto transformed_path =
-              flutter::DlPath(path.GetSkPath().makeTransform(flutter::ToSkMatrix(transform)));
-          overlay_canvas->ClipPath(transformed_path, flutter::DlClipOp::kIntersect, true);
-        }
-        break;
-      }
-      case flutter::MutatorType::kClipPath: {
-        if (transform.IsIdentity()) {
-          overlay_canvas->ClipPath((*iter)->GetPath(), flutter::DlClipOp::kIntersect, true);
-        } else {
-          auto transformed_path = flutter::DlPath(
-              (*iter)->GetPath().GetSkPath().makeTransform(flutter::ToSkMatrix(transform)));
-          overlay_canvas->ClipPath(transformed_path, flutter::DlClipOp::kIntersect, true);
-        }
-        break;
-      }
-      default:
-        break;
-    }
-    ++iter;
-  }
-}
-
 @interface FlutterPlatformViewsController ()
 
 // The pool of reusable view layers. The pool allows to recycle layer in each frame.
@@ -174,12 +105,12 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
 @property(nonatomic, readonly) FlutterClippingMaskViewPool* maskViewPool;
 
 @property(nonatomic, readonly)
-    std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*>& factories;
+    NSMutableDictionary<NSString*, NSObject<FlutterPlatformViewFactory>*>* factories;
 
-// The FlutterPlatformViewGestureRecognizersBlockingPolicy for each type of platform view.
+// The FlutterPlatformViewGestureRecognizersBlockingPolicy for each type of platform view, boxed in
+// an NSNumber.
 @property(nonatomic, readonly)
-    std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>&
-        gestureRecognizersBlockingPoliciesByType;
+    NSMutableDictionary<NSString*, NSNumber*>* gestureRecognizersBlockingPoliciesByType;
 
 /// The size of the current onscreen surface in physical pixels.
 @property(nonatomic, assign) DlISize frameSize;
@@ -307,9 +238,8 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
   // `self.slices[viewId] = x`.
   std::unique_ptr<flutter::OverlayLayerPool> _layerPool;
   std::unordered_map<int64_t, std::unique_ptr<flutter::EmbedderViewSlice>> _slices;
-  std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*> _factories;
-  std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
-      _gestureRecognizersBlockingPoliciesByType;
+  NSMutableDictionary<NSString*, NSObject<FlutterPlatformViewFactory>*>* _factories;
+  NSMutableDictionary<NSString*, NSNumber*>* _gestureRecognizersBlockingPoliciesByType;
   FlutterFMLTaskRunner* _platformTaskRunner;
   std::unordered_map<int64_t, PlatformViewData> _platformViews;
   std::unordered_map<int64_t, flutter::EmbeddedViewParams> _currentCompositionParams;
@@ -323,6 +253,8 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
 - (id)init {
   if (self = [super init]) {
     _layerPool = std::make_unique<flutter::OverlayLayerPool>();
+    _factories = [[NSMutableDictionary alloc] init];
+    _gestureRecognizersBlockingPoliciesByType = [[NSMutableDictionary alloc] init];
     _maskViewPool =
         [[FlutterClippingMaskViewPool alloc] initWithCapacity:kFlutterClippingMaskViewPoolCapacity];
     _hadPlatformViews = NO;
@@ -357,9 +289,16 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
   NSDictionary<NSString*, id>* args = [call arguments];
 
   int64_t viewId = [args[@"id"] longLongValue];
+  // A missing argument arrives as nil and an explicit Dart null as NSNull, neither of which can be
+  // converted to a view type.
   NSString* viewTypeString = args[@"viewType"];
-  std::string viewType(viewTypeString.UTF8String);
-
+  if (![viewTypeString isKindOfClass:[NSString class]]) {
+    result([FlutterError
+        errorWithCode:@"unknown_view"
+              message:@"'viewType' argument must be a string to create a platform view."
+              details:nil]);
+    return;
+  }
   if (self.platformViews.count(viewId) != 0) {
     result([FlutterError errorWithCode:@"recreating_view"
                                message:@"trying to create an already created view"
@@ -367,7 +306,7 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
     return;
   }
 
-  NSObject<FlutterPlatformViewFactory>* factory = self.factories[viewType];
+  NSObject<FlutterPlatformViewFactory>* factory = self.factories[viewTypeString];
   if (factory == nil) {
     result([FlutterError
         errorWithCode:@"unregistered_view_type"
@@ -412,7 +351,8 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
         FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded;
   } else if ([gestureBlockingPolicyValue
                  isEqualToString:kGestureBlockingPolicyFallbackToPluginDefault]) {
-    gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
+    gestureBlockingPolicy = static_cast<FlutterPlatformViewGestureRecognizersBlockingPolicy>(
+        self.gestureRecognizersBlockingPoliciesByType[viewTypeString].integerValue);
   } else {
     result([FlutterError
         errorWithCode:@"unknown_gesture_blocking_policy"
@@ -491,10 +431,9 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
                               withId:(NSString*)factoryId
     gestureRecognizersBlockingPolicy:
         (FlutterPlatformViewGestureRecognizersBlockingPolicy)gestureRecognizerBlockingPolicy {
-  std::string idString([factoryId UTF8String]);
-  FML_CHECK(self.factories.count(idString) == 0);
-  self.factories[idString] = factory;
-  self.gestureRecognizersBlockingPoliciesByType[idString] = gestureRecognizerBlockingPolicy;
+  FML_CHECK(self.factories[factoryId] == nil);
+  self.factories[factoryId] = factory;
+  self.gestureRecognizersBlockingPoliciesByType[factoryId] = @(gestureRecognizerBlockingPolicy);
 }
 
 - (void)beginFrameWithSize:(DlISize)frameSize {
@@ -504,15 +443,6 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
 
 - (void)cancelFrame {
   [self resetFrameState];
-}
-
-- (flutter::PostPrerollResult)postPrerollActionWithThreadMerger:
-    (const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger {
-  return flutter::PostPrerollResult::kSuccess;
-}
-
-- (void)endFrameWithResubmit:(BOOL)shouldResubmitFrame
-                threadMerger:(const fml::RefPtr<fml::RasterThreadMerger>&)rasterThreadMerger {
 }
 
 - (void)pushFilterToVisitedPlatformViews:(const std::shared_ptr<flutter::DlImageFilter>&)filter
@@ -684,10 +614,8 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
           [pendingClipRRects removeAllObjects];
         }
         visualEffectView.layer.cornerRadius = cornerRadius;
-        if (@available(iOS 13.0, *)) {
-          visualEffectView.layer.cornerCurve =
-              isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
-        }
+        visualEffectView.layer.cornerCurve =
+            isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
         visualEffectView.clipsToBounds = YES;
 
         PlatformViewFilter* filter = [[PlatformViewFilter alloc] initWithFrame:frameInClipView
@@ -845,19 +773,13 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
   std::vector<std::unique_ptr<flutter::SurfaceFrame>> surfaceFrames;
   surfaceFrames.reserve(self.compositionOrder.size());
   std::unordered_map<int64_t, DlRect> viewRects;
-  std::unordered_set<int64_t> viewsWithUnderlayPreserved;
 
   for (int64_t viewId : self.compositionOrder) {
-    const flutter::EmbeddedViewParams& params = self.currentCompositionParams[viewId];
-    viewRects[viewId] = params.finalBoundingRect();
-    if (HasNonRectClipForUnderlayCutout(params)) {
-      viewsWithUnderlayPreserved.insert(viewId);
-    }
+    viewRects[viewId] = self.currentCompositionParams[viewId].finalBoundingRect();
   }
 
   std::unordered_map<int64_t, DlRect> overlayLayers =
-      SliceViews(background_frame->Canvas(), self.compositionOrder, self.slices, viewRects,
-                 viewsWithUnderlayPreserved);
+      SliceViews(background_frame->Canvas(), self.compositionOrder, self.slices, viewRects);
 
   size_t requiredOverlayLayers = 0;
   for (int64_t viewId : self.compositionOrder) {
@@ -893,9 +815,6 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
     int restoreCount = overlayCanvas->GetSaveCount();
     overlayCanvas->Save();
     overlayCanvas->ClipRect(overlay->second);
-    if (viewsWithUnderlayPreserved.find(viewId) != viewsWithUnderlayPreserved.end()) {
-      ApplyNonRectClipToOverlayCanvas(overlayCanvas, self.currentCompositionParams[viewId]);
-    }
     overlayCanvas->Clear(flutter::DlColor::kTransparent());
     self.slices[viewId]->render_into(overlayCanvas);
     overlayCanvas->RestoreToCount(restoreCount);
@@ -1035,8 +954,10 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
 
 - (void)bringLayersIntoView:(const LayersMap&)layerMap
        withCompositionOrder:(const std::vector<int64_t>&)compositionOrder {
-  FML_DCHECK(self.flutterView);
   UIView* flutterView = self.flutterView;
+  if (flutterView == nil) {
+    return;
+  }
 
   _previousCompositionOrder.clear();
   NSMutableArray* desiredPlatformSubviews = [NSMutableArray array];
@@ -1181,15 +1102,6 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
 
 - (std::unordered_map<int64_t, std::unique_ptr<flutter::EmbedderViewSlice>>&)slices {
   return _slices;
-}
-
-- (std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*>&)factories {
-  return _factories;
-}
-
-- (std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>&)
-    gestureRecognizersBlockingPoliciesByType {
-  return _gestureRecognizersBlockingPoliciesByType;
 }
 
 - (std::unordered_map<int64_t, PlatformViewData>&)platformViews {

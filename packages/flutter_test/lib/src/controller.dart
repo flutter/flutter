@@ -2449,6 +2449,13 @@ abstract class WidgetController {
 
   /// Repeatedly drags `view` by `moveStep` until `finder` is visible.
   ///
+  /// The `moveStep` is the offset by which the virtual finger moves on the
+  /// virtual screen between drags. Following the standard touch-input
+  /// convention, a negative [Offset.dy] swipes up (revealing items below), a
+  /// positive [Offset.dy] swipes down (revealing items above), a positive
+  /// [Offset.dx] swipes right (revealing items to the left), and a negative
+  /// [Offset.dx] swipes left (revealing items to the right).
+  ///
   /// Between each drag, advances the clock by `duration`.
   ///
   /// Throws a [StateError] if `finder` is not found after `maxIteration`

@@ -54,10 +54,9 @@ TEST(MockWindow, OnImeCompositionCompose) {
   EXPECT_CALL(*text_input_manager, GetResultString())
       .WillRepeatedly(
           Return(std::optional<std::u16string>(std::u16string(u"`}"))));
-  EXPECT_CALL(*text_input_manager, GetComposingCursorPosition())
-      .WillRepeatedly(Return((int)0));
+  EXPECT_CALL(*text_input_manager, GetComposingCursorPosition()).Times(0);
 
-  EXPECT_CALL(window, OnComposeChange(std::u16string(u"nihao"), 0)).Times(1);
+  EXPECT_CALL(window, OnComposeChange(std::u16string(u"nihao"), 5)).Times(1);
   EXPECT_CALL(window, OnComposeChange(std::u16string(u"`}"), 0)).Times(0);
   EXPECT_CALL(window, OnComposeCommit()).Times(0);
   ON_CALL(window, OnImeComposition)
@@ -65,6 +64,27 @@ TEST(MockWindow, OnImeCompositionCompose) {
   EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
 
   // Send an IME_COMPOSITION event that contains just the composition string.
+  window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_COMPSTR);
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/140739.
+TEST(MockWindow, OnImeCompositionDefaultsKoreanCursorToCompositionEnd) {
+  auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
+  auto* text_input_manager = new MockTextInputManager();
+  std::unique_ptr<TextInputManager> text_input_manager_ptr(text_input_manager);
+  MockWindow window(std::move(windows_proc_table),
+                    std::move(text_input_manager_ptr));
+  EXPECT_CALL(*text_input_manager, GetComposingString())
+      .WillRepeatedly(
+          Return(std::optional<std::u16string>(std::u16string(u"다"))));
+  EXPECT_CALL(*text_input_manager, GetComposingCursorPosition()).Times(0);
+
+  EXPECT_CALL(window, OnComposeChange(std::u16string(u"다"), 1)).Times(1);
+  EXPECT_CALL(window, OnComposeCommit()).Times(0);
+  ON_CALL(window, OnImeComposition)
+      .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
+  EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
+
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0, GCS_COMPSTR);
 }
 
@@ -80,11 +100,10 @@ TEST(MockWindow, OnImeCompositionResult) {
   EXPECT_CALL(*text_input_manager, GetResultString())
       .WillRepeatedly(
           Return(std::optional<std::u16string>(std::u16string(u"`}"))));
-  EXPECT_CALL(*text_input_manager, GetComposingCursorPosition())
-      .WillRepeatedly(Return((int)0));
+  EXPECT_CALL(*text_input_manager, GetComposingCursorPosition()).Times(0);
 
   EXPECT_CALL(window, OnComposeChange(std::u16string(u"nihao"), 0)).Times(0);
-  EXPECT_CALL(window, OnComposeChange(std::u16string(u"`}"), 0)).Times(1);
+  EXPECT_CALL(window, OnComposeChange(std::u16string(u"`}"), 2)).Times(1);
   EXPECT_CALL(window, OnComposeCommit()).Times(1);
   ON_CALL(window, OnImeComposition)
       .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
@@ -114,13 +133,12 @@ TEST(MockWindow, OnImeCompositionResultAndCompose) {
   }
   {
     InSequence dummy;
-    EXPECT_CALL(window, OnComposeChange(std::u16string(u"今日"), 0)).Times(1);
+    EXPECT_CALL(window, OnComposeChange(std::u16string(u"今日"), 2)).Times(1);
     EXPECT_CALL(window, OnComposeCommit()).Times(1);
-    EXPECT_CALL(window, OnComposeChange(std::u16string(u"は"), 0)).Times(1);
+    EXPECT_CALL(window, OnComposeChange(std::u16string(u"は"), 1)).Times(1);
   }
 
-  EXPECT_CALL(*text_input_manager, GetComposingCursorPosition())
-      .WillRepeatedly(Return((int)0));
+  EXPECT_CALL(*text_input_manager, GetComposingCursorPosition()).Times(0);
 
   ON_CALL(window, OnImeComposition)
       .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
@@ -130,6 +148,50 @@ TEST(MockWindow, OnImeCompositionResultAndCompose) {
   // composition string.
   window.InjectWindowMessage(WM_IME_COMPOSITION, 0,
                              GCS_COMPSTR | GCS_RESULTSTR);
+}
+
+TEST(MockWindow, OnImeCompositionUsesCursorPositionWhenProvided) {
+  auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
+  auto* text_input_manager = new MockTextInputManager();
+  std::unique_ptr<TextInputManager> text_input_manager_ptr(text_input_manager);
+  MockWindow window(std::move(windows_proc_table),
+                    std::move(text_input_manager_ptr));
+  EXPECT_CALL(*text_input_manager, GetComposingString())
+      .WillRepeatedly(
+          Return(std::optional<std::u16string>(std::u16string(u"nihao"))));
+  EXPECT_CALL(*text_input_manager, GetComposingCursorPosition())
+      .WillOnce(Return(2));
+
+  EXPECT_CALL(window, OnComposeChange(std::u16string(u"nihao"), 2)).Times(1);
+  EXPECT_CALL(window, OnComposeCommit()).Times(0);
+  ON_CALL(window, OnImeComposition)
+      .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
+  EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
+
+  window.InjectWindowMessage(WM_IME_COMPOSITION, 0,
+                             GCS_COMPSTR | GCS_CURSORPOS);
+}
+
+TEST(MockWindow, OnImeCompositionFallsBackToTextEndForInvalidCursorPosition) {
+  auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
+  auto* text_input_manager = new MockTextInputManager();
+  std::unique_ptr<TextInputManager> text_input_manager_ptr(text_input_manager);
+  MockWindow window(std::move(windows_proc_table),
+                    std::move(text_input_manager_ptr));
+  EXPECT_CALL(*text_input_manager, GetComposingString())
+      .WillRepeatedly(
+          Return(std::optional<std::u16string>(std::u16string(u"nihao"))));
+  EXPECT_CALL(*text_input_manager, GetComposingCursorPosition())
+      .WillOnce(Return(-1));
+
+  EXPECT_CALL(window, OnComposeChange(std::u16string(u"nihao"), 5)).Times(1);
+  EXPECT_CALL(window, OnComposeCommit()).Times(0);
+  ON_CALL(window, OnImeComposition)
+      .WillByDefault(Invoke(&window, &MockWindow::CallOnImeComposition));
+  EXPECT_CALL(window, OnImeComposition(_, _, _)).Times(1);
+
+  window.InjectWindowMessage(WM_IME_COMPOSITION, 0,
+                             GCS_COMPSTR | GCS_CURSORPOS);
 }
 
 TEST(MockWindow, OnImeCompositionClearChange) {
@@ -165,8 +227,9 @@ TEST(MockWindow, MouseLeave) {
   const double mouse_x = 10.0;
   const double mouse_y = 20.0;
 
-  EXPECT_CALL(window, OnPointerMove(mouse_x, mouse_y,
-                                    kFlutterPointerDeviceKindMouse, 0, 0, 0, 0))
+  EXPECT_CALL(window,
+              OnPointerMove(mouse_x, mouse_y, kFlutterPointerDeviceKindMouse, 0,
+                            0, 0, 0, 0))
       .Times(1);
   EXPECT_CALL(window, OnPointerLeave(mouse_x, mouse_y,
                                      kFlutterPointerDeviceKindMouse, 0))

@@ -287,6 +287,17 @@ Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
   return Uri(path: '$fileName.framework/$fileName');
 }
 
+/// The install name stamped into the framework bundled at [frameworkUri], which
+/// is also the name it has to be loaded with at runtime.
+///
+/// `dlopen` recognizes a library it has already loaded by the name it is opened
+/// with, and only falls back to identifying the file on disk when that name
+/// matches no install name it knows. A rebuild replaces that file underneath a
+/// debug instance that is still running, so opening an asset by anything other
+/// than its install name maps a second copy of it into the process, and the two
+/// copies do not share the library's global state.
+String frameworkInstallName(Uri frameworkUri) => '@rpath/${frameworkUri.path}';
+
 Map<Architecture?, List<String>> parseOtoolArchitectureSections(String output) {
   // The output of `otool -D`, for example, looks like below. For each
   // architecture, there is a separate section.

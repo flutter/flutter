@@ -110,8 +110,23 @@ class AndroidDevices extends PollingDeviceDiscovery {
         !_processManager.canRun(_androidSdk.adbPath);
   }
 
-  // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
-  static final _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)(.*)');
+  // Parses the output of `adb devices -l`.
+  //
+  // The regex is structured as:
+  // 1. Group 1 (Serial): Greedily matched before the state. ADB formats long
+  //    listings as `%-22s %s`, so the width is a minimum: serials longer than
+  //    22 characters are followed by one space. Serials can also contain
+  //    whitespace, such as a wireless mDNS conflict suffix (`device (2)`).
+  // 2. Group 2 (State): Matches known ADB device states explicitly, including
+  //    "no permissions" (which contains a space). Explicitly listing states
+  //    lets the greedy serial capture retain state-like serial components.
+  // 3. Group 3 (Extra Info): Optional trailing details (e.g. key:value pairs
+  //    like "product:mokey model:mokey device:mokey transport_id:1" or "usb:123").
+  static final _kDeviceRegex = RegExp(
+    r'^(.*)\s+'
+    r'(device|offline|unauthorized|no permissions|bootloader|recovery|sideload|rescue|connecting|authorizing|host|unknown)'
+    r'(?:\s+(.*)|$)',
+  );
 
   /// Parse the given `adb devices` output in [text], and fill out the given list
   /// of devices and possible device issue diagnostics. Either argument can be null,
@@ -127,7 +142,8 @@ class AndroidDevices extends PollingDeviceDiscovery {
       return;
     }
 
-    for (final String line in text.trim().split('\n')) {
+    for (final String rawLine in text.trim().split('\n')) {
+      final String line = rawLine.trim();
       // Skip lines like: * daemon started successfully *
       if (line.startsWith('* daemon ')) {
         continue;
@@ -146,7 +162,9 @@ class AndroidDevices extends PollingDeviceDiscovery {
       if (_kDeviceRegex.hasMatch(line)) {
         final Match match = _kDeviceRegex.firstMatch(line)!;
 
-        final String deviceID = match[1]!;
+        // The greedy serial capture includes the optional padding from ADB's
+        // minimum-width serial field.
+        final String deviceID = match[1]!.trimRight();
         final String deviceState = match[2]!;
         String? rest = match[3];
 
@@ -174,6 +192,9 @@ class AndroidDevices extends PollingDeviceDiscovery {
             );
           case 'offline':
             diagnostics?.add('Device $deviceID is offline.');
+          case 'no permissions':
+            final udevMessage = _platform.isLinux ? '\nPlease check your udev rules.' : '';
+            diagnostics?.add('Device $deviceID has no permissions.$udevMessage');
           default:
             devices?.add(
               AndroidDevice(

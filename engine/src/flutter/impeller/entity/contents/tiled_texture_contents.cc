@@ -111,6 +111,9 @@ bool TiledTextureContents::IsOpaque(const Matrix& transform) const {
   if (color_filter_) {
     return false;
   }
+  if (!texture_) {
+    return false;
+  }
   return texture_->IsOpaque() && !AppliesAlphaForStrokeCoverage(transform);
 }
 
@@ -130,7 +133,6 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
   }
 
   VS::FrameInfo frame_info;
-  frame_info.texture_sampler_y_coord_scale = texture_->GetYCoordScale();
   frame_info.uv_transform =
       Rect::MakeSize(texture_size).GetNormalizingTransform() *
       GetInverseEffectTransform();
@@ -224,6 +226,9 @@ std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
     const SnapshotOptions& options) const {
+  if (!texture_) {
+    return std::nullopt;
+  }
   std::optional<Rect> geometry_coverage = GetGeometry()->GetCoverage({});
   if (GetInverseEffectTransform().IsIdentity() &&
       GetGeometry()->IsAxisAlignedRect() &&

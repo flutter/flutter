@@ -67,6 +67,12 @@ class FakeAndroidViewController implements AndroidViewController {
   /// Events that are dispatched.
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
 
+  /// Offsets that are set on the platform view, in the order they were set.
+  final List<Offset> offsets = <Offset>[];
+
+  /// Sizes that are set on the platform view, in the order they were set.
+  final List<Size> sizes = <Size>[];
+
   @override
   final int viewId;
 
@@ -80,6 +86,8 @@ class FakeAndroidViewController implements AndroidViewController {
 
   void clearTestingVariables() {
     dispatchedPointerEvents.clear();
+    offsets.clear();
+    sizes.clear();
     disposed = false;
     focusCleared = false;
   }
@@ -96,11 +104,14 @@ class FakeAndroidViewController implements AndroidViewController {
 
   @override
   Future<Size> setSize(Size size) {
+    sizes.add(size);
     return Future<Size>.value(size);
   }
 
   @override
-  Future<void> setOffset(Offset off) async {}
+  Future<void> setOffset(Offset off) async {
+    offsets.add(off);
+  }
 
   @override
   int get textureId => 0;

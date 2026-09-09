@@ -139,7 +139,6 @@ runner("dart_aot_runner_bin") {
   extra_deps = [
     "$dart_src/runtime:libdart_aotruntime",
     "$dart_src/runtime/platform:libdart_platform_aotruntime",
-    "embedder:dart_aot_snapshot_cc",
   ]
 }
 
@@ -153,7 +152,6 @@ runner("dart_aot_product_runner_bin") {
   extra_deps = [
     "$dart_src/runtime:libdart_aotruntime",
     "$dart_src/runtime/platform:libdart_platform_aotruntime",
-    "embedder:dart_aot_product_snapshot_cc",
   ]
 }
 

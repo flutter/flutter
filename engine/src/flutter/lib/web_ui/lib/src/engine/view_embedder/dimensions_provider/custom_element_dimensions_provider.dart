@@ -56,6 +56,9 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
     _hostElementResizeObserver?.observe(_hostElement);
   }
 
+  /// Limit size of canvas to render into. Anything larger than 16384 breaks rendering
+  static const double _maxElementSize = 16384.0;
+
   // The host element that will be used to retrieve (and observe) app size measurements.
   final DomElement _hostElement;
 
@@ -84,10 +87,12 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
   @override
   ui.Size computePhysicalSize() {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
-    return ui.Size(
-      _hostElement.clientWidth * devicePixelRatio,
-      _hostElement.clientHeight * devicePixelRatio,
+    final double width = (_hostElement.clientWidth * devicePixelRatio).clamp(0.0, _maxElementSize);
+    final double height = (_hostElement.clientHeight * devicePixelRatio).clamp(
+      0.0,
+      _maxElementSize,
     );
+    return ui.Size(width, height);
   }
 
   @override

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert' show LineSplitter, utf8;
+import 'dart:convert' show LineSplitter, Utf8Decoder;
 import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
@@ -111,7 +111,7 @@ class Command {
     }
     final Stream<String> lines = file
         .openRead()
-        .transform(utf8.decoder)
+        .transform(const Utf8Decoder(allowMalformed: true))
         .transform(const LineSplitter());
     return lintActionFromContents(lines);
   }

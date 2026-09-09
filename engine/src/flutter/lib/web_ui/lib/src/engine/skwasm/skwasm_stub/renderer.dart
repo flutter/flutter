@@ -3,38 +3,63 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_interop';
-import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 class SkwasmRenderer extends Renderer {
+  @override
   bool get isMultiThreaded => false;
+
+  @override
+  bool get supportsResizingAnimatedImages =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
 
   bool get isWimp => false;
 
   @override
-  DisposablePathConstructors get pathConstructors =>
+  BackendPathConstructors get pathConstructors =>
       throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
-  ui.ImageFilter composeImageFilters({
-    required ui.ImageFilter outer,
-    required ui.ImageFilter inner,
-  }) {
+  BackendColorFilter createColorFilter(EngineColorFilter filter) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
   @override
-  ui.ImageFilter createBlurImageFilter({
-    double sigmaX = 0.0,
-    double sigmaY = 0.0,
-    ui.TileMode? tileMode,
-    ui.Rect? bounds,
-  }) {
+  BackendImageFilter createBlurImageFilter({
+    required double sigmaX,
+    required double sigmaY,
+    required ui.TileMode tileMode,
+  }) => throw UnimplementedError('Skwasm not implemented on this platform.');
+
+  @override
+  BackendImageFilter createDilateImageFilter({required double radiusX, required double radiusY}) =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
+
+  @override
+  BackendImageFilter createErodeImageFilter({required double radiusX, required double radiusY}) =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
+
+  @override
+  BackendImageFilter createMatrixImageFilter({
+    required Float64List matrix,
+    required ui.FilterQuality filterQuality,
+  }) => throw UnimplementedError('Skwasm not implemented on this platform.');
+
+  @override
+  BackendImageFilter createComposeImageFilter({
+    required BackendImageFilter outer,
+    required BackendImageFilter inner,
+  }) => throw UnimplementedError('Skwasm not implemented on this platform.');
+
+  @override
+  BackendImageFilter createColorFilterImageFilter({required BackendColorFilter filter}) =>
+      throw UnimplementedError('Skwasm not implemented on this platform.');
+
+  @override
+  BackendMaskFilter createMaskFilter(EngineMaskFilter filter) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
@@ -44,57 +69,67 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.Gradient createConicalGradient(
-    ui.Offset focal,
-    double focalRadius,
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix,
-  ]) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0}) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0}) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.ImageShader createImageShader(
-    ui.Image image,
-    ui.TileMode tmx,
-    ui.TileMode tmy,
-    Float64List matrix4,
-    ui.FilterQuality? filterQuality,
+  BackendGradient createGradientLinear(
+    Float32List endPoints,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
   ) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
   @override
-  ui.Gradient createLinearGradient(
-    ui.Offset from,
-    ui.Offset to,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
+  BackendGradient createGradientRadial(
+    double centerX,
+    double centerY,
+    double radius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
     Float32List? matrix4,
-  ]) {
+  ) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
   @override
-  ui.ImageFilter createMatrixImageFilter(
-    Float64List matrix4, {
-    ui.FilterQuality filterQuality = ui.FilterQuality.low,
-  }) {
+  BackendGradient createGradientConical(
+    double startX,
+    double startY,
+    double startRadius,
+    double endX,
+    double endY,
+    double endRadius,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    Float32List? matrix4,
+  ) {
+    throw UnimplementedError('Skwasm not implemented on this platform.');
+  }
+
+  @override
+  BackendGradient createGradientSweep(
+    double centerX,
+    double centerY,
+    Uint32List colors,
+    Float32List? colorStops,
+    ui.TileMode tileMode,
+    double startAngle,
+    double endAngle,
+    Float32List? matrix4,
+  ) {
+    throw UnimplementedError('Skwasm not implemented on this platform.');
+  }
+
+  @override
+  BackendImageShader createImageShader(
+    EngineImage image,
+    ui.TileMode tmx,
+    ui.TileMode tmy,
+    Float64List? matrix4,
+    ui.FilterQuality filterQuality,
+  ) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
@@ -137,18 +172,6 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.Gradient createRadialGradient(
-    ui.Offset center,
-    double radius,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    Float32List? matrix4,
-  ]) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
   ui.SceneBuilder createSceneBuilder() {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
@@ -165,19 +188,6 @@ class SkwasmRenderer extends Renderer {
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
   }) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.Gradient createSweepGradient(
-    ui.Offset center,
-    List<ui.Color> colors, [
-    List<double>? colorStops,
-    ui.TileMode tileMode = ui.TileMode.clamp,
-    double startAngle = 0.0,
-    double endAngle = math.pi * 2,
-    Float32List? matrix4,
-  ]) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
@@ -209,18 +219,7 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  ui.Vertices createVertices(
-    ui.VertexMode mode,
-    List<ui.Offset> positions, {
-    List<ui.Offset>? textureCoordinates,
-    List<ui.Color>? colors,
-    List<int>? indices,
-  }) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.Vertices createVerticesRaw(
+  BackendVertices createVertices(
     ui.VertexMode mode,
     Float32List positions, {
     Float32List? textureCoordinates,
@@ -231,16 +230,12 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
-  void decodeImageFromPixels(
-    Uint8List pixels,
-    int width,
-    int height,
-    ui.PixelFormat format,
-    ui.ImageDecoderCallback callback, {
+  FutureOr<BackendImage> decodeBackendImageFromPixels(
+    Uint8List pixels, {
+    required int width,
+    required int height,
+    required ui.PixelFormat format,
     int? rowBytes,
-    int? targetWidth,
-    int? targetHeight,
-    bool allowUpscaling = true,
   }) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
@@ -250,20 +245,12 @@ class SkwasmRenderer extends Renderer {
       throw UnimplementedError('Skwasm not implemented on this platform.');
 
   @override
-  Future<ui.Codec> instantiateImageCodec(
-    Uint8List list, {
-    int? targetWidth,
-    int? targetHeight,
-    bool allowUpscaling = true,
-  }) {
+  BackendAnimatedImage createAnimatedImage(Uint8List bytes, {int? targetWidth, int? targetHeight}) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
   @override
-  Future<ui.Codec> instantiateImageCodecFromUrl(
-    Uri uri, {
-    ui_web.ImageCodecChunkCallback? chunkCallback,
-  }) {
+  BackendImage createImageFromImageSource(ImageSource source) {
     throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 
@@ -296,21 +283,6 @@ class SkwasmRenderer extends Renderer {
     required double baseline,
     required int lineNumber,
   }) => throw UnimplementedError('Skwasm not implemented on this platform.');
-
-  @override
-  ui.Image createImageFromImageBitmap(DomImageBitmap imageSource) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
-
-  @override
-  ui.Image createImageFromTextureSource(
-    JSAny object, {
-    required int width,
-    required int height,
-    required bool transferOwnership,
-  }) {
-    throw UnimplementedError('Skwasm not implemented on this platform.');
-  }
 
   @override
   void dumpDebugInfo() {

@@ -68,6 +68,8 @@ class MockableJNIEnv : public JNIEnv {
     jni_.NewGlobalRef = WrapNewGlobalRef;
     jni_.NewLocalRef = WrapNewLocalRef;
     jni_.RegisterNatives = WrapRegisterNatives;
+    jni_.GetArrayLength = WrapGetArrayLength;
+    jni_.GetIntArrayRegion = WrapGetIntArrayRegion;
   }
 
   virtual jobject CallObjectMethodV(jobject, jmethodID, va_list) = 0;
@@ -86,6 +88,8 @@ class MockableJNIEnv : public JNIEnv {
   virtual jobject NewGlobalRef(jobject) = 0;
   virtual jobject NewLocalRef(jobject) = 0;
   virtual jint RegisterNatives(jclass, const JNINativeMethod*, jint) = 0;
+  virtual jsize GetArrayLength(jarray) = 0;
+  virtual void GetIntArrayRegion(jintArray, jsize, jsize, jint*) = 0;
 
  private:
   static jobject WrapCallObjectMethod(JNIEnv* env,
@@ -168,6 +172,17 @@ class MockableJNIEnv : public JNIEnv {
     return static_cast<MockableJNIEnv*>(env)->RegisterNatives(clazz, methods,
                                                               nMethods);
   }
+  static jsize WrapGetArrayLength(JNIEnv* env, jarray array) {
+    return static_cast<MockableJNIEnv*>(env)->GetArrayLength(array);
+  }
+  static void WrapGetIntArrayRegion(JNIEnv* env,
+                                    jintArray array,
+                                    jsize start,
+                                    jsize len,
+                                    jint* buf) {
+    static_cast<MockableJNIEnv*>(env)->GetIntArrayRegion(array, start, len,
+                                                         buf);
+  }
 
   JNINativeInterface jni_ = {};
 };
@@ -207,6 +222,11 @@ class MockJNIEnv : public MockableJNIEnv {
   MOCK_METHOD(jint,
               RegisterNatives,
               (jclass, const JNINativeMethod*, jint),
+              (override));
+  MOCK_METHOD(jsize, GetArrayLength, (jarray), (override));
+  MOCK_METHOD(void,
+              GetIntArrayRegion,
+              (jintArray, jsize, jsize, jint*),
               (override));
 };
 

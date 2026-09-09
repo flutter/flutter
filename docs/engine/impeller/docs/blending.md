@@ -67,8 +67,8 @@ render.
 
 Advanced blends are blends that Impeller can't always implement using the
 built-in raster pipeline blend configuration offered by graphics backends.
-Instead, they're implemented using special blend shaders that bind the backdrop
-texture in a separate render pass.
+Instead, they're implemented using special blend shaders that access the
+backdrop color.
 
 Note that all of the advanced blends are _color blends_ rather than _alpha
 composites_, and they can technically be combined with any _pipeline blend_ with
@@ -76,13 +76,25 @@ predictable compositing behavior. However, in order to keep in line with
 Flutter's (and Skia's) current behavior, Impeller uses _Source Over_ compositing
 when rendering all advanced blends.
 
-Advanced blends are expensive when compared to pipeline blends (which are
-essentially free) for the following reasons:
-* For each advanced blend, the current render pass ends because the backdrop
-  texture needs to be sampled.
-* A potentially large texture (the render pass backdrop) is sampled. Although in
-  practice, just the coverage rectangle of the source being blended is actually
-  used.
+Advanced blends are more expensive than pipeline blends (which are essentially
+free). Their cost depends on whether the device supports
+[framebuffer fetch](https://registry.khronos.org/OpenGL/extensions/EXT/EXT_shader_framebuffer_fetch.txt).
+
+**When framebuffer fetch is supported** (all Metal devices with Apple A8+ GPU,
+and most Vulkan devices; not available on the iOS simulator or older Adreno/PowerVR GPUs):
+
+Impeller uses a framebuffer fetch shader that reads the backdrop color directly
+from the current framebuffer attachment without ending the render pass. The
+source is still rendered to a snapshot, but no backdrop texture copy or
+intermediary blit is required. This makes advanced blends significantly cheaper
+than the legacy path, though still more expensive than a pure pipeline blend.
+
+**When framebuffer fetch is not supported** (e.g. OpenGL ES devices, iOS
+simulator, Adreno 630 and below, PowerVR):
+
+* The current render pass ends so the backdrop texture can be sampled.
+* A potentially large backdrop texture is sampled (though in practice only the
+  coverage rectangle of the source is used).
 * An intermediary texture is allocated for the blend output before being blitted
   back to the render pass texture.
 

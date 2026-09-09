@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
-import 'widgets_app_tester.dart';
 
 Iterable<SingleActivator> allModifierVariants(LogicalKeyboardKey trigger) {
   const Iterable<bool> trueFalse = <bool>[false, true];

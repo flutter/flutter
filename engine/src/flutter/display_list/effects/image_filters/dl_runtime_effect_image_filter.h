@@ -17,20 +17,24 @@ class DlRuntimeEffectImageFilter final : public DlImageFilter {
   explicit DlRuntimeEffectImageFilter(
       sk_sp<DlRuntimeEffect> runtime_effect,
       std::vector<std::shared_ptr<DlColorSource>> samplers,
-      std::shared_ptr<std::vector<uint8_t>> uniform_data)
+      std::shared_ptr<std::vector<uint8_t>> uniform_data,
+      DlImageSampling input_sampling = DlImageSampling::kNearestNeighbor)
       : runtime_effect_(std::move(runtime_effect)),
         samplers_(std::move(samplers)),
-        uniform_data_(std::move(uniform_data)) {}
+        uniform_data_(std::move(uniform_data)),
+        input_sampling_(input_sampling) {}
 
   std::shared_ptr<DlImageFilter> shared() const override {
     return std::make_shared<DlRuntimeEffectImageFilter>(
-        this->runtime_effect_, this->samplers_, this->uniform_data_);
+        this->runtime_effect_, this->samplers_, this->uniform_data_,
+        this->input_sampling_);
   }
 
   static std::shared_ptr<DlImageFilter> Make(
       sk_sp<DlRuntimeEffect> runtime_effect,
       std::vector<std::shared_ptr<DlColorSource>> samplers,
-      std::shared_ptr<std::vector<uint8_t>> uniform_data);
+      std::shared_ptr<std::vector<uint8_t>> uniform_data,
+      DlImageSampling input_sampling = DlImageSampling::kNearestNeighbor);
 
   DlImageFilterType type() const override {
     return DlImageFilterType::kRuntimeEffect;
@@ -66,6 +70,8 @@ class DlRuntimeEffectImageFilter final : public DlImageFilter {
     return uniform_data_;
   }
 
+  DlImageSampling input_sampling() const { return input_sampling_; }
+
  protected:
   bool equals_(const DlImageFilter& other) const override;
 
@@ -73,6 +79,7 @@ class DlRuntimeEffectImageFilter final : public DlImageFilter {
   sk_sp<DlRuntimeEffect> runtime_effect_;
   std::vector<std::shared_ptr<DlColorSource>> samplers_;
   std::shared_ptr<std::vector<uint8_t>> uniform_data_;
+  DlImageSampling input_sampling_;
 };
 
 }  // namespace flutter

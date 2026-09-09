@@ -11,6 +11,7 @@
 #include <string_view>
 
 #include "flutter/lib/gpu/shader.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/vertex_descriptor.h"
@@ -43,16 +44,46 @@ RenderPipeline::RenderPipeline(
       fragment_shader_->GetDescriptorSetLayouts().size());
 }
 
-void RenderPipeline::BindToPipelineDescriptor(
+bool RenderPipeline::BindToPipelineDescriptor(
     impeller::ShaderLibrary& library,
     impeller::PipelineDescriptor& desc) {
-  desc.SetVertexDescriptor(vertex_descriptor_);
+  // A failed lookup previously flowed into `AddStageEntrypoint`, which
+  // dereferences its argument, crashing with no signal about which shader
+  // was at fault.
+  auto vertex_function = vertex_shader_->GetFunctionFromLibrary(library);
+  if (!vertex_function) {
+    VALIDATION_LOG << "Unable to resolve the vertex shader function '"
+                   << vertex_shader_->GetEntrypoint()
+                   << "' from the shader library.";
+    return false;
+  }
+  auto fragment_function = fragment_shader_->GetFunctionFromLibrary(library);
+  if (!fragment_function) {
+    VALIDATION_LOG << "Unable to resolve the fragment shader function '"
+                   << fragment_shader_->GetEntrypoint()
+                   << "' from the shader library.";
+    return false;
+  }
 
-  desc.AddStageEntrypoint(vertex_shader_->GetFunctionFromLibrary(library));
-  desc.AddStageEntrypoint(fragment_shader_->GetFunctionFromLibrary(library));
+  desc.SetVertexDescriptor(vertex_descriptor_);
+  desc.AddStageEntrypoint(std::move(vertex_function));
+  desc.AddStageEntrypoint(std::move(fragment_function));
+  return true;
 }
 
 RenderPipeline::~RenderPipeline() = default;
+
+const char* ValidateRenderPipelineShaderStages(const Shader& vertex_shader,
+                                               const Shader& fragment_shader) {
+  if (vertex_shader.GetShaderStage() != impeller::ShaderStage::kVertex) {
+    return "The shader given for the vertex stage is not a vertex shader.";
+  }
+  if (fragment_shader.GetShaderStage() != impeller::ShaderStage::kFragment) {
+    return "The shader given for the fragment stage is not a fragment "
+           "shader.";
+  }
+  return nullptr;
+}
 
 namespace {
 
@@ -83,9 +114,10 @@ constexpr std::array<VertexFormatInfo, 12> kVertexFormatTable = {{
 }};
 
 // Width of each "row" in the packed `bufferLayouts` ByteData passed from
-// Dart: `[strideInBytes, attributeCount]`. Each buffer's binding slot is
-// implicit in its position in the array (the first buffer is slot 0, etc.).
-constexpr size_t kBufferLayoutInts = 2;
+// Dart: `[strideInBytes, attributeCount, stepMode]`. Each buffer's binding
+// slot is implicit in its position in the array (the first buffer is slot 0,
+// etc.).
+constexpr size_t kBufferLayoutInts = 3;
 
 // Width of each "row" in the packed `attributes` ByteData passed from Dart:
 // `[offsetInBytes, formatIndex, nameByteLength]`. Attribute rows are
@@ -128,10 +160,17 @@ BuildCustomVertexDescriptor(const flutter::gpu::Shader& vertex_shader,
     const int32_t stride = buffer_layouts[buffer_index * kBufferLayoutInts + 0];
     const int32_t attr_count_in_buffer =
         buffer_layouts[buffer_index * kBufferLayoutInts + 1];
+    const int32_t step_mode =
+        buffer_layouts[buffer_index * kBufferLayoutInts + 2];
     if (stride <= 0) {
       return absl::InvalidArgumentError(
           absl::StrCat("VertexBuffer.strideInBytes must be positive (got ",
                        stride, ") on buffer at index ", buffer_index, "."));
+    }
+    if (step_mode < 0 || step_mode > 1) {
+      return absl::InvalidArgumentError(
+          absl::StrCat("VertexBuffer.stepMode is out of range (got ", step_mode,
+                       ") on buffer at index ", buffer_index, "."));
     }
     if (attr_count_in_buffer < 0 ||
         attr_cursor + static_cast<size_t>(attr_count_in_buffer) >
@@ -140,7 +179,10 @@ BuildCustomVertexDescriptor(const flutter::gpu::Shader& vertex_shader,
           "Internal error: attribute count overruns the packed attributes "
           "blob.");
     }
-    stage_layouts.push_back({static_cast<size_t>(stride), buffer_index});
+    stage_layouts.push_back({static_cast<size_t>(stride), buffer_index,
+                             step_mode == 0
+                                 ? impeller::VertexInputRate::kVertex
+                                 : impeller::VertexInputRate::kInstance});
 
     // Track each attribute's byte range within this buffer so we can
     // detect overlaps after building them all.
@@ -229,13 +271,12 @@ BuildCustomVertexDescriptor(const flutter::gpu::Shader& vertex_shader,
             "shader."));
       }
       // Match the shader's scalar type class (float vs signed int vs
-      // unsigned int). Mirroring WebGPU, Vulkan, and Metal, component-count
-      // mismatches are NOT errors: the shader receives default substitution
-      // (missing components default to (0, 0, 0, 1)) when the buffer
-      // supplies fewer components than declared, and reads only the leading
-      // components when the buffer supplies more. The shipped enum only
-      // contains 32-bit formats, so checking `type` alone is sufficient
-      // until 8/16-bit formats are added.
+      // unsigned int). Component-count mismatches are NOT errors: the shader
+      // receives default substitution (missing components default to
+      // (0, 0, 0, 1)) when the buffer supplies fewer components than
+      // declared, and reads only the leading components when the buffer
+      // supplies more. The shipped enum only contains 32-bit formats, so
+      // checking `type` alone is sufficient until 8/16-bit formats are added.
       // TODO(https://github.com/flutter/flutter/issues/186309): Add
       // normalized, packed, half-float, BGRA-swizzled, and 64-bit vertex
       // attribute formats; the format check will need to also verify
@@ -287,6 +328,14 @@ Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
     Dart_Handle buffer_layouts_handle,
     Dart_Handle attributes_handle,
     Dart_Handle attribute_names_handle) {
+  // Swapped or mismatched stages would otherwise only fail at first draw,
+  // deep inside backend pipeline compilation.
+  if (const char* stage_error =
+          flutter::gpu::ValidateRenderPipelineShaderStages(*vertex_shader,
+                                                           *fragment_shader)) {
+    return tonic::ToDart(stage_error);
+  }
+
   // Lazily register the shaders synchronously if they haven't been already.
   vertex_shader->RegisterSync(*gpu_context);
   fragment_shader->RegisterSync(*gpu_context);

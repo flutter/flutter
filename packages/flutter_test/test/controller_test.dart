@@ -579,7 +579,13 @@ void main() {
                         ListTile(title: Text('Item a-$i')),
                   ),
                 ),
-                const Divider(thickness: 5),
+                const Padding(
+                  padding: EdgeInsets.all(4),
+                  child: ColoredBox(
+                    color: Color(0xFF000000),
+                    child: SizedBox(height: 5, width: double.infinity),
+                  ),
+                ),
                 Expanded(
                   child: ListView.builder(
                     key: const Key('listView-b'),

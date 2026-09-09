@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'editable_text_tester.dart';
 import 'list_tile_tester.dart';
 import 'multi_view_testing.dart';
-import 'widgets_app_tester.dart';
 
 // Matches the Material kMinInteractiveDimension (48.0).
 const double _kMinInteractiveDimension = 48.0;

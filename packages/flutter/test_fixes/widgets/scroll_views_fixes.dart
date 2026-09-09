@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 void main() {
   // Runtime variable (should NOT be migrated)
@@ -163,7 +163,7 @@ void main() {
   listView = ListView.separated(
     cacheExtent: 200.0,
     itemBuilder: (BuildContext context, int index) => const Text(''),
-    separatorBuilder: (BuildContext context, int index) => const Divider(),
+    separatorBuilder: (BuildContext context, int index) => const SizedBox(),
     itemCount: 10,
   );
 

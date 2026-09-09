@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+
 import '../base/platform.dart';
 import '../doctor_validator.dart';
 import 'chrome.dart';
@@ -58,21 +60,4 @@ class ChromeValidator extends ChromiumValidator {
 
   @override
   String get _name => 'Chrome';
-}
-
-/// A validator that checks whether Edge is installed and can run.
-class EdgeValidator extends ChromiumValidator {
-  EdgeValidator({required Platform platform, required ChromiumLauncher chromiumLauncher})
-    : _platform = platform,
-      _chromiumLauncher = chromiumLauncher,
-      super('Edge - develop for the web');
-
-  @override
-  final Platform _platform;
-
-  @override
-  final ChromiumLauncher _chromiumLauncher;
-
-  @override
-  String get _name => 'Edge';
 }

@@ -148,9 +148,7 @@ Future<io.WebSocket> _defaultOpenChannel(
     attempts += 1;
     try {
       socket = await constructor(url, compression: compression, logger: logger);
-    } on io.WebSocketException catch (e) {
-      await handleError(e);
-    } on io.SocketException catch (e) {
+    } on io.IOException catch (e) {
       await handleError(e);
     }
   }
@@ -700,6 +698,24 @@ class FlutterVmService {
     );
   }
 
+  /// Reload the Flutter GPU shader library compiled from the shader bundle at
+  /// [assetPath].
+  ///
+  /// Invokes `ext.ui.gpu.reinitializeShaderLibrary`, which the engine registers
+  /// lazily on the first `ShaderLibrary.fromAsset` in debug mode and no-ops if
+  /// no library is registered at [assetPath]. Returns null when the extension is
+  /// not registered (no Flutter GPU shader library has been loaded yet).
+  Future<Map<String, Object?>?> flutterReinitializeShaderLibrary(
+    String assetPath, {
+    required String isolateId,
+  }) {
+    return invokeFlutterExtensionRpcRaw(
+      'ext.ui.gpu.reinitializeShaderLibrary',
+      isolateId: isolateId,
+      args: <String, Object?>{'assetKey': assetPath},
+    );
+  }
+
   /// Exit the application by calling [exit] from `dart:io`.
   ///
   /// This method is only supported by certain embedders. This is
@@ -827,11 +843,20 @@ class FlutterVmService {
   /// Tell the provided flutter view that the font manifest has been updated
   /// and asset fonts should be reloaded.
   Future<void> reloadAssetFonts({required String isolateId, required String viewId}) async {
-    await callMethodWrapper(
-      kReloadAssetFonts,
-      isolateId: isolateId,
-      args: <String, Object?>{'viewId': viewId},
-    );
+    try {
+      await callMethodWrapper(
+        kReloadAssetFonts,
+        isolateId: isolateId,
+        args: <String, Object?>{'viewId': viewId},
+      );
+    } on vm_service.RPCError catch (e) {
+      if (e.code == vm_service.RPCErrorKind.kMethodNotFound.code) {
+        // Some platforms or embedders (like web) may not implement this VM
+        // service protocol method. Just ignore the error and return.
+        return;
+      }
+      rethrow;
+    }
   }
 
   /// Waits for a signal from the VM service that [extensionName] is registered.

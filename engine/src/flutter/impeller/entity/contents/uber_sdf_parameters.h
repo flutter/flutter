@@ -7,10 +7,13 @@
 
 #include <optional>
 
+#include "impeller/core/texture.h"
+#include "impeller/entity/entity.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/round_rect.h"
+#include "impeller/geometry/round_superellipse.h"
 #include "impeller/geometry/stroke_parameters.h"
 #include "impeller/geometry/vector.h"
 
@@ -28,7 +31,32 @@ struct UberSDFParameters {
     kRect,
     kOval,
     kRoundedRect,
-    kRoundedSuperellipse,
+    kRoundedSuperellipseSymmetric,
+  };
+
+  /// The gradient properties applied to the shape.
+  struct GradientParameters {
+    enum class Type {
+      kLinear,
+      kRadial,
+    };
+
+    /// The type of gradient.
+    Type type;
+
+    /// Gradient start point (for linear gradients) or center (for radial
+    /// gradients).
+    Point start;
+
+    /// Gradient end point (for linear gradients) or `(radius, 0)` (for radial
+    /// gradients).
+    Point end;
+
+    /// Tile mode for the gradient.
+    Entity::TileMode tile_mode = Entity::TileMode::kClamp;
+
+    /// Texture for gradient ramp.
+    std::shared_ptr<Texture> texture;
   };
 
   /// Creates UberSDFParameters for a rectangle.
@@ -54,18 +82,12 @@ struct UberSDFParameters {
       const RoundingRadii& radii,
       std::optional<StrokeParameters> stroke);
 
-  /// Creates UberSDFParameters for a symmetric round superellipse.
-  static UberSDFParameters MakeRoundedSuperellipse(
+  /// Creates UberSDFParameters for a rounded superellipse with
+  /// uniform circular corner radii. Returns std::nullopt if given an
+  /// incompatible rounded superellipse.
+  static std::optional<UberSDFParameters> MakeRoundedSuperellipse(
       Color color,
-      Rect bounds,
-      Point superellipse_degree,
-      Point superellipse_a,
-      RoundingRadii radii,
-      Point corner_angle_span,
-      Point corner_circle_center_top,
-      Point corner_circle_center_right,
-      Scalar superellipse_c,
-      Point superellipse_scale,
+      const RoundSuperellipse& round_superellipse,
       std::optional<StrokeParameters> stroke);
 
   /// The type of shape to render.
@@ -73,6 +95,9 @@ struct UberSDFParameters {
 
   /// The color used for filling or stroking the shape.
   Color color;
+
+  /// Gradient properties. Populated when using a gradient color source.
+  std::optional<GradientParameters> gradient;
 
   /// The center point of the shape in local coordinates.
   Point center;
@@ -85,32 +110,23 @@ struct UberSDFParameters {
   /// The stroke parameters. If std::nullopt, the shape is filled.
   std::optional<StrokeParameters> stroke;
 
-  /// The corner radii for a rounded shapes.
-  ///
-  /// For RoundSuperellipse, the 'width' component holds the top-octant radius
-  /// and the 'height' component holds the right-octant radius.
-  RoundingRadii radii;
-
-  /// The degrees of the top (.x) and right (.y) octants of a RoundSuperellipse.
+  /// The degree (n) of the superellipse curve for the top and right octants.
   Point superellipse_degree;
 
-  /// The semi-axes of the top (.x) and right (.y) superellipse segments.
-  Point superellipse_a;
+  /// The angular span of the circular cap for the top and right octants.
+  Point angle_span;
 
-  /// The spans of the top (.x) and right (.y) circular arcs.
-  Point corner_angle_span;
+  /// The circular cap center for the top octant of each
+  /// quadrant.
+  Point circle_center_top;
 
-  /// The center of the top circular arc in a RoundSuperellipse.
-  Point corner_circle_center_top;
+  /// The circular cap center for the right octant of each
+  /// quadrant.
+  Point circle_center_right;
 
-  /// The center of the right circular arc in a RoundSuperellipse.
-  Point corner_circle_center_right;
-
-  /// The offset of the octants in a RoundSuperellipse.
-  Scalar superellipse_c;
-
-  /// The scale of the superellipse.
-  Point superellipse_scale;
+  /// Rounding radii for standard rounded rects and corner radii for circular
+  /// caps of superellipses for top and right octants.
+  Vector4 radii;
 };
 
 }  // namespace impeller

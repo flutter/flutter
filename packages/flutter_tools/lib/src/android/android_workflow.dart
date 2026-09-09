@@ -4,12 +4,15 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
@@ -30,6 +33,10 @@ enum LicensesAccepted { none, some, all, unknown }
 final licenseCounts = RegExp(r'(\d+) of (\d+) SDK package licenses? not accepted.');
 final licenseNotAccepted = RegExp(r'licenses? not accepted', caseSensitive: false);
 final licenseAccepted = RegExp(r'All SDK package licenses accepted.');
+final licensesNoLongerNeeded = RegExp(
+  r'--licenses option is no longer needed',
+  caseSensitive: false,
+);
 
 class AndroidWorkflow implements Workflow {
   AndroidWorkflow({required AndroidSdk? androidSdk, required FeatureFlags featureFlags})
@@ -111,12 +118,14 @@ class AndroidValidator extends DoctorValidator {
     required Platform platform,
     required UserMessages userMessages,
     required ProcessManager processManager,
+    required OperatingSystemUtils osUtils,
   }) : _java = java,
        _androidSdk = androidSdk,
        _logger = logger,
        _platform = platform,
        _userMessages = userMessages,
        _processManager = processManager,
+       _osUtils = osUtils,
        super('Android toolchain - develop for Android devices');
 
   final Java? _java;
@@ -125,6 +134,7 @@ class AndroidValidator extends DoctorValidator {
   final Platform _platform;
   final UserMessages _userMessages;
   final ProcessManager _processManager;
+  final OperatingSystemUtils _osUtils;
 
   @override
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
@@ -295,6 +305,37 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
+    _task = 'Checking for multiple ADB binaries';
+    final List<File> adbCandidates = _osUtils.whichAll('adb');
+    final String? sdkAdbPath = androidSdk.adbPath;
+    final uniqueAdbPaths = <String>{};
+
+    void addAdbPath(String path, FileSystem fs) {
+      try {
+        uniqueAdbPaths.add(fs.file(path).resolveSymbolicLinksSync());
+      } on Exception catch (_) {
+        uniqueAdbPaths.add(path);
+      }
+    }
+
+    if (sdkAdbPath != null) {
+      addAdbPath(sdkAdbPath, androidSdk.directory.fileSystem);
+    }
+    for (final adbFile in adbCandidates) {
+      addAdbPath(adbFile.path, adbFile.fileSystem);
+    }
+
+    if (uniqueAdbPaths.length > 1) {
+      final warningMessage = StringBuffer(
+        'Multiple adb binaries found. This can cause conflicts '
+        'and device detection issues:\n',
+      );
+      for (final adbPath in uniqueAdbPaths) {
+        warningMessage.write('  - $adbPath\n');
+      }
+      messages.add(ValidationMessage.hint(warningMessage.toString().trim()));
+    }
+
     _task = 'Finding Java binary';
 
     // Check JDK version.
@@ -409,6 +450,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
   Future<LicensesAccepted> get licensesAccepted async {
     LicensesAccepted? status;
+    var sawNewCliLicensesMessage = false;
 
     void handleLine(String line) {
       if (licenseCounts.hasMatch(line)) {
@@ -425,6 +467,8 @@ class AndroidLicenseValidator extends DoctorValidator {
         status = LicensesAccepted.none;
       } else if (licenseAccepted.hasMatch(line)) {
         status ??= LicensesAccepted.all;
+      } else if (licensesNoLongerNeeded.hasMatch(line)) {
+        sawNewCliLicensesMessage = true;
       }
     }
 
@@ -451,9 +495,33 @@ class AndroidLicenseValidator extends DoctorValidator {
           .listen(handleLine)
           .asFuture<void>();
       await Future.wait<void>(<Future<void>>[output, errors]);
-      return status ?? LicensesAccepted.unknown;
+      if (status != null) {
+        return status!;
+      }
+      if (sawNewCliLicensesMessage) {
+        return _licensesAcceptedFromDisk();
+      }
+      return LicensesAccepted.unknown;
     } on IOException catch (e) {
       _logger.printTrace('Failed to run Android sdk manager: $e');
+      return LicensesAccepted.unknown;
+    }
+  }
+
+  /// Fallback license check for Android cmdline-tools versions where
+  /// `sdkmanager --licenses` no longer prints a parseable status
+  /// (see https://github.com/flutter/flutter/issues/191487).
+  LicensesAccepted _licensesAcceptedFromDisk() {
+    if (_androidSdk == null || !_androidSdk.licensesAvailable) {
+      return LicensesAccepted.none;
+    }
+    final Directory licensesDir = _androidSdk.directory.childDirectory('licenses');
+    try {
+      final bool hasAcceptedLicense = licensesDir.listSync().whereType<File>().any(
+        (File file) => !file.basename.startsWith('.') && file.lengthSync() > 0,
+      );
+      return hasAcceptedLicense ? LicensesAccepted.all : LicensesAccepted.none;
+    } on FileSystemException {
       return LicensesAccepted.unknown;
     }
   }

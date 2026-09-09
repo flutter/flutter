@@ -11,13 +11,9 @@
 
 #import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 
 FLUTTER_ASSERT_ARC
-
-@interface FlutterDisplayLinkManager : NSObject
-@property(class, nonatomic, readonly) BOOL maxRefreshRateEnabledOnIPhone;
-+ (double)displayRefreshRate;
-@end
 
 @class FlutterTexture;
 @class FlutterDrawable;
@@ -27,6 +23,7 @@ extern CFTimeInterval display_link_target;
 @interface FlutterMetalLayer () {
   id<MTLDevice> _preferredDevice;
   CGSize _drawableSize;
+  FlutterDisplayLinkManager* _displayLinkManager;
 
   NSUInteger _nextDrawableId;
 
@@ -185,11 +182,12 @@ extern CFTimeInterval display_link_target;
     self.device = self.preferredDevice;
     self.pixelFormat = MTLPixelFormatBGRA8Unorm;
     _availableTextures = [[NSMutableSet alloc] init];
+    _displayLinkManager = FlutterDisplayLinkManager.shared;
 
     FlutterMetalLayerDisplayLinkProxy* proxy =
         [[FlutterMetalLayerDisplayLinkProxy alloc] initWithLayer:self];
     _displayLink = [CADisplayLink displayLinkWithTarget:proxy selector:@selector(onDisplayLink:)];
-    [self setMaxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate forceMax:NO];
+    [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:NO];
     [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground:)
@@ -209,17 +207,13 @@ extern CFTimeInterval display_link_target;
   // thread which does not trigger actual core animation frame. As a workaround FlutterMetalLayer
   // has it's own displaylink scheduled on main thread, which is used to trigger core animation
   // frame allowing for 120hz updates.
-  if (!FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone) {
+  if (!_displayLinkManager.maxRefreshRateEnabledOnIPhone) {
     return;
   }
   double maxFrameRate = fmax(refreshRate, 60);
   double minFrameRate = fmax(maxFrameRate / 2, 60);
-  if (@available(iOS 15.0, *)) {
-    _displayLink.preferredFrameRateRange =
-        CAFrameRateRangeMake(forceMax ? maxFrameRate : minFrameRate, maxFrameRate, maxFrameRate);
-  } else {
-    _displayLink.preferredFramesPerSecond = maxFrameRate;
-  }
+  _displayLink.preferredFrameRateRange =
+      CAFrameRateRangeMake(forceMax ? maxFrameRate : minFrameRate, maxFrameRate, maxFrameRate);
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
@@ -228,7 +222,7 @@ extern CFTimeInterval display_link_target;
   if (_displayLinkPauseCountdown == 3) {
     _displayLink.paused = YES;
     if (_displayLinkForcedMaxRate) {
-      [self setMaxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate forceMax:NO];
+      [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:NO];
       _displayLinkForcedMaxRate = NO;
     }
   } else {
@@ -426,7 +420,7 @@ extern CFTimeInterval display_link_target;
     _didSetContentsDuringThisDisplayLinkPeriod = YES;
   } else if (!_displayLinkForcedMaxRate) {
     _displayLinkForcedMaxRate = YES;
-    [self setMaxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate forceMax:YES];
+    [self setMaxRefreshRate:_displayLinkManager.displayRefreshRate forceMax:YES];
   }
 }
 

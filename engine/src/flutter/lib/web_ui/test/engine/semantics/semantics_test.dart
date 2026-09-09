@@ -2430,9 +2430,9 @@ void _testVerticalScrolling() {
     final expectedOffset = Float64List(2);
     expectedOffset[0] = 0.0;
     expectedOffset[1] = 20.0;
-    var message = const StandardMessageCodec().decodeMessage(
-      capturedEvent.arguments! as ByteData,
-    ) as Float64List;
+    var message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
     expect(message, expectedOffset);
 
     // Update scrollPosition to scrollTop value.
@@ -2459,9 +2459,9 @@ void _testVerticalScrolling() {
     expect(capturedEvent.arguments, isNotNull);
     expectedOffset[0] = 0.0;
     expectedOffset[1] = 5.0;
-    message = const StandardMessageCodec().decodeMessage(
-      capturedEvent.arguments! as ByteData,
-    ) as Float64List;
+    message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
     expect(message, expectedOffset);
   });
 
@@ -2658,9 +2658,9 @@ void _testHorizontalScrolling() {
     final expectedOffset = Float64List(2);
     expectedOffset[0] = 20.0;
     expectedOffset[1] = 0.0;
-    var message = const StandardMessageCodec().decodeMessage(
-      capturedEvent.arguments! as ByteData,
-    ) as Float64List;
+    var message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
     expect(message, expectedOffset);
 
     // Update scrollPosition to scrollLeft value.
@@ -2687,9 +2687,9 @@ void _testHorizontalScrolling() {
     expect(capturedEvent.arguments, isNotNull);
     expectedOffset[0] = 5.0;
     expectedOffset[1] = 0.0;
-    message = const StandardMessageCodec().decodeMessage(
-      capturedEvent.arguments! as ByteData,
-    ) as Float64List;
+    message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
     expect(message, expectedOffset);
   });
 }
@@ -2813,6 +2813,52 @@ void _testIncrementables() {
 </sem>''');
 
     semantics().semanticsEnabled = false;
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/186472.
+  // When the user enables semantics by clicking the "Enable Accessibility"
+  // placeholder, the click switches the engine into pointer-events gesture
+  // mode. The slider's first semantics update arrives in that mode and must
+  // still populate the input's value/aria-* attributes; otherwise the dirty
+  // flags are cleared before the engine returns to browser-gestures mode and
+  // the screen reader has no value to announce.
+  test('populates input values when first update arrives in pointer-events mode', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+    addTearDown(() {
+      semantics().semanticsEnabled = false;
+    });
+
+    semantics().receiveGlobalEvent(createDomEvent('Event', 'pointerdown'));
+    expect(semantics().gestureMode, GestureMode.pointerEvents);
+
+    final builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      actions: 0 | ui.SemanticsAction.decrease.index | ui.SemanticsAction.increase.index,
+      value: 'd',
+      increasedValue: 'e',
+      decreasedValue: 'c',
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+
+    owner().updateSemantics(builder.build());
+
+    final input = owner().semanticsHost.querySelector('input')! as DomHTMLInputElement;
+    expect(input.value, '1');
+    expect(input.getAttribute('aria-valuenow'), '1');
+    expect(input.getAttribute('aria-valuetext'), 'd');
+    expect(input.getAttribute('max'), '2');
+    expect(input.getAttribute('aria-valuemax'), '2');
+    expect(input.getAttribute('min'), '0');
+    expect(input.getAttribute('aria-valuemin'), '0');
+    expect(
+      input.disabled,
+      isTrue,
+      reason: 'Input must remain disabled while gesture mode is pointer-events.',
+    );
   });
 
   test('sends focus events', () async {

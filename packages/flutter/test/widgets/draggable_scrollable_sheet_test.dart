@@ -9,7 +9,6 @@ import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'button_tester.dart';
 import 'utils.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   Widget boilerplateWidget(
