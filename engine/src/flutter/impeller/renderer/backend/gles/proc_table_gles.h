@@ -271,6 +271,17 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(BlitFramebuffer);                   \
   PROC(InvalidateFramebuffer);
 
+// 3D texture entry points, used by 2D array textures. These are core on
+// GL/GLES 3.0 and also reachable below it: desktop GL 2.x exposes these exact
+// entry points through GL_EXT_texture_array, and OpenGL ES 2.0 exposes them
+// through GL_NV_texture_array under *NV-suffixed names (resolved as aliases
+// into these procs). See ProcTableGLES setup.
+#define FOR_EACH_IMPELLER_TEXTURE_ARRAY_PROC(PROC) \
+  PROC(TexImage3D);                                \
+  PROC(TexSubImage3D);                             \
+  PROC(CompressedTexImage3D);                      \
+  PROC(CompressedTexSubImage3D);
+
 #define FOR_EACH_IMPELLER_EXT_PROC(PROC)    \
   PROC(DebugMessageControlKHR);             \
   PROC(DebugMessageCallbackKHR);            \
@@ -319,6 +330,7 @@ class ProcTableGLES {
   FOR_EACH_IMPELLER_ES_ONLY_PROC(IMPELLER_PROC);
   FOR_EACH_IMPELLER_DESKTOP_ONLY_PROC(IMPELLER_PROC);
   FOR_EACH_IMPELLER_GLES3_PROC(IMPELLER_PROC);
+  FOR_EACH_IMPELLER_TEXTURE_ARRAY_PROC(IMPELLER_PROC);
   FOR_EACH_IMPELLER_EXT_PROC(IMPELLER_PROC);
 
 #undef IMPELLER_PROC

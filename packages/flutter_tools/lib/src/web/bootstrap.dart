@@ -48,97 +48,6 @@ const forceLoadModule = function (relativeUrl, root) {
 ''';
 
 // TODO(srujzs): Delete this once it's no longer used internally.
-String generateDDCBootstrapScript({
-  required String entrypoint,
-  required String ddcModuleLoaderUrl,
-  required String mapperUrl,
-  required bool generateLoadingIndicator,
-  String appRootDirectory = '/',
-}) {
-  return '''
-${generateLoadingIndicator ? _generateLoadingIndicator() : ""}
-// TODO(markzipan): This is safe if Flutter app roots are always equal to the
-// host root '/'. Validate if this is true.
-var _currentDirectory = "$appRootDirectory";
-
-$_simpleLoaderScript
-
-// A map containing the URLs for the bootstrap scripts in debug.
-let _scriptUrls = {
-  "mapper": "$mapperUrl",
-  "moduleLoader": "$ddcModuleLoaderUrl"
-};
-
-(function() {
-  let appName = "$entrypoint";
-
-  // A uuid that identifies a subapp.
-  // Stubbed out since subapps aren't supported in Flutter.
-  let uuid = "00000000-0000-0000-0000-000000000000";
-
-  window.postMessage(
-      {type: "DDC_STATE_CHANGE", state: "initial_load", targetUuid: uuid}, "*");
-
-  // Load pre-requisite DDC scripts.
-  // We intentionally use invalid names to avoid namespace clashes.
-  let prerequisiteScripts = [
-    {
-      "src": "$ddcModuleLoaderUrl",
-      "id": "ddc_module_loader \x00"
-    },
-    {
-      "src": "$mapperUrl",
-      "id": "dart_stack_trace_mapper \x00"
-    }
-  ];
-
-  // Load ddc_module_loader.js to access DDC's module loader API.
-  let prerequisiteLoads = [];
-  for (let i = 0; i < prerequisiteScripts.length; i++) {
-    prerequisiteLoads.push(forceLoadModule(prerequisiteScripts[i].src));
-  }
-  Promise.all(prerequisiteLoads).then((_) => afterPrerequisiteLogic());
-
-  // Save the current script so we can access it in a closure.
-  var _currentScript = document.currentScript;
-
-  var afterPrerequisiteLogic = function() {
-    window.\$dartLoader.rootDirectories.push(_currentDirectory);
-    let scripts = [
-      {
-        "src": "dart_sdk.js",
-        "id": "dart_sdk"
-      },
-      {
-        "src": "main_module.bootstrap.js",
-        "id": "data-main"
-      }
-    ];
-    let loadConfig = new window.\$dartLoader.LoadConfiguration();
-    loadConfig.bootstrapScript = scripts[scripts.length - 1];
-
-    loadConfig.loadScriptFn = function(loader) {
-      loader.addScriptsToQueue(scripts, null);
-      loader.loadEnqueuedModules();
-    }
-    loadConfig.ddcEventForLoadStart = /* LOAD_ALL_MODULES_START */ 1;
-    loadConfig.ddcEventForLoadedOk = /* LOAD_ALL_MODULES_END_OK */ 2;
-    loadConfig.ddcEventForLoadedError = /* LOAD_ALL_MODULES_END_ERROR */ 3;
-
-    let loader = new window.\$dartLoader.DDCLoader(loadConfig);
-
-    // Record prerequisite scripts' fully resolved URLs.
-    prerequisiteScripts.forEach(script => loader.registerScript(script));
-
-    // Note: these variables should only be used in non-multi-app scenarios since
-    // they can be arbitrarily overridden based on multi-app load order.
-    window.\$dartLoader.loadConfig = loadConfig;
-    window.\$dartLoader.loader = loader;
-    loader.nextAttempt();
-  }
-})();
-''';
-}
 
 String generateDDCLibraryBundleBootstrapScript({
   required String entrypoint,
@@ -161,8 +70,6 @@ const _currentDirectory = (function () {
 $_simpleLoaderScript
 
 (function() {
-  let appName = "org-dartlang-app:/$entrypoint";
-
   // Load pre-requisite DDC scripts. We intentionally use invalid names to avoid
   // namespace clashes.
   let prerequisiteScripts = [
@@ -248,60 +155,46 @@ $_simpleLoaderScript
       });
     }
 
-    let currentUri = _currentScript.src;
-    // We should have written a file containing all the scripts that need to be
-    // reloaded into the page. This is then read when a hot restart is triggered
-    // in DDC via the `\$dartReloadModifiedModules` callback.
-    // TODO(srujzs): We should avoid using a callback here in the bootstrap once
-    // the embedder supports passing a list of files/libraries to `hotRestart`
-    // instead. Currently, we're forced to read this file twice.
-    let reloadedSources = _currentDirectory + 'reloaded_sources.json';
-
     if (!window.\$dartReloadModifiedModules) {
-      window.\$dartReloadModifiedModules = (function(appName, callback) {
-        const xhttp = new XMLHttpRequest();
-        xhttp.withCredentials = true;
-        xhttp.onreadystatechange = function() {
-          // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/readyState
-          if (this.readyState == 4 && this.status == 200 || this.status == 304) {
-            const scripts = JSON.parse(this.responseText);
-            let numToLoad = 0;
-            let numLoaded = 0;
-            for (let i = 0; i < scripts.length; i++) {
-              const script = scripts[i];
-              const module = script.module;
-              if (module == null) continue;
-              const src = script.src;
-              const oldSrc = window.\$dartLoader.moduleIdToUrl.get(module);
-
-              // We might actually load from a different uri, delete the old one
-              // just to be sure.
-              window.\$dartLoader.urlToModuleId.delete(oldSrc);
-
-              window.\$dartLoader.moduleIdToUrl.set(module, src);
-              window.\$dartLoader.urlToModuleId.set(src, module);
-
-              numToLoad++;
-
-              let el = document.getElementById(module);
-              if (el) el.remove();
-              el = window.\$dartCreateScript();
-              el.src = policy.createScriptURL(src);
-              el.async = false;
-              el.defer = true;
-              el.id = module;
-              el.onload = function() {
-                numLoaded++;
-                if (numToLoad == numLoaded) callback();
-              };
-              document.head.appendChild(el);
-            }
-            // Call `callback` right away if we found no updated scripts.
-            if (numToLoad == 0) callback();
+      window.\$dartReloadModifiedModules = (function(filesToReload, appName) {
+        return new Promise(function(resolve) {
+          function callback() {
+            resolve(filesToReload);
           }
-        };
-        xhttp.open("GET", reloadedSources, true);
-        xhttp.send();
+          let numToLoad = 0;
+          let numLoaded = 0;
+          for (let i = 0; i < filesToReload.length; i++) {
+            const file = filesToReload[i];
+            const module = file.module;
+            if (module == null) continue;
+            const src = file.src;
+            const oldSrc = window.\$dartLoader.moduleIdToUrl.get(module);
+
+            // We might actually load from a different uri, delete the old one
+            // just to be sure.
+            window.\$dartLoader.urlToModuleId.delete(oldSrc);
+
+            window.\$dartLoader.moduleIdToUrl.set(module, src);
+            window.\$dartLoader.urlToModuleId.set(src, module);
+
+            numToLoad++;
+
+            let el = document.getElementById(module);
+            if (el) el.remove();
+            el = window.\$dartCreateScript();
+            el.src = policy.createScriptURL(src);
+            el.async = false;
+            el.defer = true;
+            el.id = module;
+            el.onload = function() {
+              numLoaded++;
+              if (numToLoad == numLoaded) callback();
+            };
+            document.head.appendChild(el);
+          }
+          // Call `callback` right away if we found no updated scripts.
+          if (numToLoad == 0) callback();
+        });
       });
     }
   };
@@ -455,9 +348,9 @@ indeterminate.className = "indeterminate";
 loader.appendChild(indeterminate);
 
 document.addEventListener('dart-app-ready', function (e) {
-   loader.parentNode.removeChild(loader);
-   styleSheet.parentNode.removeChild(styleSheet);
-});
+   loader.remove();
+   styleSheet.remove();
+}, { once: true });
 ''';
 }
 
@@ -478,7 +371,7 @@ String generateDDCLibraryBundleMainModule({
 /* ENTRYPOINT_EXTENTION_MARKER */
 
 (function() {
-  const appName = "org-dartlang-app:/$entrypoint";
+  const appName = "org-dartlang-app:///$entrypoint";
 
   dartDevEmbedder.debugger.registerDevtoolsFormatter();
 
@@ -640,35 +533,6 @@ Future<void> main() {
   return runWebTest(webTest);
 }
   ''';
-}
-
-/// Generate the unit test bootstrap file.
-String generateTestBootstrapFileContents(String mainUri, String requireUrl, String mapperUrl) {
-  return '''
-(function() {
-  if (typeof document != 'undefined') {
-    var el = document.createElement("script");
-    el.defer = true;
-    el.async = false;
-    el.src = '$mapperUrl';
-    document.head.appendChild(el);
-
-    el = document.createElement("script");
-    el.defer = true;
-    el.async = false;
-    el.src = '$requireUrl';
-    el.setAttribute("data-main", '$mainUri');
-    document.head.appendChild(el);
-  } else {
-    importScripts('$mapperUrl', '$requireUrl');
-    require.config({
-      baseUrl: baseUrl,
-    });
-    window = self;
-    require(['$mainUri']);
-  }
-})();
-''';
 }
 
 String generateDefaultFlutterBootstrapScript({required bool includeServiceWorkerSettings}) {

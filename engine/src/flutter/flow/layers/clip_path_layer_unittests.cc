@@ -707,6 +707,49 @@ TEST_F(ClipPathLayerTest, EmptyClipDoesNotCullPlatformView) {
   EXPECT_EQ(embedder.painted_views(), std::vector<int64_t>({view_id}));
 }
 
+// Prerolls a ClipPathLayer with a platform view child and returns the clips
+// that the layer pushed to the view embedder.
+static std::vector<Mutator> PushedClipsForPath(PrerollContext* context,
+                                               const DlPath& clip_path) {
+  auto platform_view = std::make_shared<PlatformViewLayer>(
+      DlPoint(0.0f, 0.0f), DlSize(8.0f, 8.0f), 42);
+  auto clip = std::make_shared<ClipPathLayer>(clip_path, Clip::kHardEdge);
+  clip->Add(platform_view);
+
+  MockViewEmbedder embedder;
+  context->view_embedder = &embedder;
+  clip->Preroll(context);
+  context->view_embedder = nullptr;
+  return embedder.pushed_clips();
+}
+
+TEST_F(ClipPathLayerTest, RectPathPushesClipRectToEmbedder) {
+  const DlRect rect = DlRect::MakeLTRB(2.0f, 2.0f, 12.0f, 12.0f);
+  EXPECT_EQ(PushedClipsForPath(preroll_context(), DlPath::MakeRect(rect)),
+            std::vector({Mutator(rect)}));
+}
+
+TEST_F(ClipPathLayerTest, OvalPathPushesClipRRectToEmbedder) {
+  const DlRect bounds = DlRect::MakeLTRB(2.0f, 2.0f, 12.0f, 12.0f);
+  EXPECT_EQ(PushedClipsForPath(preroll_context(), DlPath::MakeOval(bounds)),
+            std::vector({Mutator(DlRoundRect::MakeOval(bounds))}));
+}
+
+TEST_F(ClipPathLayerTest, RoundRectPathPushesClipRRectToEmbedder) {
+  const DlRoundRect rrect = DlRoundRect::MakeRectXY(
+      DlRect::MakeLTRB(2.0f, 2.0f, 12.0f, 12.0f), 3.0f, 3.0f);
+  EXPECT_EQ(PushedClipsForPath(preroll_context(), DlPath::MakeRoundRect(rrect)),
+            std::vector({Mutator(rrect)}));
+}
+
+TEST_F(ClipPathLayerTest, ComplexPathPushesClipPathToEmbedder) {
+  const DlRect bounds = DlRect::MakeLTRB(2.0f, 2.0f, 12.0f, 12.0f);
+  const DlPath path =
+      DlPath::MakeRect(bounds) + DlPath::MakeRect(bounds.Expand(-1.0f, -1.0f));
+  EXPECT_EQ(PushedClipsForPath(preroll_context(), path),
+            std::vector({Mutator(path)}));
+}
+
 }  // namespace testing
 }  // namespace flutter
 

@@ -18,5 +18,4 @@ customization_config:
     skills:
       inherit_user: true
       skills_paths:
-        - workspace_relative: ".agents/agents/reidbaker-agent/skills/code-review"
-        - workspace_relative: ".agents/agents/reidbaker-agent/skills/natural-writing"
+        - workspace_relative: ".agents/agents/reidbaker-agent/skills"

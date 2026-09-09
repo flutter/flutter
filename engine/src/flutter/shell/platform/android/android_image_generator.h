@@ -14,6 +14,10 @@
 
 namespace flutter {
 
+namespace testing {
+FML_TEST_CLASS(AndroidImageGenerator, HeaderDecodeDimensionMismatch);
+}
+
 class AndroidImageGenerator : public ImageGenerator {
  private:
   explicit AndroidImageGenerator(sk_sp<SkData> buffer);
@@ -59,6 +63,9 @@ class AndroidImageGenerator : public ImageGenerator {
                                         int height);
 
  private:
+  FML_FRIEND_TEST(testing::AndroidImageGenerator,
+                  HeaderDecodeDimensionMismatch);
+
   sk_sp<SkData> data_;
   sk_sp<SkData> software_decoded_data_;
 
@@ -70,6 +77,10 @@ class AndroidImageGenerator : public ImageGenerator {
 
   /// Blocks until the image has been fully decoded.
   fml::ManualResetWaitableEvent fully_decoded_latch_;
+
+  static std::shared_ptr<AndroidImageGenerator> MakeForTesting(
+      const SkImageInfo& header_info,
+      sk_sp<SkData> decoded_data);
 
   void DoDecodeImage();
 

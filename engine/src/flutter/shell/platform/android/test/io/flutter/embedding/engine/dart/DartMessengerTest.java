@@ -342,7 +342,7 @@ public class DartMessengerTest {
     latch.await();
     assertEquals(count, ints.size());
     for (int i = 0; i < count - 1; ++i) {
-      assertEquals((int) ints.get(i), (int) (ints.get(i + 1)) - 1);
+      assertEquals((int) ints.get(i), ints.get(i + 1) - 1);
     }
   }
 }

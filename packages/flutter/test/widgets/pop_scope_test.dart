@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'navigator_utils.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   bool? lastFrameworkHandlesBack;
@@ -105,58 +104,56 @@ void main() {
     expect(receivedResult, poppedResult);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets(
-    'pop scope can have Object? generic type while route has stricter generic type',
-    (WidgetTester tester) async {
-      Object? receivedResult;
-      const poppedResult = 13;
-      final nav = GlobalKey<NavigatorState>();
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          initialRoute: '/',
-          navigatorKey: nav,
-          home: PopScope<Object?>(
-            canPop: false,
-            onPopInvokedWithResult: (bool didPop, Object? result) {
-              receivedResult = result;
-            },
-            child: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[Text('Home/PopScope Page')],
-              ),
+  testWidgets('pop scope can have Object? generic type while route has stricter generic type', (
+    WidgetTester tester,
+  ) async {
+    Object? receivedResult;
+    const poppedResult = 13;
+    final nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        initialRoute: '/',
+        navigatorKey: nav,
+        home: PopScope<Object?>(
+          canPop: false,
+          onPopInvokedWithResult: (bool didPop, Object? result) {
+            receivedResult = result;
+          },
+          child: const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[Text('Home/PopScope Page')],
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      nav.currentState!.push(
-        PageRouteBuilder<int>(
-          pageBuilder:
-              (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return PopScope<Object?>(
-                  canPop: false,
-                  onPopInvokedWithResult: (bool didPop, Object? result) {
-                    receivedResult = result;
-                  },
-                  child: const Center(child: Text('new page')),
-                );
-              },
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('new page'), findsOneWidget);
+    nav.currentState!.push(
+      PageRouteBuilder<int>(
+        pageBuilder:
+            (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) {
+              return PopScope<Object?>(
+                canPop: false,
+                onPopInvokedWithResult: (bool didPop, Object? result) {
+                  receivedResult = result;
+                },
+                child: const Center(child: Text('new page')),
+              );
+            },
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('new page'), findsOneWidget);
 
-      nav.currentState!.maybePop(poppedResult);
-      await tester.pumpAndSettle();
-      expect(receivedResult, poppedResult);
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    nav.currentState!.maybePop(poppedResult);
+    await tester.pumpAndSettle();
+    expect(receivedResult, poppedResult);
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('toggling canPop on secondary route allows/prevents backs', (
     WidgetTester tester,
@@ -321,52 +318,50 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets(
-    'removing PopScope from the tree removes its effect on navigation',
-    (WidgetTester tester) async {
-      var usePopScope = true;
-      late StateSetter setState;
-      late BuildContext context;
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          initialRoute: '/',
-          routes: <String, WidgetBuilder>{
-            '/': (BuildContext buildContext) => StatefulBuilder(
-              builder: (BuildContext buildContext, StateSetter stateSetter) {
-                context = buildContext;
-                setState = stateSetter;
-                const Widget child = Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[Text('Home/PopScope Page')],
-                  ),
-                );
-                if (!usePopScope) {
-                  return child;
-                }
-                return const PopScope<Object?>(canPop: false, child: child);
-              },
-            ),
-          },
-        ),
-      );
+  testWidgets('removing PopScope from the tree removes its effect on navigation', (
+    WidgetTester tester,
+  ) async {
+    var usePopScope = true;
+    late StateSetter setState;
+    late BuildContext context;
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext buildContext) => StatefulBuilder(
+            builder: (BuildContext buildContext, StateSetter stateSetter) {
+              context = buildContext;
+              setState = stateSetter;
+              const Widget child = Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[Text('Home/PopScope Page')],
+                ),
+              );
+              if (!usePopScope) {
+                return child;
+              }
+              return const PopScope<Object?>(canPop: false, child: child);
+            },
+          ),
+        },
+      ),
+    );
 
-      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-        expect(lastFrameworkHandlesBack, isTrue);
-      }
-      expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.doNotPop);
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      expect(lastFrameworkHandlesBack, isTrue);
+    }
+    expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.doNotPop);
 
-      setState(() {
-        usePopScope = false;
-      });
-      await tester.pump();
-      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-        expect(lastFrameworkHandlesBack, isFalse);
-      }
-      expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.bubble);
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    setState(() {
+      usePopScope = false;
+    });
+    await tester.pump();
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      expect(lastFrameworkHandlesBack, isFalse);
+    }
+    expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.bubble);
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('identical PopScopes', (WidgetTester tester) async {
     var usePopScope1 = true;
@@ -416,4 +411,49 @@ void main() {
     }
     expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.bubble);
   }, variant: TargetPlatformVariant.all());
+
+  testWidgets(
+    'nested navigators with PopScope(canPop: false) in between keeps setFrameworkHandlesBack true',
+    (WidgetTester tester) async {
+      final rootNavigatorKey = GlobalKey<NavigatorState>();
+      final nestedNavigatorKey = GlobalKey<NavigatorState>();
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          navigatorKey: rootNavigatorKey,
+          initialRoute: '/',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) {
+              return Center(
+                child: PopScope<Object?>(
+                  canPop: false,
+                  child: Navigator(
+                    key: nestedNavigatorKey,
+                    onGenerateRoute: (RouteSettings settings) {
+                      return PageRouteBuilder<void>(
+                        pageBuilder:
+                            (
+                              BuildContext context,
+                              Animation<double> animation,
+                              Animation<double> secondaryAnimation,
+                            ) {
+                              return const Center(child: Text('Nested Page'));
+                            },
+                      );
+                    },
+                  ),
+                ),
+              );
+            },
+          },
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      expect(find.text('Nested Page'), findsOneWidget);
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+        expect(lastFrameworkHandlesBack, isTrue);
+      }
+    },
+  );
 }

@@ -73,10 +73,6 @@ class LLDBInitMigration extends ProjectMigrator {
       logger.printTrace('Unable to get Xcode project info.');
       throw _exceptionMessage();
     }
-    if (_xcodeProject.xcodeWorkspace == null) {
-      logger.printTrace('Xcode workspace not found.');
-      throw _exceptionMessage();
-    }
     final String? scheme = projectInfo.schemeFor(_buildInfo);
     if (scheme == null) {
       projectInfo.reportFlavorNotFoundAndExit();

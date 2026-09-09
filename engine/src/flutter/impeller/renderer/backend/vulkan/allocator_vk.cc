@@ -5,8 +5,10 @@
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
 
 #include <memory>
+#include <mutex>
 #include <utility>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/allocation_size.h"
@@ -306,7 +308,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     };
     image_info.samples = ToVKSampleCount(desc.sample_count);
     image_info.mipLevels = desc.mip_count;
-    image_info.arrayLayers = ToArrayLayerCount(desc.type);
+    image_info.arrayLayers = ToArrayLayerCount(desc);
     image_info.tiling = vk::ImageTiling::eOptimal;
     image_info.initialLayout = vk::ImageLayout::eUndefined;
     image_info.usage = AllocatorVK::ToVKImageUsageFlags(
@@ -343,34 +345,63 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
             desc.storage_mode, supports_memoryless_textures));
     alloc_nfo.flags = ToVmaAllocationCreateFlags(desc.storage_mode);
 
-    auto create_info_native =
-        static_cast<vk::ImageCreateInfo::NativeType>(image_info);
-
     VkImage vk_image = VK_NULL_HANDLE;
     VmaAllocation allocation = {};
     VmaAllocationInfo allocation_info = {};
-    {
-      auto result = vk::Result{::vmaCreateImage(allocator,            //
-                                                &create_info_native,  //
-                                                &alloc_nfo,           //
-                                                &vk_image,            //
-                                                &allocation,          //
-                                                &allocation_info      //
-                                                )};
-      if (result != vk::Result::eSuccess) {
-        VALIDATION_LOG << "Unable to allocate Vulkan Image: "
-                       << vk::to_string(result)
-                       << " Type: " << TextureTypeToString(desc.type)
-                       << " Mode: " << StorageModeToString(desc.storage_mode)
-                       << " Usage: " << TextureUsageMaskToString(desc.usage)
-                       << " [VK]Flags: " << vk::to_string(image_info.flags)
-                       << " [VK]Format: " << vk::to_string(image_info.format)
-                       << " [VK]Usage: " << vk::to_string(image_info.usage)
-                       << " [VK]Mem. Flags: "
-                       << vk::to_string(vk::MemoryPropertyFlags(
-                              alloc_nfo.preferredFlags));
-        return;
-      }
+
+    // Performs the VMA image allocation using the current create-info chain.
+    // The native create-info is re-derived from the chain on each call, so an
+    // unlink of the compression-control struct between calls is reflected.
+    const auto try_create_image = [&]() -> vk::Result {
+      vk::ImageCreateInfo::NativeType create_info_native =
+          static_cast<vk::ImageCreateInfo::NativeType>(
+              image_info_chain.get<vk::ImageCreateInfo>());
+      return vk::Result{::vmaCreateImage(allocator,            //
+                                         &create_info_native,  //
+                                         &alloc_nfo,           //
+                                         &vk_image,            //
+                                         &allocation,          //
+                                         &allocation_info      //
+                                         )};
+    };
+
+    // Fixed-rate compression was requested iff a rate was selected above.
+    const bool requested_compression = frc_rate.has_value();
+    vk::Result alloc_result = try_create_image();
+
+    // Some drivers (e.g. PowerVR) can return VK_ERROR_COMPRESSION_EXHAUSTED_EXT
+    // when fixed-rate compression resources are depleted. Per the Vulkan spec
+    // this error is only returned for fixed-rate compression requests, so
+    // retrying without compression is a valid recovery. Without it the
+    // allocation fails, the texture is invalid, and the resulting null render
+    // target crashes the raster thread.
+    if (alloc_result == vk::Result::eErrorCompressionExhaustedEXT &&
+        requested_compression) {
+      static std::once_flag warn_once;
+      std::call_once(warn_once, [] {
+        FML_LOG(WARNING)
+            << "Fixed-rate image compression exhausted; falling back to "
+               "uncompressed image allocation. (This message is logged once.)";
+      });
+      // The compression-control struct is only present here because compression
+      // was requested above, so unlinking it once is safe (no double-unlink).
+      image_info_chain.unlink<vk::ImageCompressionControlEXT>();
+      alloc_result = try_create_image();
+    }
+
+    if (alloc_result != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Unable to allocate Vulkan Image: "
+                     << vk::to_string(alloc_result)
+                     << " Type: " << TextureTypeToString(desc.type)
+                     << " Mode: " << StorageModeToString(desc.storage_mode)
+                     << " Usage: " << TextureUsageMaskToString(desc.usage)
+                     << " [VK]Flags: " << vk::to_string(image_info.flags)
+                     << " [VK]Format: " << vk::to_string(image_info.format)
+                     << " [VK]Usage: " << vk::to_string(image_info.usage)
+                     << " [VK]Mem. Flags: "
+                     << vk::to_string(
+                            vk::MemoryPropertyFlags(alloc_nfo.preferredFlags));
+      return;
     }
 
     auto image = vk::Image{vk_image};
@@ -381,7 +412,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     view_info.format = image_info.format;
     view_info.subresourceRange.aspectMask = ToVKImageAspectFlags(desc.format);
     view_info.subresourceRange.levelCount = image_info.mipLevels;
-    view_info.subresourceRange.layerCount = ToArrayLayerCount(desc.type);
+    view_info.subresourceRange.layerCount = ToArrayLayerCount(desc);
 
     // Vulkan does not have an image format that is equivalent to
     // `MTLPixelFormatA8Unorm`, so we use `R8Unorm` instead. Given that the
@@ -408,7 +439,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     const bool is_render_target = !!(desc.usage & TextureUsage::kRenderTarget);
     const uint32_t rt_mip_count = is_render_target ? image_info.mipLevels : 1u;
     const uint32_t rt_layer_count =
-        is_render_target ? ToArrayLayerCount(desc.type) : 1u;
+        is_render_target ? ToArrayLayerCount(desc) : 1u;
     std::vector<vk::UniqueImageView> rt_image_views;
     rt_image_views.reserve(rt_mip_count * rt_layer_count);
     for (uint32_t mip = 0; mip < rt_mip_count; mip++) {
@@ -449,7 +480,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     if (views.empty()) {
       return VK_NULL_HANDLE;
     }
-    const uint32_t layer_count = ToArrayLayerCount(GetTextureDescriptor().type);
+    const uint32_t layer_count = ToArrayLayerCount(GetTextureDescriptor());
     const size_t index =
         static_cast<size_t>(mip_level) * layer_count + array_layer;
     return index < views.size() ? views[index].get() : views[0].get();
@@ -587,7 +618,7 @@ Bytes AllocatorVK::DebugGetHeapUsage() const {
     const VmaBudget& budget = budgets[i];
     total_usage += budget.usage;
   }
-  return Bytes{static_cast<double>(total_usage)};
+  return Bytes{total_usage};
 }
 
 void AllocatorVK::DebugTraceMemoryStatistics() const {

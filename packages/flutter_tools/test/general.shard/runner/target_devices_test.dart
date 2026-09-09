@@ -677,6 +677,31 @@ target-device-5 (wireless) (mobile) • xxx • android • Android 10
             expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
           }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
 
+          testUsingContext('does not prompt if canPrompt is false', () async {
+            deviceManager.androidDiscoverer.deviceList = <Device>[
+              attachedAndroidDevice1,
+              attachedAndroidDevice2,
+            ];
+
+            final List<Device>? devices = await targetDevices.findAllTargetDevices(
+              canPrompt: false,
+            );
+
+            expect(
+              logger.statusText,
+              equals('''
+More than one device connected; please specify a device with the '-d <deviceId>' flag, or use '-d all' to act on all devices.
+
+target-device-1 (mobile) • xxx • android • Android 10
+target-device-2 (mobile) • xxx • android • Android 10
+'''),
+            );
+            expect(devices, isNull);
+            expect(deviceManager.androidDiscoverer.devicesCalled, 4);
+            expect(deviceManager.androidDiscoverer.discoverDevicesCalled, 0);
+            expect(deviceManager.androidDiscoverer.numberOfTimesPolled, 1);
+          }, overrides: <Type, Generator>{AnsiTerminal: () => terminal});
+
           testUsingContext('including only attached devices', () async {
             deviceManager.androidDiscoverer.deviceList = <Device>[
               attachedAndroidDevice1,

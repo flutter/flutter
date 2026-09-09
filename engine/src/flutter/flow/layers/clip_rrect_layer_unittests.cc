@@ -638,6 +638,22 @@ TEST_F(ClipRRectLayerTest, EmptyClipDoesNotCullPlatformView) {
   EXPECT_EQ(embedder.painted_views(), std::vector<int64_t>({view_id}));
 }
 
+TEST_F(ClipRRectLayerTest, PushesClipRRectToEmbedder) {
+  auto platform_view = std::make_shared<PlatformViewLayer>(
+      DlPoint(0.0f, 0.0f), DlSize(8.0f, 8.0f), 42);
+  const DlRoundRect clip_rrect = DlRoundRect::MakeRectXY(
+      DlRect::MakeLTRB(2.0f, 2.0f, 12.0f, 12.0f), 3.0f, 3.0f);
+  auto clip = std::make_shared<ClipRRectLayer>(clip_rrect, Clip::kHardEdge);
+  clip->Add(platform_view);
+
+  MockViewEmbedder embedder;
+  preroll_context()->view_embedder = &embedder;
+  clip->Preroll(preroll_context());
+  preroll_context()->view_embedder = nullptr;
+
+  EXPECT_EQ(embedder.pushed_clips(), std::vector({Mutator(clip_rrect)}));
+}
+
 }  // namespace testing
 }  // namespace flutter
 

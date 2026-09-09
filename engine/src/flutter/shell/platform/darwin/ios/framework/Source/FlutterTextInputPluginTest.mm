@@ -125,6 +125,9 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
                                     bool transient) override {}
   void UpdateAssetResolverByType(std::unique_ptr<flutter::AssetResolver> updated_asset_resolver,
                                  flutter::AssetResolver::AssetResolverType type) override {}
+  std::shared_ptr<fml::BasicTaskRunner> OnPlatformViewGetShutdownSafeIOTaskRunner() const override {
+    return nullptr;
+  }
 
   flutter::Settings settings_;
 };
@@ -590,6 +593,22 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   XCTAssertEqual(substring.length, 0ul);
 }
 
+- (void)testInsertTextReplacesEntireMarkedRangeForDeadKeySequence {
+  // Regression test for https://github.com/flutter/flutter/issues/59541#issuecomment-4617810595.
+  NSDictionary* config = self.mutableTemplateCopy;
+  [self setClientId:123 configuration:config];
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = inputFields[0];
+
+  [inputView setMarkedText:@"´" selectedRange:NSMakeRange(1, 0)];
+  [inputView insertText:@"Á"];
+
+  UITextRange* range = [inputView textRangeFromPosition:inputView.beginningOfDocument
+                                             toPosition:inputView.endOfDocument];
+  NSString* substring = [inputView textInRange:range];
+  XCTAssertEqualObjects(substring, @"Á");
+}
+
 - (void)testTextInRangeAcceptsNSNotFoundLocationGracefully {
   NSDictionary* config = self.mutableTemplateCopy;
   [self setClientId:123 configuration:config];
@@ -888,12 +907,8 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   thread_task_runner->PostTask([&] {
     auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
         /*delegate=*/mock_platform_view_delegate,
-        /*rendering_api=*/mock_platform_view_delegate.settings_.enable_impeller
-            ? flutter::IOSRenderingAPI::kMetal
-            : flutter::IOSRenderingAPI::kSoftware,
         /*platform_views_controller=*/nil,
         /*task_runners=*/runners,
-        /*worker_task_runner=*/nil,
         /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
 
     platform_view->SetOwnerViewController(mockFlutterViewController);

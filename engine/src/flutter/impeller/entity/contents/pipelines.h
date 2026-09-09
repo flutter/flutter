@@ -34,8 +34,6 @@
 #include "impeller/entity/glyph_atlas.frag.h"
 #include "impeller/entity/glyph_atlas.vert.h"
 #include "impeller/entity/gradient_fill.vert.h"
-#include "impeller/entity/line.frag.h"
-#include "impeller/entity/line.vert.h"
 #include "impeller/entity/linear_gradient_fill.frag.h"
 #include "impeller/entity/linear_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/linear_gradient_uniform_fill.frag.h"
@@ -137,7 +135,6 @@ using FramebufferBlendScreenPipeline = FramebufferBlendPipelineHandle;
 using FramebufferBlendSoftLightPipeline = FramebufferBlendPipelineHandle;
 using GaussianBlurPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, GaussianFragmentShader>;
 using GlyphAtlasPipeline = RenderPipelineHandle<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
-using LinePipeline = RenderPipelineHandle<LineVertexShader, LineFragmentShader>;
 using LinearGradientFillPipeline = GradientPipelineHandle<LinearGradientFillFragmentShader>;
 using LinearGradientSSBOFillPipeline = GradientPipelineHandle<LinearGradientSsboFillFragmentShader>;
 using LinearGradientUniformFillPipeline = GradientPipelineHandle<LinearGradientUniformFillFragmentShader>;

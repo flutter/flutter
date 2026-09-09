@@ -30,6 +30,9 @@ class ArchiveCreator {
   ///
   /// If subprocessOutput is true, then output from processes invoked during
   /// archive creation is echoed to stderr and stdout.
+  ///
+  /// If [targetArch] is set, the archive is built for that architecture rather
+  /// than the architecture of the host machine.
   factory ArchiveCreator(
     Directory tempDir,
     Directory outputDir,
@@ -41,6 +44,7 @@ class ArchiveCreator {
     ProcessManager? processManager,
     bool strict = true,
     bool subprocessOutput = true,
+    TargetArch? targetArch,
   }) {
     final Directory flutterRoot = fs.directory(path.join(tempDir.path, 'flutter'));
     final processRunner = ProcessRunner(
@@ -48,6 +52,14 @@ class ArchiveCreator {
       subprocessOutput: subprocessOutput,
       platform: platform,
     )..environment['PUB_CACHE'] = path.join(tempDir.path, '.pub-cache');
+    if (targetArch != null) {
+      // This environment is passed to `bin/internal/update_dart_sdk.{sh,ps1}`,
+      // which run before the tool itself and pick the Dart SDK to download.
+      // `flutter` commands below also pick this up, which results in
+      // `OperatingSystemUtils.hostPlatform` being set and used when we select
+      // which engine artifacts to cache.
+      processRunner.environment['FLUTTER_HOST_ARCH'] = targetArch.name;
+    }
     final String flutterExecutable = path.join(flutterRoot.absolute.path, 'bin', 'flutter');
     final String dartExecutable = path.join(
       flutterRoot.absolute.path,
@@ -71,6 +83,7 @@ class ArchiveCreator {
       httpReader: httpReader ?? http.readBytes,
       flutterExecutable: flutterExecutable,
       dartExecutable: dartExecutable,
+      targetArch: targetArch,
     );
   }
 
@@ -87,6 +100,7 @@ class ArchiveCreator {
     required this.revision,
     required this.strict,
     required this.tempDir,
+    this.targetArch,
   }) : assert(revision.length == 40),
        _processRunner = processRunner,
        _flutter = flutterExecutable,
@@ -98,6 +112,21 @@ class ArchiveCreator {
 
   /// The branch to build the archive for. The branch must contain [revision].
   final Branch branch;
+
+  /// The target host architecture to build the archive for.
+  ///
+  /// This is the host architecture of the Flutter tool inside the archive we
+  /// are building and is used to select the Dart SDK and host engine artifacts
+  /// to be bundled in the archive. For example, if the archive creator is
+  /// running on an arm64 host but producing an SDK to be used by an x64 host,
+  /// this will be x64.
+  ///
+  /// This is passed to the tool via the `FLUTTER_HOST_ARCH` environment
+  /// variable. When null, defaults to the current host architecture.
+  ///
+  /// Warning: The scripts and tool that consume this are the ones in the
+  /// [branch] being packaged, not the ones this script was run from.
+  final TargetArch? targetArch;
 
   /// The git revision hash to build the archive for. This revision has
   /// to be available in the [branch], although it doesn't have to be
@@ -145,7 +174,8 @@ class ArchiveCreator {
   Future<String> get _archiveName async {
     final String os = platform.operatingSystem.toLowerCase();
     // Include the intended host architecture in the file name for non-x64.
-    final arch = await _dartArch == 'x64' ? '' : '${await _dartArch}_';
+    final String effectiveArch = targetArch?.name ?? await _dartArch;
+    final arch = effectiveArch == 'x64' ? '' : '${effectiveArch}_';
     // We don't use .tar.xz on Mac because although it can unpack them
     // on the command line (with tar), the "Archive Utility" that runs
     // when you double-click on them just does some crazy behavior (it
@@ -240,7 +270,22 @@ class ArchiveCreator {
     final result = json.decode(versionJson) as Map<String, dynamic>;
     result.forEach((String key, dynamic value) => versionMap[key] = value.toString());
     versionMap[frameworkVersionTag] = gitVersion;
-    versionMap[dartTargetArchTag] = await _dartArch;
+
+    // The archive filename is derived from [targetArch], but the arch published
+    // in the release metadata is derived from the Dart SDK that was actually
+    // downloaded.
+    //
+    // Perform a paranoid check to be sure that FLUTTER_HOST_ARCH triggered the
+    // download of the artifacts for [targetArch] and fail loudly if not.
+    final String dartArch = await _dartArch;
+    if (targetArch case final TargetArch arch when arch.name != dartArch) {
+      throw PreparePackageException(
+        'Requested an archive for ${arch.name}, but the Dart SDK in the archive '
+        'is $dartArch. Check that FLUTTER_HOST_ARCH was correctly handled in '
+        'bin/internal/update_dart_sdk.sh and bin/internal/update_dart_sdk.ps1.',
+      );
+    }
+    versionMap[dartTargetArchTag] = dartArch;
     return versionMap;
   }
 
@@ -384,7 +429,14 @@ class ArchiveCreator {
   Future<void> _populateCaches() async {
     await _runFlutter(<String>['doctor']);
     await _runFlutter(<String>['update-packages']);
-    await _runFlutter(<String>['precache']);
+    // `FLUTTER_HOST_ARCH` in the environment has already selected the host
+    // artifacts by this point, so this is a no-op. We pass the flag anyway for
+    // future-proofing and so the architecture is recorded in the logs for
+    // visibility/debugging.
+    await _runFlutter(<String>[
+      'precache',
+      if (targetArch case final TargetArch arch) '--host-arch=${arch.name}',
+    ]);
     await _runFlutter(<String>['ide-config']);
 
     // Create each of the templates, since they will call 'pub get' on

@@ -103,12 +103,12 @@ public class StandardMethodCodecTest {
     final Object message = StandardMessageCodec.INSTANCE.readValue(buffer);
     final Object details = StandardMessageCodec.INSTANCE.readValue(buffer);
     final Object stacktrace = StandardMessageCodec.INSTANCE.readValue(buffer);
-    assertEquals("code", (String) code);
-    assertEquals("foo", (String) message);
+    assertEquals("code", code);
+    assertEquals("foo", message);
     String stack = (String) details;
     assertTrue(
         stack.contains(
             "at io.flutter.plugin.common.StandardMethodCodecTest.encodeErrorEnvelopeWithStacktraceTest(StandardMethodCodecTest.java:"));
-    assertEquals("error stacktrace", (String) stacktrace);
+    assertEquals("error stacktrace", stacktrace);
   }
 }

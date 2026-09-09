@@ -334,7 +334,7 @@ void main() {
     test('builds only once if the target and host are the same', () async {
       await et.run(['run', '--config=host_debug']);
 
-      expect(commandsRun, containsOnce(containsAllInOrder([endsWith('ninja')])));
+      expect(commandsRun, containsOnce(containsAllInOrder([endsWith('ninja'), '-C'])));
     });
 
     test('builds both the target and host if they are different', () async {

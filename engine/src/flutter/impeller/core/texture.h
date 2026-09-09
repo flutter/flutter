@@ -50,18 +50,15 @@ class Texture {
 
   const TextureDescriptor& GetTextureDescriptor() const;
 
-  /// Update the coordinate system used by the texture.
-  ///
-  /// The setting is used to conditionally invert the coordinates to
-  /// account for the different origin of GLES textures.
-  void SetCoordinateSystem(TextureCoordinateSystem coordinate_system);
-
-  TextureCoordinateSystem GetCoordinateSystem() const;
-
   /// Returns true if mipmaps have never been generated.
   /// The contents of the mipmap may be out of date if the root texture has been
   /// modified and the mipmaps hasn't been regenerated.
   bool NeedsMipmapGeneration() const;
+
+  /// Returns true if `slice` addresses a valid layer for this texture's type
+  /// (0 for 2D textures, 0-5 for cube maps, and below the descriptor's
+  /// `array_layer_count` for 2D array textures).
+  bool IsSliceValid(size_t slice) const;
 
  protected:
   explicit Texture(TextureDescriptor desc);
@@ -77,12 +74,8 @@ class Texture {
   bool mipmap_generated_ = false;
 
  private:
-  TextureCoordinateSystem coordinate_system_ =
-      TextureCoordinateSystem::kRenderToTexture;
   const TextureDescriptor desc_;
   bool is_opaque_ = false;
-
-  bool IsSliceValid(size_t slice) const;
 
   Texture(const Texture&) = delete;
 

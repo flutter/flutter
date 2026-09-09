@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_tester.dart';
 import 'two_dimensional_utils.dart';
-import 'widgets_app_tester.dart';
 
 Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
   return SizedBox.square(

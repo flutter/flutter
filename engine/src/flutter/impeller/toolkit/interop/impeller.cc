@@ -672,7 +672,6 @@ ImpellerTexture ImpellerTextureCreateWithOpenGLTextureHandleNew(
     VALIDATION_LOG << "Could not wrap external texture.";
     return nullptr;
   }
-  texture->SetCoordinateSystem(TextureCoordinateSystem::kUploadFromHost);
   return Create<Texture>(impeller::Context::BackendType::kOpenGLES,
                          std::move(texture))
       .Leak();

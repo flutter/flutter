@@ -21,6 +21,10 @@ FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformData);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindArrayData);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformFailsWithoutFloatType);
+FML_TEST_CLASS(BufferBindingsGLESTest,
+               BindsTexturesAcrossThePerStageUnitBoundary);
+FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondThePerStageLimit);
+FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit);
 }  // namespace testing
 
 //------------------------------------------------------------------------------
@@ -66,6 +70,12 @@ class BufferBindingsGLES {
                   BindUniformDataVerticesAndMatrices);
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
                   BindUniformFailsWithoutFloatType);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  BindsTexturesAcrossThePerStageUnitBoundary);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  RejectsTexturesBeyondThePerStageLimit);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  RejectsTexturesBeyondTheCombinedLimit);
   //----------------------------------------------------------------------------
   /// @brief      The arguments to glVertexAttribPointer.
   ///
@@ -82,7 +92,12 @@ class BufferBindingsGLES {
   std::vector<std::vector<VertexAttribPointer>> vertex_attrib_arrays_;
 
   absl::flat_hash_map<std::string, GLint> uniform_locations_;
-  absl::flat_hash_map<std::string, std::pair<GLint, GLuint>> ubo_locations_;
+  struct UBOInfo {
+    GLint block_index = 0;
+    GLuint binding_point = 0;
+    GLint data_size = 0;
+  };
+  absl::flat_hash_map<std::string, UBOInfo> ubo_locations_;
 
   using BindingMap = absl::flat_hash_map<std::string, std::vector<GLint>>;
   BindingMap binding_map_ = {};

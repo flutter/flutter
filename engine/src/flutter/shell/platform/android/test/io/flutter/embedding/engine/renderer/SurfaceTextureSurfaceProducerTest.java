@@ -59,7 +59,7 @@ public final class SurfaceTextureSurfaceProducerTest {
     canvas.drawARGB(255, 255, 0, 0);
     surface.unlockCanvasAndPost(canvas);
     shadowOf(Looper.getMainLooper()).idle();
-    assertEquals(frames.get(), 1);
+    assertEquals(1, frames.get());
 
     // Resize and redraw.
     producer.setSize(400, 800);
@@ -67,7 +67,7 @@ public final class SurfaceTextureSurfaceProducerTest {
     canvas.drawARGB(255, 255, 0, 0);
     surface.unlockCanvasAndPost(canvas);
     shadowOf(Looper.getMainLooper()).idle();
-    assertEquals(frames.get(), 2);
+    assertEquals(2, frames.get());
 
     // Done.
     fakeJNI.detachFromNativeAndReleaseResources();

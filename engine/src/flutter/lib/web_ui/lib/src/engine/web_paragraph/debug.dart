@@ -8,8 +8,8 @@ typedef Entry = ({String group, String name});
 
 /// Debugging utilities for WebParagraph.
 class WebParagraphDebug {
-  static bool logging = false;
-  static bool apiLogging = false;
+  static const bool logging = false;
+  static const bool apiLogging = false;
 
   /// Logs a debug message if logging is enabled.
   static void log(String arg) {

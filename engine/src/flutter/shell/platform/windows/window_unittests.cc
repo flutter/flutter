@@ -227,8 +227,9 @@ TEST(MockWindow, MouseLeave) {
   const double mouse_x = 10.0;
   const double mouse_y = 20.0;
 
-  EXPECT_CALL(window, OnPointerMove(mouse_x, mouse_y,
-                                    kFlutterPointerDeviceKindMouse, 0, 0, 0, 0))
+  EXPECT_CALL(window,
+              OnPointerMove(mouse_x, mouse_y, kFlutterPointerDeviceKindMouse, 0,
+                            0, 0, 0, 0))
       .Times(1);
   EXPECT_CALL(window, OnPointerLeave(mouse_x, mouse_y,
                                      kFlutterPointerDeviceKindMouse, 0))

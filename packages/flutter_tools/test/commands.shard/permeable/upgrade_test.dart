@@ -24,6 +24,10 @@ import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.disableLocking();
+    Cache.flutterRoot = getFlutterRoot();
+  });
   group('UpgradeCommandRunner', () {
     final jan12026 = DateTime.utc(2026);
 
@@ -55,50 +59,42 @@ void main() {
         });
     });
 
-    testUsingContext(
-      'throws on unknown tag, official branch,  noforce',
-      () async {
-        final flutterVersion = FakeFlutterVersion(branch: 'beta');
-        const upstreamRevision = '';
-        final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
-        fakeCommandRunner.remoteVersion = latestVersion;
+    testUsingContext('throws on unknown tag, official branch,  noforce', () async {
+      final flutterVersion = FakeFlutterVersion(branch: 'beta');
+      const upstreamRevision = '';
+      final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
+      fakeCommandRunner.remoteVersion = latestVersion;
 
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          const UpgradePhase.firstHalf(),
-          force: false,
-          testFlow: false,
-          gitTagVersion: const GitTagVersion.unknown(),
-          flutterVersion: flutterVersion,
-          verifyOnly: false,
-        );
-        expect(result, throwsToolExit());
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{Platform: () => fakePlatform},
-    );
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        const UpgradePhase.firstHalf(),
+        force: false,
+        testFlow: false,
+        gitTagVersion: const GitTagVersion.unknown(),
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(result, throwsToolExit());
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{Platform: () => fakePlatform});
 
-    testUsingContext(
-      'throws tool exit with uncommitted changes',
-      () async {
-        final flutterVersion = FakeFlutterVersion(branch: 'beta');
-        const upstreamRevision = '';
-        final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
-        fakeCommandRunner.remoteVersion = latestVersion;
-        fakeCommandRunner.willHaveUncommittedChanges = true;
+    testUsingContext('throws tool exit with uncommitted changes', () async {
+      final flutterVersion = FakeFlutterVersion(branch: 'beta');
+      const upstreamRevision = '';
+      final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
+      fakeCommandRunner.remoteVersion = latestVersion;
+      fakeCommandRunner.willHaveUncommittedChanges = true;
 
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          const UpgradePhase.firstHalf(),
-          force: false,
-          testFlow: false,
-          gitTagVersion: gitTagVersion,
-          flutterVersion: flutterVersion,
-          verifyOnly: false,
-        );
-        expect(result, throwsToolExit());
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{Platform: () => fakePlatform},
-    );
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        const UpgradePhase.firstHalf(),
+        force: false,
+        testFlow: false,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(result, throwsToolExit());
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{Platform: () => fakePlatform});
 
     testUsingContext(
       'hasUncommittedChanges ignores pubspec.lock on non-stable channel',
@@ -218,7 +214,7 @@ void main() {
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             command: <String>[
-              globals.fs.path.join('bin', 'flutter'),
+              globals.fs.path.join(Cache.flutterRoot!, 'bin', 'flutter'),
               'upgrade',
               '--continue',
               '--continue-started-at',
@@ -504,7 +500,11 @@ void main() {
         processManager.addCommand(
           FakeCommand(
             command: <String>[
-              globals.fs.path.join('bin', 'flutter'),
+              globals.fs.path.join(
+                realCommandRunner.workingDirectory ?? Cache.flutterRoot!,
+                'bin',
+                'flutter',
+              ),
               'upgrade',
               '--continue',
               '--continue-started-at',
@@ -655,13 +655,20 @@ void main() {
           },
         );
 
-        await runInContext(() async {
-          await runner.run(<String>['upgrade', '--continue']);
-          // Verify that ensureVersionFile() was invoked, which will create flutter.version.json
-          // if it doesn't exist.
-          expect(latestVersion.didEnsureVersionFile, true);
-          expect(latestVersion.didDeleteVersionFile, false);
-        }, overrides: {FlutterVersion: () => latestVersion});
+        await runInContext(
+          () async {
+            await runner.run(<String>['upgrade', '--continue']);
+            // Verify that ensureVersionFile() was invoked, which will create flutter.version.json
+            // if it doesn't exist.
+            expect(latestVersion.didEnsureVersionFile, true);
+            expect(latestVersion.didDeleteVersionFile, false);
+          },
+          overrides: <Type, Generator>{
+            FlutterVersion: () => latestVersion,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => fakePlatform,
+          },
+        );
       },
       overrides: <Type, Generator>{
         ProcessManager: () => FakeProcessManager.any(),
@@ -743,7 +750,7 @@ void main() {
         processManager.addCommand(
           FakeCommand(
             command: <String>[
-              globals.fs.path.join('bin', 'flutter'),
+              globals.fs.path.join(Cache.flutterRoot!, 'bin', 'flutter'),
               'upgrade',
               '--continue',
               '--continue-started-at',
@@ -831,7 +838,6 @@ void main() {
         late FileSystem fs;
 
         setUp(() {
-          Cache.disableLocking();
           fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
             const FakeCommand(command: <String>['git', 'tag', '--points-at', 'HEAD']),
             const FakeCommand(
@@ -845,7 +851,6 @@ void main() {
         });
 
         tearDown(() {
-          Cache.enableLocking();
           tryToDelete(tempDir);
         });
 

@@ -13,14 +13,9 @@ import 'package:path/path.dart' as p;
 // Android binaries (libflutter.so) should only export one symbol "JNI_OnLoad"
 // of type "T".
 //
-// Ideally, iOS binaries (Flutter.framework/Flutter) should only export
-// Objective-C Symbols from the Flutter namespace, of type "(__DATA,__common)" or
-// "(__DATA,__objc_data)". However, to allow Swift symbols to be exported in
-// an Objective-C bridging header, they must be public or open. The framework
-// uses these types internally and never publishes these types in a public header.
-// Like `_InternalFlutter` Obj-C symbols, we allow `InternalFlutterSwift` and
-// `InternalFlutterSwiftCommon` symbols, as they are clearly marked as internal
-// in the name.
+// The iOS binaries (Flutter.framework/Flutter) should only export Objective-C
+// Symbols from the Flutter namespace, of type "(__DATA,__common)" or
+// "(__DATA,__objc_data)".
 
 /// Takes the path to the out directory as the first argument, and the path to
 /// the buildtools directory as the second argument.
@@ -106,49 +101,10 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
       failures++;
       continue;
     }
-    final swiftEntries = <NmEntry>[];
-    final unexpectedEntries = <NmEntry>[];
-
-    for (final NmEntry entry in NmEntry.parse(nmResult.stdout as String)) {
-      if (entry.isCInternalSymbol || entry.isAllowedCSymbol || entry.isAllowedObjCSymbol) {
-        continue;
-      }
-      final bool isSwiftSymbol = switch (entry.type) {
-        '(__TEXT,__text)' ||
-        '(__TEXT,__const)' ||
-        '(__TEXT,__constg_swiftt)' ||
-        '(__DATA_CONST,__const)' ||
-        '(__DATA,__data)' ||
-        '(__DATA,__objc_data)' => entry.name.startsWith(r'_$s'),
-        _ => false,
-      };
-
-      if (isSwiftSymbol) {
-        swiftEntries.add(entry);
-      } else {
-        unexpectedEntries.add(entry);
-      }
-    }
-
-    final Map<String, String?>? symbolToModuleNameMap = _demangleSymbols(
-      swiftEntries.map((NmEntry entry) => entry.name),
+    final Iterable<NmEntry> unexpectedEntries = NmEntry.parse(nmResult.stdout as String).where(
+      (NmEntry entry) =>
+          !entry.isCInternalSymbol && !entry.isAllowedCSymbol && !entry.isAllowedObjCSymbol,
     );
-
-    if (symbolToModuleNameMap == null) {
-      print('ERROR: failed to execute "swift demangle"');
-      failures++;
-      return failures;
-    }
-
-    unexpectedEntries.addAll(
-      swiftEntries.where(
-        (NmEntry entry) => switch (symbolToModuleNameMap[entry.name]) {
-          'InternalFlutterSwiftCommon' || 'InternalFlutterSwift' => false,
-          _ => true,
-        },
-      ),
-    );
-
     if (unexpectedEntries.isNotEmpty) {
       print('ERROR: $libFlutter exports unexpected symbols:');
       print(
@@ -269,7 +225,10 @@ final class NmEntry {
     return switch (type) {
       '(__DATA,__objc_data)' || '(__DATA,__data)' =>
         (name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
-            name.startsWith(r'_OBJC_CLASS_$_Flutter')),
+            name.startsWith(r'_OBJC_CLASS_$_Flutter') ||
+            ((name.startsWith(r'_OBJC_METACLASS_$__TtC') ||
+                    name.startsWith(r'_OBJC_CLASS_$__TtC')) &&
+                name.contains('InternalFlutterSwift'))),
       _ => false,
     };
   }
@@ -280,59 +239,4 @@ final class NmEntry {
 
   @override
   String toString() => '$name: $type';
-}
-
-final RegExp moduleLinePattern = RegExp(r'kind=Module, text="(.+)"');
-// Demangles the given `symbols` and maps each mangled name to its Swift module name.
-//
-// Returns null if the `swift demangle` command failed entirely.
-// Individual map values may be null if a symbol failed to demangle or did not belong to a Swift module.
-Map<String, String?>? _demangleSymbols(Iterable<String> symbols) {
-  if (symbols.isEmpty) {
-    return <String, String?>{};
-  }
-  final ProcessResult demangledResult = Process.runSync('swift', <String>[
-    'demangle',
-    '--tree-only',
-    ...symbols,
-  ]);
-  if (demangledResult.exitCode != 0) {
-    return null;
-  }
-
-  final symbolToModule = <String, String?>{};
-  final output = demangledResult.stdout as String;
-
-  String trim(String string) => string.trim();
-
-  for (final String symbolTree in output.split('Demangling for ').map(trim)) {
-    final List<String> lines = LineSplitter.split(symbolTree).toList();
-    if (lines.isEmpty) {
-      continue;
-    }
-    final String mangledName = lines.first;
-
-    // Parses the output from `swift demangle --tree-only` and extracts the module
-    // name of a single entry.
-    //
-    // Example `swift demangle --tree-only` output:
-    //
-    // Demangling for _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
-    // kind=Global
-    //   kind=ProtocolConformanceDescriptor
-    //     kind=ProtocolConformance
-    //       kind=Type
-    //         kind=Enum
-    //           kind=Module, text="InternalFlutterSwiftCommon"
-    //           kind=Identifier, text="LogLevel"
-    //       kind=Type
-    //         kind=Protocol
-    //           kind=Module, text="Swift"
-    //           kind=Identifier, text="RawRepresentable"
-    //       kind=Module, text="InternalFlutterSwiftCommon"
-    final String? moduleName = moduleLinePattern.firstMatch(symbolTree)?.group(1);
-
-    symbolToModule[mangledName] = moduleName;
-  }
-  return symbolToModule;
 }
