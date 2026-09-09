@@ -1033,7 +1033,7 @@ abstract class FlutterCommand extends Command<void> {
   /// This is only a default. Gradle injects it when the merged manifest does
   /// not set `io.flutter.embedding.android.EnableHcpp` at all, so an entry in
   /// the manifest wins over it. [explicitEnableHcpp] in turn wins over both.
-  bool get enableHcpp => explicitEnableHcpp ?? (featureFlags?.isHcppEnabled ?? false);
+  bool get enableHcpp => explicitEnableHcpp ?? runner?.featureFlags?.isHcppEnabled ?? false;
 
   void addTestFlag({required bool verboseHelp}) {
     argParser.addDescriptor(DebuggingOptionDescriptors.testFlag, verboseHelp: verboseHelp);
@@ -1262,7 +1262,7 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    final FeatureFlags? flags = featureFlags;
+    final FeatureFlags? flags = runner?.featureFlags;
     if (flags == null) {
       return;
     }

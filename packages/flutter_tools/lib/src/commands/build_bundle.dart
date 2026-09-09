@@ -112,8 +112,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<Event> unifiedAnalyticsUsageValues(String commandPath) async {
-    final FileSystem fs = toolContext.fs;
-    final FlutterProjectFactory projectFactory = toolContext.projectFactory;
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     final String projectDir = fs.file(targetFile).parent.parent.path;
     final FlutterProject flutterProject = projectFactory.fromDirectory(fs.directory(projectDir));
     return Event.commandUsageValues(
