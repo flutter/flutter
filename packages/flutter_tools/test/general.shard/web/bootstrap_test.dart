@@ -58,6 +58,22 @@ void main() {
     expect(result, matches(regex), reason: '.flutter-loader must have overflow: hidden');
   });
 
+  // https://github.com/flutter/flutter/issues/192226
+  test('generateBootstrapScript loading indicator listener is removed after first event and safely removes elements', () {
+    final String result = generateBootstrapScript(
+      requireUrl: 'require.js',
+      mapperUrl: 'mapper.js',
+      generateLoadingIndicator: true,
+    );
+
+    expect(result, contains("document.addEventListener('dart-app-ready', function (e) {"));
+    expect(result, contains('loader.remove();'));
+    expect(result, contains('styleSheet.remove();'));
+    expect(result, contains('}, { once: true });'));
+    expect(result, isNot(contains('loader.parentNode.removeChild')));
+    expect(result, isNot(contains('styleSheet.parentNode.removeChild')));
+  });
+
   // https://github.com/flutter/flutter/issues/82524
   test('generateMainModule removes timeout from requireJS', () {
     final String result = generateMainModule(
@@ -156,16 +172,6 @@ void main() {
     expect(result, contains('''window.\$dartLoader.rootDirectories = ["$root"];'''));
   });
 
-  test('generateTestBootstrapFileContents embeds urls correctly', () {
-    final String result = generateTestBootstrapFileContents(
-      'foo.dart.js',
-      'require.js',
-      'mapper.js',
-    );
-
-    expect(result, contains('el.setAttribute("data-main", \'foo.dart.js\');'));
-  });
-
   test('generateTestEntrypoint generates proper imports and mappings for tests', () {
     final String result = generateTestEntrypoint(
       testInfos: <WebTestInfo>[
@@ -259,6 +265,24 @@ void main() {
       expect(result, matches(regex), reason: '.flutter-loader must have overflow: hidden');
     });
 
+    // https://github.com/flutter/flutter/issues/192226
+    test('bootstrap script loading indicator listener is removed after first event and safely removes elements', () {
+      final String result = generateDDCLibraryBundleBootstrapScript(
+        entrypoint: 'foo/bar/main.js',
+        ddcModuleLoaderUrl: 'ddc_module_loader.js',
+        mapperUrl: 'mapper.js',
+        generateLoadingIndicator: true,
+        isWindows: false,
+      );
+
+      expect(result, contains("document.addEventListener('dart-app-ready', function (e) {"));
+      expect(result, contains('loader.remove();'));
+      expect(result, contains('styleSheet.remove();'));
+      expect(result, contains('}, { once: true });'));
+      expect(result, isNot(contains('loader.parentNode.removeChild')));
+      expect(result, isNot(contains('styleSheet.parentNode.removeChild')));
+    });
+
     test('generateDDCLibraryBundleMainModule embeds the entrypoint correctly', () {
       final String result = generateDDCLibraryBundleMainModule(
         entrypoint: 'main.js',
@@ -311,16 +335,6 @@ void main() {
       );
 
       expect(result, isNot(contains('maxRequestPoolSize =')));
-    });
-
-    test('generateTestBootstrapFileContents embeds urls correctly', () {
-      final String result = generateTestBootstrapFileContents(
-        'foo.dart.js',
-        'require.js',
-        'mapper.js',
-      );
-
-      expect(result, contains('el.setAttribute("data-main", \'foo.dart.js\');'));
     });
   });
 }

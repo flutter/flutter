@@ -76,6 +76,62 @@ void testMain() {
       expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
     });
 
+    test('fires a focus event with undefined direction when a child is focused', () async {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+      final DomElement button = createDomElement('button');
+
+      view.dom.rootElement.append(button);
+      button.focusWithoutScroll();
+
+      expect(dispatchedViewFocusEvents, hasLength(1));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.undefined);
+    });
+
+    test('fires a refocus event with undefined direction when child focus returns', () async {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+      final DomElement button1 = createDomElement('button');
+      final DomElement button2 = createDomElement('button');
+
+      view.dom.rootElement.append(button1);
+      view.dom.rootElement.append(button2);
+
+      button1.focusWithoutScroll();
+      button1.blur();
+      await Future<void>.delayed(Duration.zero);
+      button2.focusWithoutScroll();
+
+      expect(dispatchedViewFocusEvents, hasLength(3));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.undefined);
+
+      expect(dispatchedViewFocusEvents[1].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[1].state, ui.ViewFocusState.unfocused);
+      expect(dispatchedViewFocusEvents[1].direction, ui.ViewFocusDirection.undefined);
+
+      expect(dispatchedViewFocusEvents[2].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[2].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[2].direction, ui.ViewFocusDirection.undefined);
+    });
+
+    test('fires a focus event with backward direction when shift tab focuses the root', () async {
+      final EngineFlutterView view = createAndRegisterView(dispatcher);
+
+      domDocument.body!.pressTabKey(shift: true);
+      view.dom.rootElement.focusWithoutScroll();
+      domDocument.body!.releaseTabKey();
+
+      expect(dispatchedViewFocusEvents, hasLength(1));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.backward);
+    });
+
     test('fires a focus event - a view was unfocused', () async {
       final EngineFlutterView view = createAndRegisterView(dispatcher);
 
@@ -141,6 +197,34 @@ void testMain() {
       expect(dispatchedViewFocusEvents[2].viewId, view2.viewId);
       expect(dispatchedViewFocusEvents[2].state, ui.ViewFocusState.unfocused);
       expect(dispatchedViewFocusEvents[2].direction, ui.ViewFocusDirection.undefined);
+    });
+
+    test('fires a focus event - focus transitions between children of two views', () async {
+      final EngineFlutterView view1 = createAndRegisterView(dispatcher);
+      final EngineFlutterView view2 = createAndRegisterView(dispatcher);
+      final DomElement button1 = createDomElement('button');
+      final DomElement button2 = createDomElement('button');
+
+      view1.dom.rootElement.append(button1);
+      view2.dom.rootElement.append(button2);
+
+      button1.focusWithoutScroll();
+      button2.focusWithoutScroll();
+
+      expect(dispatchedViewFocusEvents, hasLength(2));
+
+      expect(dispatchedViewFocusEvents[0].viewId, view1.viewId);
+      expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.undefined);
+
+      expect(dispatchedViewFocusEvents[1].viewId, view2.viewId);
+      expect(dispatchedViewFocusEvents[1].state, ui.ViewFocusState.focused);
+      expect(dispatchedViewFocusEvents[1].direction, ui.ViewFocusDirection.undefined);
+
+      // The view that lost the focus becomes reachable by the keyboard again,
+      // and the view that gained it is taken out of the tab order.
+      expect(view1.dom.rootElement.getAttribute('tabindex'), '0');
+      expect(view2.dom.rootElement.getAttribute('tabindex'), '-1');
     });
 
     test('requestViewFocusChange focuses the view', () {
@@ -242,7 +326,7 @@ void testMain() {
 
       expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
       expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
-      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.undefined);
     });
 
     test('works even if focus is changed in the middle of a blur call', () {
@@ -266,7 +350,7 @@ void testMain() {
 
       expect(dispatchedViewFocusEvents[0].viewId, view.viewId);
       expect(dispatchedViewFocusEvents[0].state, ui.ViewFocusState.focused);
-      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.forward);
+      expect(dispatchedViewFocusEvents[0].direction, ui.ViewFocusDirection.undefined);
     });
   });
 }

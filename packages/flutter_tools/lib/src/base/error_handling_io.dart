@@ -35,9 +35,6 @@ import 'platform.dart';
 // ToolExit and a message that is more clear than the FileSystemException by
 // itself.
 
-/// On Windows this is error code 0: ERROR_SUCCESS.
-const int kSystemCodeSuccess = 0;
-
 /// On Windows this is error code 1: ERROR_INVALID_FUNCTION.
 const int kSystemCodeInvalidFunction = 1;
 
@@ -58,10 +55,6 @@ const int kSystemCodeSharingViolation = 32;
 
 /// On Windows this is error code 33: ERROR_LOCK_VIOLATION.
 const int kSystemCodeLockViolation = 33;
-
-/// On Windows this is error code 112: ERROR_DISK_FULL, and on
-/// macOS/Linux, it is error code 28/ENOSPC: No space left on device.
-const int kSystemCodeDeviceFull = 112;
 
 /// On Windows this is error code 1224: ERROR_USER_MAPPED_FILE.
 const int kSystemCodeUserMappedSectionOpened = 1224;
@@ -1457,6 +1450,9 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kAccessDenied = 5;
   const kFatalDeviceHardwareError = 483;
   const kDeviceDoesNotExist = 433;
+  const kApplicationControlPolicyBlocked = 4551;
+  const kAccessDisabledByPolicy = 1260;
+  const kSystemIntegrityPolicyViolation = 454;
 
   // Catch errors and bail when:
   final String? errorMessage = switch (errorCode) {
@@ -1485,6 +1481,13 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The device was not found.'
           '\n$e\n'
           'Verify the device is mounted and try again.',
+    kApplicationControlPolicyBlocked ||
+    kAccessDisabledByPolicy ||
+    kSystemIntegrityPolicyViolation =>
+      '${message != null ? "$message. " : ""}An Application Control policy or security policy has blocked execution.\n'
+          '$e\n'
+          'Please verify your Windows Security Smart App Control, Application Control policy (WDAC), '
+          'or Group Policy settings, or add an exclusion for the Flutter SDK directory.',
     _ => null,
   };
   _throwFileSystemException(errorMessage);

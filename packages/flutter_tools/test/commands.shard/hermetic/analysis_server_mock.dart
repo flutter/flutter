@@ -24,11 +24,11 @@ class MockLspServerProcess extends test_process_manager.FakeProcess {
     required Completer<void> exitCompleter,
   }) : _exitCompleter = exitCompleter,
        super(completer: exitCompleter) {
-    _stdinController.stream.transform(utf8.decoder).listen(_handleStdinChunk);
+    _stdinController.stream.listen(_handleStdinBytes);
   }
 
   final StreamController<List<int>> _stdinController;
-  final _inputBuffer = StringBuffer();
+  final _inputBuffer = <int>[];
   final _stdoutController = StreamController<List<int>>();
   final Completer<void> _exitCompleter;
 
@@ -85,31 +85,44 @@ class MockLspServerProcess extends test_process_manager.FakeProcess {
     }
   }
 
-  void _handleStdinChunk(String chunk) {
-    _inputBuffer.write(chunk);
-    var input = _inputBuffer.toString();
-    while (true) {
-      final int headerEnd = input.indexOf('\r\n\r\n');
+  static final RegExp _contentLengthRegExp = RegExp(
+    r'content-length:\s*(\d+)',
+    caseSensitive: false,
+  );
+
+  void _handleStdinBytes(List<int> bytes) {
+    _inputBuffer.addAll(bytes);
+    while (_inputBuffer.isNotEmpty) {
+      var headerEnd = -1;
+      for (var i = 0; i < _inputBuffer.length - 3; i++) {
+        if (_inputBuffer[i] == 13 &&
+            _inputBuffer[i + 1] == 10 &&
+            _inputBuffer[i + 2] == 13 &&
+            _inputBuffer[i + 3] == 10) {
+          headerEnd = i;
+          break;
+        }
+      }
       if (headerEnd == -1) {
         break;
       }
-      final String header = input.substring(0, headerEnd);
-      final Match? contentLengthMatch = RegExp(r'Content-Length: (\d+)').firstMatch(header);
+      final String header = utf8.decode(_inputBuffer.sublist(0, headerEnd));
+      final Match? contentLengthMatch = _contentLengthRegExp.firstMatch(header);
       if (contentLengthMatch == null) {
         throw StateError('LSP request is missing a Content-Length header.');
       }
       final int contentLength = int.parse(contentLengthMatch.group(1)!);
-      final int messageEnd = headerEnd + 4 + contentLength;
-      if (input.length < messageEnd) {
+      if (_inputBuffer.length < headerEnd + 4 + contentLength) {
         break;
       }
-      final String message = input.substring(headerEnd + 4, messageEnd);
+      final List<int> messageBytes = _inputBuffer.sublist(
+        headerEnd + 4,
+        headerEnd + 4 + contentLength,
+      );
+      _inputBuffer.removeRange(0, headerEnd + 4 + contentLength);
+      final String message = utf8.decode(messageBytes);
       unawaited(_handleRequest(jsonDecode(message) as Map<String, Object?>));
-      input = input.substring(messageEnd);
     }
-    _inputBuffer
-      ..clear()
-      ..write(input);
   }
 
   void _sendNotification(String method, Map<String, Object?> params) {
@@ -166,7 +179,8 @@ class MockLspServerProcess extends test_process_manager.FakeProcess {
   }
 
   void _writeAsLspToStdout(String message) {
-    _stdoutController.add(utf8.encode('Content-Length: ${message.length}\r\n\r\n$message'));
+    final List<int> bytes = utf8.encode(message);
+    _stdoutController.add(utf8.encode('Content-Length: ${bytes.length}\r\n\r\n$message'));
   }
 
   void _writeRawOutput(String output) {

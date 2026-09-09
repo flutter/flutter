@@ -5,6 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -537,7 +538,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           buildInfo,
         );
         // Create XcodeCodeSigningSettings for dependency injection into createExportPlist
-        final codeSigningSettings = XcodeCodeSigningSettings(
+        final codeSigningSettings = XcodeCodeSigningSettings.fromParameters(
           config: globals.config,
           logger: logger,
           platform: globals.platform,
@@ -835,13 +836,13 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     // Use provided or create new XcodeCodeSigningSettings instance
     final XcodeCodeSigningSettings settings =
         codeSigningSettings ??
-        XcodeCodeSigningSettings(
+        XcodeCodeSigningSettings.fromParameters(
           config: globals.config,
           logger: logger,
           platform: globals.platform,
           processUtils: globals.processUtils,
-          fileSystem: globals.fs,
-          fileSystemUtils: globals.fsUtils,
+          fileSystem: fileSystem,
+          fileSystemUtils: fileSystemUtils,
           terminal: globals.terminal,
           plistParser: globals.plistParser,
         );

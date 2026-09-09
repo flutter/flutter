@@ -11,6 +11,8 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/error/error.dart';
 
+import '../flutter_analysis_rule.dart';
+
 /// Verify that no RenderBox subclasses call compute* instead of get* for
 /// computing the intrinsic dimensions. The [candidates] variable contains the
 /// full list of RenderBox intrinsic method invocations checked by this rule.
@@ -24,7 +26,7 @@ const Map<String, String> candidates = <String, String>{
   'computeMinIntrinsicWidth': 'getMinIntrinsicWidth',
 };
 
-class RenderBoxIntrinsicCalculationRule extends AnalysisRule {
+class RenderBoxIntrinsicCalculationRule extends FlutterAnalysisRule {
   RenderBoxIntrinsicCalculationRule()
     : super(
         name: code.name,
@@ -42,7 +44,7 @@ class RenderBoxIntrinsicCalculationRule extends AnalysisRule {
   LintCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
     final visitor = _Visitor(this, context);
     registry.addSimpleIdentifier(this, visitor);
   }

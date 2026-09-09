@@ -746,7 +746,7 @@ void main() {
         exception,
         endsWith(
           '_ViewScope ← ⋯"\n' // End of ownership chain.
-          'Typically, the Directionality widget is introduced by the MaterialApp or WidgetsApp widget at the '
+          'Typically, the Directionality widget is introduced by the WidgetsApp widget at the '
           'top of your application widget tree. It determines the ambient reading direction and is used, for '
           'example, to determine how to lay out text, how to interpret "start" and "end" values, and to resolve '
           'EdgeInsetsDirectional, AlignmentDirectional, and other *Directional objects.\n'

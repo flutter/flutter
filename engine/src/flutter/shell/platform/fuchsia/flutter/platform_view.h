@@ -33,6 +33,7 @@
 #include "flutter/shell/platform/fuchsia/flutter/focus_delegate.h"
 #include "flutter/shell/platform/fuchsia/flutter/keyboard.h"
 #include "flutter/shell/platform/fuchsia/flutter/pointer_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/pointer_injector_delegate.h"
 #include "flutter/shell/platform/fuchsia/flutter/text_delegate.h"
 #include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
 
@@ -82,6 +83,7 @@ class PlatformView : public flutter::PlatformView {
       fuchsia::ui::views::ViewRefFocusedHandle view_ref_focused,
       fuchsia::ui::composition::ParentViewportWatcherHandle
           parent_viewport_watcher,
+      fuchsia::ui::pointerinjector::RegistryHandle pointerinjector_registry,
       OnEnableWireframeCallback wireframe_enabled_callback,
       OnCreateViewCallback on_create_view_callback,
       OnUpdateViewCallback on_update_view_callback,
@@ -196,6 +198,7 @@ class PlatformView : public flutter::PlatformView {
 
   std::shared_ptr<FocusDelegate> focus_delegate_;
   std::shared_ptr<PointerDelegate> pointer_delegate_;
+  std::unique_ptr<PointerInjectorDelegate> pointer_injector_delegate_;
 
   // Text delegate is responsible for handling keyboard input and text editing.
   std::unique_ptr<TextDelegate> text_delegate_;
