@@ -6,11 +6,11 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../src/common.dart';
@@ -53,6 +53,7 @@ void main() {
       artifacts: FakeArtifacts(),
       cache: FakeCache(),
       flutterVersion: FakeFlutterVersion(),
+      featureFlags: TestFeatureFlags(),
     );
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
@@ -79,7 +80,6 @@ void main() {
   group('Fatal Logs', () {
     late FakeBuildCommand command;
     late MemoryFileSystem fs;
-    late BufferLogger logger;
     late ProcessManager processManager;
 
     setUp(() {
@@ -87,7 +87,6 @@ void main() {
       fs.file('/package/pubspec.yaml').createSync(recursive: true);
       fs.currentDirectory = '/package';
       Cache.disableLocking();
-      logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
     });
 
@@ -97,7 +96,7 @@ void main() {
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(fs: fs, logger: logger),
+        toolContext: FakeToolContext(fs: fs, logger: testLogger),
       );
       try {
         await createTestCommandRunner(
@@ -114,7 +113,7 @@ void main() {
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(fs: fs, logger: logger),
+        toolContext: FakeToolContext(fs: fs, logger: testLogger),
       );
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
       try {
@@ -130,7 +129,7 @@ void main() {
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(fs: fs, logger: logger),
+        toolContext: FakeToolContext(fs: fs, logger: testLogger),
       );
       testLogger.printWarning('Warning: Mild annoyance Will Robinson!');
       await expectLater(
@@ -150,7 +149,7 @@ void main() {
         appleContext: FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(fs: fs, logger: logger),
+        toolContext: FakeToolContext(fs: fs, logger: testLogger),
       );
       testLogger.printError('Error: Danger Will Robinson!');
       await expectLater(
@@ -192,9 +191,10 @@ class FakeBuildCommand extends BuildCommand {
     required super.buildSystem,
     required super.templateRenderer,
     required super.toolContext,
+    FeatureFlags? featureFlags,
     bool verboseHelp = false,
-  }) {
-    addSubcommand(FakeBuildSubcommand(logger: toolContext!.logger, verboseHelp: verboseHelp));
+  }) : super(featureFlags: featureFlags ?? TestFeatureFlags(), verboseHelp: verboseHelp) {
+    addSubcommand(FakeBuildSubcommand(logger: toolContext.logger, verboseHelp: verboseHelp));
   }
 
   @override
