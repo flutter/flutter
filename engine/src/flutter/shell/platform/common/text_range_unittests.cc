@@ -245,4 +245,18 @@ TEST(TextRange, ReversedReversedRange) {
   EXPECT_TRUE(range.reversed());
 }
 
+TEST(TextRange, ClampedToLongerLength) {
+  EXPECT_EQ(TextRange(2, 6).ClampedTo(10), TextRange(2, 6));
+}
+
+TEST(TextRange, ClampedToShorterLength) {
+  EXPECT_EQ(TextRange(2, 6).ClampedTo(4), TextRange(2, 4));
+}
+
+TEST(TextRange, ClampedToShorterLengthReversed) {
+  // A reversed range must stay reversed: callers derive the cursor position
+  // from the extent, not from the lesser endpoint.
+  EXPECT_EQ(TextRange(6, 2).ClampedTo(4), TextRange(4, 2));
+}
+
 }  // namespace flutter
