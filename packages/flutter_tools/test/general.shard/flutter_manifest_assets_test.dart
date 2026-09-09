@@ -2,12 +2,55 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:yaml/yaml.dart';
 
 import '../src/common.dart';
 
 void main() {
+  testWithoutContext('bundle_path is optional and round trips through the descriptor', () {
+    final AssetsEntry entry = AssetsEntry.parseFromYaml(<String, Object>{
+      'path': 'configs/dev.json',
+      'bundle_path': 'assets/config #1.json',
+      'flavors': YamlList.wrap(<String>['dev']),
+    })!;
+    expect(entry.uri, Uri.parse('configs/dev.json'));
+    expect(entry.bundleUri, Uri(path: 'assets/config #1.json'));
+    expect(AssetsEntry.parseFromYaml(loadYaml(jsonEncode(entry.descriptor))), entry);
+    final AssetsEntry legacy = AssetsEntry.parseFromYaml('config.json')!;
+    expect(legacy.bundleUri, isNull);
+    expect(legacy.descriptor, 'config.json');
+    expect(entry, isNot(AssetsEntry(uri: entry.uri, flavors: entry.flavors)));
+  });
+
+  for (final path in <Object?>[
+    null,
+    '',
+    1,
+    <String>[],
+    '/absolute.json',
+    '../escape.json',
+    'assets/../escape.json',
+    './config.json',
+    'assets//config.json',
+    r'assets\config.json',
+    'C:/config.json',
+    'file:config.json',
+    'assets/',
+  ]) {
+    testWithoutContext('rejects invalid bundle_path $path', () {
+      final (AssetsEntry? entry, String? error) = AssetsEntry.parseFromYamlSafe(<String, Object?>{
+        'path': 'config.json',
+        'bundle_path': path,
+      });
+      expect(entry, isNull);
+      expect(error, contains('bundle_path'));
+    });
+  }
+
   group('parsing of assets section in flutter manifests', () {
     testWithoutContext('ignores empty list of assets', () {
       final logger = BufferLogger.test();

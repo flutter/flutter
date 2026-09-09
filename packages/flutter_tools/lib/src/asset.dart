@@ -264,6 +264,8 @@ class ManifestAssetBundle implements AssetBundle {
   // the current project.
   final _wildcardDirectories = <Uri, Directory>{};
 
+  Set<String> _bundlePathKeys = <String>{};
+
   DateTime? _lastBuildTimestamp;
 
   FlutterHookResult _lastHookResult;
@@ -555,6 +557,20 @@ class ManifestAssetBundle implements AssetBundle {
       assetVariants[asset] = <_Asset>[asset];
     }
 
+    final selectedAssets = <_Asset>[
+      for (final Map<_Asset, List<_Asset>> assets in <Map<_Asset, List<_Asset>>>[
+        assetVariants,
+        ...deferredComponentsAssetVariants.values,
+      ])
+        for (final MapEntry<_Asset, List<_Asset>> entry in assets.entries) ...<_Asset>[
+          entry.key,
+          ...entry.value,
+        ],
+      if (flutterManifest.usesMaterialDesign) ..._getMaterialFonts(),
+      ..._getFrameworkShaders(),
+    ];
+    _checkForBundlePathConflicts(selectedAssets);
+
     // Save the contents of each image, image variant, and font
     // asset in [entries].
     for (final _Asset asset in assetVariants.keys) {
@@ -695,6 +711,14 @@ class ManifestAssetBundle implements AssetBundle {
     }
     _setIfChanged(kFontManifestJson, fontManifest, AssetKind.regular);
     _setLicenseIfChanged(licenseResult.combinedLicenses, targetPlatform);
+    final Set<String> selectedKeys = selectedAssets
+        .map((_Asset asset) => asset.entryUri.path)
+        .toSet();
+    _bundlePathKeys.difference(selectedKeys).forEach(entries.remove);
+    _bundlePathKeys = selectedAssets
+        .where((_Asset asset) => asset.hasBundlePath)
+        .map((_Asset asset) => asset.entryUri.path)
+        .toSet();
     return 0;
   }
 
@@ -737,7 +761,12 @@ class ManifestAssetBundle implements AssetBundle {
     AssetBundleEntry entry,
   ) {
     final AssetBundleEntry? existingEntry = entryMap[key];
-    if (existingEntry == null || !entry.hasEquivalentConfigurationWith(existingEntry)) {
+    if (existingEntry == null ||
+        (entry.content is DevFSFileContent &&
+            existingEntry.content is DevFSFileContent &&
+            (entry.content as DevFSFileContent).file.path !=
+                (existingEntry.content as DevFSFileContent).file.path) ||
+        !entry.hasEquivalentConfigurationWith(existingEntry)) {
       entryMap[key] = entry;
     }
   }
@@ -901,6 +930,7 @@ class ManifestAssetBundle implements AssetBundle {
             cache,
             componentAssets,
             assetsEntry.uri,
+            bundleUri: assetsEntry.bundleUri,
             flavors: assetsEntry.flavors,
             platforms: assetsEntry.platforms,
             transformers: assetsEntry.transformers,
@@ -913,6 +943,7 @@ class ManifestAssetBundle implements AssetBundle {
             cache,
             componentAssets,
             assetsEntry.uri,
+            bundleUri: assetsEntry.bundleUri,
             flavors: assetsEntry.flavors,
             platforms: assetsEntry.platforms,
             transformers: assetsEntry.transformers,
@@ -1084,6 +1115,7 @@ class ManifestAssetBundle implements AssetBundle {
           assetsEntry.uri,
           packageName: packageName,
           attributedPackage: attributedPackage,
+          bundleUri: assetsEntry.bundleUri,
           flavors: assetsEntry.flavors,
           platforms: assetsEntry.platforms,
           transformers: assetsEntry.transformers,
@@ -1098,6 +1130,7 @@ class ManifestAssetBundle implements AssetBundle {
           assetsEntry.uri,
           packageName: packageName,
           attributedPackage: attributedPackage,
+          bundleUri: assetsEntry.bundleUri,
           flavors: assetsEntry.flavors,
           platforms: assetsEntry.platforms,
           transformers: assetsEntry.transformers,
@@ -1137,6 +1170,7 @@ class ManifestAssetBundle implements AssetBundle {
         packageName: packageName,
         attributedPackage: attributedPackage,
         assetKind: AssetKind.shader,
+        bundleUri: shaderEntry.bundleUri,
         flavors: shaderEntry.flavors,
         platforms: shaderEntry.platforms,
         transformers: shaderEntry.transformers,
@@ -1199,6 +1233,7 @@ class ManifestAssetBundle implements AssetBundle {
     _AssetDirectoryCache cache,
     Map<_Asset, List<_Asset>> result,
     Uri assetUri, {
+    Uri? bundleUri,
     String? packageName,
     Package? attributedPackage,
     required Set<String> flavors,
@@ -1273,6 +1308,7 @@ class ManifestAssetBundle implements AssetBundle {
         packageName: packageName,
         attributedPackage: attributedPackage,
         originUri: assetUri,
+        bundleUri: bundleUri?.resolveUri(Uri(pathSegments: <String>[uri.pathSegments.last])),
         flavors: flavors,
         platforms: platforms,
         transformers: transformers,
@@ -1288,6 +1324,7 @@ class ManifestAssetBundle implements AssetBundle {
     Map<_Asset, List<_Asset>> result,
     Uri assetUri, {
     Uri? originUri,
+    Uri? bundleUri,
     String? packageName,
     Package? attributedPackage,
     AssetKind assetKind = AssetKind.regular,
@@ -1308,7 +1345,12 @@ class ManifestAssetBundle implements AssetBundle {
       transformers: transformers,
     );
 
-    _checkForFlavorConflicts(asset, result.keys.toList());
+    if (bundleUri == null) {
+      _checkForFlavorConflicts(
+        asset,
+        result.keys.where((_Asset asset) => !asset.hasBundlePath).toList(),
+      );
+    }
 
     final variants = <_Asset>[];
     final File assetFile = asset.lookupAssetFile(_fileSystem);
@@ -1335,7 +1377,29 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
 
-    result[asset] = variants;
+    if (bundleUri == null) {
+      result[asset] = variants;
+    } else {
+      final Uri entryUri = packageName == null
+          ? bundleUri
+          : Uri(pathSegments: <String>['packages', packageName, ...bundleUri.pathSegments]);
+      result[asset.withBundleUri(entryUri)] = <_Asset>[
+        for (final _Asset variant in variants)
+          variant.withBundleUri(
+            variant.relativeUri == asset.relativeUri
+                ? entryUri
+                : entryUri.resolveUri(
+                    Uri(
+                      pathSegments: <String>[
+                        variant.relativeUri.pathSegments[variant.relativeUri.pathSegments.length -
+                            2],
+                        entryUri.pathSegments.last,
+                      ],
+                    ),
+                  ),
+          ),
+      ];
+    }
   }
 
   // Since it is not clear how overlapping asset declarations should work in the
@@ -1407,6 +1471,62 @@ class ManifestAssetBundle implements AssetBundle {
     }
 
     throwToolExit(errorMessage.toString());
+  }
+
+  // Run after flavor and platform filtering and after combining package and hook
+  // assets. Legacy duplicate declarations keep their existing behavior.
+  void _checkForBundlePathConflicts(List<_Asset> assets) {
+    final destinations = <String, _Asset>{};
+    const generatedPaths = <String>{
+      _kAssetManifestBinFilename,
+      _kAssetManifestBinJsonFilename,
+      kFontManifestJson,
+      _kNoticeFile,
+      _kNoticeZippedFile,
+      'kernel_blob.bin',
+      'isolate_snapshot_data',
+      'vm_snapshot_data',
+      'NativeAssetsManifest.json',
+    };
+    for (final asset in assets) {
+      final String key = asset.entryUri.normalizePath().path;
+      if (asset.hasBundlePath &&
+          generatedPaths.any((String path) => key == path || key.startsWith('$path/'))) {
+        throwToolExit(
+          'The bundle_path "$key" of asset "${asset.originUri}" '
+          'is reserved for a generated Flutter asset.',
+        );
+      }
+      final _Asset? previous = destinations[key];
+      if (previous != null &&
+          (asset.hasBundlePath || previous.hasBundlePath) &&
+          (asset.baseDir != previous.baseDir ||
+              asset.relativeUri != previous.relativeUri ||
+              asset.kind != previous.kind ||
+              !listEquals(asset.transformers, previous.transformers))) {
+        throwToolExit(
+          'Conflicting assets at bundle path "$key": '
+          '"${previous.originUri}" and "${asset.originUri}" are both selected for this build.',
+        );
+      }
+      // Keep the mapped declaration so a later legacy duplicate cannot hide it.
+      if (previous == null || asset.hasBundlePath) {
+        destinations[key] = asset;
+      }
+    }
+    for (final MapEntry<String, _Asset> entry in destinations.entries) {
+      final List<String> segments = entry.key.split('/');
+      for (var index = 1; index < segments.length; index += 1) {
+        final String parent = segments.take(index).join('/');
+        final _Asset? parentAsset = destinations[parent];
+        if (parentAsset != null && (entry.value.hasBundlePath || parentAsset.hasBundlePath)) {
+          throwToolExit(
+            'Conflicting assets at bundle paths "$parent" and "${entry.key}": '
+            'a file cannot also be used as a directory.',
+          );
+        }
+      }
+    }
   }
 
   void _ensureAssetPathIsValid({
@@ -1554,6 +1674,7 @@ class _Asset {
     required this.entryUri,
     required this.package,
     this.kind = AssetKind.regular,
+    this.hasBundlePath = false,
     Set<String>? flavors,
     Set<String>? platforms,
     List<AssetTransformerEntry>? transformers,
@@ -1578,6 +1699,21 @@ class _Asset {
   final Uri entryUri;
 
   final AssetKind kind;
+
+  final bool hasBundlePath;
+
+  _Asset withBundleUri(Uri uri) => _Asset(
+    baseDir: baseDir,
+    originUri: originUri,
+    relativeUri: relativeUri,
+    entryUri: uri,
+    package: package,
+    kind: kind,
+    hasBundlePath: true,
+    flavors: flavors,
+    platforms: platforms,
+    transformers: transformers,
+  );
 
   final Set<String> flavors;
 
@@ -1643,13 +1779,23 @@ class _Asset {
         other.relativeUri == relativeUri &&
         other.entryUri == entryUri &&
         other.kind == kind &&
+        other.hasBundlePath == hasBundlePath &&
+        (!hasBundlePath || listEquals(other.transformers, transformers)) &&
         hasEquivalentFlavorsWith(other) &&
         hasEquivalentPlatformsWith(other);
   }
 
   @override
-  int get hashCode =>
-      Object.hashAll(<Object>[baseDir, relativeUri, entryUri, kind, ...flavors, ...platforms]);
+  int get hashCode => Object.hashAll(<Object>[
+    baseDir,
+    relativeUri,
+    entryUri,
+    kind,
+    hasBundlePath,
+    if (hasBundlePath) ...transformers,
+    ...flavors,
+    ...platforms,
+  ]);
 }
 
 // Given an assets directory like this:
