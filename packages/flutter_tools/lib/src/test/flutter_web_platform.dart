@@ -124,8 +124,18 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_packageFilesHandler);
     _server.mount(cascade.handler);
     _testGoldenComparator = TestGoldenComparator(
-      compilerFactory: () =>
-          TestCompiler(buildInfo, flutterProject, testTimeRecorder: testTimeRecorder),
+      compilerFactory: () => TestCompiler(
+        buildInfo,
+        flutterProject,
+        artifacts: artifacts ?? globals.artifacts!,
+        config: globals.config,
+        fileSystem: _fileSystem,
+        logger: _logger,
+        platform: globals.platform,
+        processManager: processManager,
+        shutdownHooks: globals.shutdownHooks,
+        testTimeRecorder: testTimeRecorder,
+      ),
       flutterTesterBinPath: flutterTesterBinPath,
       fileSystem: _fileSystem,
       logger: _logger,
@@ -797,16 +807,24 @@ class BrowserManager {
     // the browser is still running code which means the user isn't debugging.
     _channel = MultiChannel<dynamic>(
       webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object?> stream) {
-        return stream.map((Object? message) {
-          if (!_closed) {
-            _timer.reset();
-          }
-          for (final RunnerSuiteController controller in _controllers) {
-            controller.setDebugging(false);
-          }
+        return stream
+            .handleError((Object error) {
+              final formatException = error as FormatException;
+              _logger.printWarning(
+                'Received unexpected non-JSON message from browser WebSocket: ${formatException.source}',
+              );
+              _logger.printTrace('JSON decode error: $formatException');
+            }, test: (error) => error is FormatException)
+            .map((Object? message) {
+              if (!_closed) {
+                _timer.reset();
+              }
+              for (final RunnerSuiteController controller in _controllers) {
+                controller.setDebugging(false);
+              }
 
-          return message;
-        });
+              return message;
+            });
       }),
     );
 
