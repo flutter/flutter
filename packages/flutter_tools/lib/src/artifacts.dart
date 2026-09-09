@@ -303,28 +303,28 @@ abstract class Artifacts {
     required ToolContext toolContext,
   }) {
     final ToolContext(
-      cache: Cache targetCache,
-      fs: FileSystem targetFileSystem,
-      os: OperatingSystemUtils targetOs,
-      platform: Platform targetPlatform,
-      processManager: ProcessManager targetProcessManager,
+      :Cache cache,
+      :FileSystem fs,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessManager processManager,
     ) = toolContext;
 
     Artifacts artifacts = CachedArtifacts(
-      fileSystem: targetFileSystem,
-      platform: targetPlatform,
-      cache: targetCache,
-      operatingSystemUtils: targetOs,
+      fileSystem: fs,
+      platform: platform,
+      cache: cache,
+      operatingSystemUtils: os,
     );
     if (engineBuildPaths.hostEngine != null && engineBuildPaths.targetEngine != null) {
       artifacts = CachedLocalEngineArtifacts(
         engineBuildPaths.hostEngine!,
         engineOutPath: engineBuildPaths.targetEngine!,
-        cache: targetCache,
-        fileSystem: targetFileSystem,
-        processManager: targetProcessManager,
-        platform: targetPlatform,
-        operatingSystemUtils: targetOs,
+        cache: cache,
+        fileSystem: fs,
+        processManager: processManager,
+        platform: platform,
+        operatingSystemUtils: os,
         parent: artifacts,
       );
     }
@@ -332,9 +332,9 @@ abstract class Artifacts {
       artifacts = CachedLocalWebSdkArtifacts(
         parent: artifacts,
         webSdkPath: engineBuildPaths.webSdk!,
-        fileSystem: targetFileSystem,
-        platform: targetPlatform,
-        operatingSystemUtils: targetOs,
+        fileSystem: fs,
+        platform: platform,
+        operatingSystemUtils: os,
       );
     }
     return artifacts;
