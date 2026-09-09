@@ -438,7 +438,7 @@ void main() {
             expect(environment.artifacts.usesLocalArtifacts, isTrue);
             expect(
               environment.artifacts.localEngineInfo?.targetOutPath,
-              endsWith('engine/src/out/host_debug'),
+              endsWith(fileSystem.path.join('engine', 'src', 'out', 'host_debug')),
             );
             expect(environment.engineVersion, isNull);
           }),
