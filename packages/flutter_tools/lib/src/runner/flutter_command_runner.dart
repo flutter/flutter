@@ -564,11 +564,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (engineBuildPaths != null) {
       final Artifacts localArtifacts = Artifacts.getLocalEngine(
         engineBuildPaths,
-        cache: _toolContext.cache,
-        fileSystem: _toolContext.fs,
-        operatingSystemUtils: _toolContext.os,
-        platform: _toolContext.platform,
-        processManager: _toolContext.processManager,
+        toolContext: _toolContext,
       );
       contextOverrides.addAll(<Type, Object?>{Artifacts: localArtifacts});
       // Update the artifacts the commands were created with.

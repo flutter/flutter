@@ -14,6 +14,7 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
+import 'context/tool_context.dart';
 import 'globals.dart' as globals;
 
 //////////////////////////////////////////////////////////////////////
@@ -299,27 +300,31 @@ abstract class Artifacts {
 
   static Artifacts getLocalEngine(
     EngineBuildPaths engineBuildPaths, {
-    required Cache cache,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-    required ProcessManager processManager,
+    required ToolContext toolContext,
   }) {
+    final ToolContext(
+      cache: targetCache,
+      fs: targetFileSystem,
+      os: targetOs,
+      platform: targetPlatform,
+      processManager: targetProcessManager,
+    ) = toolContext;
+
     Artifacts artifacts = CachedArtifacts(
-      fileSystem: fileSystem,
-      platform: platform,
-      cache: cache,
-      operatingSystemUtils: operatingSystemUtils,
+      fileSystem: targetFileSystem,
+      platform: targetPlatform,
+      cache: targetCache,
+      operatingSystemUtils: targetOs,
     );
     if (engineBuildPaths.hostEngine != null && engineBuildPaths.targetEngine != null) {
       artifacts = CachedLocalEngineArtifacts(
         engineBuildPaths.hostEngine!,
         engineOutPath: engineBuildPaths.targetEngine!,
-        cache: cache,
-        fileSystem: fileSystem,
-        processManager: processManager,
-        platform: platform,
-        operatingSystemUtils: operatingSystemUtils,
+        cache: targetCache,
+        fileSystem: targetFileSystem,
+        processManager: targetProcessManager,
+        platform: targetPlatform,
+        operatingSystemUtils: targetOs,
         parent: artifacts,
       );
     }
@@ -327,9 +332,9 @@ abstract class Artifacts {
       artifacts = CachedLocalWebSdkArtifacts(
         parent: artifacts,
         webSdkPath: engineBuildPaths.webSdk!,
-        fileSystem: fileSystem,
-        platform: platform,
-        operatingSystemUtils: operatingSystemUtils,
+        fileSystem: targetFileSystem,
+        platform: targetPlatform,
+        operatingSystemUtils: targetOs,
       );
     }
     return artifacts;
