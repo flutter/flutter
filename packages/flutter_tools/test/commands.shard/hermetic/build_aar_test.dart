@@ -9,11 +9,14 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
+import '../../src/context.dart';
+
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
@@ -81,7 +84,7 @@ flutter:
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testWithoutContext('will build an AAR for a module', () async {
+  testUsingContext('will build an AAR for a module', () async {
     fs.file('pubspec.yaml').writeAsStringSync('''
 name: foo_bar
 
@@ -111,7 +114,7 @@ flutter:
         ),
       ),
     );
-  });
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
   testWithoutContext('throws ToolExit if androidSdk is null', () async {
     fs.file('pubspec.yaml').writeAsStringSync('''

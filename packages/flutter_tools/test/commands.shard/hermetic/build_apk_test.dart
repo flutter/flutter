@@ -11,12 +11,13 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/android_common.dart';
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -84,7 +85,7 @@ flutter:
 ''');
   }
 
-  testWithoutContext('throws ToolExit if androidSdk is null', () async {
+  testUsingContext('throws ToolExit if androidSdk is null', () async {
     createMinimalProject();
 
     final command = BuildApkCommand(
@@ -98,9 +99,9 @@ flutter:
       createTestCommandRunner(command).run(const <String>['apk', '--no-pub']),
       throwsToolExit(message: 'No Android SDK found'),
     );
-  });
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
-  testWithoutContext('builds APK successfully with default arguments', () async {
+  testUsingContext('builds APK successfully with default arguments', () async {
     createMinimalProject();
 
     var buildApkCalled = false;
@@ -123,15 +124,16 @@ flutter:
       toolContext: toolContext,
     );
 
-    await createTestCommandRunner(command, fakeAnalytics).run(const <String>['apk', '--no-pub']);
+    final CommandRunner<void> runner = createTestCommandRunner(command, fakeAnalytics);
+    await runner.run(const <String>['apk', '--no-pub']);
     expect(buildApkCalled, isTrue);
     expect(
       fakeAnalytics.sentEvents,
       contains(Event.flutterBuildInfo(label: 'manifest-impeller-enabled', buildType: 'android')),
     );
-  });
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
-  testWithoutContext('records unified analytics usage values', () async {
+  testUsingContext('records unified analytics usage values', () async {
     createMinimalProject();
 
     final command = BuildApkCommand(
@@ -155,9 +157,9 @@ flutter:
         buildApkEnableHcpp: true,
       ),
     );
-  });
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true)});
 
-  testWithoutContext('passes splitPerAbi and targetPlatform to AndroidBuildInfo', () async {
+  testUsingContext('passes splitPerAbi and targetPlatform to AndroidBuildInfo', () async {
     createMinimalProject();
 
     AndroidBuildInfo? capturedBuildInfo;
@@ -180,7 +182,8 @@ flutter:
       toolContext: toolContext,
     );
 
-    await createTestCommandRunner(command).run(const <String>[
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(const <String>[
       'apk',
       '--no-pub',
       '--split-per-abi',
@@ -192,7 +195,7 @@ flutter:
     expect(capturedBuildInfo!.splitPerAbi, isTrue);
     expect(capturedBuildInfo!.targetArchs, <CpuArch>[CpuArch.arm64]);
     expect(capturedBuildInfo!.buildInfo.mode, BuildMode.debug);
-  });
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 }
 
 class _RecordingAndroidBuilder extends FakeAndroidBuilder {

@@ -17,9 +17,9 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 
-import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
@@ -54,25 +54,24 @@ void main() {
     () async {
       fileSystem.file(fileSystem.path.join('web', 'index.html')).deleteSync();
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(
-          androidBuilder: FakeAndroidBuilder(),
-          androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-          appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+        createFakeBuildCommand(
+          androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: logger,
+          osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
           templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(
-            artifacts: FakeArtifacts(),
-            cache: FakeCache(),
-            config: FakeConfig(),
-            fs: fileSystem,
-            flutterVersion: FakeFlutterVersion(),
-            logger: logger,
-            os: FakeOperatingSystemUtils(),
-            platform: FakePlatform(),
-            processManager: FakeProcessManager.any(),
-            processUtils: FakeProcessUtils(),
-            terminal: FakeTerminal(),
-          ),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         ),
       );
 
@@ -97,25 +96,24 @@ void main() {
     'Refuses to build for web when feature is disabled',
     () async {
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(
-          androidBuilder: FakeAndroidBuilder(),
-          androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-          appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+        createFakeBuildCommand(
+          androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: MemoryFileSystem.test(),
+          logger: logger,
+          osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
           templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(
-            artifacts: FakeArtifacts(),
-            cache: FakeCache(),
-            config: FakeConfig(),
-            fs: MemoryFileSystem.test(),
-            flutterVersion: FakeFlutterVersion(),
-            logger: logger,
-            os: FakeOperatingSystemUtils(),
-            platform: FakePlatform(),
-            processManager: FakeProcessManager.any(),
-            processUtils: FakeProcessUtils(),
-            terminal: FakeTerminal(),
-          ),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         ),
       );
 
@@ -138,25 +136,24 @@ void main() {
   testUsingContext(
     'Setup for a web build with default output directory',
     () async {
-      final buildCommand = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+      final BuildCommand buildCommand = createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -202,25 +199,24 @@ void main() {
   testUsingContext(
     'Passes --web-define values to environment defines with prefix',
     () async {
-      final buildCommand = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+      final BuildCommand buildCommand = createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -254,25 +250,24 @@ void main() {
   testUsingContext(
     'Builds successfully without --web-define',
     () async {
-      final buildCommand = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+      final BuildCommand buildCommand = createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -302,25 +297,24 @@ void main() {
     'Infers target entrypoint correctly from --target',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/136830.
-      final buildCommand = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+      final BuildCommand buildCommand = createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -366,25 +360,24 @@ void main() {
     'Infers target entrypoint correctly from positional argument list',
     () async {
       // Regression test for https://github.com/flutter/flutter/issues/136830.
-      final buildCommand = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+      final BuildCommand buildCommand = createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -429,25 +422,24 @@ void main() {
   testUsingContext(
     'Does not allow -O0 optimization level',
     () async {
-      final buildCommand = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+      final BuildCommand buildCommand = createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: BufferLogger.test(),
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: BufferLogger.test(),
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
@@ -481,25 +473,24 @@ void main() {
   testUsingContext(
     'Setup for a web build with a user specified output directory',
     () async {
-      final buildCommand = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+      final BuildCommand buildCommand = createFakeBuildCommand(
+        androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
       );
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
 
@@ -1048,25 +1039,24 @@ void main() {
     () async {
       fileSystem.file(fileSystem.path.join('web')).deleteSync(recursive: true);
       final CommandRunner<void> runner = createTestCommandRunner(
-        BuildCommand(
-          androidBuilder: FakeAndroidBuilder(),
-          androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-          appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+        createFakeBuildCommand(
+          androidSdk: FakeAndroidSdk(),
           buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          fileSystem: fileSystem,
+          logger: logger,
+          osUtils: FakeOperatingSystemUtils(),
+          config: FakeConfig(),
+          platform: FakePlatform(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          terminal: FakeTerminal(),
+          plistParser: FakePlistParser(),
+          processUtils: FakeProcessUtils(),
+          processManager: FakeProcessManager.any(),
           templateRenderer: FakeTemplateRenderer(),
-          toolContext: FakeToolContext(
-            artifacts: FakeArtifacts(),
-            cache: FakeCache(),
-            config: FakeConfig(),
-            fs: fileSystem,
-            flutterVersion: FakeFlutterVersion(),
-            logger: logger,
-            os: FakeOperatingSystemUtils(),
-            platform: FakePlatform(),
-            processManager: FakeProcessManager.any(),
-            processUtils: FakeProcessUtils(),
-            terminal: FakeTerminal(),
-          ),
+          xcode: FakeXcode(),
+          artifacts: FakeArtifacts(),
+          cache: FakeCache(),
+          flutterVersion: FakeFlutterVersion(),
         ),
       );
 

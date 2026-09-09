@@ -112,6 +112,22 @@ class BuildApkCommand extends BuildSubCommand {
   ToolContext get toolContext => super.toolContext!;
 
   @override
+  FlutterProject get project =>
+      toolContext.projectFactory.fromDirectory(toolContext.fs.currentDirectory);
+
+  @override
+  String get targetFile {
+    if (argResults?.wasParsed('target') ?? false) {
+      return stringArg('target')!;
+    }
+    final List<String>? rest = argResults?.rest;
+    if (rest != null && rest.isNotEmpty) {
+      return rest.first;
+    }
+    return toolContext.fs.path.join('lib', 'main.dart');
+  }
+
+  @override
   final name = 'apk';
 
   @override
@@ -152,7 +168,7 @@ class BuildApkCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(:Logger logger, :Terminal terminal) = toolContext;
     if (androidSdk == null) {
-      exitWithNoSdkMessage(analytics: analytics, logger: toolContext.logger);
+      exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
     final BuildInfo buildInfo = await getBuildInfo();
 

@@ -16,9 +16,9 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:test/fake.dart';
 
-import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_build_command.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
@@ -76,25 +76,11 @@ void main() {
   }
 
   BuildCommand makeBuildCommand() {
-    return BuildCommand(
-      androidBuilder: FakeAndroidBuilder(),
-      androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-      appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
+    return createFakeBuildCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      templateRenderer: FakeTemplateRenderer(),
-      toolContext: FakeToolContext(
-        artifacts: FakeArtifacts(),
-        cache: FakeCache(),
-        config: FakeConfig(),
-        fs: fileSystem,
-        flutterVersion: FakeFlutterVersion(),
-        logger: logger,
-        os: FakeOperatingSystemUtils(),
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.any(),
-        processUtils: FakeProcessUtils(),
-        terminal: FakeTerminal(),
-      ),
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true),
+      fileSystem: fileSystem,
+      logger: logger,
     );
   }
 

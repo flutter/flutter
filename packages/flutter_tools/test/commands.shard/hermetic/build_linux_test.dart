@@ -5,6 +5,7 @@
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -20,7 +21,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
@@ -110,29 +110,83 @@ void main() {
     );
   }
 
+  BuildCommand createBuildCommand({
+    Platform? platform,
+    FeatureFlags? featureFlags,
+    OperatingSystemUtils? osUtils,
+    bool verboseHelp = false,
+  }) {
+    final Platform effectivePlatform = platform ?? (context.get<Platform>() ?? linuxPlatform);
+    final FeatureFlags effectiveFeatureFlags =
+        featureFlags ?? (context.get<FeatureFlags>() ?? TestFeatureFlags(isLinuxEnabled: true));
+    final OperatingSystemUtils effectiveOsUtils =
+        osUtils ?? (context.get<OperatingSystemUtils>() ?? FakeOperatingSystemUtils());
+    final BufferLogger effectiveLogger =
+        (context.get<Logger>() as BufferLogger?) ?? (logger as BufferLogger);
+    final ProcessManager effectiveProcessManager = context.get<ProcessManager>() ?? processManager;
+    final toolContext = FakeToolContext(
+      cache: Cache.test(
+        rootOverride: fileSystem.directory(_kTestFlutterRoot),
+        logger: effectiveLogger,
+        processManager: effectiveProcessManager,
+      ),
+      fs: fileSystem,
+      logger: effectiveLogger,
+      os: effectiveOsUtils,
+      platform: effectivePlatform,
+      processManager: effectiveProcessManager,
+      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
+    );
+    return BuildCommand(
+      androidContext: FakeAndroidContext(),
+      appleContext: FakeAppleContext(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      featureFlags: effectiveFeatureFlags,
+      templateRenderer: FakeTemplateRenderer(),
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    );
+  }
+
+  BuildLinuxCommand createBuildLinuxCommand({
+    Platform? platform,
+    FeatureFlags? featureFlags,
+    OperatingSystemUtils? osUtils,
+    bool verboseHelp = false,
+  }) {
+    final Platform effectivePlatform = platform ?? (context.get<Platform>() ?? linuxPlatform);
+    final FeatureFlags effectiveFeatureFlags =
+        featureFlags ?? (context.get<FeatureFlags>() ?? TestFeatureFlags(isLinuxEnabled: true));
+    final OperatingSystemUtils effectiveOsUtils =
+        osUtils ?? (context.get<OperatingSystemUtils>() ?? FakeOperatingSystemUtils());
+    final BufferLogger effectiveLogger =
+        (context.get<Logger>() as BufferLogger?) ?? (logger as BufferLogger);
+    final ProcessManager effectiveProcessManager = context.get<ProcessManager>() ?? processManager;
+    final toolContext = FakeToolContext(
+      cache: Cache.test(
+        rootOverride: fileSystem.directory(_kTestFlutterRoot),
+        logger: effectiveLogger,
+        processManager: effectiveProcessManager,
+      ),
+      fs: fileSystem,
+      logger: effectiveLogger,
+      os: effectiveOsUtils,
+      platform: effectivePlatform,
+      processManager: effectiveProcessManager,
+      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
+    );
+    return BuildLinuxCommand(
+            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      featureFlags: effectiveFeatureFlags,
+      toolContext: toolContext,
+      verboseHelp: verboseHelp,
+    );
+  }
+
   testUsingContext(
     'Linux build fails when there is no linux project',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       setUpMockCoreProjectFiles();
 
       expect(
@@ -156,26 +210,7 @@ void main() {
   testUsingContext(
     'Linux build fails on non-linux platform',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       setUpMockProjectFilesForBuild();
 
       expect(
@@ -194,33 +229,13 @@ void main() {
   testUsingContext(
     'Linux build fails when feature is disabled',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       setUpMockProjectFilesForBuild();
 
       expect(
         createTestCommandRunner(command).run(const <String>['build', 'linux', '--no-pub']),
         throwsToolExit(
-          message:
-              '"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".',
+          message: '"build linux" is not currently supported. To enable, run "flutter config --enable-linux-desktop".',
         ),
       );
     },
@@ -235,26 +250,6 @@ void main() {
   testUsingContext(
     'Linux build outputs path when successful',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: MemoryFileSystem.test(),
-          flutterVersion: FakeFlutterVersion(),
-          logger: BufferLogger.test(),
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
       processManager = FakeProcessManager.list(<FakeCommand>[
         cmakeCommand('release'),
         ninjaCommand('release'),
@@ -262,6 +257,7 @@ void main() {
 
       setUpMockProjectFilesForBuild();
 
+      final BuildCommand command = createBuildCommand();
       await createTestCommandRunner(command).run(const <String>['build', 'linux', '--no-pub']);
       expect(testLogger.statusText, contains('✓ Built build/linux/x64/release/bundle'));
     },
@@ -277,26 +273,7 @@ void main() {
   testUsingContext(
     'Linux build invokes CMake and ninja, and writes temporary files',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       processManager.addCommands(<FakeCommand>[cmakeCommand('release'), ninjaCommand('release')]);
 
       setUpMockProjectFilesForBuild();
@@ -334,34 +311,16 @@ void main() {
   testUsingContext(
     'Handles missing cmake',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
       setUpMockProjectFilesForBuild();
       processManager = FakeProcessManager.empty()..excludedExecutables.add('cmake');
 
+      final BuildCommand command = createBuildCommand();
       expect(
         createTestCommandRunner(command).run(const <String>['build', 'linux', '--no-pub']),
         throwsToolExit(message: 'CMake is required for Linux development.'),
       );
     },
+
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
@@ -374,26 +333,7 @@ void main() {
   testUsingContext(
     'Handles argument error from missing ninja',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
         cmakeCommand('release'),
@@ -422,35 +362,15 @@ void main() {
   testUsingContext(
     'Linux build does not spew stdout to status logger',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
         cmakeCommand('debug'),
         ninjaCommand('debug', stdout: 'STDOUT STUFF'),
       ]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--debug', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--debug', '--no-pub']);
       expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
       expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
       expect(testLogger.errorText, isNot(contains('STDOUT STUFF')));
@@ -468,26 +388,7 @@ void main() {
   testUsingContext(
     'Linux build extracts errors from stdout',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       setUpMockProjectFilesForBuild();
 
       // This contains a mix of routine build output and various types of errors
@@ -541,26 +442,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   testUsingContext(
     'Linux verbose build sets VERBOSE_SCRIPT_LOGGING',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
         cmakeCommand('debug'),
@@ -571,9 +453,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         ),
       ]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--debug', '-v', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--debug', '-v', '--no-pub']);
       expect(testLogger.statusText, contains('STDOUT STUFF'));
       expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
       expect(testLogger.warningText, isNot(contains('STDOUT STUFF')));
@@ -592,32 +473,12 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   testUsingContext(
     'Linux on x64 build --debug passes debug mode to cmake and ninja',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[cmakeCommand('debug'), ninjaCommand('debug')]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--debug', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--debug', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -632,25 +493,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   testUsingContext(
     'Linux on ARM64 build --debug passes debug mode to cmake and ninja',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+      final BuildCommand command = createBuildCommand(
+        osUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -658,9 +502,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         ninjaCommand('debug', target: 'arm64'),
       ]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--debug', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--debug', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -673,25 +516,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   testUsingContext(
     'Linux on RISCV64 build --debug passes debug mode to cmake and ninja',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_riscv64),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+      final BuildCommand command = createBuildCommand(
+        osUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_riscv64),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -699,9 +525,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         ninjaCommand('debug', target: 'riscv64'),
       ]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--debug', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--debug', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -714,32 +539,12 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   testUsingContext(
     'Linux on x64 build --profile passes profile mode to make',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[cmakeCommand('profile'), ninjaCommand('profile')]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--profile', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--profile', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -753,25 +558,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   testUsingContext(
     'Linux on ARM64 build --profile passes profile mode to make',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+      final BuildCommand command = createBuildCommand(
+        osUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -779,9 +567,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         ninjaCommand('profile', target: 'arm64'),
       ]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--profile', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--profile', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -794,25 +581,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   testUsingContext(
     'Linux on RISCV64 build --profile passes profile mode to make',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_riscv64),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+      final BuildCommand command = createBuildCommand(
+        osUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_riscv64),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -820,9 +590,8 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
         ninjaCommand('profile', target: 'riscv64'),
       ]);
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--profile', '--no-pub']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--profile', '--no-pub']);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -835,31 +604,13 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   testUsingContext(
     'Not support Linux cross-build for x64 on arm64',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+      final BuildCommand command = createBuildCommand(
+        osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
       );
 
       expect(
-        createTestCommandRunner(
-          command,
-        ).run(const <String>['build', 'linux', '--no-pub', '--target-platform=linux-x64']),
+        createTestCommandRunner(command)
+            .run(const <String>['build', 'linux', '--no-pub', '--target-platform=linux-x64']),
         throwsToolExit(),
       );
     },
@@ -872,26 +623,7 @@ ERROR: No file or variants found for asset: images/a_dot_burr.jpeg
   testUsingContext(
     'Linux build configures CMake exports',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[cmakeCommand('release'), ninjaCommand('release')]);
       fileSystem.file('lib/other.dart').createSync(recursive: true);
@@ -988,28 +720,7 @@ set(BINARY_NAME "fizz_bar")
   );
 
   testUsingContext('Refuses to build for Linux when feature is disabled', () {
-    final CommandRunner<void> runner = createTestCommandRunner(
-      BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      ),
-    );
+    final CommandRunner<void> runner = createTestCommandRunner(createBuildCommand());
 
     expect(() => runner.run(<String>['build', 'linux', '--no-pub']), throwsToolExit());
   }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
@@ -1017,13 +728,7 @@ set(BINARY_NAME "fizz_bar")
   testUsingContext(
     'hidden when not enabled on Linux host',
     () {
-      expect(
-        BuildLinuxCommand(
-          logger: BufferLogger.test(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-        ).hidden,
-        true,
-      );
+      expect(createBuildLinuxCommand().hidden, true);
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(),
@@ -1034,13 +739,7 @@ set(BINARY_NAME "fizz_bar")
   testUsingContext(
     'Not hidden when enabled and on Linux host',
     () {
-      expect(
-        BuildLinuxCommand(
-          logger: BufferLogger.test(),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-        ).hidden,
-        false,
-      );
+      expect(createBuildLinuxCommand().hidden, false);
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
@@ -1051,26 +750,7 @@ set(BINARY_NAME "fizz_bar")
   testUsingContext(
     'Performs code size analysis and sends analytics',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: FakeOperatingSystemUtils(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
-      );
+      final BuildCommand command = createBuildCommand();
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
         cmakeCommand('release'),
@@ -1099,9 +779,8 @@ set(BINARY_NAME "fizz_bar")
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.filled(10000, 0));
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
 
       expect(
         testLogger.statusText,
@@ -1123,25 +802,8 @@ set(BINARY_NAME "fizz_bar")
   testUsingContext(
     'Linux on ARM64 build --release passes, and check if the LinuxBuildDirectory for arm64 can be referenced correctly by using analytics',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+      final BuildCommand command = createBuildCommand(
+        osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
@@ -1172,9 +834,8 @@ set(BINARY_NAME "fizz_bar")
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.filled(10000, 0));
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
 
       // check if libapp.so of "build/linux/arm64/release" directory can be referenced.
       expect(testLogger.statusText, contains('libapp.so (Dart AOT)'));
@@ -1194,31 +855,15 @@ set(BINARY_NAME "fizz_bar")
   testUsingContext(
     'Linux on RISCV64 build --release passes, and check if the LinuxBuildDirectory for riscv64 can be referenced correctly by using analytics',
     () async {
-      final command = BuildCommand(
-        androidBuilder: FakeAndroidBuilder(),
-        androidContext: FakeAndroidContext(androidSdk: FakeAndroidSdk()),
-        appleContext: FakeAppleContext(xcode: FakeXcode(), plistParser: FakePlistParser()),
-        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        templateRenderer: FakeTemplateRenderer(),
-        toolContext: FakeToolContext(
-          artifacts: FakeArtifacts(),
-          cache: FakeCache(),
-          config: FakeConfig(),
-          fs: fileSystem,
-          flutterVersion: FakeFlutterVersion(),
-          logger: logger,
-          os: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_riscv64),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.any(),
-          processUtils: FakeProcessUtils(),
-          terminal: FakeTerminal(),
-        ),
+      final BuildCommand command = createBuildCommand(
+        osUtils: CustomFakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_riscv64),
       );
       setUpMockProjectFilesForBuild();
       processManager.addCommands(<FakeCommand>[
         cmakeCommand('release', target: 'riscv64'),
         ninjaCommand(
           'release',
+
           target: 'riscv64',
           onRun: (_) {
             fileSystem.file('build/flutter_size_01/snapshot.linux-riscv64.json')
@@ -1243,9 +888,8 @@ set(BINARY_NAME "fizz_bar")
         ..createSync(recursive: true)
         ..writeAsBytesSync(List<int>.filled(10000, 0));
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
+      await createTestCommandRunner(command)
+          .run(const <String>['build', 'linux', '--no-pub', '--analyze-size']);
 
       // check if libapp.so of "build/linux/riscv64/release" directory can be referenced.
       expect(testLogger.statusText, contains('libapp.so (Dart AOT)'));

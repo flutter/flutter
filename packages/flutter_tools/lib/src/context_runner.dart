@@ -29,8 +29,6 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
-import 'context/android_context.dart';
-import 'context/tool_context.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
@@ -93,40 +91,16 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         config: globals.config,
       ),
       AndroidBuilder: () => AndroidGradleBuilder(
-        toolContext: ToolContext(
-          artifacts: globals.artifacts!,
-          botDetector: globals.botDetector,
-          cache: globals.cache,
-          config: globals.config,
-          customDevicesConfig: globals.customDevicesConfig,
-          flutterVersion: globals.flutterVersion,
-          fs: globals.fs,
-          git: globals.git,
-          localEngineLocator: globals.localEngineLocator!,
-          logger: globals.logger,
-          os: globals.os,
-          outputPreferences: globals.outputPreferences,
-          persistentToolState: globals.persistentToolState!,
-          platform: globals.platform,
-          preRunValidator: globals.preRunValidator,
-          processInfo: globals.processInfo,
-          processManager: globals.processManager,
-          processUtils: globals.processUtils,
-          projectFactory: globals.projectFactory,
-          shutdownHooks: globals.shutdownHooks,
-          signals: globals.signals,
-          stdio: globals.stdio,
-          systemClock: globals.systemClock,
-          terminal: globals.terminal,
-          userMessages: globals.userMessages,
-        ),
-        androidContext: AndroidContext(
-          androidSdk: globals.androidSdk,
-          androidStudio: globals.androidStudio,
-          gradleUtils: globals.gradleUtils!,
-          java: globals.java,
-        ),
+        java: globals.java,
+        logger: globals.logger,
+        processManager: globals.processManager,
+        fileSystem: globals.fs,
+        artifacts: globals.artifacts!,
         analytics: globals.analytics,
+        gradleUtils: globals.gradleUtils!,
+        platform: globals.platform,
+        androidStudio: globals.androidStudio,
+        androidSdk: globals.androidSdk,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         platform: globals.platform,
