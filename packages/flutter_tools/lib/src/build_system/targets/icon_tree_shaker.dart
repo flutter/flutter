@@ -25,7 +25,7 @@ List<Map<String, Object?>> _getList(Object? object, String errorMessage) {
   throw IconTreeShakerException._(errorMessage);
 }
 
-/// A class that wraps the functionality of the const finder package and the
+/// A class that wraps the functionality of recorded uses and the
 /// font subset utility to tree shake unused icons from fonts.
 class IconTreeShaker {
   /// Creates a wrapper for icon font subsetting.
