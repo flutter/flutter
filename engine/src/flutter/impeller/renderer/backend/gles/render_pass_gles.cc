@@ -43,10 +43,39 @@ void RenderPassGLES::OnSetLabel(std::string_view label) {
   label_ = label;
 }
 
+/// Whether any of this attachment's factors reads the constant blend colour.
+static bool UsesBlendColor(const ColorAttachmentDescriptor* color) {
+  auto reads_constant = [](BlendFactor factor) {
+    switch (factor) {
+      case BlendFactor::kBlendColor:
+      case BlendFactor::kOneMinusBlendColor:
+      case BlendFactor::kBlendAlpha:
+      case BlendFactor::kOneMinusBlendAlpha:
+        return true;
+      default:
+        return false;
+    }
+  };
+  return reads_constant(color->src_color_blend_factor) ||
+         reads_constant(color->dst_color_blend_factor) ||
+         reads_constant(color->src_alpha_blend_factor) ||
+         reads_constant(color->dst_alpha_blend_factor);
+}
+
 void ConfigureBlending(const ProcTableGLES& gl,
-                       const ColorAttachmentDescriptor* color) {
+                       const ColorAttachmentDescriptor* color,
+                       const Color& blend_color) {
   if (color->blending_enabled) {
     gl.Enable(GL_BLEND);
+    // Only when one of the four constant factors actually reads it. The
+    // factors are already in hand, so the check is free, and this runs once
+    // per command in the encode loop where an unconditional call would be
+    // hundreds of redundant driver round-trips a frame — two each in debug,
+    // where every GL call is followed by glGetError.
+    if (UsesBlendColor(color)) {
+      gl.BlendColor(blend_color.red, blend_color.green, blend_color.blue,
+                    blend_color.alpha);
+    }
     gl.BlendFuncSeparate(
         ToBlendFactor(color->src_color_blend_factor),  // src color
         ToBlendFactor(color->dst_color_blend_factor),  // dst color
@@ -196,6 +225,10 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   gl.DepthMask(GL_TRUE);
   gl.StencilMaskSeparate(GL_FRONT, 0xFFFFFFFF);
   gl.StencilMaskSeparate(GL_BACK, 0xFFFFFFFF);
+  // The blend constant belongs to the context, not the pass, so a pass that
+  // set one would otherwise hand it to whoever draws next — another pass, an
+  // embedder, a platform view.
+  gl.BlendColor(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 static void EncodeViewport(const ProcTableGLES& gl,
@@ -391,7 +424,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Configure blending.
     ///
-    ConfigureBlending(gl, color_attachment);
+    ConfigureBlending(gl, color_attachment, command.blend_color);
 
     //--------------------------------------------------------------------------
     /// Setup stencil.
