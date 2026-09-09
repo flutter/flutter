@@ -34,32 +34,20 @@ typedef MDnsClientFactory = MDnsClient Function();
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
   /// Creates a new [MDnsVmServiceDiscovery] object.
-  ///
-  /// The [mdnsClient] parameter can be used to provide a specific [MDnsClient]
-  /// instance (typically for testing).
-  ///
-  /// If [mdnsClientFactory] is provided, it is invoked to produce a fresh
-  /// [MDnsClient] for launch queries so that cached mDNS records do not persist
-  /// across separate launches.
   MDnsVmServiceDiscovery({
-    MDnsClient? mdnsClient,
-    MDnsClientFactory? mdnsClientFactory,
-    MDnsClient? preliminaryMDnsClient,
     required Logger logger,
     required Analytics analytics,
-  }) : _client = mdnsClient,
-       _clientFactory = mdnsClientFactory ?? (mdnsClient == null ? MDnsClient.new : null),
+    MDnsClientFactory mdnsClientFactory = MDnsClient.new,
+    MDnsClient? preliminaryMDnsClient,
+  }) : _clientFactory = mdnsClientFactory,
        _preliminaryClient = preliminaryMDnsClient,
        _logger = logger,
        _analytics = analytics;
 
-  final MDnsClient? _client;
-  final MDnsClientFactory? _clientFactory;
-
-  MDnsClient get _effectiveClient => _clientFactory?.call() ?? _client!;
+  final MDnsClientFactory _clientFactory;
 
   // Used when discovering VM services with `queryForAttach` to do a preliminary
-  // check for already running services so that results are not cached in _client.
+  // check for already running services so that results are not cached in client.
   final MDnsClient? _preliminaryClient;
 
   final Logger _logger;
@@ -125,7 +113,7 @@ class MDnsVmServiceDiscovery {
     );
     if (results.isEmpty) {
       return firstMatchingVmService(
-        _effectiveClient,
+        _clientFactory(),
         applicationId: applicationId,
         deviceVmservicePort: deviceVmservicePort,
         ipv6: ipv6,
@@ -189,7 +177,7 @@ class MDnsVmServiceDiscovery {
 
     // Query for a specific application matching on either device port or device name.
     return firstMatchingVmService(
-      _effectiveClient,
+      _clientFactory(),
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       deviceName: deviceName,
