@@ -546,12 +546,31 @@ mixin CreateBase on FlutterCommand {
       final File metadataFile = globals.fs.file(
         globals.fs.path.join(projectDir.absolute.path, '.metadata'),
       );
+      // Seed the migrate config with the platforms already tracked in an
+      // existing .metadata file. Re-running `flutter create --platforms` must
+      // add the newly requested platforms without dropping the previously
+      // added ones, and without overwriting their recorded revisions.
+      // See https://github.com/flutter/flutter/issues/191567.
+
+      var migrateConfig = MigrateConfig();
+      if (metadataFile.existsSync()) {
+        try {
+          migrateConfig = FlutterProjectMetadata(
+            metadataFile,
+            globals.logger,
+            extensionTemplateManager: null,
+          ).migrateConfig;
+        } on Exception catch (error) {
+          globals.logger.printTrace('Failed to parse existing .metadata file: $error');
+        }
+      }
+
       final metadata = FlutterProjectMetadata.explicit(
         file: metadataFile,
         versionRevision: globals.flutterVersion.frameworkRevision,
         versionChannel: globals.flutterVersion.getBranchName(), // may contain PII
         projectType: projectType,
-        migrateConfig: MigrateConfig(),
+        migrateConfig: migrateConfig,
         logger: globals.logger,
         extensionTemplateManager: null,
       );
