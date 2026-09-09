@@ -307,6 +307,7 @@ Future<int> _testNativeApp({
       .createTempSync('flutter_module_test_ios_xcresult.')
       .path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
+  final String derivedDataPath = path.join(xcodeProjectDir.path, 'DerivedData');
   final int testResultExit = await exec(
     'xcodebuild',
     <String>[
@@ -318,6 +319,8 @@ Future<int> _testNativeApp({
       'Debug',
       '-destination',
       'id=$deviceId',
+      '-derivedDataPath',
+      derivedDataPath,
       '-resultBundlePath',
       resultBundlePath,
       'test',
@@ -502,6 +505,23 @@ class Scenarios {
       r'$TEMPLATE_DIR/native/UITests-ApplicationEvents-AppNotMigrated.swift':
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
+
+    // Single scene app where FlutterViewController is instantiated with the engine,
+    // but never added to the scene hierarchy. Engine still receives events automatically.
+    'SingleScene-FlutterViewControllerNotAddedToScene': <String, String>{
+      ...sharedAppLifecycleFiles,
+      ...sharedPluginLifecycleFiles,
+      r'$TEMPLATE_DIR/native/AppDelegate-FlutterAppDelegate-FlutterEngine.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/AppDelegate.swift',
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/native/ViewController-FlutterEngineFromAppDelegate-FlutterViewControllerNotAdded.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/ViewController.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+    },
   };
 
   late Map<String, Map<String, String>> multiSceneScenarios = <String, Map<String, String>>{
@@ -555,6 +575,25 @@ class Scenarios {
       r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate-MultiScene-Storyboard.swift':
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
       r'$TEMPLATE_DIR/native/ViewController-FlutterEngineFromSceneDelegate-Storyboard.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/ViewController.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents-NoApplicationEvents.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+    },
+
+    // Multi scene app where FlutterViewController is never added to the scene hierarchy,
+    // but the engine is manually registered via registerSceneLifeCycle(with:scene:).
+    'MultiSceneEnabled-ManualRegistration-FlutterViewControllerNotAddedToScene': <String, String>{
+      ...sharedAppLifecycleFiles,
+      ...sharedPluginLifecycleFiles,
+      r'$TEMPLATE_DIR/native/Info-MultiSceneEnabled-NoStoryboard.plist':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/Info.plist',
+      r'$TEMPLATE_DIR/native/AppDelegate-FlutterAppDelegate.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/AppDelegate.swift',
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate-MultiScene-FlutterViewControllerNotAdded.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/native/ViewController-FlutterEngineFromSceneDelegate-FlutterViewControllerNotAdded.swift':
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/ViewController.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
