@@ -523,9 +523,11 @@ class NestedScrollViewState extends State<NestedScrollView> {
   }
 }
 
-// The outer position must stay within its scroll extents, but its ballistic
-// simulation should follow the inherited physics so that it stays in sync with
-// the inner position when scrolling across the header boundary.
+/// Clamps the outer scroll position while inheriting ballistic simulations.
+///
+/// The outer position must stay within its scroll extents, but its ballistic
+/// simulation should follow the inherited physics so that it stays in sync with
+/// the inner position when scrolling across the header boundary.
 class _NestedScrollViewPhysics extends ScrollPhysics {
   const _NestedScrollViewPhysics({super.parent});
 
