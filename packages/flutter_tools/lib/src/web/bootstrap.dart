@@ -390,7 +390,11 @@ const styles = `
       content: '';
       position: absolute;
       height: 100%;
+      width: 100%;
+      left: 0;
       background-color: #0175C2;
+      transform-origin: left;
+      will-change: transform;
       animation: indeterminate_first 2.0s infinite ease-out;
   }
 
@@ -398,29 +402,29 @@ const styles = `
       content: '';
       position: absolute;
       height: 100%;
+      width: 100%;
+      left: 0;
       background-color: #02569B;
+      transform-origin: left;
+      will-change: transform;
       animation: indeterminate_second 2.0s infinite ease-in;
   }
 
   @keyframes indeterminate_first {
       0% {
-          left: -100%;
-          width: 100%;
+          transform: translateX(-100%) scaleX(1);
       }
       100% {
-          left: 100%;
-          width: 10%;
+          transform: translateX(100%) scaleX(0.1);
       }
   }
 
   @keyframes indeterminate_second {
       0% {
-          left: -150%;
-          width: 100%;
+          transform: translateX(-150%) scaleX(1);
       }
       100% {
-          left: 100%;
-          width: 10%;
+          transform: translateX(100%) scaleX(0.1);
       }
   }
 `;
