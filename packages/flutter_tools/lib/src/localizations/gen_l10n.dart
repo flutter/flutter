@@ -132,11 +132,6 @@ List<String> generateMethodParameters(
 }
 
 // Similar to above, but is used for passing arguments into helper functions.
-List<String> generateMethodArguments(Message message) {
-  return message.templatePlaceholders.values
-      .map((Placeholder placeholder) => placeholder.name)
-      .toList();
-}
 
 String generateDateFormattingLogic(Message message, LocaleInfo locale) {
   if (message.templatePlaceholders.isEmpty) {

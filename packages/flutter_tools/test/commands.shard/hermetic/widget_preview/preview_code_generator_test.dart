@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:code_builder/code_builder.dart' as cb;
 import 'package:dart_style/dart_style.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -15,6 +17,7 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dependency_graph.dart';
+import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
 import 'package:flutter_tools/src/widget_preview/preview_detector.dart';
 import 'package:process/process.dart';
@@ -265,7 +268,12 @@ void main() {
         ..childFile('lib/src/transitive_error.dart').writeAsStringSync(kTransitiveErrorLibrary)
         ..childFile('lib/src/custom_previews.dart').writeAsStringSync(kCustomPreviews);
       project = FlutterProject.fromDirectoryTest(projectDir);
+      final String? sdkPath = Cache.flutterRoot != null
+          ? fs.path.join(Cache.flutterRoot!, 'bin', 'cache', 'dart-sdk')
+          : null;
+      final Artifacts artifacts = FakeArtifacts(sdkPath: sdkPath);
       previewDetector = PreviewDetector(
+        artifacts: artifacts,
         platform: FakePlatform(),
         previewAnalytics: WidgetPreviewAnalytics(
           analytics: getInitializedFakeAnalyticsInstance(
@@ -374,8 +382,8 @@ List<_i1.WidgetPreview> previews() => [
           size: _i7.Size(123.0, 456.0),
           textScaleFactor: 50.0,
           wrapper: _i8.wrapper,
-          brightness: _i7.Brightness.dark,
           theme: _i9.myThemeData,
+          brightness: _i7.Brightness.dark,
           localizations: _i10.myLocalizations,
         ).transform(),
   ),
@@ -455,6 +463,79 @@ List<_i1.WidgetPreview> previews() => [];
       },
     );
 
+    testUsingContext('ignores previews with null packageName for LSP updates', () async {
+      await previewDetector.initialize();
+      final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
+        PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
+      );
+      generatedPreviewFile.createSync(recursive: true);
+
+      final update = FlutterWidgetPreviews(
+        namespaces: <String, String>{
+          'widget_preview.dart': '_i1',
+          'utils.dart': '_i2',
+          'package:foo_project/preview.dart': '_i3',
+          'preview.dart': '_i4',
+          'package:flutter/src/widget_previews/widget_previews.dart': '_i5',
+          'dart:ui': '_i6',
+        },
+        previews: <FlutterWidgetPreviewDetails>[
+          FlutterWidgetPreviewDetails(
+            functionName: 'validPreview',
+            hasError: false,
+            dependencyHasErrors: false,
+            isBuilder: false,
+            isMultiPreview: false,
+            packageName: 'foo_project',
+            position: const Position(character: 1, line: 4),
+            previewAnnotation: "const _i5.Preview(name: 'valid')",
+            scriptUri: Uri.file('/user/flutter_project/lib/preview.dart'),
+            libraryUri: Uri.parse('package:foo_project/preview.dart'),
+          ),
+          FlutterWidgetPreviewDetails(
+            functionName: 'rootPreview',
+            hasError: false,
+            dependencyHasErrors: false,
+            isBuilder: false,
+            isMultiPreview: false,
+            position: const Position(character: 1, line: 4),
+            previewAnnotation: "const _i5.Preview(name: 'root')",
+            scriptUri: Uri.file('/user/flutter_project/preview.dart'),
+            libraryUri: Uri.parse('preview.dart'),
+          ),
+        ],
+        scriptUris: <Uri>[
+          Uri.file('/user/flutter_project/lib/preview.dart'),
+          Uri.file('/user/flutter_project/preview.dart'),
+        ],
+      );
+
+      codeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(update);
+
+      const expectedGeneratedPreviewFileContents = '''
+// ignore_for_file: implementation_imports
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'widget_preview.dart' as _i1;
+import 'utils.dart' as _i2;
+import 'package:foo_project/preview.dart' as _i3;
+import 'package:flutter/src/widget_previews/widget_previews.dart' as _i5;
+import 'dart:ui' as _i6;
+
+List<_i1.WidgetPreview> previews() => [
+  _i2.buildWidgetPreview(
+    packageName: 'foo_project',
+    scriptUri: 'file:///user/flutter_project/lib/preview.dart',
+    line: 4,
+    column: 1,
+    previewFunction: () => _i3.validPreview(),
+    transformedPreview: const _i5.Preview(name: 'valid').transform(),
+  ),
+];
+''';
+      expect(generatedPreviewFile.readAsStringSync(), expectedGeneratedPreviewFileContents);
+    });
+
     testUsingContext(
       'correctly generates ${PreviewCodeGenerator.getGeneratedDtdConnectionInfoFilePath(fs)}',
       () async {
@@ -487,5 +568,41 @@ const String kProjectRootPath = r'${project.directory.absolute.path}';
         expect(generatedDtdConnectionInfoFile.readAsStringSync(), expectedDtdConnectionInfo);
       },
     );
+  });
+
+  group('PreviewPrefixedAllocator', () {
+    test('filters out non-package/non-SDK imports and allocates non-colliding prefixes', () {
+      final allocator = PreviewPrefixedAllocator();
+      allocator.populateKnownImportPrefixes(<String, String>{
+        'widget_preview.dart': '_i1',
+        'utils.dart': '_i2',
+        'package:foo/foo.dart': '_i3',
+        'preview.dart': '_i4',
+        'package:flutter/widgets.dart': '_i5',
+        'dart:ui': '_i6',
+        'root.dart': '_i7',
+      });
+
+      expect(allocator.imports.map((cb.Directive d) => d.url).toList(), <String>[
+        'widget_preview.dart',
+        'utils.dart',
+        'package:foo/foo.dart',
+        'package:flutter/widgets.dart',
+        'dart:ui',
+      ]);
+
+      // Allocating a new reference must not collide with existing or skipped prefixes.
+      // Maximum prefix from the populate call was _i7, so the next allocated key must be >= _i8.
+      expect(allocator.allocate(cb.refer('Bar', 'package:bar/bar.dart')), '_i8.Bar');
+    });
+
+    test('throws StateError when prefixes have already been allocated', () {
+      final allocator = PreviewPrefixedAllocator();
+      allocator.allocate(cb.refer('Foo', 'package:foo/foo.dart'));
+      expect(
+        () => allocator.populateKnownImportPrefixes(<String, String>{'dart:ui': '_i1'}),
+        throwsStateError,
+      );
+    });
   });
 }

@@ -6,11 +6,12 @@ package com.flutter.gradle
 
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.artifact.SingleArtifact
+import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.DynamicFeatureBuildType
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
-import com.android.build.gradle.BaseExtension
-import com.android.builder.model.BuildType
+import com.android.build.api.variant.ApplicationVariant
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
 import com.flutter.gradle.tasks.EnableHcppManifestTask
@@ -30,6 +31,8 @@ import java.io.File
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.Properties
+import com.android.build.api.dsl.BuildType as DslBuildType
+import com.android.builder.model.BuildType as ModelBuildType
 
 /**
  * A collection of static utility functions used by the Flutter Gradle Plugin.
@@ -473,13 +476,45 @@ object FlutterPluginUtils {
      */
     @JvmStatic
     @JvmName("buildModeFor")
-    internal fun buildModeFor(buildType: BuildType): String {
-        if (buildType.name == "profile") {
+    internal fun buildModeFor(buildType: ModelBuildType): String = buildModeFor(buildType.name, buildType.isDebuggable)
+
+    /**
+     * Returns a Flutter build mode for a build type identified by [buildTypeName] and its
+     * [isDebuggable] flag.
+     *
+     * @return "debug", "profile", or "release" (fall-back).
+     */
+    @JvmStatic
+    @JvmName("buildModeFor")
+    internal fun buildModeFor(
+        buildTypeName: String,
+        isDebuggable: Boolean
+    ): String {
+        if (buildTypeName == "profile") {
             return "profile"
-        } else if (buildType.isDebuggable) {
+        } else if (isDebuggable) {
             return "debug"
         }
         return "release"
+    }
+
+    /**
+     * Returns a Flutter build mode for an AGP public DSL [buildType].
+     *
+     * Application and dynamic-feature build types expose a public `isDebuggable` flag.
+     * Library build types do not, so for them the conventional "debug" name is the only
+     * public signal available at DSL scope.
+     */
+    @JvmStatic
+    @JvmName("buildModeFor")
+    internal fun buildModeFor(buildType: DslBuildType): String {
+        val isDebuggable =
+            when (buildType) {
+                is ApplicationBuildType -> buildType.isDebuggable
+                is DynamicFeatureBuildType -> buildType.isDebuggable
+                else -> buildType.name == "debug"
+            }
+        return buildModeFor(buildType.name, isDebuggable)
     }
 
     /**
@@ -500,22 +535,6 @@ object FlutterPluginUtils {
         // Don't configure dependencies for a build mode that the local engine
         // doesn't support.
         return project.property(PROP_LOCAL_ENGINE_BUILD_MODE) == flutterBuildMode
-    }
-
-    /**
-     * Returns BaseExtension for the project. Used for compatibility.
-     *
-     * From BaseExtension docs:
-     * "Don't use this extension directly Instead, use one of the following:
-     *  ApplicationExtension, LibraryExtension, TestExtension, DynamicFeatureExtension"
-     *
-     *  For ApplicationExtension use `getAndroidApplicationExtension`.
-     *  For LibraryExtension use `getAndroidLibraryExtension`.
-     */
-    internal fun getLegacyAndroidExtension(project: Project): BaseExtension {
-        // Common supertype of the android extension types.
-        // But maybe this should be https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/dsl/TestedExtension.
-        return project.extensions.findByType(BaseExtension::class.java)!!
     }
 
     internal fun getAndroidExtension(project: Project): AgpCommonExtensionWrapper {
@@ -542,9 +561,10 @@ object FlutterPluginUtils {
     @JvmName("getCompileSdkFromProject")
     internal fun getCompileSdkFromProject(project: Project): CompileSdkVersion {
         val androidExtension = getAndroidExtension(project)
+        val preview = androidExtension.compileSdkPreview
         return CompileSdkVersion(
-            apiLevel = androidExtension.compileSdk,
-            previewCodename = androidExtension.compileSdkPreview
+            apiLevel = if (preview != null) null else androidExtension.compileSdk,
+            previewCodename = preview
         )
     }
 
@@ -801,11 +821,11 @@ object FlutterPluginUtils {
         }
 
         // If the project is already configuring a native build, we don't need to do anything.
-        val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
+        val gradleProjectAndroidExtension = getAndroidExtension(gradleProject)
         val externalNativeBuild = gradleProjectAndroidExtension.externalNativeBuild
         val forcingNotRequired: Boolean =
-            externalNativeBuild?.cmake?.path != null ||
-                externalNativeBuild?.ndkBuild?.path != null
+            externalNativeBuild.cmake.path != null ||
+                externalNativeBuild.ndkBuild.path != null
         if (forcingNotRequired) {
             return
         }
@@ -929,10 +949,9 @@ object FlutterPluginUtils {
         gradleProject: Project,
         flutterSdkRootPath: String
     ) {
-        val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
-        gradleProjectAndroidExtension.externalNativeBuild.cmake.path(
-            "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
-        )
+        val gradleProjectAndroidExtension = getAndroidExtension(gradleProject)
+        gradleProjectAndroidExtension.externalNativeBuild.cmake.path =
+            File("$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt")
 
         // AGP defaults to outputting build artifacts in `android/app/.cxx`. This directory is a
         // build artifact, so we move it from that directory to within Flutter's build directory
@@ -944,22 +963,22 @@ object FlutterPluginUtils {
         // but as we are not actually building anything (and are instead only tricking AGP into
         // downloading the NDK), it is acceptable for the buildStagingDirectory to be removed
         // and rebuilt when running clean builds.
-        gradleProjectAndroidExtension.externalNativeBuild.cmake.buildStagingDirectory(
+        gradleProjectAndroidExtension.externalNativeBuild.cmake.buildStagingDirectory =
             gradleProject.layout.buildDirectory
                 .dir("../.cxx")
                 .get()
-                .asFile.path
-        )
+                .asFile
 
         // CMake will print warnings when you try to build an empty project.
         // These arguments silence the warnings - our project is intentionally
         // empty.
         gradleProjectAndroidExtension.buildTypes.forEach { buildType ->
-            buildType.externalNativeBuild.cmake.arguments(
-                "-Wno-dev",
-                "--no-warn-unused-cli",
-                "-DCMAKE_BUILD_TYPE=${buildType.name}"
-            )
+            buildType.externalNativeBuild.cmake.arguments +=
+                listOf(
+                    "-Wno-dev",
+                    "--no-warn-unused-cli",
+                    "-DCMAKE_BUILD_TYPE=${buildType.name}"
+                )
         }
     }
 
@@ -990,7 +1009,7 @@ object FlutterPluginUtils {
     @JvmName("addFlutterDependencies")
     internal fun addFlutterDependencies(
         project: Project,
-        buildType: BuildType,
+        buildType: DslBuildType,
         pluginHandler: PluginHandler,
         engineVersion: String
     ) {
@@ -1139,9 +1158,12 @@ object FlutterPluginUtils {
         // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
         androidComponents.onVariants { variant ->
+            if (variant !is ApplicationVariant) {
+                return@onVariants
+            }
             val manifestUpdater =
                 project.tasks.register("output${capitalize(variant.name)}AppLinkSettings", DeepLinkJsonFromManifestTask::class.java) {
-                    namespace.set(variant.namespace)
+                    applicationId.set(variant.applicationId)
                     // Flutter should always use project.layout.buildDirectory.file("deeplink.json")
                     // instead of relying on passing in a path.
                     if (project.hasProperty("outputPath")) {
@@ -1198,8 +1220,10 @@ object FlutterPluginUtils {
 
     /**
      * Adds tasks that inject the `io.flutter.embedding.android.EnableHcpp` meta-data into the
-     * merged manifest of each variant, when the flutter tool passed `-Penable-hcpp=true` (i.e.
-     * when the `--enable-hcpp` flag was passed).
+     * merged manifest of each variant, when the flutter tool passed `-Penable-hcpp=true`. The
+     * tool does that when the `enable-hcpp` feature flag is on, or when `--enable-hcpp` was
+     * passed explicitly (these are not the same thing: an explicit flag sets the property
+     * regardless of the feature flag).
      *
      * The meta-data is only added when not already present in the merged manifest, so an
      * explicit value in the developer's manifest always takes priority over the tool's default.
