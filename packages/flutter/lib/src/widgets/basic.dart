@@ -6609,6 +6609,9 @@ class RichText extends MultiChildRenderObjectWidget {
   ///
   /// If this is 1, text will not wrap. Otherwise, text will be wrapped at the
   /// edge of the box.
+  ///
+  /// Must be null or 1 when [overflow] is [TextOverflow.ellipsisStart] or
+  /// [TextOverflow.ellipsisMiddle], which render on a single line.
   final int? maxLines;
 
   /// Used to select a font when the same Unicode character can

@@ -164,6 +164,10 @@ class DefaultTextStyle extends InheritedTheme {
   /// If this is 1, text will not wrap. Otherwise, text will be wrapped at the
   /// edge of the box.
   ///
+  /// Must be null or 1 when [DefaultTextStyle.overflow] is
+  /// [TextOverflow.ellipsisStart] or [TextOverflow.ellipsisMiddle], which
+  /// render on a single line.
+  ///
   /// If this is non-null, it will override even explicit null values of
   /// [Text.maxLines].
   final int? maxLines;
@@ -665,6 +669,9 @@ class Text extends StatelessWidget {
   ///
   /// If this is 1, text will not wrap. Otherwise, text will be wrapped at the
   /// edge of the box.
+  ///
+  /// Must be null or 1 when [overflow] is [TextOverflow.ellipsisStart] or
+  /// [TextOverflow.ellipsisMiddle], which render on a single line.
   ///
   /// If this is null, but there is an ambient [DefaultTextStyle] that specifies
   /// an explicit number for its [DefaultTextStyle.maxLines], then the

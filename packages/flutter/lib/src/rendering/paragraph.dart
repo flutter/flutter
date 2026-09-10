@@ -20,6 +20,7 @@ import 'dart:ui'
         TextBox,
         TextHeightBehavior;
 
+import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
@@ -41,12 +42,25 @@ typedef _TextBoundaryAtPosition = _TextBoundaryRecord Function(TextPosition posi
 
 /// Signature for a function that determines the [_TextBoundaryRecord] at the given
 /// [TextPosition], for the given [String].
-typedef _TextBoundaryAtPositionInText = _TextBoundaryRecord Function(
-  TextPosition position,
-  String text,
-);
+typedef _TextBoundaryAtPositionInText =
+    _TextBoundaryRecord Function(TextPosition position, String text);
 
 const String _kEllipsis = '\u2026';
+
+// Whether [overflow] places the ellipsis somewhere other than the end of the
+// text.
+//
+// The text engine can only place an ellipsis at the end of the last line, so
+// [RenderParagraph] computes the truncated text itself for these values.
+bool _hasNonTrailingEllipsis(TextOverflow overflow) {
+  return switch (overflow) {
+    TextOverflow.ellipsisStart || TextOverflow.ellipsisMiddle => true,
+    TextOverflow.clip ||
+    TextOverflow.ellipsis ||
+    TextOverflow.fade ||
+    TextOverflow.visible => false,
+  };
+}
 
 /// Used by the [RenderParagraph] to map its rendering children to their
 /// corresponding semantics nodes.
@@ -359,6 +373,11 @@ class RenderParagraph extends RenderBox
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
+         maxLines == null || maxLines == 1 || !_hasNonTrailingEllipsis(overflow),
+         'TextOverflow.ellipsisStart and TextOverflow.ellipsisMiddle place the ellipsis inside a '
+         'single line of text, so maxLines must be null or 1.',
+       ),
+       assert(
          identical(textScaler, const _UnspecifiedTextScaler()) || textScaleFactor == 1.0,
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        ),
@@ -366,6 +385,8 @@ class RenderParagraph extends RenderBox
        _overflow = overflow,
        _devicePixelRatio = devicePixelRatio,
        _selectionColor = selectionColor,
+       _text = text,
+       _maxLines = maxLines,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -373,7 +394,10 @@ class RenderParagraph extends RenderBox
          textScaler: textScaler == const _UnspecifiedTextScaler()
              ? TextScaler.linear(textScaleFactor)
              : textScaler,
-         maxLines: maxLines,
+         // ellipsisStart and ellipsisMiddle render on a single line, and
+         // compute the truncated text themselves rather than handing the
+         // ellipsis string to the engine.
+         maxLines: _hasNonTrailingEllipsis(overflow) ? 1 : maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
          locale: locale,
          strutStyle: strutStyle,
@@ -398,9 +422,11 @@ class RenderParagraph extends RenderBox
   //  non-destructive operation.
   TextPainter? _textIntrinsicsCache;
 
+  // Every access resets the painter's configuration, which invalidates its
+  // layout; hold the result in a local when it has to be read twice.
   TextPainter get _textIntrinsics {
     return (_textIntrinsicsCache ??= TextPainter())
-      ..text = _textPainter.text
+      ..text = _text
       ..textAlign = _textPainter.textAlign
       ..textDirection = _textPainter.textDirection
       ..textScaler = _textPainter.textScaler
@@ -412,29 +438,44 @@ class RenderParagraph extends RenderBox
       ..textHeightBehavior = _textPainter.textHeightBehavior;
   }
 
+  // Whether [overflow] makes this render object compute the truncated text
+  // itself instead of letting the text engine append a trailing ellipsis.
+  bool get _truncatesText => _hasNonTrailingEllipsis(_overflow);
+
   List<AttributedString>? _cachedAttributedLabels;
 
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
 
   /// The text to display.
-  InlineSpan get text => _textPainter.text!;
+  ///
+  /// When [overflow] is [TextOverflow.ellipsisStart] or
+  /// [TextOverflow.ellipsisMiddle] this is the full, untruncated text; the
+  /// truncated text that is actually laid out is not exposed.
+  InlineSpan get text => _text;
+  InlineSpan _text;
 
   set text(InlineSpan value) {
-    switch (_textPainter.text!.compareTo(value)) {
+    final RenderComparison comparison = _text.compareTo(value);
+    if (comparison == RenderComparison.identical) {
+      return;
+    }
+    _text = value;
+    _textPainter.text = value;
+    // The truncated text is derived from the text, so when it is in use every
+    // change has to go through a layout pass, even one that would otherwise
+    // only affect painting or semantics: the text painter is holding the text
+    // truncated from the previous value until then.
+    switch (_truncatesText ? RenderComparison.layout : comparison) {
       case RenderComparison.identical:
-        return;
       case RenderComparison.metadata:
-        _textPainter.text = value;
         _cachedCombinedSemanticsInfos = null;
         markNeedsSemanticsUpdate();
       case RenderComparison.paint:
-        _textPainter.text = value;
         _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
         markNeedsPaint();
         markNeedsSemanticsUpdate();
       case RenderComparison.layout:
-        _textPainter.text = value;
         _overflowShader = null;
         _cachedAttributedLabels = null;
         _cachedCombinedSemanticsInfos = null;
@@ -506,7 +547,10 @@ class RenderParagraph extends RenderBox
   }
 
   List<_SelectableFragment> _getSelectableFragments() {
-    final String plainText = text.toPlainText(includeSemanticsLabels: false);
+    // Selection addresses the text that is laid out, which for
+    // TextOverflow.ellipsisStart and TextOverflow.ellipsisMiddle is the
+    // truncated text rather than `text`.
+    final String plainText = _textPainter.text!.toPlainText(includeSemanticsLabels: false);
     final result = <_SelectableFragment>[];
     var start = 0;
     while (start < plainText.length) {
@@ -559,6 +603,7 @@ class RenderParagraph extends RenderBox
     _lastSelectableFragments?.forEach(
       (_SelectableFragment element) => element.didChangeParagraphLayout(),
     );
+    _cachedTruncationWidth = null;
     super.markNeedsLayout();
   }
 
@@ -568,6 +613,7 @@ class RenderParagraph extends RenderBox
     _disposeSelectableFragments();
     _textPainter.dispose();
     _textIntrinsicsCache?.dispose();
+    _truncationPainter?.dispose();
     super.dispose();
   }
 
@@ -629,8 +675,27 @@ class RenderParagraph extends RenderBox
     if (_overflow == value) {
       return;
     }
+    assert(
+      _maxLines == null || _maxLines == 1 || !_hasNonTrailingEllipsis(value),
+      'TextOverflow.ellipsisStart and TextOverflow.ellipsisMiddle place the ellipsis inside a '
+      'single line of text, so maxLines must be null or 1.',
+    );
+    final bool wasTruncating = _truncatesText;
     _overflow = value;
-    _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
+    // Restore the untruncated text: the next layout recomputes the truncation
+    // from scratch, and the other overflow modes lay out the text in full.
+    _textPainter
+      ..ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null
+      ..maxLines = _truncatesText ? 1 : _maxLines
+      ..text = _text;
+    _renderedPlainText = null;
+    if (wasTruncating && !_truncatesText) {
+      // The full text is back in the text painter as of this assignment, so
+      // the state indexing into the truncated text is already stale. Entering
+      // a truncating mode does not need this, because the truncated text is
+      // only computed during the layout that follows, which does it there.
+      _didChangeRenderedText();
+    }
     markNeedsLayout();
   }
 
@@ -691,16 +756,26 @@ class RenderParagraph extends RenderBox
   /// An optional maximum number of lines for the text to span, wrapping if
   /// necessary. If the text exceeds the given number of lines, it will be
   /// truncated according to [overflow] and [softWrap].
-  int? get maxLines => _textPainter.maxLines;
+  ///
+  /// Must be null or 1 when [overflow] is [TextOverflow.ellipsisStart] or
+  /// [TextOverflow.ellipsisMiddle], which render on a single line.
+  int? get maxLines => _maxLines;
+  int? _maxLines;
 
   /// The value may be null. If it is not null, then it must be greater than
   /// zero.
   set maxLines(int? value) {
     assert(value == null || value > 0);
-    if (_textPainter.maxLines == value) {
+    assert(
+      value == null || value == 1 || !_truncatesText,
+      'TextOverflow.ellipsisStart and TextOverflow.ellipsisMiddle place the ellipsis inside a '
+      'single line of text, so maxLines must be null or 1.',
+    );
+    if (_maxLines == value) {
       return;
     }
-    _textPainter.maxLines = value;
+    _maxLines = value;
+    _textPainter.maxLines = _truncatesText ? 1 : value;
     _overflowShader = null;
     markNeedsLayout();
   }
@@ -883,6 +958,7 @@ class RenderParagraph extends RenderBox
   @override
   void systemFontsDidChange() {
     super.systemFontsDidChange();
+    _cachedTruncationWidth = null;
     _textPainter.markNeedsLayout();
   }
 
@@ -894,7 +970,9 @@ class RenderParagraph extends RenderBox
   List<PlaceholderDimensions>? _placeholderDimensions;
 
   double _adjustMaxWidth(double maxWidth) {
-    return softWrap || overflow == TextOverflow.ellipsis ? maxWidth : double.infinity;
+    return softWrap || _overflow == TextOverflow.ellipsis || _truncatesText
+        ? maxWidth
+        : double.infinity;
   }
 
   void _layoutTextWithConstraints(BoxConstraints constraints) {
@@ -908,6 +986,9 @@ class RenderParagraph extends RenderBox
   Size computeDryLayout(covariant BoxConstraints constraints) {
     final Size size =
         (_textIntrinsics
+              // Apply the same truncation performLayout would, so that the dry
+              // size matches the size the text is actually laid out at.
+              ..text = _spanForMaxWidth(constraints.maxWidth)
               ..setPlaceholderDimensions(
                 layoutInlineChildren(
                   constraints.maxWidth,
@@ -940,7 +1021,13 @@ class RenderParagraph extends RenderBox
   @override
   double computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
     assert(constraints.debugAssertIsValid());
-    _textIntrinsics
+    // Held in a local: reading _textIntrinsics again would reset its text to
+    // the untruncated span and discard the layout computed just below.
+    final TextPainter textIntrinsics = _textIntrinsics;
+    textIntrinsics
+      // Apply the same truncation performLayout would, so that the dry
+      // baseline matches the baseline the text is actually laid out at.
+      ..text = _spanForMaxWidth(constraints.maxWidth)
       ..setPlaceholderDimensions(
         layoutInlineChildren(
           constraints.maxWidth,
@@ -949,8 +1036,211 @@ class RenderParagraph extends RenderBox
         ),
       )
       ..layout(minWidth: constraints.minWidth, maxWidth: _adjustMaxWidth(constraints.maxWidth));
-    return _textIntrinsics.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    return textIntrinsics.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
+
+  // The span to lay out for an incoming maximum width: the truncated text when
+  // [overflow] places the ellipsis inside the text, and [text] otherwise.
+  InlineSpan _spanForMaxWidth(double maxWidth) {
+    return _truncatesText ? _truncatedSpan(maxWidth) ?? _text : _text;
+  }
+
+  // A single-line painter used to measure truncation candidates. Reused across
+  // measurements so that a binary search does not allocate a painter per probe.
+  TextPainter? _truncationPainter;
+
+  // Single entry memo for [_truncatedSpan], keyed by the maximum width it was
+  // computed for. A null width means there is no memoized value; the memoized
+  // span is itself nullable, so the width is what marks the entry as valid.
+  //
+  // Invalidated by [markNeedsLayout], which every property setter that affects
+  // the truncation calls.
+  double? _cachedTruncationWidth;
+  InlineSpan? _cachedTruncatedSpan;
+
+  // The plain text the text painter was last laid out with. See
+  // [_updateRenderedSpan].
+  String? _renderedPlainText;
+
+  // The text to render so that it fits within [maxWidth] with an ellipsis at
+  // the position [overflow] asks for, or null if the text should be rendered
+  // in full.
+  //
+  // Null is returned when the text already fits, when it is empty, and when it
+  // cannot be split because it contains anything but plain [TextSpan]s, such as
+  // the [PlaceholderSpan] of a [WidgetSpan] or a [TextSpan] subclass. In the
+  // last case the text falls back to being clipped.
+  InlineSpan? _truncatedSpan(double maxWidth) {
+    assert(_truncatesText);
+    if (_cachedTruncationWidth == maxWidth) {
+      return _cachedTruncatedSpan;
+    }
+    _cachedTruncationWidth = maxWidth;
+    return _cachedTruncatedSpan = _computeTruncatedSpan(maxWidth);
+  }
+
+  InlineSpan? _computeTruncatedSpan(double maxWidth) {
+    if (!_SpanSlicer.canSlice(_text)) {
+      return null;
+    }
+    final String plainText = _text.toPlainText(includeSemanticsLabels: false);
+    if (plainText.isEmpty || _measureWidth(_text) <= maxWidth) {
+      return null;
+    }
+
+    // The code unit offsets the text may be split at. Splitting on grapheme
+    // cluster boundaries keeps surrogate pairs, combining marks and emoji
+    // sequences intact. boundaries.first is 0 and boundaries.last is the
+    // length of the text.
+    final boundaries = <int>[0];
+    var offset = 0;
+    for (final String cluster in plainText.characters) {
+      offset += cluster.length;
+      boundaries.add(offset);
+    }
+    final int clusterCount = boundaries.length - 1;
+
+    // Find the largest number of grapheme clusters that fits alongside the
+    // ellipsis, by binary search; `low` is always a number of clusters that
+    // fits and `high` one that may not.
+    //
+    // Keeping more clusters usually makes a candidate wider, but not always:
+    // the ellipsis is styled after the first cluster it replaces, and for
+    // TextOverflow.ellipsisMiddle that cluster moves through the text as more
+    // of it is kept, so the ellipsis itself can become narrower. The two
+    // passes after the search correct for that.
+    var low = 0;
+    int high = clusterCount - 1;
+    while (low < high) {
+      final int mid = low + (high - low + 1) ~/ 2;
+      if (_measureWidth(_buildTruncatedSpan(boundaries, mid)) <= maxWidth) {
+        low = mid;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    // Shrink until the result really does fit, so that the text is never
+    // rendered wider than maxWidth. Keeping only the ellipsis is the last
+    // resort, even if the ellipsis alone overflows.
+    var keptClusters = low;
+    InlineSpan truncated = _buildTruncatedSpan(boundaries, keptClusters);
+    while (keptClusters > 0 && _measureWidth(truncated) > maxWidth) {
+      truncated = _buildTruncatedSpan(boundaries, --keptClusters);
+    }
+
+    // Then grow again while the next candidate also fits, so that a candidate
+    // the binary search stepped over because a wider ellipsis made it overflow
+    // is not left behind. Both loops stop immediately unless the elided text
+    // spans more than one style.
+    while (keptClusters < clusterCount - 1) {
+      final InlineSpan wider = _buildTruncatedSpan(boundaries, keptClusters + 1);
+      if (_measureWidth(wider) > maxWidth) {
+        break;
+      }
+      keptClusters += 1;
+      truncated = wider;
+    }
+    return truncated;
+  }
+
+  // Builds the span that keeps [keptClusters] grapheme clusters of [text],
+  // taken from the end for [TextOverflow.ellipsisStart] and split evenly
+  // between both ends for [TextOverflow.ellipsisMiddle].
+  //
+  // [boundaries] are the code unit offsets of the grapheme cluster boundaries,
+  // as computed by [_computeTruncatedSpan].
+  InlineSpan _buildTruncatedSpan(List<int> boundaries, int keptClusters) {
+    final int clusterCount = boundaries.length - 1;
+    assert(keptClusters >= 0 && keptClusters <= clusterCount);
+    final int leadingClusters;
+    final int trailingClusters;
+    switch (_overflow) {
+      case TextOverflow.ellipsisStart:
+        leadingClusters = 0;
+        trailingClusters = keptClusters;
+      case TextOverflow.ellipsisMiddle:
+        // The leading half gets the odd cluster: the beginning of the text is
+        // read first, so it is the more useful half to round up.
+        leadingClusters = (keptClusters + 1) ~/ 2;
+        trailingClusters = keptClusters ~/ 2;
+      case TextOverflow.clip || TextOverflow.ellipsis || TextOverflow.fade || TextOverflow.visible:
+        throw StateError('$_overflow does not place an ellipsis inside the text.');
+    }
+
+    final children = <InlineSpan>[];
+    if (leadingClusters > 0) {
+      children.add(_SpanSlicer(0, boundaries[leadingClusters]).slice(_text)!);
+    }
+    // The ellipsis takes the style of the first grapheme cluster it replaces,
+    // which is what the text engine does for TextOverflow.ellipsis and what
+    // UIKit does for its head and middle truncation modes. Only the style is
+    // taken: a gesture recognizer or a semantics label describes the text that
+    // was elided, not the glyph standing in for it.
+    children.add(
+      TextSpan(text: _kEllipsis, style: _StyleAtOffset(boundaries[leadingClusters]).of(_text)),
+    );
+    if (trailingClusters > 0) {
+      children.add(
+        _SpanSlicer(boundaries[clusterCount - trailingClusters], boundaries.last).slice(_text)!,
+      );
+    }
+    return TextSpan(children: children);
+  }
+
+  // The width [span] occupies when laid out on a single unconstrained line,
+  // using this paragraph's text style configuration.
+  double _measureWidth(InlineSpan span) {
+    final TextPainter painter = _truncationPainter ??= TextPainter();
+    return (painter
+          ..text = span
+          ..textAlign = _textPainter.textAlign
+          ..textDirection = _textPainter.textDirection
+          ..textScaler = _textPainter.textScaler
+          ..maxLines = 1
+          ..locale = _textPainter.locale
+          ..strutStyle = _textPainter.strutStyle
+          ..textWidthBasis = _textPainter.textWidthBasis
+          ..textHeightBehavior = _textPainter.textHeightBehavior
+          ..layout())
+        .width;
+  }
+
+  // Lays the text painter out over [span], and rebuilds the state that indexes
+  // into the laid out text if the text changed.
+  //
+  // The selectable fragments and the semantics tree address the text the text
+  // painter holds, which for [TextOverflow.ellipsisStart] and
+  // [TextOverflow.ellipsisMiddle] is the truncated text rather than [text].
+  void _updateRenderedSpan(InlineSpan span) {
+    _textPainter.text = span;
+    final String plainText = span.toPlainText(includeSemanticsLabels: false);
+    if (plainText == _renderedPlainText) {
+      return;
+    }
+    _renderedPlainText = plainText;
+    _didChangeRenderedText();
+  }
+
+  // Rebuilds the state that addresses the text the text painter holds: the
+  // semantics information and the selectable fragments, both of which index
+  // into it by code unit offset.
+  void _didChangeRenderedText() {
+    _cachedAttributedLabels = null;
+    _cachedCombinedSemanticsInfos = null;
+    markNeedsSemanticsUpdate();
+    _removeSelectionRegistrarSubscription();
+    _disposeSelectableFragments();
+    _updateSelectionRegistrarSubscription();
+  }
+
+  /// The plain text that is currently laid out, which is a truncated version of
+  /// [text] when [overflow] is [TextOverflow.ellipsisStart] or
+  /// [TextOverflow.ellipsisMiddle] and the text does not fit.
+  ///
+  /// Used to test this object. Not for use in production.
+  @visibleForTesting
+  String get debugRenderedText => _textPainter.text!.toPlainText();
 
   @override
   void performLayout() {
@@ -963,6 +1253,10 @@ class RenderParagraph extends RenderBox
       ChildLayoutHelper.layoutChild,
       ChildLayoutHelper.getBaseline,
     );
+
+    if (_truncatesText) {
+      _updateRenderedSpan(_spanForMaxWidth(constraints.maxWidth));
+    }
     _layoutTextWithConstraints(constraints);
     positionInlineChildren(_textPainter.inlinePlaceholderBoxes!);
 
@@ -984,6 +1278,11 @@ class RenderParagraph extends RenderBox
           _overflowShader = null;
         case TextOverflow.clip:
         case TextOverflow.ellipsis:
+        // The truncated text fits the constraints horizontally, but text that
+        // could not be truncated (a paragraph containing a WidgetSpan) and
+        // vertical overflow are still clipped.
+        case TextOverflow.ellipsisStart:
+        case TextOverflow.ellipsisMiddle:
           _needsClipping = true;
           _overflowShader = null;
         case TextOverflow.fade:
@@ -1217,7 +1516,10 @@ class RenderParagraph extends RenderBox
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    _semanticsInfo = text.getSemanticsInformation();
+    // Semantics rectangles are resolved against the text that is laid out, so
+    // the semantics information has to describe that text and not `text`. See
+    // TextOverflow.ellipsisStart for what this means for truncated paragraphs.
+    _semanticsInfo = _textPainter.text!.getSemanticsInformation();
     var needsAssembleSemanticsNode = false;
     var needsChildConfigurationsDelegate = false;
     for (final InlineSpanSemanticsInformation info in _semanticsInfo!) {
@@ -1499,6 +1801,130 @@ class RenderParagraph extends RenderBox
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
     properties.add(DoubleProperty('devicePixelRatio', devicePixelRatio, defaultValue: 1.0));
+  }
+}
+
+/// Finds the style that applies to a code unit offset in an [InlineSpan] tree,
+/// merging the styles of the spans containing that offset from the outside in.
+class _StyleAtOffset {
+  _StyleAtOffset(this.offset) : assert(offset >= 0);
+
+  /// The code unit offset whose style to resolve.
+  final int offset;
+
+  int _cursor = 0;
+  bool _found = false;
+  TextStyle? _style;
+
+  /// The style [offset] is rendered with, or null if [span] has no text at that
+  /// offset or no style applies to it.
+  TextStyle? of(InlineSpan span) {
+    _visit(span, null);
+    return _style;
+  }
+
+  void _visit(InlineSpan span, TextStyle? inherited) {
+    final TextStyle? style = inherited?.merge(span.style) ?? span.style;
+    if (span is! TextSpan) {
+      return;
+    }
+    final String? text = span.text;
+    if (text != null) {
+      if (offset < _cursor + text.length) {
+        _found = true;
+        _style = style;
+        return;
+      }
+      _cursor += text.length;
+    }
+    for (final InlineSpan child in span.children ?? const <InlineSpan>[]) {
+      _visit(child, style);
+      if (_found) {
+        return;
+      }
+    }
+  }
+}
+
+/// Rebuilds an [InlineSpan] tree so that it only contains the text within a
+/// code unit range, preserving the style and the other properties of every span
+/// the range intersects.
+///
+/// Only trees made up entirely of [TextSpan]s can be sliced; see [canSlice].
+class _SpanSlicer {
+  _SpanSlicer(this.start, this.end) : assert(start <= end);
+
+  /// The code unit offset the slice starts at, inclusive.
+  final int start;
+
+  /// The code unit offset the slice ends at, exclusive.
+  final int end;
+
+  /// The code unit offset within the paragraph of the span being visited.
+  int _offset = 0;
+
+  /// Whether [span] is made up entirely of plain [TextSpan]s, and so can be
+  /// split at an arbitrary code unit offset.
+  ///
+  /// A [PlaceholderSpan] stands for a single code unit that renders an inline
+  /// widget, so it cannot be split. Subclasses of [TextSpan] are rejected as
+  /// well: slicing rebuilds the tree out of plain [TextSpan]s, which would
+  /// silently drop whatever state and behavior a subclass adds.
+  static bool canSlice(InlineSpan span) {
+    if (span is! TextSpan || span.runtimeType != TextSpan) {
+      return false;
+    }
+    var result = true;
+    span.visitDirectChildren((InlineSpan child) => result = canSlice(child));
+    return result;
+  }
+
+  /// Returns the part of [span] within the `[start, end)` code unit range, or
+  /// null if the range covers none of its text.
+  ///
+  /// Must be called at most once per [_SpanSlicer], as it consumes the offset
+  /// the traversal tracks.
+  InlineSpan? slice(InlineSpan span) {
+    final textSpan = span as TextSpan;
+    String? slicedText;
+    final String? text = textSpan.text;
+    if (text != null) {
+      final int spanStart = _offset;
+      _offset += text.length;
+      final int from = math.max(start, spanStart);
+      final int to = math.min(end, _offset);
+      if (from < to) {
+        slicedText = text.substring(from - spanStart, to - spanStart);
+      }
+    }
+    List<InlineSpan>? slicedChildren;
+    final List<InlineSpan>? children = textSpan.children;
+    if (children != null) {
+      for (final InlineSpan child in children) {
+        final InlineSpan? slicedChild = slice(child);
+        if (slicedChild != null) {
+          (slicedChildren ??= <InlineSpan>[]).add(slicedChild);
+        }
+      }
+    }
+    if (slicedText == null && slicedChildren == null) {
+      return null;
+    }
+    return TextSpan(
+      text: slicedText,
+      children: slicedChildren,
+      style: textSpan.style,
+      recognizer: textSpan.recognizer,
+      mouseCursor: textSpan.mouseCursor,
+      onEnter: textSpan.onEnter,
+      onExit: textSpan.onExit,
+      // TextSpan asserts that a span with a semantics label has text; a span
+      // whose own text falls entirely outside the range keeps only children.
+      semanticsLabel: slicedText == null ? null : textSpan.semanticsLabel,
+      semanticsIdentifier: textSpan.semanticsIdentifier,
+      locale: textSpan.locale,
+      spellOut: textSpan.spellOut,
+    );
   }
 }
 
