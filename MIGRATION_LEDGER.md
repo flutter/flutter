@@ -173,14 +173,15 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `dev/integration_tests/android_views` (Backend: Impeller OpenGLES) - Passed (67/67 motion events verified, 0 diffs on Google Pixel `48171HFH80D9S7`).
     - [x] `dev/integration_tests/android_views` (Backend: Impeller Vulkan) - Passed (67/67 motion events verified, 0 diffs on Google Pixel `48171HFH80D9S7`).
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR; approved unconditionally by `reidbaker-agent` with 100% confidence.
-- [ ] **4.4 DeviceLab Android Lifecycle & Platform Views**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-4.4-devicelab-android-lifecycle-platform-views`
-    - [ ] `dev/devicelab/bin/tasks/android_lifecycles_test.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/android_verified_input_test.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/android_semantics_integration_test.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/android_engine_flags_debug_test.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/android_engine_flags_release_test.dart` - Passed.
+- [x] **4.4 DeviceLab Android Lifecycle & Platform Views**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-4.4-devicelab-android-lifecycle-platform-views`
+    - [x] `dev/devicelab/bin/tasks/android_lifecycles_test.dart` - Passed (1st attempt across `debug`, `profile`, `release` on Google Pixel `48171HFH80D9S7`).
+    - [x] `dev/devicelab/bin/tasks/android_verified_input_test.dart` - Passed (verified on Google Pixel `48171HFH80D9S7`).
+    - [x] `dev/devicelab/bin/tasks/android_semantics_integration_test.dart` - Passed (verified on Google Pixel `48171HFH80D9S7`).
+    - [x] `dev/devicelab/bin/tasks/hybrid_android_views_integration_test.dart` - Passed (1st attempt, 67/67 motion events verified with 0 diffs on Google Pixel `48171HFH80D9S7`).
+    - [x] `dev/devicelab/bin/tasks/android_engine_flags_debug_test.dart` - Passed (verified on Google Pixel `48171HFH80D9S7`).
+    - [x] `dev/devicelab/bin/tasks/android_engine_flags_release_test.dart` - Passed against `android_release_arm64` (verified on Google Pixel `48171HFH80D9S7`).
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR; approved unconditionally by `reidbaker-agent` with 98% confidence.
 - [ ] **4.5 DeviceLab Performance & Memory Parity (No Regressions)**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-4.5-devicelab-performance-memory-parity-no-regressions`
     - [ ] `dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart` - Passed.
