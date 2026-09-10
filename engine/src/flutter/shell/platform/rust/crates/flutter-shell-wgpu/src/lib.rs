@@ -55,12 +55,20 @@ mod vulkan {
     /// Rust reference from escaping the handoff into C++.
     pub struct GpuBroker {
         context: std::sync::Arc<GpuContext>,
+        // Swappable as a pair so `recreate_surface` can replace both without
+        // moving (and thereby invalidating the address of) the `GpuBroker`
+        // itself: C++ holds a raw pointer to it for the shell's lifetime via
+        // `presentation_callbacks`'s `user_data`.
+        presentable: parking_lot::RwLock<Presentable>,
+        surface_state: Mutex<SurfaceState>,
+        presentation_stats: Option<Mutex<PresentationStats>>,
+    }
+
+    struct Presentable {
         surface: wgpu::Surface<'static>,
         // Retained both for the unsafe surface lifetime and so presentation
         // can notify winit immediately before the Vulkan WSI commit.
         window: std::sync::Arc<dyn winit::window::Window>,
-        surface_state: Mutex<SurfaceState>,
-        presentation_stats: Option<Mutex<PresentationStats>>,
     }
 
     /// Engine-owned triple-buffered texture storage shared by wgpu producers
@@ -226,6 +234,11 @@ mod vulkan {
         // submission that consumed them has completed. A small bounded queue
         // preserves normal frame overlap without leaking one pair per frame.
         retired_frames: VecDeque<RetiredFrame>,
+        // Set while the native surface behind `presentable` is known invalid
+        // (e.g. Android destroyed the window on minimize) and cleared once
+        // `GpuBroker::recreate_surface` has replaced it. Acquiring or
+        // presenting during this window would touch a dead swapchain.
+        suspended: bool,
     }
 
     struct PendingFrame {
@@ -314,18 +327,16 @@ mod vulkan {
                 // this wgpu-hal fork's supported escape hatch for injecting
                 // extra Vulkan device extensions before creation.
                 let open_device = {
-                    let hal_adapter =
-                        unsafe { adapter.as_hal::<wgpu::hal::vulkan::Api>() }
-                            .ok_or_else(|| "adapter is not a Vulkan adapter".to_owned())?;
+                    let hal_adapter = unsafe { adapter.as_hal::<wgpu::hal::vulkan::Api>() }
+                        .ok_or_else(|| "adapter is not a Vulkan adapter".to_owned())?;
                     unsafe {
                         hal_adapter.open_with_callback(
                             device_descriptor.required_features,
                             &device_descriptor.required_limits,
                             &wgpu::MemoryHints::default(),
                             Some(Box::new(|args| {
-                                args.extensions.push(
-                                    c"VK_ANDROID_external_memory_android_hardware_buffer",
-                                );
+                                args.extensions
+                                    .push(c"VK_ANDROID_external_memory_android_hardware_buffer");
                                 args.extensions.push(c"VK_KHR_sampler_ycbcr_conversion");
                                 args.extensions.push(c"VK_KHR_external_memory");
                                 args.extensions.push(c"VK_EXT_queue_family_foreign");
@@ -891,13 +902,13 @@ mod vulkan {
                 .map(Mutex::new);
             Ok(Self {
                 context,
-                surface,
-                window,
+                presentable: parking_lot::RwLock::new(Presentable { surface, window }),
                 surface_state: Mutex::new(SurfaceState {
                     configuration: None,
                     pending_frame: None,
                     deferred_configuration: None,
                     retired_frames: VecDeque::new(),
+                    suspended: false,
                 }),
                 presentation_stats,
             })
@@ -905,6 +916,82 @@ mod vulkan {
 
         pub fn shared_context(&self) -> std::sync::Arc<GpuContext> {
             std::sync::Arc::clone(&self.context)
+        }
+
+        /// Marks the current surface as unusable without destroying the
+        /// broker. Android destroys the native window (and therefore the
+        /// wgpu surface backed by it) when the activity is paused; further
+        /// acquire/present calls in that window would touch a dead
+        /// swapchain. Call [`Self::recreate_surface`] once a replacement
+        /// window exists to resume presentation.
+        pub fn suspend(&self) {
+            self.surface_state.lock().suspended = true;
+        }
+
+        /// Replaces the broker's surface and window in place, keeping this
+        /// `GpuBroker`'s address (and therefore every raw pointer C++ holds
+        /// to it via `presentation_callbacks`) stable. Used to recover from
+        /// Android's destroy/recreate window cycle without rebuilding the
+        /// C++ shell or Vulkan device.
+        pub fn recreate_surface(
+            &self,
+            window: std::sync::Arc<dyn winit::window::Window>,
+        ) -> Result<(), String> {
+            // SAFETY: the broker retains the window until after this surface
+            // has been destroyed.
+            let surface = unsafe {
+                self.context.instance.create_surface_unsafe(
+                    wgpu::SurfaceTargetUnsafe::from_display_and_window(&window, &window)
+                        .map_err(|error| error.to_string())?,
+                )
+            }
+            .map_err(|error| error.to_string())?;
+            if surface
+                .get_capabilities(&self.context.adapter)
+                .formats
+                .is_empty()
+            {
+                return Err("shared Vulkan adapter cannot present to this window".to_owned());
+            }
+            let mut state = self.surface_state.lock();
+            self.destroy_all_frames(&mut state);
+            state.configuration = None;
+            state.deferred_configuration = None;
+            *self.presentable.write() = Presentable { surface, window };
+            state.suspended = false;
+            Ok(())
+        }
+
+        /// Waits for the device to go idle, then destroys every outstanding
+        /// frame-sync semaphore. Shared by `Drop` (full teardown) and
+        /// `recreate_surface` (the old surface's in-flight frames can never
+        /// be presented once the native window is gone).
+        fn destroy_all_frames(&self, state: &mut SurfaceState) {
+            let Some(device) = (unsafe { self.context.device.as_hal::<wgpu::hal::vulkan::Api>() })
+            else {
+                return;
+            };
+            let _ = unsafe { device.raw_device().device_wait_idle() };
+            if let Some(pending) = state.pending_frame.take() {
+                unsafe {
+                    device
+                        .raw_device()
+                        .destroy_semaphore(pending.sync.acquire, None);
+                    device
+                        .raw_device()
+                        .destroy_semaphore(pending.sync.render, None);
+                }
+            }
+            for retired in state.retired_frames.drain(..) {
+                unsafe {
+                    device
+                        .raw_device()
+                        .destroy_semaphore(retired.sync.acquire, None);
+                    device
+                        .raw_device()
+                        .destroy_semaphore(retired.sync.render, None);
+                }
+            }
         }
 
         fn create_frame_sync(&self) -> Option<FrameSync> {
@@ -996,7 +1083,8 @@ mod vulkan {
                 return Ok(());
             }
             let mut state = self.surface_state.lock();
-            let capabilities = self.surface.get_capabilities(&self.context.adapter);
+            let presentable = self.presentable.read();
+            let capabilities = presentable.surface.get_capabilities(&self.context.adapter);
             // Impeller's Vulkan backend only recognizes these two swapchain
             // formats (see VkFormatToImpellerFormat); sRGB and other variants
             // the surface may prefer are rejected at frame-acquire time.
@@ -1026,7 +1114,9 @@ mod vulkan {
                 state.deferred_configuration = Some(configuration);
                 return Ok(());
             }
-            self.surface.configure(&self.context.device, &configuration);
+            presentable
+                .surface
+                .configure(&self.context.device, &configuration);
             state.configuration = Some(configuration);
             state.deferred_configuration = None;
             Ok(())
@@ -1043,9 +1133,10 @@ mod vulkan {
             requested_height: u32,
         ) -> Option<AcquiredImage> {
             let mut state = self.surface_state.lock();
-            if state.pending_frame.is_some() {
+            if state.suspended || state.pending_frame.is_some() {
                 return None;
             }
+            let presentable = self.presentable.read();
             // The dimensions Flutter passes here belong to the layer tree that
             // Impeller is about to render. A newer winit resize may already be
             // queued, but applying that newer size would combine a swapchain
@@ -1076,7 +1167,9 @@ mod vulkan {
                         return None;
                     }
                 }
-                self.surface.configure(&self.context.device, &configuration);
+                presentable
+                    .surface
+                    .configure(&self.context.device, &configuration);
                 state.configuration = Some(configuration);
             } else if deferred_matches_request {
                 // A matching deferred request has now reached its layer-tree
@@ -1095,12 +1188,14 @@ mod vulkan {
             let configuration = state.configuration.clone()?;
             let format = configuration.format;
             let vk_format = vulkan_format(format)?;
-            let (surface_texture, suboptimal) = match self.surface.get_current_texture() {
+            let (surface_texture, suboptimal) = match presentable.surface.get_current_texture() {
                 wgpu::CurrentSurfaceTexture::Success(texture) => (texture, false),
                 wgpu::CurrentSurfaceTexture::Suboptimal(texture) => (texture, true),
                 wgpu::CurrentSurfaceTexture::Outdated => {
-                    self.surface.configure(&self.context.device, &configuration);
-                    match self.surface.get_current_texture() {
+                    presentable
+                        .surface
+                        .configure(&self.context.device, &configuration);
+                    match presentable.surface.get_current_texture() {
                         wgpu::CurrentSurfaceTexture::Success(texture) => (texture, false),
                         wgpu::CurrentSurfaceTexture::Suboptimal(texture) => (texture, true),
                         _ => return None,
@@ -1178,11 +1273,19 @@ mod vulkan {
         ///
         pub fn present_image(&self) -> bool {
             let mut state = self.surface_state.lock();
-            let Some(queue) = (unsafe { self.context.queue.as_hal::<wgpu::hal::vulkan::Api>() })
-            else {
+            let Some(pending) = state.pending_frame.take() else {
                 return false;
             };
-            let Some(pending) = state.pending_frame.take() else {
+            if state.suspended {
+                // The native surface this frame was acquired against is
+                // already gone (e.g. Android destroyed the window before
+                // Impeller finished this frame); presenting would touch a
+                // dead swapchain. Drop the frame instead of submitting it.
+                self.destroy_frame_sync(pending.sync);
+                return false;
+            }
+            let Some(queue) = (unsafe { self.context.queue.as_hal::<wgpu::hal::vulkan::Api>() })
+            else {
                 return false;
             };
             // Impeller signals `render` after its final layout transition. Make
@@ -1224,7 +1327,7 @@ mod vulkan {
             // is guaranteed. Doing this at the earlier vsync pulse can freeze
             // redraw delivery when Flutter requested a secondary vsync that
             // intentionally produced no frame.
-            self.window.pre_present_notify();
+            self.presentable.read().window.pre_present_notify();
             self.context.queue.present(pending.texture);
             if let (Some(stats), Some(configuration)) =
                 (&self.presentation_stats, &state.configuration)
@@ -1253,34 +1356,9 @@ mod vulkan {
 
     impl Drop for GpuBroker {
         fn drop(&mut self) {
-            let state = self.surface_state.get_mut();
-            // SAFETY: no callback can enter the broker during `drop`. Waiting
-            // for the borrowed device to become idle makes every outstanding
-            // broker semaphore safe to destroy.
-            if let Some(device) = unsafe { self.context.device.as_hal::<wgpu::hal::vulkan::Api>() }
-            {
-                let _ = unsafe { device.raw_device().device_wait_idle() };
-                if let Some(pending) = state.pending_frame.take() {
-                    unsafe {
-                        device
-                            .raw_device()
-                            .destroy_semaphore(pending.sync.acquire, None);
-                        device
-                            .raw_device()
-                            .destroy_semaphore(pending.sync.render, None);
-                    }
-                }
-                for retired in state.retired_frames.drain(..) {
-                    unsafe {
-                        device
-                            .raw_device()
-                            .destroy_semaphore(retired.sync.acquire, None);
-                        device
-                            .raw_device()
-                            .destroy_semaphore(retired.sync.render, None);
-                    }
-                }
-            }
+            // SAFETY: no callback can enter the broker during `drop`.
+            let mut state = self.surface_state.lock();
+            self.destroy_all_frames(&mut state);
         }
     }
 

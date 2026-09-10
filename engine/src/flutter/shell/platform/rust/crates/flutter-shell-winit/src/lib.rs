@@ -54,7 +54,7 @@ use std::{
 use winit::monitor::Fullscreen;
 use winit::{
     application::ApplicationHandler,
-    dpi::{LogicalPosition, LogicalSize},
+    dpi::{LogicalPosition, LogicalSize, PhysicalPosition},
     event::{
         ButtonSource, ElementState, Ime, KeyEvent as WinitKeyEvent, MouseButton, MouseScrollDelta,
         PointerKind, PointerSource, TouchPhase, WindowEvent,
@@ -1958,6 +1958,7 @@ struct PointerState {
     buttons: i64,
     inside: bool,
     pointer_outside: bool,
+    active_touches: HashMap<usize, (f64, f64)>,
 }
 
 impl PointerState {
@@ -1974,6 +1975,7 @@ impl PointerState {
             buttons: 0,
             inside: false,
             pointer_outside: true,
+            active_touches: HashMap::new(),
         }
     }
 
@@ -2117,7 +2119,7 @@ impl PointerState {
         events
     }
 
-    fn touch(
+    fn touch_event(
         &self,
         finger_id: usize,
         physical_x: f64,
@@ -2145,6 +2147,69 @@ impl PointerState {
             scroll_delta_y: 0.0,
             buttons,
         }
+    }
+
+    fn touch(
+        &mut self,
+        finger_id: usize,
+        physical_x: f64,
+        physical_y: f64,
+        touch_phase: TouchPhase,
+    ) -> Vec<FlutterRustPointerEvent> {
+        match touch_phase {
+            TouchPhase::Started => {
+                let previous = self
+                    .active_touches
+                    .insert(finger_id, (physical_x, physical_y));
+                let mut events = Vec::with_capacity(if previous.is_some() { 2 } else { 1 });
+                // A platform may reuse an ID after cancelling a gesture while
+                // its window is being torn down. Close any stale Flutter
+                // pointer stream before starting the replacement gesture.
+                if let Some((old_x, old_y)) = previous {
+                    events.push(self.touch_event(finger_id, old_x, old_y, TouchPhase::Cancelled));
+                }
+                events.push(self.touch_event(
+                    finger_id,
+                    physical_x,
+                    physical_y,
+                    TouchPhase::Started,
+                ));
+                events
+            }
+            TouchPhase::Moved => {
+                let Some(position) = self.active_touches.get_mut(&finger_id) else {
+                    return Vec::new();
+                };
+                *position = (physical_x, physical_y);
+                vec![self.touch_event(finger_id, physical_x, physical_y, TouchPhase::Moved)]
+            }
+            TouchPhase::Ended | TouchPhase::Cancelled => {
+                if self.active_touches.remove(&finger_id).is_none() {
+                    return Vec::new();
+                }
+                vec![self.touch_event(finger_id, physical_x, physical_y, touch_phase)]
+            }
+        }
+    }
+
+    fn touch_left(
+        &mut self,
+        finger_id: usize,
+        position: Option<PhysicalPosition<f64>>,
+    ) -> Vec<FlutterRustPointerEvent> {
+        let Some((last_x, last_y)) = self.active_touches.get(&finger_id).copied() else {
+            return Vec::new();
+        };
+        let position = position.unwrap_or(PhysicalPosition::new(last_x, last_y));
+        self.touch(finger_id, position.x, position.y, TouchPhase::Cancelled)
+    }
+
+    fn cancel_touches(&mut self) -> Vec<FlutterRustPointerEvent> {
+        let touches = self.active_touches.drain().collect::<Vec<_>>();
+        touches
+            .into_iter()
+            .map(|(finger_id, (x, y))| self.touch_event(finger_id, x, y, TouchPhase::Cancelled))
+            .collect()
     }
 }
 
@@ -3304,6 +3369,59 @@ enum NativeWindowKind {
 }
 
 impl ShellApplication {
+    /// Android destroys the native window on minimize and creates a fresh
+    /// one when the activity resumes, while the C++ shell/engine and
+    /// Rust-owned Vulkan device stay alive throughout. Create a new winit
+    /// window and hand it to the existing `GpuBroker`
+    /// (`GpuBroker::recreate_surface`) instead of rebooting the shell, then
+    /// push updated viewport metrics to kick a fresh frame the same way a
+    /// resize does.
+    fn recreate_implicit_surface(&mut self, event_loop: &dyn ActiveEventLoop) {
+        let Some(old_window_id) = self
+            .windows
+            .borrow()
+            .view_windows
+            .get(&FlutterRustViewId::IMPLICIT)
+            .copied()
+        else {
+            return;
+        };
+        let attributes = WindowAttributes::default().with_title(&self.config.title);
+        let window: Arc<dyn Window> = Arc::from(
+            event_loop
+                .create_window(attributes)
+                .expect("winit failed to recreate the Flutter Rust Shell window"),
+        );
+        let mut windows = self.windows.borrow_mut();
+        let Some(mut view) = windows.views.remove(&old_window_id) else {
+            return;
+        };
+        if let Err(error) = view.gpu_broker.recreate_surface(Arc::clone(&window)) {
+            log::error!("failed to recreate the Vulkan surface: {error}");
+        }
+        let size = window.surface_size();
+        if let Err(error) = view.gpu_broker.configure(size.width, size.height) {
+            log::error!("failed to reconfigure the recreated Vulkan surface: {error}");
+        }
+        view.visible = size.width > 0 && size.height > 0;
+        view.focused = window.has_focus();
+        let metrics = WindowMetrics::from_window(window.as_ref(), window.scale_factor());
+        view.window = window;
+        let new_window_id = view.window.id();
+        if windows.focused_window == Some(old_window_id) {
+            windows.focused_window = Some(new_window_id);
+        }
+        windows.views.insert(new_window_id, view);
+        windows
+            .view_windows
+            .insert(FlutterRustViewId::IMPLICIT, new_window_id);
+        let shell = windows.shell;
+        drop(windows);
+        if let Some(shell) = shell {
+            set_cpp_shell_viewport_metrics(shell, FlutterRustViewId::IMPLICIT, metrics);
+        }
+    }
+
     fn start_demo_texture_fixture(&mut self) {
         let Some(fixture) = self.demo_fixture.take() else {
             return;
@@ -3384,12 +3502,19 @@ impl Drop for ShellApplication {
 
 impl ApplicationHandler for ShellApplication {
     fn can_create_surfaces(&mut self, event_loop: &dyn ActiveEventLoop) {
-        if !self
+        let already_bootstrapped = self
             .windows
             .borrow()
             .view_windows
-            .contains_key(&FlutterRustViewId::IMPLICIT)
-        {
+            .contains_key(&FlutterRustViewId::IMPLICIT);
+        if already_bootstrapped {
+            // Not first boot: winit only re-invokes `can_create_surfaces`
+            // for an already-registered view on Android, where minimizing
+            // destroys the native window and restoring creates a new one.
+            // The shell/engine/Vulkan device all survive that cycle; only
+            // the swapchain-owning surface needs replacing.
+            self.recreate_implicit_surface(event_loop);
+        } else {
             let attributes = WindowAttributes::default().with_title(&self.config.title);
             let window: Arc<dyn Window> = Arc::from(
                 event_loop
@@ -3554,6 +3679,27 @@ impl ApplicationHandler for ShellApplication {
         let (visible, focused) = self.windows.borrow().aggregate_window_state();
         let state = self.lifecycle_state.resumed(visible, focused);
         self.send_lifecycle_event(state);
+    }
+
+    fn destroy_surfaces(&mut self, _event_loop: &dyn ActiveEventLoop) {
+        // Android destroys every native window's surface here (e.g. on
+        // minimize) before the window itself is torn down; winit fires
+        // `can_create_surfaces` again once a replacement is ready. Suspend
+        // presentation immediately so acquire/present calls in flight right
+        // now stop touching the dying swapchain instead of spamming
+        // "BufferQueue has been abandoned" until the surface is recreated.
+        let cancelled_touches = {
+            let mut windows = self.windows.borrow_mut();
+            windows
+                .views
+                .values_mut()
+                .flat_map(|view| {
+                    view.gpu_broker.suspend();
+                    view.pointer_state.cancel_touches()
+                })
+                .collect::<Vec<_>>()
+        };
+        self.send_pointer_events(cancelled_touches);
     }
 
     fn suspended(&mut self, _: &dyn ActiveEventLoop) {
@@ -3749,6 +3895,21 @@ impl ApplicationHandler for ShellApplication {
                     self.send_pointer_events([event]);
                 }
             }
+            WindowEvent::PointerLeft {
+                position,
+                kind: PointerKind::Touch(finger_id),
+                ..
+            } => {
+                let events = self
+                    .windows
+                    .borrow_mut()
+                    .views
+                    .get_mut(&window_id)
+                    .expect("known window disappeared")
+                    .pointer_state
+                    .touch_left(finger_id.into_raw(), position);
+                self.send_pointer_events(events);
+            }
             WindowEvent::PointerMoved {
                 position, source, ..
             } => {
@@ -3760,14 +3921,14 @@ impl ApplicationHandler for ShellApplication {
                     .pointer_state;
                 match source {
                     PointerSource::Touch { finger_id, .. } => {
-                        let event = pointer.touch(
+                        let events = pointer.touch(
                             finger_id.into_raw(),
                             position.x,
                             position.y,
                             TouchPhase::Moved,
                         );
                         drop(windows);
-                        self.send_pointer_events([event]);
+                        self.send_pointer_events(events);
                     }
                     _ => {
                         let events = pointer.moved(position.x, position.y);
@@ -3790,7 +3951,7 @@ impl ApplicationHandler for ShellApplication {
                     .pointer_state;
                 match button {
                     ButtonSource::Touch { finger_id, .. } => {
-                        let event = pointer.touch(
+                        let events = pointer.touch(
                             finger_id.into_raw(),
                             position.x,
                             position.y,
@@ -3800,7 +3961,7 @@ impl ApplicationHandler for ShellApplication {
                             },
                         );
                         drop(windows);
-                        self.send_pointer_events([event]);
+                        self.send_pointer_events(events);
                     }
                     button => {
                         pointer.physical_x = position.x;
@@ -5330,6 +5491,44 @@ mod tests {
         assert_eq!(touch_device_id(0), 1);
         assert_eq!(touch_device_id(7), 8);
         assert_eq!(touch_device_id(u64::MAX), i64::MAX);
+    }
+
+    #[test]
+    fn touch_leave_cancels_an_active_touch_once() {
+        let mut pointer = PointerState::new();
+        let down = pointer.touch(0, 10.0, 20.0, TouchPhase::Started);
+        assert_eq!(down.len(), 1);
+        assert_eq!(down[0].phase, FlutterRustPointerPhase::Down as u32);
+
+        let cancelled = pointer.touch_left(0, None);
+        assert_eq!(cancelled.len(), 1);
+        assert_eq!(cancelled[0].phase, FlutterRustPointerPhase::Cancel as u32);
+        assert_eq!(
+            (cancelled[0].physical_x, cancelled[0].physical_y),
+            (10.0, 20.0)
+        );
+        assert!(pointer.touch_left(0, None).is_empty());
+    }
+
+    #[test]
+    fn touch_release_makes_the_following_leave_a_noop() {
+        let mut pointer = PointerState::new();
+        pointer.touch(0, 10.0, 20.0, TouchPhase::Started);
+        let up = pointer.touch(0, 10.0, 20.0, TouchPhase::Ended);
+        assert_eq!(up.len(), 1);
+        assert_eq!(up[0].phase, FlutterRustPointerPhase::Up as u32);
+        assert!(pointer.touch_left(0, None).is_empty());
+    }
+
+    #[test]
+    fn duplicate_touch_down_closes_the_stale_stream_first() {
+        let mut pointer = PointerState::new();
+        pointer.touch(0, 10.0, 20.0, TouchPhase::Started);
+        let restarted = pointer.touch(0, 30.0, 40.0, TouchPhase::Started);
+
+        assert_eq!(restarted.len(), 2);
+        assert_eq!(restarted[0].phase, FlutterRustPointerPhase::Cancel as u32);
+        assert_eq!(restarted[1].phase, FlutterRustPointerPhase::Down as u32);
     }
 
     #[test]
