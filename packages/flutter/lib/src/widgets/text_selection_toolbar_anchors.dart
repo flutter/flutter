@@ -78,6 +78,10 @@ class TextSelectionToolbarAnchors {
       return Rect.zero;
     }
 
+    if (selectionEndpoints.isEmpty) {
+      return Rect.zero;
+    }
+
     final bool isMultiline =
         selectionEndpoints.last.point.dy - selectionEndpoints.first.point.dy > endGlyphHeight / 2;
 
