@@ -21,8 +21,8 @@
 namespace flutter {
 namespace android {
 
-/// @brief Abstract legacy delegate interface allowing fallback execution
-/// when the embedder C-API rollout flag is disabled.
+/// @brief Legacy delegate interface retained as a deprecated compatibility stub
+/// following Phase 5.5 Flag Obliteration.
 class LegacyJniDelegate {
  public:
   virtual ~LegacyJniDelegate() = default;
@@ -76,15 +76,12 @@ class LegacyJniDelegate {
   virtual bool OnEngineGarbageCollected(int64_t engine_id) { return false; }
 };
 
-/// @brief Native JNI Routing Boundary that dispatches calls between
-/// JniDelegate and LegacyJniDelegate.
+/// @brief Native JNI Routing Boundary that unconditionally executes through
+/// the modern C-API Embedder JniDelegate.
 ///
-/// Subsystems whose legacy implementations have been deleted (Assets, Images,
-/// Callbacks, Mutators, Platform Views, Semantics, Graphics Pipeline [VSync,
-/// Metrics, SurfaceControl, HardwareBuffer, Vulkan]) dispatch directly and
-/// unconditionally to JniDelegate. For remaining transitioning subsystems,
-/// if IsEmbedderEnabled() is true, dispatches to JniDelegate; if false,
-/// dispatches to LegacyJniDelegate.
+/// Post-Phase 5.5 Flag Obliteration, all dual-dispatch fallback logic and
+/// rollout flags are obliterated. Routing is hardcoded unconditionally to
+/// JniDelegate.
 class JniRouter {
  public:
   enum class RoutingPath {
@@ -92,30 +89,37 @@ class JniRouter {
     kEmbedder,
   };
 
-  JniRouter(std::shared_ptr<JniDelegate> embedder_delegate,
-            std::shared_ptr<LegacyJniDelegate> legacy_delegate = nullptr);
+  explicit JniRouter(
+      std::shared_ptr<JniDelegate> embedder_delegate,
+      const std::shared_ptr<LegacyJniDelegate>& legacy_delegate = nullptr);
   virtual ~JniRouter();
 
-  /// @brief Checks whether the Embedder C-API pipeline is active globally.
+  /// @brief Checks whether the Embedder C-API pipeline is active globally
+  /// (unconditionally true).
   static bool IsGlobalEmbedderEnabled();
 
-  /// @brief Sets whether the Embedder C-API pipeline is active globally.
+  /// @brief Sets whether the Embedder C-API pipeline is active globally (no-op
+  /// post Phase 5.5).
   static void SetGlobalEmbedderEnabled(bool enabled);
 
-  /// @brief Backward-compatible alias for IsGlobalEmbedderEnabled.
+  /// @brief Backward-compatible alias for IsGlobalEmbedderEnabled
+  /// (unconditionally true).
   static bool IsEmbedderEnabled();
 
-  /// @brief Backward-compatible alias for SetGlobalEmbedderEnabled.
+  /// @brief Backward-compatible alias for SetGlobalEmbedderEnabled (no-op post
+  /// Phase 5.5).
   static void SetEmbedderEnabled(bool enabled);
 
-  /// @brief Sets per-instance override for embedder routing.
+  /// @brief Sets per-instance override for embedder routing (no-op post Phase
+  /// 5.5).
   void SetInstanceEmbedderEnabled(std::optional<bool> enabled);
 
   /// @brief Checks whether embedder pipeline is active for this router
-  /// instance.
+  /// instance (unconditionally true).
   bool IsInstanceEmbedderEnabled() const;
 
-  /// @brief Returns the active routing path according to current flag.
+  /// @brief Returns the active routing path (unconditionally
+  /// RoutingPath::kEmbedder).
   RoutingPath GetActiveRoutingPath() const;
 
   // Routing entry points:
@@ -376,21 +380,13 @@ class JniRouter {
   bool RouteOnEngineGarbageCollected(int64_t engine_id);
 
   std::shared_ptr<JniDelegate> GetEmbedderDelegate() const;
+
+  /// @brief Returns legacy delegate pointer (unconditionally nullptr post
+  /// Phase 5.5 Flag Obliteration).
   std::shared_ptr<LegacyJniDelegate> GetLegacyDelegate() const;
 
  private:
-  enum class InstanceOverride : int8_t {
-    kUseGlobal = -1,
-    kDisabled = 0,
-    kEnabled = 1,
-  };
-
-  static std::atomic<bool> embedder_enabled_;
-  std::atomic<InstanceOverride> instance_embedder_enabled_{
-      InstanceOverride::kUseGlobal};
-
   std::shared_ptr<JniDelegate> embedder_delegate_;
-  std::shared_ptr<LegacyJniDelegate> legacy_delegate_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(JniRouter);
 };

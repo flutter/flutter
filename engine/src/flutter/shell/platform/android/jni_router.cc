@@ -10,12 +10,10 @@
 namespace flutter {
 namespace android {
 
-std::atomic<bool> JniRouter::embedder_enabled_{true};
-
 JniRouter::JniRouter(std::shared_ptr<JniDelegate> embedder_delegate,
-                     std::shared_ptr<LegacyJniDelegate> legacy_delegate)
-    : embedder_delegate_(std::move(embedder_delegate)),
-      legacy_delegate_(std::move(legacy_delegate)) {
+                     const std::shared_ptr<LegacyJniDelegate>& legacy_delegate)
+    : embedder_delegate_(std::move(embedder_delegate)) {
+  (void)legacy_delegate;
   TRACE_EVENT0("flutter", "JniRouter::JniRouter");
 }
 
@@ -24,44 +22,37 @@ JniRouter::~JniRouter() {
 }
 
 bool JniRouter::IsGlobalEmbedderEnabled() {
-  return embedder_enabled_.load();
+  return true;
 }
 
 void JniRouter::SetGlobalEmbedderEnabled(bool enabled) {
-  embedder_enabled_.store(enabled);
+  // Post-Phase 5.5 Flag Obliteration: No-op. The embedder C-API is permanently
+  // enabled.
+  (void)enabled;
 }
 
 bool JniRouter::IsEmbedderEnabled() {
-  return IsGlobalEmbedderEnabled();
+  return true;
 }
 
 void JniRouter::SetEmbedderEnabled(bool enabled) {
-  SetGlobalEmbedderEnabled(enabled);
+  // Post-Phase 5.5 Flag Obliteration: No-op. The embedder C-API is permanently
+  // enabled.
+  (void)enabled;
 }
 
 void JniRouter::SetInstanceEmbedderEnabled(std::optional<bool> enabled) {
-  if (!enabled.has_value()) {
-    instance_embedder_enabled_.store(InstanceOverride::kUseGlobal);
-  } else {
-    instance_embedder_enabled_.store(*enabled ? InstanceOverride::kEnabled
-                                              : InstanceOverride::kDisabled);
-  }
+  // Post-Phase 5.5 Flag Obliteration: No-op. The embedder C-API is permanently
+  // enabled.
+  (void)enabled;
 }
 
 bool JniRouter::IsInstanceEmbedderEnabled() const {
-  InstanceOverride override_val = instance_embedder_enabled_.load();
-  if (override_val == InstanceOverride::kUseGlobal) {
-    if (!legacy_delegate_) {
-      return true;
-    }
-    return IsGlobalEmbedderEnabled();
-  }
-  return override_val == InstanceOverride::kEnabled;
+  return true;
 }
 
 JniRouter::RoutingPath JniRouter::GetActiveRoutingPath() const {
-  return IsInstanceEmbedderEnabled() ? RoutingPath::kEmbedder
-                                     : RoutingPath::kLegacy;
+  return RoutingPath::kEmbedder;
 }
 
 std::shared_ptr<JniDelegate> JniRouter::GetEmbedderDelegate() const {
@@ -69,7 +60,7 @@ std::shared_ptr<JniDelegate> JniRouter::GetEmbedderDelegate() const {
 }
 
 std::shared_ptr<LegacyJniDelegate> JniRouter::GetLegacyDelegate() const {
-  return legacy_delegate_;
+  return nullptr;
 }
 
 bool JniRouter::RoutePlatformMessage(const std::string& channel,
@@ -79,15 +70,8 @@ bool JniRouter::RoutePlatformMessage(const std::string& channel,
                                      int64_t message_data) {
   TRACE_EVENT1("flutter", "JniRouter::RoutePlatformMessage", "channel",
                channel.c_str());
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->HandlePlatformMessage(
-          channel, message, message_size, response_id, message_data);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->HandlePlatformMessage(
+  if (embedder_delegate_) {
+    return embedder_delegate_->HandlePlatformMessage(
         channel, message, message_size, response_id, message_data);
   }
   return false;
@@ -105,16 +89,9 @@ bool JniRouter::RoutePlatformMessageResponse(int32_t response_id,
                                              const uint8_t* data,
                                              size_t data_size) {
   TRACE_EVENT0("flutter", "JniRouter::RoutePlatformMessageResponse");
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->HandlePlatformMessageResponse(response_id,
-                                                               data, data_size);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->HandlePlatformMessageResponse(response_id, data,
-                                                           data_size);
+  if (embedder_delegate_) {
+    return embedder_delegate_->HandlePlatformMessageResponse(response_id, data,
+                                                             data_size);
   }
   return false;
 }
@@ -166,42 +143,24 @@ bool JniRouter::RouteSemanticsTreeEnabled(bool enabled) {
 bool JniRouter::RouteApplicationLocale(const std::string& locale) {
   TRACE_EVENT1("flutter", "JniRouter::RouteApplicationLocale", "locale",
                locale.c_str());
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetApplicationLocale(locale);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetApplicationLocale(locale);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetApplicationLocale(locale);
   }
   return false;
 }
 
 bool JniRouter::RouteFirstFrame() {
   TRACE_EVENT0("flutter", "JniRouter::RouteFirstFrame");
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OnFirstFrame();
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OnFirstFrame();
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnFirstFrame();
   }
   return false;
 }
 
 bool JniRouter::RoutePreEngineRestart() {
   TRACE_EVENT0("flutter", "JniRouter::RoutePreEngineRestart");
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OnPreEngineRestart();
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OnPreEngineRestart();
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnPreEngineRestart();
   }
   return false;
 }
@@ -269,14 +228,8 @@ bool JniRouter::RouteViewportMetrics(int64_t view_id,
 
 bool JniRouter::RouteRequestDartDeferredLibrary(int loading_unit_id) {
   TRACE_EVENT0("flutter", "JniRouter::RouteRequestDartDeferredLibrary");
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->RequestDartDeferredLibrary(loading_unit_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->RequestDartDeferredLibrary(loading_unit_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->RequestDartDeferredLibrary(loading_unit_id);
   }
   return false;
 }
@@ -743,28 +696,16 @@ bool JniRouter::RoutePlatformViewMutators(
 
 bool JniRouter::RouteInitVM(const AndroidVMArgs& args) {
   TRACE_EVENT0("flutter", "JniRouter::RouteInitVM");
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->InitVM(args);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->InitVM(args);
+  if (embedder_delegate_) {
+    return embedder_delegate_->InitVM(args);
   }
   return false;
 }
 
 bool JniRouter::RoutePrefetchDefaultFontManager() {
   TRACE_EVENT0("flutter", "JniRouter::RoutePrefetchDefaultFontManager");
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->PrefetchDefaultFontManager();
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->PrefetchDefaultFontManager();
+  if (embedder_delegate_) {
+    return embedder_delegate_->PrefetchDefaultFontManager();
   }
   return false;
 }
@@ -772,14 +713,8 @@ bool JniRouter::RoutePrefetchDefaultFontManager() {
 bool JniRouter::RouteSetVmServiceUri(const std::string& uri) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSetVmServiceUri", "uri",
                uri.c_str());
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SetVmServiceUri(uri);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SetVmServiceUri(uri);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SetVmServiceUri(uri);
   }
   return false;
 }
@@ -913,14 +848,8 @@ int64_t JniRouter::RouteSpawnEngine(int64_t parent_engine_id,
                                     const AndroidEngineSpawnArgs& args) {
   TRACE_EVENT1("flutter", "JniRouter::RouteSpawnEngine", "parent_engine_id",
                std::to_string(parent_engine_id).c_str());
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->SpawnEngine(parent_engine_id, args);
-    }
-    return 0;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->SpawnEngine(parent_engine_id, args);
+  if (embedder_delegate_) {
+    return embedder_delegate_->SpawnEngine(parent_engine_id, args);
   }
   return 0;
 }
@@ -928,28 +857,16 @@ int64_t JniRouter::RouteSpawnEngine(int64_t parent_engine_id,
 bool JniRouter::RouteShutdownSpawnedEngine(int64_t engine_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteShutdownSpawnedEngine", "engine_id",
                std::to_string(engine_id).c_str());
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->ShutdownSpawnedEngine(engine_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->ShutdownSpawnedEngine(engine_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->ShutdownSpawnedEngine(engine_id);
   }
   return false;
 }
 
 size_t JniRouter::RouteGetActiveEngineCount() const {
   TRACE_EVENT0("flutter", "JniRouter::RouteGetActiveEngineCount");
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->GetActiveEngineCount();
-    }
-    return 0;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->GetActiveEngineCount();
+  if (embedder_delegate_) {
+    return embedder_delegate_->GetActiveEngineCount();
   }
   return 0;
 }
@@ -957,14 +874,8 @@ size_t JniRouter::RouteGetActiveEngineCount() const {
 bool JniRouter::RouteOnEngineGarbageCollected(int64_t engine_id) {
   TRACE_EVENT1("flutter", "JniRouter::RouteOnEngineGarbageCollected",
                "engine_id", std::to_string(engine_id).c_str());
-  if (IsInstanceEmbedderEnabled()) {
-    if (embedder_delegate_) {
-      return embedder_delegate_->OnEngineGarbageCollected(engine_id);
-    }
-    return false;
-  }
-  if (legacy_delegate_) {
-    return legacy_delegate_->OnEngineGarbageCollected(engine_id);
+  if (embedder_delegate_) {
+    return embedder_delegate_->OnEngineGarbageCollected(engine_id);
   }
   return false;
 }
