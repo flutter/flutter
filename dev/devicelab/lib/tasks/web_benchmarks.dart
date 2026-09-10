@@ -37,8 +37,8 @@ typedef WebBenchmarkOptions = ({
 /// Deletes a directory with retry logic to handle file locks on various platforms.
 Future<void> deleteDirectoryWithRetry(
   io.Directory dir, {
-  int maxAttempts = 5,
-  Duration delay = const Duration(milliseconds: 200),
+  int maxAttempts = 10,
+  Duration delay = const Duration(milliseconds: 500),
 }) async {
   for (var attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -88,21 +88,23 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         print('Warning: Error closing server: $e');
       }
 
-      // 2. Stop Chrome
-      try {
-        final currentChrome = chrome;
-        final readyFuture = whenChromeIsReady;
-        if (currentChrome != null) {
-          currentChrome.stop();
-        } else if (readyFuture != null) {
-          final Chrome readyChrome = await readyFuture.timeout(
-            const Duration(seconds: 3),
-            onTimeout: () => throw TimeoutException('Chrome ready timeout during cleanup'),
-          );
-          readyChrome.stop();
+      // 2. Stop Chrome (non-DDC mode only; in DDC mode Chrome is managed by flutterRunProcess)
+      if (!benchmarkOptions.useDdc) {
+        try {
+          final currentChrome = chrome;
+          final readyFuture = whenChromeIsReady;
+          if (currentChrome != null) {
+            currentChrome.stop();
+          } else if (readyFuture != null) {
+            final Chrome readyChrome = await readyFuture.timeout(
+              const Duration(seconds: 5),
+              onTimeout: () => throw TimeoutException('Chrome ready timeout during cleanup'),
+            );
+            readyChrome.stop();
+          }
+        } catch (e) {
+          print('Warning: Error stopping Chrome: $e');
         }
-      } catch (e) {
-        print('Warning: Error stopping Chrome: $e');
       }
 
       // 3. Stop flutter run process if present
@@ -385,6 +387,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           workingDirectory: cwd,
         );
       }
+      unawaited(whenChromeIsReady?.then((Chrome c) => chrome = c, onError: (_) {}));
 
       print('Waiting for the benchmark to report benchmark profile.');
       final taskResult = <String, dynamic>{};
