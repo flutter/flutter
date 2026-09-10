@@ -44,10 +44,6 @@ class CanvasKitPainter extends WebParagraphPainter {
   @visibleForTesting
   int debugRasterizeCount = 0;
 
-  /// Across all paragraphs, how many times they were rasterized in the current test
-  @visibleForTesting
-  static int debugTotalRasterizeCount = 0;
-
   @override
   bool get hasCache => _cacheEntry != null;
 
@@ -78,7 +74,6 @@ class CanvasKitPainter extends WebParagraphPainter {
     if (!hasCache) {
       assert(() {
         debugRasterizeCount++;
-        debugTotalRasterizeCount++;
         return true;
       }());
       final imageInfo = SkImageInfo(

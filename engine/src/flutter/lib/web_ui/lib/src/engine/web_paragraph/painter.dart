@@ -58,8 +58,8 @@ class ParagraphTransform {
     required this.devicePixelRatio,
   });
 
-  factory ParagraphTransform.from(Float64List? transform, double devicePixelRatio) {
-    if (transform == null) {
+  factory ParagraphTransform.from(Float64List transform, double devicePixelRatio) {
+    if (transformKindOf(transform) == TransformKind.identity) {
       return ParagraphTransform(
         effectiveScaleX: devicePixelRatio,
         effectiveScaleY: devicePixelRatio,

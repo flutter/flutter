@@ -19,6 +19,7 @@ void main() {
 Future<void> testMain() async {
   const region = Rect.fromLTWH(0, 0, 500, 500);
   const epsilon = 1e-5;
+  final Float64List identityTransform = Matrix4.identity().toFloat64();
   setUpUnitTests();
 
   test('WebParagraph snaps physical offset to integer device pixels and renders 1:1', () {
@@ -39,7 +40,7 @@ Future<void> testMain() async {
         final (Rect sourceRect, Rect targetRect, Offset canvas2dShift) = calculateParagraph(
           paragraph,
           positiveOffset,
-          ParagraphTransform.from(null, dpr),
+          ParagraphTransform.from(identityTransform, dpr),
         );
 
         // Verify sourceRect dimensions are exact integers in physical pixels
@@ -65,8 +66,15 @@ Future<void> testMain() async {
 
         // Test negative fractional offset (e.g. text scrolling partially off screen)
         const negativeOffset = Offset(-5.65, -10.25);
-        final (Rect negSourceRect, Rect negTargetRect, Offset negCanvas2dShift) =
-            calculateParagraph(paragraph, negativeOffset, ParagraphTransform.from(null, dpr));
+        final (
+          Rect negSourceRect,
+          Rect negTargetRect,
+          Offset negCanvas2dShift,
+        ) = calculateParagraph(
+          paragraph,
+          negativeOffset,
+          ParagraphTransform.from(identityTransform, dpr),
+        );
 
         expect(negSourceRect.width % 1.0, closeTo(0.0, epsilon));
         expect(negSourceRect.height % 1.0, closeTo(0.0, epsilon));
@@ -260,7 +268,7 @@ Future<void> testMain() async {
         final (Rect sourceRect, Rect targetRect, Offset canvas2dShift) = calculateParagraph(
           paragraph,
           Offset.zero,
-          ParagraphTransform.from(null, 1.0),
+          ParagraphTransform.from(identityTransform, 1.0),
         );
 
         final double shiftPhysicalX = (-paragraph.paintBounds.left).ceilToDouble();
@@ -537,14 +545,9 @@ Future<void> testMain() async {
   });
 
   test(
-    'ParagraphTransform correctly extracts scale from matrix and handles rotations and nulls',
+    'ParagraphTransform correctly extracts scale from matrix and handles rotations and translations',
     () {
       const dpr = 2.0;
-
-      // Null transform: returns (dpr, dpr)
-      final nullTransform = ParagraphTransform.from(null, dpr);
-      expect(nullTransform.effectiveScaleX, closeTo(2.0, epsilon));
-      expect(nullTransform.effectiveScaleY, closeTo(2.0, epsilon));
 
       // Identity transform
       final identity = Float64List.fromList(<double>[
@@ -568,6 +571,33 @@ Future<void> testMain() async {
       final idTransform = ParagraphTransform.from(identity, dpr);
       expect(idTransform.effectiveScaleX, closeTo(2.0, epsilon));
       expect(idTransform.effectiveScaleY, closeTo(2.0, epsilon));
+      expect(idTransform.transformX, closeTo(0.0, epsilon));
+      expect(idTransform.transformY, closeTo(0.0, epsilon));
+
+      // Translation only (not identity)
+      final translation = Float64List.fromList(<double>[
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        10.0,
+        20.0,
+        0.0,
+        1.0,
+      ]);
+      final transTransform = ParagraphTransform.from(translation, dpr);
+      expect(transTransform.effectiveScaleX, closeTo(2.0, epsilon));
+      expect(transTransform.effectiveScaleY, closeTo(2.0, epsilon));
+      expect(transTransform.transformX, closeTo(10.0, epsilon));
+      expect(transTransform.transformY, closeTo(20.0, epsilon));
 
       // Uniform scale 1.5x
       final uniform = Float64List.fromList(<double>[
