@@ -971,7 +971,7 @@ Information about project "Runner":
   testWithoutContext('getInfo filters local Swift package schemes from project schemes', () async {
     const workingDirectory = '/';
     final Directory buildDirectory = fileSystem.directory('build/ios');
-    final FakeXcodeBasedProject xcodeProject = FakeXcodeBasedProject(workingDirectory, fileSystem);
+    final xcodeProject = FakeXcodeBasedProject(workingDirectory, fileSystem);
 
     // A local Swift package added directly to the Xcode project (not fetched
     // as a remote dependency, so it never appears under the SwiftPM
