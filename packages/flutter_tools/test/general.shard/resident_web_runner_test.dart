@@ -2339,7 +2339,9 @@ flutter:
         Pub: ThrowingPub.new,
       },
     );
+  });
 
+  group('WasmCompilerConfig defaults', () {
     WebCompilerConfig? capturedConfig;
 
     testUsingContext(
