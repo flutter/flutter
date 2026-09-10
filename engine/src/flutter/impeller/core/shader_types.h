@@ -159,6 +159,41 @@ struct ShaderUniformSlot {
   size_t binding;
 };
 
+/// @brief Metadata required to set a push constant block.
+///
+/// A pipeline has a single block of push constant memory. Both stages may
+/// declare a block against it, in which case they read the same bytes.
+struct ShaderPushConstantSlot {
+  /// @brief The name of the push constant block.
+  ///
+  /// The OpenGL ES backend, which has no push constants, matches this against
+  /// the plain uniforms the block was lowered to.
+  const char* name;
+
+  /// @brief `ext_res_0` is the Metal binding value.
+  size_t ext_res_0;
+
+  /// @brief The reflected size of the block, including alignment padding.
+  size_t size_in_bytes;
+};
+
+/// @brief The span of push constant memory a single shader stage reads.
+///
+/// Stages always read from offset zero, so two stages that both declare a
+/// block are aliases of each other rather than neighbours.
+struct PushConstantRange {
+  ShaderStage shader_stage;
+  uint32_t size;
+
+  constexpr size_t GetHash() const {
+    return fml::HashCombine(shader_stage, size);
+  }
+
+  constexpr bool operator==(const PushConstantRange& other) const {
+    return shader_stage == other.shader_stage && size == other.size;
+  }
+};
+
 /// @brief Metadata required to bind a combined texture and sampler.
 ///
 /// OpenGL binding requires the usage of the separate shader metadata struct.

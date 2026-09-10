@@ -5,6 +5,8 @@
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 
 #include <format>
+#include <optional>
+#include <vector>
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/status_or.h"
@@ -225,8 +227,28 @@ fml::StatusOr<vk::UniquePipelineLayout> MakePipelineLayout(
     const PipelineDescriptor& desc,
     const std::shared_ptr<DeviceHolderVK>& device_holder,
     const vk::DescriptorSetLayout& descs_layout) {
+  // Every stage reads its block from offset zero, so two stages that both
+  // declare one alias the same memory. Vulkan allows that; what it forbids is
+  // naming a stage in more than one range.
+  std::vector<vk::PushConstantRange> push_constant_ranges;
+  if (const auto& vertex_descriptor = desc.GetVertexDescriptor()) {
+    for (const auto& range : vertex_descriptor->GetPushConstantRanges()) {
+      std::optional<vk::ShaderStageFlagBits> stage =
+          ToVKShaderStageFlagBits(range.shader_stage);
+      if (!stage.has_value()) {
+        continue;
+      }
+      vk::PushConstantRange vk_range;
+      vk_range.setStageFlags(stage.value());
+      vk_range.setOffset(0u);
+      vk_range.setSize(range.size);
+      push_constant_ranges.push_back(vk_range);
+    }
+  }
+
   vk::PipelineLayoutCreateInfo pipeline_layout_info;
   pipeline_layout_info.setSetLayouts(descs_layout);
+  pipeline_layout_info.setPushConstantRanges(push_constant_ranges);
   auto pipeline_layout = device_holder->GetDevice().createPipelineLayoutUnique(
       pipeline_layout_info);
   if (pipeline_layout.result != vk::Result::eSuccess) {

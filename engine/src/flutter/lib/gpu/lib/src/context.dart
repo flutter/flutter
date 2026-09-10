@@ -46,6 +46,16 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getMinimumUniformByteAlignment();
   }
 
+  /// The maximum size in bytes of the push constant block a single shader
+  /// stage can read (see [RenderPass.setPushConstants]).
+  ///
+  /// This varies widely by backend and device, so branch on it rather than
+  /// assume a constant. A shader that declares a larger block fails at
+  /// [createRenderPipeline] rather than falling back to a uniform buffer.
+  int get maxPushConstantSizeInBytes {
+    return _getMaxPushConstantSize();
+  }
+
   /// Whether the backend supports multisample anti-aliasing for offscreen
   /// color and stencil attachments. A subset of OpenGLES-only devices do not
   /// support this functionality.
@@ -303,6 +313,11 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetMinimumUniformByteAlignment',
   )
   external int _getMinimumUniformByteAlignment();
+
+  @Native<Int Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetMaxPushConstantSize',
+  )
+  external int _getMaxPushConstantSize();
 
   @Native<Bool Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_Context_GetSupportsOffscreenMSAA',

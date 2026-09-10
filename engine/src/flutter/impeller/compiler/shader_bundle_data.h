@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_COMPILER_SHADER_BUNDLE_DATA_H_
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "flutter/fml/mapping.h"
@@ -48,6 +49,13 @@ class ShaderBundleData {
     size_t binding = 0u;
   };
 
+  struct ShaderPushConstantBlock {
+    std::string name;
+    size_t ext_res_0 = 0u;
+    size_t size_in_bytes = 0u;
+    std::vector<ShaderUniformStructField> fields;
+  };
+
   ShaderBundleData(std::string entrypoint,
                    spv::ExecutionModel stage,
                    TargetPlatform target_platform);
@@ -57,6 +65,8 @@ class ShaderBundleData {
   void AddUniformStruct(ShaderUniformStruct uniform_struct);
 
   void AddUniformTexture(ShaderUniformTexture uniform_texture);
+
+  void SetPushConstantBlock(ShaderPushConstantBlock push_constants);
 
   void AddInputDescription(InputDescription input);
 
@@ -72,6 +82,7 @@ class ShaderBundleData {
   const TargetPlatform target_platform_;
   std::vector<ShaderUniformStruct> uniform_structs_;
   std::vector<ShaderUniformTexture> uniform_textures_;
+  std::optional<ShaderPushConstantBlock> push_constants_;
   std::vector<InputDescription> inputs_;
   std::shared_ptr<fml::Mapping> shader_;
   std::shared_ptr<fml::Mapping> sksl_;

@@ -806,6 +806,10 @@ size_t CapabilitiesVK::GetMinimumStorageBufferAlignment() const {
   return minimum_storage_alignment_;
 }
 
+size_t CapabilitiesVK::GetMaxPushConstantSize() const {
+  return device_properties_.limits.maxPushConstantsSize;
+}
+
 bool CapabilitiesVK::NeedsPartitionedHostBuffer() const {
   return false;
 }

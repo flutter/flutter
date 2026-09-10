@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <vector>
 #include "flutter/lib/gpu/command_buffer.h"
 #include "flutter/lib/gpu/export.h"
 #include "flutter/lib/ui/dart_wrapper.h"
@@ -68,6 +69,10 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   void ClearBindings();
 
+  /// Record the bytes the bound pipeline's push constant block reads. The
+  /// value persists until it is set again or [ClearBindings] is called.
+  void SetPushConstants(const uint8_t* data, size_t length);
+
   /// Append a draw to the underlying render pass. [element_count] is the
   /// vertex count for a non-indexed draw, or the index count when
   /// [indexed] is true. [instance_count] is the number of instances to draw.
@@ -111,11 +116,21 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   impeller::BufferView index_buffer;
   impeller::IndexType index_buffer_type = impeller::IndexType::kNone;
 
+  // The push constant bytes replayed to every stage that declares a block.
+  // Both stages read the same memory, so there is one copy, not one per
+  // stage.
+  std::vector<uint8_t> push_constant_data;
+
   uint32_t stencil_reference = 0;
   std::optional<impeller::IRect32> scissor;
   std::optional<impeller::Viewport> viewport;
 
  private:
+  /// Push the recorded push constant data to every stage of the bound
+  /// pipeline that declares a block. Returns false when a stage declares one
+  /// and nothing was set.
+  bool ReplayPushConstants();
+
   /// Lookup an Impeller pipeline by building a descriptor based on the current
   /// command state, or return the memoized pipeline when that state is
   /// unchanged since the last draw. Returns null (after a validation log)
@@ -266,6 +281,11 @@ extern bool InternalFlutterGpu_RenderPass_BindTextureIndexed(
     int width_address_mode,
     int height_address_mode,
     int max_anisotropy);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_RenderPass_SetPushConstants(
+    flutter::gpu::RenderPass* wrapper,
+    Dart_Handle data_handle);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_ClearBindings(

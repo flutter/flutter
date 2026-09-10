@@ -89,6 +89,13 @@ class RenderPassMTL final : public RenderPass {
   bool SetIndexBuffer(BufferView index_buffer, IndexType index_type) override;
 
   // |RenderPass|
+  bool SetPushConstants(ShaderStage stage,
+                        const ShaderPushConstantSlot& slot,
+                        const ShaderMetadata* metadata,
+                        const uint8_t* data,
+                        size_t length) override;
+
+  // |RenderPass|
   fml::Status Draw() override;
 
   // |RenderPass|

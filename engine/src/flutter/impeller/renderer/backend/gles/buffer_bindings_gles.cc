@@ -407,9 +407,23 @@ bool BufferBindingsGLES::BindUniformBufferV2(
     const BufferView& buffer,
     const ShaderMetadata* metadata,
     const DeviceBufferGLES& device_buffer_gles) {
-  const uint8_t* buffer_ptr =
-      device_buffer_gles.GetBufferData() + buffer.GetRange().offset;
+  return BindUniformMembers(
+      gl, metadata,
+      device_buffer_gles.GetBufferData() + buffer.GetRange().offset);
+}
 
+bool BufferBindingsGLES::BindPushConstants(const ProcTableGLES& gl,
+                                           const ShaderMetadata* metadata,
+                                           const uint8_t* data) {
+  // GLES has no push constants. The shader compiler lowers the block to plain
+  // uniforms named the same way a legacy uniform block's members are, so the
+  // per-member upload path is shared verbatim.
+  return BindUniformMembers(gl, metadata, data);
+}
+
+bool BufferBindingsGLES::BindUniformMembers(const ProcTableGLES& gl,
+                                            const ShaderMetadata* metadata,
+                                            const uint8_t* buffer_ptr) {
   if (metadata->members.empty()) {
     VALIDATION_LOG << "Uniform buffer had no members. This is currently "
                       "unsupported in the OpenGL ES backend. Use a uniform "

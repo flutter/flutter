@@ -499,6 +499,34 @@ bool RenderPassVK::SetIndexBuffer(BufferView index_buffer,
 }
 
 // |RenderPass|
+bool RenderPassVK::SetPushConstants(ShaderStage stage,
+                                    const ShaderPushConstantSlot& slot,
+                                    const ShaderMetadata* metadata,
+                                    const uint8_t* data,
+                                    size_t length) {
+  if (data == nullptr || length < slot.size_in_bytes) {
+    VALIDATION_LOG << "Push constant data is smaller than the block declared "
+                      "by the shader.";
+    return false;
+  }
+  // The push happens in `Draw`, once the pipeline layout the data has to be
+  // compatible with is known.
+  switch (stage) {
+    case ShaderStage::kVertex:
+      vertex_push_constants_.assign(data, data + slot.size_in_bytes);
+      return true;
+    case ShaderStage::kFragment:
+      fragment_push_constants_.assign(data, data + slot.size_in_bytes);
+      return true;
+    case ShaderStage::kUnknown:
+    case ShaderStage::kCompute:
+      VALIDATION_LOG << "Cannot set push constants on this shader stage.";
+      return false;
+  }
+  FML_UNREACHABLE();
+}
+
+// |RenderPass|
 fml::Status RenderPassVK::Draw() {
   if (!pipeline_) {
     return fml::Status(fml::StatusCode::kCancelled,
@@ -565,6 +593,34 @@ fml::Status RenderPassVK::Draw() {
       0,                                 // offset count
       nullptr                            // offsets
   );
+
+  // A push must be covered by a range this layout declares for the stage, so
+  // the pipeline is what decides which stages get one and how much.
+  if (const auto& vertex_descriptor =
+          pipeline_->GetDescriptor().GetVertexDescriptor()) {
+    for (const auto& range : vertex_descriptor->GetPushConstantRanges()) {
+      vk::ShaderStageFlagBits stage;
+      const std::vector<uint8_t>* data = nullptr;
+      switch (range.shader_stage) {
+        case ShaderStage::kVertex:
+          stage = vk::ShaderStageFlagBits::eVertex;
+          data = &vertex_push_constants_;
+          break;
+        case ShaderStage::kFragment:
+          stage = vk::ShaderStageFlagBits::eFragment;
+          data = &fragment_push_constants_;
+          break;
+        case ShaderStage::kUnknown:
+        case ShaderStage::kCompute:
+          continue;
+      }
+      if (data->size() < range.size) {
+        continue;
+      }
+      command_buffer_vk_.pushConstants(pipeline_layout, stage, 0u, range.size,
+                                       data->data());
+    }
+  }
 
   if (pipeline_uses_input_attachments_) {
     InsertBarrierForInputAttachmentRead(

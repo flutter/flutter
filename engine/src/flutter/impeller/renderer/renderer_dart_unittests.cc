@@ -314,8 +314,16 @@ TEST_P(RendererDartTest, CanReflectUniformStructs) {
   ASSERT_TRUE(RunDartFunction("canReflectUniformStructs"));
 }
 
+TEST_P(RendererDartTest, CanReflectPushConstants) {
+  ASSERT_TRUE(RunDartFunction("canReflectPushConstants"));
+}
+
 TEST_P(RendererDartTest, CanCreateRenderPassAndSubmit) {
   ASSERT_TRUE(RenderDartToPlayground("canCreateRenderPassAndSubmit"));
+}
+
+TEST_P(RendererDartTest, CanDrawWithPushConstants) {
+  ASSERT_TRUE(RenderDartToPlayground("canDrawWithPushConstants"));
 }
 
 }  // namespace testing

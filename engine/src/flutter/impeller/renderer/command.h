@@ -55,6 +55,19 @@ class Resource {
 using BufferResource = Resource<BufferView>;
 using TextureResource = Resource<std::shared_ptr<const Texture>>;
 
+/// @brief A push constant block and the bytes to fill it with.
+///
+/// Only backends that defer encoding to submit record these. The metadata is
+/// owned rather than borrowed because the shader it was reflected from can be
+/// collected before the pass is encoded.
+struct PushConstantBinding {
+  ShaderPushConstantSlot slot;
+  ShaderStage stage;
+  ShaderMetadata metadata;
+  /// The block's bytes within the render pass's push constant storage.
+  Range data;
+};
+
 /// @brief combines the texture, sampler and sampler slot information.
 struct TextureAndSampler {
   SampledImageSlot slot;
@@ -91,6 +104,10 @@ struct Command {
   /// stored.
   Range bound_buffers = Range{0, 0};
   Range bound_textures = Range{0, 0};
+
+  /// An offset into render pass storage where push constant blocks set for
+  /// this draw are stored.
+  Range push_constants = Range{0, 0};
 
   //----------------------------------------------------------------------------
   /// An offset and range of vertex buffers bound for this draw call.

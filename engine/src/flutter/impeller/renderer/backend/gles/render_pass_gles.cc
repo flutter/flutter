@@ -241,6 +241,8 @@ static void EncodeViewport(const ProcTableGLES& gl,
     const std::vector<BufferView>& vertex_buffers,
     const std::vector<TextureAndSampler>& bound_textures,
     const std::vector<BufferResource>& bound_buffers,
+    const std::vector<PushConstantBinding>& push_constants,
+    const std::vector<uint8_t>& push_constant_data,
     const std::shared_ptr<GPUTracerGLES>& tracer,
     const std::shared_ptr<const Context>& impeller_context) {
   TRACE_EVENT0("impeller", "RenderPassGLES::EncodeCommandsInReactor");
@@ -518,6 +520,19 @@ static void EncodeViewport(const ProcTableGLES& gl,
             /*buffer_range=*/command.bound_buffers     //
             )) {
       return false;
+    }
+
+    //--------------------------------------------------------------------------
+    /// Bind push constant data.
+    ///
+    for (size_t i = 0; i < command.push_constants.length; i++) {
+      const PushConstantBinding& binding =
+          push_constants[command.push_constants.offset + i];
+      if (!vertex_desc_gles->BindPushConstants(
+              gl, &binding.metadata,
+              push_constant_data.data() + binding.data.offset)) {
+        return false;
+      }
     }
 
     //--------------------------------------------------------------------------
@@ -839,7 +854,9 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
             /*vertex_buffers=*/render_pass->vertex_buffers_,  //
             /*bound_textures=*/render_pass->bound_textures_,  //
             /*bound_buffers=*/render_pass->bound_buffers_,    //
-            /*tracer=*/tracer,                                //
+            /*push_constants=*/render_pass->push_constants_,  //
+            /*push_constant_data=*/render_pass->push_constant_data_,
+            /*tracer=*/tracer,  //
             /*impeller_context=*/render_pass->context_);
         FML_CHECK(result)
             << "Must be able to encode GL commands without error.";
