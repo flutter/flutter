@@ -4,6 +4,8 @@
 
 import 'package:args/args.dart';
 
+import '../../base/utils.dart';
+
 /// Defines the lookup scope for an [OptionDescriptor].
 enum OptionScope {
   /// Look up only within the subcommand's local `ArgResults`.
@@ -15,6 +17,17 @@ enum OptionScope {
   /// Check local `ArgResults` first, falling back to `globalResults`.
   any,
 }
+
+/// Registry mapping option names to their registered [OptionDescriptor] instances.
+typedef ArgParserRegistry = Map<String, OptionDescriptor<Object?>>;
+
+// Uses an Expando (weak keys) rather than a top-level Map<ArgParser, ...> so that
+// short-lived ArgParser instances created across tests and commands can be
+// garbage-collected without leaking memory for the lifetime of the isolate.
+final _parserRegistry = Expando<ArgParserRegistry>('OptionDescriptorRegistry');
+
+ArgParserRegistry _registryFor(ArgParser parser) =>
+    _parserRegistry[parser] ??= <String, OptionDescriptor<Object?>>{};
 
 /// A metadata-rich, type-safe descriptor for a command-line option or flag.
 abstract class OptionDescriptor<T> {
@@ -64,13 +77,8 @@ abstract class OptionDescriptor<T> {
   /// The CLI flag representation (e.g., `--target`).
   String get flag => '--$name';
 
-  /// Registers this option with [parser], maintaining descriptor identity in [registry].
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  });
+  /// Registers this option with [parser], maintaining descriptor identity per parser.
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride});
 
   /// Checks if this option was explicitly provided on the command line.
   bool wasProvided(ArgResults? results, {ArgResults? globalResults}) {
@@ -102,6 +110,22 @@ abstract class OptionDescriptor<T> {
 
   bool _computeEffectiveHide({required bool verboseHelp, bool? hideOverride}) =>
       hideOverride ?? (hide || (verboseOnly && !verboseHelp));
+
+  bool _isAlreadyRegistered(ArgParser parser) {
+    final ArgParserRegistry registry = _registryFor(parser);
+    if (parser.options.containsKey(name)) {
+      final OptionDescriptor<Object?>? existing = registry[name];
+      if (existing != null && identical(existing, this)) {
+        return true;
+      }
+      _throwConflictError(name, existing);
+    }
+    return false;
+  }
+
+  void _recordRegistration(ArgParser parser) {
+    _registryFor(parser)[name] = this;
+  }
 
   void _throwConflictError(String name, OptionDescriptor<Object?>? existing) {
     final existingInfo = existing != null
@@ -135,18 +159,9 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
   final List<String> aliases;
 
   @override
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  }) {
-    if (parser.options.containsKey(name)) {
-      final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && identical(existing, this)) {
-        return;
-      }
-      _throwConflictError(name, existing);
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
     }
 
     parser.addOption(
@@ -160,7 +175,7 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
       allowedHelp: allowedHelp,
       hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
-    registry?[name] = this;
+    _recordRegistration(parser);
   }
 
   @override
@@ -171,13 +186,156 @@ class StringOptionDescriptor extends OptionDescriptor<String?> {
     }
     return defaultsTo;
   }
+}
 
-  /// Returns the resolved value or [fallback] if null.
-  String getValueOrDefault(
-    ArgResults? results, {
-    ArgResults? globalResults,
-    String fallback = '',
-  }) => getValue(results, globalResults: globalResults) ?? fallback;
+/// A descriptor for single-value string options that have a non-null default value.
+class DefaultedStringOptionDescriptor extends OptionDescriptor<String> {
+  const DefaultedStringOptionDescriptor({
+    required super.name,
+    required super.help,
+    required String super.defaultsTo,
+    super.abbr,
+    super.valueHelp,
+    this.aliases = const <String>[],
+    super.allowed,
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  /// Alternative names for this option.
+  final List<String> aliases;
+
+  @override
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
+    }
+
+    parser.addOption(
+      name,
+      abbr: abbr,
+      aliases: aliases,
+      help: help,
+      valueHelp: valueHelp,
+      defaultsTo: defaultsTo,
+      allowed: allowed,
+      allowedHelp: allowedHelp,
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+    );
+    _recordRegistration(parser);
+  }
+
+  @override
+  String getValue(ArgResults? results, {ArgResults? globalResults}) {
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      return (target[name] as String?) ?? defaultsTo!;
+    }
+    return defaultsTo!;
+  }
+}
+
+/// A private base class providing shared integer parsing and registration infrastructure
+/// for [IntOptionDescriptor] and [DefaultedIntOptionDescriptor].
+abstract class _IntOptionDescriptorBase<R> extends OptionDescriptor<R> {
+  const _IntOptionDescriptorBase({
+    required super.name,
+    required super.help,
+    super.abbr,
+    super.valueHelp,
+    super.defaultsTo,
+    this.aliases = const <String>[],
+    super.allowed,
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  /// Alternative names for this option.
+  final List<String> aliases;
+
+  @override
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
+    }
+
+    parser.addOption(
+      name,
+      abbr: abbr,
+      aliases: aliases,
+      help: help,
+      valueHelp: valueHelp,
+      defaultsTo: defaultsTo?.toString(),
+      allowed: allowed,
+      allowedHelp: allowedHelp,
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+    );
+    _recordRegistration(parser);
+  }
+
+  /// Resolves and parses the integer option value from [results] or [globalResults],
+  /// throwing a [FormatException] if the provided string is not a valid integer.
+  int? _parseValue(ArgResults? results, {ArgResults? globalResults}) {
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      final raw = target[name] as String?;
+      if (raw == null) {
+        return defaultsTo as int?;
+      }
+      final int? parsed = int.tryParse(raw);
+      if (parsed == null) {
+        throw FormatException('Invalid integer value "$raw" for "--$name".');
+      }
+      return parsed;
+    }
+    return defaultsTo as int?;
+  }
+}
+
+/// A descriptor for single-value integer options.
+class IntOptionDescriptor extends _IntOptionDescriptorBase<int?> {
+  const IntOptionDescriptor({
+    required super.name,
+    required super.help,
+    super.abbr,
+    super.valueHelp,
+    super.defaultsTo,
+    super.aliases,
+    super.allowed,
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  @override
+  int? getValue(ArgResults? results, {ArgResults? globalResults}) =>
+      _parseValue(results, globalResults: globalResults);
+}
+
+/// A descriptor for single-value integer options that have a non-null default value.
+class DefaultedIntOptionDescriptor extends _IntOptionDescriptorBase<int> {
+  const DefaultedIntOptionDescriptor({
+    required super.name,
+    required super.help,
+    required int super.defaultsTo,
+    super.abbr,
+    super.valueHelp,
+    super.aliases,
+    super.allowed,
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  @override
+  int getValue(ArgResults? results, {ArgResults? globalResults}) =>
+      _parseValue(results, globalResults: globalResults)!;
 }
 
 /// A descriptor for boolean flags with a concrete default value.
@@ -197,18 +355,9 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
   final bool negatable;
 
   @override
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  }) {
-    if (parser.options.containsKey(name)) {
-      final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && identical(existing, this)) {
-        return;
-      }
-      _throwConflictError(name, existing);
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
     }
     parser.addFlag(
       name,
@@ -218,7 +367,7 @@ class FlagOptionDescriptor extends OptionDescriptor<bool> {
       negatable: negatable,
       hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
-    registry?[name] = this;
+    _recordRegistration(parser);
   }
 
   @override
@@ -249,18 +398,9 @@ class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
   final bool negatable;
 
   @override
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  }) {
-    if (parser.options.containsKey(name)) {
-      final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && identical(existing, this)) {
-        return;
-      }
-      _throwConflictError(name, existing);
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
     }
     parser.addFlag(
       name,
@@ -270,7 +410,7 @@ class NullableFlagOptionDescriptor extends OptionDescriptor<bool?> {
       negatable: negatable,
       hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
-    registry?[name] = this;
+    _recordRegistration(parser);
   }
 
   @override
@@ -307,18 +447,9 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
   final List<String> aliases;
 
   @override
-  void addTo(
-    ArgParser parser, {
-    Map<String, OptionDescriptor<Object?>>? registry,
-    bool verboseHelp = false,
-    bool? hideOverride,
-  }) {
-    if (parser.options.containsKey(name)) {
-      final OptionDescriptor<Object?>? existing = registry?[name];
-      if (existing != null && identical(existing, this)) {
-        return;
-      }
-      _throwConflictError(name, existing);
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
     }
     parser.addMultiOption(
       name,
@@ -332,7 +463,7 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
       allowedHelp: allowedHelp,
       hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
     );
-    registry?[name] = this;
+    _recordRegistration(parser);
   }
 
   @override
@@ -342,5 +473,185 @@ class MultiOptionDescriptor extends OptionDescriptor<List<String>> {
       return (target[name] as List<dynamic>?)?.cast<String>() ?? const <String>[];
     }
     return defaultsTo ?? const <String>[];
+  }
+}
+
+/// A descriptor for enum-based options that automatically validates allowed values
+/// and parses CLI string arguments directly into typed enum values [T].
+/// A private base class providing shared enum parsing and registration infrastructure
+/// for [EnumOptionDescriptor] and [DefaultedEnumOptionDescriptor].
+abstract class _EnumOptionDescriptorBase<T extends Enum, R> extends OptionDescriptor<R> {
+  const _EnumOptionDescriptorBase({
+    required super.name,
+    required super.help,
+    required this.values,
+    this.nameMapper,
+    this.valueParser,
+    super.abbr,
+    super.valueHelp,
+    super.defaultsTo,
+    this.aliases = const <String>[],
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  /// The list of enum values allowed for this option.
+  final List<T> values;
+
+  /// Optional function to map an enum value to its CLI string representation.
+  /// Defaults to `value.cliName` if [T] is a [CliEnum], otherwise `value.name`.
+  final String Function(T value)? nameMapper;
+
+  /// Optional function to parse a string into an enum value.
+  /// Defaults to matching against [nameMapper], `cliName`, or `value.name`.
+  final T? Function(String name)? valueParser;
+
+  /// Alternative names for this option.
+  final List<String> aliases;
+
+  String _formatName(T value) {
+    if (nameMapper != null) {
+      return nameMapper!(value);
+    }
+    if (value is CliEnum) {
+      return (value as CliEnum).cliName;
+    }
+    return value.name;
+  }
+
+  @override
+  List<String> get allowed => values.map(_formatName).toList();
+
+  @override
+  void addTo(ArgParser parser, {bool verboseHelp = false, bool? hideOverride}) {
+    if (_isAlreadyRegistered(parser)) {
+      return;
+    }
+
+    final String? defaultString = defaultsTo != null ? _formatName(defaultsTo! as T) : null;
+
+    Map<String, String>? effectiveAllowedHelp = allowedHelp;
+    if (effectiveAllowedHelp == null && values.isNotEmpty && values.first is CliEnum) {
+      effectiveAllowedHelp = <String, String>{
+        for (final T val in values) _formatName(val): (val as CliEnum).helpText,
+      };
+    }
+
+    parser.addOption(
+      name,
+      abbr: abbr,
+      aliases: aliases,
+      help: help,
+      valueHelp: valueHelp,
+      defaultsTo: defaultString,
+      allowed: allowed,
+      allowedHelp: effectiveAllowedHelp,
+      hide: _computeEffectiveHide(verboseHelp: verboseHelp, hideOverride: hideOverride),
+    );
+    _recordRegistration(parser);
+  }
+}
+
+/// A descriptor for enum-based options that automatically validates allowed values
+/// and parses CLI string arguments directly into typed enum values [T].
+class EnumOptionDescriptor<T extends Enum> extends _EnumOptionDescriptorBase<T, T?> {
+  const EnumOptionDescriptor({
+    required super.name,
+    required super.help,
+    required super.values,
+    super.nameMapper,
+    super.valueParser,
+    super.abbr,
+    super.valueHelp,
+    super.defaultsTo,
+    super.aliases,
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  @override
+  T? getValue(ArgResults? results, {ArgResults? globalResults}) {
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      final raw = target[name] as String?;
+      if (raw == null) {
+        return defaultsTo;
+      }
+      if (valueParser != null) {
+        return valueParser!(raw) ?? defaultsTo;
+      }
+      for (final T val in values) {
+        if (_formatName(val) == raw || val.name == raw) {
+          return val;
+        }
+      }
+    }
+    return defaultsTo;
+  }
+}
+
+/// A descriptor for enum-based options that have a non-null default value.
+class DefaultedEnumOptionDescriptor<T extends Enum> extends _EnumOptionDescriptorBase<T, T> {
+  const DefaultedEnumOptionDescriptor({
+    required super.name,
+    required super.help,
+    required super.values,
+    required T super.defaultsTo,
+    super.nameMapper,
+    super.valueParser,
+    super.abbr,
+    super.valueHelp,
+    super.aliases,
+    super.allowedHelp,
+    super.scope,
+    super.hide,
+    super.verboseOnly,
+  });
+
+  @override
+  T getValue(ArgResults? results, {ArgResults? globalResults}) {
+    final ArgResults? target = _resolveTargetResults(results, globalResults);
+    if (target != null && target.options.contains(name)) {
+      final raw = target[name] as String?;
+      if (raw == null) {
+        return defaultsTo!;
+      }
+      if (valueParser != null) {
+        return valueParser!(raw) ?? defaultsTo!;
+      }
+      for (final T val in values) {
+        if (_formatName(val) == raw || val.name == raw) {
+          return val;
+        }
+      }
+    }
+    return defaultsTo!;
+  }
+}
+
+/// Extension on [ArgParser] for registering [OptionDescriptor] instances directly.
+extension ArgParserDescriptorExtension on ArgParser {
+  /// Registers [descriptor] with this parser.
+  void addDescriptor(
+    OptionDescriptor<Object?> descriptor, {
+    bool verboseHelp = false,
+    bool? hideOverride,
+  }) {
+    descriptor.addTo(this, verboseHelp: verboseHelp, hideOverride: hideOverride);
+  }
+
+  /// Registers multiple [descriptors] with this parser.
+  void addDescriptors(
+    Iterable<OptionDescriptor<Object?>> descriptors, {
+    bool verboseHelp = false,
+    bool? hideOverride,
+  }) {
+    for (final descriptor in descriptors) {
+      descriptor.addTo(this, verboseHelp: verboseHelp, hideOverride: hideOverride);
+    }
   }
 }
