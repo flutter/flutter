@@ -72,6 +72,7 @@ impeller_component("compiler_lib") {
     "//flutter/fml",
     "//flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
     "//flutter/skia",
+    "//flutter/third_party/re2",
 
     # All third_party deps must be included by the global license script.
     "//third_party/abseil-cpp/absl/status",

@@ -173,6 +173,7 @@ class ShaderCompiler {
   final Artifacts _artifacts;
   final Platform _platform;
   bool _hasLoggedSecurityBlockError = false;
+  final Set<String> _loggedWarningShaders = <String>{};
 
   List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
     switch (targetPlatform) {
@@ -315,6 +316,12 @@ class ShaderCompiler {
           );
         }
         return false;
+      }
+      final String? stderr = (result.stderr as String?)?.trim();
+      if (stderr != null && stderr.isNotEmpty) {
+        if (_loggedWarningShaders.add(input.path)) {
+          _logger.printBox(stderr, title: 'Shader Warning');
+        }
       }
     } on _SecurityPolicyBlockException catch (_) {
       _logSecurityBlockError(impellerc.path);
