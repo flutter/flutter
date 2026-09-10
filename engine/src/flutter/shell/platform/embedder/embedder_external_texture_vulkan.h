@@ -8,11 +8,66 @@
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "include/core/SkTypes.h"
-#include "include/gpu/vk/VulkanTypes.h"
+#include "impeller/renderer/backend/vulkan/context_vk.h"
+#include "impeller/renderer/backend/vulkan/texture_source_vk.h"
+#include "impeller/renderer/backend/vulkan/vk.h"
+#include "impeller/renderer/backend/vulkan/yuv_conversion_vk.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
+
+class EmbedderExternalTextureSourceVulkan final
+    : public impeller::TextureSourceVK {
+ public:
+  EmbedderExternalTextureSourceVulkan(
+      const std::shared_ptr<impeller::Context>& context,
+      FlutterVulkanExternalTexture* embedder_desc);
+
+  // |TextureSourceVK|
+  ~EmbedderExternalTextureSourceVulkan() override;
+
+  // |TextureSourceVK|
+  impeller::vk::Image GetImage() const override;
+
+  // |TextureSourceVK|
+  impeller::vk::ImageView GetImageView() const override;
+
+  // |TextureSourceVK|
+  impeller::vk::ImageView GetRenderTargetView(
+      uint32_t mip_level,
+      uint32_t array_layer) const override;
+
+  bool IsValid() const;
+
+  // |TextureSourceVK|
+  bool IsSwapchainImage() const override;
+
+  // |TextureSourceVK|
+  std::shared_ptr<impeller::YUVConversionVK> GetYUVConversion() const override;
+
+ private:
+  bool CreateTextureImageView(
+      const impeller::vk::Device& device,
+      FlutterVulkanExternalTexture* embedder_desc,
+      const std::shared_ptr<impeller::YUVConversionVK>& yuv_conversion_wrapper);
+  impeller::TextureDescriptor ToTextureDescriptor(
+      FlutterVulkanExternalTexture* embedder_desc);
+  std::shared_ptr<impeller::YUVConversionVK> CreateYUVConversion(
+      const impeller::ContextVK& context,
+      FlutterVulkanExternalTexture* embedder_desc);
+  std::shared_ptr<impeller::YUVConversionVK> yuv_conversion_ = {};
+  bool needs_yuv_conversion_ = false;
+  bool is_swapchain_image_ = false;
+  bool is_valid_ = false;
+  impeller::vk::Image texture_image_;
+  impeller::vk::UniqueImageView texture_image_view_ = {};
+  VoidCallback destruction_callback_;
+  void* user_data_;
+  EmbedderExternalTextureSourceVulkan(
+      const EmbedderExternalTextureSourceVulkan&) = delete;
+  EmbedderExternalTextureSourceVulkan& operator=(
+      const EmbedderExternalTextureSourceVulkan&) = delete;
+};
 
 class EmbedderExternalTextureVulkan : public flutter::Texture {
  public:
