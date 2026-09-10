@@ -483,6 +483,44 @@ List<String> _flutterCommandArgs(
   final String? localEngineSrcPath = localEngineSrcPathFromEnv;
   final String? localWebSdk = localWebSdkFromEnv;
   final bool pubOrPackagesCommand = command.startsWith('packages') || command.startsWith('pub');
+
+  var effectiveLocalEngine = localEngine;
+  if (localEngine != null && localEngineSrcPath != null) {
+    String? targetMode;
+    if (options.contains('--release')) {
+      targetMode = 'release';
+    } else if (options.contains('--profile')) {
+      targetMode = 'profile';
+    } else if (options.contains('--debug')) {
+      targetMode = 'debug';
+    }
+    if (targetMode != null) {
+      if (targetMode == 'debug') {
+        final String candidateUnopt = localEngine
+            .replaceFirst('release', 'debug_unopt')
+            .replaceFirst('profile', 'debug_unopt');
+        if (Directory(path.join(localEngineSrcPath, 'out', candidateUnopt)).existsSync()) {
+          effectiveLocalEngine = candidateUnopt;
+        } else {
+          final String candidateOpt = localEngine
+              .replaceFirst('release', 'debug')
+              .replaceFirst('profile', 'debug');
+          if (Directory(path.join(localEngineSrcPath, 'out', candidateOpt)).existsSync()) {
+            effectiveLocalEngine = candidateOpt;
+          }
+        }
+      } else {
+        final String candidate = localEngine
+            .replaceFirst('debug_unopt', targetMode)
+            .replaceFirst('debug', targetMode)
+            .replaceFirst(targetMode == 'release' ? 'profile' : 'release', targetMode);
+        if (Directory(path.join(localEngineSrcPath, 'out', candidate)).existsSync()) {
+          effectiveLocalEngine = candidate;
+        }
+      }
+    }
+  }
+
   return <String>[
     command,
     if (deviceOperatingSystem == DeviceOperatingSystem.ios &&
@@ -496,10 +534,23 @@ List<String> _flutterCommandArgs(
       '--screenshot',
       hostAgent.dumpDirectory!.path,
     ],
-    if (localEngine != null) ...<String>['--local-engine', localEngine],
-    if (localEngineHost != null) ...<String>['--local-engine-host', localEngineHost],
-    if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
-    if (localWebSdk != null) ...<String>['--local-web-sdk', localWebSdk],
+    if (effectiveLocalEngine != null &&
+        !options.any(
+          (String opt) => opt == '--local-engine' || opt.startsWith('--local-engine='),
+        )) ...<String>['--local-engine', effectiveLocalEngine],
+    if (localEngineHost != null &&
+        !options.any(
+          (String opt) => opt == '--local-engine-host' || opt.startsWith('--local-engine-host='),
+        )) ...<String>['--local-engine-host', localEngineHost],
+    if (localEngineSrcPath != null &&
+        !options.any(
+          (String opt) =>
+              opt == '--local-engine-src-path' || opt.startsWith('--local-engine-src-path='),
+        )) ...<String>['--local-engine-src-path', localEngineSrcPath],
+    if (localWebSdk != null &&
+        !options.any(
+          (String opt) => opt == '--local-web-sdk' || opt.startsWith('--local-web-sdk='),
+        )) ...<String>['--local-web-sdk', localWebSdk],
     ...options,
     // Use CI flag when running devicelab tests, except for `packages`/`pub` commands.
     // `packages`/`pub` commands effectively runs the `pub` tool, which does not have

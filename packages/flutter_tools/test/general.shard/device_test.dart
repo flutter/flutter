@@ -1216,6 +1216,15 @@ void main() {
       expect(launchArguments.contains('test-flag'), isFalse);
       expect(launchArguments.contains('enable-hcpp-and-surface-control'), isFalse);
     });
+
+    testWithoutContext('Get Intent launch arguments - debugging disabled with test-flag', () {
+      final original = DebuggingOptions.disabled(BuildInfo.release, testFlag: true);
+
+      final List<String> launchArguments = original.getAndroidLaunchArgumentsAsIntentExtras();
+
+      expect(launchArguments, containsAllInOrder(<String>['--ez', 'test-flag', 'true']));
+      expect(launchArguments.contains('enable-checked-mode'), isFalse);
+    });
   });
 
   group('PollingDeviceDiscovery', () {
