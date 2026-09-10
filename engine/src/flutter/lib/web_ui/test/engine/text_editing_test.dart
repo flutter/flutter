@@ -79,6 +79,15 @@ Future<void> testMain() async {
     editingDeltaState = null;
     lastInputAction = null;
     cleanTextEditingStrategy();
+    // Tests in this file drive the global `textEditing` singleton via
+    // `TextInputShow`, which is a no-op while `isEditing` is already true.
+    // Nothing else here resets it: `cleanTextEditingStrategy` only disables the
+    // test-local strategy, and `clearBackUpDomElementIfExists` removes the DOM
+    // element without touching singleton state. Leaving it set makes the next
+    // test's `TextInputShow` silently do nothing.
+    if (textEditing.isEditing) {
+      textEditing.stopEditing();
+    }
     cleanTestFlags();
     clearBackUpDomElementIfExists();
     await waitForTextStrategyStopPropagation();
@@ -776,6 +785,7 @@ Future<void> testMain() async {
       textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
       await showCompleter.future;
       expect(textEditing.isEditing, isTrue);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
 
       final DomHTMLElement input = textEditing.strategy.domElement!;
       debugEmulateIosSafari = true;
@@ -784,41 +794,25 @@ Future<void> testMain() async {
       // the wrong reason: the refocus is what must skip the close, not the
       // visibility bail-out.
       textEditing.strategy.debugDocumentVisibilityStateOverride = 'visible';
-      try {
-        // Blur the element for real so `document.activeElement` moves, then
-        // invoke the handler directly. Browsers differ on whether a dispatched
-        // blur reaches `handleBlur` at all: desktop Safari does not subscribe to
-        // `blur`, and Firefox does not deliver it in the shape this path needs.
-        // The neighbouring tests in this group invoke it directly for the same
-        // reason. On browsers where the listener does fire, the extra call just
-        // cancels and re-arms the same timer.
-        input.blur();
-        textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
-        // The immediate refocus, as WebKit does mid-drag, must skip the close.
-        input.focusWithoutScroll();
-        // Unlike the other conditions the deferral checks, focus has no debug
-        // override: it reads `domDocument.activeElement` live. Assert the
-        // precondition so a runner that will not grant focus fails here rather
-        // than on the message list below.
-        expect(domDocument.activeElement, input);
-        await Future<void>.delayed(const Duration(milliseconds: 150));
-        expect(connectionClosedMessages(spy), isEmpty);
-        expect(textEditing.isEditing, isTrue);
-      } finally {
-        debugEmulateIosSafari = false;
-        textEditing.strategy.debugDocumentHasFocusOverride = null;
-        textEditing.strategy.debugDocumentVisibilityStateOverride = null;
-      }
+      // Blur the element for real so `document.activeElement` moves, then
+      // invoke the handler directly. Browsers differ on whether a dispatched
+      // blur reaches `handleBlur` at all: `SafariDesktopTextEditingStrategy`
+      // does not subscribe to `blur`. The neighbouring tests in this group
+      // invoke it directly for the same reason. Where the listener does fire,
+      // the extra call just cancels and re-arms the same timer.
+      input.blur();
+      textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+      // The immediate refocus, as WebKit does mid-drag, must skip the close.
+      input.focusWithoutScroll();
+      // Focus is the one condition the deferral reads live, with no debug
+      // override, so assert it took effect before relying on it below.
+      expect(domDocument.activeElement, input);
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
 
       spy.tearDown();
-      // This is the one case that needs the browser to actually grant focus
-      // back. Unlike the other conditions the deferral checks, focus has no
-      // debug override: it reads `domDocument.activeElement` live. Runners that
-      // do not focus their window make `focusWithoutScroll` a no-op, so the
-      // deferred close fires and the test fails for an environmental reason.
-      // Chrome keeps full coverage of this path; the sibling tests do not
-      // depend on real focus and run everywhere.
-    }, skip: isSafari || isFirefox);
+    });
 
     // The Done button and tapping away also blur with `relatedTarget == null`,
     // but do not refocus, so the deferred close must still fire.
@@ -833,6 +827,7 @@ Future<void> testMain() async {
       textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
       await showCompleter.future;
       expect(textEditing.isEditing, isTrue);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
 
       final DomHTMLElement input = textEditing.strategy.domElement!;
       debugEmulateIosSafari = true;
@@ -842,27 +837,20 @@ Future<void> testMain() async {
       // test page reports, so leaving it unpinned makes the result depend on
       // the host browser.
       textEditing.strategy.debugDocumentVisibilityStateOverride = 'visible';
-      try {
-        // Blur the element for real so `document.activeElement` moves, then
-        // invoke the handler directly. Browsers differ on whether a dispatched
-        // blur reaches `handleBlur` at all: desktop Safari does not subscribe to
-        // `blur`, and Firefox does not deliver it in the shape this path needs.
-        // The neighbouring tests in this group invoke it directly for the same
-        // reason. On browsers where the listener does fire, the extra call just
-        // cancels and re-arms the same timer.
-        input.blur();
-        textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
-        // The deferral bails out if the input regained focus, so assert the blur
-        // took effect. A browser that refocuses fails here with a clear message
-        // instead of an empty message list below.
-        expect(domDocument.activeElement, isNot(input));
-        await Future<void>.delayed(const Duration(milliseconds: 150));
-        expect(connectionClosedMessages(spy), hasLength(1));
-      } finally {
-        debugEmulateIosSafari = false;
-        textEditing.strategy.debugDocumentHasFocusOverride = null;
-        textEditing.strategy.debugDocumentVisibilityStateOverride = null;
-      }
+      // Blur the element for real so `document.activeElement` moves, then
+      // invoke the handler directly. Browsers differ on whether a dispatched
+      // blur reaches `handleBlur` at all: `SafariDesktopTextEditingStrategy`
+      // does not subscribe to `blur`. The neighbouring tests in this group
+      // invoke it directly for the same reason. Where the listener does fire,
+      // the extra call just cancels and re-arms the same timer.
+      input.blur();
+      textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+      // The deferral bails out if the input regained focus, so assert the blur
+      // took effect. A browser that refocuses fails here with a clear message
+      // instead of an empty message list below.
+      expect(domDocument.activeElement, isNot(input));
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(connectionClosedMessages(spy), hasLength(1));
 
       spy.tearDown();
     });
@@ -880,14 +868,11 @@ Future<void> testMain() async {
       textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
       await showCompleter.future;
       expect(textEditing.isEditing, isTrue);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
 
       textEditing.strategy.debugDocumentHasFocusOverride = true;
-      try {
-        textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
-        expect(connectionClosedMessages(spy), hasLength(1));
-      } finally {
-        textEditing.strategy.debugDocumentHasFocusOverride = null;
-      }
+      textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+      expect(connectionClosedMessages(spy), hasLength(1));
 
       spy.tearDown();
     });
@@ -905,34 +890,25 @@ Future<void> testMain() async {
       textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
       await showCompleter.future;
       expect(textEditing.isEditing, isTrue);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
 
       final DomHTMLElement input = textEditing.strategy.domElement!;
       debugEmulateIosSafari = true;
       textEditing.strategy.debugDocumentHasFocusOverride = true;
-      try {
-        // Blur without refocusing schedules the deferred close, then the page
-        // is hidden before it fires.
-        // Blur the element for real so `document.activeElement` moves, then
-        // invoke the handler directly. Browsers differ on whether a dispatched
-        // blur reaches `handleBlur` at all: desktop Safari does not subscribe to
-        // `blur`, and Firefox does not deliver it in the shape this path needs.
-        // The neighbouring tests in this group invoke it directly for the same
-        // reason. On browsers where the listener does fire, the extra call just
-        // cancels and re-arms the same timer.
-        input.blur();
-        textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
-        textEditing.strategy.debugDocumentVisibilityStateOverride = 'hidden';
-        await Future<void>.delayed(const Duration(milliseconds: 150));
-        expect(connectionClosedMessages(spy), isEmpty);
-        expect(textEditing.isEditing, isTrue);
-      } finally {
-        debugEmulateIosSafari = false;
-        textEditing.strategy.debugDocumentHasFocusOverride = null;
-        textEditing.strategy.debugDocumentVisibilityStateOverride = null;
-        // Restore focus so this "left blurred" scenario does not leak into the
-        // next test.
-        input.focusWithoutScroll();
-      }
+      // Blur without refocusing schedules the deferred close, then the page
+      // is hidden before it fires.
+      // Blur the element for real so `document.activeElement` moves, then
+      // invoke the handler directly. Browsers differ on whether a dispatched
+      // blur reaches `handleBlur` at all: `SafariDesktopTextEditingStrategy`
+      // does not subscribe to `blur`. The neighbouring tests in this group
+      // invoke it directly for the same reason. Where the listener does fire,
+      // the extra call just cancels and re-arms the same timer.
+      input.blur();
+      textEditing.strategy.handleBlur(createDomEvent('Event', 'blur'));
+      textEditing.strategy.debugDocumentVisibilityStateOverride = 'hidden';
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      expect(connectionClosedMessages(spy), isEmpty);
+      expect(textEditing.isEditing, isTrue);
 
       spy.tearDown();
     });
@@ -4661,6 +4637,9 @@ void cleanTextEditingStrategy() {
 void cleanTestFlags() {
   ui_web.browser.debugBrowserEngineOverride = null;
   ui_web.browser.debugOperatingSystemOverride = null;
+  debugEmulateIosSafari = false;
+  textEditing.strategy.debugDocumentHasFocusOverride = null;
+  textEditing.strategy.debugDocumentVisibilityStateOverride = null;
 }
 
 void checkInputEditingState(DomElement? element, String text, int start, int end) {
