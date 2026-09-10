@@ -1275,7 +1275,7 @@ void fl_engine_send_touch_up_event(FlEngine* self,
     return;
   }
 
-  FlutterPointerEvent event;
+  FlutterPointerEvent event = {};
   event.timestamp = timestamp;
   event.x = x;
   event.y = y;
@@ -1304,7 +1304,7 @@ void fl_engine_send_touch_down_event(FlEngine* self,
     return;
   }
 
-  FlutterPointerEvent event;
+  FlutterPointerEvent event = {};
   event.timestamp = timestamp;
   event.x = x;
   event.y = y;
@@ -1333,7 +1333,7 @@ void fl_engine_send_touch_move_event(FlEngine* self,
     return;
   }
 
-  FlutterPointerEvent event;
+  FlutterPointerEvent event = {};
   event.timestamp = timestamp;
   event.x = x;
   event.y = y;
@@ -1350,6 +1350,35 @@ void fl_engine_send_touch_move_event(FlEngine* self,
   }
 }
 
+void fl_engine_send_touch_cancel_event(FlEngine* self,
+                                       FlutterViewId view_id,
+                                       size_t timestamp,
+                                       double x,
+                                       double y,
+                                       int32_t device) {
+  g_return_if_fail(FL_IS_ENGINE(self));
+
+  if (self->engine == nullptr) {
+    return;
+  }
+
+  FlutterPointerEvent event = {};
+  event.timestamp = timestamp;
+  event.x = x;
+  event.y = y;
+  event.device_kind = kFlutterPointerDeviceKindTouch;
+  event.device = device;
+  event.buttons = 0;
+  event.view_id = view_id;
+  event.phase = FlutterPointerPhase::kCancel;
+  event.struct_size = sizeof(event);
+
+  if (self->embedder_api.SendPointerEvent(self->engine, &event, 1) !=
+      kSuccess) {
+    g_warning("Failed to send touch cancel event");
+  }
+}
+
 void fl_engine_send_touch_add_event(FlEngine* self,
                                     FlutterViewId view_id,
                                     size_t timestamp,
@@ -1362,7 +1391,7 @@ void fl_engine_send_touch_add_event(FlEngine* self,
     return;
   }
 
-  FlutterPointerEvent event;
+  FlutterPointerEvent event = {};
   event.timestamp = timestamp;
   event.x = x;
   event.y = y;
@@ -1391,7 +1420,7 @@ void fl_engine_send_touch_remove_event(FlEngine* self,
     return;
   }
 
-  FlutterPointerEvent event;
+  FlutterPointerEvent event = {};
   event.timestamp = timestamp;
   event.x = x;
   event.y = y;
