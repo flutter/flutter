@@ -30,17 +30,11 @@ Start from existing generated token files under `packages/material_ui/tool/gen_d
 
 ## 2. Create the M3E Template
 
-Create or update the component template under:
-
-```shell
-packages/material_ui/tool/gen_defaults/templates/
-```
+Create or update the component template under `packages/material_ui/tool/gen_defaults/templates/`.
 
 Use the existing component template file when the component already has one. Otherwise, create:
 
-```shell
-packages/material_ui/tool/gen_defaults/templates/<component>_template.dart
-```
+`packages/material_ui/tool/gen_defaults/templates/<component>_template.dart`
 
 Create an M3E template class that extends `TokenTemplateM3E`.
 
@@ -73,11 +67,7 @@ Do not hardcode values in component code. Keep fallback values in the template o
 
 ## 3. Register the Template and Generate Defaults
 
-Update:
-
-```shell
-packages/material_ui/tool/gen_defaults/bin/gen_defaults.dart
-```
+Update `packages/material_ui/tool/gen_defaults/bin/gen_defaults.dart`.
 
 Add the template import:
 
@@ -229,11 +219,7 @@ Example entry:
 
 Create a separate PR for examples if the migration PR is already large. The example should show the Material 3 Expressive opt-in component, such as all new M3E size, width, shape, color, and state variants that apply.
 
-Place examples under:
-
-```shell
-packages/material_ui/example/
-```
+Place examples under `packages/material_ui/example/`.
 
 Add or update example tests if required by the package. Remember to list the example path in the component documentation.
 
@@ -254,11 +240,18 @@ Create a pending changelog file that includes the changelog entry and version bu
 
 Make a copy of the [`material_ui` `template.yaml`](https://github.com/flutter/packages/blob/main/packages/material_ui/pending_changelogs/template.yaml), then fill out the details. Use `version: minor` when the PR adds public API or new M3E component support.
 
-Alternatively, use the Flutter Packages Tool. Follow the [configuration instructions](https://github.com/flutter/packages/tree/main/script/tool#flutter-plugin-tools), then run this from the `material_ui` package directory:
+Alternatively, use the Flutter Packages Tool. Follow the [configuration instructions](https://github.com/flutter/packages/tree/main/script/tool#flutter-plugin-tools), then set up the local tool from the repository root:
 
 ```shell
-fpt update-release-info \
+dart pub get -C script/tool
+```
+
+Run this from the `material_ui` package directory:
+
+```shell
+dart run ../../script/tool/bin/flutter_plugin_tools.dart update-release-info \
   --current-package \
+  --base-branch=origin/main \
   --version=minor \
   --changelog="Adds Material 3 Expressive support for <Component>."
 ```
@@ -267,29 +260,44 @@ Use `bugfix` or `next` instead of `minor` only when that better matches the chan
 
 ## 12. Run Verification
 
+Set up the Flutter Packages Tool from the repository root:
+
+```shell
+dart pub get -C script/tool
+```
+
 Run formatting:
 
 ```shell
-dart run script/tool/bin/flutter_plugin_tools.dart format --packages material_ui
+dart run script/tool/bin/flutter_plugin_tools.dart format \
+  --packages material_ui \
+  --base-branch=origin/main \
+  --no-clang-format \
+  --no-kotlin \
+  --no-java \
+  --no-swift
 ```
 
 Run analysis:
 
 ```shell
-dart run script/tool/bin/flutter_plugin_tools.dart analyze --packages material_ui
+dart run script/tool/bin/flutter_plugin_tools.dart analyze \
+  --packages material_ui \
+  --base-branch=origin/main
 ```
 
-Run the relevant component tests:
-
-```shell
-flutter test packages/material_ui/test/<component>_test.dart
-```
-
-Run generator tests from the `material_ui` package directory if generator code changed:
+Run the relevant component tests from the `material_ui` package directory. For example:
 
 ```shell
 cd packages/material_ui
-dart run test tool/gen_defaults/test
+flutter test test/icon_button_test.dart
+```
+
+Run generator tests from the `gen_defaults` package directory if generator code changed:
+
+```shell
+cd packages/material_ui/tool/gen_defaults
+dart run test test
 ```
 
 ## 13. PR Description Checklist
