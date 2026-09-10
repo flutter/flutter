@@ -37,6 +37,7 @@ void main() {
       artifacts: FakeArtifacts(),
       cache: FakeCache(),
       flutterVersion: FakeFlutterVersion(),
+      featureFlags: TestFeatureFlags(),
     );
     for (final Command<void> x in command.subcommands.values) {
       expect((x as BuildSubCommand).supported, isTrue);
