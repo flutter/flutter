@@ -17,7 +17,7 @@ namespace flutter {
 class EmbedderExternalTextureVulkan : public flutter::Texture {
  public:
   using ExternalTextureCallback = std::function<
-      std::unique_ptr<FlutterVulkanTexture>(int64_t, size_t, size_t)>;
+      std::unique_ptr<FlutterVulkanExternalTexture>(int64_t, size_t, size_t)>;
   EmbedderExternalTextureVulkan(int64_t texture_identifier,
                                 const ExternalTextureCallback& callback);
 

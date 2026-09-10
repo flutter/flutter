@@ -2394,10 +2394,10 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       auto external_texture_vulkan_callback =
           [ptr = callback, user_data](
               int64_t texture_identifier, size_t width,
-              size_t height) -> std::unique_ptr<FlutterVulkanTexture> {
-        std::unique_ptr<FlutterVulkanTexture> texture =
-            std::make_unique<FlutterVulkanTexture>();
-        texture->struct_size = sizeof(FlutterVulkanTexture);
+              size_t height) -> std::unique_ptr<FlutterVulkanExternalTexture> {
+        std::unique_ptr<FlutterVulkanExternalTexture> texture =
+            std::make_unique<FlutterVulkanExternalTexture>();
+        texture->struct_size = sizeof(FlutterVulkanExternalTexture);
         if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
           return nullptr;
         }
