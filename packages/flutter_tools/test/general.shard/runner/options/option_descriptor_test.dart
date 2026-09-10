@@ -577,6 +577,42 @@ void main() {
       expect(verboseCommand.usage, contains('public-flag'));
     });
 
+    testUsingContext('AndroidGradleOptionsBundle registers Gradle options with verbose hiding', () {
+      final normalCommand = _FakeCommand(
+        name: 'apk',
+        description: 'Build APK',
+        bundles: const <OptionBundle>[AndroidGradleOptionsBundle()],
+      );
+      createTestCommandRunner(normalCommand);
+
+      for (final name in const <String>[
+        FlutterOptions.kAndroidGradleDaemon,
+        FlutterOptions.kAndroidSkipBuildDependencyValidation,
+        FlutterOptions.kAndroidProjectArgs,
+        FlutterOptions.kAndroidGradleProjectCacheDir,
+      ]) {
+        expect(normalCommand.argParser.options.containsKey(name), isTrue);
+        expect(normalCommand.argParser.options[name]!.hide, isTrue);
+      }
+
+      final verboseCommand = _FakeCommand(
+        name: 'apk',
+        description: 'Build APK',
+        verboseHelp: true,
+        bundles: const <OptionBundle>[AndroidGradleOptionsBundle()],
+      );
+      createTestCommandRunner(verboseCommand);
+
+      for (final name in const <String>[
+        FlutterOptions.kAndroidGradleDaemon,
+        FlutterOptions.kAndroidSkipBuildDependencyValidation,
+        FlutterOptions.kAndroidProjectArgs,
+        FlutterOptions.kAndroidGradleProjectCacheDir,
+      ]) {
+        expect(verboseCommand.argParser.options[name]!.hide, isFalse);
+      }
+    });
+
     testUsingContext('AndroidBuildOptionsBundle registers Android and Gradle options', () {
       final command = _FakeCommand(
         name: 'apk',
@@ -585,34 +621,32 @@ void main() {
       );
       createTestCommandRunner(command);
 
-      expect(command.argParser.options.containsKey(BuildInfoOptions.shrink.name), isTrue);
-      expect(command.argParser.options.containsKey(BuildInfoOptions.flavor.name), isTrue);
-      expect(
-        command.argParser.options.containsKey(BuildInfoOptions.ignoreDeprecation.name),
-        isTrue,
-      );
-      expect(
-        command.argParser.options.containsKey(BuildInfoOptions.androidGradleDaemon.name),
-        isTrue,
-      );
-      expect(
-        command.argParser.options.containsKey(
-          BuildInfoOptions.androidSkipBuildDependencyValidation.name,
-        ),
-        isTrue,
-      );
-      expect(
-        command.argParser.options.containsKey(BuildInfoOptions.androidProjectArg.name),
-        isTrue,
-      );
-      expect(
-        command.argParser.options.containsKey(BuildInfoOptions.androidProjectCacheDir.name),
-        isTrue,
-      );
-      expect(
-        command.argParser.options.containsKey(DebuggingOptionDescriptors.enableHcpp.name),
-        isTrue,
-      );
+      const allOptions = <OptionDescriptor<Object?>>[
+        BuildInfoOptions.shrink,
+        BuildInfoOptions.flavor,
+        BuildInfoOptions.ignoreDeprecation,
+        BuildInfoOptions.splitDebugInfo,
+        BuildInfoOptions.obfuscate,
+        BuildInfoOptions.extraFrontEndOptions,
+        BuildInfoOptions.extraGenSnapshotOptions,
+        BuildInfoOptions.performanceMeasurementFile,
+        BuildInfoOptions.analyzeSize,
+        BuildInfoOptions.codeSizeDirectory,
+        BuildInfoOptions.trackWidgetCreation,
+        DebuggingOptionDescriptors.enableHcpp,
+        BuildInfoOptions.androidGradleDaemon,
+        BuildInfoOptions.androidSkipBuildDependencyValidation,
+        BuildInfoOptions.androidProjectArg,
+        BuildInfoOptions.androidProjectCacheDir,
+      ];
+
+      for (final descriptor in allOptions) {
+        expect(
+          command.argParser.options.containsKey(descriptor.name),
+          isTrue,
+          reason: 'Option ${descriptor.name} should be registered',
+        );
+      }
     });
   });
 }

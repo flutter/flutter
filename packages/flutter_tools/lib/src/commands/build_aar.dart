@@ -29,13 +29,13 @@ class BuildAarCommand extends BuildSubCommand {
       DartCompileOptionsBundle(),
       AndroidGradleOptionsBundle(),
     ]);
-    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       _debugMode,
       _profileMode,
       _releaseMode,
       CommonOptions.treeShakeIcons,
       BuildInfoOptions.flavor,
-      _buildNumber,
+      CommonOptions.buildNumber,
       CommonOptions.outputDir,
       CommonOptions.pub,
       BuildInfoOptions.splitDebugInfo,
@@ -63,15 +63,6 @@ class BuildAarCommand extends BuildSubCommand {
     name: 'release',
     defaultsTo: true,
     help: 'Build a release version of the current project.',
-  );
-
-  static const _buildNumber = DefaultedStringOptionDescriptor(
-    name: 'build-number',
-    defaultsTo: '1.0',
-    valueHelp: '1.0.0',
-    help:
-        'An identifier used as an internal version number.\n'
-        'Each build must have a unique identifier to differentiate it from previous builds.',
   );
 
   static const _targetPlatform = MultiOptionDescriptor(
@@ -145,8 +136,10 @@ class BuildAarCommand extends BuildSubCommand {
       _targetPlatform,
     ).map<CpuArch>(getCpuArchForName);
 
-    final String buildNumberValue = getValue(_buildNumber);
-    final buildNumber = buildNumberValue.isNotEmpty ? buildNumberValue : '1.0';
+    final String? buildNumberArg = getValue(CommonOptions.buildNumber);
+    final String buildNumber = (buildNumberArg != null && buildNumberArg.isNotEmpty)
+        ? buildNumberArg
+        : '1.0';
 
     final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
     for (final (buildMode, descriptor) in const [
