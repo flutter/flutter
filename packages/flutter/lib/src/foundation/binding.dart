@@ -247,8 +247,6 @@ abstract class BindingBase {
   /// [TestWidgetsFlutterBinding], can override this accessor to return a
   /// different [ui.PlatformDispatcher] implementation.
   ///
-  ui.PlatformDispatcher? _debugPlatformDispatcher;
-
   /// In debug builds this is [ui.PlatformDispatcher.instance] wrapped so that
   /// the entries of [debugViewMetricsOverrides] apply to the view metrics it
   /// reports; see [debugApplyViewMetricsOverrides]. The wrapper is transparent
@@ -265,6 +263,8 @@ abstract class BindingBase {
     }());
     return dispatcher;
   }
+
+  ui.PlatformDispatcher? _debugPlatformDispatcher;
 
   /// The initialization method.
   ///

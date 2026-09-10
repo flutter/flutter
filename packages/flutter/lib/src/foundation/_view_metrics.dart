@@ -414,8 +414,8 @@ final Expando<_DebugViewMetricsPlatformDispatcher> _wrappers =
 // here, weakly and pruned as they die. A wrapper is reachable only through the
 // entry its own dispatcher keys, and holds that dispatcher strongly, so the two
 // die together and remembering one for the sake of notifying it keeps neither
-// it nor the isolate's worth of fake dispatchers a test suite makes alive.
-final _wrapped = <WeakReference<_DebugViewMetricsPlatformDispatcher>>[];
+final List<WeakReference<_DebugViewMetricsPlatformDispatcher>> _wrapped =
+    <WeakReference<_DebugViewMetricsPlatformDispatcher>>[];
 
 // The wrapper for `dispatcher`, built and cached if there is not one already,
 // and `dispatcher` itself if it is already a wrapper.

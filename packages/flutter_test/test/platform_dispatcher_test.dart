@@ -166,6 +166,7 @@ void main() {
     // Set fake values for window properties.
     testPlatformDispatcher.localeTestValue = const Locale('foobar');
     testPlatformDispatcher.textScaleFactorTestValue = 3.0;
+    testPlatformDispatcher.applicationLocale = const Locale('foobar_app');
 
     // Erase fake window property values.
     testPlatformDispatcher.clearAllTestValues();
@@ -173,6 +174,7 @@ void main() {
     // Verify that the window once again reports real property values.
     expect(WidgetsBinding.instance.platformDispatcher.locale, originalLocale);
     expect(WidgetsBinding.instance.platformDispatcher.textScaleFactor, originalTextScaleFactor);
+    expect(testPlatformDispatcher.applicationLocale, isNull);
   });
 
   testWidgets(

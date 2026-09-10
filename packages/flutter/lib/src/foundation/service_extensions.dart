@@ -86,9 +86,9 @@ enum FoundationServiceExtensions {
   ///
   /// See also:
   ///
-  /// * [DebugViewMetricsOverride], the value this service extension exposes.
-  /// * [debugViewMetricsOverrides], the map this service extension writes to.
-  /// * [BindingBase.initServiceExtensions], where the service extension is
-  ///   registered.
+  ///  * [DebugViewMetricsOverride], the value this service extension exposes.
+  ///  * [debugViewMetricsOverrides], the map this service extension writes to.
+  ///  * [BindingBase.initServiceExtensions], where the service extension is
+  ///    registered.
   viewMetricsOverride,
 }

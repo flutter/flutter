@@ -759,6 +759,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   Locale? _applicationLocale;
 
+  /// Resets [applicationLocale] to null.
+  void resetApplicationLocale() {
+    _testValues._applicationLocale = null;
+  }
+
   @override
   void setApplicationLocale(Locale locale) {
     applicationLocale = locale;
@@ -850,6 +855,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     clearPlatformBrightnessTestValue();
     clearLocaleTestValue();
     clearLocalesTestValue();
+    resetApplicationLocale();
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
     clearNativeSpellCheckServiceDefined();
