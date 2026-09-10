@@ -802,10 +802,6 @@ abstract class FlutterCommand extends Command<void> {
     CommonOptions.treeShakeIcons.addTo(argParser, hideOverride: enabledByDefault == false);
   }
 
-  void addShrinkingFlag({required bool verboseHelp}) {
-    BuildInfoOptions.shrink.addTo(argParser, verboseHelp: verboseHelp);
-  }
-
   void usesFrontendServerStarterPathOption({required bool verboseHelp}) {
     BuildInfoOptions.frontendServerStarterPath.addTo(argParser, verboseHelp: verboseHelp);
   }
