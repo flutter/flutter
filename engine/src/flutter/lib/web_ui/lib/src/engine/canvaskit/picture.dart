@@ -24,9 +24,11 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
       skPicture,
       this,
       'Picture',
-      onDispose: (SkPicture _) {
-        imageTracker?.releaseAll();
-      },
+      onDispose: imageTracker == null
+          ? null
+          : (SkPicture _) {
+              imageTracker!.releaseAll();
+            },
     );
     _initStackTrace();
   }

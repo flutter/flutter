@@ -11,11 +11,13 @@ import 'package:ui/ui.dart' as ui;
 
 class SkwasmCanvas implements LayerCanvas {
   /// Creates a canvas that records drawing commands into [recorder] bounded by [cullRect].
-  factory SkwasmCanvas(SkwasmPictureRecorder recorder, ui.Rect cullRect) {
+  factory SkwasmCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
     if (recorder.isRecording) {
       throw ArgumentError('"recorder" must not already be associated with another Canvas.');
     }
-    return recorder.beginRecording(cullRect);
+    cullRect ??= ui.Rect.largest;
+    final skwasmRecorder = recorder as SkwasmPictureRecorder;
+    return skwasmRecorder.beginRecording(cullRect);
   }
 
   /// Creates a [SkwasmCanvas] wrapping an underlying native [_handle].
@@ -389,11 +391,11 @@ class SkwasmCanvas implements LayerCanvas {
   /// Retains any image sources referenced by [paint] (such as an [ImageShader]).
   @override
   void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode, ui.Paint paint) {
-    _tracker?.recordPaint(paint);
     final skwasmVertices = (vertices as EngineVertices).delegate as SkwasmVertices?;
     if (skwasmVertices == null) {
       return;
     }
+    _tracker?.recordPaint(paint);
     final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint();
     canvasDrawVertices(_handle, skwasmVertices.handle, blendMode.index, paintHandle);
     paintDispose(paintHandle);
