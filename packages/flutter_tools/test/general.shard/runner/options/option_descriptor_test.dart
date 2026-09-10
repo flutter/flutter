@@ -576,6 +576,44 @@ void main() {
       expect(verboseCommand.usage, contains('internal-flag'));
       expect(verboseCommand.usage, contains('public-flag'));
     });
+
+    testUsingContext('AndroidBuildOptionsBundle registers Android and Gradle options', () {
+      final command = _FakeCommand(
+        name: 'apk',
+        description: 'Build APK',
+        bundles: const <OptionBundle>[AndroidBuildOptionsBundle()],
+      );
+      createTestCommandRunner(command);
+
+      expect(command.argParser.options.containsKey(BuildInfoOptions.shrink.name), isTrue);
+      expect(command.argParser.options.containsKey(BuildInfoOptions.flavor.name), isTrue);
+      expect(
+        command.argParser.options.containsKey(BuildInfoOptions.ignoreDeprecation.name),
+        isTrue,
+      );
+      expect(
+        command.argParser.options.containsKey(BuildInfoOptions.androidGradleDaemon.name),
+        isTrue,
+      );
+      expect(
+        command.argParser.options.containsKey(
+          BuildInfoOptions.androidSkipBuildDependencyValidation.name,
+        ),
+        isTrue,
+      );
+      expect(
+        command.argParser.options.containsKey(BuildInfoOptions.androidProjectArg.name),
+        isTrue,
+      );
+      expect(
+        command.argParser.options.containsKey(BuildInfoOptions.androidProjectCacheDir.name),
+        isTrue,
+      );
+      expect(
+        command.argParser.options.containsKey(DebuggingOptionDescriptors.enableHcpp.name),
+        isTrue,
+      );
+    });
   });
 }
 

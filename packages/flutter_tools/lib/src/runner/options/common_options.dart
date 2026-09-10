@@ -223,6 +223,23 @@ abstract final class BuildInfoOptions {
     help: 'Output file name for performance measurement file.',
   );
 
+  static const shrink = FlagOptionDescriptor(
+    name: 'shrink',
+    verboseOnly: true,
+    help:
+        'This flag has no effect. Code shrinking is always enabled in release builds. '
+        'To learn more, see: https://developer.android.com/studio/build/shrink-code',
+  );
+
+  static const ignoreDeprecation = FlagOptionDescriptor(
+    name: 'ignore-deprecation',
+    negatable: false,
+    help:
+        'Indicates that the app should ignore deprecation warnings and continue to build '
+        'using deprecated APIs. Use of this flag may cause your app to fail to build when '
+        'deprecated APIs are removed.',
+  );
+
   static const flavor = StringOptionDescriptor(
     name: 'flavor',
     help:
@@ -342,11 +359,10 @@ class DartCompileOptionsBundle extends OptionBundle {
     CommonOptions.dartDefines,
     CommonOptions.dartDefineFromFile,
     CommonOptions.enableExperiment,
-    CommonOptions.nativeNullAssertions,
   ];
 }
 
-/// A bundle encapsulating basic build parameters (target, output-dir, pub, build-number/name).
+/// A bundle encapsulating basic build parameters (target, pub, build-number/name).
 class CommonBuildOptionsBundle extends OptionBundle {
   const CommonBuildOptionsBundle();
 
@@ -360,10 +376,46 @@ class CommonBuildOptionsBundle extends OptionBundle {
   List<OptionDescriptor<Object?>> get descriptors => const [
     CommonOptions.treeShakeIcons,
     CommonOptions.target,
-    CommonOptions.outputDir,
     CommonOptions.pub,
     CommonOptions.buildNumber,
     CommonOptions.buildName,
+  ];
+}
+
+/// A bundle encapsulating Gradle-specific Android build options.
+class AndroidGradleOptionsBundle extends OptionBundle {
+  const AndroidGradleOptionsBundle();
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    BuildInfoOptions.androidGradleDaemon,
+    BuildInfoOptions.androidSkipBuildDependencyValidation,
+    BuildInfoOptions.androidProjectArg,
+    BuildInfoOptions.androidProjectCacheDir,
+  ];
+}
+
+/// A bundle encapsulating general options for Android builds.
+class AndroidBuildOptionsBundle extends OptionBundle {
+  const AndroidBuildOptionsBundle();
+
+  @override
+  List<OptionBundle> get subBundles => const [AndroidGradleOptionsBundle()];
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    BuildInfoOptions.flavor,
+    BuildInfoOptions.shrink,
+    BuildInfoOptions.splitDebugInfo,
+    BuildInfoOptions.obfuscate,
+    BuildInfoOptions.extraFrontEndOptions,
+    BuildInfoOptions.extraGenSnapshotOptions,
+    BuildInfoOptions.performanceMeasurementFile,
+    BuildInfoOptions.analyzeSize,
+    BuildInfoOptions.codeSizeDirectory,
+    BuildInfoOptions.trackWidgetCreation,
+    BuildInfoOptions.ignoreDeprecation,
+    DebuggingOptionDescriptors.enableHcpp,
   ];
 }
 
