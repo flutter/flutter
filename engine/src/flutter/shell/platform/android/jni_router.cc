@@ -10,7 +10,7 @@
 namespace flutter {
 namespace android {
 
-std::atomic<bool> JniRouter::embedder_enabled_{false};
+std::atomic<bool> JniRouter::embedder_enabled_{true};
 
 JniRouter::JniRouter(std::shared_ptr<JniDelegate> embedder_delegate,
                      std::shared_ptr<LegacyJniDelegate> legacy_delegate)
