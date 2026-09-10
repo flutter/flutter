@@ -413,6 +413,7 @@ mixin CreateBase on FlutterCommand {
       'withSwiftPackageManager': withSwiftPackageManager,
       'withPluginHook': withFfiPluginHook || withFfiPackage || withPlatformChannelPluginHook,
       'withEmptyMain': withEmptyMain,
+      'withJava': androidLanguage == 'java',
       'androidLanguage': androidLanguage,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
       'iosDevelopmentTeam': iosDevelopmentTeam ?? '',

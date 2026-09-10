@@ -23,8 +23,17 @@ import 'package:pigeon/pigeon.dart';
     gobjectSourceOut: 'linux/messages.g.cc',
 {{/linux}}
 {{#android}}
+{{#withJava}}
+    javaOut: 'android/src/main/java/com/example/{{androidIdentifier}}/Messages.java',
+    javaOptions: JavaOptions(
+      className: 'Messages',
+      package: '{{androidIdentifier}}',
+    ),
+{{/withJava}}
+{{^withJava}}
     kotlinOut:
         'android/src/main/kotlin/com/example/{{androidIdentifier}}/Messages.g.kt',
+{{/withJava}}
 {{/android}}
 {{#darwin}}
     swiftOut:
