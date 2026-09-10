@@ -321,7 +321,7 @@ final double width = child.getMinIntrinsicWidth(height);
 - **Severity**: `ERROR`
 - **Scope**: `packages/flutter`
 - **Description**: Requires all non-static fields annotated with `@_debugOnly` to be lazy initialized (declared as `late` with an initializer).
-- **Rationale**: Expensive debug fields must not allocate heap memory or execute costly initialization logic in profile and release builds. Declaring them as `late` ensures lazy evaluation on first read (which can happen only in `assert(...)` blocks). 
+- **Rationale**: Expensive debug fields must not allocate heap memory or execute costly initialization logic in profile and release builds. Declaring them as `late` ensures lazy evaluation on first read (which can happen only in `assert(...)` blocks).
 
 ```dart
 // BAD:
