@@ -156,7 +156,7 @@ Future<void> testMain() async {
   });
 
   test(
-    'WebParagraphPainter unified scale cache policy reuses cache across arbitrary offset shifts',
+    'WebParagraph unified scale cache policy reuses cache across arbitrary offset shifts',
     () async {
       final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
       try {
@@ -167,46 +167,45 @@ Future<void> testMain() async {
         final paragraph = builder.build() as WebParagraph;
         paragraph.layout(const ParagraphConstraints(width: 300));
 
-        final painter = CanvasKitPainter(paragraph);
         final recorder = PictureRecorder();
         final canvas = Canvas(recorder, region);
 
         // Initial paint rasterizes once (count: 0 -> 1)
-        expect(painter.debugRasterizeCount, 0);
-        painter.paint(canvas, const Offset(10.1, 20.1));
-        expect(painter.hasCache, isTrue);
-        expect(painter.debugRasterizeCount, 1);
+        expect(paragraph.debugRasterizeCount, 0);
+        paragraph.paint(canvas, const Offset(10.1, 20.1));
+        expect(paragraph.debugPainter.hasCache, isTrue);
+        expect(paragraph.debugRasterizeCount, 1);
 
         // Same offset: cache hit (count: 1 -> 1)
-        painter.paint(canvas, const Offset(10.1, 20.1));
-        expect(painter.debugRasterizeCount, 1);
+        paragraph.paint(canvas, const Offset(10.1, 20.1));
+        expect(paragraph.debugRasterizeCount, 1);
 
         // Small fractional shift: cache hit (count: 1 -> 1)
-        painter.paint(canvas, const Offset(10.35, 20.35));
-        expect(painter.debugRasterizeCount, 1);
+        paragraph.paint(canvas, const Offset(10.35, 20.35));
+        expect(paragraph.debugRasterizeCount, 1);
 
         // Different fractional shift: cache hit (count: 1 -> 1)
-        painter.paint(canvas, const Offset(10.6, 20.6));
-        expect(painter.debugRasterizeCount, 1);
+        paragraph.paint(canvas, const Offset(10.6, 20.6));
+        expect(paragraph.debugRasterizeCount, 1);
 
         // Negative offset shift: cache hit (count: 1 -> 1)
-        painter.paint(canvas, const Offset(-5.75, -12.4));
-        expect(painter.debugRasterizeCount, 1);
+        paragraph.paint(canvas, const Offset(-5.75, -12.4));
+        expect(paragraph.debugRasterizeCount, 1);
 
         // Large scrolling jump: cache hit (count: 1 -> 1)
-        painter.paint(canvas, const Offset(100.85, 250.75));
-        expect(painter.debugRasterizeCount, 1);
+        paragraph.paint(canvas, const Offset(100.85, 250.75));
+        expect(paragraph.debugRasterizeCount, 1);
 
         // Jump back to original offset: cache hit (count: 1 -> 1)
-        painter.paint(canvas, const Offset(10.1, 20.1));
-        expect(painter.debugRasterizeCount, 1);
+        paragraph.paint(canvas, const Offset(10.1, 20.1));
+        expect(paragraph.debugRasterizeCount, 1);
       } finally {
         EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
       }
     },
   );
 
-  test('WebParagraphPainter cache policy across different device pixel ratios', () async {
+  test('WebParagraph cache policy across different device pixel ratios', () async {
     final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
     try {
       final builder = ParagraphBuilder(ParagraphStyle(fontFamily: 'Roboto', fontSize: 16));
@@ -214,40 +213,39 @@ Future<void> testMain() async {
       final paragraph = builder.build() as WebParagraph;
       paragraph.layout(const ParagraphConstraints(width: 300));
 
-      final painter = CanvasKitPainter(paragraph);
       final recorder = PictureRecorder();
       final canvas = Canvas(recorder, region);
 
       // DPR = 1.0
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
-      expect(painter.debugRasterizeCount, 0);
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 1);
+      expect(paragraph.debugRasterizeCount, 0);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 1);
 
       // Moving offset at same DPR = 1.0 reuses cache
-      painter.paint(canvas, const Offset(10.35, 20.35));
-      expect(painter.debugRasterizeCount, 1);
+      paragraph.paint(canvas, const Offset(10.35, 20.35));
+      expect(paragraph.debugRasterizeCount, 1);
 
       // DPR = 2.0 -> scale mismatch forces re-rasterization
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
-      painter.paint(canvas, const Offset(10.35, 20.35));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 2);
+      paragraph.paint(canvas, const Offset(10.35, 20.35));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 2);
 
       // Moving offset at same DPR = 2.0 reuses cache
-      painter.paint(canvas, const Offset(50.85, 60.85));
-      expect(painter.debugRasterizeCount, 2);
+      paragraph.paint(canvas, const Offset(50.85, 60.85));
+      expect(paragraph.debugRasterizeCount, 2);
 
       // DPR = 1.5 -> scale mismatch forces re-rasterization
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.5);
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 3);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 3);
 
       // Moving offset at same DPR = 1.5 reuses cache
-      painter.paint(canvas, const Offset(10.25, 20.25));
-      expect(painter.debugRasterizeCount, 3);
+      paragraph.paint(canvas, const Offset(10.25, 20.25));
+      expect(paragraph.debugRasterizeCount, 3);
     } finally {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
     }
@@ -271,9 +269,11 @@ Future<void> testMain() async {
           ParagraphTransform.from(identityTransform, 1.0),
         );
 
-        final double shiftPhysicalX = (-paragraph.paintBounds.left).ceilToDouble();
-        final double shiftPhysicalY = (-paragraph.paintBounds.top).ceilToDouble();
         const kAntialiasingPadding = 2.0;
+        final double shiftPhysicalX = (-paragraph.paintBounds.left + kAntialiasingPadding)
+            .ceilToDouble();
+        final double shiftPhysicalY = (-paragraph.paintBounds.top + kAntialiasingPadding)
+            .ceilToDouble();
         final double expectedWidth =
             (shiftPhysicalX + paragraph.paintBounds.right + kAntialiasingPadding).ceilToDouble();
         final double expectedHeight =
@@ -287,7 +287,7 @@ Future<void> testMain() async {
     },
   );
 
-  test('WebParagraphPainter invalidates cache when canvas transform scale changes', () {
+  test('WebParagraph invalidates cache when canvas transform scale changes', () {
     final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
     try {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
@@ -297,49 +297,48 @@ Future<void> testMain() async {
       final paragraph = builder.build() as WebParagraph;
       paragraph.layout(const ParagraphConstraints(width: 300));
 
-      final painter = CanvasKitPainter(paragraph);
       final recorder = PictureRecorder();
       final canvas = Canvas(recorder, region);
 
       // Identity scale (1.0x) -> Rasterize #1
       canvas.save();
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 1);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 1);
 
       // Same scale -> cache hit
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.debugRasterizeCount, 1);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugRasterizeCount, 1);
       canvas.restore();
 
       // Zoom to 1.25x scale -> scale mismatch invalidates cache -> Rasterize #2
       canvas.save();
       canvas.scale(1.25, 1.25);
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 2);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 2);
 
       // Same 1.25x scale -> cache hit
-      painter.paint(canvas, const Offset(15.0, 25.0));
-      expect(painter.debugRasterizeCount, 2);
+      paragraph.paint(canvas, const Offset(15.0, 25.0));
+      expect(paragraph.debugRasterizeCount, 2);
       canvas.restore();
 
       // Zoom to 0.75x scale -> scale mismatch invalidates cache -> Rasterize #3
       canvas.save();
       canvas.scale(0.75, 0.75);
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 3);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 3);
 
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.debugRasterizeCount, 3);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugRasterizeCount, 3);
       canvas.restore();
     } finally {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
     }
   });
 
-  test('WebParagraphPainter clearCache resets cache and forces fresh rasterization', () {
+  test('WebParagraph clearPaintCache resets cache and forces fresh rasterization', () {
     final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
     try {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
@@ -349,29 +348,28 @@ Future<void> testMain() async {
       final paragraph = builder.build() as WebParagraph;
       paragraph.layout(const ParagraphConstraints(width: 300));
 
-      final painter = CanvasKitPainter(paragraph);
       final recorder = PictureRecorder();
       final canvas = Canvas(recorder, region);
 
       // Initial paint -> Rasterize #1
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 1);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 1);
 
-      // clearCache() sets cache to null
-      painter.clearCache();
-      expect(painter.hasCache, isFalse);
+      // clearPaintCache() resets cache to null
+      paragraph.clearPaintCache();
+      expect(paragraph.debugPainter.hasCache, isFalse);
 
       // Next paint forces fresh rasterization -> Rasterize #2
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 2);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 2);
     } finally {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
     }
   });
 
-  test('WebParagraphPainter handles non-uniform canvas scale and complex transforms', () {
+  test('WebParagraph handles non-uniform canvas scale and complex transforms', () {
     final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
     try {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
@@ -381,36 +379,35 @@ Future<void> testMain() async {
       final paragraph = builder.build() as WebParagraph;
       paragraph.layout(const ParagraphConstraints(width: 300));
 
-      final painter = CanvasKitPainter(paragraph);
       final recorder = PictureRecorder();
       final canvas = Canvas(recorder, region);
 
       // Identity scale (1.0, 1.0) -> Rasterize #1
       canvas.save();
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 1);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 1);
       canvas.restore();
 
       // Non-uniform scale (1.5x, 0.8y) -> Scale mismatch invalidates cache -> Rasterize #2
       canvas.save();
       canvas.scale(1.5, 0.8);
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 2);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 2);
 
       // Repaint at same non-uniform scale (1.5x, 0.8y) -> Cache hit
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 2);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 2);
       canvas.restore();
 
       // Non-uniform scale with different ratio (0.8x, 1.5y) -> Invalidation -> Rasterize #3
       canvas.save();
       canvas.scale(0.8, 1.5);
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 3);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 3);
       canvas.restore();
     } finally {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
@@ -427,18 +424,18 @@ Future<void> testMain() async {
       final paragraph = builder.build() as WebParagraph;
       paragraph.layout(const ParagraphConstraints(width: 300));
 
-      final painter = CanvasKitPainter(paragraph);
       final recorder = PictureRecorder();
       final canvas = Canvas(recorder, region);
 
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.debugRasterizeCount, lessThanOrEqualTo(1));
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugRasterizeCount, 0);
+      expect(paragraph.debugPainter.hasCache, isFalse);
     } finally {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
     }
   });
 
-  test('WebParagraphPainter handles canvas rotation and reuses cache when scale matches', () {
+  test('WebParagraph handles canvas rotation and reuses cache when scale matches', () {
     final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
     try {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
@@ -448,47 +445,46 @@ Future<void> testMain() async {
       final paragraph = builder.build() as WebParagraph;
       paragraph.layout(const ParagraphConstraints(width: 300));
 
-      final painter = CanvasKitPainter(paragraph);
       final recorder = PictureRecorder();
       final canvas = Canvas(recorder, region);
 
       // Initial paint at identity transform (0 radians) -> Rasterize #1
       canvas.save();
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 1);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 1);
 
       // Repaint at identity transform -> Cache hit
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 1);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 1);
       canvas.restore();
 
       // Rotate canvas by π/4 (45 degrees) -> Rotation preserves scale (1.0x) -> Cache hit!
       canvas.save();
       canvas.rotate(math.pi / 4);
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 1);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 1);
 
       // Repaint at same π/4 rotation -> Cache hit
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 1);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 1);
       canvas.restore();
 
       // Rotate canvas by π/2 (90 degrees) -> Rotation preserves scale (1.0x) -> Cache hit!
       canvas.save();
       canvas.rotate(math.pi / 2);
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 1);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 1);
       canvas.restore();
 
       // Restore canvas to identity transform -> Cache hit!
-      painter.paint(canvas, const Offset(10.0, 20.0));
-      expect(painter.hasCache, isTrue);
-      expect(painter.debugRasterizeCount, 1);
+      paragraph.paint(canvas, const Offset(10.0, 20.0));
+      expect(paragraph.debugPainter.hasCache, isTrue);
+      expect(paragraph.debugRasterizeCount, 1);
     } finally {
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
     }

@@ -152,12 +152,15 @@ class ParagraphTransform {
     paragraph.paintBounds.bottom * transform.effectiveScaleY,
   );
 
-  // Canvas2D translation shift (always integer device pixels, phase = 0.0)
-  final double shiftPhysicalX = (-physicalPaintBounds.left).ceilToDouble();
-  final double shiftPhysicalY = (-physicalPaintBounds.top).ceilToDouble();
-
-  // Add 2 physical pixels of safety padding so font antialiasing bleeding at the edges is not clipped
+  // Add 2 physical pixels of safety padding so font antialiasing bleeding in all directions is not clipped
   const kAntialiasingPadding = 2.0;
+
+  // Canvas2D translation shift (always integer device pixels, phase = 0.0)
+  // Include safety padding on the left and top so font antialiasing bleeding is not clipped
+  final double shiftPhysicalX = (-physicalPaintBounds.left + kAntialiasingPadding).ceilToDouble();
+  final double shiftPhysicalY = (-physicalPaintBounds.top + kAntialiasingPadding).ceilToDouble();
+
+  // Width and height include the shift (which contains left/top padding) plus right/bottom padding
   final double physicalWidth = (shiftPhysicalX + physicalPaintBounds.right + kAntialiasingPadding)
       .ceilToDouble();
   final double physicalHeight = (shiftPhysicalY + physicalPaintBounds.bottom + kAntialiasingPadding)
