@@ -176,7 +176,7 @@ abstract final class WebOptions {
         'IPV4 for either the Chrome or web-server device.',
   );
 
-  static const webPort = StringOptionDescriptor(
+  static const webPort = IntOptionDescriptor(
     name: 'web-port',
     verboseOnly: true,
     help:
@@ -250,7 +250,7 @@ abstract final class WebOptions {
         'supports this option.',
   );
 
-  static const webBrowserDebugPort = StringOptionDescriptor(
+  static const webBrowserDebugPort = IntOptionDescriptor(
     name: 'web-browser-debug-port',
     verboseOnly: true,
     help:

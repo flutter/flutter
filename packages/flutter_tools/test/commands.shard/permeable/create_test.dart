@@ -29,7 +29,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/create_base.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/flutter_project_metadata.dart' show FlutterTemplateType;
+import 'package:flutter_tools/src/flutter_project_metadata.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -66,6 +66,24 @@ FakePlatform _kNoColorTerminalPlatform() =>
 FakePlatform _kNoColorTerminalMacOSPlatform() => FakePlatform.fromPlatform(const LocalPlatform())
   ..stdoutSupportsAnsi = false
   ..operatingSystem = 'macos';
+
+/// A [FakeFlutterVersion] whose [FakeFlutterVersion.frameworkRevision] can be
+/// changed between `flutter create` runs, to simulate re-creating a platform
+/// with a newer Flutter SDK revision.
+class _MutableFakeFlutterVersion extends FakeFlutterVersion {
+  _MutableFakeFlutterVersion(String revision, String branch)
+    : _frameworkRevision = revision,
+      super(frameworkRevision: revision, branch: branch);
+
+  String _frameworkRevision;
+
+  @override
+  String get frameworkRevision => _frameworkRevision;
+
+  set frameworkRevision(String value) {
+    _frameworkRevision = value;
+  }
+}
 
 final Map<Type, FakePlatform Function()> noColorTerminalOverride = {
   Platform: _kNoColorTerminalPlatform,
@@ -979,6 +997,100 @@ void main() {
     expect(actualContents.contains('useAndroidX'), true);
   });
 
+  testUsingContext('flutter create --platforms appends platforms to existing .metadata', () async {
+    // The revisions written to .metadata must look like git hashes; a purely
+    // numeric revision would be parsed back as a number by YAML and rejected
+    // by the migrate config validation.
+    final mutableFlutterVersion = _MutableFakeFlutterVersion(
+      'abcdef1234567890abcdef1234567890abcdef12',
+      frameworkChannel,
+    );
+    fakeFlutterVersion = mutableFlutterVersion;
+
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    // Create the project with only the android platform enabled.
+    await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
+
+    final File metadataFile = projectDir.childFile('.metadata');
+    expect(metadataFile.existsSync(), isTrue);
+
+    // .metadata is a YAML file, so read it back through FlutterProjectMetadata.
+    // Besides the requested platforms it always tracks a 'root' entry that
+    // records the revisions for the project itself.
+    final initialMetadata = FlutterProjectMetadata(
+      metadataFile,
+      globals.logger,
+      extensionTemplateManager: null,
+    );
+    const initialRevision = 'abcdef1234567890abcdef1234567890abcdef12';
+    expect(
+      initialMetadata.migrateConfig.platformConfigs.keys,
+      unorderedEquals(<SupportedPlatform>[SupportedPlatform.root, SupportedPlatform.android]),
+    );
+    expect(
+      initialMetadata.migrateConfig.platformConfigs[SupportedPlatform.android]!.createRevision,
+      initialRevision,
+    );
+    expect(
+      initialMetadata.migrateConfig.platformConfigs[SupportedPlatform.android]!.baseRevision,
+      initialRevision,
+    );
+
+    // Append the ios platform to the existing project, simulating a later
+    // run with a newer Flutter SDK revision. The platforms already recorded
+    // in the existing .metadata (android) must be preserved instead of being
+    // dropped.
+    // See https://github.com/flutter/flutter/issues/191567.
+    mutableFlutterVersion.frameworkRevision = 'fedcba9876543210fedcba9876543210fedcba98';
+    await runner.run(<String>['create', '--no-pub', '--platforms=ios', projectDir.path]);
+
+    final updatedMetadata = FlutterProjectMetadata(
+      metadataFile,
+      globals.logger,
+      extensionTemplateManager: null,
+    );
+    expect(
+      updatedMetadata.migrateConfig.platformConfigs.keys,
+      unorderedEquals(<SupportedPlatform>[
+        SupportedPlatform.root,
+        SupportedPlatform.android,
+        SupportedPlatform.ios,
+      ]),
+    );
+    // Appending a new platform must not overwrite the revisions recorded for
+    // platforms that are not part of this run: the android entry keeps the
+    // revisions of the run that created it.
+    expect(
+      updatedMetadata.migrateConfig.platformConfigs[SupportedPlatform.android]!.createRevision,
+      initialRevision,
+    );
+    expect(
+      updatedMetadata.migrateConfig.platformConfigs[SupportedPlatform.android]!.baseRevision,
+      initialRevision,
+    );
+    // The root platform is part of every create run, so its entry reflects
+    // the most recent run, as does the newly added ios entry.
+    const latestRevision = 'fedcba9876543210fedcba9876543210fedcba98';
+    expect(
+      updatedMetadata.migrateConfig.platformConfigs[SupportedPlatform.root]!.createRevision,
+      latestRevision,
+    );
+    expect(
+      updatedMetadata.migrateConfig.platformConfigs[SupportedPlatform.root]!.baseRevision,
+      latestRevision,
+    );
+    expect(
+      updatedMetadata.migrateConfig.platformConfigs[SupportedPlatform.ios]!.createRevision,
+      latestRevision,
+    );
+    expect(
+      updatedMetadata.migrateConfig.platformConfigs[SupportedPlatform.ios]!.baseRevision,
+      latestRevision,
+    );
+  }, overrides: {FlutterVersion: () => fakeFlutterVersion});
+
   testUsingContext('androidx is used by default in a module project', () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1613,6 +1725,83 @@ void main() {
       Platform: _kNoColorTerminalMacOSPlatform,
       ProcessManager: () => fakeProcessManager,
     },
+  );
+
+  testUsingContext(
+    'flutter create --platforms overwrites the .metadata entry when the same platform is created twice',
+    () async {
+      // The revisions written to .metadata must look like git hashes; a
+      // purely numeric revision would be parsed back as a number by YAML and
+      // rejected by the migrate config validation.
+      final mutableFlutterVersion = _MutableFakeFlutterVersion(
+        'abcdef1234567890abcdef1234567890abcdef12',
+        frameworkChannel,
+      );
+      fakeFlutterVersion = mutableFlutterVersion;
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+        'flutter_create_overwrite_platform_',
+      );
+      final Directory projectDir = tempDir.childDirectory('myapp');
+
+      try {
+        // Create a project that supports the android platform.
+        final command = CreateCommand();
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
+
+        // Re-create the same android platform, simulating a later run with a
+        // newer Flutter SDK revision.
+        mutableFlutterVersion.frameworkRevision = 'fedcba9876543210fedcba9876543210fedcba98';
+        final repeatCommand = CreateCommand();
+        final CommandRunner<void> repeatRunner = createTestCommandRunner(repeatCommand);
+        await repeatRunner.run(<String>[
+          'create',
+          '--no-pub',
+          '--platforms=android',
+          projectDir.path,
+        ]);
+
+        // Parse the migration section of the .metadata file with loadYaml,
+        // the same parser the tool uses when reading the file back.
+        final File metadataFile = projectDir.childFile('.metadata');
+        expect(metadataFile, exists);
+
+        final yamlMap = loadYaml(metadataFile.readAsStringSync()) as YamlMap;
+        final migration = yamlMap['migration'] as YamlMap;
+        final platforms = migration['platforms'] as YamlList;
+        final List<YamlMap> platformEntries = platforms.whereType<YamlMap>().toList();
+
+        // Each entry in the platforms list is a map that tracks the platform
+        // name along with the revisions it was created at; extract the names.
+        final actualPlatforms = <String>[
+          for (final YamlMap platform in platformEntries) platform['platform'] as String,
+        ];
+
+        // Creating the same platform twice must not add a duplicate entry:
+        // the root platform and the android platform each appear exactly once.
+        expect(actualPlatforms, unorderedEquals(<String>['root', 'android']));
+
+        // The existing android entry is overwritten with the revisions of the
+        // most recent create run instead of keeping the old ones.
+        const latestRevision = 'fedcba9876543210fedcba9876543210fedcba98';
+        final YamlMap androidEntry = platformEntries.singleWhere(
+          (YamlMap platform) => platform['platform'] == 'android',
+        );
+        expect(androidEntry['create_revision'], latestRevision);
+        expect(androidEntry['base_revision'], latestRevision);
+
+        // The root platform is always part of every create run, so its entry
+        // is overwritten the same way.
+        final YamlMap rootEntry = platformEntries.singleWhere(
+          (YamlMap platform) => platform['platform'] == 'root',
+        );
+        expect(rootEntry['create_revision'], latestRevision);
+        expect(rootEntry['base_revision'], latestRevision);
+      } finally {
+        tryToDelete(tempDir);
+      }
+    },
+    overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform},
   );
 
   testUsingContext('Correct info.plist key-value pairs for project.', () async {
