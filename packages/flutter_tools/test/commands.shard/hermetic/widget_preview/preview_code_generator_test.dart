@@ -326,8 +326,8 @@ void main() {
 
         const expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: implementation_imports
-
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'widget_preview.dart' as _i1;
 import 'utils.dart' as _i2;
 import 'package:foo_project/foo.dart' as _i3;
@@ -450,8 +450,8 @@ List<_i1.WidgetPreview> previews() => [
         // - A top-level function 'List<WidgetPreviewGroup> previews()' that returns an empty list.
         const emptyGeneratedPreviewFileContents = '''
 // ignore_for_file: implementation_imports
-
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'widget_preview.dart' as _i1;
 
 List<_i1.WidgetPreview> previews() => [];
@@ -511,8 +511,8 @@ List<_i1.WidgetPreview> previews() => [];
 
       const expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: implementation_imports
-
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+
 import 'widget_preview.dart' as _i1;
 import 'utils.dart' as _i2;
 import 'package:foo_project/preview.dart' as _i3;
