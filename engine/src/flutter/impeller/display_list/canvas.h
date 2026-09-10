@@ -292,31 +292,7 @@ class Canvas {
   /// Visible for testing.
   static bool IsCompatibleWithSDFRendering(const Paint& paint);
 
-  /// Visible for testing.
-  static void SetOverrideShouldUseOnscreenForTesting(
-      std::optional<bool> override_value) {
-    override_should_use_onscreen_ = override_value;
-  }
-
-  /// Visible for testing.
-  class ScopedOnscreenOverrideForTesting {
-   public:
-    explicit ScopedOnscreenOverrideForTesting(bool override_value) {
-      Canvas::SetOverrideShouldUseOnscreenForTesting(override_value);
-    }
-    ~ScopedOnscreenOverrideForTesting() {
-      Canvas::SetOverrideShouldUseOnscreenForTesting(std::nullopt);
-    }
-
-    ScopedOnscreenOverrideForTesting(const ScopedOnscreenOverrideForTesting&) =
-        delete;
-    ScopedOnscreenOverrideForTesting& operator=(
-        const ScopedOnscreenOverrideForTesting&) = delete;
-  };
-
  private:
-  inline static thread_local std::optional<bool> override_should_use_onscreen_;
-
   class BlurShape {
    public:
     virtual ~BlurShape() = default;

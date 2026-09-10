@@ -1937,9 +1937,9 @@ void Canvas::SaveLayer(const Paint& paint,
       // 1. The device supports framebuffer fetch
       // 2. There are no more backdrop filters
       // 3. The current render pass is for the onscreen pass.
-      const bool should_use_onscreen = override_should_use_onscreen_.value_or(
+      const bool should_use_onscreen =
           renderer_.GetDeviceCapabilities().SupportsFramebufferFetch() &&
-          backdrop_count_ == 0 && render_passes_.size() == 1u);
+          backdrop_count_ == 0 && render_passes_.size() == 1u && is_onscreen_;
       input_texture = FlipBackdrop(
           GetGlobalPassPosition(),                                //
           /*should_remove_texture=*/will_cache_backdrop_texture,  //

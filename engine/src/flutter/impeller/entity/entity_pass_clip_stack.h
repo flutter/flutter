@@ -27,6 +27,9 @@ class EntityPassClipStack {
     Matrix transform;
     std::optional<Rect> clip_coverage;
     uint32_t clip_depth = 0;
+    /// The clip stack nesting depth at which this clip entity was recorded.
+    /// Used during restoration to preserve parent clips while popping child
+    /// scopes.
     size_t clip_height = 0;
   };
 

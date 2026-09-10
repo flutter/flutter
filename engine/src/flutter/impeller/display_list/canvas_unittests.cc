@@ -29,7 +29,8 @@ namespace testing {
 std::unique_ptr<Canvas> CreateTestCanvas(
     ContentContext& context,
     std::optional<Rect> cull_rect = std::nullopt,
-    bool requires_readback = false) {
+    bool requires_readback = false,
+    bool is_onscreen = false) {
   TextureDescriptor onscreen_desc;
   onscreen_desc.size = {100, 100};
   onscreen_desc.format =
@@ -68,10 +69,11 @@ std::unique_ptr<Canvas> CreateTestCanvas(
 
   if (cull_rect.has_value()) {
     return std::make_unique<Canvas>(
-        context, render_target, /*is_onscreen=*/false,
+        context, render_target, /*is_onscreen=*/is_onscreen,
         /*requires_readback=*/requires_readback, cull_rect.value());
   }
-  return std::make_unique<Canvas>(context, render_target, /*is_onscreen=*/false,
+  return std::make_unique<Canvas>(context, render_target,
+                                  /*is_onscreen=*/is_onscreen,
                                   /*requires_readback=*/requires_readback);
 }
 
@@ -609,10 +611,9 @@ TEST_P(AiksTest, ClipDepthMaintainedAcrossBackdropFilterAndLayers) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
 
-  Canvas::ScopedOnscreenOverrideForTesting scoped_override(true);
-
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 800, 600),
-                                 /*requires_readback=*/true);
+                                 /*requires_readback=*/true,
+                                 /*is_onscreen=*/true);
 
   // 1. Root route saves and applies ClipRoundSuperellipse.
   canvas->Save(/*total_content_depth=*/20);
@@ -660,10 +661,9 @@ TEST_P(AiksTest, ParentClipDepthBudgetPreservedAfterBackdropLayerRestore) {
     GTEST_SKIP() << "Test requires device with framebuffer fetch";
   }
 
-  Canvas::ScopedOnscreenOverrideForTesting scoped_override(true);
-
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 800, 600),
-                                 /*requires_readback=*/true);
+                                 /*requires_readback=*/true,
+                                 /*is_onscreen=*/true);
 
   // 1. Root pass with finite clip depth budget.
   canvas->Save(/*total_content_depth=*/50);
