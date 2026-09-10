@@ -450,6 +450,18 @@ void main() {
         const DebugViewPadding(top: 48),
       );
       expect(
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'platformBrightness': 'Brightness.dark',
+        }).platformBrightness,
+        ui.Brightness.dark,
+      );
+      expect(
+        DebugViewMetricsOverride.fromJson(const <String, Object?>{
+          'platformBrightness': 'Brightness.light',
+        }).platformBrightness,
+        ui.Brightness.light,
+      );
+      expect(
         () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
           'platformBrightness': 'DARK',
         }),

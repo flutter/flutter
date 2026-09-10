@@ -329,10 +329,11 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// value would produce infinite or NaN sizes throughout the render tree.
   /// [textScaleFactor], if given, must be finite and non-negative.
   ///
-  /// [physicalSize], [padding], [viewPadding] and [viewInsets] are subject to
-  /// similar requirements, which cannot be asserted here because reading a
-  /// field off one of them is not a constant expression and would make this
-  /// constructor unusable in a `const` expression.
+  /// [physicalSize], [padding], [viewPadding], [viewInsets], and
+  /// [systemGestureInsets] are subject to similar requirements, which cannot
+  /// be asserted here because reading a field off one of them is not a constant
+  /// expression and would make this constructor unusable in a `const`
+  /// expression.
   /// [DebugViewMetricsOverride.fromJson] rejects invalid values, which covers
   /// everything arriving from developer tooling.
   const DebugViewMetricsOverride({
@@ -399,8 +400,8 @@ class DebugViewMetricsOverride with Diagnosticable {
       },
       platformBrightness: switch (json['platformBrightness']) {
         null => null,
-        'light' => ui.Brightness.light,
-        'dark' => ui.Brightness.dark,
+        'light' || 'Brightness.light' => ui.Brightness.light,
+        'dark' || 'Brightness.dark' => ui.Brightness.dark,
         final Object? value => throw FormatException(
           'Expected "light" or "dark" for platformBrightness, got $value.',
         ),

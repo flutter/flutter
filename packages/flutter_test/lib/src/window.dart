@@ -926,7 +926,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
       try {
         final Display realDisplay = view.display;
         if (_testDisplays.containsKey(realDisplay.id)) {
-          display = _testDisplays[view.display.id]!;
+          display = _testDisplays[realDisplay.id]!;
         } else if (displays.isNotEmpty) {
           display = displays.first;
         } else {

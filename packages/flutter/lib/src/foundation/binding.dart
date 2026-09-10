@@ -729,11 +729,11 @@ abstract class BindingBase {
 
     final String? rawViewId = parameters['viewId'];
     if (rawViewId == null) {
-      throw Exception('The viewId parameter is required unless clearAll is true.');
+      throw ArgumentError('The viewId parameter is required unless clearAll is true.');
     }
     final int? viewId = int.tryParse(rawViewId);
     if (viewId == null) {
-      throw Exception('The viewId parameter must be an integer, got "$rawViewId".');
+      throw FormatException('The viewId parameter must be an integer, got "$rawViewId".');
     }
 
     final String? rawOverrides = parameters['overrides'];
@@ -751,7 +751,7 @@ abstract class BindingBase {
           _postViewMetricsOverrideStateChangedEvent();
         }
       } else {
-        throw Exception('The overrides parameter must be a JSON object or null.');
+        throw const FormatException('The overrides parameter must be a JSON object or null.');
       }
     }
 

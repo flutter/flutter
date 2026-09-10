@@ -1053,7 +1053,9 @@ class _DebugViewMetricsFlutterView implements ui.FlutterView {
         ? null
         : _override?.devicePixelRatio;
     final List<ui.DisplayFeature> displayFeatures = _view.displayFeatures;
-    if (devicePixelRatio == null || displayFeatures.isEmpty) {
+    if (devicePixelRatio == null ||
+        displayFeatures.isEmpty ||
+        _view.devicePixelRatio == devicePixelRatio) {
       return displayFeatures;
     }
     // [ui.DisplayFeature.bounds] is the one metric [ui.FlutterView] reports in
