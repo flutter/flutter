@@ -6,6 +6,7 @@
 
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/make_copyable.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/painting/multi_frame_codec.h"
 #include "flutter/lib/ui/painting/single_frame_codec.h"
@@ -113,21 +114,36 @@ Dart_Handle ImageDescriptor::initEncoded(Dart_Handle descriptor_handle,
         "https://github.com/flutter/flutter/issues.");
   }
 
-  auto generator =
-      registry->CreateCompatibleGenerator(immutable_buffer->data());
+  auto ui_task_runner = dart_state->GetTaskRunners().GetUITaskRunner();
+  auto descriptor_wrapper = std::make_unique<tonic::DartPersistentValue>(
+      dart_state, descriptor_handle);
+  auto callback =
+      std::make_unique<tonic::DartPersistentValue>(dart_state, callback_handle);
+  const sk_sp<SkData> buffer = immutable_buffer->data();
 
-  if (!generator) {
-    // No compatible image decoder was found.
-    return tonic::ToDart("Invalid image data");
-  }
+  registry->CreateCompatibleGeneratorAsync(
+      buffer, dart_state->GetConcurrentTaskRunner(), ui_task_runner,
+      fml::MakeCopyable([buffer,
+                         descriptor_wrapper = std::move(descriptor_wrapper),
+                         callback = std::move(callback)](
+                            std::shared_ptr<ImageGenerator> generator) mutable {
+        auto dart_state = callback->dart_state().lock();
+        if (!dart_state) {
+          return;
+        }
+        tonic::DartState::Scope scope(dart_state);
 
-  auto descriptor = fml::MakeRefCounted<ImageDescriptor>(
-      immutable_buffer->data(), std::move(generator));
+        if (!generator) {
+          tonic::DartInvoke(callback->Get(),
+                            {Dart_Null(), tonic::ToDart("Invalid image data")});
+          return;
+        }
 
-  FML_DCHECK(descriptor);
-
-  descriptor->AssociateWithDartWrapper(descriptor_handle);
-  tonic::DartInvoke(callback_handle, {Dart_TypeVoid()});
+        auto descriptor =
+            fml::MakeRefCounted<ImageDescriptor>(buffer, std::move(generator));
+        descriptor->AssociateWithDartWrapper(descriptor_wrapper->Get());
+        tonic::DartInvoke(callback->Get(), {Dart_TypeVoid(), Dart_Null()});
+      }));
 
   return Dart_Null();
 }
