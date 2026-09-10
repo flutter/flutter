@@ -669,7 +669,9 @@ class _ExpansionTileState extends State<ExpansionTile> {
       return Semantics(
         // Live region used to announce state changes (e.g., "expanded" or "collapsed")
         // without taking focus.
-        // blockNode prevents this node from being part of the focus traversal.
+        // The container ensures the live region forms the node that blockNode
+        // removes from focus traversal.
+        container: true,
         label: semanticsHint,
         liveRegion: true,
         accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
