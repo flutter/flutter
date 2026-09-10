@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Propagates `UIAppDelegate` callbacks to registered plugins.
  */
 FLUTTER_DARWIN_EXPORT
+NS_SWIFT_UI_ACTOR
 @interface FlutterPluginAppLifeCycleDelegate : NSObject <UNUserNotificationCenterDelegate>
 
 /**
