@@ -2270,6 +2270,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     int scrollChildren;
     private int scrollIndex;
     private int traversalParent;
+    int indexInParent = -1;
     private float scrollPosition;
     private float scrollExtentMax;
     private float scrollExtentMin;
@@ -2395,6 +2396,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return (flags & flag.value) != 0;
     }
 
+    boolean hasRole(@NonNull Role role) {
+      return this.role == role.value;
+    }
+
     private boolean hadFlag(@NonNull Flag flag) {
       if (BuildConfig.DEBUG && !hadPreviousConfig) {
         Log.e(TAG, "Attempted to check hadFlag but had no previous config.");
@@ -2516,6 +2521,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       scrollChildren = buffer.getInt();
       scrollIndex = buffer.getInt();
       traversalParent = buffer.getInt();
+      indexInParent = buffer.getInt();
       scrollPosition = buffer.getFloat();
       scrollExtentMax = buffer.getFloat();
       scrollExtentMin = buffer.getFloat();
