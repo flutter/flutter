@@ -62,6 +62,53 @@ system. A dialog-style top-level is also not a `GtkPopover` or tooltip.
 The creation helpers provide no position parameter. Do not build an integration
 that requires arbitrary global top-level positioning on Wayland.
 
+## GTK4 Unsupported Windowing APIs
+
+The experimental Dart windowing API includes a few GTK3 operations whose GTK
+implementation was removed in GTK4. On GTK4, the following methods throw
+`UnsupportedError` rather than resolving a GTK3-only symbol from the GTK4
+library:
+
+| Dart operation | GTK3 implementation | GTK4 status |
+| --- | --- | --- |
+| `setAppPaintable` | `gtk_widget_set_app_paintable` | Unsupported. GTK4 does not expose app-paintable windows. |
+| `beginMoveDrag` | `gtk_window_begin_move_drag` | Unsupported. GTK4 removed this direct interactive-move entry point. |
+| `beginResizeDrag` | `gtk_window_begin_resize_drag` | Unsupported. GTK4 removed this direct interactive-resize entry point. |
+
+These are intentional fail-closed checks. Calling a removed GTK3 symbol from a
+GTK4 process would make the API unreliable and can fail during native-symbol
+resolution. Code that uses these operations must retain a GTK3-specific path
+or provide a GTK4-native interaction model. Do not infer GTK capability from
+the Linux platform alone; select behavior using the configured GTK variant.
+
+Regular GTK4 top-level windows continue to support title, decoration, modal
+parenting, presentation, size requests, maximize, and fullscreen through their
+GTK4 equivalents. GTK4 tooltip and popup controllers use `GtkPopover` for
+parent-relative placement instead of GTK3 `GdkWindow` positioning.
+
+### Upstream API Recommendations
+
+These limitations are candidates for improving the experimental windowing API
+rather than adding GTK4-specific workarounds to application code:
+
+- Expose windowing capabilities or feature-specific availability checks. A
+  Linux platform check does not say whether the selected runner is GTK3 or
+  GTK4, and a GTK major version alone does not guarantee a Wayland compositor
+  grants a particular operation.
+- Keep interactive move and resize semantic APIs, but route them through the
+  embedder while it has the native input event and its compositor serial. GTK3
+  can accept the older timestamp-based calls; GTK4 and Wayland require a
+  different native interaction path.
+- Model transparent or app-painted content as a cross-platform window visual
+  capability. `gtk_widget_set_app_paintable` is a GTK3 implementation detail,
+  not a portable windowing primitive.
+- Keep parent-relative transient surfaces separate from top-level windows.
+  GTK4 `GtkPopover` provides correct Wayland placement but deliberately does
+  not offer arbitrary global placement or all `GtkWindow` operations.
+
+Until such APIs exist, applications should treat these as optional features
+and provide a normal in-content interaction when unavailable.
+
 ## Monitoring
 
 [FlWindowMonitor](../../../engine/src/flutter/shell/platform/linux/fl_window_monitor.h)
