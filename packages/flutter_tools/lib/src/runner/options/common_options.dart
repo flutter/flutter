@@ -192,6 +192,7 @@ abstract final class BuildInfoOptions {
   static const androidGradleDaemon = FlagOptionDescriptor(
     name: FlutterOptions.kAndroidGradleDaemon,
     defaultsTo: true,
+    verboseOnly: true,
     help: 'Whether to enable the Gradle daemon when performing an Android build.',
   );
 
@@ -199,6 +200,7 @@ abstract final class BuildInfoOptions {
     name: FlutterOptions.kAndroidProjectArgs,
     abbr: 'P',
     aliases: <String>['android-project-args'],
+    verboseOnly: true,
     help:
         'Additional arguments specified as key=value that are passed directly to the gradle project '
         'via the -P flag. These can be accessed in build.gradle via the "project.property" API.',
@@ -207,6 +209,7 @@ abstract final class BuildInfoOptions {
   static const androidProjectCacheDir = StringOptionDescriptor(
     name: FlutterOptions.kAndroidGradleProjectCacheDir,
     valueHelp: 'path/to/project/cache/',
+    verboseOnly: true,
     help:
         'In an Android build, this flag allows the Gradle project cache directory to be specified '
         'to an absolute path. Setting this is roughly equivalent to setting the '
@@ -215,6 +218,7 @@ abstract final class BuildInfoOptions {
 
   static const androidSkipBuildDependencyValidation = FlagOptionDescriptor(
     name: FlutterOptions.kAndroidSkipBuildDependencyValidation,
+    verboseOnly: true,
     help: 'Skips Android Gradle project dependency verification.',
   );
 
