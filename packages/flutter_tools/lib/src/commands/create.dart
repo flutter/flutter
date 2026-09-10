@@ -1348,7 +1348,8 @@ You've created a plugin project that doesn't yet support any platforms.
 
 void _printPluginAddPlatformMessage(String pluginPath, String template, {required Logger logger}) {
   logger.printStatus('''
-To add platforms, run `flutter create -t $template --platforms <platforms> .` under $pluginPath.
+To add platforms, run `flutter create -t $template --platforms <platforms> .` under $pluginPath,
+then update pigeon/messages.dart and pubspec.yaml to include the new platforms.
 For more information, see https://flutter.dev/to/pubspec-plugin-platforms.
 
 ''');

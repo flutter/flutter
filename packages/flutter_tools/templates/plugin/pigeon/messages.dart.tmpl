@@ -1,0 +1,49 @@
+import 'package:pigeon/pigeon.dart';
+
+// This file is where you define the interface between Dart code and host
+// platform code. After editing this file, run
+//   dart run pigeon --input pigeon/messages.dart
+// to re-generate all of the output files.
+//
+// If you add new platforms to your plugin, add the corresponding output
+// options in the PigeonOptions below.
+//
+// To learn more about Pigeon, see https://pub.dev/packages/pigeon.
+
+@ConfigurePigeon(
+  PigeonOptions(
+    dartOut: 'lib/src/messages.g.dart',
+{{#windows}}
+    cppHeaderOut: 'windows/messages.g.h',
+    cppSourceOut: 'windows/messages.g.cpp',
+    cppOptions: CppOptions(namespace: '{{projectName}}'),
+{{/windows}}
+{{#linux}}
+    gobjectHeaderOut: 'linux/messages.g.h',
+    gobjectSourceOut: 'linux/messages.g.cc',
+{{/linux}}
+{{#android}}
+    kotlinOut:
+        'android/src/main/kotlin/com/example/{{androidIdentifier}}/Messages.g.kt',
+{{/android}}
+{{#darwin}}
+    swiftOut:
+      'darwin/{{projectName}}/Sources/{{projectName}}/Messages.g.swift',
+{{/darwin}}
+{{^darwin}}
+    swiftOut: [
+{{#ios}}
+      'ios/{{projectName}}/Sources/{{projectName}}/Messages.g.swift',
+{{/ios}}
+{{#macos}}
+      'macos/{{projectName}}/Sources/{{projectName}}/Messages.g.swift',
+{{/macos}}
+    ],
+{{/darwin}}
+  ),
+)
+@HostApi()
+abstract class {{pluginClass}}Api {
+  /// Returns the system version of the host platform.
+  String getPlatformVersion();
+}
