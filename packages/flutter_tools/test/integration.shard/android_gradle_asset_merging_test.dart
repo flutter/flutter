@@ -53,19 +53,44 @@ void main() {
     pubspecFile.writeAsStringSync(updated);
   }
 
+  Future<Directory> createApp(Directory workingDir, {String name = 'app'}) async {
+    final ProcessResult createResult = await processManager.run(<String>[
+      flutterBin,
+      'create',
+      '--template=app',
+      '--platforms=android',
+      name,
+    ], workingDirectory: workingDir.path);
+    expect(createResult, const ProcessResultMatcher());
+    return workingDir.childDirectory(name);
+  }
+
+  Future<File> buildApk(Directory projectDir, {String mode = '--debug', String? flavor}) async {
+    final ProcessResult buildResult = await processManager.run(<String>[
+      flutterBin,
+      ...getLocalEngineArguments(),
+      'build',
+      'apk',
+      mode,
+      if (flavor != null) ...<String>['--flavor', flavor],
+    ], workingDirectory: projectDir.path);
+    expect(buildResult, const ProcessResultMatcher());
+
+    final apkName = flavor == null ? 'app-debug.apk' : 'app-$flavor-debug.apk';
+    final File apkFile = projectDir
+        .childDirectory('build')
+        .childDirectory('app')
+        .childDirectory('outputs')
+        .childDirectory('flutter-apk')
+        .childFile(apkName);
+    expect(apkFile, exists);
+    return apkFile;
+  }
+
   testWithoutContext(
     'Flutter assets, directory assets, resolution variants, and native Android assets coexist in APK',
     () async {
-      final Directory projectDir = tempDir.childDirectory('app');
-
-      final ProcessResult createResult = await processManager.run(<String>[
-        flutterBin,
-        'create',
-        '--template=app',
-        '--platforms=android',
-        'app',
-      ], workingDirectory: tempDir.path);
-      expect(createResult, const ProcessResultMatcher());
+      final Directory projectDir = await createApp(tempDir);
 
       // Create Flutter assets.
       final Directory assetsDir = projectDir.childDirectory('assets');
@@ -113,21 +138,7 @@ void main() {
         'assets/2.0x/image.png',
       ]);
 
-      final ProcessResult buildResult = await processManager.run(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'build',
-        'apk',
-        '--debug',
-      ], workingDirectory: projectDir.path);
-      expect(buildResult, const ProcessResultMatcher());
-
-      final File apkFile = projectDir
-          .childDirectory('build')
-          .childDirectory('app')
-          .childDirectory('outputs')
-          .childDirectory('flutter-apk')
-          .childFile('app-debug.apk');
+      final File apkFile = await buildApk(projectDir);
       final Archive archive = readApkArchive(apkFile);
 
       // Verify Flutter assets packaged under assets/flutter_assets/.
@@ -167,16 +178,7 @@ void main() {
   );
 
   testWithoutContext('incremental asset add and remove synchronizes output APK cleanly', () async {
-    final Directory projectDir = tempDir.childDirectory('app');
-
-    final ProcessResult createResult = await processManager.run(<String>[
-      flutterBin,
-      'create',
-      '--template=app',
-      '--platforms=android',
-      'app',
-    ], workingDirectory: tempDir.path);
-    expect(createResult, const ProcessResultMatcher());
+    final Directory projectDir = await createApp(tempDir);
 
     final Directory assetsDir = projectDir.childDirectory('assets');
     assetsDir.createSync(recursive: true);
@@ -192,21 +194,7 @@ void main() {
     addAssetsToPubspec(pubspecFile, <String>['assets/asset1.txt', 'assets/asset2.txt']);
 
     // Build 1: Initial debug APK.
-    final ProcessResult build1Result = await processManager.run(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      'apk',
-      '--debug',
-    ], workingDirectory: projectDir.path);
-    expect(build1Result, const ProcessResultMatcher());
-
-    final File apkFile = projectDir
-        .childDirectory('build')
-        .childDirectory('app')
-        .childDirectory('outputs')
-        .childDirectory('flutter-apk')
-        .childFile('app-debug.apk');
+    final File apkFile = await buildApk(projectDir);
     Archive archive = readApkArchive(apkFile);
 
     expect(archive.findFile('assets/flutter_assets/assets/asset1.txt'), isNotNull);
@@ -225,14 +213,7 @@ void main() {
     pubspecFile.writeAsStringSync(updatedPubspec);
 
     // Build 2: Incremental debug APK without clean.
-    final ProcessResult build2Result = await processManager.run(<String>[
-      flutterBin,
-      ...getLocalEngineArguments(),
-      'build',
-      'apk',
-      '--debug',
-    ], workingDirectory: projectDir.path);
-    expect(build2Result, const ProcessResultMatcher());
+    await buildApk(projectDir);
 
     archive = readApkArchive(apkFile);
 
@@ -248,16 +229,7 @@ void main() {
   testWithoutContext(
     'generated Flutter assets take precedence over static src/main/assets on path collision without build failure',
     () async {
-      final Directory projectDir = tempDir.childDirectory('app');
-
-      final ProcessResult createResult = await processManager.run(<String>[
-        flutterBin,
-        'create',
-        '--template=app',
-        '--platforms=android',
-        'app',
-      ], workingDirectory: tempDir.path);
-      expect(createResult, const ProcessResultMatcher());
+      final Directory projectDir = await createApp(tempDir);
 
       // Create a Flutter asset in assets/collision.txt.
       final Directory assetsDir = projectDir.childDirectory('assets');
@@ -281,21 +253,7 @@ void main() {
       final File pubspecFile = projectDir.childFile('pubspec.yaml');
       addAssetsToPubspec(pubspecFile, <String>['assets/collision.txt']);
 
-      final ProcessResult buildResult = await processManager.run(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'build',
-        'apk',
-        '--debug',
-      ], workingDirectory: projectDir.path);
-      expect(buildResult, const ProcessResultMatcher());
-
-      final File apkFile = projectDir
-          .childDirectory('build')
-          .childDirectory('app')
-          .childDirectory('outputs')
-          .childDirectory('flutter-apk')
-          .childFile('app-debug.apk');
+      final File apkFile = await buildApk(projectDir);
       final Archive archive = readApkArchive(apkFile);
 
       final ArchiveFile? collisionEntry = archive.findFile(
@@ -314,16 +272,7 @@ void main() {
   testWithoutContext(
     'flavor-specific native assets are packaged into corresponding flavor APKs',
     () async {
-      final Directory projectDir = tempDir.childDirectory('app');
-
-      final ProcessResult createResult = await processManager.run(<String>[
-        flutterBin,
-        'create',
-        '--template=app',
-        '--platforms=android',
-        'app',
-      ], workingDirectory: tempDir.path);
-      expect(createResult, const ProcessResultMatcher());
+      final Directory projectDir = await createApp(tempDir);
 
       // Add product flavors to build.gradle.kts.
       final File buildGradleFile = projectDir
@@ -376,23 +325,7 @@ android {
       addAssetsToPubspec(pubspecFile, <String>['assets/shared.txt']);
 
       // Build flavor "free".
-      final ProcessResult buildFreeResult = await processManager.run(<String>[
-        flutterBin,
-        ...getLocalEngineArguments(),
-        'build',
-        'apk',
-        '--debug',
-        '--flavor',
-        'free',
-      ], workingDirectory: projectDir.path);
-      expect(buildFreeResult, const ProcessResultMatcher());
-
-      final File freeApkFile = projectDir
-          .childDirectory('build')
-          .childDirectory('app')
-          .childDirectory('outputs')
-          .childDirectory('flutter-apk')
-          .childFile('app-free-debug.apk');
+      final File freeApkFile = await buildApk(projectDir, flavor: 'free');
       final Archive freeArchive = readApkArchive(freeApkFile);
 
       // Free flavor must contain shared Flutter asset and free flavor asset, but not paid asset.
