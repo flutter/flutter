@@ -1320,8 +1320,21 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   double _getValueFromGlobalPosition(Offset globalPosition) {
-    final double visualPosition =
-        (globalToLocal(globalPosition).dx - _trackRect.left) / _trackRect.width;
+    final double localDx = globalToLocal(globalPosition).dx;
+    final double visualPosition;
+    // Mirror the padded coordinate system used when painting tick marks and
+    // thumbs on discrete rounded tracks (see _RenderSlider._getValueFromGlobalPosition).
+    if (isDiscrete && _sliderTheme.rangeTrackShape!.isRounded) {
+      final double padding = _trackRect.height;
+      final double adjustedWidth = _trackRect.width - padding;
+      if (adjustedWidth <= 0.0) {
+        visualPosition = 0.5;
+      } else {
+        visualPosition = (localDx - _trackRect.left - padding / 2) / adjustedWidth;
+      }
+    } else {
+      visualPosition = (localDx - _trackRect.left) / _trackRect.width;
+    }
     return _getValueFromVisualPosition(visualPosition);
   }
 
