@@ -321,7 +321,7 @@ class RenderEditable extends RenderBox
     Offset cursorOffset = Offset.zero,
     double devicePixelRatio = 1.0,
     ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.max,
-    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.max,
+    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
     bool? enableInteractiveSelection,
     this.floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     TextRange? promptRectRange,
@@ -604,6 +604,8 @@ class RenderEditable extends RenderBox
   }
 
   /// Controls how wide the selection highlight boxes are computed to be.
+  ///
+  /// Defaults to [ui.BoxWidthStyle.tight].
   ///
   /// See [ui.BoxWidthStyle] for details on available styles.
   ui.BoxWidthStyle get selectionWidthStyle => _selectionPainter.selectionWidthStyle;
