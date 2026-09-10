@@ -2833,6 +2833,37 @@ fn init_logging() {
     let _ = log::set_logger(&LOGGER);
 }
 
+/// Carries the `AndroidApp` winit's `EventLoopBuilder` needs on Android,
+/// where (unlike every other platform) it is not global state and must be
+/// supplied explicitly before building the event loop. `android_main` calls
+/// [`set_android_app`] before calling [`run_application`]; this keeps
+/// `run_application`'s signature identical across platforms.
+#[cfg(target_os = "android")]
+mod android_app {
+    use std::sync::OnceLock;
+    use winit::platform::android::activity::AndroidApp;
+
+    static ANDROID_APP: OnceLock<AndroidApp> = OnceLock::new();
+
+    pub(crate) fn take() -> AndroidApp {
+        ANDROID_APP
+            .get()
+            .cloned()
+            .expect("set_android_app must be called before run_application on Android")
+    }
+
+    pub(crate) fn set(app: AndroidApp) {
+        ANDROID_APP
+            .set(app)
+            .unwrap_or_else(|_| panic!("set_android_app must only be called once"));
+    }
+}
+
+#[cfg(target_os = "android")]
+pub fn set_android_app(app: winit::platform::android::activity::AndroidApp) {
+    android_app::set(app);
+}
+
 /// Runs an application with no source-linked Rust plugins.
 pub fn run(config: ShellConfig) -> Result<(), RunError> {
     run_application(config, |_| Ok(()))
@@ -2870,6 +2901,14 @@ fn run_application_with_fixture(
     demo_fixture: Option<DemoTextureFixture>,
 ) -> Result<(), RunError> {
     init_logging();
+    #[cfg(target_os = "android")]
+    let event_loop = {
+        use winit::platform::android::EventLoopBuilderExtAndroid;
+        EventLoop::builder()
+            .with_android_app(android_app::take())
+            .build()?
+    };
+    #[cfg(not(target_os = "android"))]
     let event_loop = EventLoop::new()?;
     let event_proxy = HostEventSender::new(event_loop.create_proxy());
     let dispatcher_events = event_proxy.clone();

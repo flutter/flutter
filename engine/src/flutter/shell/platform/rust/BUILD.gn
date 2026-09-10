@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/config/android/config.gni")
+import("//flutter/build/bin_to_obj.gni")
 import("//flutter/testing/testing.gni")
 
 _flutter_shell_core_output = "$target_gen_dir/rust/libflutter_shell_core.a"
@@ -95,6 +96,22 @@ action("flutter_shell_wgpu_rust") {
   ]
 }
 
+# Unlike the Java Android embedding, this shared library has no Activity/
+# AssetManager-backed asset loading yet (see flutter-rs-proggress.md
+# milestone 2); ICU data still must be linked in as a binary symbol, since
+# //flutter/shell/common/switches.cc unconditionally expects
+# _binary_icudtl_dat_start/_size to exist on Android rather than accepting a
+# filesystem icu_data_path there.
+if (is_android) {
+  bin_to_assembly("rust_shell_icudtl_asm") {
+    deps = []
+    input = "//flutter/third_party/icu/flutter/icudtl.dat"
+    symbol = "_binary_icudtl_dat_start"
+    size_symbol = "_binary_icudtl_dat_size"
+    executable = false
+  }
+}
+
 # This target is intentionally independent of a particular native platform.
 # Platform-specific Rust implementations are selected by the Rust runner, not
 # by the existing GTK, Win32, Android, or Darwin shell targets.
@@ -131,6 +148,11 @@ source_set("flutter_rust_shell") {
     "//flutter/runtime",
     "//flutter/shell/platform/common:common_cpp_switches",
   ]
+
+  if (is_android) {
+    sources += get_target_outputs(":rust_shell_icudtl_asm")
+    deps += [ ":rust_shell_icudtl_asm" ]
+  }
 }
 
 # The application-facing engine boundary. Cargo links a small Rust binary to
@@ -156,7 +178,7 @@ shared_library("flutter_rust_engine") {
   # Export only the private C ABI plus the two debug snapshot symbols the Dart
   # VM discovers from this loaded library. The Rust executable itself remains
   # unaware of Dart, Impeller, and Skia.
-  if (is_linux) {
+  if (is_linux || is_android) {
     ldflags = [ "-Wl,--version-script=" +
                 rebase_path("cpp/rust_engine_exports.lst", root_build_dir) ]
   }
@@ -177,9 +199,12 @@ executable("flutter_rust_shell_runner") {
   # currently loaded process; this makes them visible despite the default
   # hidden-visibility build config. See shell_host_executable in
   # //flutter/shell/common/BUILD.gn for the same requirement.
+  inputs = []
+  ldflags = []
   if (is_linux) {
-    inputs = [ "cpp/rust_runner_exports.sym" ]
-    ldflags = [ "-Wl,--dynamic-list=" + rebase_path(inputs[0], root_build_dir) ]
+    inputs += [ "cpp/rust_runner_exports.sym" ]
+    ldflags +=
+        [ "-Wl,--dynamic-list=" + rebase_path(inputs[0], root_build_dir) ]
   } else {
     public_configs = [ "//flutter:export_dynamic_symbols" ]
   }
@@ -203,12 +228,14 @@ executable("flutter_rust_shell_runner") {
   ]
 }
 
-# Android milestone 1 (see flutter-rs-proggress.md): prove the winit/wgpu
-# GameActivity entry-point seam before the C++ RustShell ABI is stubbed for
-# Android. Unlike the other actions above, this crate is a cdylib: Android has
-# no separate host executable, so the OS loads this shared object directly
-# and calls its exported `android_main`. It intentionally does not depend on
-# :flutter_rust_shell or :flutter_shell_winit_rust yet.
+# Android milestones 1 and 2 (see flutter-rs-proggress.md). Unlike the other
+# actions above, this crate is a cdylib: Android has no separate host
+# executable, so the OS loads this shared object directly and calls its
+# exported `android_main`. It does not link :flutter_shell_winit_rust's
+# static archive the way the desktop runner does; instead its own build.rs
+# dynamically links against :flutter_rust_engine's shared object, the same
+# way a generated app's runner-rs links against the SDK-distributed one on
+# Linux (see build.rs's doc comment).
 if (is_android && (current_cpu == "arm64" || current_cpu == "x64")) {
   if (current_cpu == "arm64") {
     _rust_android_target = "aarch64-linux-android"
@@ -217,19 +244,38 @@ if (is_android && (current_cpu == "arm64" || current_cpu == "x64")) {
   }
 
   _flutter_shell_android_runner_output = "$root_out_dir/android_shell/jniLibs/$android_app_abi/libflutter_shell_android_runner.so"
+
+  # Deliberately outside android_shell/jniLibs/: Gradle's jniLibs source set
+  # scans that whole directory tree for native libraries, so Cargo's build
+  # scratch (host-built proc-macro .so files, intermediate objects) must not
+  # live underneath the ABI directory that only the final artifact belongs
+  # in.
+  _flutter_shell_android_runner_cargo_target_dir =
+      "$root_out_dir/android_shell/cargo-target/$android_app_abi"
+
   _android_clang = "$android_toolchain_root/bin/$_rust_android_target$android_api_level-clang"
   _android_clang_cxx = "$android_toolchain_root/bin/$_rust_android_target$android_api_level-clang++"
   _android_ar = "$android_toolchain_root/bin/llvm-ar"
 
   action("flutter_shell_android_runner_rust") {
     script = "build_rust.py"
+    deps = [ ":flutter_rust_engine" ]
 
     inputs = [
       "Cargo.lock",
       "Cargo.toml",
       "rust-toolchain.toml",
+      "crates/flutter-plugin-sdk/Cargo.toml",
+      "crates/flutter-plugin-sdk/src/lib.rs",
+      "crates/flutter-shell-core/Cargo.toml",
+      "crates/flutter-shell-core/src/lib.rs",
+      "crates/flutter-shell-wgpu/Cargo.toml",
+      "crates/flutter-shell-wgpu/src/lib.rs",
+      "crates/flutter-shell-winit/Cargo.toml",
+      "crates/flutter-shell-winit/src/lib.rs",
       "crates/flutter-shell-android-runner/Cargo.toml",
       "crates/flutter-shell-android-runner/src/lib.rs",
+      "crates/flutter-shell-android-runner/build.rs",
       _android_clang,
       _android_clang_cxx,
       _android_ar,
@@ -254,6 +300,11 @@ if (is_android && (current_cpu == "arm64" || current_cpu == "x64")) {
       rebase_path(_android_clang_cxx, root_build_dir),
       "--android-ar",
       rebase_path(_android_ar, root_build_dir),
+      "--cargo-target-dir",
+      rebase_path(_flutter_shell_android_runner_cargo_target_dir,
+                  root_build_dir),
+      "--engine-dir",
+      rebase_path(root_out_dir, root_build_dir),
     ]
   }
 }

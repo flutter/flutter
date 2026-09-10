@@ -4,7 +4,7 @@ version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
-description = "Android GameActivity entry point proving the winit/wgpu presentation seam"
+description = "Android GameActivity entry point for the Flutter Rust shell"
 
 [lib]
 # Android has no separate host executable: the OS loads this cdylib directly
@@ -18,9 +18,7 @@ path = "src/lib.rs"
 [target.'cfg(target_os = "android")'.dependencies]
 android_logger = "=0.15.1"
 log = "=0.4.33"
-pollster = "=0.4.0"
-raw-window-handle = "=0.6.2"
-wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "014d9e84813a2946febfa4888694c0b70565b2f5", default-features = false, features = ["vulkan"] }
+flutter-shell-winit = { path = "../flutter-shell-winit", version = "0.1.0" }
 winit = { version = "=0.31.0-beta.2", default-features = false, features = [
   "android-game-activity",
 ] }

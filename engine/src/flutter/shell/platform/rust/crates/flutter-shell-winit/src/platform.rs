@@ -13,7 +13,13 @@ mod linux;
 #[cfg(target_os = "linux")]
 pub(crate) use linux::LinuxPlatform as CurrentPlatform;
 
-#[cfg(not(target_os = "linux"))]
+#[cfg(target_os = "android")]
+mod android;
+
+#[cfg(target_os = "android")]
+pub(crate) use android::AndroidPlatform as CurrentPlatform;
+
+#[cfg(not(any(target_os = "linux", target_os = "android")))]
 compile_error!(
     "flutter-shell-winit needs a platform adapter for this target; the shared host is platform-neutral"
 );

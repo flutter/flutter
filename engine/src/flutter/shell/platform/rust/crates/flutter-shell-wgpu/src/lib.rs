@@ -3,8 +3,11 @@
 
 #![deny(unsafe_op_in_unsafe_fn)]
 
-#[cfg(target_os = "linux")]
-mod linux {
+// This module is Vulkan/wgpu code with no Linux-specific dependencies; it
+// currently builds for every platform that has a working `ash`/`wgpu`
+// Vulkan target dependency block in Cargo.toml (Linux and Android so far).
+#[cfg(any(target_os = "linux", target_os = "android"))]
+mod vulkan {
     use ash::vk::Handle as _;
     use flutter_plugin_sdk::{
         PixelBufferTextureBackendHandle, PixelBufferTextureFrameBackend, PixelWriteTask,
@@ -287,13 +290,56 @@ mod linux {
                     apply_limit_buckets: false,
                 }))
                 .map_err(|error| error.to_string())?;
-            let (device, queue) =
-                pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
-                    label: Some("Flutter Rust Shell Vulkan device"),
-                    required_features: wgpu::Features::empty(),
-                    required_limits: wgpu::Limits::downlevel_defaults(),
-                    ..Default::default()
-                }))
+            let device_descriptor = wgpu::DeviceDescriptor {
+                label: Some("Flutter Rust Shell Vulkan device"),
+                required_features: wgpu::Features::empty(),
+                // `downlevel_defaults()` caps max_texture_dimension_2d at
+                // 2048, smaller than common phone display heights (e.g.
+                // 2408px); request whatever the adapter actually
+                // supports for the full-screen surface instead. This was
+                // latent on Linux, where monitor heights rarely exceed
+                // 2048px, until Android surfaced it (see
+                // flutter-rs-proggress.md milestone 2).
+                required_limits: adapter.limits(),
+                ..Default::default()
+            };
+            #[cfg(target_os = "android")]
+            let (device, queue) = {
+                // Impeller's Android capability check (capabilities_vk.cc)
+                // hard-requires these device extensions for
+                // AHardwareBuffer-backed texture interop; wgpu has no
+                // concept of them since it never needs them itself, so the
+                // safe `request_device` path never enables them and C++
+                // rejects the device as unsuitable. `open_with_callback` is
+                // this wgpu-hal fork's supported escape hatch for injecting
+                // extra Vulkan device extensions before creation.
+                let open_device = {
+                    let hal_adapter =
+                        unsafe { adapter.as_hal::<wgpu::hal::vulkan::Api>() }
+                            .ok_or_else(|| "adapter is not a Vulkan adapter".to_owned())?;
+                    unsafe {
+                        hal_adapter.open_with_callback(
+                            device_descriptor.required_features,
+                            &device_descriptor.required_limits,
+                            &wgpu::MemoryHints::default(),
+                            Some(Box::new(|args| {
+                                args.extensions.push(
+                                    c"VK_ANDROID_external_memory_android_hardware_buffer",
+                                );
+                                args.extensions.push(c"VK_KHR_sampler_ycbcr_conversion");
+                                args.extensions.push(c"VK_KHR_external_memory");
+                                args.extensions.push(c"VK_EXT_queue_family_foreign");
+                                args.extensions.push(c"VK_KHR_dedicated_allocation");
+                            })),
+                        )
+                    }
+                    .map_err(|error| error.to_string())?
+                };
+                unsafe { adapter.create_device_from_hal(open_device, &device_descriptor) }
+                    .map_err(|error| error.to_string())?
+            };
+            #[cfg(not(target_os = "android"))]
+            let (device, queue) = pollster::block_on(adapter.request_device(&device_descriptor))
                 .map_err(|error| error.to_string())?;
             Ok(std::sync::Arc::new(Self {
                 instance,
@@ -1451,5 +1497,5 @@ mod linux {
     }
 }
 
-#[cfg(target_os = "linux")]
-pub use linux::{GpuBroker, GpuContext, VulkanContextData, WgpuTextureRing};
+#[cfg(any(target_os = "linux", target_os = "android"))]
+pub use vulkan::{GpuBroker, GpuContext, VulkanContextData, WgpuTextureRing};

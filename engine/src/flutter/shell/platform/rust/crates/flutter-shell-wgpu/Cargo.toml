@@ -30,3 +30,11 @@ winit = { version = "=0.31.0-beta.2", default-features = false, features = [
   "wayland-dlopen",
   "x11",
 ] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+ash = "=0.38.0"
+pollster = "=0.4.0"
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "014d9e84813a2946febfa4888694c0b70565b2f5", default-features = false, features = ["vulkan", "wgsl"] }
+winit = { version = "=0.31.0-beta.2", default-features = false, features = [
+  "android-game-activity",
+] }

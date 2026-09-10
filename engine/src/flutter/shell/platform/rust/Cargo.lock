@@ -401,10 +401,8 @@ name = "flutter-shell-android-runner"
 version = "0.1.0"
 dependencies = [
  "android_logger",
+ "flutter-shell-winit",
  "log",
- "pollster",
- "raw-window-handle",
- "wgpu",
  "winit",
 ]
 
