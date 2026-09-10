@@ -616,6 +616,11 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     }
   }
   XCTAssertEqual(numberOfExpectedVisualEffectView, 1u);
+
+  // The visual effect view shouldn't swallow touches.
+  // See: https://github.com/flutter/flutter/issues/191203
+  UIView* hitView = [childClippingView hitTest:CGPointMake(5, 5) withEvent:nil];
+  XCTAssertEqual(hitView, gMockPlatformView.superview);
 }
 
 - (void)testApplyBackdropFilterWithCorrectFrame {
@@ -1732,6 +1737,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertEqual(visualEffectView.layer.cornerRadius, radii.top_left.width);
   XCTAssertEqual(visualEffectView.layer.cornerCurve, kCACornerCurveCircular);
+  XCTAssertFalse(visualEffectView.userInteractionEnabled);
 }
 
 - (void)testApplyBackdropFilterRespectsClipRSuperellipse {
@@ -1810,6 +1816,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
 
   XCTAssertEqual(visualEffectView.layer.cornerRadius, radii.top_left.width);
   XCTAssertEqual(visualEffectView.layer.cornerCurve, kCACornerCurveContinuous);
+  XCTAssertFalse(visualEffectView.userInteractionEnabled);
 }
 
 - (void)testBackdropFilterVisualEffectSubviewBackgroundColor {
@@ -4909,6 +4916,7 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
                       expectedFrame:(CGRect)frame
                         inputRadius:(CGFloat)inputRadius {
   XCTAssertTrue(CGRectEqualToRect(visualEffectView.frame, frame));
+  XCTAssertFalse(visualEffectView.userInteractionEnabled);
   for (UIView* view in visualEffectView.subviews) {
     if (![NSStringFromClass([view class]) hasSuffix:@"BackdropView"]) {
       continue;
