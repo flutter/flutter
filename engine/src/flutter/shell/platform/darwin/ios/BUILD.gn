@@ -386,7 +386,15 @@ shared_library("create_flutter_framework_dylib") {
 
   output_name = "Flutter"
 
-  ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter" ]
+  inputs = [ "//flutter/shell/platform/darwin/common/unexported_symbols.sym" ]
+
+  ldflags = [
+    "-Wl,-install_name,@rpath/Flutter.framework/Flutter",
+    "-Xlinker",
+    "-unexported_symbols_list",
+    "-Xlinker",
+    rebase_path(inputs[0], root_build_dir),
+  ]
 
   public = _flutter_framework_headers
 
@@ -486,6 +494,26 @@ copy("copy_license") {
   outputs = [ "$root_out_dir/LICENSE" ]
 }
 
+source_set("copy_and_verify_framework_module_swift") {
+  visibility = [ ":*" ]
+  swiftflags = [
+    "-F",
+    rebase_path(root_out_dir),
+  ]
+  sources = [ "framework/Source/FlutterUmbrellaImport.swift" ]
+  deps = [
+    ":copy_dylib",
+    ":copy_framework_headers",
+    ":copy_framework_info_plist",
+    ":copy_framework_module_map",
+    ":copy_framework_privacy_manifest",
+  ]
+  configs += [
+    "//flutter/shell/platform/darwin/common:config",
+    "//build/config/ios:ios_application_extension",
+  ]
+}
+
 shared_library("copy_and_verify_framework_module") {
   framework_search_path = rebase_path("$root_out_dir")
   visibility = [ ":*" ]
@@ -495,16 +523,22 @@ shared_library("copy_and_verify_framework_module") {
     "-Xlinker",
     "-fatal_warnings",
   ]
+  frameworks = [ "Flutter.framework" ]
 
   sources = [ "framework/Source/FlutterUmbrellaImport.m" ]
   deps = [
+    ":copy_and_verify_framework_module_swift",
+    ":copy_dylib",
     ":copy_framework_headers",
     ":copy_framework_info_plist",
     ":copy_framework_module_map",
     ":copy_framework_privacy_manifest",
   ]
 
-  configs += [ "//build/config/ios:ios_application_extension" ]
+  configs += [
+    "//flutter/shell/platform/darwin/common:config",
+    "//build/config/ios:ios_application_extension",
+  ]
 }
 
 group("universal_flutter_framework") {
