@@ -732,7 +732,6 @@ class IOSCoreDeviceControl {
       'launch',
       '--device',
       deviceId,
-      '--terminate-existing',
       if (startStopped) '--start-stopped',
       if (attachToConsole) ...<String>[
         '--console',

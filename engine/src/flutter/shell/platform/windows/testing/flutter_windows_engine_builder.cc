@@ -61,6 +61,11 @@ void FlutterWindowsEngineBuilder::SetDartEntrypoint(std::string entrypoint) {
   properties_.dart_entrypoint = dart_entrypoint_.c_str();
 }
 
+void FlutterWindowsEngineBuilder::SetAotLibraryPath(std::wstring path) {
+  aot_library_path_ = std::move(path);
+  properties_.aot_library_path = aot_library_path_.c_str();
+}
+
 void FlutterWindowsEngineBuilder::AddDartEntrypointArgument(std::string arg) {
   dart_entrypoint_arguments_.emplace_back(std::move(arg));
 }
