@@ -13,9 +13,14 @@
 //
 // IgnoreAttributeDispatchHelper:
 // IgnoreClipDispatchHelper:
-// IgnoreTransformDispatchHelper
+// IgnoreTransformDispatchHelper:
+// IgnoreDrawDispatchHelper:
 //     Empty overrides of all of the associated methods of DlOpReceiver
 //     for receivers that only track some of the rendering operations
+//
+// DrawHookDispatchHelper:
+//     Overrides of all draw methods of DlOpReceiver that forward to a
+//     virtual onDraw() hook for receivers that intercept draw operations
 
 namespace flutter {
 
@@ -74,53 +79,69 @@ class IgnoreTransformDispatchHelper : public virtual DlOpReceiver {
   void transformReset() override {}
 };
 
-class IgnoreDrawDispatchHelper : public virtual DlOpReceiver {
+// A utility class that intercepts all DlOpReceiver methods relating
+// to rendering/drawing operations and forwards them to a virtual onDraw() hook.
+class DrawHookDispatchHelper : public virtual DlOpReceiver {
  public:
-  void save() override {}
-  void saveLayer(const DlRect& bounds,
-                 const SaveLayerOptions options,
-                 const DlImageFilter* backdrop,
-                 std::optional<int64_t> backdrop_id) override {}
-  void restore() override {}
-  void drawColor(DlColor color, DlBlendMode mode) override {}
-  void drawPaint() override {}
-  void drawLine(const DlPoint& p0, const DlPoint& p1) override {}
+  virtual void onDraw() {}
+
+  void drawColor(DlColor color, DlBlendMode mode) override { onDraw(); }
+  void drawPaint() override { onDraw(); }
+  void drawLine(const DlPoint& p0, const DlPoint& p1) override { onDraw(); }
   void drawDashedLine(const DlPoint& p0,
                       const DlPoint& p1,
                       DlScalar on_length,
-                      DlScalar off_length) override {}
-  void drawRect(const DlRect& rect) override {}
-  void drawOval(const DlRect& bounds) override {}
-  void drawCircle(const DlPoint& center, DlScalar radius) override {}
-  void drawRoundRect(const DlRoundRect& rrect) override {}
+                      DlScalar off_length) override {
+    onDraw();
+  }
+  void drawRect(const DlRect& rect) override { onDraw(); }
+  void drawOval(const DlRect& bounds) override { onDraw(); }
+  void drawCircle(const DlPoint& center, DlScalar radius) override { onDraw(); }
+  void drawRoundRect(const DlRoundRect& rrect) override { onDraw(); }
   void drawDiffRoundRect(const DlRoundRect& outer,
-                         const DlRoundRect& inner) override {}
-  void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override {}
-  void drawPath(const DlPath& path) override {}
+                         const DlRoundRect& inner) override {
+    onDraw();
+  }
+  void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override {
+    onDraw();
+  }
+  void drawPath(const DlPath& path) override { onDraw(); }
   void drawArc(const DlRect& oval_bounds,
                DlScalar start_degrees,
                DlScalar sweep_degrees,
-               bool use_center) override {}
+               bool use_center) override {
+    onDraw();
+  }
   void drawPoints(DlPointMode mode,
                   uint32_t count,
-                  const DlPoint points[]) override {}
+                  const DlPoint points[]) override {
+    onDraw();
+  }
   void drawVertices(const std::shared_ptr<DlVertices>& vertices,
-                    DlBlendMode mode) override {}
+                    DlBlendMode mode) override {
+    onDraw();
+  }
   void drawImage(const sk_sp<DlImage> image,
                  const DlPoint& point,
                  DlImageSampling sampling,
-                 bool render_with_attributes) override {}
+                 bool render_with_attributes) override {
+    onDraw();
+  }
   void drawImageRect(const sk_sp<DlImage> image,
                      const DlRect& src,
                      const DlRect& dst,
                      DlImageSampling sampling,
                      bool render_with_attributes,
-                     DlSrcRectConstraint constraint) override {}
+                     DlSrcRectConstraint constraint) override {
+    onDraw();
+  }
   void drawImageNine(const sk_sp<DlImage> image,
                      const DlIRect& center,
                      const DlRect& dst,
                      DlFilterMode filter,
-                     bool render_with_attributes) override {}
+                     bool render_with_attributes) override {
+    onDraw();
+  }
   void drawAtlas(const sk_sp<DlImage> atlas,
                  const DlRSTransform xform[],
                  const DlRect tex[],
@@ -129,17 +150,38 @@ class IgnoreDrawDispatchHelper : public virtual DlOpReceiver {
                  DlBlendMode mode,
                  DlImageSampling sampling,
                  const DlRect* cull_rect,
-                 bool render_with_attributes) override {}
+                 bool render_with_attributes) override {
+    onDraw();
+  }
   void drawDisplayList(const sk_sp<DisplayList> display_list,
-                       DlScalar opacity) override {}
+                       DlScalar opacity) override {
+    onDraw();
+  }
   void drawText(const std::shared_ptr<DlText>& text,
                 DlScalar x,
-                DlScalar y) override {}
+                DlScalar y) override {
+    onDraw();
+  }
   void drawShadow(const DlPath& path,
                   const DlColor color,
                   const DlScalar elevation,
                   bool transparent_occluder,
-                  DlScalar dpr) override {}
+                  DlScalar dpr) override {
+    onDraw();
+  }
+};
+
+// A utility class that will ignore all DlOpReceiver methods relating
+// to rendering/drawing operations and canvas save/restore/saveLayer stack
+// management.
+class IgnoreDrawDispatchHelper : public virtual DrawHookDispatchHelper {
+ public:
+  void save() override {}
+  void saveLayer(const DlRect& bounds,
+                 const SaveLayerOptions options,
+                 const DlImageFilter* backdrop,
+                 std::optional<int64_t> backdrop_id) override {}
+  void restore() override {}
 };
 
 }  // namespace flutter

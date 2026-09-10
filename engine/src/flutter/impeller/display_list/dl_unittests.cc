@@ -1749,7 +1749,8 @@ TEST_P(DisplayListTest, FirstPassDispatcherBackdropCoverageUnion) {
                                 Rect::MakeLTRB(0, 0, 1000, 1000));
   display_list->Dispatch(collector);
 
-  auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
   EXPECT_EQ(backdrop_count, 2u);
   auto it = backdrop_data.find(1);
   ASSERT_TRUE(it != backdrop_data.end());
@@ -1784,7 +1785,8 @@ TEST_P(DisplayListTest, FirstPassDispatcherBackdropCoverageUnionClippedOut) {
                                 Rect::MakeLTRB(0, 0, 1000, 1000));
   display_list->Dispatch(collector);
 
-  auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
   EXPECT_EQ(backdrop_count, 2u);
   auto it = backdrop_data.find(1);
   ASSERT_TRUE(it != backdrop_data.end());
@@ -1820,7 +1822,8 @@ TEST_P(DisplayListTest,
                                 Rect::MakeLTRB(0, 0, 1000, 1000));
   display_list->Dispatch(collector);
 
-  auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
   EXPECT_EQ(backdrop_count, 2u);
   auto it = backdrop_data.find(1);
   ASSERT_TRUE(it != backdrop_data.end());
@@ -1851,7 +1854,8 @@ TEST_P(DisplayListTest,
                                 Rect::MakeLTRB(0, 0, 1000, 1000));
   display_list->Dispatch(collector);
 
-  auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
   EXPECT_EQ(backdrop_count, 2u);
   auto it = backdrop_data.find(1);
   ASSERT_TRUE(it != backdrop_data.end());
@@ -1883,12 +1887,350 @@ TEST_P(DisplayListTest,
   collector.restore();
   collector.restore();
 
-  auto [backdrop_data, backdrop_count] = collector.TakeBackdropData();
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
   EXPECT_EQ(backdrop_count, 1u);
   auto it = backdrop_data.find(1);
   ASSERT_TRUE(it != backdrop_data.end());
   EXPECT_FALSE(it->second.coverage_union.IsEmpty());
   EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(0, 0, 1000, 1000));
+}
+
+TEST_P(DisplayListTest, FirstPassDispatcherGeneratedBackdropGrouping) {
+  flutter::DisplayListBuilder builder;
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // Sibling SaveLayer 1
+  builder.SaveLayer(DlRect::MakeLTRB(10, 20, 60, 80), &save_paint, blur.get());
+  builder.Restore();
+  // Sibling SaveLayer 2 with matching blur filter
+  builder.SaveLayer(DlRect::MakeLTRB(100, 120, 160, 180), &save_paint,
+                    blur.get());
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  EXPECT_EQ(generated_backdrop_ids.size(), 2u);
+  // Both sibling layers share the first generated backdrop ID (-1).
+  EXPECT_EQ(generated_backdrop_ids[0], -1);
+  EXPECT_EQ(generated_backdrop_ids[1], -1);
+
+  auto it = backdrop_data.find(-1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
+  EXPECT_TRUE(it->second.all_filters_equal);
+  EXPECT_EQ(it->second.coverage_union, Rect::MakeLTRB(10, 20, 160, 180));
+}
+
+TEST_P(DisplayListTest,
+       FirstPassDispatcherGeneratedBackdropNotGroupedWhenInterveningDraw) {
+  flutter::DisplayListBuilder builder;
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // Sibling SaveLayer 1
+  builder.SaveLayer(DlRect::MakeLTRB(10, 20, 60, 80), &save_paint, blur.get());
+  builder.Restore();
+  // Intervening draw directly on the canvas invalidates active generated group
+  builder.DrawRect(DlRect::MakeLTRB(0, 0, 50, 50), flutter::DlPaint());
+  // Sibling SaveLayer 2
+  builder.SaveLayer(DlRect::MakeLTRB(100, 120, 160, 180), &save_paint,
+                    blur.get());
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  EXPECT_EQ(generated_backdrop_ids.size(), 2u);
+  // Due to intervening draw, layers receive distinct generated backdrop IDs.
+  EXPECT_EQ(generated_backdrop_ids[0], -1);
+  EXPECT_EQ(generated_backdrop_ids[1], -2);
+
+  auto it1 = backdrop_data.find(-1);
+  ASSERT_TRUE(it1 != backdrop_data.end());
+  EXPECT_EQ(it1->second.backdrop_count, 1u);
+
+  auto it2 = backdrop_data.find(-2);
+  ASSERT_TRUE(it2 != backdrop_data.end());
+  EXPECT_EQ(it2->second.backdrop_count, 1u);
+}
+
+TEST_P(DisplayListTest,
+       FirstPassDispatcherGeneratedBackdropNotGroupedWhenDifferentFilters) {
+  flutter::DisplayListBuilder builder;
+  auto blur1 =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  auto blur2 =
+      flutter::DlImageFilter::MakeBlur(20, 20, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // SaveLayer 1 with sigma 10
+  builder.SaveLayer(DlRect::MakeLTRB(10, 20, 60, 80), &save_paint, blur1.get());
+  builder.Restore();
+  // SaveLayer 2 with sigma 20
+  builder.SaveLayer(DlRect::MakeLTRB(100, 120, 160, 180), &save_paint,
+                    blur2.get());
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  EXPECT_EQ(generated_backdrop_ids.size(), 2u);
+  // Different filter parameters receive distinct generated backdrop IDs.
+  EXPECT_EQ(generated_backdrop_ids[0], -1);
+  EXPECT_EQ(generated_backdrop_ids[1], -2);
+
+  auto it1 = backdrop_data.find(-1);
+  ASSERT_TRUE(it1 != backdrop_data.end());
+  EXPECT_EQ(it1->second.backdrop_count, 1u);
+
+  auto it2 = backdrop_data.find(-2);
+  ASSERT_TRUE(it2 != backdrop_data.end());
+  EXPECT_EQ(it2->second.backdrop_count, 1u);
+}
+
+TEST_P(DisplayListTest,
+       FirstPassDispatcherGeneratedBackdropNestedSiblingsAndScopeReset) {
+  flutter::DisplayListBuilder builder;
+  auto blur_parent =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  auto blur_child =
+      flutter::DlImageFilter::MakeBlur(20, 20, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // 1. Parent SaveLayer (Blur 10)
+  builder.SaveLayer(DlRect::MakeLTRB(0, 0, 500, 500), &save_paint,
+                    blur_parent.get());
+
+  // 2. Child Layer 1 (Blur 20) inside Parent Layer
+  builder.SaveLayer(DlRect::MakeLTRB(10, 10, 100, 100), &save_paint,
+                    blur_child.get());
+  builder.DrawRect(DlRect::MakeLTRB(10, 10, 100, 100), flutter::DlPaint());
+  builder.Restore();
+
+  // 3. Child Layer 2 (Blur 20) inside Parent Layer - Sibling of Child Layer 1
+  builder.SaveLayer(DlRect::MakeLTRB(120, 10, 210, 100), &save_paint,
+                    blur_child.get());
+  builder.DrawRect(DlRect::MakeLTRB(120, 10, 210, 100), flutter::DlPaint());
+  builder.Restore();
+
+  // 4. Parent SaveLayer finishes and restores
+  builder.Restore();
+
+  // 5. Root-level SaveLayer (Blur 20) - after Parent SaveLayer restored
+  builder.SaveLayer(DlRect::MakeLTRB(250, 10, 350, 100), &save_paint,
+                    blur_child.get());
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 4u);
+  EXPECT_EQ(generated_backdrop_ids.size(), 4u);
+
+  // Parent Layer gets -1
+  EXPECT_EQ(generated_backdrop_ids[0], -1);
+  // Child Layer 1 and Child Layer 2 are siblings inside Parent Layer and share
+  // -2
+  EXPECT_EQ(generated_backdrop_ids[1], -2);
+  EXPECT_EQ(generated_backdrop_ids[2], -2);
+  // Root Layer gets -3 because Parent Layer restored and reset the group scope
+  EXPECT_EQ(generated_backdrop_ids[3], -3);
+
+  auto it_parent = backdrop_data.find(-1);
+  ASSERT_TRUE(it_parent != backdrop_data.end());
+  EXPECT_EQ(it_parent->second.backdrop_count, 1u);
+
+  auto it_child = backdrop_data.find(-2);
+  ASSERT_TRUE(it_child != backdrop_data.end());
+  EXPECT_EQ(it_child->second.backdrop_count, 2u);
+
+  auto it_root = backdrop_data.find(-3);
+  ASSERT_TRUE(it_root != backdrop_data.end());
+  EXPECT_EQ(it_root->second.backdrop_count, 1u);
+}
+
+TEST_P(DisplayListTest,
+       FirstPassDispatcherGeneratedBackdropInterleavedExplicitBackdrop) {
+  flutter::DisplayListBuilder builder;
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // 1. Enclosing explicit backdrop layer (Blur 10, explicit ID 100)
+  builder.SaveLayer(DlRect::MakeLTRB(0, 0, 500, 500), &save_paint, blur.get(),
+                    /*backdrop_id=*/100);
+
+  // 2. Child Auto SaveLayer 1 inside Explicit Layer (Blur 10, generated ID)
+  builder.SaveLayer(DlRect::MakeLTRB(10, 10, 100, 100), &save_paint,
+                    blur.get());
+  builder.Restore();
+
+  // 3. Child Auto SaveLayer 2 inside Explicit Layer (Blur 10, generated ID)
+  builder.SaveLayer(DlRect::MakeLTRB(120, 10, 210, 100), &save_paint,
+                    blur.get());
+  builder.Restore();
+
+  // 4. Enclosing explicit backdrop layer restores
+  builder.Restore();
+
+  // 5. Root Auto SaveLayer 3 (Blur 10, generated ID)
+  builder.SaveLayer(DlRect::MakeLTRB(250, 10, 350, 100), &save_paint,
+                    blur.get());
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 4u);
+  // generated_backdrop_ids only collects entries for generated backdrops (3
+  // generated backdrops total)
+  EXPECT_EQ(generated_backdrop_ids.size(), 3u);
+
+  // Child 1 and Child 2 are siblings and share generated ID -1
+  EXPECT_EQ(generated_backdrop_ids[0], -1);
+  EXPECT_EQ(generated_backdrop_ids[1], -1);
+  // Root Auto Layer 3 gets -2 because explicit layer restored and reset scope
+  EXPECT_EQ(generated_backdrop_ids[2], -2);
+
+  auto it_auto1 = backdrop_data.find(-1);
+  ASSERT_TRUE(it_auto1 != backdrop_data.end());
+  EXPECT_EQ(it_auto1->second.backdrop_count, 2u);
+
+  auto it_auto2 = backdrop_data.find(-2);
+  ASSERT_TRUE(it_auto2 != backdrop_data.end());
+  EXPECT_EQ(it_auto2->second.backdrop_count, 1u);
+
+  auto it_explicit = backdrop_data.find(100);
+  ASSERT_TRUE(it_explicit != backdrop_data.end());
+  EXPECT_EQ(it_explicit->second.backdrop_count, 1u);
+}
+
+TEST_P(DisplayListTest,
+       FirstPassDispatcherGeneratedBackdropNestedInterveningDrawOnParent) {
+  flutter::DisplayListBuilder builder;
+  auto blur_parent =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  auto blur_child =
+      flutter::DlImageFilter::MakeBlur(20, 20, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // 1. Parent Layer (Blur 10)
+  builder.SaveLayer(DlRect::MakeLTRB(0, 0, 500, 500), &save_paint,
+                    blur_parent.get());
+
+  // 2. Child Layer 1 (Blur 20)
+  builder.SaveLayer(DlRect::MakeLTRB(10, 10, 100, 100), &save_paint,
+                    blur_child.get());
+  builder.Restore();
+
+  // 3. Draw on Parent Layer (mutates canvas between child 1 and child 2)
+  builder.DrawRect(DlRect::MakeLTRB(10, 10, 100, 100), flutter::DlPaint());
+
+  // 4. Child Layer 2 (Blur 20) inside Parent Layer
+  builder.SaveLayer(DlRect::MakeLTRB(120, 10, 210, 100), &save_paint,
+                    blur_child.get());
+  builder.Restore();
+
+  // 5. Parent Layer finishes and restores
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 3u);
+  EXPECT_EQ(generated_backdrop_ids.size(), 3u);
+
+  // Parent Layer gets -1
+  EXPECT_EQ(generated_backdrop_ids[0], -1);
+  // Child 1 gets -2
+  EXPECT_EQ(generated_backdrop_ids[1], -2);
+  // Child 2 gets -3 because the intervening draw on the parent layer
+  // invalidated group -2
+  EXPECT_EQ(generated_backdrop_ids[2], -3);
+
+  auto it1 = backdrop_data.find(-1);
+  ASSERT_TRUE(it1 != backdrop_data.end());
+  EXPECT_EQ(it1->second.backdrop_count, 1u);
+
+  auto it2 = backdrop_data.find(-2);
+  ASSERT_TRUE(it2 != backdrop_data.end());
+  EXPECT_EQ(it2->second.backdrop_count, 1u);
+
+  auto it3 = backdrop_data.find(-3);
+  ASSERT_TRUE(it3 != backdrop_data.end());
+  EXPECT_EQ(it3->second.backdrop_count, 1u);
+}
+
+TEST_P(
+    DisplayListTest,
+    FirstPassDispatcherGeneratedBackdropInternalSaveRestoreDoesNotInvalidate) {
+  flutter::DisplayListBuilder builder;
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // 1. SaveLayer 1 with internal save() / restore() and draws inside
+  builder.SaveLayer(DlRect::MakeLTRB(0, 0, 100, 100), &save_paint, blur.get());
+  builder.Save();
+  builder.DrawRect(DlRect::MakeLTRB(0, 0, 100, 100), flutter::DlPaint());
+  builder.Restore();
+  builder.Restore();
+
+  // 2. SaveLayer 2 immediately following SaveLayer 1 with same filter
+  builder.SaveLayer(DlRect::MakeLTRB(120, 0, 220, 100), &save_paint,
+                    blur.get());
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  EXPECT_EQ(generated_backdrop_ids.size(), 2u);
+
+  // SaveLayer 1 and SaveLayer 2 both share -1 because the internal
+  // save()/draw occurred within SaveLayer 1's layer
+  EXPECT_EQ(generated_backdrop_ids[0], -1);
+  EXPECT_EQ(generated_backdrop_ids[1], -1);
+
+  auto it = backdrop_data.find(-1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
 }
 
 }  // namespace testing

@@ -971,8 +971,10 @@ void CanvasDlDispatcher::drawVertices(
 
 void CanvasDlDispatcher::SetBackdropData(
     std::unordered_map<int64_t, BackdropData> backdrop,
-    size_t backdrop_count) {
-  GetCanvas().SetBackdropData(std::move(backdrop), backdrop_count);
+    size_t backdrop_count,
+    std::deque<int64_t> generated_backdrop_ids) {
+  GetCanvas().SetBackdropData(std::move(backdrop), backdrop_count,
+                              std::move(generated_backdrop_ids));
 }
 
 //// Text Frame Dispatcher
@@ -992,7 +994,10 @@ FirstPassDispatcher::~FirstPassDispatcher() {
 }
 
 void FirstPassDispatcher::save() {
-  stack_.push_back(stack_.back());
+  stack_.push_back(SaveFrame{
+      .matrix = stack_.back().matrix,
+      .cull_rect = stack_.back().cull_rect,
+  });
 }
 
 namespace {
@@ -1029,6 +1034,7 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
   SaveFrame frame = {
       .matrix = stack_.back().matrix,
       .cull_rect = stack_.back().cull_rect,
+      .is_save_layer = true,
   };
 
   const bool has_layer_bounds =
@@ -1036,7 +1042,34 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
       (!bounds.IsEmpty() || options.bounds_from_caller());
 
   backdrop_count_ += (backdrop == nullptr ? 0 : 1);
-  if (backdrop != nullptr && backdrop_id.has_value()) {
+  if (backdrop != nullptr) {
+    if (backdrop_id.has_value()) {
+      // saveLayer called with an explicit backdrop_id. Invalidate any active
+      // generated backdrop group.
+      active_generated_backdrop_group_ = std::nullopt;
+    } else {
+      // saveLayer called with no explicit backdrop_id.
+      // The currently active backdrop group ID can be reused if:
+      // 1. There is a currently active generated backdrop group, and
+      // 2. This layer is at the same saveLayer depth as the active
+      //    backdrop group, and
+      // 3. The backdrop filter parameters are equal to the active group's.
+      // If these conditions are not all met, generate a new backdrop group.
+      if (!(active_generated_backdrop_group_.has_value() &&
+            active_generated_backdrop_group_->save_layer_depth ==
+                save_layer_depth_ &&
+            *active_generated_backdrop_group_->filter == *backdrop)) {
+        active_generated_backdrop_group_ = GeneratedBackdropGroup{
+            .id = --next_generated_backdrop_id_,
+            .save_layer_depth = save_layer_depth_,
+            .filter = backdrop->shared(),
+        };
+      }
+      backdrop_id = active_generated_backdrop_group_->id;
+      frame.is_generated_backdrop = true;
+      generated_backdrop_ids_.push_back(active_generated_backdrop_group_->id);
+    }
+
     Rect layer_coverage = frame.cull_rect;
     if (has_layer_bounds) {
       layer_coverage = layer_coverage.IntersectionOrEmpty(
@@ -1056,10 +1089,38 @@ void FirstPassDispatcher::saveLayer(const DlRect& bounds,
   }
 
   stack_.push_back(std::move(frame));
+  save_layer_depth_++;
 }
 
 void FirstPassDispatcher::restore() {
+  SaveFrame frame = stack_.back();
   stack_.pop_back();
+
+  if (frame.is_save_layer) {
+    save_layer_depth_--;
+    if (!frame.is_generated_backdrop) {
+      // Restoring a non-generated saveLayer (e.g. non-backdrop saveLayer or
+      // backdrop with an explicit ID) composites onto the parent canvas and
+      // invalidates the active generated backdrop group.
+      active_generated_backdrop_group_ = std::nullopt;
+    }
+    if (active_generated_backdrop_group_.has_value() &&
+        active_generated_backdrop_group_->save_layer_depth >
+            save_layer_depth_) {
+      // The parent layer of the active backdrop group was restored, so
+      // invalidate the active group.
+      active_generated_backdrop_group_ = std::nullopt;
+    }
+  }
+}
+
+void FirstPassDispatcher::onDraw() {
+  // Drawing on the current canvas mutates its backdrop and invalidates any
+  // active generated backdrop group at this saveLayer depth.
+  if (active_generated_backdrop_group_.has_value() &&
+      active_generated_backdrop_group_->save_layer_depth == save_layer_depth_) {
+    active_generated_backdrop_group_ = std::nullopt;
+  }
 }
 
 namespace {
@@ -1162,6 +1223,7 @@ void FirstPassDispatcher::transformReset() {
 void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
                                    DlScalar x,
                                    DlScalar y) {
+  flutter::DrawHookDispatchHelper::drawText(text, x, y);
   GlyphProperties properties;
   auto text_frame = text->GetTextFrame();
   if (text_frame == nullptr) {
@@ -1287,11 +1349,12 @@ bool PixelFormatSupportsMSAA(std::optional<PixelFormat> pixel_format) {
 }
 }  // namespace
 
-std::pair<std::unordered_map<int64_t, BackdropData>, size_t>
+std::tuple<std::unordered_map<int64_t, BackdropData>,
+           size_t,
+           std::deque<int64_t>>
 FirstPassDispatcher::TakeBackdropData() {
-  std::unordered_map<int64_t, BackdropData> temp;
-  std::swap(temp, backdrop_data_);
-  return std::make_pair(temp, backdrop_count_);
+  return {std::move(backdrop_data_), backdrop_count_,
+          std::move(generated_backdrop_ids_)};
 }
 
 std::shared_ptr<Texture> DisplayListToTexture(
@@ -1356,8 +1419,9 @@ std::shared_ptr<Texture> DisplayListToTexture(
       display_list->max_root_blend_mode(),       //
       impeller::IRect32::MakeSize(size)          //
   );
-  const auto& [data, count] = collector.TakeBackdropData();
-  impeller_dispatcher.SetBackdropData(data, count);
+  const auto& [data, count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  impeller_dispatcher.SetBackdropData(data, count, generated_backdrop_ids);
   context.GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
@@ -1404,8 +1468,9 @@ bool RenderToTarget(ContentContext& context,
       display_list->max_root_blend_mode(),       //
       IRect32::RoundOut(cull_rect)               //
   );
-  const auto& [data, count] = collector.TakeBackdropData();
-  impeller_dispatcher.SetBackdropData(data, count);
+  const auto& [data, count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  impeller_dispatcher.SetBackdropData(data, count, generated_backdrop_ids);
   context.GetTextShadowCache().MarkFrameStart();
   fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {

@@ -5,8 +5,10 @@
 #ifndef FLUTTER_IMPELLER_DISPLAY_LIST_DL_DISPATCHER_H_
 #define FLUTTER_IMPELLER_DISPLAY_LIST_DL_DISPATCHER_H_
 
+#include <deque>
 #include <map>
 #include <memory>
+#include <tuple>
 
 #include "flutter/display_list/dl_op_receiver.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
@@ -318,7 +320,8 @@ class CanvasDlDispatcher : public DlDispatcherBase {
   ~CanvasDlDispatcher() = default;
 
   void SetBackdropData(std::unordered_map<int64_t, BackdropData> backdrop,
-                       size_t backdrop_count);
+                       size_t backdrop_count,
+                       std::deque<int64_t> generated_backdrop_ids = {});
 
   // |flutter::DlOpReceiver|
   void save() override {
@@ -357,12 +360,14 @@ class CanvasDlDispatcher : public DlDispatcherBase {
 /// that will be useful in a second pass by the CanvasDlDispatcher.
 /// This class collects things like text frames and backdrop filters.
 class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
-                            public flutter::IgnoreDrawDispatchHelper {
+                            public flutter::DrawHookDispatchHelper {
  public:
   struct SaveFrame {
     Matrix matrix;
     // Note: cull rects are always in the global coordinate space.
     Rect cull_rect;
+    bool is_save_layer = false;
+    bool is_generated_backdrop = false;
   };
 
   FirstPassDispatcher(const ContentContext& renderer,
@@ -379,6 +384,9 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
                  std::optional<int64_t> backdrop_id) override;
 
   void restore() override;
+
+  // |flutter::DrawHookDispatchHelper|
+  void onDraw() override;
 
   // |flutter::DlOpReceiver|
   void clipRect(const DlRect& rect,
@@ -458,15 +466,42 @@ class FirstPassDispatcher : public flutter::IgnoreAttributeDispatchHelper,
   // |flutter::DlOpReceiver|
   void setImageFilter(const flutter::DlImageFilter* filter) override;
 
-  std::pair<std::unordered_map<int64_t, BackdropData>, size_t>
+  std::tuple<std::unordered_map<int64_t, BackdropData>,
+             size_t,
+             std::deque<int64_t>>
   TakeBackdropData();
 
  private:
+  struct GeneratedBackdropGroup {
+    int64_t id;
+    size_t save_layer_depth;
+    std::shared_ptr<flutter::DlImageFilter> filter;
+  };
+
   const Rect GetCurrentLocalCullingBounds() const;
 
   const ContentContext& renderer_;
   std::vector<SaveFrame> stack_;
   std::unordered_map<int64_t, BackdropData> backdrop_data_;
+
+  // Automatic backdrop grouping state. Used to automatically synthesize
+  // backdrop IDs to group sibling backdrop layers that are not in explicit
+  // user-specified backdrop groups. Sibling backdrop layers with matching
+  // filter configurations and without an intervening draw mutation can share a
+  // generated backdrop group.
+
+  /// The active generated backdrop group, if one is currently active.
+  std::optional<GeneratedBackdropGroup> active_generated_backdrop_group_ =
+      std::nullopt;
+  /// Tracks the current saveLayer nesting depth.
+  size_t save_layer_depth_ = 0;
+  /// Monotonically decreasing negative counter for generating unique backdrop
+  /// IDs.
+  int64_t next_generated_backdrop_id_ = 0;
+  /// Synthesized backdrop IDs generated during display list preprocessing, in
+  /// encounter order.
+  std::deque<int64_t> generated_backdrop_ids_;
+
   bool has_image_filter_ = false;
   size_t backdrop_count_ = 0;
   Paint paint_;
