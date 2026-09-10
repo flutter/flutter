@@ -2386,4 +2386,107 @@ console.log(mapName);
       expect(configString, isNot(contains('"skwasm.wasm":')));
     }),
   );
+
+  test(
+    'Dart2JSTarget getBuildConfig safely returns defaultName when buildDir does not exist',
+    () => testbed.run(() async {
+      final jsTarget = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      // environment.buildDir does not exist yet.
+      final Map<String, Object?> config = jsTarget.getBuildConfig(environment);
+      expect(config['mainJsPath'], 'main.dart.js');
+    }),
+  );
+
+  test(
+    'Dart2JSTarget getBuildConfig picks the newest modified file when multiple hashed files exist',
+    () => testbed.run(() async {
+      final jsTarget = Dart2JSTarget(const JsCompilerConfig(webContentHash: true));
+      final File olderFile = environment.buildDir.childFile('main.dart.11111111.js')
+        ..createSync(recursive: true)
+        ..setLastModifiedSync(DateTime(2026));
+      environment.buildDir.childFile('main.dart.22222222.js')
+        ..createSync(recursive: true)
+        ..setLastModifiedSync(DateTime(2026, 1, 2));
+
+      final Map<String, Object?> config = jsTarget.getBuildConfig(environment);
+      expect(config['mainJsPath'], 'main.dart.22222222.js');
+
+      olderFile.setLastModifiedSync(DateTime(2026, 1, 3));
+      final Map<String, Object?> updatedConfig = jsTarget.getBuildConfig(environment);
+      expect(updatedConfig['mainJsPath'], 'main.dart.11111111.js');
+    }),
+  );
+
+  test(
+    'Dart2JSTarget buildFiles does not match .part.js.map when sourceMaps is false',
+    () => testbed.run(() async {
+      final jsTarget = Dart2JSTarget(const JsCompilerConfig(sourceMaps: false));
+      environment.buildDir.childFile('main.dart.js').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js_1.part.js').createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js_1.part.js.map').createSync(recursive: true);
+
+      final List<String> fileNames = jsTarget
+          .buildFiles(environment)
+          .map((File f) => f.basename)
+          .toList();
+      expect(fileNames, contains('main.dart.js'));
+      expect(fileNames, contains('main.dart.js_1.part.js'));
+      expect(fileNames, isNot(contains('main.dart.js_1.part.js.map')));
+    }),
+  );
+
+  test(
+    'WebReleaseBundle build cleans up stale deferred part files',
+    () => testbed.run(() async {
+      environment.defines[kBuildMode] = 'release';
+      environment.projectDir
+          .childDirectory('web')
+          .childFile('index.html')
+          .createSync(recursive: true);
+      environment.buildDir.childFile('main.dart.js').createSync(recursive: true);
+
+      final File stalePartJs = environment.outputDir.childFile('main.dart.js_1.part.js')
+        ..createSync(recursive: true);
+      final File stalePartMap = environment.outputDir.childFile('main.dart.js_1.part.js.map')
+        ..createSync(recursive: true);
+
+      await WebReleaseBundle(<WebCompilerConfig>[
+        const JsCompilerConfig(),
+      ], const NoOpAnalytics()).build(environment);
+
+      expect(stalePartJs, isNot(exists));
+      expect(stalePartMap, isNot(exists));
+      expect(environment.outputDir.childFile('main.dart.js'), exists);
+    }),
+  );
+
+  test(
+    'WebTemplatedFiles does not exclude wasm when ancestor directory contains canvaskit in path',
+    () => testbed.run(() async {
+      final customEnv = Environment.test(
+        environment.fileSystem.directory('/work/canvaskit/app'),
+        projectDir: environment.fileSystem.directory('/work/canvaskit/app/foo'),
+        outputDir: environment.fileSystem.directory('/work/canvaskit/app/bar'),
+        artifacts: Artifacts.test(),
+        processManager: processManager,
+        logger: environment.logger,
+        fileSystem: environment.fileSystem,
+      );
+      customEnv.buildDir.childFile('main.dart.89abcdef.wasm')
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(<int>[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]);
+
+      final wasmTarget = Dart2WasmTarget(
+        const WasmCompilerConfig(webContentHash: true),
+        const NoOpAnalytics(),
+      );
+      final target = WebTemplatedFiles(
+        <Map<String, Object?>>[],
+        compileTargets: <Dart2WebTarget>[wasmTarget],
+      );
+
+      final String configString = target.buildConfigString(customEnv);
+      expect(configString, contains('"main.dart.89abcdef.wasm":'));
+    }),
+  );
 }

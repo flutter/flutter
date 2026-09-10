@@ -446,12 +446,12 @@ void main() {
       await runner.run(<String>['build', 'web', '--no-pub', '--web-content-hash']);
 
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains(
           'Serving tip: Configure your web host to serve "index.html" and "flutter_bootstrap.js"',
         ),
       );
-      expect(testLogger.statusText, contains('with "Cache-Control: no-cache"'));
+      expect(logger.statusText, contains('with "Cache-Control: no-cache"'));
     },
     overrides: <Type, Generator>{
       Platform: () => fakePlatform,

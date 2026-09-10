@@ -202,7 +202,7 @@ class BuildWebCommand extends BuildSubCommand {
     // TODO(kevmoo): Ensure https://github.com/flutter/website/issues/13825 is
     // documented and merged before this feature is promoted to default/stable.
     if (webContentHash) {
-      globals.logger.printStatus(
+      logger.printStatus(
         '\nServing tip: Configure your web host to serve "index.html" and "flutter_bootstrap.js"\n'
         'with "Cache-Control: no-cache" (or revalidation) so browser clients immediately pick up new deployments.\n'
         'Hashed entrypoint files (*.<hash>.*) can be served with long-term immutable caching (e.g. "Cache-Control: max-age=31536000, immutable").\n'

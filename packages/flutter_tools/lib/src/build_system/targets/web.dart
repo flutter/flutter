@@ -230,6 +230,9 @@ abstract class Dart2WebTarget extends Target {
   String get buildKey => compilerConfig.buildKey;
 
   String _resolveHashedBasename(Directory dir, RegExp pattern, String defaultName) {
+    if (!dir.existsSync()) {
+      return defaultName;
+    }
     final List<File> candidates = dir
         .listSync()
         .whereType<File>()
@@ -238,9 +241,15 @@ abstract class Dart2WebTarget extends Target {
     if (candidates.isEmpty) {
       return defaultName;
     }
-    return candidates
-        .firstWhere((File f) => f.basename != defaultName, orElse: () => candidates.first)
-        .basename;
+    final List<File> hashedCandidates = candidates
+        .where((File f) => f.basename != defaultName)
+        .toList();
+    final targetCandidates = hashedCandidates.isNotEmpty ? hashedCandidates : candidates;
+    if (targetCandidates.length == 1) {
+      return targetCandidates.first.basename;
+    }
+    targetCandidates.sort((File a, File b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
+    return targetCandidates.first.basename;
   }
 
   void _cleanStaleBuildOutputs(Directory dir, List<RegExp> patterns) {
@@ -261,8 +270,8 @@ class Dart2JSTarget extends Dart2WebTarget {
 
   static final RegExp _mainJsRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.js$');
   static final RegExp _mainJsMapRegex = RegExp(r'^main\.dart(\.[a-f0-9]+)?\.js\.map$');
-  static final RegExp _partFileRegex = RegExp(r'main\.dart\.js_[0-9].*\.part\.js');
-  static final RegExp _partFileMapRegex = RegExp(r'\.part\.js\.map$');
+  static final RegExp _partFileRegex = RegExp(r'^main\.dart\.js_[0-9].*\.part\.js$');
+  static final RegExp _partFileMapRegex = RegExp(r'^main\.dart\.js_[0-9].*\.part\.js\.map$');
 
   @override
   final JsCompilerConfig compilerConfig;
@@ -421,11 +430,8 @@ class Dart2JSTarget extends Dart2WebTarget {
         return true;
       }
 
-      if (compilerConfig.sourceMaps) {
-        final partFileSourceMapRegex = RegExp(r'main\.dart\.js_[0-9].*.part\.js\.map');
-        if (partFileSourceMapRegex.hasMatch(file.basename)) {
-          return true;
-        }
+      if (compilerConfig.sourceMaps && _partFileMapRegex.hasMatch(file.basename)) {
+        return true;
       }
 
       if (compilerConfig.dumpInfo) {
@@ -1057,10 +1063,10 @@ class WebReleaseBundle extends Target {
   @override
   List<String> get depfiles => const <String>['flutter_assets.d', 'web_resources.d'];
 
-  /// Matches the compiled entrypoint files (hashed or not) that this bundle
-  /// copies into the output directory.
+  /// Matches the compiled entrypoint files (hashed or not) and deferred part
+  /// files that this bundle copies into the output directory.
   static final RegExp _entrypointFileRegex = RegExp(
-    r'^main\.dart(_module[0-9]+)?(\.[a-f0-9]+)?\.(js|wasm|mjs)(\.map)?$',
+    r'^main\.dart((\.js_[0-9]+.*\.part\.js)|((_module[0-9]+)?(\.[a-f0-9]+)?\.(js|wasm|mjs)))(\.map)?$',
   );
 
   @override
@@ -1272,8 +1278,16 @@ class WebTemplatedFiles extends Target {
     if (compileTargets != null) {
       for (final Dart2WebTarget target in compileTargets!) {
         for (final File file in target.buildFiles(environment)) {
+          // CanvasKit WASM assets (canvaskit.wasm, skwasm.wasm) are already
+          // scanned and hashed separately from the SDK host artifacts above.
+          // Scope the exclusion check to the relative build directory path so
+          // parent directory names (e.g. /work/canvaskit/app) do not falsely match.
+          final String relativePath = environment.fileSystem.path.relative(
+            file.path,
+            from: environment.buildDir.path,
+          );
           if (environment.fileSystem.path.extension(file.path) == '.wasm' &&
-              !environment.fileSystem.path.split(file.path).contains('canvaskit') &&
+              !environment.fileSystem.path.split(relativePath).contains('canvaskit') &&
               file.existsSync()) {
             wasmHashes[file.basename] = crypto.sha256.convert(file.readAsBytesSync()).toString();
           }
