@@ -7269,7 +7269,6 @@ targets:
   - name: Windows windows_gradient_consistent_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7283,7 +7282,6 @@ targets:
   - name: Windows windows_gradient_dynamic_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -7297,7 +7295,6 @@ targets:
   - name: Windows windows_gradient_static_perf__e2e_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
