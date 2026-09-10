@@ -555,6 +555,63 @@ public class PlatformViewsController2Test {
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createTransactionConsolidatesOnPlatformThread() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    // On the platform/test thread, repeated calls to createTransaction() return the same instance.
+    SurfaceControl.Transaction tx1 = controller.createTransaction();
+    SurfaceControl.Transaction tx2 = controller.createTransaction();
+    assertSame("Platform thread should reuse the consolidated transaction", tx1, tx2);
+
+    controller.swapTransactions();
+
+    // After swapping, a new frame gets a new consolidated transaction.
+    SurfaceControl.Transaction tx3 = controller.createTransaction();
+    assertNotSame("New frame on platform thread should get a fresh transaction", tx1, tx3);
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createTransactionIsolatesRasterThreadTransactions() throws Exception {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    // Transaction on platform thread:
+    SurfaceControl.Transaction platformTx = controller.createTransaction();
+
+    // Transactions created on a background/raster thread:
+    final SurfaceControl.Transaction[] rasterTxs = new SurfaceControl.Transaction[2];
+    Thread rasterThread =
+        new Thread(
+            () -> {
+              rasterTxs[0] = controller.createTransaction();
+              rasterTxs[1] = controller.createTransaction();
+            });
+    rasterThread.start();
+    rasterThread.join();
+
+    assertNotNull(rasterTxs[0]);
+    assertNotNull(rasterTxs[1]);
+    assertNotSame("Raster thread must not share platform transaction", platformTx, rasterTxs[0]);
+    assertNotSame(
+        "Raster thread submissions must receive isolated transactions", rasterTxs[0], rasterTxs[1]);
+
+    // Swapping and ending frame should merge both without crashing.
+    FlutterView mockFlutterView = mock(FlutterView.class);
+    AttachedSurfaceControl mockAttachedSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
+    controller.attachToView(mockFlutterView);
+
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(mockAttachedSurfaceControl, times(1))
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void onEndFrameIsANoopAfterDetachFromView() {
     PlatformViewsController2 controller = new PlatformViewsController2();
     controller.setRegistry(new PlatformViewRegistryImpl());
