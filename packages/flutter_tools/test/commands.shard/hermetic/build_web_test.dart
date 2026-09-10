@@ -187,7 +187,7 @@ void main() {
     expect(logger.statusText, contains('✓ Built ${buildDir.path}'));
   });
 
-  for (final bool useWasm in <bool>[false, true]) {
+  for (final useWasm in <bool>[false, true]) {
     // The build system receives only the top-level WebServiceWorker target, so
     // the compile targets are found by walking the dependency graph. A flag
     // asserted after the run proves the expectations actually executed.
