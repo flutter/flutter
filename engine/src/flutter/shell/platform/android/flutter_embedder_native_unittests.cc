@@ -163,171 +163,15 @@ class MockLegacyJniDelegate : public LegacyJniDelegate {
   MOCK_METHOD(bool, OnPreEngineRestart, (), (override));
 
   MOCK_METHOD(bool,
-              OnVsync,
-              (int64_t frame_time_nanos, int64_t frame_target_time_nanos),
-              (override));
-
-  MOCK_METHOD(bool, AsyncWaitForVsync, (intptr_t baton), (override));
-
-  MOCK_METHOD(bool,
-              SetViewportMetrics,
-              (const AndroidViewportMetrics& metrics),
-              (override));
-
-  MOCK_METHOD(bool,
-              UpdateDisplayMetrics,
-              (const AndroidDisplayMetrics& metrics),
-              (override));
-
-  MOCK_METHOD(bool,
-              UpdateDisplayMetrics,
-              (uint64_t display_id,
-               double refresh_rate,
-               double width,
-               double height,
-               double device_pixel_ratio),
-              (override));
-
-  MOCK_METHOD(
-      bool,
-      DispatchViewportMetrics,
-      (int64_t view_id, double width, double height, double pixel_ratio),
-      (override));
-
-  MOCK_METHOD(bool,
               RequestDartDeferredLibrary,
               (int loading_unit_id),
               (override));
-
-  MOCK_METHOD(bool,
-              CreateSurfaceControl,
-              (int64_t surface_id, const std::string& debug_name),
-              (override));
-
-  MOCK_METHOD(bool, DestroySurfaceControl, (int64_t surface_id), (override));
-
-  MOCK_METHOD(bool,
-              ReparentSurfaceControl,
-              (int64_t surface_id, int64_t new_parent_id),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlGeometry,
-              (int64_t surface_id,
-               const AndroidSurfaceControlRect& source,
-               const AndroidSurfaceControlRect& destination,
-               int32_t transform),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlVisibility,
-              (int64_t surface_id, bool visible),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlZOrder,
-              (int64_t surface_id, int32_t z_order),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlDamageRegion,
-              (int64_t surface_id,
-               const std::vector<AndroidSurfaceControlRect>& rects),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlBuffer,
-              (int64_t surface_id, void* buffer, int fence_fd),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlBufferAlpha,
-              (int64_t surface_id, float alpha),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetSurfaceControlColor,
-              (int64_t surface_id, float r, float g, float b, float alpha),
-              (override));
-
-  MOCK_METHOD(std::optional<AndroidSurfaceControlState>,
-              GetSurfaceControlState,
-              (int64_t surface_id),
-              (const, override));
-
-  MOCK_METHOD(std::shared_ptr<AndroidSurfaceControl>,
-              GetSurfaceControl,
-              (int64_t surface_id),
-              (const, override));
 
   MOCK_METHOD(bool, InitVM, (const AndroidVMArgs& args), (override));
 
   MOCK_METHOD(bool, PrefetchDefaultFontManager, (), (override));
 
   MOCK_METHOD(bool, SetVmServiceUri, (const std::string& uri), (override));
-
-  MOCK_METHOD(bool,
-              RegisterHardwareBufferTexture,
-              (int64_t texture_id),
-              (override));
-
-  MOCK_METHOD(bool,
-              UnregisterHardwareBufferTexture,
-              (int64_t texture_id),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetHardwareBufferFrame,
-              (int64_t texture_id,
-               const std::shared_ptr<AndroidHardwareBuffer>& buffer),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetHardwareBufferFrame,
-              (int64_t texture_id,
-               const FlutterHardwareBufferExternalTexture& texture),
-              (override));
-
-  MOCK_METHOD(bool,
-              GetHardwareBufferTextureFrame,
-              (int64_t texture_id,
-               size_t width,
-               size_t height,
-               FlutterHardwareBufferExternalTexture* texture_out),
-              (override));
-
-  MOCK_METHOD(bool,
-              OnHardwareBufferFrameAvailable,
-              (int64_t texture_id),
-              (override));
-
-  MOCK_METHOD(bool, RegisterVulkanTexture, (int64_t texture_id), (override));
-
-  MOCK_METHOD(bool, UnregisterVulkanTexture, (int64_t texture_id), (override));
-
-  MOCK_METHOD(bool,
-              SetVulkanTextureFrame,
-              (int64_t texture_id,
-               const std::shared_ptr<AndroidVulkanExternalTexture>& texture),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetVulkanTextureFrame,
-              (int64_t texture_id, const FlutterVulkanExternalTexture& texture),
-              (override));
-
-  MOCK_METHOD(bool,
-              GetVulkanTextureFrame,
-              (int64_t texture_id,
-               size_t width,
-               size_t height,
-               FlutterVulkanExternalTexture* texture_out),
-              (override));
-
-  MOCK_METHOD(bool,
-              OnVulkanTextureFrameAvailable,
-              (int64_t texture_id),
-              (override));
 
   MOCK_METHOD(int64_t,
               SpawnEngine,
@@ -3594,7 +3438,7 @@ TEST(WindowMetricsTranslationTest, ConcurrentProviderReplacementInNative) {
   }
 }
 
-TEST(WindowMetricsTranslationTest, JniRouterWindowMetricsRoutingFlip) {
+TEST(WindowMetricsTranslationTest, JniRouterWindowMetricsDirectRouting) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto in_memory_provider = std::make_shared<InMemoryWindowMetricsProvider>();
   auto embedder_delegate = std::make_shared<JniDelegate>(
@@ -3616,35 +3460,29 @@ TEST(WindowMetricsTranslationTest, JniRouterWindowMetricsRoutingFlip) {
   disp.height = 3040.0;
   disp.device_pixel_ratio = 3.5;
 
-  // 1. Legacy routing
-  JniRouter::SetEmbedderEnabled(false);
-  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kLegacy);
+  // Across both flag states (Embedder disabled vs enabled), WindowMetrics
+  // routes directly and unconditionally to embedder_delegate (legacy is
+  // purged).
+  for (bool flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(flag);
 
-  EXPECT_CALL(*legacy_delegate, SetViewportMetrics(vp)).WillOnce(Return(true));
-  EXPECT_CALL(*legacy_delegate, UpdateDisplayMetrics(disp))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*legacy_delegate,
-              UpdateDisplayMetrics(1, 120.0, 1440.0, 3040.0, 3.5))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*legacy_delegate, DispatchViewportMetrics(7, 1440.0, 3040.0, 3.5))
-      .WillOnce(Return(true));
+    EXPECT_TRUE(router.RouteSetViewportMetrics(vp));
+    EXPECT_TRUE(router.RouteUpdateDisplayMetrics(disp));
+    EXPECT_TRUE(
+        router.RouteUpdateDisplayMetrics(1, 120.0, 1440.0, 3040.0, 3.5));
+    EXPECT_TRUE(router.RouteViewportMetrics(7, 1440.0, 3040.0, 3.5));
+  }
 
-  EXPECT_TRUE(router.RouteSetViewportMetrics(vp));
-  EXPECT_TRUE(router.RouteUpdateDisplayMetrics(disp));
-  EXPECT_TRUE(router.RouteUpdateDisplayMetrics(1, 120.0, 1440.0, 3040.0, 3.5));
-  EXPECT_TRUE(router.RouteViewportMetrics(7, 1440.0, 3040.0, 3.5));
+  EXPECT_EQ(in_memory_provider->GetSendCount(), 4u);
+  EXPECT_EQ(in_memory_provider->GetUpdateCount(), 4u);
 
-  // 2. Embedder routing
-  JniRouter::SetEmbedderEnabled(true);
-  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
-
-  EXPECT_TRUE(router.RouteSetViewportMetrics(vp));
-  EXPECT_TRUE(router.RouteUpdateDisplayMetrics(disp));
-  EXPECT_TRUE(router.RouteUpdateDisplayMetrics(1, 120.0, 1440.0, 3040.0, 3.5));
-  EXPECT_TRUE(router.RouteViewportMetrics(7, 1440.0, 3040.0, 3.5));
-
-  EXPECT_EQ(in_memory_provider->GetSendCount(), 2u);
-  EXPECT_EQ(in_memory_provider->GetUpdateCount(), 2u);
+  // Graceful fallback when embedder_delegate is null
+  JniRouter null_router(nullptr, legacy_delegate);
+  EXPECT_FALSE(null_router.RouteSetViewportMetrics(vp));
+  EXPECT_FALSE(null_router.RouteUpdateDisplayMetrics(disp));
+  EXPECT_FALSE(
+      null_router.RouteUpdateDisplayMetrics(1, 120.0, 1440.0, 3040.0, 3.5));
+  EXPECT_FALSE(null_router.RouteViewportMetrics(7, 1440.0, 3040.0, 3.5));
 
   JniRouter::SetEmbedderEnabled(true);
 }
@@ -3757,7 +3595,7 @@ TEST(VsyncRoutingTest, JniDelegateVsyncOperations) {
   EXPECT_EQ(vsync_waiter->GetVsyncDeliveredCount(), 1u);
 }
 
-TEST(VsyncRoutingTest, JniRouterVsyncRoutingFlip) {
+TEST(VsyncRoutingTest, JniRouterVsyncDirectRouting) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto mock_choreographer =
       std::make_shared<InMemoryAndroidChoreographerProvider>();
@@ -3765,32 +3603,29 @@ TEST(VsyncRoutingTest, JniRouterVsyncRoutingFlip) {
       std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
   auto embedder_delegate = std::make_shared<JniDelegate>(
       mock_invoker, nullptr, nullptr, nullptr, nullptr, nullptr, vsync_waiter);
-  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
 
   JniRouter router(embedder_delegate, legacy_delegate);
 
-  // 1. Legacy routing (Embedder disabled)
-  JniRouter::SetEmbedderEnabled(false);
-  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kLegacy);
+  // Across both flag states (Embedder disabled vs enabled), VSync routes
+  // directly and unconditionally to embedder_delegate (legacy is purged).
+  for (bool flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(flag);
 
-  EXPECT_CALL(*legacy_delegate, OnVsync(5000LL, 10000LL))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*legacy_delegate, AsyncWaitForVsync(123)).WillOnce(Return(true));
+    EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
+        .Times(2)
+        .WillRepeatedly(Return(true));
+    EXPECT_TRUE(router.RouteVsync(5000LL, 10000LL));
 
-  EXPECT_TRUE(router.RouteVsync(5000LL, 10000LL));
-  EXPECT_TRUE(router.RouteAsyncWaitForVsync(123));
+    EXPECT_TRUE(router.RouteAsyncWaitForVsync(456));
+    EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
+    mock_choreographer->TriggerPendingCallbacks(10000000LL);
+  }
 
-  // 2. Embedder routing (Embedder enabled)
-  JniRouter::SetEmbedderEnabled(true);
-  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
-
-  EXPECT_CALL(*mock_invoker, InvokeVoidMethod("onVsync", "(JJ)V", _))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router.RouteVsync(5000LL, 10000LL));
-
-  EXPECT_TRUE(router.RouteAsyncWaitForVsync(456));
-  EXPECT_EQ(vsync_waiter->GetVsyncRequestCount(), 1u);
-  EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
+  // Graceful fallback when embedder_delegate is null
+  JniRouter null_router(nullptr, legacy_delegate);
+  EXPECT_FALSE(null_router.RouteVsync(5000LL, 10000LL));
+  EXPECT_FALSE(null_router.RouteAsyncWaitForVsync(123));
 
   JniRouter::SetEmbedderEnabled(true);
 }
@@ -4233,7 +4068,7 @@ TEST(HardwareBufferTest, JniDelegateHardwareBufferOperations) {
                                                       &cleared_frame));
 }
 
-TEST(HardwareBufferTest, JniRouterHardwareBufferRoutingFlip) {
+TEST(HardwareBufferTest, JniRouterHardwareBufferDirectRouting) {
   auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
   auto mock_legacy = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
   auto hw_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
@@ -4245,37 +4080,49 @@ TEST(HardwareBufferTest, JniRouterHardwareBufferRoutingFlip) {
 
   int64_t texture_id = 101;
 
-  // Test with embedder flag = true
-  FlutterEmbedderNative::SetEmbedderEnabled(true);
-  EXPECT_CALL(*mock_invoker,
-              InvokeBooleanMethod("registerHardwareBufferTexture", "(J)Z", _))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router.RouteRegisterHardwareBufferTexture(texture_id));
+  // Across both flag states (Embedder disabled vs enabled), HardwareBuffer
+  // routes directly and unconditionally to embedder_delegate (legacy is
+  // purged).
+  for (bool flag : {false, true}) {
+    FlutterEmbedderNative::SetEmbedderEnabled(flag);
 
-  auto desc = AndroidHardwareBufferDesc::MakeRGBA8(1920, 1080);
-  auto buffer = hw_provider->Allocate(desc);
-  EXPECT_TRUE(
-      router.RouteSetHardwareBufferFrame(texture_id, std::move(buffer)));
+    EXPECT_CALL(*mock_invoker,
+                InvokeBooleanMethod("registerHardwareBufferTexture", "(J)Z", _))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router.RouteRegisterHardwareBufferTexture(texture_id));
 
-  FlutterHardwareBufferExternalTexture out_frame = {};
-  EXPECT_TRUE(router.RouteGetHardwareBufferTextureFrame(texture_id, 1920, 1080,
-                                                        &out_frame));
-  EXPECT_EQ(out_frame.width, 1920u);
-  EXPECT_EQ(out_frame.height, 1080u);
+    auto desc = AndroidHardwareBufferDesc::MakeRGBA8(1920, 1080);
+    auto buffer = hw_provider->Allocate(desc);
+    EXPECT_TRUE(
+        router.RouteSetHardwareBufferFrame(texture_id, std::move(buffer)));
 
-  // Test with embedder flag = false (legacy routing)
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
-  EXPECT_CALL(*mock_legacy, RegisterHardwareBufferTexture(texture_id))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router.RouteRegisterHardwareBufferTexture(texture_id));
+    FlutterHardwareBufferExternalTexture out_frame = {};
+    EXPECT_TRUE(router.RouteGetHardwareBufferTextureFrame(texture_id, 1920,
+                                                          1080, &out_frame));
+    EXPECT_EQ(out_frame.width, 1920u);
+    EXPECT_EQ(out_frame.height, 1080u);
 
-  EXPECT_CALL(*mock_legacy, OnHardwareBufferFrameAvailable(texture_id))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router.RouteOnHardwareBufferFrameAvailable(texture_id));
+    EXPECT_CALL(*mock_invoker, InvokeBooleanMethod(
+                                   "onHardwareBufferFrameAvailable", "(J)Z", _))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router.RouteOnHardwareBufferFrameAvailable(texture_id));
 
-  EXPECT_CALL(*mock_legacy, UnregisterHardwareBufferTexture(texture_id))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router.RouteUnregisterHardwareBufferTexture(texture_id));
+    EXPECT_CALL(
+        *mock_invoker,
+        InvokeBooleanMethod("unregisterHardwareBufferTexture", "(J)Z", _))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router.RouteUnregisterHardwareBufferTexture(texture_id));
+  }
+
+  // Graceful fallback when embedder_delegate is null
+  JniRouter null_router(nullptr, mock_legacy);
+  EXPECT_FALSE(null_router.RouteRegisterHardwareBufferTexture(texture_id));
+  EXPECT_FALSE(null_router.RouteUnregisterHardwareBufferTexture(texture_id));
+  FlutterHardwareBufferExternalTexture null_frame = {};
+  EXPECT_FALSE(null_router.RouteSetHardwareBufferFrame(texture_id, null_frame));
+  EXPECT_FALSE(null_router.RouteGetHardwareBufferTextureFrame(
+      texture_id, 100, 100, &null_frame));
+  EXPECT_FALSE(null_router.RouteOnHardwareBufferFrameAvailable(texture_id));
 
   FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
@@ -4581,7 +4428,7 @@ TEST(VulkanExternalTextureTest, JniDelegateVulkanOperations) {
       delegate.GetVulkanTextureFrame(texture_id, 1280, 720, &out_frame3));
 }
 
-TEST(VulkanExternalTextureTest, JniRouterVulkanRoutingFlip) {
+TEST(VulkanExternalTextureTest, JniRouterVulkanDirectRouting) {
   auto mock_invoker = std::make_shared<StrictMock<MockJvmInvoker>>();
   auto mock_legacy = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
   auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
@@ -4594,50 +4441,47 @@ TEST(VulkanExternalTextureTest, JniRouterVulkanRoutingFlip) {
 
   int64_t texture_id = 777;
 
-  // --- Path 1: Legacy Routing (Flag = false) ---
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
-  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kLegacy);
+  // Across both flag states (Embedder disabled vs enabled), Vulkan textures
+  // route directly and unconditionally to embedder_delegate (legacy is purged).
+  for (bool flag : {false, true}) {
+    FlutterEmbedderNative::SetEmbedderEnabled(flag);
 
-  EXPECT_CALL(*mock_legacy, RegisterVulkanTexture(texture_id))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*mock_legacy, UnregisterVulkanTexture(texture_id))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*mock_legacy, OnVulkanTextureFrameAvailable(texture_id))
-      .WillOnce(Return(true));
+    EXPECT_CALL(*mock_invoker,
+                InvokeBooleanMethod("registerVulkanTexture", "(J)Z", _))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router.RouteRegisterVulkanTexture(texture_id));
 
-  EXPECT_TRUE(router.RouteRegisterVulkanTexture(texture_id));
-  EXPECT_TRUE(router.RouteOnVulkanTextureFrameAvailable(texture_id));
-  EXPECT_TRUE(router.RouteUnregisterVulkanTexture(texture_id));
+    auto desc = AndroidVulkanImageDesc::MakeRGBA8(800, 600);
+    auto tex_obj = vk_provider->AllocateTexture(desc);
+    EXPECT_TRUE(
+        router.RouteSetVulkanTextureFrame(texture_id, std::move(tex_obj)));
 
-  // --- Path 2: Embedder Routing (Flag = true) ---
-  FlutterEmbedderNative::SetEmbedderEnabled(true);
-  EXPECT_EQ(router.GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
+    FlutterVulkanExternalTexture out_tex = {};
+    EXPECT_TRUE(
+        router.RouteGetVulkanTextureFrame(texture_id, 800, 600, &out_tex));
+    EXPECT_EQ(out_tex.width, 800u);
+    EXPECT_EQ(out_tex.height, 600u);
 
-  EXPECT_CALL(*mock_invoker,
-              InvokeBooleanMethod("registerVulkanTexture", "(J)Z", _))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*mock_invoker,
-              InvokeBooleanMethod("onVulkanTextureFrameAvailable", "(J)Z", _))
-      .WillOnce(Return(true));
-  EXPECT_CALL(*mock_invoker,
-              InvokeBooleanMethod("unregisterVulkanTexture", "(J)Z", _))
-      .WillOnce(Return(true));
+    EXPECT_CALL(*mock_invoker,
+                InvokeBooleanMethod("onVulkanTextureFrameAvailable", "(J)Z", _))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router.RouteOnVulkanTextureFrameAvailable(texture_id));
 
-  EXPECT_TRUE(router.RouteRegisterVulkanTexture(texture_id));
+    EXPECT_CALL(*mock_invoker,
+                InvokeBooleanMethod("unregisterVulkanTexture", "(J)Z", _))
+        .WillOnce(Return(true));
+    EXPECT_TRUE(router.RouteUnregisterVulkanTexture(texture_id));
+  }
 
-  auto desc = AndroidVulkanImageDesc::MakeRGBA8(800, 600);
-  auto tex_obj = vk_provider->AllocateTexture(desc);
-  EXPECT_TRUE(
-      router.RouteSetVulkanTextureFrame(texture_id, std::move(tex_obj)));
-
-  FlutterVulkanExternalTexture out_tex = {};
-  EXPECT_TRUE(
-      router.RouteGetVulkanTextureFrame(texture_id, 800, 600, &out_tex));
-  EXPECT_EQ(out_tex.width, 800u);
-  EXPECT_EQ(out_tex.height, 600u);
-
-  EXPECT_TRUE(router.RouteOnVulkanTextureFrameAvailable(texture_id));
-  EXPECT_TRUE(router.RouteUnregisterVulkanTexture(texture_id));
+  // Graceful fallback when embedder_delegate is null
+  JniRouter null_router(nullptr, mock_legacy);
+  EXPECT_FALSE(null_router.RouteRegisterVulkanTexture(texture_id));
+  EXPECT_FALSE(null_router.RouteUnregisterVulkanTexture(texture_id));
+  FlutterVulkanExternalTexture null_tex = {};
+  EXPECT_FALSE(null_router.RouteSetVulkanTextureFrame(texture_id, null_tex));
+  EXPECT_FALSE(
+      null_router.RouteGetVulkanTextureFrame(texture_id, 800, 600, &null_tex));
+  EXPECT_FALSE(null_router.RouteOnVulkanTextureFrameAvailable(texture_id));
 
   FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
@@ -5148,7 +4992,7 @@ TEST(SurfaceControlHcppTest, JniDelegateLifecycleAndOperations) {
       delegate.SetSurfaceControlColor(non_existent_id, 1.0f, 1.0f, 1.0f, 1.0f));
 }
 
-TEST(SurfaceControlHcppTest, JniRouterRoutingFlip) {
+TEST(SurfaceControlHcppTest, JniRouterSurfaceControlDirectRouting) {
   auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
   ON_CALL(*mock_invoker, InvokeBooleanMethod(_, _, _))
       .WillByDefault(Return(true));
@@ -5160,93 +5004,68 @@ TEST(SurfaceControlHcppTest, JniRouterRoutingFlip) {
   auto mock_legacy = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
   auto router = std::make_shared<JniRouter>(jni_delegate, mock_legacy);
 
-  // 1. When Embedder is disabled (legacy routing)
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+  // Across both flag states (Embedder disabled vs enabled), all SurfaceControl
+  // and HCPP methods route directly and unconditionally to embedder_delegate
+  // (legacy is purged).
+  for (bool embedder_flag : {false, true}) {
+    FlutterEmbedderNative::SetEmbedderEnabled(embedder_flag);
+    EXPECT_EQ(JniRouter::IsEmbedderEnabled(), embedder_flag);
 
-  // In Phase 5.3, HCPP and platform view transaction methods route directly to
-  // embedder_delegate even when embedder is disabled.
-  EXPECT_TRUE(router->RouteSetHcppEnabled(true));
-  EXPECT_TRUE(router->RouteIsHcppEnabled());
-  EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
-  EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
-  EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
+    EXPECT_TRUE(router->RouteSetHcppEnabled(true));
+    EXPECT_TRUE(router->RouteIsHcppEnabled());
+    EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
 
-  EXPECT_CALL(*mock_legacy, CreateSurfaceControl(200, "legacy_sc"))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteCreateSurfaceControl(200, "legacy_sc"));
+    int64_t sc_id = embedder_flag ? 300 : 200;
+    EXPECT_TRUE(router->RouteCreateSurfaceControl(sc_id, "test_sc"));
+    EXPECT_TRUE(router->RouteReparentSurfaceControl(sc_id, 100));
 
-  EXPECT_CALL(*mock_legacy, ReparentSurfaceControl(200, 100))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteReparentSurfaceControl(200, 100));
+    AndroidSurfaceControlRect src = {0, 0, 100, 100};
+    AndroidSurfaceControlRect dst = {0, 0, 200, 200};
+    EXPECT_TRUE(router->RouteSetSurfaceControlGeometry(sc_id, src, dst, 0));
+    EXPECT_TRUE(router->RouteSetSurfaceControlVisibility(sc_id, true));
+    EXPECT_TRUE(router->RouteSetSurfaceControlZOrder(sc_id, 10));
 
-  AndroidSurfaceControlRect src = {0, 0, 100, 100};
-  AndroidSurfaceControlRect dst = {0, 0, 200, 200};
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlGeometry(200, src, dst, 0))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlGeometry(200, src, dst, 0));
+    std::vector<AndroidSurfaceControlRect> rects = {{0, 0, 50, 50}};
+    EXPECT_TRUE(router->RouteSetSurfaceControlDamageRegion(sc_id, rects));
 
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlVisibility(200, true))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlVisibility(200, true));
+    int dummy_buf = 99;
+    EXPECT_TRUE(router->RouteSetSurfaceControlBuffer(sc_id, &dummy_buf, -1));
+    EXPECT_TRUE(router->RouteSetSurfaceControlBufferAlpha(sc_id, 0.5f));
+    EXPECT_TRUE(
+        router->RouteSetSurfaceControlColor(sc_id, 0.1f, 0.2f, 0.3f, 1.0f));
 
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlZOrder(200, 10))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlZOrder(200, 10));
+    EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
+    EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
 
-  std::vector<AndroidSurfaceControlRect> rects = {{0, 0, 50, 50}};
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlDamageRegion(200, rects))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlDamageRegion(200, rects));
+    auto state = router->RouteGetSurfaceControlState(sc_id);
+    ASSERT_TRUE(state.has_value());
+    EXPECT_EQ(state->id, static_cast<uint64_t>(sc_id));
+    EXPECT_EQ(state->z_order, 10);
+    EXPECT_NE(router->RouteGetSurfaceControl(sc_id), nullptr);
 
-  int dummy_buf = 99;
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlBuffer(200, &dummy_buf, -1))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlBuffer(200, &dummy_buf, -1));
+    EXPECT_TRUE(router->RouteDestroySurfaceControl(sc_id));
+  }
 
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlBufferAlpha(200, 0.5f))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlBufferAlpha(200, 0.5f));
-
-  EXPECT_CALL(*mock_legacy, SetSurfaceControlColor(200, 0.1f, 0.2f, 0.3f, 1.0f))
-      .WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlColor(200, 0.1f, 0.2f, 0.3f, 1.0f));
-
-  EXPECT_CALL(*mock_legacy, DestroySurfaceControl(200)).WillOnce(Return(true));
-  EXPECT_TRUE(router->RouteDestroySurfaceControl(200));
-
-  AndroidSurfaceControlState mock_legacy_state;
-  mock_legacy_state.id = 200;
-  mock_legacy_state.z_order = 42;
-  EXPECT_CALL(*mock_legacy, GetSurfaceControlState(200))
-      .WillOnce(Return(mock_legacy_state));
-  auto queried_state = router->RouteGetSurfaceControlState(200);
-  ASSERT_TRUE(queried_state.has_value());
-  EXPECT_EQ(queried_state->id, 200u);
-  EXPECT_EQ(queried_state->z_order, 42);
-
-  EXPECT_CALL(*mock_legacy, GetSurfaceControl(200)).WillOnce(Return(nullptr));
-  EXPECT_EQ(router->RouteGetSurfaceControl(200), nullptr);
-
-  // 2. Flip routing to Embedder enabled
-  FlutterEmbedderNative::SetEmbedderEnabled(true);
-  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
-
-  // These should go directly to JniDelegate, NO calls to mock_legacy!
-  EXPECT_TRUE(router->RouteSetHcppEnabled(true));
-  EXPECT_TRUE(router->RouteIsHcppEnabled());
-  EXPECT_TRUE(router->RouteCreatePlatformViewTransaction());
-  EXPECT_TRUE(router->RouteCreateSurfaceControl(300, "embedder_sc"));
-  EXPECT_TRUE(router->RouteSetSurfaceControlVisibility(300, true));
-  EXPECT_TRUE(router->RouteSetSurfaceControlZOrder(300, 3));
-  EXPECT_TRUE(router->RouteSwapPlatformViewTransactions());
-  EXPECT_TRUE(router->RouteApplyPlatformViewTransactions());
-
-  auto state = router->RouteGetSurfaceControlState(300);
-  ASSERT_TRUE(state.has_value());
-  EXPECT_EQ(state->visibility, AndroidSurfaceControlVisibility::kShow);
-  EXPECT_EQ(state->z_order, 3);
-  EXPECT_TRUE(router->RouteDestroySurfaceControl(300));
+  // Graceful fallback when embedder_delegate is null
+  auto null_router = std::make_shared<JniRouter>(nullptr, mock_legacy);
+  EXPECT_FALSE(null_router->RouteCreateSurfaceControl(400, "null_sc"));
+  EXPECT_FALSE(null_router->RouteDestroySurfaceControl(400));
+  EXPECT_FALSE(null_router->RouteReparentSurfaceControl(400, 100));
+  AndroidSurfaceControlRect dummy_rect = {0, 0, 10, 10};
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlGeometry(400, dummy_rect,
+                                                           dummy_rect, 0));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlVisibility(400, true));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlZOrder(400, 1));
+  std::vector<AndroidSurfaceControlRect> dummy_rects = {dummy_rect};
+  EXPECT_FALSE(
+      null_router->RouteSetSurfaceControlDamageRegion(400, dummy_rects));
+  int dummy_b = 1;
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlBuffer(400, &dummy_b, -1));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlBufferAlpha(400, 0.5f));
+  EXPECT_FALSE(
+      null_router->RouteSetSurfaceControlColor(400, 0.0f, 0.0f, 0.0f, 1.0f));
+  EXPECT_FALSE(null_router->RouteGetSurfaceControlState(400).has_value());
+  EXPECT_EQ(null_router->RouteGetSurfaceControl(400), nullptr);
 
   FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
@@ -6321,6 +6140,311 @@ TEST(Phase53LegacyDeletionPlatformViewsSemanticsTest,
         }
 
         if (!native.DisposePlatformView(view_id)) {
+          return false;
+        }
+      }
+      return true;
+    }));
+  }
+
+  for (auto& f : futures) {
+    EXPECT_TRUE(f.get());
+  }
+
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
+}
+
+// =============================================================================
+// Phase 5.4: Legacy Deletion (Graphics Pipeline)
+// =============================================================================
+
+TEST(Phase54LegacyDeletionGraphicsPipelineTest,
+     DirectRoutingGraphicsPipelineBypassesLegacy) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker,
+          InvokeBooleanMethod(::testing::_, ::testing::_, ::testing::_))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker,
+          InvokeVoidMethod(::testing::_, ::testing::_, ::testing::_))
+      .WillByDefault(::testing::Return(true));
+
+  auto in_memory_metrics = std::make_shared<InMemoryWindowMetricsProvider>();
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter =
+      std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
+  auto hw_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
+  auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+
+  auto embedder_delegate = std::make_shared<JniDelegate>(
+      mock_invoker, nullptr, nullptr, nullptr, nullptr, in_memory_metrics,
+      vsync_waiter, nullptr, hw_provider, vk_provider, sc_provider);
+
+  auto legacy_delegate = std::make_shared<StrictMock<MockLegacyJniDelegate>>();
+  auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
+
+  AndroidViewportMetrics vp = {
+      .view_id = 1,
+      .device_pixel_ratio = 2.0,
+      .physical_width = 1080.0,
+      .physical_height = 1920.0,
+  };
+  AndroidDisplayMetrics disp = {
+      .display_id = 1,
+      .single_display = true,
+      .refresh_rate = 60.0,
+      .width = 1080.0,
+      .height = 1920.0,
+      .device_pixel_ratio = 2.0,
+  };
+  AndroidSurfaceControlRect src = {0, 0, 100, 100};
+  AndroidSurfaceControlRect dst = {0, 0, 200, 200};
+  std::vector<AndroidSurfaceControlRect> damage_rects = {src};
+
+  int64_t hw_tex_id = 1001;
+  int64_t vk_tex_id = 2002;
+  int64_t sc_id = 3003;
+
+  for (bool embedder_flag : {false, true}) {
+    JniRouter::SetEmbedderEnabled(embedder_flag);
+
+    // 1. VSync routing
+    EXPECT_CALL(*mock_invoker,
+                InvokeVoidMethod("onVsync", "(JJ)V", ::testing::_))
+        .Times(2)
+        .WillRepeatedly(::testing::Return(true));
+    EXPECT_TRUE(router->RouteVsync(1000000LL, 2000000LL));
+    EXPECT_TRUE(router->RouteAsyncWaitForVsync(999));
+    EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
+    mock_choreographer->TriggerPendingCallbacks(1000000LL);
+
+    // 2. Window & Display Metrics routing
+    EXPECT_TRUE(router->RouteSetViewportMetrics(vp));
+    EXPECT_TRUE(router->RouteUpdateDisplayMetrics(disp));
+    EXPECT_TRUE(
+        router->RouteUpdateDisplayMetrics(1, 60.0, 1080.0, 1920.0, 2.0));
+    EXPECT_TRUE(router->RouteViewportMetrics(1, 1080.0, 1920.0, 2.0));
+
+    // 3. SurfaceControl routing
+    EXPECT_CALL(*mock_invoker,
+                InvokeVoidMethod("createSurfaceControl",
+                                 "(JLjava/lang/String;)V", ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteCreateSurfaceControl(sc_id, "phase54_sc"));
+    EXPECT_TRUE(router->RouteReparentSurfaceControl(sc_id, 0));
+    EXPECT_TRUE(router->RouteSetSurfaceControlGeometry(sc_id, src, dst, 0));
+    EXPECT_TRUE(router->RouteSetSurfaceControlVisibility(sc_id, true));
+    EXPECT_TRUE(router->RouteSetSurfaceControlZOrder(sc_id, 5));
+    EXPECT_TRUE(
+        router->RouteSetSurfaceControlDamageRegion(sc_id, damage_rects));
+    int dummy_buffer = 42;
+    EXPECT_TRUE(router->RouteSetSurfaceControlBuffer(sc_id, &dummy_buffer, -1));
+    EXPECT_TRUE(router->RouteSetSurfaceControlBufferAlpha(sc_id, 0.8f));
+    EXPECT_TRUE(
+        router->RouteSetSurfaceControlColor(sc_id, 0.2f, 0.4f, 0.6f, 1.0f));
+    auto sc_state = router->RouteGetSurfaceControlState(sc_id);
+    ASSERT_TRUE(sc_state.has_value());
+    EXPECT_EQ(sc_state->id, static_cast<uint64_t>(sc_id));
+    EXPECT_NE(router->RouteGetSurfaceControl(sc_id), nullptr);
+    EXPECT_CALL(*mock_invoker,
+                InvokeVoidMethod("destroySurfaceControl", "(J)V", ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteDestroySurfaceControl(sc_id));
+
+    // 4. AHardwareBuffer routing
+    EXPECT_CALL(*mock_invoker,
+                InvokeBooleanMethod("registerHardwareBufferTexture", "(J)Z",
+                                    ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteRegisterHardwareBufferTexture(hw_tex_id));
+    auto hw_desc = AndroidHardwareBufferDesc::MakeRGBA8(512, 512);
+    auto hw_buf = hw_provider->Allocate(hw_desc);
+    EXPECT_TRUE(
+        router->RouteSetHardwareBufferFrame(hw_tex_id, std::move(hw_buf)));
+    FlutterHardwareBufferExternalTexture hw_frame = {};
+    EXPECT_TRUE(router->RouteGetHardwareBufferTextureFrame(hw_tex_id, 512, 512,
+                                                           &hw_frame));
+    EXPECT_EQ(hw_frame.width, 512u);
+    EXPECT_EQ(hw_frame.height, 512u);
+    EXPECT_CALL(*mock_invoker,
+                InvokeBooleanMethod("onHardwareBufferFrameAvailable", "(J)Z",
+                                    ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteOnHardwareBufferFrameAvailable(hw_tex_id));
+    EXPECT_CALL(*mock_invoker,
+                InvokeBooleanMethod("unregisterHardwareBufferTexture", "(J)Z",
+                                    ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteUnregisterHardwareBufferTexture(hw_tex_id));
+
+    // 5. Vulkan external textures routing
+    EXPECT_CALL(*mock_invoker, InvokeBooleanMethod("registerVulkanTexture",
+                                                   "(J)Z", ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteRegisterVulkanTexture(vk_tex_id));
+    auto vk_desc = AndroidVulkanImageDesc::MakeRGBA8(256, 256);
+    auto vk_tex = vk_provider->AllocateTexture(vk_desc);
+    EXPECT_TRUE(
+        router->RouteSetVulkanTextureFrame(vk_tex_id, std::move(vk_tex)));
+    FlutterVulkanExternalTexture vk_frame = {};
+    EXPECT_TRUE(
+        router->RouteGetVulkanTextureFrame(vk_tex_id, 256, 256, &vk_frame));
+    EXPECT_EQ(vk_frame.width, 256u);
+    EXPECT_EQ(vk_frame.height, 256u);
+    EXPECT_CALL(*mock_invoker,
+                InvokeBooleanMethod("onVulkanTextureFrameAvailable", "(J)Z",
+                                    ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteOnVulkanTextureFrameAvailable(vk_tex_id));
+    EXPECT_CALL(*mock_invoker, InvokeBooleanMethod("unregisterVulkanTexture",
+                                                   "(J)Z", ::testing::_))
+        .WillOnce(::testing::Return(true));
+    EXPECT_TRUE(router->RouteUnregisterVulkanTexture(vk_tex_id));
+  }
+
+  // Graceful fallback when embedder_delegate is null
+  auto null_router = std::make_unique<JniRouter>(nullptr, legacy_delegate);
+  EXPECT_FALSE(null_router->RouteVsync(100, 200));
+  EXPECT_FALSE(null_router->RouteAsyncWaitForVsync(123));
+  EXPECT_FALSE(null_router->RouteSetViewportMetrics(vp));
+  EXPECT_FALSE(null_router->RouteUpdateDisplayMetrics(disp));
+  EXPECT_FALSE(
+      null_router->RouteUpdateDisplayMetrics(1, 60.0, 1080.0, 1920.0, 2.0));
+  EXPECT_FALSE(null_router->RouteViewportMetrics(1, 1080.0, 1920.0, 2.0));
+  EXPECT_FALSE(null_router->RouteCreateSurfaceControl(sc_id, "null_sc"));
+  EXPECT_FALSE(null_router->RouteDestroySurfaceControl(sc_id));
+  EXPECT_FALSE(null_router->RouteReparentSurfaceControl(sc_id, 0));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlGeometry(sc_id, src, dst, 0));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlVisibility(sc_id, true));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlZOrder(sc_id, 0));
+  EXPECT_FALSE(
+      null_router->RouteSetSurfaceControlDamageRegion(sc_id, damage_rects));
+  int dummy = 0;
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlBuffer(sc_id, &dummy, -1));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlBufferAlpha(sc_id, 1.0f));
+  EXPECT_FALSE(null_router->RouteSetSurfaceControlColor(sc_id, 0, 0, 0, 1));
+  EXPECT_FALSE(null_router->RouteGetSurfaceControlState(sc_id).has_value());
+  EXPECT_EQ(null_router->RouteGetSurfaceControl(sc_id), nullptr);
+
+  EXPECT_FALSE(null_router->RouteRegisterHardwareBufferTexture(hw_tex_id));
+  EXPECT_FALSE(null_router->RouteUnregisterHardwareBufferTexture(hw_tex_id));
+  FlutterHardwareBufferExternalTexture null_hw_frame = {};
+  EXPECT_FALSE(
+      null_router->RouteSetHardwareBufferFrame(hw_tex_id, null_hw_frame));
+  EXPECT_FALSE(null_router->RouteGetHardwareBufferTextureFrame(
+      hw_tex_id, 100, 100, &null_hw_frame));
+  EXPECT_FALSE(null_router->RouteOnHardwareBufferFrameAvailable(hw_tex_id));
+
+  EXPECT_FALSE(null_router->RouteRegisterVulkanTexture(vk_tex_id));
+  EXPECT_FALSE(null_router->RouteUnregisterVulkanTexture(vk_tex_id));
+  FlutterVulkanExternalTexture null_vk_frame = {};
+  EXPECT_FALSE(
+      null_router->RouteSetVulkanTextureFrame(vk_tex_id, null_vk_frame));
+  EXPECT_FALSE(null_router->RouteGetVulkanTextureFrame(vk_tex_id, 100, 100,
+                                                       &null_vk_frame));
+  EXPECT_FALSE(null_router->RouteOnVulkanTextureFrameAvailable(vk_tex_id));
+
+  JniRouter::SetEmbedderEnabled(true);
+}
+
+TEST(Phase54LegacyDeletionGraphicsPipelineTest,
+     ConcurrentMultithreadedGraphicsPipelineExecution) {
+  auto mock_invoker = std::make_shared<NiceMock<MockJvmInvoker>>();
+  ON_CALL(*mock_invoker,
+          InvokeVoidMethod(::testing::_, ::testing::_, ::testing::_))
+      .WillByDefault(::testing::Return(true));
+  ON_CALL(*mock_invoker,
+          InvokeBooleanMethod(::testing::_, ::testing::_, ::testing::_))
+      .WillByDefault(::testing::Return(true));
+
+  auto in_memory_metrics = std::make_shared<InMemoryWindowMetricsProvider>();
+  auto mock_choreographer =
+      std::make_shared<InMemoryAndroidChoreographerProvider>();
+  auto vsync_waiter =
+      std::make_shared<AndroidVsyncWaiter>(mock_choreographer, mock_invoker);
+  auto hw_provider = std::make_shared<InMemoryAndroidHardwareBufferProvider>();
+  auto vk_provider = std::make_shared<InMemoryAndroidVulkanTextureProvider>();
+  auto sc_provider = std::make_shared<InMemoryAndroidSurfaceControlProvider>();
+
+  FlutterEmbedderNative native(mock_invoker);
+  native.SetWindowMetricsProvider(in_memory_metrics);
+  native.SetChoreographerProvider(mock_choreographer);
+  native.SetVsyncWaiter(vsync_waiter);
+  native.SetHardwareBufferProvider(hw_provider);
+  native.SetVulkanTextureProvider(vk_provider);
+  native.SetSurfaceControlProvider(sc_provider);
+
+  constexpr size_t kWorkers = 8;
+  constexpr size_t kIterations = 100;
+  std::vector<std::future<bool>> futures;
+  futures.reserve(kWorkers);
+
+  for (size_t worker = 0; worker < kWorkers; ++worker) {
+    futures.push_back(std::async(std::launch::async, [&native,
+                                                      &mock_choreographer,
+                                                      &hw_provider,
+                                                      &vk_provider, worker]() {
+      for (size_t iter = 0; iter < kIterations; ++iter) {
+        int idx = static_cast<int>(worker * kIterations + iter);
+        int64_t tex_id = static_cast<int64_t>(idx + 5000);
+        int64_t sc_id = static_cast<int64_t>(idx + 10000);
+
+        // 1. VSync
+        FlutterEmbedderNative::OnVsyncCallback(&native, idx);
+        mock_choreographer->TriggerPendingCallbacks(1000000LL + idx);
+
+        // 2. Metrics
+        AndroidViewportMetrics vp = {
+            .view_id = static_cast<int64_t>(idx),
+            .device_pixel_ratio = 2.0,
+            .physical_width = 800.0 + (idx % 100),
+            .physical_height = 600.0 + (idx % 100),
+        };
+        if (!native.SetViewportMetrics(vp)) {
+          return false;
+        }
+
+        // 3. SurfaceControl
+        if (!native.CreateSurfaceControl(sc_id, "worker_sc")) {
+          return false;
+        }
+        if (!native.SetSurfaceControlVisibility(sc_id, true)) {
+          return false;
+        }
+        if (!native.SetSurfaceControlZOrder(sc_id,
+                                            static_cast<int32_t>(idx % 20))) {
+          return false;
+        }
+        if (!native.DestroySurfaceControl(sc_id)) {
+          return false;
+        }
+
+        // 4. HardwareBuffer
+        auto hw_desc = AndroidHardwareBufferDesc::MakeRGBA8(64, 64);
+        auto hw_buf = hw_provider->Allocate(hw_desc);
+        if (!native.RegisterHardwareBufferTexture(tex_id, std::move(hw_buf))) {
+          return false;
+        }
+        FlutterHardwareBufferExternalTexture hw_out = {};
+        if (!native.GetHardwareBufferTextureFrame(tex_id, 64, 64, &hw_out)) {
+          return false;
+        }
+        if (!native.UnregisterHardwareBufferTexture(tex_id)) {
+          return false;
+        }
+
+        // 5. Vulkan texture
+        auto vk_desc = AndroidVulkanImageDesc::MakeRGBA8(64, 64);
+        auto vk_tex = vk_provider->AllocateTexture(vk_desc);
+        if (!native.RegisterVulkanTexture(tex_id, std::move(vk_tex))) {
+          return false;
+        }
+        FlutterVulkanExternalTexture vk_out = {};
+        if (!native.GetVulkanTextureFrame(tex_id, 64, 64, &vk_out)) {
+          return false;
+        }
+        if (!native.UnregisterVulkanTexture(tex_id)) {
           return false;
         }
       }
