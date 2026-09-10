@@ -1098,18 +1098,20 @@ void FirstPassDispatcher::restore() {
 
   if (frame.is_save_layer) {
     save_layer_depth_--;
-    if (!frame.is_generated_backdrop) {
-      // Restoring a non-generated saveLayer (e.g. non-backdrop saveLayer or
-      // backdrop with an explicit ID) composites onto the parent canvas and
-      // invalidates the active generated backdrop group.
-      active_generated_backdrop_group_ = std::nullopt;
-    }
-    if (active_generated_backdrop_group_.has_value() &&
-        active_generated_backdrop_group_->save_layer_depth >
-            save_layer_depth_) {
-      // The parent layer of the active backdrop group was restored, so
-      // invalidate the active group.
-      active_generated_backdrop_group_ = std::nullopt;
+    if (active_generated_backdrop_group_.has_value()) {
+      if (active_generated_backdrop_group_->save_layer_depth >
+          save_layer_depth_) {
+        // The parent layer of the active backdrop group was restored, so
+        // invalidate the active group.
+        active_generated_backdrop_group_ = std::nullopt;
+      } else if (active_generated_backdrop_group_->save_layer_depth ==
+                     save_layer_depth_ &&
+                 !frame.is_generated_backdrop) {
+        // Restoring a non-generated saveLayer (e.g. non-backdrop saveLayer or
+        // backdrop with an explicit ID) composites onto the parent canvas and
+        // invalidates the active generated backdrop group at this depth.
+        active_generated_backdrop_group_ = std::nullopt;
+      }
     }
   }
 }

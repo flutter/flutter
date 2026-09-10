@@ -2233,5 +2233,92 @@ TEST_P(
   EXPECT_EQ(it->second.backdrop_count, 2u);
 }
 
+TEST_P(
+    DisplayListTest,
+    FirstPassDispatcherGeneratedBackdropNestedNonBackdropSaveLayerDoesNotInvalidate) {
+  flutter::DisplayListBuilder builder;
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // 1. Card 1 (Blur 10) with internal non-backdrop SaveLayer (e.g.
+  // clip/opacity)
+  builder.SaveLayer(DlRect::MakeLTRB(0, 0, 100, 100), &save_paint, blur.get());
+  builder.SaveLayer(DlRect::MakeLTRB(10, 10, 90, 90), &save_paint);
+  builder.DrawRect(DlRect::MakeLTRB(10, 10, 90, 90), flutter::DlPaint());
+  builder.Restore();  // restores inner non-backdrop SaveLayer
+  builder.Restore();  // restores Card 1
+
+  // 2. Card 2 (Blur 10) immediately following Card 1 at root level
+  builder.SaveLayer(DlRect::MakeLTRB(120, 0, 220, 100), &save_paint,
+                    blur.get());
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  EXPECT_EQ(generated_backdrop_ids.size(), 2u);
+
+  // Card 1 and Card 2 should share ID -1 because the nested non-backdrop
+  // SaveLayer only composited onto Card 1's layer, not the root canvas
+  EXPECT_EQ(generated_backdrop_ids[0], -1);
+  EXPECT_EQ(generated_backdrop_ids[1], -1);
+
+  auto it = backdrop_data.find(-1);
+  ASSERT_TRUE(it != backdrop_data.end());
+  EXPECT_EQ(it->second.backdrop_count, 2u);
+}
+
+TEST_P(
+    DisplayListTest,
+    FirstPassDispatcherGeneratedBackdropInterveningNonBackdropSaveLayerInvalidates) {
+  flutter::DisplayListBuilder builder;
+  auto blur =
+      flutter::DlImageFilter::MakeBlur(10, 10, flutter::DlTileMode::kClamp);
+  flutter::DlPaint save_paint;
+
+  // 1. Card 1 (Blur 10) at root level
+  builder.SaveLayer(DlRect::MakeLTRB(0, 0, 100, 100), &save_paint, blur.get());
+  builder.Restore();
+
+  // 2. Intervening non-backdrop SaveLayer at root level
+  builder.SaveLayer(DlRect::MakeLTRB(50, 0, 150, 100), &save_paint);
+  builder.DrawRect(DlRect::MakeLTRB(50, 0, 150, 100), flutter::DlPaint());
+  builder.Restore();  // compositing this layer mutates the root canvas
+
+  // 3. Card 2 (Blur 10) at root level
+  builder.SaveLayer(DlRect::MakeLTRB(120, 0, 220, 100), &save_paint,
+                    blur.get());
+  builder.Restore();
+
+  auto display_list = builder.Build();
+  FirstPassDispatcher collector(GetContentContext(), Matrix(),
+                                Rect::MakeLTRB(0, 0, 1000, 1000));
+  display_list->Dispatch(collector);
+
+  auto [backdrop_data, backdrop_count, generated_backdrop_ids] =
+      collector.TakeBackdropData();
+  EXPECT_EQ(backdrop_count, 2u);
+  EXPECT_EQ(generated_backdrop_ids.size(), 2u);
+
+  // Card 1 gets -1 and Card 2 gets -2 because the intervening non-backdrop
+  // layer at root level composited onto the root canvas
+  EXPECT_EQ(generated_backdrop_ids[0], -1);
+  EXPECT_EQ(generated_backdrop_ids[1], -2);
+
+  auto it1 = backdrop_data.find(-1);
+  ASSERT_TRUE(it1 != backdrop_data.end());
+  EXPECT_EQ(it1->second.backdrop_count, 1u);
+
+  auto it2 = backdrop_data.find(-2);
+  ASSERT_TRUE(it2 != backdrop_data.end());
+  EXPECT_EQ(it2->second.backdrop_count, 1u);
+}
+
 }  // namespace testing
 }  // namespace impeller
