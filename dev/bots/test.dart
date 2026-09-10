@@ -204,6 +204,7 @@ Future<void> _runCommandsToolTests() async {
       allTests.add(file.path);
     }
   }
+  allTests.sort();
 
   await runDartTest(
     _toolsPath,
@@ -222,6 +223,8 @@ Future<void> _runWebToolTests() async {
       allTests.add(file.path);
     }
   }
+  allTests.sort();
+
   await runDartTest(
     _toolsPath,
     forceSingleCore: true,
@@ -234,12 +237,14 @@ Future<void> _runWebToolTests() async {
 Future<void> _runToolHostCrossArchTests() async {}
 
 Future<void> _runIntegrationToolTests() async {
-  final List<String> allTests = Directory(path.join(_toolsPath, 'test', 'integration.shard'))
-      .listSync(recursive: true)
-      .whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-      .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
-      .toList();
+  final List<String> allTests =
+      Directory(path.join(_toolsPath, 'test', 'integration.shard'))
+          .listSync(recursive: true)
+          .whereType<File>()
+          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+          .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
+          .toList()
+        ..sort();
 
   await runDartTest(
     _toolsPath,
@@ -268,12 +273,14 @@ Future<void> _runToolTests() async {
 
 Future<void> _runSnippetsTests() async {
   final String snippetsPath = path.join(flutterRoot, 'dev', 'snippets');
-  final List<String> allTests = Directory(path.join(snippetsPath, 'test'))
-      .listSync(recursive: true)
-      .whereType<File>()
-      .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
-      .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
-      .toList();
+  final List<String> allTests =
+      Directory(path.join(snippetsPath, 'test'))
+          .listSync(recursive: true)
+          .whereType<File>()
+          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+          .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
+          .toList()
+        ..sort();
 
   await runDartTest(
     snippetsPath,
