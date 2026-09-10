@@ -192,6 +192,7 @@ abstract final class BuildInfoOptions {
   static const androidGradleDaemon = FlagOptionDescriptor(
     name: FlutterOptions.kAndroidGradleDaemon,
     defaultsTo: true,
+    verboseOnly: true,
     help: 'Whether to enable the Gradle daemon when performing an Android build.',
   );
 
@@ -199,6 +200,7 @@ abstract final class BuildInfoOptions {
     name: FlutterOptions.kAndroidProjectArgs,
     abbr: 'P',
     aliases: <String>['android-project-args'],
+    verboseOnly: true,
     help:
         'Additional arguments specified as key=value that are passed directly to the gradle project '
         'via the -P flag. These can be accessed in build.gradle via the "project.property" API.',
@@ -207,6 +209,7 @@ abstract final class BuildInfoOptions {
   static const androidProjectCacheDir = StringOptionDescriptor(
     name: FlutterOptions.kAndroidGradleProjectCacheDir,
     valueHelp: 'path/to/project/cache/',
+    verboseOnly: true,
     help:
         'In an Android build, this flag allows the Gradle project cache directory to be specified '
         'to an absolute path. Setting this is roughly equivalent to setting the '
@@ -215,12 +218,30 @@ abstract final class BuildInfoOptions {
 
   static const androidSkipBuildDependencyValidation = FlagOptionDescriptor(
     name: FlutterOptions.kAndroidSkipBuildDependencyValidation,
+    verboseOnly: true,
     help: 'Skips Android Gradle project dependency verification.',
   );
 
   static const performanceMeasurementFile = StringOptionDescriptor(
     name: FlutterOptions.kPerformanceMeasurementFile,
     help: 'Output file name for performance measurement file.',
+  );
+
+  static const shrink = FlagOptionDescriptor(
+    name: 'shrink',
+    verboseOnly: true,
+    help:
+        'This flag has no effect. Code shrinking is always enabled in release builds. '
+        'To learn more, see: https://developer.android.com/studio/build/shrink-code',
+  );
+
+  static const ignoreDeprecation = FlagOptionDescriptor(
+    name: 'ignore-deprecation',
+    negatable: false,
+    help:
+        'Indicates that the app should ignore deprecation warnings and continue to build '
+        'using deprecated APIs. Use of this flag may cause your app to fail to build when '
+        'deprecated APIs are removed.',
   );
 
   static const flavor = StringOptionDescriptor(
@@ -342,11 +363,10 @@ class DartCompileOptionsBundle extends OptionBundle {
     CommonOptions.dartDefines,
     CommonOptions.dartDefineFromFile,
     CommonOptions.enableExperiment,
-    CommonOptions.nativeNullAssertions,
   ];
 }
 
-/// A bundle encapsulating basic build parameters (target, output-dir, pub, build-number/name).
+/// A bundle encapsulating basic build parameters (target, pub, build-number/name).
 class CommonBuildOptionsBundle extends OptionBundle {
   const CommonBuildOptionsBundle();
 
@@ -360,10 +380,46 @@ class CommonBuildOptionsBundle extends OptionBundle {
   List<OptionDescriptor<Object?>> get descriptors => const [
     CommonOptions.treeShakeIcons,
     CommonOptions.target,
-    CommonOptions.outputDir,
     CommonOptions.pub,
     CommonOptions.buildNumber,
     CommonOptions.buildName,
+  ];
+}
+
+/// A bundle encapsulating Gradle-specific Android build options.
+class AndroidGradleOptionsBundle extends OptionBundle {
+  const AndroidGradleOptionsBundle();
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    BuildInfoOptions.androidGradleDaemon,
+    BuildInfoOptions.androidSkipBuildDependencyValidation,
+    BuildInfoOptions.androidProjectArg,
+    BuildInfoOptions.androidProjectCacheDir,
+  ];
+}
+
+/// A bundle encapsulating general options for Android builds.
+class AndroidBuildOptionsBundle extends OptionBundle {
+  const AndroidBuildOptionsBundle();
+
+  @override
+  List<OptionBundle> get subBundles => const [AndroidGradleOptionsBundle()];
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const [
+    BuildInfoOptions.flavor,
+    BuildInfoOptions.shrink,
+    BuildInfoOptions.splitDebugInfo,
+    BuildInfoOptions.obfuscate,
+    BuildInfoOptions.extraFrontEndOptions,
+    BuildInfoOptions.extraGenSnapshotOptions,
+    BuildInfoOptions.performanceMeasurementFile,
+    BuildInfoOptions.analyzeSize,
+    BuildInfoOptions.codeSizeDirectory,
+    BuildInfoOptions.trackWidgetCreation,
+    BuildInfoOptions.ignoreDeprecation,
+    DebuggingOptionDescriptors.enableHcpp,
   ];
 }
 

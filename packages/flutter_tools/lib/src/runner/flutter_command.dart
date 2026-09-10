@@ -802,16 +802,6 @@ abstract class FlutterCommand extends Command<void> {
     CommonOptions.treeShakeIcons.addTo(argParser, hideOverride: enabledByDefault == false);
   }
 
-  void addShrinkingFlag({required bool verboseHelp}) {
-    argParser.addFlag(
-      'shrink',
-      hide: !verboseHelp,
-      help:
-          'This flag has no effect. Code shrinking is always enabled in release builds. '
-          'To learn more, see: https://developer.android.com/studio/build/shrink-code',
-    );
-  }
-
   void usesFrontendServerStarterPathOption({required bool verboseHelp}) {
     BuildInfoOptions.frontendServerStarterPath.addTo(argParser, verboseHelp: verboseHelp);
   }
@@ -875,14 +865,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addIgnoreDeprecationOption({bool hide = false}) {
-    argParser.addFlag(
-      'ignore-deprecation',
-      negatable: false,
-      help:
-          'Indicates that the app should ignore deprecation warnings and continue to build '
-          'using deprecated APIs. Use of this flag may cause your app to fail to build when '
-          'deprecated APIs are removed.',
-    );
+    BuildInfoOptions.ignoreDeprecation.addTo(argParser, hideOverride: hide);
   }
 
   /// Adds build options common to all of the desktop build commands.

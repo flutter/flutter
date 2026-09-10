@@ -11,10 +11,9 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart';
 import 'build.dart';
 
 class BuildAarCommand extends BuildSubCommand {
@@ -22,46 +21,56 @@ class BuildAarCommand extends BuildSubCommand {
     required super.logger,
     required AndroidSdk? androidSdk,
     required FileSystem fileSystem,
-    required bool verboseHelp,
+    required super.verboseHelp,
   }) : _androidSdk = androidSdk,
-       _fileSystem = fileSystem,
-       super(verboseHelp: verboseHelp) {
-    argParser
-      ..addFlag('debug', defaultsTo: true, help: 'Build a debug version of the current project.')
-      ..addFlag(
-        'profile',
-        defaultsTo: true,
-        help: 'Build a version of the current project specialized for performance profiling.',
-      )
-      ..addFlag(
-        'release',
-        defaultsTo: true,
-        help: 'Build a release version of the current project.',
-      );
-    addTreeShakeIconsFlag();
-    usesFlavorOption();
-    usesBuildNumberOption();
-    usesOutputDir();
-    usesPubOption();
-    addSplitDebugInfoOption();
-    addDartObfuscationOption();
-    usesDartDefineOption();
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    usesTrackWidgetCreation(verboseHelp: false);
-    addEnableExperimentation(hide: !verboseHelp);
-    addAndroidSpecificBuildOptions(hide: !verboseHelp);
-    // No --[no-]enable-hcpp flag here: the Flutter Gradle Plugin intentionally
-    // does not inject the EnableHcpp metadata into module (aar) manifests,
-    // because a library-provided value that conflicts with an explicit value in
-    // the host app's manifest fails the host build in the manifest merger. The
-    // host app's manifest is the source of truth for HCPP in add-to-app.
-    argParser.addMultiOption(
-      'target-platform',
-      defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
-      allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
-      help: 'The target platform for which the project is compiled.',
-    );
+       _fileSystem = fileSystem {
+    enableUsesPubOption();
+    registerOptionBundles(const <OptionBundle>[
+      DartCompileOptionsBundle(),
+      AndroidGradleOptionsBundle(),
+    ]);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      _debugMode,
+      _profileMode,
+      _releaseMode,
+      CommonOptions.treeShakeIcons,
+      BuildInfoOptions.flavor,
+      CommonOptions.buildNumber,
+      CommonOptions.outputDir,
+      CommonOptions.pub,
+      BuildInfoOptions.splitDebugInfo,
+      BuildInfoOptions.obfuscate,
+      BuildInfoOptions.extraFrontEndOptions,
+      BuildInfoOptions.extraGenSnapshotOptions,
+      _targetPlatform,
+      BuildInfoOptions.trackWidgetCreation,
+    ], verboseHelp: verboseHelp);
   }
+
+  static const _debugMode = FlagOptionDescriptor(
+    name: 'debug',
+    defaultsTo: true,
+    help: 'Build a debug version of the current project.',
+  );
+
+  static const _profileMode = FlagOptionDescriptor(
+    name: 'profile',
+    defaultsTo: true,
+    help: 'Build a version of the current project specialized for performance profiling.',
+  );
+
+  static const _releaseMode = FlagOptionDescriptor(
+    name: 'release',
+    defaultsTo: true,
+    help: 'Build a release version of the current project.',
+  );
+
+  static const _targetPlatform = MultiOptionDescriptor(
+    name: 'target-platform',
+    defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
+    allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
+    help: 'The target platform for which the project is compiled.',
+  );
   final AndroidSdk? _androidSdk;
   final FileSystem _fileSystem;
 
@@ -91,7 +100,7 @@ class BuildAarCommand extends BuildSubCommand {
       workflow: commandPath,
       commandHasTerminal: hasTerminal,
       buildAarProjectType: projectType,
-      buildAarTargetPlatform: stringsArg('target-platform').join(','),
+      buildAarTargetPlatform: getValue(_targetPlatform).join(','),
       // TODO(gmackall): Consider collecting hcpp analytics, see https://github.com/flutter/flutter/issues/184541.
     );
   }
@@ -123,25 +132,22 @@ class BuildAarCommand extends BuildSubCommand {
     }
     final androidBuildInfo = <AndroidBuildInfo>{};
 
-    final Iterable<CpuArch> targetArchitectures = stringsArg(
-      'target-platform',
+    final Iterable<CpuArch> targetArchitectures = getValue(
+      _targetPlatform,
     ).map<CpuArch>(getCpuArchForName);
 
-    final String? buildNumberArg = stringArg('build-number');
-    final String buildNumber =
-        argParser.options.containsKey('build-number') &&
-            buildNumberArg != null &&
-            buildNumberArg.isNotEmpty
+    final String? buildNumberArg = getValue(CommonOptions.buildNumber);
+    final String buildNumber = (buildNumberArg != null && buildNumberArg.isNotEmpty)
         ? buildNumberArg
         : '1.0';
 
     final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
-    for (final buildMode in const <String>['debug', 'profile', 'release']) {
-      if (boolArg(buildMode)) {
+    for (final FlagOptionDescriptor descriptor in const [_debugMode, _profileMode, _releaseMode]) {
+      if (getValue(descriptor)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
             await getBuildInfo(
-              forcedBuildMode: BuildMode.fromCliName(buildMode),
+              forcedBuildMode: BuildMode.fromCliName(descriptor.name),
               forcedTargetFile: targetFile,
             ),
             targetArchs: targetArchitectures,
@@ -158,7 +164,7 @@ class BuildAarCommand extends BuildSubCommand {
       target: targetFile.path,
       androidBuildInfo: androidBuildInfo,
       generateTooling: regeneratePlatformSpecificToolingIfApplicable,
-      outputDirectoryPath: stringArg('output'),
+      outputDirectoryPath: getValue(CommonOptions.outputDir),
       buildNumber: buildNumber,
     );
 
