@@ -1236,9 +1236,7 @@ class PointerEnterEvent extends PointerEvent with _PointerEventDescription, _Cop
     super.down,
     super.synthesized,
     super.embedderId,
-  }) : // Dart doesn't support comparing enums with == in const contexts yet.
-       // https://github.com/dart-lang/language/issues/1811
-       assert(!identical(kind, PointerDeviceKind.trackpad)),
+  }) : assert(kind != PointerDeviceKind.trackpad),
        super(pressure: 0.0);
 
   /// Creates an enter event from a [PointerEvent].
@@ -1384,7 +1382,7 @@ class PointerExitEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.down,
     super.synthesized,
     super.embedderId,
-  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
+  }) : assert(kind != PointerDeviceKind.trackpad),
        super(pressure: 0.0);
 
   /// Creates an exit event from a [PointerEvent].
@@ -1520,7 +1518,7 @@ class PointerDownEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.orientation,
     super.tilt,
     super.embedderId,
-  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
+  }) : assert(kind != PointerDeviceKind.trackpad),
        super(down: true, distance: 0.0);
 
   @override
@@ -1636,7 +1634,7 @@ class PointerMoveEvent extends PointerEvent with _PointerEventDescription, _Copy
     super.platformData,
     super.synthesized,
     super.embedderId,
-  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
+  }) : assert(kind != PointerDeviceKind.trackpad),
        super(down: true, distance: 0.0);
 
   @override
@@ -1750,7 +1748,7 @@ class PointerUpEvent extends PointerEvent with _PointerEventDescription, _CopyPo
     super.orientation,
     super.tilt,
     super.embedderId,
-  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
+  }) : assert(kind != PointerDeviceKind.trackpad),
        super(down: false);
 
   @override
@@ -2536,7 +2534,7 @@ class PointerCancelEvent extends PointerEvent
     super.orientation,
     super.tilt,
     super.embedderId,
-  }) : assert(!identical(kind, PointerDeviceKind.trackpad)),
+  }) : assert(kind != PointerDeviceKind.trackpad),
        super(down: false, pressure: 0.0);
 
   @override

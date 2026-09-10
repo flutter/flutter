@@ -1,0 +1,157 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+/// Dynamic argument parser mixin for tool extensions.
+///
+/// This library provides a mixin to allow commands to dynamically rebuild
+/// their argument parsers when extension-provided options change.
+library experimental.extension_arg_parser;
+
+import 'package:args/args.dart';
+import 'package:meta/meta.dart';
+
+import '../base/terminal.dart';
+import '../runner/flutter_command.dart';
+
+/// A mixin on `FlutterCommand` that supports lazy, dynamic rebuilding of `argParser`
+/// when extension-provided options or templates change at runtime.
+///
+/// Because `ArgParser` instances in `package:args` cannot be mutated once options
+/// or commands are registered, dynamic commands must reconstruct their `argParser`
+/// when new extension capabilities (such as project templates) are discovered.
+mixin ExtensionArgParserMixin on FlutterCommand {
+  ArgParser? _baseArgParser;
+  ArgParser? _dynamicArgParser;
+  bool _buildingBaseParser = false;
+
+  /// Hook called by the command runner before parsing arguments,
+  /// allowing the command to perform asynchronous initialization
+  /// (e.g. querying extensions) to populate its dynamic options.
+  Future<void> initializeDynamicOptions() async {}
+
+  /// Creates and configures the static base `ArgParser` for this command.
+  ///
+  /// Subclasses should override this method to register their static options
+  /// and flags rather than adding options in the constructor, allowing the
+  /// base parser to be cloned and dynamically rebuilt when extension options change.
+  @protected
+  ArgParser createBaseArgParser() {
+    final OutputPreferences? preferences = toolContext?.outputPreferences;
+    final bool wrapText = preferences?.wrapText ?? false;
+    final int? wrapColumn = preferences?.wrapColumn;
+    return ArgParser(allowTrailingOptions: false, usageLineLength: wrapText ? wrapColumn : null);
+  }
+
+  /// Injects dynamic extension options or allowed help entries into [dynamicParser].
+  ///
+  /// [dynamicParser] is a pre-cloned copy of [baseArgParser]. Subclasses should
+  /// mutate and return [dynamicParser] with extension options added.
+  @protected
+  ArgParser buildDynamicArgParser(ArgParser dynamicParser);
+
+  /// Clones [opt] from an existing [ArgParser] into [target].
+  @protected
+  static void copyOption(ArgParser target, Option opt) {
+    switch (opt.type) {
+      case OptionType.flag:
+        target.addFlag(
+          opt.name,
+          abbr: opt.abbr,
+          aliases: opt.aliases,
+          defaultsTo: opt.defaultsTo as bool?,
+          help: opt.help,
+          hide: opt.hide,
+          hideNegatedUsage: opt.hideNegatedUsage ?? false,
+          negatable: opt.negatable ?? true,
+        );
+      case OptionType.single:
+        target.addOption(
+          opt.name,
+          abbr: opt.abbr,
+          aliases: opt.aliases,
+          allowed: opt.allowed,
+          allowedHelp: opt.allowedHelp,
+          defaultsTo: opt.defaultsTo as String?,
+          help: opt.help,
+          hide: opt.hide,
+          mandatory: opt.mandatory,
+          valueHelp: opt.valueHelp,
+        );
+      case OptionType.multiple:
+        target.addMultiOption(
+          opt.name,
+          abbr: opt.abbr,
+          aliases: opt.aliases,
+          allowed: opt.allowed,
+          allowedHelp: opt.allowedHelp,
+          defaultsTo: (opt.defaultsTo as Iterable<Object?>?)?.cast<String>(),
+          help: opt.help,
+          hide: opt.hide,
+          splitCommas: opt.splitCommas,
+          valueHelp: opt.valueHelp,
+        );
+    }
+  }
+
+  /// Clones all options from [source] into a new [ArgParser] instance.
+  @protected
+  static ArgParser cloneParser(
+    ArgParser source, {
+    void Function(ArgParser newParser, Option opt)? optionCloner,
+  }) {
+    final newParser = ArgParser(
+      allowTrailingOptions: source.allowTrailingOptions,
+      usageLineLength: source.usageLineLength,
+    );
+    for (final Option opt in source.options.values) {
+      if (optionCloner != null) {
+        optionCloner(newParser, opt);
+      } else {
+        copyOption(newParser, opt);
+      }
+    }
+    return newParser;
+  }
+
+  /// Returns the base static `ArgParser` for this command, initializing it if needed.
+  ArgParser get baseArgParser {
+    if (_baseArgParser != null) {
+      return _baseArgParser!;
+    }
+    _buildingBaseParser = true;
+    try {
+      final ArgParser parser = createBaseArgParser();
+      _baseArgParser = parser;
+      return parser;
+    } finally {
+      _buildingBaseParser = false;
+    }
+  }
+
+  /// Rebuilds the dynamic argument parser from [baseArgParser].
+  ///
+  /// Subclasses should call this when dynamic options or capabilities are discovered.
+  @protected
+  void rebuildDynamicArgParser() {
+    final ArgParser clonedParser = cloneParser(baseArgParser);
+    _dynamicArgParser = buildDynamicArgParser(clonedParser);
+    // Re-add subcommands to the dynamic parser to ensure they are not lost.
+    for (final MapEntry(:key, :value) in subcommands.entries) {
+      if (!_dynamicArgParser!.commands.containsKey(key)) {
+        _dynamicArgParser!.addCommand(key, value.argParser);
+      }
+    }
+  }
+
+  /// Returns either the base parser or a dynamically rebuilt parser if dynamic options were added.
+  @override
+  ArgParser get argParser {
+    assert(
+      !_buildingBaseParser,
+      'argParser was accessed re-entrantly while createBaseArgParser was executing. '
+      'Subclasses should add options directly to the ArgParser created in createBaseArgParser.',
+    );
+    return _dynamicArgParser ?? baseArgParser;
+  }
+}

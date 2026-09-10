@@ -20,6 +20,7 @@ import 'base/project_migrator.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'base/yaml.dart';
+import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
 import 'convert.dart';
@@ -91,8 +92,69 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, FlutterManifest manifest, this._exampleManifest) {
+  FlutterProject(
+    this.directory,
+    FlutterManifest manifest,
+    this._exampleManifest, {
+    Directory? buildDirectory,
+  }) : _buildDirectory = buildDirectory {
     _setManifest(manifest);
+  }
+
+  FlutterProject? _workspaceRoot;
+  bool _searchedForWorkspaceRoot = false;
+
+  /// Returns the workspace root project if this project is a member of a workspace.
+  ///
+  /// Returns null if this project is not part of a workspace or is itself the workspace root.
+  FlutterProject? get workspaceRoot {
+    if (_searchedForWorkspaceRoot) {
+      return _workspaceRoot;
+    }
+    _searchedForWorkspaceRoot = true;
+    _workspaceRoot = _findWorkspaceRoot();
+    return _workspaceRoot;
+  }
+
+  FlutterProject? _findWorkspaceRoot() {
+    final FileSystem fileSystem = directory.fileSystem;
+    final String normalizedPath = fileSystem.path.normalize(directory.absolute.path);
+    Directory candidate = fileSystem.directory(normalizedPath);
+
+    while (true) {
+      final Directory parent = candidate.parent;
+      if (fileSystem.path.equals(parent.path, candidate.path)) {
+        break;
+      }
+      candidate = parent;
+      final File pubspec = candidate.childFile('pubspec.yaml');
+      if (!pubspec.existsSync()) {
+        continue;
+      }
+      try {
+        final FlutterManifest manifest = FlutterProject._readManifest(
+          pubspec.path,
+          logger: globals.logger,
+          fileSystem: fileSystem,
+        );
+        if (manifest.workspace.isNotEmpty) {
+          final String relativePath = fileSystem.path.relative(
+            normalizedPath,
+            from: candidate.path,
+          );
+          final bool isMember = manifest.workspace.any((String entry) {
+            final glob = Glob(entry, context: fileSystem.path);
+            return glob.matches(relativePath);
+          });
+          if (isMember) {
+            return FlutterProject.fromDirectory(candidate);
+          }
+        }
+      } on Exception catch (_) {
+        // Ignore manifest reading errors.
+      }
+    }
+    return null;
   }
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
@@ -107,7 +169,11 @@ class FlutterProject {
 
   /// Create a [FlutterProject] and bypass the project caching.
   @visibleForTesting
-  static FlutterProject fromDirectoryTest(Directory directory, [Logger? logger]) {
+  static FlutterProject fromDirectoryTest(
+    Directory directory, [
+    Logger? logger,
+    Directory? buildDirectory,
+  ]) {
     final FileSystem fileSystem = directory.fileSystem;
     logger ??= BufferLogger.test();
     final FlutterManifest manifest = FlutterProject._readManifest(
@@ -120,14 +186,22 @@ class FlutterProject {
       logger: logger,
       fileSystem: fileSystem,
     );
-    return FlutterProject(directory, manifest, exampleManifest);
+    return FlutterProject(
+      directory,
+      manifest,
+      exampleManifest,
+      buildDirectory: buildDirectory ?? directory.childDirectory('build'),
+    );
   }
 
   /// The location of this project.
   final Directory directory;
 
+  final Directory? _buildDirectory;
+
   /// The location of the build folder.
-  Directory get buildDirectory => directory.childDirectory('build');
+  Directory get buildDirectory =>
+      _buildDirectory ?? directory.childDirectory(getBuildDirectory(null, directory.fileSystem));
 
   /// The manifest of this project.
   FlutterManifest get manifest => _manifest;
@@ -142,19 +216,105 @@ class FlutterProject {
 
   void _setManifest(FlutterManifest manifest) {
     _manifest = manifest;
+    _searchedForWorkspaceRoot = false;
+    _workspaceRoot = null;
 
     // Update the workspace projects based on the new manifest.
     _workspaceProjects = <FlutterProject>[];
+    if (!directory.existsSync()) {
+      return;
+    }
     for (final String entry in manifest.workspace) {
-      final glob = Glob(entry);
-      for (final Directory globResult
-          in glob
-              .listFileSystemSync(directory.fileSystem, root: directory.path)
-              .whereType<Directory>()) {
-        if (globResult.childFile('pubspec.yaml').existsSync()) {
-          _workspaceProjects.add(FlutterProject.fromDirectory(globResult));
+      for (final Directory entity in _resolveWorkspacePattern(directory, entry)) {
+        if (entity.childFile('pubspec.yaml').existsSync()) {
+          try {
+            _workspaceProjects.add(FlutterProject.fromDirectory(entity));
+          } on Exception catch (_) {
+            // Ignore child projects with invalid manifests.
+          }
         }
       }
+    }
+  }
+
+  /// Resolves the given workspace [pattern] relative to [root] to find all
+  /// matching package root directories.
+  ///
+  /// Evaluates the pattern segment-by-segment using shallow directory listings
+  /// to avoid deep recursive tree traversal into build artifacts or caches
+  /// (such as Gradle `.transforms/...`) that can exceed Windows `MAX_PATH`
+  /// limits. Hidden directories (starting with `.`) and `build/` directories
+  /// are ignored during matching.
+  ///
+  /// Supports exact relative paths, single-level glob patterns (e.g. `packages/*`),
+  /// and recursive multi-level directory descent (`**`).
+  static List<Directory> _resolveWorkspacePattern(Directory root, String pattern) {
+    final List<String> segments = pattern
+        .replaceAll(r'\', '/')
+        .split('/')
+        .where((String s) => s.isNotEmpty)
+        .toList();
+    if (segments.isEmpty) {
+      return const <Directory>[];
+    }
+
+    var currentDirs = <Directory>[root];
+
+    for (final segment in segments) {
+      if (segment == '**') {
+        final nextDirs = <Directory>[];
+        final visited = <String>{};
+        for (final dir in currentDirs) {
+          if (!dir.existsSync()) {
+            continue;
+          }
+          if (visited.add(dir.path)) {
+            nextDirs.add(dir);
+            _collectSubdirectories(dir, nextDirs, visited);
+          }
+        }
+        currentDirs = nextDirs;
+      } else {
+        final glob = Glob(segment, context: root.fileSystem.path);
+        currentDirs = currentDirs.expand((Directory dir) {
+          if (!dir.existsSync()) {
+            return const <Directory>[];
+          }
+          try {
+            return dir.listSync(followLinks: false).whereType<Directory>().where((Directory d) {
+              final String name = d.basename;
+              return !name.startsWith('.') && name != 'build' && glob.matches(name);
+            });
+          } on FileSystemException {
+            return const <Directory>[];
+          }
+        }).toList();
+      }
+    }
+
+    return currentDirs;
+  }
+
+  /// Recursively collects all subdirectories under [dir], excluding hidden
+  /// directories (starting with `.`) and `build/` directories.
+  ///
+  /// Tracks [visited] paths to prevent infinite loops from cyclic directory
+  /// structures or overlapping search roots.
+  static void _collectSubdirectories(Directory dir, List<Directory> results, Set<String> visited) {
+    try {
+      for (final FileSystemEntity entity in dir.listSync(followLinks: false)) {
+        if (entity is Directory) {
+          final String name = entity.basename;
+          if (!name.startsWith('.') && name != 'build') {
+            if (visited.add(entity.path)) {
+              results.add(entity);
+              _collectSubdirectories(entity, results, visited);
+            }
+          }
+        }
+      }
+    } on FileSystemException {
+      // Ignore unreadable or transient directories.
     }
   }
 
@@ -283,7 +443,7 @@ class FlutterProject {
   FlutterProject get example => FlutterProject(
     _exampleDirectory(directory),
     _exampleManifest,
-    FlutterManifest.empty(logger: globals.logger),
+    FlutterManifest.empty(logger: _manifest.logger),
   );
 
   /// The generated scaffolding project for hosting widget previews from this

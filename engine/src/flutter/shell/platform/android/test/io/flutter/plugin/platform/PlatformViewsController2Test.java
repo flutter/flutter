@@ -553,6 +553,44 @@ public class PlatformViewsController2Test {
         .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
   }
 
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onEndFrameIsANoopAfterDetachFromView() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    FlutterView mockFlutterView = mock(FlutterView.class);
+    AttachedSurfaceControl mockAttachedSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
+
+    controller.attachToView(mockFlutterView);
+    controller.detachFromView();
+
+    // onEndFrame is posted from the raster thread, so it can run after the view was detached.
+    // It must not throw: the JNI caller turns a pending exception into an abort.
+    controller.onEndFrame();
+
+    verify(mockAttachedSurfaceControl, never())
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onEndFrameIsANoopWhenFlutterViewHasNoRootSurfaceControl() {
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+
+    // getRootSurfaceControl() returns null while the view is not attached to a window.
+    FlutterView mockFlutterView = mock(FlutterView.class);
+    when(mockFlutterView.getRootSurfaceControl()).thenReturn(null);
+
+    controller.attachToView(mockFlutterView);
+
+    controller.onEndFrame();
+
+    verify(mockFlutterView, never()).invalidate();
+  }
+
   private static ByteBuffer encodeMethodCall(MethodCall call) {
     final ByteBuffer buffer = StandardMethodCodec.INSTANCE.encodeMethodCall(call);
     buffer.rewind();

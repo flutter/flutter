@@ -132,11 +132,6 @@ List<String> generateMethodParameters(
 }
 
 // Similar to above, but is used for passing arguments into helper functions.
-List<String> generateMethodArguments(Message message) {
-  return message.templatePlaceholders.values
-      .map((Placeholder placeholder) => placeholder.name)
-      .toList();
-}
 
 String generateDateFormattingLogic(Message message, LocaleInfo locale) {
   if (message.templatePlaceholders.isEmpty) {
@@ -1056,16 +1051,26 @@ class LocalizationsGenerator {
 
   String _generateSubclass(String className, AppResourceBundle bundle) {
     final LocaleInfo locale = bundle.locale;
-    final baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
+    final languageLocale = LocaleInfo.fromString(locale.languageCode);
+    var parentLocale = languageLocale;
+    if (locale.scriptCode != null && locale.countryCode != null) {
+      parentLocale = _allBundles
+          .localesForLanguage(locale.languageCode)
+          .firstWhere(
+            (LocaleInfo candidate) =>
+                candidate.scriptCode == locale.scriptCode && candidate.countryCode == null,
+            orElse: () => languageLocale,
+          );
+    }
+    final baseClassName = '$className${parentLocale.camelCase()}';
 
-    // Only mark a message as unimplemented/untranslated for a regional subclass
-    // (e.g. en_US) if it is also missing in the parent base locale (e.g. en).
-    // If it is present in the parent locale, it will be correctly inherited
-    // at runtime via Dart class inheritance, so it shouldn't be reported as missing.
-    final parentLocale = LocaleInfo.fromString(locale.languageCode);
+    // Only mark a message as unimplemented/untranslated if it is missing from
+    // every locale in the subclass's inheritance chain.
     _allMessages
         .where((Message message) {
-          return message.messages[locale] == null && message.messages[parentLocale] == null;
+          return message.messages[locale] == null &&
+              message.messages[parentLocale] == null &&
+              message.messages[languageLocale] == null;
         })
         .forEach((Message message) {
           _addUnimplementedMessage(locale, message.resourceId);
@@ -1075,12 +1080,28 @@ class LocalizationsGenerator {
         .where((Message message) => message.parsedMessages[locale] != null)
         .map((Message message) => _generateMethod(message, locale));
 
+    final bool hasRegionalSubclass =
+        locale.scriptCode != null &&
+        locale.countryCode == null &&
+        _allBundles.localesForLanguage(locale.languageCode).any((LocaleInfo candidate) {
+          return candidate.scriptCode == locale.scriptCode && candidate.countryCode != null;
+        });
+    final parentConstructor = parentLocale == languageLocale ? 'super' : 'super._withLocale';
+    final subclassName = '$className${locale.camelCase()}';
+    // Preserve the public zero-argument constructor while allowing a regional
+    // subclass to initialize the locale name through its script parent.
+    final classMembers = <String>[
+      if (hasRegionalSubclass) '  $subclassName._withLocale(String locale): super(locale);',
+      ...methods,
+    ];
+
     return subclassTemplate
+        .replaceFirst("super('@(localeName)')", "$parentConstructor('@(localeName)')")
         .replaceAll('@(language)', describeLocale(locale.toString()))
         .replaceAll('@(baseLanguageClassName)', baseClassName)
-        .replaceAll('@(class)', '$className${locale.camelCase()}')
+        .replaceAll('@(class)', subclassName)
         .replaceAll('@(localeName)', locale.toString())
-        .replaceAll('@(methods)', methods.join('\n\n'));
+        .replaceAll('@(methods)', classMembers.join('\n\n'));
   }
 
   // Generate the AppLocalizations class, its LocalizationsDelegate subclass,

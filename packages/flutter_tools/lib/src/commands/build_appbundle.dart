@@ -7,6 +7,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../android/android_builder.dart';
 import '../android/build_validation.dart';
 import '../android/deferred_components_prebuild_validator.dart';
+import '../android/deferred_components_validator.dart';
 import '../android/gradle_utils.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
@@ -111,8 +112,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       buildAppBundleTargetPlatform: stringsArg('target-platform').join(','),
       buildAppBundleBuildMode: buildMode,
       buildBundleEnableHcpp:
-          explicitEnableHcpp ??
-          FlutterProject.current().android.computeHcppEnabled(ifAbsent: enableHcpp),
+          explicitEnableHcpp ?? project.android.computeHcppEnabled(ifAbsent: enableHcpp),
     );
   }
 
@@ -127,8 +127,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
     );
     // Do all setup verification that doesn't involve loading units. Checks that
     // require generated loading units are done after gen_snapshot in assemble.
-    final List<DeferredComponent>? deferredComponents =
-        FlutterProject.current().manifest.deferredComponents;
+    final List<DeferredComponent>? deferredComponents = project.manifest.deferredComponents;
     if (deferredComponents != null && boolArg('deferred-components')) {
       // Record to analytics that DeferredComponents is being used.
       globals.analytics.send(
@@ -144,6 +143,9 @@ class BuildAppBundleCommand extends BuildSubCommand {
         globals.logger,
         globals.platform,
         title: 'Deferred components prebuild validation',
+        outputDir: project.buildDirectory.childDirectory(
+          DeferredComponentsValidator.kDeferredComponentsTempDirectory,
+        ),
       );
       validator.clearOutputDir();
       await validator.checkAndroidDynamicFeature(deferredComponents);
@@ -154,8 +156,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       // Delete intermediates libs dir for components to resolve mismatching
       // abis supported by base and dynamic feature modules.
       for (final DeferredComponent component in deferredComponents) {
-        final Directory deferredLibsIntermediate = project.directory
-            .childDirectory('build')
+        final Directory deferredLibsIntermediate = project.buildDirectory
             .childDirectory(component.name)
             .childDirectory('intermediates')
             .childDirectory('flutter')

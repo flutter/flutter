@@ -1220,18 +1220,6 @@ void updateLocalProperties({
   }
 }
 
-/// Writes standard Android local properties to the specified [properties] file.
-///
-/// Writes the path to the Android SDK, if known.
-void writeLocalProperties(File properties) {
-  final settings = SettingsFile();
-  final AndroidSdk? androidSdk = globals.androidSdk;
-  if (androidSdk != null) {
-    settings.values['sdk.dir'] = globals.fsUtils.escapePath(androidSdk.directory.path);
-  }
-  settings.writeContents(properties);
-}
-
 void exitWithNoSdkMessage() {
   globals.analytics.send(
     Event.flutterBuildInfo(
