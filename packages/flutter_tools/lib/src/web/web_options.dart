@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../runner/options/common_options.dart';
 import '../runner/options/option_bundle.dart';
 import '../runner/options/option_descriptor.dart';
 import '../web_template.dart';
@@ -314,6 +315,7 @@ class WebCoreOptionsBundle extends OptionBundle {
     WebOptions.webDefineFromFile,
     WebOptions.optimizationLevel,
     WebOptions.sourceMaps,
+    CommonOptions.outputDir,
   ];
 }
 
@@ -331,6 +333,7 @@ class WebJsOptionsBundle extends OptionBundle {
     WebOptions.dumpInfo,
     WebOptions.minifyJs,
     WebOptions.noFrequencyBasedMinification,
+    CommonOptions.nativeNullAssertions,
   ];
 }
 
