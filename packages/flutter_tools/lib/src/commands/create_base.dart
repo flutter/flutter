@@ -564,16 +564,33 @@ mixin CreateBase on FlutterCommand {
       platformsForMigrateConfig.add(SupportedPlatform.fuchsia);
     }
     if (generateMetadata) {
-      final FileSystem fs = _context.fs;
-      final Logger logger = _context.logger;
-      final FlutterVersion flutterVersion = _context.flutterVersion;
+      final ToolContext(:FileSystem fs, :FlutterVersion flutterVersion, :Logger logger) = _context;
       final File metadataFile = fs.file(fs.path.join(projectDir.absolute.path, '.metadata'));
+      // Seed the migrate config with the platforms already tracked in an
+      // existing .metadata file. Re-running `flutter create --platforms` must
+      // add the newly requested platforms without dropping the previously
+      // added ones, and without overwriting their recorded revisions.
+      // See https://github.com/flutter/flutter/issues/191567.
+
+      var migrateConfig = MigrateConfig();
+      if (metadataFile.existsSync()) {
+        try {
+          migrateConfig = FlutterProjectMetadata(
+            metadataFile,
+            logger,
+            extensionTemplateManager: null,
+          ).migrateConfig;
+        } on Exception catch (error) {
+          logger.printTrace('Failed to parse existing .metadata file: $error');
+        }
+      }
+
       final metadata = FlutterProjectMetadata.explicit(
         file: metadataFile,
         versionRevision: flutterVersion.frameworkRevision,
         versionChannel: flutterVersion.getBranchName(), // may contain PII
         projectType: projectType,
-        migrateConfig: MigrateConfig(),
+        migrateConfig: migrateConfig,
         extensionTemplateManager: null,
         logger: logger,
       );
