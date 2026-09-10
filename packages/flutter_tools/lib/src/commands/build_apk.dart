@@ -64,12 +64,15 @@ class BuildApkCommand extends BuildSubCommand {
 
   static const _kDefaultJitArchs = <String>['android-arm', 'android-arm64', 'android-x64'];
   static const _kDefaultAotArchs = <String>['android-arm', 'android-arm64', 'android-x64'];
-  List<String> get _targetArchs => getValue(_targetPlatform).isEmpty
-      ? switch (_buildMode) {
-          BuildMode.release || BuildMode.profile => _kDefaultAotArchs,
-          BuildMode.debug || BuildMode.jitRelease => _kDefaultJitArchs,
-        }
-      : getValue(_targetPlatform);
+  List<String> get _targetArchs {
+    final List<String> targetPlatform = getValue(_targetPlatform);
+    return targetPlatform.isEmpty
+        ? switch (_buildMode) {
+            BuildMode.release || BuildMode.profile => _kDefaultAotArchs,
+            BuildMode.debug || BuildMode.jitRelease => _kDefaultJitArchs,
+          }
+        : targetPlatform;
+  }
 
   @override
   final name = 'apk';
