@@ -945,7 +945,7 @@ TEST(JniRouterWindowMetricsTest, RoutingFlipLegacyAndEmbedder) {
   EXPECT_EQ(in_memory_provider->GetSendCount(), 2u);
   EXPECT_EQ(in_memory_provider->GetUpdateCount(), 2u);
 
-  JniRouter::SetEmbedderEnabled(false);
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 // ---------------------------------------------------------------------------
@@ -999,7 +999,7 @@ TEST(FlutterEmbedderNativeWindowMetricsTest, FullSubsystemIntegration) {
             kInvalidArguments);
   EXPECT_EQ(native.NotifyDisplayUpdate(nullptr, disp), kInvalidArguments);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 // ---------------------------------------------------------------------------

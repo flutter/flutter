@@ -809,6 +809,21 @@ TEST(FlutterEmbedderNativeTest, JniDelegateWithMockInvoker) {
   EXPECT_FALSE(delegate->LookupCallbackInformation(999L).has_value());
 }
 
+TEST(FlutterEmbedderNativeTest, TargetFlipDefaultState) {
+  // Phase 5.1 Target Flip: Embedder flags default to true.
+  EXPECT_TRUE(JniRouter::IsGlobalEmbedderEnabled());
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
+  EXPECT_TRUE(FlutterEmbedderNative::IsEmbedderEnabled());
+
+  auto mock_invoker = std::make_shared<MockJvmInvoker>();
+  auto legacy_delegate = std::make_shared<MockLegacyJniDelegate>();
+  auto embedder_delegate = std::make_shared<JniDelegate>(mock_invoker);
+  auto router = std::make_unique<JniRouter>(embedder_delegate, legacy_delegate);
+
+  EXPECT_TRUE(router->IsInstanceEmbedderEnabled());
+  EXPECT_EQ(router->GetActiveRoutingPath(), JniRouter::RoutingPath::kEmbedder);
+}
+
 TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
   auto mock_invoker = std::make_shared<MockJvmInvoker>();
   auto embedder_cache = std::make_shared<InMemoryCallbackCacheProvider>();
@@ -899,9 +914,9 @@ TEST(FlutterEmbedderNativeTest, JniRouterRoutingFlip) {
   router->SetInstanceEmbedderEnabled(std::nullopt);
   EXPECT_TRUE(router->IsInstanceEmbedderEnabled());
 
-  // Reset global flag back to false for test hygiene
-  JniRouter::SetGlobalEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsGlobalEmbedderEnabled());
+  // Reset global flag back to true for test hygiene (Phase 5.1 default)
+  JniRouter::SetGlobalEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsGlobalEmbedderEnabled());
 }
 
 TEST(FlutterEmbedderNativeTest, DynamicInstanceRouterWithCustomInvoker) {
@@ -919,7 +934,7 @@ TEST(FlutterEmbedderNativeTest, DynamicInstanceRouterWithCustomInvoker) {
   EXPECT_CALL(*mock_invoker, OnFirstFrame()).WillOnce(Return(true));
   EXPECT_TRUE(native.GetRouter()->RouteFirstFrame());
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(FlutterEmbedderNativeTest, NativeWindowManagement) {
@@ -1389,7 +1404,7 @@ TEST(FlutterEmbedderNativeTest, JniRouterNullDelegateSafety) {
   EXPECT_FALSE(empty_router->RouteFirstFrame());
   EXPECT_FALSE(empty_router->RoutePreEngineRestart());
 
-  JniRouter::SetEmbedderEnabled(false);
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 // =============================================================================
@@ -2218,8 +2233,8 @@ TEST(ImageDecoderTest, JniRouterImageDecoderRoutingFlip) {
   EXPECT_FALSE(router->RouteGetImageHeader(88L).has_value());
 
   // Reset flag
-  JniRouter::SetEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
 }
 
 TEST(ImageDecoderTest, FlutterEmbedderNativeImageDecoderAndLRUIntegration) {
@@ -2349,8 +2364,8 @@ TEST(MutatorTranslationTest, JniRouterPlatformViewMutatorsRoutingFlip) {
   EXPECT_TRUE(router->RoutePlatformViewMutators(1001L, 0, 0, 100, 200, stack));
 
   // Reset flag
-  JniRouter::SetEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
 }
 
 TEST(MutatorTranslationTest,
@@ -2413,7 +2428,7 @@ TEST(MutatorTranslationTest,
   EXPECT_FALSE(
       native.OnDisplayPlatformView(invalid_pv, 0, 0, 500, 500, 500, 500));
 
-  JniRouter::SetEmbedderEnabled(false);
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 TEST(SemanticsAndAccessibilityTest, JniDelegateSemanticsOperations) {
@@ -2552,8 +2567,8 @@ TEST(SemanticsAndAccessibilityTest, JniRouterSemanticsRoutingFlip) {
   EXPECT_TRUE(router->RouteSemanticsEnabled(true));
 
   // Reset flag
-  JniRouter::SetEmbedderEnabled(false);
-  EXPECT_FALSE(JniRouter::IsEmbedderEnabled());
+  JniRouter::SetEmbedderEnabled(true);
+  EXPECT_TRUE(JniRouter::IsEmbedderEnabled());
 }
 
 TEST(SemanticsAndAccessibilityTest, FlutterEmbedderNativeSemanticsIntegration) {
@@ -2607,7 +2622,7 @@ TEST(SemanticsAndAccessibilityTest, FlutterEmbedderNativeSemanticsIntegration) {
                 nullptr, 100, kFlutterSemanticsActionTap, nullptr, 0),
             kInvalidArguments);
 
-  JniRouter::SetEmbedderEnabled(false);
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 // =============================================================================
@@ -3590,7 +3605,7 @@ TEST(PlatformViewsTest, JniRouterPlatformViewsRoutingFlip) {
   EXPECT_TRUE(router->RouteDisposePlatformView(88));
   EXPECT_FALSE(mem_provider->IsViewCreated(88));
 
-  JniRouter::SetEmbedderEnabled(false);
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 TEST(PlatformViewsTest, FlutterEmbedderNativePlatformViewsIntegration) {
@@ -3663,7 +3678,7 @@ TEST(PlatformViewsTest, FlutterEmbedderNativePlatformViewsIntegration) {
   EXPECT_TRUE(native.DisposePlatformView(77));
   EXPECT_FALSE(mem_provider->IsViewCreated(77));
 
-  JniRouter::SetEmbedderEnabled(false);
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 TEST(PlatformViewsTest, ThreadSafeConcurrentPlatformViewsOperations) {
@@ -3940,7 +3955,7 @@ TEST(WindowMetricsTranslationTest, JniRouterWindowMetricsRoutingFlip) {
   EXPECT_EQ(in_memory_provider->GetSendCount(), 2u);
   EXPECT_EQ(in_memory_provider->GetUpdateCount(), 2u);
 
-  JniRouter::SetEmbedderEnabled(false);
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 TEST(WindowMetricsTranslationTest,
@@ -3994,7 +4009,7 @@ TEST(WindowMetricsTranslationTest,
             kInvalidArguments);
   EXPECT_EQ(native.NotifyDisplayUpdate(nullptr, disp), kInvalidArguments);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(WindowMetricsTranslationTest, InvalidStructSizeRejected) {
@@ -4086,7 +4101,7 @@ TEST(VsyncRoutingTest, JniRouterVsyncRoutingFlip) {
   EXPECT_EQ(vsync_waiter->GetVsyncRequestCount(), 1u);
   EXPECT_TRUE(mock_choreographer->HasPendingCallbacks());
 
-  JniRouter::SetEmbedderEnabled(false);
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 TEST(VsyncRoutingTest, FlutterEmbedderNativeVsyncIntegration) {
@@ -4131,7 +4146,7 @@ TEST(VsyncRoutingTest, FlutterEmbedderNativeVsyncIntegration) {
   EXPECT_EQ(native.NotifyVsync(nullptr, 8888, 10000000LL, 26666666LL),
             kInvalidArguments);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(VsyncRoutingTest, FlutterEmbedderNativeVsync120HzPacing) {
@@ -4335,6 +4350,7 @@ TEST(GlobalVMInitializationTest, JniRouterVMRoutingFlip) {
   EXPECT_EQ(embedder_delegate->GetVmServiceUri(), "http://embedder:8181/");
 
   router.SetInstanceEmbedderEnabled(false);
+  JniRouter::SetEmbedderEnabled(true);
 }
 
 TEST(GlobalVMInitializationTest, FlutterEmbedderNativeVMIntegration) {
@@ -4410,7 +4426,7 @@ TEST(GlobalVMInitializationTest, FlutterEmbedderNativeVMIntegration) {
   EXPECT_EQ(native.InitializeEngine(&config, &bad_args, nullptr, &engine_out),
             kInvalidArguments);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(GlobalVMInitializationTest,
@@ -4475,7 +4491,7 @@ TEST(GlobalVMInitializationTest,
   EXPECT_EQ(project_args->isolate_snapshot_instructions_size,
             sizeof(iso_instr));
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 // =============================================================================
@@ -4569,6 +4585,8 @@ TEST(HardwareBufferTest, JniRouterHardwareBufferRoutingFlip) {
   EXPECT_CALL(*mock_legacy, UnregisterHardwareBufferTexture(texture_id))
       .WillOnce(Return(true));
   EXPECT_TRUE(router.RouteUnregisterHardwareBufferTexture(texture_id));
+
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(HardwareBufferTest, FlutterEmbedderNativeHardwareBufferIntegration) {
@@ -4628,7 +4646,7 @@ TEST(HardwareBufferTest, FlutterEmbedderNativeHardwareBufferIntegration) {
   EXPECT_TRUE(native.OnHardwareBufferFrameAvailable(texture_id));
   EXPECT_TRUE(native.UnregisterHardwareBufferTexture(texture_id));
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(HardwareBufferTest, FlutterEmbedderNativeExternalTextureEngineAPIs) {
@@ -4930,7 +4948,7 @@ TEST(VulkanExternalTextureTest, JniRouterVulkanRoutingFlip) {
   EXPECT_TRUE(router.RouteOnVulkanTextureFrameAvailable(texture_id));
   EXPECT_TRUE(router.RouteUnregisterVulkanTexture(texture_id));
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(VulkanExternalTextureTest, FlutterEmbedderNativeVulkanIntegration) {
@@ -4982,7 +5000,7 @@ TEST(VulkanExternalTextureTest, FlutterEmbedderNativeVulkanIntegration) {
   EXPECT_TRUE(native.OnVulkanTextureFrameAvailable(texture_id));
   EXPECT_TRUE(native.UnregisterVulkanTexture(texture_id));
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(VulkanExternalTextureTest,
@@ -5338,7 +5356,7 @@ TEST(VulkanExternalTextureTest, ThreadSafeConcurrentVulkanOperations) {
     f.get();
   }
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 // =============================================================================
@@ -5549,7 +5567,7 @@ TEST(SurfaceControlHcppTest, JniRouterRoutingFlip) {
   EXPECT_EQ(state->z_order, 3);
   EXPECT_TRUE(router->RouteDestroySurfaceControl(300));
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(SurfaceControlHcppTest, FlutterEmbedderNativeIntegration) {
@@ -5604,7 +5622,7 @@ TEST(SurfaceControlHcppTest, FlutterEmbedderNativeIntegration) {
   native.SetSurfaceControlProvider(new_sc_provider);
   EXPECT_EQ(native.GetSurfaceControlProvider(), new_sc_provider);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(SurfaceControlHcppTest, ThreadSafeConcurrentSurfaceOperations) {
@@ -5659,7 +5677,7 @@ TEST(SurfaceControlHcppTest, ThreadSafeConcurrentSurfaceOperations) {
     f.get();
   }
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 class FailingApplySurfaceControlProvider
@@ -5825,7 +5843,7 @@ TEST(MultiEngineAndAddToAppTest, JniRouterEngineGroupRoutingFlip) {
   EXPECT_TRUE(router.RouteOnEngineGarbageCollected(10));
   EXPECT_EQ(router.RouteGetActiveEngineCount(), 0u);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(MultiEngineAndAddToAppTest, FlutterEmbedderNativeEngineGroupIntegration) {
@@ -5896,7 +5914,7 @@ TEST(MultiEngineAndAddToAppTest, FlutterEmbedderNativeEngineGroupIntegration) {
   native.SetEngineGroupProvider(new_provider);
   EXPECT_EQ(native.GetEngineGroupProvider(), new_provider);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(MultiEngineAndAddToAppTest, ThreadSafeConcurrentMultiEngineOperations) {
@@ -5955,7 +5973,7 @@ TEST(MultiEngineAndAddToAppTest, ThreadSafeConcurrentMultiEngineOperations) {
   EXPECT_TRUE(native.ShutdownSpawnedEngine(5000));
   EXPECT_EQ(native.GetActiveEngineCount(), 0u);
 
-  FlutterEmbedderNative::SetEmbedderEnabled(false);
+  FlutterEmbedderNative::SetEmbedderEnabled(true);
 }
 
 TEST(MultiEngineAndAddToAppTest,
