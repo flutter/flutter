@@ -282,9 +282,9 @@ static bool OutputBundleDepfile(const Switches& switches,
                                 const std::string& target,
                                 const std::set<std::string>& dependencies) {
   std::stringstream stream;
-  stream << target << ":";
+  stream << EscapeDepfilePath(target) << ":";
   for (const auto& dep : dependencies) {
-    stream << " " << dep;
+    stream << " " << EscapeDepfilePath(dep);
   }
   stream << "\n";
   const auto contents = std::make_shared<std::string>(stream.str());

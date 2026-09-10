@@ -10,6 +10,7 @@
 #include "impeller/compiler/compiler_test.h"
 #include "impeller/compiler/source_options.h"
 #include "impeller/compiler/types.h"
+#include "impeller/compiler/utilities.h"
 
 namespace impeller {
 namespace compiler {
@@ -668,6 +669,28 @@ TEST_P(CompilerTestRuntime, Mat2Reflection) {
 TEST_P(CompilerTestUnknownPlatform, MustFailDueToUnknownPlatform) {
   ASSERT_FALSE(
       CanCompileAndReflect("sample.frag", SourceType::kFragmentShader));
+}
+
+TEST(CompilerTest, EscapeDepfilePathEscapesSpaces) {
+  EXPECT_EQ(EscapeDepfilePath("/Users/me/Application Support/constants.glsl"),
+            "/Users/me/Application\\ Support/constants.glsl");
+  EXPECT_EQ(EscapeDepfilePath("C:\\my code\\a.frag"), "C:\\my\\ code\\a.frag");
+}
+
+TEST(CompilerTest, EscapeDepfilePathDoublesBackslashesBeforeASpace) {
+  // 2N+1 backslashes followed by a space read back as N backslashes followed
+  // by a space, so a run that ends up next to a space has to be doubled.
+  EXPECT_EQ(EscapeDepfilePath("/tmp/trailing slash\\ /a.frag"),
+            "/tmp/trailing\\ slash\\\\\\ /a.frag");
+}
+
+TEST(CompilerTest, EscapeDepfilePathLeavesEverythingElseAlone) {
+  // Backslashes away from a space are copied through verbatim, which is the
+  // only way a Windows path survives.
+  EXPECT_EQ(EscapeDepfilePath("C:\\src\\flutter\\a.frag"),
+            "C:\\src\\flutter\\a.frag");
+  EXPECT_EQ(EscapeDepfilePath("/plain/path/a.frag"), "/plain/path/a.frag");
+  EXPECT_EQ(EscapeDepfilePath(""), "");
 }
 
 }  // namespace testing
