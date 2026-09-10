@@ -89,7 +89,8 @@ void fl_opengl_frame_composite(FlOpenGLFrame* self,
     GLint general_format =
         fl_compositor_opengl_get_frame_format(layers, layers_count);
     g_clear_object(&self->framebuffer);
-    self->framebuffer = fl_framebuffer_new(general_format, width, height);
+    self->framebuffer =
+        fl_framebuffer_new(general_format, width, height, FALSE);
 
     // Make a buffer to copy the frame pixels into.
     self->pixels = g_renew(uint8_t, self->pixels, width * height * 4);
