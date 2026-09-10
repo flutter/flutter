@@ -5,7 +5,9 @@ plugins:
     path: ../../../dev/flutter_analyzer_plugin
     diagnostics:
       no_double_clamp: true
-      no_runtimetype_in_tostring: true
+      # There are existing violations in the framework code:
+      # https://github.com/flutter/flutter/issues/192586
+      no_runtimetype_in_tostring: false
       no_stopwatches: true
       lazy_initialized_debug_expensive_fields: true
       protect_public_state_subtypes: true
