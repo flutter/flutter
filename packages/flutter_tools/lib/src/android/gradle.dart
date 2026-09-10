@@ -580,6 +580,14 @@ To fix this, you can either:
           .join(',');
       options.add('-Ptarget-platform=$targetPlatforms');
     }
+    if (androidBuildInfo.releaseManifestEngineShellArgs != null) {
+      // Base64-encode the JSON string to prevent shell or Gradle argument parser
+      // from splitting or stripping double quotes and spaces across operating systems.
+      final String base64JsonArgs = base64Encode(
+        utf8.encode(jsonEncode(androidBuildInfo.releaseManifestEngineShellArgs)),
+      );
+      options.add('-Pflutter.engineShellArgs=$base64JsonArgs');
+    }
     options.add('-Ptarget=$target');
     // If using v1 embedding, we want to use FlutterApplication as the base app.
     final baseApplicationName = project.android.getEmbeddingVersion() == AndroidEmbeddingVersion.v2

@@ -896,6 +896,9 @@ mixin WidgetsBinding
   Future<AppExitResponse> handleRequestAppExit() async {
     var didCancel = false;
     for (final observer in List<WidgetsBindingObserver>.of(_observers)) {
+      if (!_observers.contains(observer)) {
+        continue;
+      }
       try {
         if ((await observer.didRequestAppExit()) == AppExitResponse.cancel) {
           didCancel = true;

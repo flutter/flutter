@@ -13,6 +13,8 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 
+const _allPlatforms = <String>['android', 'ios', 'web', 'windows', 'macos', 'linux'];
+
 void main() {
   group('Analysis options migration', () {
     testWithoutContext('skipped if analysis_options.yaml file is missing', () async {
@@ -161,6 +163,47 @@ analyzer:
       expect(migratedContents, contains('- linux/**'));
     });
 
+    testWithoutContext(
+      'skipped entirely for a Dart-only package (no flutter dependency)',
+      () async {
+        final _TestContext context = _createTestContext(
+          isFlutterProject: false,
+          platforms: <String>['web'],
+        );
+        const analysisOptionsContents = '''
+include: package:lints/recommended.yaml
+''';
+        context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+
+        final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+        await migration.migrate();
+
+        expect(context.analysisOptionsFile.readAsStringSync(), analysisOptionsContents);
+        expect(context.testLogger.statusText, isEmpty);
+      },
+    );
+
+    testWithoutContext('only excludes platform directories that actually exist', () async {
+      final _TestContext context = _createTestContext(platforms: <String>['android', 'ios']);
+      const analysisOptionsContents = '''
+include: package:flutter_lints/flutter.yaml
+''';
+
+      context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+
+      final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+      await migration.migrate();
+
+      final String migratedContents = context.analysisOptionsFile.readAsStringSync();
+      expect(migratedContents, contains('- build/**'));
+      expect(migratedContents, contains('- android/**'));
+      expect(migratedContents, contains('- ios/**'));
+      expect(migratedContents, isNot(contains('- web/**')));
+      expect(migratedContents, isNot(contains('- windows/**')));
+      expect(migratedContents, isNot(contains('- macos/**')));
+      expect(migratedContents, isNot(contains('- linux/**')));
+    });
+
     testWithoutContext('migrates and preserves comments inside exclude list', () async {
       final _TestContext context = _createTestContext();
       const analysisOptionsContents = '''
@@ -203,6 +246,36 @@ analyzer:
       expect(migratedContents, contains('macos/**'));
       expect(migratedContents, contains('linux/**'));
     });
+
+    testWithoutContext(
+      'migrates and merges excludes when list is in flow style with newlines',
+      () async {
+        final _TestContext context = _createTestContext();
+        const analysisOptionsContents = '''
+analyzer:
+  exclude:
+    [
+      foo/**,
+      build/**,
+    ]
+''';
+
+        context.analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+
+        final migration = AnalysisOptionsMigration(context.mockProject, context.testLogger);
+        await migration.migrate();
+
+        final String migratedContents = context.analysisOptionsFile.readAsStringSync();
+        expect(migratedContents, contains('foo/**'));
+        expect(migratedContents, contains('build/**'));
+        expect(migratedContents, contains('android/**'));
+        expect(migratedContents, contains('ios/**'));
+        expect(migratedContents, contains('web/**'));
+        expect(migratedContents, contains('windows/**'));
+        expect(migratedContents, contains('macos/**'));
+        expect(migratedContents, contains('linux/**'));
+      },
+    );
 
     testWithoutContext('skipped if exclusions are inherited via relative include', () async {
       final _TestContext context = _createTestContext();
@@ -432,30 +505,69 @@ typedef _TestContext = ({
   MemoryFileSystem memoryFileSystem,
   File analysisOptionsFile,
   BufferLogger testLogger,
-  FakeFlutterProject mockProject,
+  FlutterProject mockProject,
 });
 
-_TestContext _createTestContext() {
+/// Builds a test context backed by a real [FlutterProject] view of an
+/// in-memory directory, so that platform existence checks (`android.existsSync()`,
+/// etc.) reflect the directories actually created here, matching production
+/// behavior instead of being separately mocked.
+_TestContext _createTestContext({
+  bool isFlutterProject = true,
+  List<String> platforms = _allPlatforms,
+}) {
   final memoryFileSystem = MemoryFileSystem.test();
-  final File analysisOptionsFile = memoryFileSystem.file('analysis_options.yaml');
+  final Directory projectDirectory = memoryFileSystem.currentDirectory;
+  final File analysisOptionsFile = projectDirectory.childFile('analysis_options.yaml');
   final testLogger = BufferLogger(
     terminal: Terminal.test(),
     outputPreferences: OutputPreferences.test(),
   );
-  final mockProject = FakeFlutterProject(directory: memoryFileSystem.currentDirectory);
+
+  projectDirectory
+      .childFile('pubspec.yaml')
+      .writeAsStringSync(
+        isFlutterProject
+            ? '''
+name: test_project
+dependencies:
+  flutter:
+    sdk: flutter
+'''
+            : '''
+name: test_project
+''',
+      );
+
+  if (platforms.contains('android')) {
+    projectDirectory.childDirectory('android').createSync(recursive: true);
+  }
+  if (platforms.contains('ios')) {
+    projectDirectory.childDirectory('ios').createSync(recursive: true);
+  }
+  if (platforms.contains('web')) {
+    projectDirectory.childDirectory('web').childFile('index.html').createSync(recursive: true);
+  }
+  if (platforms.contains('windows')) {
+    projectDirectory
+        .childDirectory('windows')
+        .childFile('CMakeLists.txt')
+        .createSync(recursive: true);
+  }
+  if (platforms.contains('macos')) {
+    projectDirectory.childDirectory('macos').createSync(recursive: true);
+  }
+  if (platforms.contains('linux')) {
+    projectDirectory.childDirectory('linux').createSync(recursive: true);
+  }
+
+  final FlutterProject mockProject = FlutterProject.fromDirectoryTest(projectDirectory);
   return (
     memoryFileSystem: memoryFileSystem,
     analysisOptionsFile: analysisOptionsFile,
     testLogger: testLogger,
     mockProject: mockProject,
   );
-}
-
-class FakeFlutterProject extends Fake implements FlutterProject {
-  FakeFlutterProject({required this.directory});
-
-  @override
-  final Directory directory;
 }
 
 class FakePackageConfig extends Fake implements PackageConfig {

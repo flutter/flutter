@@ -80,6 +80,9 @@ mixin FlutterFeatureFlagsIsEnabled implements FeatureFlags {
   bool get isMacOSArm64OnlyEnabled => isEnabled(macOSArm64Only);
 
   @override
+  bool get isHcppEnabled => isEnabled(hcpp);
+
+  @override
   bool get isToolExtensionsEnabled => isEnabled(toolExtensionsFeature);
 }
 

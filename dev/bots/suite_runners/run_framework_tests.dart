@@ -306,7 +306,6 @@ Future<void> frameworkTestsRunner() async {
     await runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'tools'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_defaults'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'gen_keycodes'));
     await runFlutterTest(path.join(flutterRoot, 'dev', 'benchmarks', 'test_apps', 'stocks'));
     await runFlutterTest(

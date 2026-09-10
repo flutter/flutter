@@ -212,6 +212,22 @@ class StackScope {
     return pointer;
   }
 
+  Pointer<Float> convertFloat32ListToNative(Float32List values) {
+    final Pointer<Float> pointer = allocFloatArray(values.length);
+    for (var i = 0; i < values.length; i++) {
+      pointer[i] = values[i];
+    }
+    return pointer;
+  }
+
+  Pointer<Uint32> convertUint32ListToNative(Uint32List values) {
+    final Pointer<Uint32> pointer = allocUint32Array(values.length);
+    for (var i = 0; i < values.length; i++) {
+      pointer[i] = values[i];
+    }
+    return pointer;
+  }
+
   Pointer<Float> convertPointArrayToNative(List<ui.Offset> points) {
     final Pointer<Float> pointer = allocFloatArray(points.length * 2);
     for (var i = 0; i < points.length; i++) {

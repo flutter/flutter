@@ -35,9 +35,6 @@ import 'platform.dart';
 // ToolExit and a message that is more clear than the FileSystemException by
 // itself.
 
-/// On Windows this is error code 0: ERROR_SUCCESS.
-const int kSystemCodeSuccess = 0;
-
 /// On Windows this is error code 1: ERROR_INVALID_FUNCTION.
 const int kSystemCodeInvalidFunction = 1;
 
@@ -58,10 +55,6 @@ const int kSystemCodeSharingViolation = 32;
 
 /// On Windows this is error code 33: ERROR_LOCK_VIOLATION.
 const int kSystemCodeLockViolation = 33;
-
-/// On Windows this is error code 112: ERROR_DISK_FULL, and on
-/// macOS/Linux, it is error code 28/ENOSPC: No space left on device.
-const int kSystemCodeDeviceFull = 112;
 
 /// On Windows this is error code 1224: ERROR_USER_MAPPED_FILE.
 const int kSystemCodeUserMappedSectionOpened = 1224;
@@ -103,8 +96,9 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       final T result = operation();
       if (result is Future) {
         return (result.whenComplete(() {
-          ErrorHandlingFileSystem._noExitOnFailure = previousValue;
-        })) as T;
+              ErrorHandlingFileSystem._noExitOnFailure = previousValue;
+            }))
+            as T;
       }
       ErrorHandlingFileSystem._noExitOnFailure = previousValue;
       return result;
@@ -1374,8 +1368,9 @@ void _handlePosixException(
   // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
   const eperm = 1;
   const enoent = 2;
-  const enospc = 28;
   const eacces = 13;
+  const enospc = 28;
+  const erofs = 30;
   // Catch errors and bail when:
   final String? errorMessage = switch (errorCode) {
     enoent =>
@@ -1387,6 +1382,17 @@ void _handlePosixException(
       '$message. The target device is full.'
           '\n$e\n'
           'Free up space and try again.',
+    erofs => () {
+      final errorBuffer = StringBuffer();
+      if (message != null && message.isNotEmpty) {
+        errorBuffer.writeln('$message.');
+      }
+      errorBuffer.writeln(
+        'The file system is read-only. Please ensure that the SDK and/or project '
+        'is installed in a location with write permissions.',
+      );
+      return errorBuffer.toString().trim();
+    }(),
     eperm || eacces => () {
       final errorBuffer = StringBuffer();
       if (message != null && message.isNotEmpty) {
@@ -1450,13 +1456,18 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   // https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes
   const kFileNotFound = 2;
   const kPathNotFound = 3;
-  const kDeviceFull = 112;
+  const kAccessDenied = 5;
+  const kWriteProtect = 19;
   const kSharingViolation = 32;
   const kLockViolation = 33;
-  const kUserMappedSectionOpened = 1224;
-  const kAccessDenied = 5;
-  const kFatalDeviceHardwareError = 483;
+  const kDeviceFull = 112;
   const kDeviceDoesNotExist = 433;
+  const kSystemIntegrityPolicyViolation = 454;
+  const kFatalDeviceHardwareError = 483;
+  const kUserMappedSectionOpened = 1224;
+  const kAccessDisabledByPolicy = 1260;
+  const kPrivilegeNotHeld = 1314;
+  const kApplicationControlPolicyBlocked = 4551;
 
   // Catch errors and bail when:
   final String? errorMessage = switch (errorCode) {
@@ -1465,7 +1476,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
           '\n$e\n'
           'This can sometimes happen if the file was deleted or moved while the tool was running.'
           ' Try running "flutter clean" and try again.',
-    kAccessDenied =>
+    kAccessDenied || kWriteProtect || kPrivilegeNotHeld =>
       '$message. The flutter tool cannot access the file or directory.\n'
           'Please ensure that the SDK and/or project is installed in a location '
           'that has read/write permissions for the current user.',
@@ -1485,6 +1496,13 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
       '$message. The device was not found.'
           '\n$e\n'
           'Verify the device is mounted and try again.',
+    kApplicationControlPolicyBlocked ||
+    kAccessDisabledByPolicy ||
+    kSystemIntegrityPolicyViolation =>
+      '${message != null ? "$message. " : ""}An Application Control policy or security policy has blocked execution.\n'
+          '$e\n'
+          'Please verify your Windows Security Smart App Control, Application Control policy (WDAC), '
+          'or Group Policy settings, or add an exclusion for the Flutter SDK directory.',
     _ => null,
   };
   _throwFileSystemException(errorMessage);
