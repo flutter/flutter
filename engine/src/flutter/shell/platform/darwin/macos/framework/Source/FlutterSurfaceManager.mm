@@ -324,10 +324,11 @@ static const int kSurfaceEvictionAge = 30;
     // checked per surface: the cache can hold mixed sizes when the front
     // surfaces of a frame with a different size are returned while a surface
     // of the current size is still held by the window server.
-    [_surfaces filterUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(FlutterSurface* surface,
-                                                                          NSDictionary* bindings) {
-                 return CGSizeEqualToSize(surface.size, size);
-               }]];
+    for (NSInteger i = static_cast<NSInteger>(_surfaces.count) - 1; i >= 0; i--) {
+      if (!CGSizeEqualToSize(_surfaces[i].size, size)) {
+        [_surfaces removeObjectAtIndex:i];
+      }
+    }
 
     FlutterSurface* res;
 
