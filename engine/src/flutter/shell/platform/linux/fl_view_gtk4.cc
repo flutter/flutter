@@ -4,19 +4,13 @@
 
 #include "flutter/shell/platform/linux/fl_view_private.h"
 
-#include <gdk/wayland/gdkwayland.h>
-
-#include "flutter/common/constants.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
-#include "flutter/shell/platform/linux/fl_subsurface.h"
-#include "flutter/shell/platform/linux/fl_subsurface_egl.h"
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
 #include "flutter/shell/platform/linux/fl_view_gtk4_accessibility.h"
-#include "flutter/shell/platform/linux/fl_wayland_display.h"
 
 static FlutterPointerDeviceKind get_pointer_device_kind(GdkEvent* event) {
   GdkDevice* device = gdk_event_get_device(event);
@@ -87,81 +81,6 @@ void fl_view_gtk4_update_accessible_tree(FlView* view) {
   }
 }
 
-static gboolean gtk4_subsurface_enabled() {
-  return g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_SUBSURFACE"), "1") == 0;
-}
-
-void fl_view_gtk4_setup_subsurface(FlView* view) {
-  if (view->engine == nullptr || !gtk4_subsurface_enabled() ||
-      fl_engine_get_renderer_type(view->engine) != kOpenGL ||
-      view->view_id != flutter::kFlutterImplicitViewId) {
-    return;
-  }
-
-  GtkWidget* toplevel = fl_view_gtk4_get_toplevel_window(view);
-  if (toplevel == nullptr || !GTK_IS_NATIVE(toplevel)) {
-    return;
-  }
-  GdkSurface* surface = gtk_native_get_surface(GTK_NATIVE(toplevel));
-  if (!GDK_IS_WAYLAND_SURFACE(surface)) {
-    return;
-  }
-
-  FlWaylandDisplay* display =
-      fl_wayland_display_get_for_display(gtk_widget_get_display(toplevel));
-  if (display == nullptr) {
-    return;
-  }
-  FlSubsurface* subsurface = fl_wayland_display_create_subsurface(
-      display, gdk_wayland_surface_get_wl_surface(surface));
-  if (subsurface == nullptr) {
-    return;
-  }
-
-  const int width = gtk_widget_get_width(view->render_area);
-  const int height = gtk_widget_get_height(view->render_area);
-  if (width <= 0 || height <= 0) {
-    return;
-  }
-  const int scale = MAX(gtk_widget_get_scale_factor(view->render_area), 1);
-  FlSubsurfaceEGL* subsurface_egl =
-      fl_subsurface_egl_new(fl_engine_get_opengl_manager(view->engine),
-                            subsurface, width, height, scale);
-  if (!fl_subsurface_egl_is_ready(subsurface_egl)) {
-    g_object_unref(subsurface_egl);
-    g_object_unref(subsurface);
-    return;
-  }
-
-  graphene_point_t point = GRAPHENE_POINT_INIT(0.0f, 0.0f);
-  graphene_point_t translated_point;
-  if (gtk_widget_compute_point(view->render_area, toplevel, &point,
-                               &translated_point)) {
-    fl_subsurface_set_position(subsurface, static_cast<int>(translated_point.x),
-                               static_cast<int>(translated_point.y));
-  }
-
-  g_mutex_lock(&view->subsurface_mutex);
-  view->subsurface = subsurface;
-  view->subsurface_egl = subsurface_egl;
-  view->subsurface_enabled = TRUE;
-  g_mutex_unlock(&view->subsurface_mutex);
-}
-
-void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height) {
-  g_mutex_lock(&view->subsurface_mutex);
-  const gboolean subsurface_enabled = view->subsurface_enabled;
-  if (view->subsurface_enabled && view->subsurface_egl != nullptr) {
-    const int scale = MAX(gtk_widget_get_scale_factor(view->render_area), 1);
-    fl_subsurface_egl_resize(view->subsurface_egl, width * scale,
-                             height * scale);
-  }
-  g_mutex_unlock(&view->subsurface_mutex);
-
-  if (!subsurface_enabled && width > 0 && height > 0) {
-    fl_view_gtk4_setup_subsurface(view);
-  }
-}
 
 void fl_view_gtk4_set_cursor(FlView* view, const gchar* cursor_name) {
   FlGdkSurface* surface = fl_gtk_widget_get_surface(GTK_WIDGET(view));

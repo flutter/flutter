@@ -344,6 +344,7 @@ source_set("flutter_linux_sources_gtk4") {
     "fl_view_gtk4.cc",
     "fl_view_gtk4_accessibility.cc",
     "fl_view_monitor.cc",
+    "fl_view_rendering_gtk4.cc",
     "fl_wayland_display.cc",
     "fl_window_monitor.cc",
     "fl_window_state_monitor.cc",

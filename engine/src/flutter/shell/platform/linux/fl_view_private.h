@@ -83,6 +83,8 @@ void fl_view_gtk4_update_accessible_name(FlView* view);
 void fl_view_gtk4_update_accessible_tree(FlView* view);
 void fl_view_gtk4_setup_subsurface(FlView* view);
 void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height);
+void fl_view_gtk4_setup_rendering(FlView* view);
+void fl_view_gtk4_present_subsurface(FlView* view);
 #endif
 
 G_END_DECLS

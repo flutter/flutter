@@ -19,8 +19,6 @@
 #include <cstring>
 
 #include "flutter/common/constants.h"
-#include "flutter/shell/platform/linux/fl_compositor_opengl.h"
-#include "flutter/shell/platform/linux/fl_compositor_software.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
@@ -399,18 +397,7 @@ static void fl_view_present_layers(FlRenderable* renderable,
 
   fl_compositor_present_layers(self->compositor, layers, layers_count);
 
-#if FLUTTER_LINUX_GTK4
-  g_autoptr(FlSubsurfaceEGL) subsurface_egl = nullptr;
-  g_mutex_lock(&self->subsurface_mutex);
-  if (self->subsurface_enabled && self->subsurface_egl != nullptr) {
-    subsurface_egl = FL_SUBSURFACE_EGL(g_object_ref(self->subsurface_egl));
-  }
-  g_mutex_unlock(&self->subsurface_mutex);
-  if (subsurface_egl != nullptr && FL_IS_COMPOSITOR_OPENGL(self->compositor)) {
-    fl_compositor_opengl_present_to_subsurface(
-        FL_COMPOSITOR_OPENGL(self->compositor), subsurface_egl);
-  }
-#endif
+  fl_view_gtk4_present_subsurface(self);
 
   // Perform the redraw in the GTK thead.
   g_idle_add(redraw_cb, g_object_ref(self));
@@ -436,57 +423,9 @@ static void fl_view_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface) {
   iface->get_registrar_for_plugin = fl_view_get_registrar_for_plugin;
 }
-
-#if FLUTTER_LINUX_GTK4
-static void setup_opengl(FlView* self) {
-  g_autoptr(GError) error = nullptr;
-
-  FlGdkSurface* surface =
-      fl_gtk_widget_get_surface(GTK_WIDGET(self->render_area));
-  if (surface == nullptr) {
-    return;
-  }
-  self->render_context = gdk_surface_create_gl_context(surface, &error);
-  if (self->render_context == nullptr) {
-    g_warning("Failed to create OpenGL context: %s", error->message);
-    return;
-  }
-
-  if (!gdk_gl_context_realize(self->render_context, &error)) {
-    g_warning("Failed to realize OpenGL context: %s", error->message);
-    return;
-  }
-
-  // If using Wayland, then EGL is in use and we can access the frame
-  // from the Flutter context using EGLImage. If not (i.e. X11 using GLX)
-  // then we have to copy the texture via the CPU.
-  gboolean shareable =
-      GDK_IS_WAYLAND_DISPLAY(fl_gtk_surface_get_display(surface));
-  self->compositor = FL_COMPOSITOR(fl_compositor_opengl_new(
-      fl_engine_get_task_runner(self->engine),
-      fl_engine_get_opengl_manager(self->engine), shareable));
-}
-
-static void setup_software(FlView* self) {
-  self->compositor = FL_COMPOSITOR(
-      fl_compositor_software_new(fl_engine_get_task_runner(self->engine)));
-}
-#endif
-
 static void realize_cb(FlView* self) {
 #if FLUTTER_LINUX_GTK4
-  switch (fl_engine_get_renderer_type(self->engine)) {
-    case kOpenGL:
-      setup_opengl(self);
-      break;
-    case kSoftware:
-      setup_software(self);
-      break;
-    default:
-      break;
-  }
-
-  fl_view_gtk4_setup_subsurface(self);
+  fl_view_gtk4_setup_rendering(self);
 
   if (self->view_id != flutter::kFlutterImplicitViewId) {
     setup_cursor(self);
