@@ -485,39 +485,66 @@ List<String> _flutterCommandArgs(
   final bool pubOrPackagesCommand = command.startsWith('packages') || command.startsWith('pub');
 
   var effectiveLocalEngine = localEngine;
-  if (localEngine != null && localEngineSrcPath != null) {
-    String? targetMode;
-    if (options.contains('--release')) {
-      targetMode = 'release';
-    } else if (options.contains('--profile')) {
-      targetMode = 'profile';
-    } else if (options.contains('--debug')) {
-      targetMode = 'debug';
+  var forwardedOptions = options;
+  if (localEngineSrcPath != null) {
+    String? baseEngine;
+    for (var i = 0; i < options.length; i++) {
+      if (options[i] == '--local-engine' && i + 1 < options.length) {
+        baseEngine = options[i + 1];
+      } else if (options[i].startsWith('--local-engine=')) {
+        baseEngine = options[i].substring('--local-engine='.length);
+      }
     }
-    if (targetMode != null) {
-      if (targetMode == 'debug') {
-        final String candidateUnopt = localEngine
-            .replaceFirst('release', 'debug_unopt')
-            .replaceFirst('profile', 'debug_unopt');
-        if (Directory(path.join(localEngineSrcPath, 'out', candidateUnopt)).existsSync()) {
-          effectiveLocalEngine = candidateUnopt;
+    baseEngine ??= localEngine;
+    if (baseEngine != null) {
+      String? targetMode;
+      if (options.contains('--release')) {
+        targetMode = 'release';
+      } else if (options.contains('--profile')) {
+        targetMode = 'profile';
+      } else if (options.contains('--debug')) {
+        targetMode = 'debug';
+      }
+      if (targetMode != null) {
+        if (targetMode == 'debug') {
+          final String candidateUnopt = baseEngine
+              .replaceFirst('release', 'debug_unopt')
+              .replaceFirst('profile', 'debug_unopt');
+          if (Directory(path.join(localEngineSrcPath, 'out', candidateUnopt)).existsSync()) {
+            effectiveLocalEngine = candidateUnopt;
+          } else {
+            final String candidateOpt = baseEngine
+                .replaceFirst('release', 'debug')
+                .replaceFirst('profile', 'debug');
+            if (Directory(path.join(localEngineSrcPath, 'out', candidateOpt)).existsSync()) {
+              effectiveLocalEngine = candidateOpt;
+            }
+          }
         } else {
-          final String candidateOpt = localEngine
-              .replaceFirst('release', 'debug')
-              .replaceFirst('profile', 'debug');
-          if (Directory(path.join(localEngineSrcPath, 'out', candidateOpt)).existsSync()) {
-            effectiveLocalEngine = candidateOpt;
+          final String candidate = baseEngine
+              .replaceFirst('debug_unopt', targetMode)
+              .replaceFirst('debug', targetMode)
+              .replaceFirst(targetMode == 'release' ? 'profile' : 'release', targetMode);
+          if (Directory(path.join(localEngineSrcPath, 'out', candidate)).existsSync()) {
+            effectiveLocalEngine = candidate;
           }
         }
       } else {
-        final String candidate = localEngine
-            .replaceFirst('debug_unopt', targetMode)
-            .replaceFirst('debug', targetMode)
-            .replaceFirst(targetMode == 'release' ? 'profile' : 'release', targetMode);
-        if (Directory(path.join(localEngineSrcPath, 'out', candidate)).existsSync()) {
-          effectiveLocalEngine = candidate;
+        effectiveLocalEngine = baseEngine;
+      }
+    }
+    if (effectiveLocalEngine != null) {
+      final sanitized = <String>[];
+      for (var i = 0; i < options.length; i++) {
+        if (options[i] == '--local-engine') {
+          i++;
+        } else if (options[i].startsWith('--local-engine=')) {
+          // skip
+        } else {
+          sanitized.add(options[i]);
         }
       }
+      forwardedOptions = sanitized;
     }
   }
 
@@ -535,23 +562,23 @@ List<String> _flutterCommandArgs(
       hostAgent.dumpDirectory!.path,
     ],
     if (effectiveLocalEngine != null &&
-        !options.any(
+        !forwardedOptions.any(
           (String opt) => opt == '--local-engine' || opt.startsWith('--local-engine='),
         )) ...<String>['--local-engine', effectiveLocalEngine],
     if (localEngineHost != null &&
-        !options.any(
+        !forwardedOptions.any(
           (String opt) => opt == '--local-engine-host' || opt.startsWith('--local-engine-host='),
         )) ...<String>['--local-engine-host', localEngineHost],
     if (localEngineSrcPath != null &&
-        !options.any(
+        !forwardedOptions.any(
           (String opt) =>
               opt == '--local-engine-src-path' || opt.startsWith('--local-engine-src-path='),
         )) ...<String>['--local-engine-src-path', localEngineSrcPath],
     if (localWebSdk != null &&
-        !options.any(
+        !forwardedOptions.any(
           (String opt) => opt == '--local-web-sdk' || opt.startsWith('--local-web-sdk='),
         )) ...<String>['--local-web-sdk', localWebSdk],
-    ...options,
+    ...forwardedOptions,
     // Use CI flag when running devicelab tests, except for `packages`/`pub` commands.
     // `packages`/`pub` commands effectively runs the `pub` tool, which does not have
     // the same allowed args.
