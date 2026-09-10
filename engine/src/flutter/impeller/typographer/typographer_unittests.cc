@@ -470,8 +470,33 @@ TEST(TypographerTest, RectanglePackerFillsRows) {
     skyline->AddRect(16, 16, &loc);
   }
 
-  EXPECT_EQ(loc.x(), 256 - 16);
+   EXPECT_EQ(loc.x(), 256 - 16);
   EXPECT_EQ(loc.y(), 16);
+}
+
+TEST(TypographerTest, RectanglePackerRejectsPlacementsExceedingInt16Range) {
+  // Regression test: SkylineRectanglePacker::AddRect() used to narrow its
+  // computed placement coordinates from `int` into `IPoint16::x_`/`y_`
+  // (`int16_t`) with no range check, silently wrapping a valid placement
+  // above y=32767 into a corrupted, negative coordinate while still
+  // reporting success. A sufficiently tall glyph atlas (reachable on
+  // backends where the max texture size is read unclamped from the
+  // driver, e.g. Vulkan's `maxImageDimension2D`) could hit this.
+  constexpr int kAtlasWidth = 4096;
+  constexpr int kAtlasHeight = 40000;  // taller than INT16_MAX (32767)
+  auto packer = RectanglePacker::Factory(kAtlasWidth, kAtlasHeight);
+  ASSERT_NE(packer, nullptr);
+
+  // Fill the skyline up to a height above INT16_MAX.
+  const int kFillHeight = 32800;
+  IPoint16 fill_loc;
+  ASSERT_TRUE(packer->AddRect(kAtlasWidth, kFillHeight, &fill_loc));
+
+  // The next rectangle would be placed at y == kFillHeight, which does not
+  // fit in an int16_t. The packer must reject the placement instead of
+  // truncating the coordinate and reporting a corrupted result as success.
+  IPoint16 glyph_loc;
+  EXPECT_FALSE(packer->AddRect(24, 24, &glyph_loc));
 }
 
 TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
