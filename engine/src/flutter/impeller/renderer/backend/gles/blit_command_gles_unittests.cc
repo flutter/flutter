@@ -112,11 +112,11 @@ TEST(BlitCommandGLESTest, BlitCopyBufferToTextureCommandGLESRGBA) {
     ::testing::InSequence sequence;
     EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_2D, 0u));
     EXPECT_CALL(mock_gles_impl_ref, BindTexture(GL_TEXTURE_2D, 7u));
+    // Upload only after the texture has been rebound.
+    EXPECT_CALL(mock_gles_impl_ref,
+                TexSubImage2D(GL_TEXTURE_2D, _, _, _, _, _, GL_RGBA, _, _))
+        .Times(1);
   }
-  // Expect gl TexSubImage2D with GL_RGBA.
-  EXPECT_CALL(mock_gles_impl_ref,
-              TexSubImage2D(GL_TEXTURE_2D, _, _, _, _, _, GL_RGBA, _, _))
-      .Times(1);
 
   EXPECT_TRUE(command.Encode(*reactor));
 }
