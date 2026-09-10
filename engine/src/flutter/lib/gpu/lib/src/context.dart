@@ -78,6 +78,14 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getSupportsManuallyMippedTextures();
   }
 
+  /// Whether 2D array textures ([TextureType.texture2DArray]) can be created,
+  /// uploaded, and sampled by shaders. True on Metal and Vulkan. Currently
+  /// false on the GLES backend, where shader bundles do not yet carry a
+  /// shader variant that can sample array textures.
+  bool get doesSupportTextureArrays {
+    return _getSupportsTextureArrays();
+  }
+
   /// The maximum anisotropy clamp supported by device samplers (see
   /// [SamplerOptions.maxAnisotropy]).
   ///
@@ -189,6 +197,10 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     bool enableShaderReadUsage = true,
     bool enableShaderWriteUsage = false,
     int mipLevelCount = 1,
+
+    /// The number of layers to allocate for a [TextureType.texture2DArray]
+    /// texture. Must be 1 (the default) for all other texture types.
+    int layerCount = 1,
   }) {
     final resolvedTextureType =
         textureType ??
@@ -200,6 +212,25 @@ base class GpuContext extends NativeFieldWrapperClass1 {
       throw Exception(
         'mipLevelCount ($mipLevelCount) must be in the range [1, $maxMipLevels] '
         'for a ${width}x$height texture',
+      );
+    }
+    if (layerCount < 1) {
+      throw ArgumentError('layerCount ($layerCount) must be at least 1');
+    }
+    if (layerCount > 1 && resolvedTextureType != TextureType.texture2DArray) {
+      throw ArgumentError(
+        'layerCount ($layerCount) must be 1 for textures of type '
+        '$resolvedTextureType',
+      );
+    }
+    if (resolvedTextureType == TextureType.texture2DArray && sampleCount != 1) {
+      throw ArgumentError('2D array textures do not support multisampling');
+    }
+    if (resolvedTextureType == TextureType.texture2DArray &&
+        !doesSupportTextureArrays) {
+      throw ArgumentError(
+        '2D array textures are not supported by this GpuContext. Check '
+        'GpuContext.doesSupportTextureArrays before creating one.',
       );
     }
     if (format.isCompressed) {
@@ -235,6 +266,7 @@ base class GpuContext extends NativeFieldWrapperClass1 {
       enableShaderReadUsage,
       enableShaderWriteUsage,
       mipLevelCount,
+      layerCount,
     );
     // `Texture._initialize` throws on failure, so `result` is always valid here.
     return result;
@@ -318,6 +350,11 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetSupportsManuallyMippedTextures',
   )
   external bool _getSupportsManuallyMippedTextures();
+
+  @Native<Bool Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetSupportsTextureArrays',
+  )
+  external bool _getSupportsTextureArrays();
 
   @Native<Int Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_Context_GetMaxSamplerAnisotropy',

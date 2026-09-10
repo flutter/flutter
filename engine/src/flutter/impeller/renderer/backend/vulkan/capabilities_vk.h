@@ -276,6 +276,9 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsManuallyMippedTextures() const override;
 
   // |Capabilities|
+  bool SupportsTextureArrays() const override;
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override;
 
   // |Capabilities|

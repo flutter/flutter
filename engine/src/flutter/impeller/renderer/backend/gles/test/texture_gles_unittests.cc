@@ -10,11 +10,16 @@
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/range.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
+#include "impeller/renderer/blit_pass.h"
+#include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/command_queue.h"
 
 namespace impeller::testing {
 
@@ -155,24 +160,25 @@ TEST_P(TextureGLESTest, CanCreateAndUpload2DArrayTexture) {
   if (!context_gles.GetReactor()
            ->GetProcTable()
            .GetCapabilities()
-           ->SupportsTextureArray()) {
+           ->SupportsTextureArrays()) {
     GTEST_SKIP() << "2D array textures are not supported on this context.";
   }
 
+  // More than 6 layers, to cover slices beyond the cubemap face range.
   TextureDescriptor desc;
   desc.storage_mode = StorageMode::kHostVisible;
   desc.size = {2, 2};
   desc.format = PixelFormat::kR8G8B8A8UNormInt;
   desc.type = TextureType::kTexture2DArray;
-  desc.array_layer_count = 3;
+  desc.array_layer_count = 8;
   desc.mip_count = 1;
 
   auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
   ASSERT_TRUE(texture);
   EXPECT_EQ(static_cast<int>(texture->GetTextureDescriptor().array_layer_count),
-            3);
-  EXPECT_TRUE(texture->IsSliceValid(2));
-  EXPECT_FALSE(texture->IsSliceValid(3));
+            8);
+  EXPECT_TRUE(texture->IsSliceValid(7));
+  EXPECT_FALSE(texture->IsSliceValid(8));
 
   // Every layer can be uploaded.
   std::vector<uint8_t> layer(2u * 2u * 4u, 0xFF);
@@ -180,6 +186,28 @@ TEST_P(TextureGLESTest, CanCreateAndUpload2DArrayTexture) {
        ++slice) {
     EXPECT_TRUE(texture->SetContents(layer.data(), layer.size(), slice));
   }
+  EXPECT_TRUE(context_gles.GetReactor()->React());
+
+  // Every layer can also be uploaded through the blit path.
+  auto staging = GetContext()->GetResourceAllocator()->CreateBufferWithCopy(
+      layer.data(), layer.size());
+  ASSERT_TRUE(staging);
+  auto command_buffer = GetContext()->CreateCommandBuffer();
+  ASSERT_TRUE(command_buffer);
+  auto blit_pass = command_buffer->CreateBlitPass();
+  ASSERT_TRUE(blit_pass);
+  for (size_t slice = 0; slice < static_cast<size_t>(desc.array_layer_count);
+       ++slice) {
+    EXPECT_TRUE(blit_pass->AddCopy(BufferView(staging, Range(0, layer.size())),
+                                   texture, std::nullopt,
+                                   /*label=*/"ArrayLayerUpload",
+                                   /*mip_level=*/0, slice));
+  }
+  EXPECT_TRUE(blit_pass->EncodeCommands());
+  EXPECT_TRUE(GetContext()
+                  ->GetCommandQueue()
+                  ->Submit({std::move(command_buffer)})
+                  .ok());
   EXPECT_TRUE(context_gles.GetReactor()->React());
 }
 

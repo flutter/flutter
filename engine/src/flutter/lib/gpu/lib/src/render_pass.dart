@@ -33,8 +33,9 @@ base class ColorAttachment {
   int mipLevel;
 
   /// The slice of [texture] to render into. For cubemap textures this selects
-  /// the face in the order `+X, -X, +Y, -Y, +Z, -Z`. Must be in the range
-  /// `[0, texture.sliceCount)` (always 0 for non-cubemap textures).
+  /// the face in the order `+X, -X, +Y, -Y, +Z, -Z`; for 2D array textures it
+  /// selects the layer. Must be in the range `[0, texture.sliceCount)`
+  /// (always 0 for other texture types).
   int slice;
 
   void _validate() {
