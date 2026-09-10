@@ -41,6 +41,28 @@ android {
         debug {
             debuggable true
         }
+        release {
+            // `debuggable` only controls the Android manifest attribute (adb
+            // run-as / JDWP access) needed to adb-push the milestone's
+            // placeholder flutter_assets/app.so into a non-rooted device's
+            // app-private files dir; it does not affect the Rust cdylib
+            // itself, which is always a real `cargo build --release`
+            // artifact regardless of this flag.
+            debuggable true
+            // No release keystore exists for this milestone-scaffold app; the
+            // default debug signing config is a dev-only convenience for
+            // on-device validation, not production signing.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    // "lint vital" (AGP's mandatory pre-release lint pass) is irrelevant for
+    // this milestone-scaffold app and, separately, currently crashes under
+    // newer JDKs unrelated to anything in this source tree; skip it so
+    // assembleRelease actually reaches the packaging task.
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
     }
 }
 

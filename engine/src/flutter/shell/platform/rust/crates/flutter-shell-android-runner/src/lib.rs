@@ -1,3 +1,10 @@
+// This crate's dependencies (android_logger, winit's android-game-activity
+// feature, flutter-shell-winit) are declared `cfg(target_os = "android")` in
+// Cargo.toml, so host builds (e.g. `cargo test --workspace` on Linux) never
+// pull them in; gate the crate body the same way so those builds see an
+// empty crate instead of unresolved-import errors.
+#![cfg(target_os = "android")]
+
 //! Android GameActivity entry point.
 //!
 //! Milestone 1 (see `flutter-rs-proggress.md`) proved the native
@@ -15,6 +22,13 @@
 //! already exist under the app's files directory (adb-pushed ahead of
 //! launch) and points `ShellConfig` at it directly, matching how Linux
 //! already works. Real `AAssetManager`-backed loading is a later milestone.
+//!
+//! Milestone 3 adds release/AOT support: `cfg!(debug_assertions)` reflects
+//! the cdylib's own Cargo profile (`build_rust.py` now passes `--release`
+//! when GN's `FLUTTER_RUNTIME_MODE=release`, matching how
+//! `runner-rs/src/main.rs.tmpl` picks its engine profile on Linux). In
+//! release, `app.so` is expected next to `flutter_assets/` in the same
+//! adb-pushed files directory.
 
 use winit::platform::android::activity::AndroidApp;
 
@@ -35,11 +49,16 @@ fn android_main(app: AndroidApp) {
     // here before launch; see flutter-rs-proggress.md milestone 2 for why
     // this is a placeholder rather than real APK asset loading.
     let files_dir = "/data/data/dev.flutter.rustshell/files";
+    let aot_library_path = if cfg!(debug_assertions) {
+        String::new()
+    } else {
+        format!("{files_dir}/app.so")
+    };
     let config = flutter_shell_winit::ShellConfig {
         title: "Flutter Rust Shell (Android)".to_owned(),
         assets_path: format!("{files_dir}/flutter_assets"),
         icu_data_path: format!("{files_dir}/icudtl.dat"),
-        aot_library_path: String::new(),
+        aot_library_path,
         presentation_stats_path: None,
     };
 

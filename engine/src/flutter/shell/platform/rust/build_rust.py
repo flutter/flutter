@@ -71,6 +71,8 @@ def main() -> None:
       "--package",
       args.package,
   ]
+  if profile_dir == "release":
+    command.append("--release")
   if args.target:
     command += ["--target", args.target]
     cargo_env_target = args.target.replace("-", "_").upper()

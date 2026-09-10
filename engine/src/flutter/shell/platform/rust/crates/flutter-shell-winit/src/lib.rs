@@ -1936,6 +1936,76 @@ impl TextInputSession {
             .then(|| self.encode_update(client))
     }
 
+    #[cfg(target_os = "android")]
+    fn ime_allowed(&self) -> bool {
+        self.ime_allowed
+    }
+
+    /// Builds the GameActivity `TextInputState` to seed its IME buffer with
+    /// when the keyboard is shown, so the soft keyboard's `InputConnection`
+    /// starts from Flutter's current field contents instead of an empty
+    /// buffer.
+    #[cfg(target_os = "android")]
+    fn android_seed_state(&self) -> winit::platform::android::activity::input::TextInputState {
+        use winit::platform::android::activity::input::{TextInputState, TextSpan};
+        TextInputState {
+            text: self.editing_state.text.clone(),
+            selection: TextSpan {
+                start: self.editing_state.selection_base.max(0) as usize,
+                end: self.editing_state.selection_extent.max(0) as usize,
+            },
+            compose_region: (self.editing_state.composing_base >= 0
+                && self.editing_state.composing_extent >= 0)
+                .then_some(TextSpan {
+                    start: self.editing_state.composing_base as usize,
+                    end: self.editing_state.composing_extent as usize,
+                }),
+        }
+    }
+
+    /// Applies GameActivity's polled `TextInputState` (see
+    /// `poll_android_text_input`) as the new editing state, replacing
+    /// Flutter's UTF-16 selection/composing model directly rather than
+    /// synthesizing `Ime::Preedit`/`Commit` deltas the way the Linux Wayland
+    /// path does, since GameActivity only ever exposes the full current
+    /// buffer, not an incremental edit.
+    #[cfg(target_os = "android")]
+    fn apply_android_text_input_state(
+        &mut self,
+        state: winit::platform::android::activity::input::TextInputState,
+    ) -> Option<Vec<u8>> {
+        let client = self.active_client?;
+        let selection_base = state.selection.start as i64;
+        let selection_extent = state.selection.end as i64;
+        let (composing_base, composing_extent) = match state.compose_region {
+            Some(span) => (span.start as i64, span.end as i64),
+            None => (-1, -1),
+        };
+        let changed = self.editing_state.text != state.text
+            || self.editing_state.selection_base != selection_base
+            || self.editing_state.selection_extent != selection_extent
+            || self.editing_state.composing_base != composing_base
+            || self.editing_state.composing_extent != composing_extent;
+        if !changed {
+            return None;
+        }
+        self.editing_state.text = state.text;
+        self.editing_state.selection_base = selection_base;
+        self.editing_state.selection_extent = selection_extent;
+        self.editing_state.selection_affinity = TextAffinity::Downstream;
+        self.editing_state.selection_is_directional = false;
+        self.editing_state.composing_base = composing_base;
+        self.editing_state.composing_extent = composing_extent;
+        if !self.editing_state.validate() {
+            // GameActivity's spans are Java/UTF-16-index-based like Flutter's
+            // own model, but defend against a malformed report the same way
+            // the Wayland/X11 IME and raw-key paths already validate at
+            // their boundaries rather than forwarding a corrupt range.
+            return None;
+        }
+        Some(self.encode_update(client))
+    }
+
     fn encode_update(&self, client: TextInputClientId) -> Vec<u8> {
         #[derive(Serialize)]
         struct UpdateEditingState<'a> {
@@ -3019,6 +3089,8 @@ fn run_application_with_fixture(
         retained_textures,
         demo_fixture,
         demo_texture: None,
+        #[cfg(target_os = "android")]
+        android_app: None,
     };
     event_loop.run_app(application)?;
     match registration_error.lock().take() {
@@ -3043,6 +3115,13 @@ struct ShellApplication {
     retained_textures: Arc<Mutex<Vec<Arc<RegisteredWgpuTexture>>>>,
     demo_fixture: Option<DemoTextureFixture>,
     demo_texture: Option<DemoTexture>,
+    // Android has no `WindowEvent::Ime`: winit's Android backend never emits
+    // one (GameActivity's soft keyboard writes committed/composing text into
+    // its own JNI-owned buffer instead). Polled once per event-loop turn in
+    // `poll_android_text_input` to bridge that buffer into the same
+    // `TextInputSession` the Linux Wayland/X11 IME path feeds.
+    #[cfg(target_os = "android")]
+    android_app: Option<winit::platform::android::activity::AndroidApp>,
 }
 struct DemoTextureFixture {
     texture: Arc<Mutex<Option<DemoTextureHandle>>>,
@@ -3502,6 +3581,11 @@ impl Drop for ShellApplication {
 
 impl ApplicationHandler for ShellApplication {
     fn can_create_surfaces(&mut self, event_loop: &dyn ActiveEventLoop) {
+        #[cfg(target_os = "android")]
+        {
+            use winit::platform::android::ActiveEventLoopExtAndroid;
+            self.android_app = Some(event_loop.android_app().clone());
+        }
         let already_bootstrapped = self
             .windows
             .borrow()
@@ -4129,6 +4213,8 @@ impl ApplicationHandler for ShellApplication {
             self.task_runner_host.dispatch_due_tasks();
         });
         self.apply_text_input_commands();
+        #[cfg(target_os = "android")]
+        self.poll_android_text_input();
         if let Some(demo) = &mut self.demo_texture {
             for message in self.text_input_inbox.drain_texture_fixture_messages() {
                 if message == "ready" {
@@ -4339,12 +4425,23 @@ impl ApplicationHandler for ShellApplication {
             demo.next_frame = Instant::now() + Duration::from_millis(16);
         }
         let task_deadline = self.task_runner_host.next_deadline();
-        let next_deadline = match (task_deadline, self.demo_texture.as_ref()) {
+        #[cfg_attr(not(target_os = "android"), allow(unused_mut))]
+        let mut next_deadline = match (task_deadline, self.demo_texture.as_ref()) {
             (Some(task), Some(demo)) => Some(task.min(demo.next_frame)),
             (Some(task), None) => Some(task),
             (None, Some(demo)) => Some(demo.next_frame),
             (None, None) => None,
         };
+        // Android has no event to wake the loop when GameActivity's text
+        // buffer changes (see `poll_android_text_input`), so force a short
+        // poll cadence while a field is focused instead of only picking up
+        // typed text whenever something else (e.g. cursor blink) happens to
+        // wake the loop.
+        #[cfg(target_os = "android")]
+        if self.text_input_session.ime_allowed() {
+            let poll_deadline = Instant::now() + Duration::from_millis(16);
+            next_deadline = Some(next_deadline.map_or(poll_deadline, |d| d.min(poll_deadline)));
+        }
         match next_deadline {
             Some(deadline) => event_loop.set_control_flow(ControlFlow::WaitUntil(deadline)),
             None => event_loop.set_control_flow(ControlFlow::Wait),
@@ -4850,6 +4947,14 @@ impl ShellApplication {
                         ImeRequest::Disable
                     };
                     let _ = window.request_ime_update(request);
+                    // Android has no IME "activate with surrounding text"
+                    // request; seed GameActivity's own text buffer directly
+                    // so its soft keyboard starts from Flutter's current
+                    // field contents instead of an empty one.
+                    #[cfg(target_os = "android")]
+                    if allowed && let Some(app) = &self.android_app {
+                        app.set_text_input_state(self.text_input_session.android_seed_state());
+                    }
                 }
                 Some(TextInputEffect::SetCursorRect(rect)) => {
                     if window
@@ -4872,6 +4977,26 @@ impl ShellApplication {
     fn send_text_input_update(&self, message: &[u8]) {
         if let Some(shell) = { self.windows.borrow().shell } {
             send_cpp_platform_message(shell, TEXT_INPUT_CHANNEL, message);
+        }
+    }
+
+    /// Bridges GameActivity's own text buffer into Flutter. Winit's Android
+    /// backend never emits `WindowEvent::Ime` (see the `android_app` field's
+    /// doc comment), so unlike Wayland/X11 this polls once per event-loop
+    /// turn instead of reacting to a native event; `about_to_wait` also
+    /// shortens the wake deadline while `ime_allowed` so this stays
+    /// responsive instead of only running on the cursor-blink cadence.
+    #[cfg(target_os = "android")]
+    fn poll_android_text_input(&mut self) {
+        if !self.text_input_session.ime_allowed() {
+            return;
+        }
+        let Some(app) = &self.android_app else {
+            return;
+        };
+        let state = app.text_input_state();
+        if let Some(message) = self.text_input_session.apply_android_text_input_state(state) {
+            self.send_text_input_update(&message);
         }
     }
 }

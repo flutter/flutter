@@ -52,6 +52,20 @@ the tool AOT-compiles the Dart app, builds `runner-rs` with `cargo build
 --release`, and links it against a second, precompiled-runtime engine build
 that the CI workflow now produces alongside the existing debug one.
 
+Android work (milestones 1–2) has separately proved a GameActivity cdylib that
+dynamically links a GN-built engine and renders a real Dart isolate, but only
+in debug/JIT mode. Milestone 3 brings the same native release/AOT support
+Linux already has to that Android scaffold: fixed a `build_rust.py` bug that
+silently built every Cargo GN action's debug profile regardless of
+`FLUTTER_RUNTIME_MODE`, added `aot_library_path` derivation to the Android
+runner, and validated a real release-mode `app.so` rendering interactively on
+a physical device with no `kernel_blob.bin` present (proving the AOT path,
+not a silent JIT fallback). A generalized `AndroidRustShellDevice` in
+flutter_tools (matching `RustShellDevice` for Linux) — generated-app Android
+templates, real Gradle-driven `flutter run -d <android>`, and `AAssetManager`
+asset loading instead of the adb-push placeholder — remains future work, the
+same way Linux's own flutter_tools integration followed its native runner.
+
 ## Status
 
 | Area | Status | Evidence |
@@ -78,6 +92,7 @@ that the CI workflow now produces alongside the existing debug one.
 | Application plugin registration | Runtime and Flutter-tool generation complete | `flutter-shell-winit::run_application` accepts `register_application(&mut PluginRegistrar)` and invokes it once after startup capabilities are installed. For `flutter.shell: rust` projects, the Flutter tool discovers source-linked Rust plugins from the resolved Pub graph, updates the marked dependency block in `runner-rs/Cargo.toml`, generates `flutter_plugins.rs`, and validates a single resolved plugin SDK. |
 | Flutter CLI launch | Linux x64 debug and release complete | `flutter run -d rust` discovers the Rust shell as a built-in local device for `flutter.shell: rust` applications. Debug mode builds `build/flutter_assets` and the generated Cargo runner and uses the normal resident-runner lifecycle for logs, hot reload, and shutdown. Release mode AOT-compiles the Dart app to `app.so`, builds `runner-rs` with `cargo build --release`, and launches the release runner directly (no VM-service/resident-runner support, matching other release desktop targets). Profile mode is not yet supported. |
 | Rust-shell SDK distribution | BETA channel complete | CI (`flutter-rust-beta.yml`) configures and builds the engine in both `debug` and `release` runtime modes, packages the workspace crates plus each engine's `libflutter_rust_engine.so`/`icudtl.dat` under `lib/debug/` and `lib/release/`, and republishes them to a rolling `BETA` GitHub release tagged to the latest imported Flutter version. `flutter pub get` on a `flutter.shell: rust` project prefers a local engine checkout's `out/host_debug`/`out/host_release` when present and otherwise downloads and unpacks the BETA tarball into `.dart_tool/flutter_rs/sdk/`; `runner-rs/build.rs` links whichever profile directory matches Cargo's own build profile. |
+| Android scaffold (native) | AOT/release mode complete, debug/JIT already worked | The GameActivity cdylib (`crates/flutter-shell-android-runner`) dynamically links a GN-built `libflutter_rust_engine.so` and renders a real Dart isolate/Impeller frame in both runtime modes. `aot_library_path` now derives from `cfg!(debug_assertions)` instead of being hardcoded empty, matching `runner-rs/src/main.rs.tmpl`'s approach on Linux. Asset loading is still an adb-pushed placeholder (`flutter_assets/`/`icudtl.dat`/`app.so` copied into the app's private files dir before launch); real `AAssetManager`-backed loading and a flutter_tools-driven `AndroidRustShellDevice` remain future work. |
 | Rust external texture | Engine seam complete | `RustExternalTexture` uses Flutter's existing texture registry and dirty-frame scheduling path. It retains the last good image, honors freeze, retries failed acquisition, imports borrowed wgpu Vulkan image/view handles without taking ownership, and brackets Impeller sampling with producer/consumer semaphores. Context loss, unregister, and repeated teardown are covered by focused tests. |
 | Engine-owned wgpu texture | SDK runtime path complete | `WgpuTextureRing` owns three RGBA8 textures, views, and reusable semaphore pairs on the application's shared device. A bounded Tokio channel carries available slot IDs: `try_next_frame` applies immediate backpressure, `next_frame().await` sleeps until Flutter releases a slot, an unpresented reservation returns its slot on drop, and shutdown wakes waiters with `Shutdown`. Ready frames remain queue-serialized through Flutter's acquire callback. The opt-in animated proof now runs through normal `FlutterRustPlugin` registration and public SDK operations. |
 | `WgpuTexture` plugin API | Public contract and Linux runtime adapter complete | `flutter-plugin-sdk` exposes validated texture descriptors, `GpuTextures::create_texture`, stable Flutter texture IDs, nonblocking `try_next_frame`, asynchronous `next_frame().await`, single-record frame reservations, consuming `present(self)`, and its pinned API crate at `gpu::wgpu` so plugins do not duplicate the Git dependency. The hidden backend uses `async-trait`; no manual `Future` or `Poll` API leaks into the SDK. The winit factory registers the callback-owning ring, routes dirty notifications and handle-drop unregister through the main thread, and releases each retained ring after C++ confirms raster-thread registry removal. The recording closure receives a device, encoder, and view—but no queue—so plugins cannot violate shared-queue external synchronization. |
@@ -646,6 +661,73 @@ that the CI workflow now produces alongside the existing debug one.
     `_RustAotBundle.dependencies`, so both share the same `KernelSnapshot` and
     assets stay consistent with the AOT-compiled code.
 
+### Milestone 3 — Android AOT/release mode
+
+- Fixed `build_rust.py`: it derived `profile_dir` from
+  `FLUTTER_RUNTIME_MODE` to decide where to look for the built artifact, but
+  never actually passed `--release` to the `cargo build` invocation itself —
+  so cargo always produced a debug binary regardless of the requested mode,
+  and the script would then fail to find it under `target/release`. This
+  affected every platform's Cargo GN action (`flutter_shell_core_rust`,
+  `flutter_shell_winit_rust`, `flutter_shell_android_runner_rust`, ...), not
+  only Android.
+- Replaced the Android runner's hardcoded `aot_library_path: String::new()`
+  with a `cfg!(debug_assertions)` derivation mirroring
+  `runner-rs/src/main.rs.tmpl`: JIT (empty path) in debug, `{files_dir}/app.so`
+  in release, keeping the existing adb-pushed `flutter_assets/`/`icudtl.dat`
+  placeholder convention.
+- Added a `release` Gradle build type to `android_shell_app/app/build.gradle`
+  (debug-signed, since this milestone-scaffold app has no release keystore)
+  and disabled `lintVital`, which otherwise blocks `assembleRelease` under
+  this environment's JDK independent of anything in this source tree. Left
+  `debuggable true` on the release build type deliberately: it only controls
+  the manifest attribute that gates `adb run-as` access to the app's private
+  files directory (needed to push the placeholder assets/AOT library into a
+  non-rooted device), not the Rust cdylib itself, which is always a genuine
+  `cargo build --release` artifact regardless of this flag.
+- Gated the Android runner crate's body with `#![cfg(target_os = "android")]`
+  to match its already-`cfg(target_os = "android")`-gated dependencies in
+  `Cargo.toml`. Without it, `cargo test --workspace` on a host Linux checkout
+  failed to compile the crate (unresolved `android_logger`/`log`/
+  `flutter-shell-winit` imports) — a pre-existing gap since the crate was
+  first added, not something introduced by this milestone's other changes,
+  but it blocked running the workspace test suite as a regression check.
+- Configured `out/android_release_arm64` (`--android --android-cpu arm64
+  --runtime-mode release`) and built `flutter_shell_android_runner_rust`,
+  `flutter_rust_engine`, and the host-side `clang_x64/gen_snapshot` cross
+  tool, plus `dart_sdk`/`frontend_server_aot` in `out/host_release` (needed
+  to produce a real AOT snapshot; they were not already built there).
+
+### Validation — Milestone 3
+
+- Ran `cargo +1.93.1 test --workspace --locked` after the `build_rust.py` and
+  `cfg` fixes: all crate and documentation tests pass (3 + 28 unit tests
+  across `flutter-shell-core`/`flutter-shell-winit`, 0 doc tests, no
+  regressions).
+- Rebuilt `flutter_shell_android_runner_rust` for `out/android_release_arm64`
+  and confirmed cargo actually invokes `--release` now (`Finished \`release\`
+  profile [optimized] target(s)` in the build log, where it previously always
+  built debug).
+- Produced a real release AOT snapshot (`app.so`) and tree-shaken
+  `flutter_assets/` for an existing multi-window sample app by invoking
+  `gen_snapshot --deterministic --snapshot_kind=app-aot-elf` directly against
+  the kernel dill `flutter build bundle --release --target-platform
+  android-arm64` produced, using the locally built `out/android_release_arm64`
+  engine and `out/host_release`'s frontend server via `--local-engine`.
+- Built a release-signed APK (`android_shell_app`'s Gradle project, JDK from
+  Android Studio's bundled JBR since the system default was too new for this
+  Gradle/AGP version) with both `libflutter_shell_android_runner.so` and
+  `libflutter_rust_engine.so` staged into `jniLibs/arm64-v8a/`, installed it
+  on a physical Android device over adb, and adb-pushed `flutter_assets/`,
+  `app.so`, and `icudtl.dat` into its private files directory — deliberately
+  without a `kernel_blob.bin`, so a successful boot could only mean the AOT
+  path engaged, not a silent JIT fallback.
+- Launched the app: it rendered real interactive UI (a modal dialog, live
+  text field, and soft keyboard from the sample's windowing/IME test screen),
+  stayed alive and responsive, and produced no `FATAL`/panic in `logcat` for
+  the whole session. A screenshot confirmed the rendered content matched the
+  sample app, not a blank or crashed surface.
+
 ## Validation
 
 - Created a fresh generated Rust-shell application and ran it through `flutter
@@ -870,6 +952,11 @@ that the CI workflow now produces alongside the existing debug one.
 2. Begin Phase 3 with a Windows platform adapter and the existing Vulkan GPU
    path once the generated application workflow is usable without hand-written
    Cargo glue.
+3. Generalize Android from a fixed milestone-scaffold app to generated
+   applications: a flutter_tools `AndroidRustShellDevice` (matching
+   `RustShellDevice`'s role for Linux), per-project `runner-rs` Android
+   templates, real Gradle-driven `flutter run -d <android-device>`, and real
+   `AAssetManager`-backed asset loading in place of the adb-push placeholder.
 
 ## Constraints carried into implementation
 
