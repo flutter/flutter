@@ -142,16 +142,12 @@ class BuildAarCommand extends BuildSubCommand {
         : '1.0';
 
     final File targetFile = _fileSystem.file(_fileSystem.path.join('lib', 'main.dart'));
-    for (final (buildMode, descriptor) in const [
-      ('debug', _debugMode),
-      ('profile', _profileMode),
-      ('release', _releaseMode),
-    ]) {
+    for (final FlagOptionDescriptor descriptor in const [_debugMode, _profileMode, _releaseMode]) {
       if (getValue(descriptor)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
             await getBuildInfo(
-              forcedBuildMode: BuildMode.fromCliName(buildMode),
+              forcedBuildMode: BuildMode.fromCliName(descriptor.name),
               forcedTargetFile: targetFile,
             ),
             targetArchs: targetArchitectures,
