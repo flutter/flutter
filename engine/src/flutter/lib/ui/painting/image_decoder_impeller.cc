@@ -30,7 +30,6 @@
 #include "third_party/skia/include/core/SkPixmap.h"
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkSize.h"
-#include "third_party/skia/modules/skcms/skcms.h"
 
 namespace flutter {
 
