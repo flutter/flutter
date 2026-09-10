@@ -155,26 +155,6 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
               (override));
 
   MOCK_METHOD(bool,
-              UpdateSemantics,
-              (const std::vector<uint8_t>& buffer,
-               const std::vector<std::string>& strings,
-               const std::vector<std::vector<uint8_t>>& string_attribute_args),
-              (override));
-
-  MOCK_METHOD(bool,
-              UpdateCustomAccessibilityActions,
-              (const std::vector<uint8_t>& actions_buffer,
-               const std::vector<std::string>& action_strings),
-              (override));
-
-  MOCK_METHOD(bool,
-              UpdateSemantics,
-              (const FlutterSemanticsUpdate2& update),
-              (override));
-
-  MOCK_METHOD(bool, SetSemanticsTreeEnabled, (bool enabled), (override));
-
-  MOCK_METHOD(bool,
               SetApplicationLocale,
               (const std::string& locale),
               (override));
@@ -211,86 +191,6 @@ class MockLegacyJniDelegateForMetrics : public LegacyJniDelegate {
               RequestDartDeferredLibrary,
               (int loading_unit_id),
               (override));
-
-  MOCK_METHOD(int64_t,
-              CreatePlatformView,
-              (const PlatformViewCreationParams& params,
-               PlatformViewCompositionType composition_type),
-              (override));
-
-  MOCK_METHOD(bool, DisposePlatformView, (int64_t view_id), (override));
-
-  MOCK_METHOD(bool,
-              ResizePlatformView,
-              (const PlatformViewResizeRequest& request),
-              (override));
-
-  MOCK_METHOD(bool,
-              OffsetPlatformView,
-              (int64_t view_id, double top, double left),
-              (override));
-
-  MOCK_METHOD(bool,
-              SetPlatformViewDirection,
-              (int64_t view_id, int32_t direction),
-              (override));
-
-  MOCK_METHOD(bool, ClearPlatformViewFocus, (int64_t view_id), (override));
-
-  MOCK_METHOD(bool,
-              DispatchPlatformViewTouch,
-              (const PlatformViewTouch& touch),
-              (override));
-
-  MOCK_METHOD(bool,
-              OnDisplayPlatformView,
-              (const PlatformViewGeometry& geometry),
-              (override));
-
-  MOCK_METHOD(bool,
-              OnDisplayPlatformView,
-              (const FlutterPlatformView& platform_view,
-               int32_t x,
-               int32_t y,
-               int32_t width,
-               int32_t height,
-               int32_t view_width,
-               int32_t view_height),
-              (override));
-
-  MOCK_METHOD(bool, HidePlatformView, (int64_t view_id), (override));
-
-  MOCK_METHOD(bool,
-              SynchronizeToNativeViewHierarchy,
-              (bool synchronize),
-              (override));
-
-  MOCK_METHOD(bool, OnBeginFrame, (), (override));
-
-  MOCK_METHOD(bool, OnEndFrame, (), (override));
-
-  MOCK_METHOD(std::optional<int32_t>, CreateOverlaySurface, (), (override));
-
-  MOCK_METHOD(bool, DestroyOverlaySurfaces, (), (override));
-
-  MOCK_METHOD(bool,
-              OnDisplayOverlaySurface,
-              (const PlatformViewOverlay& overlay),
-              (override));
-
-  MOCK_METHOD(bool, ShowOverlaySurface, (int32_t surface_id), (override));
-
-  MOCK_METHOD(bool, HideOverlaySurface, (int32_t surface_id), (override));
-
-  MOCK_METHOD(bool, SetHcppEnabled, (bool enabled), (override));
-
-  MOCK_METHOD(bool, CreatePlatformViewTransaction, (), (override));
-
-  MOCK_METHOD(bool, SwapPlatformViewTransactions, (), (override));
-
-  MOCK_METHOD(bool, ApplyPlatformViewTransactions, (), (override));
-
-  MOCK_METHOD(bool, IsHcppEnabled, (), (const, override));
 
   MOCK_METHOD(bool,
               CreateSurfaceControl,
