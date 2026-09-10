@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- GameActivity is built on AppCompatActivity and requires an
+         AppCompat theme; the plain platform Theme.NoTitleBar.Fullscreen
+         throws IllegalStateException at setContentView time. -->
+    <style name="AndroidRunnerTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>

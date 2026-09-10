@@ -1,0 +1,26 @@
+[package]
+name = "flutter-shell-android-runner"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Android GameActivity entry point proving the winit/wgpu presentation seam"
+
+[lib]
+# Android has no separate host executable: the OS loads this cdylib directly
+# and calls its exported `android_main`. This crate is deliberately the only
+# one in the workspace that depends on `android-activity` (via winit's
+# android-game-activity feature), matching winit-android's requirement that
+# only the final artifact define that entry point.
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[target.'cfg(target_os = "android")'.dependencies]
+android_logger = "=0.15.1"
+log = "=0.4.33"
+pollster = "=0.4.0"
+raw-window-handle = "=0.6.2"
+wgpu = { git = "https://github.com/gfx-rs/wgpu.git", rev = "014d9e84813a2946febfa4888694c0b70565b2f5", default-features = false, features = ["vulkan"] }
+winit = { version = "=0.31.0-beta.2", default-features = false, features = [
+  "android-game-activity",
+] }

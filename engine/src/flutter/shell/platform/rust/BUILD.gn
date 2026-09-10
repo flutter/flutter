@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/android/config.gni")
 import("//flutter/testing/testing.gni")
 
 _flutter_shell_core_output = "$target_gen_dir/rust/libflutter_shell_core.a"
@@ -200,6 +201,61 @@ executable("flutter_rust_shell_runner") {
     "dl",
     "pthread",
   ]
+}
+
+# Android milestone 1 (see flutter-rs-proggress.md): prove the winit/wgpu
+# GameActivity entry-point seam before the C++ RustShell ABI is stubbed for
+# Android. Unlike the other actions above, this crate is a cdylib: Android has
+# no separate host executable, so the OS loads this shared object directly
+# and calls its exported `android_main`. It intentionally does not depend on
+# :flutter_rust_shell or :flutter_shell_winit_rust yet.
+if (is_android && (current_cpu == "arm64" || current_cpu == "x64")) {
+  if (current_cpu == "arm64") {
+    _rust_android_target = "aarch64-linux-android"
+  } else {
+    _rust_android_target = "x86_64-linux-android"
+  }
+
+  _flutter_shell_android_runner_output = "$root_out_dir/android_shell/jniLibs/$android_app_abi/libflutter_shell_android_runner.so"
+  _android_clang = "$android_toolchain_root/bin/$_rust_android_target$android_api_level-clang"
+  _android_clang_cxx = "$android_toolchain_root/bin/$_rust_android_target$android_api_level-clang++"
+  _android_ar = "$android_toolchain_root/bin/llvm-ar"
+
+  action("flutter_shell_android_runner_rust") {
+    script = "build_rust.py"
+
+    inputs = [
+      "Cargo.lock",
+      "Cargo.toml",
+      "rust-toolchain.toml",
+      "crates/flutter-shell-android-runner/Cargo.toml",
+      "crates/flutter-shell-android-runner/src/lib.rs",
+      _android_clang,
+      _android_clang_cxx,
+      _android_ar,
+    ]
+
+    outputs = [ _flutter_shell_android_runner_output ]
+
+    args = [
+      "--manifest-path",
+      rebase_path("Cargo.toml", root_build_dir),
+      "--package",
+      "flutter-shell-android-runner",
+      "--output",
+      rebase_path(_flutter_shell_android_runner_output, root_build_dir),
+      "--target",
+      _rust_android_target,
+      "--crate-type",
+      "cdylib",
+      "--android-clang",
+      rebase_path(_android_clang, root_build_dir),
+      "--android-clang-cxx",
+      rebase_path(_android_clang_cxx, root_build_dir),
+      "--android-ar",
+      rebase_path(_android_ar, root_build_dir),
+    ]
+  }
 }
 
 if (enable_unittests) {
