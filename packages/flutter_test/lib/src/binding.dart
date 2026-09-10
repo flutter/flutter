@@ -441,9 +441,15 @@ class _TestWindowController extends WindowController with _ChildWindowHierarchyM
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
+    if (rootView.platformDispatcher case final TestPlatformDispatcher dispatcher) {
+      dispatcher.removeTestView(rootView);
+    }
     windowingOwner.deactivateWindowController(this);
   }
 }
@@ -583,9 +589,15 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
+    if (rootView.platformDispatcher case final TestPlatformDispatcher dispatcher) {
+      dispatcher.removeTestView(rootView);
+    }
     windowingOwner.deactivateWindowController(this);
     _removeChildFromParent(_parent, this);
   }
@@ -654,9 +666,15 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
+    if (rootView.platformDispatcher case final TestPlatformDispatcher dispatcher) {
+      dispatcher.removeTestView(rootView);
+    }
     windowingOwner.deactivateWindowController(this);
     _removeChildFromParent(parent, this);
   }
@@ -725,9 +743,15 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
+    if (rootView.platformDispatcher case final TestPlatformDispatcher dispatcher) {
+      dispatcher.removeTestView(rootView);
+    }
     windowingOwner.deactivateWindowController(this);
     _removeChildFromParent(parent, this);
   }
@@ -839,9 +863,15 @@ class _TestSatelliteWindowController extends SatelliteWindowController
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
     _delegate.onWindowDestroyed();
     removeAllChildren();
+    if (rootView.platformDispatcher case final TestPlatformDispatcher dispatcher) {
+      dispatcher.removeTestView(rootView);
+    }
     windowingOwner.deactivateWindowController(this);
     _removeChildFromParent(_parent, this);
   }

@@ -963,12 +963,14 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// Adds a [TestFlutterView] that wraps the given [view] to the list of views
   /// managed by this [TestPlatformDispatcher].
   ///
-  /// The added view will be associated with the first display in the list of
-  /// displays managed by this [TestPlatformDispatcher].
+  /// The added view will be associated with the display matching [FlutterView.display]
+  /// if managed by this [TestPlatformDispatcher], or the first display in [displays]
+  /// if not found or unsupported.
   void addTestView(FlutterView view) {
     final TestPlatformDispatcher owner = _testValues;
     owner._customViews[view.viewId] = view;
     owner._updateViewsAndDisplays();
+    owner._onMetricsChanged?.call();
   }
 
   /// Removes the [TestFlutterView] that wraps the given [view] from the list of
@@ -977,6 +979,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     final TestPlatformDispatcher owner = _testValues;
     owner._customViews.remove(view.viewId);
     owner._updateViewsAndDisplays();
+    owner._onMetricsChanged?.call();
   }
 
   @override

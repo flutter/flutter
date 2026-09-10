@@ -465,7 +465,13 @@ void main() {
         () => DebugViewMetricsOverride.fromJson(const <String, Object?>{
           'platformBrightness': 'DARK',
         }),
-        throwsFormatException,
+        throwsA(
+          isA<FormatException>().having(
+            (FormatException e) => e.message,
+            'message',
+            contains('Expected "light", "dark", "Brightness.light", or "Brightness.dark"'),
+          ),
+        ),
       );
     });
 

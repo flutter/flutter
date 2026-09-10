@@ -2204,6 +2204,24 @@ void main() {
         expect(tester.takeException(), isNull);
       });
 
+      testWidgets('Destroying a test window controller removes its view from platformDispatcher', (
+        WidgetTester tester,
+      ) async {
+        final WindowingOwner previousOwner = WidgetsBinding.instance.windowingOwner;
+        // ignore: invalid_use_of_protected_member
+        WidgetsBinding.instance.windowingOwner = WidgetsBinding.instance.createWindowingOwner();
+        addTearDown(() {
+          WidgetsBinding.instance.windowingOwner = previousOwner;
+        });
+        final WindowController controller = WidgetsBinding.instance.windowingOwner
+            .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
+        addTearDown(controller.dispose);
+        expect(tester.platformDispatcher.views, contains(controller.rootView));
+
+        controller.destroy();
+        expect(tester.platformDispatcher.views, isNot(contains(controller.rootView)));
+      });
+
       testWidgets('SatelliteWindow does not throw', (WidgetTester tester) async {
         final controller = _StubSatelliteWindowController(tester: tester);
         addTearDown(controller.dispose);

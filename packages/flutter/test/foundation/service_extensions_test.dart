@@ -1563,7 +1563,7 @@ void main() {
       binding.testExtension(FoundationServiceExtensions.viewMetricsOverride.name, <String, String>{
         'overrides': '{}',
       }),
-      throwsA(isA<ArgumentError>()),
+      throwsA(isA<FormatException>()),
     );
 
     // A non-object/non-null overrides parameter is rejected.

@@ -403,7 +403,7 @@ class DebugViewMetricsOverride with Diagnosticable {
         'light' || 'Brightness.light' => ui.Brightness.light,
         'dark' || 'Brightness.dark' => ui.Brightness.dark,
         final Object? value => throw FormatException(
-          'Expected "light" or "dark" for platformBrightness, got $value.',
+          'Expected "light", "dark", "Brightness.light", or "Brightness.dark" for platformBrightness, got $value.',
         ),
       },
       padding: _viewPaddingFromJson(json, 'padding'),

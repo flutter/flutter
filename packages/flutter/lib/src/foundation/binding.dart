@@ -729,7 +729,7 @@ abstract class BindingBase {
 
     final String? rawViewId = parameters['viewId'];
     if (rawViewId == null) {
-      throw ArgumentError('The viewId parameter is required unless clearAll is true.');
+      throw const FormatException('The viewId parameter is required unless clearAll is true.');
     }
     final int? viewId = int.tryParse(rawViewId);
     if (viewId == null) {

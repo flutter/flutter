@@ -20,6 +20,13 @@ import 'utils/fake_and_mock_utils.dart';
 
 void main() {
   test('TestPlatformDispatcher can handle new methods without breaking', () {
+    final VoidCallback? previousOnMetricsChanged = PlatformDispatcher.instance.onMetricsChanged;
+    final ViewFocusChangeCallback? previousOnViewFocusChange =
+        PlatformDispatcher.instance.onViewFocusChange;
+    addTearDown(() {
+      PlatformDispatcher.instance.onMetricsChanged = previousOnMetricsChanged;
+      PlatformDispatcher.instance.onViewFocusChange = previousOnViewFocusChange;
+    });
     final dynamic testPlatformDispatcher = TestPlatformDispatcher(
       platformDispatcher: PlatformDispatcher.instance,
     );
@@ -202,10 +209,16 @@ void main() {
   testWidgets('TestPlatformDispatcher addTestView and removeTestView manages custom views', (
     WidgetTester tester,
   ) async {
+    var metricsNotificationCount = 0;
+    tester.platformDispatcher.onMetricsChanged = () {
+      metricsNotificationCount++;
+    };
+
     final customView = _FakeFlutterView(display: tester.view.display, viewId: 100);
     tester.platformDispatcher.addTestView(customView);
     addTearDown(() => tester.platformDispatcher.removeTestView(customView));
 
+    expect(metricsNotificationCount, 1);
     final TestFlutterView? addedView = tester.platformDispatcher.view(id: customView.viewId);
     expect(addedView, isNotNull);
     expect(addedView!.viewId, customView.viewId);
@@ -213,11 +226,13 @@ void main() {
 
     // Ensure custom view survives metrics changed notifications.
     tester.platformDispatcher.onMetricsChanged?.call();
+    expect(metricsNotificationCount, 2);
     expect(tester.platformDispatcher.view(id: customView.viewId), same(addedView));
     expect(tester.platformDispatcher.views, contains(addedView));
 
     // Removing the view removes it from views and view(id:).
     tester.platformDispatcher.removeTestView(customView);
+    expect(metricsNotificationCount, 3);
     expect(tester.platformDispatcher.view(id: customView.viewId), isNull);
     expect(tester.platformDispatcher.views, isNot(contains(addedView)));
   });
