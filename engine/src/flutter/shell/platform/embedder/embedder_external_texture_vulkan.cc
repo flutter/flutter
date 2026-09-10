@@ -145,7 +145,7 @@ EmbedderExternalTextureSourceVulkan::ToTextureDescriptor(
   desc.sample_count = impeller::SampleCount::kCount1;
   desc.compression_type = impeller::CompressionType::kLossless;
   desc.mip_count = 1u;
-  desc.usage = impeller::TextureUsage::kRenderTarget;
+  desc.usage = impeller::TextureUsage::kShaderRead;
   return desc;
 }
 
