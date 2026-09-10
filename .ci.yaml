@@ -6481,10 +6481,6 @@ targets:
     timeout: 120
     properties:
       test_timeout_secs: "3600" # 1 hour
-      dependencies: >-
-        [
-          {"dependency": "goldctl", "version": "git_revision:c845c41b9b81bfcb11f2f0ab17b5b2386d634c31"}
-        ]
       shard: framework_tests
       subshard: widgets
       tags: >
