@@ -228,7 +228,9 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @override
   Future<void> kill() async {
-    _killed = true;
+    if (!_exitCode.isCompleted) {
+      _killed = true;
+    }
     logger.printTrace('test $id: Terminating flutter_tester process');
     _process?.kill(io.ProcessSignal.sigkill);
 
