@@ -288,7 +288,7 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
         return fl_pointer_manager_handle_enter(
             view->pointer_manager, gdk_event_get_time(event),
             get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
-            0.0, 0.0);
+            gdk_event_get_modifier_state(event), 0.0, 0.0);
       }
       return fl_pointer_manager_handle_leave(
           view->pointer_manager, gdk_event_get_time(event),

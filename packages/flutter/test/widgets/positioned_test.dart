@@ -129,4 +129,18 @@ void main() {
     await tester.pump();
     expect(completer.isCompleted, isTrue);
   });
+
+  testWidgets('Positioned does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Stack(children: [Positioned(top: 0.0, left: 0.0, child: Placeholder())]),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Stack)), Size.zero);
+  });
 }

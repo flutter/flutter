@@ -328,9 +328,9 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
     self->framebuffer =
         self->shareable
             ? fl_framebuffer_new_shareable(general_format, width, height)
-            : fl_framebuffer_new(general_format, width, height);
+            : fl_framebuffer_new(general_format, width, height, TRUE);
 #else
-    self->framebuffer = fl_framebuffer_new(general_format, width, height);
+    self->framebuffer = fl_framebuffer_new(general_format, width, height, TRUE);
 #endif
 
     // If not shareable make buffer to copy frame pixels into.

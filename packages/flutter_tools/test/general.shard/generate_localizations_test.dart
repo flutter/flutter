@@ -3528,8 +3528,7 @@ String helloNameAndAge({required String name, required int age}) {
           }
         }
       }
-    }
-    ''';
+    }''';
 
     setupLocalizations(<String, String>{'en': en, 'da': da});
 
@@ -3537,6 +3536,53 @@ String helloNameAndAge({required String name, required int age}) {
     expect(
       localizationsFile,
       containsIgnoringWhitespace(r'''String get test => 'No placeholder in here'''),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192130.
+  testWithoutContext('throws an exception when placeholder type is invalid', () {
+    const maliciousArb = r'''
+{
+  "greeting": "Hello {user}",
+  "@greeting": {
+    "placeholders": {
+      "user": {
+        "type": "Object user) { print('bad'); return 'x'; } String injected("
+      }
+    }
+  }
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': maliciousArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid placeholder type'),
+        ),
+      ),
+    );
+
+    const genericInjectionArb = r'''
+{
+  "greeting": "Hello {user}",
+  "@greeting": {
+    "placeholders": {
+      "user": {
+        "type": "dynamic> foo) { print('bad'); } void bar<dynamic>"
+      }
+    }
+  }
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': genericInjectionArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid placeholder type'),
+        ),
+      ),
     );
   });
 }

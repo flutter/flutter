@@ -118,7 +118,8 @@ static void attach_depth_stencil(GLuint depth_stencil) {
 static FlFramebuffer* fl_framebuffer_new_internal(GLint format,
                                                   size_t width,
                                                   size_t height,
-                                                  gboolean shareable) {
+                                                  gboolean shareable,
+                                                  gboolean depth_stencil) {
   FlFramebuffer* self =
       FL_FRAMEBUFFER(g_object_new(fl_framebuffer_get_type(), nullptr));
   self->width = width;
@@ -140,23 +141,29 @@ static FlFramebuffer* fl_framebuffer_new_internal(GLint format,
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                          self->texture_id, 0);
 
-  glGenRenderbuffers(1, &self->depth_stencil);
-  glBindRenderbuffer(GL_RENDERBUFFER, self->depth_stencil);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-  attach_depth_stencil(self->depth_stencil);
+  if (depth_stencil) {
+    glGenRenderbuffers(1, &self->depth_stencil);
+    glBindRenderbuffer(GL_RENDERBUFFER, self->depth_stencil);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    attach_depth_stencil(self->depth_stencil);
+  }
 
   return self;
 }
 
-FlFramebuffer* fl_framebuffer_new(GLint format, size_t width, size_t height) {
-  return fl_framebuffer_new_internal(format, width, height, FALSE);
+FlFramebuffer* fl_framebuffer_new(GLint format,
+                                  size_t width,
+                                  size_t height,
+                                  gboolean depth_stencil) {
+  return fl_framebuffer_new_internal(format, width, height, FALSE,
+                                     depth_stencil);
 }
 
 #if FLUTTER_LINUX_GTK4
 FlFramebuffer* fl_framebuffer_new_shareable(GLint format,
                                             size_t width,
                                             size_t height) {
-  return fl_framebuffer_new_internal(format, width, height, TRUE);
+  return fl_framebuffer_new_internal(format, width, height, TRUE, TRUE);
 }
 #endif
 

@@ -443,8 +443,9 @@ abstract final class DebuggingOptionDescriptors {
         'not already connected to the target application.',
   );
 
-  static const ddsPort = StringOptionDescriptor(
+  static const ddsPort = DefaultedIntOptionDescriptor(
     name: 'dds-port',
+    defaultsTo: 0,
     help:
         'When this value is provided, the Dart Development Service (DDS) will be '
         'bound to the provided port.\n'

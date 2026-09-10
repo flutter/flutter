@@ -54,6 +54,20 @@ static GtkWindow* create_toplevel_window() {
 #endif
 }
 
+#if !FLUTTER_LINUX_GTK4
+static void use_rgba_visual(GtkWindow* window) {
+  GdkScreen* screen = gtk_widget_get_screen(GTK_WIDGET(window));
+  if (!gdk_screen_is_composited(screen)) {
+    return;
+  }
+
+  GdkVisual* visual = gdk_screen_get_rgba_visual(screen);
+  if (visual != nullptr) {
+    gtk_widget_set_visual(GTK_WIDGET(window), visual);
+  }
+}
+#endif
+
 static FlLinuxWindowingWindow* create_window(FlEngine* engine,
                                              GtkWindow* parent,
                                              gboolean is_dialog,
@@ -69,6 +83,9 @@ static FlLinuxWindowingWindow* create_window(FlEngine* engine,
                                              gboolean decorated,
                                              gboolean resizable) {
   GtkWindow* window = create_toplevel_window();
+#if !FLUTTER_LINUX_GTK4
+  use_rgba_visual(window);
+#endif
 
   if (has_preferred_size) {
     gtk_window_set_default_size(window, preferred_width, preferred_height);
