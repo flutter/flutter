@@ -45,7 +45,7 @@ TEST_F(FlOpenGLFrameTest, CompositeRGBA) {
 
   g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new();
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGBA, width, height);
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
@@ -75,7 +75,7 @@ TEST_F(FlOpenGLFrameTest, CompositeBGRA) {
 
   g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new();
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_BGRA_EXT, width, height);
+      fl_framebuffer_new(GL_BGRA_EXT, width, height, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
@@ -105,7 +105,7 @@ TEST_F(FlOpenGLFrameTest, ZeroSizeClearsFrame) {
 
   g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new();
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGBA, width, height);
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
@@ -145,7 +145,7 @@ TEST_F(FlOpenGLFrameTest, CompositeReadsBackPixels) {
 
   g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new();
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGBA, width, height);
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
@@ -171,7 +171,7 @@ TEST_F(FlOpenGLFrameTest, CompositeNotSynchronizedTwice) {
 
   g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new();
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGBA, width, height);
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
@@ -209,7 +209,7 @@ TEST_F(FlOpenGLFrameTest, DrawUploadsPixels) {
 
   g_autoptr(FlOpenGLFrame) frame = fl_opengl_frame_new();
   g_autoptr(FlFramebuffer) framebuffer =
-      fl_framebuffer_new(GL_RGBA, width, height);
+      fl_framebuffer_new(GL_RGBA, width, height, FALSE);
   FlutterBackingStore backing_store = {
       .type = kFlutterBackingStoreTypeOpenGL,
       .open_gl = {
