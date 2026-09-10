@@ -1514,6 +1514,180 @@ void main() async {
     await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  // Renders the same green triangle as the non-indexed test, this time
+  // supplying the uniform through a reusable BindingSet instead of a per-draw
+  // bindUniform call.
+  test('Can render triangle with a BindingSet', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    state.renderPass.bindVertexBuffer(
+      transients.emplace(float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5])),
+    );
+
+    final gpu.BindingSet bindings = gpu.gpuContext.createBindingSet(
+      uniforms: <gpu.UniformSlot, gpu.BufferView>{
+        pipeline.vertexShader.getUniformSlot('VertInfo'): transients.emplace(
+          unlitUBO(Matrix4.identity(), Colors.lime),
+        ),
+      },
+    );
+    // Binding the same set repeatedly is the expected per-draw usage, and
+    // must leave exactly one binding in the slot.
+    state.renderPass.bindSet(bindings);
+    state.renderPass.bindSet(bindings);
+    state.renderPass.draw(3);
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  // Set bindings are applied before individual binds, so a bindUniform to the
+  // same slot wins. The set paints the triangle red and the override paints it
+  // the green of the shared triangle golden.
+  test('Individual binds override a bound BindingSet', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    state.renderPass.bindVertexBuffer(
+      transients.emplace(float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5])),
+    );
+
+    final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+    state.renderPass.bindSet(
+      gpu.gpuContext.createBindingSet(
+        uniforms: <gpu.UniformSlot, gpu.BufferView>{
+          vertInfo: transients.emplace(unlitUBO(Matrix4.identity(), Vector4(1.0, 0.0, 0.0, 1.0))),
+        },
+      ),
+    );
+    state.renderPass.bindUniform(
+      vertInfo,
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+    state.renderPass.draw(3);
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  // A texture and uniform bound through a set must reach the shader exactly
+  // like the per-draw binds they replace, on every backend.
+  test('BindingSet bindings render the same as per-draw binds', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
+    final magenta = Uint8List(2 * 2 * 4);
+    for (var i = 0; i < magenta.length; i += 4) {
+      magenta[i] = 0xFF;
+      magenta[i + 1] = 0x00;
+      magenta[i + 2] = 0xFF;
+      magenta[i + 3] = 0xFF;
+    }
+    texture.overwrite(magenta.buffer.asByteData());
+
+    // A fullscreen quad. Each vertex is position (vec3), texture_coords
+    // (vec2), and a white color (vec4) so the sampled texel passes through.
+    final quad = <double>[
+      -1, -1, 0, 0, 0, 1, 1, 1, 1, //
+      1, -1, 0, 1, 0, 1, 1, 1, 1, //
+      1, 1, 0, 1, 1, 1, 1, 1, 1, //
+      -1, -1, 0, 0, 0, 1, 1, 1, 1, //
+      1, 1, 0, 1, 1, 1, 1, 1, 1, //
+      -1, 1, 0, 0, 1, 1, 1, 1, 1, //
+    ];
+
+    Future<ByteData> renderQuad({required bool withBindingSet}) async {
+      final RenderPassState state = createSimpleRenderPass();
+      final gpu.RenderPipeline pipeline = await createTextureRenderPipeline();
+      state.renderPass.bindPipeline(pipeline);
+
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      state.renderPass.bindVertexBuffer(transients.emplace(float32(quad)));
+
+      final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+      final gpu.UniformSlot tex = pipeline.fragmentShader.getUniformSlot('tex');
+      final gpu.BufferView mvp = transients.emplace(mvpUBO(Matrix4.identity()));
+      if (withBindingSet) {
+        state.renderPass.bindSet(
+          gpu.gpuContext.createBindingSet(
+            uniforms: <gpu.UniformSlot, gpu.BufferView>{vertInfo: mvp},
+            textures: <gpu.UniformSlot, gpu.TextureBinding>{tex: gpu.TextureBinding(texture)},
+          ),
+        );
+      } else {
+        state.renderPass.bindUniform(vertInfo, mvp);
+        state.renderPass.bindTexture(tex, texture);
+      }
+      state.renderPass.draw(6);
+      await submitAndWait(state.commandBuffer);
+      return readTextureBytes(state.renderTexture);
+    }
+
+    final ByteData perDraw = await renderQuad(withBindingSet: false);
+    final ByteData viaSet = await renderQuad(withBindingSet: true);
+    expect(viaSet.lengthInBytes, perDraw.lengthInBytes);
+    expect(
+      Uint8List.view(viaSet.buffer, viaSet.offsetInBytes, viaSet.lengthInBytes),
+      Uint8List.view(perDraw.buffer, perDraw.offsetInBytes, perDraw.lengthInBytes),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  // A set validates its entries once at creation, so a name the shader does
+  // not declare must fail there rather than silently at draw time.
+  test('createBindingSet throws for an unknown uniform name', () async {
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView view = transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime));
+
+    try {
+      gpu.gpuContext.createBindingSet(
+        uniforms: <gpu.UniformSlot, gpu.BufferView>{
+          pipeline.vertexShader.getUniformSlot('DoesNotExist'): view,
+        },
+      );
+      fail('Exception not thrown for an unknown uniform name.');
+    } catch (e) {
+      expect(e.toString(), contains("no uniform struct named 'DoesNotExist'"));
+    }
+
+    try {
+      gpu.gpuContext.createBindingSet(
+        textures: <gpu.UniformSlot, gpu.TextureBinding>{
+          pipeline.fragmentShader.getUniformSlot('DoesNotExist'): gpu.TextureBinding(
+            gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 1, 1),
+          ),
+        },
+      );
+      fail('Exception not thrown for an unknown texture name.');
+    } catch (e) {
+      expect(e.toString(), contains("no texture named 'DoesNotExist'"));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('bindSet throws RangeError for out-of-range slot', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BindingSet bindings = gpu.gpuContext.createBindingSet(
+      uniforms: <gpu.UniformSlot, gpu.BufferView>{
+        pipeline.vertexShader.getUniformSlot('VertInfo'): transients.emplace(
+          unlitUBO(Matrix4.identity(), Colors.lime),
+        ),
+      },
+    );
+
+    expect(() => state.renderPass.bindSet(bindings, slot: -1), throwsRangeError);
+    expect(
+      () => state.renderPass.bindSet(bindings, slot: gpu.RenderPass.maxBindingSets),
+      throwsRangeError,
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   // Samples a texture whose mip chain was uploaded by hand with
   // Texture.overwrite(mipLevel:) rather than generated, exercising the
   // manually-mipped sampling path end to end through Flutter GPU. The quad is

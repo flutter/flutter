@@ -265,6 +265,33 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return CommandBuffer._(this);
   }
 
+  /// Creates a reusable group of uniform and texture bindings.
+  ///
+  /// Every entry is resolved against its shader's reflection data here, so
+  /// binding the set later costs one slot assignment instead of per-resource
+  /// work on every draw. See [RenderPass.bindSet].
+  ///
+  /// The keys come from [Shader.getUniformSlot], so a single set may span the
+  /// vertex and fragment stages. Throws if a slot names a uniform the shader
+  /// does not declare, if a [BufferView] runs past the end of its buffer, or
+  /// if a [SamplerOptions] is invalid.
+  ///
+  /// ```dart
+  /// final gpu.BindingSet material = gpu.gpuContext.createBindingSet(
+  ///   uniforms: {vertex.getUniformSlot('FrameInfo'): frameInfo},
+  ///   textures: {
+  ///     fragment.getUniformSlot('base_color_texture'): gpu.TextureBinding(albedo),
+  ///   },
+  /// );
+  /// ```
+  BindingSet createBindingSet({
+    Map<UniformSlot, BufferView> uniforms = const <UniformSlot, BufferView>{},
+    Map<UniformSlot, TextureBinding> textures =
+        const <UniformSlot, TextureBinding>{},
+  }) {
+    return BindingSet._(this, uniforms, textures);
+  }
+
   RenderPipeline createRenderPipeline(
     Shader vertexShader,
     Shader fragmentShader, {
