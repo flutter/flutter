@@ -5,6 +5,15 @@
 #include "flutter/shell/platform/embedder/embedder_semantics_update.h"
 
 namespace {
+FlutterTransformation ToFlutterTransformation(const SkM44& value) {
+  SkMatrix transform = value.asM33();
+  return {transform.get(SkMatrix::kMScaleX), transform.get(SkMatrix::kMSkewX),
+          transform.get(SkMatrix::kMTransX), transform.get(SkMatrix::kMSkewY),
+          transform.get(SkMatrix::kMScaleY), transform.get(SkMatrix::kMTransY),
+          transform.get(SkMatrix::kMPersp0), transform.get(SkMatrix::kMPersp1),
+          transform.get(SkMatrix::kMPersp2)};
+}
+
 FlutterCheckState ToFlutterCheckState(flutter::SemanticsCheckState state) {
   switch (state) {
     case flutter::SemanticsCheckState::kNone:
@@ -187,13 +196,8 @@ FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
 }
 
 void EmbedderSemanticsUpdate::AddNode(const SemanticsNode& node) {
-  SkMatrix transform = node.transform.asM33();
-  FlutterTransformation flutter_transform{
-      transform.get(SkMatrix::kMScaleX), transform.get(SkMatrix::kMSkewX),
-      transform.get(SkMatrix::kMTransX), transform.get(SkMatrix::kMSkewY),
-      transform.get(SkMatrix::kMScaleY), transform.get(SkMatrix::kMTransY),
-      transform.get(SkMatrix::kMPersp0), transform.get(SkMatrix::kMPersp1),
-      transform.get(SkMatrix::kMPersp2)};
+  FlutterTransformation flutter_transform =
+      ToFlutterTransformation(node.transform);
 
   // Do not add new members to FlutterSemanticsNode.
   // This would break the forward compatibility of FlutterSemanticsUpdate.
@@ -284,13 +288,10 @@ EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
 EmbedderSemanticsUpdate2::~EmbedderSemanticsUpdate2() {}
 
 void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
-  SkMatrix transform = node.transform.asM33();
-  FlutterTransformation flutter_transform{
-      transform.get(SkMatrix::kMScaleX), transform.get(SkMatrix::kMSkewX),
-      transform.get(SkMatrix::kMTransX), transform.get(SkMatrix::kMSkewY),
-      transform.get(SkMatrix::kMScaleY), transform.get(SkMatrix::kMTransY),
-      transform.get(SkMatrix::kMPersp0), transform.get(SkMatrix::kMPersp1),
-      transform.get(SkMatrix::kMPersp2)};
+  FlutterTransformation flutter_transform =
+      ToFlutterTransformation(node.transform);
+  FlutterTransformation flutter_hit_test_transform =
+      ToFlutterTransformation(node.hitTestTransform);
 
   auto label_attributes = CreateStringAttributes(node.labelAttributes);
   auto hint_attributes = CreateStringAttributes(node.hintAttributes);
@@ -344,6 +345,8 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       flags_.back().get(),
       node.headingLevel,
       node.identifier.c_str(),
+      flutter_hit_test_transform,
+      node.childrenInHitTestOrder.size(),
   });
 }
 
