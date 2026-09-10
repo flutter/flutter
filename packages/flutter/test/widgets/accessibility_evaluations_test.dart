@@ -120,7 +120,7 @@ void main() {
         ),
       );
       final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
-        return await evaluation.evaluate(tester.binding);
+        return evaluation.evaluate(tester.binding);
       });
       expect(result!.violations, isEmpty);
       handle.dispose();
@@ -142,7 +142,7 @@ void main() {
         ),
       );
       final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
-        return await evaluation.evaluate(tester.binding);
+        return evaluation.evaluate(tester.binding);
       });
       expect(result!.violations, hasLength(1));
       expect(result.violations.first.reason, contains('Expected contrast ratio of at least 4.5'));
@@ -404,7 +404,7 @@ void main() {
         ),
       );
       final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
-        return await evaluation.evaluate(tester.binding);
+        return evaluation.evaluate(tester.binding);
       });
       expect(result!.violations, isEmpty);
       handle.dispose();
@@ -433,7 +433,7 @@ void main() {
         ),
       );
       final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
-        return await evaluation.evaluate(tester.binding);
+        return evaluation.evaluate(tester.binding);
       });
       expect(result!.violations, hasLength(1));
       expect(
@@ -463,7 +463,7 @@ void main() {
         ),
       );
       final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
-        return await evaluation.evaluate(tester.binding);
+        return evaluation.evaluate(tester.binding);
       });
       expect(result!.violations, isEmpty);
       handle.dispose();
@@ -492,7 +492,7 @@ void main() {
         ),
       );
       final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
-        return await evaluation.evaluate(tester.binding);
+        return evaluation.evaluate(tester.binding);
       });
       expect(result!.violations, hasLength(1));
       expect(
@@ -525,7 +525,7 @@ void main() {
         ),
       );
       final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
-        return await evaluation.evaluate(tester.binding);
+        return evaluation.evaluate(tester.binding);
       });
       expect(result!.violations, isEmpty);
       handle.dispose();
@@ -554,7 +554,7 @@ void main() {
         ),
       );
       final EvaluationResult? result = await tester.runAsync<EvaluationResult>(() async {
-        return await evaluation.evaluate(tester.binding);
+        return evaluation.evaluate(tester.binding);
       });
       expect(result!.violations, hasLength(1));
       expect(
