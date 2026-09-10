@@ -168,10 +168,11 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `dev/integration_tests/platform_interaction` - Passed (100% green, 17,834ms on Google Pixel `48171HFH80D9S7`).
     - [x] `dev/integration_tests/android_engine_test` - Passed (`engine_handle` + `system_ui_mode_transitions` 100% green on Google Pixel `48171HFH80D9S7`).
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR; approved unconditionally by `reidbaker-agent` with 98% confidence.
-- [ ] **4.3 Framework Integration Tests (Impeller)**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-4.3-framework-integration-tests-impeller`
-    - [ ] `dev/integration_tests/android_views` (Backend: Impeller OpenGLES) - Passed.
-    - [ ] `dev/integration_tests/android_views` (Backend: Impeller Vulkan) - Passed.
+- [x] **4.3 Framework Integration Tests (Impeller)**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-4.3-framework-integration-tests-impeller`
+    - [x] `dev/integration_tests/android_views` (Backend: Impeller OpenGLES) - Passed (67/67 motion events verified, 0 diffs on Google Pixel `48171HFH80D9S7`).
+    - [x] `dev/integration_tests/android_views` (Backend: Impeller Vulkan) - Passed (67/67 motion events verified, 0 diffs on Google Pixel `48171HFH80D9S7`).
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR; approved unconditionally by `reidbaker-agent` with 100% confidence.
 - [ ] **4.4 DeviceLab Android Lifecycle & Platform Views**:
     - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-4.4-devicelab-android-lifecycle-platform-views`
     - [ ] `dev/devicelab/bin/tasks/android_lifecycles_test.dart` - Passed.
