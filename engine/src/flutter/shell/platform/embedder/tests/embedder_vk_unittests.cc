@@ -47,9 +47,9 @@ using EmbedderTest = testing::EmbedderTest;
 namespace {
 
 struct VulkanProcInfo {
-  decltype(vkGetInstanceProcAddr)* get_instance_proc_addr = nullptr;
-  decltype(vkGetDeviceProcAddr)* get_device_proc_addr = nullptr;
-  decltype(vkQueueSubmit)* queue_submit_proc_addr = nullptr;
+  PFN_vkGetInstanceProcAddr get_instance_proc_addr = nullptr;
+  PFN_vkGetDeviceProcAddr get_device_proc_addr = nullptr;
+  PFN_vkQueueSubmit queue_submit_proc_addr = nullptr;
   bool did_call_queue_submit = false;
 };
 
@@ -76,7 +76,7 @@ PFN_vkVoidFunction GetDeviceProcAddr(VkDevice device, const char* pName) {
   FML_DCHECK(g_vulkan_proc_info.get_device_proc_addr != nullptr);
   if (StrcmpFixed(pName, "vkQueueSubmit") == 0) {
     g_vulkan_proc_info.queue_submit_proc_addr =
-        reinterpret_cast<decltype(vkQueueSubmit)*>(
+        reinterpret_cast<PFN_vkQueueSubmit>(
             g_vulkan_proc_info.get_device_proc_addr(device, pName));
     return reinterpret_cast<PFN_vkVoidFunction>(QueueSubmit);
   }
@@ -87,7 +87,7 @@ PFN_vkVoidFunction GetInstanceProcAddr(VkInstance instance, const char* pName) {
   FML_DCHECK(g_vulkan_proc_info.get_instance_proc_addr != nullptr);
   if (StrcmpFixed(pName, "vkGetDeviceProcAddr") == 0) {
     g_vulkan_proc_info.get_device_proc_addr =
-        reinterpret_cast<decltype(vkGetDeviceProcAddr)*>(
+        reinterpret_cast<PFN_vkGetDeviceProcAddr>(
             g_vulkan_proc_info.get_instance_proc_addr(instance, pName));
     return reinterpret_cast<PFN_vkVoidFunction>(GetDeviceProcAddr);
   }
@@ -100,12 +100,15 @@ struct CheckSameSignature : std::false_type {};
 template <typename Ret, typename... Args>
 struct CheckSameSignature<Ret(Args...), Ret(Args...)> : std::true_type {};
 
-static_assert(CheckSameSignature<decltype(GetInstanceProcAddr),
-                                 decltype(vkGetInstanceProcAddr)>::value);
-static_assert(CheckSameSignature<decltype(GetDeviceProcAddr),
-                                 decltype(vkGetDeviceProcAddr)>::value);
+static_assert(CheckSameSignature<
+              decltype(GetInstanceProcAddr),
+              std::remove_pointer_t<PFN_vkGetInstanceProcAddr>>::value);
 static_assert(
-    CheckSameSignature<decltype(QueueSubmit), decltype(vkQueueSubmit)>::value);
+    CheckSameSignature<decltype(GetDeviceProcAddr),
+                       std::remove_pointer_t<PFN_vkGetDeviceProcAddr>>::value);
+static_assert(
+    CheckSameSignature<decltype(QueueSubmit),
+                       std::remove_pointer_t<PFN_vkQueueSubmit>>::value);
 }  // namespace
 
 TEST_F(EmbedderTest, CanGetVulkanEmbedderContext) {
@@ -123,7 +126,7 @@ TEST_F(EmbedderTest, CanSwapOutVulkanCalls) {
          const char* name) -> void* {
         if (StrcmpFixed(name, "vkGetInstanceProcAddr") == 0) {
           g_vulkan_proc_info.get_instance_proc_addr =
-              reinterpret_cast<decltype(vkGetInstanceProcAddr)*>(
+              reinterpret_cast<PFN_vkGetInstanceProcAddr>(
                   EmbedderTestContextVulkan::InstanceProcAddr(user_data,
                                                               instance, name));
           return reinterpret_cast<void*>(GetInstanceProcAddr);

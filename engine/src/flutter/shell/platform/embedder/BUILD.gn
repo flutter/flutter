@@ -175,8 +175,6 @@ template("embedder_source_set") {
 
       if (impeller_supports_rendering) {
         sources += [
-          "embedder_external_texture_source_vulkan.cc",
-          "embedder_external_texture_source_vulkan.h",
           "embedder_surface_vulkan_impeller.cc",
           "embedder_surface_vulkan_impeller.h",
         ]
