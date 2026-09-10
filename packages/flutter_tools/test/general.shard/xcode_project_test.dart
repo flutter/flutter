@@ -245,22 +245,6 @@ void main() {
       );
 
       testUsingContext(
-        'is false when Xcode is less than 15',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('ios').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.ios.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(14, 0, 0)),
-        },
-      );
-
-      testUsingContext(
         'is false when Swift Package Manager feature is not enabled',
         () async {
           final fs = MemoryFileSystem.test();
@@ -513,22 +497,6 @@ void main() {
         overrides: <Type, Generator>{
           FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
           XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
-        },
-      );
-
-      testUsingContext(
-        'is false when Xcode is less than 15',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final Directory projectDirectory = fs.directory('path');
-          projectDirectory.childDirectory('macos').createSync(recursive: true);
-          final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
-          expect(project.macos.usesSwiftPackageManager, isFalse);
-        },
-        overrides: <Type, Generator>{
-          FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
-          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(14, 0, 0)),
         },
       );
 

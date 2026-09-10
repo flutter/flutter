@@ -8,7 +8,7 @@ PRs are triaged directly by teams during secondary triage, and assigned reviewer
 
 # Primary issue triage process
 
-The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-devexp%2Cteam-accessibility%2Cteam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-fluttergpu%2Cteam-framework%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-text-input) as described in this section, so as to make that list empty.
+The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-devexp%2Cteam-accessibility%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-fluttergpu%2Cteam-framework%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-text-input) as described in this section, so as to make that list empty.
 
 _See also: [Issue triage reports](https://github.com/flutter/flutter/wiki/Issue-triage-reports)_
 
@@ -81,14 +81,17 @@ Some labels are used to track the flow of issues from the time they're filed unt
 
 In general the flow chart for team assignment is as follows, stopping as soon as the first `team-` label is assigned:
 
-- If it's about a codelab, add `team-codelab`.
+- If it's about a codelab, transfer the issue to https://github.com/flutter/website using the sidebar option.
 - If it's about the release process or tooling (e.g., `packages_autoroller`), add `team-infra` and `infra: release`.
 - If it's about the Flutter team's CI or infrastructure, add `team-infra`.
 - If it's about Flutter GPU (the `flutter_gpu` Dart library or its native bindings), add `team-fluttergpu`.
 - If it's about Impeller, add `team-engine`.
 - If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`. And:
   - if it's specific to a single platform, also add that platform's `fyi-*` label.
-- If it's about Cupertino or Material Design, add `team-design`.
+- If it's about Cupertino or Material Design, add `team-design` and `package`.
+  - Material Design issues should have the `p: material_ui` label.
+  - Cupertino issues should have the `p: cupertino_ui` label.
+  - Note: The `framework` label should no longer be applied to these issues.
 - If it's about text fields or other user-facing text field, text input, or text selection issues, add `team-text-input`. And:
   - if it's specific to a single platform, also add that platform's `fyi-*` label.
   - if it's specific to text fields or text input, also add `a: text input`.
@@ -101,13 +104,14 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about developer tools, add `team-devexp`.
 - If it's about a first-party package:
   - Apply `team-framework` if it's about:
-    - `animations`
-    - `cupertino_icons`
-    - `flutter_lints`
-    - `go_router`, `go_router_builder`
-    - `google_fonts`
-    - `two_dimensional_scrollables`
+    - `listen`
     - `vector_math`
+  - Apply `team-design` if it's about:
+    - `animations`
+    - `cupertino_ui`
+    - `cupertino_icons`
+    - `google_fonts`
+    - `material_ui`
   - Apply `team-engine` if it's about:
     - `flutter_svg`
     - `vector_graphics`
@@ -240,23 +244,18 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-android+label%3AP0+sort%3Aupdated-asc)
 - PRs: [Framework/Tool](https://github.com/flutter/flutter/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android%2Cteam-android+-label%3A%22work+in+progress%3B+do+not+review%22+sort%3Aupdated-asc+), [Plugins \(non-dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Atriage-android+sort%3Aupdated-asc+-author%3Aapp%2Fdependabot+), [Plugins \(dependabot\)](https://github.com/flutter/packages/pulls?q=is%3Aopen+draft%3Afalse+is%3Apr+label%3Aplatform-android+sort%3Aupdated-asc+author%3Aapp%2Fdependabot+)
 
-### Codelabs team (`team-codelabs`)
-
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-codelabs%2Cfyi-codelabs+-label%3Atriaged-codelabs+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-codelabs+label%3AP0+sort%3Aupdated-asc)
-
 ### Design Languages team (`team-design`)
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-design%2Cfyi-design+-label%3Atriaged-design+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+-label%3A%22waiting+for+response%22+)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-design+label%3AP0+sort%3Aupdated-asc)
-- [Legacy Design Languages PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22f%3A+material+design%22%2C%22f%3A+cupertino%22+sort%3Aupdated-asc+draft%3Afalse)
-- [Design Language PRs](https://github.com/flutter/packages/pulls?q=sort%3Aupdated-desc+is%3Apr+is%3Aopen+label%3A%22p%3A+material_ui%22%2C%22p%3A+cupertino_ui%22+draft%3Afalse)
+- [Legacy Design Languages PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22f%3A+material+design%22%2C%22f%3A+cupertino%22%2C%22p%3A+cupertino_ui%22%2C%22p%3A+material_ui%22+sort%3Aupdated-asc+draft%3Afalse)
+- [Design Language PRs](https://github.com/flutter/packages/pulls?q=sort%3Aupdated-desc+is%3Apr+is%3Aopen+label%3A%22p%3A+material_ui%22%2C%22p%3A+cupertino_ui%22%2C%22triage-design%22+draft%3Afalse+)
 
 ### Ecosystem team (`team-ecosystem`)
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ecosystem%2Cfyi-ecosystem+-label%3Atriaged-ecosystem+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ecosystem+label%3AP0+sort%3Aupdated-asc)
-- [flutter/packages PR list](https://github.com/flutter/packages/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-asc+-label%3A%22p%3A+go_router%22+-label%3A%22p%3A+go_router_builder%22)
+- [flutter/packages PR list](https://github.com/flutter/packages/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-asc)
   - Make sure that any PR that still needs review by a platform team has the appropriate `triage-<platform>` label(s) on it, so that it shows up in the regular platform team triages. This is separate from `platform-*` because a multi-platform PR may have sign-off from some platforms, and still need review from others.
 - [flutter/core-packages PR list](https://github.com/flutter/core-packages/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-asc)
 
@@ -284,8 +283,7 @@ In addition, consider these issues that fall under another team's triage, but ar
 ### Framework team (`team-framework`)
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%20label%3AP0%20sort%3Aupdated-desc)
-- [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+-label%3A%22a%3A+text+input%22+draft%3Afalse+sort%3Aupdated-desc+)
-- [Framework-owned Package PR list](https://github.com/flutter/packages/pulls?q=sort%3Aupdated-desc+is%3Aopen+is%3Apr+label%3Atriage-framework+draft%3Afalse+-label%3A%22p%3A+material_ui%22+-label%3A%22p%3A+cupertino_ui%22+)
+- [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+-label%3A%22a%3A+text+input%22+draft%3Afalse+sort%3Aupdated-desc+-label%3A%22p%3A+material_ui%22+-label%3A%22p%3A+cupertino_ui%22)
 - [Framework-owned Core Package PR list](https://github.com/flutter/core-packages/pulls?q=sort%3Aupdated-desc+is%3Aopen+is%3Apr+label%3A%22triage-framework%22+draft%3Afalse)
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2Cfyi-framework%20-label%3Atriaged-framework%20-label%3A%22will%20need%20additional%20triage%22%20-label%3A%22waiting%20for%20response%22%20sort%3Aupdated-desc)
 

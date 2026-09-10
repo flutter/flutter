@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools_core/flutter_tools_core.dart';
+
 import 'base/io.dart';
 import 'base/net.dart';
 import 'base/platform.dart';

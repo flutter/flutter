@@ -1573,6 +1573,53 @@ class AppLocalizationsEn extends AppLocalizations {
       expect(() => getGeneratedFileContent(locale: 'en_US'), throwsException);
     });
 
+    testWithoutContext('uses a script locale as the parent for a regional locale', () {
+      final String untranslatedMessagesFilePath = fs.path.join(
+        'lib',
+        'l10n',
+        'unimplemented_message_translations.json',
+      );
+      setupLocalizations(<String, String>{
+        'en': twoMessageArbFileString,
+        'zh': singleZhMessageArbFileString,
+        'zh_Hant': '''
+{
+  "subtitle": "副標題"
+}''',
+        'zh_Hant_HK': '{}',
+      }, untranslatedMessagesFile: untranslatedMessagesFilePath);
+
+      final String content = getGeneratedFileContent(locale: 'zh');
+      expect(content, contains('class AppLocalizationsZhHant extends AppLocalizationsZh'));
+      expect(content, contains('class AppLocalizationsZhHantHk extends AppLocalizationsZhHant'));
+      expect(content, contains('AppLocalizationsZhHant._withLocale(String locale): super(locale)'));
+      expect(content, contains("AppLocalizationsZhHantHk(): super._withLocale('zh_Hant_HK')"));
+
+      final untranslatedMessages =
+          json.decode(fs.file(untranslatedMessagesFilePath).readAsStringSync())
+              as Map<String, Object?>;
+      expect(untranslatedMessages, <String, Object?>{
+        'zh': <String>['subtitle'],
+      });
+    });
+
+    testWithoutContext('selects parent locales for script and country combinations', () {
+      setupLocalizations(<String, String>{
+        'en': singleMessageArbFileString,
+        'sr': singleMessageArbFileString,
+        'sr_Cyrl_RS': singleMessageArbFileString,
+        'sr_Latn': singleMessageArbFileString,
+        'sr_Latn_RS': singleMessageArbFileString,
+        'sr_RS': singleMessageArbFileString,
+      });
+
+      final String content = getGeneratedFileContent(locale: 'sr');
+      expect(content, contains('class AppLocalizationsSrLatn extends AppLocalizationsSr'));
+      expect(content, contains('class AppLocalizationsSrRs extends AppLocalizationsSr'));
+      expect(content, contains('class AppLocalizationsSrLatnRs extends AppLocalizationsSrLatn'));
+      expect(content, contains('class AppLocalizationsSrCyrlRs extends AppLocalizationsSr'));
+    });
+
     testWithoutContext(
       'language imports are sorted when preferredSupportedLocaleString is given',
       () {
@@ -3481,8 +3528,7 @@ String helloNameAndAge({required String name, required int age}) {
           }
         }
       }
-    }
-    ''';
+    }''';
 
     setupLocalizations(<String, String>{'en': en, 'da': da});
 
@@ -3490,6 +3536,53 @@ String helloNameAndAge({required String name, required int age}) {
     expect(
       localizationsFile,
       containsIgnoringWhitespace(r'''String get test => 'No placeholder in here'''),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192130.
+  testWithoutContext('throws an exception when placeholder type is invalid', () {
+    const maliciousArb = r'''
+{
+  "greeting": "Hello {user}",
+  "@greeting": {
+    "placeholders": {
+      "user": {
+        "type": "Object user) { print('bad'); return 'x'; } String injected("
+      }
+    }
+  }
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': maliciousArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid placeholder type'),
+        ),
+      ),
+    );
+
+    const genericInjectionArb = r'''
+{
+  "greeting": "Hello {user}",
+  "@greeting": {
+    "placeholders": {
+      "user": {
+        "type": "dynamic> foo) { print('bad'); } void bar<dynamic>"
+      }
+    }
+  }
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': genericInjectionArb}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid placeholder type'),
+        ),
+      ),
     );
   });
 }

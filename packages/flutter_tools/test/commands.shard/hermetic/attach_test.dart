@@ -390,7 +390,7 @@ void main() {
           // Listen to the URI before checking port forwarder. Port forwarding
           // is done as a side effect when generating the uri.
           final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-          final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+          final Uri? vmServiceUri = await flutterDevice.vmServiceUri;
           expect(vmServiceUri.toString(), 'http://127.0.0.1:$hostPort/xyz/');
 
           expect(portForwarder.forwardedPorts, <TypeMatcher<ForwardedPort>>[
@@ -470,7 +470,7 @@ void main() {
           // Listen to the URI before checking port forwarder. Port forwarding
           // is done as a side effect when generating the uri.
           final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-          final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+          final Uri? vmServiceUri = await flutterDevice.vmServiceUri;
           expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
 
           expect(portForwarder.forwardedPorts, isEmpty);
@@ -555,7 +555,7 @@ void main() {
           // Listen to the URI before checking port forwarder. Port forwarding
           // is done as a side effect when generating the uri.
           final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-          final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+          final Uri? vmServiceUri = await flutterDevice.vmServiceUri;
           expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
 
           expect(portForwarder.forwardedPorts, isEmpty);
@@ -653,7 +653,7 @@ void main() {
           // Listen to the URI before checking port forwarder. Port forwarding
           // is done as a side effect when generating the uri.
           final FlutterDevice flutterDevice = hotRunnerFactory.devices.first;
-          final Uri? vmServiceUri = await flutterDevice.vmServiceUris?.first;
+          final Uri? vmServiceUri = await flutterDevice.vmServiceUri;
           expect(vmServiceUri.toString(), 'http://111.111.111.111:123/xyz/');
 
           expect(portForwarder.forwardedPorts, isEmpty);
@@ -1498,10 +1498,11 @@ void main() {
     testUsingContext(
       'does not try to attach to a new target when the original application disappears',
       () async {
-        // Regression test for https://github.com/flutter/flutter/issues/156692.
+        final fakeLogReader = FakeDeviceLogReader();
+        fakeLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:1234');
         final device = FakeAndroidDevice(id: '1')
           ..portForwarder = const NoOpDevicePortForwarder()
-          ..onGetLogReader = () => NoOpDeviceLogReader('test');
+          ..onGetLogReader = () => fakeLogReader;
         final hotRunner = FakeHotRunner();
         final hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
         var attachCount = 0;
@@ -1511,12 +1512,9 @@ void main() {
               Completer<void>? appStartedCompleter,
               bool enableDevTools,
             ) async {
-              // Mimic listening to the `vmServiceUris` stream for the FlutterDevice we're
-              // trying to attach to. Without the fix for
-              // https://github.com/flutter/flutter/issues/156692, calling `HotRunner.attach`
-              // multiple times would result in this stream being listened to again, causing a
-              // `StateError` to be thrown.
-              await hotRunner.flutterDevices.first.vmServiceUris!.toList();
+              // Mimic awaiting the `vmServiceUri` future for the FlutterDevice we're
+              // trying to attach to.
+              await hotRunner.flutterDevices.first.vmServiceUri;
               attachCount++;
               return 0;
             };
@@ -1908,7 +1906,11 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   DeviceLogReader Function()? onGetLogReader;
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) {
     if (onGetLogReader == null) {
       throw UnimplementedError(
         'Called getLogReader but no onGetLogReader callback was supplied in the constructor to FakeAndroidDevice.',

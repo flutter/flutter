@@ -219,10 +219,6 @@ class AOTSnapshotter {
     }
 
     if (platform == TargetPlatform.android_arm) {
-      // Use softfp for Android armv7 devices.
-      // TODO(cbracken): eliminate this when we fix https://github.com/flutter/flutter/issues/17489
-      genSnapshotArgs.add('--no-sim-use-hardfp');
-
       // Not supported by the Pixel in 32-bit mode.
       genSnapshotArgs.add('--no-use-integer-division');
     }

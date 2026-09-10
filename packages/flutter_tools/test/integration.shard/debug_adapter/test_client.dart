@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:dds/dap.dart';
+import 'package:dap_adapters/dap_adapters.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
 
 import 'test_server.dart';
@@ -39,6 +39,9 @@ class DapTestClient {
           ),
         );
         _pendingRequests.clear();
+        if (!_eventController.isClosed) {
+          unawaited(_eventController.close());
+        }
       },
     );
   }

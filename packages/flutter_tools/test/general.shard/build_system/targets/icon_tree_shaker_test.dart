@@ -532,7 +532,12 @@ void main() {
       targetPlatform: TargetPlatform.android,
     );
 
+    final stdinSink = CompleterIOSink();
     writeRecordedUsesFile(appDill.path, content: emptyRecordedUsesResult);
+    resetFontSubsetInvocation(stdinSink: stdinSink);
+    fileSystem.file(outputPath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.filled(1200, 0));
     // Does not throw
     await iconTreeShaker.subsetFont(
       input: fileSystem.file(inputPath),
@@ -540,6 +545,7 @@ void main() {
       relativePath: relativePath,
     );
 
+    expect(stdinSink.getAndClear(), '57415\n');
     expect(
       logger.traceText,
       contains(
@@ -911,6 +917,114 @@ void main() {
 
     final String stdin = stdinSink.getAndClear();
     expect(stdin, contains('59470'));
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('Subsets unused CupertinoIcons font to fallback code point', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+    const cupertinoFontPath = 'packages/cupertino_icons/assets/CupertinoIcons.ttf';
+    const cupertinoManifestJson =
+        '''
+[
+  {
+    "family": "packages/cupertino_icons/CupertinoIcons",
+    "fonts": [
+      {
+        "asset": "$cupertinoFontPath"
+      }
+    ]
+  }
+]
+''';
+    fontManifestContent = DevFSStringContent(cupertinoManifestJson);
+
+    final iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
+
+    // Empty recordings (0 icons used)
+    writeRecordedUsesFile(appDill.path, content: emptyRecordedUsesResult);
+
+    final stdinSink = CompleterIOSink();
+    fontSubsetArgs = <String>[fontSubsetPath, outputPath, inputPath];
+    resetFontSubsetInvocation(stdinSink: stdinSink);
+
+    final File inputFont = fileSystem.file(inputPath)..writeAsBytesSync(List<int>.filled(2500, 0));
+    fileSystem.file(outputPath)
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(List<int>.filled(1200, 0));
+
+    expect(
+      await iconTreeShaker.subsetFont(
+        input: inputFont,
+        outputPath: outputPath,
+        relativePath: cupertinoFontPath,
+      ),
+      true,
+    );
+
+    expect(stdinSink.getAndClear(), '62418\n');
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('Does not subset unused non-icon font', () async {
+    final Environment environment = createEnvironment(<String, String>{
+      kIconTreeShakerFlag: 'true',
+      kBuildMode: 'release',
+    });
+    final File appDill = environment.buildDir.childFile('app.dill')..createSync(recursive: true);
+
+    const customFontPath = 'fonts/Roboto-Regular.ttf';
+    const customManifestJson =
+        '''
+[
+  {
+    "family": "Roboto",
+    "fonts": [
+      {
+        "asset": "$customFontPath"
+      }
+    ]
+  }
+]
+''';
+    fontManifestContent = DevFSStringContent(customManifestJson);
+
+    final iconTreeShaker = IconTreeShaker(
+      environment,
+      fontManifestContent,
+      logger: logger,
+      processManager: processManager,
+      fileSystem: fileSystem,
+      artifacts: artifacts,
+      targetPlatform: TargetPlatform.android,
+    );
+
+    // Empty recordings (0 icons used)
+    writeRecordedUsesFile(appDill.path, content: emptyRecordedUsesResult);
+
+    final File inputFont = fileSystem.file(inputPath)..writeAsBytesSync(List<int>.filled(2500, 0));
+
+    expect(
+      await iconTreeShaker.subsetFont(
+        input: inputFont,
+        outputPath: outputPath,
+        relativePath: customFontPath,
+      ),
+      false,
+    );
+
     expect(processManager, hasNoRemainingExpectations);
   });
 }

@@ -2,13 +2,14 @@ The packages gardener role currently makes use of several tools and communicatio
 
 ## Objective
 
-The packages gardener’s role is to eliminate impediments to engineering velocity on teams working on the [flutter/packages] repository, and to minimize the latency with which critical fixes arrive in our customers' hands. To that end, we maintain a rotation so that there is a clear owner and point of contact for flutter/packages issues, and so that engineers can plan their work around an assumption of reduced productivity during their rotation.
+The packages gardener’s role is to eliminate impediments to engineering velocity on teams working on the [flutter/packages] and [flutter/core-packages] repositories, and to minimize the latency with which critical fixes arrive in our customers' hands. To that end, we maintain a rotation so that there is a clear owner and point of contact for flutter/packages issues, and so that engineers can plan their work around an assumption of reduced productivity during their rotation.
 
 The packages gardener's core responsibilities are:
-* Keep the flutter/packages tree green to keep developers, and the release process unblocked.
+* Keep the flutter/packages and flutter/core-packages trees green to keep developers and the release process unblocked.
 * Keep the various packages rollers (see below) rolling.
 * Ensure others are informed of issues which may affect them.
 * Ensure bugs/investigations are delegated and taken care of by the right person, which may be themself.
+* Update the repositories for any stable releases (see below).
 * Update the list of known deprecations (see below).
 
 The gardener's responsibilities do not include:
@@ -16,7 +17,7 @@ The gardener's responsibilities do not include:
 * Personally investigate issues or fix bugs, unless the right person to investigate and fix is the gardener themself.
 
 As such, the gardener should use their trowel and hat to:
-* Aggressively roll back problematic changes (in all relevant repositories including [flutter/packages] and [flutter/flutter]).
+* Aggressively roll back problematic changes (in all relevant repositories including [flutter/packages], [flutter/core-packages], and [flutter/flutter]).
 * Delegate investigations/issues to the right engineer(s) on the team, and follow-up.
 * Detect infrastructure issues that cause test failures and flakiness and report to the infrastructure team.
 * Notify the [Flutter framework gardener] when a framework change causes the flutter/packages roller to fail in a way that can’t easily be fixed locally.
@@ -37,7 +38,7 @@ Please briefly describe any issues you encountered during your week of gardening
 
 Below are the tasks that should be done routinely while gardening.
 
-### Dashboard
+### flutter/packages dashboard
 Open the [packages build dashboard].
 1. If the tree is closed, identify which test shards are failing. If there are yellow boxes with an exclamation point, that means that the failed tests are automatically re-running themselves. The tree is not fully closed until there are solid red boxes or red boxes with exclamation points. You can begin investigation as soon as you notice the tree going red, but it is suggested not to begin escalation until re-runs have completed.
 1. Identify which test within the shard failed, and try to locate obvious errors or failures in the logs.
@@ -49,6 +50,11 @@ Open the [packages build dashboard].
 1. If the tree is open, investigate green exclamation point squares, which are tests that have failed, rerun, and then passed. They may be [flaky and warrant an investigation](#handling-a-flaky-test). They also may have hit an intermittent infrastructure issue.
 
 Unmute the [hackers-ecosystem channel] and [hackers-infra channel] on [Discord]. Contributors are encouraged to escalate tree closures to you. Respond there as quickly as possible.
+
+### flutter/core-packages tree status
+1. Check the [flutter/core-packages build status] (core-packages does not currently have a Flutter dashboard), which should show a green checkmark for the latest commit.
+1. If it doesn't, click the red X to see what failed, and find the relevant errors.
+1. Proceed as with flutter/packages failures above.
 
 ### Rollers
 
@@ -62,6 +68,10 @@ Check that all of the auto-rollers are running:
 If a roller's status is not `running`, contact the person who paused it and work with them make sure whatever work needs to be done to re-activate the roller is happening.
 
 If a roller is failing, check the recent runs to see why, and take action to ensure that the roller starts succeeding again. If the issue will take a while to resolve, pause the roller while resolving it, and include an explanation of why.
+
+### Stable release
+
+If there is a stable release (a full new release, not a hotfix release), both flutter/packages and flutter/core-packages need to be updated to ensure that they are testing the new set of `stable`, N-1, and N-2 releases. See [these instructions][update for stable release] for steps to follow.
 
 ### Deprecations
 
@@ -79,8 +89,10 @@ Once during your rotation, do a manual check for any new deprecations:
         * If it's easy to determine, include the version that the replacement API will be available in the issue description.
     * Exception: If a deprecation warning is from a package integration test that is testing a deprecated API from that package (which does not count as `deprecated_member_use_from_same_package` since the example is technically a different package), annotate it with an `ignore` instead, so it doesn’t show up in this manual check in the future.
 
+These steps should be done for both flutter/packages and flutter/core-packages.
+
 #### Consider fixing deprecated APIs
-If old deprecations have reached the point where they can be fixed without losing support for stable, considering using some of your gardening time to replace the deprecated API usage.
+If old deprecations have reached the point where they can be fixed without losing support for stable, consider using some of your gardening time to replace the deprecated API usage.
 
 ## Handling failures
 
@@ -106,7 +118,7 @@ If the commit landed within the last 24 hours:
 If the commit could not be automatically reverted:
 1. Create a revert pull request from the bad merged pull request via the "Revert" button at the bottom.
 1. Add the `revert` label to the PR to allow the bot to land it without approval.
-1. Add the original author to the as a reviewer so they are notified. If they are not a member of [flutter-hackers], also include the original pull request reviewers.
+1. Add the original author as a reviewer so they are notified. If they are not a member of [flutter-hackers], also include the original pull request reviewers.
 1. In "Related Issues" add a link to any GitHub issues that describe the failure.
 1. @ mention the author in the [hackers-ecosystem channel] with a link to the revert pull request. If they are unavailable, send an email. If they are not a [Flutter committer][flutter-hackers] and are not on Discord, escalate to the reviewers of the original pull request.
 1. As soon as analysis test passes, merge it. You do not need to wait for all presubmit tests to pass, or for an LGTM.
@@ -122,6 +134,7 @@ If you see a test failure that appears to be a flake:
 1. If the test has neither been recently introduced, nor recently changed, disable the test. The test owner will turn it back on or delete the test as part of their investigation.
 
 [flutter/packages]: https://github.com/flutter/packages
+[flutter/core-packages]: https://github.com/flutter/core-packages
 [flutter/flutter]: https://github.com/flutter/flutter
 [Flutter framework gardener]: /docs/infra/Flutter-Framework-Gardener-Rotation.md
 [Flutter issues]: https://github.com/flutter/flutter/issues
@@ -129,6 +142,7 @@ If you see a test failure that appears to be a flake:
 [deprecated api issues]: https://github.com/flutter/flutter/labels/p%3A%20deprecated%20api
 [flutter-hackers]: https://github.com/orgs/flutter/teams/flutter-hackers
 [packages build dashboard]: https://flutter-dashboard.appspot.com/#/build?repo=packages
+[flutter/core-packages build status]: https://github.com/flutter/core-packages/commits/main/
 [Discord]: https://discord.gg/BS8KZyg
 [hackers-ecosystem channel]: https://discord.com/channels/608014603317936148/608020293944082452
 [hackers-infra channel]: https://discord.com/channels/608014603317936148/608021351567065092
@@ -139,4 +153,5 @@ If you see a test failure that appears to be a flake:
 [packages-to-flutter roller]: https://autoroll.skia.org/r/flutter-packages-flutter-autoroll
 [packages gardening journal]: https://goto.google.com/flutter-packages-gardener-journal
 [flutter-stable-to-packages roller]: https://autoroll.skia.org/r/flutter-stable-packages
+[update for stable release]: /docs/ecosystem/release/Updating-Packages-repo-for-a-stable-release.md
 [On-call scheduling for Flutter]: https://docs.google.com/document/d/1i-11by4J3zvxWG3qLMm4MKfJ8DrjIJna6DPA9tBmJWc/edit#heading=h.w8bl5vic6x95
