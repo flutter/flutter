@@ -114,7 +114,7 @@ void doTests() {
       expect(computed, expected);
     });
 
-    test('limits physical width of element given custom dpr', () {
+    test('limits physical height of element given custom dpr', () {
       const double logicalWidth = 5000;
       const double logicalHeight = 10000;
       EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
