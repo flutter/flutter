@@ -6891,32 +6891,26 @@ abstract class RenderObjectElement extends Element {
   }
 
   void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
-    var applyParentData = true;
+    // Fails loudly when the ParentDataWidget cannot apply its parent data to
+    // this render object, instead of silently skipping the update and leaving
+    // a latent release-mode type-cast crash behind. This intentionally makes
+    // the incompatible-type case behave like the competing-ParentDataWidgets
+    // case, which also stops the build with a descriptive error.
+    // See https://github.com/flutter/flutter/issues/188272.
     assert(() {
-      try {
-        if (!parentDataWidget.debugIsValidRenderObject(renderObject)) {
-          applyParentData = false;
-          throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('Incorrect use of ParentDataWidget.'),
-            ...parentDataWidget._debugDescribeIncorrectParentDataType(
-              parentData: renderObject.parentData,
-              parentDataCreator: _ancestorRenderObjectElement?.widget as RenderObjectWidget?,
-              ownershipChain: ErrorDescription(debugGetCreatorChain(10)),
-            ),
-          ]);
-        }
-      } on FlutterError catch (e) {
-        // We catch the exception directly to avoid activating the ErrorWidget,
-        // while still allowing debuggers to break on exception. Since the tree
-        // is in a broken state, adding the ErrorWidget would likely cause more
-        // exceptions, which is not good for the debugging experience.
-        _reportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
+      if (!parentDataWidget.debugIsValidRenderObject(renderObject)) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Incorrect use of ParentDataWidget.'),
+          ...parentDataWidget._debugDescribeIncorrectParentDataType(
+            parentData: renderObject.parentData,
+            parentDataCreator: _ancestorRenderObjectElement?.widget as RenderObjectWidget?,
+            ownershipChain: ErrorDescription(debugGetCreatorChain(10)),
+          ),
+        ]);
       }
       return true;
     }());
-    if (applyParentData) {
-      parentDataWidget.applyParentData(renderObject);
-    }
+    parentDataWidget.applyParentData(renderObject);
   }
 
   @override
