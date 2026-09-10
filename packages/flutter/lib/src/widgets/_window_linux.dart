@@ -266,6 +266,12 @@ class LinuxWindowRegistrar {
   _FlView? _viewForViewId(int viewId) => _views[viewId];
 }
 
+/// The edge of a window to resize when dragging with a pointer.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+@internal
+enum WindowDragEdge { northWest, north, northEast, west, east, southWest, south, southEast }
+
 /// Platform specific functionality for all window controllers on Linux.
 ///
 /// {@macro flutter.widgets.windowing.experimental}
@@ -296,6 +302,27 @@ abstract mixin class BaseWindowControllerLinux {
     }
     _owner = owner;
     _window = _GtkWindow(type);
+    _useRgbaVisual();
+  }
+
+  /// Gives the window a visual with an alpha channel, so that it can show
+  /// translucent contents, e.g. the rounded corners and shadow of a client side
+  /// decorated window.
+  ///
+  /// A window is given the visual of its screen, which on Wayland has an alpha
+  /// channel already but on X11 is usually the 24 bit visual of the display. A
+  /// visual can only be set before the window is realized, so this is done for
+  /// every window rather than when one is made transparent.
+  void _useRgbaVisual() {
+    final _GdkScreen screen = _window.getScreen();
+    if (!screen.isComposited) {
+      return;
+    }
+    final _GdkVisual? visual = screen.rgbaVisual;
+    if (visual == null) {
+      return;
+    }
+    _window.setVisual(visual);
   }
 
   /// Creates the view that renders the Flutter content into this window, and
@@ -394,6 +421,86 @@ abstract mixin class BaseWindowControllerLinux {
     if (isDestroyed) {
       throw StateError('Window has been destroyed.');
     }
+  }
+
+  /// Sets whether this window is decorated with a titlebar and border drawn by
+  /// GTK.
+  ///
+  /// An undecorated window is left entirely to Flutter to draw, so an app that
+  /// turns this off has to provide its own titlebar and window borders.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setDecorated(bool decorated) {
+    _checkNotDestroyed();
+    _window.setDecorated(decorated);
+  }
+
+  /// Sets whether the contents of this window paint its background, rather
+  /// than GTK filling it with the background color of the current theme.
+  ///
+  /// Anything an app paintable window does not paint is left transparent, so a
+  /// client side decorated window can draw rounded corners and a shadow around
+  /// itself. This requires a compositing window manager, without one the window
+  /// is drawn opaque.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setAppPaintable(bool appPaintable) {
+    _checkNotDestroyed();
+    _window.setAppPaintable(appPaintable);
+  }
+
+  /// Sets the color drawn behind the contents of this window.
+  ///
+  /// A translucent color only shows through if the window is app paintable, see
+  /// [setAppPaintable].
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void setBackgroundColor(Color color) {
+    _checkNotDestroyed();
+    _view.setBackgroundColor(color);
+  }
+
+  /// Starts an interactive move of this window, e.g. in response to a pointer
+  /// button being pressed on a client side titlebar.
+  ///
+  /// [button] is the pointer button that started the drag, [rootX] and [rootY]
+  /// are the position of that button press in root window co-ordinates and
+  /// [timestamp] is the time of that button press.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void beginMoveDrag({required int button, int rootX = 0, int rootY = 0, int timestamp = 0}) {
+    _checkNotDestroyed();
+    _window.beginMoveDrag(button: button, rootX: rootX, rootY: rootY, timestamp: timestamp);
+  }
+
+  /// Starts an interactive resize of this window from [edge], e.g. in response
+  /// to a pointer button being pressed on a client side window border.
+  ///
+  /// [button] is the pointer button that started the drag, [rootX] and [rootY]
+  /// are the position of that button press in root window co-ordinates and
+  /// [timestamp] is the time of that button press.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  @internal
+  void beginResizeDrag({
+    required WindowDragEdge edge,
+    required int button,
+    int rootX = 0,
+    int rootY = 0,
+    int timestamp = 0,
+  }) {
+    _checkNotDestroyed();
+    _window.beginResizeDrag(
+      edge: _GdkWindowEdge.values[edge.index],
+      button: button,
+      rootX: rootX,
+      rootY: rootY,
+      timestamp: timestamp,
+    );
   }
 }
 
@@ -901,6 +1008,13 @@ enum _GdkWindowTypeHint {
   dnd,
 }
 
+/// Window edges that can be dragged to resize a window. Matches the
+/// GdkWindowEdge enum in gdk/gdkwindow.h.
+///
+/// The values must stay in the same order as [WindowDragEdge], which is mapped
+/// onto this enum by index.
+enum _GdkWindowEdge { northWest, north, northEast, west, east, southWest, south, southEast }
+
 /// Window reference points. Matches the GdkGravity enum in gdk/gdkwindow.h.
 enum _GdkGravity {
   // ignore: unused_field
@@ -1026,10 +1140,51 @@ class _GtkWidget extends _GObject {
     return result;
   }
 
+  /// Sets if this widget draws its own background. If true GTK will not draw
+  /// the background from the current theme.
+  void setAppPaintable(bool appPaintable) {
+    _gtkWidgetSetAppPaintable(instance, appPaintable);
+  }
+
+  /// Gets the screen this widget is being displayed on.
+  _GdkScreen getScreen() {
+    return _GdkScreen(_gtkWidgetGetScreen(instance));
+  }
+
+  /// Sets the visual used to render this widget.
+  ///
+  /// Must be called before the widget is realized.
+  void setVisual(_GdkVisual visual) {
+    _gtkWidgetSetVisual(instance, visual.instance);
+  }
+
   /// Destroy the widget.
   void destroy() {
     _gtkWindowDestroy(instance);
   }
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Bool)>(
+    symbol: 'gtk_widget_set_app_paintable',
+  )
+  external static void _gtkWidgetSetAppPaintable(
+    ffi.Pointer<ffi.NativeType> widget,
+    bool appPaintable,
+  );
+
+  @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
+    symbol: 'gtk_widget_get_screen',
+  )
+  external static ffi.Pointer<ffi.NativeType> _gtkWidgetGetScreen(
+    ffi.Pointer<ffi.NativeType> widget,
+  );
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Pointer<ffi.NativeType>)>(
+    symbol: 'gtk_widget_set_visual',
+  )
+  external static void _gtkWidgetSetVisual(
+    ffi.Pointer<ffi.NativeType> widget,
+    ffi.Pointer<ffi.NativeType> visual,
+  );
 
   @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gtk_widget_realize')
   external static void _gtkWidgetRealize(ffi.Pointer<ffi.NativeType> widget);
@@ -1068,6 +1223,43 @@ class _GtkWidget extends _GObject {
     ffi.Pointer<ffi.Int> destX,
     ffi.Pointer<ffi.Int> destY,
   );
+}
+
+/// Wraps GdkVisual.
+class _GdkVisual extends _GObject {
+  /// Creates a wrapper to an existing [GdkVisual] in [instance].
+  const _GdkVisual(super.instance);
+}
+
+/// Wraps GdkScreen.
+class _GdkScreen extends _GObject {
+  /// Creates a wrapper to an existing [GdkScreen] in [instance].
+  const _GdkScreen(super.instance);
+
+  /// Gets the visual that supports translucent windows, or null if this screen
+  /// does not have one.
+  _GdkVisual? get rgbaVisual {
+    final ffi.Pointer<ffi.NativeType> visual = _gdkScreenGetRgbaVisual(instance);
+    if (visual == ffi.nullptr) {
+      return null;
+    }
+    return _GdkVisual(visual);
+  }
+
+  /// Checks if windows on this screen can be made translucent.
+  bool get isComposited {
+    return _gdkScreenIsComposited(instance);
+  }
+
+  @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
+    symbol: 'gdk_screen_get_rgba_visual',
+  )
+  external static ffi.Pointer<ffi.NativeType> _gdkScreenGetRgbaVisual(
+    ffi.Pointer<ffi.NativeType> screen,
+  );
+
+  @ffi.Native<ffi.Bool Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'gdk_screen_is_composited')
+  external static bool _gdkScreenIsComposited(ffi.Pointer<ffi.NativeType> screen);
 }
 
 /// Wraps GdkWindow.
@@ -1237,6 +1429,23 @@ class _GtkWindow extends _GtkContainer {
     _gtkWindowSetDecorated(instance, decorated);
   }
 
+  /// Starts moving this window in response to a pointer button being pressed.
+  void beginMoveDrag({required int button, int rootX = 0, int rootY = 0, int timestamp = 0}) {
+    _gtkWindowBeginMoveDrag(instance, button, rootX, rootY, timestamp);
+  }
+
+  /// Starts resizing this window from [edge] in response to a pointer button
+  /// being pressed.
+  void beginResizeDrag({
+    required _GdkWindowEdge edge,
+    required int button,
+    int rootX = 0,
+    int rootY = 0,
+    int timestamp = 0,
+  }) {
+    _gtkWindowBeginResizeDrag(instance, edge.index, button, rootX, rootY, timestamp);
+  }
+
   /// Sets the title of the window.
   void setTitle(String title) {
     final ffi.Pointer<ffi.Uint8> titleBuffer = _stringToNative(title);
@@ -1361,6 +1570,29 @@ class _GtkWindow extends _GtkContainer {
   )
   external static void _gtkWindowSetDecorated(ffi.Pointer<ffi.NativeType> window, bool decorated);
 
+  @ffi.Native<
+    ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Int, ffi.Int, ffi.Int, ffi.Uint32)
+  >(symbol: 'gtk_window_begin_move_drag')
+  external static void _gtkWindowBeginMoveDrag(
+    ffi.Pointer<ffi.NativeType> window,
+    int button,
+    int rootX,
+    int rootY,
+    int timestamp,
+  );
+
+  @ffi.Native<
+    ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Int, ffi.Int, ffi.Int, ffi.Int, ffi.Uint32)
+  >(symbol: 'gtk_window_begin_resize_drag')
+  external static void _gtkWindowBeginResizeDrag(
+    ffi.Pointer<ffi.NativeType> window,
+    int edge,
+    int button,
+    int rootX,
+    int rootY,
+    int timestamp,
+  );
+
   @ffi.Native<ffi.Pointer<ffi.Uint8> Function(ffi.Pointer<ffi.NativeType>)>(
     symbol: 'gtk_window_get_title',
   )
@@ -1435,6 +1667,21 @@ class _FlEngine extends _GObject {
   factory _FlEngine.current() => _FlEngine(WidgetsBinding.instance.platformDispatcher.engineId!);
 }
 
+/// Matches the GdkRGBA struct in gdk/gdkrgba.h.
+final class _GdkRGBA extends ffi.Struct {
+  @ffi.Double()
+  external double red;
+
+  @ffi.Double()
+  external double green;
+
+  @ffi.Double()
+  external double blue;
+
+  @ffi.Double()
+  external double alpha;
+}
+
 /// Wraps FlView.
 class _FlView extends _GtkWidget {
   /// Create a new FlView widget.
@@ -1453,6 +1700,18 @@ class _FlView extends _GtkWidget {
     return _flViewGetId(instance);
   }
 
+  /// Sets the color drawn behind the Flutter contents.
+  void setBackgroundColor(Color color) {
+    final ffi.Pointer<_GdkRGBA> rgba = _gMalloc0(ffi.sizeOf<_GdkRGBA>()).cast<_GdkRGBA>();
+    rgba.ref
+      ..red = color.r
+      ..green = color.g
+      ..blue = color.b
+      ..alpha = color.a;
+    _flViewSetBackgroundColor(instance, rgba);
+    _gFree(rgba);
+  }
+
   @ffi.Native<ffi.Pointer<ffi.NativeType> Function(ffi.Pointer<ffi.NativeType>)>(
     symbol: 'fl_view_new_for_engine',
   )
@@ -1469,6 +1728,14 @@ class _FlView extends _GtkWidget {
 
   @ffi.Native<ffi.Int64 Function(ffi.Pointer<ffi.NativeType>)>(symbol: 'fl_view_get_id')
   external static int _flViewGetId(ffi.Pointer<ffi.NativeType> view);
+
+  @ffi.Native<ffi.Void Function(ffi.Pointer<ffi.NativeType>, ffi.Pointer<_GdkRGBA>)>(
+    symbol: 'fl_view_set_background_color',
+  )
+  external static void _flViewSetBackgroundColor(
+    ffi.Pointer<ffi.NativeType> view,
+    ffi.Pointer<_GdkRGBA> color,
+  );
 }
 
 /// Wraps FlViewMonitor (helper object for handling signals from FlView).
