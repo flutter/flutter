@@ -56,140 +56,13 @@ class LegacyJniDelegate {
 
   virtual bool OnPreEngineRestart() = 0;
 
-  virtual bool OnVsync(int64_t frame_time_nanos,
-                       int64_t frame_target_time_nanos) {
-    return true;
-  }
-
-  virtual bool AsyncWaitForVsync(intptr_t baton) { return true; }
-  virtual bool SetViewportMetrics(const AndroidViewportMetrics& metrics) = 0;
-
-  virtual bool UpdateDisplayMetrics(const AndroidDisplayMetrics& metrics) = 0;
-
-  virtual bool UpdateDisplayMetrics(uint64_t display_id,
-                                    double refresh_rate,
-                                    double width,
-                                    double height,
-                                    double device_pixel_ratio) = 0;
-
-  virtual bool DispatchViewportMetrics(int64_t view_id,
-                                       double width,
-                                       double height,
-                                       double pixel_ratio) = 0;
-
   virtual bool RequestDartDeferredLibrary(int loading_unit_id) = 0;
-
-  virtual bool CreateSurfaceControl(int64_t surface_id,
-                                    const std::string& debug_name = "") = 0;
-
-  virtual bool DestroySurfaceControl(int64_t surface_id) = 0;
-
-  virtual bool ReparentSurfaceControl(int64_t surface_id,
-                                      int64_t new_parent_id) = 0;
-
-  virtual bool SetSurfaceControlGeometry(
-      int64_t surface_id,
-      const AndroidSurfaceControlRect& source,
-      const AndroidSurfaceControlRect& destination,
-      int32_t transform) = 0;
-
-  virtual bool SetSurfaceControlVisibility(int64_t surface_id,
-                                           bool visible) = 0;
-
-  virtual bool SetSurfaceControlZOrder(int64_t surface_id, int32_t z_order) = 0;
-
-  virtual bool SetSurfaceControlDamageRegion(
-      int64_t surface_id,
-      const std::vector<AndroidSurfaceControlRect>& rects) = 0;
-
-  virtual bool SetSurfaceControlBuffer(int64_t surface_id,
-                                       void* buffer,
-                                       int fence_fd = -1) = 0;
-
-  virtual bool SetSurfaceControlBufferAlpha(int64_t surface_id,
-                                            float alpha) = 0;
-
-  virtual bool SetSurfaceControlColor(int64_t surface_id,
-                                      float r,
-                                      float g,
-                                      float b,
-                                      float alpha) = 0;
-
-  virtual std::optional<AndroidSurfaceControlState> GetSurfaceControlState(
-      int64_t surface_id) const {
-    return std::nullopt;
-  }
-
-  virtual std::shared_ptr<AndroidSurfaceControl> GetSurfaceControl(
-      int64_t surface_id) const {
-    return nullptr;
-  }
 
   virtual bool InitVM(const AndroidVMArgs& args) { return true; }
 
   virtual bool PrefetchDefaultFontManager() { return true; }
 
   virtual bool SetVmServiceUri(const std::string& uri) { return true; }
-
-  virtual bool RegisterHardwareBufferTexture(int64_t texture_id) {
-    return false;
-  }
-
-  virtual bool UnregisterHardwareBufferTexture(int64_t texture_id) {
-    return false;
-  }
-
-  virtual bool SetHardwareBufferFrame(
-      int64_t texture_id,
-      const std::shared_ptr<AndroidHardwareBuffer>& buffer) {
-    return false;
-  }
-
-  virtual bool SetHardwareBufferFrame(
-      int64_t texture_id,
-      const FlutterHardwareBufferExternalTexture& texture) {
-    return false;
-  }
-
-  virtual bool GetHardwareBufferTextureFrame(
-      int64_t texture_id,
-      size_t width,
-      size_t height,
-      FlutterHardwareBufferExternalTexture* texture_out) {
-    return false;
-  }
-
-  virtual bool OnHardwareBufferFrameAvailable(int64_t texture_id) {
-    return false;
-  }
-
-  virtual bool RegisterVulkanTexture(int64_t texture_id) { return false; }
-
-  virtual bool UnregisterVulkanTexture(int64_t texture_id) { return false; }
-
-  virtual bool SetVulkanTextureFrame(
-      int64_t texture_id,
-      const std::shared_ptr<AndroidVulkanExternalTexture>& texture) {
-    return false;
-  }
-
-  virtual bool SetVulkanTextureFrame(
-      int64_t texture_id,
-      const FlutterVulkanExternalTexture& texture) {
-    return false;
-  }
-
-  virtual bool GetVulkanTextureFrame(
-      int64_t texture_id,
-      size_t width,
-      size_t height,
-      FlutterVulkanExternalTexture* texture_out) {
-    return false;
-  }
-
-  virtual bool OnVulkanTextureFrameAvailable(int64_t texture_id) {
-    return false;
-  }
 
   virtual int64_t SpawnEngine(int64_t parent_engine_id,
                               const AndroidEngineSpawnArgs& args) {
@@ -207,7 +80,8 @@ class LegacyJniDelegate {
 /// JniDelegate and LegacyJniDelegate.
 ///
 /// Subsystems whose legacy implementations have been deleted (Assets, Images,
-/// Callbacks, Mutators, Platform Views, Semantics) dispatch directly and
+/// Callbacks, Mutators, Platform Views, Semantics, Graphics Pipeline [VSync,
+/// Metrics, SurfaceControl, HardwareBuffer, Vulkan]) dispatch directly and
 /// unconditionally to JniDelegate. For remaining transitioning subsystems,
 /// if IsEmbedderEnabled() is true, dispatches to JniDelegate; if false,
 /// dispatches to LegacyJniDelegate.
