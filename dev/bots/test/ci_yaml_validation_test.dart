@@ -41,15 +41,21 @@ void main() {
     expect(properties['test_randomization_off'], anyOf('true', 'false', isNull));
 
     if (properties['shard'] == 'tool_integration_tests') {
-      final timeoutSecs = properties['test_timeout_secs'] as String?;
+      final Object? timeoutSecsValue = properties['test_timeout_secs'];
       expect(
-        timeoutSecs,
+        timeoutSecsValue,
         isNotNull,
         reason: '${target.name} must specify test_timeout_secs (e.g. "2700") to avoid hitting the 30-minute step execution timeout.',
       );
-      if (timeoutSecs != null) {
+      if (timeoutSecsValue != null) {
+        final int? timeoutSecs = int.tryParse(timeoutSecsValue.toString());
         expect(
-          int.parse(timeoutSecs),
+          timeoutSecs,
+          isNotNull,
+          reason: '${target.name} test_timeout_secs must be a valid integer, got "$timeoutSecsValue".',
+        );
+        expect(
+          timeoutSecs!,
           greaterThanOrEqualTo(2700),
           reason: '${target.name} test_timeout_secs should be at least 2700s (45 minutes).',
         );

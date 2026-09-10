@@ -186,10 +186,11 @@ void main() {
       }, <String>['--dry-run']);
       expectExitCode(result, 0);
 
+      final String prefix = path.join('test', 'integration.shard');
       final List<String> lines = (result.stdout as String).split('\n');
       final List<String> testLines = lines
           .map((String line) => line.trim())
-          .where((String line) => line.startsWith('test/integration.shard/') && line.endsWith('_test.dart'))
+          .where((String line) => (line.startsWith(prefix) || line.startsWith('test/integration.shard/')) && line.endsWith('_test.dart'))
           .toList();
 
       expect(testLines, isNotEmpty);

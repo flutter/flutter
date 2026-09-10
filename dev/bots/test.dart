@@ -277,7 +277,7 @@ Future<void> _runSnippetsTests() async {
       Directory(path.join(snippetsPath, 'test'))
           .listSync(recursive: true)
           .whereType<File>()
-          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: _toolsPath))
+          .map<String>((FileSystemEntity entry) => path.relative(entry.path, from: snippetsPath))
           .where((String testPath) => path.basename(testPath).endsWith('_test.dart'))
           .toList()
         ..sort();
