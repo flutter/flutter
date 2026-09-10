@@ -282,7 +282,6 @@ FlutterEmbedderNative::FlutterEmbedderNative()
       jni_router_(std::make_shared<JniRouter>(jni_delegate_, nullptr)),
       asset_provider_(std::make_shared<APKAssetProvider>(
           std::make_shared<InMemoryAPKAssetProviderImpl>())) {
-  jni_router_->SetInstanceEmbedderEnabled(true);
   AttachWindowMetricsCallbacks();
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::FlutterEmbedderNative");
   FML_DLOG(INFO)
@@ -390,7 +389,6 @@ FlutterEmbedderNative::FlutterEmbedderNative(
               ? std::move(asset_provider)
               : std::make_shared<APKAssetProvider>(
                     std::make_shared<InMemoryAPKAssetProviderImpl>())) {
-  jni_router_->SetInstanceEmbedderEnabled(true);
   AttachWindowMetricsCallbacks();
   TRACE_EVENT0("flutter",
                "FlutterEmbedderNative::FlutterEmbedderNative(custom)");
@@ -660,12 +658,12 @@ bool FlutterEmbedderNative::PresentSoftware(const void* allocation,
 
 bool FlutterEmbedderNative::IsEmbedderEnabled() {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::IsEmbedderEnabled");
-  return JniRouter::IsEmbedderEnabled();
+  return true;
 }
 
 void FlutterEmbedderNative::SetEmbedderEnabled(bool enabled) {
   TRACE_EVENT0("flutter", "FlutterEmbedderNative::SetEmbedderEnabled");
-  JniRouter::SetEmbedderEnabled(enabled);
+  (void)enabled;
 }
 
 void FlutterEmbedderNative::SetDefaultLibraryLoader(
@@ -708,7 +706,8 @@ std::shared_ptr<JniRouter> FlutterEmbedderNative::CreateDefaultRouter(
       std::move(vm_init), std::move(hardware_buffer_provider),
       std::move(vulkan_texture_provider), std::move(surface_control_provider),
       std::move(engine_group_provider), std::move(engine_group));
-  return std::make_shared<JniRouter>(std::move(delegate), legacy_delegate);
+  (void)legacy_delegate;
+  return std::make_shared<JniRouter>(std::move(delegate));
 }
 
 std::shared_ptr<JniRouter> FlutterEmbedderNative::GetRouter() const {
