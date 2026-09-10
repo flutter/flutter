@@ -43,8 +43,8 @@ class BuildAarCommand extends BuildSubCommand {
       BuildInfoOptions.extraFrontEndOptions,
       BuildInfoOptions.extraGenSnapshotOptions,
       _targetPlatform,
+      BuildInfoOptions.trackWidgetCreation,
     ], verboseHelp: verboseHelp);
-    BuildInfoOptions.trackWidgetCreation.addTo(argParser);
   }
 
   static const _debugMode = FlagOptionDescriptor(
