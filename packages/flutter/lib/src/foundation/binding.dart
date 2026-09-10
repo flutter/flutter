@@ -252,10 +252,11 @@ abstract class BindingBase {
   /// In debug builds this is [ui.PlatformDispatcher.instance] wrapped so that
   /// the entries of [debugViewMetricsOverrides] apply to the view metrics it
   /// reports; see [debugApplyViewMetricsOverrides]. The wrapper is transparent
-  /// while no override is registered, and is not built at all in release mode.
-  /// A subclass that overrides this accessor takes that wrapper away, so it
-  /// should apply [debugApplyViewMetricsOverrides] to whatever it returns
-  /// instead, the way [TestWidgetsFlutterBinding] does.
+  /// while no override is registered, and is not built at all outside of debug
+  /// mode (in profile or release mode). A subclass that overrides this accessor
+  /// takes that wrapper away, so it should apply
+  /// [debugApplyViewMetricsOverrides] to whatever it returns instead, the way
+  /// [TestWidgetsFlutterBinding] does.
   ui.PlatformDispatcher get platformDispatcher {
     ui.PlatformDispatcher dispatcher = ui.PlatformDispatcher.instance;
     assert(() {

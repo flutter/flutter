@@ -29,10 +29,10 @@ import 'debug.dart';
 /// Wraps `dispatcher` so that the entries of [debugViewMetricsOverrides] are
 /// applied to the view metrics it and its [ui.FlutterView]s report.
 ///
-/// Returns `dispatcher` itself in release mode, and returns the same wrapper
-/// every time it is called with the same `dispatcher`, so that the views it
-/// vends keep a stable identity. Wrapping an already-wrapped dispatcher returns
-/// it unchanged.
+/// Returns `dispatcher` itself outside of debug mode (in profile or release
+/// mode), and returns the same wrapper every time it is called with the same
+/// `dispatcher`, so that the views it vends keep a stable identity. Wrapping an
+/// already-wrapped dispatcher returns it unchanged.
 ///
 /// [BindingBase.platformDispatcher] applies this to
 /// [ui.PlatformDispatcher.instance], which is what makes overrides visible to
@@ -86,7 +86,8 @@ ui.PlatformDispatcher debugApplyViewMetricsOverrides(ui.PlatformDispatcher dispa
 /// to, so a new one is built per call and the caller is expected to hold it
 /// rather than to look it up again.
 ///
-/// Returns [dispatcher] unchanged in release mode.
+/// Returns [dispatcher] unchanged outside of debug mode (in profile or release
+/// mode).
 ui.PlatformDispatcher debugApplyViewMetricsOverridesForView(
   ui.PlatformDispatcher dispatcher,
   int viewId,
@@ -128,7 +129,7 @@ ui.PlatformDispatcher debugApplyViewMetricsOverridesForView(
 /// is registered: a view that is wrapped while one exists would otherwise
 /// change identity as tooling installs and removes overrides.
 ///
-/// Returns `view` unchanged in release mode.
+/// Returns `view` unchanged outside of debug mode (in profile or release mode).
 ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
   var result = view;
   assert(() {
@@ -153,6 +154,10 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
             : _wrappers[dispatcher];
         result = wrapper?._wrapView(view) ?? view;
       }
+    } on NoSuchMethodError {
+      // Low-level rendering tests can provide a view without a dispatcher.
+      // Such a view cannot opt in to overrides; leave its existing contract
+      // intact until a consumer actually needs the missing platform data.
     } on UnimplementedError {
       // Low-level rendering tests can provide a view without a dispatcher.
       // Such a view cannot opt in to overrides; leave its existing contract
@@ -173,7 +178,8 @@ ui.FlutterView debugViewWithMetricsOverrides(ui.FlutterView view) {
 /// implement its own dispatcher getter.
 ///
 /// Returns the same wrapper on repeated calls, or [view] itself if it already
-/// applies overrides. Returns [view] unchanged outside debug mode.
+/// applies overrides. Returns [view] unchanged outside of debug mode (in profile
+/// or release mode).
 ui.FlutterView debugApplyViewMetricsOverridesToView(
   ui.FlutterView view, {
   ui.PlatformDispatcher? platformDispatcher,
@@ -183,16 +189,30 @@ ui.FlutterView debugApplyViewMetricsOverridesToView(
     var appliesOverrides = false;
     try {
       appliesOverrides = _debugViewAppliesMetricsOverrides(view);
+    } on NoSuchMethodError {
+      if (platformDispatcher == null) {
+        rethrow;
+      }
     } on UnimplementedError {
       if (platformDispatcher == null) {
         rethrow;
       }
     }
     if (!appliesOverrides) {
-      result = _wrapperFor(
-        platformDispatcher ?? view.platformDispatcher,
-        notify: false,
-      )._wrapView(view);
+      try {
+        result = _wrapperFor(
+          platformDispatcher ?? view.platformDispatcher,
+          notify: false,
+        )._wrapView(view);
+      } on NoSuchMethodError {
+        // Low-level rendering tests can provide a view without a viewId or
+        // dispatcher. Such a view cannot opt in to overrides; leave its
+        // existing contract intact.
+      } on UnimplementedError {
+        // Low-level rendering tests can provide a view without a viewId or
+        // dispatcher. Such a view cannot opt in to overrides; leave its
+        // existing contract intact.
+      }
     }
     return true;
   }());
@@ -212,7 +232,8 @@ ui.FlutterView debugApplyViewMetricsOverridesToView(
 /// rescaling display features when an adapter supplies an explicit test ratio.
 ///
 /// The context is synchronous and does not change the override registry or
-/// platform-wide metrics. Outside debug mode, invokes [read] directly.
+/// platform-wide metrics. Outside of debug mode (in profile or release mode),
+/// invokes [read] directly.
 T debugReadViewMetrics<T>(
   ui.FlutterView view,
   ui.FlutterView backingView,
@@ -227,6 +248,9 @@ T debugReadViewMetrics<T>(
       final int viewId;
       try {
         viewId = inherited?.$1 ?? view.viewId;
+      } on NoSuchMethodError {
+        // A render-only fake without an id cannot resolve an override.
+        return true;
       } on UnimplementedError {
         // A render-only fake without an id cannot resolve an override.
         return true;
@@ -267,7 +291,8 @@ T debugReadViewMetrics<T>(
 /// an entry some other way is not otherwise distinguishable from one that
 /// resolves none, and guessing is what produced the state above.
 ///
-/// Always null in release mode, where there are no overrides.
+/// Always null outside of debug mode (in profile or release mode), where there
+/// are no overrides.
 DebugViewMetricsOverride? debugViewMetricsOverrideApplied(ui.FlutterView view) {
   DebugViewMetricsOverride? result;
   assert(() {
@@ -279,6 +304,9 @@ DebugViewMetricsOverride? debugViewMetricsOverrideApplied(ui.FlutterView view) {
       if (override != null && _debugViewAppliesMetricsOverrides(view)) {
         result = override;
       }
+    } on NoSuchMethodError {
+      // A geometry-only fake cannot apply platform overrides. Inherited
+      // platform data must remain usable without its missing dispatcher.
     } on UnimplementedError {
       // A geometry-only fake cannot apply platform overrides. Inherited
       // platform data must remain usable without its missing dispatcher.
@@ -296,7 +324,8 @@ DebugViewMetricsOverride? debugViewMetricsOverrideApplied(ui.FlutterView view) {
 /// different dispatcher is not credited with overrides it does not apply.
 /// Geometry is always read from the view itself.
 ///
-/// Does nothing outside debug mode. The record does not keep the view alive.
+/// Does nothing outside of debug mode (in profile or release mode). The record
+/// does not keep the view alive.
 void debugMarkViewAppliesItsOwnMetricsOverride(
   ui.FlutterView view,
   ui.PlatformDispatcher dispatcher,
@@ -345,7 +374,8 @@ final Expando<ui.PlatformDispatcher> _viewsApplyingTheirOwnOverride =
 /// metrics that did not change is what the platform's own notifications ask
 /// for too.
 ///
-/// Does nothing in release mode, where nothing is ever wrapped.
+/// Does nothing outside of debug mode (in profile or release mode), where
+/// nothing is ever wrapped.
 void debugReplayViewMetricsNotifications({
   required bool platformConfiguration,
   required bool textScaleFactor,

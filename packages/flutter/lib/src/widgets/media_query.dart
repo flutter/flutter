@@ -2836,7 +2836,9 @@ final class SystemTextScaler extends TextScaler {
   @override
   double scale(double fontSize) {
     if (kDebugMode && _debugScalesLinearly) {
-      return TextScaler.linear(textScaleFactor).scale(fontSize);
+      assert(fontSize >= 0);
+      assert(fontSize.isFinite);
+      return fontSize * textScaleFactor;
     }
     return _platformDispatcher.scaleFontSize(fontSize);
   }

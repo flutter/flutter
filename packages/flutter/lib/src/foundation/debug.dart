@@ -311,7 +311,7 @@ class DebugViewPadding implements ui.ViewPadding {
 /// corresponding metric here, because those objects wrap the ones this
 /// overrides and resolve their own value first.
 ///
-/// This class has no effect in release mode.
+/// This class has no effect outside of debug mode (in profile or release mode).
 ///
 /// See also:
 ///
@@ -942,7 +942,7 @@ class DebugViewMetricsOverride with Diagnosticable {
 /// the entry becomes inert, and applies again if a view is later created with
 /// the same [ui.FlutterView.viewId].
 ///
-/// This map is always empty in release mode.
+/// This map is always empty outside of debug mode (in profile or release mode).
 Map<int, DebugViewMetricsOverride> get debugViewMetricsOverrides =>
     _unmodifiableViewMetricsOverrides;
 
@@ -957,7 +957,7 @@ final Map<int, DebugViewMetricsOverride> _unmodifiableViewMetricsOverrides =
 /// true, removes the entry.
 ///
 /// Returns true if the registered override actually changed. Always returns
-/// false, and does nothing, in release mode.
+/// false, and does nothing, outside of debug mode (in profile or release mode).
 ///
 /// The framework is told to re-read the metrics that changed, synchronously,
 /// before this returns. Do not call this during a build: the service extension
@@ -992,7 +992,7 @@ bool debugSetViewMetricsOverride(int viewId, DebugViewMetricsOverride? override)
 /// Removes every entry from [debugViewMetricsOverrides].
 ///
 /// Returns true if anything was removed. Always returns false, and does
-/// nothing, in release mode.
+/// nothing, outside of debug mode (in profile or release mode).
 bool debugClearViewMetricsOverrides() {
   var changed = false;
   assert(() {

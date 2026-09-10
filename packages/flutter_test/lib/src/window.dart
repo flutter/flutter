@@ -243,7 +243,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   void _handleMetricsChanged() {
     _updateViewsAndDisplays();
-    _onMetricsChanged?.call();
+    _testValues._onMetricsChanged?.call();
   }
 
   @override
@@ -1091,6 +1091,9 @@ class TestFlutterView implements FlutterView {
         _view,
         platformDispatcher: _ownerPlatformDispatcher,
       );
+    } on NoSuchMethodError {
+      // Render-only test doubles may omit their view id as well as dispatcher.
+      return _view;
     } on UnimplementedError {
       // Render-only test doubles may omit their view id as well as dispatcher.
       return _view;
@@ -1152,6 +1155,8 @@ class TestFlutterView implements FlutterView {
       }
     } on NoSuchMethodError {
       // Allow Fake test doubles that implement TestDisplay without _devicePixelRatio.
+    } on UnimplementedError {
+      // Allow Fake test doubles that implement TestDisplay without _devicePixelRatio.
     }
     return _readMetric((FlutterView view) => view.devicePixelRatio);
   }
@@ -1164,6 +1169,8 @@ class TestFlutterView implements FlutterView {
     try {
       return _display._devicePixelRatio != null;
     } on NoSuchMethodError {
+      return false;
+    } on UnimplementedError {
       return false;
     }
   }
