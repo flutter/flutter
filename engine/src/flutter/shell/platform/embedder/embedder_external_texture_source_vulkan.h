@@ -18,7 +18,7 @@ class EmbedderExternalTextureSourceVulkan final
  public:
   EmbedderExternalTextureSourceVulkan(
       const std::shared_ptr<impeller::Context>& context,
-      FlutterVulkanTexture* embedder_desc);
+      FlutterVulkanExternalTexture* embedder_desc);
 
   // |TextureSourceVK|
   ~EmbedderExternalTextureSourceVulkan() override;
@@ -45,13 +45,13 @@ class EmbedderExternalTextureSourceVulkan final
  private:
   bool CreateTextureImageView(
       const impeller::vk::Device& device,
-      FlutterVulkanTexture* embedder_desc,
+      FlutterVulkanExternalTexture* embedder_desc,
       const std::shared_ptr<impeller::YUVConversionVK>& yuv_conversion_wrapper);
   impeller::TextureDescriptor ToTextureDescriptor(
-      FlutterVulkanTexture* embedder_desc);
+      FlutterVulkanExternalTexture* embedder_desc);
   std::shared_ptr<impeller::YUVConversionVK> CreateYUVConversion(
       const impeller::ContextVK& context,
-      FlutterVulkanTexture* embedder_desc);
+      FlutterVulkanExternalTexture* embedder_desc);
   std::shared_ptr<impeller::YUVConversionVK> yuv_conversion_ = {};
   bool needs_yuv_conversion_ = false;
   bool is_swapchain_image_ = false;

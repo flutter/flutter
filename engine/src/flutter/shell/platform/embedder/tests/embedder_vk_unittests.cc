@@ -214,7 +214,7 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkan) {
   auto rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
-         FlutterVulkanTexture* texture) -> bool {
+         FlutterVulkanExternalTexture* texture) -> bool {
     texture->image = reinterpret_cast<uint64_t>(s_texture_image->GetImage());
     texture->format = VK_FORMAT_R8G8B8A8_UNORM;
     texture->destruction_callback = nullptr;
@@ -273,7 +273,7 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkan) {
   auto rendered_scene = context.GetNextSceneImage();
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
-         FlutterVulkanTexture* texture) -> bool {
+         FlutterVulkanExternalTexture* texture) -> bool {
     texture->image = reinterpret_cast<uint64_t>(s_texture_image->GetImage());
     texture->format = VK_FORMAT_R8G8B8A8_UNORM;
     texture->destruction_callback = nullptr;
@@ -334,7 +334,7 @@ TEST_F(EmbedderTest, RenderTextureWithImpellerVulkanDestructCallback) {
 
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
-         FlutterVulkanTexture* texture) -> bool {
+         FlutterVulkanExternalTexture* texture) -> bool {
     auto* embedder_test_context =
         static_cast<EmbedderTestContextVulkan*>(user_data);
     auto texture_image = CreateVulkanTextureWithPixels(
@@ -402,7 +402,7 @@ TEST_F(EmbedderTest, RenderTextureWithSkiaVulkanDestructCallback) {
 
   context.GetRendererConfig().vulkan.external_texture_frame_callback =
       [](void* user_data, int64_t texture_id, size_t width, size_t height,
-         FlutterVulkanTexture* texture) -> bool {
+         FlutterVulkanExternalTexture* texture) -> bool {
     auto* embedder_test_context =
         static_cast<EmbedderTestContextVulkan*>(user_data);
     auto texture_image = CreateVulkanTextureWithPixels(

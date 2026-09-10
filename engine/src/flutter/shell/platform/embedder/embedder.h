@@ -987,7 +987,7 @@ typedef struct {
   size_t width;
   /// Height of the texture.
   size_t height;
-} FlutterVulkanTexture;
+} FlutterVulkanExternalTexture;
 
 /// Callback to provide an external texture for a given texture_id.
 /// See: external_texture_frame_callback.
@@ -996,7 +996,7 @@ typedef bool (*FlutterVulkanTextureFrameCallback)(
     int64_t /* texture identifier */,
     size_t /* width */,
     size_t /* height */,
-    FlutterVulkanTexture* /* texture out */);
+    FlutterVulkanExternalTexture* /* texture out */);
 
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterVulkanRendererConfig).
