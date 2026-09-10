@@ -182,11 +182,12 @@ This ledger strictly enforces that **all tests are explicitly run and validated*
     - [x] `dev/devicelab/bin/tasks/android_engine_flags_debug_test.dart` - Passed (verified on Google Pixel `48171HFH80D9S7`).
     - [x] `dev/devicelab/bin/tasks/android_engine_flags_release_test.dart` - Passed against `android_release_arm64` (verified on Google Pixel `48171HFH80D9S7`).
     - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR; approved unconditionally by `reidbaker-agent` with 98% confidence.
-- [ ] **4.5 DeviceLab Performance & Memory Parity (No Regressions)**:
-    - [ ] *Branch Stub*: `android-embedder-migration-v7/phase-4.5-devicelab-performance-memory-parity-no-regressions`
-    - [ ] `dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart` - Passed.
-    - [ ] `dev/devicelab/bin/tasks/flutter_engine_group_performance.dart` - Passed.
+- [x] **4.5 DeviceLab Performance & Memory Parity (No Regressions)**:
+    - [x] *Branch Stub*: `android-embedder-migration-v7/phase-4.5-devicelab-performance-memory-parity-no-regressions`
+    - [x] `dev/devicelab/bin/tasks/complex_layout_android__scroll_smoothness.dart` - Passed on 1st attempt against `android_profile_arm64` (verified on Google Pixel `48171HFH80D9S7`).
+    - [x] `dev/devicelab/bin/tasks/android_view_scroll_perf__timeline_summary.dart` - Passed on 1st attempt against `android_profile_arm64` (verified on Google Pixel `48171HFH80D9S7`).
+    - [x] `dev/devicelab/bin/tasks/flutter_engine_group_performance.dart` - Passed on 1st attempt against `android_release_arm64` across 10 memory sampling iterations with hermetic local Maven repository generation and host engine resolution (verified on Google Pixel `48171HFH80D9S7`).
+    - [x] *Review*: Autonomous Adversarial Review Loop executed natively on PR; approved unconditionally by `reidbaker-agent` with 99% confidence.
 
 ## Phase 5: Emancipation
 - [ ] **5.1 Target Flip**:
