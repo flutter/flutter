@@ -231,6 +231,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   final Map<int, TestFlutterView> _testViews = <int, TestFlutterView>{};
   final Map<int, TestDisplay> _testDisplays = <int, TestDisplay>{};
+  final Map<int, FlutterView> _customViews = <int, FlutterView>{};
 
   @override
   VoidCallback? get onMetricsChanged => _platformDispatcher.onMetricsChanged;
@@ -255,11 +256,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
 
   void _handleViewFocusChanged(ViewFocusEvent event) {
     _updateViewsAndDisplays();
-    _currentlyFocusedViewId = switch (event.state) {
+    _testValues._currentlyFocusedViewId = switch (event.state) {
       ViewFocusState.focused => event.viewId,
       ViewFocusState.unfocused => null,
     };
-    _onViewFocusChange?.call(event);
+    _testValues._onViewFocusChange?.call(event);
   }
 
   /// Returns the list of [ViewFocusEvent]s that have been received by
@@ -285,7 +286,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     if (owner._currentlyFocusedViewId != null) {
       // If there is a focused view, then tell everyone who still cares that
       // it's unfocusing.
-      _platformDispatcher.onViewFocusChange?.call(
+      owner._platformDispatcher.onViewFocusChange?.call(
         ViewFocusEvent(
           viewId: owner._currentlyFocusedViewId!,
           state: ViewFocusState.unfocused,
@@ -306,7 +307,11 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _testValues._testFocusEvents.add(
       ViewFocusEvent(viewId: viewId, state: state, direction: direction),
     );
-    _platformDispatcher.requestViewFocusChange(viewId: viewId, state: state, direction: direction);
+    _testValues._platformDispatcher.requestViewFocusChange(
+      viewId: viewId,
+      state: state,
+      direction: direction,
+    );
   }
 
   @override
@@ -837,6 +842,8 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// If desired, clearing of properties can be done on an individual basis,
   /// e.g., [clearLocaleTestValue].
   void clearAllTestValues() {
+    _testValues._customViews.clear();
+    _testValues._updateViewsAndDisplays();
     clearAccessibilityFeaturesTestValue();
     clearAlwaysUse24HourTestValue();
     clearDefaultRouteNameTestValue();
@@ -891,7 +898,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   Iterable<TestFlutterView> get views => _testValues._testViews.values;
 
   @override
-  FlutterView? view({required int id}) => _testValues._testViews[id];
+  TestFlutterView? view({required int id}) => _testValues._testViews[id];
 
   @override
   Iterable<TestDisplay> get displays => _testValues._testDisplays.values;
@@ -912,13 +919,16 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     extraDisplayKeys.forEach(_testDisplays.remove);
 
     final extraViewKeys = <Object>[..._testViews.keys];
-    for (final FlutterView view in _platformDispatcher.views) {
+    final allViews = <FlutterView>[..._platformDispatcher.views, ..._customViews.values];
+    for (final view in allViews) {
       // TODO(pdblasi-google): Remove this try-catch once the Display API is stable and supported on all platforms
       late final TestDisplay display;
       try {
         final Display realDisplay = view.display;
         if (_testDisplays.containsKey(realDisplay.id)) {
           display = _testDisplays[view.display.id]!;
+        } else if (displays.isNotEmpty) {
+          display = displays.first;
         } else {
           display = _UnsupportedDisplay(
             this,
@@ -928,7 +938,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
           );
         }
       } catch (error) {
-        display = _UnsupportedDisplay(this, view, error);
+        display = displays.isNotEmpty ? displays.first : _UnsupportedDisplay(this, view, error);
       }
 
       extraViewKeys.remove(view.viewId);
@@ -950,17 +960,17 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   /// The added view will be associated with the first display in the list of
   /// displays managed by this [TestPlatformDispatcher].
   void addTestView(FlutterView view) {
-    assert(
-      _testValuesOwner == null,
-      'Add test views through the root TestPlatformDispatcher. A per-view '
-      "dispatcher vends the root's views, so a view added to one would never be reported.",
-    );
-    _testViews[view.viewId] = TestFlutterView(
-      view: view,
-      platformDispatcher: this,
-      display: displays.first,
-    );
-    _updateViewsAndDisplays();
+    final TestPlatformDispatcher owner = _testValues;
+    owner._customViews[view.viewId] = view;
+    owner._updateViewsAndDisplays();
+  }
+
+  /// Removes the [TestFlutterView] that wraps the given [view] from the list of
+  /// views managed by this [TestPlatformDispatcher].
+  void removeTestView(FlutterView view) {
+    final TestPlatformDispatcher owner = _testValues;
+    owner._customViews.remove(view.viewId);
+    owner._updateViewsAndDisplays();
   }
 
   @override
@@ -1134,10 +1144,28 @@ class TestFlutterView implements FlutterView {
   ///   * [resetDevicePixelRatio] to reset this value specifically
   ///   * [reset] to reset all test values for this view
   @override
-  double get devicePixelRatio =>
-      _display._devicePixelRatio ?? _readMetric((FlutterView view) => view.devicePixelRatio);
+  double get devicePixelRatio {
+    try {
+      final double? explicit = _display._devicePixelRatio;
+      if (explicit != null) {
+        return explicit;
+      }
+    } on NoSuchMethodError {
+      // Allow Fake test doubles that implement TestDisplay without _devicePixelRatio.
+    }
+    return _readMetric((FlutterView view) => view.devicePixelRatio);
+  }
+
   set devicePixelRatio(double value) {
     _display.devicePixelRatio = value;
+  }
+
+  bool get _hasExplicitDevicePixelRatio {
+    try {
+      return _display._devicePixelRatio != null;
+    } on NoSuchMethodError {
+      return false;
+    }
   }
 
   /// Resets [devicePixelRatio] for this test view to the default value for this view.
@@ -1165,7 +1193,7 @@ class TestFlutterView implements FlutterView {
       _readMetric(
         (FlutterView view) => view.displayFeatures,
         devicePixelRatioIsOverridden:
-            debugViewMetricsOverrides.isNotEmpty && _display._devicePixelRatio != null,
+            debugViewMetricsOverrides.isNotEmpty && _hasExplicitDevicePixelRatio,
       );
   List<DisplayFeature>? _displayFeatures;
   set displayFeatures(List<DisplayFeature> value) {

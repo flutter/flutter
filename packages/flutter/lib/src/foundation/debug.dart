@@ -674,6 +674,20 @@ class DebugViewMetricsOverride with Diagnosticable {
     deterministicCursor,
   );
 
+  /// Whether any [ui.AccessibilityFeatures] are overridden by this instance.
+  bool get hasAccessibilityFeatures =>
+      accessibleNavigation != null ||
+      invertColors != null ||
+      disableAnimations != null ||
+      boldText != null ||
+      reduceMotion != null ||
+      highContrast != null ||
+      onOffSwitchLabels != null ||
+      supportsAnnounce != null ||
+      autoPlayAnimatedImages != null ||
+      autoPlayVideos != null ||
+      deterministicCursor != null;
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {

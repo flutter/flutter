@@ -197,6 +197,29 @@ void main() {
     );
   });
 
+  testWidgets('TestPlatformDispatcher addTestView and removeTestView manages custom views', (
+    WidgetTester tester,
+  ) async {
+    final customView = _FakeFlutterView(display: tester.view.display, viewId: 100);
+    tester.platformDispatcher.addTestView(customView);
+    addTearDown(() => tester.platformDispatcher.removeTestView(customView));
+
+    final TestFlutterView? addedView = tester.platformDispatcher.view(id: customView.viewId);
+    expect(addedView, isNotNull);
+    expect(addedView!.viewId, customView.viewId);
+    expect(tester.platformDispatcher.views, contains(addedView));
+
+    // Ensure custom view survives metrics changed notifications.
+    tester.platformDispatcher.onMetricsChanged?.call();
+    expect(tester.platformDispatcher.view(id: customView.viewId), same(addedView));
+    expect(tester.platformDispatcher.views, contains(addedView));
+
+    // Removing the view removes it from views and view(id:).
+    tester.platformDispatcher.removeTestView(customView);
+    expect(tester.platformDispatcher.view(id: customView.viewId), isNull);
+    expect(tester.platformDispatcher.views, isNot(contains(addedView)));
+  });
+
   testWidgets('TestPlatformDispatcher has a working scaleFontSize implementation', (
     WidgetTester tester,
   ) async {
@@ -309,7 +332,8 @@ class _FakeDisplay extends Fake implements Display {
 }
 
 class _FakeFlutterView extends Fake implements FlutterView {
-  _FakeFlutterView({this.devicePixelRatio = 1, Display? display}) : _display = display;
+  _FakeFlutterView({this.devicePixelRatio = 1, Display? display, this.viewId = 1})
+    : _display = display;
 
   @override
   final double devicePixelRatio;
@@ -326,7 +350,7 @@ class _FakeFlutterView extends Fake implements FlutterView {
   final Display? _display;
 
   @override
-  final int viewId = 1;
+  final int viewId;
 }
 
 class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {

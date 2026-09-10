@@ -629,7 +629,9 @@ class _DebugViewMetricsPlatformDispatcher implements ui.PlatformDispatcher {
   ui.AccessibilityFeatures get accessibilityFeatures {
     final ui.AccessibilityFeatures features = _dispatcher.accessibilityFeatures;
     final DebugViewMetricsOverride? override = _override;
-    return override == null ? features : _DebugAccessibilityFeatures(features, override);
+    return override == null || !override.hasAccessibilityFeatures
+        ? features
+        : _DebugAccessibilityFeatures(features, override);
   }
 
   @override

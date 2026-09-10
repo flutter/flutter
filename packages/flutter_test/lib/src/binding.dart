@@ -188,11 +188,7 @@ class _TestFlutterView implements FlutterView {
       constraints: constraints,
       onRender: onRender,
     );
-    return TestFlutterView(
-      view: debugApplyViewMetricsOverridesToView(view),
-      platformDispatcher: platformDispatcher,
-      display: platformDispatcher.displays.first,
-    );
+    return platformDispatcher.view(id: view.viewId)!;
   }
 
   static int _nextViewId = 1;

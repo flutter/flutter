@@ -1913,6 +1913,10 @@ void main() {
       final second = WindowController(size: const Size(500, 200));
       addTearDown(first.destroy);
       addTearDown(second.destroy);
+      expect(first.rootView, same(tester.platformDispatcher.view(id: first.rootView.viewId)));
+      expect(second.rootView, same(tester.platformDispatcher.view(id: second.rootView.viewId)));
+      expect(tester.platformDispatcher.views, contains(first.rootView));
+      expect(tester.platformDispatcher.views, contains(second.rootView));
       final views = <ui.FlutterView>[first.rootView, second.rootView];
       final List<ui.Size> before = views.map((ui.FlutterView view) => view.physicalSize).toList();
       const inherited = MediaQueryData(
@@ -1980,6 +1984,10 @@ void main() {
     ) async {
       final controller = WindowController(size: const Size(400, 300));
       addTearDown(controller.destroy);
+      expect(
+        controller.rootView,
+        same(tester.platformDispatcher.view(id: controller.rootView.viewId)),
+      );
       final view = controller.rootView as TestFlutterView;
       view.physicalSize = const Size(900, 600);
       view.devicePixelRatio = 6;
