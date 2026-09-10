@@ -101,20 +101,6 @@ class LegacyJniDelegate {
 
   virtual bool RequestDartDeferredLibrary(int loading_unit_id) = 0;
 
-  virtual std::optional<DartCallbackInfo> LookupCallbackInformation(
-      int64_t handle) = 0;
-
-  virtual bool DecodeImage(const uint8_t* data,
-                           size_t size,
-                           int64_t generator_handle) = 0;
-
-  virtual void OnNativeImageHeader(int64_t generator_handle,
-                                   int32_t width,
-                                   int32_t height) = 0;
-
-  virtual std::optional<ImageHeaderInfo> GetImageHeader(
-      int64_t generator_handle) = 0;
-
   virtual int64_t CreatePlatformView(
       const PlatformViewCreationParams& params,
       PlatformViewCompositionType composition_type) = 0;
@@ -213,45 +199,6 @@ class LegacyJniDelegate {
   virtual std::shared_ptr<AndroidSurfaceControl> GetSurfaceControl(
       int64_t surface_id) const {
     return nullptr;
-  }
-
-  virtual bool PushPlatformViewMutators(
-      int64_t view_id,
-      int32_t x,
-      int32_t y,
-      int32_t width,
-      int32_t height,
-      const AndroidMutatorsStack& mutators_stack) = 0;
-
-  virtual bool PushPlatformViewMutators(
-      int64_t view_id,
-      int32_t x,
-      int32_t y,
-      int32_t width,
-      int32_t height,
-      int32_t view_width,
-      int32_t view_height,
-      const AndroidMutatorsStack& mutators_stack) {
-    return PushPlatformViewMutators(view_id, x, y, width, height,
-                                    mutators_stack);
-  }
-
-  virtual bool PushPlatformViewMutators(
-      const FlutterPlatformView& platform_view,
-      int32_t x,
-      int32_t y,
-      int32_t width,
-      int32_t height) = 0;
-
-  virtual bool PushPlatformViewMutators(
-      const FlutterPlatformView& platform_view,
-      int32_t x,
-      int32_t y,
-      int32_t width,
-      int32_t height,
-      int32_t view_width,
-      int32_t view_height) {
-    return PushPlatformViewMutators(platform_view, x, y, width, height);
   }
 
   virtual bool InitVM(const AndroidVMArgs& args) { return true; }
