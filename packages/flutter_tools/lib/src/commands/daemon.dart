@@ -1095,12 +1095,12 @@ class AppDomain extends Domain {
         }),
         appRunFuture,
       ]);
-    } on Object catch (error) {
+    } on Object catch (error, stackTrace) {
       // `appRunFuture` only converts an [Exception] into a `stop` event, so an
       // [Error] thrown by the runner or by the `finally` above surfaces here.
       // Settle anything waiting on [AppInstance.started] before it propagates,
       // otherwise a deferred `app.restart` waits forever.
-      app._failedToStart(error);
+      app._failedToStart(error, stackTrace);
       rethrow;
     }
 
@@ -1884,11 +1884,11 @@ class AppInstance {
     _startedCompleter.complete();
   }
 
-  void _failedToStart(Object error) {
+  void _failedToStart(Object error, [StackTrace? stackTrace]) {
     // Reachable after [_markStarted] when sending the `app.started` event is
     // what threw, so this cannot assume the completer is still pending.
     if (!_startedCompleter.isCompleted) {
-      _startedCompleter.completeError(error);
+      _startedCompleter.completeError(error, stackTrace);
     }
   }
 
