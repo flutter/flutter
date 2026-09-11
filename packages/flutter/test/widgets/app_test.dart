@@ -461,6 +461,82 @@ void main() {
     expect(find.text('/'), findsOneWidget);
   });
 
+  testWidgets('WidgetsApp.router wraps routing in FocusScope', (WidgetTester tester) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    await tester.pumpWidget(
+      WidgetsApp.router(
+        routeInformationParser: SimpleRouteInformationParser(),
+        routerDelegate: delegate,
+        color: const Color(0xFF123456),
+      ),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    expect(focusScopeFinder, findsOneWidget);
+
+    final FocusScope focusScope = tester.widget(focusScopeFinder);
+    expect(focusScope.autofocus, isTrue);
+  });
+
+  testWidgets('WidgetsApp.router with routerConfig wraps routing in FocusScope', (
+    WidgetTester tester,
+  ) async {
+    final delegate = SimpleNavigatorRouterDelegate(
+      builder: (BuildContext context, RouteInformation information) {
+        return Text(information.uri.toString());
+      },
+      onPopPage: (Route<Object?> route, Object? result, SimpleNavigatorRouterDelegate delegate) =>
+          true,
+    );
+    addTearDown(delegate.dispose);
+    delegate.routeInformation = RouteInformation(uri: Uri.parse('initial'));
+    final routerConfig = RouterConfig<RouteInformation>(routerDelegate: delegate);
+    await tester.pumpWidget(
+      WidgetsApp.router(routerConfig: routerConfig, color: const Color(0xFF123456)),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    expect(focusScopeFinder, findsOneWidget);
+
+    final FocusScope focusScope = tester.widget(focusScopeFinder);
+    expect(focusScope.autofocus, isTrue);
+  });
+
+  testWidgets('WidgetsApp wraps navigator in FocusScope', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF123456),
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            settings: settings,
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) =>
+                builder(context),
+          );
+        },
+        home: const Placeholder(),
+      ),
+    );
+
+    final Finder focusScopeFinder = find.byWidgetPredicate(
+      (Widget widget) => widget is FocusScope && widget.debugLabel == 'Navigator Scope',
+    );
+    expect(focusScopeFinder, findsOneWidget);
+
+    final FocusScope focusScope = tester.widget(focusScopeFinder);
+    expect(focusScope.autofocus, isTrue);
+  });
+
   testWidgets('WidgetsApp has correct default ScrollBehavior', (WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
