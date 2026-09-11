@@ -687,9 +687,8 @@ void main() {
         child: Builder(
           builder: (BuildContext context) {
             return MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).applyDisplayCornerRadii(const BorderRadius.all(Radius.circular(99))),
+              data: MediaQuery.of(context)
+                  .applyDisplayCornerRadii(const BorderRadius.all(Radius.circular(99))),
               child: Builder(
                 builder: (BuildContext context) {
                   updatedData = MediaQuery.of(context);

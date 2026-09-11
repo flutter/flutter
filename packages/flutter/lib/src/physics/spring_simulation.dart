@@ -221,11 +221,10 @@ class SpringSimulation extends Simulation {
     double start,
     double end,
     double velocity, {
-    bool snapToEnd = false,
+    this._snapToEnd = false,
     super.tolerance,
   }) : _endPosition = end,
-       _solution = _SpringSolution(spring, start - end, velocity),
-       _snapToEnd = snapToEnd;
+       _solution = _SpringSolution(spring, start - end, velocity);
 
   final double _endPosition;
   final _SpringSolution _solution;

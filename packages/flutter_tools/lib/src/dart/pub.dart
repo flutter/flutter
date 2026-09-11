@@ -218,15 +218,13 @@ abstract class Pub {
 
 class _DefaultPub implements Pub {
   _DefaultPub({
-    required BotDetector botDetector,
-    required FileSystem fileSystem,
+    required this._botDetector,
+    required this._fileSystem,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
+  }) : _logger = logger,
        _platform = platform,
-       _botDetector = botDetector,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
        _stdio = null {
@@ -235,19 +233,16 @@ class _DefaultPub implements Pub {
 
   @visibleForTesting
   _DefaultPub.test({
-    required BotDetector botDetector,
-    required FileSystem fileSystem,
+    required this._botDetector,
+    required this._fileSystem,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-    required Stdio stdio,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
+    required Stdio this._stdio,
+  }) : _logger = logger,
        _platform = platform,
-       _botDetector = botDetector,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _processManager = processManager,
-       _stdio = stdio {
+       _processManager = processManager {
     _git = Git(currentPlatform: platform, runProcessWith: _processUtils);
   }
 

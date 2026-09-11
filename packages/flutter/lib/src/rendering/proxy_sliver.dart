@@ -115,11 +115,10 @@ class RenderSliverOpacity extends RenderProxySliver {
   /// The [opacity] argument must be between 0.0 and 1.0, inclusive.
   RenderSliverOpacity({
     double opacity = 1.0,
-    bool alwaysIncludeSemantics = false,
+    this._alwaysIncludeSemantics = false,
     RenderSliver? sliver,
   }) : assert(opacity >= 0.0 && opacity <= 1.0),
        _opacity = opacity,
-       _alwaysIncludeSemantics = alwaysIncludeSemantics,
        _alpha = ui.Color.getAlphaFromOpacity(opacity) {
     child = sliver;
   }
@@ -224,7 +223,7 @@ class RenderSliverOpacity extends RenderProxySliver {
 /// {@macro flutter.widgets.IgnorePointer.semantics}
 class RenderSliverIgnorePointer extends RenderProxySliver {
   /// Creates a render object that is invisible to hit testing.
-  RenderSliverIgnorePointer({RenderSliver? sliver, bool ignoring = true}) : _ignoring = ignoring {
+  RenderSliverIgnorePointer({RenderSliver? sliver, this._ignoring = true}) {
     child = sliver;
   }
 
@@ -276,7 +275,7 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
 /// without taking any room in the parent.
 class RenderSliverOffstage extends RenderProxySliver {
   /// Creates an offstage render object.
-  RenderSliverOffstage({bool offstage = true, RenderSliver? sliver}) : _offstage = offstage {
+  RenderSliverOffstage({this._offstage = true, RenderSliver? sliver}) {
     child = sliver;
   }
 

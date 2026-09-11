@@ -1101,39 +1101,35 @@ void main() {
     expect(project.usesAndroidX, true);
   });
 
-  testUsingContext(
-    'creating a new project should create v2 embedding and never show an Android v1 deprecation warning',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  testUsingContext('creating a new project should create v2 embedding and never show an Android v1 deprecation warning', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', '--platform', 'android', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--platform', 'android', projectDir.path]);
 
-      final String androidManifest = await globals.fs
-          .file('${projectDir.path}/android/app/src/main/AndroidManifest.xml')
-          .readAsString();
-      expect(androidManifest.contains('android:name="flutterEmbedding"'), true);
-      expect(androidManifest.contains('android:value="2"'), true);
+    final String androidManifest = await globals.fs
+        .file('${projectDir.path}/android/app/src/main/AndroidManifest.xml')
+        .readAsString();
+    expect(androidManifest.contains('android:name="flutterEmbedding"'), true);
+    expect(androidManifest.contains('android:value="2"'), true);
 
-      final String mainActivity = await globals.fs
-          .file(
-            '${projectDir.path}/android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt',
-          )
-          .readAsString();
-      // Import for the new embedding class.
-      expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
+    final String mainActivity = await globals.fs
+        .file(
+          '${projectDir.path}/android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt',
+        )
+        .readAsString();
+    // Import for the new embedding class.
+    expect(mainActivity.contains('import io.flutter.embedding.android.FlutterActivity'), true);
 
-      expect(
-        logger.statusText,
-        isNot(
-          contains(
-            'https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-pre-1.12-Android-projects.md',
-          ),
+    expect(
+      logger.statusText,
+      isNot(
+        contains(
+          'https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-pre-1.12-Android-projects.md',
         ),
-      );
-    },
-    overrides: {Logger: () => logger},
-  );
+      ),
+    );
+  }, overrides: {Logger: () => logger});
 
   testUsingContext('app supports android and ios by default', () async {
     final command = CreateCommand();
@@ -1727,82 +1723,78 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'flutter create --platforms overwrites the .metadata entry when the same platform is created twice',
-    () async {
-      // The revisions written to .metadata must look like git hashes; a
-      // purely numeric revision would be parsed back as a number by YAML and
-      // rejected by the migrate config validation.
-      final mutableFlutterVersion = _MutableFakeFlutterVersion(
-        'abcdef1234567890abcdef1234567890abcdef12',
-        frameworkChannel,
+  testUsingContext('flutter create --platforms overwrites the .metadata entry when the same platform is created twice', () async {
+    // The revisions written to .metadata must look like git hashes; a
+    // purely numeric revision would be parsed back as a number by YAML and
+    // rejected by the migrate config validation.
+    final mutableFlutterVersion = _MutableFakeFlutterVersion(
+      'abcdef1234567890abcdef1234567890abcdef12',
+      frameworkChannel,
+    );
+    fakeFlutterVersion = mutableFlutterVersion;
+    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
+      'flutter_create_overwrite_platform_',
+    );
+    final Directory projectDir = tempDir.childDirectory('myapp');
+
+    try {
+      // Create a project that supports the android platform.
+      final command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
+
+      // Re-create the same android platform, simulating a later run with a
+      // newer Flutter SDK revision.
+      mutableFlutterVersion.frameworkRevision = 'fedcba9876543210fedcba9876543210fedcba98';
+      final repeatCommand = CreateCommand();
+      final CommandRunner<void> repeatRunner = createTestCommandRunner(repeatCommand);
+      await repeatRunner.run(<String>[
+        'create',
+        '--no-pub',
+        '--platforms=android',
+        projectDir.path,
+      ]);
+
+      // Parse the migration section of the .metadata file with loadYaml,
+      // the same parser the tool uses when reading the file back.
+      final File metadataFile = projectDir.childFile('.metadata');
+      expect(metadataFile, exists);
+
+      final yamlMap = loadYaml(metadataFile.readAsStringSync()) as YamlMap;
+      final migration = yamlMap['migration'] as YamlMap;
+      final platforms = migration['platforms'] as YamlList;
+      final List<YamlMap> platformEntries = platforms.whereType<YamlMap>().toList();
+
+      // Each entry in the platforms list is a map that tracks the platform
+      // name along with the revisions it was created at; extract the names.
+      final actualPlatforms = <String>[
+        for (final YamlMap platform in platformEntries) platform['platform'] as String,
+      ];
+
+      // Creating the same platform twice must not add a duplicate entry:
+      // the root platform and the android platform each appear exactly once.
+      expect(actualPlatforms, unorderedEquals(<String>['root', 'android']));
+
+      // The existing android entry is overwritten with the revisions of the
+      // most recent create run instead of keeping the old ones.
+      const latestRevision = 'fedcba9876543210fedcba9876543210fedcba98';
+      final YamlMap androidEntry = platformEntries.singleWhere(
+        (YamlMap platform) => platform['platform'] == 'android',
       );
-      fakeFlutterVersion = mutableFlutterVersion;
-      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-        'flutter_create_overwrite_platform_',
+      expect(androidEntry['create_revision'], latestRevision);
+      expect(androidEntry['base_revision'], latestRevision);
+
+      // The root platform is always part of every create run, so its entry
+      // is overwritten the same way.
+      final YamlMap rootEntry = platformEntries.singleWhere(
+        (YamlMap platform) => platform['platform'] == 'root',
       );
-      final Directory projectDir = tempDir.childDirectory('myapp');
-
-      try {
-        // Create a project that supports the android platform.
-        final command = CreateCommand();
-        final CommandRunner<void> runner = createTestCommandRunner(command);
-        await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
-
-        // Re-create the same android platform, simulating a later run with a
-        // newer Flutter SDK revision.
-        mutableFlutterVersion.frameworkRevision = 'fedcba9876543210fedcba9876543210fedcba98';
-        final repeatCommand = CreateCommand();
-        final CommandRunner<void> repeatRunner = createTestCommandRunner(repeatCommand);
-        await repeatRunner.run(<String>[
-          'create',
-          '--no-pub',
-          '--platforms=android',
-          projectDir.path,
-        ]);
-
-        // Parse the migration section of the .metadata file with loadYaml,
-        // the same parser the tool uses when reading the file back.
-        final File metadataFile = projectDir.childFile('.metadata');
-        expect(metadataFile, exists);
-
-        final yamlMap = loadYaml(metadataFile.readAsStringSync()) as YamlMap;
-        final migration = yamlMap['migration'] as YamlMap;
-        final platforms = migration['platforms'] as YamlList;
-        final List<YamlMap> platformEntries = platforms.whereType<YamlMap>().toList();
-
-        // Each entry in the platforms list is a map that tracks the platform
-        // name along with the revisions it was created at; extract the names.
-        final actualPlatforms = <String>[
-          for (final YamlMap platform in platformEntries) platform['platform'] as String,
-        ];
-
-        // Creating the same platform twice must not add a duplicate entry:
-        // the root platform and the android platform each appear exactly once.
-        expect(actualPlatforms, unorderedEquals(<String>['root', 'android']));
-
-        // The existing android entry is overwritten with the revisions of the
-        // most recent create run instead of keeping the old ones.
-        const latestRevision = 'fedcba9876543210fedcba9876543210fedcba98';
-        final YamlMap androidEntry = platformEntries.singleWhere(
-          (YamlMap platform) => platform['platform'] == 'android',
-        );
-        expect(androidEntry['create_revision'], latestRevision);
-        expect(androidEntry['base_revision'], latestRevision);
-
-        // The root platform is always part of every create run, so its entry
-        // is overwritten the same way.
-        final YamlMap rootEntry = platformEntries.singleWhere(
-          (YamlMap platform) => platform['platform'] == 'root',
-        );
-        expect(rootEntry['create_revision'], latestRevision);
-        expect(rootEntry['base_revision'], latestRevision);
-      } finally {
-        tryToDelete(tempDir);
-      }
-    },
-    overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform},
-  );
+      expect(rootEntry['create_revision'], latestRevision);
+      expect(rootEntry['base_revision'], latestRevision);
+    } finally {
+      tryToDelete(tempDir);
+    }
+  }, overrides: {FlutterVersion: () => fakeFlutterVersion, Platform: _kNoColorTerminalPlatform});
 
   testUsingContext('Correct info.plist key-value pairs for project.', () async {
     final command = CreateCommand();
@@ -2544,52 +2536,43 @@ void main() {
     );
   });
 
-  testUsingContext(
-    'does not remove an existing test/ directory when recreating an application project with the --empty flag',
-    () async {
-      await _createProject(projectDir, <String>['--no-pub', '--empty'], <String>[]);
+  testUsingContext('does not remove an existing test/ directory when recreating an application project with the --empty flag', () async {
+    await _createProject(projectDir, <String>['--no-pub', '--empty'], <String>[]);
 
-      projectDir.childDirectory('test').childFile('example_test.dart').createSync(recursive: true);
+    projectDir.childDirectory('test').childFile('example_test.dart').createSync(recursive: true);
 
-      await _createProject(
-        projectDir,
-        <String>['--no-pub', '--empty'],
-        <String>['test/example_test.dart'],
-      );
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>['test/example_test.dart'],
+    );
 
-      expect(projectDir.childDirectory('test').childFile('example_test.dart'), exists);
-    },
-  );
+    expect(projectDir.childDirectory('test').childFile('example_test.dart'), exists);
+  });
 
-  testUsingContext(
-    'does not create a test/ directory when creating a new application project with the --empty flag',
-    () async {
-      await _createProject(
-        projectDir,
-        <String>['--no-pub', '--empty'],
-        <String>[],
-        unexpectedPaths: <String>['test'],
-      );
+  testUsingContext('does not create a test/ directory when creating a new application project with the --empty flag', () async {
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+      unexpectedPaths: <String>['test'],
+    );
 
-      expect(projectDir.childDirectory('test'), isNot(exists));
-    },
-  );
+    expect(projectDir.childDirectory('test'), isNot(exists));
+  });
 
-  testUsingContext(
-    "does not create a test/ directory, if it doesn't already exist, when recreating an application project with the --empty flag",
-    () async {
-      await _createProject(projectDir, <String>['--no-pub', '--empty'], <String>[]);
+  testUsingContext("does not create a test/ directory, if it doesn't already exist, when recreating an application project with the --empty flag", () async {
+    await _createProject(projectDir, <String>['--no-pub', '--empty'], <String>[]);
 
-      await _createProject(
-        projectDir,
-        <String>['--no-pub', '--empty'],
-        <String>[],
-        unexpectedPaths: <String>['test'],
-      );
+    await _createProject(
+      projectDir,
+      <String>['--no-pub', '--empty'],
+      <String>[],
+      unexpectedPaths: <String>['test'],
+    );
 
-      expect(projectDir.childDirectory('test'), isNot(exists));
-    },
-  );
+    expect(projectDir.childDirectory('test'), isNot(exists));
+  });
 
   testUsingContext(
     'can create a sample-based project',
@@ -3331,24 +3314,21 @@ void main() {
     overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)},
   );
 
-  testUsingContext(
-    'flutter create . on and existing plugin does not add android folders if android is not supported in pubspec',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await runner.run(<String>[
-        'create',
-        '--no-pub',
-        '--template=plugin',
-        '--platform=ios',
-        projectDir.path,
-      ]);
+  testUsingContext('flutter create . on and existing plugin does not add android folders if android is not supported in pubspec', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--platform=ios',
+      projectDir.path,
+    ]);
 
-      await runner.run(<String>['create', '--no-pub', projectDir.path]);
-      expect(projectDir.childDirectory('android'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('android'), isNot(exists));
-    },
-  );
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    expect(projectDir.childDirectory('android'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('android'), isNot(exists));
+  });
 
   testUsingContext(
     'flutter create . on and existing plugin does not add windows folder even feature is enabled',
@@ -4219,68 +4199,56 @@ void main() {
     expect(cmakeContents, contains('set(PLUGIN_NAME "foo_bar_plugin_plugin")'));
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true)});
 
-  testUsingContext(
-    'created plugin supports no platforms should print `no platforms` message',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  testUsingContext('created plugin supports no platforms should print `no platforms` message', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-      expect(logger.errorText, contains(_kNoPlatformsMessage));
-      expect(
-        logger.statusText,
-        contains(
-          'To add platforms, run `flutter create -t plugin --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.',
-        ),
-      );
-      expect(
-        logger.statusText,
-        contains('For more information, see https://flutter.dev/to/pubspec-plugin-platforms.'),
-      );
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
-  );
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    expect(logger.errorText, contains(_kNoPlatformsMessage));
+    expect(
+      logger.statusText,
+      contains(
+        'To add platforms, run `flutter create -t plugin --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.',
+      ),
+    );
+    expect(
+      logger.statusText,
+      contains('For more information, see https://flutter.dev/to/pubspec-plugin-platforms.'),
+    );
+  }, overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger});
 
-  testUsingContext(
-    'created FFI plugin supports no platforms should print `no platforms` message',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  testUsingContext('created FFI plugin supports no platforms should print `no platforms` message', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
-      expect(logger.errorText, contains(_kNoPlatformsMessage));
-      expect(
-        logger.statusText,
-        contains(
-          'To add platforms, run `flutter create -t plugin_ffi --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.',
-        ),
-      );
-      expect(
-        logger.statusText,
-        contains('For more information, see https://flutter.dev/to/pubspec-plugin-platforms.'),
-      );
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
-  );
+    await runner.run(<String>['create', '--no-pub', '--template=plugin_ffi', projectDir.path]);
+    expect(logger.errorText, contains(_kNoPlatformsMessage));
+    expect(
+      logger.statusText,
+      contains(
+        'To add platforms, run `flutter create -t plugin_ffi --platforms <platforms> .` under ${globals.fs.path.normalize(globals.fs.path.relative(projectDir.path))}.',
+      ),
+    );
+    expect(
+      logger.statusText,
+      contains('For more information, see https://flutter.dev/to/pubspec-plugin-platforms.'),
+    );
+  }, overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger});
 
-  testUsingContext(
-    'created plugin with no --platforms flag should not print `no platforms` message if the existing plugin supports a platform.',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  testUsingContext('created plugin with no --platforms flag should not print `no platforms` message if the existing plugin supports a platform.', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>[
-        'create',
-        '--no-pub',
-        '--template=plugin',
-        '--platform=ios',
-        projectDir.path,
-      ]);
-      await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-      expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
-  );
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--platform=ios',
+      projectDir.path,
+    ]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+  }, overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger});
 
   testUsingContext(
     'should show warning when disabled platforms are selected while creating a plugin',
@@ -4574,18 +4542,14 @@ void main() {
     overrides: {FeatureFlags: () => TestFeatureFlags(), Logger: () => logger},
   );
 
-  testUsingContext(
-    'should not show warning for incompatible Java/template Gradle versions when Java version not found',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  testUsingContext('should not show warning for incompatible Java/template Gradle versions when Java version not found', () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--platforms=android', projectDir.path]);
 
-      expect(logger.warningText, isNot(contains(_kIncompatibleJavaVersionMessage)));
-    },
-    overrides: {Java: () => null, Logger: () => logger},
-  );
+    expect(logger.warningText, isNot(contains(_kIncompatibleJavaVersionMessage)));
+  }, overrides: {Java: () => null, Logger: () => logger});
 
   testUsingContext('should return correct warning for incompatible Gradle versions', () async {
     const projectType = 'app';
@@ -5244,13 +5208,9 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
       final projectPackages = projectPubspecLock['packages'] as Map;
       expect(projectPackages, isNotEmpty);
 
-      final flutterPubspecLock =
-          loadYaml(
-                globals.fs
-                    .file(globals.fs.path.join(getFlutterRoot(), 'pubspec.lock'))
-                    .readAsStringSync(),
-              )
-              as YamlMap;
+      final flutterPubspecLock = loadYaml(
+        globals.fs.file(globals.fs.path.join(getFlutterRoot(), 'pubspec.lock')).readAsStringSync(),
+      ) as YamlMap;
       final flutterPackages = flutterPubspecLock['packages'] as YamlMap;
       for (final MapEntry<Object?, Object?> p in projectPackages.entries) {
         expect(flutterPackages[p.key], p.value);
