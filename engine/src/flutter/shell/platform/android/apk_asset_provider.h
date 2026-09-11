@@ -19,18 +19,11 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 
-#if defined(__ANDROID__)
+#include <jni.h>
+
 #include <android/asset_manager.h>
 #include <android/asset_manager_jni.h>
-#include <jni.h>
 #include "flutter/fml/platform/android/scoped_java_ref.h"
-#else
-// Host-safe forward declarations for desktop / CI test builds
-typedef struct _JNIEnv JNIEnv;
-typedef void* jobject;
-struct AAsset;
-struct AAssetManager;
-#endif
 
 #if defined(__cplusplus)
 extern "C" {

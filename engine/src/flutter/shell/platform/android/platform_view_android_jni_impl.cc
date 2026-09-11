@@ -750,7 +750,7 @@ static void UpdateJavaAssetManager(JNIEnv* env,
       AssetResolver::AssetResolverType::kApkAssetProvider);
 }
 
-bool RegisterApi(JNIEnv* env) {
+bool RegisterApi(JNIEnv* env, bool register_natives = true) {
   static const JNINativeMethod flutter_jni_methods[] = {
       // Start of methods from FlutterJNI
       {
@@ -956,10 +956,12 @@ bool RegisterApi(JNIEnv* env) {
           .fnPtr = reinterpret_cast<void*>(&IsSurfaceControlEnabled),
       }};
 
-  if (env->RegisterNatives(g_flutter_jni_class->obj(), flutter_jni_methods,
-                           std::size(flutter_jni_methods)) != 0) {
-    FML_LOG(ERROR) << "Failed to RegisterNatives with FlutterJNI";
-    return false;
+  if (register_natives) {
+    if (env->RegisterNatives(g_flutter_jni_class->obj(), flutter_jni_methods,
+                             std::size(flutter_jni_methods)) != 0) {
+      FML_LOG(ERROR) << "Failed to RegisterNatives with FlutterJNI";
+      return false;
+    }
   }
 
   g_jni_shell_holder_field = env->GetFieldID(
@@ -1047,7 +1049,7 @@ bool RegisterApi(JNIEnv* env) {
   return true;
 }
 
-bool PlatformViewAndroid::Register(JNIEnv* env) {
+bool PlatformViewAndroid::Register(JNIEnv* env, bool register_natives) {
   if (env == nullptr) {
     FML_LOG(ERROR) << "No JNIEnv provided";
     return false;
@@ -1360,7 +1362,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
-  return RegisterApi(env);
+  return RegisterApi(env, register_natives);
 }
 
 PlatformViewAndroidJNIImpl::PlatformViewAndroidJNIImpl(

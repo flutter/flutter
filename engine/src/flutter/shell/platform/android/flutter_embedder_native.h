@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_FLUTTER_EMBEDDER_NATIVE_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_FLUTTER_EMBEDDER_NATIVE_H_
 
+#include <jni.h>
 #include <cstddef>
 #include <cstdint>
 #include <map>
@@ -12,9 +13,13 @@
 #include <mutex>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/fml/platform/android/jni_weak_ref.h"
+#include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/shell/platform/android/android_engine_group.h"
 #include "flutter/shell/platform/android/android_hardware_buffer.h"
 #include "flutter/shell/platform/android/android_mutators_mapper.h"
@@ -32,12 +37,7 @@
 #include "flutter/shell/platform/android/os_library_loader.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
-#if defined(__ANDROID__)
 #include <android/native_window.h>
-#else
-// Opaque forward declaration for non-Android unit test builds.
-typedef struct ANativeWindow ANativeWindow;
-#endif
 
 namespace flutter {
 namespace android {
@@ -199,6 +199,13 @@ class FlutterEmbedderNative {
   /// @brief Sets the Embedder C-API rollout flag.
   static void SetEmbedderEnabled(bool enabled);
 
+  /// @brief Registers all JNI native methods for
+  /// io.flutter.embedding.engine.FlutterJNI directly with FlutterEmbedderNative
+  /// and JniRouter.
+  /// @param env JNIEnv pointer.
+  /// @return True if JNI native registration succeeded.
+  static bool RegisterJni(JNIEnv* env);
+
   /// @brief Sets the default global OSLibraryLoader instance.
   static void SetDefaultLibraryLoader(std::shared_ptr<OSLibraryLoader> loader);
 
@@ -232,6 +239,12 @@ class FlutterEmbedderNative {
   /// @brief Returns the JvmInvoker managed by this native instance.
   std::shared_ptr<JvmInvoker> GetJvmInvoker() const;
 
+  /// @brief Attaches the Java FlutterJNI instance to this native embedder.
+  void AttachJavaObject(JNIEnv* env, jobject flutterJNI);
+
+  /// @brief Returns a local reference to the attached Java FlutterJNI instance.
+  fml::jni::ScopedJavaLocalRef<jobject> GetJavaObject(JNIEnv* env) const;
+
   /// @brief Returns the OSLibraryLoader managed by this native instance.
   std::shared_ptr<OSLibraryLoader> GetLibraryLoader() const;
 
@@ -259,15 +272,9 @@ class FlutterEmbedderNative {
     int32_t format = 0;
   };
 
-#if defined(__ANDROID__)
   static constexpr int32_t kFormatRgba8888 = WINDOW_FORMAT_RGBA_8888;
   static constexpr int32_t kFormatRgbx8888 = WINDOW_FORMAT_RGBX_8888;
   static constexpr int32_t kFormatRgb565 = WINDOW_FORMAT_RGB_565;
-#else
-  static constexpr int32_t kFormatRgba8888 = 1;
-  static constexpr int32_t kFormatRgbx8888 = 2;
-  static constexpr int32_t kFormatRgb565 = 4;
-#endif
 
   /// @brief Pure software raster blitter decoupled from OS handles for
   /// multi-platform testability and verification.
@@ -617,8 +624,11 @@ class FlutterEmbedderNative {
   void SetWindowMetricsProvider(
       std::shared_ptr<WindowMetricsProvider> provider);
 
-  /// @brief Sends viewport metrics via JniRouter.
+  /// @brief Sends viewport metrics via JniRouter and caches the latest state.
   bool SetViewportMetrics(const AndroidViewportMetrics& metrics) const;
+
+  /// @brief Returns the last cached AndroidViewportMetrics.
+  AndroidViewportMetrics GetViewportMetrics() const;
 
   /// @brief Updates display metrics via JniRouter.
   bool UpdateDisplayMetrics(const AndroidDisplayMetrics& metrics) const;
@@ -718,6 +728,11 @@ class FlutterEmbedderNative {
   /// FlutterProjectArgs::vsync_callback.
   static void OnVsyncCallback(void* user_data, intptr_t baton);
 
+  /// @brief Static C-API compatible platform message callback matching
+  /// FlutterProjectArgs::platform_message_callback.
+  static void OnPlatformMessageCallback(const FlutterPlatformMessage* message,
+                                        void* user_data);
+
   /// @brief Asynchronously requests a VSync signal for the given baton.
   bool AsyncWaitForVsync(intptr_t baton) const;
 
@@ -773,6 +788,89 @@ class FlutterEmbedderNative {
                                        void* user_data,
                                        FLUTTER_API_SYMBOL(FlutterEngine) *
                                            engine_out) const;
+
+  /// @brief Runs an initialized FlutterEngine instance via C-API
+  /// FlutterEngineRunInitialized.
+  FlutterEngineResult RunInitializedEngine(FLUTTER_API_SYMBOL(FlutterEngine)
+                                               engine) const;
+
+  /// @brief Launches or runs the engine with entrypoint and asset provider.
+  FlutterEngineResult Launch(const std::string& entrypoint,
+                             const std::string& library_url,
+                             const std::vector<std::string>& entrypoint_args,
+                             int64_t engine_id);
+
+  /// @brief Requests a frame to be scheduled on the active engine via C-API
+  /// FlutterEngineScheduleFrame.
+  FlutterEngineResult ScheduleFrame() const;
+
+  /// @brief Sends an array of pointer events to the active engine via C-API
+  /// FlutterEngineSendPointerEvent.
+  FlutterEngineResult SendPointerEvents(const FlutterPointerEvent* events,
+                                        size_t count) const;
+
+  /// @brief Unpacks a serialized pointer data packet and dispatches the
+  /// converted pointer events to the engine.
+  FlutterEngineResult SendPointerDataPacket(const uint8_t* buffer,
+                                            size_t size) const;
+
+  /// @brief Sends a platform message to the active engine via C-API
+  /// FlutterEngineSendPlatformMessage.
+  FlutterEngineResult SendPlatformMessage(const std::string& channel,
+                                          const uint8_t* message,
+                                          size_t size,
+                                          int32_t response_id) const;
+
+  /// @brief Sends a platform message response back to the active engine via
+  /// C-API FlutterEngineSendPlatformMessageResponse.
+  FlutterEngineResult SendPlatformMessageResponse(int32_t response_id,
+                                                  const uint8_t* data,
+                                                  size_t data_length) const;
+
+  /// @brief Registers an external SurfaceTexture with its Java global
+  /// reference.
+  void RegisterSurfaceTexture(
+      int64_t texture_id,
+      fml::jni::ScopedJavaGlobalRef<jobject> surface_texture);
+
+  /// @brief Unregisters an external SurfaceTexture.
+  void UnregisterSurfaceTexture(int64_t texture_id);
+
+  /// @brief Registers an opaque C-API response handle and assigns an integer
+  /// ID.
+  int32_t RegisterResponseHandle(
+      const FlutterPlatformMessageResponseHandle* handle) const;
+
+  /// @brief Releases and returns the response handle associated with an ID.
+  const FlutterPlatformMessageResponseHandle* ReleaseResponseHandle(
+      int32_t response_id) const;
+
+  using SendPointerEventFn =
+      std::function<FlutterEngineResult(const FlutterPointerEvent*, size_t)>;
+  using SendPlatformMessageFn = std::function<
+      FlutterEngineResult(const std::string&, const uint8_t*, size_t, int32_t)>;
+  using SendPlatformMessageResponseFn =
+      std::function<FlutterEngineResult(int32_t, const uint8_t*, size_t)>;
+
+  void SetSendPointerEventFnForTesting(SendPointerEventFn fn);
+  void SetSendPlatformMessageFnForTesting(SendPlatformMessageFn fn);
+  void SetSendPlatformMessageResponseFnForTesting(
+      SendPlatformMessageResponseFn fn);
+
+  using DeinitializeEngineFn =
+      std::function<FlutterEngineResult(FLUTTER_API_SYMBOL(FlutterEngine))>;
+  void SetDeinitializeEngineFnForTesting(DeinitializeEngineFn fn);
+
+  using InitializeEngineFn =
+      std::function<FlutterEngineResult(const FlutterRendererConfig*,
+                                        const FlutterProjectArgs*,
+                                        void*,
+                                        FLUTTER_API_SYMBOL(FlutterEngine)*)>;
+  void SetInitializeEngineFnForTesting(InitializeEngineFn fn);
+
+  using RunInitializedEngineFn =
+      std::function<FlutterEngineResult(FLUTTER_API_SYMBOL(FlutterEngine))>;
+  void SetRunInitializedEngineFnForTesting(RunInitializedEngineFn fn);
 
   /// @brief Deinitializes a FlutterEngine instance via C-API
   /// FlutterEngineDeinitialize.
@@ -999,6 +1097,12 @@ class FlutterEmbedderNative {
   mutable std::mutex vulkan_texture_provider_mutex_;
   ANativeWindow* native_window_ = nullptr;
 
+  mutable std::mutex java_object_mutex_;
+  std::shared_ptr<fml::jni::JavaObjectWeakGlobalRef> java_object_;
+
+  mutable std::mutex viewport_metrics_mutex_;
+  AndroidViewportMetrics cached_viewport_metrics_;
+
   std::shared_ptr<JvmInvoker> jvm_invoker_;
   std::shared_ptr<EmbedderImageLRU> image_lru_;
   std::shared_ptr<PlatformViewsProvider> platform_views_provider_;
@@ -1028,6 +1132,23 @@ class FlutterEmbedderNative {
   SendWindowMetricsEventFn send_window_metrics_event_fn_;
   NotifyDisplayUpdateFn notify_display_update_fn_;
   NotifyVsyncFn notify_vsync_fn_;
+  SendPointerEventFn send_pointer_event_fn_;
+  SendPlatformMessageFn send_platform_message_fn_;
+  SendPlatformMessageResponseFn send_platform_message_response_fn_;
+  mutable DeinitializeEngineFn deinitialize_engine_fn_;
+  mutable InitializeEngineFn initialize_engine_fn_;
+  mutable RunInitializedEngineFn run_initialized_engine_fn_;
+
+  mutable std::mutex surface_textures_mutex_;
+  std::unordered_map<int64_t,
+                     std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>>>
+      surface_textures_;
+
+  mutable std::mutex response_handles_mutex_;
+  mutable std::unordered_map<int32_t,
+                             const FlutterPlatformMessageResponseHandle*>
+      response_handles_;
+  mutable std::atomic<int32_t> next_response_id_{1};
 
   void AttachWindowMetricsCallbacks();
 
