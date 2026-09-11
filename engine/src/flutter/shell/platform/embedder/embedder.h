@@ -972,7 +972,9 @@ typedef struct {
   /// The size of this struct. Must be sizeof(FlutterVulkanTexture).
   size_t struct_size;
   /// Handle to the VkImage that is owned by the embedder. The engine will
-  /// sample from this image during composition.
+  /// sample from this image during composition. The VkImage must be in the
+  /// VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL layout when provided to the
+  /// engine.
   FlutterVulkanImageHandle image;
   /// The VkFormat of the image (for example: VK_FORMAT_R8G8B8A8_UNORM).
   uint32_t format;
