@@ -374,8 +374,10 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// throws a [FormatException], so that a tooling mistake surfaces at the
   /// service extension boundary instead of as a metric that silently failed to
   /// apply.
-  factory DebugViewMetricsOverride.fromJson(Map<String, Object?> json) {
-    final Iterable<String> unknownKeys = json.keys.where((String key) => !_jsonKeys.contains(key));
+  factory DebugViewMetricsOverride.fromJson(Map<Object?, Object?> json) {
+    final Iterable<Object?> unknownKeys = json.keys.where(
+      (Object? key) => !_jsonKeys.contains(key),
+    );
     if (unknownKeys.isNotEmpty) {
       throw FormatException(
         'Unknown view metric override(s): ${unknownKeys.join(', ')}. '
@@ -534,54 +536,108 @@ class DebugViewMetricsOverride with Diagnosticable {
   /// Whether this instance overrides nothing at all.
   bool get isEmpty => this == const DebugViewMetricsOverride();
 
+  /// A sentinel value used by [copyWith] as the default argument value to indicate
+  /// that an argument was omitted.
+  static const Object _omitted = _Omitted();
+
+  /// A sentinel value that can be passed to [copyWith] to explicitly unset an
+  /// override.
+  ///
+  /// Passing `null` to [copyWith] also unsets the override.
+  static const Object unset = _Unset();
+
   /// Creates a copy of this object with the given fields replaced.
   ///
-  /// Because a null field means "not overridden", passing null for an argument
-  /// leaves the existing override in place rather than clearing it. To clear an
-  /// override, construct a new [DebugViewMetricsOverride].
+  /// Passing `null` or [unset] for an argument clears the override for that
+  /// field (resetting it to null, so that the underlying platform value is used).
+  /// Omitting an argument leaves the existing override in place.
   DebugViewMetricsOverride copyWith({
-    double? devicePixelRatio,
-    ui.Size? physicalSize,
-    double? textScaleFactor,
-    ui.Brightness? platformBrightness,
-    DebugViewPadding? padding,
-    DebugViewPadding? viewPadding,
-    DebugViewPadding? viewInsets,
-    DebugViewPadding? systemGestureInsets,
-    bool? alwaysUse24HourFormat,
-    bool? accessibleNavigation,
-    bool? invertColors,
-    bool? disableAnimations,
-    bool? boldText,
-    bool? reduceMotion,
-    bool? highContrast,
-    bool? onOffSwitchLabels,
-    bool? supportsAnnounce,
-    bool? autoPlayAnimatedImages,
-    bool? autoPlayVideos,
-    bool? deterministicCursor,
+    Object? devicePixelRatio = _omitted,
+    Object? physicalSize = _omitted,
+    Object? textScaleFactor = _omitted,
+    Object? platformBrightness = _omitted,
+    Object? padding = _omitted,
+    Object? viewPadding = _omitted,
+    Object? viewInsets = _omitted,
+    Object? systemGestureInsets = _omitted,
+    Object? alwaysUse24HourFormat = _omitted,
+    Object? accessibleNavigation = _omitted,
+    Object? invertColors = _omitted,
+    Object? disableAnimations = _omitted,
+    Object? boldText = _omitted,
+    Object? reduceMotion = _omitted,
+    Object? highContrast = _omitted,
+    Object? onOffSwitchLabels = _omitted,
+    Object? supportsAnnounce = _omitted,
+    Object? autoPlayAnimatedImages = _omitted,
+    Object? autoPlayVideos = _omitted,
+    Object? deterministicCursor = _omitted,
   }) {
+    bool check<T>(Object? value) =>
+        identical(value, _omitted) || identical(value, unset) || value == null || value is T;
+
+    assert(check<num>(devicePixelRatio));
+    assert(check<ui.Size>(physicalSize));
+    assert(check<num>(textScaleFactor));
+    assert(check<ui.Brightness>(platformBrightness));
+    assert(check<DebugViewPadding>(padding));
+    assert(check<DebugViewPadding>(viewPadding));
+    assert(check<DebugViewPadding>(viewInsets));
+    assert(check<DebugViewPadding>(systemGestureInsets));
+    assert(check<bool>(alwaysUse24HourFormat));
+    assert(check<bool>(accessibleNavigation));
+    assert(check<bool>(invertColors));
+    assert(check<bool>(disableAnimations));
+    assert(check<bool>(boldText));
+    assert(check<bool>(reduceMotion));
+    assert(check<bool>(highContrast));
+    assert(check<bool>(onOffSwitchLabels));
+    assert(check<bool>(supportsAnnounce));
+    assert(check<bool>(autoPlayAnimatedImages));
+    assert(check<bool>(autoPlayVideos));
+    assert(check<bool>(deterministicCursor));
+
+    double? resolveDouble(Object? value, double? current) {
+      if (identical(value, _omitted)) {
+        return current;
+      }
+      if (identical(value, unset) || value == null) {
+        return null;
+      }
+      return (value as num).toDouble();
+    }
+
+    T? resolve<T>(Object? value, T? current) {
+      if (identical(value, _omitted)) {
+        return current;
+      }
+      if (identical(value, unset) || value == null) {
+        return null;
+      }
+      return value as T;
+    }
+
     return DebugViewMetricsOverride(
-      devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
-      physicalSize: physicalSize ?? this.physicalSize,
-      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
-      platformBrightness: platformBrightness ?? this.platformBrightness,
-      padding: padding ?? this.padding,
-      viewPadding: viewPadding ?? this.viewPadding,
-      viewInsets: viewInsets ?? this.viewInsets,
-      systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
-      alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
-      accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
-      invertColors: invertColors ?? this.invertColors,
-      disableAnimations: disableAnimations ?? this.disableAnimations,
-      boldText: boldText ?? this.boldText,
-      reduceMotion: reduceMotion ?? this.reduceMotion,
-      highContrast: highContrast ?? this.highContrast,
-      onOffSwitchLabels: onOffSwitchLabels ?? this.onOffSwitchLabels,
-      supportsAnnounce: supportsAnnounce ?? this.supportsAnnounce,
-      autoPlayAnimatedImages: autoPlayAnimatedImages ?? this.autoPlayAnimatedImages,
-      autoPlayVideos: autoPlayVideos ?? this.autoPlayVideos,
-      deterministicCursor: deterministicCursor ?? this.deterministicCursor,
+      devicePixelRatio: resolveDouble(devicePixelRatio, this.devicePixelRatio),
+      physicalSize: resolve<ui.Size>(physicalSize, this.physicalSize),
+      textScaleFactor: resolveDouble(textScaleFactor, this.textScaleFactor),
+      platformBrightness: resolve<ui.Brightness>(platformBrightness, this.platformBrightness),
+      padding: resolve<DebugViewPadding>(padding, this.padding),
+      viewPadding: resolve<DebugViewPadding>(viewPadding, this.viewPadding),
+      viewInsets: resolve<DebugViewPadding>(viewInsets, this.viewInsets),
+      systemGestureInsets: resolve<DebugViewPadding>(systemGestureInsets, this.systemGestureInsets),
+      alwaysUse24HourFormat: resolve<bool>(alwaysUse24HourFormat, this.alwaysUse24HourFormat),
+      accessibleNavigation: resolve<bool>(accessibleNavigation, this.accessibleNavigation),
+      invertColors: resolve<bool>(invertColors, this.invertColors),
+      disableAnimations: resolve<bool>(disableAnimations, this.disableAnimations),
+      boldText: resolve<bool>(boldText, this.boldText),
+      reduceMotion: resolve<bool>(reduceMotion, this.reduceMotion),
+      highContrast: resolve<bool>(highContrast, this.highContrast),
+      onOffSwitchLabels: resolve<bool>(onOffSwitchLabels, this.onOffSwitchLabels),
+      supportsAnnounce: resolve<bool>(supportsAnnounce, this.supportsAnnounce),
+      autoPlayAnimatedImages: resolve<bool>(autoPlayAnimatedImages, this.autoPlayAnimatedImages),
+      autoPlayVideos: resolve<bool>(autoPlayVideos, this.autoPlayVideos),
+      deterministicCursor: resolve<bool>(deterministicCursor, this.deterministicCursor),
     );
   }
 
@@ -782,7 +838,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     };
   }
 
-  static double? _doubleFromJson(Map<String, Object?> json, String key) {
+  static double? _doubleFromJson(Map<Object?, Object?> json, String key) {
     return switch (json[key]) {
       null => null,
       final num value => value.toDouble(),
@@ -790,7 +846,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     };
   }
 
-  static bool? _boolFromJson(Map<String, Object?> json, String key) {
+  static bool? _boolFromJson(Map<Object?, Object?> json, String key) {
     return switch (json[key]) {
       null => null,
       final bool value => value,
@@ -798,7 +854,7 @@ class DebugViewMetricsOverride with Diagnosticable {
     };
   }
 
-  static ui.Size? _sizeFromJson(Map<String, Object?> json, String key) {
+  static ui.Size? _sizeFromJson(Map<Object?, Object?> json, String key) {
     final Object? value = _checkedMembers(json[key], key, const <String>{'width', 'height'});
     return switch (value) {
       null => null,
@@ -810,13 +866,13 @@ class DebugViewMetricsOverride with Diagnosticable {
     };
   }
 
-  static DebugViewPadding? _viewPaddingFromJson(Map<String, Object?> json, String key) {
+  static DebugViewPadding? _viewPaddingFromJson(Map<Object?, Object?> json, String key) {
     const members = <String>{'left', 'top', 'right', 'bottom'};
     final Object? value = _checkedMembers(json[key], key, members);
     if (value == null) {
       return null;
     }
-    if (value is! Map<String, Object?>) {
+    if (value is! Map<Object?, Object?>) {
       throw FormatException(
         'Expected {"left": num, "top": num, "right": num, "bottom": num} for $key, got $value.',
       );
@@ -893,8 +949,8 @@ class DebugViewMetricsOverride with Diagnosticable {
   // silently not applied, and the call still reports success. Returns [value]
   // so that it can wrap the read.
   static Object? _checkedMembers(Object? value, String key, Set<String> members) {
-    if (value is Map<String, Object?>) {
-      final Iterable<String> unknown = value.keys.where((String k) => !members.contains(k));
+    if (value is Map<Object?, Object?>) {
+      final Iterable<Object?> unknown = value.keys.where((Object? k) => !members.contains(k));
       if (unknown.isNotEmpty) {
         throw FormatException(
           'Unknown member(s) of $key: ${unknown.join(', ')}. '
@@ -1070,4 +1126,12 @@ void _debugReplayPlatformNotifications(
     accessibilityFeatures: accessibilityFeatures,
     viewMetrics: viewMetrics,
   );
+}
+
+class _Omitted {
+  const _Omitted();
+}
+
+class _Unset {
+  const _Unset();
 }

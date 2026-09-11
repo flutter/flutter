@@ -743,7 +743,7 @@ abstract class BindingBase {
         if (debugSetViewMetricsOverride(viewId, null)) {
           _postViewMetricsOverrideStateChangedEvent();
         }
-      } else if (decoded is Map<String, Object?>) {
+      } else if (decoded is Map<Object?, Object?>) {
         // DebugViewMetricsOverride.fromJson throws a FormatException on a
         // malformed payload, which the service extension machinery reports back
         // to the caller as an error rather than silently applying part of it.

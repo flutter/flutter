@@ -315,8 +315,18 @@ void main() {
       const original = DebugViewMetricsOverride(devicePixelRatio: 2.0, boldText: true);
       expect(original.copyWith(boldText: false).devicePixelRatio, 2.0);
       expect(original.copyWith(boldText: false).boldText, isFalse);
-      // A null argument means "leave it alone", not "clear it".
+      // An omitted argument leaves the existing override in place.
       expect(original.copyWith().boldText, isTrue);
+      // Passing null explicitly clears the override.
+      expect(original.copyWith(boldText: null).boldText, isNull);
+      expect(original.copyWith(boldText: null).devicePixelRatio, 2.0);
+      expect(original.copyWith(devicePixelRatio: null).devicePixelRatio, isNull);
+      // Passing DebugViewMetricsOverride.unset also explicitly clears the override.
+      expect(original.copyWith(boldText: DebugViewMetricsOverride.unset).boldText, isNull);
+      expect(
+        original.copyWith(devicePixelRatio: DebugViewMetricsOverride.unset).devicePixelRatio,
+        isNull,
+      );
     });
 
     test('equality covers every metric', () {
@@ -442,6 +452,30 @@ void main() {
           'padding': <String, Object?>{'left': 1, 'top': 2, 'right': 3},
         }).padding,
         const DebugViewPadding(left: 1, top: 2, right: 3),
+      );
+      // Loosely typed / un-reified maps are accepted for both the payload and nested geometry.
+      expect(
+        DebugViewMetricsOverride.fromJson(const <dynamic, dynamic>{
+          'padding': <dynamic, dynamic>{'left': 10, 'top': 20},
+          'physicalSize': <dynamic, dynamic>{'width': 800, 'height': 600},
+        }),
+        const DebugViewMetricsOverride(
+          padding: DebugViewPadding(left: 10, top: 20),
+          physicalSize: ui.Size(800, 600),
+        ),
+      );
+      // Unknown members inside an un-reified map are rejected.
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <dynamic, dynamic>{
+          'padding': <dynamic, dynamic>{'left': 10, 'unknown': 20},
+        }),
+        throwsFormatException,
+      );
+      expect(
+        () => DebugViewMetricsOverride.fromJson(const <dynamic, dynamic>{
+          'physicalSize': <dynamic, dynamic>{'width': 800, 'height': 600, 'extra': 5},
+        }),
+        throwsFormatException,
       );
       expect(
         DebugViewMetricsOverride.fromJson(const <String, Object?>{
