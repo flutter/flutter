@@ -36,8 +36,7 @@ void main(List<String> arguments) {
     )
     ..addFlag(
       'exclusion',
-      help:
-          'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
+      help: 'Run the script using the config file at ./configs/lockfile_exclusion.yaml to skip the specified subdirectories.',
       defaultsTo: true,
     )
     ..addOption(
