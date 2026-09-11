@@ -26,6 +26,10 @@ class TestVulkanContext : public fml::RefCountedThreadSafe<TestVulkanContext> {
   std::optional<TestVulkanImage> CreateImage(const DlISize& size,
                                              VkFormat format) const;
 
+  std::optional<TestVulkanImage> CreateNV12Image(const DlISize& size,
+                                                 const uint8_t* y_data,
+                                                 const uint8_t* uv_data) const;
+
   sk_sp<GrDirectContext> GetGrDirectContext() const;
 
  private:

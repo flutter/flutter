@@ -615,6 +615,126 @@ TEST_F(EmbedderTest, RenderBGRATextureWithSkiaVulkan) {
       ImageMatchesFixture("external_texture_impeller.png", rendered_scene));
 }
 
+static std::optional<TestVulkanImage> CreateVulkanTextureNV12(
+    fml::RefPtr<TestVulkanContext> context,
+    int width,
+    int height) {
+  auto nv12_mapping = testing::OpenFixtureAsMapping("texture.nv12");
+  if (!nv12_mapping || nv12_mapping->GetSize() == 0) {
+    FML_LOG(ERROR) << "Could not load texture.nv12 fixture.";
+    return std::nullopt;
+  }
+
+  size_t y_size = static_cast<size_t>(width) * height;
+  const uint8_t* y_data = nv12_mapping->GetMapping();
+  const uint8_t* uv_data = y_data + y_size;
+
+  return context->CreateNV12Image({width, height}, y_data, uv_data);
+}
+
+TEST_F(EmbedderTest, RenderNV12TextureWithImpellerVulkan) {
+  constexpr int kWidth = 800;
+  constexpr int kHeight = 600;
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderConfigBuilder builder(context);
+  fml::AutoResetWaitableEvent latch;
+  context.SetVulkanPresentCallback([&]() { latch.Signal(); });
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetDartEntrypoint("render_texture_impeller_test");
+  builder.SetSurface(DlISize(kWidth, kHeight));
+
+  auto image_result =
+      CreateVulkanTextureNV12(context.vulkan_context(), kWidth, kHeight);
+  if (!image_result.has_value()) {
+    GTEST_SKIP() << "NV12 format not supported by the Vulkan device.";
+  }
+
+  static TestVulkanImage* s_texture_image = nullptr;
+  s_texture_image = &image_result.value();
+
+  auto rendered_scene = context.GetNextSceneImage();
+  context.GetRendererConfig().vulkan.external_texture_frame_callback =
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterVulkanExternalTexture* texture) -> bool {
+    texture->image = reinterpret_cast<uint64_t>(s_texture_image->GetImage());
+    texture->format = VK_FORMAT_G8_B8R8_2PLANE_420_UNORM;
+    texture->destruction_callback = nullptr;
+    texture->user_data = nullptr;
+    texture->width = width;
+    texture->height = height;
+    return true;
+  };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+
+  constexpr int texture_id = 1;
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = kWidth;
+  event.height = kHeight;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  latch.Wait();
+  ASSERT_TRUE(ImageMatchesFixture("external_texture_nv12.png", rendered_scene));
+}
+
+TEST_F(EmbedderTest, RenderNV12TextureWithSkiaVulkan) {
+  constexpr int kWidth = 800;
+  constexpr int kHeight = 600;
+  auto& context = GetEmbedderContext<EmbedderTestContextVulkan>();
+  EmbedderConfigBuilder builder(context);
+  fml::AutoResetWaitableEvent latch;
+  context.SetVulkanPresentCallback([&]() { latch.Signal(); });
+  builder.SetDartEntrypoint("render_texture_impeller_test");
+  builder.SetSurface(DlISize(kWidth, kHeight));
+
+  auto image_result =
+      CreateVulkanTextureNV12(context.vulkan_context(), kWidth, kHeight);
+  if (!image_result.has_value()) {
+    GTEST_SKIP() << "NV12 format not supported by the Vulkan device.";
+  }
+
+  static TestVulkanImage* s_texture_image = nullptr;
+  s_texture_image = &image_result.value();
+
+  auto rendered_scene = context.GetNextSceneImage();
+  context.GetRendererConfig().vulkan.external_texture_frame_callback =
+      [](void* user_data, int64_t texture_id, size_t width, size_t height,
+         FlutterVulkanExternalTexture* texture) -> bool {
+    texture->image = reinterpret_cast<uint64_t>(s_texture_image->GetImage());
+    texture->format = VK_FORMAT_G8_B8R8_2PLANE_420_UNORM;
+    texture->destruction_callback = nullptr;
+    texture->user_data = nullptr;
+    texture->width = width;
+    texture->height = height;
+    return true;
+  };
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  flutter::EmbedderEngine* embedder_engine = ToEmbedderEngine(engine.get());
+
+  constexpr int texture_id = 1;
+  ASSERT_TRUE(embedder_engine->RegisterTexture(texture_id));
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = kWidth;
+  event.height = kHeight;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  latch.Wait();
+  ASSERT_TRUE(ImageMatchesFixture("external_texture_nv12.png", rendered_scene));
+}
+
 }  // namespace testing
 }  // namespace flutter
 
