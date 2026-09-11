@@ -9,12 +9,14 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 
+import '../flutter_analysis_rule.dart';
+
 const String _matchesGoldenFile = 'matchesGoldenFile';
 const String _reducedTestSetTag = 'reduced-test-set';
 const String _tagsAnnotation = 'Tags';
 
 /// Files containing golden tests must be tagged using `@Tags(<String>['reduced-test-set'])`.
-class GoldenTestTags extends AnalysisRule {
+class GoldenTestTags extends FlutterAnalysisRule {
   GoldenTestTags() : super(name: code.name, description: ruleDescription);
 
   static const String ruleDescription =
@@ -24,7 +26,8 @@ class GoldenTestTags extends AnalysisRule {
   static const LintCode code = LintCode(
     'golden_test_tags',
     ruleDescription,
-    correctionMessage: 'See https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md for details.',
+    correctionMessage:
+        'See https://github.com/flutter/flutter/blob/main/docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md for details.',
     severity: DiagnosticSeverity.ERROR,
   );
 
@@ -32,7 +35,12 @@ class GoldenTestTags extends AnalysisRule {
   LintCode get diagnosticCode => code;
 
   @override
-  void registerNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+  void registerCustomNodeProcessors(RuleVisitorRegistry registry, RuleContext context) {
+    final String filePath = context.definingUnit.file.path.replaceAll(r'\', '/');
+    // Only golden tests in packages/flutter (or test runner) are subject to reduced testing tags.
+    if (!filePath.contains('packages/flutter/test') && !filePath.contains('/home/test')) {
+      return;
+    }
     final visitor = _Visitor(this, context);
     registry.addMethodInvocation(this, visitor);
   }
@@ -47,10 +55,9 @@ class _Visitor extends SimpleAstVisitor<void> {
   bool? _hasReducedTestSetTagCache;
 
   bool _isReducedTestSetTag(Annotation annotation) {
-    final String? name = switch (annotation.name) {
+    final String name = switch (annotation.name) {
       SimpleIdentifier(:final String name) => name,
       PrefixedIdentifier(:final SimpleIdentifier identifier) => identifier.name,
-      _ => null,
     };
     if (name != _tagsAnnotation) {
       return false;
@@ -59,21 +66,27 @@ class _Visitor extends SimpleAstVisitor<void> {
     if (argumentList == null) {
       return false;
     }
-    for (final Expression argument in argumentList.arguments) {
-      final Expression expr = switch (argument) {
-        NamedExpression(:final Expression expression) => expression,
-        _ => argument,
+    for (final Argument argument in argumentList.arguments) {
+      final Expression? expr = switch (argument) {
+        NamedArgument(:final Expression argumentExpression) => argumentExpression,
+        final Expression expression => expression,
+        _ => null,
       };
-      if (expr case StringLiteral(:final String? stringValue)
-          when stringValue == _reducedTestSetTag) {
+      if (expr == null) {
+        continue;
+      }
+      if (expr case StringLiteral(
+        :final String? stringValue,
+      ) when stringValue == _reducedTestSetTag) {
         return true;
       }
       if (expr
           case ListLiteral(:final NodeList<CollectionElement> elements) ||
               SetOrMapLiteral(:final NodeList<CollectionElement> elements)) {
         for (final element in elements) {
-          if (element case StringLiteral(:final String? stringValue)
-              when stringValue == _reducedTestSetTag) {
+          if (element case StringLiteral(
+            :final String? stringValue,
+          ) when stringValue == _reducedTestSetTag) {
             return true;
           }
         }

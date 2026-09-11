@@ -168,20 +168,14 @@ Future<Plugin?> _pluginFromPackage(
 /// If [throwOnError] is `true`, an empty package configuration is an error.
 Future<List<Plugin>> findPlugins(
   FlutterProject project, {
-  bool throwOnError = true,
-  PubspecCache? pubspecCache,
-  PackageGraph? packageGraph,
+  required Logger logger,
   PackageConfig? packageConfig,
-  Logger? logger,
+  PackageGraph? packageGraph,
+  PubspecCache? pubspecCache,
+  bool throwOnError = true,
 }) async {
   final plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
-  Logger effectiveLogger;
-  try {
-    effectiveLogger = logger ?? globals.logger;
-  } on UnsupportedError {
-    effectiveLogger = BufferLogger.test();
-  }
 
   // Shared workspace resources (packageGraph, packageConfig) are only valid
   // when the project is actually a member of the workspace — i.e. its name
@@ -197,7 +191,7 @@ Future<List<Plugin>> findPlugins(
     final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
     resolvedPackageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
-      logger: effectiveLogger,
+      logger: logger,
       throwOnError: throwOnError,
     );
   }
@@ -213,7 +207,7 @@ Future<List<Plugin>> findPlugins(
       if (throwOnError) {
         throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`');
       } else {
-        effectiveLogger.printTrace('Could not locate package:$packageName');
+        logger.printTrace('Could not locate package:$packageName');
         continue;
       }
     }
@@ -224,7 +218,7 @@ Future<List<Plugin>> findPlugins(
       isDevDependency: dependency.isExclusiveDevDependency,
       fileSystem: fs,
       pubspecCache: pubspecCache,
-      logger: effectiveLogger,
+      logger: logger,
     );
     if (plugin != null) {
       plugins.add(plugin);
@@ -1318,6 +1312,7 @@ Future<void> refreshPluginsList(
 }) async {
   final List<Plugin> plugins = await findPlugins(
     project,
+    logger: globals.logger,
     pubspecCache: pubspecCache,
     packageGraph: packageGraph,
     packageConfig: packageConfig,
@@ -1376,7 +1371,7 @@ Future<void> injectBuildTimePluginFilesForWebPlatform(
   FlutterProject project, {
   required Directory destination,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project, logger: globals.logger);
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
     plugins,
     pluginResolutionType: _PluginResolutionType.nativeOrDart,
@@ -1415,6 +1410,7 @@ Future<void> injectPlugins(
 }) async {
   final List<Plugin> plugins = await findPlugins(
     project,
+    logger: globals.logger,
     pubspecCache: pubspecCache,
     packageGraph: packageGraph,
     packageConfig: packageConfig,
@@ -1953,7 +1949,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   File mainFile, {
   String? flutterRoot,
 }) async {
-  final List<Plugin> plugins = await findPlugins(rootProject);
+  final List<Plugin> plugins = await findPlugins(rootProject, logger: globals.logger);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
     selectDartPluginsOnly: true,
