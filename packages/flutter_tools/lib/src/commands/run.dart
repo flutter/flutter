@@ -9,6 +9,7 @@ import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
 
 import '../android/android_device.dart';
+import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -134,9 +135,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   @protected
   Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final int? webBrowserDebugPort =
-        featureFlags.isWebEnabled && wasParsed(WebOptions.webBrowserDebugPort)
-        ? int.parse(getValue(WebOptions.webBrowserDebugPort)!)
+    final int? webBrowserDebugPort = featureFlags.isWebEnabled
+        ? getValue(WebOptions.webBrowserDebugPort)
         : null;
     final List<String> webBrowserFlags = featureFlags.isWebEnabled
         ? getValue(WebOptions.webBrowserFlags)
@@ -263,8 +263,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       logger: globals.logger,
     );
 
-    final String? webPortArg = getValue(WebOptions.webPort);
-    final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
+    final int? webPort = getValue(WebOptions.webPort);
 
     // Determine HTTPS config with CLI > file precedence
     final HttpsConfig? httpsConfig = HttpsConfig.parse(
@@ -671,7 +670,22 @@ class RunCommand extends RunCommandBase {
 
   @visibleForTesting
   Daemon createMachineDaemon() {
-    return Daemon.createMachineDaemon();
+    return Daemon.createMachineDaemon(
+      analytics: globals.analytics,
+      androidSdk: globals.androidSdk,
+      androidWorkflow: android_workflow.androidWorkflow,
+      deviceManager: globals.deviceManager,
+      featureFlags: featureFlags,
+      fileSystem: globals.fs,
+      java: globals.java,
+      logger: globals.logger,
+      outputPreferences: globals.outputPreferences,
+      platform: globals.platform,
+      processManager: globals.processManager,
+      stdio: globals.stdio,
+      systemClock: globals.systemClock,
+      terminal: globals.terminal,
+    );
   }
 
   @override

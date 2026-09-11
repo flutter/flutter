@@ -255,18 +255,6 @@ class AnalysisServer {
     final Object? response = json.decode(line);
 
     if (response is Map<String, Object?>) {
-      final Object? id = response['id'];
-      final Completer<Map<String, Object?>?>? completer = _outstandingRequests.remove(id);
-      if (completer != null) {
-        if (response case {'result': final Map<String, Object?>? result}) {
-          completer.complete(result);
-        } else if (response case {'error': final Map<String, Object?> error}) {
-          completer.completeError(error['message'] ?? error);
-        } else {
-          completer.completeError('Response for unknown request received: $response');
-        }
-      }
-
       final method = response['method'] as String?;
       if (method != null) {
         final Object? id = response['id'];
@@ -291,6 +279,18 @@ class AnalysisServer {
               _handleAnalysisIssues(paramsMap);
             case 'window/showMessage':
               _handleShowMessage(paramsMap);
+          }
+        }
+      } else {
+        final Object? id = response['id'];
+        final Completer<Map<String, Object?>?>? completer = _outstandingRequests.remove(id);
+        if (completer != null) {
+          if (response case {'result': final Map<String, Object?>? result}) {
+            completer.complete(result);
+          } else if (response case {'error': final Map<String, Object?> error}) {
+            completer.completeError(error['message'] ?? error);
+          } else {
+            completer.completeError('Response for unknown request received: $response');
           }
         }
       }
