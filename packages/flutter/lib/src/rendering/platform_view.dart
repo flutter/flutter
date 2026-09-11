@@ -42,11 +42,11 @@ bool _factoryTypesSetEquals<T>(Set<Factory<T>>? a, Set<Factory<T>>? b) {
   if (a == null || b == null) {
     return false;
   }
-  return setEquals(_factoriesTypeSet(a), _factoriesTypeSet(b));
+  return setEquals<Type>(_factoriesTypeSet<T>(a), _factoriesTypeSet<T>(b));
 }
 
 Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
-  return factories.map<Type>((Factory<T> factory) => factory.type).toSet();
+  return factories.map<Type>((Factory<T> factory) => T).toSet();
 }
 
 /// A render object for an Android view.
@@ -728,9 +728,9 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   /// gesture arena, the entire pointer event sequence starting from the pointer down event
   /// will be dispatched to the Android view.
   ///
-  /// The `gestureRecognizers` property must not contain more than one factory with the same [Factory.type].
+  /// The `gestureRecognizers` property must not contain more than one factory with the same `Factory type`.
   ///
-  /// Setting a new set of gesture recognizer factories with the same [Factory.type]s as the current
+  /// Setting a new set of gesture recognizer factories with the same `Factory type` as the current
   /// set has no effect, because the factories' constructors would have already been called with the previous set.
   /// {@endtemplate}
   ///
