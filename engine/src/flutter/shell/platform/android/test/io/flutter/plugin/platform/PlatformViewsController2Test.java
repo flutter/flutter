@@ -517,106 +517,92 @@ public class PlatformViewsController2Test {
     verify(platformView, times(1)).dispose();
   }
 
-  // Class member variable
-  private SurfaceControl.Transaction mCapturedTx;
+  private static class TransactionTrackingController extends PlatformViewsController2 {
+    final List<SurfaceControl.Transaction> transactions = new ArrayList<>();
+
+    @Override
+    SurfaceControl.Transaction newTransaction() {
+      SurfaceControl.Transaction tx = spy(super.newTransaction());
+      transactions.add(tx);
+      return tx;
+    }
+  }
+
+  private AttachedSurfaceControl attachToViewWithOverlay(PlatformViewsController2 controller) {
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterView flutterView = mock(FlutterView.class);
+    AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
+    when(rootSurfaceControl.buildReparentTransaction(any()))
+        .thenReturn(new SurfaceControl.Transaction());
+    controller.attachToView(flutterView);
+    controller.createOverlaySurface();
+    return rootSurfaceControl;
+  }
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void showOverlaySurfaceDefersTransactionUntilEndFrame() {
-
-    PlatformViewsController2 controller =
-        new PlatformViewsController2() {
-          @Override
-          public SurfaceControl.Transaction createTransaction() {
-            // Call super to ensure the real transaction is added to the private
-            // 'pendingTransactions' list
-            SurfaceControl.Transaction realTx = super.createTransaction();
-            // Spy on it so we can verify calls like 'apply()'
-            mCapturedTx = spy(realTx);
-            return mCapturedTx;
-          }
-        };
-
-    PlatformViewRegistryImpl registry = new PlatformViewRegistryImpl();
-    controller.setRegistry(registry);
-
-    // Mocks
-    FlutterView mockFlutterView = mock(FlutterView.class);
-    AttachedSurfaceControl mockAttachedSurfaceControl = mock(AttachedSurfaceControl.class);
-
-    when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
-    when(mockAttachedSurfaceControl.buildReparentTransaction(any()))
-        .thenReturn(new SurfaceControl.Transaction());
-
-    controller.attachToView(mockFlutterView);
-    controller.createOverlaySurface();
+    TransactionTrackingController controller = new TransactionTrackingController();
+    AttachedSurfaceControl rootSurfaceControl = attachToViewWithOverlay(controller);
 
     controller.showOverlaySurface();
-    assertNotNull("Transaction should have been created", mCapturedTx);
-    verify(mCapturedTx, never()).apply();
+    assertEquals(1, controller.transactions.size());
+    SurfaceControl.Transaction platformTx = controller.transactions.get(0);
+    verify(platformTx, never()).apply();
+    verify(platformTx, never()).close();
 
     controller.swapTransactions();
     controller.onEndFrame();
 
-    verify(mockAttachedSurfaceControl, times(1))
+    verify(rootSurfaceControl, times(1))
         .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    verify(platformTx).close();
   }
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void createTransactionConsolidatesOnPlatformThread() {
-    PlatformViewsController2 controller = new PlatformViewsController2();
-    controller.setRegistry(new PlatformViewRegistryImpl());
+  public void overlayMutationsSharePlatformTransactionUntilSwap() {
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
 
-    // On the platform/test thread, repeated calls to createTransaction() return the same instance.
-    SurfaceControl.Transaction tx1 = controller.createTransaction();
-    SurfaceControl.Transaction tx2 = controller.createTransaction();
-    assertSame("Platform thread should reuse the consolidated transaction", tx1, tx2);
+    controller.showOverlaySurface();
+    controller.hideOverlaySurface();
+    assertEquals(1, controller.transactions.size());
+    SurfaceControl.Transaction platformTx = controller.transactions.get(0);
+    verify(platformTx).setVisibility(any(SurfaceControl.class), eq(true));
+    verify(platformTx).setVisibility(any(SurfaceControl.class), eq(false));
 
     controller.swapTransactions();
 
-    // After swapping, a new frame gets a new consolidated transaction.
-    SurfaceControl.Transaction tx3 = controller.createTransaction();
-    assertNotSame("New frame on platform thread should get a fresh transaction", tx1, tx3);
+    controller.showOverlaySurface();
+    assertEquals(2, controller.transactions.size());
+    assertNotSame(platformTx, controller.transactions.get(1));
   }
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void createTransactionIsolatesRasterThreadTransactions() throws Exception {
-    PlatformViewsController2 controller = new PlatformViewsController2();
-    controller.setRegistry(new PlatformViewRegistryImpl());
+  public void createTransactionIsolatesRasterSubmissionsRegardlessOfCallingThread() {
+    TransactionTrackingController controller = new TransactionTrackingController();
+    AttachedSurfaceControl rootSurfaceControl = attachToViewWithOverlay(controller);
+    controller.showOverlaySurface();
+    SurfaceControl.Transaction platformTx = controller.transactions.get(0);
 
-    // Transaction on platform thread:
-    SurfaceControl.Transaction platformTx = controller.createTransaction();
-
-    // Transactions created on a background/raster thread:
-    final SurfaceControl.Transaction[] rasterTxs = new SurfaceControl.Transaction[2];
-    Thread rasterThread =
-        new Thread(
-            () -> {
-              rasterTxs[0] = controller.createTransaction();
-              rasterTxs[1] = controller.createTransaction();
-            });
-    rasterThread.start();
-    rasterThread.join();
-
-    assertNotNull(rasterTxs[0]);
-    assertNotNull(rasterTxs[1]);
-    assertNotSame("Raster thread must not share platform transaction", platformTx, rasterTxs[0]);
-    assertNotSame(
-        "Raster thread submissions must receive isolated transactions", rasterTxs[0], rasterTxs[1]);
-
-    // Swapping and ending frame should merge both without crashing.
-    FlutterView mockFlutterView = mock(FlutterView.class);
-    AttachedSurfaceControl mockAttachedSurfaceControl = mock(AttachedSurfaceControl.class);
-    when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
-    controller.attachToView(mockFlutterView);
+    // The JNI entry point always creates raster transactions, even on this test's main thread.
+    SurfaceControl.Transaction rasterTx1 = controller.createTransaction();
+    SurfaceControl.Transaction rasterTx2 = controller.createTransaction();
+    assertNotSame(platformTx, rasterTx1);
+    assertNotSame(platformTx, rasterTx2);
+    assertNotSame(rasterTx1, rasterTx2);
 
     controller.swapTransactions();
     controller.onEndFrame();
 
-    verify(mockAttachedSurfaceControl, times(1))
+    verify(rootSurfaceControl, times(1))
         .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
+    verify(platformTx).close();
+    verify(rasterTx1, never()).close();
+    verify(rasterTx2, never()).close();
   }
 
   @Test
@@ -688,7 +674,7 @@ public class PlatformViewsController2Test {
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
-  public void onEndFrameUsesSeparateMergeDestinationForRasterOnlyFrame() throws Exception {
+  public void onEndFrameUsesSeparateMergeDestinationForRasterOnlyFrame() {
     PlatformViewsController2 controller = new PlatformViewsController2();
     controller.setRegistry(new PlatformViewRegistryImpl());
     FlutterView flutterView = mock(FlutterView.class);
@@ -696,38 +682,26 @@ public class PlatformViewsController2Test {
     when(flutterView.getRootSurfaceControl()).thenReturn(rootSurfaceControl);
     controller.attachToView(flutterView);
 
-    AtomicReference<SurfaceControl.Transaction> rasterTx = new AtomicReference<>();
-    Thread rasterThread = new Thread(() -> rasterTx.set(controller.createTransaction()));
-    rasterThread.setDaemon(true);
-    rasterThread.start();
-    rasterThread.join(10000);
-    assertFalse("Producer did not terminate", rasterThread.isAlive());
-    assertNotNull(rasterTx.get());
+    SurfaceControl.Transaction rasterTx = controller.createTransaction();
 
     controller.swapTransactions();
     controller.onEndFrame();
 
-    verify(rootSurfaceControl)
-        .applyTransactionOnDraw(argThat(tx -> tx != null && tx != rasterTx.get()));
+    verify(rootSurfaceControl).applyTransactionOnDraw(argThat(tx -> tx != null && tx != rasterTx));
     verify(flutterView).invalidate();
   }
 
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void swapTransactionsClosesDiscardedPlatformTransaction() {
-    final SurfaceControl.Transaction platformTx = spy(new SurfaceControl.Transaction());
-    PlatformViewsController2 controller =
-        new PlatformViewsController2() {
-          @Override
-          SurfaceControl.Transaction newTransaction() {
-            return platformTx;
-          }
-        };
-    controller.createTransaction();
+    TransactionTrackingController controller = new TransactionTrackingController();
+    attachToViewWithOverlay(controller);
+    controller.showOverlaySurface();
+    // Defensive coverage: production calls onEndFrame() between swaps.
     controller.swapTransactions();
     controller.swapTransactions();
 
-    verify(platformTx).close();
+    verify(controller.transactions.get(0)).close();
   }
 
   /**
@@ -735,14 +709,14 @@ public class PlatformViewsController2Test {
    * null entries, causing merge(null) to throw and abort the engine through JNI.
    *
    * <p>Detection is probabilistic. This does not exercise native writes after publication; see
-   * {@code createTransaction()} for that separate race. Thread classification is covered by the
-   * consolidation and isolation tests above.
+   * {@code createTransaction()} for that separate race. Barrier timeouts skip the run, so this is
+   * not a liveness test.
    */
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void createTransactionIsSafeWhenRasterAndPlatformThreadsRaceOnFrames() throws Exception {
     final PlatformViewsController2 controller = new PlatformViewsController2();
-    controller.setRegistry(new PlatformViewRegistryImpl());
+    attachToViewWithOverlay(controller);
 
     final int rasterThreadCount = 4;
     // Larger batches increase the opportunity for add() to overlap clear()/addAll().
@@ -792,12 +766,10 @@ public class PlatformViewsController2Test {
       for (int round = 0; round < rounds; round++) {
         roundStart.await(timeoutMs, TimeUnit.MILLISECONDS);
 
-        // Simulate platform-view clip transactions.
-        controller.createTransaction();
-        controller.createTransaction();
+        controller.showOverlaySurface();
+        controller.hideOverlaySurface();
 
         controller.swapTransactions();
-        // Without a FlutterView, this still merges the transactions before dropping the frame.
         controller.onEndFrame();
       }
     } catch (TimeoutException | BrokenBarrierException e) {
@@ -814,20 +786,17 @@ public class PlatformViewsController2Test {
           rasterThread.join(10);
         }
         if (rasterThread.isAlive()) {
-          harnessFailure.compareAndSet(
+          raceFailure.compareAndSet(
               null, new AssertionError(rasterThread.getName() + " did not terminate"));
         }
       }
     }
 
     if (raceFailure.get() != null) {
-      throw new AssertionError(
-          "Concurrent createTransaction()/swapTransactions() corrupted the transaction lists.",
-          raceFailure.get());
+      throw new AssertionError("Concurrent transaction processing failed.", raceFailure.get());
     }
     Assume.assumeNoException(
-        "The harness could not complete a clean run on this machine; this is not a product "
-            + "failure.",
+        "Stress run interrupted by a barrier failure; transaction failures are reported above.",
         harnessFailure.get());
   }
 

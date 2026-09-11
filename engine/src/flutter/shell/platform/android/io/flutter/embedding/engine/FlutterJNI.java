@@ -1358,9 +1358,9 @@ public class FlutterJNI {
 
   // ----- New Platform Views ----------
 
+  // Called from the raster thread for AHB swapchain presentation.
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
-  @UiThread
   public SurfaceControl.Transaction createTransaction() {
     if (platformViewsController2 == null) {
       throw new RuntimeException("");

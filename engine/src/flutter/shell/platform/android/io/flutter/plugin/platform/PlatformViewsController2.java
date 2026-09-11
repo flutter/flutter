@@ -11,7 +11,6 @@ import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.os.Looper;
 import android.util.SparseArray;
 import android.view.AttachedSurfaceControl;
 import android.view.Gravity;
@@ -621,7 +620,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       return;
     }
     SurfaceControl.Transaction tx =
-        createTransaction().setAlpha(sc, opacity).setCrop(sc, screenRect);
+        platformTransaction().setAlpha(sc, opacity).setCrop(sc, screenRect);
   }
 
   @RequiresApi(API_LEVELS.API_34)
@@ -633,15 +632,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return new SurfaceHolder.Callback() {
       @Override
       public void surfaceCreated(@NonNull SurfaceHolder holder) {
-        if (platformViews.get(viewId) == null) {
-          viewsWithPendingSurfaceCallback.remove(viewId);
-          surfaceView.getHolder().removeCallback(this);
-          return;
-        }
         SurfaceControl surfaceControl = surfaceView.getSurfaceControl();
         if (surfaceControl != null && surfaceControl.isValid()) {
           SurfaceControl.Transaction tx =
-              createTransaction()
+              platformTransaction()
                   .setAlpha(surfaceControl, opacity)
                   .setCrop(surfaceControl, screenRect);
         } else {
@@ -681,11 +675,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     parentView.setVisibility(View.GONE);
   }
 
-  private static boolean isPlatformThread() {
-    final Looper mainLooper = Looper.getMainLooper();
-    return mainLooper != null && Looper.myLooper() == mainLooper;
-  }
-
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
     final List<SurfaceControl.Transaction> rasterTxs;
@@ -706,6 +695,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       tx = new SurfaceControl.Transaction();
       if (platformTx != null) {
         tx.merge(platformTx);
+        platformTx.close();
       }
       if (rasterTxs != null) {
         for (int i = 0; i < rasterTxs.size(); i++) {
@@ -740,8 +730,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   @RequiresApi(API_LEVELS.API_34)
   public void swapTransactions() {
     synchronized (transactionLock) {
-      // Preserve the existing lifetime of discarded raster transactions. Explicit close() must
-      // wait for a native producer-completion handoff; transactionLock only protects the lists.
+      // Normally onEndFrame() has already consumed the active transactions. Do not explicitly
+      // close raster inputs here; their native producers may still be using them.
       activeRasterTransactions.clear();
       activeRasterTransactions.addAll(pendingRasterTransactions);
       pendingRasterTransactions.clear();
@@ -754,22 +744,24 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
   }
 
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  private SurfaceControl.Transaction platformTransaction() {
+    synchronized (transactionLock) {
+      if (pendingPlatformTransaction == null) {
+        pendingPlatformTransaction = newTransaction();
+      }
+      return pendingPlatformTransaction;
+    }
+  }
+
+  // Called from the raster thread through FlutterJNI.
   @RequiresApi(API_LEVELS.API_34)
   public SurfaceControl.Transaction createTransaction() {
-    if (isPlatformThread()) {
-      // Consolidate platform-thread mutations into one transaction per frame.
-      synchronized (transactionLock) {
-        if (pendingPlatformTransaction == null) {
-          pendingPlatformTransaction = newTransaction();
-        }
-        return pendingPlatformTransaction;
-      }
-    }
-
-    // Give each raster submission its own transaction. The lock prevents list corruption, but
-    // AHBSwapchainImplVK::Present still writes through a borrowed native pointer after publication
-    // here. Merging can race those writes; swapping lists does not transfer exclusive ownership.
-    // Resolving that pre-existing race requires a native producer-completion handoff.
+    // The lock protects the lists, but AHBSwapchainImplVK::Present writes through a borrowed native
+    // pointer after publication here. Merging can race those writes, and releasing Java references
+    // allows GC to free the transaction while native code still uses it. Both pre-existing hazards
+    // require native lifetime retention and publication after the producer finishes writing.
     synchronized (transactionLock) {
       final SurfaceControl.Transaction tx = newTransaction();
       pendingRasterTransactions.add(tx);
@@ -818,7 +810,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlaySurfaceControl == null) {
       return;
     }
-    SurfaceControl.Transaction tx = createTransaction();
+    SurfaceControl.Transaction tx = platformTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ true);
   }
 
@@ -827,7 +819,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     if (overlaySurfaceControl == null) {
       return;
     }
-    SurfaceControl.Transaction tx = createTransaction();
+    SurfaceControl.Transaction tx = platformTransaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
   }
 
