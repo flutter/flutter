@@ -127,14 +127,20 @@ class ResidentWebRunner extends ResidentRunner {
        super(
          <FlutterDevice>[device],
          target: target ?? fileSystem.path.join('lib', 'main.dart'),
+         analytics: analytics,
+         buildTargets: buildTargets ?? const BuildTargetsImpl(),
          commandHelp: CommandHelp(
            logger: logger,
-           terminal: terminal,
-           platform: platform,
            outputPreferences: outputPreferences,
+           platform: platform,
+           terminal: terminal,
          ),
          dartBuilder: hookRunner,
-         buildTargets: buildTargets ?? const BuildTargetsImpl(),
+         fileSystem: fileSystem,
+         logger: logger,
+         outputPreferences: outputPreferences,
+         platform: platform,
+         terminal: terminal,
        );
 
   final FileSystem _fileSystem;
@@ -433,11 +439,7 @@ class ResidentWebRunner extends ResidentRunner {
 
   WebCompilerConfig get _compilerConfig {
     if (debuggingOptions.webUseWasm) {
-      return WasmCompilerConfig(
-        optimizationLevel: 0,
-        stripWasm: false,
-        renderer: debuggingOptions.webRenderer,
-      );
+      return WasmCompilerConfig(renderer: debuggingOptions.webRenderer);
     }
     return JsCompilerConfig.run(
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,

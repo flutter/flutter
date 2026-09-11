@@ -7,6 +7,7 @@ import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_
 import 'package:meta/meta.dart';
 
 import 'runner.dart' as runner;
+import 'src/android/android_workflow.dart' as android_workflow;
 import 'src/base/context.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
@@ -185,7 +186,7 @@ Future<void> main(List<String> args) async {
   );
 }
 
-/// The name of the command in [args], or null if there isn't one.
+/// The name of the command in `args`, or null if there isn't one.
 ///
 /// Global options can come before the command, so it can't be found by
 /// position. A throwaway parser walks past them instead: trailing options are
@@ -290,8 +291,14 @@ List<FlutterCommand> generateCommands({
   ),
   CustomDevicesCommand(featureFlags: featureFlags, toolContext: toolDependencies.toolContext),
   CreateCommand(verboseHelp: verboseHelp, extensionTemplateManager: extensionTemplateManager),
-  DaemonCommand(hidden: !verboseHelp),
-  DebugAdapterCommand(verboseHelp: verboseHelp),
+  DaemonCommand(
+    androidContext: toolDependencies.androidContext,
+    androidWorkflow: android_workflow.androidWorkflow,
+    deviceManager: globals.deviceManager,
+    hidden: !verboseHelp,
+    toolContext: toolDependencies.toolContext,
+  ),
+  DebugAdapterCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DevicesCommand(
     deviceManager: globals.deviceManager!,
     doctor: globals.doctor!,
@@ -306,7 +313,7 @@ List<FlutterCommand> generateCommands({
     doctor: globals.doctor,
     extensionManager: extensionManager,
   ),
-  DowngradeCommand(verboseHelp: verboseHelp, logger: toolDependencies.toolContext.logger),
+  DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DriveCommand(
     verboseHelp: verboseHelp,
     fileSystem: toolDependencies.toolContext.fs,
@@ -326,7 +333,11 @@ List<FlutterCommand> generateCommands({
   GenerateLocalizationsCommand(toolContext: toolDependencies.toolContext),
   InstallCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   LogsCommand(toolContext: toolDependencies.toolContext),
-  PackagesCommand(),
+  PackagesCommand(
+    buildSystem: toolDependencies.buildSystem,
+    toolContext: toolDependencies.toolContext,
+    verboseHelp: verboseHelp,
+  ),
   PrecacheCommand(
     verboseHelp: verboseHelp,
     cache: toolDependencies.toolContext.cache,
@@ -336,9 +347,12 @@ List<FlutterCommand> generateCommands({
   ),
   RunCommand(
     appleContext: toolDependencies.appleContext,
+    toolContext: toolDependencies.toolContext,
+    androidContext: toolDependencies.androidContext,
+    androidWorkflow: android_workflow.androidWorkflow,
     buildSystem: toolDependencies.buildSystem,
     buildTargets: toolDependencies.buildTargets,
-    toolContext: toolDependencies.toolContext,
+    deviceManager: globals.deviceManager,
     verboseHelp: verboseHelp,
   ),
   ScreenshotCommand(toolContext: toolDependencies.toolContext),
@@ -350,11 +364,11 @@ List<FlutterCommand> generateCommands({
     nativeAssetsBuilder: toolDependencies.toolContext.nativeAssetsBuilder,
   ),
   WidgetPreviewCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
-  UpgradeCommand(verboseHelp: verboseHelp),
+  UpgradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   SymbolizeCommand(toolContext: toolDependencies.toolContext),
   // Development-only commands. These are always hidden,
   IdeConfigCommand(toolContext: toolDependencies.toolContext),
-  UpdatePackagesCommand(verboseHelp: verboseHelp),
+  UpdatePackagesCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
 ];
 
 /// An abstraction for instantiation of the correct logger type.
