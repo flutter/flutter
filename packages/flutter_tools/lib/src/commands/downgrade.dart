@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -11,8 +10,9 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
+import '../cache.dart';
+import '../context/tool_context.dart';
 import '../git.dart';
-import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -40,21 +40,15 @@ String downgradePositionalArgumentErrorMessage(List<String> args) {
 /// Additionally, if they had switched channels to stable before trying to downgrade,
 /// the command would fail since there was no previously recorded stable version.
 class DowngradeCommand extends FlutterCommand {
-  DowngradeCommand({
-    bool verboseHelp = false,
-    PersistentToolState? persistentToolState,
-    required Logger logger,
-    FlutterVersion? flutterVersion,
-    Terminal? terminal,
-    Stdio? stdio,
-    FileSystem? fileSystem,
-  }) : _terminal = terminal,
-       _flutterVersion = flutterVersion,
-       _persistentToolState = persistentToolState,
-       _stdio = stdio,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _git = globals.git {
+  DowngradeCommand({required ToolContext super.toolContext, super.verboseHelp})
+    : _cache = toolContext.cache,
+      _fileSystem = toolContext.fs,
+      _flutterVersion = toolContext.flutterVersion,
+      _git = toolContext.git,
+      _logger = toolContext.logger,
+      _persistentToolState = toolContext.persistentToolState,
+      _stdio = toolContext.stdio,
+      _terminal = toolContext.terminal {
     argParser.addOption(
       'working-directory',
       hide: !verboseHelp,
@@ -72,14 +66,14 @@ class DowngradeCommand extends FlutterCommand {
     );
   }
 
-  Terminal? _terminal;
-  FlutterVersion? _flutterVersion;
-  PersistentToolState? _persistentToolState;
-  ProcessManager? _processManager;
-  final Logger _logger;
+  final Cache _cache;
+  final FileSystem _fileSystem;
+  FlutterVersion _flutterVersion;
   final Git _git;
-  Stdio? _stdio;
-  FileSystem? _fileSystem;
+  final Logger _logger;
+  final PersistentToolState _persistentToolState;
+  final Stdio _stdio;
+  final Terminal _terminal;
 
   @override
   String get description => 'Downgrade Flutter to the last active version for the current channel.';
@@ -96,22 +90,13 @@ class DowngradeCommand extends FlutterCommand {
       throwToolExit(downgradePositionalArgumentErrorMessage(argResults!.rest), exitCode: 2);
     }
 
-    // Commands do not necessarily have access to the correct zone injected
-    // values when being created. Fields must be lazily instantiated in runCommand,
-    // at least until the zone injection is refactored.
-    _terminal ??= globals.terminal;
-    _flutterVersion ??= globals.flutterVersion;
-    _persistentToolState ??= globals.persistentToolState;
-    _processManager ??= globals.processManager;
-    _stdio ??= globals.stdio;
-    _fileSystem ??= globals.fs;
-    String workingDirectory = globals.cache.flutterRoot;
+    String workingDirectory = _cache.flutterRoot;
     if (argResults!.wasParsed('working-directory')) {
       workingDirectory = stringArg('working-directory')!;
-      _flutterVersion = FlutterVersion(fs: _fileSystem!, flutterRoot: workingDirectory, git: _git);
+      _flutterVersion = FlutterVersion(fs: _fileSystem, flutterRoot: workingDirectory, git: _git);
     }
 
-    final String currentChannel = _flutterVersion!.channel;
+    final String currentChannel = _flutterVersion.channel;
     final Channel? channel = getChannelForName(currentChannel);
     if (channel == null) {
       throwToolExit(
@@ -119,9 +104,8 @@ class DowngradeCommand extends FlutterCommand {
         'Use "flutter channel" to switch to an official channel. ',
       );
     }
-    final PersistentToolState persistentToolState = _persistentToolState!;
-    final String? lastFlutterVersion = persistentToolState.lastActiveVersion(channel);
-    final String? currentFlutterVersion = _flutterVersion?.frameworkRevision;
+    final String? lastFlutterVersion = _persistentToolState.lastActiveVersion(channel);
+    final String currentFlutterVersion = _flutterVersion.frameworkRevision;
     if (lastFlutterVersion == null || currentFlutterVersion == lastFlutterVersion) {
       final String trailing = await _createErrorMessage(workingDirectory, channel);
       throwToolExit(
@@ -148,11 +132,9 @@ class DowngradeCommand extends FlutterCommand {
     final String humanReadableVersion = parseResult.stdout;
 
     // If there is a terminal attached, prompt the user to confirm the downgrade.
-    final Stdio stdio = _stdio!;
-    final Terminal terminal = _terminal!;
-    if (stdio.hasTerminal && boolArg('prompt')) {
-      terminal.usesTerminalUi = true;
-      final String result = await terminal.promptForCharInput(
+    if (_stdio.hasTerminal && boolArg('prompt')) {
+      _terminal.usesTerminalUi = true;
+      final String result = await _terminal.promptForCharInput(
         const <String>['y', 'n'],
         prompt: 'Downgrade flutter to version $humanReadableVersion?',
         logger: _logger,
@@ -207,7 +189,7 @@ class DowngradeCommand extends FlutterCommand {
       if (channel == currentChannel) {
         continue;
       }
-      final String? sha = _persistentToolState?.lastActiveVersion(channel);
+      final String? sha = _persistentToolState.lastActiveVersion(channel);
       if (sha == null) {
         continue;
       }

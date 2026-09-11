@@ -580,7 +580,6 @@ class TestFeatureFlags implements FeatureFlags {
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
-    this.isAccessibilityEvaluationsEnabled = false,
     this.isLLDBDebuggingEnabled = false,
     this.isUISceneMigrationEnabled = false,
     this.isRiscv64SupportEnabled = false,
@@ -635,9 +634,6 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowingEnabled;
 
   @override
-  final bool isAccessibilityEvaluationsEnabled;
-
-  @override
   final bool isLLDBDebuggingEnabled;
 
   @override
@@ -671,7 +667,6 @@ class TestFeatureFlags implements FeatureFlags {
       swiftPackageManager => isSwiftPackageManagerEnabled,
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
       windowingFeature => isWindowingEnabled,
-      accessibilityEvaluationsFeature => isAccessibilityEvaluationsEnabled,
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
       riscv64 => isRiscv64SupportEnabled,
@@ -700,7 +695,6 @@ class TestFeatureFlags implements FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
-    accessibilityEvaluationsFeature,
     lldbDebugging,
     uiSceneMigration,
     riscv64,
@@ -1378,11 +1372,11 @@ class FakeToolContext extends Fake implements ToolContext {
   late final LocalEngineLocator localEngineLocator =
       _localEngineLocator ??
       LocalEngineLocator(
-        flutterRoot: '',
-        userMessages: userMessages,
+        fileSystem: fs,
+        flutterRoot: cache.flutterRoot,
         logger: logger,
         platform: platform,
-        fileSystem: fs,
+        userMessages: userMessages,
       );
 
   @override
@@ -1557,11 +1551,11 @@ class DelegatingToolContext extends Fake implements ToolContext {
       _localEngineLocator ??
       globals.localEngineLocator ??
       LocalEngineLocator(
-        flutterRoot: '',
-        userMessages: userMessages,
+        fileSystem: fs,
+        flutterRoot: cache.flutterRoot,
         logger: logger,
         platform: platform,
-        fileSystem: fs,
+        userMessages: userMessages,
       );
 
   @override
