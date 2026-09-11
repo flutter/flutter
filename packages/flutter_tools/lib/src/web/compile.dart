@@ -13,7 +13,6 @@ import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../cache.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../platform_plugins.dart';
@@ -134,7 +133,7 @@ class WebBuilder {
           engineVersion: globals.artifacts!.usesLocalArtifacts
               ? null
               : _flutterVersion.engineRevision,
-          flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
+          flutterRootDir: _fileSystem.directory(globals.cache.flutterRoot),
           // Web uses a different Dart plugin registry.
           // https://github.com/flutter/flutter/issues/80406
           generateDartPluginRegistry: false,

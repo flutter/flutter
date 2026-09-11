@@ -25,7 +25,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart' as globals;
@@ -105,7 +104,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(
           createDirectoryHandler(
             fileSystem.directory(
-              fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
+              fileSystem.path.join(globals.cache.flutterRoot, 'packages', 'flutter_tools'),
             ),
             crossOriginIsolated: crossOriginIsolation,
           ),
@@ -135,7 +134,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         'FLUTTER_TEST_BROWSER': 'chrome',
         'FLUTTER_WEB_RENDERER': webRenderer.name,
         // Pass FLUTTER_ROOT so flutter_goldens can locate the cache directory and resolve repo paths.
-        if (Cache.flutterRoot case final String flutterRoot) 'FLUTTER_ROOT': flutterRoot,
+        'FLUTTER_ROOT': globals.cache.flutterRoot,
       },
     );
   }
@@ -240,7 +239,13 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The ahem text file.
   File get _ahem => _fileSystem.file(
-    _fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'static', 'Ahem.ttf'),
+    _fileSystem.path.join(
+      globals.cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+      'static',
+      'Ahem.ttf',
+    ),
   );
 
   /// The require js binary.

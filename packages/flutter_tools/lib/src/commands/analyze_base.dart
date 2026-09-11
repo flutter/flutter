@@ -26,6 +26,7 @@ abstract class AnalyzeBase {
   AnalyzeBase(
     this.argResults, {
     required this.artifacts,
+    required this.cache,
     required this.fileSystem,
     required this.logger,
     required this.platform,
@@ -40,6 +41,10 @@ abstract class AnalyzeBase {
   @protected
   final List<Directory> repoPackages;
   @protected
+  final Artifacts artifacts;
+  @protected
+  final Cache cache;
+  @protected
   final FileSystem fileSystem;
   @protected
   final Logger logger;
@@ -50,12 +55,10 @@ abstract class AnalyzeBase {
   @protected
   final Terminal terminal;
   @protected
-  final Artifacts artifacts;
-  @protected
   final bool suppressAnalytics;
 
   @protected
-  String get flutterRoot => fileSystem.path.absolute(Cache.flutterRoot!);
+  String get flutterRoot => fileSystem.path.absolute(cache.flutterRoot);
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
@@ -150,13 +153,12 @@ class PackageDependency {
   }
 
   bool get hasConflict => values.length > 1;
-  bool hasConflictAffectingFlutterRepo(FileSystem fileSystem) {
-    final String? flutterRoot = Cache.flutterRoot;
-    assert(flutterRoot != null && fileSystem.path.isAbsolute(flutterRoot));
+  bool hasConflictAffectingFlutterRepo(FileSystem fileSystem, String flutterRoot) {
+    assert(fileSystem.path.isAbsolute(flutterRoot));
     for (final List<String> targetSources in values.values) {
       for (final source in targetSources) {
         assert(fileSystem.path.isAbsolute(source));
-        if (fileSystem.path.isWithin(flutterRoot!, source)) {
+        if (fileSystem.path.isWithin(flutterRoot, source)) {
           return true;
         }
       }
@@ -210,6 +212,7 @@ class PackageDependencyTracker {
   void checkForConflictingDependencies(
     Iterable<Directory> pubSpecDirectories, {
     required FileSystem fileSystem,
+    required String flutterRoot,
   }) {
     for (final directory in pubSpecDirectories) {
       final String pubSpecYamlPath = fileSystem.path.join(directory.path, 'pubspec.yaml');
@@ -241,7 +244,7 @@ class PackageDependencyTracker {
       message.writeln(
         'Make sure you have run "pub upgrade" in all the directories mentioned above.',
       );
-      if (hasConflictsAffectingFlutterRepo(fileSystem)) {
+      if (hasConflictsAffectingFlutterRepo(fileSystem, flutterRoot)) {
         message.writeln(
           'For packages in the flutter repository, try using "flutter update-packages" to do all of them at once.\n'
           'If you need to actually upgrade them, consider "flutter update-packages --force-upgrade". '
@@ -260,9 +263,10 @@ class PackageDependencyTracker {
     return packages.values.any((PackageDependency dependency) => dependency.hasConflict);
   }
 
-  bool hasConflictsAffectingFlutterRepo(FileSystem fileSystem) {
+  bool hasConflictsAffectingFlutterRepo(FileSystem fileSystem, String flutterRoot) {
     return packages.values.any(
-      (PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo(fileSystem),
+      (PackageDependency dependency) =>
+          dependency.hasConflictAffectingFlutterRepo(fileSystem, flutterRoot),
     );
   }
 

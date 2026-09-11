@@ -55,14 +55,14 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
-      Cache.flutterRoot = 'flutter';
+      globals.cache.flutterRoot = 'flutter';
     });
 
     setUp(() {
       testbed = TestBed(
         setup: () {
           fakePub = FakePub();
-          Cache.flutterRoot = 'flutter';
+          globals.cache.flutterRoot = 'flutter';
           final filePaths = <String>[
             globals.fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
             globals.fs.path.join('flutter', 'packages', 'flutter_driver', 'pubspec.yaml'),

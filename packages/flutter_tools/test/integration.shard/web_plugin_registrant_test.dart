@@ -272,7 +272,7 @@ void main() {
 }
 
 Future<void> _createProject(Directory dir, List<String> createArgs) async {
-  Cache.flutterRoot = '../..';
+  globals.cache.flutterRoot = '../..';
   final command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...createArgs, dir.path]);

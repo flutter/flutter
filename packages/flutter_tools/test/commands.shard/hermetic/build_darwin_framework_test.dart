@@ -35,7 +35,6 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
-    Cache.flutterRoot = getFlutterRoot();
   });
 
   const storageBaseUrl = 'https://fake.googleapis.com';
@@ -163,8 +162,6 @@ void main() {
         const licenseText = 'This is the license!';
 
         setUp(() {
-          // cache.getLicenseFile() relies on the flutter root being set.
-          Cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);
@@ -620,8 +617,6 @@ void main() {
         const licenseText = 'This is the license!';
 
         setUp(() {
-          // cache.getLicenseFile() relies on the flutter root being set.
-          Cache.flutterRoot ??= getFlutterRoot();
           cache.getLicenseFile()
             ..createSync(recursive: true)
             ..writeAsStringSync(licenseText);

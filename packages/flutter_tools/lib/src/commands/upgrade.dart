@@ -12,7 +12,6 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/pub.dart';
 import '../git.dart';
@@ -103,10 +102,9 @@ class UpgradeCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() {
     final String? workingDirectory = stringArg('working-directory');
-    _commandRunner.workingDirectory = workingDirectory ?? Cache.flutterRoot!;
+    _commandRunner.workingDirectory = workingDirectory ?? _toolContext.cache.flutterRoot;
     final Git git = _toolContext.git;
     final Platform platform = _toolContext.platform;
-
     return _commandRunner.runCommand(
       _parsePhaseFromContinueArg(),
       force: boolArg('force'),
@@ -284,7 +282,11 @@ class UpgradeCommandRunner {
   Future<void> flutterUpgradeContinue({required DateTime startedAt}) async {
     final int code = await _toolContext.processUtils.stream(
       [
-        _toolContext.fs.path.join(workingDirectory ?? Cache.flutterRoot!, 'bin', 'flutter'),
+        _toolContext.fs.path.join(
+          workingDirectory ?? _toolContext.cache.flutterRoot,
+          'bin',
+          'flutter',
+        ),
         'upgrade',
         '--continue',
         '--continue-started-at',

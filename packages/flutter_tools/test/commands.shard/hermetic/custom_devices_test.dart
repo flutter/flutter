@@ -204,6 +204,7 @@ CustomDevicesCommand createCustomDevicesCommand({
           fileSystem: fileSystem,
           directory: fileSystem.directory('/'),
           logger: logger,
+          flutterRoot: platform.isWindows ? windowsFlutterRoot : linuxFlutterRoot,
         );
 
   final operatingSystemUtils = FakeOperatingSystemUtils(
@@ -293,10 +294,6 @@ void main() {
   });
 
   group('linux', () {
-    setUp(() {
-      Cache.flutterRoot = linuxFlutterRoot;
-    });
-
     testWithoutContext(
       'custom-devices command shows config file in help when feature is enabled',
       () async {
@@ -1036,10 +1033,6 @@ void main() {
   });
 
   group('windows', () {
-    setUp(() {
-      Cache.flutterRoot = windowsFlutterRoot;
-    });
-
     testWithoutContext(
       'custom-devices add command correctly adds ssh device config on windows',
       () async {

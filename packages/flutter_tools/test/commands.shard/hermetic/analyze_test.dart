@@ -54,8 +54,11 @@ void main() {
       platform = FakePlatform();
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
+      // Setup repo roots
+      const homePath = '/home/user/flutter';
       toolContext = FakeToolContext(
         artifacts: Artifacts.test(),
+        cache: FakeCache(fileSystem: fileSystem, flutterRoot: homePath),
         fs: fileSystem,
         logger: logger,
         platform: platform,
@@ -68,9 +71,6 @@ void main() {
       );
       runner = createTestCommandRunner(command);
 
-      // Setup repo roots
-      const homePath = '/home/user/flutter';
-      Cache.flutterRoot = homePath;
       for (final dir in <String>['dev', 'examples', 'packages']) {
         fileSystem.directory(homePath).childDirectory(dir).createSync(recursive: true);
       }
@@ -244,33 +244,38 @@ void main() {
     final Directory tempDir = fileSystem.systemTempDirectory.createTempSync(
       'flutter_analysis_test.',
     );
-    Cache.flutterRoot = _kFlutterRoot;
 
     // Absolute paths
-    expect(inRepo(<String>[tempDir.path], fileSystem), isFalse);
-    expect(inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem), isFalse);
-    expect(inRepo(<String>[Cache.flutterRoot!], fileSystem), isTrue);
-    expect(inRepo(<String>[fileSystem.path.join(Cache.flutterRoot!, 'foo')], fileSystem), isTrue);
+    expect(inRepo(<String>[tempDir.path], fileSystem, _kFlutterRoot), isFalse);
+    expect(
+      inRepo(<String>[fileSystem.path.join(tempDir.path, 'foo')], fileSystem, _kFlutterRoot),
+      isFalse,
+    );
+    expect(inRepo(<String>[_kFlutterRoot], fileSystem, _kFlutterRoot), isTrue);
+    expect(
+      inRepo(<String>[fileSystem.path.join(_kFlutterRoot, 'foo')], fileSystem, _kFlutterRoot),
+      isTrue,
+    );
 
     // Relative paths
-    fileSystem.currentDirectory = Cache.flutterRoot;
-    expect(inRepo(<String>['.'], fileSystem), isTrue);
-    expect(inRepo(<String>['foo'], fileSystem), isTrue);
+    fileSystem.currentDirectory = _kFlutterRoot;
+    expect(inRepo(<String>['.'], fileSystem, _kFlutterRoot), isTrue);
+    expect(inRepo(<String>['foo'], fileSystem, _kFlutterRoot), isTrue);
     fileSystem.currentDirectory = tempDir.path;
-    expect(inRepo(<String>['.'], fileSystem), isFalse);
-    expect(inRepo(<String>['foo'], fileSystem), isFalse);
+    expect(inRepo(<String>['.'], fileSystem, _kFlutterRoot), isFalse);
+    expect(inRepo(<String>['foo'], fileSystem, _kFlutterRoot), isFalse);
 
     // Ensure no exceptions
-    inRepo(null, fileSystem);
-    inRepo(<String>[], fileSystem);
+    inRepo(null, fileSystem, _kFlutterRoot);
+    inRepo(<String>[], fileSystem, _kFlutterRoot);
   });
 }
 
-bool inRepo(List<String>? fileList, FileSystem fileSystem) {
+bool inRepo(List<String>? fileList, FileSystem fileSystem, String flutterRoot) {
   if (fileList == null || fileList.isEmpty) {
     fileList = <String>[fileSystem.path.current];
   }
-  final String root = fileSystem.path.normalize(fileSystem.path.absolute(Cache.flutterRoot!));
+  final String root = fileSystem.path.normalize(fileSystem.path.absolute(flutterRoot));
   final String prefix = root + fileSystem.path.separator;
   for (String file in fileList) {
     file = fileSystem.path.normalize(fileSystem.path.absolute(file));

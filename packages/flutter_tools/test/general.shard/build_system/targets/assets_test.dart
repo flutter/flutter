@@ -425,7 +425,7 @@ flutter:
   testUsingContext(
     'transforms assets declared with transformers',
     () async {
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
+      globals.cache.flutterRoot = Cache.defaultFlutterRoot(
         platform: globals.platform,
         fileSystem: fileSystem,
         userMessages: UserMessages(),
@@ -512,7 +512,7 @@ flutter:
   testUsingContext(
     'transforms shaders declared with transformers before compilation',
     () async {
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
+      globals.cache.flutterRoot = Cache.defaultFlutterRoot(
         platform: globals.platform,
         fileSystem: fileSystem,
         userMessages: UserMessages(),
@@ -630,7 +630,7 @@ flutter:
   testUsingContext(
     'exits tool if an asset transformation fails',
     () async {
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
+      globals.cache.flutterRoot = Cache.defaultFlutterRoot(
         platform: globals.platform,
         fileSystem: fileSystem,
         userMessages: UserMessages(),
@@ -724,7 +724,7 @@ flutter:
         },
       );
 
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
+      globals.cache.flutterRoot = Cache.defaultFlutterRoot(
         platform: globals.platform,
         fileSystem: fileSystem,
         userMessages: UserMessages(),
@@ -972,7 +972,7 @@ flutter:
         completer: markTransformDone,
       );
 
-      Cache.flutterRoot = Cache.defaultFlutterRoot(
+      globals.cache.flutterRoot = Cache.defaultFlutterRoot(
         platform: globals.platform,
         fileSystem: fileSystem,
         userMessages: UserMessages(),
