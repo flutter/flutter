@@ -81,7 +81,6 @@ static jfieldID g_jni_shell_holder_field = nullptr;
   V(g_create_transaction_method, createTransaction,                           \
     "()Landroid/view/SurfaceControl$Transaction;")                            \
   V(g_swap_transaction_method, swapTransactions, "()V")                       \
-  V(g_apply_transaction_method, applyTransactions, "()V")                     \
   V(g_create_overlay_surface2_method, createOverlaySurface2,                  \
     "()Lio/flutter/embedding/engine/FlutterOverlaySurface;")                  \
   V(g_destroy_overlay_surface2_method, destroyOverlaySurface2, "()V")         \
@@ -2095,19 +2094,6 @@ void PlatformViewAndroidJNIImpl::swapTransaction() {
   }
 
   env->CallVoidMethod(java_object.obj(), g_swap_transaction_method);
-
-  FML_CHECK(fml::jni::CheckException(env));
-}
-
-void PlatformViewAndroidJNIImpl::applyTransaction() {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-
-  auto java_object = java_object_.get(env);
-  if (java_object.is_null()) {
-    return;
-  }
-
-  env->CallVoidMethod(java_object.obj(), g_apply_transaction_method);
 
   FML_CHECK(fml::jni::CheckException(env));
 }

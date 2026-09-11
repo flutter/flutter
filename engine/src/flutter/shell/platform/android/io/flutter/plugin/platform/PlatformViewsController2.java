@@ -816,28 +816,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   @RequiresApi(API_LEVELS.API_34)
-  public void applyTransactions() {
-    final List<SurfaceControl.Transaction> rasterTxs;
-    final SurfaceControl.Transaction platformTx;
-    synchronized (transactionLock) {
-      rasterTxs =
-          pendingRasterTransactions.isEmpty() ? null : new ArrayList<>(pendingRasterTransactions);
-      pendingRasterTransactions.clear();
-
-      platformTx = pendingPlatformTransaction;
-      pendingPlatformTransaction = null;
-    }
-    if (platformTx != null) {
-      platformTx.apply();
-    }
-    if (rasterTxs != null) {
-      for (int i = 0; i < rasterTxs.size(); i++) {
-        rasterTxs.get(i).apply();
-      }
-    }
-  }
-
-  @RequiresApi(API_LEVELS.API_34)
   public FlutterOverlaySurface createOverlaySurface() {
     if (overlayerSurface == null) {
       final SurfaceControl.Builder surfaceControlBuilder = new SurfaceControl.Builder();

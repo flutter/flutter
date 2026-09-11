@@ -1381,16 +1381,6 @@ public class FlutterJNI {
   @SuppressWarnings("unused")
   @SuppressLint("NewApi")
   @UiThread
-  public void applyTransactions() {
-    if (platformViewsController2 == null) {
-      throw new RuntimeException("");
-    }
-    platformViewsController2.applyTransactions();
-  }
-
-  @SuppressWarnings("unused")
-  @SuppressLint("NewApi")
-  @UiThread
   public void endFrame2() {
     if (platformViewsController2 == null) {
       throw new RuntimeException("");

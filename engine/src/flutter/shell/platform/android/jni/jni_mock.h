@@ -127,8 +127,6 @@ class JNIMock final : public PlatformViewAndroidJNI {
 
   MOCK_METHOD(void, swapTransaction, (), (override));
 
-  MOCK_METHOD(void, applyTransaction, (), (override));
-
   MOCK_METHOD(void, destroyOverlaySurface2, (), (override));
 
   MOCK_METHOD(std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata>,
