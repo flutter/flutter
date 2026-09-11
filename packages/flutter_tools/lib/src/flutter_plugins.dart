@@ -13,6 +13,7 @@ import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/template.dart';
@@ -161,10 +162,11 @@ Future<Plugin?> _pluginFromPackage(
 /// If [throwOnError] is `true`, an empty package configuration is an error.
 Future<List<Plugin>> findPlugins(
   FlutterProject project, {
-  bool throwOnError = true,
-  PubspecCache? pubspecCache,
-  PackageGraph? packageGraph,
+  required Logger logger,
   PackageConfig? packageConfig,
+  PackageGraph? packageGraph,
+  PubspecCache? pubspecCache,
+  bool throwOnError = true,
 }) async {
   final plugins = <Plugin>[];
   final FileSystem fs = project.directory.fileSystem;
@@ -183,7 +185,7 @@ Future<List<Plugin>> findPlugins(
     final File packageConfigFile = findPackageConfigFileOrDefault(project.directory);
     resolvedPackageConfig = await loadPackageConfigWithLogging(
       packageConfigFile,
-      logger: globals.logger,
+      logger: logger,
       throwOnError: throwOnError,
     );
   }
@@ -199,7 +201,7 @@ Future<List<Plugin>> findPlugins(
       if (throwOnError) {
         throwToolExit('Could not locate package:$packageName. Try running `flutter pub get`');
       } else {
-        globals.logger.printTrace('Could not locate package:$packageName');
+        logger.printTrace('Could not locate package:$packageName');
         continue;
       }
     }
@@ -1248,8 +1250,26 @@ void _createPlatformPluginSymlinks(
     final name = pluginInfo[_kFlutterPluginsNameKey]! as String;
     final path = pluginInfo[_kFlutterPluginsPathKey]! as String;
     final Link link = symlinkDirectory.childLink(name);
-    if (link.existsSync()) {
-      continue;
+    // Inspect the entity on disk without following links. Link.existsSync()
+    // only returns true if the entity is specifically a link; if a conflicting
+    // non-link file or directory occupies link.path, or if an existing link
+    // points to an outdated target, it must be cleaned up before creating the
+    // new link to avoid FileSystemException collisions (such as
+    // ERROR_ALREADY_EXISTS on Windows or EEXIST on POSIX).
+    final FileSystemEntityType entityType = link.fileSystem.typeSync(link.path, followLinks: false);
+    if (entityType == FileSystemEntityType.link) {
+      try {
+        final String target = link.targetSync();
+        if (link.fileSystem.path.canonicalize(target) == link.fileSystem.path.canonicalize(path) &&
+            link.existsSync()) {
+          continue;
+        }
+      } on FileSystemException {
+        // Fall through to delete and recreate if resolving target throws.
+      }
+      ErrorHandlingFileSystem.deleteIfExists(link);
+    } else if (entityType != FileSystemEntityType.notFound) {
+      ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
     }
     try {
       link.createSync(path);
@@ -1285,6 +1305,7 @@ Future<void> refreshPluginsList(
 }) async {
   final List<Plugin> plugins = await findPlugins(
     project,
+    logger: globals.logger,
     pubspecCache: pubspecCache,
     packageGraph: packageGraph,
     packageConfig: packageConfig,
@@ -1343,7 +1364,7 @@ Future<void> injectBuildTimePluginFilesForWebPlatform(
   FlutterProject project, {
   required Directory destination,
 }) async {
-  final List<Plugin> plugins = await findPlugins(project);
+  final List<Plugin> plugins = await findPlugins(project, logger: globals.logger);
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
     plugins,
     pluginResolutionType: _PluginResolutionType.nativeOrDart,
@@ -1382,6 +1403,7 @@ Future<void> injectPlugins(
 }) async {
   final List<Plugin> plugins = await findPlugins(
     project,
+    logger: globals.logger,
     pubspecCache: pubspecCache,
     packageGraph: packageGraph,
     packageConfig: packageConfig,
@@ -1920,7 +1942,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   PackageConfig packageConfig,
   File mainFile,
 ) async {
-  final List<Plugin> plugins = await findPlugins(rootProject);
+  final List<Plugin> plugins = await findPlugins(rootProject, logger: globals.logger);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
     plugins,
     selectDartPluginsOnly: true,

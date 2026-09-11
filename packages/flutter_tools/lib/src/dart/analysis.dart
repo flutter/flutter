@@ -27,6 +27,8 @@ class AnalysisServer {
     required Platform platform,
     required Terminal terminal,
     required this.suppressAnalytics,
+    this.withFineDependencies = true,
+    this.usePlugins = true,
     String? protocolTrafficLog,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
@@ -35,6 +37,8 @@ class AnalysisServer {
        _terminal = terminal,
        _protocolTrafficLog = protocolTrafficLog;
 
+  final bool withFineDependencies;
+  final bool usePlugins;
   final String sdkPath;
   final List<String> directories;
   final FileSystem _fileSystem;
@@ -75,6 +79,8 @@ class AnalysisServer {
       sdkPath,
       '--disable-server-feature-completion',
       '--disable-server-feature-search',
+      if (!withFineDependencies) '--no-with-fine-dependencies',
+      if (!usePlugins) '--no-plugins',
       if (suppressAnalytics) '--suppress-analytics',
       if (_protocolTrafficLog != null) '--protocol-traffic-log=$_protocolTrafficLog',
     ];
@@ -249,18 +255,6 @@ class AnalysisServer {
     final Object? response = json.decode(line);
 
     if (response is Map<String, Object?>) {
-      final Object? id = response['id'];
-      final Completer<Map<String, Object?>?>? completer = _outstandingRequests.remove(id);
-      if (completer != null) {
-        if (response case {'result': final Map<String, Object?>? result}) {
-          completer.complete(result);
-        } else if (response case {'error': final Map<String, Object?> error}) {
-          completer.completeError(error['message'] ?? error);
-        } else {
-          completer.completeError('Response for unknown request received: $response');
-        }
-      }
-
       final method = response['method'] as String?;
       if (method != null) {
         final Object? id = response['id'];
@@ -285,6 +279,18 @@ class AnalysisServer {
               _handleAnalysisIssues(paramsMap);
             case 'window/showMessage':
               _handleShowMessage(paramsMap);
+          }
+        }
+      } else {
+        final Object? id = response['id'];
+        final Completer<Map<String, Object?>?>? completer = _outstandingRequests.remove(id);
+        if (completer != null) {
+          if (response case {'result': final Map<String, Object?>? result}) {
+            completer.complete(result);
+          } else if (response case {'error': final Map<String, Object?> error}) {
+            completer.completeError(error['message'] ?? error);
+          } else {
+            completer.completeError('Response for unknown request received: $response');
           }
         }
       }
