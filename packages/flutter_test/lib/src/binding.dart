@@ -1378,6 +1378,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return super.createWindowingOwner();
   }
 
+  /// Resets [windowingOwner] to a new instance created by [createWindowingOwner].
+  @visibleForTesting
+  void resetWindowingOwner() {
+    windowingOwner = createWindowingOwner();
+  }
+
   @override
   // ignore: must_call_super
   void initLicenses() {

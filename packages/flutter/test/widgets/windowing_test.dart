@@ -2208,8 +2208,7 @@ void main() {
         WidgetTester tester,
       ) async {
         final WindowingOwner previousOwner = WidgetsBinding.instance.windowingOwner;
-        // ignore: invalid_use_of_protected_member
-        WidgetsBinding.instance.windowingOwner = WidgetsBinding.instance.createWindowingOwner();
+        tester.binding.resetWindowingOwner();
         addTearDown(() {
           WidgetsBinding.instance.windowingOwner = previousOwner;
         });

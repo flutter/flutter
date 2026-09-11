@@ -243,6 +243,22 @@ class _NoAccessibilityFeatures implements ui.AccessibilityFeatures {
       throw UnimplementedError('${invocation.memberName} is not needed by these tests.');
 }
 
+class _NegativeViewPadding implements ui.ViewPadding {
+  const _NegativeViewPadding({this.left = 0, this.top = 0, this.right = 0, this.bottom = 0});
+
+  @override
+  final double left;
+
+  @override
+  final double top;
+
+  @override
+  final double right;
+
+  @override
+  final double bottom;
+}
+
 class _ReidentifiedTestView extends TestFlutterView {
   _ReidentifiedTestView(TestFlutterView view, this.viewId)
     : super(view: view, platformDispatcher: view.platformDispatcher, display: view.display);
@@ -656,6 +672,48 @@ void main() {
       expect(padding, isNot(const DebugViewPadding(left: 1, top: 2, right: 3, bottom: 5)));
     });
 
+    test('fromViewPadding copies all edges from a ui.ViewPadding', () {
+      final copyFromZero = DebugViewPadding.fromViewPadding(ui.ViewPadding.zero);
+      expect(copyFromZero, DebugViewPadding.zero);
+
+      const ui.ViewPadding original = DebugViewPadding(left: 10, top: 20, right: 30, bottom: 40);
+      final copy = DebugViewPadding.fromViewPadding(original);
+      expect(copy.left, 10.0);
+      expect(copy.top, 20.0);
+      expect(copy.right, 30.0);
+      expect(copy.bottom, 40.0);
+      expect(copy, original);
+    });
+
+    test('copyWith updates specified edges and preserves others', () {
+      const original = DebugViewPadding(left: 1, top: 2, right: 3, bottom: 4);
+      expect(original.copyWith(), original);
+      expect(
+        original.copyWith(left: 10),
+        const DebugViewPadding(left: 10, top: 2, right: 3, bottom: 4),
+      );
+      expect(
+        original.copyWith(top: 20),
+        const DebugViewPadding(left: 1, top: 20, right: 3, bottom: 4),
+      );
+      expect(
+        original.copyWith(right: 30),
+        const DebugViewPadding(left: 1, top: 2, right: 30, bottom: 4),
+      );
+      expect(
+        original.copyWith(bottom: 40),
+        const DebugViewPadding(left: 1, top: 2, right: 3, bottom: 40),
+      );
+      expect(
+        original.copyWith(left: 10, top: 20, right: 30, bottom: 40),
+        const DebugViewPadding(left: 10, top: 20, right: 30, bottom: 40),
+      );
+      expect(() => original.copyWith(left: -1), throwsAssertionError);
+      expect(() => original.copyWith(top: -1), throwsAssertionError);
+      expect(() => original.copyWith(right: -1), throwsAssertionError);
+      expect(() => original.copyWith(bottom: -1), throwsAssertionError);
+    });
+
     test('rejects negative or non-finite distances', () {
       expect(() => DebugViewPadding(left: -1), throwsAssertionError);
       expect(() => DebugViewPadding(left: double.nan), throwsAssertionError);
@@ -668,6 +726,22 @@ void main() {
       expect(() => DebugViewPadding.all(-1), throwsAssertionError);
       expect(() => DebugViewPadding.all(double.nan), throwsAssertionError);
       expect(() => DebugViewPadding.all(double.infinity), throwsAssertionError);
+      expect(
+        () => DebugViewPadding.fromViewPadding(const _NegativeViewPadding(left: -1)),
+        throwsAssertionError,
+      );
+      expect(
+        () => DebugViewPadding.fromViewPadding(const _NegativeViewPadding(top: -1)),
+        throwsAssertionError,
+      );
+      expect(
+        () => DebugViewPadding.fromViewPadding(const _NegativeViewPadding(right: -1)),
+        throwsAssertionError,
+      );
+      expect(
+        () => DebugViewPadding.fromViewPadding(const _NegativeViewPadding(bottom: -1)),
+        throwsAssertionError,
+      );
     });
   });
 

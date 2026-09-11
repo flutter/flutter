@@ -699,11 +699,13 @@ abstract class BindingBase {
   ///
   /// The result always reports the override now in effect for `viewId` under
   /// the `overrides` key, plus every overridden view id under
-  /// `overriddenViewIds`, so that tooling can resynchronize after any call.
+  /// `overriddenViewIds` (as a `List<int>`), so that tooling can resynchronize
+  /// after any call.
   ///
   /// A call that changes an override also posts a
   /// `Flutter.ServiceExtensionStateChanged` event whose value is the JSON text
-  /// of every override now installed, keyed by view id, so that a client which
+  /// of every override now installed, keyed by stringified view id (e.g. `{"1": ...}`
+  /// because JSON object keys must be strings), so that a client which
   /// is not the one that made the request learns about it too. A read, and a
   /// write that changes nothing, post no event.
   ///

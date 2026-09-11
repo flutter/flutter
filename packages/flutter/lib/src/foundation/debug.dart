@@ -226,6 +226,29 @@ class DebugViewPadding implements ui.ViewPadding {
       right = value,
       bottom = value;
 
+  /// Creates a view padding with the same distances as [padding].
+  DebugViewPadding.fromViewPadding(ui.ViewPadding padding)
+    : assert(
+        padding.left >= 0.0 && padding.left < double.infinity,
+        'left must be non-negative and finite.',
+      ),
+      assert(
+        padding.top >= 0.0 && padding.top < double.infinity,
+        'top must be non-negative and finite.',
+      ),
+      assert(
+        padding.right >= 0.0 && padding.right < double.infinity,
+        'right must be non-negative and finite.',
+      ),
+      assert(
+        padding.bottom >= 0.0 && padding.bottom < double.infinity,
+        'bottom must be non-negative and finite.',
+      ),
+      left = padding.left,
+      top = padding.top,
+      right = padding.right,
+      bottom = padding.bottom;
+
   @override
   final double left;
 
@@ -237,6 +260,16 @@ class DebugViewPadding implements ui.ViewPadding {
 
   @override
   final double bottom;
+
+  /// Creates a copy of this object with the given fields replaced.
+  DebugViewPadding copyWith({double? left, double? top, double? right, double? bottom}) {
+    return DebugViewPadding(
+      left: left ?? this.left,
+      top: top ?? this.top,
+      right: right ?? this.right,
+      bottom: bottom ?? this.bottom,
+    );
+  }
 
   /// A view padding that is zero on all four edges.
   static const DebugViewPadding zero = DebugViewPadding();
@@ -582,68 +615,166 @@ class DebugViewMetricsOverride with Diagnosticable {
   }) {
     bool check<T>(Object? value) => identical(value, _omitted) || value == null || value is T;
 
-    assert(check<num>(devicePixelRatio));
-    assert(check<ui.Size>(physicalSize));
-    assert(check<num>(textScaleFactor));
-    assert(check<ui.Brightness>(platformBrightness));
-    assert(check<DebugViewPadding>(padding));
-    assert(check<DebugViewPadding>(viewPadding));
-    assert(check<DebugViewPadding>(viewInsets));
-    assert(check<DebugViewPadding>(systemGestureInsets));
-    assert(check<bool>(alwaysUse24HourFormat));
-    assert(check<bool>(accessibleNavigation));
-    assert(check<bool>(invertColors));
-    assert(check<bool>(disableAnimations));
-    assert(check<bool>(boldText));
-    assert(check<bool>(reduceMotion));
-    assert(check<bool>(highContrast));
-    assert(check<bool>(onOffSwitchLabels));
-    assert(check<bool>(supportsAnnounce));
-    assert(check<bool>(autoPlayAnimatedImages));
-    assert(check<bool>(autoPlayVideos));
-    assert(check<bool>(deterministicCursor));
+    assert(
+      check<num>(devicePixelRatio),
+      'devicePixelRatio must be a num or null, got ${devicePixelRatio.runtimeType} ($devicePixelRatio).',
+    );
+    assert(
+      check<ui.Size>(physicalSize),
+      'physicalSize must be a ui.Size or null, got ${physicalSize.runtimeType} ($physicalSize).',
+    );
+    assert(
+      check<num>(textScaleFactor),
+      'textScaleFactor must be a num or null, got ${textScaleFactor.runtimeType} ($textScaleFactor).',
+    );
+    assert(
+      check<ui.Brightness>(platformBrightness),
+      'platformBrightness must be a ui.Brightness or null, got ${platformBrightness.runtimeType} ($platformBrightness).',
+    );
+    assert(
+      check<DebugViewPadding>(padding),
+      'padding must be a DebugViewPadding or null, got ${padding.runtimeType} ($padding).',
+    );
+    assert(
+      check<DebugViewPadding>(viewPadding),
+      'viewPadding must be a DebugViewPadding or null, got ${viewPadding.runtimeType} ($viewPadding).',
+    );
+    assert(
+      check<DebugViewPadding>(viewInsets),
+      'viewInsets must be a DebugViewPadding or null, got ${viewInsets.runtimeType} ($viewInsets).',
+    );
+    assert(
+      check<DebugViewPadding>(systemGestureInsets),
+      'systemGestureInsets must be a DebugViewPadding or null, got ${systemGestureInsets.runtimeType} ($systemGestureInsets).',
+    );
+    assert(
+      check<bool>(alwaysUse24HourFormat),
+      'alwaysUse24HourFormat must be a bool or null, got ${alwaysUse24HourFormat.runtimeType} ($alwaysUse24HourFormat).',
+    );
+    assert(
+      check<bool>(accessibleNavigation),
+      'accessibleNavigation must be a bool or null, got ${accessibleNavigation.runtimeType} ($accessibleNavigation).',
+    );
+    assert(
+      check<bool>(invertColors),
+      'invertColors must be a bool or null, got ${invertColors.runtimeType} ($invertColors).',
+    );
+    assert(
+      check<bool>(disableAnimations),
+      'disableAnimations must be a bool or null, got ${disableAnimations.runtimeType} ($disableAnimations).',
+    );
+    assert(
+      check<bool>(boldText),
+      'boldText must be a bool or null, got ${boldText.runtimeType} ($boldText).',
+    );
+    assert(
+      check<bool>(reduceMotion),
+      'reduceMotion must be a bool or null, got ${reduceMotion.runtimeType} ($reduceMotion).',
+    );
+    assert(
+      check<bool>(highContrast),
+      'highContrast must be a bool or null, got ${highContrast.runtimeType} ($highContrast).',
+    );
+    assert(
+      check<bool>(onOffSwitchLabels),
+      'onOffSwitchLabels must be a bool or null, got ${onOffSwitchLabels.runtimeType} ($onOffSwitchLabels).',
+    );
+    assert(
+      check<bool>(supportsAnnounce),
+      'supportsAnnounce must be a bool or null, got ${supportsAnnounce.runtimeType} ($supportsAnnounce).',
+    );
+    assert(
+      check<bool>(autoPlayAnimatedImages),
+      'autoPlayAnimatedImages must be a bool or null, got ${autoPlayAnimatedImages.runtimeType} ($autoPlayAnimatedImages).',
+    );
+    assert(
+      check<bool>(autoPlayVideos),
+      'autoPlayVideos must be a bool or null, got ${autoPlayVideos.runtimeType} ($autoPlayVideos).',
+    );
+    assert(
+      check<bool>(deterministicCursor),
+      'deterministicCursor must be a bool or null, got ${deterministicCursor.runtimeType} ($deterministicCursor).',
+    );
 
-    double? resolveDouble(Object? value, double? current) {
+    double? resolveDouble(Object? value, double? current, String name) {
       if (identical(value, _omitted)) {
         return current;
       }
       if (value == null) {
         return null;
       }
-      return (value as num).toDouble();
+      if (value is! num) {
+        throw ArgumentError.value(value, name, 'Expected a num or null.');
+      }
+      return value.toDouble();
     }
 
-    T? resolve<T>(Object? value, T? current) {
+    T? resolve<T extends Object>(Object? value, T? current, String name) {
       if (identical(value, _omitted)) {
         return current;
       }
       if (value == null) {
         return null;
       }
-      return value as T;
+      if (value is! T) {
+        throw ArgumentError.value(value, name, 'Expected a $T or null.');
+      }
+      return value;
     }
 
     final result = DebugViewMetricsOverride(
-      devicePixelRatio: resolveDouble(devicePixelRatio, this.devicePixelRatio),
-      physicalSize: resolve<ui.Size>(physicalSize, this.physicalSize),
-      textScaleFactor: resolveDouble(textScaleFactor, this.textScaleFactor),
-      platformBrightness: resolve<ui.Brightness>(platformBrightness, this.platformBrightness),
-      padding: resolve<DebugViewPadding>(padding, this.padding),
-      viewPadding: resolve<DebugViewPadding>(viewPadding, this.viewPadding),
-      viewInsets: resolve<DebugViewPadding>(viewInsets, this.viewInsets),
-      systemGestureInsets: resolve<DebugViewPadding>(systemGestureInsets, this.systemGestureInsets),
-      alwaysUse24HourFormat: resolve<bool>(alwaysUse24HourFormat, this.alwaysUse24HourFormat),
-      accessibleNavigation: resolve<bool>(accessibleNavigation, this.accessibleNavigation),
-      invertColors: resolve<bool>(invertColors, this.invertColors),
-      disableAnimations: resolve<bool>(disableAnimations, this.disableAnimations),
-      boldText: resolve<bool>(boldText, this.boldText),
-      reduceMotion: resolve<bool>(reduceMotion, this.reduceMotion),
-      highContrast: resolve<bool>(highContrast, this.highContrast),
-      onOffSwitchLabels: resolve<bool>(onOffSwitchLabels, this.onOffSwitchLabels),
-      supportsAnnounce: resolve<bool>(supportsAnnounce, this.supportsAnnounce),
-      autoPlayAnimatedImages: resolve<bool>(autoPlayAnimatedImages, this.autoPlayAnimatedImages),
-      autoPlayVideos: resolve<bool>(autoPlayVideos, this.autoPlayVideos),
-      deterministicCursor: resolve<bool>(deterministicCursor, this.deterministicCursor),
+      devicePixelRatio: resolveDouble(devicePixelRatio, this.devicePixelRatio, 'devicePixelRatio'),
+      physicalSize: resolve<ui.Size>(physicalSize, this.physicalSize, 'physicalSize'),
+      textScaleFactor: resolveDouble(textScaleFactor, this.textScaleFactor, 'textScaleFactor'),
+      platformBrightness: resolve<ui.Brightness>(
+        platformBrightness,
+        this.platformBrightness,
+        'platformBrightness',
+      ),
+      padding: resolve<DebugViewPadding>(padding, this.padding, 'padding'),
+      viewPadding: resolve<DebugViewPadding>(viewPadding, this.viewPadding, 'viewPadding'),
+      viewInsets: resolve<DebugViewPadding>(viewInsets, this.viewInsets, 'viewInsets'),
+      systemGestureInsets: resolve<DebugViewPadding>(
+        systemGestureInsets,
+        this.systemGestureInsets,
+        'systemGestureInsets',
+      ),
+      alwaysUse24HourFormat: resolve<bool>(
+        alwaysUse24HourFormat,
+        this.alwaysUse24HourFormat,
+        'alwaysUse24HourFormat',
+      ),
+      accessibleNavigation: resolve<bool>(
+        accessibleNavigation,
+        this.accessibleNavigation,
+        'accessibleNavigation',
+      ),
+      invertColors: resolve<bool>(invertColors, this.invertColors, 'invertColors'),
+      disableAnimations: resolve<bool>(
+        disableAnimations,
+        this.disableAnimations,
+        'disableAnimations',
+      ),
+      boldText: resolve<bool>(boldText, this.boldText, 'boldText'),
+      reduceMotion: resolve<bool>(reduceMotion, this.reduceMotion, 'reduceMotion'),
+      highContrast: resolve<bool>(highContrast, this.highContrast, 'highContrast'),
+      onOffSwitchLabels: resolve<bool>(
+        onOffSwitchLabels,
+        this.onOffSwitchLabels,
+        'onOffSwitchLabels',
+      ),
+      supportsAnnounce: resolve<bool>(supportsAnnounce, this.supportsAnnounce, 'supportsAnnounce'),
+      autoPlayAnimatedImages: resolve<bool>(
+        autoPlayAnimatedImages,
+        this.autoPlayAnimatedImages,
+        'autoPlayAnimatedImages',
+      ),
+      autoPlayVideos: resolve<bool>(autoPlayVideos, this.autoPlayVideos, 'autoPlayVideos'),
+      deterministicCursor: resolve<bool>(
+        deterministicCursor,
+        this.deterministicCursor,
+        'deterministicCursor',
+      ),
     );
     assert(result._debugAssertGeometryIsValid());
     return result;
@@ -739,19 +870,11 @@ class DebugViewMetricsOverride with Diagnosticable {
     deterministicCursor,
   );
 
+  static const (bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?, bool?)
+  _emptyAccessibilityFeatures = (null, null, null, null, null, null, null, null, null, null, null);
+
   /// Whether any [ui.AccessibilityFeatures] are overridden by this instance.
-  bool get hasAccessibilityFeatures =>
-      accessibleNavigation != null ||
-      invertColors != null ||
-      disableAnimations != null ||
-      boldText != null ||
-      reduceMotion != null ||
-      highContrast != null ||
-      onOffSwitchLabels != null ||
-      supportsAnnounce != null ||
-      autoPlayAnimatedImages != null ||
-      autoPlayVideos != null ||
-      deterministicCursor != null;
+  bool get hasAccessibilityFeatures => _accessibilityFeatures != _emptyAccessibilityFeatures;
 
   @override
   bool operator ==(Object other) {
