@@ -272,7 +272,7 @@ void EmbedderExternalTextureVulkan::Paint(PaintContext& context,
                                           const DlRect& bounds,
                                           bool freeze,
                                           const DlImageSampling sampling) {
-  if (last_image_ == nullptr) {
+  if (last_image_ == nullptr && !freeze) {
     last_image_ =
         ResolveTexture(Id(), context.gr_context, context.aiks_context,
                        SkISize::Make(bounds.GetWidth(), bounds.GetHeight()));
