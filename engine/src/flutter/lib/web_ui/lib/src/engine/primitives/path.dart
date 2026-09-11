@@ -673,9 +673,17 @@ class EnginePath implements ui.Path, Collectable {
     return _cachedPath!;
   }
 
+  // Invalidated backend paths that must remain alive until the end of the frame
+  // when [collect] is called by the [FrameArena]. Disposing them immediately
+  // here can cause premature deallocation while recorded display list operations
+  // are being rasterized concurrently on the worker thread.
+  List<BackendPath>? _stalePaths;
+
   void _invalidateCachedPath() {
-    _cachedPath?.dispose();
-    _cachedPath = null;
+    if (_cachedPath != null) {
+      (_stalePaths ??= <BackendPath>[]).add(_cachedPath!);
+      _cachedPath = null;
+    }
   }
 
   void _addCommand(PathCommand command) {
@@ -875,6 +883,12 @@ class EnginePath implements ui.Path, Collectable {
 
   @override
   void collect() {
+    if (_stalePaths != null) {
+      for (final BackendPath path in _stalePaths!) {
+        path.dispose();
+      }
+      _stalePaths = null;
+    }
     _cachedPath?.dispose();
     if (!identical(_cachedBuilder, _cachedPath)) {
       _cachedBuilder?.dispose();
