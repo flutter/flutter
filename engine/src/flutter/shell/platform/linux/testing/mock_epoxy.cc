@@ -387,10 +387,21 @@ EGLBoolean _eglQuerySurface(EGLDisplay dpy,
     return EGL_FALSE;
   }
 
-  // The mock surfaces have no size, so anything drawing to them will see a
-  // size change on the first frame.
+  // The mock surfaces have the size the test asked for, which is zero unless
+  // it was set, so anything drawing to them will see a size change on the
+  // first frame.
   if (value != nullptr) {
-    *value = 0;
+    switch (attribute) {
+      case EGL_WIDTH:
+        *value = mock->egl_surface_width;
+        break;
+      case EGL_HEIGHT:
+        *value = mock->egl_surface_height;
+        break;
+      default:
+        *value = 0;
+        break;
+    }
   }
 
   return bool_success();
@@ -527,6 +538,12 @@ void _glDeleteTextures(GLsizei n, const GLuint* textures) {
 void _glFinish() {
   if (mock) {
     mock->glFinish();
+  }
+}
+
+void _glViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
+  if (mock) {
+    mock->glViewport(x, y, width, height);
   }
 }
 
@@ -851,6 +868,7 @@ void (*epoxy_glDeleteFramebuffers)(GLsizei n, const GLuint* framebuffers);
 void (*expoxy_glDeleteShader)(GLuint shader);
 void (*epoxy_glDeleteTextures)(GLsizei n, const GLuint* textures);
 void (*epoxy_glFinish)();
+void (*epoxy_glViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
 void (*epoxy_glFramebufferRenderbuffer)(GLenum target,
                                         GLenum attachment,
                                         GLenum renderbuffertarget,
@@ -952,6 +970,7 @@ static void library_init() {
   epoxy_glDeleteShader = _glDeleteShader;
   epoxy_glDeleteTextures = _glDeleteTextures;
   epoxy_glFinish = _glFinish;
+  epoxy_glViewport = _glViewport;
   epoxy_glDisable = _glDisable;
   epoxy_glEnable = _glEnable;
   epoxy_glFramebufferRenderbuffer = _glFramebufferRenderbuffer;
