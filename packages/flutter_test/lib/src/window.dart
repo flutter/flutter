@@ -233,67 +233,52 @@ class TestPlatformDispatcher implements PlatformDispatcher {
   final Map<int, TestDisplay> _testDisplays = <int, TestDisplay>{};
   final Map<int, FlutterView> _customViews = <int, FlutterView>{};
 
-  // The getter intentionally returns [_platformDispatcher.onMetricsChanged]
-  // (wired to [_handleMetricsChanged] in the constructor) rather than
-  // [_testValues._onMetricsChanged] so that invoking
-  // `platformDispatcher.onMetricsChanged?.call()` executes
-  // [_updateViewsAndDisplays] before delegating to the test callback.
   @override
-  VoidCallback? get onMetricsChanged => _platformDispatcher.onMetricsChanged;
+  VoidCallback? get onMetricsChanged => _testValues._onMetricsChanged;
   VoidCallback? _onMetricsChanged;
   @override
   set onMetricsChanged(VoidCallback? callback) {
-    // If a test reads [onMetricsChanged] (which yields the forwarding closure
-    // [_handleMetricsChanged]) and later restores it, setting it directly on
-    // [_testValues._onMetricsChanged] would cause infinite recursion when
-    // [_handleMetricsChanged] delegates to [_testValues._onMetricsChanged].
-    // Treat the forwarding closure as restoring the default (no test callback).
-    _testValues._onMetricsChanged =
-        (identical(callback, _handleMetricsChanged) ||
-            identical(callback, _platformDispatcher.onMetricsChanged) ||
-            identical(callback, _testValues._handleMetricsChanged) ||
-            identical(callback, _testValues._platformDispatcher.onMetricsChanged))
-        ? null
-        : callback;
+    _testValues._onMetricsChanged = callback;
   }
 
+  bool _isHandlingMetricsChanged = false;
   void _handleMetricsChanged() {
-    _updateViewsAndDisplays();
-    _testValues._onMetricsChanged?.call();
+    if (_testValues._isHandlingMetricsChanged) {
+      return;
+    }
+    _testValues._isHandlingMetricsChanged = true;
+    try {
+      _updateViewsAndDisplays();
+      _testValues._onMetricsChanged?.call();
+    } finally {
+      _testValues._isHandlingMetricsChanged = false;
+    }
   }
 
-  // The getter intentionally returns [_platformDispatcher.onViewFocusChange]
-  // (wired to [_handleViewFocusChanged] in the constructor) rather than
-  // [_testValues._onViewFocusChange] so that invoking
-  // `platformDispatcher.onViewFocusChange?.call(event)` executes
-  // [_updateViewsAndDisplays] and updates [_currentlyFocusedViewId] before
-  // delegating to the test callback.
   @override
-  ViewFocusChangeCallback? get onViewFocusChange => _platformDispatcher.onViewFocusChange;
+  ViewFocusChangeCallback? get onViewFocusChange => _testValues._onViewFocusChange;
   ViewFocusChangeCallback? _onViewFocusChange;
   @override
   set onViewFocusChange(ViewFocusChangeCallback? callback) {
-    // If a test reads [onViewFocusChange] (which yields the forwarding closure
-    // [_handleViewFocusChanged]) and later restores it, setting it directly on
-    // [_testValues._onViewFocusChange] would cause infinite recursion when
-    // [_handleViewFocusChanged] delegates to [_testValues._onViewFocusChange].
-    // Treat the forwarding closure as restoring the default (no test callback).
-    _testValues._onViewFocusChange =
-        (identical(callback, _handleViewFocusChanged) ||
-            identical(callback, _platformDispatcher.onViewFocusChange) ||
-            identical(callback, _testValues._handleViewFocusChanged) ||
-            identical(callback, _testValues._platformDispatcher.onViewFocusChange))
-        ? null
-        : callback;
+    _testValues._onViewFocusChange = callback;
   }
 
+  bool _isHandlingViewFocusChanged = false;
   void _handleViewFocusChanged(ViewFocusEvent event) {
-    _updateViewsAndDisplays();
-    _testValues._currentlyFocusedViewId = switch (event.state) {
-      ViewFocusState.focused => event.viewId,
-      ViewFocusState.unfocused => null,
-    };
-    _testValues._onViewFocusChange?.call(event);
+    if (_testValues._isHandlingViewFocusChanged) {
+      return;
+    }
+    _testValues._isHandlingViewFocusChanged = true;
+    try {
+      _updateViewsAndDisplays();
+      _testValues._currentlyFocusedViewId = switch (event.state) {
+        ViewFocusState.focused => event.viewId,
+        ViewFocusState.unfocused => null,
+      };
+      _testValues._onViewFocusChange?.call(event);
+    } finally {
+      _testValues._isHandlingViewFocusChanged = false;
+    }
   }
 
   /// Returns the list of [ViewFocusEvent]s that have been received by

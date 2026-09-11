@@ -418,6 +418,73 @@ void main() {
     expect(() => tester.platformDispatcher.onViewFocusChange?.call(event), returnsNormally);
     expect(callCount, 1);
   });
+
+  testWidgets('onMetricsChanged has symmetric getter and setter and supports chaining', (
+    WidgetTester tester,
+  ) async {
+    final VoidCallback? previous = tester.platformDispatcher.onMetricsChanged;
+    addTearDown(() {
+      tester.platformDispatcher.onMetricsChanged = previous;
+    });
+
+    var initialCalled = false;
+    void initialCallback() {
+      initialCalled = true;
+    }
+
+    tester.platformDispatcher.onMetricsChanged = initialCallback;
+    expect(tester.platformDispatcher.onMetricsChanged, initialCallback);
+
+    var chainedCalled = false;
+    tester.platformDispatcher.onMetricsChanged = () {
+      chainedCalled = true;
+      initialCallback();
+    };
+
+    tester.platformDispatcher.onMetricsChanged?.call();
+    expect(chainedCalled, isTrue);
+    expect(initialCalled, isTrue);
+
+    // Restoring initial callback returns original reference without losing listener.
+    tester.platformDispatcher.onMetricsChanged = initialCallback;
+    expect(tester.platformDispatcher.onMetricsChanged, initialCallback);
+  });
+
+  testWidgets('onViewFocusChange has symmetric getter and setter and supports chaining', (
+    WidgetTester tester,
+  ) async {
+    final ViewFocusChangeCallback? previous = tester.platformDispatcher.onViewFocusChange;
+    addTearDown(() {
+      tester.platformDispatcher.onViewFocusChange = previous;
+    });
+
+    var initialCalled = false;
+    void initialCallback(ViewFocusEvent event) {
+      initialCalled = true;
+    }
+
+    tester.platformDispatcher.onViewFocusChange = initialCallback;
+    expect(tester.platformDispatcher.onViewFocusChange, initialCallback);
+
+    var chainedCalled = false;
+    tester.platformDispatcher.onViewFocusChange = (ViewFocusEvent event) {
+      chainedCalled = true;
+      initialCallback(event);
+    };
+
+    const event = ViewFocusEvent(
+      viewId: 0,
+      state: ViewFocusState.focused,
+      direction: ViewFocusDirection.undefined,
+    );
+    tester.platformDispatcher.onViewFocusChange?.call(event);
+    expect(chainedCalled, isTrue);
+    expect(initialCalled, isTrue);
+
+    // Restoring initial callback returns original reference without losing listener.
+    tester.platformDispatcher.onViewFocusChange = initialCallback;
+    expect(tester.platformDispatcher.onViewFocusChange, initialCallback);
+  });
 }
 
 class TestObserver with WidgetsBindingObserver {
