@@ -37,7 +37,7 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 - [flutter/192120](https://github.com/flutter/flutter/pull/192120) Fixes missing preview reload timing analytics in LspPreviewDetector across all platforms.
 - [flutter/181560](https://github.com/flutter/flutter/issues/181560) When building iOS and macOS app, SwiftPM migration warnings and errors are not tracked in analytics.
 - [flutter/191964](https://github.com/flutter/flutter/pull/191964) On iOS, apps bundling native assets fail App Store submission when native libraries are compiled with deployment targets above iOS 13.
-- [flutter/189284](https://github.com/flutter/flutter/issues/189284) When debugging with an iOS 27 device, the app may launch to a white screen and hang for multiple minutes.
+- [flutter/189284](https://github.com/flutter/flutter/issues/189284) When debugging with Xcode 27, the app may launch to a white screen and hang for multiple minutes.
 - [flutter/190465](https://github.com/flutter/flutter/issues/190465) When running WebAssembly dry-run builds on Web, remove redundant experiment flag warning that dropped telemetry error findings.
 - [flutter/191898](https://github.com/flutter/flutter/issues/191898) When remote test processes emit plain-text error output on all platforms, prevent flutter_tools from crashing with an unhandled FormatException.
 
