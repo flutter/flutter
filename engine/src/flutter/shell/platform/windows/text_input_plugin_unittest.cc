@@ -135,10 +135,14 @@ static TestBinaryMessenger::SendHandler RecordEditingState(
                                         BinaryReply reply) {
     auto method = JsonMethodCodec::GetInstance().DecodeMethodCall(
         std::vector<uint8_t>(message, message + size));
-    if (method->method_name() != kUpdateEditingStateMethod) {
+    if (!method || method->method_name() != kUpdateEditingStateMethod) {
       return;
     }
-    const auto& editing_state = (*method->arguments())[1];
+    const auto* arguments = method->arguments();
+    ASSERT_NE(arguments, nullptr);
+    ASSERT_TRUE(arguments->IsArray());
+    ASSERT_GE(arguments->Size(), 2u);
+    const auto& editing_state = (*arguments)[1];
     auto text = editing_state.FindMember(kTextKey);
     auto base = editing_state.FindMember(kSelectionBaseKey);
     ASSERT_NE(text, editing_state.MemberEnd());
