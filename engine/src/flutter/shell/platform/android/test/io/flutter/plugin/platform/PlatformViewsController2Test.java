@@ -731,25 +731,12 @@ public class PlatformViewsController2Test {
   }
 
   /**
-   * Reproduces the HCPP transaction data race.
+   * Stress-tests HCPP transaction list synchronization. Concurrent add/clear operations can leave
+   * null entries, causing merge(null) to throw and abort the engine through JNI.
    *
-   * <p>With the AHB swapchain, the raster thread calls {@code createTransaction()} once per
-   * present, while the platform thread calls it once per SurfaceView platform view per frame and
-   * then runs {@code swapTransactions()} and {@code onEndFrame()}. If the lists holding those
-   * transactions are not synchronized, an {@code add()} racing a {@code clear()} leaves {@code
-   * null} at a live index, and {@code onEndFrame()} then calls {@code merge(null)}. On device that
-   * NPE unwinds into {@code onEndFrame2()}, where {@code FML_CHECK(fml::jni::CheckException(env))}
-   * turns it into an {@code abort()}.
-   *
-   * <p>This is a probabilistic detector, but a one-sided one: it has no timing assertions, so
-   * scheduling luck decides whether it catches an unsynchronized implementation, never whether it
-   * fails a synchronized one. It reliably catches wholesale loss of the locking; it is not
-   * guaranteed to catch a subtle partial regression.
-   *
-   * <p>It covers only the transaction <i>lists</i>, not the transaction objects. In production the
-   * raster thread keeps writing to a transaction after {@code createTransaction()} has published it
-   * -- the buffer and the completion callback are attached afterwards -- and that
-   * write-after-publish is out of scope here. See {@code createTransaction()} in the controller.
+   * <p>Detection is probabilistic. This does not exercise native writes after publication; see
+   * {@code createTransaction()} for that separate race. Thread classification is covered by the
+   * consolidation and isolation tests above.
    */
   @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
@@ -758,28 +745,15 @@ public class PlatformViewsController2Test {
     controller.setRegistry(new PlatformViewRegistryImpl());
 
     final int rasterThreadCount = 4;
-    // The pending list is what swapTransactions() has to walk, so its length sets how long the
-    // clear()/addAll() pair stays exposed to a concurrent add(). It is the dominant lever on
-    // whether the race is observed at all; 8 presents per round detects it far less reliably.
+    // Larger batches increase the opportunity for add() to overlap clear()/addAll().
     final int presentsPerRound = 64;
     final int rounds = 300;
-    // Only a safety net: the cleanup below breaks the barrier explicitly, so a failing run does
-    // not wait this out.
+    // Safety timeout; cleanup resets the barrier to release waiting threads sooner.
     final long timeoutMs = 30000;
 
-    // This test is only meaningful if isPlatformThread() classifies the test thread and the
-    // background threads differently. It is not asserted here because
-    // createTransactionConsolidatesOnPlatformThread and
-    // createTransactionIsolatesRasterThreadTransactions already assert exactly that, on exactly
-    // these two kinds of thread; if the classification broke, they would go red first.
-
-    // Each round is barrier-synchronized so the raster threads' add()s land inside the platform
-    // thread's swapTransactions(), instead of relying on two free-running loops happening to
-    // overlap. Collision density is then a property of the test rather than of the machine.
+    // Start producers and the frame swap together each round to encourage overlap.
     final CyclicBarrier roundStart = new CyclicBarrier(rasterThreadCount + 1);
-    // Two buckets, deliberately. A product failure is an assertion; a bot that could not schedule
-    // the threads is a skip. Collapsing them makes a slow machine indistinguishable from the
-    // crash this test is named after.
+    // Report product failures before skipping runs interrupted by harness timeouts or shutdown.
     final AtomicReference<Throwable> raceFailure = new AtomicReference<>();
     final AtomicReference<Throwable> harnessFailure = new AtomicReference<>();
     final AtomicBoolean running = new AtomicBoolean(true);
@@ -793,22 +767,18 @@ public class PlatformViewsController2Test {
                   for (int round = 0; round < rounds && running.get(); round++) {
                     roundStart.await(timeoutMs, TimeUnit.MILLISECONDS);
                     for (int present = 0; present < presentsPerRound; present++) {
-                      // Unlike production, this thread is finished with the transaction as soon
-                      // as it is returned. The real raster thread goes on to attach a buffer and
-                      // a completion callback to it; that write-after-publish is out of scope
-                      // here (see the class doc above).
                       controller.createTransaction();
                     }
                   }
                 } catch (TimeoutException e) {
                   harnessFailure.compareAndSet(null, e);
                 } catch (BrokenBarrierException e) {
-                  // Another participant stopped early. Whichever one it was recorded why.
+                  // The participant that stopped early recorded the cause.
                 } catch (Throwable t) {
                   raceFailure.compareAndSet(null, t);
                 } finally {
                   running.set(false);
-                  // Release anyone parked on the barrier so a failure cannot turn into a hang.
+                  // Release waiting participants on exit.
                   roundStart.reset();
                 }
               },
@@ -822,28 +792,23 @@ public class PlatformViewsController2Test {
       for (int round = 0; round < rounds; round++) {
         roundStart.await(timeoutMs, TimeUnit.MILLISECONDS);
 
-        // Stand-in for maybeApplyClipToSurfaceView(), which runs once per SurfaceView platform
-        // view in onDisplayPlatformView().
+        // Simulate platform-view clip transactions.
         controller.createTransaction();
         controller.createTransaction();
 
         controller.swapTransactions();
-        // flutterView is null, so onEndFrame() drops the frame instead of applying it. It still
-        // merges the active transactions first, which is where the race shows up.
+        // Without a FlutterView, this still merges the transactions before dropping the frame.
         controller.onEndFrame();
       }
     } catch (TimeoutException | BrokenBarrierException e) {
-      // Either this thread stalled, or a raster thread left the barrier. If it left because it
-      // hit a real failure, it recorded that in raceFailure, which is reported first below.
+      // Any producer failure is recorded separately and reported first below.
       harnessFailure.compareAndSet(null, e);
     } catch (Throwable t) {
       raceFailure.compareAndSet(null, t);
     } finally {
       running.set(false);
       for (Thread rasterThread : rasterThreads) {
-        // A raster thread can be parked on the barrier waiting for a participant that has already
-        // left, so keep breaking the barrier until it exits. Without this, a failing run waits out
-        // the barrier timeout before it reports, which is exactly when you want a fast answer.
+        // Repeat resets in case a producer enters await() after an earlier reset.
         for (int attempt = 0; attempt < 500 && rasterThread.isAlive(); attempt++) {
           roundStart.reset();
           rasterThread.join(10);
