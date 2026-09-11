@@ -150,7 +150,7 @@ final class _SecondHalf implements UpgradePhase {
 
 @visibleForTesting
 class UpgradeCommandRunner {
-  UpgradeCommandRunner({required ToolContext toolContext}) : _toolContext = toolContext;
+  UpgradeCommandRunner({required this._toolContext});
 
   final ToolContext _toolContext;
 
